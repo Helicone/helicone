@@ -4,10 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { HeliconeRequest } from "../../../lib/api/request/request";
 import { useJawnClient } from "../../../lib/clients/jawnHook";
-import {
-  getTimeIntervalAgo,
-  TimeInterval,
-} from "../../../lib/timeCalculations/time";
+import { TimeInterval } from "../../../lib/timeCalculations/time";
 import { useGetUnauthorized } from "../../../services/hooks/dashboard";
 import { useDebounce } from "../../../services/hooks/debounce";
 import useShiftKeyPress from "../../../services/hooks/isShiftPressed";
@@ -54,6 +51,7 @@ import RequestCard from "./requestCard";
 import RequestDrawerV2 from "./requestDrawerV2";
 import TableFooter from "./tableFooter";
 import useRequestsPageV2 from "./useRequestsPageV2";
+import { useRouter } from "next/router";
 
 interface RequestsPageV2Props {
   currentPage: number;
@@ -70,6 +68,35 @@ interface RequestsPageV2Props {
   currentFilter: OrganizationFilter | null;
   organizationLayout: OrganizationLayout | null;
   organizationLayoutAvailable: boolean;
+}
+
+function getTimeIntervalAgo(interval: TimeInterval): Date {
+  const now = new Date();
+  const utcNow = Date.UTC(
+    now.getUTCFullYear(),
+    now.getUTCMonth(),
+    now.getUTCDate(),
+    now.getUTCHours(),
+    now.getUTCMinutes(),
+    now.getUTCSeconds()
+  );
+
+  switch (interval) {
+    case "3m":
+      return new Date(utcNow - 3 * 30 * 24 * 60 * 60 * 1000);
+    case "1m":
+      return new Date(utcNow - 30 * 24 * 60 * 60 * 1000);
+    case "7d":
+      return new Date(utcNow - 7 * 24 * 60 * 60 * 1000);
+    case "24h":
+      return new Date(utcNow - 24 * 60 * 60 * 1000);
+    case "1h":
+      return new Date(utcNow - 60 * 60 * 1000);
+    case "all":
+      return new Date(0);
+    default:
+      return new Date(utcNow - 24 * 60 * 60 * 1000); // Default to 24h
+  }
 }
 
 function getSortLeaf(
@@ -103,7 +130,11 @@ function getSortLeaf(
 }
 
 function getTableName(isCached: boolean): string {
-  return isCached ? "cache_hits" : "request";
+  return isCached ? "cache_hits" : "request_response_rmt";
+}
+
+function getCreatedAtColumn(isCached: boolean): string {
+  return isCached ? "created_at" : "request_created_at";
 }
 
 const RequestsPageV2 = (props: RequestsPageV2Props) => {
@@ -120,7 +151,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     organizationLayoutAvailable,
   } = props;
   const initialLoadRef = useRef(true);
-  const [isLive, setIsLive] = useLocalStorage("isLive", false);
+  const [isLive, setIsLive] = useLocalStorage("isLive-RequestPage", false);
   const jawn = useJawnClient();
   const orgContext = useOrg();
   const searchParams = useSearchParams();
@@ -161,6 +192,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   const getTimeFilter = () => {
     const currentTimeFilter = searchParams.get("t");
     const tableName = getTableName(isCached);
+    const createdAtColumn = getCreatedAtColumn(isCached);
 
     if (currentTimeFilter && currentTimeFilter.split("_")[0] === "custom") {
       const [_, start, end] = currentTimeFilter.split("_");
@@ -168,7 +200,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
       const filter: FilterNode = {
         left: {
           [tableName]: {
-            created_at: {
+            [createdAtColumn]: {
               gte: new Date(start).toISOString(),
             },
           },
@@ -176,7 +208,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
         operator: "and",
         right: {
           [tableName]: {
-            created_at: {
+            [createdAtColumn]: {
               lte: new Date(end).toISOString(),
             },
           },
@@ -184,12 +216,13 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
       };
       return filter;
     } else {
+      const timeIntervalDate = getTimeIntervalAgo(
+        (currentTimeFilter as TimeInterval) || "24h"
+      );
       return {
         [tableName]: {
-          created_at: {
-            gte: getTimeIntervalAgo(
-              (searchParams.get("t") as TimeInterval) || "24h"
-            ).toISOString(),
+          [createdAtColumn]: {
+            gte: new Date(timeIntervalDate).toISOString(),
           },
         },
       };
@@ -276,12 +309,12 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   useEffect(() => {
     if (initialRequestId && selectedData === undefined) {
       const fetchRequest = async () => {
-        const response = await jawn.POST("/v1/request/query", {
+        const response = await jawn.POST("/v1/request/query-clickhouse", {
           body: {
             filter: {
               left: {
-                request: {
-                  id: {
+                request_response_rmt: {
+                  request_id: {
                     equals: initialRequestId,
                   },
                 },
@@ -317,13 +350,8 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
                 request.response_body = content.response;
 
                 const model =
-                  request.model_override ||
-                  request.response_model ||
                   request.request_model ||
-                  content.response?.model ||
-                  content.request?.model ||
-                  content.response?.body?.model || // anthropic
-                  getModelFromPath(request.request_path) ||
+                  getModelFromPath(request.target_url) ||
                   "";
 
                 if (
@@ -388,7 +416,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
         return {
           filterMapIdx,
           operatorIdx,
-          value: decodeURIComponent(value),
+          value: value,
         };
       }
     };
@@ -414,7 +442,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   }, [searchParams, filterMap]);
 
   useEffect(() => {
-    if (initialLoadRef.current && filterMap.length > 0) {
+    if (initialLoadRef.current && filterMap.length > 0 && !isDataLoading) {
       const loadedFilters = getAdvancedFilters();
       setAdvancedFilters(loadedFilters);
       initialLoadRef.current = false;
@@ -493,24 +521,44 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
       });
     }
   }, [userFilterMapIndex, rateLimited, setAdvancedFilters]);
-  const onPageSizeChangeHandler = async (newPageSize: number) => {
-    setCurrentPageSize(newPageSize);
-    refetch();
-  };
 
-  const onPageChangeHandler = async (newPageNumber: number) => {
-    setPage(newPageNumber);
-    refetch();
-  };
+  const router = useRouter();
+
+  // Update the page state and router query when the page changes
+  const handlePageChange = useCallback(
+    (newPage: number) => {
+      router.push(
+        {
+          pathname: router.pathname,
+          query: { ...router.query, page: newPage.toString() },
+        },
+        undefined,
+        { shallow: true }
+      );
+    },
+    [router]
+  );
+
+  // Sync the page state with the router query on component mount
+  useEffect(() => {
+    const pageFromQuery = router.query.page;
+    if (pageFromQuery && !Array.isArray(pageFromQuery)) {
+      const parsedPage = parseInt(pageFromQuery, 10);
+      if (!isNaN(parsedPage) && parsedPage !== page) {
+        setPage(parsedPage);
+      }
+    }
+  }, [router.query.page, page]);
 
   const onTimeSelectHandler = (key: TimeInterval, value: string) => {
     const tableName = getTableName(isCached);
+    const createdAtColumn = getCreatedAtColumn(isCached);
     if (key === "custom") {
       const [start, end] = value.split("_");
       const filter: FilterNode = {
         left: {
           [tableName]: {
-            created_at: {
+            [createdAtColumn]: {
               gte: new Date(start).toISOString(),
             },
           },
@@ -518,7 +566,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
         operator: "and",
         right: {
           [tableName]: {
-            created_at: {
+            [createdAtColumn]: {
               lte: new Date(end).toISOString(),
             },
           },
@@ -527,10 +575,11 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
       setTimeFilter(filter);
       return;
     }
+
     setTimeFilter({
       [tableName]: {
-        created_at: {
-          gte: getTimeIntervalAgo(key).toISOString(),
+        [createdAtColumn]: {
+          gte: new Date(getTimeIntervalAgo(key)).toISOString(),
         },
       },
     });
@@ -757,11 +806,13 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
           }
           actions={
             <>
-              <ThemedSwitch
-                checked={isLive}
-                onChange={setIsLive}
-                label="Live"
-              />
+              <div>
+                <ThemedSwitch
+                  checked={isLive}
+                  onChange={setIsLive}
+                  label="Live"
+                />
+              </div>
             </>
           }
         />
@@ -907,13 +958,14 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
               </Row>
             )}
           </ThemedTable>
+
           <TableFooter
-            currentPage={currentPage}
+            currentPage={page}
             pageSize={pageSize}
             isCountLoading={isCountLoading}
             count={count || 0}
-            onPageChange={onPageChangeHandler}
-            onPageSizeChange={onPageSizeChangeHandler}
+            onPageChange={(n) => handlePageChange(n)}
+            onPageSizeChange={(n) => setCurrentPageSize(n)}
             pageSizeOptions={[25, 50, 100, 250, 500]}
           />
         </div>

@@ -13,6 +13,8 @@ import {
   getRequestAsset,
   getRequests,
   getRequestsCached,
+  getRequestsCachedClickhouse,
+  getRequestsClickhouse,
 } from "../../lib/stores/request/request";
 import { costOfPrompt } from "../../packages/cost";
 import { BaseManager } from "../BaseManager";
@@ -250,6 +252,73 @@ export class RequestManager extends BaseManager {
           }),
         };
       });
+    });
+  }
+
+  async getRequestsClickhouse(
+    params: RequestQueryParams
+  ): Promise<Result<HeliconeRequest[], string>> {
+    const {
+      filter,
+      offset = 0,
+      limit = 10,
+      sort = {
+        created_at: "desc",
+      },
+      isCached,
+      isPartOfExperiment,
+      isScored,
+    } = params;
+
+    let newFilter = filter;
+
+    if (isScored !== undefined) {
+      newFilter = this.addScoreFilter(isScored, newFilter);
+    }
+
+    if (isPartOfExperiment !== undefined) {
+      newFilter = this.addPartOfExperimentFilter(isPartOfExperiment, newFilter);
+    }
+
+    const requests = isCached
+      ? await getRequestsCachedClickhouse(
+          this.authParams.organizationId,
+          filter,
+          offset,
+          limit,
+          sort,
+          isPartOfExperiment,
+          isScored
+        )
+      : await getRequestsClickhouse(
+          this.authParams.organizationId,
+          newFilter,
+          offset,
+          limit,
+          sort
+        );
+
+    return resultMap(requests, (req) => {
+      const seen = new Set();
+      return req
+        .map((r) => {
+          return {
+            ...r,
+            costUSD: costOfPrompt({
+              model: r.request_model ?? "",
+              provider: r.provider ?? "",
+              completionTokens: r.completion_tokens ?? 0,
+              promptTokens: r.prompt_tokens ?? 0,
+            }),
+          };
+        })
+        .filter((r) => {
+          if (seen.has(r.request_id)) {
+            return false;
+          }
+          seen.add(r.request_id);
+          return true;
+        });
     });
   }
 

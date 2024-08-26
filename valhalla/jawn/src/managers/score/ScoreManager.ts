@@ -111,16 +111,23 @@ export class ScoreManager extends BaseManager {
         return err(bumpedVersions.error);
       }
       const scoresScoreResult = await this.scoreStore.putScoresIntoClickhouse(
-        //@ts-ignore
         bumpedVersions.data.map((scoresMessage) => {
           return {
             requestId: scoresMessage.id,
             organizationId: scoresMessage.helicone_org_id,
             provider: scoresMessage.provider,
-            version: scoresMessage.version,
             mappedScores:
-              filteredMessages.find((x) => x.requestId === scoresMessage.id)
-                ?.scores ?? [],
+              filteredMessages
+                .find((x) => x.requestId === scoresMessage.id)
+                ?.scores.map((score) => {
+                  if (score.score_attribute_type === "boolean") {
+                    return {
+                      ...score,
+                      score_attribute_key: `${score.score_attribute_key}-hcone-bool`,
+                    };
+                  }
+                  return score;
+                }) ?? [],
           };
         })
       );
@@ -150,7 +157,7 @@ export class ScoreManager extends BaseManager {
       );
       if (feedbackResult.error) {
         console.error("Error upserting feedback:", feedbackResult.error);
-        return err(feedbackResult.error);
+        return ok(null);
       }
       return ok(null);
     } catch (error: any) {

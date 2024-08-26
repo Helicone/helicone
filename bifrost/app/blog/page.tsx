@@ -197,6 +197,16 @@ const blogContent: BlogStructure[] = [
   },
   {
     dynmaicEntry: {
+      folderName: "best-langfuse-alternatives",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "redeem-promo-code",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "llm-stack-guide",
     },
   },

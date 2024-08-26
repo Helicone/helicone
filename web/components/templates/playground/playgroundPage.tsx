@@ -242,12 +242,16 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                 />
               </>
             ) : singleRequest !== null && !isChat ? (
-              <div className="col-span-8 h-96 items-center justify-center flex flex-col border border-dashed border-gray-300 dark:border-gray-700 rounded-xl text-gray-500">
-                This request is not a chat completion request. We do not
-                currently support non-chat completion requests in playground
-                {JSON.stringify(chat, null, 4)}
-                <div className="whitespace-pre-wrap text-black overflow-auto">
-                  {JSON.stringify(singleRequest, null, 4)}
+              <div className="col-span-8 h-full max-w-full flex flex-col items-center justify-center border border-dashed border-gray-300 dark:border-gray-700 rounded-xl text-gray-500 p-4 overflow-hidden">
+                <p className="text-center mb-4">
+                  This request is not a chat completion request. We do not
+                  currently support non-chat completion requests in playground.
+                </p>
+
+                <div className="max-w-96 overflow-auto mt-4">
+                  <pre className="text-xs whitespace-pre-wrap text-black dark:text-white break-words max-w-full">
+                    {JSON.stringify(singleRequest, null, 2)}
+                  </pre>
                 </div>
               </div>
             ) : debouncedRequestId === "" ? (

@@ -173,6 +173,19 @@ const whereKeyMappings: KeyMappings = {
         value: placeValueSafely(value),
       };
     }
+    if ("scores" in filter && filter.scores) {
+      const key = Object.keys(filter.scores)[0];
+      const { operator, value } = extractOperatorAndValueFromAnOperator(
+        filter.scores[key as keyof typeof filter.scores]
+      );
+      return {
+        column: `has(scores, ${placeValueSafely(
+          key
+        )}) AND scores[${placeValueSafely(key)}]`,
+        operator: operator,
+        value: value,
+      };
+    }
     return easyKeyMappings<"request_response_rmt">({
       latency: "request_response_rmt.latency",
       status: "request_response_rmt.status",
@@ -184,6 +197,10 @@ const whereKeyMappings: KeyMappings = {
       node_id: "request_response_rmt.node_id",
       job_id: "request_response_rmtd",
       threat: "request_response_rmt.threat",
+      prompt_tokens: "request_response_rmt.prompt_tokens",
+      completion_tokens: "request_response_rmt.completion_tokens",
+      request_body: "request_response_rmt.request_body",
+      response_body: "request_response_rmt.response_body",
     })(filter, placeValueSafely);
   },
   request_response_search: (filter, placeValueSafely) => {
@@ -272,6 +289,19 @@ const havingKeyMappings: KeyMappings = {
         column: `key`,
         operator: operator,
         value: placeValueSafely(value),
+      };
+    }
+    if ("scores" in filter && filter.scores) {
+      const key = Object.keys(filter.scores)[0];
+      const { operator, value } = extractOperatorAndValueFromAnOperator(
+        filter.scores[key as keyof typeof filter.scores]
+      );
+      return {
+        column: `has(scores, ${placeValueSafely(
+          key
+        )}) AND scores[${placeValueSafely(key)}]`,
+        operator: operator,
+        value: value,
       };
     }
     return easyKeyMappings<"request_response_rmt">({
@@ -365,7 +395,7 @@ export function buildFilterLeaf(
       filters.push(`${column} is null`);
     } else {
       if (operatorKey === "contains" || operatorKey === "not-contains") {
-        filters.push(`${column} ${sqlOperator} %${value}%`);
+        filters.push(`${column} ${sqlOperator} '%' || ${value}::text || '%'`);
       } else {
         filters.push(`${column} ${sqlOperator} ${value}`);
       }

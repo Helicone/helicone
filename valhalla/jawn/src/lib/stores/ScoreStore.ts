@@ -106,7 +106,7 @@ export class ScoreStore extends BaseStore {
   ): Promise<Result<RequestResponseRMT[], string>> {
     const queryPlaceholders = newVersions
       .map((_, index) => {
-        const base = index * 4;
+        const base = index * 3;
         return `({val_${base} : String}, {val_${base + 1} : String}, {val_${
           base + 2
         } : String})`;
@@ -156,7 +156,9 @@ export class ScoreStore extends BaseStore {
       return acc;
     }, {} as Record<string, RequestResponseRMT>);
 
-    const filteredRequestResponseLogs = Object.values(uniqueRequestResponseLogs);
+    const filteredRequestResponseLogs = Object.values(
+      uniqueRequestResponseLogs
+    );
 
     const res = await clickhouseDb.dbInsertClickhouse(
       "request_response_rmt",

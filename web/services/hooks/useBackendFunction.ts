@@ -13,6 +13,7 @@ export interface BackendMetricsCall<T> {
   };
   endpoint: string;
   key?: string;
+  isLive?: boolean;
   postProcess?: (data: T) => T;
 }
 
@@ -32,10 +33,12 @@ export function useBackendMetricCall<T>({
   endpoint,
   key,
   postProcess,
+  isLive,
 }: BackendMetricsCall<T>) {
   return useQuery<T>({
     queryKey: [endpoint, params, "" + key],
     retry: false,
+    refetchInterval: isLive ? 5_000 : undefined,
     queryFn: async (query) => {
       const { timeFilter, userFilters, dbIncrement, timeZoneDifference } = query
         .queryKey[1] as BackendMetricsCall<T>["params"];

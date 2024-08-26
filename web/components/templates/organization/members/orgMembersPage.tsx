@@ -42,8 +42,8 @@ const OrgMembersPage = (props: OrgMembersPageProps) => {
 
   const isOwner = org.owner === user?.id;
 
-  const members = data?.data
-    ? data?.data
+  const members = data
+    ? data
         .filter((d) => {
           // if the org is a customer org, remove all "owner" roles UNLESS the user is the owner
           if (orgContext?.currentOrg?.organization_type === "customer") {

@@ -28,6 +28,26 @@ function getPathName(url: string) {
     return url;
   }
 }
+const convertToUSDateFormat = (date: string) => {
+  const dateObj = new Date(date);
+  const tzOffset = dateObj.getTimezoneOffset() * 60000;
+
+  const localDateObj = new Date(dateObj.getTime() - tzOffset);
+  const formattedDate =
+    [
+      ("0" + (localDateObj.getMonth() + 1)).slice(-2),
+      ("0" + localDateObj.getDate()).slice(-2),
+      localDateObj.getFullYear(),
+    ].join("/") +
+    " " +
+    [
+      ("0" + localDateObj.getHours()).slice(-2),
+      ("0" + localDateObj.getMinutes()).slice(-2),
+      ("0" + localDateObj.getSeconds()).slice(-2),
+    ].join(":");
+
+  return formattedDate;
+};
 
 const RequestRow = (props: {
   request: NormalizedRequest;
@@ -56,8 +76,7 @@ const RequestRow = (props: {
     }[]
   >();
 
-  const [currentScores, setCurrentScores] =
-    useState<Record<string, { value: number; valueType: string }>>();
+  const [currentScores, setCurrentScores] = useState<Record<string, number>>();
 
   const { setNotification } = useNotification();
 
@@ -79,8 +98,8 @@ const RequestRow = (props: {
     });
 
     setCurrentProperties(currentProperties);
-    const currentScores: Record<string, { value: number; valueType: string }> =
-      request.scores || {};
+    const currentScores: Record<string, number> =
+      (request.scores as Record<string, number>) || {};
     setCurrentScores(currentScores);
   }, [properties, request.customProperties, request.scores]);
 
@@ -179,16 +198,10 @@ const RequestRow = (props: {
           currentScores
             ? {
                 ...currentScores,
-                [key]: {
-                  value: value,
-                  valueType: valueType,
-                },
+                [key]: value,
               }
             : {
-                [key]: {
-                  value: value,
-                  valueType: valueType,
-                },
+                [key]: value,
               }
         );
 
@@ -221,7 +234,7 @@ const RequestRow = (props: {
               Created At
             </p>
             <p className="text-gray-700 dark:text-gray-300 truncate">
-              {new Date(request.createdAt).toLocaleString("en-US")}
+              {convertToUSDateFormat(request.createdAt)}
             </p>
           </li>
           <li className="flex flex-row justify-between items-center py-2 gap-4">
@@ -331,8 +344,8 @@ const RequestRow = (props: {
 
       <div className="flex flex-col gap-5">
         <div className="font-semibold text-gray-900 dark:text-gray-100 text-sm items-center flex">
-          <button className="flex flex-row items-center space-x-1">
-            Add to Dataset
+          <div className="flex flex-row items-center space-x-1">
+            <span>Add to Dataset</span>
             <Tooltip title="Add to Dataset" placement="top">
               <button
                 onClick={() => {
@@ -343,7 +356,7 @@ const RequestRow = (props: {
                 <PlusIcon className="h-3 w-3 text-gray-500" />
               </button>
             </Tooltip>
-          </button>
+          </div>
         </div>
         <div className="font-semibold text-gray-900 dark:text-gray-100 text-sm items-center flex">
           Custom Properties{" "}
@@ -520,32 +533,39 @@ const RequestRow = (props: {
 
         <div className="flex flex-wrap gap-4 text-sm items-center pt-2">
           {currentScores &&
-            Object.entries(currentScores).map(([key, scoreValue]) => (
-              <li
-                className="flex flex-col space-y-1 justify-between text-left p-2.5 shadow-sm border border-gray-300 dark:border-gray-700 rounded-lg min-w-[5rem]"
-                key={key}
-              >
-                <p className="font-semibold text-gray-900 dark:text-gray-100">
-                  {key}
-                </p>
-                <p className="text-gray-700 dark:text-gray-300">
-                  {scoreValue.valueType === "boolean"
-                    ? scoreValue.value === 1
-                      ? "true"
-                      : "false"
-                    : Number(scoreValue.value)}
-                </p>
-              </li>
-            ))}
+            Object.entries(currentScores)
+              .filter((x) => x[0] !== "helicone-score-feedback")
+              .map(([key, value]) => (
+                <li
+                  className="flex flex-col space-y-1 justify-between text-left p-2.5 shadow-sm border border-gray-300 dark:border-gray-700 rounded-lg min-w-[5rem]"
+                  key={key}
+                >
+                  <p className="font-semibold text-gray-900 dark:text-gray-100">
+                    {key.replace("-hcone-bool", "")}
+                  </p>
+                  <p className="text-gray-700 dark:text-gray-300">
+                    {key.endsWith("-hcone-bool")
+                      ? value === 1
+                        ? "true"
+                        : "false"
+                      : Number(value)}
+                  </p>
+                </li>
+              ))}
         </div>
       </div>
-
       {displayPreview && (
         <div className="flex flex-col space-y-8">
           <div className="flex w-full justify-end">
             <FeedbackButtons
               requestId={request.id}
-              defaultValue={request.feedback.rating}
+              defaultValue={
+                request.scores && request.scores["helicone-score-feedback"]
+                  ? Number(request.scores["helicone-score-feedback"]) === 1
+                    ? true
+                    : false
+                  : null
+              }
             />
           </div>
 
