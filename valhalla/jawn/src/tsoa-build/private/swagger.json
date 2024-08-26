@@ -4240,6 +4240,24 @@
 							"application/json": {
 								"schema": {
 									"properties": {
+										"usersOverTime": {
+											"items": {
+												"properties": {
+													"day": {
+														"type": "string"
+													},
+													"count": {
+														"type": "string"
+													}
+												},
+												"required": [
+													"day",
+													"count"
+												],
+												"type": "object"
+											},
+											"type": "array"
+										},
 										"newUsersOvertime": {
 											"items": {
 												"properties": {
@@ -4278,6 +4296,7 @@
 										}
 									},
 									"required": [
+										"usersOverTime",
 										"newUsersOvertime",
 										"newOrgsOvertime"
 									],
