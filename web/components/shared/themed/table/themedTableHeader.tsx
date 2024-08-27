@@ -18,6 +18,7 @@ import FiltersButton from "./filtersButton";
 import { DragColumnItem } from "./columns/DragList";
 import SortButton from "./columns/sortButton";
 import { UIFilterRowTree } from "../../../../services/lib/filters/uiFilterRowTree";
+import React from 'react';
 
 interface ThemedTableHeaderProps<T> {
   rows?: T[];
