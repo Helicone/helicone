@@ -19,6 +19,7 @@ import { Row } from "../../layout/common";
 import useShiftKeyPress from "../../../services/hooks/isShiftPressed";
 import { useJawnClient } from "../../../lib/clients/jawnHook";
 import useNotification from "../../shared/notification/useNotification";
+import { useSelectMode } from "../../../services/hooks/dataset/selectMode";
 
 interface DatasetIdPageProps {
   id: string;
@@ -46,29 +47,21 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
   const [open, setOpen] = useState(false);
   const isShiftPressed = useShiftKeyPress();
 
+  const {
+    selectMode: selectModeHook,
+    toggleSelectMode,
+    selectedIds,
+    toggleSelection,
+    selectAll,
+    isShiftPressed: isShiftPressedHook,
+  } = useSelectMode({
+    items: rows,
+    getItemId: (row) => row.id,
+  });
+
   const onRowSelectHandler = (row: any, index: number) => {
-    if (selectMode) {
-      if (selectedRows.includes(row.id)) {
-        setSelectedRows(selectedRows.filter((id) => id !== row.id));
-      } else {
-        if (isShiftPressed && lastSelectedRow) {
-          const startIndex = rows.findIndex(
-            (request) => request.id === lastSelectedRow.id
-          );
-          const endIndex = rows.findIndex((request) => request.id === row.id);
-          const selectedIds = rows
-            .slice(startIndex, endIndex + 1)
-            .map((request) => request.id);
-          setSelectedRows(
-            [...selectedRows, ...selectedIds].filter(
-              (id, index, self) => self.indexOf(id) === index
-            )
-          );
-        } else {
-          setSelectedRows([...selectedRows, row.id]);
-        }
-        setLastSelectedRow(row);
-      }
+    if (selectModeHook) {
+      toggleSelection(row);
     } else {
       setSelectedDataIndex(index);
       setSelectedRow(row);
@@ -104,8 +97,8 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
           </div>
         </div>
         <ThemedTable
-          highlightedIds={selectedRows}
-          showCheckboxes={selectMode}
+          highlightedIds={selectedIds}
+          showCheckboxes={selectModeHook}
           defaultColumns={[
             {
               header: "Created At",
@@ -156,54 +149,41 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
           customButtons={[
             <div key={"dataset-button"}>
               <DatasetButton
-                datasetMode={selectMode}
-                isDatasetPage={true}
-                setDatasetMode={(selectMode) => {
-                  if (!selectMode) {
-                    setSelectedRows([]);
-                  }
-                  setSelectMode(selectMode);
-                }}
+                datasetMode={selectModeHook}
+                setDatasetMode={toggleSelectMode}
                 items={rows.filter((request) =>
-                  selectedRows.includes(request.id)
+                  selectedIds.includes(request.id)
                 )}
                 onAddToDataset={() => {
-                  setSelectedRows([]);
-                  setSelectMode(false);
+                  rows
+                    .filter((row) => selectedIds.includes(row.id))
+                    .forEach(toggleSelection);
+                  toggleSelectMode(false);
                 }}
               />
             </div>,
           ]}
         >
-          {selectMode && (
+          {selectModeHook && (
             <Row className="gap-5 items-center w-full bg-white dark:bg-black rounded-lg p-5 border border-gray-300 dark:border-gray-700">
               <span className="text-sm font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap">
                 Select Mode:
               </span>
-              {isShiftPressed && lastSelectedRow && (
+              {isShiftPressedHook && lastSelectedRow && (
                 <span className="text-sm font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap">
-                  {lastSelectedRow.id} - {selectedRows[selectedRows.length - 1]}
+                  {lastSelectedRow.id} - {selectedIds[selectedIds.length - 1]}
                 </span>
               )}
 
               <GenericButton
-                onClick={() => {
-                  if (selectedRows.length > 0) {
-                    setSelectedRows([]);
-                  } else {
-                    setSelectedRows(rows.map((request) => request.id));
-                  }
-                }}
-                text={selectedRows.length > 0 ? "Deselect All" : "Select All"}
+                onClick={selectAll}
+                text={selectedIds.length > 0 ? "Deselect All" : "Select All"}
               />
               <GenericButton
-                onClick={() => {
-                  setSelectedRows([]);
-                  setSelectMode(false);
-                }}
+                onClick={() => toggleSelectMode(false)}
                 text="Cancel"
               />
-              {selectedRows.length > 0 && (
+              {selectedIds.length > 0 && (
                 <GenericButton
                   onClick={async () => {
                     const res = await jawn.POST(
@@ -216,7 +196,7 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
                         },
                         body: {
                           addRequests: [],
-                          removeRequests: selectedRows,
+                          removeRequests: selectedIds,
                         },
                       }
                     );
@@ -232,14 +212,13 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
                         "error"
                       );
                     }
-                    setSelectedRows([]);
-                    setSelectMode(false);
+                    toggleSelectMode(false);
                   }}
                   icon={
                     <MinusIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
                   }
                   text="Remove requests"
-                  count={selectedRows.length}
+                  count={selectedIds.length}
                 />
               )}
             </Row>
