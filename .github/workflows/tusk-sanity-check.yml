@@ -34,6 +34,16 @@ jobs:
         with:
           node-version: 18
 
+
+      - name: Install bifrsot dependencies
+        run: yarn install
+        working-directory: ./bifrost
+
+      - name: Bifrost lint fix
+        run: yarn lint
+        working-directory: ./bifrost
+
+
       - name: Install web dependencies
         run: yarn install
         working-directory: ./web
