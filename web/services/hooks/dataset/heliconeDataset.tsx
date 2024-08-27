@@ -36,7 +36,11 @@ type NotUndefined<T> = T extends undefined ? never : T;
 type NotNull<T> = T extends null ? never : T;
 type NotNullAndUndefined<T> = NotNull<NotUndefined<T>>;
 
-const useGetHeliconeDatasetRows = (id: string) => {
+const useGetHeliconeDatasetRows = (
+  id: string,
+  currentPage: number,
+  currentPageSize: number
+) => {
   const org = useOrg();
   type Rows = (NotNullAndUndefined<
     NotNullAndUndefined<NotNullAndUndefined<typeof data>["data"]>["data"]
@@ -57,7 +61,10 @@ const useGetHeliconeDatasetRows = (id: string) => {
       const datasetId = query.queryKey[2] as string;
       const jawn = getJawnClient(orgId);
       return jawn.POST(`/v1/helicone-dataset/{datasetId}/query`, {
-        body: {},
+        body: {
+          limit: currentPageSize,
+          offset: (currentPage - 1) * currentPageSize,
+        },
         params: {
           path: {
             datasetId,
@@ -67,6 +74,8 @@ const useGetHeliconeDatasetRows = (id: string) => {
     },
     refetchOnWindowFocus: false,
   });
+
+  const { count, isLoading: isCountLoading } = useGetHeliconeDatasetCount(id);
 
   const rowsWithSignedUrls = useMemo(() => data?.data?.data ?? [], [data]);
 
@@ -119,7 +128,40 @@ const useGetHeliconeDatasetRows = (id: string) => {
     })),
     completedQueries: urlQueries.filter((query) => query.isSuccess).length,
     totalQueries: rowsWithSignedUrls.length,
+    count,
+    isCountLoading,
   };
 };
 
-export { useGetHeliconeDatasets, useGetHeliconeDatasetRows };
+const useGetHeliconeDatasetCount = (id: string) => {
+  const org = useOrg();
+  const { data, isLoading, refetch, isRefetching } = useQuery({
+    queryKey: ["dataset-count", org?.currentOrg?.id, id],
+    queryFn: async (query) => {
+      const orgId = query.queryKey[1] as string;
+      const datasetId = query.queryKey[2] as string;
+      const jawn = getJawnClient(orgId);
+      return jawn.POST(`/v1/helicone-dataset/{datasetId}/count`, {
+        params: {
+          path: {
+            datasetId,
+          },
+        },
+      });
+    },
+    refetchOnWindowFocus: false,
+  });
+
+  return {
+    isLoading,
+    refetch,
+    isRefetching,
+    count: data?.data?.data,
+  };
+};
+
+export {
+  useGetHeliconeDatasets,
+  useGetHeliconeDatasetRows,
+  useGetHeliconeDatasetCount,
+};

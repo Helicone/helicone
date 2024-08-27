@@ -90,6 +90,9 @@ export interface paths {
   "/v1/helicone-dataset/{datasetId}/query": {
     post: operations["QueryHeliconeDatasetRows"];
   };
+  "/v1/helicone-dataset/{datasetId}/count": {
+    post: operations["CountHeliconeDatasetRows"];
+  };
   "/v1/helicone-dataset/query": {
     post: operations["QueryHeliconeDataset"];
   };
@@ -920,6 +923,13 @@ export interface components {
       error: null;
     };
     "Result_HeliconeDatasetRow-Array.string_": components["schemas"]["ResultSuccess_HeliconeDatasetRow-Array_"] | components["schemas"]["ResultError_string_"];
+    ResultSuccess_number_: {
+      /** Format: double */
+      data: number;
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_number.string_": components["schemas"]["ResultSuccess_number_"] | components["schemas"]["ResultError_string_"];
 Json: JsonObject;
     HeliconeDataset: {
       created_at: string | null;
@@ -1169,13 +1179,6 @@ Json: JsonObject;
       error: null;
     };
     "Result_ProviderUsageOverTime-Array.string_": components["schemas"]["ResultSuccess_ProviderUsageOverTime-Array_"] | components["schemas"]["ResultError_string_"];
-    ResultSuccess_number_: {
-      /** Format: double */
-      data: number;
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_number.string_": components["schemas"]["ResultSuccess_number_"] | components["schemas"]["ResultError_string_"];
     /**
      * @description *
      * FUTURE HELICONE DEVS ALL THE ROUTES HERE ARE CACHE UNAUTHENTICATED!! PLEASE DO NOT USE THE AUTH PARAM
@@ -1771,7 +1774,12 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": Record<string, never>;
+        "application/json": {
+          /** Format: double */
+          limit: number;
+          /** Format: double */
+          offset: number;
+        };
       };
     };
     responses: {
@@ -1779,6 +1787,21 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_HeliconeDatasetRow-Array.string_"];
+        };
+      };
+    };
+  };
+  CountHeliconeDatasetRows: {
+    parameters: {
+      path: {
+        datasetId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_number.string_"];
         };
       };
     };
