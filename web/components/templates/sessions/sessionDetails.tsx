@@ -88,12 +88,6 @@ const SessionDetails = ({
           </li>
         </ul>
       </div>
-      <TextInput
-        icon={MagnifyingGlassIcon}
-        value={sessionIdSearch}
-        onValueChange={(value) => setSessionIdSearch(value)}
-        placeholder="Search session id..."
-      />
       <ThemedTable
         id="session-table"
         defaultData={sessions || []}
@@ -127,6 +121,16 @@ const SessionDetails = ({
         onRowSelect={(row) => {
           router.push(`/sessions/${row.session}`);
         }}
+        customButtons={[
+          <TextInput
+            key="search-input"
+            icon={MagnifyingGlassIcon}
+            value={sessionIdSearch}
+            onValueChange={(value) => setSessionIdSearch(value)}
+            placeholder="Search session id..."
+            className="w-64 max-w-full"
+          />,
+        ]}
       />
     </Col>
   );

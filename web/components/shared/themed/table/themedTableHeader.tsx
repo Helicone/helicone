@@ -121,7 +121,7 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
           <div />
         )}
 
-        <div className="flex flex-wrap justify-start lg:justify-end gap-2">
+        <div className="flex flex-wrap justify-start lg:justify-end gap-2 items-center">
           {advancedFilters && (
             <button
               onClick={showFilterHandler}
@@ -160,6 +160,10 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
             />
           )}
 
+          {customButtons && customButtons.map((button, index) => (
+            <React.Fragment key={index}>{button}</React.Fragment>
+          ))}
+
           {columns &&
             columns.filter((column) => column.columnDef.meta?.sortKey).length >
               0 && <SortButton columns={columns} />}
@@ -190,7 +194,6 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
               </p>
             </button>
           )}
-          {customButtons && customButtons.map((button) => button)}
         </div>
       </div>
 
