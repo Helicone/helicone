@@ -180,7 +180,6 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
               <span className="text-sm font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap">
                 Select Mode:
               </span>
-              {isShiftPressed && "hello"}
               {isShiftPressed && lastSelectedRow && (
                 <span className="text-sm font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap">
                   {lastSelectedRow.id} - {selectedRows[selectedRows.length - 1]}
@@ -204,40 +203,45 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
                 }}
                 text="Cancel"
               />
-              <GenericButton
-                onClick={async () => {
-                  const res = await jawn.POST(
-                    `/v1/helicone-dataset/{datasetId}/mutate`,
-                    {
-                      params: {
-                        path: {
-                          datasetId: id,
+              {selectedRows.length > 0 && (
+                <GenericButton
+                  onClick={async () => {
+                    const res = await jawn.POST(
+                      `/v1/helicone-dataset/{datasetId}/mutate`,
+                      {
+                        params: {
+                          path: {
+                            datasetId: id,
+                          },
                         },
-                      },
-                      body: {
-                        addRequests: [],
-                        removeRequests: selectedRows,
-                      },
-                    }
-                  );
-                  if (res.data && !res.data.error) {
-                    setNotification("Requests removed from dataset", "success");
-                    await refetch();
-                  } else {
-                    setNotification(
-                      "Failed to remove requests from dataset",
-                      "error"
+                        body: {
+                          addRequests: [],
+                          removeRequests: selectedRows,
+                        },
+                      }
                     );
+                    if (res.data && !res.data.error) {
+                      setNotification(
+                        "Requests removed from dataset",
+                        "success"
+                      );
+                      await refetch();
+                    } else {
+                      setNotification(
+                        "Failed to remove requests from dataset",
+                        "error"
+                      );
+                    }
+                    setSelectedRows([]);
+                    setSelectMode(false);
+                  }}
+                  icon={
+                    <MinusIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
                   }
-                  setSelectedRows([]);
-                  setSelectMode(false);
-                }}
-                icon={
-                  <MinusIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
-                }
-                text="Remove requests"
-                count={selectedRows.length}
-              />
+                  text="Remove requests"
+                  count={selectedRows.length}
+                />
+              )}
             </Row>
           )}
         </ThemedTable>
