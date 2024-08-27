@@ -7,7 +7,6 @@ import { useJawnClient } from "../../../lib/clients/jawnHook";
 import { TimeInterval } from "../../../lib/timeCalculations/time";
 import { useGetUnauthorized } from "../../../services/hooks/dashboard";
 import { useDebounce } from "../../../services/hooks/debounce";
-import useShiftKeyPress from "../../../services/hooks/isShiftPressed";
 import { useLocalStorage } from "../../../services/hooks/localStorage";
 import { useOrganizationLayout } from "../../../services/hooks/organization_layout";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
@@ -52,6 +51,9 @@ import RequestDrawerV2 from "./requestDrawerV2";
 import TableFooter from "./tableFooter";
 import useRequestsPageV2 from "./useRequestsPageV2";
 import { useRouter } from "next/router";
+import ThemedModal from "../../shared/themed/themedModal";
+import NewDataset from "../datasets/NewDataset";
+import { useSelectMode } from "../../../services/hooks/dataset/selectMode";
 
 interface RequestsPageV2Props {
   currentPage: number;
@@ -607,34 +609,21 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     })
   );
 
-  const [datasetMode, setDatasetMode] = useState<boolean>(false);
-  const [selectedRows, setSelectedRows] = useState<string[]>([]);
+  const {
+    selectMode,
+    toggleSelectMode,
+    selectedIds,
+    toggleSelection,
+    selectAll,
+    isShiftPressed,
+  } = useSelectMode({
+    items: normalizedRequests,
+    getItemId: (request: NormalizedRequest) => request.id,
+  });
 
   const onRowSelectHandler = (row: NormalizedRequest, index: number) => {
-    if (datasetMode) {
-      if (selectedRows.includes(row.id)) {
-        setSelectedRows(selectedRows.filter((id) => id !== row.id));
-      } else {
-        if (isShiftPressed && lastSelectedRow) {
-          const startIndex = normalizedRequests.findIndex(
-            (request) => request.id === lastSelectedRow.id
-          );
-          const endIndex = normalizedRequests.findIndex(
-            (request) => request.id === row.id
-          );
-          const selectedIds = normalizedRequests
-            .slice(startIndex, endIndex + 1)
-            .map((request) => request.id);
-          setSelectedRows(
-            [...selectedRows, ...selectedIds].filter(
-              (id, index, self) => self.indexOf(id) === index
-            )
-          );
-        } else {
-          setSelectedRows([...selectedRows, row.id]);
-        }
-        setLastSelectedRow(row);
-      }
+    if (selectMode) {
+      toggleSelection(row);
     } else {
       setSelectedDataIndex(index);
       setSelectedData(row);
@@ -748,11 +737,6 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     }
   };
 
-  const [lastSelectedRow, setLastSelectedRow] =
-    useState<NormalizedRequest | null>(null);
-
-  const isShiftPressed = useShiftKeyPress();
-
   return (
     <div>
       {requestWithoutStream && !isWarningHidden && (
@@ -828,8 +812,8 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
         >
           <ThemedTable
             id="requests-table"
-            highlightedIds={selectedRows}
-            showCheckboxes={datasetMode}
+            highlightedIds={selectedIds}
+            showCheckboxes={selectMode}
             defaultData={normalizedRequests}
             defaultColumns={columnsWithProperties}
             skeletonLoading={isDataLoading}
@@ -905,54 +889,43 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
             customButtons={[
               <div key={"dataset-button"}>
                 <DatasetButton
-                  datasetMode={datasetMode}
-                  setDatasetMode={(datasetMode) => {
-                    if (!datasetMode) {
-                      setSelectedRows([]);
-                    }
-                    setDatasetMode(datasetMode);
-                  }}
-                  requests={normalizedRequests.filter((request) =>
-                    selectedRows.includes(request.id)
+                  datasetMode={selectMode}
+                  setDatasetMode={toggleSelectMode}
+                  items={normalizedRequests.filter((request) =>
+                    selectedIds.includes(request.id)
                   )}
-                  onComplete={() => {
-                    setSelectedRows([]);
-                    setDatasetMode(false);
+                  onAddToDataset={() => {
+                    // Handle adding to dataset without modal
                   }}
+                  renderModal={(isOpen, onClose) => (
+                    <ThemedModal open={isOpen} setOpen={onClose}>
+                      <NewDataset
+                        requests={normalizedRequests.filter((request) =>
+                          selectedIds.includes(request.id)
+                        )}
+                        onComplete={() => {
+                          onClose();
+                          toggleSelectMode(false);
+                        }}
+                      />
+                    </ThemedModal>
+                  )}
                 />
               </div>,
             ]}
           >
-            {datasetMode && (
+            {selectMode && (
               <Row className="gap-5 items-center w-full bg-white dark:bg-black rounded-lg p-5 border border-gray-300 dark:border-gray-700">
                 <span className="text-sm font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap">
                   Select Mode:
                 </span>
-                {isShiftPressed && "hello"}
-                {isShiftPressed && lastSelectedRow && (
-                  <span className="text-sm font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap">
-                    {lastSelectedRow.id} -{" "}
-                    {selectedRows[selectedRows.length - 1]}
-                  </span>
-                )}
 
                 <GenericButton
-                  onClick={() => {
-                    if (selectedRows.length > 0) {
-                      setSelectedRows([]);
-                    } else {
-                      setSelectedRows(
-                        normalizedRequests.map((request) => request.id)
-                      );
-                    }
-                  }}
-                  text={selectedRows.length > 0 ? "Deselect All" : "Select All"}
+                  onClick={selectAll}
+                  text={selectedIds.length > 0 ? "Deselect All" : "Select All"}
                 />
                 <GenericButton
-                  onClick={() => {
-                    setSelectedRows([]);
-                    setDatasetMode(false);
-                  }}
+                  onClick={() => toggleSelectMode(false)}
                   text="Cancel"
                 />
               </Row>
