@@ -78,7 +78,11 @@ const SessionsPage = (props: SessionsPageProps) => {
               sessionNames={names.sessions}
             />
             <SessionDetails
-              selectedName={selectedName}
+              selectedSession={
+                names.sessions.find(
+                  (session) => session.name === selectedName
+                ) ?? null
+              }
               sessionIdSearch={sessionIdSearch}
               setSessionIdSearch={setSessionIdSearch}
               sessions={sessions}
