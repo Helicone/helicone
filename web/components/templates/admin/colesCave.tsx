@@ -29,7 +29,7 @@ const ColesCave = () => {
 
   return (
     <div className="flex flex-col space-y-4 text-gray-200 bg-gray-800 p-6 rounded-lg">
-      <h1 className="text-2xl font-semibold">Cole's Cave</h1>
+      <h1 className="text-2xl font-semibold">Cole&apos;s Cave</h1>
       <form onSubmit={handleSubmit} className="flex space-x-2">
         <input
           type="text"
