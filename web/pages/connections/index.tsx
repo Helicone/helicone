@@ -1,18 +1,18 @@
 import { ReactElement } from "react";
 import AuthLayout from "../../components/layout/authLayout";
-import IntegrationsPage from "../../components/templates/integrations/IntegrationsPage";
+import ConnectionsPage from "../../components/templates/connections/connectionsPage";
 import { withAuthSSR } from "../../lib/api/handlerWrappers";
 import { SortDirection } from "../../services/lib/sorts/requests/sorts";
 
-const Integrations = () => {
-  return <IntegrationsPage />;
+const Connections = () => {
+  return <ConnectionsPage />;
 };
 
-Integrations.getLayout = function getLayout(page: ReactElement) {
+Connections.getLayout = function getLayout(page: ReactElement) {
   return <AuthLayout>{page}</AuthLayout>;
 };
 
-export default Integrations;
+export default Connections;
 
 export const getServerSideProps = withAuthSSR(async (options) => {
   const { page, page_size, sortKey, sortDirection, isCustomProperty, tab } =

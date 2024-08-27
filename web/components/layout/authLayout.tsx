@@ -105,10 +105,10 @@ const AuthLayout = (props: AuthLayoutProps) => {
             current: pathname.includes("/evals"),
           },
           {
-            name: "Integrations",
-            href: "/integrations",
+            name: "Connections",
+            href: "/connections",
             icon: GoRepoForked,
-            current: pathname.includes("/evals"),
+            current: pathname.includes("/connections"),
           },
         ]),
     {
