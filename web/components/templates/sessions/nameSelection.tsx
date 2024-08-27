@@ -1,11 +1,7 @@
-import {
-  DocumentTextIcon,
-} from "@heroicons/react/24/outline";
 import { getTimeAgo } from "../../../lib/sql/timeHelpers";
 import { Col } from "../../layout/common/col";
 import { clsx } from "../../shared/clsx";
 import { Row } from "../../layout/common/row";
-import { Tooltip } from "@mui/material";
 import { useState } from "react";
 
 interface SessionNameSelectionProps {
