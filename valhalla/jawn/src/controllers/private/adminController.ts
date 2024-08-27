@@ -89,7 +89,7 @@ export class AdminController extends Controller {
     LEFT JOIN organization_member ON organization.id = organization_member.organization
     LEFT JOIN users_view AS member_user ON organization_member.member = member_user.id
     WHERE (
-      true 
+      true
       ${body.tier !== "all" ? `AND organization.tier = '${body.tier}'` : ""}
     )
     GROUP BY
@@ -114,8 +114,8 @@ export class AdminController extends Controller {
     SELECT
       organization_id,
       count(*) as ct
-    FROM request_response_rmt 
-    WHERE 
+    FROM request_response_rmt
+    WHERE
       request_response_rmt.request_created_at > toDateTime('${body.startDate}')
       and request_response_rmt.request_created_at < toDateTime('${
         body.endDate
@@ -256,6 +256,173 @@ export class AdminController extends Controller {
       .select("*");
 
     return data ?? [];
+  }
+
+  @Post("/whodis")
+  public async whodis(
+    @Request() request: JawnAuthenticatedRequest,
+    @Body()
+    body: {
+      organizationId: string;
+    }
+  ): Promise<{
+    organization: {
+      id: string;
+      name: string;
+      created_at: string;
+      owner: string;
+      tier: string;
+      stripe_customer_id: string | null;
+      stripe_subscription_id: string | null;
+      subscription_status: string | null;
+      members:
+        | {
+            id: string;
+            email: string;
+            name: string;
+            role: string;
+            last_sign_in_at: string | null;
+          }[];
+    } | null;
+    usage: {
+      total_requests: number;
+      requests_last_30_days: number;
+      monthly_usage: {
+        month: string;
+        requestCount: number;
+      }[];
+      all_time_count: number;
+    } | null;
+  }> {
+    await authCheckThrow(request.authParams.userId);
+
+    const { organizationId } = body;
+
+    // Fetch organization details
+    const orgQuery = `
+      SELECT
+        o.id, o.name, o.created_at, o.owner, o.tier,
+        o.stripe_customer_id, o.stripe_subscription_id, o.subscription_status,
+        json_agg(
+          json_build_object(
+            'id', om.member,
+            'email', u.email,
+            'name', u.raw_user_meta_data->>'name',
+            'role', om.org_role,
+            'last_sign_in_at', u.last_sign_in_at
+          )
+        ) AS members
+      FROM organization o
+      LEFT JOIN organization_member om ON o.id = om.organization
+      LEFT JOIN auth.users u ON om.member = u.id
+      WHERE o.id = $1
+      GROUP BY o.id
+    `;
+
+    const orgResult = await dbExecute<{
+      id: string;
+      name: string;
+      created_at: string;
+      owner: string;
+      tier: string;
+      stripe_customer_id: string | null;
+      stripe_subscription_id: string | null;
+      subscription_status: string | null;
+      members: {
+        id: string;
+        email: string;
+        name: string;
+        role: string;
+        last_sign_in_at: string | null;
+      }[];
+    }>(orgQuery, [organizationId]);
+
+    console.log(`orgResult.data: ${JSON.stringify(orgResult.data)}`);
+
+    if (!orgResult.data || orgResult.data.length === 0) {
+      return {
+        organization: null,
+        usage: null,
+      };
+    }
+
+    const org = orgResult.data[0];
+
+    // Fetch usage data from ClickHouse
+    const usageQuery = `
+      SELECT
+        count(*) as total_requests,
+        countIf(request_created_at >= now() - INTERVAL 30 DAY) as requests_last_30_days
+      FROM request_response_rmt
+      WHERE organization_id = '${organizationId}'
+    `;
+
+    const monthlyUsageQuery = `
+      SELECT
+        toStartOfMonth(request_created_at) AS month,
+        COUNT(*) AS requestCount
+      FROM
+        request_response_rmt
+      WHERE
+        request_created_at > now() - INTERVAL 12 MONTH
+        AND organization_id = '${organizationId}'
+      GROUP BY
+        toStartOfMonth(request_created_at)
+      ORDER BY
+        month DESC
+    `;
+
+    const allTimeCountQuery = `
+      SELECT count(*) as all_time_count
+      FROM request_response_rmt
+      WHERE organization_id = '${organizationId}'
+    `;
+
+    const [usageResult, monthlyUsageResult, allTimeCountResult] =
+      await Promise.all([
+        clickhouseDb.dbQuery<{
+          total_requests: string;
+          requests_last_30_days: string;
+        }>(usageQuery, []),
+        clickhouseDb.dbQuery<{
+          month: string;
+          requestCount: string;
+        }>(monthlyUsageQuery, []),
+        clickhouseDb.dbQuery<{
+          all_time_count: string;
+        }>(allTimeCountQuery, []),
+      ]);
+
+    const usage = usageResult.data?.[0] ?? {
+      total_requests: 0,
+      requests_last_30_days: 0,
+    };
+
+    const monthlyUsage = monthlyUsageResult.data ?? [];
+    const allTimeCount = allTimeCountResult.data?.[0]?.all_time_count ?? "0";
+
+    return {
+      organization: {
+        id: org.id,
+        name: org.name,
+        created_at: org.created_at,
+        owner: org.owner,
+        tier: org.tier,
+        stripe_customer_id: org.stripe_customer_id,
+        stripe_subscription_id: org.stripe_subscription_id,
+        subscription_status: org.subscription_status,
+        members: org.members,
+      },
+      usage: {
+        total_requests: Number(usage.total_requests),
+        requests_last_30_days: Number(usage.requests_last_30_days),
+        monthly_usage: monthlyUsage.map((item) => ({
+          month: item.month,
+          requestCount: Number(item.requestCount),
+        })),
+        all_time_count: Number(allTimeCount),
+      },
+    };
   }
 
   @Get("/settings/{name}")
@@ -415,7 +582,7 @@ export class AdminController extends Controller {
         count(*) as count,
         date_trunc('${body.groupBy}', created_at) AS day
       FROM organization
-      WHERE 
+      WHERE
         created_at > now() - INTERVAL '${body.timeFilter}'
       GROUP BY day
       ORDER BY day ASC
@@ -433,7 +600,7 @@ export class AdminController extends Controller {
         count(*) as count,
         date_trunc('${body.groupBy}', created_at) AS day
       FROM auth.users
-      WHERE 
+      WHERE
         created_at > now() - INTERVAL '${body.timeFilter}'
       GROUP BY day
       ORDER BY day ASC
