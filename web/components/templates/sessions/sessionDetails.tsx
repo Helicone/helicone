@@ -10,7 +10,7 @@ import { Col } from "../../layout/common/col";
 import ThemedTable from "../../shared/themed/table/themedTable";
 import { INITIAL_COLUMNS } from "./initialColumns";
 import { getTimeAgo } from "../../../lib/sql/timeHelpers";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSessionNames } from "../../../services/hooks/sessions";
 
 type TSessions = {
@@ -57,18 +57,10 @@ const SessionDetails = ({
 }: SessionDetailsProps) => {
   const router = useRouter();
 
-  const [totalCost, setTotalCost] = useState("0.0");
-
-  function calculateMetadata() {
-    if (sessions.length === 0) return;
-
-    setTotalCost(
-      sessions.reduce((acc, session) => acc + session.total_cost, 0).toFixed(3)
-    );
-  }
-
-  useEffect(() => {
-    calculateMetadata();
+  const totalCost = useMemo(() => {
+    return sessions
+      .reduce((acc, session) => acc + session.total_cost, 0)
+      .toFixed(3);
   }, [sessions]);
 
   return (
