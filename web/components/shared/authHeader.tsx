@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ReactNode } from "react";
 
 interface AuthHeaderProps {
-  title: string;
+  title: React.ReactNode;
   breadcrumb?: {
     title: string;
     href: string;
