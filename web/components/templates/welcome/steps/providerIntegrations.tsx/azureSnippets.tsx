@@ -133,7 +133,7 @@ const NAMES: {
   langchain_python: "LangChain",
   langchain_typescript: "LangChainJS",
   asyncLogging: "OpenLLMetry",
-  manualLogging: "Custom Logging",
+  manualLogging: "Custom",
 };
 
 interface AzureSnippetsProps {
@@ -202,7 +202,7 @@ export default function AzureSnippets(props: AzureSnippetsProps) {
           )}
           onClick={() => setLang("manualLogging")}
         >
-          <h2 className="font-semibold">Custom Logging</h2>
+          <h2 className="font-semibold">Custom</h2>
         </button>
       </div>
 

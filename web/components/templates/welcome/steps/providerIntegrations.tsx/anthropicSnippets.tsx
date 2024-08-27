@@ -138,7 +138,7 @@ const NAMES: {
   langchain_python: "LangChain",
   langchain_typescript: "LangChainJS",
   asyncLogging: "OpenLLMetry",
-  manualLogging: "Manual Logging",
+  manualLogging: "Custom",
 };
 
 interface AnthropicSnippetsProps {
@@ -207,7 +207,7 @@ export default function AnthropicSnippets(props: AnthropicSnippetsProps) {
           )}
           onClick={() => setLang("manualLogging")}
         >
-          <h2 className="font-semibold">Custom Logging</h2>
+          <h2 className="font-semibold">Custom</h2>
         </button>
       </div>
 

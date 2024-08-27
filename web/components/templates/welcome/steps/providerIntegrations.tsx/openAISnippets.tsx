@@ -132,7 +132,7 @@ const NAMES: {
   langchain_python: "LangChain",
   langchain_typescript: "LangChainJS",
   asyncLogging: "OpenLLMetry",
-  manualLogging: "Custom Logging",
+  manualLogging: "Custom",
 };
 
 interface OpenAISnippetsProps {
@@ -210,7 +210,7 @@ export default function OpenAISnippets(props: OpenAISnippetsProps) {
           )}
           onClick={() => setLang("manualLogging")}
         >
-          <h2 className="font-semibold">Custom Logging</h2>
+          <h2 className="font-semibold">Custom</h2>
         </button>
       </div>
 
