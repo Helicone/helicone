@@ -31,7 +31,7 @@ export type DatasetRow =
   | null;
 const DatasetIdPage = (props: DatasetIdPageProps) => {
   const { id, currentPage, pageSize } = props;
-  const { rows, isLoading } = useGetHeliconeDatasetRows(id);
+  const { rows, isLoading, refetch } = useGetHeliconeDatasetRows(id);
   const { datasets, isLoading: isLoadingDataset } = useGetHeliconeDatasets([
     id,
   ]);
@@ -104,6 +104,7 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
           </div>
         </div>
         <ThemedTable
+          highlightedIds={selectedRows}
           showCheckboxes={selectMode}
           defaultColumns={[
             {
@@ -221,6 +222,7 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
                   );
                   if (res.data && !res.data.error) {
                     setNotification("Requests removed from dataset", "success");
+                    await refetch();
                   } else {
                     setNotification(
                       "Failed to remove requests from dataset",

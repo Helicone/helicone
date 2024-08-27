@@ -45,7 +45,12 @@ const useGetHeliconeDatasetRows = (id: string) => {
   })[];
   const [rows, setRows] = useState<Rows>([]);
 
-  const { data, isLoading, refetch, isRefetching } = useQuery({
+  const {
+    data,
+    isLoading,
+    refetch: originalRefetch,
+    isRefetching,
+  } = useQuery({
     queryKey: ["dataset", org?.currentOrg?.id, id],
     queryFn: async (query) => {
       const orgId = query.queryKey[1] as string;
@@ -60,8 +65,8 @@ const useGetHeliconeDatasetRows = (id: string) => {
         },
       });
     },
+    refetchOnWindowFocus: false,
   });
-  data?.data;
 
   const rowsWithSignedUrls = useMemo(() => data?.data?.data ?? [], [data]);
 
@@ -93,6 +98,15 @@ const useGetHeliconeDatasetRows = (id: string) => {
   }, [rowsWithSignedUrls]);
 
   const isUrlsFetching = urlQueries.some((query) => query.isFetching);
+
+  // Custom refetch function
+  const refetch = async () => {
+    const result = await originalRefetch();
+    if (result.data?.data?.data) {
+      setRows(result.data.data.data);
+    }
+    return result;
+  };
 
   return {
     isLoading: isLoading || isUrlsFetching,
