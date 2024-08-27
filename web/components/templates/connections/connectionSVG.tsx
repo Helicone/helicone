@@ -41,7 +41,7 @@ const TogetherAI = ({ className }: { className: string }) => {
 const OpenRouter = ({ className }: { className: string }) => {
   return (
     <Image
-      src="/assets/home/providers/openrouter.png"
+      src="/assets/home/providers/openrouter.jpg"
       alt="OpenRouter"
       width={100}
       height={100}
@@ -65,7 +65,7 @@ const Fireworks = ({ className }: { className: string }) => {
 const Azure = ({ className }: { className: string }) => {
   return (
     <Image
-      src="/assets/home/providers/azure.png"
+      src="/assets/home/providers/azure.webp"
       alt="Azure"
       width={100}
       height={100}

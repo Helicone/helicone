@@ -54,7 +54,9 @@ const ConnectionsPage: React.FC = () => {
           <CarouselItem className="basis-[30%]">
             <IntegrationCard
               title="Together AI"
-              Logo={() => <LOGOS.TogetherAI className="w-8 h-2" />}
+              Logo={() => (
+                <LOGOS.TogetherAI className="w-[80px] h-[24px] py-[4px]" />
+              )}
               description="Access Together AI's collaborative AI platform."
               href="/integrations/together-ai"
             />
@@ -284,7 +286,7 @@ const IntegrationCard: React.FC<IntegrationCardProps> = ({
     <Card>
       <CardHeader>
         <div className="flex items-center ">
-          {Logo && <Logo className="w-8 h-8" />}
+          {Logo && <Logo className="w-[2rem] h-[2rem]" />}
         </div>
         <CardTitle>{title}</CardTitle>
         <CardDescription>{description}</CardDescription>
