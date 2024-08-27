@@ -80,7 +80,7 @@ export class KafkaProducer {
       return;
     }
 
-    const p = this.kafka.producer();
+    const producer = this.kafka.producer();
 
     let attempts = 0;
     const maxAttempts = 3;
@@ -92,9 +92,13 @@ export class KafkaProducer {
           value: JSON.stringify(msg),
         });
 
-        const res = await p.produce("request-response-logs-prod", message, {
-          key: msg.log.request.id,
-        });
+        const res = await producer.produce(
+          "request-response-logs-prod",
+          message,
+          {
+            key: msg.log.request.id,
+          }
+        );
         console.log(`Produced message, response: ${JSON.stringify(res)}`);
         return res;
         // eslint-disable-next-line @typescript-eslint/no-explicit-any

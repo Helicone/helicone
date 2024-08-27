@@ -12,6 +12,7 @@ import {
 import { clickhousePriceCalc } from "../../../packages/cost";
 
 export interface UserMetric {
+  id?: string;
   user_id: string;
   active_for: number;
   first_active: Date;
@@ -68,7 +69,7 @@ SELECT
   sum(r.prompt_tokens) as total_prompt_token,
   (${clickhousePriceCalc("r")}) as cost,
   sum(CASE WHEN r.properties['Helicone-Rate-Limit-Status'] = 'rate_limited' THEN 1 ELSE 0 END) as rate_limited_count
-from request_response_versioned r
+from request_response_rmt r
 WHERE (${builtFilter.filter})
 GROUP BY r.user_id
 HAVING (${havingFilter.filter})
@@ -105,7 +106,7 @@ export async function userMetricsCount(
   const query = `
 SELECT
   count(DISTINCT r.user_id) as count
-from request_response_versioned r
+from request_response_rmt r
 WHERE (${builtFilter.filter})
   `;
   const { data, error } = await dbQueryClickhouse<{ count: number }>(

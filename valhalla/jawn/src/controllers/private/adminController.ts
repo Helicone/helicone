@@ -114,12 +114,10 @@ export class AdminController extends Controller {
     SELECT
       organization_id,
       count(*) as ct
-    FROM request_response_versioned
+    FROM request_response_rmt 
     WHERE 
-      request_response_versioned.request_created_at > toDateTime('${
-        body.startDate
-      }')
-      and request_response_versioned.request_created_at < toDateTime('${
+      request_response_rmt.request_created_at > toDateTime('${body.startDate}')
+      and request_response_rmt.request_created_at < toDateTime('${
         body.endDate
       }')
     AND organization_id in (
@@ -201,18 +199,18 @@ export class AdminController extends Controller {
       select
         count(*) as count,
         date_trunc('${timeGrain}', request_created_at) AS dt,
-        request_response_versioned.organization_id as organization_id
-      from request_response_versioned
-      where request_response_versioned.organization_id in (
+        request_response_rmt.organization_id as organization_id
+      from request_response_rmt
+      where request_response_rmt.organization_id in (
         ${orgs.data
           ?.map((org) => `'${org.organization_id}'`)
           .slice(0, 30)
           .join(",")}
       )
-      and request_response_versioned.request_created_at > toDateTime('${
+      and request_response_rmt.request_created_at > toDateTime('${
         body.startDate
       }')
-      and request_response_versioned.request_created_at < toDateTime('${
+      and request_response_rmt.request_created_at < toDateTime('${
         body.endDate
       }')
       group by dt, organization_id
@@ -401,6 +399,10 @@ export class AdminController extends Controller {
       count: string;
       day: string;
     }[];
+    usersOverTime: {
+      count: string;
+      day: string;
+    }[];
   }> {
     await authCheckThrow(request.authParams.userId);
 
@@ -439,9 +441,48 @@ export class AdminController extends Controller {
       []
     );
 
+    const countBeforeTimeFilter = await dbExecute<{
+      count: string;
+    }>(
+      `
+      SELECT count(*) as count FROM auth.users
+      WHERE created_at < now() - INTERVAL '${body.timeFilter}'
+      `,
+      []
+    );
+
+    const userOverTime = await dbExecute<{
+      count: string;
+      day: string;
+    }>(
+      `
+      WITH user_counts AS (
+        SELECT
+          date_trunc('${body.groupBy}', created_at) AS day,
+          count(*) as new_users
+        FROM auth.users
+        WHERE created_at > now() - INTERVAL '${body.timeFilter}'
+        GROUP BY day
+      )
+      SELECT
+        day,
+        sum(new_users) OVER (ORDER BY day) as count
+      FROM user_counts
+      ORDER BY day ASC
+    `,
+      []
+    );
+
     return {
       newOrgsOvertime: orgData.data ?? [],
       newUsersOvertime: userData.data ?? [],
+      usersOverTime:
+        userOverTime.data?.map((data) => ({
+          count: (
+            +data.count + +countBeforeTimeFilter.data![0].count
+          ).toString(),
+          day: data.day,
+        })) ?? [],
     };
   }
 

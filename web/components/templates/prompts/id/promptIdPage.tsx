@@ -173,7 +173,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
   const timeIncrement = getTimeInterval(timeFilter);
 
   const promptIdFilterLeaf: FilterLeaf = {
-    request_response_versioned: {
+    request_response_rmt: {
       properties: {
         "Helicone-Prompt-Id": {
           equals: prompt?.user_defined_id,

@@ -19,7 +19,7 @@ import {
   ArrowPathIcon,
   FunnelIcon,
 } from "@heroicons/react/24/outline";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { TimeInterval } from "../../../lib/timeCalculations/time";
 import { FilterLeaf } from "../../../services/lib/filters/filterDefs";
 import { SingleFilterDef } from "../../../services/lib/filters/frontendFilterDefs";
@@ -87,6 +87,14 @@ const notificationMethods = [
   { id: "all", title: "All event properties", filtered: false },
 ];
 
+const countFilters = (filters: UIFilterRowTree): number => {
+  if ("operator" in filters) {
+    return filters.rows.reduce((acc, row) => acc + countFilters(row), 0);
+  } else {
+    return 1;
+  }
+};
+
 export default function ThemedHeader(props: ThemedHeaderProps) {
   const {
     isFetching,
@@ -99,6 +107,9 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
 
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [exportFiltered, setExportFiltered] = useState(false);
+  const advencedFiltersLength = useMemo(() => {
+    return advancedFilter?.filters ? countFilters(advancedFilter.filters) : 0;
+  }, [advancedFilter?.filters]);
 
   return (
     <>
@@ -139,8 +150,8 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                       />
                       <p className="text-sm font-medium text-gray-900 dark:text-gray-100 hidden sm:block">
                         {showAdvancedFilters ? "Hide Filters" : "Show Filters"}{" "}
-                        {/* {advancedFilter.filters.length > 0 &&
-                          `(${advancedFilter.filters.length})`} */}
+                        {advencedFiltersLength > 0 &&
+                          `(${advencedFiltersLength})`}
                       </p>
                     </button>
                   </div>

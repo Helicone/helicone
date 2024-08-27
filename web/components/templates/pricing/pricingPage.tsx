@@ -294,15 +294,15 @@ export default function Example() {
                       </p>
                       <Slider
                         min={0}
-                        max={10_000_000}
-                        exponent={3} // Adjust the exponent as needed for the scale you want
+                        max={50_000_000}
+                        exponent={3}
                         onChange={handleRequestLogChange}
                         labels={{
                           0: "0",
                           100_000: "100k",
                           1_000_000: "1m",
-                          3_500_000: "3.5m",
                           10_000_000: "10m",
+                          50_000_000: "50m",
                         }}
                       />
                     </div>

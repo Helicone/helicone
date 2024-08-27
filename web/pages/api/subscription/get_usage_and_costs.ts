@@ -75,14 +75,14 @@ async function handler({
   if (data.tier == "growth") {
     const requestCount = await getRequestCountClickhouse(orgId, {
       left: {
-        request_response_versioned: {
+        request_response_rmt: {
           request_created_at: {
             gte: new Date(subscriptionData.current_period_start * 1000),
           },
         },
       },
       right: {
-        request_response_versioned: {
+        request_response_rmt: {
           request_created_at: {
             lt: new Date(subscriptionData.current_period_end * 1000),
           },

@@ -32,7 +32,6 @@ const RequestRowView = (props: RequestRowViewProps) => {
           />
         ))}
       </ul>
-
       {selectedRow ? (
         <div className="flex flex-col space-y-2 w-full h-full overflow-auto">
           {selectedRow.render()}

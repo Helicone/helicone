@@ -1,0 +1,34 @@
+We've added a new `hpstatic` function to our [Helicone Prompt Formatter (HPF) package](https://github.com/Helicone/prompts). This function allows users to create static prompts that don't change between requests, which is particularly useful for system prompts or other constant text. The `hpstatic` function wraps the text in `<helicone-prompt-static>` tags, indicating to Helicone that this part of the prompt should not be treated as variable input.
+
+Here's a quick example of how to use `hpstatic`:
+
+```typescript
+import { hpf, hpstatic } from "@helicone/prompts";
+
+const systemPrompt = hpstatic`You are a helpful assistant.`;
+const userPrompt = hpf`Write a story about ${{ character }}`;
+
+const chatCompletion = await openai.chat.completions.create(
+  {
+    messages: [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: userPrompt },
+    ],
+    model: "gpt-3.5-turbo",
+  },
+  {
+    headers: {
+      "Helicone-Prompt-Id": "prompt_story",
+    },
+  }
+);
+```
+
+This new feature enhances our prompt management capabilities, allowing for more flexible and efficient prompt structuring in your applications.
+
+<a
+  href="https://docs.helicone.ai/features/prompts#static-prompts-with-hpstatic"
+  className="shadow-md hover:shadow-none no-underline inline-block px-4 py-2 mt-4 text-gray-700 bg-white border rounded hover:bg-gray-100 hover:text-black transition-colors duration-300"
+>
+  Start Using Static Prompts 🚀
+</a>

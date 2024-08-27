@@ -14,23 +14,36 @@ const useGetOrgMembers = (orgId: string) => {
     queryKey: ["OrganizationsMembers", orgId],
     queryFn: async (query) => {
       const organizationId = query.queryKey[1];
-      const { data: orgMembers, error } = await jawn.GET(
-        `/v1/organization/{organizationId}/members`,
-        {
-          params: {
-            path: {
-              organizationId,
+      if (!organizationId) {
+        return [];
+      }
+      try {
+        const { data: orgMembers, error } = await jawn.GET(
+          `/v1/organization/{organizationId}/members`,
+          {
+            params: {
+              path: {
+                organizationId,
+              },
             },
-          },
-        }
-      );
+          }
+        );
 
-      return orgMembers;
+        if (error) {
+          console.error("Error fetching org members:", error);
+          return [];
+        }
+
+        return orgMembers.data || [];
+      } catch (error) {
+        console.error("Error in useGetOrgMembers:", error);
+        return [];
+      }
     },
     refetchOnWindowFocus: false,
   });
   return {
-    data,
+    data: data || [],
     isLoading,
     refetch,
   };
@@ -227,6 +240,7 @@ const useOrgsContextManager = () => {
   }, [org?.organization_type, org?.reseller_id, orgs]);
 
   let orgContextValue: OrgContextValue | null = null;
+
   orgContextValue = {
     allOrgs: orgs ?? [],
     currentOrg: org ?? undefined,

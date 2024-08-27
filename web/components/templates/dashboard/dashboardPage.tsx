@@ -60,6 +60,8 @@ import StyledAreaChart from "./styledAreaChart";
 import SuggestionModal from "./suggestionsModal";
 import { useDashboardPage } from "./useDashboardPage";
 import { formatLargeNumber } from "../../shared/utils/numberFormat";
+import { ThemedSwitch } from "../../shared/themed/themedSwitch";
+import { useLocalStorage } from "../../../services/hooks/localStorage";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -202,6 +204,8 @@ const DashboardPage = (props: DashboardPageProps) => {
     return JSON.stringify(encode(filters));
   };
 
+  const [isLive, setIsLive] = useLocalStorage("isLive-DashboardPage", false);
+
   const {
     metrics,
     filterMap,
@@ -218,6 +222,7 @@ const DashboardPage = (props: DashboardPageProps) => {
     apiKeyFilter: null,
     timeZoneDifference: new Date().getTimezoneOffset(),
     dbIncrement: timeIncrement,
+    isLive,
   });
 
   const getAdvancedFilters = useCallback((): UIFilterRowTree => {
@@ -253,7 +258,7 @@ const DashboardPage = (props: DashboardPageProps) => {
         return {
           filterMapIdx,
           operatorIdx,
-          value: decodeURIComponent(value),
+          value: value,
         };
       }
     };
@@ -279,7 +284,7 @@ const DashboardPage = (props: DashboardPageProps) => {
   }, [searchParams, filterMap]);
 
   useEffect(() => {
-    if (initialLoadRef.current && filterMap.length > 0) {
+    if (initialLoadRef.current && filterMap.length > 0 && !isAnyLoading) {
       console.log("load");
       const loadedFilters = getAdvancedFilters();
       setAdvancedFilters(loadedFilters);
@@ -541,6 +546,17 @@ const DashboardPage = (props: DashboardPageProps) => {
             />
           </button>
         }
+        actions={
+          <>
+            <div>
+              <ThemedSwitch
+                checked={isLive}
+                onChange={setIsLive}
+                label="Live"
+              />
+            </div>
+          </>
+        }
       />
       {unauthorized ? (
         <>{renderUnauthorized()}</>
@@ -653,6 +669,8 @@ const DashboardPage = (props: DashboardPageProps) => {
                         colors={["green", "red"]}
                         showYAxis={false}
                         curveType="monotone"
+                        animationDuration={1000}
+                        showAnimation={true}
                       />
                     )}
                   </div>
@@ -683,6 +701,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                   title={`Top Models`}
                   value={undefined}
                   isDataOverTimeLoading={isModelsLoading}
+                  withAnimation={true}
                 >
                   <div className="flex flex-row justify-between items-center pb-2">
                     <p className="text-xs font-semibold text-gray-700">Name</p>
@@ -700,6 +719,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                         ) ?? []
                     }
                     className="overflow-auto h-full"
+                    showAnimation={true}
                   />
                 </StyledAreaChart>
               </div>
@@ -874,6 +894,19 @@ const DashboardPage = (props: DashboardPageProps) => {
                   >
                     Request a new graph
                   </button>
+                  <div className="text-sm text-gray-500 text-center max-w-xs">
+                    Or use our{" "}
+                    <a
+                      href="https://docs.helicone.ai/getting-started/integration-method/posthog"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-blue-500 underline"
+                    >
+                      PostHog integration
+                    </a>{" "}
+                    to create custom graphs or get started with our pre-built
+                    template.
+                  </div>
                 </div>
               </div>
 

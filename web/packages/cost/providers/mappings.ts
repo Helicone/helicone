@@ -13,6 +13,7 @@ import { costs as openRouterCosts } from "./openrouter";
 import { costs as fireworksAICosts } from "./fireworks";
 import { costs as groqCosts } from "./groq";
 import { ModelRow } from "../interfaces/Cost";
+import { costs as qstashCosts } from "./qstash";
 
 const openAiPattern = /^https:\/\/api\.openai\.com/;
 const anthropicPattern = /^https:\/\/api\.anthropic\.com/;
@@ -43,6 +44,8 @@ const mistral = /^https:\/\/api\.mistral\.ai/;
 const deepinfra = /^https:\/\/api\.deepinfra\.com/;
 //https://qstash.upstash.io/llm
 const qstash = /^https:\/\/qstash\.upstash\.io/;
+//https://www.firecrawl.dev/
+const firecrawl = /^https:\/\/api\.firecrawl\.dev/;
 
 export const providersNames = [
   "OPENAI",
@@ -66,6 +69,7 @@ export const providersNames = [
   "MISTRAL",
   "DEEPINFRA",
   "QSTASH",
+  "FIRECRAWL",
 ] as const;
 
 export type ProviderName = (typeof providersNames)[number];
@@ -175,6 +179,11 @@ export const providers: {
   {
     pattern: qstash,
     provider: "QSTASH",
+    costs: qstashCosts,
+  },
+  {
+    pattern: firecrawl,
+    provider: "FIRECRAWL",
   },
 ];
 

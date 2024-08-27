@@ -32,7 +32,7 @@ export async function getTotalCost(
     {
       org_id,
       filter: {
-        left: timeFilterToFilterNode(timeFilter, "request_response_versioned"),
+        left: timeFilterToFilterNode(timeFilter, "request_response_rmt"),
         right: filter,
         operator: "and",
       },
@@ -42,8 +42,8 @@ export async function getTotalCost(
   const query = `
 
   WITH total_cost AS (
-    SELECT ${clickhousePriceCalc("request_response_versioned")} as cost
-    FROM request_response_versioned
+    SELECT ${clickhousePriceCalc("request_response_rmt")} as cost
+    FROM request_response_rmt
     WHERE (
       (${filterString})
     )
@@ -51,7 +51,7 @@ export async function getTotalCost(
   SELECT coalesce(sum(cost), 0) as cost,
   (
     SELECT count(*) as count
-    FROM request_response_versioned
+    FROM request_response_rmt
     WHERE (
       (${filterString})
     )

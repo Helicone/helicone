@@ -1,0 +1,4 @@
+{
+  "title": "Docker images on Docker Hub",
+  "description": "Helicone now publishes Docker images on Docker Hub, simplifying deployment on platforms that don't natively support the Google Container Registry. This makes Helicone deployment easier across various platforms."
+}

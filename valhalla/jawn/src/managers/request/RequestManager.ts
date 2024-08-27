@@ -13,10 +13,13 @@ import {
   getRequestAsset,
   getRequests,
   getRequestsCached,
+  getRequestsCachedClickhouse,
+  getRequestsClickhouse,
 } from "../../lib/stores/request/request";
 import { costOfPrompt } from "../../packages/cost";
 import { BaseManager } from "../BaseManager";
 import { ScoreManager } from "../score/ScoreManager";
+import { HeliconeScoresMessage } from "../../lib/handlers/HandlerContext";
 
 export class RequestManager extends BaseManager {
   private versionedRequestStore: VersionedRequestStore;
@@ -115,57 +118,26 @@ export class RequestManager extends BaseManager {
     requestId: string,
     feedback: boolean
   ): Promise<Result<null, string>> {
-    const requestResponse = await this.waitForRequestAndResponse(
-      requestId,
-      this.authParams.organizationId
-    );
-
-    if (requestResponse.error || !requestResponse.data) {
-      return err("Request not found");
+    if (!this.isUUID(requestId)) {
+      return err("Invalid requestId: must be a valid UUID");
     }
+    const feedbackMessage: HeliconeScoresMessage = {
+      requestId: requestId,
+      organizationId: this.authParams.organizationId,
+      scores: [
+        {
+          score_attribute_key: "helicone-score-feedback",
+          score_attribute_type: "number",
+          score_attribute_value: feedback ? 1 : 0,
+        },
+      ],
+      createdAt: new Date(),
+    };
+    const scoreManager = new ScoreManager({
+      organizationId: this.authParams.organizationId,
+    });
 
-    const feedbackResult = await this.queryTimer.withTiming(
-      supabaseServer.client
-        .from("feedback")
-        .upsert(
-          {
-            response_id: requestResponse.data.responseId,
-            rating: feedback,
-            created_at: new Date().toISOString(),
-          },
-          { onConflict: "response_id" }
-        )
-        .select("*")
-        .single(),
-      {
-        queryName: "upsert_feedback_by_response_id",
-        percentLogging: FREQUENT_PRECENT_LOGGING,
-      }
-    );
-
-    if (feedbackResult.error) {
-      console.error("Error upserting feedback:", feedbackResult.error);
-      return err(feedbackResult.error.message);
-    }
-
-    const scoreManager = new ScoreManager(this.authParams);
-    // const feedbackScoreResult = await scoreManager.addScoresToClickhouse(
-    //   requestId,
-    //   [
-    //     {
-    //       score_attribute_key: "helicone-score-feedback",
-    //       score_attribute_type: "number",
-    //       score_attribute_value: feedback ? 1 : 0,
-    //     },
-    //   ]
-    // );
-
-    // if (feedbackScoreResult.error) {
-    //   console.error("Error upserting feedback:", feedbackScoreResult.error);
-    //   return err(feedbackScoreResult.error);
-    // }
-
-    return ok(null);
+    return await scoreManager.addBatchScores([feedbackMessage]);
   }
 
   private addScoreFilter(isScored: boolean, filter: FilterNode): FilterNode {
@@ -286,6 +258,73 @@ export class RequestManager extends BaseManager {
     });
   }
 
+  async getRequestsClickhouse(
+    params: RequestQueryParams
+  ): Promise<Result<HeliconeRequest[], string>> {
+    const {
+      filter,
+      offset = 0,
+      limit = 10,
+      sort = {
+        created_at: "desc",
+      },
+      isCached,
+      isPartOfExperiment,
+      isScored,
+    } = params;
+
+    let newFilter = filter;
+
+    if (isScored !== undefined) {
+      newFilter = this.addScoreFilter(isScored, newFilter);
+    }
+
+    if (isPartOfExperiment !== undefined) {
+      newFilter = this.addPartOfExperimentFilter(isPartOfExperiment, newFilter);
+    }
+
+    const requests = isCached
+      ? await getRequestsCachedClickhouse(
+          this.authParams.organizationId,
+          filter,
+          offset,
+          limit,
+          sort,
+          isPartOfExperiment,
+          isScored
+        )
+      : await getRequestsClickhouse(
+          this.authParams.organizationId,
+          newFilter,
+          offset,
+          limit,
+          sort
+        );
+
+    return resultMap(requests, (req) => {
+      const seen = new Set();
+      return req
+        .map((r) => {
+          return {
+            ...r,
+            costUSD: costOfPrompt({
+              model: r.request_model ?? "",
+              provider: r.provider ?? "",
+              completionTokens: r.completion_tokens ?? 0,
+              promptTokens: r.prompt_tokens ?? 0,
+            }),
+          };
+        })
+        .filter((r) => {
+          if (seen.has(r.request_id)) {
+            return false;
+          }
+          seen.add(r.request_id);
+          return true;
+        });
+    });
+  }
+
   async getRequestAssetById(
     requestId: string,
     assetId: string
@@ -310,5 +349,11 @@ export class RequestManager extends BaseManager {
     return ok({
       assetUrl: assetUrl.data,
     });
+  }
+
+  private isUUID(uuid: string): boolean {
+    const uuidRegex =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    return uuidRegex.test(uuid);
   }
 }
