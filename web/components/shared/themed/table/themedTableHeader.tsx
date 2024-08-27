@@ -18,7 +18,7 @@ import FiltersButton from "./filtersButton";
 import { DragColumnItem } from "./columns/DragList";
 import SortButton from "./columns/sortButton";
 import { UIFilterRowTree } from "../../../../services/lib/filters/uiFilterRowTree";
-import React from 'react';
+import React from "react";
 
 interface ThemedTableHeaderProps<T> {
   rows?: T[];
@@ -161,9 +161,10 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
             />
           )}
 
-          {customButtons && customButtons.map((button, index) => (
-            <React.Fragment key={index}>{button}</React.Fragment>
-          ))}
+          {customButtons &&
+            customButtons.map((button, index) => (
+              <React.Fragment key={index}>{button}</React.Fragment>
+            ))}
 
           {columns &&
             columns.filter((column) => column.columnDef.meta?.sortKey).length >
