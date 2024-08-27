@@ -615,7 +615,6 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     selectedIds,
     toggleSelection,
     selectAll,
-    isShiftPressed,
   } = useSelectMode({
     items: normalizedRequests,
     getItemId: (request: NormalizedRequest) => request.id,
@@ -736,9 +735,6 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
       );
     }
   };
-
-  const [lastSelectedRow, setLastSelectedRow] =
-    useState<NormalizedRequest | null>(null);
 
   return (
     <div>
@@ -922,12 +918,6 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
                 <span className="text-sm font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap">
                   Select Mode:
                 </span>
-                {isShiftPressed && "hello"}
-                {isShiftPressed && lastSelectedRow && (
-                  <span className="text-sm font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap">
-                    {lastSelectedRow.id} - {selectedIds[selectedIds.length - 1]}
-                  </span>
-                )}
 
                 <GenericButton
                   onClick={selectAll}

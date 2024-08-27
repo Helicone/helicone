@@ -40,9 +40,6 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
   const jawn = useJawnClient();
 
   const [selectedRow, setSelectedRow] = useState<DatasetRow>(null);
-  const [selectMode, setSelectMode] = useState<boolean>(false);
-  const [selectedRows, setSelectedRows] = useState<string[]>([]);
-  const [lastSelectedRow, setLastSelectedRow] = useState<any | null>(null);
   const [selectedDataIndex, setSelectedDataIndex] = useState<number>();
   const [open, setOpen] = useState(false);
   const isShiftPressed = useShiftKeyPress();
@@ -53,7 +50,6 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
     selectedIds,
     toggleSelection,
     selectAll,
-    isShiftPressed: isShiftPressedHook,
   } = useSelectMode({
     items: rows,
     getItemId: (row) => row.id,
@@ -169,11 +165,6 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
               <span className="text-sm font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap">
                 Select Mode:
               </span>
-              {isShiftPressedHook && lastSelectedRow && (
-                <span className="text-sm font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap">
-                  {lastSelectedRow.id} - {selectedIds[selectedIds.length - 1]}
-                </span>
-              )}
 
               <GenericButton
                 onClick={selectAll}
