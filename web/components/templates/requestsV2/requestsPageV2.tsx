@@ -1,4 +1,4 @@
-import { ArrowPathIcon, HomeIcon } from "@heroicons/react/24/outline";
+import { ArrowPathIcon, HomeIcon, PlusIcon } from "@heroicons/react/24/outline";
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -169,6 +169,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   const [selectedData, setSelectedData] = useState<
     NormalizedRequest | undefined
   >(undefined);
+  const [modalOpen, setModalOpen] = useState(false);
 
   const encodeFilters = (filters: UIFilterRowTree): string => {
     const encode = (node: UIFilterRowTree): any => {
@@ -891,25 +892,9 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
                 <DatasetButton
                   datasetMode={selectMode}
                   setDatasetMode={toggleSelectMode}
-                  items={normalizedRequests.filter((request) =>
-                    selectedIds.includes(request.id)
-                  )}
-                  onAddToDataset={() => {
-                    // Handle adding to dataset without modal
-                  }}
-                  renderModal={(isOpen, onClose) => (
-                    <ThemedModal open={isOpen} setOpen={onClose}>
-                      <NewDataset
-                        requests={normalizedRequests.filter((request) =>
-                          selectedIds.includes(request.id)
-                        )}
-                        onComplete={() => {
-                          onClose();
-                          toggleSelectMode(false);
-                        }}
-                      />
-                    </ThemedModal>
-                  )}
+                  items={[]}
+                  onAddToDataset={() => {}}
+                  renderModal={undefined}
                 />
               </div>,
             ]}
@@ -928,6 +913,18 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
                   onClick={() => toggleSelectMode(false)}
                   text="Cancel"
                 />
+                {selectedIds.length > 0 && (
+                  <GenericButton
+                    onClick={() => {
+                      setModalOpen(true);
+                    }}
+                    icon={
+                      <PlusIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
+                    }
+                    text="Add to dataset"
+                    count={selectedIds.length}
+                  />
+                )}
               </Row>
             )}
           </ThemedTable>
@@ -977,6 +974,17 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
           }
         }}
       />
+      <ThemedModal open={modalOpen} setOpen={setModalOpen}>
+        <NewDataset
+          requests={normalizedRequests.filter((request) =>
+            selectedIds.includes(request.id)
+          )}
+          onComplete={() => {
+            setModalOpen(false);
+            toggleSelectMode(false);
+          }}
+        />
+      </ThemedModal>
     </div>
   );
 };
