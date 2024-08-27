@@ -1,8 +1,6 @@
 import {
-  MagnifyingGlassIcon,
   DocumentTextIcon,
 } from "@heroicons/react/24/outline";
-import { TextInput } from "@tremor/react";
 import { getTimeAgo } from "../../../lib/sql/timeHelpers";
 import { Col } from "../../layout/common/col";
 import { clsx } from "../../shared/clsx";
@@ -11,8 +9,6 @@ import { Tooltip } from "@mui/material";
 import { useState } from "react";
 
 interface SessionNameSelectionProps {
-  sessionIdSearch: string;
-  setSessionIdSearch: (value: string) => void;
   sessionNames: Array<{
     name: string;
     created_at: string;
@@ -25,8 +21,6 @@ interface SessionNameSelectionProps {
 }
 
 const SessionNameSelection = ({
-  sessionIdSearch,
-  setSessionIdSearch,
   sessionNames,
   selectedName,
   setSelectedName,
@@ -35,25 +29,6 @@ const SessionNameSelection = ({
 
   return (
     <Col className="min-w-[20em] place-items-stretch rounded-lg py-3 gap-3">
-      <Row className="items-center gap-2">
-        <TextInput
-          icon={MagnifyingGlassIcon}
-          placeholder="Search session..."
-          onChange={(e) => setSessionIdSearch(e.target.value)}
-          value={sessionIdSearch}
-        />
-        <Tooltip title="View doc" placement="top" arrow>
-          <a
-            href="https://docs.helicone.ai/features/sessions"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="bg-white p-2.5 rounded-lg border border-gray-300 shadow-sm"
-          >
-            <DocumentTextIcon className="h-4 w-4 text-gray-500 hover:cursor-pointer" />
-          </a>
-        </Tooltip>
-      </Row>
-
       <Col className="space-y-4 max-h-[70vh] overflow-y-auto">
         {sessionNames.map((seshName) => (
           <button

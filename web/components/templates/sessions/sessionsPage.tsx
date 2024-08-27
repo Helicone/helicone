@@ -69,10 +69,8 @@ const SessionsPage = (props: SessionsPageProps) => {
       <AuthHeader title={"Sessions (beta)"} />
       <div>
         {hasSomeSessions || hasSomeSessions === null ? (
-          <Row className="gap-5 ">
+          <Row className="gap-5">
             <SessionNameSelection
-              sessionIdSearch={sessionIdSearch}
-              setSessionIdSearch={setSessionIdSearch}
               selectedName={selectedName}
               setSelectedName={setSelectedName}
               sessionNames={names.sessions}

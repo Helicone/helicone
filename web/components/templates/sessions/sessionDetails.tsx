@@ -88,12 +88,18 @@ const SessionDetails = ({
           </li>
         </ul>
       </div>
-      <TextInput
-        icon={MagnifyingGlassIcon}
-        value={sessionIdSearch}
-        onValueChange={(value) => setSessionIdSearch(value)}
-        placeholder="Search session id..."
-      />
+      <div className="flex justify-between items-center">
+        <div className="flex items-center space-x-2">
+          {/* Existing UI elements such as filters or buttons should be placed here */}
+        </div>
+        <TextInput
+          icon={MagnifyingGlassIcon}
+          value={sessionIdSearch}
+          onChange={(e) => setSessionIdSearch(e.target.value)}
+          placeholder="Search session id..."
+          className="max-w-xs"
+        />
+      </div>
       <ThemedTable
         id="session-table"
         defaultData={sessions || []}
