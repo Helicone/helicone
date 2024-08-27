@@ -194,6 +194,7 @@ export interface components {
       /** Format: double */
       total_cost: number;
       last_used: string;
+      first_used: string;
       /** Format: double */
       session_count: number;
     };

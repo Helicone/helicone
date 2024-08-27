@@ -159,6 +159,9 @@
 					"last_used": {
 						"type": "string"
 					},
+					"first_used": {
+						"type": "string"
+					},
 					"session_count": {
 						"type": "number",
 						"format": "double"
@@ -169,6 +172,7 @@
 					"created_at",
 					"total_cost",
 					"last_used",
+					"first_used",
 					"session_count"
 				],
 				"type": "object",
