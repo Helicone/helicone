@@ -113,20 +113,35 @@ export class HeliconeDatasetManager extends BaseManager {
   ): Promise<Result<null, string>> {
     const { addRequests, removeRequests } = params;
 
+    if (addRequests.length > 0) {
+      const addResult = await this.addRequests(datasetId, addRequests);
+      if (addResult.error) return addResult;
+    }
+
+    if (removeRequests.length > 0) {
+      const removeResult = await this.removeRequests(datasetId, removeRequests);
+      if (removeResult.error) return removeResult;
+    }
+
+    return ok(null);
+  }
+
+  private async addRequests(
+    datasetId: string,
+    addRequests: string[]
+  ): Promise<Result<null, string>> {
     const { data, error } = await supabaseServer.client
       .from("helicone_dataset_row")
-      .insert([
-        ...addRequests.map((request) => ({
+      .insert(
+        addRequests.map((request) => ({
           organization_id: this.authParams.organizationId,
           origin_request_id: request,
           dataset_id: datasetId,
-        })),
-      ])
+        }))
+      )
       .select("*");
 
-    if (error) {
-      return err(error.message);
-    }
+    if (error) return err(error.message);
 
     const results = await Promise.all(
       data.map(async (row) => {
@@ -134,13 +149,11 @@ export class HeliconeDatasetManager extends BaseManager {
           row.origin_request_id,
           this.authParams.organizationId
         );
-
         const newKey = this.s3Client.getDatasetKey(
           datasetId,
           row.id,
           this.authParams.organizationId
         );
-
         return await this.s3Client.copyObject(key, newKey);
       })
     );
@@ -148,6 +161,22 @@ export class HeliconeDatasetManager extends BaseManager {
     if (results.some((result) => result.error)) {
       return err(results.find((result) => result.error)?.error!);
     }
+
+    return ok(null);
+  }
+
+  private async removeRequests(
+    datasetId: string,
+    removeRequests: string[]
+  ): Promise<Result<null, string>> {
+    const { error } = await supabaseServer.client
+      .from("helicone_dataset_row")
+      .delete()
+      .eq("dataset_id", datasetId)
+      .eq("organization_id", this.authParams.organizationId)
+      .in("id", removeRequests);
+
+    if (error) return err(error.message);
 
     const removeResults = await Promise.all(
       removeRequests.map(async (request) => {

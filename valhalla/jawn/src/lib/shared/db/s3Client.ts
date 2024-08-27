@@ -300,7 +300,7 @@ export class S3Client {
 
       const response = await this.awsClient.send(command);
 
-      if (!response || response.$metadata.httpStatusCode !== 200) {
+      if (!response || response.$metadata.httpStatusCode !== 204) {
         return err(
           `Failed to delete data: ${response.$metadata.httpStatusCode}`
         );
