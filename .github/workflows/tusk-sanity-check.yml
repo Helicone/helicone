@@ -57,7 +57,7 @@ jobs:
 
       - name: Bifrost lint fix
         if: steps.filter.outputs.bifrost == 'true'
-        run: yarn lint
+        run: yarn lint-fix
         working-directory: ./bifrost
 
 
@@ -68,7 +68,7 @@ jobs:
 
       - name: Web lint fix
         if: steps.filter.outputs.web == 'true'
-        run: yarn lint --fix
+        run: yarn lint-fix
         working-directory: ./web
 
       - name: Install worker dependencies
