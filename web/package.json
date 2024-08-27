@@ -10,6 +10,7 @@
     "start": "next start",
     "build-and-start": "next build && next start",
     "lint": "next lint",
+    "lint-fix": "next lint --fix",
     "codegen": "graphql-codegen --config codegen.ts",
     "postbuild": "next-sitemap"
   },
