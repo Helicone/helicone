@@ -256,11 +256,16 @@ export class ScoreStore extends BaseStore {
       )
       .join(", ");
 
-    const values = feedbacks.flatMap((feedback) => [
-      feedback.responseId,
-      feedback.rating,
-      new Date().toISOString(),
-    ]);
+    const values = feedbacks
+      .filter(
+        (feedback) =>
+          feedback.responseId !== "00000000-0000-0000-0000-000000000000"
+      )
+      .flatMap((feedback) => [
+        feedback.responseId,
+        feedback.rating,
+        new Date().toISOString(),
+      ]);
 
     const query = `
     INSERT INTO feedback (response_id, rating, created_at)
