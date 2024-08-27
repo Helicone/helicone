@@ -92,6 +92,7 @@ const models: TsoaRoute.Models = {
             "created_at": {"dataType":"string","required":true},
             "total_cost": {"dataType":"double","required":true},
             "last_used": {"dataType":"string","required":true},
+            "first_used": {"dataType":"string","required":true},
             "session_count": {"dataType":"double","required":true},
         },
         "additionalProperties": false,

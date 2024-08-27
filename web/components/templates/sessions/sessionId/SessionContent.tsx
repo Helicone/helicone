@@ -41,7 +41,7 @@ const SessionContent: React.FC<SessionContentProps> = ({
       requests.requests.requests?.map((r) => new Date(r.request_created_at)) ??
       [];
 
-    return dates.sort((a, b) => a.getTime() - b.getTime())?.[0] ?? new Date(0);
+    return dates.sort((a, b) => a.getTime() - b.getTime())?.[0] ?? undefined;
   }, [requests.requests.requests]);
 
   const endTime = useMemo(() => {
@@ -49,7 +49,7 @@ const SessionContent: React.FC<SessionContentProps> = ({
       requests.requests.requests?.map((r) => new Date(r.request_created_at)) ??
       [];
 
-    return dates.sort((a, b) => b.getTime() - a.getTime())?.[0] ?? new Date(0);
+    return dates.sort((a, b) => b.getTime() - a.getTime())?.[0] ?? undefined;
   }, [requests.requests.requests]);
 
   return (
