@@ -239,15 +239,20 @@ export class ScoreStore extends BaseStore {
       return ok([]);
     }
 
+    const validFeedbacks = feedbacks.filter(
+      (feedback) =>
+        feedback.responseId !== "00000000-0000-0000-0000-000000000000"
+    );
+
     console.log(
       `Upserting feedback for ${
-        feedbacks.length
-      } responses, responseIds: ${feedbacks
+        validFeedbacks.length
+      } responses, responseIds: ${validFeedbacks
         .map((f) => f.responseId)
         .join(", ")}`
     );
 
-    const placeholders = feedbacks
+    const placeholders = validFeedbacks
       .map(
         (_, index) =>
           `($${index * 3 + 1}::uuid, $${index * 3 + 2}::boolean, $${
@@ -256,16 +261,11 @@ export class ScoreStore extends BaseStore {
       )
       .join(", ");
 
-    const values = feedbacks
-      .filter(
-        (feedback) =>
-          feedback.responseId !== "00000000-0000-0000-0000-000000000000"
-      )
-      .flatMap((feedback) => [
-        feedback.responseId,
-        feedback.rating,
-        new Date().toISOString(),
-      ]);
+    const values = validFeedbacks.flatMap((feedback) => [
+      feedback.responseId,
+      feedback.rating,
+      new Date().toISOString(),
+    ]);
 
     const query = `
     INSERT INTO feedback (response_id, rating, created_at)
