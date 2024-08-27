@@ -16,7 +16,6 @@ import DatasetButton from "../requestsV2/buttons/datasetButton";
 import GenericButton from "../../layout/common/button";
 import { MinusIcon } from "@heroicons/react/24/outline";
 import { Row } from "../../layout/common";
-import useShiftKeyPress from "../../../services/hooks/isShiftPressed";
 import { useJawnClient } from "../../../lib/clients/jawnHook";
 import useNotification from "../../shared/notification/useNotification";
 import { useSelectMode } from "../../../services/hooks/dataset/selectMode";
@@ -42,7 +41,6 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
   const [selectedRow, setSelectedRow] = useState<DatasetRow>(null);
   const [selectedDataIndex, setSelectedDataIndex] = useState<number>();
   const [open, setOpen] = useState(false);
-  const isShiftPressed = useShiftKeyPress();
 
   const {
     selectMode: selectModeHook,

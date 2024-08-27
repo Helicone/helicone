@@ -615,6 +615,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     selectedIds,
     toggleSelection,
     selectAll,
+    isShiftPressed,
   } = useSelectMode({
     items: normalizedRequests,
     getItemId: (request: NormalizedRequest) => request.id,
