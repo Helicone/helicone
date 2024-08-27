@@ -51,27 +51,33 @@ jobs:
 
 
       - name: Install bifrsot dependencies
+        if: steps.filter.outputs.bifrost == 'true'
         run: yarn install
         working-directory: ./bifrost
 
       - name: Bifrost lint fix
+        if: steps.filter.outputs.bifrost == 'true'
         run: yarn lint
         working-directory: ./bifrost
 
 
       - name: Install web dependencies
+        if: steps.filter.outputs.web == 'true'
         run: yarn install
         working-directory: ./web
 
       - name: Web lint fix
+        if: steps.filter.outputs.web == 'true'
         run: yarn lint --fix
         working-directory: ./web
 
       - name: Install worker dependencies
+        if: steps.filter.outputs.worker == 'true'
         run: yarn install
         working-directory: ./worker
 
       - name: Worker lint fix
+        if: steps.filter.outputs.worker == 'true'
         run: yarn lint-fix
         working-directory: ./worker
 
@@ -82,7 +88,14 @@ jobs:
           skip_checkout: true
 
       - name: Web build
+        if: steps.filter.outputs.web == 'true'
         run: |
           cp ../.env.example .env
           yarn build
         working-directory: ./web
+
+      - name: Bifrost build
+        if: steps.filter.outputs.bifrost == 'true'
+        run: |
+          yarn build
+        working-directory: ./bifrost
