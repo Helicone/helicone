@@ -12,6 +12,13 @@ import {
   getGenericResponseText,
 } from "../requestsV2/helpers";
 import EditDataset from "./EditDataset";
+import DatasetButton from "../requestsV2/buttons/datasetButton";
+import GenericButton from "../../layout/common/button";
+import { MinusIcon } from "@heroicons/react/24/outline";
+import { Row } from "../../layout/common";
+import { useJawnClient } from "../../../lib/clients/jawnHook";
+import useNotification from "../../shared/notification/useNotification";
+import { useSelectMode } from "../../../services/hooks/dataset/selectMode";
 
 interface DatasetIdPageProps {
   id: string;
@@ -24,14 +31,37 @@ export type DatasetRow =
   | null;
 const DatasetIdPage = (props: DatasetIdPageProps) => {
   const { id, currentPage, pageSize } = props;
-  const { rows, isLoading } = useGetHeliconeDatasetRows(id);
+  const { rows, isLoading, refetch } = useGetHeliconeDatasetRows(id);
   const { datasets, isLoading: isLoadingDataset } = useGetHeliconeDatasets([
     id,
   ]);
+  const { setNotification } = useNotification();
+  const jawn = useJawnClient();
 
   const [selectedRow, setSelectedRow] = useState<DatasetRow>(null);
-
+  const [selectedDataIndex, setSelectedDataIndex] = useState<number>();
   const [open, setOpen] = useState(false);
+
+  const {
+    selectMode: selectModeHook,
+    toggleSelectMode,
+    selectedIds,
+    toggleSelection,
+    selectAll,
+  } = useSelectMode({
+    items: rows,
+    getItemId: (row) => row.id,
+  });
+
+  const onRowSelectHandler = (row: any, index: number) => {
+    if (selectModeHook) {
+      toggleSelection(row);
+    } else {
+      setSelectedDataIndex(index);
+      setSelectedRow(row);
+      setOpen(true);
+    }
+  };
 
   return (
     <>
@@ -61,6 +91,8 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
           </div>
         </div>
         <ThemedTable
+          highlightedIds={selectedIds}
+          showCheckboxes={selectModeHook}
           defaultColumns={[
             {
               header: "Created At",
@@ -105,11 +137,82 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
           dataLoading={isLoading}
           id="datasets"
           skeletonLoading={false}
-          onRowSelect={(row) => {
-            setSelectedRow(row);
-            setOpen(true);
+          onRowSelect={(row, index) => {
+            onRowSelectHandler(row, index);
           }}
-        />
+          customButtons={[
+            <div key={"dataset-button"}>
+              <DatasetButton
+                datasetMode={selectModeHook}
+                setDatasetMode={toggleSelectMode}
+                items={rows.filter((request) =>
+                  selectedIds.includes(request.id)
+                )}
+                onAddToDataset={() => {
+                  rows
+                    .filter((row) => selectedIds.includes(row.id))
+                    .forEach(toggleSelection);
+                  toggleSelectMode(false);
+                }}
+              />
+            </div>,
+          ]}
+        >
+          {selectModeHook && (
+            <Row className="gap-5 items-center w-full bg-white dark:bg-black rounded-lg p-5 border border-gray-300 dark:border-gray-700">
+              <span className="text-sm font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap">
+                Select Mode:
+              </span>
+
+              <GenericButton
+                onClick={selectAll}
+                text={selectedIds.length > 0 ? "Deselect All" : "Select All"}
+              />
+              <GenericButton
+                onClick={() => toggleSelectMode(false)}
+                text="Cancel"
+              />
+              {selectedIds.length > 0 && (
+                <GenericButton
+                  onClick={async () => {
+                    const res = await jawn.POST(
+                      `/v1/helicone-dataset/{datasetId}/mutate`,
+                      {
+                        params: {
+                          path: {
+                            datasetId: id,
+                          },
+                        },
+                        body: {
+                          addRequests: [],
+                          removeRequests: selectedIds,
+                        },
+                      }
+                    );
+                    if (res.data && !res.data.error) {
+                      setNotification(
+                        "Requests removed from dataset",
+                        "success"
+                      );
+                      await refetch();
+                    } else {
+                      setNotification(
+                        "Failed to remove requests from dataset",
+                        "error"
+                      );
+                    }
+                    toggleSelectMode(false);
+                  }}
+                  icon={
+                    <MinusIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
+                  }
+                  text="Remove requests"
+                  count={selectedIds.length}
+                />
+              )}
+            </Row>
+          )}
+        </ThemedTable>
       </div>
       <ThemedDrawer
         open={!!selectedRow}
