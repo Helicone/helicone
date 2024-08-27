@@ -118,6 +118,9 @@ export class RequestManager extends BaseManager {
     requestId: string,
     feedback: boolean
   ): Promise<Result<null, string>> {
+    if (!this.isUUID(requestId)) {
+      return err("Invalid requestId: must be a valid UUID");
+    }
     const feedbackMessage: HeliconeScoresMessage = {
       requestId: requestId,
       organizationId: this.authParams.organizationId,
@@ -346,5 +349,11 @@ export class RequestManager extends BaseManager {
     return ok({
       assetUrl: assetUrl.data,
     });
+  }
+
+  private isUUID(uuid: string): boolean {
+    const uuidRegex =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    return uuidRegex.test(uuid);
   }
 }
