@@ -1,17 +1,17 @@
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { TextInput } from "@tremor/react";
 import { useRouter } from "next/router";
+import { useMemo } from "react";
+import { getTimeAgo } from "../../../lib/sql/timeHelpers";
 import {
   getTimeIntervalAgo,
   TimeInterval,
 } from "../../../lib/timeCalculations/time";
+import { useSessionNames } from "../../../services/hooks/sessions";
 import { SortDirection } from "../../../services/lib/sorts/users/sorts";
 import { Col } from "../../layout/common/col";
 import ThemedTable from "../../shared/themed/table/themedTable";
 import { INITIAL_COLUMNS } from "./initialColumns";
-import { getTimeAgo } from "../../../lib/sql/timeHelpers";
-import { useEffect, useMemo, useState } from "react";
-import { useSessionNames } from "../../../services/hooks/sessions";
 
 type TSessions = {
   created_at: string;
