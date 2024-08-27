@@ -399,6 +399,10 @@ export class AdminController extends Controller {
       count: string;
       day: string;
     }[];
+    usersOverTime: {
+      count: string;
+      day: string;
+    }[];
   }> {
     await authCheckThrow(request.authParams.userId);
 
@@ -437,9 +441,48 @@ export class AdminController extends Controller {
       []
     );
 
+    const countBeforeTimeFilter = await dbExecute<{
+      count: string;
+    }>(
+      `
+      SELECT count(*) as count FROM auth.users
+      WHERE created_at < now() - INTERVAL '${body.timeFilter}'
+      `,
+      []
+    );
+
+    const userOverTime = await dbExecute<{
+      count: string;
+      day: string;
+    }>(
+      `
+      WITH user_counts AS (
+        SELECT
+          date_trunc('${body.groupBy}', created_at) AS day,
+          count(*) as new_users
+        FROM auth.users
+        WHERE created_at > now() - INTERVAL '${body.timeFilter}'
+        GROUP BY day
+      )
+      SELECT
+        day,
+        sum(new_users) OVER (ORDER BY day) as count
+      FROM user_counts
+      ORDER BY day ASC
+    `,
+      []
+    );
+
     return {
       newOrgsOvertime: orgData.data ?? [],
       newUsersOvertime: userData.data ?? [],
+      usersOverTime:
+        userOverTime.data?.map((data) => ({
+          count: (
+            +data.count + +countBeforeTimeFilter.data![0].count
+          ).toString(),
+          day: data.day,
+        })) ?? [],
     };
   }
 

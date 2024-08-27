@@ -26,6 +26,7 @@ export interface SessionNameResult {
   created_at: string;
   total_cost: number;
   last_used: string;
+  first_used: string;
   session_count: number;
 }
 
@@ -71,6 +72,11 @@ export class SessionManager {
           ? `- INTERVAL '${Math.abs(timezoneDifference)} minute'`
           : `+ INTERVAL '${timezoneDifference} minute'`
       } AS last_used,
+      min(request_response_rmt.request_created_at) ${
+        timezoneDifference > 0
+          ? `- INTERVAL '${Math.abs(timezoneDifference)} minute'`
+          : `+ INTERVAL '${timezoneDifference} minute'`
+      } AS first_used,
       count(DISTINCT properties['Helicone-Session-Id']) AS session_count
     FROM request_response_rmt
     WHERE (

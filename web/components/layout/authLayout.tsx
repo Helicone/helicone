@@ -26,6 +26,8 @@ import {
   UsersIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
+
+import { GoRepoForked } from "react-icons/go";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -100,6 +102,12 @@ const AuthLayout = (props: AuthLayoutProps) => {
             name: "Evals",
             href: "/evals",
             icon: ChartBarIcon,
+            current: pathname.includes("/evals"),
+          },
+          {
+            name: "Integrations",
+            href: "/integrations",
+            icon: GoRepoForked,
             current: pathname.includes("/evals"),
           },
         ]),
