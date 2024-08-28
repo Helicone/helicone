@@ -217,6 +217,11 @@ const blogContent: BlogStructure[] = [
   },
   {
     dynmaicEntry: {
+      folderName: "essential-helicone-features",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "llm-stack-guide",
     },
   },
