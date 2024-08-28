@@ -115,7 +115,7 @@ const SessionMetrics = ({ selectedSession }: SessionMetricsProps) => {
       </div>
 
       <Chart
-        title="Requests per Session"
+        title="Requests count distribution"
         data={metrics.session_count.map((sessionCount) => {
           const start = Math.ceil(Number(sessionCount.range_start ?? 0));
           const end = Math.floor(Number(sessionCount.range_end ?? 0));
@@ -126,13 +126,13 @@ const SessionMetrics = ({ selectedSession }: SessionMetricsProps) => {
         })}
         category="count"
         color="blue"
-        valueFormatter={(value) => `${Math.round(value)} sessions`}
+        valueFormatter={(value) => `${formatLargeNumber(value, true)} sessions`}
         isLoading={isLoading}
-        xAxisLabel="Number of Requests"
+        xAxisLabel="Requests per session"
       />
 
       <Chart
-        title="Cost per Session"
+        title="Cost distribution"
         data={metrics.session_cost.map((sessionCost) => {
           const start = Math.round(Number(sessionCost.range_start ?? 0));
           const end = Math.round(Number(sessionCost.range_end ?? 0));
@@ -146,13 +146,13 @@ const SessionMetrics = ({ selectedSession }: SessionMetricsProps) => {
         })}
         category="cost"
         color="green"
-        valueFormatter={(value) => `${formatLargeNumber(value)} sessions`}
+        valueFormatter={(value) => `${formatLargeNumber(value, true)} sessions`}
         isLoading={isLoading}
-        xAxisLabel="Cost"
+        xAxisLabel="Cost per session"
       />
 
       <Chart
-        title="Duration per Session"
+        title="Duration distribution"
         data={metrics.session_duration.map((sessionDuration) => {
           const start = Math.round(Number(sessionDuration.range_start ?? 0));
           const end = Math.round(Number(sessionDuration.range_end ?? 0));
@@ -166,9 +166,9 @@ const SessionMetrics = ({ selectedSession }: SessionMetricsProps) => {
         })}
         category="duration"
         color="purple"
-        valueFormatter={(value) => `${formatLargeNumber(value)} sessions`}
+        valueFormatter={(value) => `${formatLargeNumber(value, true)} sessions`}
         isLoading={isLoading}
-        xAxisLabel="Duration"
+        xAxisLabel="Duration per session"
       />
     </Col>
   );
