@@ -118,7 +118,7 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
                 <h1 className="font-semibold text-4xl text-black dark:text-white">
                   {datasets?.[0]?.name}
                 </h1>
-                <HcBadge title={`${rows?.length || 0} rows`} size={"sm"} />
+                <HcBadge title={`${count || 0} rows`} size={"sm"} />
               </div>
             </div>
           </div>

@@ -44,18 +44,26 @@ export default function NewDataset({ requests, onComplete }: NewDatasetProps) {
   const newDatasetInputRef = useRef<HTMLInputElement>(null);
 
   const [showLimitWarning, setShowLimitWarning] = useState(false);
+  const [limitedRequests, setLimitedRequests] = useState(requests);
 
   const handleSelection = (id: string | "new") => {
     setSelectedOption(id);
     if (id !== "new") {
       setNewDatasetName("");
       const selectedDataset = datasets.find((d) => d.id === id);
-      setShowLimitWarning(
-        !!selectedDataset &&
-          selectedDataset.requests_count + requests.length > 500
-      );
+      if (selectedDataset) {
+        if (selectedDataset.requests_count >= 500) {
+          setShowLimitWarning(true);
+          setLimitedRequests([]);
+        } else {
+          const remainingSlots = 500 - selectedDataset.requests_count;
+          setLimitedRequests(requests.slice(0, remainingSlots));
+          setShowLimitWarning(limitedRequests.length < requests.length);
+        }
+      }
     } else {
       setShowLimitWarning(false);
+      setLimitedRequests(requests.slice(0, 500));
     }
   };
 
@@ -75,12 +83,14 @@ export default function NewDataset({ requests, onComplete }: NewDatasetProps) {
       });
       if (res.data && res.data.data) {
         setNotification("Dataset created", "success");
-        refetchDatasets();
-        setSelectedOption(res.data.data.datasetId);
+        await refetchDatasets();
+        return res.data.data.datasetId;
       } else {
         setNotification("Failed to create dataset", "error");
+        return null;
       }
     }
+    return null;
   };
 
   return (
@@ -151,9 +161,9 @@ export default function NewDataset({ requests, onComplete }: NewDatasetProps) {
           <div className="flex space-x-2 flex-col text-sm bg-[#F1F5F9] p-2 rounded-lg">
             <span className="ml-2 font-medium text-lg">Note</span>
             <span className="text-[#64748B]">
-              {
-                "We've included the first 500 results from your query to stay within the limit of 500 requests per dataset."
-              }
+              {limitedRequests.length === 0
+                ? "This dataset already has 500 or more requests. Please select or create a different dataset."
+                : `Only ${limitedRequests.length} requests will be added to stay within the limit of 500 requests per dataset.`}
             </span>
           </div>
         )}
@@ -179,23 +189,27 @@ export default function NewDataset({ requests, onComplete }: NewDatasetProps) {
             disabled={
               !selectedOption ||
               (selectedOption === "new" && !newDatasetName) ||
-              addingRequests
+              addingRequests ||
+              limitedRequests.length === 0
             }
             onClick={async () => {
               setAddingRequests(true);
+              let datasetId = selectedOption;
               if (selectedOption === "new") {
-                await handleCreateDataset();
+                const newDatasetId = await handleCreateDataset();
+                if (newDatasetId) {
+                  datasetId = newDatasetId;
+                } else {
+                  setAddingRequests(false);
+                  return;
+                }
               }
-              const datasetId =
-                selectedOption === "new"
-                  ? datasets[datasets.length - 1].id
-                  : selectedOption;
               const res = await jawn.POST(
                 "/v1/helicone-dataset/{datasetId}/mutate",
                 {
                   params: { path: { datasetId: datasetId! } },
                   body: {
-                    addRequests: requests.map((r) => r.id),
+                    addRequests: limitedRequests.map((r) => r.id),
                     removeRequests: [],
                   },
                 }
@@ -213,7 +227,7 @@ export default function NewDataset({ requests, onComplete }: NewDatasetProps) {
               setAddingRequests(false);
             }}
           >
-            {addingRequests ? "Adding..." : `Add ${requests.length} requests`}
+            {addingRequests ? "Adding..." : `Add ${limitedRequests.length} requests`}
           </Button>
         </div>
       </CardFooter>
