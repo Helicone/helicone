@@ -1,38 +1,26 @@
+import { useLocalStorage } from "@/services/hooks/localStorage";
 import {
   ChartPieIcon,
   ListBulletIcon,
   MagnifyingGlassIcon,
 } from "@heroicons/react/24/outline";
-import { BarChart, TextInput } from "@tremor/react";
+import { TextInput } from "@tremor/react";
 import { useRouter } from "next/router";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { getTimeAgo } from "../../../lib/sql/timeHelpers";
 import {
   getTimeIntervalAgo,
   TimeInterval,
 } from "../../../lib/timeCalculations/time";
-import {
-  useSessionMetrics,
-  useSessionNames,
-} from "../../../services/hooks/sessions";
+import { useSessionNames } from "../../../services/hooks/sessions";
 import { SortDirection } from "../../../services/lib/sorts/users/sorts";
 import { Row } from "../../layout/common";
 import { Col } from "../../layout/common/col";
 import ThemedTable from "../../shared/themed/table/themedTable";
 import ThemedTabSelector from "../../shared/themed/themedTabSelector";
-import { formatLargeNumber } from "../../shared/utils/numberFormat";
 import { INITIAL_COLUMNS } from "./initialColumns";
-import { useLocalStorage } from "@/services/hooks/localStorage";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
 
-import { Checkbox } from "@/components/ui/checkbox";
+import SessionMetrics from "./SessionMetrics";
 
 const TABS = [
   {
@@ -58,7 +46,9 @@ type TSessions = {
   total_tokens: number;
 };
 
-type SessionResult = ReturnType<typeof useSessionNames>["sessions"][number];
+export type SessionResult = ReturnType<
+  typeof useSessionNames
+>["sessions"][number];
 interface SessionDetailsProps {
   selectedSession: SessionResult | null;
   sessionIdSearch: string;
@@ -100,19 +90,9 @@ const SessionDetails = ({
   const [currentTab, setCurrentTab] = useLocalStorage<
     (typeof TABS)[number]["id"]
   >("session-details-tab", "sessions");
-  const [pSize, setPSize] = useLocalStorage<
-    "p50" | "p75" | "p95" | "p99" | "p99.9"
-  >("session-details-pSize", "p75");
-  const [useInterquartile, setUseInterquartile] = useState(false);
-
-  const metrics = useSessionMetrics(
-    selectedSession?.name ?? "",
-    pSize,
-    useInterquartile
-  );
 
   return (
-    <Col className="space-y-4 min-w-0">
+    <Col className="space-y-4 w-full max-w-2xl">
       <div>
         <div className="text-xl font-semibold">
           {selectedSession?.name ?? "No Name"}
@@ -188,84 +168,7 @@ const SessionDetails = ({
           }}
         />
       ) : (
-        <Col>
-          <div className="space-y-2">
-            <Label htmlFor="percentile-select">Select Percentile</Label>
-            <Row className="items-center gap-2">
-              <Col>
-                <Select
-                  onValueChange={(value) =>
-                    setPSize(value as "p50" | "p75" | "p95" | "p99" | "p99.9")
-                  }
-                  value={pSize}
-                >
-                  <SelectTrigger id="percentile-select" className="w-[100px]">
-                    <SelectValue placeholder="Percentile" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="p50">p50</SelectItem>
-                    <SelectItem value="p75">p75</SelectItem>
-                    <SelectItem value="p95">p95</SelectItem>
-                    <SelectItem value="p99">p99</SelectItem>
-                    <SelectItem value="p99.9">p99.9</SelectItem>
-                  </SelectContent>
-                </Select>
-              </Col>
-              <Row className="items-center gap-2">
-                <Checkbox
-                  checked={useInterquartile}
-                  onCheckedChange={(checked) => setUseInterquartile(checked)}
-                />
-                <Label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                  Interquartile
-                </Label>
-              </Row>
-            </Row>
-
-            <BarChart
-              data={metrics.metrics.session_count.map((sessionCount) => ({
-                range: `${sessionCount.range_start}-${sessionCount.range_end}`,
-                count: sessionCount.value,
-              }))}
-              index="range"
-              categories={["count"]}
-              colors={["blue"]}
-              valueFormatter={(value) => `${value} Sessions`}
-              yAxisWidth={48}
-              showLegend={false}
-            />
-            <BarChart
-              data={metrics.metrics.session_cost.map((sessionCost) => ({
-                range: `$${formatLargeNumber(
-                  Number(sessionCost.range_start ?? 0)
-                )}-$${formatLargeNumber(Number(sessionCost.range_end ?? 0))}`,
-                count: sessionCost.value,
-              }))}
-              index="range"
-              categories={["count"]}
-              colors={["blue"]}
-              valueFormatter={(value) => `$${value}`}
-              yAxisWidth={48}
-              showLegend={false}
-            />
-            <BarChart
-              data={metrics.metrics.session_duration.map((sessionDuration) => ({
-                range: `${formatLargeNumber(
-                  Number(sessionDuration.range_start ?? 0) / 1000
-                )}s-${formatLargeNumber(
-                  Number(sessionDuration.range_end ?? 0) / 1000
-                )}s`,
-                count: sessionDuration.value,
-              }))}
-              index="range"
-              categories={["count"]}
-              colors={["blue"]}
-              valueFormatter={(value) => `${value}s`}
-              yAxisWidth={48}
-              showLegend={false}
-            />
-          </div>
-        </Col>
+        <SessionMetrics selectedSession={selectedSession} />
       )}
     </Col>
   );

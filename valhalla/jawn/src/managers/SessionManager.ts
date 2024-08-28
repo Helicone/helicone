@@ -134,7 +134,7 @@ WHERE ${buildWhereClause("row_count")}
 WITH session_durations AS (
   SELECT
     properties['Helicone-Session-Id'] AS session_id,
-    sum(latency) AS duration
+    dateDiff('second', min(request_response_rmt.request_created_at), max(request_response_rmt.request_created_at)) AS duration
   FROM request_response_rmt
   WHERE ${builtFilter.filter}
   GROUP BY session_id
