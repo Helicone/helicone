@@ -15,12 +15,51 @@ import { Row } from "../../layout/common";
 import { Col } from "../../layout/common/col";
 import { formatLargeNumber } from "../../shared/utils/numberFormat";
 import { SessionResult } from "./sessionDetails";
-import { Loader2 } from "lucide-react";
 import { formatSeconds } from "@/lib/sql/timeHelpers";
+import LoadingAnimation from "../../shared/loadingAnimation";
+import { ReactNode } from "react";
 
 interface SessionMetricsProps {
   selectedSession: SessionResult | null;
 }
+
+interface ChartProps {
+  title: string;
+  data: any[];
+  category: string;
+  color: string;
+  valueFormatter: (value: number) => string;
+  isLoading: boolean;
+}
+
+const Chart: React.FC<ChartProps> = ({
+  title,
+  data,
+  category,
+  color,
+  valueFormatter,
+  isLoading,
+}) => (
+  <Card>
+    <Title>{title}</Title>
+    {isLoading ? (
+      <div className="h-64">
+        <LoadingAnimation height={200} width={200} />
+      </div>
+    ) : (
+      <BarChart
+        data={data}
+        index="range"
+        categories={[category]}
+        colors={[color]}
+        valueFormatter={valueFormatter}
+        yAxisWidth={100}
+        showLegend={false}
+        className="p-5 h-80"
+      />
+    )}
+  </Card>
+);
 
 const SessionMetrics = ({ selectedSession }: SessionMetricsProps) => {
   const [pSize, setPSize] = useLocalStorage<
@@ -34,16 +73,8 @@ const SessionMetrics = ({ selectedSession }: SessionMetricsProps) => {
     useInterquartile
   );
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
-      </div>
-    );
-  }
-
   return (
-    <Col className="space-y-4 ">
+    <Col className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="percentile-select">Select Percentile</Label>
         <Row className="items-center gap-2">
@@ -80,64 +111,51 @@ const SessionMetrics = ({ selectedSession }: SessionMetricsProps) => {
         </Row>
       </div>
 
-      <Card>
-        <Title>Session Count</Title>
-        <BarChart
-          data={metrics.session_count.map((sessionCount) => ({
-            range: `${Math.round(
-              Number(sessionCount.range_start ?? 0)
-            )}-${Math.round(Number(sessionCount.range_end ?? 0))}`,
-            count: Math.round(sessionCount.value),
-          }))}
-          index="range"
-          categories={["count"]}
-          colors={["blue"]}
-          valueFormatter={(value) => `${Math.round(value)} sessions`}
-          yAxisWidth={100}
-          showLegend={false}
-        />
-      </Card>
+      <Chart
+        title="Session Count"
+        data={metrics.session_count.map((sessionCount) => ({
+          range: `${Math.round(
+            Number(sessionCount.range_start ?? 0)
+          )}-${Math.round(Number(sessionCount.range_end ?? 0))}`,
+          count: Math.round(sessionCount.value),
+        }))}
+        category="count"
+        color="blue"
+        valueFormatter={(value) => `${Math.round(value)} sessions`}
+        isLoading={isLoading}
+      />
 
-      <Card>
-        <Title>Session Cost</Title>
-        <BarChart
-          data={metrics.session_cost.map((sessionCost) => ({
-            range: `$${formatLargeNumber(
-              Math.round(Number(sessionCost.range_start ?? 0))
-            )}-$${formatLargeNumber(
-              Math.round(Number(sessionCost.range_end ?? 0))
-            )}`,
-            cost: Math.round(sessionCost.value),
-          }))}
-          index="range"
-          categories={["cost"]}
-          colors={["green"]}
-          valueFormatter={(value) => `${formatLargeNumber(value)} sessions`}
-          yAxisWidth={100}
-          showLegend={false}
-        />
-      </Card>
+      <Chart
+        title="Session Cost"
+        data={metrics.session_cost.map((sessionCost) => ({
+          range: `$${formatLargeNumber(
+            Math.round(Number(sessionCost.range_start ?? 0))
+          )}-$${formatLargeNumber(
+            Math.round(Number(sessionCost.range_end ?? 0))
+          )}`,
+          cost: Math.round(sessionCost.value),
+        }))}
+        category="cost"
+        color="green"
+        valueFormatter={(value) => `${formatLargeNumber(value)} sessions`}
+        isLoading={isLoading}
+      />
 
-      <Card>
-        <Title>Session Duration</Title>
-        <BarChart
-          data={metrics.session_duration.map((sessionDuration) => ({
-            range: `${formatSeconds(
-              Math.round(Number(sessionDuration.range_start ?? 0))
-            )}-${formatSeconds(
-              Math.round(Number(sessionDuration.range_end ?? 0))
-            )}`,
-            duration: Math.round(sessionDuration.value),
-          }))}
-          index="range"
-          categories={["duration"]}
-          colors={["purple"]}
-          valueFormatter={(value) => `${formatLargeNumber(value)} sessions`}
-          yAxisWidth={100}
-          showLegend={false}
-          className="p-5 h-80"
-        />
-      </Card>
+      <Chart
+        title="Session Duration"
+        data={metrics.session_duration.map((sessionDuration) => ({
+          range: `${formatSeconds(
+            Math.round(Number(sessionDuration.range_start ?? 0))
+          )}-${formatSeconds(
+            Math.round(Number(sessionDuration.range_end ?? 0))
+          )}`,
+          duration: Math.round(sessionDuration.value),
+        }))}
+        category="duration"
+        color="purple"
+        valueFormatter={(value) => `${formatLargeNumber(value)} sessions`}
+        isLoading={isLoading}
+      />
     </Col>
   );
 };
