@@ -70,12 +70,13 @@ export default function DatasetButton<T>(props: DatasetButtonProps<T>) {
                   count={items.length}
                 />
               )}
-              <button
-                className="bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg p-1.5 hover:bg-sky-50 dark:hover:bg-sky-900"
-                onClick={() => setDatasetMode(false)}
-              >
-                <XMarkIcon className="h-5 w-5 text-gray-500 dark:text-gray-400" />
-              </button>
+              <GenericButton
+                onClick={() => setDatasetMode(!datasetMode)}
+                icon={
+                  <XMarkIcon className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                }
+                text={"Cancel"}
+              />
             </>
           )}
         </Row>

@@ -1052,6 +1052,7 @@ const models: TsoaRoute.Models = {
             "meta": {"dataType":"union","subSchemas":[{"ref":"Json"},{"dataType":"enum","enums":[null]}],"required":true},
             "name": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
             "organization": {"dataType":"string","required":true},
+            "requests_count": {"dataType":"double","required":true},
         },
         "additionalProperties": false,
     },

@@ -77,6 +77,8 @@ interface ThemedTableV5Props<T extends { id?: string }> {
   showCheckboxes?: boolean;
   customButtons?: React.ReactNode[];
   children?: React.ReactNode;
+  onSelectAll?: (checked: boolean) => void;
+  selectedIds?: string[];
 }
 
 export type RequestViews = "table" | "card" | "row";
@@ -106,6 +108,8 @@ export default function ThemedTable<T extends { id?: string }>(
 
     customButtons,
     children,
+    onSelectAll,
+    selectedIds,
   } = props;
 
   const [view, setView] = useLocalStorage<RequestViews>("view", "table");
@@ -148,6 +152,14 @@ export default function ThemedTable<T extends { id?: string }>(
       }
     }
   }, [activeColumns, columns]);
+
+  const handleSelectAll = (checked: boolean) => {
+    onSelectAll?.(checked);
+  };
+
+  const handleRowSelect = (row: T, index: number) => {
+    onRowSelect?.(row, index);
+  };
 
   return (
     <div className="flex flex-col space-y-4">
@@ -242,7 +254,17 @@ export default function ThemedTable<T extends { id?: string }>(
                     className="border-b border-gray-300 dark:border-gray-700"
                   >
                     {showCheckboxes && (
-                      <th className="w-8 px-2"></th> /* Checkbox header */
+                      <th className="w-8 px-2">
+                        <Checkbox
+                          onChange={(e) => handleSelectAll(e.target.checked)}
+                          checked={selectedIds?.length === rows.length}
+                          indeterminate={
+                            selectedIds &&
+                            selectedIds?.length > 0 &&
+                            selectedIds?.length < rows.length
+                          }
+                        />
+                      </th>
                     )}
                     {headerGroup.headers.map((header, index) => (
                       <DraggableColumnHeader
@@ -264,15 +286,17 @@ export default function ThemedTable<T extends { id?: string }>(
                         "bg-blue-100 border-l border-blue-500 pl-2"
                     )}
                     onClick={
-                      onRowSelect && (() => onRowSelect(row.original, index))
+                      onRowSelect &&
+                      (() => handleRowSelect(row.original, index))
                     }
                   >
                     {showCheckboxes && (
                       <td className="w-8 px-2">
                         <Checkbox
-                          id={`row-${row.id}`}
-                          onChange={(id, checked) => {}}
-                          checked={checkedIds?.includes(row.original?.id ?? "")}
+                          checked={selectedIds?.includes(
+                            row.original?.id ?? ""
+                          )}
+                          onChange={() => {}} // Handle individual row selection
                         />
                       </td>
                     )}
