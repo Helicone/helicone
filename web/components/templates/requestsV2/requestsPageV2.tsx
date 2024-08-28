@@ -898,21 +898,19 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
                 />
               </div>,
             ]}
+            onSelectAll={selectAll}
+            selectedIds={selectedIds}
           >
             {selectMode && (
-              <Row className="gap-5 items-center w-full bg-white dark:bg-black rounded-lg p-5 border border-gray-300 dark:border-gray-700">
-                <span className="text-sm font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap">
-                  Select Mode:
-                </span>
-
-                <GenericButton
-                  onClick={selectAll}
-                  text={selectedIds.length > 0 ? "Deselect All" : "Select All"}
-                />
-                <GenericButton
-                  onClick={() => toggleSelectMode(false)}
-                  text="Cancel"
-                />
+              <Row className="gap-5 items-center w-full justify-between bg-white dark:bg-black rounded-lg p-5 border border-gray-300 dark:border-gray-700">
+                <div className="flex flex-row gap-2 items-center">
+                  <span className="text-sm font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap">
+                    Select Mode:
+                  </span>
+                  <span className="text-sm p-2 rounded-md font-medium bg-[#F1F5F9] text-[#1876D2] dark:text-gray-100 whitespace-nowrap">
+                    {selectedIds.length} selected
+                  </span>
+                </div>
                 {selectedIds.length > 0 && (
                   <GenericButton
                     onClick={() => {
@@ -922,7 +920,6 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
                       <PlusIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
                     }
                     text="Add to dataset"
-                    count={selectedIds.length}
                   />
                 )}
               </Row>
