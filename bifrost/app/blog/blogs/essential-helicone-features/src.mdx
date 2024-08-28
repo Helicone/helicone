@@ -22,11 +22,11 @@ If you're ready to follow the practical steps with zero fluff, read on.
 
 Whether you're prototyping or maintaining a production app, Helicone's one-line integration lets you focus on building, not configuring. 
 
-### Ease of Use
+### Integrating with any provider
 
 - Change a single line of code to integrate Helicone with your AI app.
-- Compatible with various AI models and APIs. Here's the <a href="https://docs.helicone.ai/getting-started/integration-method/gateway" target="_blank">list of integrations</a>.
-- Easily switch between models (e.g., GPT-4 to LLaMA) by updating the base URL.
+- Compatible with various AI models and APIs. Here's the entire <a href="https://docs.helicone.ai/getting-started/integration-method/gateway" target="_blank">list of integrations</a>.
+- Update the base URL to easily switch between models (e.g., GPT-4 to LLaMA).
 
   ```python
   # Before
@@ -40,16 +40,16 @@ Whether you're prototyping or maintaining a production app, Helicone's one-line 
 
 ## #1: Custom properties: segmenting your requests
 
-Custom Properties allow you to tailor Helicone’s analytics to your specific needs. By **<span style={{color: '#0ea5e9'}}>segmenting requests</span>**, you can make more informed decision and targeted optimizations. 
+Custom Properties helps you tailor the LLM analytics to your needs. Custom Properties lets you **<span style={{color: '#0ea5e9'}}>segment requests</span>**, allowing you to make more data-driven improvements and targeted optimizations. 
 
-### TL;DR
+### In a nutshell
 
-- Easily implemented using request headers
-- Supports any type of custom metadata
+- Custom Properties can be implemented using headers
+- Custom Properties supports any type of custom metadata
 
 ### How it works
 
-1. Add custom headers to your requests using this format: `Helicone-Property-[Name]: [value]` where `Name`is the name of your custom property. Here's the <a href="https://docs.helicone.ai/features/advanced-usage/custom-properties" target="_blank">doc</a>. For example:  
+1. Add custom headers to your requests using this format: `Helicone-Property-[Name]: [value]` where `Name`is the name of your custom property. For example:  
     
     ```python
     headers = {
@@ -58,10 +58,11 @@ Custom Properties allow you to tailor Helicone’s analytics to your specific ne
         "Helicone-Property-Conversation": "support_issue_2"
     }
     ```
+    More info about Custom Properties in the <a href="https://docs.helicone.ai/features/advanced-usage/custom-properties" target="_blank">docs</a>. 
     
-2. Use these properties to segment and analyze your requests on the **Dashboard**, **Requests**, or **Properties** page. For example: 
+2. Now you can segment incoming requests on the **Dashboard**, **Requests**, or **Properties** page. For example: 
 
-  - **Use case 1:** Track costs and latency for specific prompt chains on <a href="https://us.helicone.ai/requests" target="_blank">Requests</a> page.
+  - **Use case 1:** Filter for specific prompt chains on <a href="https://us.helicone.ai/requests" target="_blank">Requests</a> page to analyze costs and latency.
           
     ![Filter by custom properties on Helicone's Request page](/static/blog/4-essential-features/request-page.webp)
           
@@ -69,16 +70,16 @@ Custom Properties allow you to tailor Helicone’s analytics to your specific ne
 
     ![Analyze unit economics using custom properties in Helicone](/static/blog/4-essential-features/properties-page.webp)
 
-  - **Use case 3:** View metrics related to a subset of requests that meet a criteria on <a href="https://us.helicone.ai/dashboard" target="_blank">Dashboard</a> page.
+  - **Use case 3:** Filter for all requests that meet a criteria on <a href="https://us.helicone.ai/dashboard" target="_blank">Dashboard</a> page.
 
     ![Segment requests and metrics by custom properties on Helicone's dashboard](/static/blog/4-essential-features/dashboard-page.webp)
 
 
 ### Real-life examples
 
-- Monitor performance across different app versions
-- Analyze behaviours and patterns between free and paid users
-- Optimize resource allocation based on usage patterns
+- Segment your requests by app versions to monitor and compare performance. 
+- Segment your requests by free/paid users to better understand their behaviours and patterns. 
+- Segment your requests by feature to understand usage pattern and optimize resource allocation. 
 
 ### Additional reading
 
@@ -91,11 +92,11 @@ Custom Properties allow you to tailor Helicone’s analytics to your specific ne
 
 Helicone's Sessions feature allows developers to group and visualize multi-step LLM interactions, providing invaluable insights into complex AI workflows. This feature is available on all plans and is currently in beta.
 
-### TL;DR
+### In a nutshell
 
-- Group related requests for holistic analysis
-- Track request flows across multiple traces
-- Implement tracing with just two headers
+- You can group related requests for a more holistic analysis. 
+- You can track request flows across multiple traces. 
+- You can implement tracing with just three headers. 
 
 
 ### How it works
@@ -104,10 +105,9 @@ Helicone's Sessions feature allows developers to group and visualize multi-step 
 
     ```python
     headers = {
-        "Helicone-Session-Id": session_uuid, # The session id you want to track
-        "Helicone-Session-Path": "/abstract", # The path of the session
-        "Helicone-Session-Name": "Course Plan" # The name of the session
-
+        "Helicone-Session-Id": session_uuid,  # The session id you want to track
+        "Helicone-Session-Path": "/abstract",  # The path of the session
+        "Helicone-Session-Name": "Course Plan"  # The name of the session
     }
     ```
 
@@ -169,11 +169,11 @@ For developers working on applications with complex, multi-step AI interactions,
 
 Helicone's Prompt Management feature offers developers a powerful tool to version, track, and optimize their AI prompts without disrupting their existing workflow. This feature is available on all plans and is currently in beta.
 
-### TL;DR
+### In a nutshell
 
-- Automatically version prompts from your codebase
-- Run experiments using historical datasets
-- Prevent regressions in production systems
+- Helicone will automatically version your prompt whenever it's modified in the codebase. 
+- You can run experiments using past requests (grouped into a dataset). 
+- You can test your prompts with Experiments to prevent prompt regressions. 
 
 ### How it works
 
@@ -250,7 +250,7 @@ The Prompt & Experiment feature is not only for developers to iterate and experi
 
 Helicone's LLM Caching feature offers developers a powerful way to reduce latency and save costs on LLM calls. By caching responses on the edge, this feature can significantly improve your AI app's performance.
 
-### TL;DR
+### In a nutshell
 
 - Available on all plans (up to 20 caches per bucket for non-enterprise plans)
 - Utilizes Cloudflare Workers for low-latency storage
@@ -330,14 +330,14 @@ LLM Caching provides a faster response time and valuable insights into usage pat
 
 ## Conclusion
 
-If you are an AI engineer and LLM developer looking to optimize your applications effectively, by leveraging custom properties, session tracking, prompt management, and LLM caching, you can:
+If you are an building with AI, LLM observability tools can help you:
 
-- ✅ Enhance AI model performance
+- ✅ Improve your AI model output
 - ✅ Reduce latency and costs
-- ✅ Gain deeper insights into user interactions
-- ✅ Streamline AI development workflows
+- ✅ Gain deeper insights into your user interactions
+- ✅ Debug AI development workflows
 
-Helicone aims to provide all the essential tools to make data-driven improvements, resolve bottlenecks, and deliver better AI experiences. Interested in checking out other features? Here's a <a href="https://docs.helicone.ai/helicone-headers/header-directory" target="_blank">list of headers</a> to get you started. Happy optimizing!
+Helicone aims to provide all the essential tools to help you make the right improvements and deliver better AI experiences. Interested in checking out other features? Here's a <a href="https://docs.helicone.ai/helicone-headers/header-directory" target="_blank">list of headers</a> to get you started. Happy optimizing!
 
 
 ---
