@@ -23,11 +23,13 @@ import { Label } from "../../ui/label";
 interface NewDatasetProps {
   request_ids: string[];
   onComplete: () => void;
+  isCopyMode?: boolean; // Add this line
 }
 
 export default function NewDataset({
   request_ids,
   onComplete,
+  isCopyMode = false, // Add this line
 }: NewDatasetProps) {
   const [selectedOption, setSelectedOption] = useState<string | "new" | null>(
     null
@@ -59,13 +61,15 @@ export default function NewDataset({
           setLimitedRequestIds([]);
         } else {
           const remainingSlots = 500 - selectedDataset.requests_count;
-          setLimitedRequestIds(request_ids.slice(0, remainingSlots));
-          setShowLimitWarning(limitedRequestIds.length < request_ids.length);
+          const newLimitedRequestIds = request_ids.slice(0, remainingSlots);
+          setLimitedRequestIds(newLimitedRequestIds);
+          setShowLimitWarning(newLimitedRequestIds.length < request_ids.length);
         }
       }
     } else {
-      setShowLimitWarning(false);
-      setLimitedRequestIds(request_ids.slice(0, 500));
+      const newLimitedRequestIds = request_ids.slice(0, 500);
+      setLimitedRequestIds(newLimitedRequestIds);
+      setShowLimitWarning(newLimitedRequestIds.length < request_ids.length);
     }
   };
 
@@ -98,7 +102,10 @@ export default function NewDataset({
   return (
     <Card className="w-[450px] border-none shadow-none p-0 m-0 space-y-4">
       <CardHeader className="p-0 pb-4">
-        <CardTitle className="text-2xl font-semibold">Add to dataset</CardTitle>
+        <CardTitle className="text-2xl font-semibold">
+          {isCopyMode ? "Copy to dataset" : "Add to dataset"}{" "}
+          {/* Modify this line */}
+        </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4 p-2 rounded-xl border border-[#E2E8F0]">
         <ScrollArea className="h-[115px]">
@@ -230,8 +237,13 @@ export default function NewDataset({
             }}
           >
             {addingRequests
-              ? "Adding..."
-              : `Add ${limitedRequestIds.length} requests`}
+              ? isCopyMode
+                ? "Copying..."
+                : "Adding..." // Modify this line
+              : isCopyMode
+              ? `Copy ${limitedRequestIds.length} requests` // Add this line
+              : `Add ${limitedRequestIds.length} requests`}{" "}
+            {/* Modify this line */}
           </Button>
         </div>
       </CardFooter>

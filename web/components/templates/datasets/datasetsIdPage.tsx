@@ -22,6 +22,7 @@ import { useRouter } from "next/router";
 import TableFooter from "../requestsV2/tableFooter";
 import { clsx } from "../../shared/clsx";
 import NewDataset from "./NewDataset"; // Add this import at the top of the file
+import ThemedModal from "../../shared/themed/themedModal";
 
 interface DatasetIdPageProps {
   id: string;
@@ -50,6 +51,7 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
   const [selectedDataIndex, setSelectedDataIndex] = useState<number>();
   const [open, setOpen] = useState(false);
   const [showNewDatasetModal, setShowNewDatasetModal] = useState(false);
+  const [selectedRequestIds, setSelectedRequestIds] = useState<string[]>([]);
 
   const {
     selectMode: selectModeHook,
@@ -65,10 +67,32 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
   const onRowSelectHandler = (row: any, index: number) => {
     if (selectModeHook) {
       toggleSelection(row);
+      // Update selectedRequestIds when a row is selected or deselected
+      setSelectedRequestIds((prev) => {
+        if (prev.includes(row.origin_request_id)) {
+          return prev.filter((id) => id !== row.origin_request_id);
+        } else {
+          return [...prev, row.origin_request_id];
+        }
+      });
     } else {
       setSelectedDataIndex(index);
       setSelectedRow(row);
       setOpen(true);
+    }
+  };
+
+  // Update selectedRequestIds when selectAll is called
+  const handleSelectAll = (isSelected: boolean) => {
+    selectAll();
+    if (isSelected) {
+      setSelectedRequestIds(
+        rows
+          .map((row) => row.origin_request_id)
+          .filter((id): id is string => id !== undefined)
+      );
+    } else {
+      setSelectedRequestIds([]);
     }
   };
 
@@ -193,7 +217,7 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
               />
             </div>,
           ]}
-          onSelectAll={selectAll}
+          onSelectAll={handleSelectAll}
           selectedIds={selectedIds}
         >
           {selectModeHook && (
@@ -297,16 +321,18 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
       >
         <EditDataset selectedRow={selectedRow} />
       </ThemedDrawer>
-      {showNewDatasetModal && (
+      <ThemedModal open={showNewDatasetModal} setOpen={setShowNewDatasetModal}>
         <NewDataset
-          request_ids={selectedIds}
+          request_ids={selectedRequestIds}
+          isCopyMode={true}
           onComplete={() => {
             setShowNewDatasetModal(false);
             toggleSelectMode(false);
+            setSelectedRequestIds([]);
             refetch();
           }}
         />
-      )}
+      </ThemedModal>
     </>
   );
 };
