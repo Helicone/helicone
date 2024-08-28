@@ -14,7 +14,7 @@ export const GenericButton: React.FC<GenericButtonProps> = ({
   count,
 }) => (
   <button
-    className="bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2"
+    className="bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center  gap-2"
     onClick={onClick}
   >
     {icon && icon}
