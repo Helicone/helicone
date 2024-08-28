@@ -227,7 +227,9 @@ export default function NewDataset({ requests, onComplete }: NewDatasetProps) {
               setAddingRequests(false);
             }}
           >
-            {addingRequests ? "Adding..." : `Add ${limitedRequests.length} requests`}
+            {addingRequests
+              ? "Adding..."
+              : `Add ${limitedRequests.length} requests`}
           </Button>
         </div>
       </CardFooter>
