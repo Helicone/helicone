@@ -106,8 +106,8 @@ export const usePlaygroundPage = (requestId: string) => {
       rows: [],
     },
     {
-      request: {
-        id: {
+      request_response_rmt: {
+        request_id: {
           equals: requestId,
         },
       },
@@ -124,7 +124,8 @@ export const usePlaygroundPage = (requestId: string) => {
     data: requests.normalizedRequests,
     chat,
     refetch: requests.refetch,
-    hasData: requests.normalizedRequests && requests.normalizedRequests.length > 0,
+    hasData:
+      requests.normalizedRequests && requests.normalizedRequests.length > 0,
     isChat,
     tools,
   };

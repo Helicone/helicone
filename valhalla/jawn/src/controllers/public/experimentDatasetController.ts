@@ -26,6 +26,7 @@ export interface DatasetMetadata {
 export interface NewDatasetParams {
   datasetName: string;
   requestIds: string[];
+  datasetType: "experiment" | "helicone";
   meta?: DatasetMetadata;
 }
 

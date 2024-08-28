@@ -189,93 +189,92 @@ const STATUS_OPS = numberWithSuggestions([
 ]);
 
 export const DASHBOARD_PAGE_TABLE_FILTERS: [
-  SingleFilterDef<"request_response_versioned">,
-  SingleFilterDef<"request_response_versioned">,
-  SingleFilterDef<"request_response_versioned">,
-  SingleFilterDef<"request_response_versioned">
+  SingleFilterDef<"request_response_rmt">,
+  SingleFilterDef<"request_response_rmt">,
+  SingleFilterDef<"request_response_rmt">,
+  SingleFilterDef<"request_response_rmt">
 ] = [
   {
     label: "Model",
     operators: textOperators,
     category: "request",
-    table: "request_response_versioned",
+    table: "request_response_rmt",
     column: "model",
   },
   {
     label: "Status",
     operators: STATUS_OPS,
     category: "request",
-    table: "request_response_versioned",
+    table: "request_response_rmt",
     column: "status",
   },
   {
     label: "Latency",
     operators: numberOperators,
     category: "request",
-    table: "request_response_versioned",
+    table: "request_response_rmt",
     column: "latency",
   },
   {
     label: "User",
     operators: textOperators,
     category: "request",
-    table: "request_response_versioned",
+    table: "request_response_rmt",
     column: "user_id",
   },
 ];
 
 export const REQUEST_TABLE_FILTERS: [
-  SingleFilterDef<"request_response_search">,
-  SingleFilterDef<"request">,
-  SingleFilterDef<"request_response_search">,
-  SingleFilterDef<"response">,
-  SingleFilterDef<"request">,
-  SingleFilterDef<"response">,
-  SingleFilterDef<"response">,
-  SingleFilterDef<"request">,
-  SingleFilterDef<"feedback">,
-  SingleFilterDef<"request">
+  SingleFilterDef<"request_response_rmt">,
+  SingleFilterDef<"request_response_rmt">,
+  SingleFilterDef<"request_response_rmt">,
+  SingleFilterDef<"request_response_rmt">,
+  SingleFilterDef<"request_response_rmt">,
+  SingleFilterDef<"request_response_rmt">,
+  SingleFilterDef<"request_response_rmt">,
+  SingleFilterDef<"request_response_rmt">,
+  SingleFilterDef<"request_response_rmt">
 ] = [
   {
     label: "Request",
     operators: VectorOperators,
-    table: "request_response_search",
-    column: "request_body_vector",
+    table: "request_response_rmt",
+    column: "request_body",
     category: "request",
   },
   {
     label: "Request-Id",
     operators: booleanToTextOperators,
-    table: "request",
-    column: "id",
+    table: "request_response_rmt",
+    column: "request_id",
     category: "request",
   },
   {
     label: "Response",
     operators: VectorOperators,
-    table: "request_response_search",
-    column: "response_body_vector",
+    table: "request_response_rmt",
+    column: "response_body",
     category: "request",
   },
   {
     label: "Total Tokens",
     operators: numberOperators,
-    table: "response",
-    column: "body_tokens",
+    table: "request_response_rmt",
+    column: "prompt_tokens",
     category: "request",
   },
   {
     label: "User",
     operators: textOperators,
-    table: "request",
+    table: "request_response_rmt",
     column: "user_id",
     category: "request",
   },
   {
     label: "Model",
     operators: textOperators,
-    table: "response",
-    column: "body_model",
+    table: "request_response_rmt",
+    column: "model",
     category: "request",
   },
   {
@@ -335,29 +334,22 @@ export const REQUEST_TABLE_FILTERS: [
       },
     ]),
     category: "response",
-    table: "response",
+    table: "request_response_rmt",
     column: "status",
   },
   {
     label: "Path",
     operators: textOperators,
-    table: "request",
-    column: "path",
+    table: "request_response_rmt",
+    column: "target_url",
     category: "request",
   },
   {
     label: "Feedback",
     operators: booleanOperators,
-    table: "feedback",
-    column: "rating",
+    table: "request_response_rmt",
+    column: "helicone-score-feedback",
     category: "feedback",
-  },
-  {
-    label: "Prompt Id",
-    operators: textOperators,
-    table: "request",
-    column: "prompt_id",
-    category: "request",
   },
 ];
 
@@ -481,11 +473,11 @@ export function getPropertyFilters(
 export function getPropertyFiltersV2(
   properties: string[],
   inputParams: InputParam[]
-): SingleFilterDef<"request_response_versioned">[] {
+): SingleFilterDef<"request_response_rmt">[] {
   return properties.map((p) => ({
     label: p,
     operators: textWithSuggestions(inputParams),
-    table: "request_response_versioned",
+    table: "request_response_rmt",
     column: p as keyof FilterLeafRequestResponseVersioned,
     category: "properties",
     isCustomProperty: true,

@@ -61,7 +61,7 @@ const AlertForm = (props: AlertFormProps) => {
     email: string;
     member: string;
     org_role: string;
-  }[] = [...(data?.data || [])];
+  }[] = [...(data || [])];
 
   const handleCreateAlert = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();

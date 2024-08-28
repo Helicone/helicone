@@ -25,6 +25,27 @@ export const INTERNAL_ERRORS = {
   Cancelled: -3,
 };
 
+function isJson(responseBody: string): boolean {
+  try {
+    JSON.parse(responseBody);
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
+function isHTML(responseBody: string): boolean {
+  if (isJson(responseBody)) {
+    return false;
+  }
+
+  return (
+    responseBody.includes("<html") ||
+    responseBody.includes("<HTML") ||
+    responseBody.includes("<!DOCTYPE html>")
+  );
+}
+
 export class ResponseBodyHandler extends AbstractLogHandler {
   public async handle(context: HandlerContext): PromiseGenericResult<string> {
     try {
@@ -156,6 +177,15 @@ export class ResponseBodyHandler extends AbstractLogHandler {
     }
 
     try {
+      if (isHTML(responseBody)) {
+        return ok({
+          processedBody: {
+            error: `HTML response detected:`,
+            html_response: `${responseBody}`,
+          },
+          usage: {},
+        });
+      }
       responseBody = this.preprocess(
         isStream,
         log.response.status,

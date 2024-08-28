@@ -3,10 +3,12 @@ import Image from "next/image";
 
 import { Dialog, Menu, Transition } from "@headlessui/react";
 import {
+  ArchiveBoxIcon,
   Bars3BottomLeftIcon,
   BeakerIcon,
   BellIcon,
   BookOpenIcon,
+  ChartBarIcon,
   CircleStackIcon,
   CloudArrowUpIcon,
   CodeBracketIcon,
@@ -24,6 +26,8 @@ import {
   UsersIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
+
+import { GoRepoForked } from "react-icons/go";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -36,15 +40,15 @@ import UpgradeProModal from "../shared/upgradeProModal";
 import OrgDropdown from "./orgDropdown";
 
 import { useAlertBanners } from "../../services/hooks/admin";
+import { useLocalStorage } from "../../services/hooks/localStorage";
 import { Database } from "../../supabase/database.types";
 import ReferralModal from "../shared/referralModal";
 import { useTheme } from "../shared/theme/themeContext";
+import { DemoGame } from "../shared/themed/demo/demoGame";
+import ThemedBubbleModal from "../shared/themed/themedBubbleModal";
 import { ThemedSwitch } from "../shared/themed/themedSwitch";
 import { getUSDate, signOut } from "../shared/utils/utils";
 import MetaData from "./public/authMetaData";
-import ThemedBubbleModal from "../shared/themed/themedBubbleModal";
-import { DemoGame } from "../shared/themed/demo/demoGame";
-import { useLocalStorage } from "../../services/hooks/localStorage";
 interface AuthLayoutProps {
   children: React.ReactNode;
 }
@@ -85,6 +89,28 @@ const AuthLayout = (props: AuthLayoutProps) => {
       icon: TableCellsIcon,
       current: pathname.includes("/requests"),
     },
+    ...(!user?.email?.includes("@helicone.ai")
+      ? []
+      : [
+          {
+            name: "Datasets",
+            href: "/datasets",
+            icon: CircleStackIcon,
+            current: pathname.includes("/datasets"),
+          },
+          {
+            name: "Evals",
+            href: "/evals",
+            icon: ChartBarIcon,
+            current: pathname.includes("/evals"),
+          },
+          {
+            name: "Integrations",
+            href: "/integrations",
+            icon: GoRepoForked,
+            current: pathname.includes("/evals"),
+          },
+        ]),
     {
       name: "Sessions",
       href: "/sessions",
@@ -95,6 +121,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
           viewBox="0 0 18 18"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
+          className="fill-blue-500 dark:fill-blue-400"
         >
           <path
             d="M16.0313 9.70305H12.9095V6.89055C12.9095 5.90618 12.122 5.11868 11.1376 5.11868H8.3251V2.30618C8.3251 1.3218 7.5376 0.534302 6.55322 0.534302H2.27822C1.29385 0.534302 0.506348 1.3218 0.506348 2.30618V6.55305C0.506348 7.53743 1.29385 8.32493 2.27822 8.32493H5.09072V11.1374C5.09072 12.1218 5.87822 12.9093 6.8626 12.9093H9.6751V16.0312C9.6751 16.8468 10.3501 17.4937 11.1376 17.4937H16.0313C16.847 17.4937 17.4938 16.8187 17.4938 16.0312V11.1656C17.4938 10.3781 16.847 9.70305 16.0313 9.70305ZM2.27822 7.03118C1.99697 7.03118 1.77197 6.80618 1.77197 6.52493V2.27805C1.77197 1.9968 1.99697 1.7718 2.27822 1.7718H6.5251C6.80635 1.7718 7.03135 1.9968 7.03135 2.27805V5.09055H6.8626C5.87822 5.09055 5.09072 5.87805 5.09072 6.86243V7.03118H2.27822ZM6.8626 11.6437C6.58135 11.6437 6.35635 11.4187 6.35635 11.1374V6.86243C6.35635 6.58118 6.58135 6.35618 6.8626 6.35618H11.1095C11.3907 6.35618 11.6157 6.58118 11.6157 6.86243V9.67493H11.1657C10.3501 9.67493 9.70322 10.3499 9.70322 11.1374V11.5874H6.8626V11.6437ZM16.2563 16.0312C16.2563 16.1437 16.172 16.2562 16.0313 16.2562H11.1657C11.0532 16.2562 10.9407 16.1718 10.9407 16.0312V11.1656C10.9407 11.0531 11.0251 10.9406 11.1657 10.9406H16.0313C16.1438 10.9406 16.2563 11.0249 16.2563 11.1656V16.0312Z"
@@ -137,7 +164,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
     {
       name: "Cache",
       href: "/cache",
-      icon: CircleStackIcon,
+      icon: ArchiveBoxIcon,
       current: pathname.includes("/cache"),
     },
     {
@@ -315,10 +342,10 @@ const AuthLayout = (props: AuthLayoutProps) => {
         </Transition.Root>
 
         {/* Static sidebar for desktop */}
-        <div className="hidden fixed md:inset-y-0 md:flex md:w-56 md:flex-col z-30">
+        <div className="hidden fixed md:inset-y-0 md:flex md:w-56 md:flex-col z-30 bg-white dark:bg-black">
           {/* Sidebar component, swap this element with another sidebar if you like */}
           <div className="w-full flex flex-grow flex-col overflow-y-auto border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-black">
-            <div className="p-2 flex items-center gap-4 h-14 border-b border-gray-300 dark:border-gray-700 absolute w-full">
+            <div className="p-2 flex items-center gap-4 h-14 border-b border-gray-300 dark:border-gray-700 absolute w-full bg-white dark:bg-black">
               <OrgDropdown />
               <Menu as="div" className="relative">
                 <Menu.Button className="px-[7px] py-0.5 mr-2 text-sm bg-gray-900 dark:bg-gray-500 dark:text-gray-900 text-gray-50 rounded-full flex items-center justify-center focus:ring-sky-500 focus:outline-none focus:ring-2 focus:ring-offset-2">
@@ -622,7 +649,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
               <OrgContext.Provider value={org}>
                 <div
                   className="py-4 sm:py-8 mr-auto w-full max-w-[100rem]"
-                  key={org?.renderKey}
+                  key={`${pathname}-${org?.renderKey}`}
                 >
                   {children}
                 </div>

@@ -37,7 +37,7 @@ const RateLimitPage = (props: {}) => {
   const { properties } = useGetPropertiesV2(getPropertyFiltersV2);
 
   const rateLimitFilterLeaf = {
-    request_response_versioned: {
+    request_response_rmt: {
       properties: {
         "Helicone-Rate-Limit-Status": {
           equals: "rate_limited",

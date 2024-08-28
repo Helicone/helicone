@@ -19,6 +19,8 @@ import { FineTuneMainController } from './../../controllers/private/fineTuneCont
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { DemoController } from './../../controllers/private/demoController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+import { AlertController } from './../../controllers/private/alertController';
+// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { AdminController } from './../../controllers/private/adminController';
 import { expressAuthentication } from './../../authentication';
 // @ts-ignore - no great way to install types from subpackage
@@ -149,9 +151,9 @@ const models: TsoaRoute.Models = {
             "id": {"dataType":"string","required":true},
             "minor_version": {"dataType":"double","required":true},
             "major_version": {"dataType":"double","required":true},
-            "helicone_template": {"dataType":"string","required":true},
             "prompt_v2": {"dataType":"string","required":true},
             "model": {"dataType":"string","required":true},
+            "helicone_template": {"dataType":"string","required":true},
         },
         "additionalProperties": false,
     },
@@ -223,6 +225,80 @@ const models: TsoaRoute.Models = {
     "Result_PromptVersionResult-Array.string_": {
         "dataType": "refAlias",
         "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_PromptVersionResult-Array_"},{"ref":"ResultError_string_"}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Partial_NumberOperators_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"not-equals":{"dataType":"double"},"equals":{"dataType":"double"},"gte":{"dataType":"double"},"lte":{"dataType":"double"},"lt":{"dataType":"double"},"gt":{"dataType":"double"}},"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Partial_PromptVersionsToOperators_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"minor_version":{"ref":"Partial_NumberOperators_"},"major_version":{"ref":"Partial_NumberOperators_"},"id":{"ref":"Partial_TextOperators_"},"prompt_v2":{"ref":"Partial_TextOperators_"}},"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Pick_FilterLeaf.prompts_versions_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"prompts_versions":{"ref":"Partial_PromptVersionsToOperators_"}},"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "FilterLeafSubset_prompts_versions_": {
+        "dataType": "refAlias",
+        "type": {"ref":"Pick_FilterLeaf.prompts_versions_","validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "PromptVersionsFilterNode": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"ref":"FilterLeafSubset_prompts_versions_"},{"ref":"PromptVersionsFilterBranch"},{"dataType":"enum","enums":["all"]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "PromptVersionsFilterBranch": {
+        "dataType": "refAlias",
+        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"right":{"ref":"PromptVersionsFilterNode","required":true},"operator":{"dataType":"union","subSchemas":[{"dataType":"enum","enums":["or"]},{"dataType":"enum","enums":["and"]}],"required":true},"left":{"ref":"PromptVersionsFilterNode","required":true}},"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "PromptVersionsQueryParams": {
+        "dataType": "refObject",
+        "properties": {
+            "filter": {"ref":"PromptVersionsFilterNode"},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "PromptVersionResultCompiled": {
+        "dataType": "refObject",
+        "properties": {
+            "id": {"dataType":"string","required":true},
+            "minor_version": {"dataType":"double","required":true},
+            "major_version": {"dataType":"double","required":true},
+            "prompt_v2": {"dataType":"string","required":true},
+            "model": {"dataType":"string","required":true},
+            "prompt_compiled": {"dataType":"any","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ResultSuccess_PromptVersionResultCompiled_": {
+        "dataType": "refObject",
+        "properties": {
+            "data": {"ref":"PromptVersionResultCompiled","required":true},
+            "error": {"dataType":"enum","enums":[null],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Result_PromptVersionResultCompiled.string_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_PromptVersionResultCompiled_"},{"ref":"ResultError_string_"}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "PromptVersiosQueryParamsCompiled": {
+        "dataType": "refObject",
+        "properties": {
+            "filter": {"ref":"PromptVersionsFilterNode"},
+            "inputs": {"ref":"Record_string.string_","required":true},
+        },
+        "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ResultSuccess_null_": {
@@ -347,7 +423,7 @@ const models: TsoaRoute.Models = {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ProviderName": {
         "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["OPENAI"]},{"dataType":"enum","enums":["ANTHROPIC"]},{"dataType":"enum","enums":["AZURE"]},{"dataType":"enum","enums":["LOCAL"]},{"dataType":"enum","enums":["HELICONE"]},{"dataType":"enum","enums":["AMDBARTEK"]},{"dataType":"enum","enums":["ANYSCALE"]},{"dataType":"enum","enums":["CLOUDFLARE"]},{"dataType":"enum","enums":["2YFV"]},{"dataType":"enum","enums":["TOGETHER"]},{"dataType":"enum","enums":["LEMONFOX"]},{"dataType":"enum","enums":["FIREWORKS"]},{"dataType":"enum","enums":["PERPLEXITY"]},{"dataType":"enum","enums":["GOOGLE"]},{"dataType":"enum","enums":["OPENROUTER"]},{"dataType":"enum","enums":["WISDOMINANUTSHELL"]},{"dataType":"enum","enums":["GROQ"]},{"dataType":"enum","enums":["COHERE"]},{"dataType":"enum","enums":["MISTRAL"]},{"dataType":"enum","enums":["DEEPINFRA"]},{"dataType":"enum","enums":["QSTASH"]}],"validators":{}},
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["OPENAI"]},{"dataType":"enum","enums":["ANTHROPIC"]},{"dataType":"enum","enums":["AZURE"]},{"dataType":"enum","enums":["LOCAL"]},{"dataType":"enum","enums":["HELICONE"]},{"dataType":"enum","enums":["AMDBARTEK"]},{"dataType":"enum","enums":["ANYSCALE"]},{"dataType":"enum","enums":["CLOUDFLARE"]},{"dataType":"enum","enums":["2YFV"]},{"dataType":"enum","enums":["TOGETHER"]},{"dataType":"enum","enums":["LEMONFOX"]},{"dataType":"enum","enums":["FIREWORKS"]},{"dataType":"enum","enums":["PERPLEXITY"]},{"dataType":"enum","enums":["GOOGLE"]},{"dataType":"enum","enums":["OPENROUTER"]},{"dataType":"enum","enums":["WISDOMINANUTSHELL"]},{"dataType":"enum","enums":["GROQ"]},{"dataType":"enum","enums":["COHERE"]},{"dataType":"enum","enums":["MISTRAL"]},{"dataType":"enum","enums":["DEEPINFRA"]},{"dataType":"enum","enums":["QSTASH"]},{"dataType":"enum","enums":["FIRECRAWL"]}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Provider": {
@@ -679,6 +755,56 @@ const models: TsoaRoute.Models = {
         "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["none"]},{"dataType":"enum","enums":["auto"]},{"dataType":"enum","enums":["required"]},{"ref":"ChatCompletionNamedToolChoice"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "AlertResponse": {
+        "dataType": "refObject",
+        "properties": {
+            "alerts": {"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"updated_at":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},"time_window":{"dataType":"double","required":true},"time_block_duration":{"dataType":"double","required":true},"threshold":{"dataType":"double","required":true},"status":{"dataType":"string","required":true},"soft_delete":{"dataType":"boolean","required":true},"org_id":{"dataType":"string","required":true},"name":{"dataType":"string","required":true},"minimum_request_count":{"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},"metric":{"dataType":"string","required":true},"id":{"dataType":"string","required":true},"emails":{"dataType":"array","array":{"dataType":"string"},"required":true},"created_at":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true}}},"required":true},
+            "history": {"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"updated_at":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},"triggered_value":{"dataType":"string","required":true},"status":{"dataType":"string","required":true},"soft_delete":{"dataType":"boolean","required":true},"org_id":{"dataType":"string","required":true},"id":{"dataType":"string","required":true},"created_at":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},"alert_start_time":{"dataType":"string","required":true},"alert_name":{"dataType":"string","required":true},"alert_metric":{"dataType":"string","required":true},"alert_id":{"dataType":"string","required":true},"alert_end_time":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true}}},"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ResultSuccess_AlertResponse_": {
+        "dataType": "refObject",
+        "properties": {
+            "data": {"ref":"AlertResponse","required":true},
+            "error": {"dataType":"enum","enums":[null],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Result_AlertResponse.string_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_AlertResponse_"},{"ref":"ResultError_string_"}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ResultSuccess_string_": {
+        "dataType": "refObject",
+        "properties": {
+            "data": {"dataType":"string","required":true},
+            "error": {"dataType":"enum","enums":[null],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Result_string.string_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_string_"},{"ref":"ResultError_string_"}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "AlertRequest": {
+        "dataType": "refObject",
+        "properties": {
+            "name": {"dataType":"string","required":true},
+            "metric": {"dataType":"string","required":true},
+            "threshold": {"dataType":"double","required":true},
+            "time_window": {"dataType":"string","required":true},
+            "emails": {"dataType":"array","array":{"dataType":"string"},"required":true},
+            "minimum_request_count": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"undefined"}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "KafkaSettings": {
         "dataType": "refObject",
         "properties": {
@@ -893,7 +1019,7 @@ export function RegisterRoutes(app: Router) {
 
             async function PromptController_getPromptVersions(request: ExRequest, response: ExResponse, next: any) {
             const args: Record<string, TsoaRoute.ParameterSchema> = {
-                    requestBody: {"in":"body","name":"requestBody","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{}},
+                    requestBody: {"in":"body","name":"requestBody","required":true,"ref":"PromptVersionsQueryParams"},
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
                     promptId: {"in":"path","name":"promptId","required":true,"dataType":"string"},
             };
@@ -908,6 +1034,39 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'getPromptVersions',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.post('/v1/prompt/:user_defined_id/compile',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(PromptController)),
+            ...(fetchMiddlewares<RequestHandler>(PromptController.prototype.getPromptVersionsCompiled)),
+
+            async function PromptController_getPromptVersionsCompiled(request: ExRequest, response: ExResponse, next: any) {
+            const args: Record<string, TsoaRoute.ParameterSchema> = {
+                    requestBody: {"in":"body","name":"requestBody","required":true,"ref":"PromptVersiosQueryParamsCompiled"},
+                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
+                    user_defined_id: {"in":"path","name":"user_defined_id","required":true,"dataType":"string"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args, request, response });
+
+                const controller = new PromptController();
+
+              await templateService.apiHandler({
+                methodName: 'getPromptVersionsCompiled',
                 controller,
                 response,
                 next,
@@ -1533,6 +1692,101 @@ export function RegisterRoutes(app: Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.get('/v1/alert/query',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(AlertController)),
+            ...(fetchMiddlewares<RequestHandler>(AlertController.prototype.getAlerts)),
+
+            async function AlertController_getAlerts(request: ExRequest, response: ExResponse, next: any) {
+            const args: Record<string, TsoaRoute.ParameterSchema> = {
+                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args, request, response });
+
+                const controller = new AlertController();
+
+              await templateService.apiHandler({
+                methodName: 'getAlerts',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.post('/v1/alert/create',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(AlertController)),
+            ...(fetchMiddlewares<RequestHandler>(AlertController.prototype.createAlert)),
+
+            async function AlertController_createAlert(request: ExRequest, response: ExResponse, next: any) {
+            const args: Record<string, TsoaRoute.ParameterSchema> = {
+                    alert: {"in":"body","name":"alert","required":true,"ref":"AlertRequest"},
+                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args, request, response });
+
+                const controller = new AlertController();
+
+              await templateService.apiHandler({
+                methodName: 'createAlert',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.delete('/v1/alert/:alertId',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(AlertController)),
+            ...(fetchMiddlewares<RequestHandler>(AlertController.prototype.deleteAlert)),
+
+            async function AlertController_deleteAlert(request: ExRequest, response: ExResponse, next: any) {
+            const args: Record<string, TsoaRoute.ParameterSchema> = {
+                    alertId: {"in":"path","name":"alertId","required":true,"dataType":"string"},
+                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args, request, response });
+
+                const controller = new AlertController();
+
+              await templateService.apiHandler({
+                methodName: 'deleteAlert',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.post('/v1/admin/orgs/top',
             authenticateMiddleware([{"api_key":[]}]),
             ...(fetchMiddlewares<RequestHandler>(AdminController)),
@@ -1585,6 +1839,38 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'getAdmins',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.post('/v1/admin/whodis',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(AdminController)),
+            ...(fetchMiddlewares<RequestHandler>(AdminController.prototype.whodis)),
+
+            async function AdminController_whodis(request: ExRequest, response: ExResponse, next: any) {
+            const args: Record<string, TsoaRoute.ParameterSchema> = {
+                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
+                    body: {"in":"body","name":"body","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"organizationId":{"dataType":"string","required":true}}},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args, request, response });
+
+                const controller = new AdminController();
+
+              await templateService.apiHandler({
+                methodName: 'whodis',
                 controller,
                 response,
                 next,

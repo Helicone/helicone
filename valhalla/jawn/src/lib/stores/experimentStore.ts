@@ -267,7 +267,7 @@ function getExperimentsQuery(
         left join experiment_v2_hypothesis eh on e.id = eh.experiment_v2
         left join prompts_versions pv on pv.id = eh.prompt_version
         left join prompt_v2 p_v2 on p_v2.id = pv.prompt_v2
-        LEFT JOIN experiment_dataset_v2 ds ON e.dataset = ds.id
+        LEFT JOIN helicone_dataset ds ON e.dataset = ds.id
         LEFT JOIN experiment_dataset_v2_row dsr ON dsr.dataset_id = ds.id
         ${filter ? `WHERE ${filter}` : ""}
         GROUP BY e.id, ds.id

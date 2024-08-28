@@ -106,6 +106,64 @@ export function buildRequestSort(sort: SortLeafRequest) {
   }
 }
 
+export function buildRequestSortClickhouse(sort: SortLeafRequest): string {
+  if (sort.random) {
+    return "rand()";
+  }
+  if (sort.created_at) {
+    assertValidSortDirection(sort.created_at);
+    return `request_response_rmt.request_created_at ${sort.created_at}`;
+  }
+  if (sort.latency) {
+    assertValidSortDirection(sort.latency);
+    return `request_response_rmt.latency ${sort.latency}`;
+  }
+  if (sort.total_tokens) {
+    assertValidSortDirection(sort.total_tokens);
+    return `(request_response_rmt.prompt_tokens + request_response_rmt.completion_tokens) ${sort.total_tokens}`;
+  }
+  if (sort.completion_tokens) {
+    assertValidSortDirection(sort.completion_tokens);
+    return `request_response_rmt.completion_tokens ${sort.completion_tokens}`;
+  }
+  if (sort.prompt_tokens) {
+    assertValidSortDirection(sort.prompt_tokens);
+    return `request_response_rmt.prompt_tokens ${sort.prompt_tokens}`;
+  }
+  if (sort.user_id) {
+    assertValidSortDirection(sort.user_id);
+    return `request_response_rmt.user_id ${sort.user_id}`;
+  }
+  if (sort.body_model) {
+    assertValidSortDirection(sort.body_model);
+    return `request_response_rmt.model ${sort.body_model}`;
+  }
+  if (sort.is_cached) {
+    assertValidSortDirection(sort.is_cached);
+    return `request_response_rmt.is_cached ${sort.is_cached}`;
+  }
+  if (sort.request_prompt) {
+    assertValidSortDirection(sort.request_prompt);
+    return `JSONExtractString(request_response_rmt.request_body, 'prompt') ${sort.request_prompt}`;
+  }
+  if (sort.response_text) {
+    assertValidSortDirection(sort.response_text);
+    return `JSONExtractString(request_response_rmt.response_body, 'choices', 0, 'text') ${sort.response_text}`;
+  }
+  if (sort.properties) {
+    for (const key in sort.properties) {
+      assertValidSortDirection(sort.properties[key]);
+      if (!key.match(/^[a-zA-Z0-9_]+$/)) {
+        throw new Error(`Invalid property key: ${key}`);
+      }
+      return `request_response_rmt.properties['${key}'] ${sort.properties[key]}`;
+    }
+  }
+
+  // Default sort if no valid sort option is provided
+  return `request_response_rmt.request_created_at DESC`;
+}
+
 export interface SortLeafJob {
   created_at?: SortDirection;
   updated_at?: SortDirection;

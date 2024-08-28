@@ -1,7 +1,7 @@
-import { ClickhouseDB, formatTimeString } from "../db/ClickhouseWrapper";
+import { formatTimeString, RequestResponseRMT } from "../db/ClickhouseWrapper";
 import { Database } from "../db/database.types";
 import { S3Client } from "../shared/db/s3Client";
-import { PromiseGenericResult, Result, err, ok } from "../shared/result";
+import { err, ok, PromiseGenericResult, Result } from "../shared/result";
 import { LogStore } from "../stores/LogStore";
 import { VersionedRequestStore } from "../stores/request/VersionedRequestStore";
 import { AbstractLogHandler } from "./AbstractLogHandler";
@@ -29,7 +29,7 @@ export type BatchPayload = {
   prompts: PromptRecord[];
   assets: Database["public"]["Tables"]["asset"]["Insert"][];
   s3Records: S3Record[];
-  requestResponseVersionedCH: ClickhouseDB["Tables"]["request_response_versioned"][];
+  requestResponseVersionedCH: RequestResponseRMT[];
   searchRecords: Database["public"]["Tables"]["request_response_search"]["Insert"][];
 };
 
@@ -363,52 +363,46 @@ export class LoggingHandler extends AbstractLogHandler {
     return promptRecord;
   }
 
-  mapRequestResponseVersionedCH(
-    context: HandlerContext
-  ): ClickhouseDB["Tables"]["request_response_versioned"] {
+  mapRequestResponseVersionedCH(context: HandlerContext): RequestResponseRMT {
     const request = context.message.log.request;
     const response = context.message.log.response;
     const usage = context.usage;
     const orgParams = context.orgParams;
 
-    const requestResponseLog: ClickhouseDB["Tables"]["request_response_versioned"] =
-      {
-        user_id: request.userId,
-        request_id: request.id,
-        completion_tokens: usage.completionTokens ?? null,
-        latency: response.delayMs ?? null,
-        model: context.processedLog.model ?? "",
-        prompt_tokens: usage.promptTokens ?? null,
-        request_created_at: formatTimeString(
-          request.requestCreatedAt.toISOString()
-        ),
-        response_created_at: response.responseCreatedAt
-          ? formatTimeString(response.responseCreatedAt.toISOString())
-          : null,
-        response_id: response.id ?? null,
-        status: response.status ?? null,
-        organization_id:
-          orgParams?.id ?? "00000000-0000-0000-0000-000000000000",
-        proxy_key_id: request.heliconeProxyKeyId ?? null,
-        threat: request.threat ?? null,
-        time_to_first_token: response.timeToFirstToken ?? null,
-        target_url: request.targetUrl ?? null,
-        provider: request.provider ?? null,
-        country_code: request.countryCode ?? null,
-        properties: context.processedLog.request.properties ?? {},
-        assets: context.processedLog.assets
-          ? Array.from(context.processedLog.assets.keys())
-          : [],
-        scores: {},
-        request_body:
-          this.extractRequestBodyMessage(context.processedLog.request.body) ??
-          "",
-        response_body:
-          this.extractResponseBodyMessage(context.processedLog.response.body) ??
-          "",
-        sign: 1,
-        version: 1,
-      };
+    const requestResponseLog: RequestResponseRMT = {
+      user_id: request.userId,
+      request_id: request.id,
+      completion_tokens: usage.completionTokens ?? 0,
+      latency: response.delayMs ?? 0,
+      model: context.processedLog.model ?? "",
+      prompt_tokens: usage.promptTokens ?? 0,
+      request_created_at: formatTimeString(
+        request.requestCreatedAt.toISOString()
+      ),
+      response_created_at: response.responseCreatedAt
+        ? formatTimeString(response.responseCreatedAt.toISOString())
+        : "",
+      response_id: response.id ?? "",
+      status: response.status ?? 0,
+      organization_id: orgParams?.id ?? "00000000-0000-0000-0000-000000000000",
+      proxy_key_id:
+        request.heliconeProxyKeyId ?? "00000000-0000-0000-0000-000000000000",
+      threat: request.threat ?? false,
+      time_to_first_token: response.timeToFirstToken ?? 0,
+      target_url: request.targetUrl ?? "",
+      provider: request.provider ?? "",
+      country_code: request.countryCode ?? "",
+      properties: context.processedLog.request.properties ?? {},
+      assets: context.processedLog.assets
+        ? Array.from(context.processedLog.assets.keys())
+        : [],
+      scores: {},
+      request_body:
+        this.extractRequestBodyMessage(context.processedLog.request.body) ?? "",
+      response_body:
+        this.extractResponseBodyMessage(context.processedLog.response.body) ??
+        "",
+    };
 
     return requestResponseLog;
   }

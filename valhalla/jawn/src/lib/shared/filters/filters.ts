@@ -71,19 +71,18 @@ function easyKeyMappings<T extends keyof TablesAndViews>(
   };
 }
 
+export class FilterNotImplemented extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "FilterNotImplemented";
+  }
+}
+
 const NOT_IMPLEMENTED = () => {
-  throw new Error("Not implemented");
+  throw new FilterNotImplemented("This filter is not implemented");
 };
 
 const whereKeyMappings: KeyMappings = {
-  user_metrics: easyKeyMappings(
-    {
-      user_id: "user_id",
-      last_active: "last_active",
-      total_requests: "total_requests",
-    },
-    "user_metrics"
-  ),
   user_api_keys: easyKeyMappings(
     {
       api_key_hash: "api_key_hash",
@@ -186,16 +185,16 @@ const whereKeyMappings: KeyMappings = {
     job_id: "request_response_log.job_id",
     threat: "request_response_log.threat",
   }),
-  request_response_versioned: (filter, placeValueSafely) => {
+  request_response_rmt: (filter, placeValueSafely) => {
     if ("properties" in filter && filter.properties) {
       const key = Object.keys(filter.properties)[0];
       const { operator, value } = extractOperatorAndValueFromAnOperator(
         filter.properties[key as keyof typeof filter.properties]
       );
       return {
-        column: `properties[${placeValueSafely(key)}]`,
+        column: `request_response_rmt.properties[${placeValueSafely(key)}]`,
         operator: operator,
-        value: value,
+        value: `${placeValueSafely(value)}`,
       };
     }
     if ("search_properties" in filter && filter.search_properties) {
@@ -206,20 +205,38 @@ const whereKeyMappings: KeyMappings = {
       return {
         column: `key`,
         operator: operator,
-        value: value,
+        value: `${placeValueSafely(value)}`,
       };
     }
-    return easyKeyMappings<"request_response_versioned">({
-      latency: "request_response_versioned.latency",
-      status: "request_response_versioned.status",
-      request_created_at: "request_response_versioned.request_created_at",
-      response_created_at: "request_response_versioned.response_created_at",
-      model: "request_response_versioned.model",
-      user_id: "request_response_versioned.user_id",
-      organization_id: "request_response_versioned.organization_id",
-      node_id: "request_response_versioned.node_id",
-      job_id: "request_response_versioned.job_id",
-      threat: "request_response_versioned.threat",
+    if ("scores" in filter && filter.scores) {
+      const key = Object.keys(filter.scores)[0];
+      const { operator, value } = extractOperatorAndValueFromAnOperator(
+        filter.scores[key as keyof typeof filter.scores]
+      );
+      return {
+        column: `has(scores, ${placeValueSafely(
+          key
+        )}) AND scores[${placeValueSafely(key)}]`,
+        operator: operator,
+        value: `${placeValueSafely(value)}`,
+      };
+    }
+    return easyKeyMappings<"request_response_rmt">({
+      latency: "request_response_rmt.latency",
+      status: "request_response_rmt.status",
+      request_created_at: "request_response_rmt.request_created_at",
+      response_created_at: "request_response_rmt.response_created_at",
+      request_id: "request_response_rmt.request_id",
+      model: "request_response_rmt.model",
+      user_id: "request_response_rmt.user_id",
+      organization_id: "request_response_rmt.organization_id",
+      node_id: "request_response_rmt.node_id",
+      job_id: "request_response_rmt.job_id",
+      threat: "request_response_rmt.threat",
+      prompt_tokens: "request_response_rmt.prompt_tokens",
+      completion_tokens: "request_response_rmt.completion_tokens",
+      request_body: "request_response_rmt.request_body",
+      response_body: "request_response_rmt.response_body",
     })(filter, placeValueSafely);
   },
   request_response_search: (filter, placeValueSafely) => {
@@ -269,18 +286,21 @@ const whereKeyMappings: KeyMappings = {
   values: NOT_IMPLEMENTED,
   job: NOT_IMPLEMENTED,
   job_node: NOT_IMPLEMENTED,
+  user_metrics: easyKeyMappings<"user_metrics">({}),
 };
 
 const havingKeyMappings: KeyMappings = {
   user_metrics: easyKeyMappings<"user_metrics">({
-    last_active: "max(request.created_at)",
-    total_requests: "count(request.id)",
-    active_for: "active_for",
-    average_requests_per_day_active: "average_requests_per_day_active",
-    average_tokens_per_request: "average_tokens_per_request",
-    total_completion_tokens: "total_completion_tokens",
-    total_prompt_tokens: "total_prompt_tokens",
-    cost: "cost",
+    last_active: "request_response_rmt.last_active",
+    total_requests: "request_response_rmt.total_requests",
+    active_for: "request_response_rmt.active_for",
+    average_requests_per_day_active:
+      "request_response_rmt.average_requests_per_day_active",
+    average_tokens_per_request:
+      "request_response_rmt.average_tokens_per_request",
+    total_completion_tokens: "request_response_rmt.total_completion_tokens",
+    total_prompt_tokens: "request_response_rmt.total_prompt_tokens",
+    cost: "request_response_rmt.cost",
   }),
   users_view: easyKeyMappings<"users_view">({
     active_for: "active_for",
@@ -293,6 +313,7 @@ const havingKeyMappings: KeyMappings = {
     total_prompt_token: "total_prompt_token",
     cost: "cost",
   }),
+  request_response_rmt: easyKeyMappings<"request_response_rmt">({}),
   request_response_search: NOT_IMPLEMENTED,
   score_value: NOT_IMPLEMENTED,
   experiment_hypothesis_run: NOT_IMPLEMENTED,
@@ -302,7 +323,6 @@ const havingKeyMappings: KeyMappings = {
   response: NOT_IMPLEMENTED,
   properties_table: NOT_IMPLEMENTED,
   request_response_log: NOT_IMPLEMENTED,
-  request_response_versioned: NOT_IMPLEMENTED,
   properties_v3: NOT_IMPLEMENTED,
   property_with_response_v1: NOT_IMPLEMENTED,
   feedback: NOT_IMPLEMENTED,
@@ -367,6 +387,7 @@ export function buildFilterLeaf(
     const tableKey = _tableKey as keyof typeof filter;
     const table = filter[tableKey];
     const mapper = keyMappings[tableKey] as KeyMapper<typeof table>;
+
     const {
       column,
       operator: operatorKey,
@@ -540,7 +561,7 @@ export async function buildFilterWithAuthClickHouse(
   args: ExternalBuildFilterArgs & { org_id: string }
 ): Promise<{ filter: string; argsAcc: any[] }> {
   return buildFilterWithAuth(args, "clickhouse", (orgId) => ({
-    request_response_versioned: {
+    request_response_rmt: {
       organization_id: {
         equals: orgId,
       },

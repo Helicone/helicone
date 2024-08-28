@@ -28,7 +28,7 @@ const PromptUsageChart = (props: PromptUsageChartProps) => {
   const timeIncrement = getTimeInterval(timeFilter);
 
   const promptUsageFilterLeaf = {
-    request_response_versioned: {
+    request_response_rmt: {
       properties: {
         "Helicone-Prompt-Id": {
           equals: promptId,
