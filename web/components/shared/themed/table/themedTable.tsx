@@ -58,7 +58,7 @@ interface ThemedTableV5Props<T extends { id?: string }> {
     sortDirection: SortDirection | null;
     isCustomProperty: boolean;
   };
-  onRowSelect?: (rowId: string, checked: boolean) => void;
+  onRowSelect?: (row: T, index: number) => void;
   makeCard?: (row: T) => React.ReactNode;
   makeRow?: {
     properties: string[];
@@ -157,8 +157,8 @@ export default function ThemedTable<T extends { id?: string }>(
     onSelectAll?.(checked);
   };
 
-  const handleRowSelect = (rowId: string) => {
-    onRowSelect?.(rowId, !selectedIds?.includes(rowId));
+  const handleRowSelect = (row: T, index: number) => {
+    onRowSelect?.(row, index);
   };
 
   return (
@@ -286,8 +286,7 @@ export default function ThemedTable<T extends { id?: string }>(
                         "bg-blue-100 border-l border-blue-500 pl-2"
                     )}
                     onClick={
-                      onRowSelect &&
-                      (() => handleRowSelect(row.original?.id ?? ""))
+                      onRowSelect && (() => handleRowSelect(row.original, index))
                     }
                   >
                     {showCheckboxes && (
