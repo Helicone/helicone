@@ -96,6 +96,9 @@ export interface paths {
   "/v1/alert/{alertId}": {
     delete: operations["DeleteAlert"];
   };
+  "/v1/admin/orgs/top-usage": {
+    post: operations["GetTopOrgsByUsage"];
+  };
   "/v1/admin/orgs/top": {
     post: operations["GetTopOrgs"];
   };
@@ -1519,6 +1522,59 @@ export interface operations {
       };
     };
   };
+  GetTopOrgsByUsage: {
+    requestBody: {
+      content: {
+        "application/json": {
+          /** Format: double */
+          minRequests: number;
+          /** Format: double */
+          limit: number;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            organizations: ({
+                usage: {
+                  /** Format: double */
+                  all_time_count: number;
+                  monthly_usage: {
+                      /** Format: double */
+                      requestCount: number;
+                      month: string;
+                    }[];
+                  /** Format: double */
+                  requests_last_30_days: number;
+                  /** Format: double */
+                  total_requests: number;
+                };
+                organization: {
+                  members: ({
+                      last_sign_in_at: string | null;
+                      role: string;
+                      name: string;
+                      email: string;
+                      id: string;
+                    })[];
+                  subscription_status: string | null;
+                  stripe_subscription_id: string | null;
+                  stripe_customer_id: string | null;
+                  tier: string;
+                  owner: string;
+                  created_at: string;
+                  name: string;
+                  id: string;
+                };
+              })[];
+          };
+        };
+      };
+    };
+  };
   GetTopOrgs: {
     requestBody: {
       content: {
@@ -1583,7 +1639,9 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": {
-          organizationId: string;
+          email?: string;
+          userId?: string;
+          organizationId?: string;
         };
       };
     };
@@ -1592,36 +1650,38 @@ export interface operations {
       200: {
         content: {
           "application/json": {
-            usage: {
-              /** Format: double */
-              all_time_count: number;
-              monthly_usage: {
+            organizations: ({
+                usage: {
                   /** Format: double */
-                  requestCount: number;
-                  month: string;
-                }[];
-              /** Format: double */
-              requests_last_30_days: number;
-              /** Format: double */
-              total_requests: number;
-            } | null;
-            organization: ({
-              members: ({
-                  last_sign_in_at: string | null;
-                  role: string;
+                  all_time_count: number;
+                  monthly_usage: {
+                      /** Format: double */
+                      requestCount: number;
+                      month: string;
+                    }[];
+                  /** Format: double */
+                  requests_last_30_days: number;
+                  /** Format: double */
+                  total_requests: number;
+                };
+                organization: {
+                  members: ({
+                      last_sign_in_at: string | null;
+                      role: string;
+                      name: string;
+                      email: string;
+                      id: string;
+                    })[];
+                  subscription_status: string | null;
+                  stripe_subscription_id: string | null;
+                  stripe_customer_id: string | null;
+                  tier: string;
+                  owner: string;
+                  created_at: string;
                   name: string;
-                  email: string;
                   id: string;
-                })[];
-              subscription_status: string | null;
-              stripe_subscription_id: string | null;
-              stripe_customer_id: string | null;
-              tier: string;
-              owner: string;
-              created_at: string;
-              name: string;
-              id: string;
-            }) | null;
+                };
+              })[];
           };
         };
       };
