@@ -71,7 +71,7 @@ export default function NewDataset({ requests, onComplete }: NewDatasetProps) {
         <CardTitle className="text-2xl font-bold">Add to dataset</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4 p-2 rounded-xl border border-[#F3F4F6] ">
-        <ScrollArea className="h-[100px] ">
+        <ScrollArea className="h-[115px] ">
           {datasets.map((dataset) => (
             <div
               key={dataset.id}
