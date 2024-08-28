@@ -117,7 +117,7 @@ export default function NewDataset({ requests, onComplete }: NewDatasetProps) {
                   disabled={addingRequests}
                   onClick={async () => {
                     setAddingRequests(true);
-                    const res = await jawn.POST(
+                    const { data, error } = await jawn.POST(
                       "/v1/helicone-dataset/{datasetId}/mutate",
                       {
                         params: {
@@ -132,7 +132,7 @@ export default function NewDataset({ requests, onComplete }: NewDatasetProps) {
                       }
                     );
 
-                    if (res.data && !res.data.error) {
+                    if (data && !data.error) {
                       setNotification("Requests added to dataset", "success");
 
                       if (openDatasetOnAdd) {
@@ -141,7 +141,9 @@ export default function NewDataset({ requests, onComplete }: NewDatasetProps) {
                       onComplete();
                     } else {
                       setNotification(
-                        "Failed to add requests to dataset",
+                        `Failed to add requests to dataset: ${
+                          (error as any)?.error ?? "Unknown error"
+                        }`,
                         "error"
                       );
                     }
