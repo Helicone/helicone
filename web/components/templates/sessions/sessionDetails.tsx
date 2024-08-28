@@ -1,4 +1,9 @@
-import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import { useLocalStorage } from "@/services/hooks/localStorage";
+import {
+  ChartPieIcon,
+  ListBulletIcon,
+  MagnifyingGlassIcon,
+} from "@heroicons/react/24/outline";
 import { TextInput } from "@tremor/react";
 import { useRouter } from "next/router";
 import { useMemo } from "react";
@@ -9,9 +14,26 @@ import {
 } from "../../../lib/timeCalculations/time";
 import { useSessionNames } from "../../../services/hooks/sessions";
 import { SortDirection } from "../../../services/lib/sorts/users/sorts";
+import { Row } from "../../layout/common";
 import { Col } from "../../layout/common/col";
 import ThemedTable from "../../shared/themed/table/themedTable";
+import ThemedTabSelector from "../../shared/themed/themedTabSelector";
 import { INITIAL_COLUMNS } from "./initialColumns";
+
+import SessionMetrics from "./SessionMetrics";
+
+const TABS = [
+  {
+    id: "sessions",
+    label: "Sessions",
+    icon: <ListBulletIcon className="w-4 h-4" />,
+  },
+  {
+    id: "metrics",
+    label: "Metrics",
+    icon: <ChartPieIcon className="w-4 h-4" />,
+  },
+];
 
 type TSessions = {
   created_at: string;
@@ -24,7 +46,9 @@ type TSessions = {
   total_tokens: number;
 };
 
-type SessionResult = ReturnType<typeof useSessionNames>["sessions"][number];
+export type SessionResult = ReturnType<
+  typeof useSessionNames
+>["sessions"][number];
 interface SessionDetailsProps {
   selectedSession: SessionResult | null;
   sessionIdSearch: string;
@@ -63,8 +87,12 @@ const SessionDetails = ({
       .toFixed(3);
   }, [sessions]);
 
+  const [currentTab, setCurrentTab] = useLocalStorage<
+    (typeof TABS)[number]["id"]
+  >("session-details-tab", "sessions");
+
   return (
-    <Col className="space-y-4 min-w-0">
+    <Col className="space-y-4 w-full max-w-2xl">
       <div>
         <div className="text-xl font-semibold">
           {selectedSession?.name ?? "No Name"}
@@ -88,46 +116,60 @@ const SessionDetails = ({
           </li>
         </ul>
       </div>
-      <TextInput
-        icon={MagnifyingGlassIcon}
-        value={sessionIdSearch}
-        onValueChange={(value) => setSessionIdSearch(value)}
-        placeholder="Search session id..."
-      />
-      <ThemedTable
-        id="session-table"
-        defaultData={sessions || []}
-        defaultColumns={INITIAL_COLUMNS}
-        skeletonLoading={isLoading}
-        dataLoading={false}
-        sortable={sort}
-        timeFilter={{
-          currentTimeFilter: timeFilter,
-          defaultValue: "all",
-          onTimeSelectHandler: (key: TimeInterval, value: string) => {
-            if ((key as string) === "custom") {
-              const [startDate, endDate] = value.split("_");
 
-              const start = new Date(startDate);
-              const end = new Date(endDate);
-              setInterval(key);
-              setTimeFilter({
-                start,
-                end,
-              });
-            } else {
-              setInterval(key);
-              setTimeFilter({
-                start: getTimeIntervalAgo(key),
-                end: new Date(),
-              });
-            }
-          },
-        }}
-        onRowSelect={(row) => {
-          router.push(`/sessions/${row.session}`);
-        }}
-      />
+      <Row className="items-center justify-between gap-10">
+        <ThemedTabSelector
+          tabs={TABS}
+          currentTab={currentTab}
+          onTabChange={(tabId) =>
+            setCurrentTab(tabId as (typeof TABS)[number]["id"])
+          }
+        />
+        <TextInput
+          icon={MagnifyingGlassIcon}
+          value={sessionIdSearch}
+          onValueChange={(value) => setSessionIdSearch(value)}
+          placeholder="Search session id..."
+        />
+      </Row>
+      {currentTab === "sessions" ? (
+        <ThemedTable
+          id="session-table"
+          defaultData={sessions || []}
+          defaultColumns={INITIAL_COLUMNS}
+          skeletonLoading={isLoading}
+          dataLoading={false}
+          sortable={sort}
+          timeFilter={{
+            currentTimeFilter: timeFilter,
+            defaultValue: "all",
+            onTimeSelectHandler: (key: TimeInterval, value: string) => {
+              if ((key as string) === "custom") {
+                const [startDate, endDate] = value.split("_");
+
+                const start = new Date(startDate);
+                const end = new Date(endDate);
+                setInterval(key);
+                setTimeFilter({
+                  start,
+                  end,
+                });
+              } else {
+                setInterval(key);
+                setTimeFilter({
+                  start: getTimeIntervalAgo(key),
+                  end: new Date(),
+                });
+              }
+            },
+          }}
+          onRowSelect={(row) => {
+            router.push(`/sessions/${row.session}`);
+          }}
+        />
+      ) : (
+        <SessionMetrics selectedSession={selectedSession} />
+      )}
     </Col>
   );
 };
