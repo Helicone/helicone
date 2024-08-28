@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   useGetHeliconeDatasetRows,
   useGetHeliconeDatasets,
@@ -18,6 +18,8 @@ import { Row } from "../../layout/common";
 import { useJawnClient } from "../../../lib/clients/jawnHook";
 import useNotification from "../../shared/notification/useNotification";
 import { useSelectMode } from "../../../services/hooks/dataset/selectMode";
+import { useRouter } from "next/router";
+import TableFooter from "../requestsV2/tableFooter";
 import { clsx } from "../../shared/clsx";
 
 interface DatasetIdPageProps {
@@ -31,7 +33,12 @@ export type DatasetRow =
   | null;
 const DatasetIdPage = (props: DatasetIdPageProps) => {
   const { id, currentPage, pageSize } = props;
-  const { rows, isLoading, refetch } = useGetHeliconeDatasetRows(id);
+  const router = useRouter();
+  const [page, setPage] = useState<number>(currentPage);
+  const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);
+  const { rows, isLoading, refetch, count, isCountLoading } =
+    useGetHeliconeDatasetRows(id, page, currentPageSize);
+  console.log(count);
   const { datasets, isLoading: isLoadingDataset } = useGetHeliconeDatasets([
     id,
   ]);
@@ -62,6 +69,32 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
       setOpen(true);
     }
   };
+
+  // Update the page state and router query when the page changes
+  const handlePageChange = useCallback(
+    (newPage: number) => {
+      router.push(
+        {
+          pathname: router.pathname,
+          query: { ...router.query, page: newPage.toString() },
+        },
+        undefined,
+        { shallow: true }
+      );
+    },
+    [router]
+  );
+
+  // Sync the page state with the router query on component mount
+  useEffect(() => {
+    const pageFromQuery = router.query.page;
+    if (pageFromQuery && !Array.isArray(pageFromQuery)) {
+      const parsedPage = parseInt(pageFromQuery, 10);
+      if (!isNaN(parsedPage) && parsedPage !== page) {
+        setPage(parsedPage);
+      }
+    }
+  }, [router.query.page, page]);
 
   return (
     <>
@@ -215,6 +248,16 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
             </Row>
           )}
         </ThemedTable>
+
+        <TableFooter
+          currentPage={page}
+          pageSize={currentPageSize}
+          isCountLoading={isCountLoading}
+          count={count || 0}
+          onPageChange={(n) => handlePageChange(n)}
+          onPageSizeChange={(n) => setCurrentPageSize(n)}
+          pageSizeOptions={[25, 50, 100, 250, 500]}
+        />
       </div>
       <ThemedDrawer
         open={!!selectedRow}

@@ -90,7 +90,7 @@ export class HeliconeDatasetManager extends BaseManager {
     );
   }
 
-  async query(datasetId: string, params: {}) {
+  async query(datasetId: string, params: { offset: number; limit: number }) {
     const query = `
       SELECT 
         hdr.id,
@@ -101,6 +101,8 @@ export class HeliconeDatasetManager extends BaseManager {
       WHERE hdr.dataset_id = $1
       AND hdr.organization_id = $2
       ORDER BY hdr.created_at DESC
+      LIMIT ${params.limit}
+      OFFSET ${params.offset}
     `;
 
     const result = await dbExecute<HeliconeDatasetRow>(query, [
@@ -121,6 +123,24 @@ export class HeliconeDatasetManager extends BaseManager {
           ),
         }))
       );
+    });
+  }
+
+  async count(datasetId: string): Promise<Result<number, string>> {
+    const query = `
+      SELECT COUNT(*)
+      FROM helicone_dataset_row
+      WHERE dataset_id = $1
+      AND organization_id = $2
+    `;
+
+    const result = await dbExecute<{ count: number }>(query, [
+      datasetId,
+      this.authParams.organizationId,
+    ]);
+
+    return promiseResultMap(result, async (rows) => {
+      return rows[0].count;
     });
   }
 
