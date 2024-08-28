@@ -1,7 +1,5 @@
-import { useState } from "react";
-import { BarChart, Card, Title } from "@tremor/react";
-import { useSessionMetrics } from "../../../services/hooks/sessions";
-import { useLocalStorage } from "@/services/hooks/localStorage";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -9,15 +7,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
+import { formatSeconds } from "@/lib/sql/timeHelpers";
+import { useLocalStorage } from "@/services/hooks/localStorage";
+import { BarChart, Card, Title } from "@tremor/react";
+import { useState } from "react";
+import { useSessionMetrics } from "../../../services/hooks/sessions";
 import { Row } from "../../layout/common";
 import { Col } from "../../layout/common/col";
+import LoadingAnimation from "../../shared/loadingAnimation";
 import { formatLargeNumber } from "../../shared/utils/numberFormat";
 import { SessionResult } from "./sessionDetails";
-import { formatSeconds } from "@/lib/sql/timeHelpers";
-import LoadingAnimation from "../../shared/loadingAnimation";
-import { ReactNode } from "react";
 
 interface SessionMetricsProps {
   selectedSession: SessionResult | null;
