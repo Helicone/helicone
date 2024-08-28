@@ -21,6 +21,7 @@ import { useSelectMode } from "../../../services/hooks/dataset/selectMode";
 import { useRouter } from "next/router";
 import TableFooter from "../requestsV2/tableFooter";
 import { clsx } from "../../shared/clsx";
+import NewDataset from "./NewDataset"; // Add this import at the top of the file
 
 interface DatasetIdPageProps {
   id: string;
@@ -48,6 +49,7 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
   const [selectedRow, setSelectedRow] = useState<DatasetRow>(null);
   const [selectedDataIndex, setSelectedDataIndex] = useState<number>();
   const [open, setOpen] = useState(false);
+  const [showNewDatasetModal, setShowNewDatasetModal] = useState(false);
 
   const {
     selectMode: selectModeHook,
@@ -205,45 +207,73 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
                 </span>
               </div>
               {selectedIds.length > 0 && (
-                <button
-                  onClick={async () => {
-                    const res = await jawn.POST(
-                      `/v1/helicone-dataset/{datasetId}/mutate`,
-                      {
-                        params: {
-                          path: {
-                            datasetId: id,
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setShowNewDatasetModal(true)}
+                    className={clsx(
+                      "relative inline-flex items-center rounded-md hover:bg-blue-700 bg-blue-500 px-4 py-2 text-sm font-medium text-white"
+                    )}
+                  >
+                    <div className="flex flex-row gap-2 items-center">
+                      <span>Copy to...</span>
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => {
+                      // Implement duplicate functionality later
+                      setNotification(
+                        "Duplicate functionality coming soon",
+                        "info"
+                      );
+                    }}
+                    className={clsx(
+                      "relative inline-flex items-center rounded-md hover:bg-green-700 bg-green-500 px-4 py-2 text-sm font-medium text-white"
+                    )}
+                  >
+                    <div className="flex flex-row gap-2 items-center">
+                      <span>Duplicate</span>
+                    </div>
+                  </button>
+                  <button
+                    onClick={async () => {
+                      const res = await jawn.POST(
+                        `/v1/helicone-dataset/{datasetId}/mutate`,
+                        {
+                          params: {
+                            path: {
+                              datasetId: id,
+                            },
                           },
-                        },
-                        body: {
-                          addRequests: [],
-                          removeRequests: selectedIds,
-                        },
+                          body: {
+                            addRequests: [],
+                            removeRequests: selectedIds,
+                          },
+                        }
+                      );
+                      if (res.data && !res.data.error) {
+                        setNotification(
+                          "Requests removed from dataset",
+                          "success"
+                        );
+                        await refetch();
+                      } else {
+                        setNotification(
+                          "Failed to remove requests from dataset",
+                          "error"
+                        );
                       }
-                    );
-                    if (res.data && !res.data.error) {
-                      setNotification(
-                        "Requests removed from dataset",
-                        "success"
-                      );
-                      await refetch();
-                    } else {
-                      setNotification(
-                        "Failed to remove requests from dataset",
-                        "error"
-                      );
-                    }
-                    toggleSelectMode(false);
-                  }}
-                  className={clsx(
-                    "relative inline-flex items-center rounded-md hover:bg-red-700 bg-red-500 px-4 py-2 text-sm font-medium text-white"
-                  )}
-                >
-                  <div className="flex flex-row gap-2 items-center">
-                    <TrashIcon className="h-5 w-5 text-gray-100 dark:text-gray-900" />
-                    <span>Remove</span>
-                  </div>
-                </button>
+                      toggleSelectMode(false);
+                    }}
+                    className={clsx(
+                      "relative inline-flex items-center rounded-md hover:bg-red-700 bg-red-500 px-4 py-2 text-sm font-medium text-white"
+                    )}
+                  >
+                    <div className="flex flex-row gap-2 items-center">
+                      <TrashIcon className="h-5 w-5 text-gray-100 dark:text-gray-900" />
+                      <span>Remove</span>
+                    </div>
+                  </button>
+                </div>
               )}
             </Row>
           )}
@@ -267,6 +297,16 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
       >
         <EditDataset selectedRow={selectedRow} />
       </ThemedDrawer>
+      {showNewDatasetModal && (
+        <NewDataset
+          request_ids={selectedIds}
+          onComplete={() => {
+            setShowNewDatasetModal(false);
+            toggleSelectMode(false);
+            refetch();
+          }}
+        />
+      )}
     </>
   );
 };
