@@ -928,6 +928,8 @@ Json: JsonObject;
       meta: components["schemas"]["Json"] | null;
       name: string | null;
       organization: string;
+      /** Format: double */
+      requests_count: number;
     };
     "ResultSuccess_HeliconeDataset-Array_": {
       data: components["schemas"]["HeliconeDataset"][];

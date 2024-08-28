@@ -2873,6 +2873,10 @@
 					},
 					"organization": {
 						"type": "string"
+					},
+					"requests_count": {
+						"type": "number",
+						"format": "double"
 					}
 				},
 				"required": [
@@ -2881,7 +2885,8 @@
 					"id",
 					"meta",
 					"name",
-					"organization"
+					"organization",
+					"requests_count"
 				],
 				"type": "object",
 				"additionalProperties": false
