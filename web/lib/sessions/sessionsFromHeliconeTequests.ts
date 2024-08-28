@@ -25,7 +25,7 @@ export function sessionFromHeliconeRequests(
       firstRequest.request_created_at
     ).getTime(),
     end_time_unix_timestamp_ms: new Date(
-      lastRequest.response_created_at
+      lastRequest.response_created_at ?? Date.now().toString()
     ).getTime(),
     session_id: firstRequest.request_properties?.[
       "Helicone-Session-Id"
@@ -49,7 +49,7 @@ export function sessionFromHeliconeRequests(
             request.request_created_at
           ).getTime(),
           end_unix_timestamp_ms: new Date(
-            request.response_created_at
+            request.response_created_at ?? Date.now().toString()
           ).getTime(),
           properties: Object.entries(request.request_properties ?? {})
             .filter(([key]) => key.startsWith("Helicone-") === false)

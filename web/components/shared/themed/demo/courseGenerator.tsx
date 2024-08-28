@@ -4,7 +4,7 @@ import { useJawnClient } from "../../../../lib/clients/jawnHook";
 import { Col } from "../../../layout/common";
 import { useUser } from "@supabase/auth-helpers-react";
 import OpenAI from "openai";
-import { hpf } from "@helicone/prompts";
+import { hpf, hpstatic } from "@helicone/prompts";
 import TextbookCourse from "./textbookCourse";
 import {
   AcademicCapIcon,
@@ -161,7 +161,7 @@ export const CourseGenerator: React.FC = () => {
     sessionId: string
   ) => {
     let messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
-      { role: "system", content: "You are an expert course creator." },
+      { role: "system", content: hpstatic`You are an expert course creator.` },
     ];
 
     let toolName = "";

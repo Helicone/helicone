@@ -1,12 +1,11 @@
-import React from "react";
-import Editor from "react-simple-code-editor";
 import { highlight, languages } from "prismjs";
-import "prismjs/components/prism-markdown";
-import "prismjs/components/prism-markup-templating";
-import "prismjs/themes/prism.css";
 import "prismjs/components/prism-clike";
 import "prismjs/components/prism-javascript";
 import "prismjs/components/prism-json";
+import "prismjs/components/prism-markdown";
+import "prismjs/components/prism-markup-templating";
+import "prismjs/themes/prism.css";
+import Editor from "react-simple-code-editor";
 
 interface MarkdownEditorProps {
   text: string;

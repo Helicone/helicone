@@ -28,10 +28,6 @@ export async function getMetadata(
   );
   const jsonPath = path.join(basePath, "metadata.json");
 
-  console.log(`[Blog] Attempting to read metadata from: ${jsonPath}`);
-  console.log(`[Blog] Current working directory: ${process.cwd()}`);
-  console.log(`[Blog] Base path: ${basePath}`);
-
   try {
     const fileExists = await fs
       .access(jsonPath)
@@ -43,12 +39,9 @@ export async function getMetadata(
     }
 
     const jsonContent = await fs.readFile(jsonPath, "utf8");
-    console.log(`[Blog] Raw JSON content: ${jsonContent}`);
 
     const hMetadata = JSON.parse(jsonContent) as BlogStructureMetaData;
-    console.log(
-      `[Blog] Successfully read metadata: ${JSON.stringify(hMetadata)}`
-    );
+
     return hMetadata;
   } catch (error) {
     console.error(`[Blog] Error loading metadata for ${filePath}:`, error);

@@ -32,6 +32,7 @@ import {
   filterUITreeToFilterNode,
   UIFilterRowTree,
 } from "../../../services/lib/filters/uiFilterRowTree";
+import { useMemo, useCallback } from "react";
 
 export async function fetchDataOverTime<T>(
   timeFilter: {
@@ -69,26 +70,29 @@ export interface DashboardPageData {
   apiKeyFilter: string | null;
   timeZoneDifference: number;
   dbIncrement: TimeIncrement;
+  isLive: boolean;
 }
 
-export const useDashboardPage = ({
-  timeFilter,
-  uiFilters,
-  timeZoneDifference,
-  dbIncrement,
-}: DashboardPageData) => {
-  const {
-    properties,
-    isLoading: isPropertiesLoading,
-    propertyFilters,
-    searchPropertyFilters,
-  } = useGetPropertiesV2(getPropertyFiltersV2);
+export const useUIFilterConvert = (
+  uiFilters: UIFilterRowTree,
+  timeFilter: {
+    start: Date;
+    end: Date;
+  }
+) => {
+  const properties = useGetPropertiesV2(getPropertyFiltersV2);
 
-  const filterMap = (
-    DASHBOARD_PAGE_TABLE_FILTERS as SingleFilterDef<any>[]
-  ).concat(propertyFilters);
+  const filterMap = useMemo(() => {
+    return (DASHBOARD_PAGE_TABLE_FILTERS as SingleFilterDef<any>[]).concat(
+      properties.propertyFilters
+    );
+  }, [properties.propertyFilters]);
 
-  const userFilters = filterUITreeToFilterNode(filterMap, uiFilters);
+  const userFilters = useMemo(
+    () => filterUITreeToFilterNode(filterMap, uiFilters),
+    [filterMap, uiFilters]
+  );
+
   const { isLoading: isModelsLoading, models } = useModels(
     timeFilter,
     1000,
@@ -109,7 +113,79 @@ export const useDashboardPage = ({
     a.total_requests > b.total_requests ? -1 : 1
   ) ?? [];
 
-  // replace the model filter inside of the filterMap with the text suggestion model
+  const updateModelFilter = useCallback(
+    (filterMap: SingleFilterDef<any>[], allModelsData: any[]) => {
+      const modelFilterIdx = filterMap.findIndex(
+        (filter) => filter.label === "Model"
+      );
+      if (modelFilterIdx !== -1) {
+        return [
+          ...filterMap.slice(0, modelFilterIdx),
+          {
+            label: "Model",
+            operators: textWithSuggestions(
+              allModelsData
+                ?.filter((model) => model.model)
+                .map((model) => ({
+                  key: model.model,
+                  param: model.model,
+                })) || []
+            ),
+            category: "request",
+            table: "request_response_rmt",
+            column: "model",
+          },
+          ...filterMap.slice(modelFilterIdx + 1),
+        ];
+      }
+      return filterMap;
+    },
+    []
+  );
+
+  const sortedAllModelsData = useMemo(() => {
+    return (
+      allModelsData?.sort((a, b) =>
+        a.total_requests > b.total_requests ? -1 : 1
+      ) ?? []
+    );
+  }, [allModelsData]);
+
+  const updatedFilterMap = useMemo(() => {
+    return updateModelFilter(filterMap, sortedAllModelsData);
+  }, [filterMap, sortedAllModelsData, updateModelFilter]);
+
+  return {
+    properties,
+    userFilters,
+    filterMap: updatedFilterMap,
+    allModelsData: sortedAllModelsData,
+    isModelsLoading,
+    models,
+    topModels,
+  };
+};
+
+export const useDashboardPage = ({
+  timeFilter,
+  uiFilters,
+  timeZoneDifference,
+  dbIncrement,
+  isLive,
+}: DashboardPageData) => {
+  const {
+    properties: {
+      properties,
+      isLoading: isPropertiesLoading,
+      searchPropertyFilters,
+    },
+    filterMap,
+    userFilters,
+    allModelsData,
+    isModelsLoading,
+    topModels,
+  } = useUIFilterConvert(uiFilters, timeFilter);
+
   const modelFilterIdx = filterMap.findIndex(
     (filter) => filter.label === "Model"
   );
@@ -125,7 +201,7 @@ export const useDashboardPage = ({
           })) || []
       ),
       category: "request",
-      table: "request_response_versioned",
+      table: "request_response_rmt",
       column: "model",
     };
   }
@@ -144,6 +220,7 @@ export const useDashboardPage = ({
       params,
       endpoint: "/api/metrics/tokensOverTime",
       key: "errorOverTime",
+      isLive,
       postProcess: (data) => {
         return resultMap(data, (d) =>
           d.map((d) => ({
@@ -158,6 +235,7 @@ export const useDashboardPage = ({
       params,
       endpoint: "/api/metrics/errorOverTime",
       key: "errorOverTime",
+      isLive,
       postProcess: (data) => {
         return resultMap(data, (d) =>
           d.map((d) => ({ count: +d.count, time: new Date(d.time) }))
@@ -168,6 +246,7 @@ export const useDashboardPage = ({
       params,
       endpoint: "/api/metrics/requestOverTime",
       key: "requestOverTime",
+      isLive,
       postProcess: (data) => {
         return resultMap(data, (d) =>
           d.map((d) => ({ count: +d.count, time: new Date(d.time) }))
@@ -180,6 +259,7 @@ export const useDashboardPage = ({
       params,
       endpoint: "/api/metrics/requestStatusOverTime",
       key: "requestStatusOverTime",
+      isLive,
       postProcess: (data) => {
         return resultMap(data, (d) =>
           d.map((d) => ({
@@ -194,6 +274,7 @@ export const useDashboardPage = ({
       params,
       endpoint: "/api/metrics/costOverTime",
       key: "costOverTime",
+      isLive,
       postProcess: (data) => {
         return resultMap(data, (d) =>
           d.map((d) => ({ cost: +d.cost, time: new Date(d.time) }))
@@ -204,6 +285,7 @@ export const useDashboardPage = ({
       params,
       endpoint: "/api/metrics/latencyOverTime",
       key: "latencyOverTime",
+      isLive,
       postProcess: (data) => {
         return resultMap(data, (d) =>
           d.map((d) => ({ duration: +d.duration, time: new Date(d.time) }))
@@ -214,6 +296,7 @@ export const useDashboardPage = ({
       params,
       endpoint: "/api/metrics/usersOverTime",
       key: "usersOverTime",
+      isLive,
       postProcess: (data) => {
         return resultMap(data, (d) =>
           d.map((d) => ({ count: +d.count, time: new Date(d.time) }))
@@ -224,6 +307,7 @@ export const useDashboardPage = ({
       params,
       endpoint: "/api/metrics/timeToFirstToken",
       key: "timeToFirstToken",
+      isLive,
       postProcess: (data) => {
         return resultMap(data, (d) =>
           d.map((d) => ({ ttft: +d.ttft, time: new Date(d.time) }))
@@ -234,6 +318,7 @@ export const useDashboardPage = ({
       params,
       endpoint: "/api/metrics/threatsOverTime",
       key: "threatsOverTime",
+      isLive,
       postProcess: (data) => {
         return resultMap(data, (d) =>
           d.map((d) => ({ count: +d.count, time: new Date(d.time) }))
@@ -246,32 +331,39 @@ export const useDashboardPage = ({
     totalCost: useBackendMetricCall<Result<number, string>>({
       params,
       endpoint: "/api/metrics/totalCost",
+      isLive,
     }),
     totalRequests: useBackendMetricCall<Result<number, string>>({
       params,
       endpoint: "/api/metrics/totalRequests",
+      isLive,
     }),
     averageLatency: useBackendMetricCall<Result<number, string>>({
       params,
       endpoint: "/api/metrics/averageLatency",
+      isLive,
     }),
     averageTokensPerRequest: useBackendMetricCall<
       UnPromise<ReturnType<typeof getTokensPerRequest>>
     >({
       params,
       endpoint: "/api/metrics/averageTokensPerRequest",
+      isLive,
     }),
     activeUsers: useBackendMetricCall<Result<number, string>>({
       params,
       endpoint: "/api/metrics/activeUsers",
+      isLive,
     }),
     averageTimeToFirstToken: useBackendMetricCall<Result<number, string>>({
       params,
       endpoint: "/api/metrics/averageTimeToFirstToken",
+      isLive,
     }),
     totalThreats: useBackendMetricCall<Result<number, string>>({
       params,
       endpoint: "/api/metrics/totalThreats",
+      isLive,
     }),
   };
 

@@ -23,7 +23,10 @@ export function isValidTimeFilter(filter: {
   return start <= end;
 }
 
-export const getTimeAgo = (date: Date): string => {
+export const getTimeAgo = (date?: Date): string => {
+  if (!date) {
+    return "Never";
+  }
   const now = new Date();
   const diff = now.getTime() - date.getTime();
   const seconds = Math.floor(diff / 1000);

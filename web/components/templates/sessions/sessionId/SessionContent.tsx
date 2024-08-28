@@ -59,21 +59,19 @@ const SessionContent: React.FC<SessionContentProps> = ({
 
   const startTime = useMemo(() => {
     const dates =
-      requests.requests.data?.data?.map(
-        (r) => new Date(r.request_created_at)
-      ) ?? [];
+      requests.requests.requests?.map((r) => new Date(r.request_created_at)) ??
+      [];
 
-    return dates.sort((a, b) => a.getTime() - b.getTime())?.[0] ?? new Date(0);
-  }, [requests.requests.data?.data]);
+    return dates.sort((a, b) => a.getTime() - b.getTime())?.[0] ?? undefined;
+  }, [requests.requests.requests]);
 
   const endTime = useMemo(() => {
     const dates =
-      requests.requests.data?.data?.map(
-        (r) => new Date(r.request_created_at)
-      ) ?? [];
+      requests.requests.requests?.map((r) => new Date(r.request_created_at)) ??
+      [];
 
-    return dates.sort((a, b) => b.getTime() - a.getTime())?.[0] ?? new Date(0);
-  }, [requests.requests.data?.data]);
+    return dates.sort((a, b) => b.getTime() - a.getTime())?.[0] ?? undefined;
+  }, [requests.requests.requests]);
 
   return (
     <Col className="gap-[12px]">
@@ -129,11 +127,11 @@ const SessionContent: React.FC<SessionContentProps> = ({
       {currentTopView === "chat" && <ChatSession requests={requests} />}
       <RequestDrawerV2
         request={
-          requests.requests.data?.data?.find(
+          requests.requests.requests?.find(
             (r) => r.request_id === selectedRequestId
           ) &&
           getNormalizedRequest(
-            requests.requests.data?.data?.find(
+            requests.requests.requests?.find(
               (r) => r.request_id === selectedRequestId
             )!
           )

@@ -1,7 +1,4 @@
-import {
-  InsertRequestResponseVersioned,
-  clickhouseDb,
-} from "../db/ClickhouseWrapper";
+import { RequestResponseRMT, clickhouseDb } from "../db/ClickhouseWrapper";
 import { dbExecute } from "../shared/db/dbExecute";
 import { err, resultMap, ok, Result } from "../shared/result";
 import { BaseStore } from "./baseStore";
@@ -11,6 +8,27 @@ export type Score = {
   score_attribute_type: string;
   score_attribute_value: number;
 };
+
+export interface BatchScores {
+  requestId: string;
+  provider: string;
+  organizationId: string;
+  mappedScores: Score[];
+}
+
+export interface UpdatedRequestVersion {
+  id: string;
+  version: number;
+  provider: string;
+  helicone_org_id: string;
+}
+
+export interface UpdatedFeedback {
+  id: string;
+  response_id: string;
+  rating: boolean;
+  created_at: string;
+}
 
 export class ScoreStore extends BaseStore {
   constructor(organizationId: string) {
@@ -83,106 +101,177 @@ export class ScoreStore extends BaseStore {
     }
   }
 
-  public async putScoresIntoClickhouse(newVersion: {
-    id: string;
-    version: number;
-    provider: string;
-    scores: Score[];
-  }): Promise<Result<InsertRequestResponseVersioned, string>> {
-    let rowContents = resultMap(
-      await clickhouseDb.dbQuery<InsertRequestResponseVersioned>(
-        `
-      SELECT *
-      FROM request_response_versioned
-      WHERE request_id = {val_0: UUID}
-      AND version = {val_1: UInt64}
-      AND organization_id = {val_2: String}
-      AND provider = {val_3: String}
-    `,
-        [
-          newVersion.id,
-          newVersion.version - 1,
-          this.organizationId,
-          newVersion.provider,
-        ]
-      ),
-      (x) => x[0]
-    );
+  public async putScoresIntoClickhouse(
+    newVersions: BatchScores[]
+  ): Promise<Result<RequestResponseRMT[], string>> {
+    const queryPlaceholders = newVersions
+      .map((_, index) => {
+        const base = index * 3;
+        return `({val_${base} : String}, {val_${base + 1} : String}, {val_${
+          base + 2
+        } : String})`;
+      })
+      .join(",\n    ");
 
-    if (rowContents.error) {
-      return rowContents;
+    if (queryPlaceholders.length === 0) {
+      return err("No query placeholders");
     }
-    if (!rowContents.data) {
-      rowContents = resultMap(
-        await clickhouseDb.dbQuery<InsertRequestResponseVersioned>(
-          `
+
+    const queryParams: (string | number | boolean | Date)[] =
+      newVersions.flatMap((v) => [v.requestId, v.organizationId, v.provider]);
+
+    if (queryParams.length === 0) {
+      return err("No query params");
+    }
+
+    let rowContents = resultMap(
+      await clickhouseDb.dbQuery<RequestResponseRMT>(
+        `
         SELECT *
-        FROM request_response_versioned
-        WHERE request_id = {val_0: UUID}
-        AND organization_id = {val_1: String}
-        AND provider = {val_2: String}
-        ORDER BY version DESC
-        LIMIT 1
-      `,
-          [newVersion.id, this.organizationId, newVersion.provider]
-        ),
-        (x) => x[0]
-      );
-    }
+        FROM request_response_rmt
+        WHERE (request_id, organization_id, provider) IN (${queryPlaceholders})
+        `,
+        queryParams
+      ),
+      (x) => x
+    );
 
     if (rowContents.error || !rowContents.data) {
-      return err("Could not find previous version of request");
+      return err(
+        `Could not find previous versions of all requests, requestId-orgId: ${newVersions
+          .map((v) => `${v.requestId}-${v.organizationId}`)
+          .join(", ")}`
+      );
     }
+    const uniqueRequestResponseLogs = rowContents.data.reduce((acc, row) => {
+      const key = `${row.request_id}-${row.organization_id}`;
+      if (
+        !acc[key] ||
+        (row.updated_at &&
+          (!acc[key].updated_at ||
+            new Date(row.updated_at) > new Date(acc[key].updated_at)))
+      ) {
+        acc[key] = row;
+      }
+      return acc;
+    }, {} as Record<string, RequestResponseRMT>);
+
+    const filteredRequestResponseLogs = Object.values(
+      uniqueRequestResponseLogs
+    );
 
     const res = await clickhouseDb.dbInsertClickhouse(
-      "request_response_versioned",
-      [
-        // Delete the previous version
-        {
-          sign: -1,
-          version: rowContents.data.version,
-          request_id: newVersion.id,
-          organization_id: this.organizationId,
-          provider: newVersion.provider,
-          model: rowContents.data.model,
-          request_created_at: rowContents.data.request_created_at,
-        },
-        // Insert the new version
-        {
-          ...rowContents.data,
-          sign: 1,
-          version: newVersion.version,
-          scores: {
-            ...rowContents.data.scores,
-            ...newVersion.scores.reduce((acc, score) => {
-              acc[score.score_attribute_key] = score.score_attribute_value;
-              return acc;
-            }, {} as Record<string, number>),
+      "request_response_rmt",
+      filteredRequestResponseLogs.flatMap((row, index) => {
+        const newVersion = newVersions[index];
+        return [
+          // Insert the new version
+          {
+            response_id: row.response_id,
+            response_created_at: row.response_created_at,
+            latency: row.latency,
+            status: row.status,
+            completion_tokens: row.completion_tokens,
+            prompt_tokens: row.prompt_tokens,
+            model: row.model,
+            request_id: row.request_id,
+            request_created_at: row.request_created_at,
+            user_id: row.user_id,
+            organization_id: row.organization_id,
+            proxy_key_id: row.proxy_key_id,
+            threat: row.threat,
+            time_to_first_token: row.time_to_first_token,
+            provider: row.provider,
+            country_code: row.country_code,
+            target_url: row.target_url,
+            properties: row.properties,
+            request_body: row.request_body,
+            response_body: row.response_body,
+            assets: row.assets,
+            scores: {
+              ...row.scores,
+              ...newVersion.mappedScores.reduce((acc, score) => {
+                acc[score.score_attribute_key] = score.score_attribute_value;
+                return acc;
+              }, {} as Record<string, number>),
+            },
           },
-        },
-      ]
+        ];
+      })
     );
+
     if (res.error) {
       return err(res.error);
     }
 
-    return ok(rowContents.data);
+    return ok(filteredRequestResponseLogs);
   }
 
-  public async bumpRequestVersion(requestId: string) {
-    return await dbExecute<{
-      id: string;
-      version: number;
-      provider: string;
-    }>(
-      `
-          UPDATE request
-          SET version = version + 1
-          WHERE helicone_org_id = $1
-          AND id = $2
-          RETURNING version, id, provider
-          `,
-      [this.organizationId, requestId]
+  public async bumpRequestVersion(
+    requests: { id: string; organizationId: string }[]
+  ): Promise<Result<UpdatedRequestVersion[], string>> {
+    const placeholders = requests
+      .map((_, index) => `($${index * 2 + 1}::uuid, $${index * 2 + 2}::uuid)`)
+      .join(", ");
+
+    const values = requests.flatMap((request) => [
+      request.organizationId,
+      request.id,
+    ]);
+
+    const query = `
+      UPDATE request AS r
+      SET version = r.version + 1
+      FROM (VALUES ${placeholders}) AS v(org_id, req_id)
+      WHERE r.helicone_org_id = v.org_id AND r.id = v.req_id
+      RETURNING r.id, r.version, r.provider, r.helicone_org_id
+    `;
+
+    const result = await dbExecute<UpdatedRequestVersion>(query, values);
+
+    return result;
+  }
+
+  public async bulkUpsertFeedback(
+    feedbacks: { responseId: string; rating: boolean }[]
+  ): Promise<Result<UpdatedFeedback[], string>> {
+    if (feedbacks.length === 0) {
+      return ok([]);
+    }
+
+    console.log(
+      `Upserting feedback for ${
+        feedbacks.length
+      } responses, responseIds: ${feedbacks
+        .map((f) => f.responseId)
+        .join(", ")}`
     );
+
+    const placeholders = feedbacks
+      .map(
+        (_, index) =>
+          `($${index * 3 + 1}::uuid, $${index * 3 + 2}::boolean, $${
+            index * 3 + 3
+          }::timestamp)`
+      )
+      .join(", ");
+
+    const values = feedbacks.flatMap((feedback) => [
+      feedback.responseId,
+      feedback.rating,
+      new Date().toISOString(),
+    ]);
+
+    const query = `
+    INSERT INTO feedback (response_id, rating, created_at)
+    VALUES ${placeholders}
+    ON CONFLICT (response_id)
+    DO UPDATE SET
+      rating = EXCLUDED.rating,
+      created_at = EXCLUDED.created_at
+    RETURNING id, response_id, rating, created_at
+  `;
+
+    return await dbExecute<UpdatedFeedback>(query, values);
   }
 }

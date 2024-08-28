@@ -26,7 +26,7 @@ export const useUserRequests = (
   filterUITreeToFilterNode(filterMap, uiFilters);
   // const userFilters = filterUIToFilterLeafs(filterMap).concat([
   //   {
-  //     request_response_versioned: {
+  //     request_response_rmt: {
   //       user_id: {
   //         equals: userId,
   //       },

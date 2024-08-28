@@ -18,6 +18,8 @@ import FeedbackButtons from "../feedback/thumbsUpThumbsDown";
 import { NormalizedRequest } from "./builder/abstractRequestBuilder";
 import ModelPill from "./modelPill";
 import StatusBadge from "./statusBadge";
+import ThemedModal from "../../shared/themed/themedModal";
+import NewDataset from "../datasets/NewDataset";
 
 function getPathName(url: string) {
   try {
@@ -26,6 +28,26 @@ function getPathName(url: string) {
     return url;
   }
 }
+const convertToUSDateFormat = (date: string) => {
+  const dateObj = new Date(date);
+  const tzOffset = dateObj.getTimezoneOffset() * 60000;
+
+  const localDateObj = new Date(dateObj.getTime() - tzOffset);
+  const formattedDate =
+    [
+      ("0" + (localDateObj.getMonth() + 1)).slice(-2),
+      ("0" + localDateObj.getDate()).slice(-2),
+      localDateObj.getFullYear(),
+    ].join("/") +
+    " " +
+    [
+      ("0" + localDateObj.getHours()).slice(-2),
+      ("0" + localDateObj.getMinutes()).slice(-2),
+      ("0" + localDateObj.getSeconds()).slice(-2),
+    ].join(":");
+
+  return formattedDate;
+};
 
 const RequestRow = (props: {
   request: NormalizedRequest;
@@ -41,11 +63,6 @@ const RequestRow = (props: {
     wFull = false,
     displayPreview = true,
   } = props;
-  const [requestFeedback, setRequestFeedback] = useState<{
-    createdAt: string | null;
-    id: string | null;
-    rating: boolean | null;
-  }>(request.feedback);
 
   const org = useOrg();
 
@@ -59,8 +76,7 @@ const RequestRow = (props: {
     }[]
   >();
 
-  const [currentScores, setCurrentScores] =
-    useState<Record<string, { value: number; valueType: string }>>();
+  const [currentScores, setCurrentScores] = useState<Record<string, number>>();
 
   const { setNotification } = useNotification();
 
@@ -82,8 +98,8 @@ const RequestRow = (props: {
     });
 
     setCurrentProperties(currentProperties);
-    const currentScores: Record<string, { value: number; valueType: string }> =
-      request.scores || {};
+    const currentScores: Record<string, number> =
+      (request.scores as Record<string, number>) || {};
     setCurrentScores(currentScores);
   }, [properties, request.customProperties, request.scores]);
 
@@ -182,16 +198,10 @@ const RequestRow = (props: {
           currentScores
             ? {
                 ...currentScores,
-                [key]: {
-                  value: value,
-                  valueType: valueType,
-                },
+                [key]: value,
               }
             : {
-                [key]: {
-                  value: value,
-                  valueType: valueType,
-                },
+                [key]: value,
               }
         );
 
@@ -208,6 +218,8 @@ const RequestRow = (props: {
     }
   };
 
+  const [newDatasetModalOpen, setNewDatasetModalOpen] = useState(false);
+
   return (
     <div className="flex flex-col h-full space-y-8 pb-72">
       <div className="flex flex-row items-center">
@@ -222,7 +234,7 @@ const RequestRow = (props: {
               Created At
             </p>
             <p className="text-gray-700 dark:text-gray-300 truncate">
-              {new Date(request.createdAt).toLocaleString("en-US")}
+              {convertToUSDateFormat(request.createdAt)}
             </p>
           </li>
           <li className="flex flex-row justify-between items-center py-2 gap-4">
@@ -330,7 +342,22 @@ const RequestRow = (props: {
         </ul>
       </div>
 
-      <div className="flex flex-col">
+      <div className="flex flex-col gap-5">
+        <div className="font-semibold text-gray-900 dark:text-gray-100 text-sm items-center flex">
+          <div className="flex flex-row items-center space-x-1">
+            <span>Add to Dataset</span>
+            <Tooltip title="Add to Dataset" placement="top">
+              <button
+                onClick={() => {
+                  setNewDatasetModalOpen(true);
+                }}
+                className="ml-1.5 p-0.5 shadow-sm bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-md h-fit"
+              >
+                <PlusIcon className="h-3 w-3 text-gray-500" />
+              </button>
+            </Tooltip>
+          </div>
+        </div>
         <div className="font-semibold text-gray-900 dark:text-gray-100 text-sm items-center flex">
           Custom Properties{" "}
           <Tooltip title="Add a new label" placement="top">
@@ -506,38 +533,51 @@ const RequestRow = (props: {
 
         <div className="flex flex-wrap gap-4 text-sm items-center pt-2">
           {currentScores &&
-            Object.entries(currentScores).map(([key, scoreValue]) => (
-              <li
-                className="flex flex-col space-y-1 justify-between text-left p-2.5 shadow-sm border border-gray-300 dark:border-gray-700 rounded-lg min-w-[5rem]"
-                key={key}
-              >
-                <p className="font-semibold text-gray-900 dark:text-gray-100">
-                  {key}
-                </p>
-                <p className="text-gray-700 dark:text-gray-300">
-                  {scoreValue.valueType === "boolean"
-                    ? scoreValue.value === 1
-                      ? "true"
-                      : "false"
-                    : Number(scoreValue.value)}
-                </p>
-              </li>
-            ))}
+            Object.entries(currentScores)
+              .filter((x) => x[0] !== "helicone-score-feedback")
+              .map(([key, value]) => (
+                <li
+                  className="flex flex-col space-y-1 justify-between text-left p-2.5 shadow-sm border border-gray-300 dark:border-gray-700 rounded-lg min-w-[5rem]"
+                  key={key}
+                >
+                  <p className="font-semibold text-gray-900 dark:text-gray-100">
+                    {key.replace("-hcone-bool", "")}
+                  </p>
+                  <p className="text-gray-700 dark:text-gray-300">
+                    {key.endsWith("-hcone-bool")
+                      ? value === 1
+                        ? "true"
+                        : "false"
+                      : Number(value)}
+                  </p>
+                </li>
+              ))}
         </div>
       </div>
-
       {displayPreview && (
         <div className="flex flex-col space-y-8">
           <div className="flex w-full justify-end">
             <FeedbackButtons
               requestId={request.id}
-              defaultValue={request.feedback.rating}
+              defaultValue={
+                request.scores && request.scores["helicone-score-feedback"]
+                  ? Number(request.scores["helicone-score-feedback"]) === 1
+                    ? true
+                    : false
+                  : null
+              }
             />
           </div>
 
           <div className="flex flex-col space-y-2">{request.render()}</div>
         </div>
       )}
+      <ThemedModal open={newDatasetModalOpen} setOpen={setNewDatasetModalOpen}>
+        <NewDataset
+          requests={[request]}
+          onComplete={() => setNewDatasetModalOpen(false)}
+        />
+      </ThemedModal>
     </div>
   );
 };

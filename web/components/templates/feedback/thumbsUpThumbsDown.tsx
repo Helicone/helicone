@@ -50,6 +50,7 @@ const FeedbackButtons = ({
 
   return (
     <Row className="items-center space-x-4">
+      {requestFeedback.rating}
       <button
         onClick={() => {
           if (requestFeedback.rating === true) {

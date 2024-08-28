@@ -6,10 +6,13 @@ import {
 } from "@heroicons/react/24/outline";
 import { BarChart, TextInput } from "@tremor/react";
 import { useRouter } from "next/router";
+import { useMemo } from "react";
+import { getTimeAgo } from "../../../lib/sql/timeHelpers";
 import {
   getTimeIntervalAgo,
   TimeInterval,
 } from "../../../lib/timeCalculations/time";
+import { useSessionNames } from "../../../services/hooks/sessions";
 import { SortDirection } from "../../../services/lib/sorts/users/sorts";
 import { Col } from "../../layout/common/col";
 import ThemedTable from "../../shared/themed/table/themedTable";
@@ -45,8 +48,9 @@ type TSessions = {
   total_tokens: number;
 };
 
+type SessionResult = ReturnType<typeof useSessionNames>["sessions"][number];
 interface SessionDetailsProps {
-  selectedName: string;
+  selectedSession: SessionResult | null;
   sessionIdSearch: string;
   setSessionIdSearch: (value: string) => void;
   sessions: TSessions[];
@@ -65,7 +69,7 @@ interface SessionDetailsProps {
 }
 
 const SessionDetails = ({
-  selectedName,
+  selectedSession,
   sessionIdSearch,
   setSessionIdSearch,
   sessions,
@@ -76,38 +80,11 @@ const SessionDetails = ({
   setInterval,
 }: SessionDetailsProps) => {
   const router = useRouter();
-  const [lastUsedSession, setLastUsedSession] = useState<TSessions>();
-  const [oldestSession, setOldestSession] = useState<TSessions>();
-  const [totalCost, setTotalCost] = useState("0.0");
 
-  function calculateMetadata() {
-    if (sessions.length === 0) return;
-
-    setLastUsedSession(
-      sessions.reduce((latestSession, currentSession) => {
-        return new Date(currentSession.latest_request_created_at) >
-          new Date(latestSession.latest_request_created_at)
-          ? currentSession
-          : latestSession;
-      })
-    );
-
-    setTotalCost(
-      sessions.reduce((acc, session) => acc + session.total_cost, 0).toFixed(3)
-    );
-
-    setOldestSession(
-      sessions.reduce((latestSession, currentSession) => {
-        return new Date(currentSession.latest_request_created_at) >
-          new Date(latestSession.latest_request_created_at)
-          ? currentSession
-          : latestSession;
-      })
-    );
-  }
-
-  useEffect(() => {
-    calculateMetadata();
+  const totalCost = useMemo(() => {
+    return sessions
+      .reduce((acc, session) => acc + session.total_cost, 0)
+      .toFixed(3);
   }, [sessions]);
 
   const [currentTab, setCurrentTab] =
@@ -119,19 +96,13 @@ const SessionDetails = ({
     <Col className="space-y-4 min-w-0">
       <div>
         <div className="text-xl font-semibold">
-          {selectedName ? selectedName : "No Name"}
+          {selectedSession?.name ?? "No Name"}
         </div>
         <ul className="text-xs mt-1 text-gray-500 flex flex-row gap-5 list-disc">
           <p>
-            Last used{" "}
             <span className="font-semibold text-sky-500">
-              {getTimeAgo(
-                new Date(
-                  lastUsedSession?.latest_request_created_at
-                    ? lastUsedSession?.latest_request_created_at + "z"
-                    : Date.now()
-                )
-              )}
+              Active:{" "}
+              {getTimeAgo(new Date(selectedSession?.last_used ?? Date.now()))}
             </span>
           </p>
           <li className="font-semibold">{sessions.length} sessions</li>
@@ -140,7 +111,7 @@ const SessionDetails = ({
           </li>
           <li>
             Created on:{" "}
-            {new Date(oldestSession?.created_at ?? Date.now())
+            {new Date(selectedSession?.created_at ?? Date.now())
               .toDateString()
               .slice(4)}
           </li>
