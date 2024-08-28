@@ -1,28 +1,38 @@
 import {
-  ArrowPathIcon,
   ChartPieIcon,
   ListBulletIcon,
   MagnifyingGlassIcon,
 } from "@heroicons/react/24/outline";
 import { BarChart, TextInput } from "@tremor/react";
 import { useRouter } from "next/router";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { getTimeAgo } from "../../../lib/sql/timeHelpers";
 import {
   getTimeIntervalAgo,
   TimeInterval,
 } from "../../../lib/timeCalculations/time";
-import { useSessionNames } from "../../../services/hooks/sessions";
+import {
+  useSessionMetrics,
+  useSessionNames,
+} from "../../../services/hooks/sessions";
 import { SortDirection } from "../../../services/lib/sorts/users/sorts";
+import { Row } from "../../layout/common";
 import { Col } from "../../layout/common/col";
 import ThemedTable from "../../shared/themed/table/themedTable";
-import { INITIAL_COLUMNS } from "./initialColumns";
-import { getTimeAgo } from "../../../lib/sql/timeHelpers";
-import { useEffect, useState } from "react";
-import { Row } from "../../layout/common";
 import ThemedTabSelector from "../../shared/themed/themedTabSelector";
-import { useSessionMetrics } from "../../../services/hooks/sessions";
 import { formatLargeNumber } from "../../shared/utils/numberFormat";
+import { INITIAL_COLUMNS } from "./initialColumns";
+import { useLocalStorage } from "@/services/hooks/localStorage";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+
+import { Checkbox } from "@/components/ui/checkbox";
 
 const TABS = [
   {
@@ -87,10 +97,19 @@ const SessionDetails = ({
       .toFixed(3);
   }, [sessions]);
 
-  const [currentTab, setCurrentTab] =
-    useState<(typeof TABS)[number]["id"]>("sessions");
+  const [currentTab, setCurrentTab] = useLocalStorage<
+    (typeof TABS)[number]["id"]
+  >("session-details-tab", "sessions");
+  const [pSize, setPSize] = useLocalStorage<
+    "p50" | "p75" | "p95" | "p99" | "p99.9"
+  >("session-details-pSize", "p75");
+  const [useInterquartile, setUseInterquartile] = useState(false);
 
-  const metrics = useSessionMetrics(selectedName);
+  const metrics = useSessionMetrics(
+    selectedSession?.name ?? "",
+    pSize,
+    useInterquartile
+  );
 
   return (
     <Col className="space-y-4 min-w-0">
@@ -170,48 +189,82 @@ const SessionDetails = ({
         />
       ) : (
         <Col>
-          <BarChart
-            data={metrics.metrics.session_count.map((sessionCount) => ({
-              range: `${sessionCount.range_start}-${sessionCount.range_end}`,
-              count: sessionCount.value,
-            }))}
-            index="range"
-            categories={["count"]}
-            colors={["blue"]}
-            valueFormatter={(value) => `${value} Sessions`}
-            yAxisWidth={48}
-            showLegend={false}
-          />
-          <BarChart
-            data={metrics.metrics.session_cost.map((sessionCost) => ({
-              range: `$${formatLargeNumber(
-                sessionCost.range_start ?? 0
-              )}-$${formatLargeNumber(sessionCost.range_end ?? 0)}`,
-              count: sessionCost.value,
-            }))}
-            index="range"
-            categories={["count"]}
-            colors={["blue"]}
-            valueFormatter={(value) => `$${value}`}
-            yAxisWidth={48}
-            showLegend={false}
-          />
-          <BarChart
-            data={metrics.metrics.session_duration.map((sessionDuration) => ({
-              range: `${formatLargeNumber(
-                (sessionDuration.range_start ?? 0) / 1000
-              )}s-${formatLargeNumber(
-                (sessionDuration.range_end ?? 0) / 1000
-              )}s`,
-              count: sessionDuration.value,
-            }))}
-            index="range"
-            categories={["count"]}
-            colors={["blue"]}
-            valueFormatter={(value) => `${value}s`}
-            yAxisWidth={48}
-            showLegend={false}
-          />
+          <div className="space-y-2">
+            <Label htmlFor="percentile-select">Select Percentile</Label>
+            <Row className="items-center gap-2">
+              <Col>
+                <Select
+                  onValueChange={(value) =>
+                    setPSize(value as "p50" | "p75" | "p95" | "p99" | "p99.9")
+                  }
+                  value={pSize}
+                >
+                  <SelectTrigger id="percentile-select" className="w-[100px]">
+                    <SelectValue placeholder="Percentile" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="p50">p50</SelectItem>
+                    <SelectItem value="p75">p75</SelectItem>
+                    <SelectItem value="p95">p95</SelectItem>
+                    <SelectItem value="p99">p99</SelectItem>
+                    <SelectItem value="p99.9">p99.9</SelectItem>
+                  </SelectContent>
+                </Select>
+              </Col>
+              <Row className="items-center gap-2">
+                <Checkbox
+                  checked={useInterquartile}
+                  onCheckedChange={(checked) => setUseInterquartile(checked)}
+                />
+                <Label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                  Interquartile
+                </Label>
+              </Row>
+            </Row>
+
+            <BarChart
+              data={metrics.metrics.session_count.map((sessionCount) => ({
+                range: `${sessionCount.range_start}-${sessionCount.range_end}`,
+                count: sessionCount.value,
+              }))}
+              index="range"
+              categories={["count"]}
+              colors={["blue"]}
+              valueFormatter={(value) => `${value} Sessions`}
+              yAxisWidth={48}
+              showLegend={false}
+            />
+            <BarChart
+              data={metrics.metrics.session_cost.map((sessionCost) => ({
+                range: `$${formatLargeNumber(
+                  Number(sessionCost.range_start ?? 0)
+                )}-$${formatLargeNumber(Number(sessionCost.range_end ?? 0))}`,
+                count: sessionCost.value,
+              }))}
+              index="range"
+              categories={["count"]}
+              colors={["blue"]}
+              valueFormatter={(value) => `$${value}`}
+              yAxisWidth={48}
+              showLegend={false}
+            />
+            <BarChart
+              data={metrics.metrics.session_duration.map((sessionDuration) => ({
+                range: `${formatLargeNumber(
+                  Number(sessionDuration.range_start ?? 0) / 1000
+                )}s-${formatLargeNumber(
+                  Number(sessionDuration.range_end ?? 0) / 1000
+                )}s`,
+                count: sessionDuration.value,
+              }))}
+              index="range"
+              categories={["count"]}
+              colors={["blue"]}
+              valueFormatter={(value) => `${value}s`}
+              yAxisWidth={48}
+              showLegend={false}
+            />
+          </div>
         </Col>
       )}
     </Col>

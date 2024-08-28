@@ -117,6 +117,8 @@ const models: TsoaRoute.Models = {
         "properties": {
             "nameContains": {"dataType":"string","required":true},
             "timezoneDifference": {"dataType":"double","required":true},
+            "pSize": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["p50"]},{"dataType":"enum","enums":["p75"]},{"dataType":"enum","enums":["p95"]},{"dataType":"enum","enums":["p99"]},{"dataType":"enum","enums":["p99.9"]}]},
+            "useInterquartile": {"dataType":"boolean"},
         },
         "additionalProperties": false,
     },

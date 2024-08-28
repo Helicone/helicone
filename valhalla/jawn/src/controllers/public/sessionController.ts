@@ -20,6 +20,8 @@ export interface SessionQueryParams {
 export interface SessionNameQueryParams {
   nameContains: string;
   timezoneDifference: number;
+  pSize?: "p50" | "p75" | "p95" | "p99" | "p99.9";
+  useInterquartile?: boolean;
 }
 @Route("v1/session")
 @Tags("Session")

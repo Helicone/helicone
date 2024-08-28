@@ -211,6 +211,9 @@ export interface components {
       nameContains: string;
       /** Format: double */
       timezoneDifference: number;
+      /** @enum {string} */
+      pSize?: "p50" | "p75" | "p95" | "p99" | "p99.9";
+      useInterquartile?: boolean;
     };
     HistogramRow: {
       range_start: string;
