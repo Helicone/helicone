@@ -15,6 +15,9 @@ export interface paths {
   "/v1/session/name/query": {
     post: operations["GetNames"];
   };
+  "/v1/session/metrics/query": {
+    post: operations["GetMetrics"];
+  };
   "/v1/user/metrics/query": {
     post: operations["GetUserMetrics"];
   };
@@ -99,6 +102,18 @@ export interface paths {
   "/v1/experiment/query": {
     post: operations["GetExperiments"];
   };
+  "/v1/evals/query": {
+    post: operations["QueryEvals"];
+  };
+  "/v1/evals/scores": {
+    get: operations["GetEvalScores"];
+  };
+  "/v1/evals/{requestId}": {
+    post: operations["AddEval"];
+  };
+  "/v1/evals/score-distributions/query": {
+    post: operations["QueryScoreDistributions"];
+  };
   "/v1/public/dataisbeautiful/total-values": {
     post: operations["GetTotalValues"];
   };
@@ -182,6 +197,7 @@ export interface components {
       /** Format: double */
       total_cost: number;
       last_used: string;
+      first_used: string;
       /** Format: double */
       session_count: number;
     };
@@ -195,7 +211,27 @@ export interface components {
       nameContains: string;
       /** Format: double */
       timezoneDifference: number;
+      /** @enum {string} */
+      pSize?: "p50" | "p75" | "p95" | "p99" | "p99.9";
+      useInterquartile?: boolean;
     };
+    HistogramRow: {
+      range_start: string;
+      range_end: string;
+      /** Format: double */
+      value: number;
+    };
+    SessionMetrics: {
+      session_count: components["schemas"]["HistogramRow"][];
+      session_duration: components["schemas"]["HistogramRow"][];
+      session_cost: components["schemas"]["HistogramRow"][];
+    };
+    ResultSuccess_SessionMetrics_: {
+      data: components["schemas"]["SessionMetrics"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_SessionMetrics.string_": components["schemas"]["ResultSuccess_SessionMetrics_"] | components["schemas"]["ResultError_string_"];
     UserMetricsResult: {
       user_id: string;
       /** Format: double */
@@ -1045,6 +1081,79 @@ Json: JsonObject;
       /** @enum {boolean} */
       score?: true;
     };
+    Eval: {
+      name: string;
+      /** Format: double */
+      averageScore: number;
+      /** Format: double */
+      minScore: number;
+      /** Format: double */
+      maxScore: number;
+      /** Format: double */
+      count: number;
+      overTime: {
+          /** Format: double */
+          count: number;
+          date: string;
+        }[];
+      averageOverTime: {
+          /** Format: double */
+          value: number;
+          date: string;
+        }[];
+    };
+    "ResultSuccess_Eval-Array_": {
+      data: components["schemas"]["Eval"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Eval-Array.string_": components["schemas"]["ResultSuccess_Eval-Array_"] | components["schemas"]["ResultError_string_"];
+    /** @description From T, pick a set of properties whose keys are in the union K */
+    "Pick_FilterLeaf.request_response_rmt_": {
+      request_response_rmt?: components["schemas"]["Partial_RequestResponseRMTToOperators_"];
+    };
+    FilterLeafSubset_request_response_rmt_: components["schemas"]["Pick_FilterLeaf.request_response_rmt_"];
+    EvalFilterNode: components["schemas"]["FilterLeafSubset_request_response_rmt_"] | components["schemas"]["EvalFilterBranch"] | "all";
+    EvalFilterBranch: {
+      right: components["schemas"]["EvalFilterNode"];
+      /** @enum {string} */
+      operator: "or" | "and";
+      left: components["schemas"]["EvalFilterNode"];
+    };
+    EvalQueryParams: {
+      filter: components["schemas"]["EvalFilterNode"];
+      timeFilter: {
+        end: string;
+        start: string;
+      };
+      /** Format: double */
+      offset?: number;
+      /** Format: double */
+      limit?: number;
+    };
+    "ResultSuccess_string-Array_": {
+      data: string[];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_string-Array.string_": components["schemas"]["ResultSuccess_string-Array_"] | components["schemas"]["ResultError_string_"];
+    ScoreDistribution: {
+      name: string;
+      distribution: {
+          /** Format: double */
+          value: number;
+          /** Format: double */
+          upper: number;
+          /** Format: double */
+          lower: number;
+        }[];
+    };
+    "ResultSuccess_ScoreDistribution-Array_": {
+      data: components["schemas"]["ScoreDistribution"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ScoreDistribution-Array.string_": components["schemas"]["ResultSuccess_ScoreDistribution-Array_"] | components["schemas"]["ResultError_string_"];
     TotalValuesForAllOfTime: {
       /** Format: double */
       total_cost: number;
@@ -1229,6 +1338,21 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_SessionNameResult-Array.string_"];
+        };
+      };
+    };
+  };
+  GetMetrics: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SessionNameQueryParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_SessionMetrics.string_"];
         };
       };
     };
@@ -1743,6 +1867,70 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_Experiment-Array.string_"];
+        };
+      };
+    };
+  };
+  QueryEvals: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["EvalQueryParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Eval-Array.string_"];
+        };
+      };
+    };
+  };
+  GetEvalScores: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_string-Array.string_"];
+        };
+      };
+    };
+  };
+  AddEval: {
+    parameters: {
+      path: {
+        requestId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          /** Format: double */
+          score: number;
+          name: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  QueryScoreDistributions: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["EvalQueryParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ScoreDistribution-Array.string_"];
         };
       };
     };

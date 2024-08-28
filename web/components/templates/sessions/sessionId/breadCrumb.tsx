@@ -33,8 +33,8 @@ export const BreadCrumb = ({
   users,
 }: {
   sessionId: string;
-  startTime: Date;
-  endTime: Date;
+  startTime?: Date;
+  endTime?: Date;
   numTraces: number;
   sessionCost: number;
   models: string[];
@@ -77,7 +77,7 @@ export const BreadCrumb = ({
             <li className={expanded ? "" : "hidden"}>
               Created on:{" "}
               <span className="font-semibold">
-                {startTime.toLocaleDateString()}
+                {startTime ? startTime.toLocaleDateString() : ""}
               </span>
             </li>
 
@@ -95,7 +95,7 @@ export const BreadCrumb = ({
             <li>
               Total Latency:{" "}
               <span className="font-semibold">
-                {timeDiff(startTime, endTime)}
+                {startTime && endTime ? timeDiff(startTime, endTime) : ""}
               </span>
             </li>
 

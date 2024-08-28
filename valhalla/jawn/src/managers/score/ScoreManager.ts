@@ -157,7 +157,7 @@ export class ScoreManager extends BaseManager {
       );
       if (feedbackResult.error) {
         console.error("Error upserting feedback:", feedbackResult.error);
-        return ok(null);
+        return err(feedbackResult.error);
       }
       return ok(null);
     } catch (error: any) {

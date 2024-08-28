@@ -96,11 +96,17 @@ export interface paths {
   "/v1/alert/{alertId}": {
     delete: operations["DeleteAlert"];
   };
+  "/v1/admin/orgs/top-usage": {
+    post: operations["GetTopOrgsByUsage"];
+  };
   "/v1/admin/orgs/top": {
     post: operations["GetTopOrgs"];
   };
   "/v1/admin/admins/query": {
     get: operations["GetAdmins"];
+  };
+  "/v1/admin/whodis": {
+    post: operations["Whodis"];
   };
   "/v1/admin/settings/{name}": {
     get: operations["GetSetting"];
@@ -1516,6 +1522,59 @@ export interface operations {
       };
     };
   };
+  GetTopOrgsByUsage: {
+    requestBody: {
+      content: {
+        "application/json": {
+          /** Format: double */
+          minRequests: number;
+          /** Format: double */
+          limit: number;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            organizations: ({
+                usage: {
+                  /** Format: double */
+                  all_time_count: number;
+                  monthly_usage: {
+                      /** Format: double */
+                      requestCount: number;
+                      month: string;
+                    }[];
+                  /** Format: double */
+                  requests_last_30_days: number;
+                  /** Format: double */
+                  total_requests: number;
+                };
+                organization: {
+                  members: ({
+                      last_sign_in_at: string | null;
+                      role: string;
+                      name: string;
+                      email: string;
+                      id: string;
+                    })[];
+                  subscription_status: string | null;
+                  stripe_subscription_id: string | null;
+                  stripe_customer_id: string | null;
+                  tier: string;
+                  owner: string;
+                  created_at: string;
+                  name: string;
+                  id: string;
+                };
+              })[];
+          };
+        };
+      };
+    };
+  };
   GetTopOrgs: {
     requestBody: {
       content: {
@@ -1572,6 +1631,58 @@ export interface operations {
               id: number;
               created_at: string;
             })[];
+        };
+      };
+    };
+  };
+  Whodis: {
+    requestBody: {
+      content: {
+        "application/json": {
+          email?: string;
+          userId?: string;
+          organizationId?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            organizations: ({
+                usage: {
+                  /** Format: double */
+                  all_time_count: number;
+                  monthly_usage: {
+                      /** Format: double */
+                      requestCount: number;
+                      month: string;
+                    }[];
+                  /** Format: double */
+                  requests_last_30_days: number;
+                  /** Format: double */
+                  total_requests: number;
+                };
+                organization: {
+                  members: ({
+                      last_sign_in_at: string | null;
+                      role: string;
+                      name: string;
+                      email: string;
+                      id: string;
+                    })[];
+                  subscription_status: string | null;
+                  stripe_subscription_id: string | null;
+                  stripe_customer_id: string | null;
+                  tier: string;
+                  owner: string;
+                  created_at: string;
+                  name: string;
+                  id: string;
+                };
+              })[];
+          };
         };
       };
     };
@@ -1671,6 +1782,10 @@ export interface operations {
       200: {
         content: {
           "application/json": {
+            usersOverTime: {
+                day: string;
+                count: string;
+              }[];
             newUsersOvertime: {
                 day: string;
                 count: string;
