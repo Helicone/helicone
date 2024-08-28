@@ -219,6 +219,19 @@
 					"timezoneDifference": {
 						"type": "number",
 						"format": "double"
+					},
+					"pSize": {
+						"type": "string",
+						"enum": [
+							"p50",
+							"p75",
+							"p95",
+							"p99",
+							"p99.9"
+						]
+					},
+					"useInterquartile": {
+						"type": "boolean"
 					}
 				},
 				"required": [
@@ -227,6 +240,86 @@
 				],
 				"type": "object",
 				"additionalProperties": false
+			},
+			"HistogramRow": {
+				"properties": {
+					"range_start": {
+						"type": "string"
+					},
+					"range_end": {
+						"type": "string"
+					},
+					"value": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"range_start",
+					"range_end",
+					"value"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"SessionMetrics": {
+				"properties": {
+					"session_count": {
+						"items": {
+							"$ref": "#/components/schemas/HistogramRow"
+						},
+						"type": "array"
+					},
+					"session_duration": {
+						"items": {
+							"$ref": "#/components/schemas/HistogramRow"
+						},
+						"type": "array"
+					},
+					"session_cost": {
+						"items": {
+							"$ref": "#/components/schemas/HistogramRow"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"session_count",
+					"session_duration",
+					"session_cost"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_SessionMetrics_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/SessionMetrics"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_SessionMetrics.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_SessionMetrics_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
 			},
 			"UserMetricsResult": {
 				"properties": {
@@ -4349,6 +4442,42 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/Result_SessionNameResult-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Session"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/SessionNameQueryParams"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/session/metrics/query": {
+			"post": {
+				"operationId": "GetMetrics",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_SessionMetrics.string_"
 								}
 							}
 						}

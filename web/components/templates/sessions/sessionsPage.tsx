@@ -1,5 +1,5 @@
 import { BookOpenIcon } from "@heroicons/react/24/outline";
-import { Divider } from "@tremor/react";
+import { Divider, Badge } from "@tremor/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -66,7 +66,13 @@ const SessionsPage = (props: SessionsPageProps) => {
 
   return (
     <>
-      <AuthHeader title={"Sessions (beta)"} />
+      <AuthHeader
+        title={
+          <div className="flex items-center gap-2">
+            Sessions <Badge size="sm">Beta</Badge>
+          </div>
+        }
+      />
       <div>
         {hasSomeSessions || hasSomeSessions === null ? (
           <Row className="gap-5 ">

@@ -88,4 +88,58 @@ const useSessionNames = (sessionNameSearch: string) => {
   };
 };
 
-export { useSessions, useSessionNames };
+const useSessionMetrics = (
+  sessionNameSearch: string,
+  pSize: "p50" | "p75" | "p95" | "p99" | "p99.9",
+  useInterquartile: boolean
+) => {
+  const org = useOrg();
+  const { data, isLoading, refetch, isRefetching } = useQuery({
+    queryKey: [
+      "session-metrics",
+      org?.currentOrg?.id,
+      sessionNameSearch,
+      pSize,
+      useInterquartile,
+    ],
+    queryFn: async (query) => {
+      const orgId = query.queryKey[1] as string;
+      const sessionNameSearch = query.queryKey[2] as string;
+      const pSize = query.queryKey[3] as
+        | "p50"
+        | "p75"
+        | "p95"
+        | "p99"
+        | "p99.9";
+      const useInterquartile = query.queryKey[4] as boolean;
+      const timezoneDifference = new Date().getTimezoneOffset();
+
+      const jawnClient = getJawnClient(orgId);
+      return await jawnClient.POST("/v1/session/metrics/query", {
+        body: {
+          nameContains: sessionNameSearch,
+          timezoneDifference,
+          pSize,
+          useInterquartile,
+        },
+      });
+    },
+    refetchOnWindowFocus: false,
+    retry: false,
+    refetchIntervalInBackground: false,
+    refetchInterval: false,
+  });
+
+  return {
+    metrics: data?.data?.data || {
+      session_count: [],
+      session_duration: [],
+      session_cost: [],
+    },
+    refetch,
+    isLoading,
+    isRefetching,
+  };
+};
+
+export { useSessions, useSessionNames, useSessionMetrics };
