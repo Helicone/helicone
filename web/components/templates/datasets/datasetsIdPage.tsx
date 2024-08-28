@@ -13,8 +13,7 @@ import {
 } from "../requestsV2/helpers";
 import EditDataset from "./EditDataset";
 import DatasetButton from "../requestsV2/buttons/datasetButton";
-import GenericButton from "../../layout/common/button";
-import { MinusIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { TrashIcon } from "@heroicons/react/24/outline";
 import { Row } from "../../layout/common";
 import { useJawnClient } from "../../../lib/clients/jawnHook";
 import useNotification from "../../shared/notification/useNotification";

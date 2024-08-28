@@ -286,7 +286,8 @@ export default function ThemedTable<T extends { id?: string }>(
                         "bg-blue-100 border-l border-blue-500 pl-2"
                     )}
                     onClick={
-                      onRowSelect && (() => handleRowSelect(row.original, index))
+                      onRowSelect &&
+                      (() => handleRowSelect(row.original, index))
                     }
                   >
                     {showCheckboxes && (
