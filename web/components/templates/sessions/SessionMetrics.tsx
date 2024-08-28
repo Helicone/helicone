@@ -29,6 +29,7 @@ interface ChartProps {
   color: string;
   valueFormatter: (value: number) => string;
   isLoading: boolean;
+  xAxisLabel: string;
 }
 
 const Chart: React.FC<ChartProps> = ({
@@ -38,6 +39,7 @@ const Chart: React.FC<ChartProps> = ({
   color,
   valueFormatter,
   isLoading,
+  xAxisLabel,
 }) => (
   <Card>
     <Title>{title}</Title>
@@ -54,6 +56,8 @@ const Chart: React.FC<ChartProps> = ({
         valueFormatter={valueFormatter}
         yAxisWidth={100}
         showLegend={false}
+        showXAxis={true}
+        xAxisLabel={xAxisLabel}
         className="p-5 h-80"
       />
     )}
@@ -111,49 +115,60 @@ const SessionMetrics = ({ selectedSession }: SessionMetricsProps) => {
       </div>
 
       <Chart
-        title="Session Count"
-        data={metrics.session_count.map((sessionCount) => ({
-          range: `${Math.round(
-            Number(sessionCount.range_start ?? 0)
-          )}-${Math.round(Number(sessionCount.range_end ?? 0))}`,
-          count: Math.round(sessionCount.value),
-        }))}
+        title="Requests per Session"
+        data={metrics.session_count.map((sessionCount) => {
+          const start = Math.ceil(Number(sessionCount.range_start ?? 0));
+          const end = Math.floor(Number(sessionCount.range_end ?? 0));
+          return {
+            range: start === end ? `${start}` : `${start}-${end}`,
+            count: Math.round(sessionCount.value),
+          };
+        })}
         category="count"
         color="blue"
         valueFormatter={(value) => `${Math.round(value)} sessions`}
         isLoading={isLoading}
+        xAxisLabel="Number of Requests"
       />
 
       <Chart
-        title="Session Cost"
-        data={metrics.session_cost.map((sessionCost) => ({
-          range: `$${formatLargeNumber(
-            Math.round(Number(sessionCost.range_start ?? 0))
-          )}-$${formatLargeNumber(
-            Math.round(Number(sessionCost.range_end ?? 0))
-          )}`,
-          cost: Math.round(sessionCost.value),
-        }))}
+        title="Cost per Session"
+        data={metrics.session_cost.map((sessionCost) => {
+          const start = Math.round(Number(sessionCost.range_start ?? 0));
+          const end = Math.round(Number(sessionCost.range_end ?? 0));
+          return {
+            range:
+              start === end
+                ? `$${formatLargeNumber(start)}`
+                : `$${formatLargeNumber(start)}-$${formatLargeNumber(end)}`,
+            cost: Math.round(sessionCost.value),
+          };
+        })}
         category="cost"
         color="green"
         valueFormatter={(value) => `${formatLargeNumber(value)} sessions`}
         isLoading={isLoading}
+        xAxisLabel="Cost"
       />
 
       <Chart
-        title="Session Duration"
-        data={metrics.session_duration.map((sessionDuration) => ({
-          range: `${formatSeconds(
-            Math.round(Number(sessionDuration.range_start ?? 0))
-          )}-${formatSeconds(
-            Math.round(Number(sessionDuration.range_end ?? 0))
-          )}`,
-          duration: Math.round(sessionDuration.value),
-        }))}
+        title="Duration per Session"
+        data={metrics.session_duration.map((sessionDuration) => {
+          const start = Math.round(Number(sessionDuration.range_start ?? 0));
+          const end = Math.round(Number(sessionDuration.range_end ?? 0));
+          return {
+            range:
+              start === end
+                ? formatSeconds(start)
+                : `${formatSeconds(start)}-${formatSeconds(end)}`,
+            duration: Math.round(sessionDuration.value),
+          };
+        })}
         category="duration"
         color="purple"
         valueFormatter={(value) => `${formatLargeNumber(value)} sessions`}
         isLoading={isLoading}
+        xAxisLabel="Duration"
       />
     </Col>
   );
