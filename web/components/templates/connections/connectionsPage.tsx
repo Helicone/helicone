@@ -145,31 +145,6 @@ const ConnectionsPage: React.FC = () => {
         <CarouselPrevious />
         <CarouselNext />
       </Carousel>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <IntegrationCard
-          title="OpenAI"
-          description="Integrate with OpenAI's powerful language models."
-          Logo={LOGOS.OpenAI}
-          href="/integrations/openai"
-        />
-        <IntegrationCard
-          title="Anthropic"
-          Logo={() => <LOGOS.Anthropic className="w-8 h-2" />}
-          description="Connect with Anthropic's advanced AI models."
-          href="/integrations/anthropic"
-        />
-        <IntegrationCard
-          title="Azure"
-          description="Leverage Azure's cloud-based AI services."
-          href="/integrations/azure"
-        />
-        <IntegrationCard
-          title="Diffy"
-          description="Integrate with Diffy's powerful language models."
-          href="/integrations/diffy"
-        />
-        {/* Add more IntegrationCard components for other integrations */}
-      </div>
 
       <div className="mt-8">
         <h2 className="text-2xl font-semibold mb-4">
@@ -283,18 +258,18 @@ const IntegrationCard: React.FC<IntegrationCardProps> = ({
   Logo,
 }) => {
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center ">
+    <Card className="flex flex-col h-[200px]">
+      <CardHeader className="flex-grow">
+        <div className="flex items-center mb-2">
           {Logo && <Logo className="w-[2rem] h-[2rem]" />}
         </div>
-        <CardTitle>{title}</CardTitle>
-        <CardDescription>{description}</CardDescription>
+        <CardTitle className="text-lg">{title}</CardTitle>
+        <CardDescription className="text-sm">{description}</CardDescription>
       </CardHeader>
-      <CardFooter>
+      <CardFooter className="mt-auto">
         <Link
           href={href}
-          className="text-blue-600 hover:text-blue-800 flex items-center"
+          className="text-blue-600 hover:text-blue-800 flex items-center text-sm"
         >
           Learn more
           <ArrowRightIcon className="ml-1 h-4 w-4" />
