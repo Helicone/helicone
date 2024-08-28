@@ -3797,6 +3797,189 @@
 				]
 			}
 		},
+		"/v1/admin/orgs/top-usage": {
+			"post": {
+				"operationId": "GetTopOrgsByUsage",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"organizations": {
+											"items": {
+												"properties": {
+													"usage": {
+														"properties": {
+															"all_time_count": {
+																"type": "number",
+																"format": "double"
+															},
+															"monthly_usage": {
+																"items": {
+																	"properties": {
+																		"requestCount": {
+																			"type": "number",
+																			"format": "double"
+																		},
+																		"month": {
+																			"type": "string"
+																		}
+																	},
+																	"required": [
+																		"requestCount",
+																		"month"
+																	],
+																	"type": "object"
+																},
+																"type": "array"
+															},
+															"requests_last_30_days": {
+																"type": "number",
+																"format": "double"
+															},
+															"total_requests": {
+																"type": "number",
+																"format": "double"
+															}
+														},
+														"required": [
+															"all_time_count",
+															"monthly_usage",
+															"requests_last_30_days",
+															"total_requests"
+														],
+														"type": "object"
+													},
+													"organization": {
+														"properties": {
+															"members": {
+																"items": {
+																	"properties": {
+																		"last_sign_in_at": {
+																			"type": "string",
+																			"nullable": true
+																		},
+																		"role": {
+																			"type": "string"
+																		},
+																		"name": {
+																			"type": "string"
+																		},
+																		"email": {
+																			"type": "string"
+																		},
+																		"id": {
+																			"type": "string"
+																		}
+																	},
+																	"required": [
+																		"last_sign_in_at",
+																		"role",
+																		"name",
+																		"email",
+																		"id"
+																	],
+																	"type": "object"
+																},
+																"type": "array"
+															},
+															"subscription_status": {
+																"type": "string",
+																"nullable": true
+															},
+															"stripe_subscription_id": {
+																"type": "string",
+																"nullable": true
+															},
+															"stripe_customer_id": {
+																"type": "string",
+																"nullable": true
+															},
+															"tier": {
+																"type": "string"
+															},
+															"owner": {
+																"type": "string"
+															},
+															"created_at": {
+																"type": "string"
+															},
+															"name": {
+																"type": "string"
+															},
+															"id": {
+																"type": "string"
+															}
+														},
+														"required": [
+															"members",
+															"subscription_status",
+															"stripe_subscription_id",
+															"stripe_customer_id",
+															"tier",
+															"owner",
+															"created_at",
+															"name",
+															"id"
+														],
+														"type": "object"
+													}
+												},
+												"required": [
+													"usage",
+													"organization"
+												],
+												"type": "object"
+											},
+											"type": "array"
+										}
+									},
+									"required": [
+										"organizations"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"minRequests": {
+										"type": "number",
+										"format": "double"
+									},
+									"limit": {
+										"type": "number",
+										"format": "double"
+									}
+								},
+								"required": [
+									"minRequests",
+									"limit"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
 		"/v1/admin/orgs/top": {
 			"post": {
 				"operationId": "GetTopOrgs",
@@ -4023,65 +4206,106 @@
 							"application/json": {
 								"schema": {
 									"properties": {
-										"usage": {
-											"properties": {
-												"all_time_count": {
-													"type": "number",
-													"format": "double"
-												},
-												"monthly_usage": {
-													"items": {
+										"organizations": {
+											"items": {
+												"properties": {
+													"usage": {
 														"properties": {
-															"requestCount": {
+															"all_time_count": {
 																"type": "number",
 																"format": "double"
 															},
-															"month": {
-																"type": "string"
+															"monthly_usage": {
+																"items": {
+																	"properties": {
+																		"requestCount": {
+																			"type": "number",
+																			"format": "double"
+																		},
+																		"month": {
+																			"type": "string"
+																		}
+																	},
+																	"required": [
+																		"requestCount",
+																		"month"
+																	],
+																	"type": "object"
+																},
+																"type": "array"
+															},
+															"requests_last_30_days": {
+																"type": "number",
+																"format": "double"
+															},
+															"total_requests": {
+																"type": "number",
+																"format": "double"
 															}
 														},
 														"required": [
-															"requestCount",
-															"month"
+															"all_time_count",
+															"monthly_usage",
+															"requests_last_30_days",
+															"total_requests"
 														],
 														"type": "object"
 													},
-													"type": "array"
-												},
-												"requests_last_30_days": {
-													"type": "number",
-													"format": "double"
-												},
-												"total_requests": {
-													"type": "number",
-													"format": "double"
-												}
-											},
-											"required": [
-												"all_time_count",
-												"monthly_usage",
-												"requests_last_30_days",
-												"total_requests"
-											],
-											"type": "object",
-											"nullable": true
-										},
-										"organization": {
-											"properties": {
-												"members": {
-													"items": {
+													"organization": {
 														"properties": {
-															"last_sign_in_at": {
+															"members": {
+																"items": {
+																	"properties": {
+																		"last_sign_in_at": {
+																			"type": "string",
+																			"nullable": true
+																		},
+																		"role": {
+																			"type": "string"
+																		},
+																		"name": {
+																			"type": "string"
+																		},
+																		"email": {
+																			"type": "string"
+																		},
+																		"id": {
+																			"type": "string"
+																		}
+																	},
+																	"required": [
+																		"last_sign_in_at",
+																		"role",
+																		"name",
+																		"email",
+																		"id"
+																	],
+																	"type": "object"
+																},
+																"type": "array"
+															},
+															"subscription_status": {
 																"type": "string",
 																"nullable": true
 															},
-															"role": {
+															"stripe_subscription_id": {
+																"type": "string",
+																"nullable": true
+															},
+															"stripe_customer_id": {
+																"type": "string",
+																"nullable": true
+															},
+															"tier": {
+																"type": "string"
+															},
+															"owner": {
+																"type": "string"
+															},
+															"created_at": {
 																"type": "string"
 															},
 															"name": {
-																"type": "string"
-															},
-															"email": {
 																"type": "string"
 															},
 															"id": {
@@ -4089,62 +4313,30 @@
 															}
 														},
 														"required": [
-															"last_sign_in_at",
-															"role",
+															"members",
+															"subscription_status",
+															"stripe_subscription_id",
+															"stripe_customer_id",
+															"tier",
+															"owner",
+															"created_at",
 															"name",
-															"email",
 															"id"
 														],
 														"type": "object"
-													},
-													"type": "array"
+													}
 												},
-												"subscription_status": {
-													"type": "string",
-													"nullable": true
-												},
-												"stripe_subscription_id": {
-													"type": "string",
-													"nullable": true
-												},
-												"stripe_customer_id": {
-													"type": "string",
-													"nullable": true
-												},
-												"tier": {
-													"type": "string"
-												},
-												"owner": {
-													"type": "string"
-												},
-												"created_at": {
-													"type": "string"
-												},
-												"name": {
-													"type": "string"
-												},
-												"id": {
-													"type": "string"
-												}
+												"required": [
+													"usage",
+													"organization"
+												],
+												"type": "object"
 											},
-											"required": [
-												"members",
-												"subscription_status",
-												"stripe_subscription_id",
-												"stripe_customer_id",
-												"tier",
-												"owner",
-												"created_at",
-												"name",
-												"id"
-											],
-											"type": "object",
-											"nullable": true
+											"type": "array"
 										}
 									},
 									"required": [
-										"usage",
-										"organization"
+										"organizations"
 									],
 									"type": "object"
 								}
@@ -4167,13 +4359,16 @@
 						"application/json": {
 							"schema": {
 								"properties": {
+									"email": {
+										"type": "string"
+									},
+									"userId": {
+										"type": "string"
+									},
 									"organizationId": {
 										"type": "string"
 									}
 								},
-								"required": [
-									"organizationId"
-								],
 								"type": "object"
 							}
 						}
