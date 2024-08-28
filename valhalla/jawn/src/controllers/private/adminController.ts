@@ -337,8 +337,6 @@ export class AdminController extends Controller {
       }[];
     }>(orgQuery, [organizationId]);
 
-    console.log(`orgResult.data: ${JSON.stringify(orgResult.data)}`);
-
     if (!orgResult.data || orgResult.data.length === 0) {
       return {
         organization: null,
