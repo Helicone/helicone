@@ -67,7 +67,7 @@ export default function NewDataset({ requests, onComplete }: NewDatasetProps) {
 
   return (
     <Card className="w-[450px] border-none shadow-none p-0 m-0">
-      <CardHeader className="p-2">
+      <CardHeader className="p-0 pb-4">
         <CardTitle className="text-2xl font-bold">Add to dataset</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4 p-2 rounded-xl border border-[#F3F4F6] ">
@@ -112,7 +112,7 @@ export default function NewDataset({ requests, onComplete }: NewDatasetProps) {
           />
         )}
       </CardContent>
-      <CardFooter className="flex-col items-stretch space-y-4 p-2">
+      <CardFooter className="flex-col items-stretch space-y-4 py-2 px-0">
         <div className="flex items-center space-x-2">
           <Checkbox
             id="open-after"
@@ -126,7 +126,7 @@ export default function NewDataset({ requests, onComplete }: NewDatasetProps) {
             Open dataset after
           </label>
         </div>
-        <div className="flex justify-between p-0">
+        <div className="flex justify-between w-full p-0">
           <Button variant="outline" onClick={onComplete}>
             Cancel
           </Button>
