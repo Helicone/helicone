@@ -9,6 +9,7 @@ import { proxyRouter } from "./controllers/public/proxyController";
 import {
   DLQ_WORKER_COUNT,
   NORMAL_WORKER_COUNT,
+  SCORES_WORKER_COUNT,
 } from "./lib/clients/kafkaConsumers/constant";
 import { tokenRouter } from "./lib/routers/tokenRouter";
 import { runLoopsOnce, runMainLoops } from "./mainLoops";
@@ -20,9 +21,6 @@ import * as publicSwaggerDoc from "./tsoa-build/public/swagger.json";
 import { initLogs } from "./utils/injectLogs";
 import { initSentry } from "./utils/injectSentry";
 import { startConsumers } from "./workers/consumerInterface";
-import { unauthorizedCacheMiddleware } from "./middleware/unauthorizedCache";
-import { postHogClient } from "./lib/clients/postHogClient";
-import { uuid } from "uuidv4";
 
 export const ENVIRONMENT: "production" | "development" = (process.env
   .VERCEL_ENV ?? "development") as any;
@@ -65,6 +63,9 @@ if (KAFKA_ENABLED) {
   startConsumers({
     dlqCount: DLQ_WORKER_COUNT,
     normalCount: NORMAL_WORKER_COUNT,
+    scoresCount: SCORES_WORKER_COUNT,
+    scoresDlqCount: SCORES_WORKER_COUNT,
+    backFillCount: 0,
   });
 }
 

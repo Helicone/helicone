@@ -170,12 +170,22 @@ interface RequestResponseVersionedToOperators {
   node_id: SingleKey<TextOperators>;
   job_id: SingleKey<TextOperators>;
   threat: SingleKey<BooleanOperators>;
+  request_id: SingleKey<TextOperators>;
+  prompt_tokens: SingleKey<NumberOperators>;
+  completion_tokens: SingleKey<NumberOperators>;
+  target_url: SingleKey<TextOperators>;
   properties: {
     [key: string]: SingleKey<TextOperators>;
   };
   search_properties: {
     [key: string]: SingleKey<TextOperators>;
   };
+  scores: {
+    [key: string]: SingleKey<TextOperators>;
+  };
+  request_body: SingleKey<VectorOperators>;
+  response_body: SingleKey<VectorOperators>;
+  "helicone-score-feedback": SingleKey<BooleanOperators>;
 }
 
 export type FilterLeafRequestResponseLog =
@@ -269,7 +279,7 @@ export type TablesAndViews = {
   request_response_search: FilterLeafRequestResponseSearch;
   // CLICKHOUSE TABLES
   request_response_log: FilterLeafRequestResponseLog;
-  request_response_versioned: FilterLeafRequestResponseVersioned;
+  request_response_rmt: FilterLeafRequestResponseVersioned;
   users_view: FilterLeafUserView;
   properties_v3: FilterLeafPropertiesCopyV2;
   property_with_response_v1: FilterLeafPropertyWithResponseV1;
@@ -300,17 +310,17 @@ export function timeFilterToFilterNode(
   filter: TimeFilter,
   table: keyof TablesAndViews
 ): FilterNode {
-  if (table === "request_response_versioned") {
+  if (table === "request_response_rmt") {
     return {
       left: {
-        request_response_versioned: {
+        request_response_rmt: {
           request_created_at: {
             gte: filter.start,
           },
         },
       },
       right: {
-        request_response_versioned: {
+        request_response_rmt: {
           request_created_at: {
             lte: filter.end,
           },
@@ -384,10 +394,26 @@ export function uiFilterRowToFilterLeaf(
 
   if (filterDef?.isCustomProperty) {
     return {
-      request_response_versioned: {
+      request_response_rmt: {
         properties: {
           [filterDef.column]: {
             [operator]: filter.value,
+          },
+        },
+      },
+    };
+  }
+
+  if (
+    filterDef?.column === "helicone-score-feedback" &&
+    filterDef?.table === "request_response_rmt" &&
+    filterDef?.category === "feedback"
+  ) {
+    return {
+      request_response_rmt: {
+        scores: {
+          [filterDef.column]: {
+            [operator]: filter.value === "true" ? "1" : "0",
           },
         },
       },

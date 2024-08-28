@@ -40,10 +40,10 @@ function metaDataToBlogStructure(
     title: metadata.title,
     description: metadata.description,
     badgeText: "insight",
-    date: metadata.date,
+    date: metadata?.date ?? "",
     href: `/blog/${folderName}`,
-    imageUrl: metadata.images,
-    time: metadata.time,
+    imageUrl: metadata?.images ?? "",
+    time: metadata?.time ?? "",
   };
 }
 
@@ -193,6 +193,26 @@ const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
       folderName: "essential-helicone-features",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "product-hunt-automate",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "best-arize-alternatives",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "best-langfuse-alternatives",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "redeem-promo-code",
     },
   },
   {

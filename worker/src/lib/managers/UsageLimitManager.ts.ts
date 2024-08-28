@@ -24,12 +24,12 @@ export async function checkLimitsSingle(
     `
     SELECT
       count(*) as count,
-      ${clickhousePriceCalc("request_response_versioned")} as cost
-    FROM request_response_versioned
+      ${clickhousePriceCalc("request_response_rmt")} as cost
+    FROM request_response_rmt
     WHERE (
-      request_response_versioned.request_created_at >= DATE_TRUNC('${timeGrain}', now())
+      request_response_rmt.request_created_at >= DATE_TRUNC('${timeGrain}', now())
     ) AND (
-      request_response_versioned.organization_id = {val_0 : String}
+      request_response_rmt.organization_id = {val_0 : String}
     )
   `,
     [organizationId]
@@ -60,12 +60,12 @@ const generateSubquery = (index: number) => {
   return `
     (
       SELECT count(*) as count,
-      ${clickhousePriceCalc("request_response_versioned")} as cost
-      FROM request_response_versioned
+      ${clickhousePriceCalc("request_response_rmt")} as cost
+      FROM request_response_rmt
       WHERE (
-        request_response_versioned.request_created_at >= now() - INTERVAL {${secondsVal} : Int32} SECOND
+        request_response_rmt.request_created_at >= now() - INTERVAL {${secondsVal} : Int32} SECOND
       ) AND (
-        request_response_versioned.proxy_key_id = {${proxyKeyIdVal} : String}
+        request_response_rmt.proxy_key_id = {${proxyKeyIdVal} : String}
       )
     ) as x_${index}
   `;

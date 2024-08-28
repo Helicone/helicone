@@ -1,0 +1,68 @@
+---
+title: "Upstash QStash LLM Integration"
+sidebarTitle: "QStash"
+description: "Leverage Upstash QStash with Helicone to make asynchronous LLM calls, perfect for serverless environments. Enhance your LLM operations with extended timeouts, retries, and batching while maintaining full observability."
+---
+
+## Introduction
+
+Upstash QStash is a serverless message queue and task scheduler that seamlessly integrates with Helicone, allowing you to call any LLM asynchronously. This integration is particularly powerful for serverless environments, enabling you to overcome timeout limitations and efficiently manage LLM operations.
+
+## Key Features
+
+- **Asynchronous LLM Calls**: Make non-blocking LLM requests, ideal for serverless architectures.
+- **Support for Any LLM**: Use with any LLM provider while maintaining Helicone observability.
+- **Serverless-Friendly**: Perfect for environments with execution time limits.
+- **Extended Timeouts**: Up to 2 hours for long-running LLM tasks.
+- **Automatic Retries**: Handles rate limit resets efficiently.
+- **Batching Support**: Optimize large-scale LLM operations.
+
+## Integration Steps
+
+<Steps>
+  <Step title="Create a Helicone account + Generate an API Key">
+    Log into [Helicone](https://www.helicone.ai) or create an account. Once you have an account, you
+    can generate an [API key](https://helicone.ai/developer).
+
+    <Note>
+      Make sure to generate a [write only API key](helicone-headers/helicone-auth).
+    </Note>
+
+  </Step>
+  <Step title="Sign up for Upstash QStash">
+    Create an [Upstash account](https://upstash.com/) and obtain your QStash token.
+  </Step>
+  <Step title="Integrate QStash with Helicone">
+    Use the QStash client with your Helicone API key:
+
+    ```javascript
+    import { Client, custom } from "@upstash/qstash";
+
+    const client = new Client({ token: "<QSTASH_TOKEN>" });
+
+    await client.publishJSON({
+      api: {
+        name: "llm",
+        provider: custom({
+          token: "YOUR_LLM_PROVIDER_TOKEN",
+          baseUrl: "https://api.your-llm-provider.com",
+        }),
+        analytics: { name: "helicone", token: "YOUR_HELICONE_API_KEY" },
+      },
+      body: {
+        model: "your-chosen-model",
+        messages: [{ role: "user", content: "Your message here" }],
+      },
+      callback: "https://your-callback-url.com",
+    });
+    ```
+
+  </Step>
+  <Step title="View Your Logs">
+    🎉 You're all set! View your logs at [Helicone](https://www.helicone.ai).
+  </Step>
+</Steps>
+
+By combining Upstash QStash LLM with Helicone, you can build robust, serverless-compatible AI applications while maintaining comprehensive observability into your LLM operations.
+
+For more details on QStash LLM features and usage, visit the [Upstash QStash LLM documentation](https://upstash.com/docs/qstash/features/llm).

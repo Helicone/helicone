@@ -44,6 +44,12 @@ export function consolidateTextFields(responseBody: any[]): any {
                         cur.choices[i].delta.function_call ?? {}
                       )
                     : cur.choices[i].delta.function_call,
+                  tool_calls: c.delta.tool_calls
+                    ? recursivelyConsolidate(
+                        c.delta.tool_calls,
+                        cur.choices[i].delta.tool_calls ?? {}
+                      )
+                    : cur.choices[i].delta.tool_calls,
                 },
               };
             } else if (

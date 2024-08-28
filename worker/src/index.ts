@@ -2,13 +2,13 @@
 import { createClient } from "@supabase/supabase-js";
 import { Database } from "../supabase/database.types";
 import { InMemoryRateLimiter } from "./lib/clients/InMemoryRateLimiter";
-import { RequestWrapper } from "./lib/RequestWrapper";
-import { updateLoopUsers } from "./lib/managers/LoopsManager";
-import { buildRouter } from "./routers/routerFactory";
-import { AlertManager } from "./lib/managers/AlertManager";
 import { AlertStore } from "./lib/db/AlertStore";
 import { ClickhouseClientWrapper } from "./lib/db/ClickhouseWrapper";
+import { AlertManager } from "./lib/managers/AlertManager";
+import { updateLoopUsers } from "./lib/managers/LoopsManager";
+import { RequestWrapper } from "./lib/RequestWrapper";
 import { ProviderName } from "./packages/cost/providers/mappings";
+import { buildRouter } from "./routers/routerFactory";
 
 const FALLBACK_QUEUE = "fallback-queue";
 
@@ -242,6 +242,33 @@ function modifyEnvBasedOnPath(env: Env, request: RequestWrapper): Env {
         WORKER_TYPE: "GATEWAY_API",
         GATEWAY_TARGET: "https://qstash.upstash.io",
       };
+    } else if (hostParts[0].includes("firecrawl")) {
+      if (isRootPath(url) && request.getMethod() === "GET") {
+        return {
+          ...env,
+          WORKER_DEFINED_REDIRECT_URL: "https://www.firecrawl.dev/",
+        };
+      } else {
+        if (url.pathname.includes("scrape")) {
+          return {
+            ...env,
+            WORKER_TYPE: "GATEWAY_API",
+            GATEWAY_TARGET: "https://api.firecrawl.dev/v0/scrape",
+          };
+        }
+        if (url.pathname.includes("search")) {
+          return {
+            ...env,
+            WORKER_TYPE: "GATEWAY_API",
+            GATEWAY_TARGET: "https://api.firecrawl.dev/v0/search",
+          };
+        }
+        return {
+          ...env,
+          WORKER_TYPE: "GATEWAY_API",
+          GATEWAY_TARGET: "https://api.firecrawl.dev/v0/crawl",
+        };
+      }
     }
   }
 

@@ -4,7 +4,7 @@ import { useJawnClient } from "../../../../lib/clients/jawnHook";
 import { Col } from "../../../layout/common";
 import { useUser } from "@supabase/auth-helpers-react";
 import OpenAI from "openai";
-import { hpf } from "@helicone/prompts";
+import { hpf, hpstatic } from "@helicone/prompts";
 import TextbookCourse from "./textbookCourse";
 import {
   AcademicCapIcon,
@@ -161,7 +161,7 @@ export const CourseGenerator: React.FC = () => {
     sessionId: string
   ) => {
     let messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
-      { role: "system", content: "You are an expert course creator." },
+      { role: "system", content: hpstatic`You are an expert course creator.` },
     ];
 
     let toolName = "";
@@ -174,7 +174,11 @@ export const CourseGenerator: React.FC = () => {
       case "overview":
         messages.push({
           role: "user",
-          content: hpf`Generate a 1 sentence overview for a ${args.difficulty} level course on ${args.topic} for ${args.audience}, lasting 5 sessions.`,
+          content: hpf`Generate a 1 sentence overview for a ${{
+            difficulty: args.difficulty,
+          }} level course on ${{ topic: args.topic }} for ${{
+            audience: args.audience,
+          }}, lasting 5 sessions.`,
         });
         toolName = "generateOverview";
         toolDescription = "Generate the course overview";
@@ -189,7 +193,11 @@ export const CourseGenerator: React.FC = () => {
       case "sectionTitles":
         messages.push({
           role: "user",
-          content: hpf`Based on the course overview: "${args.overview.description}", generate ${args.duration} unique and relevant section titles for the course.`,
+          content: hpf`Based on the course overview: "${{
+            description: args.overview.description,
+          }}", generate ${{
+            duration: args.duration,
+          }} unique and relevant section titles for the course.`,
         });
         toolName = "generateSectionTitles";
         toolDescription = "Generate section titles for the course";
@@ -202,7 +210,13 @@ export const CourseGenerator: React.FC = () => {
       case "sectionContent":
         messages.push({
           role: "user",
-          content: hpf`Generate content that covers the section titled "${args.sectionTitle}" for a ${args.difficulty} level course on ${args.topic} for ${args.audience}. Not overly lengthy but detailed enough to be useful.`,
+          content: hpf`Generate content that covers the section titled "${{
+            sectionTitle: args.sectionTitle,
+          }}" for a ${{ difficulty: args.difficulty }} level course on ${{
+            topic: args.topic,
+          }} for ${{
+            audience: args.audience,
+          }}}. Not overly lengthy but detailed enough to be useful.`,
         });
         toolName = "generateSectionContent";
         toolDescription = "Generate content for a course section";
@@ -215,12 +229,11 @@ export const CourseGenerator: React.FC = () => {
       case "quiz":
         messages.push({
           role: "user",
-          content: hpf`Generate a quiz for the section titled "${
-            args.sectionTitle
-          }" with the following content: "${args.sectionContent.slice(
-            0,
-            500
-          )}..."`,
+          content: hpf`Generate a quiz for the section titled "${{
+            sectionTitle: args.sectionTitle,
+          }}" with the following content: "${{
+            sectionContent: args.sectionContent.slice(0, 500),
+          }}..."`,
         });
         maxTokens = 300;
         toolName = "generateQuiz";

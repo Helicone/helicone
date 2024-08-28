@@ -1,11 +1,9 @@
+import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
+import { getJawnClient } from "../../../lib/clients/jawn";
 import { clsx } from "../../shared/clsx";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedModal from "../../shared/themed/themedModal";
-import { ArrowPathIcon } from "@heroicons/react/24/outline";
-import { useGetOrgMembers } from "../../../services/hooks/organizations";
-import { useOrg } from "../../layout/organizationContext";
-import { getJawnClient } from "../../../lib/clients/jawn";
 
 interface AddMemberModalProps {
   orgId: string;
@@ -21,40 +19,11 @@ const AddMemberModal = (props: AddMemberModalProps) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const { setNotification } = useNotification();
-  const { data, refetch } = useGetOrgMembers(orgId);
-
-  const orgContext = useOrg();
   const jawn = getJawnClient(orgId);
-
-  const members = data?.data
-    ? data?.data.map((d) => {
-        return {
-          ...d,
-          isOwner: false,
-        };
-      })
-    : [];
 
   const onSubmitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
-    // if (orgContext?.currentOrg?.tier === "free" && members.length >= 3) {
-    //   setNotification(
-    //     "You have reached the maximum number of members for the free plan.",
-    //     "error"
-    //   );
-    //   setIsLoading(false);
-    //   return;
-    // }
-
-    // if (orgContext?.currentOrg?.tier === "pro" && members.length >= 8) {
-    //   setNotification(
-    //     "You have reached the maximum number of members for the pro plan.",
-    //     "error"
-    //   );
-    //   setIsLoading(false);
-    //   return;
-    // }
 
     const email = e.currentTarget.elements.namedItem(
       "email"

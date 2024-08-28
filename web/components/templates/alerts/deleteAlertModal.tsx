@@ -4,6 +4,7 @@ import useNotification from "../../shared/notification/useNotification";
 import ThemedModal from "../../shared/themed/themedModal";
 import { SUPABASE_AUTH_TOKEN } from "../../../lib/constants";
 import { clsx } from "../../shared/clsx";
+import { useJawnClient } from "../../../lib/clients/jawnHook";
 
 interface DeleteAlertModalProps {
   open: boolean;
@@ -12,15 +13,11 @@ interface DeleteAlertModalProps {
   alertId: string;
 }
 
-const API_BASE_PATH = process.env.NEXT_PUBLIC_API_BASE_PATH || "";
-
-// REMOVE THE TRAILING V1 from the API_BASE_PATH
-const API_BASE_PATH_WITHOUT_VERSION = API_BASE_PATH.replace("/v1", "");
-
 const DeleteAlertModal = (props: DeleteAlertModalProps) => {
   const { open, setOpen, onSuccess, alertId } = props;
 
   const orgContext = useOrg();
+  const jawn = useJawnClient();
   const { setNotification } = useNotification();
 
   const handleDeleteAlert = async (id: string) => {
@@ -39,22 +36,15 @@ const DeleteAlertModal = (props: DeleteAlertModalProps) => {
         return;
       }
 
-      const decodedCookie = decodeURIComponent(authFromCookie);
-      const parsedCookie = JSON.parse(decodedCookie);
-      const jwtToken = parsedCookie[0];
-      const response = await fetch(
-        `${API_BASE_PATH_WITHOUT_VERSION}/alert/${id}`,
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            "helicone-jwt": jwtToken,
-            "helicone-org-id": orgContext?.currentOrg?.id,
+      const { error: deleteError } = await jawn.DELETE("/v1/alert/{alertId}", {
+        params: {
+          path: {
+            alertId: id,
           },
-        }
-      );
+        },
+      });
 
-      if (!response.ok) {
+      if (deleteError) {
         setNotification(
           "There was an error deleting your alert! Refresh your page to try again..",
           "error"

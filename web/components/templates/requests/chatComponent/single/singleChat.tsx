@@ -31,7 +31,6 @@ export const SingleChat: React.FC<SingleChatProps> = ({
   mode,
 }) => {
   const isSystem = messageContent.role === "system";
-  const getBgColor = () => "bg-transparent dark:bg-gray-950";
 
   const message = useMemo(() => {
     const contentType = getContentType(messageContent);
@@ -50,7 +49,6 @@ export const SingleChat: React.FC<SingleChatProps> = ({
   return (
     <div
       className={clsx(
-        // getBgColor(),
         "items-start p-4 text-left flex flex-row space-x-4 text-black dark:text-white ",
         isSystem && "font-semibold",
         isLast && "rounded-b-md"

@@ -27,6 +27,9 @@ export interface paths {
   "/v1/request/query": {
     post: operations["GetRequests"];
   };
+  "/v1/request/query-clickhouse": {
+    post: operations["GetRequestsClickhouse"];
+  };
   "/v1/request/{requestId}/feedback": {
     post: operations["FeedbackRequest"];
   };
@@ -38,6 +41,9 @@ export interface paths {
   };
   "/v1/request/{requestId}/score": {
     post: operations["AddScores"];
+  };
+  "/v1/property/query": {
+    post: operations["GetProperties"];
   };
   "/v1/prompt/query": {
     post: operations["GetPrompts"];
@@ -57,6 +63,9 @@ export interface paths {
   "/v1/prompt/{promptId}/versions/query": {
     post: operations["GetPromptVersions"];
   };
+  "/v1/prompt/{user_defined_id}/compile": {
+    post: operations["GetPromptVersionsCompiled"];
+  };
   "/v1/experiment/dataset": {
     post: operations["AddDataset"];
   };
@@ -72,11 +81,35 @@ export interface paths {
   "/v1/experiment/dataset/{datasetId}/mutate": {
     post: operations["MutateDataset"];
   };
+  "/v1/helicone-dataset": {
+    post: operations["AddHeliconeDataset"];
+  };
+  "/v1/helicone-dataset/{datasetId}/mutate": {
+    post: operations["MutateHeliconeDataset"];
+  };
+  "/v1/helicone-dataset/{datasetId}/query": {
+    post: operations["QueryHeliconeDatasetRows"];
+  };
+  "/v1/helicone-dataset/query": {
+    post: operations["QueryHeliconeDataset"];
+  };
   "/v1/experiment": {
     post: operations["CreateNewExperiment"];
   };
   "/v1/experiment/query": {
     post: operations["GetExperiments"];
+  };
+  "/v1/evals/query": {
+    post: operations["QueryEvals"];
+  };
+  "/v1/evals/scores": {
+    get: operations["GetEvalScores"];
+  };
+  "/v1/evals/{requestId}": {
+    post: operations["AddEval"];
+  };
+  "/v1/evals/score-distributions/query": {
+    post: operations["QueryScoreDistributions"];
   };
   "/v1/public/dataisbeautiful/total-values": {
     post: operations["GetTotalValues"];
@@ -161,6 +194,7 @@ export interface components {
       /** Format: double */
       total_cost: number;
       last_used: string;
+      first_used: string;
       /** Format: double */
       session_count: number;
     };
@@ -243,12 +277,60 @@ export interface components {
       total_prompt_tokens?: components["schemas"]["Partial_NumberOperators_"];
       cost?: components["schemas"]["Partial_NumberOperators_"];
     };
-    /** @description From T, pick a set of properties whose keys are in the union K */
-    "Pick_FilterLeaf.user_metrics_": {
-      user_metrics?: components["schemas"]["Partial_UserMetricsToOperators_"];
+    /** @description Make all properties in T optional */
+    Partial_TimestampOperatorsTyped_: {
+      /** Format: date-time */
+      gte?: string;
+      /** Format: date-time */
+      lte?: string;
+      /** Format: date-time */
+      lt?: string;
+      /** Format: date-time */
+      gt?: string;
     };
-    FilterLeafSubset_user_metrics_: components["schemas"]["Pick_FilterLeaf.user_metrics_"];
-    UserFilterNode: components["schemas"]["FilterLeafSubset_user_metrics_"] | components["schemas"]["UserFilterBranch"] | "all";
+    /** @description Make all properties in T optional */
+    Partial_BooleanOperators_: {
+      equals?: boolean;
+    };
+    /** @description Make all properties in T optional */
+    Partial_VectorOperators_: {
+      contains?: string;
+    };
+    /** @description Make all properties in T optional */
+    Partial_RequestResponseRMTToOperators_: {
+      latency?: components["schemas"]["Partial_NumberOperators_"];
+      status?: components["schemas"]["Partial_NumberOperators_"];
+      request_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
+      response_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
+      model?: components["schemas"]["Partial_TextOperators_"];
+      user_id?: components["schemas"]["Partial_TextOperators_"];
+      organization_id?: components["schemas"]["Partial_TextOperators_"];
+      node_id?: components["schemas"]["Partial_TextOperators_"];
+      job_id?: components["schemas"]["Partial_TextOperators_"];
+      threat?: components["schemas"]["Partial_BooleanOperators_"];
+      request_id?: components["schemas"]["Partial_TextOperators_"];
+      prompt_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      completion_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      target_url?: components["schemas"]["Partial_TextOperators_"];
+      properties?: {
+        [key: string]: components["schemas"]["Partial_TextOperators_"];
+      };
+      search_properties?: {
+        [key: string]: components["schemas"]["Partial_TextOperators_"];
+      };
+      scores?: {
+        [key: string]: components["schemas"]["Partial_TextOperators_"];
+      };
+      request_body?: components["schemas"]["Partial_VectorOperators_"];
+      response_body?: components["schemas"]["Partial_VectorOperators_"];
+    };
+    /** @description From T, pick a set of properties whose keys are in the union K */
+    "Pick_FilterLeaf.user_metrics-or-request_response_rmt_": {
+      user_metrics?: components["schemas"]["Partial_UserMetricsToOperators_"];
+      request_response_rmt?: components["schemas"]["Partial_RequestResponseRMTToOperators_"];
+    };
+    "FilterLeafSubset_user_metrics-or-request_response_rmt_": components["schemas"]["Pick_FilterLeaf.user_metrics-or-request_response_rmt_"];
+    UserFilterNode: components["schemas"]["FilterLeafSubset_user_metrics-or-request_response_rmt_"] | components["schemas"]["UserFilterBranch"] | "all";
     UserFilterBranch: {
       right: components["schemas"]["UserFilterNode"];
       /** @enum {string} */
@@ -351,7 +433,10 @@ export interface components {
           };
         }[];
     };
-Json: JsonObject;
+    /** @description Construct a type with a set of properties K of type T */
+    "Record_string.string_": {
+      [key: string]: string;
+    };
     /** @enum {string} */
     Provider: "OPENAI" | "ANTHROPIC" | "TOGETHERAI" | "GROQ" | "GOOGLE" | "CUSTOM";
     /** @enum {string} */
@@ -415,38 +500,27 @@ Json: JsonObject;
       response?: components["schemas"]["Response"] | null;
     };
     /** @description Construct a type with a set of properties K of type T */
-    "Record_string.string_": {
-      [key: string]: string;
-    };
-    /** @description Construct a type with a set of properties K of type T */
     "Record_string.number_": {
       [key: string]: number;
     };
     HeliconeRequest: {
       /** @example Happy */
-      response_id: string;
-      response_created_at: string;
+      response_id: string | null;
+      response_created_at: string | null;
       response_body?: unknown;
       /** Format: double */
       response_status: number;
       response_model: string | null;
       request_id: string;
-      request_model: string | null;
-      model_override: string | null;
       request_created_at: string;
       request_body: unknown;
       request_path: string;
       request_user_id: string | null;
-      request_properties: {
-        [key: string]: components["schemas"]["Json"];
-      } | null;
-      request_feedback: {
-        [key: string]: components["schemas"]["Json"];
-      } | null;
+      request_properties: components["schemas"]["Record_string.string_"] | null;
+      request_model: string | null;
+      model_override: string | null;
       helicone_user: string | null;
-      prompt_name: string | null;
-      prompt_regex: string | null;
-      key_name: string;
+      provider: components["schemas"]["Provider"];
       /** Format: double */
       delay_ms: number | null;
       /** Format: double */
@@ -457,8 +531,6 @@ Json: JsonObject;
       prompt_tokens: number | null;
       /** Format: double */
       completion_tokens: number | null;
-      provider: components["schemas"]["Provider"];
-      node_id: string | null;
       prompt_id: string | null;
       feedback_created_at?: string | null;
       feedback_id?: string | null;
@@ -471,6 +543,9 @@ Json: JsonObject;
       scores: components["schemas"]["Record_string.number_"] | null;
       /** Format: double */
       costUSD?: number | null;
+      properties: components["schemas"]["Record_string.string_"];
+      assets: string[];
+      target_url: string;
     };
     "ResultSuccess_HeliconeRequest-Array_": {
       data: components["schemas"]["HeliconeRequest"][];
@@ -501,10 +576,6 @@ Json: JsonObject;
       prompt_id?: components["schemas"]["Partial_TextOperators_"];
     };
     /** @description Make all properties in T optional */
-    Partial_BooleanOperators_: {
-      equals?: boolean;
-    };
-    /** @description Make all properties in T optional */
     Partial_FeedbackTableToOperators_: {
       id?: components["schemas"]["Partial_NumberOperators_"];
       created_at?: components["schemas"]["Partial_TimestampOperators_"];
@@ -512,24 +583,9 @@ Json: JsonObject;
       response_id?: components["schemas"]["Partial_TextOperators_"];
     };
     /** @description Make all properties in T optional */
-    Partial_VectorOperators_: {
-      contains?: string;
-    };
-    /** @description Make all properties in T optional */
     Partial_RequestResponseSearchToOperators_: {
       request_body_vector?: components["schemas"]["Partial_VectorOperators_"];
       response_body_vector?: components["schemas"]["Partial_VectorOperators_"];
-    };
-    /** @description Make all properties in T optional */
-    Partial_TimestampOperatorsTyped_: {
-      /** Format: date-time */
-      gte?: string;
-      /** Format: date-time */
-      lte?: string;
-      /** Format: date-time */
-      lt?: string;
-      /** Format: date-time */
-      gt?: string;
     };
     /** @description Make all properties in T optional */
     Partial_CacheHitsTableToOperators_: {
@@ -541,7 +597,8 @@ Json: JsonObject;
       created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
     };
     /** @description From T, pick a set of properties whose keys are in the union K */
-    "Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits_": {
+    "Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits-or-request_response_rmt_": {
+      request_response_rmt?: components["schemas"]["Partial_RequestResponseRMTToOperators_"];
       response?: components["schemas"]["Partial_ResponseTableToOperators_"];
       request?: components["schemas"]["Partial_RequestTableToOperators_"];
       feedback?: components["schemas"]["Partial_FeedbackTableToOperators_"];
@@ -554,8 +611,8 @@ Json: JsonObject;
         [key: string]: components["schemas"]["Partial_TextOperators_"];
       };
     };
-    "FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits_": components["schemas"]["Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits_"];
-    RequestFilterNode: components["schemas"]["FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits_"] | components["schemas"]["RequestFilterBranch"] | "all";
+    "FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits-or-request_response_rmt_": components["schemas"]["Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits-or-request_response_rmt_"];
+    RequestFilterNode: components["schemas"]["FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits-or-request_response_rmt_"] | components["schemas"]["RequestFilterBranch"] | "all";
     RequestFilterBranch: {
       right: components["schemas"]["RequestFilterNode"];
       /** @enum {string} */
@@ -622,6 +679,15 @@ Json: JsonObject;
     ScoreRequest: {
       scores: components["schemas"]["Scores"];
     };
+    Property: {
+      property: string;
+    };
+    "ResultSuccess_Property-Array_": {
+      data: components["schemas"]["Property"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Property-Array.string_": components["schemas"]["ResultSuccess_Property-Array_"] | components["schemas"]["ResultError_string_"];
     PromptsResult: {
       id: string;
       user_defined_id: string;
@@ -688,9 +754,9 @@ Json: JsonObject;
       minor_version: number;
       /** Format: double */
       major_version: number;
-      helicone_template: string;
       prompt_v2: string;
       model: string;
+      helicone_template: string;
     };
     ResultSuccess_PromptVersionResult_: {
       data: components["schemas"]["PromptVersionResult"];
@@ -722,6 +788,48 @@ Json: JsonObject;
       error: null;
     };
     "Result_PromptVersionResult-Array.string_": components["schemas"]["ResultSuccess_PromptVersionResult-Array_"] | components["schemas"]["ResultError_string_"];
+    /** @description Make all properties in T optional */
+    Partial_PromptVersionsToOperators_: {
+      minor_version?: components["schemas"]["Partial_NumberOperators_"];
+      major_version?: components["schemas"]["Partial_NumberOperators_"];
+      id?: components["schemas"]["Partial_TextOperators_"];
+      prompt_v2?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description From T, pick a set of properties whose keys are in the union K */
+    "Pick_FilterLeaf.prompts_versions_": {
+      prompts_versions?: components["schemas"]["Partial_PromptVersionsToOperators_"];
+    };
+    FilterLeafSubset_prompts_versions_: components["schemas"]["Pick_FilterLeaf.prompts_versions_"];
+    PromptVersionsFilterNode: components["schemas"]["FilterLeafSubset_prompts_versions_"] | components["schemas"]["PromptVersionsFilterBranch"] | "all";
+    PromptVersionsFilterBranch: {
+      right: components["schemas"]["PromptVersionsFilterNode"];
+      /** @enum {string} */
+      operator: "or" | "and";
+      left: components["schemas"]["PromptVersionsFilterNode"];
+    };
+    PromptVersionsQueryParams: {
+      filter?: components["schemas"]["PromptVersionsFilterNode"];
+    };
+    PromptVersionResultCompiled: {
+      id: string;
+      /** Format: double */
+      minor_version: number;
+      /** Format: double */
+      major_version: number;
+      prompt_v2: string;
+      model: string;
+      prompt_compiled: unknown;
+    };
+    ResultSuccess_PromptVersionResultCompiled_: {
+      data: components["schemas"]["PromptVersionResultCompiled"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_PromptVersionResultCompiled.string_": components["schemas"]["ResultSuccess_PromptVersionResultCompiled_"] | components["schemas"]["ResultError_string_"];
+    PromptVersiosQueryParamsCompiled: {
+      filter?: components["schemas"]["PromptVersionsFilterNode"];
+      inputs: components["schemas"]["Record_string.string_"];
+    };
     "ResultSuccess__datasetId-string__": {
       data: {
         datasetId: string;
@@ -737,14 +845,9 @@ Json: JsonObject;
     NewDatasetParams: {
       datasetName: string;
       requestIds: string[];
+      /** @enum {string} */
+      datasetType: "experiment" | "helicone";
       meta?: components["schemas"]["DatasetMetadata"];
-    };
-    /** @description Make all properties in T optional */
-    Partial_PromptVersionsToOperators_: {
-      minor_version?: components["schemas"]["Partial_NumberOperators_"];
-      major_version?: components["schemas"]["Partial_NumberOperators_"];
-      id?: components["schemas"]["Partial_TextOperators_"];
-      prompt_v2?: components["schemas"]["Partial_TextOperators_"];
     };
     /** @description From T, pick a set of properties whose keys are in the union K */
     "Pick_FilterLeaf.request-or-prompts_versions_": {
@@ -785,6 +888,53 @@ Json: JsonObject;
       error: null;
     };
     "Result___-Array.string_": components["schemas"]["ResultSuccess___-Array_"] | components["schemas"]["ResultError_string_"];
+    HeliconeDatasetMetadata: {
+      promptVersionId?: string;
+      inputRecordsIds?: string[];
+    };
+    NewHeliconeDatasetParams: {
+      datasetName: string;
+      requestIds: string[];
+      meta?: components["schemas"]["HeliconeDatasetMetadata"];
+    };
+    MutateParams: {
+      addRequests: string[];
+      removeRequests: string[];
+    };
+    ResultSuccess_string_: {
+      data: string;
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_string.string_": components["schemas"]["ResultSuccess_string_"] | components["schemas"]["ResultError_string_"];
+    HeliconeDatasetRow: {
+      id: string;
+      origin_request_id: string;
+      dataset_id: string;
+      created_at: string;
+      signed_url: components["schemas"]["Result_string.string_"];
+    };
+    "ResultSuccess_HeliconeDatasetRow-Array_": {
+      data: components["schemas"]["HeliconeDatasetRow"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_HeliconeDatasetRow-Array.string_": components["schemas"]["ResultSuccess_HeliconeDatasetRow-Array_"] | components["schemas"]["ResultError_string_"];
+Json: JsonObject;
+    HeliconeDataset: {
+      created_at: string | null;
+      dataset_type: string;
+      id: string;
+      meta: components["schemas"]["Json"] | null;
+      name: string | null;
+      organization: string;
+    };
+    "ResultSuccess_HeliconeDataset-Array_": {
+      data: components["schemas"]["HeliconeDataset"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_HeliconeDataset-Array.string_": components["schemas"]["ResultSuccess_HeliconeDataset-Array_"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess__experimentId-string__": {
       data: {
         experimentId: string;
@@ -908,6 +1058,79 @@ Json: JsonObject;
       /** @enum {boolean} */
       score?: true;
     };
+    Eval: {
+      name: string;
+      /** Format: double */
+      averageScore: number;
+      /** Format: double */
+      minScore: number;
+      /** Format: double */
+      maxScore: number;
+      /** Format: double */
+      count: number;
+      overTime: {
+          /** Format: double */
+          count: number;
+          date: string;
+        }[];
+      averageOverTime: {
+          /** Format: double */
+          value: number;
+          date: string;
+        }[];
+    };
+    "ResultSuccess_Eval-Array_": {
+      data: components["schemas"]["Eval"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Eval-Array.string_": components["schemas"]["ResultSuccess_Eval-Array_"] | components["schemas"]["ResultError_string_"];
+    /** @description From T, pick a set of properties whose keys are in the union K */
+    "Pick_FilterLeaf.request_response_rmt_": {
+      request_response_rmt?: components["schemas"]["Partial_RequestResponseRMTToOperators_"];
+    };
+    FilterLeafSubset_request_response_rmt_: components["schemas"]["Pick_FilterLeaf.request_response_rmt_"];
+    EvalFilterNode: components["schemas"]["FilterLeafSubset_request_response_rmt_"] | components["schemas"]["EvalFilterBranch"] | "all";
+    EvalFilterBranch: {
+      right: components["schemas"]["EvalFilterNode"];
+      /** @enum {string} */
+      operator: "or" | "and";
+      left: components["schemas"]["EvalFilterNode"];
+    };
+    EvalQueryParams: {
+      filter: components["schemas"]["EvalFilterNode"];
+      timeFilter: {
+        end: string;
+        start: string;
+      };
+      /** Format: double */
+      offset?: number;
+      /** Format: double */
+      limit?: number;
+    };
+    "ResultSuccess_string-Array_": {
+      data: string[];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_string-Array.string_": components["schemas"]["ResultSuccess_string-Array_"] | components["schemas"]["ResultError_string_"];
+    ScoreDistribution: {
+      name: string;
+      distribution: {
+          /** Format: double */
+          value: number;
+          /** Format: double */
+          upper: number;
+          /** Format: double */
+          lower: number;
+        }[];
+    };
+    "ResultSuccess_ScoreDistribution-Array_": {
+      data: components["schemas"]["ScoreDistribution"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ScoreDistribution-Array.string_": components["schemas"]["ResultSuccess_ScoreDistribution-Array_"] | components["schemas"]["ResultError_string_"];
     TotalValuesForAllOfTime: {
       /** Format: double */
       total_cost: number;
@@ -1168,6 +1391,35 @@ export interface operations {
       };
     };
   };
+  GetRequestsClickhouse: {
+    /** @description Request query filters */
+    requestBody: {
+      content: {
+        /**
+         * @example {
+         *   "filter": "all",
+         *   "isCached": false,
+         *   "limit": 10,
+         *   "offset": 0,
+         *   "sort": {
+         *     "created_at": "desc"
+         *   },
+         *   "isScored": false,
+         *   "isPartOfExperiment": false
+         * }
+         */
+        "application/json": components["schemas"]["RequestQueryParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_HeliconeRequest-Array.string_"];
+        };
+      };
+    };
+  };
   FeedbackRequest: {
     parameters: {
       path: {
@@ -1245,6 +1497,21 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  GetProperties: {
+    requestBody: {
+      content: {
+        "application/json": Record<string, never>;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Property-Array.string_"];
         };
       };
     };
@@ -1349,7 +1616,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": Record<string, never>;
+        "application/json": components["schemas"]["PromptVersionsQueryParams"];
       };
     };
     responses: {
@@ -1357,6 +1624,26 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_PromptVersionResult-Array.string_"];
+        };
+      };
+    };
+  };
+  GetPromptVersionsCompiled: {
+    parameters: {
+      path: {
+        user_defined_id: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PromptVersiosQueryParamsCompiled"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_PromptVersionResultCompiled.string_"];
         };
       };
     };
@@ -1441,6 +1728,78 @@ export interface operations {
       };
     };
   };
+  AddHeliconeDataset: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["NewHeliconeDatasetParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__datasetId-string_.string_"];
+        };
+      };
+    };
+  };
+  MutateHeliconeDataset: {
+    parameters: {
+      path: {
+        datasetId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["MutateParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  QueryHeliconeDatasetRows: {
+    parameters: {
+      path: {
+        datasetId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": Record<string, never>;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_HeliconeDatasetRow-Array.string_"];
+        };
+      };
+    };
+  };
+  QueryHeliconeDataset: {
+    requestBody: {
+      content: {
+        "application/json": {
+          datasetIds?: string[];
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_HeliconeDataset-Array.string_"];
+        };
+      };
+    };
+  };
   CreateNewExperiment: {
     requestBody: {
       content: {
@@ -1470,6 +1829,70 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_Experiment-Array.string_"];
+        };
+      };
+    };
+  };
+  QueryEvals: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["EvalQueryParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Eval-Array.string_"];
+        };
+      };
+    };
+  };
+  GetEvalScores: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_string-Array.string_"];
+        };
+      };
+    };
+  };
+  AddEval: {
+    parameters: {
+      path: {
+        requestId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          /** Format: double */
+          score: number;
+          name: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  QueryScoreDistributions: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["EvalQueryParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ScoreDistribution-Array.string_"];
         };
       };
     };

@@ -23,9 +23,11 @@ interface BarChartTrace {
 export const TraceSpan = ({
   session,
   selectedRequestIdDispatch,
+  height,
 }: {
   session: Session;
   selectedRequestIdDispatch: [string, (x: string) => void];
+  height?: string;
 }) => {
   const [selectedRequestId, setSelectedRequestId] = selectedRequestIdDispatch;
   const spanData: BarChartTrace[] = session.traces.map((trace, index) => ({
@@ -46,14 +48,18 @@ export const TraceSpan = ({
       (spanData?.[spanData.length - 1]?.start ?? 0),
   ];
 
+  const barSize = 35; // Increased from 30 to 50
+
   return (
     <div className="mx-10">
-      <div style={{ height: "350px", overflowY: "auto" }}>
-        <ResponsiveContainer width="100%" height={spanData.length * 30}>
+      <div style={{ height: height ?? "500px", overflowY: "auto" }}>
+        {" "}
+        {/* Increased from 350px to 500px */}
+        <ResponsiveContainer width="100%" height={spanData.length * barSize}>
           <BarChart
             data={spanData}
             layout="vertical"
-            barSize={30} // Increased bar size
+            barSize={barSize}
             margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
           >
             <CartesianGrid strokeDasharray="3 3" stroke="#ccc" />
@@ -125,7 +131,6 @@ export const TraceSpan = ({
             <Bar
               dataKey="duration"
               stackId="a"
-              // className="text-black"
               isAnimationActive={false}
               radius={[
                 roundedRadius,
@@ -137,11 +142,35 @@ export const TraceSpan = ({
               <LabelList
                 dataKey="name"
                 position="insideLeft"
-                className=""
-                style={{
-                  fontSize: "12px",
-                  fill: "#000",
-                  opacity: 50,
+                content={(props) => {
+                  const { x, y, width, height, value, index } = props;
+                  const isSelected =
+                    spanData[index ?? 0].trace.request_id === selectedRequestId;
+                  return (
+                    <text
+                      x={typeof x === "number" ? x + 5 : x}
+                      y={
+                        typeof height === "number" && typeof y === "number" && y
+                          ? y + height / 2
+                          : y
+                      }
+                      fill={isSelected ? "#FFFFFF" : "#000000"}
+                      opacity={isSelected ? 1 : 0.7}
+                      textAnchor="start"
+                      dominantBaseline="central"
+                      style={{
+                        fontSize: "12px",
+                        fontWeight: isSelected ? "bold" : "normal",
+                      }}
+                      onClick={() =>
+                        setSelectedRequestId(
+                          spanData[index ?? 0].trace?.request_id ?? ""
+                        )
+                      }
+                    >
+                      {value}
+                    </text>
+                  );
                 }}
               />
               {spanData.map((entry, index) => (
@@ -149,8 +178,8 @@ export const TraceSpan = ({
                   key={`colored-cell-${index}`}
                   className={clsx(
                     entry.trace.request_id === selectedRequestId
-                      ? "fill-[#92C5FD]"
-                      : "fill-[#BFDBFE] "
+                      ? "fill-[#1E40AF] hover:fill-[#1E3A8A]"
+                      : "fill-[#BFDBFE] hover:fill-[#93C5FD]"
                   )}
                   onClick={() => setSelectedRequestId(entry.trace.request_id)}
                 />

@@ -1,10 +1,10 @@
 import { NextFunction, Request, Response } from "express";
-import { RequestWrapper } from "../lib/requestWrapper";
-import { supabaseServer } from "../lib/routers/withAuth";
 import { authCheckThrow } from "../controllers/private/adminController";
 import { newPostHogClient } from "../lib/clients/postHogClient";
-import { uuid } from "uuidv4";
 import { AuthParams } from "../lib/db/supabase";
+import { RequestWrapper } from "../lib/requestWrapper";
+import { supabaseServer } from "../lib/routers/withAuth";
+import { uuid } from "uuidv4";
 
 export const logInPostHog = (
   reqParams: {
@@ -20,37 +20,16 @@ export const logInPostHog = (
   const start = Date.now();
   const postHogClient = newPostHogClient();
   postHogClient?.capture({
-    distinctId: uuid(),
+    distinctId: authParams?.organizationId ?? "unknown",
     event: "jawn_http_request",
   });
-
-  if (authParams?.userId && postHogClient) {
-    try {
-      postHogClient.identify({
-        distinctId: authParams?.userId,
-      });
-    } catch (error) {
-      console.error("Error identifying user in PostHog:", error);
-    }
-  }
-
-  if (authParams?.organizationId && postHogClient) {
-    try {
-      postHogClient.groupIdentify({
-        groupType: "organization",
-        groupKey: authParams.organizationId,
-      });
-    } catch (error) {
-      console.error("Error identifying organization in PostHog:", error);
-    }
-  }
 
   const onFinish = async () => {
     const duration = Date.now() - start;
 
     try {
       postHogClient?.capture({
-        distinctId: uuid(),
+        distinctId: authParams?.organizationId ?? "unknown",
         event: "jawn_http_request",
         properties: {
           method: reqParams.method,
