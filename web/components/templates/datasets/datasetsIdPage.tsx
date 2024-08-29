@@ -28,6 +28,7 @@ import { clsx } from "../../shared/clsx";
 import NewDataset from "./NewDataset"; // Add this import at the top of the file
 import ThemedModal from "../../shared/themed/themedModal";
 import GenericButton from "../../layout/common/button";
+import DatasetDrawerV2 from './datasetDrawer';
 
 interface DatasetIdPageProps {
   id: string;
@@ -70,6 +71,8 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
     getItemId: (row) => row.id,
   });
 
+  const [selectedRowIndex, setSelectedRowIndex] = useState<number | null>(null);
+
   const onRowSelectHandler = (row: any, index: number) => {
     if (selectModeHook) {
       toggleSelection(row);
@@ -88,9 +91,23 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
         }
       });
     } else {
-      setSelectedDataIndex(index);
       setSelectedRow(row);
+      setSelectedRowIndex(index);
       setOpen(true);
+    }
+  };
+
+  const handlePrevious = () => {
+    if (selectedRowIndex !== null && selectedRowIndex > 0) {
+      setSelectedRowIndex(selectedRowIndex - 1);
+      setSelectedRow(rows[selectedRowIndex - 1]);
+    }
+  };
+
+  const handleNext = () => {
+    if (selectedRowIndex !== null && selectedRowIndex < rows.length - 1) {
+      setSelectedRowIndex(selectedRowIndex + 1);
+      setSelectedRow(rows[selectedRowIndex + 1]);
     }
   };
 
@@ -350,14 +367,24 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
           pageSizeOptions={[25, 50, 100, 250, 500]}
         />
       </div>
-      <ThemedDrawer
-        open={!!selectedRow}
-        setOpen={(open) => setSelectedRow(open ? selectedRow : null)}
-        defaultWidth="w-[80vw]"
-        defaultExpanded={true}
-      >
-        <EditDataset selectedRow={selectedRow} />
-      </ThemedDrawer>
+      <DatasetDrawerV2
+        open={open}
+        setOpen={setOpen}
+        hasPrevious={selectedRowIndex !== null && selectedRowIndex > 0}
+        hasNext={
+          selectedRowIndex !== null && selectedRowIndex < rows.length - 1
+        }
+        onPrevHandler={handlePrevious}
+        onNextHandler={handleNext}
+        selectedRow={selectedRow}
+        datasetId={id}
+        onDelete={() => {
+          setSelectedRow(null);
+          setSelectedRowIndex(null);
+          refetch();
+        }}
+        refetch={refetch}
+      />
       <ThemedModal open={showNewDatasetModal} setOpen={setShowNewDatasetModal}>
         <NewDataset
           request_ids={selectedRequestIds.map((item) => item.origin_request_id)}

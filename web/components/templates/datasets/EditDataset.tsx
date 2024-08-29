@@ -7,6 +7,9 @@ import { DatasetRow } from "./datasetsIdPage";
 
 interface EditDatasetProps {
   selectedRow: DatasetRow;
+  isEditing: boolean;
+  onSave: () => void;
+  onCancel: () => void;
 }
 
 function isJSON(str: string) {
@@ -18,13 +21,18 @@ function isJSON(str: string) {
   }
 }
 
-const EditDataset: React.FC<EditDatasetProps> = ({ selectedRow }) => {
+const EditDataset: React.FC<EditDatasetProps> = ({
+  selectedRow,
+  isEditing,
+  onSave,
+  onCancel,
+}) => {
   const { setNotification } = useNotification();
   const [requestBody, setRequestBody] = useState(
-    JSON.stringify(selectedRow?.request_body, null, 2)
+    JSON.stringify(selectedRow?.request_response_body?.request, null, 2)
   );
   const [responseBody, setResponseBody] = useState(
-    JSON.stringify(selectedRow?.response_body, null, 2)
+    JSON.stringify(selectedRow?.request_response_body?.response, null, 2)
   );
 
   const handleSave = () => {
@@ -33,54 +41,69 @@ const EditDataset: React.FC<EditDatasetProps> = ({ selectedRow }) => {
       return;
     }
     console.log(requestBody, responseBody);
+    onSave();
   };
 
   return (
     <div className="flex flex-col space-y-4">
       <Row className="justify-between">
         <h2 className="text-2xl font-semibold">{selectedRow?.id}</h2>
-        <Row className="gap-2">
-          <HcButton
-            variant="secondary"
-            size="sm"
-            title="Reset"
-            onClick={() => {
-              setRequestBody(
-                JSON.stringify(selectedRow?.request_body, null, 2)
-              );
-              setResponseBody(
-                JSON.stringify(selectedRow?.response_body, null, 2)
-              );
-            }}
-          />
-          <HcButton
-            variant="secondary"
-            size="sm"
-            title="Save"
-            onClick={handleSave}
-          />
-        </Row>
+        {isEditing && (
+          <Row className="gap-2">
+            <HcButton
+              variant="secondary"
+              size="sm"
+              title="Cancel"
+              onClick={onCancel}
+            />
+            <HcButton
+              variant="secondary"
+              size="sm"
+              title="Save"
+              onClick={handleSave}
+            />
+          </Row>
+        )}
       </Row>
       <div className="flex flex-col space-y-4">
-        <Row className="gap-5">
-          <div className="w-1/2">
-            <h3 className="text-lg font-semibold">Request Body</h3>
-            <MarkdownEditor
-              text={requestBody}
-              language="json"
-              setText={(text) => {
-                setRequestBody(text);
-              }}
-            />
+        <Row className="gap-5 ">
+          <div
+            className={`w-1/2 rounded-xl border border-gray-300 ${
+              isEditing ? "bg-white" : "bg-[#F7F7F7]"
+            }`}
+          >
+            <h3 className="text-md rounded-t-xl font-medium border-b bg-[#F7F7F7] border-gray-300 p-4">
+              Request Body
+            </h3>
+            <div className={`overflow-hidden rounded-b-xl `}>
+              <MarkdownEditor
+                text={requestBody}
+                language="json"
+                className="border-none"
+                setText={(text) => {
+                  if (isEditing) setRequestBody(text);
+                }}
+              />
+            </div>
           </div>
-          <div className="w-1/2">
-            <MarkdownEditor
-              text={responseBody}
-              language="json"
-              setText={(text) => {
-                setResponseBody(text);
-              }}
-            />
+          <div
+            className={`w-1/2 rounded-xl border border-gray-300 ${
+              isEditing ? "bg-white" : "bg-[#F7F7F7]"
+            }`}
+          >
+            <h3 className="text-md rounded-t-xl font-medium border-b bg-[#F7F7F7] border-gray-300 p-4">
+              Response Body
+            </h3>
+            <div className={`rounded-b-xl overflow-hidden`}>
+              <MarkdownEditor
+                text={responseBody}
+                language="json"
+                className="border-none"
+                setText={(text) => {
+                  if (isEditing) setResponseBody(text);
+                }}
+              />
+            </div>
           </div>
         </Row>
       </div>
