@@ -28,7 +28,8 @@ import { clsx } from "../../shared/clsx";
 import NewDataset from "./NewDataset"; // Add this import at the top of the file
 import ThemedModal from "../../shared/themed/themedModal";
 import GenericButton from "../../layout/common/button";
-import DatasetDrawerV2 from './datasetDrawer';
+import DatasetDrawerV2 from "./datasetDrawer";
+import RemoveRequestsModal from "./RemoveRequests";
 
 interface DatasetIdPageProps {
   id: string;
@@ -59,6 +60,7 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
   const [selectedRequestIds, setSelectedRequestIds] = useState<
     Array<{ id: string; origin_request_id: string }>
   >([]);
+  const [showRemoveModal, setShowRemoveModal] = useState(false);
 
   const {
     selectMode: selectModeHook,
@@ -156,6 +158,32 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
       }
     }
   }, [router.query.page, page]);
+
+  const handleRemoveRequests = async () => {
+    try {
+      const res = await jawn.POST(`/v1/helicone-dataset/{datasetId}/mutate`, {
+        params: {
+          path: {
+            datasetId: id,
+          },
+        },
+        body: {
+          addRequests: [],
+          removeRequests: selectedRequestIds.map((item) => item.id),
+        },
+      });
+      if (res.data && !res.data.error) {
+        setNotification("Requests removed from dataset", "success");
+        await refetch();
+      } else {
+        setNotification("Failed to remove requests from dataset", "error");
+      }
+      toggleSelectMode(false);
+      setSelectedRequestIds([]);
+    } catch (error) {
+      setNotification("Failed to remove requests from dataset", "error");
+    }
+  };
 
   return (
     <>
@@ -313,35 +341,7 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
                     }
                   ></GenericButton>
                   <button
-                    onClick={async () => {
-                      const res = await jawn.POST(
-                        `/v1/helicone-dataset/{datasetId}/mutate`,
-                        {
-                          params: {
-                            path: {
-                              datasetId: id,
-                            },
-                          },
-                          body: {
-                            addRequests: [],
-                            removeRequests: selectedIds,
-                          },
-                        }
-                      );
-                      if (res.data && !res.data.error) {
-                        setNotification(
-                          "Requests removed from dataset",
-                          "success"
-                        );
-                        await refetch();
-                      } else {
-                        setNotification(
-                          "Failed to remove requests from dataset",
-                          "error"
-                        );
-                      }
-                      toggleSelectMode(false);
-                    }}
+                    onClick={() => setShowRemoveModal(true)}
                     className={clsx(
                       "relative inline-flex items-center rounded-md hover:bg-red-700 bg-red-500 px-4 py-2 text-sm font-medium text-white"
                     )}
@@ -395,6 +395,16 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
             setSelectedRequestIds([]);
             refetch();
           }}
+        />
+      </ThemedModal>
+      <ThemedModal open={showRemoveModal} setOpen={setShowRemoveModal}>
+        <RemoveRequestsModal
+          requestCount={selectedRequestIds.length}
+          onConfirm={() => {
+            handleRemoveRequests();
+            setShowRemoveModal(false);
+          }}
+          onCancel={() => setShowRemoveModal(false)}
         />
       </ThemedModal>
     </>

@@ -1,69 +1,29 @@
-import React, { useState } from "react";
+import React from "react";
 import { Row } from "../../layout/common";
-import HcButton from "../../ui/hcButton";
 import MarkdownEditor from "../../shared/markdownEditor";
-import useNotification from "../../shared/notification/useNotification";
 import { DatasetRow } from "./datasetsIdPage";
 
 interface EditDatasetProps {
   selectedRow: DatasetRow;
   isEditing: boolean;
-  onSave: () => void;
-  onCancel: () => void;
-}
-
-function isJSON(str: string) {
-  try {
-    JSON.parse(str);
-    return true;
-  } catch (e) {
-    return false;
-  }
+  requestBody: string;
+  responseBody: string;
+  onRequestBodyChange: (text: string) => void;
+  onResponseBodyChange: (text: string) => void;
 }
 
 const EditDataset: React.FC<EditDatasetProps> = ({
   selectedRow,
   isEditing,
-  onSave,
-  onCancel,
+  requestBody,
+  responseBody,
+  onRequestBodyChange,
+  onResponseBodyChange,
 }) => {
-  const { setNotification } = useNotification();
-  const [requestBody, setRequestBody] = useState(
-    JSON.stringify(selectedRow?.request_response_body?.request, null, 2)
-  );
-  const [responseBody, setResponseBody] = useState(
-    JSON.stringify(selectedRow?.request_response_body?.response, null, 2)
-  );
-
-  const handleSave = () => {
-    if (!isJSON(requestBody) || !isJSON(responseBody)) {
-      setNotification("Invalid JSON", "error");
-      return;
-    }
-    console.log(requestBody, responseBody);
-    onSave();
-  };
-
   return (
     <div className="flex flex-col space-y-4">
       <Row className="justify-between">
         <h2 className="text-2xl font-semibold">{selectedRow?.id}</h2>
-        {isEditing && (
-          <Row className="gap-2">
-            <HcButton
-              variant="secondary"
-              size="sm"
-              title="Cancel"
-              onClick={onCancel}
-            />
-            <HcButton
-              variant="secondary"
-              size="sm"
-              title="Save"
-              onClick={handleSave}
-            />
-          </Row>
-        )}
       </Row>
       <div className="flex flex-col space-y-4">
         <Row className="gap-5 ">
@@ -81,7 +41,7 @@ const EditDataset: React.FC<EditDatasetProps> = ({
                 language="json"
                 className="border-none"
                 setText={(text) => {
-                  if (isEditing) setRequestBody(text);
+                  if (isEditing) onRequestBodyChange(text);
                 }}
               />
             </div>
@@ -100,7 +60,7 @@ const EditDataset: React.FC<EditDatasetProps> = ({
                 language="json"
                 className="border-none"
                 setText={(text) => {
-                  if (isEditing) setResponseBody(text);
+                  if (isEditing) onResponseBodyChange(text);
                 }}
               />
             </div>
