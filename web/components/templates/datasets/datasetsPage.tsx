@@ -110,7 +110,7 @@ const DatasetsPage = (props: DatasetsPageProps) => {
               },
             },
             {
-              header: "Requests Count",
+              header: "Rows",
               accessorKey: "requests_count",
               minSize: 200,
             },
