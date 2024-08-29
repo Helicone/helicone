@@ -91,7 +91,7 @@ const WelcomePageV2 = (props: WelcomePageV2Props) => {
   return (
     <div className="h-screen w-full bg-gray-50">
       {isDemo && <InfoBanner />}
-      <div className="w-full max-w-6xl mx-auto h-full flex flex-col lg:flex-row p-4 lg:divide-x divide-gray-200">
+      <div className="w-full max-w-7xl mx-auto h-full flex flex-col lg:flex-row p-4 lg:divide-x divide-gray-200">
         <section
           id="steps"
           className="w-full min-w-[22.5rem] max-w-[22.5rem] lg:flex-1 flex flex-col py-8 px-4"
