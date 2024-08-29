@@ -213,6 +213,7 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
         <ThemedTable
           highlightedIds={selectedIds}
           showCheckboxes={selectModeHook}
+          fullWidth={true}
           defaultColumns={[
             {
               header: "Created At",

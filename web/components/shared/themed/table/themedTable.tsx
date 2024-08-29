@@ -112,7 +112,7 @@ export default function ThemedTable<T extends { id?: string }>(
     children,
     onSelectAll,
     selectedIds,
-    fullWidth,
+    fullWidth = false,
     isDatasetsPage,
   } = props;
 
@@ -168,8 +168,8 @@ export default function ThemedTable<T extends { id?: string }>(
   return (
     <div className="flex flex-col space-y-4">
       <ThemedTableHeader
-        isDatasetsPage={isDatasetsPage}
         onDataSet={onDataSet}
+        isDatasetsPage={isDatasetsPage}
         advancedFilters={
           advancedFilters
             ? {
@@ -236,19 +236,13 @@ export default function ThemedTable<T extends { id?: string }>(
           properties={makeRow.properties}
         />
       ) : (
-        <div
-          className={clsx(
-            "bg-white dark:bg-black rounded-lg border border-gray-300 dark:border-gray-700 py-2 px-4",
-            fullWidth && "w-full"
-          )}
-        >
+        <div className="bg-white dark:bg-black rounded-lg border border-gray-300 dark:border-gray-700 py-2 px-4">
           <div
             className="text-sm"
             style={{
               boxSizing: "border-box",
               overflowX: "auto",
               overflowY: "visible",
-              width: fullWidth ? "100%" : table.getCenterTotalSize(),
             }}
           >
             <table
