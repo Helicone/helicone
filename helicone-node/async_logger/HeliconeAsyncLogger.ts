@@ -86,4 +86,8 @@ export class HeliconeAsyncLogger {
       },
     });
   }
+
+  withProperties(properties: Record<string, string>, fn: () => any) {
+    return traceloop.withAssociationProperties(properties, fn);
+  }
 }
