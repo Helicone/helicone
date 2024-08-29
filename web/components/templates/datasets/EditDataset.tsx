@@ -47,7 +47,6 @@ const EditDataset: React.FC<EditDatasetProps> = ({
           <ArrowUpRightIcon
             className="h-5 w-5 text-gray-500 cursor-pointer"
             onClick={() => {
-              console.log(process.env.NEXT_PUBLIC_API_URL);
               window.open(
                 `/requests?requestId=${selectedRow?.origin_request_id}`,
                 "_blank"

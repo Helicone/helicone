@@ -91,7 +91,6 @@ const DatasetDrawerV2 = (props: DatasetDrawerV2Props) => {
   };
 
   const handleSave = async () => {
-    console.log("Saving changes:", editedRequestBody, editedResponseBody);
     try {
       const result = await jawn.POST(
         `/v1/helicone-dataset/{datasetId}/request/{requestId}`,

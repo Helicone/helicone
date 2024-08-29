@@ -23,13 +23,13 @@ import { Label } from "../../ui/label";
 interface NewDatasetProps {
   request_ids: string[];
   onComplete: () => void;
-  isCopyMode?: boolean; // Add this line
+  isCopyMode?: boolean;
 }
 
 export default function NewDataset({
   request_ids,
   onComplete,
-  isCopyMode = false, // Add this line
+  isCopyMode = false,
 }: NewDatasetProps) {
   const [selectedOption, setSelectedOption] = useState<string | "new" | null>(
     null
@@ -37,7 +37,11 @@ export default function NewDataset({
   const [newDatasetName, setNewDatasetName] = useState("");
   const { setNotification } = useNotification();
   const jawn = useJawnClient();
-  const { datasets, refetch: refetchDatasets } = useGetHeliconeDatasets();
+  const {
+    datasets,
+    refetch: refetchDatasets,
+    isLoading: isDatasetsLoading,
+  } = useGetHeliconeDatasets();
   const [addingRequests, setAddingRequests] = useState(false);
   const [openDatasetOnAdd, setOpenDatasetOnAdd] = useLocalStorage(
     "openDatasetOnAdd",
@@ -104,11 +108,16 @@ export default function NewDataset({
       <CardHeader className="p-0 pb-4">
         <CardTitle className="text-2xl font-semibold">
           {isCopyMode ? "Copy to dataset" : "Add to dataset"}{" "}
-          {/* Modify this line */}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4 p-2 rounded-xl border border-[#E2E8F0]">
-        {datasets.length > 0 ? (
+        {isDatasetsLoading ? (
+          <div className="h-[115px] flex items-center justify-center">
+            <p className="text-sm text-gray-700 dark:text-gray-100">
+              Loading...
+            </p>
+          </div>
+        ) : datasets.length > 0 ? (
           <ScrollArea className="h-[115px]">
             {datasets.map((dataset) => (
               <div
