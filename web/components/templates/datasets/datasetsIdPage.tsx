@@ -78,20 +78,6 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
     (row: any) => {
       if (selectModeHook) {
         toggleSelection(row);
-        // setSelectedRequestIds((prev) => {
-        //   const existingIndex = prev.findIndex((item) => item.id === row.id);
-        //   if (existingIndex !== -1) {
-        //     // If the row is already selected, remove it
-        //     return prev.filter((_, index) => index !== existingIndex);
-        //   } else {
-        //     // If the row is not selected, add it
-        //     return [
-        //       ...prev,
-        //       { id: row.id, origin_request_id: row.origin_request_id },
-        //     ];
-        //   }
-        // });
-        console.log(selectedRequestIds);
       } else {
         setSelectedRow(row);
         setSelectedRowIndex(row.index);
