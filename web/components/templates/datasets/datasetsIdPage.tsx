@@ -176,7 +176,7 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
       } else {
         setNotification("Failed to remove requests from dataset", "error");
       }
-      toggleSelectMode(false);
+
       setSelectedRequestIds([]);
     } catch (error) {
       setNotification("Failed to remove requests from dataset", "error");
@@ -330,7 +330,6 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
                           "error"
                         );
                       }
-                      toggleSelectMode(false);
                       setSelectedRequestIds([]);
                     }}
                     text="Duplicate"
