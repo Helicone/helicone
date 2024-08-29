@@ -42,12 +42,7 @@ const useGetHeliconeDatasetRows = (
   currentPageSize: number
 ) => {
   const org = useOrg();
-  type Rows = (NotNullAndUndefined<
-    NotNullAndUndefined<NotNullAndUndefined<typeof data>["data"]>["data"]
-  >[number] & {
-    request_response_body?: any;
-  })[];
-  const [rows, setRows] = useState<Rows>([]);
+  const [rows, setRows] = useState<any[]>([]);
 
   const {
     data,
@@ -55,7 +50,13 @@ const useGetHeliconeDatasetRows = (
     refetch: originalRefetch,
     isRefetching,
   } = useQuery({
-    queryKey: ["dataset", org?.currentOrg?.id, id],
+    queryKey: [
+      "dataset",
+      org?.currentOrg?.id,
+      id,
+      currentPage,
+      currentPageSize,
+    ],
     queryFn: async (query) => {
       const orgId = query.queryKey[1] as string;
       const datasetId = query.queryKey[2] as string;
@@ -76,10 +77,25 @@ const useGetHeliconeDatasetRows = (
   });
 
   const {
-    count,
+    data: countData,
     isLoading: isCountLoading,
     refetch: refetchCount,
-  } = useGetHeliconeDatasetCount(id);
+  } = useQuery({
+    queryKey: ["datasetCount", org?.currentOrg?.id, id],
+    queryFn: async (query) => {
+      const orgId = query.queryKey[1] as string;
+      const datasetId = query.queryKey[2] as string;
+      const jawn = getJawnClient(orgId);
+      return jawn.POST(`/v1/helicone-dataset/{datasetId}/count`, {
+        params: {
+          path: {
+            datasetId,
+          },
+        },
+      });
+    },
+    refetchOnWindowFocus: false,
+  });
 
   const rowsWithSignedUrls = useMemo(() => data?.data?.data ?? [], [data]);
 
@@ -115,10 +131,10 @@ const useGetHeliconeDatasetRows = (
   // Custom refetch function
   const refetch = async () => {
     const result = await originalRefetch();
-    await refetchCount();
     if (result.data?.data?.data) {
       setRows(result.data.data.data);
     }
+    await refetchCount(); // Refetch the count when rows are refetched
     return result;
   };
 
@@ -133,7 +149,7 @@ const useGetHeliconeDatasetRows = (
     })),
     completedQueries: urlQueries.filter((query) => query.isSuccess).length,
     totalQueries: rowsWithSignedUrls.length,
-    count,
+    count: countData?.data?.data ?? 0,
     isCountLoading,
   };
 };
