@@ -397,16 +397,15 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
           }}
         />
       </ThemedModal>
-      <ThemedModal open={showRemoveModal} setOpen={setShowRemoveModal}>
-        <RemoveRequestsModal
-          requestCount={selectedRequestIds.length}
-          onConfirm={() => {
-            handleRemoveRequests();
-            setShowRemoveModal(false);
-          }}
-          onCancel={() => setShowRemoveModal(false)}
-        />
-      </ThemedModal>
+      <RemoveRequestsModal
+        open={showRemoveModal}
+        setOpen={setShowRemoveModal}
+        requestCount={selectedRequestIds.length}
+        onConfirm={() => {
+          handleRemoveRequests();
+          setShowRemoveModal(false);
+        }}
+      />
     </>
   );
 };

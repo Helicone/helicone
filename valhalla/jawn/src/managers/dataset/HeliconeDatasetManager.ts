@@ -163,6 +163,33 @@ export class HeliconeDatasetManager extends BaseManager {
     return ok(null);
   }
 
+  async updateDatasetRequest(
+    datasetId: string,
+    requestId: string,
+    params: {
+      requestBody: Json;
+      responseBody: Json;
+    }
+  ): Promise<Result<null, string>> {
+    if (!requestId) return err("Request ID is required");
+    const key = this.s3Client.getDatasetKey(
+      datasetId,
+      requestId,
+      this.authParams.organizationId
+    );
+
+    const updatedData = JSON.stringify({
+      request: params.requestBody,
+      response: params.responseBody,
+    });
+
+    const s3result = await this.s3Client.store(key, updatedData);
+
+    if (s3result.error) return err(s3result.error);
+
+    return ok(null);
+  }
+
   private async addRequests(
     datasetId: string,
     addRequests: string[]

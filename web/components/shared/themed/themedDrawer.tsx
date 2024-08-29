@@ -1,3 +1,4 @@
+import React, { useRef, useEffect } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import {
   ArrowsPointingOutIcon,
@@ -5,28 +6,30 @@ import {
 } from "@heroicons/react/20/solid";
 import { ArrowsPointingInIcon } from "@heroicons/react/24/outline";
 import { Tooltip } from "@mui/material";
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useState } from "react";
 import { clsx } from "../clsx";
 import { useTheme } from "../theme/themeContext";
 
 interface ThemedDrawerProps {
   open: boolean;
   setOpen: (open: boolean) => void;
+  isModalOpen?: boolean; // Add this line
   children: React.ReactNode;
   actions?: React.ReactNode;
   defaultExpanded?: boolean;
   defaultWidth?: string;
 }
 
-const ThemedDrawer = (props: ThemedDrawerProps) => {
-  const {
-    open,
-    setOpen,
-    children,
-    actions,
-    defaultExpanded = false,
-    defaultWidth = "md:min-w-[60rem] w-full md:w-[60vw]",
-  } = props;
+const ThemedDrawer: React.FC<ThemedDrawerProps> = ({
+  open,
+  setOpen,
+  isModalOpen = false, // Add this line
+  children,
+  actions,
+  defaultExpanded = false,
+  defaultWidth = "md:min-w-[60rem] w-full md:w-[60vw]",
+}) => {
+  const drawerRef = useRef<HTMLDivElement>(null);
 
   const [expanded, setExpanded] = useState(defaultExpanded);
 
@@ -35,6 +38,23 @@ const ThemedDrawer = (props: ThemedDrawerProps) => {
   useEffect(() => {
     setExpanded(false);
   }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        drawerRef.current &&
+        !drawerRef.current.contains(event.target as Node) &&
+        !isModalOpen // Add this condition
+      ) {
+        setOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [setOpen, isModalOpen]); // Add isModalOpen to the dependency array
 
   return (
     <Transition.Root show={open} as={Fragment}>

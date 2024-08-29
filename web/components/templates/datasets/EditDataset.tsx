@@ -2,6 +2,9 @@ import React from "react";
 import { Row } from "../../layout/common";
 import MarkdownEditor from "../../shared/markdownEditor";
 import { DatasetRow } from "./datasetsIdPage";
+import { ArrowUpRightIcon } from "@heroicons/react/24/outline";
+import { styled } from "@mui/material/styles";
+import Tooltip, { TooltipProps, tooltipClasses } from "@mui/material/Tooltip";
 
 interface EditDatasetProps {
   selectedRow: DatasetRow;
@@ -11,6 +14,18 @@ interface EditDatasetProps {
   onRequestBodyChange: (text: string) => void;
   onResponseBodyChange: (text: string) => void;
 }
+
+const BlackTooltip = styled(({ className, ...props }: TooltipProps) => (
+  <Tooltip {...props} classes={{ popper: className }} />
+))(({ theme }) => ({
+  [`& .${tooltipClasses.arrow}`]: {
+    color: theme.palette.common.black,
+  },
+  [`& .${tooltipClasses.tooltip}`]: {
+    backgroundColor: theme.palette.common.black,
+    fontSize: "0.8rem",
+  },
+}));
 
 const EditDataset: React.FC<EditDatasetProps> = ({
   selectedRow,
@@ -22,8 +37,24 @@ const EditDataset: React.FC<EditDatasetProps> = ({
 }) => {
   return (
     <div className="flex flex-col space-y-4">
-      <Row className="justify-between">
+      <Row className="justify-start items-center space-x-2">
         <h2 className="text-2xl font-semibold">{selectedRow?.id}</h2>
+        <BlackTooltip
+          title="View original request"
+          className="cursor-pointer"
+          placement="top"
+        >
+          <ArrowUpRightIcon
+            className="h-5 w-5 text-gray-500 cursor-pointer"
+            onClick={() => {
+              console.log(process.env.NEXT_PUBLIC_API_URL);
+              window.open(
+                `/requests?requestId=${selectedRow?.origin_request_id}`,
+                "_blank"
+              );
+            }}
+          />
+        </BlackTooltip>
       </Row>
       <div className="flex flex-col space-y-4">
         <Row className="gap-5 ">
