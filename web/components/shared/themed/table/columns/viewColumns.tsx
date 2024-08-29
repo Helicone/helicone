@@ -21,6 +21,7 @@ interface ViewColumnsProps<T> {
   columns: Column<T, unknown>[];
   activeColumns: DragColumnItem[];
   setActiveColumns: (columns: DragColumnItem[]) => void;
+  isDatasetsPage?: boolean;
 }
 
 export default function ViewColumns<T>(props: ViewColumnsProps<T>) {
@@ -75,7 +76,13 @@ export default function ViewColumns<T>(props: ViewColumnsProps<T>) {
         leaveFrom="transform opacity-100 scale-100"
         leaveTo="transform opacity-0 scale-95"
       >
-        <Menu.Items className="border border-gray-300 dark:border-gray-700 absolute z-10 right-0 sm:-right-40 mt-2 mx-auto w-[calc(100vw-2rem)] sm:w-[calc(100vw-4rem)] md:w-[calc(100vw-8rem)] max-w-4xl origin-top-right rounded-lg bg-white dark:bg-black shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none h-[66vh] overflow-hidden">
+        <Menu.Items
+          className={`border border-gray-300 dark:border-gray-700 absolute z-10 right-0 sm:-right-40 mt-2 mx-auto w-[calc(100vw-2rem)] sm:w-[calc(100vw-4rem)] md:w-[calc(100vw-8rem)] max-w-4xl origin-top-right rounded-lg bg-white dark:bg-black shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none h-[66vh] overflow-hidden ${
+            props.isDatasetsPage
+              ? "border border-gray-300 dark:border-gray-700 absolute z-10 right-0 sm:-right-0 mt-2 mx-auto w-[calc(100vw-2rem)] sm:w-[calc(100vw-4rem)] md:w-[calc(100vw-8rem)] max-w-4xl origin-top-right rounded-lg bg-white dark:bg-black shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none h-[66vh] overflow-hidden"
+              : "border border-gray-300 dark:border-gray-700 absolute z-10 right-0 sm:-right-40 mt-2 mx-auto w-[calc(100vw-2rem)] sm:w-[calc(100vw-4rem)] md:w-[calc(100vw-8rem)] max-w-4xl origin-top-right rounded-lg bg-white dark:bg-black shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none h-[66vh] overflow-hidden"
+          }`}
+        >
           <Row className="h-full">
             <Col className="relative flex-1 h-full p-4">
               <div className="flex flex-row items-center justify-start space-x-2 mb-4">

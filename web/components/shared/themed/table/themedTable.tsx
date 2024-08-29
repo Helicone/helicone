@@ -79,6 +79,8 @@ interface ThemedTableV5Props<T extends { id?: string }> {
   children?: React.ReactNode;
   onSelectAll?: (checked: boolean) => void;
   selectedIds?: string[];
+  fullWidth?: boolean;
+  isDatasetsPage?: boolean;
 }
 
 export type RequestViews = "table" | "card" | "row";
@@ -110,6 +112,8 @@ export default function ThemedTable<T extends { id?: string }>(
     children,
     onSelectAll,
     selectedIds,
+    fullWidth,
+    isDatasetsPage,
   } = props;
 
   const [view, setView] = useLocalStorage<RequestViews>("view", "table");
@@ -164,6 +168,7 @@ export default function ThemedTable<T extends { id?: string }>(
   return (
     <div className="flex flex-col space-y-4">
       <ThemedTableHeader
+        isDatasetsPage={isDatasetsPage}
         onDataSet={onDataSet}
         advancedFilters={
           advancedFilters
@@ -231,19 +236,25 @@ export default function ThemedTable<T extends { id?: string }>(
           properties={makeRow.properties}
         />
       ) : (
-        <div className="bg-white dark:bg-black rounded-lg border border-gray-300 dark:border-gray-700 py-2 px-4">
+        <div
+          className={clsx(
+            "bg-white dark:bg-black rounded-lg border border-gray-300 dark:border-gray-700 py-2 px-4",
+            fullWidth && "w-full"
+          )}
+        >
           <div
             className="text-sm"
             style={{
               boxSizing: "border-box",
               overflowX: "auto",
               overflowY: "visible",
+              width: fullWidth ? "100%" : table.getCenterTotalSize(),
             }}
           >
             <table
               {...{
                 style: {
-                  width: table.getCenterTotalSize(),
+                  width: fullWidth ? "100%" : table.getCenterTotalSize(),
                 },
               }}
             >

@@ -78,6 +78,7 @@ const DatasetsPage = (props: DatasetsPageProps) => {
         </div>
       ) : (
         <ThemedTable
+          isDatasetsPage={true}
           defaultColumns={[
             {
               header: "Name",
@@ -116,6 +117,7 @@ const DatasetsPage = (props: DatasetsPageProps) => {
           onRowSelect={(row) => {
             router.push(`/datasets/${row.id}`);
           }}
+          fullWidth={true}
         />
       )}
     </>
