@@ -55,9 +55,6 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
   const [selectedDataIndex, setSelectedDataIndex] = useState<number>();
   const [open, setOpen] = useState(false);
   const [showNewDatasetModal, setShowNewDatasetModal] = useState(false);
-  const [selectedRequestIds, setSelectedRequestIds] = useState<
-    Array<{ id: string; origin_request_id: string }>
-  >([]);
   const [showRemoveModal, setShowRemoveModal] = useState(false);
 
   const {
@@ -73,27 +70,36 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
 
   const [selectedRowIndex, setSelectedRowIndex] = useState<number | null>(null);
 
-  // Update selectedRequestIds when selectedIds changes
-  useEffect(() => {
-    setSelectedRequestIds(
-      rows
-        .filter((row) => selectedIds.includes(row.id))
-        .map((row) => ({
-          id: row.id,
-          origin_request_id: row.origin_request_id,
-        }))
-    );
-  }, [selectedIds, rows]);
+  const [selectedRequestIds, setSelectedRequestIds] = useState<
+    Array<{ id: string; origin_request_id: string }>
+  >([]);
 
-  const onRowSelectHandler = (row: any, index: number) => {
-    if (selectModeHook) {
-      toggleSelection(row);
-    } else {
-      setSelectedRow(row);
-      setSelectedRowIndex(index);
-      setOpen(true);
-    }
-  };
+  const onRowSelectHandler = useCallback(
+    (row: any) => {
+      if (selectModeHook) {
+        toggleSelection(row);
+        // setSelectedRequestIds((prev) => {
+        //   const existingIndex = prev.findIndex((item) => item.id === row.id);
+        //   if (existingIndex !== -1) {
+        //     // If the row is already selected, remove it
+        //     return prev.filter((_, index) => index !== existingIndex);
+        //   } else {
+        //     // If the row is not selected, add it
+        //     return [
+        //       ...prev,
+        //       { id: row.id, origin_request_id: row.origin_request_id },
+        //     ];
+        //   }
+        // });
+        console.log(selectedRequestIds);
+      } else {
+        setSelectedRow(row);
+        setSelectedRowIndex(row.index);
+        setOpen(true);
+      }
+    },
+    [selectModeHook, toggleSelection]
+  );
 
   const handlePrevious = () => {
     if (selectedRowIndex !== null && selectedRowIndex > 0) {
@@ -109,27 +115,28 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
     }
   };
 
-  // Update handleSelectAll
-  const handleSelectAll = (isSelected: boolean) => {
-    selectAll();
-    if (isSelected) {
-      setSelectedRequestIds(
-        rows
-          .map((row) => ({
-            id: row.id,
-            origin_request_id: row.origin_request_id,
-          }))
-          .filter(
-            (item): item is { id: string; origin_request_id: string } =>
-              item.id !== undefined && item.origin_request_id !== undefined
-          )
-      );
-    } else {
-      setSelectedRequestIds([]);
-    }
-  };
+  const handleSelectAll = useCallback(
+    (isSelected: boolean) => {
+      selectAll();
+      if (isSelected) {
+        setSelectedRequestIds(
+          rows
+            .map((row) => ({
+              id: row.id,
+              origin_request_id: row.origin_request_id,
+            }))
+            .filter(
+              (item): item is { id: string; origin_request_id: string } =>
+                item.id !== undefined && item.origin_request_id !== undefined
+            )
+        );
+      } else {
+        setSelectedRequestIds([]);
+      }
+    },
+    [rows, selectAll]
+  );
 
-  // Update the page state and router query when the page changes
   const handlePageChange = useCallback(
     (newPage: number) => {
       router.push(
@@ -144,7 +151,6 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
     [router]
   );
 
-  // Sync the page state with the router query on component mount
   useEffect(() => {
     const pageFromQuery = router.query.page;
     if (pageFromQuery && !Array.isArray(pageFromQuery)) {
@@ -198,7 +204,6 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
       if (res.data && !res.data.error) {
         setNotification("Requests removed from dataset", "success");
         await refetch();
-        // Clear selection after successful removal
         setSelectedRequestIds([]);
         toggleSelectMode(false);
       } else {
@@ -284,9 +289,7 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
           dataLoading={isLoading}
           id="datasets"
           skeletonLoading={false}
-          onRowSelect={(row, index) => {
-            onRowSelectHandler(row, index);
-          }}
+          onRowSelect={onRowSelectHandler}
           customButtons={[
             <div key={"dataset-button"}>
               <DatasetButton
