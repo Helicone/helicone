@@ -109,6 +109,11 @@ const DatasetsPage = (props: DatasetsPageProps) => {
                 );
               },
             },
+            {
+              header: "Requests Count",
+              accessorKey: "requests_count",
+              minSize: 200,
+            },
           ]}
           defaultData={datasets}
           dataLoading={isLoading}
