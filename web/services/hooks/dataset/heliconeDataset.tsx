@@ -75,7 +75,11 @@ const useGetHeliconeDatasetRows = (
     refetchOnWindowFocus: false,
   });
 
-  const { count, isLoading: isCountLoading } = useGetHeliconeDatasetCount(id);
+  const {
+    count,
+    isLoading: isCountLoading,
+    refetch: refetchCount,
+  } = useGetHeliconeDatasetCount(id);
 
   const rowsWithSignedUrls = useMemo(() => data?.data?.data ?? [], [data]);
 
@@ -111,6 +115,7 @@ const useGetHeliconeDatasetRows = (
   // Custom refetch function
   const refetch = async () => {
     const result = await originalRefetch();
+    await refetchCount();
     if (result.data?.data?.data) {
       setRows(result.data.data.data);
     }
