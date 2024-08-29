@@ -40,7 +40,6 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
   const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);
   const { rows, isLoading, refetch, count, isCountLoading } =
     useGetHeliconeDatasetRows(id, page, currentPageSize);
-  console.log(count);
   const { datasets, isLoading: isLoadingDataset } = useGetHeliconeDatasets([
     id,
   ]);
@@ -51,7 +50,7 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
   const [selectedDataIndex, setSelectedDataIndex] = useState<number>();
   const [open, setOpen] = useState(false);
   const [showNewDatasetModal, setShowNewDatasetModal] = useState(false);
-  const [selectedRequestIds, setSelectedRequestIds] = useState<string[]>([]);
+  const [selectedRequestIds, setSelectedRequestIds] = useState<Array<{id: string, origin_request_id: string}>>([]);
 
   const {
     selectMode: selectModeHook,
@@ -69,10 +68,13 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
       toggleSelection(row);
       // Update selectedRequestIds when a row is selected or deselected
       setSelectedRequestIds((prev) => {
-        if (prev.includes(row.origin_request_id)) {
-          return prev.filter((id) => id !== row.origin_request_id);
+        const existingIndex = prev.findIndex(item => item.id === row.id);
+        if (existingIndex !== -1) {
+          // If the row is already selected, remove it
+          return prev.filter((_, index) => index !== existingIndex);
         } else {
-          return [...prev, row.origin_request_id];
+          // If the row is not selected, add it
+          return [...prev, { id: row.id, origin_request_id: row.origin_request_id }];
         }
       });
     } else {
@@ -82,14 +84,15 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
     }
   };
 
-  // Update selectedRequestIds when selectAll is called
+  // Update handleSelectAll
   const handleSelectAll = (isSelected: boolean) => {
     selectAll();
     if (isSelected) {
       setSelectedRequestIds(
         rows
-          .map((row) => row.origin_request_id)
-          .filter((id): id is string => id !== undefined)
+          .map((row) => ({ id: row.id, origin_request_id: row.origin_request_id }))
+          .filter((item): item is { id: string, origin_request_id: string } => 
+            item.id !== undefined && item.origin_request_id !== undefined)
       );
     } else {
       setSelectedRequestIds([]);
@@ -243,12 +246,36 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
                     </div>
                   </button>
                   <button
-                    onClick={() => {
-                      // Implement duplicate functionality later
-                      setNotification(
-                        "Duplicate functionality coming soon",
-                        "info"
+                    onClick={async () => {
+                      const res = await jawn.POST(
+                        `/v1/helicone-dataset/{datasetId}/mutate`,
+                        {
+                          params: {
+                            path: {
+                              datasetId: id,
+                            },
+                          },
+                          body: {
+                            addRequests: selectedRequestIds.map(item => item.origin_request_id),
+                            removeRequests: [],
+                          },
+                        }
                       );
+                      console.log("ids", selectedRequestIds);
+                      if (res.data && !res.data.error) {
+                        setNotification(
+                          "Requests duplicated to this dataset",
+                          "success"
+                        );
+                        await refetch();
+                      } else {
+                        setNotification(
+                          "Failed to duplicate requests to this dataset",
+                          "error"
+                        );
+                      }
+                      toggleSelectMode(false);
+                      setSelectedRequestIds([]); // Clear selection after duplication
                     }}
                     className={clsx(
                       "relative inline-flex items-center rounded-md hover:bg-green-700 bg-green-500 px-4 py-2 text-sm font-medium text-white"
@@ -323,7 +350,7 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
       </ThemedDrawer>
       <ThemedModal open={showNewDatasetModal} setOpen={setShowNewDatasetModal}>
         <NewDataset
-          request_ids={selectedRequestIds}
+          request_ids={selectedRequestIds.map(item => item.origin_request_id)}
           isCopyMode={true}
           onComplete={() => {
             setShowNewDatasetModal(false);
