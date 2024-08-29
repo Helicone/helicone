@@ -25,6 +25,27 @@ function formatNumber(num: number) {
   }
 }
 
+const convertToUSDateFormat = (date: string) => {
+  const dateObj = new Date(date);
+  const tzOffset = dateObj.getTimezoneOffset() * 60000;
+
+  const localDateObj = new Date(dateObj.getTime() - tzOffset);
+  const formattedDate =
+    [
+      ("0" + (localDateObj.getMonth() + 1)).slice(-2),
+      ("0" + localDateObj.getDate()).slice(-2),
+      localDateObj.getFullYear(),
+    ].join("/") +
+    " " +
+    [
+      ("0" + localDateObj.getHours()).slice(-2),
+      ("0" + localDateObj.getMinutes()).slice(-2),
+      ("0" + localDateObj.getSeconds()).slice(-2),
+    ].join(":");
+
+  return formattedDate;
+};
+
 export const getInitialColumns: (
   isCached?: boolean
 ) => ColumnDef<NormalizedRequest>[] = (isCached = false) => [
@@ -34,7 +55,7 @@ export const getInitialColumns: (
     header: "Created At",
     cell: (info) => (
       <span className="text-gray-900 dark:text-gray-100 font-medium">
-        {getUSDateFromString(info.getValue() as string)}
+        {getUSDateFromString(convertToUSDateFormat(info.getValue() as string))}
       </span>
     ),
     meta: {
@@ -47,8 +68,13 @@ export const getInitialColumns: (
     accessorKey: "status",
     header: "Status",
     cell: (info) => {
-      const { code, statusType } =
-        info.getValue() as NormalizedRequest["status"];
+      const status = info.getValue() as NormalizedRequest["status"];
+
+      if (!status) {
+        return <span>{JSON.stringify(status)}</span>;
+      }
+
+      const { code, statusType } = status;
       return (
         <StatusBadge
           statusType={isCached ? "cached" : statusType}
@@ -162,12 +188,16 @@ export const getInitialColumns: (
   },
   {
     id: "feedback",
-    accessorKey: "feedback",
+    accessorKey: "scores",
     header: "Feedback",
     cell: (info) => {
-      const feedback = info.getValue() as NormalizedRequest["feedback"];
-      const rating = feedback?.rating;
-
+      const scores = info.getValue() as NormalizedRequest["scores"];
+      const rating =
+        scores && scores["helicone-score-feedback"]
+          ? Number(scores["helicone-score-feedback"]) === 1
+            ? true
+            : false
+          : null;
       if (rating === null) {
         return <span className="text-gray-500"></span>;
       }

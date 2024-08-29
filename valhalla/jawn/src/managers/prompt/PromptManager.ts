@@ -4,6 +4,7 @@ import {
   PromptQueryParams,
   PromptResult,
   PromptVersionResult,
+  PromptVersionResultCompiled,
   PromptsQueryParams,
   PromptsResult,
 } from "../../controllers/public/promptController";
@@ -14,6 +15,7 @@ import { buildFilterPostgres } from "../../lib/shared/filters/filters";
 import { resultMap } from "../../lib/shared/result";
 import { User } from "../../models/user";
 import { BaseManager } from "../BaseManager";
+import { autoFillInputs } from "@helicone/prompts";
 
 export class PromptManager extends BaseManager {
   async createNewPromptVersion(
@@ -105,6 +107,63 @@ export class PromptManager extends BaseManager {
     );
 
     return result;
+  }
+
+  async getCompiledPromptVersions(
+    filter: FilterNode,
+    inputs: Record<string, string>
+  ): Promise<Result<PromptVersionResultCompiled, string>> {
+    const filterWithAuth = buildFilterPostgres({
+      filter,
+      argsAcc: [this.authParams.organizationId],
+    });
+
+    const result = await dbExecute<{
+      id: string;
+      minor_version: number;
+      major_version: number;
+      helicone_template: string;
+      prompt_v2: string;
+      model: string;
+      auto_prompt_inputs: any;
+    }>(
+      `
+    SELECT 
+      prompts_versions.id,
+      minor_version,
+      major_version,
+      helicone_template,
+      prompt_v2,
+      model,
+      prompt_input_record.auto_prompt_inputs
+    FROM prompts_versions
+    left join prompt_v2 on prompt_v2.id = prompts_versions.prompt_v2
+    left join prompt_input_record on prompt_input_record.prompt_version = prompts_versions.id
+    WHERE prompt_v2.organization = $1
+    AND prompt_v2.soft_delete = false
+    AND (${filterWithAuth.filter})
+    `,
+      filterWithAuth.argsAcc
+    );
+
+    if (result.error || !result.data || result.data.length === 0) {
+      return err("Failed to get compiled prompt versions");
+    }
+
+    const lastVersion = result.data[result.data.length - 1];
+
+    return ok({
+      id: lastVersion.id,
+      minor_version: lastVersion.minor_version,
+      major_version: lastVersion.major_version,
+      prompt_v2: lastVersion.prompt_v2,
+      model: lastVersion.model,
+      prompt_compiled: autoFillInputs({
+        inputs: inputs,
+        autoInputs: lastVersion.auto_prompt_inputs,
+        template: lastVersion.helicone_template,
+      }),
+    });
   }
 
   async getPrompts(

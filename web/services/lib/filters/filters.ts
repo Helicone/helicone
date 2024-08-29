@@ -150,7 +150,7 @@ const whereKeyMappings: KeyMappings = {
     job_id: "request_response_log.job_id",
     threat: "request_response_log.threat",
   }),
-  request_response_versioned: (filter, placeValueSafely) => {
+  request_response_rmt: (filter, placeValueSafely) => {
     if ("properties" in filter && filter.properties) {
       const key = Object.keys(filter.properties)[0];
       const { operator, value } = extractOperatorAndValueFromAnOperator(
@@ -173,17 +173,34 @@ const whereKeyMappings: KeyMappings = {
         value: placeValueSafely(value),
       };
     }
-    return easyKeyMappings<"request_response_versioned">({
-      latency: "request_response_versioned.latency",
-      status: "request_response_versioned.status",
-      request_created_at: "request_response_versioned.request_created_at",
-      response_created_at: "request_response_versioned.response_created_at",
-      model: "request_response_versioned.model",
-      user_id: "request_response_versioned.user_id",
-      organization_id: "request_response_versioned.organization_id",
-      node_id: "request_response_versioned.node_id",
-      job_id: "request_response_versioned.job_id",
-      threat: "request_response_versioned.threat",
+    if ("scores" in filter && filter.scores) {
+      const key = Object.keys(filter.scores)[0];
+      const { operator, value } = extractOperatorAndValueFromAnOperator(
+        filter.scores[key as keyof typeof filter.scores]
+      );
+      return {
+        column: `has(scores, ${placeValueSafely(
+          key
+        )}) AND scores[${placeValueSafely(key)}]`,
+        operator: operator,
+        value: value,
+      };
+    }
+    return easyKeyMappings<"request_response_rmt">({
+      latency: "request_response_rmt.latency",
+      status: "request_response_rmt.status",
+      request_created_at: "request_response_rmt.request_created_at",
+      response_created_at: "request_response_rmt.response_created_at",
+      model: "request_response_rmt.model",
+      user_id: "request_response_rmt.user_id",
+      organization_id: "request_response_rmt.organization_id",
+      node_id: "request_response_rmt.node_id",
+      job_id: "request_response_rmtd",
+      threat: "request_response_rmt.threat",
+      prompt_tokens: "request_response_rmt.prompt_tokens",
+      completion_tokens: "request_response_rmt.completion_tokens",
+      request_body: "request_response_rmt.request_body",
+      response_body: "request_response_rmt.response_body",
     })(filter, placeValueSafely);
   },
   request_response_search: (filter, placeValueSafely) => {
@@ -251,7 +268,7 @@ const havingKeyMappings: KeyMappings = {
   response: NOT_IMPLEMENTED,
   properties_table: NOT_IMPLEMENTED,
   request_response_log: NOT_IMPLEMENTED,
-  request_response_versioned: (filter, placeValueSafely) => {
+  request_response_rmt: (filter, placeValueSafely) => {
     if ("properties" in filter && filter.properties) {
       const key = Object.keys(filter.properties)[0];
       const { operator, value } = extractOperatorAndValueFromAnOperator(
@@ -274,17 +291,30 @@ const havingKeyMappings: KeyMappings = {
         value: placeValueSafely(value),
       };
     }
-    return easyKeyMappings<"request_response_versioned">({
-      latency: "request_response_versioned.latency",
-      status: "request_response_versioned.status",
-      request_created_at: "request_response_versioned.request_created_at",
-      response_created_at: "request_response_versioned.response_created_at",
-      model: "request_response_versioned.model",
-      user_id: "request_response_versioned.user_id",
-      organization_id: "request_response_versioned.organization_id",
-      node_id: "request_response_versioned.node_id",
-      job_id: "request_response_versioned.job_id",
-      threat: "request_response_versioned.threat",
+    if ("scores" in filter && filter.scores) {
+      const key = Object.keys(filter.scores)[0];
+      const { operator, value } = extractOperatorAndValueFromAnOperator(
+        filter.scores[key as keyof typeof filter.scores]
+      );
+      return {
+        column: `has(scores, ${placeValueSafely(
+          key
+        )}) AND scores[${placeValueSafely(key)}]`,
+        operator: operator,
+        value: value,
+      };
+    }
+    return easyKeyMappings<"request_response_rmt">({
+      latency: "request_response_rmt",
+      status: "request_response_rmt.status",
+      request_created_at: "request_response_rmt.request_created_at",
+      response_created_at: "request_response_rmt.response_created_at",
+      model: "request_response_rmt.model",
+      user_id: "request_response_rmt.user_id",
+      organization_id: "request_response_rmt.organization_id",
+      node_id: "request_response_rmt.node_id",
+      job_id: "request_response_rmt.job_id",
+      threat: "request_response_rmt.threat",
     })(filter, placeValueSafely);
   },
   request_response_search: NOT_IMPLEMENTED,
@@ -365,7 +395,7 @@ export function buildFilterLeaf(
       filters.push(`${column} is null`);
     } else {
       if (operatorKey === "contains" || operatorKey === "not-contains") {
-        filters.push(`${column} ${sqlOperator} %${value}%`);
+        filters.push(`${column} ${sqlOperator} '%' || ${value}::text || '%'`);
       } else {
         filters.push(`${column} ${sqlOperator} ${value}`);
       }
@@ -493,7 +523,7 @@ export async function buildFilterWithAuthClickHouse(
   args: ExternalBuildFilterArgs & { org_id: string }
 ): Promise<{ filter: string; argsAcc: any[] }> {
   return buildFilterWithAuth(args, "clickhouse", (orgId) => ({
-    request_response_versioned: {
+    request_response_rmt: {
       organization_id: {
         equals: orgId,
       },
@@ -529,7 +559,7 @@ export async function buildFilterWithAuthClickHousePropertiesV2(
   args: ExternalBuildFilterArgs & { org_id: string }
 ): Promise<{ filter: string; argsAcc: any[] }> {
   return buildFilterWithAuth(args, "clickhouse", (orgId) => ({
-    request_response_versioned: {
+    request_response_rmt: {
       organization_id: {
         equals: orgId,
       },

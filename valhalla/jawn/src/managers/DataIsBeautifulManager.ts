@@ -57,7 +57,7 @@ export class DataIsBeautifulManager {
     const query = `
     SELECT
       COUNT(*) AS total
-    FROM request_response_versioned
+    FROM request_response_rmt
     WHERE ${andCondition(timeCondition, providerCondition, whereCondition)}
     `;
     const result = await clickhouseDb.dbQuery<{ total: number }>(query, []);
@@ -75,14 +75,14 @@ export class DataIsBeautifulManager {
     const query = `
     WITH total_count AS (
       SELECT COUNT(*) AS total
-      FROM request_response_versioned
+      FROM request_response_rmt
       WHERE status = '200'
         AND ${timeCondition}
     )
     SELECT
       provider AS provider,
       COUNT(*) * 100.0 / total_count.total AS percent
-    FROM request_response_versioned, total_count
+    FROM request_response_rmt, total_count
     WHERE status = '200'
       AND ${timeCondition}
       AND provider IN (${(
@@ -120,7 +120,7 @@ export class DataIsBeautifulManager {
     );
 
     // Generate the cost calculation using the clickhousePriceCalc function
-    const costCalculation = clickhousePriceCalc("request_response_versioned");
+    const costCalculation = clickhousePriceCalc("request_response_rmt");
 
     const query = `
   WITH
@@ -137,7 +137,7 @@ export class DataIsBeautifulManager {
         } AS matched_model,
         ${costCalculation} AS cost,
         model
-      FROM request_response_versioned rrv
+      FROM request_response_rmt rrv
       WHERE 
         ${andCondition(
           "status = '200'",
@@ -208,7 +208,7 @@ export class DataIsBeautifulManager {
          : "model AS matched_model"
      },
      COUNT(*) AS count
-  FROM request_response_versioned
+  FROM request_response_rmt
   WHERE 
     ${andCondition(
       "status = '200'",
@@ -292,7 +292,7 @@ export class DataIsBeautifulManager {
         quantile(0.99)(time_to_first_token / completion_tokens) AS ttft_normalized_p99,
         quantile(0.75)(time_to_first_token / completion_tokens) AS ttft_normalized_p75,
         FLOOR(prompt_tokens / 100) * 100 AS prompt_length
-    FROM request_response_versioned
+    FROM request_response_rmt
     WHERE status = 200 -- Include only successful requests
         AND prompt_tokens IS NOT NULL
         AND completion_tokens IS NOT NULL
@@ -336,7 +336,7 @@ export class DataIsBeautifulManager {
     const query = `
     WITH total_count AS (
       SELECT COUNT(*) AS total
-      FROM request_response_versioned
+      FROM request_response_rmt
       WHERE 
         ${andCondition("status = '200'", timeCondition, providerCondition)}
     )
@@ -351,7 +351,7 @@ export class DataIsBeautifulManager {
           : "model AS matched_model"
       },
       COUNT(*) * 100.0 / total_count.total AS percent
-    FROM request_response_versioned, total_count
+    FROM request_response_rmt, total_count
     WHERE 
       ${andCondition(
         "status = '200'",
@@ -388,7 +388,7 @@ export class DataIsBeautifulManager {
       END AS provider,
       formatDateTime(request_created_at, '%Y-%m-%d') AS date,
       SUM(completion_tokens) + SUM(prompt_tokens) AS tokens
-    FROM request_response_versioned
+    FROM request_response_rmt
     WHERE prompt_tokens IS NOT NULL
     AND status = 200
     AND completion_tokens IS NOT NULL
@@ -421,7 +421,7 @@ export class DataIsBeautifulManager {
       END AS model,
       formatDateTime(request_created_at, '%Y-%m-%d') AS date,
       SUM(completion_tokens) + SUM(prompt_tokens) AS tokens
-    FROM request_response_versioned
+    FROM request_response_rmt
     WHERE prompt_tokens IS NOT NULL
     AND status = 200
     AND completion_tokens IS NOT NULL
@@ -444,11 +444,11 @@ export class DataIsBeautifulManager {
   }
 
   private async getTotalCost(): Promise<number> {
-    const costQuery = clickhousePriceCalc("request_response_versioned");
+    const costQuery = clickhousePriceCalc("request_response_rmt");
     const query = `
     SELECT
       ${costQuery} AS total_cost
-    FROM request_response_versioned
+    FROM request_response_rmt
     WHERE status = 200
     `;
 
@@ -468,7 +468,7 @@ export class DataIsBeautifulManager {
     SELECT
       COUNT(*) AS total_requests,
       SUM(completion_tokens) + SUM(prompt_tokens) AS total_tokens
-    FROM request_response_versioned 
+    FROM request_response_rmt 
     `;
 
     const result = await clickhouseDb.dbQuery<{

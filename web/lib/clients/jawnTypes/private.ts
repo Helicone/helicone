@@ -27,6 +27,9 @@ export interface paths {
   "/v1/prompt/{promptId}/versions/query": {
     post: operations["GetPromptVersions"];
   };
+  "/v1/prompt/{user_defined_id}/compile": {
+    post: operations["GetPromptVersionsCompiled"];
+  };
   "/v1/settings/query": {
     get: operations["GetSettings"];
   };
@@ -84,11 +87,26 @@ export interface paths {
   "/v1/demo/completion": {
     post: operations["DemoCompletion"];
   };
+  "/v1/alert/query": {
+    get: operations["GetAlerts"];
+  };
+  "/v1/alert/create": {
+    post: operations["CreateAlert"];
+  };
+  "/v1/alert/{alertId}": {
+    delete: operations["DeleteAlert"];
+  };
+  "/v1/admin/orgs/top-usage": {
+    post: operations["GetTopOrgsByUsage"];
+  };
   "/v1/admin/orgs/top": {
     post: operations["GetTopOrgs"];
   };
   "/v1/admin/admins/query": {
     get: operations["GetAdmins"];
+  };
+  "/v1/admin/whodis": {
+    post: operations["Whodis"];
   };
   "/v1/admin/settings/{name}": {
     get: operations["GetSetting"];
@@ -198,9 +216,9 @@ export interface components {
       minor_version: number;
       /** Format: double */
       major_version: number;
-      helicone_template: string;
       prompt_v2: string;
       model: string;
+      helicone_template: string;
     };
     ResultSuccess_PromptVersionResult_: {
       data: components["schemas"]["PromptVersionResult"];
@@ -236,6 +254,63 @@ export interface components {
       error: null;
     };
     "Result_PromptVersionResult-Array.string_": components["schemas"]["ResultSuccess_PromptVersionResult-Array_"] | components["schemas"]["ResultError_string_"];
+    /** @description Make all properties in T optional */
+    Partial_NumberOperators_: {
+      /** Format: double */
+      "not-equals"?: number;
+      /** Format: double */
+      equals?: number;
+      /** Format: double */
+      gte?: number;
+      /** Format: double */
+      lte?: number;
+      /** Format: double */
+      lt?: number;
+      /** Format: double */
+      gt?: number;
+    };
+    /** @description Make all properties in T optional */
+    Partial_PromptVersionsToOperators_: {
+      minor_version?: components["schemas"]["Partial_NumberOperators_"];
+      major_version?: components["schemas"]["Partial_NumberOperators_"];
+      id?: components["schemas"]["Partial_TextOperators_"];
+      prompt_v2?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description From T, pick a set of properties whose keys are in the union K */
+    "Pick_FilterLeaf.prompts_versions_": {
+      prompts_versions?: components["schemas"]["Partial_PromptVersionsToOperators_"];
+    };
+    FilterLeafSubset_prompts_versions_: components["schemas"]["Pick_FilterLeaf.prompts_versions_"];
+    PromptVersionsFilterNode: components["schemas"]["FilterLeafSubset_prompts_versions_"] | components["schemas"]["PromptVersionsFilterBranch"] | "all";
+    PromptVersionsFilterBranch: {
+      right: components["schemas"]["PromptVersionsFilterNode"];
+      /** @enum {string} */
+      operator: "or" | "and";
+      left: components["schemas"]["PromptVersionsFilterNode"];
+    };
+    PromptVersionsQueryParams: {
+      filter?: components["schemas"]["PromptVersionsFilterNode"];
+    };
+    PromptVersionResultCompiled: {
+      id: string;
+      /** Format: double */
+      minor_version: number;
+      /** Format: double */
+      major_version: number;
+      prompt_v2: string;
+      model: string;
+      prompt_compiled: unknown;
+    };
+    ResultSuccess_PromptVersionResultCompiled_: {
+      data: components["schemas"]["PromptVersionResultCompiled"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_PromptVersionResultCompiled.string_": components["schemas"]["ResultSuccess_PromptVersionResultCompiled_"] | components["schemas"]["ResultError_string_"];
+    PromptVersiosQueryParamsCompiled: {
+      filter?: components["schemas"]["PromptVersionsFilterNode"];
+      inputs: components["schemas"]["Record_string.string_"];
+    };
     ResultSuccess_null_: {
       /** @enum {number|null} */
       data: null;
@@ -349,7 +424,7 @@ Json: JsonObject;
       modelOverride?: string;
     };
     /** @enum {string} */
-    ProviderName: "OPENAI" | "ANTHROPIC" | "AZURE" | "LOCAL" | "HELICONE" | "AMDBARTEK" | "ANYSCALE" | "CLOUDFLARE" | "2YFV" | "TOGETHER" | "LEMONFOX" | "FIREWORKS" | "PERPLEXITY" | "GOOGLE" | "OPENROUTER" | "WISDOMINANUTSHELL" | "GROQ" | "COHERE" | "MISTRAL" | "DEEPINFRA" | "QSTASH";
+    ProviderName: "OPENAI" | "ANTHROPIC" | "AZURE" | "LOCAL" | "HELICONE" | "AMDBARTEK" | "ANYSCALE" | "CLOUDFLARE" | "2YFV" | "TOGETHER" | "LEMONFOX" | "FIREWORKS" | "PERPLEXITY" | "GOOGLE" | "OPENROUTER" | "WISDOMINANUTSHELL" | "GROQ" | "COHERE" | "MISTRAL" | "DEEPINFRA" | "QSTASH" | "FIRECRAWL";
     Provider: components["schemas"]["ProviderName"] | string | "CUSTOM";
     /**
      * @description Parses a string containing custom JSX-like tags and extracts information to produce two outputs:
@@ -823,6 +898,63 @@ Json: JsonObject;
      * are present.
      */
     ChatCompletionToolChoiceOption: components["schemas"]["ChatCompletionNamedToolChoice"] | ("none" | "auto" | "required");
+    AlertResponse: {
+      alerts: ({
+          updated_at: string | null;
+          /** Format: double */
+          time_window: number;
+          /** Format: double */
+          time_block_duration: number;
+          /** Format: double */
+          threshold: number;
+          status: string;
+          soft_delete: boolean;
+          org_id: string;
+          name: string;
+          /** Format: double */
+          minimum_request_count: number | null;
+          metric: string;
+          id: string;
+          emails: string[];
+          created_at: string | null;
+        })[];
+      history: ({
+          updated_at: string | null;
+          triggered_value: string;
+          status: string;
+          soft_delete: boolean;
+          org_id: string;
+          id: string;
+          created_at: string | null;
+          alert_start_time: string;
+          alert_name: string;
+          alert_metric: string;
+          alert_id: string;
+          alert_end_time: string | null;
+        })[];
+    };
+    ResultSuccess_AlertResponse_: {
+      data: components["schemas"]["AlertResponse"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_AlertResponse.string_": components["schemas"]["ResultSuccess_AlertResponse_"] | components["schemas"]["ResultError_string_"];
+    ResultSuccess_string_: {
+      data: string;
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_string.string_": components["schemas"]["ResultSuccess_string_"] | components["schemas"]["ResultError_string_"];
+    AlertRequest: {
+      name: string;
+      metric: string;
+      /** Format: double */
+      threshold: number;
+      time_window: string;
+      emails: string[];
+      /** Format: double */
+      minimum_request_count?: number;
+    };
     KafkaSettings: {
       /** Format: double */
       miniBatchSize: number;
@@ -962,7 +1094,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": Record<string, never>;
+        "application/json": components["schemas"]["PromptVersionsQueryParams"];
       };
     };
     responses: {
@@ -970,6 +1102,26 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_PromptVersionResult-Array.string_"];
+        };
+      };
+    };
+  };
+  GetPromptVersionsCompiled: {
+    parameters: {
+      path: {
+        user_defined_id: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PromptVersiosQueryParamsCompiled"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_PromptVersionResultCompiled.string_"];
         };
       };
     };
@@ -1330,6 +1482,99 @@ export interface operations {
       };
     };
   };
+  GetAlerts: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_AlertResponse.string_"];
+        };
+      };
+    };
+  };
+  CreateAlert: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AlertRequest"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_string.string_"];
+        };
+      };
+    };
+  };
+  DeleteAlert: {
+    parameters: {
+      path: {
+        alertId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  GetTopOrgsByUsage: {
+    requestBody: {
+      content: {
+        "application/json": {
+          /** Format: double */
+          minRequests: number;
+          /** Format: double */
+          limit: number;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            organizations: ({
+                usage: {
+                  /** Format: double */
+                  all_time_count: number;
+                  monthly_usage: {
+                      /** Format: double */
+                      requestCount: number;
+                      month: string;
+                    }[];
+                  /** Format: double */
+                  requests_last_30_days: number;
+                  /** Format: double */
+                  total_requests: number;
+                };
+                organization: {
+                  members: ({
+                      last_sign_in_at: string | null;
+                      role: string;
+                      name: string;
+                      email: string;
+                      id: string;
+                    })[];
+                  subscription_status: string | null;
+                  stripe_subscription_id: string | null;
+                  stripe_customer_id: string | null;
+                  tier: string;
+                  owner: string;
+                  created_at: string;
+                  name: string;
+                  id: string;
+                };
+              })[];
+          };
+        };
+      };
+    };
+  };
   GetTopOrgs: {
     requestBody: {
       content: {
@@ -1386,6 +1631,58 @@ export interface operations {
               id: number;
               created_at: string;
             })[];
+        };
+      };
+    };
+  };
+  Whodis: {
+    requestBody: {
+      content: {
+        "application/json": {
+          email?: string;
+          userId?: string;
+          organizationId?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            organizations: ({
+                usage: {
+                  /** Format: double */
+                  all_time_count: number;
+                  monthly_usage: {
+                      /** Format: double */
+                      requestCount: number;
+                      month: string;
+                    }[];
+                  /** Format: double */
+                  requests_last_30_days: number;
+                  /** Format: double */
+                  total_requests: number;
+                };
+                organization: {
+                  members: ({
+                      last_sign_in_at: string | null;
+                      role: string;
+                      name: string;
+                      email: string;
+                      id: string;
+                    })[];
+                  subscription_status: string | null;
+                  stripe_subscription_id: string | null;
+                  stripe_customer_id: string | null;
+                  tier: string;
+                  owner: string;
+                  created_at: string;
+                  name: string;
+                  id: string;
+                };
+              })[];
+          };
         };
       };
     };
@@ -1485,6 +1782,10 @@ export interface operations {
       200: {
         content: {
           "application/json": {
+            usersOverTime: {
+                day: string;
+                count: string;
+              }[];
             newUsersOvertime: {
                 day: string;
                 count: string;

@@ -102,7 +102,7 @@ const PortalIdPage = (props: PortalIdPageProps) => {
   );
 
   const orgLimits = org?.limits as OrgLimits;
-  const owner = members?.data?.find((member) => member.org_role === "owner");
+  const owner = members?.find((member) => member.org_role === "owner");
 
   return (
     <div className="flex flex-col space-y-4">
@@ -221,7 +221,7 @@ const PortalIdPage = (props: PortalIdPageProps) => {
                   <div className="flex flex-col items-start space-y-1">
                     <p className="text-sm font-semibold">Members</p>
                     <p className="text-sm text-gray-500">
-                      {members?.data?.length || "n/a"}
+                      {members?.length || "n/a"}
                     </p>
                   </div>
                 </div>

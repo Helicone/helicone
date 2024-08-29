@@ -52,8 +52,8 @@ export const SecretInput = (props: {
 
   const isOwner = org?.currentOrg?.owner === user?.id;
 
-  const members = data?.data
-    ? data?.data.map((d) => {
+  const members = data
+    ? data.map((d) => {
         return {
           ...d,
           isOwner: false,

@@ -34,7 +34,8 @@ export default function ThemedDropdown<T>(props: ThemedDropdownProps<T>) {
     disabled = false,
   } = props;
   let { options } = props;
-  const selected = options?.find((option) => option.value === selectedValue);
+  const selected =
+    options?.find((option) => option.value === selectedValue) || null;
   const categories: {
     [key: string]: DropdownOption<T>[];
   } = options
@@ -83,7 +84,11 @@ export default function ThemedDropdown<T>(props: ThemedDropdownProps<T>) {
 
   return (
     <div className={className}>
-      <Listbox value={selected?.value} onChange={onSelect} disabled={disabled}>
+      <Listbox
+        value={selected?.value || null}
+        onChange={onSelect}
+        disabled={disabled}
+      >
         {({ open }) => (
           <>
             <div className="relative">

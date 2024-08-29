@@ -1,0 +1,4 @@
+{
+  "title": "New hpstatic Function for Static Prompts in LLM Applications",
+  "description": "Introducing hpstatic: a new function in Helicone's Prompt Formatter for managing static prompts in LLM applications. Improve consistency in system prompts and invariable text elements across requests, enhancing prompt engineering efficiency for AI assistants and language model applications."
+}
