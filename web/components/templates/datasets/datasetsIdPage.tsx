@@ -73,23 +73,21 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
 
   const [selectedRowIndex, setSelectedRowIndex] = useState<number | null>(null);
 
+  // Update selectedRequestIds when selectedIds changes
+  useEffect(() => {
+    setSelectedRequestIds(
+      rows
+        .filter((row) => selectedIds.includes(row.id))
+        .map((row) => ({
+          id: row.id,
+          origin_request_id: row.origin_request_id,
+        }))
+    );
+  }, [selectedIds, rows]);
+
   const onRowSelectHandler = (row: any, index: number) => {
     if (selectModeHook) {
       toggleSelection(row);
-      // Update selectedRequestIds when a row is selected or deselected
-      setSelectedRequestIds((prev) => {
-        const existingIndex = prev.findIndex((item) => item.id === row.id);
-        if (existingIndex !== -1) {
-          // If the row is already selected, remove it
-          return prev.filter((_, index) => index !== existingIndex);
-        } else {
-          // If the row is not selected, add it
-          return [
-            ...prev,
-            { id: row.id, origin_request_id: row.origin_request_id },
-          ];
-        }
-      });
     } else {
       setSelectedRow(row);
       setSelectedRowIndex(index);
@@ -157,6 +155,33 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
     }
   }, [router.query.page, page]);
 
+  const handleDuplicateRequests = async () => {
+    try {
+      const res = await jawn.POST(`/v1/helicone-dataset/{datasetId}/mutate`, {
+        params: {
+          path: {
+            datasetId: id,
+          },
+        },
+        body: {
+          addRequests: selectedRequestIds.map((item) => item.origin_request_id),
+          removeRequests: [],
+        },
+      });
+      if (res.data && !res.data.error) {
+        setNotification("Requests duplicated to this dataset", "success");
+        await refetch();
+      } else {
+        setNotification(
+          "Failed to duplicate requests to this dataset",
+          "error"
+        );
+      }
+    } catch (error) {
+      setNotification("Failed to duplicate requests to this dataset", "error");
+    }
+  };
+
   const handleRemoveRequests = async () => {
     try {
       const res = await jawn.POST(`/v1/helicone-dataset/{datasetId}/mutate`, {
@@ -173,11 +198,12 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
       if (res.data && !res.data.error) {
         setNotification("Requests removed from dataset", "success");
         await refetch();
+        // Clear selection after successful removal
+        setSelectedRequestIds([]);
+        toggleSelectMode(false);
       } else {
         setNotification("Failed to remove requests from dataset", "error");
       }
-
-      setSelectedRequestIds([]);
     } catch (error) {
       setNotification("Failed to remove requests from dataset", "error");
     }
@@ -213,7 +239,7 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
         <ThemedTable
           highlightedIds={selectedIds}
           showCheckboxes={selectModeHook}
-          fullWidth={true}
+          fullWidth={false}
           defaultColumns={[
             {
               header: "Created At",
@@ -302,37 +328,7 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
                     }
                   ></GenericButton>
                   <GenericButton
-                    onClick={async () => {
-                      const res = await jawn.POST(
-                        `/v1/helicone-dataset/{datasetId}/mutate`,
-                        {
-                          params: {
-                            path: {
-                              datasetId: id,
-                            },
-                          },
-                          body: {
-                            addRequests: selectedRequestIds.map(
-                              (item) => item.origin_request_id
-                            ),
-                            removeRequests: [],
-                          },
-                        }
-                      );
-                      if (res.data && !res.data.error) {
-                        setNotification(
-                          "Requests duplicated to this dataset",
-                          "success"
-                        );
-                        await refetch();
-                      } else {
-                        setNotification(
-                          "Failed to duplicate requests to this dataset",
-                          "error"
-                        );
-                      }
-                      setSelectedRequestIds([]);
-                    }}
+                    onClick={handleDuplicateRequests}
                     text="Duplicate"
                     icon={
                       <Square2StackIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
