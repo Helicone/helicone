@@ -13,7 +13,11 @@ import {
 } from "../requestsV2/helpers";
 import EditDataset from "./EditDataset";
 import DatasetButton from "../requestsV2/buttons/datasetButton";
-import { TrashIcon } from "@heroicons/react/24/outline";
+import {
+  FolderPlusIcon,
+  Square2StackIcon,
+  TrashIcon,
+} from "@heroicons/react/24/outline";
 import { Row } from "../../layout/common";
 import { useJawnClient } from "../../../lib/clients/jawnHook";
 import useNotification from "../../shared/notification/useNotification";
@@ -23,6 +27,7 @@ import TableFooter from "../requestsV2/tableFooter";
 import { clsx } from "../../shared/clsx";
 import NewDataset from "./NewDataset"; // Add this import at the top of the file
 import ThemedModal from "../../shared/themed/themedModal";
+import GenericButton from "../../layout/common/button";
 
 interface DatasetIdPageProps {
   id: string;
@@ -50,7 +55,9 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
   const [selectedDataIndex, setSelectedDataIndex] = useState<number>();
   const [open, setOpen] = useState(false);
   const [showNewDatasetModal, setShowNewDatasetModal] = useState(false);
-  const [selectedRequestIds, setSelectedRequestIds] = useState<Array<{id: string, origin_request_id: string}>>([]);
+  const [selectedRequestIds, setSelectedRequestIds] = useState<
+    Array<{ id: string; origin_request_id: string }>
+  >([]);
 
   const {
     selectMode: selectModeHook,
@@ -68,13 +75,16 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
       toggleSelection(row);
       // Update selectedRequestIds when a row is selected or deselected
       setSelectedRequestIds((prev) => {
-        const existingIndex = prev.findIndex(item => item.id === row.id);
+        const existingIndex = prev.findIndex((item) => item.id === row.id);
         if (existingIndex !== -1) {
           // If the row is already selected, remove it
           return prev.filter((_, index) => index !== existingIndex);
         } else {
           // If the row is not selected, add it
-          return [...prev, { id: row.id, origin_request_id: row.origin_request_id }];
+          return [
+            ...prev,
+            { id: row.id, origin_request_id: row.origin_request_id },
+          ];
         }
       });
     } else {
@@ -90,9 +100,14 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
     if (isSelected) {
       setSelectedRequestIds(
         rows
-          .map((row) => ({ id: row.id, origin_request_id: row.origin_request_id }))
-          .filter((item): item is { id: string, origin_request_id: string } => 
-            item.id !== undefined && item.origin_request_id !== undefined)
+          .map((row) => ({
+            id: row.id,
+            origin_request_id: row.origin_request_id,
+          }))
+          .filter(
+            (item): item is { id: string; origin_request_id: string } =>
+              item.id !== undefined && item.origin_request_id !== undefined
+          )
       );
     } else {
       setSelectedRequestIds([]);
@@ -235,17 +250,14 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
               </div>
               {selectedIds.length > 0 && (
                 <div className="flex gap-2">
-                  <button
+                  <GenericButton
                     onClick={() => setShowNewDatasetModal(true)}
-                    className={clsx(
-                      "relative inline-flex items-center rounded-md hover:bg-blue-700 bg-blue-500 px-4 py-2 text-sm font-medium text-white"
-                    )}
-                  >
-                    <div className="flex flex-row gap-2 items-center">
-                      <span>Copy to...</span>
-                    </div>
-                  </button>
-                  <button
+                    text="Copy to..."
+                    icon={
+                      <FolderPlusIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
+                    }
+                  ></GenericButton>
+                  <GenericButton
                     onClick={async () => {
                       const res = await jawn.POST(
                         `/v1/helicone-dataset/{datasetId}/mutate`,
@@ -256,12 +268,13 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
                             },
                           },
                           body: {
-                            addRequests: selectedRequestIds.map(item => item.origin_request_id),
+                            addRequests: selectedRequestIds.map(
+                              (item) => item.origin_request_id
+                            ),
                             removeRequests: [],
                           },
                         }
                       );
-                      console.log("ids", selectedRequestIds);
                       if (res.data && !res.data.error) {
                         setNotification(
                           "Requests duplicated to this dataset",
@@ -275,16 +288,13 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
                         );
                       }
                       toggleSelectMode(false);
-                      setSelectedRequestIds([]); // Clear selection after duplication
+                      setSelectedRequestIds([]);
                     }}
-                    className={clsx(
-                      "relative inline-flex items-center rounded-md hover:bg-green-700 bg-green-500 px-4 py-2 text-sm font-medium text-white"
-                    )}
-                  >
-                    <div className="flex flex-row gap-2 items-center">
-                      <span>Duplicate</span>
-                    </div>
-                  </button>
+                    text="Duplicate"
+                    icon={
+                      <Square2StackIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
+                    }
+                  ></GenericButton>
                   <button
                     onClick={async () => {
                       const res = await jawn.POST(
@@ -350,7 +360,7 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
       </ThemedDrawer>
       <ThemedModal open={showNewDatasetModal} setOpen={setShowNewDatasetModal}>
         <NewDataset
-          request_ids={selectedRequestIds.map(item => item.origin_request_id)}
+          request_ids={selectedRequestIds.map((item) => item.origin_request_id)}
           isCopyMode={true}
           onComplete={() => {
             setShowNewDatasetModal(false);
