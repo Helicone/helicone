@@ -4,14 +4,12 @@ import {
   useGetHeliconeDatasets,
 } from "../../../services/hooks/dataset/heliconeDataset";
 import ThemedTable from "../../shared/themed/table/themedTable";
-import ThemedDrawer from "../../shared/themed/themedDrawer";
 import HcBadge from "../../ui/hcBadge";
 import HcBreadcrumb from "../../ui/hcBreadcrumb";
 import {
   getGenericRequestText,
   getGenericResponseText,
 } from "../requestsV2/helpers";
-import EditDataset from "./EditDataset";
 import DatasetButton from "../requestsV2/buttons/datasetButton";
 import {
   FolderPlusIcon,

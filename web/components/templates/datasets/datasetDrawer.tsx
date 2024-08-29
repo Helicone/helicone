@@ -16,7 +16,6 @@ import { useJawnClient } from "../../../lib/clients/jawnHook";
 import { Button } from "../../ui/button";
 import { Check, X } from "lucide-react";
 import RemoveRequestsModal from "./RemoveRequests";
-import ThemedModal from "../../shared/themed/themedModal";
 
 interface DatasetDrawerV2Props {
   open: boolean;
