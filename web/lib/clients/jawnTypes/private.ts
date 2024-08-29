@@ -130,6 +130,9 @@ export interface paths {
     post: operations["CreateAlertBanner"];
     patch: operations["UpdateAlertBanner"];
   };
+  "/v1/admin/orgs/retention/query": {
+    post: operations["GetOrgRetention"];
+  };
 }
 
 export type webhooks = Record<string, never>;
@@ -1845,6 +1848,24 @@ export interface operations {
       /** @description No content */
       204: {
         content: never;
+      };
+    };
+  };
+  GetOrgRetention: {
+    requestBody: {
+      content: {
+        "application/json": {
+          tiers: string[];
+          timeFilter: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": unknown[];
+        };
       };
     };
   };

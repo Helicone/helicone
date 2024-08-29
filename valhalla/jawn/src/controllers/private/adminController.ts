@@ -968,4 +968,108 @@ export class AdminController extends Controller {
       throw new Error(updateError.message);
     }
   }
+
+  @Post("/orgs/retention/query")
+  public async getOrgRetention(
+    @Request() request: JawnAuthenticatedRequest,
+    @Body()
+    body: {
+      timeFilter: string;
+      tiers: string[];
+    }
+  ): Promise<any[]> {
+    await authCheckThrow(request.authParams.userId);
+
+    const { timeFilter, tiers } = body;
+
+    const query = `
+      WITH
+        org_creation AS (
+          SELECT
+            om.organization AS organization_id,
+            DATE_TRUNC('month', om.created_at) AS created_month
+          FROM
+            organization_member om
+          WHERE
+            om.organization IS NOT NULL
+        ),
+        month_series AS (
+          SELECT
+            GENERATE_SERIES(
+              GREATEST(
+                (SELECT MIN(created_month) FROM org_creation),
+                CURRENT_DATE - INTERVAL '${timeFilter}'
+              ),
+              CURRENT_DATE,
+              INTERVAL '1 month'
+            )::date AS MONTH
+        ),
+        org_activity AS (
+          SELECT
+            om.organization AS organization_id,
+            DATE_TRUNC('month', MAX(u.last_sign_in_at)) AS last_sign_in_month
+          FROM
+            auth.users u
+            LEFT JOIN organization_member om ON om.member = u.id
+          WHERE
+            om.organization IS NOT NULL
+          GROUP BY
+            om.organization
+        ),
+        org_retention AS (
+          SELECT
+            oc.organization_id,
+            ms.month,
+            MIN(oc.created_month) AS created_month,
+            MAX(oa.last_sign_in_month) AS last_sign_in_month
+          FROM
+            org_creation oc
+            CROSS JOIN month_series ms
+            LEFT JOIN org_activity oa ON oc.organization_id = oa.organization_id
+          WHERE
+            oc.created_month <= ms.month
+          GROUP BY
+            oc.organization_id,
+            ms.month
+        )
+      SELECT
+        MONTH,
+        COUNT(DISTINCT organization_id) AS total_orgs,
+        SUM(
+          CASE
+            WHEN last_sign_in_month >= MONTH THEN 1
+            ELSE 0
+          END
+        ) AS retained_orgs,
+        ROUND(
+          (
+            SUM(
+              CASE
+                WHEN last_sign_in_month >= MONTH THEN 1
+                ELSE 0
+              END
+            )::DECIMAL / COUNT(DISTINCT organization_id)
+          ) * 100,
+          2
+        ) AS retention_rate
+      FROM
+        org_retention
+        JOIN organization o ON org_retention.organization_id = o.id
+      WHERE
+        o.tier = ANY($1)
+        AND MONTH >= CURRENT_DATE - INTERVAL '${timeFilter}'
+      GROUP BY
+        MONTH
+      ORDER BY
+        MONTH;
+    `;
+
+    const result = await dbExecute(query, [tiers]);
+
+    if (result.error) {
+      throw new Error(result.error);
+    }
+
+    return result.data || [];
+  }
 }

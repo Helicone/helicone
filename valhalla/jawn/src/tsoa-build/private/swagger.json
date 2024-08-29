@@ -4840,6 +4840,58 @@
 					}
 				}
 			}
+		},
+		"/v1/admin/orgs/retention/query": {
+			"post": {
+				"operationId": "GetOrgRetention",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {},
+									"type": "array"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"tiers": {
+										"items": {
+											"type": "string"
+										},
+										"type": "array"
+									},
+									"timeFilter": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"tiers",
+									"timeFilter"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
 		}
 	},
 	"servers": [
