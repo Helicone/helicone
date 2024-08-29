@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Check } from "lucide-react";
+import { Check, DatabaseIcon } from "lucide-react"; // Add DatabaseIcon import
 import { TableCellsIcon } from "@heroicons/react/24/outline";
 import { useJawnClient } from "../../../lib/clients/jawnHook";
 import useNotification from "../../shared/notification/useNotification";
@@ -108,34 +108,46 @@ export default function NewDataset({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4 p-2 rounded-xl border border-[#E2E8F0]">
-        <ScrollArea className="h-[115px]">
-          {datasets.map((dataset) => (
-            <div
-              key={dataset.id}
-              className={`flex items-center space-x-2 p-2 cursor-pointer rounded-lg ${
-                selectedOption === dataset.id
-                  ? "bg-[#F1F5F9]"
-                  : "hover:bg-accent"
-              }`}
-              onClick={() => handleSelection(dataset.id)}
-            >
-              <div className="w-5 h-5 flex items-center justify-center">
-                {selectedOption === dataset.id && (
-                  <Check className="h-4 w-4 text-primary" />
-                )}
+        {datasets.length > 0 ? (
+          <ScrollArea className="h-[115px]">
+            {datasets.map((dataset) => (
+              <div
+                key={dataset.id}
+                className={`flex items-center space-x-2 p-2 cursor-pointer rounded-lg ${
+                  selectedOption === dataset.id
+                    ? "bg-[#F1F5F9]"
+                    : "hover:bg-accent"
+                }`}
+                onClick={() => handleSelection(dataset.id)}
+              >
+                <div className="w-5 h-5 flex items-center justify-center">
+                  {selectedOption === dataset.id && (
+                    <Check className="h-4 w-4 text-primary" />
+                  )}
+                </div>
+                <div className="flex-1 flex items-center justify-between text-md font-normal leading-none">
+                  <span className="text-[#334155]">
+                    {dataset.name || "Untitled"}
+                  </span>
+                  <span className="text-muted-foreground text-[#6B7280] items-center flex">
+                    <TableCellsIcon className="inline mr-1 h-4 w-4" />
+                    {dataset.requests_count || 0}
+                  </span>
+                </div>
               </div>
-              <div className="flex-1 flex items-center justify-between text-md font-normal leading-none">
-                <span className="text-[#334155]">
-                  {dataset.name || "Untitled"}
-                </span>
-                <span className="text-muted-foreground text-[#6B7280] items-center flex">
-                  <TableCellsIcon className="inline mr-1 h-4 w-4" />
-                  {dataset.requests_count || 0}
-                </span>
-              </div>
-            </div>
-          ))}
-        </ScrollArea>
+            ))}
+          </ScrollArea>
+        ) : (
+          <div className="h-[115px] flex flex-col items-center justify-center">
+            <DatabaseIcon className="h-12 w-12 text-gray-700 dark:text-gray-100" />
+            <p className="text-sm text-gray-700 dark:text-gray-100 mt-2">
+              No Datasets
+            </p>
+            <p className="text-xs text-gray-700 dark:text-gray-100 mt-1">
+              Create your first dataset below
+            </p>
+          </div>
+        )}
         <div className="border-t border-[#E2E8F0] pt-1">
           <div
             className={`flex items-center space-x-2 p-2 cursor-pointer rounded-lg ${
