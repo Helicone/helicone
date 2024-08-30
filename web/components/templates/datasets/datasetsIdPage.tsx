@@ -74,17 +74,29 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
     Array<{ id: string; origin_request_id: string }>
   >([]);
 
+  // Update selectedRequestIds whenever selectedIds changes
+  useEffect(() => {
+    setSelectedRequestIds(
+      rows
+        .filter((row) => selectedIds.includes(row.id))
+        .map((row) => ({
+          id: row.id,
+          origin_request_id: row.origin_request_id,
+        }))
+    );
+  }, [selectedIds]);
+
   const onRowSelectHandler = useCallback(
     (row: any) => {
       if (selectModeHook) {
         toggleSelection(row);
       } else {
         setSelectedRow(row);
-        setSelectedRowIndex(row.index);
+        setSelectedRowIndex(rows.findIndex((r) => r.id === row.id));
         setOpen(true);
       }
     },
-    [selectModeHook, toggleSelection]
+    [selectModeHook, toggleSelection, rows]
   );
 
   const handlePrevious = () => {
@@ -104,23 +116,8 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
   const handleSelectAll = useCallback(
     (isSelected: boolean) => {
       selectAll();
-      if (isSelected) {
-        setSelectedRequestIds(
-          rows
-            .map((row) => ({
-              id: row.id,
-              origin_request_id: row.origin_request_id,
-            }))
-            .filter(
-              (item): item is { id: string; origin_request_id: string } =>
-                item.id !== undefined && item.origin_request_id !== undefined
-            )
-        );
-      } else {
-        setSelectedRequestIds([]);
-      }
     },
-    [rows, selectAll]
+    [selectAll]
   );
 
   const handlePageChange = useCallback(
