@@ -43,6 +43,7 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
   const router = useRouter();
   const [page, setPage] = useState<number>(currentPage);
   const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);
+
   const { rows, isLoading, refetch, count, isCountLoading } =
     useGetHeliconeDatasetRows(id, page, currentPageSize);
   const { datasets, isLoading: isLoadingDataset } = useGetHeliconeDatasets([
@@ -197,6 +198,26 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
     }
   };
 
+  const handlePageSizeChange = useCallback(
+    (newPageSize: number) => {
+      setCurrentPageSize(newPageSize);
+      setPage(1); // Reset to first page when changing page size
+      router.push(
+        {
+          pathname: router.pathname,
+          query: {
+            ...router.query,
+            page: "1",
+            pageSize: newPageSize.toString(),
+          },
+        },
+        undefined,
+        { shallow: true }
+      );
+    },
+    [router]
+  );
+
   return (
     <>
       <div className="w-full h-full flex flex-col space-y-8">
@@ -343,7 +364,7 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
           isCountLoading={isCountLoading}
           count={count || 0}
           onPageChange={(n) => handlePageChange(n)}
-          onPageSizeChange={(n) => setCurrentPageSize(n)}
+          onPageSizeChange={handlePageSizeChange}
           pageSizeOptions={[25, 50, 100, 250, 500]}
         />
       </div>
