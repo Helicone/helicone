@@ -197,11 +197,6 @@ const blogContent: BlogStructure[] = [
   },
   {
     dynmaicEntry: {
-      folderName: "essential-helicone-features",
-    },
-  },
-  {
-    dynmaicEntry: {
       folderName: "product-hunt-automate",
     },
   },
@@ -213,6 +208,11 @@ const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
       folderName: "best-langfuse-alternatives",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "essential-helicone-features",
     },
   },
   {
