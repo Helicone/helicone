@@ -172,6 +172,7 @@ export class HeliconeDatasetManager extends BaseManager {
     }
   ): Promise<Result<null, string>> {
     if (!requestId) return err("Request ID is required");
+    if (!datasetId) return err("Dataset ID is required");
     const key = this.s3Client.getDatasetKey(
       datasetId,
       requestId,
