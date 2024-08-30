@@ -71,7 +71,7 @@ import json
 HELICONE_AUTH = "Bearer <API_KEY>"
 
 def provide_feedback(heliconeId, rating):
-    url = f"https://api.helicone.ai/v1/{heliconeId}/feedback"
+    url = f"https://api.helicone.ai/v1/request/{heliconeId}/feedback"
     headers = {
         "Helicone-Auth": HELICONE_AUTH,
         "Content-Type": "application/json",
@@ -158,7 +158,7 @@ const options = {
 };
 
 const response = await fetch(
-  `https://api.helicone.ai/v1/${heliconeId}/feedback`,
+  `https://api.helicone.ai/v1/request/${heliconeId}/feedback`,
   options
 );
 ```
