@@ -192,7 +192,7 @@ export type BlogStructure =
 const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
-      folderName: "product-hunt-experience",
+      folderName: "slash-llm-cost",
     },
   },
   {
