@@ -31,6 +31,8 @@ import ThemedModal from "../../shared/themed/themedModal";
 import GenericButton from "../../layout/common/button";
 import DatasetDrawerV2 from "./datasetDrawer";
 import RemoveRequestsModal from "./RemoveRequests";
+import { useIntegration } from "@/services/hooks/useIntegrations";
+import OpenPipeFineTuneButton from "../connections/openPipe/fineTuneDatasetButton";
 
 interface DatasetIdPageProps {
   id: string;
@@ -57,7 +59,9 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
   const jawn = useJawnClient();
 
   const [selectedRow, setSelectedRow] = useState<DatasetRow>(null);
-  const [selectedDataIndex, setSelectedDataIndex] = useState<number>();
+
+  const openPipeIntegration = useIntegration("open_pipe");
+
   const [open, setOpen] = useState(false);
   const [showNewDatasetModal, setShowNewDatasetModal] = useState(false);
   const [showRemoveModal, setShowRemoveModal] = useState(false);
@@ -89,7 +93,7 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
           origin_request_id: row.origin_request_id,
         }))
     );
-  }, [selectedIds]);
+  }, [rows, selectedIds]);
 
   const onRowSelectHandler = useCallback(
     (row: any) => {
@@ -335,6 +339,24 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
                 }}
               />
             </div>,
+            openPipeIntegration.integration?.active && (
+              <div key={"open-pipe-button"}>
+                <OpenPipeFineTuneButton
+                  datasetId={id}
+                  rows={rows}
+                  datasetName={datasets?.[0]?.name || ""}
+                  fetchRows={async () => {
+                    const allRows = await fetchHeliconeDatasetRows(
+                      org?.currentOrg?.id || "",
+                      id,
+                      1,
+                      count || 0
+                    );
+                    return allRows;
+                  }}
+                />
+              </div>
+            ),
           ]}
           onSelectAll={handleSelectAll}
           selectedIds={selectedIds}

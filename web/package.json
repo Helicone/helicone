@@ -41,8 +41,10 @@
     "@radix-ui/react-menubar": "^1.1.1",
     "@radix-ui/react-scroll-area": "^1.1.0",
     "@radix-ui/react-select": "^2.1.1",
+    "@radix-ui/react-slider": "^1.2.0",
     "@radix-ui/react-slot": "^1.1.0",
     "@radix-ui/react-switch": "^1.1.0",
+    "@radix-ui/react-tooltip": "^1.1.2",
     "@stripe/stripe-js": "^1.46.0",
     "@supabase/auth-helpers-nextjs": "^0.5.4",
     "@supabase/auth-helpers-react": "^0.3.1",
@@ -143,6 +145,7 @@
     "openapi-typescript": "^6.7.5",
     "postcss": "^8.4.31",
     "prettier": "^2.8.0",
+    "shadcn-ui": "^0.9.0",
     "tailwindcss": "^3.3.5"
   }
 }
