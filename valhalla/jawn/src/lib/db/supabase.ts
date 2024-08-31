@@ -226,7 +226,7 @@ export class SupabaseConnector {
     organizationId?: string
   ): AuthResult {
     const cacheKey = await hashAuth(
-      JSON.stringify(authorization) + organizationId + new Date().getTime()
+      JSON.stringify(authorization) + organizationId
     );
 
     const cacheResultMem = this.authCache.get<AuthParams>(cacheKey);

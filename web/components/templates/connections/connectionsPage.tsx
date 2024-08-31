@@ -1,10 +1,4 @@
-import {
-  Card,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Carousel,
   CarouselContent,
@@ -16,10 +10,9 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import Fuse from "fuse.js";
-import Link from "next/link";
 import React, { useMemo, useState } from "react";
-import { LOGOS } from "./connectionSVG";
 import ThemedDrawer from "../../shared/themed/themedDrawer";
+import { LOGOS } from "./connectionSVG";
 import OpenPipeConfig from "./openPipeConfig";
 
 type IntegrationType =
@@ -97,15 +90,6 @@ const ConnectionsPage: React.FC = () => {
     setActiveDrawer(null);
   };
 
-  const handleSaveOpenPipeConfig = (config: {
-    apiKey: string;
-    autoDatasetSync: boolean;
-  }) => {
-    // TODO: Implement saving the OpenPipe configuration
-    console.log("Saving OpenPipe config:", config);
-    handleCloseDrawer();
-  };
-
   return (
     <div className="flex flex-col space-y-8 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="flex flex-col space-y-2">
@@ -135,7 +119,7 @@ const ConnectionsPage: React.FC = () => {
 
       <ThemedDrawer open={activeDrawer !== null} setOpen={handleCloseDrawer}>
         {activeDrawer === "OpenPipe" && (
-          <OpenPipeConfig onClose={handleSaveOpenPipeConfig} />
+          <OpenPipeConfig onClose={handleCloseDrawer} />
         )}
         {/* Add more configuration components for other integrations here */}
       </ThemedDrawer>
