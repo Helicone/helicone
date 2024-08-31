@@ -24,14 +24,9 @@ import { useSelectMode } from "../../../services/hooks/dataset/selectMode";
 import { useRouter } from "next/router";
 import TableFooter from "../requestsV2/tableFooter";
 import { clsx } from "../../shared/clsx";
-import NewDataset from "./NewDataset"; // Add this import at the top of the file
-import ThemedModal from "../../shared/themed/themedModal";
-import GenericButton from "../../layout/common/button";
-import DatasetDrawerV2 from "./datasetDrawer";
-import RemoveRequestsModal from "./RemoveRequests";
 import { useOrg } from "../../layout/organizationContext";
 import ExportButton from "../../shared/themed/table/exportButton";
-import NewDataset from "./NewDataset"; // Add this import at the top of the file
+import NewDataset from "./NewDataset";
 import ThemedModal from "../../shared/themed/themedModal";
 import GenericButton from "../../layout/common/button";
 import DatasetDrawerV2 from "./datasetDrawer";
