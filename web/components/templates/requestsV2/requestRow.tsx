@@ -574,7 +574,7 @@ const RequestRow = (props: {
       )}
       <ThemedModal open={newDatasetModalOpen} setOpen={setNewDatasetModalOpen}>
         <NewDataset
-          requests={[request]}
+          request_ids={[request.id]}
           onComplete={() => setNewDatasetModalOpen(false)}
         />
       </ThemedModal>

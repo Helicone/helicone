@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import useShiftKeyPress from "../isShiftPressed";
 
 interface UseSelectModeProps<T> {
@@ -12,47 +12,47 @@ export function useSelectMode<T>({ items, getItemId }: UseSelectModeProps<T>) {
   const [lastSelectedItem, setLastSelectedItem] = useState<T | null>(null);
   const isShiftPressed = useShiftKeyPress();
 
-  const toggleSelectMode = (mode: boolean) => {
+  const toggleSelectMode = useCallback((mode: boolean) => {
     setSelectMode(mode);
     if (!mode) {
       setSelectedIds([]);
     }
-  };
+  }, []);
 
-  const toggleSelection = (item: T) => {
-    const id = getItemId(item);
-    if (selectedIds.includes(id)) {
-      setSelectedIds(selectedIds.filter((selectedId) => selectedId !== id));
-    } else {
-      if (isShiftPressed && lastSelectedItem) {
-        const startIndex = items.findIndex(
-          (i) => getItemId(i) === getItemId(lastSelectedItem)
-        );
-        const endIndex = items.findIndex((i) => getItemId(i) === id);
-        const newSelectedIds = items
-          .slice(
-            Math.min(startIndex, endIndex),
-            Math.max(startIndex, endIndex) + 1
-          )
-          .map(getItemId);
-        setSelectedIds([
-          ...selectedIds,
-          ...Array.from(new Set(newSelectedIds)),
-        ]);
-      } else {
-        setSelectedIds([...selectedIds, id]);
-      }
+  const toggleSelection = useCallback(
+    (item: T) => {
+      const id = getItemId(item);
+      setSelectedIds((prevSelectedIds) => {
+        if (prevSelectedIds.includes(id)) {
+          return prevSelectedIds.filter((selectedId) => selectedId !== id);
+        } else {
+          if (isShiftPressed && lastSelectedItem) {
+            const startIndex = items.findIndex(
+              (i) => getItemId(i) === getItemId(lastSelectedItem)
+            );
+            const endIndex = items.findIndex((i) => getItemId(i) === id);
+            const newSelectedIds = items
+              .slice(
+                Math.min(startIndex, endIndex),
+                Math.max(startIndex, endIndex) + 1
+              )
+              .map(getItemId);
+            return Array.from(new Set([...prevSelectedIds, ...newSelectedIds]));
+          } else {
+            return [...prevSelectedIds, id];
+          }
+        }
+      });
       setLastSelectedItem(item);
-    }
-  };
+    },
+    [items, getItemId, isShiftPressed, lastSelectedItem]
+  );
 
-  const selectAll = () => {
-    if (selectedIds.length > 0) {
-      setSelectedIds([]);
-    } else {
-      setSelectedIds(items.map(getItemId));
-    }
-  };
+  const selectAll = useCallback(() => {
+    setSelectedIds((prevSelectedIds) =>
+      prevSelectedIds.length > 0 ? [] : items.map(getItemId)
+    );
+  }, [items, getItemId]);
 
   return {
     selectMode,

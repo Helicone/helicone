@@ -99,6 +99,9 @@ export interface paths {
   "/v1/helicone-dataset/query": {
     post: operations["QueryHeliconeDataset"];
   };
+  "/v1/helicone-dataset/{datasetId}/request/{requestId}": {
+    post: operations["UpdateHeliconeDatasetRequest"];
+  };
   "/v1/experiment": {
     post: operations["CreateNewExperiment"];
   };
@@ -970,6 +973,16 @@ Json: JsonObject;
       error: null;
     };
     "Result_HeliconeDataset-Array.string_": components["schemas"]["ResultSuccess_HeliconeDataset-Array_"] | components["schemas"]["ResultError_string_"];
+    ResultSuccess_any_: {
+      data: unknown;
+      /** @enum {number|null} */
+      error: null;
+    };
+    ResultError_unknown_: {
+      /** @enum {number|null} */
+      data: null;
+      error: unknown;
+    };
     "ResultSuccess__experimentId-string__": {
       data: {
         experimentId: string;
@@ -1859,6 +1872,30 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_HeliconeDataset-Array.string_"];
+        };
+      };
+    };
+  };
+  UpdateHeliconeDatasetRequest: {
+    parameters: {
+      path: {
+        datasetId: string;
+        requestId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          responseBody: components["schemas"]["Json"];
+          requestBody: components["schemas"]["Json"];
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ResultSuccess_any_"] | components["schemas"]["ResultError_unknown_"];
         };
       };
     };

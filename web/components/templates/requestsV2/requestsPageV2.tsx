@@ -973,9 +973,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
       />
       <ThemedModal open={modalOpen} setOpen={setModalOpen}>
         <NewDataset
-          requests={normalizedRequests.filter((request) =>
-            selectedIds.includes(request.id)
-          )}
+          request_ids={selectedIds}
           onComplete={() => {
             setModalOpen(false);
             toggleSelectMode(false);
