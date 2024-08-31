@@ -1,39 +1,15 @@
-import { Card, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
 import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
-import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import Fuse from "fuse.js";
 import React, { useMemo, useState } from "react";
 import ThemedDrawer from "../../shared/themed/themedDrawer";
-import { LOGOS } from "./connectionSVG";
+import IntegrationSection from "./integrationSection";
 import OpenPipeConfig from "./openPipeConfig";
+import {
+  Integration,
+  IntegrationSection as IntegrationSectionType,
+} from "./types";
 
-type IntegrationType =
-  | "provider"
-  | "other-provider"
-  | "fine-tuning"
-  | "destination"
-  | "gateway";
-
-interface Integration {
-  title: string;
-  type: IntegrationType;
-  enabled?: boolean;
-}
-
-interface IntegrationSection {
-  title: string;
-  type: IntegrationType;
-}
-
-const INTEGRATION_SECTIONS: IntegrationSection[] = [
+const INTEGRATION_SECTIONS: IntegrationSectionType[] = [
   { title: "LLM Providers", type: "provider" },
   { title: "Other Providers", type: "other-provider" },
   { title: "Fine-Tuning Integrations", type: "fine-tuning" },
@@ -124,93 +100,6 @@ const ConnectionsPage: React.FC = () => {
         {/* Add more configuration components for other integrations here */}
       </ThemedDrawer>
     </div>
-  );
-};
-
-interface IntegrationSectionProps {
-  title: string;
-  items: Integration[];
-  onIntegrationClick: (title: string) => void;
-}
-
-const IntegrationSection: React.FC<IntegrationSectionProps> = ({
-  title,
-  items,
-  onIntegrationClick,
-}) => {
-  if (items.length === 0) return null;
-
-  return (
-    <>
-      <h2 className="text-2xl font-semibold mb-4">{title}</h2>
-      <Carousel>
-        <CarouselContent className="gap-4">
-          {items.map((item, index) => (
-            <CarouselItem key={index} className="basis-[55%] lg:basis-[30%]">
-              <IntegrationCard
-                title={item.title}
-                Logo={LOGOS[item.title as keyof typeof LOGOS]}
-                description={`Integrate with ${item.title}'s services.`}
-                enabled={item.enabled}
-                onClick={() => onIntegrationClick(item.title)}
-              />
-            </CarouselItem>
-          ))}
-        </CarouselContent>
-        {items.length >= 3 && (
-          <>
-            <CarouselPrevious />
-            <CarouselNext />
-          </>
-        )}
-      </Carousel>
-    </>
-  );
-};
-
-interface IntegrationCardProps {
-  title: string;
-  description: string;
-  enabled?: boolean;
-  Logo?: React.FC<{ className: string }>;
-  onClick: () => void;
-}
-
-const IntegrationCard: React.FC<IntegrationCardProps> = ({
-  title,
-  description,
-  enabled,
-  Logo,
-  onClick,
-}) => {
-  return (
-    <Card className="flex flex-col h-[150px]">
-      <CardHeader className="flex-grow">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center">
-            {Logo && <Logo className="w-[2rem] h-[2rem] mr-2" />}
-            <CardTitle className="text-lg">{title}</CardTitle>
-          </div>
-          {enabled !== undefined && (
-            <Switch
-              id={`${title.toLowerCase()}-switch`}
-              disabled={true}
-              checked={enabled}
-              className="data-[state=checked]:bg-green-500"
-            />
-          )}
-        </div>
-      </CardHeader>
-      <CardFooter className="mt-auto">
-        <button
-          onClick={onClick}
-          className="text-blue-600 hover:text-blue-800 flex items-center text-sm"
-        >
-          {title === "OpenPipe" ? "Configure" : "Learn more"}
-          <ArrowRightIcon className="ml-1 h-4 w-4" />
-        </button>
-      </CardFooter>
-    </Card>
   );
 };
 
