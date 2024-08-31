@@ -1,4 +1,5 @@
 import { Input } from "@/components/ui/input";
+import { useIntegrations } from "@/services/hooks/useIntegrations";
 import Fuse from "fuse.js";
 import React, { useMemo, useState } from "react";
 import ThemedDrawer from "../../shared/themed/themedDrawer";
@@ -8,10 +9,6 @@ import {
   Integration,
   IntegrationSection as IntegrationSectionType,
 } from "./types";
-import {
-  useIntegration,
-  useIntegrations,
-} from "@/services/hooks/useIntegrations";
 
 const INTEGRATION_SECTIONS: IntegrationSectionType[] = [
   { title: "LLM Providers", type: "provider" },
