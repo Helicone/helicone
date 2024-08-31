@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import {
+  fetchHeliconeDatasetRows,
   useGetHeliconeDatasetRows,
   useGetHeliconeDatasets,
 } from "../../../services/hooks/dataset/heliconeDataset";
@@ -28,6 +29,8 @@ import ThemedModal from "../../shared/themed/themedModal";
 import GenericButton from "../../layout/common/button";
 import DatasetDrawerV2 from "./datasetDrawer";
 import RemoveRequestsModal from "./RemoveRequests";
+import { useOrg } from "../../layout/organizationContext";
+import ExportButton from "../../shared/themed/table/exportButton";
 
 interface DatasetIdPageProps {
   id: string;
@@ -41,6 +44,7 @@ export type DatasetRow =
 const DatasetIdPage = (props: DatasetIdPageProps) => {
   const { id, currentPage, pageSize } = props;
   const router = useRouter();
+  const org = useOrg();
   const [page, setPage] = useState<number>(currentPage);
   const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);
 
@@ -218,6 +222,23 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
     [router]
   );
 
+  const exportedData = useCallback(async () => {
+    const rows = await fetchHeliconeDatasetRows(
+      org?.currentOrg?.id || "",
+      id,
+      1,
+      500
+    );
+    return rows.map((row) => {
+      return {
+        id: row.id,
+        created_at: row.created_at,
+        request_body: row.request_body,
+        response_body: row.response_body,
+      };
+    });
+  }, [id]);
+
   return (
     <>
       <div className="w-full h-full flex flex-col space-y-8">
@@ -311,6 +332,11 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
                 }}
               />
             </div>,
+            <ExportButton
+              key="export-button"
+              rows={rows}
+              fetchRows={exportedData}
+            />,
           ]}
           onSelectAll={handleSelectAll}
           selectedIds={selectedIds}

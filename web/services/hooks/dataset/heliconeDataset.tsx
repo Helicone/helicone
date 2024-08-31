@@ -3,6 +3,61 @@ import { useState, useEffect, useMemo } from "react";
 import { useOrg } from "../../../components/layout/organizationContext";
 import { getJawnClient } from "../../../lib/clients/jawn";
 
+const fetchHeliconeDatasetRows = async (
+  orgId: string,
+  datasetId: string,
+  page: number,
+  pageSize: number
+) => {
+  const jawn = getJawnClient(orgId);
+  const response = await jawn.POST(`/v1/helicone-dataset/{datasetId}/query`, {
+    body: {
+      limit: pageSize,
+      offset: (page - 1) * pageSize,
+    },
+    params: {
+      path: {
+        datasetId,
+      },
+    },
+  });
+
+  const rows = response.data?.data ?? [];
+
+  // Fetch request and response bodies
+  const rowsWithBodies = await Promise.all(
+    rows.map(async (row) => {
+      let request_body = "";
+      let response_body = "";
+
+      if (row.signed_url) {
+        if (row.signed_url.error) {
+          const content = row.signed_url.data;
+          request_body = content?.request ?? "";
+          response_body = content?.response ?? "";
+        } else {
+          try {
+            const response = await fetch(row.signed_url.data!);
+            const content = await response.json();
+            request_body = content?.request ?? "";
+            response_body = content?.response ?? "";
+          } catch (error) {
+            console.error("Error fetching signed URL:", error);
+          }
+        }
+      }
+
+      return {
+        ...row,
+        request_body,
+        response_body,
+      };
+    })
+  );
+
+  return rowsWithBodies;
+};
+
 const useGetHeliconeDatasets = (datasetIds?: string[]) => {
   const org = useOrg();
 
@@ -185,4 +240,5 @@ export {
   useGetHeliconeDatasets,
   useGetHeliconeDatasetRows,
   useGetHeliconeDatasetCount,
+  fetchHeliconeDatasetRows,
 };

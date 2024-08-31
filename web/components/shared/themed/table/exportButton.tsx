@@ -8,46 +8,58 @@ import ThemedModal from "../themedModal";
 
 interface ExportButtonProps<T> {
   rows: T[];
+  fetchRows?: () => Promise<T[]>;
 }
 
 export default function ExportButton<T>(props: ExportButtonProps<T>) {
-  const { rows } = props;
+  const { rows, fetchRows } = props;
 
   const [open, setOpen] = useState(false);
   const [downloadingCSV, setDownloadingCSV] = useState(false);
 
   const { setNotification } = useNotification();
 
-  const csvDownload = () => {
+  const csvDownload = async () => {
     setDownloadingCSV(true);
-    // Preprocess the rows to handle nested objects
-    const processedRows = rows.map((row: any) => {
-      const newRow: Record<string, any> = {};
-      for (const key in row) {
-        if (row[key] !== null && typeof row[key] === "object") {
-          newRow[key] = JSON.stringify(row[key]);
-        } else {
-          newRow[key] = row[key];
-        }
+    try {
+      let dataToExport = rows;
+      if (fetchRows) {
+        dataToExport = await fetchRows();
       }
-      return newRow;
-    });
 
-    // Convert JSON data to CSV
-    const csv = Papa.unparse(processedRows);
-    // Create a blob with the CSV data
-    const blob = new Blob([csv], { type: "text/csv" });
-    // Create a download link and click it to start the download
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "data.csv";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+      // Preprocess the rows to handle nested objects
+      const processedRows = dataToExport.map((row: any) => {
+        const newRow: Record<string, any> = {};
+        for (const key in row) {
+          if (row[key] !== null && typeof row[key] === "object") {
+            newRow[key] = JSON.stringify(row[key]);
+          } else {
+            newRow[key] = row[key];
+          }
+        }
+        return newRow;
+      });
 
-    setDownloadingCSV(false);
-    setOpen(false);
-    setNotification("CSV downloaded successfully!", "success");
+      // Convert JSON data to CSV
+      const csv = Papa.unparse(processedRows);
+      // Create a blob with the CSV data
+      const blob = new Blob([csv], { type: "text/csv" });
+      // Create a download link and click it to start the download
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "data.csv";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      setNotification("CSV downloaded successfully!", "success");
+    } catch (error) {
+      console.error("Error exporting CSV:", error);
+      setNotification("Error exporting CSV. Please try again.", "error");
+    } finally {
+      setDownloadingCSV(false);
+      setOpen(false);
+    }
   };
 
   return (
