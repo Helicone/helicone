@@ -897,6 +897,41 @@ export type Database = {
         }
         Relationships: []
       }
+      integrations: {
+        Row: {
+          active: boolean
+          created_at: string | null
+          id: string
+          integration_name: string
+          organization_id: string
+          settings: Json | null
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string | null
+          id?: string
+          integration_name: string
+          organization_id: string
+          settings?: Json | null
+        }
+        Update: {
+          active?: boolean
+          created_at?: string | null
+          id?: string
+          integration_name?: string
+          organization_id?: string
+          settings?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_organization"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       job: {
         Row: {
           created_at: string | null
