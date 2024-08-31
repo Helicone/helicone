@@ -31,8 +31,11 @@ const fetchHeliconeDatasetRows = async (
       let response_body = "";
 
       if (row.signed_url) {
-        if (row.signed_url.error) {
-          const content = row.signed_url.data;
+        if (row.signed_url.error && row.signed_url.data) {
+          const content = (row.signed_url as any).data as {
+            request?: string;
+            response?: string;
+          };
           request_body = content?.request ?? "";
           response_body = content?.response ?? "";
         } else {
