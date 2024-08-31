@@ -13,7 +13,6 @@ import { useTheme } from "../theme/themeContext";
 interface ThemedDrawerProps {
   open: boolean;
   setOpen: (open: boolean) => void;
-  isModalOpen?: boolean; // Add this line
   children: React.ReactNode;
   actions?: React.ReactNode;
   defaultExpanded?: boolean;
@@ -23,7 +22,6 @@ interface ThemedDrawerProps {
 const ThemedDrawer: React.FC<ThemedDrawerProps> = ({
   open,
   setOpen,
-  isModalOpen = false, // Add this line
   children,
   actions,
   defaultExpanded = false,
