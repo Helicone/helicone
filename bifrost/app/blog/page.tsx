@@ -192,7 +192,12 @@ export type BlogStructure =
 const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
-      folderName: "slash-llm-cost",
+      folderName: "product-hunt-experience",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "essential-helicone-features",
     },
   },
   {
@@ -208,11 +213,6 @@ const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
       folderName: "best-langfuse-alternatives",
-    },
-  },
-  {
-    dynmaicEntry: {
-      folderName: "essential-helicone-features",
     },
   },
   {
