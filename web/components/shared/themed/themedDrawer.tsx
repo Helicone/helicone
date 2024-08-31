@@ -39,23 +39,6 @@ const ThemedDrawer: React.FC<ThemedDrawerProps> = ({
     setExpanded(false);
   }, []);
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        drawerRef.current &&
-        !drawerRef.current.contains(event.target as Node) &&
-        !isModalOpen // Add this condition
-      ) {
-        setOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [setOpen, isModalOpen]); // Add isModalOpen to the dependency array
-
   return (
     <Transition.Root show={open} as={Fragment}>
       <Dialog
