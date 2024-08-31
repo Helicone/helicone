@@ -3,6 +3,64 @@ import { useState, useEffect, useMemo } from "react";
 import { useOrg } from "../../../components/layout/organizationContext";
 import { getJawnClient } from "../../../lib/clients/jawn";
 
+const fetchHeliconeDatasetRows = async (
+  orgId: string,
+  datasetId: string,
+  page: number,
+  pageSize: number
+) => {
+  const jawn = getJawnClient(orgId);
+  const response = await jawn.POST(`/v1/helicone-dataset/{datasetId}/query`, {
+    body: {
+      limit: pageSize,
+      offset: (page - 1) * pageSize,
+    },
+    params: {
+      path: {
+        datasetId,
+      },
+    },
+  });
+
+  const rows = response.data?.data ?? [];
+
+  // Fetch request and response bodies
+  const rowsWithBodies = await Promise.all(
+    rows.map(async (row) => {
+      let request_body = "";
+      let response_body = "";
+
+      if (row.signed_url) {
+        if (row.signed_url.error && row.signed_url.data) {
+          const content = (row.signed_url as any).data as {
+            request?: string;
+            response?: string;
+          };
+          request_body = content?.request ?? "";
+          response_body = content?.response ?? "";
+        } else {
+          try {
+            const response = await fetch(row.signed_url.data!);
+            const content = await response.json();
+            request_body = content?.request ?? "";
+            response_body = content?.response ?? "";
+          } catch (error) {
+            console.error("Error fetching signed URL:", error);
+          }
+        }
+      }
+
+      return {
+        ...row,
+        request_body,
+        response_body,
+      };
+    })
+  );
+
+  return rowsWithBodies;
+};
+
 const useGetHeliconeDatasets = (datasetIds?: string[]) => {
   const org = useOrg();
 
@@ -36,14 +94,13 @@ type NotUndefined<T> = T extends undefined ? never : T;
 type NotNull<T> = T extends null ? never : T;
 type NotNullAndUndefined<T> = NotNull<NotUndefined<T>>;
 
-const useGetHeliconeDatasetRows = (id: string) => {
+const useGetHeliconeDatasetRows = (
+  id: string,
+  currentPage: number,
+  currentPageSize: number
+) => {
   const org = useOrg();
-  type Rows = (NotNullAndUndefined<
-    NotNullAndUndefined<NotNullAndUndefined<typeof data>["data"]>["data"]
-  >[number] & {
-    request_response_body?: any;
-  })[];
-  const [rows, setRows] = useState<Rows>([]);
+  const [rows, setRows] = useState<any[]>([]);
 
   const {
     data,
@@ -51,13 +108,43 @@ const useGetHeliconeDatasetRows = (id: string) => {
     refetch: originalRefetch,
     isRefetching,
   } = useQuery({
-    queryKey: ["dataset", org?.currentOrg?.id, id],
+    queryKey: [
+      "dataset",
+      org?.currentOrg?.id,
+      id,
+      currentPage,
+      currentPageSize,
+    ],
     queryFn: async (query) => {
       const orgId = query.queryKey[1] as string;
       const datasetId = query.queryKey[2] as string;
       const jawn = getJawnClient(orgId);
       return jawn.POST(`/v1/helicone-dataset/{datasetId}/query`, {
-        body: {},
+        body: {
+          limit: currentPageSize,
+          offset: (currentPage - 1) * currentPageSize,
+        },
+        params: {
+          path: {
+            datasetId,
+          },
+        },
+      });
+    },
+    refetchOnWindowFocus: false,
+  });
+
+  const {
+    data: countData,
+    isLoading: isCountLoading,
+    refetch: refetchCount,
+  } = useQuery({
+    queryKey: ["datasetCount", org?.currentOrg?.id, id],
+    queryFn: async (query) => {
+      const orgId = query.queryKey[1] as string;
+      const datasetId = query.queryKey[2] as string;
+      const jawn = getJawnClient(orgId);
+      return jawn.POST(`/v1/helicone-dataset/{datasetId}/count`, {
         params: {
           path: {
             datasetId,
@@ -105,6 +192,7 @@ const useGetHeliconeDatasetRows = (id: string) => {
     if (result.data?.data?.data) {
       setRows(result.data.data.data);
     }
+    await refetchCount(); // Refetch the count when rows are refetched
     return result;
   };
 
@@ -119,7 +207,41 @@ const useGetHeliconeDatasetRows = (id: string) => {
     })),
     completedQueries: urlQueries.filter((query) => query.isSuccess).length,
     totalQueries: rowsWithSignedUrls.length,
+    count: countData?.data?.data ?? 0,
+    isCountLoading,
   };
 };
 
-export { useGetHeliconeDatasets, useGetHeliconeDatasetRows };
+const useGetHeliconeDatasetCount = (id: string) => {
+  const org = useOrg();
+  const { data, isLoading, refetch, isRefetching } = useQuery({
+    queryKey: ["dataset-count", org?.currentOrg?.id, id],
+    queryFn: async (query) => {
+      const orgId = query.queryKey[1] as string;
+      const datasetId = query.queryKey[2] as string;
+      const jawn = getJawnClient(orgId);
+      return jawn.POST(`/v1/helicone-dataset/{datasetId}/count`, {
+        params: {
+          path: {
+            datasetId,
+          },
+        },
+      });
+    },
+    refetchOnWindowFocus: false,
+  });
+
+  return {
+    isLoading,
+    refetch,
+    isRefetching,
+    count: data?.data?.data,
+  };
+};
+
+export {
+  useGetHeliconeDatasets,
+  useGetHeliconeDatasetRows,
+  useGetHeliconeDatasetCount,
+  fetchHeliconeDatasetRows,
+};

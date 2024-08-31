@@ -1,4 +1,3 @@
-// src/users/usersService.ts
 import { Json } from "../../lib/db/database.types";
 import { AuthParams, supabaseServer } from "../../lib/db/supabase";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
@@ -18,6 +17,7 @@ export interface HeliconeDataset {
   meta: Json | null;
   name: string | null;
   organization: string;
+  requests_count: number;
 }
 
 export interface HeliconeDatasetRow {
@@ -45,22 +45,39 @@ export class HeliconeDatasetManager extends BaseManager {
   async getDatasets(params: {
     datasetIds?: string[];
   }): Promise<Result<HeliconeDataset[], string>> {
-    let query = supabaseServer.client
-      .from("helicone_dataset")
-      .select("*")
-      .eq("organization", this.authParams.organizationId)
-      .eq("dataset_type", "helicone");
-    if (params.datasetIds) {
-      query = query.in("id", params.datasetIds);
-    }
-    const { data, error } = await query;
+    let sql = `
+      SELECT 
+        hd.*,
+        COUNT(hdr.id) AS requests_count
+      FROM 
+        helicone_dataset hd
+      LEFT JOIN 
+        helicone_dataset_row hdr ON hd.id = hdr.dataset_id
+      WHERE 
+        hd.organization = $1
+        AND hd.dataset_type = 'helicone'
+    `;
 
-    if (error) {
-      return err(error.message);
+    const values: any[] = [this.authParams.organizationId];
+
+    if (params.datasetIds && params.datasetIds.length > 0) {
+      sql += ` AND hd.id = ANY($2)`;
+      values.push(params.datasetIds);
+    }
+
+    sql += `
+      GROUP BY hd.id
+      ORDER BY hd.created_at DESC
+    `;
+
+    const result = await dbExecute<HeliconeDataset>(sql, values);
+
+    if (result.error || !result.data) {
+      return err(result.error);
     }
 
     return ok(
-      data.map((d) => ({
+      result.data.map((d) => ({
         ...d,
         signed_url: this.s3Client.getSignedUrl(
           this.s3Client.getDatasetKey(
@@ -73,7 +90,7 @@ export class HeliconeDatasetManager extends BaseManager {
     );
   }
 
-  async query(datasetId: string, params: {}) {
+  async query(datasetId: string, params: { offset: number; limit: number }) {
     const query = `
       SELECT 
         hdr.id,
@@ -84,6 +101,8 @@ export class HeliconeDatasetManager extends BaseManager {
       WHERE hdr.dataset_id = $1
       AND hdr.organization_id = $2
       ORDER BY hdr.created_at DESC
+      LIMIT ${params.limit}
+      OFFSET ${params.offset}
     `;
 
     const result = await dbExecute<HeliconeDatasetRow>(query, [
@@ -107,6 +126,24 @@ export class HeliconeDatasetManager extends BaseManager {
     });
   }
 
+  async count(datasetId: string): Promise<Result<number, string>> {
+    const query = `
+      SELECT COUNT(*)
+      FROM helicone_dataset_row
+      WHERE dataset_id = $1
+      AND organization_id = $2
+    `;
+
+    const result = await dbExecute<{ count: number }>(query, [
+      datasetId,
+      this.authParams.organizationId,
+    ]);
+
+    return promiseResultMap(result, async (rows) => {
+      return rows[0].count;
+    });
+  }
+
   async mutate(
     datasetId: string,
     params: MutateParams
@@ -122,6 +159,34 @@ export class HeliconeDatasetManager extends BaseManager {
       const removeResult = await this.removeRequests(datasetId, removeRequests);
       if (removeResult.error) return removeResult;
     }
+
+    return ok(null);
+  }
+
+  async updateDatasetRequest(
+    datasetId: string,
+    requestId: string,
+    params: {
+      requestBody: Json;
+      responseBody: Json;
+    }
+  ): Promise<Result<null, string>> {
+    if (!requestId) return err("Request ID is required");
+    if (!datasetId) return err("Dataset ID is required");
+    const key = this.s3Client.getDatasetKey(
+      datasetId,
+      requestId,
+      this.authParams.organizationId
+    );
+
+    const updatedData = JSON.stringify({
+      request: params.requestBody,
+      response: params.responseBody,
+    });
+
+    const s3result = await this.s3Client.store(key, updatedData);
+
+    if (s3result.error) return err(s3result.error);
 
     return ok(null);
   }

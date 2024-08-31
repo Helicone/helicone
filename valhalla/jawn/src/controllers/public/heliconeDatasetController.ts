@@ -21,6 +21,7 @@ import {
   HeliconeDatasetRow,
   MutateParams,
 } from "../../managers/dataset/HeliconeDatasetManager";
+import { Json } from "../../lib/db/database.types";
 
 export type DatasetFilterBranch = {
   left: DatasetFilterNode;
@@ -110,11 +111,31 @@ export class HeliconeDatasetController extends Controller {
     @Path()
     datasetId: string,
     @Body()
-    requestBody: {},
+    requestBody: {
+      offset: number;
+      limit: number;
+    },
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<HeliconeDatasetRow[], string>> {
     const datasetManager = new DatasetManager(request.authParams);
     const result = await datasetManager.helicone.query(datasetId, requestBody);
+    if (result.error) {
+      this.setStatus(500);
+      return err(result.error);
+    } else {
+      this.setStatus(200); // set return status 201
+      return ok(result.data!);
+    }
+  }
+
+  @Post("/{datasetId}/count")
+  public async countHeliconeDatasetRows(
+    @Path()
+    datasetId: string,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<number, string>> {
+    const datasetManager = new DatasetManager(request.authParams);
+    const result = await datasetManager.helicone.count(datasetId);
     if (result.error) {
       this.setStatus(500);
       return err(result.error);
@@ -142,5 +163,28 @@ export class HeliconeDatasetController extends Controller {
       this.setStatus(200); // set return status 201
       return ok(result.data);
     }
+  }
+
+  @Post("/{datasetId}/request/{requestId}")
+  public async updateHeliconeDatasetRequest(
+    @Path()
+    datasetId: string,
+    @Path()
+    requestId: string,
+    @Body() requestBody: { requestBody: Json; responseBody: Json },
+    @Request() request: JawnAuthenticatedRequest
+  ) {
+    const datasetManager = new DatasetManager(request.authParams);
+    const result = await datasetManager.helicone.updateDatasetRequest(
+      datasetId,
+      requestId,
+      requestBody
+    );
+    if (result.error) {
+      this.setStatus(500);
+      return err(result.error);
+    }
+    this.setStatus(200);
+    return ok(null);
   }
 }
