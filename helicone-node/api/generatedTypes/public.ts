@@ -9,6 +9,18 @@ interface JsonObject { [key: string]: JsonValue; }
 
 
 export interface paths {
+  "/v1/vault/add": {
+    post: operations["AddKey"];
+  };
+  "/v1/vault/keys": {
+    get: operations["GetKeys"];
+  };
+  "/v1/vault/key/{providerKeyId}": {
+    get: operations["GetKeyById"];
+  };
+  "/v1/vault/update/{id}": {
+    patch: operations["UpdateKey"];
+  };
   "/v1/session/query": {
     post: operations["GetSessions"];
   };
@@ -153,6 +165,50 @@ export type webhooks = Record<string, never>;
 
 export interface components {
   schemas: {
+    "ResultSuccess__id-string__": {
+      data: {
+        id: string;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    ResultError_string_: {
+      /** @enum {number|null} */
+      data: null;
+      error: string;
+    };
+    "Result__id-string_.string_": components["schemas"]["ResultSuccess__id-string__"] | components["schemas"]["ResultError_string_"];
+    AddVaultKeyParams: {
+      key: string;
+      provider: string;
+      name?: string;
+    };
+    DecryptedProviderKey: {
+      provider_key_name: string | null;
+      provider_name: string | null;
+      provider_key: string | null;
+      org_id: string | null;
+      id: string | null;
+    };
+    "ResultSuccess_DecryptedProviderKey-Array_": {
+      data: components["schemas"]["DecryptedProviderKey"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_DecryptedProviderKey-Array.string_": components["schemas"]["ResultSuccess_DecryptedProviderKey-Array_"] | components["schemas"]["ResultError_string_"];
+    ResultSuccess_DecryptedProviderKey_: {
+      data: components["schemas"]["DecryptedProviderKey"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_DecryptedProviderKey.string_": components["schemas"]["ResultSuccess_DecryptedProviderKey_"] | components["schemas"]["ResultError_string_"];
+    ResultSuccess_null_: {
+      /** @enum {number|null} */
+      data: null;
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_null.string_": components["schemas"]["ResultSuccess_null_"] | components["schemas"]["ResultError_string_"];
     SessionResult: {
       created_at: string;
       latest_request_created_at: string;
@@ -172,11 +228,6 @@ export interface components {
       data: components["schemas"]["SessionResult"][];
       /** @enum {number|null} */
       error: null;
-    };
-    ResultError_string_: {
-      /** @enum {number|null} */
-      data: null;
-      error: string;
     };
     "Result_SessionResult-Array.string_": components["schemas"]["ResultSuccess_SessionResult-Array_"] | components["schemas"]["ResultError_string_"];
     SessionQueryParams: {
@@ -678,13 +729,6 @@ export interface components {
       isPartOfExperiment?: boolean;
       isScored?: boolean;
     };
-    ResultSuccess_null_: {
-      /** @enum {number|null} */
-      data: null;
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_null.string_": components["schemas"]["ResultSuccess_null_"] | components["schemas"]["ResultError_string_"];
     HeliconeRequestAsset: {
       assetUrl: string;
     };
@@ -1312,6 +1356,69 @@ export type external = Record<string, never>;
 
 export interface operations {
 
+  AddKey: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AddVaultKeyParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__id-string_.string_"];
+        };
+      };
+    };
+  };
+  GetKeys: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_DecryptedProviderKey-Array.string_"];
+        };
+      };
+    };
+  };
+  GetKeyById: {
+    parameters: {
+      path: {
+        providerKeyId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_DecryptedProviderKey.string_"];
+        };
+      };
+    };
+  };
+  UpdateKey: {
+    parameters: {
+      path: {
+        id: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          name?: string;
+          key?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
   GetSessions: {
     requestBody: {
       content: {

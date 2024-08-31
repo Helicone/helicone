@@ -19,6 +19,8 @@ import Fuse from "fuse.js";
 import Link from "next/link";
 import React, { useMemo, useState } from "react";
 import { LOGOS } from "./connectionSVG";
+import ThemedDrawer from "../../shared/themed/themedDrawer";
+import OpenPipeConfig from "./openPipeConfig";
 
 type IntegrationType =
   | "provider"
@@ -48,6 +50,7 @@ const INTEGRATION_SECTIONS: IntegrationSection[] = [
 
 const ConnectionsPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [activeDrawer, setActiveDrawer] = useState<string | null>(null);
 
   const allItems: Integration[] = useMemo(
     () => [
@@ -86,6 +89,23 @@ const ConnectionsPage: React.FC = () => {
     return fuse.search(searchQuery).map((result) => result.item);
   }, [searchQuery, allItems, fuse]);
 
+  const handleIntegrationClick = (title: string) => {
+    setActiveDrawer(title);
+  };
+
+  const handleCloseDrawer = () => {
+    setActiveDrawer(null);
+  };
+
+  const handleSaveOpenPipeConfig = (config: {
+    apiKey: string;
+    autoDatasetSync: boolean;
+  }) => {
+    // TODO: Implement saving the OpenPipe configuration
+    console.log("Saving OpenPipe config:", config);
+    handleCloseDrawer();
+  };
+
   return (
     <div className="flex flex-col space-y-8 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="flex flex-col space-y-2">
@@ -109,8 +129,16 @@ const ConnectionsPage: React.FC = () => {
           key={section.type}
           title={section.title}
           items={filteredItems.filter((item) => item.type === section.type)}
+          onIntegrationClick={handleIntegrationClick}
         />
       ))}
+
+      <ThemedDrawer open={activeDrawer !== null} setOpen={handleCloseDrawer}>
+        {activeDrawer === "OpenPipe" && (
+          <OpenPipeConfig onClose={handleSaveOpenPipeConfig} />
+        )}
+        {/* Add more configuration components for other integrations here */}
+      </ThemedDrawer>
     </div>
   );
 };
@@ -118,11 +146,13 @@ const ConnectionsPage: React.FC = () => {
 interface IntegrationSectionProps {
   title: string;
   items: Integration[];
+  onIntegrationClick: (title: string) => void;
 }
 
 const IntegrationSection: React.FC<IntegrationSectionProps> = ({
   title,
   items,
+  onIntegrationClick,
 }) => {
   if (items.length === 0) return null;
 
@@ -132,20 +162,18 @@ const IntegrationSection: React.FC<IntegrationSectionProps> = ({
       <Carousel>
         <CarouselContent className="gap-4">
           {items.map((item, index) => (
-            <CarouselItem key={index} className="basis-[30%]">
+            <CarouselItem key={index} className="basis-[55%] lg:basis-[30%]">
               <IntegrationCard
                 title={item.title}
                 Logo={LOGOS[item.title as keyof typeof LOGOS]}
                 description={`Integrate with ${item.title}'s services.`}
-                href={`/integrations/${item.title
-                  .toLowerCase()
-                  .replace(" ", "-")}`}
                 enabled={item.enabled}
+                onClick={() => onIntegrationClick(item.title)}
               />
             </CarouselItem>
           ))}
         </CarouselContent>
-        {items.length > 3 && (
+        {items.length >= 3 && (
           <>
             <CarouselPrevious />
             <CarouselNext />
@@ -159,20 +187,20 @@ const IntegrationSection: React.FC<IntegrationSectionProps> = ({
 interface IntegrationCardProps {
   title: string;
   description: string;
-  href: string;
   enabled?: boolean;
   Logo?: React.FC<{ className: string }>;
+  onClick: () => void;
 }
 
 const IntegrationCard: React.FC<IntegrationCardProps> = ({
   title,
   description,
   enabled,
-  href,
   Logo,
+  onClick,
 }) => {
   return (
-    <Card className="flex flex-col h-[200px]">
+    <Card className="flex flex-col h-[150px]">
       <CardHeader className="flex-grow">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center">
@@ -188,16 +216,15 @@ const IntegrationCard: React.FC<IntegrationCardProps> = ({
             />
           )}
         </div>
-        <CardDescription className="text-sm">{description}</CardDescription>
       </CardHeader>
       <CardFooter className="mt-auto">
-        <Link
-          href={href}
+        <button
+          onClick={onClick}
           className="text-blue-600 hover:text-blue-800 flex items-center text-sm"
         >
-          Learn more
+          {title === "OpenPipe" ? "Configure" : "Learn more"}
           <ArrowRightIcon className="ml-1 h-4 w-4" />
-        </Link>
+        </button>
       </CardFooter>
     </Card>
   );

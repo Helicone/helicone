@@ -5,7 +5,7 @@ import { Database } from "./database.types";
 import { hashAuth } from "../../utils/hash";
 import { HeliconeAuth } from "../requestWrapper";
 import { redisClient } from "../clients/redisClient";
-import { KeyPermissions } from "../../models/models";
+import { KeyPermissions, Role } from "../../models/models";
 
 // SINGLETON
 class SupabaseAuthCache extends InMemoryCache {
@@ -51,6 +51,7 @@ export interface AuthParams {
   userId?: string;
   heliconeApiKeyId?: number;
   keyPermissions?: KeyPermissions;
+  role?: Role;
 }
 type AuthResult = PromiseGenericResult<AuthParams>;
 
@@ -125,12 +126,14 @@ export class SupabaseConnector {
       return ok({
         organizationId: member.data[0].organization,
         userId: data.user.id,
+        role: member.data[0].org_role as Role,
       });
     }
     if (owner.data.length !== 0) {
       return ok({
         organizationId: owner.data[0].id,
         userId: data.user.id,
+        role: "owner" as Role,
       });
     }
 
@@ -223,7 +226,7 @@ export class SupabaseConnector {
     organizationId?: string
   ): AuthResult {
     const cacheKey = await hashAuth(
-      JSON.stringify(authorization) + organizationId
+      JSON.stringify(authorization) + organizationId + new Date().getTime()
     );
 
     const cacheResultMem = this.authCache.get<AuthParams>(cacheKey);
@@ -262,6 +265,7 @@ export class SupabaseConnector {
       userId,
       heliconeApiKeyId,
       keyPermissions,
+      role,
     } = result.data;
 
     if (!orgId) {
@@ -273,6 +277,7 @@ export class SupabaseConnector {
       userId,
       heliconeApiKeyId,
       keyPermissions,
+      role,
     };
 
     this.authCache.set(cacheKey, authParamsResult);
