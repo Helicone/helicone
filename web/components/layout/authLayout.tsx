@@ -89,15 +89,15 @@ const AuthLayout = (props: AuthLayoutProps) => {
       icon: TableCellsIcon,
       current: pathname.includes("/requests"),
     },
+    {
+      name: "Datasets",
+      href: "/datasets",
+      icon: CircleStackIcon,
+      current: pathname.includes("/datasets"),
+    },
     ...(!user?.email?.includes("@helicone.ai")
       ? []
       : [
-          {
-            name: "Datasets",
-            href: "/datasets",
-            icon: CircleStackIcon,
-            current: pathname.includes("/datasets"),
-          },
           {
             name: "Evals",
             href: "/evals",

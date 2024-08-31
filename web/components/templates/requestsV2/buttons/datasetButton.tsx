@@ -6,7 +6,6 @@ import {
 } from "@heroicons/react/24/outline";
 import { useState } from "react";
 import { Row } from "../../../layout/common";
-import { useUser } from "@supabase/auth-helpers-react";
 import GenericButton from "../../../layout/common/button";
 
 interface DatasetButtonProps<T> {
@@ -30,9 +29,6 @@ export default function DatasetButton<T>(props: DatasetButtonProps<T>) {
     isDatasetPage = false,
   } = props;
   const [modalOpen, setModalOpen] = useState(false);
-  const user = useUser();
-
-  if (!user?.email?.includes("@helicone.ai")) return null;
 
   return (
     <>
