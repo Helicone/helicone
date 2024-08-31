@@ -8,6 +8,10 @@ import {
   Integration,
   IntegrationSection as IntegrationSectionType,
 } from "./types";
+import {
+  useIntegration,
+  useIntegrations,
+} from "@/services/hooks/useIntegrations";
 
 const INTEGRATION_SECTIONS: IntegrationSectionType[] = [
   { title: "LLM Providers", type: "provider" },
@@ -20,6 +24,9 @@ const INTEGRATION_SECTIONS: IntegrationSectionType[] = [
 const ConnectionsPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [activeDrawer, setActiveDrawer] = useState<string | null>(null);
+
+  const { integrations, isLoadingIntegrations, refetchIntegrations } =
+    useIntegrations();
 
   const allItems: Integration[] = useMemo(
     () => [
@@ -36,16 +43,22 @@ const ConnectionsPage: React.FC = () => {
       { title: "LemonFox", type: "provider" },
       { title: "Perplexity", type: "provider" },
       { title: "Mistral", type: "provider" },
-      { title: "OpenPipe", type: "fine-tuning", enabled: true },
+      {
+        title: "OpenPipe",
+        type: "fine-tuning",
+        enabled:
+          integrations?.find(
+            (integration) => integration.integration_name === "open_pipe"
+          )?.active ?? false,
+      },
       { title: "PostHog", type: "destination", enabled: false },
-      { title: "Datadog", type: "destination", enabled: true },
+      { title: "Datadog", type: "destination", enabled: false },
       { title: "Pillar", type: "gateway", enabled: true },
       { title: "NotDiamond", type: "gateway", enabled: false },
-
       { title: "Diffy", type: "other-provider", enabled: false },
       { title: "Lytix", type: "destination", enabled: false },
     ],
-    []
+    [integrations]
   );
 
   const fuse = useMemo(
@@ -64,6 +77,7 @@ const ConnectionsPage: React.FC = () => {
 
   const handleCloseDrawer = () => {
     setActiveDrawer(null);
+    refetchIntegrations();
   };
 
   return (

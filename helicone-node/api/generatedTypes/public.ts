@@ -81,6 +81,14 @@ export interface paths {
   "/v1/prompt/{user_defined_id}/compile": {
     post: operations["GetPromptVersionsCompiled"];
   };
+  "/v1/integration": {
+    get: operations["GetIntegrations"];
+    post: operations["CreateIntegration"];
+  };
+  "/v1/integration/{integrationId}": {
+    get: operations["GetIntegration"];
+    post: operations["UpdateIntegration"];
+  };
   "/v1/experiment/dataset": {
     post: operations["AddDataset"];
   };
@@ -903,6 +911,38 @@ export interface components {
       filter?: components["schemas"]["PromptVersionsFilterNode"];
       inputs: components["schemas"]["Record_string.string_"];
     };
+    /** @description Construct a type with a set of properties K of type T */
+    "Record_string.any_": {
+      [key: string]: unknown;
+    };
+    IntegrationCreateParams: {
+      integration_name: string;
+      settings?: components["schemas"]["Record_string.any_"];
+      active?: boolean;
+    };
+    Integration: {
+      integration_name?: string;
+      settings?: components["schemas"]["Record_string.any_"];
+      active?: boolean;
+      id: string;
+    };
+    ResultSuccess_Array_Integration__: {
+      data: components["schemas"]["Integration"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Array_Integration_.string_": components["schemas"]["ResultSuccess_Array_Integration__"] | components["schemas"]["ResultError_string_"];
+    IntegrationUpdateParams: {
+      integration_name?: string;
+      settings?: components["schemas"]["Record_string.any_"];
+      active?: boolean;
+    };
+    ResultSuccess_Integration_: {
+      data: components["schemas"]["Integration"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Integration.string_": components["schemas"]["ResultSuccess_Integration_"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess__datasetId-string__": {
       data: {
         datasetId: string;
@@ -1423,6 +1463,7 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": {
+          active?: boolean;
           name?: string;
           key?: string;
         };
@@ -1807,6 +1848,66 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_PromptVersionResultCompiled.string_"];
+        };
+      };
+    };
+  };
+  GetIntegrations: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Array_Integration_.string_"];
+        };
+      };
+    };
+  };
+  CreateIntegration: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["IntegrationCreateParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__id-string_.string_"];
+        };
+      };
+    };
+  };
+  GetIntegration: {
+    parameters: {
+      path: {
+        integrationId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Integration.string_"];
+        };
+      };
+    };
+  };
+  UpdateIntegration: {
+    parameters: {
+      path: {
+        integrationId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["IntegrationUpdateParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
         };
       };
     };

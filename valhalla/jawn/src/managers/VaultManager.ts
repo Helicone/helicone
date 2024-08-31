@@ -123,11 +123,13 @@ export class VaultManager extends BaseManager {
     id: string;
     key?: string;
     name?: string;
+    active?: boolean;
   }): Promise<Result<null, string>> {
     try {
       const updateData: {
         provider_key?: string;
         provider_key_name?: string;
+        active?: boolean;
       } = {};
 
       if (params.key) {
@@ -135,6 +137,9 @@ export class VaultManager extends BaseManager {
       }
       if (params.name) {
         updateData.provider_key_name = params.name;
+      }
+      if (params.active) {
+        updateData.active = params.active;
       }
 
       const { error } = await supabaseServer.client
