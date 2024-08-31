@@ -1,9 +1,8 @@
 import { useState, useRef, useEffect } from "react";
-import { Check } from "lucide-react";
+import { Check, DatabaseIcon } from "lucide-react"; // Add DatabaseIcon import
 import { TableCellsIcon } from "@heroicons/react/24/outline";
 import { useJawnClient } from "../../../lib/clients/jawnHook";
 import useNotification from "../../shared/notification/useNotification";
-import { NormalizedRequest } from "../requestsV2/builder/abstractRequestBuilder";
 import { useGetHeliconeDatasets } from "../../../services/hooks/dataset/heliconeDataset";
 import { useLocalStorage } from "../../../services/hooks/localStorage";
 import { useRouter } from "next/router";
@@ -22,18 +21,27 @@ import { TextInput } from "@tremor/react";
 import { Label } from "../../ui/label";
 
 interface NewDatasetProps {
-  requests: NormalizedRequest[];
+  request_ids: string[];
   onComplete: () => void;
+  isCopyMode?: boolean;
 }
 
-export default function NewDataset({ requests, onComplete }: NewDatasetProps) {
+export default function NewDataset({
+  request_ids,
+  onComplete,
+  isCopyMode = false,
+}: NewDatasetProps) {
   const [selectedOption, setSelectedOption] = useState<string | "new" | null>(
     null
   );
   const [newDatasetName, setNewDatasetName] = useState("");
   const { setNotification } = useNotification();
   const jawn = useJawnClient();
-  const { datasets, refetch: refetchDatasets } = useGetHeliconeDatasets();
+  const {
+    datasets,
+    refetch: refetchDatasets,
+    isLoading: isDatasetsLoading,
+  } = useGetHeliconeDatasets();
   const [addingRequests, setAddingRequests] = useState(false);
   const [openDatasetOnAdd, setOpenDatasetOnAdd] = useLocalStorage(
     "openDatasetOnAdd",
@@ -44,7 +52,7 @@ export default function NewDataset({ requests, onComplete }: NewDatasetProps) {
   const newDatasetInputRef = useRef<HTMLInputElement>(null);
 
   const [showLimitWarning, setShowLimitWarning] = useState(false);
-  const [limitedRequests, setLimitedRequests] = useState(requests);
+  const [limitedRequestIds, setLimitedRequestIds] = useState(request_ids);
 
   const handleSelection = (id: string | "new") => {
     setSelectedOption(id);
@@ -54,16 +62,18 @@ export default function NewDataset({ requests, onComplete }: NewDatasetProps) {
       if (selectedDataset) {
         if (selectedDataset.requests_count >= 500) {
           setShowLimitWarning(true);
-          setLimitedRequests([]);
+          setLimitedRequestIds([]);
         } else {
           const remainingSlots = 500 - selectedDataset.requests_count;
-          setLimitedRequests(requests.slice(0, remainingSlots));
-          setShowLimitWarning(limitedRequests.length < requests.length);
+          const newLimitedRequestIds = request_ids.slice(0, remainingSlots);
+          setLimitedRequestIds(newLimitedRequestIds);
+          setShowLimitWarning(newLimitedRequestIds.length < request_ids.length);
         }
       }
     } else {
-      setShowLimitWarning(false);
-      setLimitedRequests(requests.slice(0, 500));
+      const newLimitedRequestIds = request_ids.slice(0, 500);
+      setLimitedRequestIds(newLimitedRequestIds);
+      setShowLimitWarning(newLimitedRequestIds.length < request_ids.length);
     }
   };
 
@@ -96,37 +106,57 @@ export default function NewDataset({ requests, onComplete }: NewDatasetProps) {
   return (
     <Card className="w-[450px] border-none shadow-none p-0 m-0 space-y-4">
       <CardHeader className="p-0 pb-4">
-        <CardTitle className="text-2xl font-semibold">Add to dataset</CardTitle>
+        <CardTitle className="text-2xl font-semibold">
+          {isCopyMode ? "Copy to dataset" : "Add to dataset"}{" "}
+        </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4 p-2 rounded-xl border border-[#E2E8F0]">
-        <ScrollArea className="h-[115px]">
-          {datasets.map((dataset) => (
-            <div
-              key={dataset.id}
-              className={`flex items-center space-x-2 p-2 cursor-pointer rounded-lg ${
-                selectedOption === dataset.id
-                  ? "bg-[#F1F5F9]"
-                  : "hover:bg-accent"
-              }`}
-              onClick={() => handleSelection(dataset.id)}
-            >
-              <div className="w-5 h-5 flex items-center justify-center">
-                {selectedOption === dataset.id && (
-                  <Check className="h-4 w-4 text-primary" />
-                )}
+        {isDatasetsLoading ? (
+          <div className="h-[115px] flex items-center justify-center">
+            <p className="text-sm text-gray-700 dark:text-gray-100">
+              Loading...
+            </p>
+          </div>
+        ) : datasets.length > 0 ? (
+          <ScrollArea className="h-[115px]">
+            {datasets.map((dataset) => (
+              <div
+                key={dataset.id}
+                className={`flex items-center space-x-2 p-2 cursor-pointer rounded-lg ${
+                  selectedOption === dataset.id
+                    ? "bg-[#F1F5F9]"
+                    : "hover:bg-accent"
+                }`}
+                onClick={() => handleSelection(dataset.id)}
+              >
+                <div className="w-5 h-5 flex items-center justify-center">
+                  {selectedOption === dataset.id && (
+                    <Check className="h-4 w-4 text-primary" />
+                  )}
+                </div>
+                <div className="flex-1 flex items-center justify-between text-md font-normal leading-none">
+                  <span className="text-[#334155]">
+                    {dataset.name || "Untitled"}
+                  </span>
+                  <span className="text-muted-foreground text-[#6B7280] items-center flex">
+                    <TableCellsIcon className="inline mr-1 h-4 w-4" />
+                    {dataset.requests_count || 0}
+                  </span>
+                </div>
               </div>
-              <div className="flex-1 flex items-center justify-between text-md font-normal leading-none">
-                <span className="text-[#334155]">
-                  {dataset.name || "Untitled"}
-                </span>
-                <span className="text-muted-foreground text-[#6B7280] items-center flex">
-                  <TableCellsIcon className="inline mr-1 h-4 w-4" />
-                  {dataset.requests_count || 0}
-                </span>
-              </div>
-            </div>
-          ))}
-        </ScrollArea>
+            ))}
+          </ScrollArea>
+        ) : (
+          <div className="h-[115px] flex flex-col items-center justify-center">
+            <DatabaseIcon className="h-12 w-12 text-gray-700 dark:text-gray-100" />
+            <p className="text-sm text-gray-700 dark:text-gray-100 mt-2">
+              No Datasets
+            </p>
+            <p className="text-xs text-gray-700 dark:text-gray-100 mt-1">
+              Create your first dataset below
+            </p>
+          </div>
+        )}
         <div className="border-t border-[#E2E8F0] pt-1">
           <div
             className={`flex items-center space-x-2 p-2 cursor-pointer rounded-lg ${
@@ -161,9 +191,9 @@ export default function NewDataset({ requests, onComplete }: NewDatasetProps) {
           <div className="flex space-x-2 flex-col text-sm bg-[#F1F5F9] p-2 rounded-lg">
             <span className="ml-2 font-medium text-lg">Note</span>
             <span className="text-[#64748B]">
-              {limitedRequests.length === 0
+              {limitedRequestIds.length === 0
                 ? "This dataset already has 500 or more requests. Please select or create a different dataset."
-                : `Only ${limitedRequests.length} requests will be added to stay within the limit of 500 requests per dataset.`}
+                : `Only ${limitedRequestIds.length} requests will be added to stay within the limit of 500 requests per dataset.`}
             </span>
           </div>
         )}
@@ -190,7 +220,7 @@ export default function NewDataset({ requests, onComplete }: NewDatasetProps) {
               !selectedOption ||
               (selectedOption === "new" && !newDatasetName) ||
               addingRequests ||
-              limitedRequests.length === 0
+              limitedRequestIds.length === 0
             }
             onClick={async () => {
               setAddingRequests(true);
@@ -209,7 +239,7 @@ export default function NewDataset({ requests, onComplete }: NewDatasetProps) {
                 {
                   params: { path: { datasetId: datasetId! } },
                   body: {
-                    addRequests: limitedRequests.map((r) => r.id),
+                    addRequests: limitedRequestIds,
                     removeRequests: [],
                   },
                 }
@@ -228,8 +258,13 @@ export default function NewDataset({ requests, onComplete }: NewDatasetProps) {
             }}
           >
             {addingRequests
-              ? "Adding..."
-              : `Add ${limitedRequests.length} requests`}
+              ? isCopyMode
+                ? "Copying..."
+                : "Adding..." // Modify this line
+              : isCopyMode
+              ? `Copy ${limitedRequestIds.length} requests` // Add this line
+              : `Add ${limitedRequestIds.length} requests`}{" "}
+            {/* Modify this line */}
           </Button>
         </div>
       </CardFooter>

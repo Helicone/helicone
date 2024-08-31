@@ -79,6 +79,8 @@ interface ThemedTableV5Props<T extends { id?: string }> {
   children?: React.ReactNode;
   onSelectAll?: (checked: boolean) => void;
   selectedIds?: string[];
+  fullWidth?: boolean;
+  isDatasetsPage?: boolean;
 }
 
 export type RequestViews = "table" | "card" | "row";
@@ -110,6 +112,8 @@ export default function ThemedTable<T extends { id?: string }>(
     children,
     onSelectAll,
     selectedIds,
+    fullWidth = false,
+    isDatasetsPage,
   } = props;
 
   const [view, setView] = useLocalStorage<RequestViews>("view", "table");
@@ -165,6 +169,7 @@ export default function ThemedTable<T extends { id?: string }>(
     <div className="flex flex-col space-y-4">
       <ThemedTableHeader
         onDataSet={onDataSet}
+        isDatasetsPage={isDatasetsPage}
         advancedFilters={
           advancedFilters
             ? {
@@ -243,7 +248,7 @@ export default function ThemedTable<T extends { id?: string }>(
             <table
               {...{
                 style: {
-                  width: table.getCenterTotalSize(),
+                  width: fullWidth ? "100%" : table.getCenterTotalSize(),
                 },
               }}
             >

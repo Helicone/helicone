@@ -4,16 +4,18 @@ import {
   useGetHeliconeDatasets,
 } from "../../../services/hooks/dataset/heliconeDataset";
 import ThemedTable from "../../shared/themed/table/themedTable";
-import ThemedDrawer from "../../shared/themed/themedDrawer";
 import HcBadge from "../../ui/hcBadge";
 import HcBreadcrumb from "../../ui/hcBreadcrumb";
 import {
   getGenericRequestText,
   getGenericResponseText,
 } from "../requestsV2/helpers";
-import EditDataset from "./EditDataset";
 import DatasetButton from "../requestsV2/buttons/datasetButton";
-import { TrashIcon } from "@heroicons/react/24/outline";
+import {
+  FolderPlusIcon,
+  Square2StackIcon,
+  TrashIcon,
+} from "@heroicons/react/24/outline";
 import { Row } from "../../layout/common";
 import { useJawnClient } from "../../../lib/clients/jawnHook";
 import useNotification from "../../shared/notification/useNotification";
@@ -21,6 +23,11 @@ import { useSelectMode } from "../../../services/hooks/dataset/selectMode";
 import { useRouter } from "next/router";
 import TableFooter from "../requestsV2/tableFooter";
 import { clsx } from "../../shared/clsx";
+import NewDataset from "./NewDataset"; // Add this import at the top of the file
+import ThemedModal from "../../shared/themed/themedModal";
+import GenericButton from "../../layout/common/button";
+import DatasetDrawerV2 from "./datasetDrawer";
+import RemoveRequestsModal from "./RemoveRequests";
 
 interface DatasetIdPageProps {
   id: string;
@@ -36,9 +43,9 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
   const router = useRouter();
   const [page, setPage] = useState<number>(currentPage);
   const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);
+
   const { rows, isLoading, refetch, count, isCountLoading } =
     useGetHeliconeDatasetRows(id, page, currentPageSize);
-  console.log(count);
   const { datasets, isLoading: isLoadingDataset } = useGetHeliconeDatasets([
     id,
   ]);
@@ -48,6 +55,8 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
   const [selectedRow, setSelectedRow] = useState<DatasetRow>(null);
   const [selectedDataIndex, setSelectedDataIndex] = useState<number>();
   const [open, setOpen] = useState(false);
+  const [showNewDatasetModal, setShowNewDatasetModal] = useState(false);
+  const [showRemoveModal, setShowRemoveModal] = useState(false);
 
   const {
     selectMode: selectModeHook,
@@ -60,17 +69,58 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
     getItemId: (row) => row.id,
   });
 
-  const onRowSelectHandler = (row: any, index: number) => {
-    if (selectModeHook) {
-      toggleSelection(row);
-    } else {
-      setSelectedDataIndex(index);
-      setSelectedRow(row);
-      setOpen(true);
+  const [selectedRowIndex, setSelectedRowIndex] = useState<number | null>(null);
+
+  const [selectedRequestIds, setSelectedRequestIds] = useState<
+    Array<{ id: string; origin_request_id: string }>
+  >([]);
+
+  // Update selectedRequestIds whenever selectedIds changes
+  useEffect(() => {
+    setSelectedRequestIds(
+      rows
+        .filter((row) => selectedIds.includes(row.id))
+        .map((row) => ({
+          id: row.id,
+          origin_request_id: row.origin_request_id,
+        }))
+    );
+  }, [selectedIds]);
+
+  const onRowSelectHandler = useCallback(
+    (row: any) => {
+      if (selectModeHook) {
+        toggleSelection(row);
+      } else {
+        setSelectedRow(row);
+        setSelectedRowIndex(rows.findIndex((r) => r.id === row.id));
+        setOpen(true);
+      }
+    },
+    [selectModeHook, toggleSelection, rows]
+  );
+
+  const handlePrevious = () => {
+    if (selectedRowIndex !== null && selectedRowIndex > 0) {
+      setSelectedRowIndex(selectedRowIndex - 1);
+      setSelectedRow(rows[selectedRowIndex - 1]);
     }
   };
 
-  // Update the page state and router query when the page changes
+  const handleNext = () => {
+    if (selectedRowIndex !== null && selectedRowIndex < rows.length - 1) {
+      setSelectedRowIndex(selectedRowIndex + 1);
+      setSelectedRow(rows[selectedRowIndex + 1]);
+    }
+  };
+
+  const handleSelectAll = useCallback(
+    (isSelected: boolean) => {
+      selectAll();
+    },
+    [selectAll]
+  );
+
   const handlePageChange = useCallback(
     (newPage: number) => {
       router.push(
@@ -85,7 +135,6 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
     [router]
   );
 
-  // Sync the page state with the router query on component mount
   useEffect(() => {
     const pageFromQuery = router.query.page;
     if (pageFromQuery && !Array.isArray(pageFromQuery)) {
@@ -95,6 +144,79 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
       }
     }
   }, [router.query.page, page]);
+
+  const handleDuplicateRequests = async () => {
+    try {
+      const res = await jawn.POST(`/v1/helicone-dataset/{datasetId}/mutate`, {
+        params: {
+          path: {
+            datasetId: id,
+          },
+        },
+        body: {
+          addRequests: selectedRequestIds.map((item) => item.origin_request_id),
+          removeRequests: [],
+        },
+      });
+      if (res.data && !res.data.error) {
+        setNotification("Requests duplicated to this dataset", "success");
+        await refetch();
+      } else {
+        setNotification(
+          "Failed to duplicate requests to this dataset",
+          "error"
+        );
+      }
+    } catch (error) {
+      setNotification("Failed to duplicate requests to this dataset", "error");
+    }
+  };
+
+  const handleRemoveRequests = async () => {
+    try {
+      const res = await jawn.POST(`/v1/helicone-dataset/{datasetId}/mutate`, {
+        params: {
+          path: {
+            datasetId: id,
+          },
+        },
+        body: {
+          addRequests: [],
+          removeRequests: selectedRequestIds.map((item) => item.id),
+        },
+      });
+      if (res.data && !res.data.error) {
+        setNotification("Requests removed from dataset", "success");
+        await refetch();
+        setSelectedRequestIds([]);
+        toggleSelectMode(false);
+      } else {
+        setNotification("Failed to remove requests from dataset", "error");
+      }
+    } catch (error) {
+      setNotification("Failed to remove requests from dataset", "error");
+    }
+  };
+
+  const handlePageSizeChange = useCallback(
+    (newPageSize: number) => {
+      setCurrentPageSize(newPageSize);
+      setPage(1); // Reset to first page when changing page size
+      router.push(
+        {
+          pathname: router.pathname,
+          query: {
+            ...router.query,
+            page: "1",
+            pageSize: newPageSize.toString(),
+          },
+        },
+        undefined,
+        { shallow: true }
+      );
+    },
+    [router]
+  );
 
   return (
     <>
@@ -126,6 +248,7 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
         <ThemedTable
           highlightedIds={selectedIds}
           showCheckboxes={selectModeHook}
+          fullWidth={false}
           defaultColumns={[
             {
               header: "Created At",
@@ -170,9 +293,7 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
           dataLoading={isLoading}
           id="datasets"
           skeletonLoading={false}
-          onRowSelect={(row, index) => {
-            onRowSelectHandler(row, index);
-          }}
+          onRowSelect={onRowSelectHandler}
           customButtons={[
             <div key={"dataset-button"}>
               <DatasetButton
@@ -191,7 +312,7 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
               />
             </div>,
           ]}
-          onSelectAll={selectAll}
+          onSelectAll={handleSelectAll}
           selectedIds={selectedIds}
         >
           {selectModeHook && (
@@ -205,45 +326,33 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
                 </span>
               </div>
               {selectedIds.length > 0 && (
-                <button
-                  onClick={async () => {
-                    const res = await jawn.POST(
-                      `/v1/helicone-dataset/{datasetId}/mutate`,
-                      {
-                        params: {
-                          path: {
-                            datasetId: id,
-                          },
-                        },
-                        body: {
-                          addRequests: [],
-                          removeRequests: selectedIds,
-                        },
-                      }
-                    );
-                    if (res.data && !res.data.error) {
-                      setNotification(
-                        "Requests removed from dataset",
-                        "success"
-                      );
-                      await refetch();
-                    } else {
-                      setNotification(
-                        "Failed to remove requests from dataset",
-                        "error"
-                      );
+                <div className="flex gap-2">
+                  <GenericButton
+                    onClick={() => setShowNewDatasetModal(true)}
+                    text="Copy to..."
+                    icon={
+                      <FolderPlusIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
                     }
-                    toggleSelectMode(false);
-                  }}
-                  className={clsx(
-                    "relative inline-flex items-center rounded-md hover:bg-red-700 bg-red-500 px-4 py-2 text-sm font-medium text-white"
-                  )}
-                >
-                  <div className="flex flex-row gap-2 items-center">
-                    <TrashIcon className="h-5 w-5 text-gray-100 dark:text-gray-900" />
-                    <span>Remove</span>
-                  </div>
-                </button>
+                  ></GenericButton>
+                  <GenericButton
+                    onClick={handleDuplicateRequests}
+                    text="Duplicate"
+                    icon={
+                      <Square2StackIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
+                    }
+                  ></GenericButton>
+                  <button
+                    onClick={() => setShowRemoveModal(true)}
+                    className={clsx(
+                      "relative inline-flex items-center rounded-md hover:bg-red-700 bg-red-500 px-4 py-2 text-sm font-medium text-white"
+                    )}
+                  >
+                    <div className="flex flex-row gap-2 items-center">
+                      <TrashIcon className="h-5 w-5 text-gray-100 dark:text-gray-900" />
+                      <span>Remove</span>
+                    </div>
+                  </button>
+                </div>
               )}
             </Row>
           )}
@@ -255,18 +364,49 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
           isCountLoading={isCountLoading}
           count={count || 0}
           onPageChange={(n) => handlePageChange(n)}
-          onPageSizeChange={(n) => setCurrentPageSize(n)}
+          onPageSizeChange={handlePageSizeChange}
           pageSizeOptions={[25, 50, 100, 250, 500]}
         />
       </div>
-      <ThemedDrawer
-        open={!!selectedRow}
-        setOpen={(open) => setSelectedRow(open ? selectedRow : null)}
-        defaultWidth="w-[80vw]"
-        defaultExpanded={true}
-      >
-        <EditDataset selectedRow={selectedRow} />
-      </ThemedDrawer>
+      <DatasetDrawerV2
+        open={open}
+        setOpen={setOpen}
+        hasPrevious={selectedRowIndex !== null && selectedRowIndex > 0}
+        hasNext={
+          selectedRowIndex !== null && selectedRowIndex < rows.length - 1
+        }
+        onPrevHandler={handlePrevious}
+        onNextHandler={handleNext}
+        selectedRow={selectedRow}
+        datasetId={id}
+        onDelete={() => {
+          setSelectedRow(null);
+          setSelectedRowIndex(null);
+          refetch();
+        }}
+        refetch={refetch}
+      />
+      <ThemedModal open={showNewDatasetModal} setOpen={setShowNewDatasetModal}>
+        <NewDataset
+          request_ids={selectedRequestIds.map((item) => item.origin_request_id)}
+          isCopyMode={true}
+          onComplete={() => {
+            setShowNewDatasetModal(false);
+            toggleSelectMode(false);
+            setSelectedRequestIds([]);
+            refetch();
+          }}
+        />
+      </ThemedModal>
+      <RemoveRequestsModal
+        open={showRemoveModal}
+        setOpen={setShowRemoveModal}
+        requestCount={selectedRequestIds.length}
+        onConfirm={() => {
+          handleRemoveRequests();
+          setShowRemoveModal(false);
+        }}
+      />
     </>
   );
 };
