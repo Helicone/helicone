@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import {
+  fetchHeliconeDatasetRows,
   useGetHeliconeDatasetRows,
   useGetHeliconeDatasets,
 } from "../../../services/hooks/dataset/heliconeDataset";
@@ -23,7 +24,9 @@ import { useSelectMode } from "../../../services/hooks/dataset/selectMode";
 import { useRouter } from "next/router";
 import TableFooter from "../requestsV2/tableFooter";
 import { clsx } from "../../shared/clsx";
-import NewDataset from "./NewDataset"; // Add this import at the top of the file
+import { useOrg } from "../../layout/organizationContext";
+import ExportButton from "../../shared/themed/table/exportButton";
+import NewDataset from "./NewDataset";
 import ThemedModal from "../../shared/themed/themedModal";
 import GenericButton from "../../layout/common/button";
 import DatasetDrawerV2 from "./datasetDrawer";
@@ -41,6 +44,7 @@ export type DatasetRow =
 const DatasetIdPage = (props: DatasetIdPageProps) => {
   const { id, currentPage, pageSize } = props;
   const router = useRouter();
+  const org = useOrg();
   const [page, setPage] = useState<number>(currentPage);
   const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);
 
@@ -218,6 +222,21 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
     [router]
   );
 
+  const exportedData = useCallback(async () => {
+    const rows = await fetchHeliconeDatasetRows(
+      org?.currentOrg?.id || "",
+      id,
+      1,
+      500
+    );
+    return rows.map((row) => {
+      return {
+        ...(typeof row.request_body === "object" ? row.request_body : {}),
+        ...(typeof row.response_body === "object" ? row.response_body : {}),
+      };
+    });
+  }, [id, org?.currentOrg?.id]);
+
   return (
     <>
       <div className="w-full h-full flex flex-col space-y-8">
@@ -295,6 +314,11 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
           skeletonLoading={false}
           onRowSelect={onRowSelectHandler}
           customButtons={[
+            <ExportButton
+              key="export-button"
+              rows={rows}
+              fetchRows={exportedData}
+            />,
             <div key={"dataset-button"}>
               <DatasetButton
                 datasetMode={selectModeHook}
