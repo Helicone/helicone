@@ -93,7 +93,7 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
           origin_request_id: row.origin_request_id,
         }))
     );
-  }, [selectedIds]);
+  }, [rows, selectedIds]);
 
   const onRowSelectHandler = useCallback(
     (row: any) => {

@@ -107,7 +107,11 @@ const useOpenPipeClient = ({ apiKey }: OpenPipeClientProps) => {
       });
 
       if (!response.ok) {
-        throw new Error(`OpenPipe API error: ${response.statusText}`);
+        throw new Error(
+          `OpenPipe API error: ${response.statusText} ${
+            response.status
+          } ${await response.text()}`
+        );
       }
 
       return response.json();
