@@ -108,7 +108,7 @@ export class VaultController extends Controller {
   @Patch("update/{id}")
   public async updateKey(
     @Path() id: string,
-    @Body() requestBody: { key?: string; name?: string },
+    @Body() requestBody: { key?: string; name?: string; active?: boolean },
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<null, string>> {
     if (
