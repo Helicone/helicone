@@ -231,13 +231,11 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
     );
     return rows.map((row) => {
       return {
-        id: row.id,
-        created_at: row.created_at,
-        request_body: row.request_body,
-        response_body: row.response_body,
+        ...(typeof row.request_body === "object" ? row.request_body : {}),
+        ...(typeof row.response_body === "object" ? row.response_body : {}),
       };
     });
-  }, [id]);
+  }, [id, org?.currentOrg?.id]);
 
   return (
     <>
@@ -316,6 +314,11 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
           skeletonLoading={false}
           onRowSelect={onRowSelectHandler}
           customButtons={[
+            <ExportButton
+              key="export-button"
+              rows={rows}
+              fetchRows={exportedData}
+            />,
             <div key={"dataset-button"}>
               <DatasetButton
                 datasetMode={selectModeHook}
@@ -332,11 +335,6 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
                 }}
               />
             </div>,
-            <ExportButton
-              key="export-button"
-              rows={rows}
-              fetchRows={exportedData}
-            />,
           ]}
           onSelectAll={handleSelectAll}
           selectedIds={selectedIds}
