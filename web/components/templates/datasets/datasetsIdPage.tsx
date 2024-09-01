@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useMemo } from "react";
 import {
   fetchHeliconeDatasetRows,
   useGetHeliconeDatasetRows,
@@ -72,6 +72,7 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
     selectedIds,
     toggleSelection,
     selectAll,
+    deselectAll,
   } = useSelectMode({
     items: rows,
     getItemId: (row) => row.id,
@@ -79,20 +80,14 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
 
   const [selectedRowIndex, setSelectedRowIndex] = useState<number | null>(null);
 
-  const [selectedRequestIds, setSelectedRequestIds] = useState<
-    Array<{ id: string; origin_request_id: string }>
-  >([]);
-
-  // Update selectedRequestIds whenever selectedIds changes
-  useEffect(() => {
-    setSelectedRequestIds(
-      rows
-        .filter((row) => selectedIds.includes(row.id))
-        .map((row) => ({
-          id: row.id,
-          origin_request_id: row.origin_request_id,
-        }))
-    );
+  // Use useMemo to derive selectedRequestIds
+  const selectedRequestIds = useMemo(() => {
+    return rows
+      .filter((row) => selectedIds.includes(row.id))
+      .map((row) => ({
+        id: row.id,
+        origin_request_id: row.origin_request_id,
+      }));
   }, [rows, selectedIds]);
 
   const onRowSelectHandler = useCallback(
@@ -196,7 +191,8 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
       if (res.data && !res.data.error) {
         setNotification("Requests removed from dataset", "success");
         await refetch();
-        setSelectedRequestIds([]);
+        deselectAll();
+
         toggleSelectMode(false);
       } else {
         setNotification("Failed to remove requests from dataset", "error");
@@ -439,7 +435,7 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
           onComplete={() => {
             setShowNewDatasetModal(false);
             toggleSelectMode(false);
-            setSelectedRequestIds([]);
+            deselectAll();
             refetch();
           }}
         />

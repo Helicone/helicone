@@ -57,10 +57,11 @@ const TableFooter = (props: TableFooterProps) => {
               const newPageSize = e.target.value;
               onPageSizeChange(parseInt(newPageSize, 10));
             }}
-            value={pageSize}
           >
             {pageSizeOptions?.map((o) => (
-              <option key={o}>{o}</option>
+              <option key={o} value={o}>
+                {o}
+              </option>
             ))}
           </select>
         </div>
