@@ -52,15 +52,16 @@ const TableFooter = (props: TableFooterProps) => {
             id="location"
             name="location"
             className="text-gray-700 dark:text-gray-300 bg-white dark:bg-black block w-fit rounded-md border-gray-300 dark:border-gray-700 py-1.5 pl-3 pr-6 text-base focus:border-sky-500 hover:cursor-pointer focus:outline-none focus:ring-sky-500 sm:text-sm"
-            defaultValue={pageSize}
+            value={pageSize}
             onChange={(e) => {
               const newPageSize = e.target.value;
               onPageSizeChange(parseInt(newPageSize, 10));
             }}
-            value={pageSize}
           >
             {pageSizeOptions?.map((o) => (
-              <option key={o}>{o}</option>
+              <option key={o} value={o}>
+                {o}
+              </option>
             ))}
           </select>
         </div>
