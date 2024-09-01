@@ -54,12 +54,17 @@ export function useSelectMode<T>({ items, getItemId }: UseSelectModeProps<T>) {
     );
   }, [items, getItemId]);
 
+  const deselectAll = useCallback(() => {
+    setSelectedIds([]);
+  }, []);
+
   return {
     selectMode,
     toggleSelectMode,
     selectedIds,
     toggleSelection,
     selectAll,
+    deselectAll,
     isShiftPressed,
   };
 }

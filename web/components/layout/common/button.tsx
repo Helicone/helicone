@@ -7,14 +7,13 @@ interface GenericButtonProps {
   count?: number;
 }
 
-export const GenericButton: React.FC<GenericButtonProps> = ({
-  onClick,
-  icon,
-  text,
-  count,
-}) => (
+export const GenericButton = React.forwardRef<
+  HTMLButtonElement,
+  GenericButtonProps
+>(({ onClick, icon, text, count }, ref) => (
   <button
-    className="bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center  gap-2"
+    ref={ref}
+    className="bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2"
     onClick={onClick}
   >
     {icon && icon}
@@ -27,6 +26,8 @@ export const GenericButton: React.FC<GenericButtonProps> = ({
       </code>
     )}
   </button>
-);
+));
+
+GenericButton.displayName = "GenericButton";
 
 export default GenericButton;
