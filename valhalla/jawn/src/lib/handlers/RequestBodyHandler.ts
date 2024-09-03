@@ -107,30 +107,21 @@ export class RequestBodyHandler extends AbstractLogHandler {
 
   private isAssistantRequest(requestBody: any): boolean {
     return (
-      !requestBody.hasOwnProperty("messages") &&
-      requestBody.hasOwnProperty("instructions") &&
-      requestBody.hasOwnProperty("name")
+      (!requestBody.hasOwnProperty("messages") &&
+        requestBody.hasOwnProperty("instructions") &&
+        requestBody.hasOwnProperty("name")) ||
+      requestBody.hasOwnProperty("assistant_id")
     );
   }
 
   private processAssistantRequestMetadata(
     requestBody: any
   ): Record<string, string> {
-    const heliconeMetadata: Record<string, string> = {};
-    const updatedMetadata: Record<string, any> = {};
-
-    if (requestBody.metadata) {
-      Object.entries(requestBody.metadata).forEach(([key, value]) => {
-        if (key.toLowerCase().startsWith("helicone")) {
-          heliconeMetadata[key] = value as string;
-        } else {
-          updatedMetadata[key] = value;
-        }
-      });
-      requestBody.metadata = updatedMetadata;
-    }
-    console.log("heliconeMetadata", heliconeMetadata);
-    return heliconeMetadata;
+    return Object.fromEntries(
+      Object.entries(requestBody.metadata || {})
+        .filter(([key]) => key.toLowerCase().startsWith("helicone"))
+        .map(([key, value]) => [key, String(value)])
+    );
   }
 
   private processRequestBodyImages(
