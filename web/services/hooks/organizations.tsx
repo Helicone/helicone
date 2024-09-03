@@ -205,6 +205,12 @@ const useOrgsContextManager = () => {
           email: user.email,
         }
       );
+
+      window.Atlas.call("identify", {
+        userId: user.id,
+        name: user.user_metadata?.name,
+        email: user.email,
+      });
     }
 
     if (org) {
@@ -215,6 +221,25 @@ const useOrgsContextManager = () => {
         organization_type: org.organization_type || "",
         date_joined: org.created_at || "",
       });
+
+      if (user) {
+        window.Atlas.call("identify", {
+          userId: user.id,
+          name: user.user_metadata?.name,
+          email: user.email,
+          account: {
+            name: org?.name,
+            email: user?.email,
+            externalId: org?.id,
+            customFields: {
+              organization_type: org?.organization_type,
+              date_joined: org?.created_at,
+              stripe_customer_id: org?.stripe_customer_id,
+              tier: org?.tier,
+            },
+          },
+        });
+      }
     }
   }, [user, org?.id]);
 
