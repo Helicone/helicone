@@ -7,11 +7,11 @@ const BASE_LOG_PRICING: {
 }[] = [
   {
     lower: 0,
-    upper: 100_000,
+    upper: 10_000,
     rate: 0,
   },
   {
-    lower: 100_000,
+    lower: 10_000,
     upper: 2_000_000,
     rate: 0.000248,
   },
