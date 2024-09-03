@@ -255,6 +255,14 @@ export const getGatewayAPIRouter = (router: BaseRouter) => {
         return await fallBack(requestWrapper, forwarder);
       } else {
         console.log("Just forwarding");
+        console.log(
+          "heliconeHeaders",
+          JSON.stringify(requestWrapper.heliconeHeaders)
+        );
+        console.log(
+          "targetBaseUrl",
+          requestWrapper.heliconeHeaders.targetBaseUrl
+        );
         return await forwarder(requestWrapper.heliconeHeaders.targetBaseUrl);
       }
     }
