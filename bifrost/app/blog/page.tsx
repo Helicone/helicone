@@ -197,6 +197,11 @@ const blogContent: BlogStructure[] = [
   },
   {
     dynmaicEntry: {
+      folderName: "product-hunt-experience",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "product-hunt-automate",
     },
   },
