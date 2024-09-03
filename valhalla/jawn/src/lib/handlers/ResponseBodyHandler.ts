@@ -73,6 +73,21 @@ export class ResponseBodyHandler extends AbstractLogHandler {
           context.processedLog.model
         );
 
+      console.log("responseBodyFinal", responseBodyFinal);
+      if (this.isAssistantResponse(responseBodyFinal)) {
+        const existingProperties =
+          context.processedLog.request.properties || {};
+        const newProperties = this.processAssistantResponseMetadata(
+          responseBodyFinal,
+          existingProperties
+        );
+        console.log("newProperties", newProperties);
+        context.processedLog.request.properties = {
+          ...existingProperties,
+          ...newProperties,
+        };
+      }
+
       // Set processed response body
       context.processedLog.response.assets = responseBodyAssets;
       context.processedLog.assets = new Map([
@@ -191,7 +206,7 @@ export class ResponseBodyHandler extends AbstractLogHandler {
         log.response.status,
         responseBody
       );
-      console.log("responseBody", responseBody);
+
       const parser = this.getBodyProcessor(isStream, provider, responseBody);
       return await parser.parse({
         responseBody: responseBody,
@@ -215,6 +230,43 @@ export class ResponseBodyHandler extends AbstractLogHandler {
     }
 
     return responseBody;
+  }
+
+  private isAssistantResponse(responseBody: any): boolean {
+    return (
+      responseBody.hasOwnProperty("assistant_id") ||
+      responseBody.data?.[0]?.hasOwnProperty("assistant_id")
+    );
+  }
+
+  private processAssistantResponseMetadata(
+    responseBody: any,
+    existingProperties: Record<string, string>
+  ): Record<string, string> {
+    const processMetadata = (metadata: any) =>
+      Object.entries(metadata || {})
+        .filter(([key]) => key.toLowerCase().startsWith("helicone"))
+        .reduce((acc, [key, value]) => {
+          if (!(key in existingProperties)) {
+            acc[key] = String(value);
+          }
+          return acc;
+        }, {} as Record<string, string>);
+
+    if (Array.isArray(responseBody.data)) {
+      const assistantListItem = responseBody.data.find(
+        (x: any) => x.metadata && Object.keys(x.metadata).length > 0
+      );
+      return assistantListItem
+        ? processMetadata(assistantListItem.metadata)
+        : {};
+    } else if (responseBody.data?.metadata) {
+      return processMetadata(responseBody.data.metadata);
+    } else if (responseBody.metadata) {
+      return processMetadata(responseBody.metadata);
+    }
+
+    return {};
   }
 
   getBodyProcessor(

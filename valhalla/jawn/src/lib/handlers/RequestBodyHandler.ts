@@ -97,8 +97,7 @@ export class RequestBodyHandler extends AbstractLogHandler {
       };
     }
 
-    console.log("props", context.processedLog.request.properties);
-
+    console.log("finalReqiestBody", parsedRequestBody);
     return {
       body: parsedRequestBody,
       model: requestModel,
@@ -110,7 +109,8 @@ export class RequestBodyHandler extends AbstractLogHandler {
       (!requestBody.hasOwnProperty("messages") &&
         requestBody.hasOwnProperty("instructions") &&
         requestBody.hasOwnProperty("name")) ||
-      requestBody.hasOwnProperty("assistant_id")
+      requestBody.hasOwnProperty("assistant_id") ||
+      requestBody.hasOwnProperty("metadata")
     );
   }
 
