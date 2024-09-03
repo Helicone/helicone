@@ -243,8 +243,8 @@ export class ResponseBodyHandler extends AbstractLogHandler {
     responseBody: any,
     existingProperties: Record<string, string>
   ): Record<string, string> {
-    const processMetadata = (metadata: any) =>
-      Object.entries(metadata || {})
+    const processMetadata = (metadata: any) => {
+      return Object.entries(metadata || {})
         .filter(([key]) => key.toLowerCase().startsWith("helicone"))
         .reduce((acc, [key, value]) => {
           if (!(key in existingProperties)) {
@@ -252,6 +252,7 @@ export class ResponseBodyHandler extends AbstractLogHandler {
           }
           return acc;
         }, {} as Record<string, string>);
+    };
 
     if (Array.isArray(responseBody.data)) {
       const assistantListItem = responseBody.data.find(
