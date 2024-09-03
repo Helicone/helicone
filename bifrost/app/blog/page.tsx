@@ -192,6 +192,11 @@ export type BlogStructure =
 const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
+      folderName: "portkey-vs-helicone",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "slash-llm-cost",
     },
   },
