@@ -446,6 +446,7 @@ export const costs: ModelRow[] = [
       operator: "equals",
       value: "gpt-35-turbo-16k-0613",
     },
+    showInPlayground: true,
     cost: {
       prompt_token: 0.000003,
       completion_token: 0.000004,
@@ -456,6 +457,7 @@ export const costs: ModelRow[] = [
       operator: "equals",
       value: "gpt-4o-2024-08-06",
     },
+    showInPlayground: true,
     cost: {
       prompt_token: 0.0000025,
       completion_token: 0.00001,
