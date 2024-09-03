@@ -132,6 +132,14 @@ test("cost calc snapshot test", () => {
         "provider": "OPENAI"
     },
     {
+        "name": "gpt-35-turbo-16k-0613",
+        "provider": "OPENAI"
+    },
+    {
+        "name": "gpt-4o-2024-08-06",
+        "provider": "OPENAI"
+    },
+    {
         "name": "claude-3-opus-20240229",
         "provider": "ANTHROPIC"
     },
@@ -241,6 +249,14 @@ test("cost calc snapshot test", () => {
     },
     {
         "name": "gpt-4-turbo-0125-preview",
+        "provider": "AZURE"
+    },
+    {
+        "name": "gpt-35-turbo-16k-0613",
+        "provider": "AZURE"
+    },
+    {
+        "name": "gpt-4o-2024-08-06",
         "provider": "AZURE"
     }
 ]"
