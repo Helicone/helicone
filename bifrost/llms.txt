@@ -1,0 +1,30 @@
+# Helicone
+
+> Helicone is an open-source observability platform for LLM users. It helps companies monitor usage, latency, and costs for AI models like GPT-3, enabling optimization of AI applications and reduction of OpenAI bills. Helicone provides key insights into spend, performance, and usage patterns.
+
+Helicone offers tools for developers to monitor, analyze, and optimize their use of large language models (LLMs). Key features include:
+- Usage and cost tracking across multiple AI models
+- Latency monitoring and performance optimization
+- Request caching and model-swapping capabilities
+- Custom property tracking for detailed analytics
+- Integration with popular AI frameworks and platforms
+
+Helicone is designed to be easily integrated into existing AI workflows, with support for self-hosted deployments and cloud-based solutions.
+
+## Docs
+- [Quick Start Guide](https://docs.helicone.ai/getting-started/quick-start): Introduction to setting up and using Helicone
+- [Gateway Integration](https://docs.helicone.ai/getting-started/integration-method/gateway): Guide to integrating Helicone as a proxy for AI model requests
+- [Custom Properties](https://docs.helicone.ai/features/advanced-usage/custom-properties): Advanced usage for tracking custom metrics and properties
+- [Self-Hosted Deployment](https://docs.helicone.ai/getting-started/self-deploy): Instructions for deploying Helicone on your own infrastructure
+- [Authentication](https://docs.helicone.ai/helicone-headers/helicone-auth): Details on authenticating requests with Helicone
+
+## Examples
+- [First AI App with Helicone](https://www.helicone.ai/blog/first-ai-app-with-helicone): Tutorial on building an AI app with Helicone integration
+- [Product Hunt Launch Automation](https://www.helicone.ai/blog/product-hunt-automate): Case study on using Helicone for automating a product launch
+- [Helicone vs Competitors](https://www.helicone.ai/blog/portkey-vs-helicone): Comparison of Helicone with other LLM observability tools
+
+## Optional
+- [GitHub Repository](https://github.com/Helicone/helicone): Source code and open-source contributions
+- [Y Combinator Profile](https://www.ycombinator.com/companies/helicone): Information about Helicone's participation in Y Combinator
+- [Company Blog](https://www.helicone.ai/blog): Latest updates, tutorials, and insights from the Helicone team
+- [API Reference](https://docs.helicone.ai/getting-started/quick-start): Detailed API documentation for advanced integrations
