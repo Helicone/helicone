@@ -90,38 +90,10 @@ export class RequestBodyHandler extends AbstractLogHandler {
         }
       : parsedRequestBody;
 
-    if (this.isAssistantRequest(parsedRequestBody)) {
-      context.message.log.request.properties = {
-        ...context.message.log.request.properties,
-        ...this.processAssistantRequestMetadata(parsedRequestBody),
-      };
-    }
-
-    console.log("finalReqiestBody", parsedRequestBody);
     return {
       body: parsedRequestBody,
       model: requestModel,
     };
-  }
-
-  private isAssistantRequest(requestBody: any): boolean {
-    return (
-      (!requestBody.hasOwnProperty("messages") &&
-        requestBody.hasOwnProperty("instructions") &&
-        requestBody.hasOwnProperty("name")) ||
-      requestBody.hasOwnProperty("assistant_id") ||
-      requestBody.hasOwnProperty("metadata")
-    );
-  }
-
-  private processAssistantRequestMetadata(
-    requestBody: any
-  ): Record<string, string> {
-    return Object.fromEntries(
-      Object.entries(requestBody.metadata || {})
-        .filter(([key]) => key.toLowerCase().startsWith("helicone"))
-        .map(([key, value]) => [key, String(value)])
-    );
   }
 
   private processRequestBodyImages(
