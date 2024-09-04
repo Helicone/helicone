@@ -191,7 +191,6 @@ export class ResponseBodyHandler extends AbstractLogHandler {
         log.response.status,
         responseBody
       );
-
       const parser = this.getBodyProcessor(isStream, provider, responseBody);
       return await parser.parse({
         responseBody: responseBody,
@@ -235,7 +234,6 @@ export class ResponseBodyHandler extends AbstractLogHandler {
     } else if (isStream) {
       return new OpenAIStreamProcessor();
     } else {
-      console.log("Using generic body processor");
       return new GenericBodyProcessor();
     }
   }

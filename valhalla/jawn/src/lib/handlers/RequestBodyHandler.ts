@@ -24,8 +24,6 @@ export class RequestBodyHandler extends AbstractLogHandler {
       const { body: processedBody, model: requestModel } =
         this.processRequestBody(context);
 
-      console.log("req", JSON.stringify(processedBody));
-
       const { body: requestBodyFinal, assets: requestBodyAssets } =
         this.processRequestBodyImages(
           context.message.log.request.id,
@@ -47,7 +45,6 @@ export class RequestBodyHandler extends AbstractLogHandler {
         context.processedLog.request.properties =
           context.message.log.request.properties;
       }
-      console.log("finalprops123", context.processedLog.request.properties);
 
       return await super.handle(context);
     } catch (error: any) {

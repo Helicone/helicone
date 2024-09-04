@@ -369,7 +369,6 @@ export class LoggingHandler extends AbstractLogHandler {
     const usage = context.usage;
     const orgParams = context.orgParams;
 
-    console.log("final props", context.processedLog.request.properties);
     const requestResponseLog: RequestResponseRMT = {
       user_id: request.userId,
       request_id: request.id,
