@@ -1,8 +1,7 @@
+import logging
 import re
 import string
-import logging
 from typing import ClassVar, Iterable, Literal
-
 
 log = logging.getLogger("helicone-prompt-formatter")
 
@@ -63,26 +62,29 @@ class HeliconePromptFormatter(string.Formatter):
                         token,
                         format_string,
                     )
-            if parser_state == "opened" and format_spec is not None:
-                # We've opened a tag, and are now
-                # close a tag
+            if parser_state == "opened":
+                # We've opened a tag, and are now closing a tag
                 literal_text = f"{close_tag}{self.helicone_tag_spacer}{token[0]}"
                 parser_state = "init"
-
-            if parser_state == "opened" and format_spec is None:
-                # when opened and _fmt is None, this indicates that we're looking at the format spec and should ignore it
-                pass
 
             if parser_state == "init" and format_spec is not None:
                 if field_name is None:
                     # this should be unreachable, the field_name is always defined for us if the format_spec is...
-                    raise HeliconePromptFormatterError("Internal parse error (expected field_name to not be None).", token, format_string)
+                    raise HeliconePromptFormatterError(
+                        "Internal parse error (expected field_name to not be None).",
+                        token,
+                        format_string,
+                    )
 
                 # this is an arbitrary limitation, we could escape things or something, it depends on how the helicone is parsing out the tags on the backend...
                 # throws on a format string like `'{foo[bar"]}'`
                 #   ...even though `'{foo[bar"]}'.format(foo={'bar"': 'moo'}) == 'moo'`
                 if self.valid_field_name_regex.match(field_name) is None:
-                    raise HeliconePromptFormatterError(f"Internal parse error: invalid field name (fields must match {self.valid_field_name_regex.pattern}).", token, format_string)
+                    raise HeliconePromptFormatterError(
+                        f"Internal parse error: invalid field name (fields must match {self.valid_field_name_regex.pattern}).",
+                        token,
+                        format_string,
+                    )
                 # open a tag
                 if field_name == "":
                     # we got an unamed field, i.e. '{}'

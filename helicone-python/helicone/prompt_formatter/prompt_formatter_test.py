@@ -1,7 +1,8 @@
 from typing import Any, Iterable, Mapping
+
 import pytest
 
-from helicone.prompt_formatter import HeliconePromptFormatter, HeliconePromptFormatterError
+from scripts.helicone_prompt_formatter import HeliconePromptFormatter, HeliconePromptFormatterError
 
 cases: list[tuple[str, list[str], dict[str, Any], str]] = [
     (
@@ -39,6 +40,12 @@ cases: list[tuple[str, list[str], dict[str, Any], str]] = [
         ["a", "d", "f"],
         {"c": "c_", "e": "  e"},
         """<helicone-prompt-input key="arg-0">a</helicone-prompt-input> b <helicone-prompt-input key="c">c_</helicone-prompt-input> <helicone-prompt-input key="arg-1">d</helicone-prompt-input> <helicone-prompt-input key="e">  e</helicone-prompt-input> <helicone-prompt-input key="arg-2">f</helicone-prompt-input>""",
+    ),
+    (
+        "input:\n```\n{x}\n```",
+        [],
+        {"x": "foobar"},
+        """input:\n```\n<helicone-prompt-input key="x">foobar</helicone-prompt-input>\n```""",
     ),
 ]
 
