@@ -5,7 +5,7 @@ import {
   Square2StackIcon,
   TableCellsIcon,
 } from "@heroicons/react/24/outline";
-import { Badge, Divider, TextInput } from "@tremor/react";
+import { Divider, TextInput } from "@tremor/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { Fragment, useState } from "react";
@@ -21,6 +21,8 @@ import LoadingAnimation from "../../shared/loadingAnimation";
 import PromptUsageChart from "./promptUsageChart";
 import ThemedTabs from "../../shared/themed/themedTabs";
 import useSearchParams from "../../shared/utils/useSearchParams";
+import AuthHeader from "../../shared/authHeader";
+import HcBadge from "../../ui/hcBadge";
 
 interface PromptsPageProps {
   defaultIndex: number;
@@ -43,9 +45,13 @@ const PromptsPage = (props: PromptsPageProps) => {
   return (
     <>
       <div className="flex flex-col space-y-4 w-full">
-        <div className="font-semibold text-3xl text-black dark:text-white items-center flex gap-2">
-          Prompts <Badge size="sm">Beta</Badge>
-        </div>
+        <AuthHeader
+          title={
+            <div className="flex items-center gap-2">
+              Prompts <HcBadge title="Beta" size="sm" />
+            </div>
+          }
+        />
 
         <div className="flex flex-col space-y-4 w-full py-2">
           {isLoading ? (
