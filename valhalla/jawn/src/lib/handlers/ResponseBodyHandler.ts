@@ -81,6 +81,13 @@ export class ResponseBodyHandler extends AbstractLogHandler {
       ]);
       context.processedLog.response.body = responseBodyFinal;
 
+      if (
+        this.isAssistantResponse(responseBodyFinal) &&
+        !context.processedLog.response.model
+      ) {
+        context.processedLog.model = "Assistant Call";
+      }
+
       // Set usage
       const usage = processedResponseBody.data?.usage ?? {};
       context.usage.completionTokens = usage.completionTokens;
@@ -214,6 +221,17 @@ export class ResponseBodyHandler extends AbstractLogHandler {
     }
 
     return responseBody;
+  }
+
+  private isAssistantResponse(responseBody: any): boolean {
+    if (typeof responseBody !== "object" || responseBody === null) {
+      return false;
+    }
+    return (
+      responseBody.hasOwnProperty("assistant_id") ||
+      responseBody.data?.[0]?.hasOwnProperty("assistant_id") ||
+      responseBody.hasOwnProperty("metadata")
+    );
   }
 
   getBodyProcessor(
