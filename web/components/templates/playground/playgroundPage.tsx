@@ -42,6 +42,7 @@ import React from "react";
 import { useLocalStorage } from "../../../services/hooks/localStorage";
 import Link from "next/link";
 import { Row } from "../../layout/common";
+import { useQuery } from "@tanstack/react-query";
 
 const PlaygroundPage = (props: PlaygroundPageProps) => {
   const { request, showNewButton } = props;
@@ -59,14 +60,13 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
   const [currentTools, setCurrentTools] = useState<ChatCompletionTool[]>();
   const [providerAPIKey, setProviderAPIKey] = useState<string>();
 
-  const memoedPlaygroundModels = useMemo(() => {
-    return PLAYGROUND_MODELS.filter((model) => model.provider !== "AZURE").sort(
-      (a, b) => a.name.localeCompare(b.name)
-    );
-  }, []);
-  const [playgroundModels, setPlaygroundModels] = useState<PlaygroundModel[]>(
-    memoedPlaygroundModels
-  );
+  const fineTuneModels = useFineTuneModels(providerAPIKey);
+
+  const playgroundModels = useMemo(() => {
+    return PLAYGROUND_MODELS.filter((model) => model.provider !== "AZURE")
+      .concat(fineTuneModels.data || [])
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [fineTuneModels]);
 
   const singleRequest = data.length > 0 ? data[0] : null;
   const singleModel = useMemo(
@@ -103,10 +103,6 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
       setCurrentTools([]);
     }
   }, [tools, requestId]);
-
-  useEffect(() => {
-    fetchFineTuneModels(providerAPIKey, setPlaygroundModels);
-  }, [providerAPIKey]);
 
   const [newPlaygroundOpen, setNewPlaygroundOpen] = useLocalStorage<boolean>(
     "newPlaygroundOpen",
@@ -335,9 +331,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                     key={idx}
                     className="font-medium text-black"
                   >
-                    <Tooltip title={model.name || ""} placement="right">
-                      <div>{model.name || ""}</div>
-                    </Tooltip>
+                    {model.name || ""}
                   </MultiSelectItem>
                 ))}
               </MultiSelect>
@@ -670,4 +664,36 @@ export async function fetchFineTuneModels(
     .filter((model) => model !== undefined) as PlaygroundModel[];
 
   setPlaygroundModels((prev) => playgroundModels.concat(ftModels));
+}
+
+export function useFineTuneModels(providerAPIKey: string | undefined) {
+  return useQuery({
+    queryKey: ["fine-tune-models", providerAPIKey],
+    queryFn: async (query) => {
+      const providerAPIKey = query.queryKey[1];
+      const res = await fetch("https://api.openai.com/v1/fine_tuning/jobs", {
+        headers: {
+          Authorization: `Bearer ${providerAPIKey}`,
+          "Content-Type": "application/json",
+        },
+      });
+      const ftJobsList = await res.json();
+      if (ftJobsList.error) return;
+
+      const ftJobs = ftJobsList.data as Array<TFinetunedJob>;
+
+      const ftModels = ftJobs
+        .map((job) => {
+          if (job.status === "succeeded") {
+            return {
+              name: job.fine_tuned_model,
+              provider: "OPENAI",
+            };
+          }
+        })
+        .filter((model) => model !== undefined) as PlaygroundModel[];
+
+      return ftModels;
+    },
+  });
 }
