@@ -39,7 +39,7 @@ export class RequestBodyHandler extends AbstractLogHandler {
         this.isAssistantRequest(requestBodyFinal) &&
         !context.processedLog.request.model
       ) {
-        context.processedLog.request.model = "Assistant Call";
+        context.processedLog.request.model = "assistant-call";
       }
       try {
         context.processedLog.request.properties = Object.entries(

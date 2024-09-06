@@ -245,9 +245,9 @@ export class ResponseBodyHandler extends AbstractLogHandler {
       responseBody.hasOwnProperty("status") &&
       ["queued", "in_progress"].includes(responseBody.status)
     ) {
-      return { responseModel: "Assistant Polling", model: "Assistant Polling" };
+      return { responseModel: "Assistant Polling", model: "assistant-polling" };
     } else if (this.isAssistantResponse(responseBody) && !currentModel) {
-      return { responseModel: "Assistant Call", model: "Assistant Call" };
+      return { responseModel: "Assistant Call", model: "assistant-call" };
     }
     return { responseModel: currentModel || "", model: currentModel || "" };
   }
