@@ -1816,4 +1816,15 @@ export const costs: ModelRow[] = [
       completion_token: 6e-5,
     },
   },
+  
+  {
+    model: {
+      operator: "equals",
+      value: "openai/gpt-4o-mini",
+    },
+    cost: {
+      prompt_token: 1.5e-7,
+      completion_token: 6e-7,
+    },
+  },
 ];
