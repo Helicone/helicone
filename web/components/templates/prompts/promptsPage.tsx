@@ -8,7 +8,7 @@ import {
 import { Divider, TextInput } from "@tremor/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { Fragment, useState } from "react";
+import { Fragment, useRef, useState } from "react";
 import { usePrompts } from "../../../services/hooks/prompts/prompts";
 import { DiffHighlight } from "../welcome/diffHighlight";
 import PromptCard from "./promptCard";
@@ -23,6 +23,9 @@ import ThemedTabs from "../../shared/themed/themedTabs";
 import useSearchParams from "../../shared/utils/useSearchParams";
 import AuthHeader from "../../shared/authHeader";
 import HcBadge from "../../ui/hcBadge";
+import { Switch } from "../../ui/switch";
+import { Label } from "../../ui/label";
+import { Button } from "../../ui/button";
 
 interface PromptsPageProps {
   defaultIndex: number;
@@ -37,6 +40,9 @@ const PromptsPage = (props: PromptsPageProps) => {
   const [open, setOpen] = useState<boolean>(false);
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [imNotTechnical, setImNotTechnical] = useState<boolean>(false);
+  const [newPromptName, setNewPromptName] = useState<string>("");
+  const newPromptInputRef = useRef<HTMLInputElement>(null);
 
   const filteredPrompts = prompts?.filter((prompt) =>
     prompt.user_defined_id.toLowerCase().includes(searchName.toLowerCase())
@@ -231,13 +237,43 @@ const chatCompletion = await openai.chat.completions.create(
         </div>
       </div>
       <ThemedModal open={open} setOpen={setOpen}>
-        <div className="flex flex-col w-full">
-          <h3 className="text-xl text-black dark:text-white font-semibold">
-            Create a new prompt by following the below code snippet
-          </h3>
-          <p className="text-gray-500 mt-4">TS/JS Quick Start</p>
-          <DiffHighlight
-            code={`
+        <div className="flex flex-col w-full min-w-[878px] md:min-h-[620px] justify-between">
+          <div className="flex flex-row justify-between items-center">
+            <h3 className="text-xl text-black dark:text-white font-semibold">
+              Create a new prompt
+            </h3>
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="im-not-technical"
+                checked={imNotTechnical}
+                onCheckedChange={setImNotTechnical}
+              />
+              <Label htmlFor="im-not-technical">I&apos;m not technical</Label>
+            </div>
+          </div>
+          {imNotTechnical === true && (
+            <>
+              <div className="flex flex-col space-y-2">
+                <Label htmlFor="new-prompt-name">Name</Label>
+                <TextInput
+                  id="new-prompt-name"
+                  value={newPromptName}
+                  onChange={(e) => setNewPromptName(e.target.value)}
+                  ref={newPromptInputRef}
+                  className="max-w-md"
+                />
+              </div>
+              <div className="flex justify-end">
+                <Button className="w-auto">Create new prompt</Button>
+              </div>
+            </>
+          )}
+          {imNotTechnical === false && (
+            <>
+              {" "}
+              <p className="text-gray-500 mt-4">TS/JS Quick Start</p>
+              <DiffHighlight
+                code={`
 // 1. Add this line
 import { hprompt } from "@helicone/helicone";
  
@@ -260,10 +296,12 @@ const chatCompletion = await openai.chat.completions.create(
   }
 );
  `}
-            language="typescript"
-            newLines={[]}
-            oldLines={[]}
-          />
+                language="typescript"
+                newLines={[]}
+                oldLines={[]}
+              />
+            </>
+          )}
         </div>
       </ThemedModal>
     </>
