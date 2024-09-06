@@ -115,6 +115,10 @@ export interface PromptInputRecord {
   auto_prompt_inputs: any[];
 }
 
+export interface CreatePromptResponse {
+  id: string;
+}
+
 @Route("v1/prompt")
 @Tags("Prompt")
 @Security("api_key")
@@ -172,6 +176,28 @@ export class PromptController extends Controller {
     }
   }
 
+  @Post("create")
+  public async createPrompt(
+    @Body()
+    requestBody: {
+      userDefinedId: string;
+      prompt: {
+        model: string;
+        messages: any[];
+      };
+    },
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<CreatePromptResponse, string>> {
+    const promptManager = new PromptManager(request.authParams);
+
+    const result = await promptManager.createPrompt(requestBody);
+    if (result.error || !result.data) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(201); // set return status 201
+    }
+    return result;
+  }
   @Post("version/{promptVersionId}/subversion")
   public async createSubversion(
     @Body()

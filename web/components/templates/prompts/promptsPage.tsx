@@ -8,14 +8,20 @@ import {
 import { Divider, TextInput } from "@tremor/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { Fragment, useRef, useState } from "react";
+import { Fragment, useRef, useState, useCallback } from "react";
 import { usePrompts } from "../../../services/hooks/prompts/prompts";
 import { DiffHighlight } from "../welcome/diffHighlight";
 import PromptCard from "./promptCard";
 import { SimpleTable } from "../../shared/table/simpleTable";
 import HcButton from "../../ui/hcButton";
 import { MagnifyingGlassIcon } from "@heroicons/react/20/solid";
-import ThemedModal from "../../shared/themed/themedModal";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../../ui/dialog";
 import PromptDelete from "./promptDelete";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import PromptUsageChart from "./promptUsageChart";
@@ -26,6 +32,18 @@ import HcBadge from "../../ui/hcBadge";
 import { Switch } from "../../ui/switch";
 import { Label } from "../../ui/label";
 import { Button } from "../../ui/button";
+import { useJawnClient } from "../../../lib/clients/jawnHook";
+import useNotification from "../../shared/notification/useNotification";
+import { Textarea } from "../../ui/textarea";
+import { Badge } from "../../ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../ui/select";
+import { MODEL_LIST } from "../playground/new/modelList";
 
 interface PromptsPageProps {
   defaultIndex: number;
@@ -42,11 +60,57 @@ const PromptsPage = (props: PromptsPageProps) => {
   const searchParams = useSearchParams();
   const [imNotTechnical, setImNotTechnical] = useState<boolean>(false);
   const [newPromptName, setNewPromptName] = useState<string>("");
+  const [newPromptModel, setNewPromptModel] = useState(MODEL_LIST[0].value);
+  const [newPromptContent, setNewPromptContent] = useState("");
+  const [promptVariables, setPromptVariables] = useState<string[]>([]);
   const newPromptInputRef = useRef<HTMLInputElement>(null);
-
+  const notification = useNotification();
   const filteredPrompts = prompts?.filter((prompt) =>
     prompt.user_defined_id.toLowerCase().includes(searchName.toLowerCase())
   );
+  const jawn = useJawnClient();
+
+  const createPrompt = async (userDefinedId: string) => {
+    const promptData = {
+      model: newPromptModel,
+      messages: [
+        {
+          role: "user",
+          content: [
+            {
+              text: newPromptContent,
+              type: "text",
+            },
+          ],
+        },
+      ],
+    };
+
+    const res = await jawn.POST("/v1/prompt/create", {
+      body: {
+        userDefinedId,
+        prompt: promptData,
+      },
+    });
+
+    if (res.error || !res.data.data?.id) {
+      notification.setNotification("Error creating prompt", "error");
+    } else {
+      notification.setNotification("Prompt created successfully", "success");
+      router.push(`/prompts/${res.data.data?.id}`);
+    }
+  };
+
+  const extractVariables = useCallback((content: string) => {
+    const regex = /\{\{([^}]+)\}\}/g;
+    const matches = content.match(regex);
+    if (matches) {
+      const variables = matches.map((match) => match.slice(2, -2).trim());
+      setPromptVariables(Array.from(new Set(variables)));
+    } else {
+      setPromptVariables([]);
+    }
+  }, []);
 
   return (
     <>
@@ -135,15 +199,143 @@ const chatCompletion = await openai.chat.completions.create(
                       placeholder="Search prompts..."
                     />
                   </div>
-                  <HcButton
-                    variant={"primary"}
-                    size={"sm"}
-                    title={"Create new prompt"}
-                    icon={DocumentPlusIcon}
-                    onClick={() => {
-                      setOpen(true);
-                    }}
-                  />
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <HcButton
+                        variant={"primary"}
+                        size={"sm"}
+                        title={"Create new prompt"}
+                        icon={DocumentPlusIcon}
+                      />
+                    </DialogTrigger>
+                    <DialogContent className="w-[900px]">
+                      <DialogHeader className="flex flex-row justify-between items-center">
+                        <DialogTitle>Create a new prompt</DialogTitle>
+                        <div className="flex items-center space-x-2">
+                          <Switch
+                            id="im-not-technical"
+                            checked={imNotTechnical}
+                            onCheckedChange={setImNotTechnical}
+                          />
+                          <Label htmlFor="im-not-technical">
+                            I&apos;m not technical
+                          </Label>
+                        </div>
+                      </DialogHeader>
+                      <div className="flex flex-col space-y-4 h-[570px]">
+                        {imNotTechnical ? (
+                          <>
+                            <div className="flex flex-col space-y-2">
+                              <Label htmlFor="new-prompt-name">Name</Label>
+                              <TextInput
+                                id="new-prompt-name"
+                                value={newPromptName}
+                                onChange={(e) =>
+                                  setNewPromptName(e.target.value)
+                                }
+                                ref={newPromptInputRef}
+                              />
+                            </div>
+                            <div className="flex flex-col space-y-2">
+                              <Label htmlFor="new-prompt-model">Model</Label>
+                              <Select
+                                value={newPromptModel}
+                                onValueChange={setNewPromptModel}
+                              >
+                                <SelectTrigger className="w-[200px]">
+                                  <SelectValue placeholder="Select a model" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {MODEL_LIST.map((model) => (
+                                    <SelectItem
+                                      key={model.value}
+                                      value={model.value}
+                                    >
+                                      {model.label}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="flex flex-col space-y-2">
+                              <Label htmlFor="new-prompt-content">
+                                Prompt Content
+                              </Label>
+                              <Textarea
+                                id="new-prompt-content"
+                                value={newPromptContent}
+                                onChange={(e) => {
+                                  setNewPromptContent(e.target.value);
+                                  extractVariables(e.target.value);
+                                }}
+                                placeholder="Type your prompt here"
+                                rows={4}
+                              />
+                              <p className="text-sm text-gray-500">
+                                Use &#123;&#123; sample_variable &#125;&#125; to
+                                insert variables into your prompt.
+                              </p>
+                            </div>
+                            {promptVariables.length > 0 && (
+                              <div className="flex flex-col space-y-2">
+                                <Label>Your variables</Label>
+                                <div className="flex flex-wrap gap-2">
+                                  {promptVariables.map((variable, index) => (
+                                    <Badge key={index} variant="secondary">
+                                      {variable}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                            <div className="flex justify-end items-center mt-4">
+                              <Button
+                                className="w-auto"
+                                onClick={() => createPrompt(newPromptName)}
+                              >
+                                Create prompt
+                              </Button>
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <p className="text-gray-500 mb-2">
+                              TS/JS Quick Start
+                            </p>
+                            <DiffHighlight
+                              code={`
+// 1. Add this line
+import { hprompt } from "@helicone/helicone";
+
+const chatCompletion = await openai.chat.completions.create(
+  {
+    messages: [
+      {
+        role: "user",
+        // 2: Add hprompt to any string, and nest any variable in additional brackets \`{}\`
+        content: hprompt\`Write a story about \${{ scene }}\`,
+      },
+    ],
+    model: "gpt-3.5-turbo",
+  },
+  {
+    // 3. Add Prompt Id Header
+    headers: {
+      "Helicone-Prompt-Id": "prompt_story",
+    },
+  }
+);
+                              `}
+                              language="typescript"
+                              newLines={[]}
+                              oldLines={[]}
+                              minHeight={false}
+                            />
+                          </>
+                        )}
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                 </div>
                 <ThemedTabs
                   options={[
@@ -236,74 +428,6 @@ const chatCompletion = await openai.chat.completions.create(
           )}
         </div>
       </div>
-      <ThemedModal open={open} setOpen={setOpen}>
-        <div className="flex flex-col w-full min-w-[878px] md:min-h-[620px] justify-between">
-          <div className="flex flex-row justify-between items-center">
-            <h3 className="text-xl text-black dark:text-white font-semibold">
-              Create a new prompt
-            </h3>
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="im-not-technical"
-                checked={imNotTechnical}
-                onCheckedChange={setImNotTechnical}
-              />
-              <Label htmlFor="im-not-technical">I&apos;m not technical</Label>
-            </div>
-          </div>
-          {imNotTechnical === true && (
-            <>
-              <div className="flex flex-col space-y-2">
-                <Label htmlFor="new-prompt-name">Name</Label>
-                <TextInput
-                  id="new-prompt-name"
-                  value={newPromptName}
-                  onChange={(e) => setNewPromptName(e.target.value)}
-                  ref={newPromptInputRef}
-                  className="max-w-md"
-                />
-              </div>
-              <div className="flex justify-end">
-                <Button className="w-auto">Create new prompt</Button>
-              </div>
-            </>
-          )}
-          {imNotTechnical === false && (
-            <>
-              {" "}
-              <p className="text-gray-500 mt-4">TS/JS Quick Start</p>
-              <DiffHighlight
-                code={`
-// 1. Add this line
-import { hprompt } from "@helicone/helicone";
- 
-const chatCompletion = await openai.chat.completions.create(
-  {
-    messages: [
-      {
-        role: "user",
-        // 2: Add hprompt to any string, and nest any variable in additional brackets \`{}\`
-        content: hprompt\`Write a story about \${{ scene }}\`,
-      },
-    ],
-    model: "gpt-3.5-turbo",
-  },
-  {
-    // 3. Add Prompt Id Header
-    headers: {
-      "Helicone-Prompt-Id": "prompt_story",
-    },
-  }
-);
- `}
-                language="typescript"
-                newLines={[]}
-                oldLines={[]}
-              />
-            </>
-          )}
-        </div>
-      </ThemedModal>
     </>
   );
 };

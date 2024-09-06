@@ -18,6 +18,9 @@ export interface paths {
   "/v1/prompt/{promptId}": {
     delete: operations["DeletePrompt"];
   };
+  "/v1/prompt/create": {
+    post: operations["CreatePrompt"];
+  };
   "/v1/prompt/version/{promptVersionId}/subversion": {
     post: operations["CreateSubversion"];
   };
@@ -210,6 +213,15 @@ export interface components {
         start: string;
       };
     };
+    CreatePromptResponse: {
+      id: string;
+    };
+    ResultSuccess_CreatePromptResponse_: {
+      data: components["schemas"]["CreatePromptResponse"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_CreatePromptResponse.string_": components["schemas"]["ResultSuccess_CreatePromptResponse_"] | components["schemas"]["ResultError_string_"];
     PromptVersionResult: {
       id: string;
       /** Format: double */
@@ -1039,6 +1051,27 @@ export interface operations {
       /** @description No content */
       204: {
         content: never;
+      };
+    };
+  };
+  CreatePrompt: {
+    requestBody: {
+      content: {
+        "application/json": {
+          prompt: {
+            messages: unknown[];
+            model: string;
+          };
+          userDefinedId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_CreatePromptResponse.string_"];
+        };
       };
     };
   };

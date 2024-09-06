@@ -1,5 +1,6 @@
 // src/users/usersService.ts
 import {
+  CreatePromptResponse,
   PromptCreateSubversionParams,
   PromptQueryParams,
   PromptResult,
@@ -70,6 +71,8 @@ export class PromptManager extends BaseManager {
     );
 
     console.log("result", result);
+    console.log("helicone template", params.newHeliconeTemplate);
+    console.log("parentPromptVersionId", parentPromptVersionId);
     return resultMap(result, (data) => data[0]);
   }
 
@@ -279,6 +282,68 @@ export class PromptManager extends BaseManager {
       [this.authParams.organizationId, params.promptVersionId]
     );
     return result;
+  }
+
+  async createPrompt(params: {
+    userDefinedId: string;
+    prompt: {
+      model: string;
+      messages: any[];
+    };
+  }): Promise<Result<CreatePromptResponse, string>> {
+    const existingPrompt = await dbExecute<{
+      id: string;
+    }>(
+      `
+    SELECT id FROM prompt_v2 WHERE user_defined_id = $1 AND organization = $2
+    `,
+      [params.userDefinedId, this.authParams.organizationId]
+    );
+
+    if (existingPrompt.data && existingPrompt.data.length > 0) {
+      return err(`Prompt with name ${params.userDefinedId} already exists`);
+    }
+
+    const result = await dbExecute<{
+      id: string;
+    }>(
+      `
+    INSERT INTO prompt_v2 (organization, user_defined_id) VALUES ($1, $2) RETURNING id
+    `,
+      [this.authParams.organizationId, params.userDefinedId]
+    );
+
+    if (result.error || !result.data) {
+      return err(`Failed to create prompt: ${result.error}`);
+    }
+
+    const promptId = result.data[0].id;
+
+    const insertVersionResult = await dbExecute<{
+      id: string;
+    }>(
+      `
+    INSERT INTO prompts_versions (prompt_v2, organization, major_version, minor_version, helicone_template, model, created_at)
+    VALUES ($1, $2, $3, $4, $5, $6, NOW())
+    RETURNING id
+    `,
+      [
+        promptId,
+        this.authParams.organizationId,
+        1, // Starting with major version 1
+        0, // Starting with minor version 0
+        JSON.stringify(params.prompt),
+        params.prompt.model,
+      ]
+    );
+
+    if (insertVersionResult.error || !insertVersionResult.data) {
+      return err(
+        `Failed to create prompt version: ${insertVersionResult.error}`
+      );
+    }
+
+    return ok({ id: promptId });
   }
 
   async deletePrompt(params: {
