@@ -34,6 +34,13 @@ export class RequestBodyHandler extends AbstractLogHandler {
       context.processedLog.request.assets = requestBodyAssets;
       context.processedLog.request.body = requestBodyFinal;
       context.processedLog.request.model = requestModel;
+
+      if (
+        this.isAssistantRequest(requestBodyFinal) &&
+        !context.processedLog.request.model
+      ) {
+        context.processedLog.request.model = "assistant-call";
+      }
       try {
         context.processedLog.request.properties = Object.entries(
           context.message.log.request.properties
@@ -52,6 +59,19 @@ export class RequestBodyHandler extends AbstractLogHandler {
         `Error processing request body: ${error}, Context: ${this.constructor.name}`
       );
     }
+  }
+
+  private isAssistantRequest(requestBody: any): boolean {
+    if (typeof requestBody !== "object" || requestBody === null) {
+      return false;
+    }
+    return (
+      (!requestBody.hasOwnProperty("messages") &&
+        requestBody.hasOwnProperty("instructions") &&
+        requestBody.hasOwnProperty("name")) ||
+      requestBody.hasOwnProperty("assistant_id") ||
+      requestBody.hasOwnProperty("metadata")
+    );
   }
 
   processRequestBody(context: HandlerContext): {
