@@ -1,87 +1,210 @@
-import React, { useState } from "react";
-import { TextInput, Select, SelectItem } from "@tremor/react";
+import { PaperAirplaneIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react";
+import { Message } from "../../requests/chatComponent/types";
+import ChatRow from "../../playground/chatRow";
 import { RenderImageWithPrettyInputKeys } from "./promptIdPage";
-import HcButton from "../../../ui/hcButton";
+import {
+  ChatTopBar,
+  PROMPT_MODES,
+} from "../../requests/chatComponent/chatTopBar";
+import { JsonView } from "../../requests/chatComponent/jsonView";
+import { MessageRenderer } from "../../requests/chatComponent/MessageRenderer";
 
 type Input = {
   id: string;
+  inputs: { [key: string]: string };
   source_request: string;
+  prompt_version: string;
   created_at: string;
-  inputs: Record<string, string>;
-  auto_prompt_inputs?: Record<string, string>;
-  response_body?: any;
+  response_body: string;
+  auto_prompt_inputs: Record<string, string> | unknown[];
+};
+
+type PromptObject = {
+  model: string;
+  messages: {
+    role: string;
+    content: { text: string; type: string }[];
+  }[];
 };
 
 interface PromptPlaygroundProps {
-  prompt: string | undefined;
-  inputs: Input[] | undefined;
+  prompt: string | PromptObject;
   selectedInput: Input | undefined;
-  onInputSelect: (input: Input | undefined) => void;
+  onSubmit?: (history: Message[]) => void;
+  submitText: string;
 }
 
 const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
   prompt,
-  inputs,
   selectedInput,
-  onInputSelect,
+  onSubmit,
+  submitText,
 }) => {
-  const [editedPrompt, setEditedPrompt] = useState(prompt || "");
-  const [searchRequestId, setSearchRequestId] = useState("");
+  const parsePromptToMessages = (
+    promptInput: string | PromptObject
+  ): Message[] => {
+    if (typeof promptInput === "string") {
+      return promptInput
+        .split("\n\n")
+        .filter((msg) => msg.trim() !== "")
+        .map((content, index) => ({
+          id: `msg-${index}`,
+          role: content.startsWith("<helicone-prompt-static>")
+            ? "system"
+            : "user",
+          content,
+        }));
+    }
 
-  const handlePromptChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setEditedPrompt(e.target.value);
+    const promptObject = promptInput as PromptObject;
+    return promptObject.messages.map((msg, index) => ({
+      id: `msg-${index}`,
+      role: msg.role as "user" | "assistant" | "system",
+      content: msg.content.map((c) => c.text).join("\n"),
+    }));
+  };
+  const [mode, setMode] = useState<(typeof PROMPT_MODES)[number]>("Pretty");
+  const [currentChat, setCurrentChat] = useState<Message[]>(() =>
+    parsePromptToMessages(prompt)
+  );
+  const [expandedChildren, setExpandedChildren] = useState<
+    Record<string, boolean>
+  >({});
+
+  useEffect(() => {
+    setCurrentChat(parsePromptToMessages(prompt));
+  }, [prompt]);
+
+  const handleAddMessage = () => {
+    const newMessage: Message = {
+      id: `msg-${currentChat.length}`,
+      role: "user",
+      content: "",
+    };
+    setCurrentChat([...currentChat, newMessage]);
+  };
+
+  const handleUpdateMessage = (
+    index: number,
+    newContent: string,
+    newRole: string
+  ) => {
+    const updatedChat = [...currentChat];
+    updatedChat[index] = {
+      ...updatedChat[index],
+      content: newContent,
+      role: newRole as "user" | "assistant" | "system",
+    };
+    setCurrentChat(updatedChat);
+  };
+
+  const handleDeleteMessage = (index: number) => {
+    const updatedChat = currentChat.filter((_, i) => i !== index);
+    setCurrentChat(updatedChat);
+  };
+
+  const allExpanded = Object.values(expandedChildren).every(Boolean);
+
+  const toggleAllExpanded = () => {
+    setExpandedChildren(
+      Object.fromEntries(
+        Object.keys(expandedChildren).map((key) => [key, !allExpanded])
+      )
+    );
+  };
+
+  const chatTopBarProps = {
+    allExpanded,
+    toggleAllExpanded,
+    requestMessages: currentChat,
+    requestId: "playground",
+    model: "playground",
+    setOpen: () => {},
+    mode,
+    setMode,
+  };
+
+  const renderMessages = () => {
+    switch (mode) {
+      case "Pretty":
+        return (
+          <ul className="w-full relative h-fit">
+            {currentChat.map((message, index) => (
+              <li
+                key={message.id}
+                className=" border-gray-300 dark:border-gray-700 last:border-b-0"
+              >
+                <ChatRow
+                  message={message}
+                  index={index}
+                  callback={(userText, role) =>
+                    handleUpdateMessage(index, userText, role)
+                  }
+                  deleteRow={() => handleDeleteMessage(index)}
+                />
+              </li>
+            ))}
+          </ul>
+        );
+      case "Markdown":
+        return (
+          <MessageRenderer
+            messages={currentChat}
+            showAllMessages={true}
+            expandedChildren={expandedChildren}
+            setExpandedChildren={setExpandedChildren}
+            selectedProperties={selectedInput?.inputs}
+            isHeliconeTemplate={false}
+            autoInputs={[]}
+            setShowAllMessages={() => {}}
+            mode={mode}
+          />
+        );
+      case "JSON":
+        return (
+          <JsonView requestBody={{ messages: currentChat }} responseBody={{}} />
+        );
+    }
   };
 
   return (
-    <div className="flex flex-row space-x-4 h-[75vh]">
-      <div className="w-2/3 flex flex-col space-y-4">
-        <h2 className="text-xl font-semibold">Edit Prompt</h2>
-        <textarea
-          value={editedPrompt}
-          onChange={handlePromptChange}
-          className="w-full h-full p-4 border rounded-md resize-none"
-          placeholder="Enter your prompt here..."
-        />
-        <HcButton
-          variant="primary"
-          size="sm"
-          title="Save Changes"
-          onClick={() => {
-            // Implement save functionality here
-            console.log("Saving prompt:", editedPrompt);
-          }}
-        />
-      </div>
-      <div className="w-1/3 flex flex-col space-y-4">
-        <h2 className="text-xl font-semibold">Inputs</h2>
-        <TextInput
-          placeholder="Search by request id..."
-          value={searchRequestId}
-          onValueChange={setSearchRequestId}
-        />
-        <Select
-          value={selectedInput?.id || ""}
-          onValueChange={(value) => {
-            const input = inputs?.find((i) => i.id === value);
-            onInputSelect(input);
-          }}
-        >
-          {inputs
-            ?.filter((input) => input.source_request.includes(searchRequestId))
-            .map((input) => (
-              <SelectItem key={input.id} value={input.id}>
-                {input.source_request}
-              </SelectItem>
-            ))}
-        </Select>
-        {selectedInput && (
-          <div className="mt-4">
-            <h3 className="text-lg font-semibold mb-2">Selected Input</h3>
-            <RenderImageWithPrettyInputKeys
-              text={editedPrompt}
-              selectedProperties={selectedInput.inputs}
-            />
+    <div className="flex flex-col space-y-4 ">
+      <div className="w-full border border-gray-300 dark:border-gray-700 rounded-md divide-y divide-gray-300 dark:divide-gray-700 h-full">
+        <ChatTopBar {...chatTopBarProps} />
+
+        <div className="flex-grow overflow-auto">{renderMessages()}</div>
+
+        {/* Add message button and Submit */}
+        <div className="flex justify-between items-center p-4 border-t border-gray-300 dark:border-gray-700 bg-white dark:bg-black rounded-b-lg">
+          <div className="w-full flex space-x-2">
+            <Button onClick={handleAddMessage} variant="outline" size="sm">
+              <PlusIcon className="h-4 w-4 mr-2" />
+              Add Message
+            </Button>
           </div>
+          <div className="flex space-x-4 w-full justify-end">
+            <Button
+              onClick={() => onSubmit && onSubmit(currentChat)}
+              variant="default"
+              size="sm"
+            >
+              <PaperAirplaneIcon className="h-4 w-4 mr-2" />
+              {submitText}
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Preview section */}
+      <div className="w-full">
+        <h3 className="text-lg font-semibold mb-2">Preview</h3>
+        {selectedInput && (
+          <RenderImageWithPrettyInputKeys
+            text={typeof prompt === "string" ? prompt : JSON.stringify(prompt)}
+            selectedProperties={selectedInput.inputs}
+          />
         )}
       </div>
     </div>

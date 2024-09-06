@@ -86,6 +86,18 @@ const PromptsPage = (props: PromptsPageProps) => {
       ],
     };
 
+    // Replace variables in the prompt content
+    promptVariables.forEach((variable) => {
+      const key = variable.match(/key="([^"]+)"/)?.[1];
+      if (key) {
+        promptData.messages[0].content[0].text =
+          promptData.messages[0].content[0].text.replace(
+            new RegExp(`\\{\\{\\s*${key}\\s*\\}\\}`, "g"),
+            variable
+          );
+      }
+    });
+
     const res = await jawn.POST("/v1/prompt/create", {
       body: {
         userDefinedId,
@@ -105,7 +117,10 @@ const PromptsPage = (props: PromptsPageProps) => {
     const regex = /\{\{([^}]+)\}\}/g;
     const matches = content.match(regex);
     if (matches) {
-      const variables = matches.map((match) => match.slice(2, -2).trim());
+      const variables = matches.map((match) => {
+        const key = match.slice(2, -2).trim();
+        return `<helicone-prompt-input key="${key}" />`;
+      });
       setPromptVariables(Array.from(new Set(variables)));
     } else {
       setPromptVariables([]);

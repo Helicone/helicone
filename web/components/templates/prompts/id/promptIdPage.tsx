@@ -123,7 +123,15 @@ export const RenderImageWithPrettyInputKeys = (props: {
 
 type NotNullOrUndefined<T> = T extends null | undefined ? never : T;
 
-type Input = NotNullOrUndefined<ReturnType<typeof useInputs>["inputs"]>[number];
+type Input = {
+  id: string;
+  inputs: { [key: string]: string };
+  source_request: string;
+  prompt_version: string;
+  created_at: string;
+  response_body: string;
+  auto_prompt_inputs: Record<string, string> | unknown[];
+};
 
 const PromptIdPage = (props: PromptIdPageProps) => {
   const { id, currentPage, pageSize } = props;
@@ -131,7 +139,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
   const [page, setPage] = useState<number>(currentPage);
   const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);
   const [inputView, setInputView] = useState<"list" | "grid">("list");
-  const [selectedInput, setSelectedInput] = useState<Input>();
+  const [selectedInput, setSelectedInput] = useState<Input | undefined>();
 
   const [searchRequestId, setSearchRequestId] = useState<string>("");
   const searchParams = useSearchParams();
@@ -292,6 +300,10 @@ const PromptIdPage = (props: PromptIdPageProps) => {
         end: new Date(),
       });
     }
+  };
+
+  const handleInputSelect = (input: Input | undefined) => {
+    setSelectedInput(input);
   };
 
   return (
@@ -612,41 +624,20 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                       </Select>
                     </div>
                   </div>
-                  <div className="overflow-auto h-full">
-                    <Chat
-                      requestBody={selectedPrompt?.helicone_template}
-                      responseBody={
-                        selectedInput?.response_body || {
-                          id: "123",
-                          choices: [
-                            {
-                              message: {
-                                role: "assistant",
-                                content: `<helicone-prompt-input key="output" />`,
-                              },
-                            },
-                          ],
-                        }
-                      }
-                      status={200}
-                      requestId={selectedInput?.source_request || ""}
-                      model={prompts?.at(0)?.model || "unknown"}
-                      selectedProperties={selectedInput?.inputs}
-                      autoInputs={selectedInput?.auto_prompt_inputs}
-                    />
-                  </div>
+                  <PromptPlayground
+                    prompt={selectedPrompt?.helicone_template || ""}
+                    selectedInput={selectedInput}
+                    onSubmit={(history) => {
+                      // Handle submission if needed
+                      console.log("Submitted history:", history);
+                    }}
+                    submitText="Submit"
+                  />
                 </div>
               </div>
             </TabPanel>
             <TabPanel>
-              <div className="py-4">
-                <PromptPlayground
-                  prompt={selectedPrompt?.helicone_template}
-                  inputs={inputs}
-                  selectedInput={selectedInput}
-                  onInputSelect={setSelectedInput}
-                />
-              </div>
+              <div className="py-4"></div>
             </TabPanel>
           </TabPanels>
         </TabGroup>
