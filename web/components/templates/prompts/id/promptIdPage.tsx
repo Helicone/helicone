@@ -1,4 +1,8 @@
-import { BookOpenIcon, ChartBarIcon } from "@heroicons/react/24/outline";
+import {
+  BookOpenIcon,
+  ChartBarIcon,
+  PencilIcon,
+} from "@heroicons/react/24/outline";
 import {
   AreaChart,
   MultiSelect,
@@ -52,6 +56,7 @@ import {
   FilterBranch,
   FilterLeaf,
 } from "../../../../services/lib/filters/filterDefs";
+import PromptPlayground from "./promptPlayground";
 
 interface PromptIdPageProps {
   id: string;
@@ -352,6 +357,9 @@ const PromptIdPage = (props: PromptIdPageProps) => {
             <Tab value="2" icon={BookOpenIcon}>
               Prompt & Inputs
             </Tab>
+            <Tab value="3" icon={PencilIcon}>
+              Prompt
+            </Tab>
           </TabList>
           <TabPanels>
             <TabPanel>
@@ -628,6 +636,16 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                     />
                   </div>
                 </div>
+              </div>
+            </TabPanel>
+            <TabPanel>
+              <div className="py-4">
+                <PromptPlayground
+                  prompt={selectedPrompt?.helicone_template}
+                  inputs={inputs}
+                  selectedInput={selectedInput}
+                  onInputSelect={setSelectedInput}
+                />
               </div>
             </TabPanel>
           </TabPanels>
