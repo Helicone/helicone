@@ -1,118 +1,64 @@
-import { useState } from "react";
-import BaseCard from "./BaseCard";
-import Slider from "./Slider";
-import { renderLogCost } from "@/app/utils/pricingUtils";
+import { Card } from "@/components/ui/card";
 import { Col } from "@/components/common/col";
-import { Button } from "@/components/ui/button";
-
-import { Switch } from "@/components/ui/switch";
-
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Row } from "@/components/common/row";
+import { CheckIcon } from "@heroicons/react/24/outline";
+import { FeatureItem } from "./FeaturedItem";
 
 const ScaleCard: React.FC = () => {
-  const [requestLogs, setRequestLogs] = useState(0);
-  const [promptCount, setPromptCount] = useState(0);
-
-  const handleRequestLogChange = (newValue: number) => {
-    setRequestLogs(newValue);
-  };
-
-  const handlePromptCountChange = (newValue: number) => {
-    setPromptCount(newValue);
-  };
-
-  const calculatePromptCost = (count: number) => {
-    if (count <= 3) return 0;
-    return (count - 3) * 25;
-  };
-
-  const features = [
-    { name: "Observability and Analytics", included: true },
-    { name: "Feature-Rich Tooling", included: true },
-    { name: "Prompt Templates", included: true },
-    { name: "Prompt Experiments", included: true },
-    { name: "SOC-2 Compliance", included: false },
-    { name: "On-Prem Deployment", included: false },
-  ];
-
-  const totalCost =
-    parseFloat(renderLogCost(requestLogs).replace(/[^0-9.-]+/g, "")) +
-    calculatePromptCost(promptCount);
-
   return (
-    <BaseCard
-      name="Scale"
-      price={
-        <>
-          <p className="text-3xl font-semibold">${totalCost.toFixed(2)}</p>
-          <p className="text-sm text-gray-500">/month</p>
-        </>
-      }
-      features={features}
-      ctaText="Get started for free"
-      ctaLink="https://us.helicone.ai/signup"
-    >
-      <div className="space-y-4 border-t border-b border-gray-100 py-4">
-        <Col>
-          <h3 className="text-5xl font-semibold">Scale</h3>
-          <Switch />
-          <p>Enable scaling</p>
+    <Card className="relative p-[24px] bg-white h-[500px] border-[#0CA5EA] border-[2px] ">
+      <Card className="absolute top-0 right-0 bg-[#E7F6FD] translate-x-[14px] -translate-y-[14px] rotate-[10.2deg] px-[12px] py-[6px]  border-[#0CA5EA] border-[2px] rounded-[4px]">
+        <Col className="items-center text-[#0CA5EA]">
+          <h3 className="text-[14px] font-extrabold ">Recommended</h3>
+          <h4 className="text-[12px] whitespace-nowrap ">
+            for <u>serious</u> AI developers
+          </h4>
         </Col>
-        <div>
-          <p className="text-xs text-black font-semibold">
-            {new Intl.NumberFormat("us", {
-              minimumFractionDigits: 0,
-              maximumFractionDigits: 0,
-            }).format(requestLogs)}
-            <span className="text-gray-500 font-normal"> requests / month</span>
-          </p>
-          <Slider
-            min={0}
-            max={50_000_000}
-            exponent={3}
-            onChange={handleRequestLogChange}
-            labels={{
-              0: "0",
-              100_000: "100k",
-              1_000_000: "1m",
-              10_000_000: "10m",
-              50_000_000: "50m",
-            }}
-          />
-        </div>
+      </Card>
+      <Col className="h-full justify-between">
+        <Col className="gap-[24px]">
+          <div className="px-[12px] py-[6px]  w-fit rounded-[3px] bg-[#E7F6FD] font-semibold">
+            Team
+          </div>
+          <Col className="gap-[8px]">
+            <Row className="items-center gap-[8px]">
+              <Row className="text-[36px] font-extrabold text-[#0CA5EA] items-center">
+                <Row>
+                  <span className="text-[24px] pt-[7px]">$</span>40
+                </Row>
 
-        <div>
-          <p className="text-xs text-black font-semibold">
-            {promptCount}{" "}
-            <span className="text-gray-500 font-normal">prompts</span>
-          </p>
-          <Slider
-            min={0}
-            max={100}
-            exponent={1}
-            onChange={handlePromptCountChange}
-            labels={{
-              0: "0",
-              25: "25",
-              50: "50",
-              75: "75",
-              100: "100",
-            }}
+                <span className="text-[18px]">/mo</span>
+              </Row>
+
+              <Row className="text-[18px] text-black font-semibold line-through">
+                $50/mo
+              </Row>
+            </Row>
+
+            <h4 className="text-[18px]">
+              Everything to <b>kickstart your AI project</b>.
+            </h4>
+          </Col>
+        </Col>
+        <Col className="gap-[16px]">
+          <FeatureItem
+            title="Generous free monthly tier"
+            description="10k free requests/month."
           />
-          <p className="text-xs text-gray-500 mt-1">
-            First 3 prompts free, then $25/prompt
-          </p>
-        </div>
-      </div>
-    </BaseCard>
+          <FeatureItem
+            title="Access to Dashboard"
+            description="Watch your AI app improve."
+          />
+          <FeatureItem
+            title="Unlimited seats"
+            description="Invite your whole team!"
+          />
+        </Col>
+        <button className="bg-[#0CA5EA] text-white py-[12px] rounded-[4px] mt-[8px] text-[16px] font-semibold">
+          Upgrade Now
+        </button>
+      </Col>
+    </Card>
   );
 };
 

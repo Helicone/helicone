@@ -20,10 +20,20 @@ import RequestLogTable, {
 } from "@/components/templates/pricing/requestLogTable";
 import FeatureTable from "@/components/templates/pricing/featureTable";
 import ScaleCard from "../components/templates/pricing/ScaleCard";
-import GrowthCard from "../components/templates/pricing/GrowthCard";
+import FreeCard from "../components/templates/pricing/FreeCard";
 import EnterpriseCard from "../components/templates/pricing/EnterpriseCard";
 
 import { renderLogCost } from "@/app/utils/pricingUtils";
+import { Col } from "@/components/common/col";
+import { Row } from "@/components/common/row";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Card,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 const Slider = ({
   min,
@@ -149,38 +159,109 @@ export default function Example() {
               Get a demo
             </Link>
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 py-16">
-            <GrowthCard />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 py-16 max-w-[500px]">
+            <FreeCard />
             <ScaleCard />
             <EnterpriseCard />
           </div>
-          <div className="flex flex-col max-w-6xl mx-auto space-y-8 py-4 w-full">
-            <button
-              onClick={() => {
-                setShowPlans(!showPlans);
-              }}
-              className="text-sky-500 w-fit flex items-center gap-2 mx-auto"
-            >
-              {!showPlans ? (
-                <ChevronDownIcon className="h-6 w-6 text-sky-500" />
-              ) : (
-                <ChevronUpIcon className="h-6 w-6 text-sky-500" />
-              )}
-              Show More Info
-            </button>
+          <div className="grid grid-cols-1 lg:grid-cols-3 border rounded-lg max-w-[500px] bg-[#F9F9F9]">
+            <div className=" h-[250px] w-full ">
+              <Col className="h-full">
+                <Col className=" py-[36px] px-[24px] justify-between h-full">
+                  <h1>
+                    <b>386 hours</b> saved by using cached responses.
+                  </h1>
+                  <div className="bg-blue-100 h-[43px] w-[175px]">LOGO</div>
+                </Col>
+                <Row className=" w-full h-[72px] px-[24px] items-center justify-between border-t">
+                  <span>Developer</span>
+                  <Button variant={"outline"}>Start for Free</Button>
+                </Row>
+              </Col>
+            </div>
+            <div className="bg-white h-[300px] w-full rounded-lg  border-[#0CA5EA] border-2">
+              <Col className="h-full">
+                <Col className=" py-[36px] px-[24px] justify-between h-full">
+                  <h1>
+                    <b>2 days</b> saved combing through requests.
+                  </h1>
+                  <div className="bg-blue-100 h-[43px] w-[175px]">LOGO</div>
+                </Col>
+                <Row className=" w-full h-[72px] px-[24px] items-center justify-between border-t">
+                  <span>Scale</span>
+                  <Button className="bg-[#0CA5EA] text-white">
+                    Upgrade now
+                  </Button>
+                </Row>
+              </Col>
+            </div>
+            <div className="h-[300px] w-full">
+              <Col className="h-full">
+                <Col className=" py-[36px] px-[24px] justify-between h-full">
+                  <h1>
+                    <b>Critical bug detected</b>, saved agent runtime by 30%.
+                  </h1>
+                  <div className="bg-blue-100 h-[43px] w-[175px]">LOGO</div>
+                </Col>
+                <Row className=" w-full h-[72px] px-[24px] items-center justify-between border-t">
+                  <span>Enterprise</span>
+                  <Button variant={"outline"}>Contact Sales</Button>
+                </Row>
+              </Col>
+            </div>
+          </div>
 
-            {showPlans && (
-              <>
-                <div className="flex flex-col space-y-2">
-                  <p className="text-xs text-gray-700 font-semibold">
-                    Request Log Table Rates
-                  </p>
-                  <RequestLogTable />
+          <div className="flex flex-col max-w-6xl mx-auto space-y-8 py-16 w-full">
+            <h2 className="text-lg sm:text-2xl font-bold tracking-tight max-w-4xl pt-8">
+              Compare plans
+            </h2>
+
+            <Tabs defaultValue="team" className="w-full">
+              <Row className="justify-between items-center">
+                <TabsList>
+                  <TabsTrigger value="developer">Developer</TabsTrigger>
+                  <TabsTrigger value="team">Team</TabsTrigger>
+                </TabsList>
+                {/* Add your content here */}
+                <div className="text-sm text-gray-500">
+                  Additional information or controls
                 </div>
+              </Row>
+              <TabsContent value="developer">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Developer</CardTitle>
+                    <CardDescription>
+                      For most startups under two years old, we offer 50% off
+                      for the first year.
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+              </TabsContent>
+              <TabsContent value="team">
+                <div className="w-full overflow-x-auto">
+                  <div className="min-w-[800px]">
+                    <Col className="gap-4 rounded-lg border">
+                      <Row className="justify-between p-[24px]">
+                        <h1 className="text-2xl font-bold">Team plan</h1>
+                        <Row className="items-center gap-[8px]">
+                          <Row className="text-[18px] text-black font-semibold line-through">
+                            $50/mo
+                          </Row>
+                          <Row className="text-[36px] font-extrabold text-[#0CA5EA] items-center">
+                            <Row>
+                              <span className="text-[24px] pt-[7px]">$</span>40
+                            </Row>
 
-                <FeatureTable />
-              </>
-            )}
+                            <span className="text-[18px]">/mo</span>
+                          </Row>
+                        </Row>
+                      </Row>
+                    </Col>
+                  </div>
+                </div>
+              </TabsContent>
+            </Tabs>
           </div>
           <div className="flex flex-col max-w-6xl mx-auto space-y-8 py-16 w-full">
             <h2 className="text-lg sm:text-2xl font-bold tracking-tight max-w-4xl pt-8">
