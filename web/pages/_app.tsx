@@ -81,19 +81,13 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
       </PHProvider>
       {trackingEnabled && <Analytics />}
       {trackingEnabled && (
-          <Script
-            id="koala-snippet"
-            dangerouslySetInnerHTML={{
-              __html: `!function(t){if(window.ko)return;window.ko=[],["identify","track","removeListeners","open","on","off","qualify","ready"].forEach(function(t){ko[t]=function(){var n=[].slice.call(arguments);return n.unshift(t),ko.push(n),ko}});var n=document.createElement("script");n.async=!0,n.setAttribute("src","https://cdn.getkoala.com/v1/pk_3d24ae9e69e18decfcb68b9d7b668c4501b5/sdk.js"),(document.body || document.head).appendChild(n)}();`,
-            }}
-          />
-        ) && (
-          <Script id="atlas-snippet">
-            {
-              '(()=>{"use strict";var t,e={appId:"wwtet1uu7r",v:2,autorun:{},q:[],call:function(){this.q.push(arguments)}};window.Atlas=e;var n=document.createElement("script");n.async=!0,n.src="https://app.atlas.so/client-js/atlas.bundle.js";var s=document.getElementsByTagName("script")[0];null===(t=s.parentNode)||void 0===t||t.insertBefore(n,s)})();'
-            }
-          </Script>
-        )}
+        <Script
+          id="koala-snippet"
+          dangerouslySetInnerHTML={{
+            __html: `!function(t){if(window.ko)return;window.ko=[],["identify","track","removeListeners","open","on","off","qualify","ready"].forEach(function(t){ko[t]=function(){var n=[].slice.call(arguments);return n.unshift(t),ko.push(n),ko}});var n=document.createElement("script");n.async=!0,n.setAttribute("src","https://cdn.getkoala.com/v1/pk_3d24ae9e69e18decfcb68b9d7b668c4501b5/sdk.js"),(document.body || document.head).appendChild(n)}();`,
+          }}
+        />
+      )}
     </>
   );
 }
