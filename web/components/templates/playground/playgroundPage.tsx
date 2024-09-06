@@ -84,15 +84,21 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     reqBody !== null ? reqBody.max_tokens : 256
   );
 
-  const [selectedModels, setSelectedModels] = useState<PlaygroundModel[]>(
-    singleModel
-      ? [
-          {
-            ...singleModel,
-          },
-        ]
-      : []
-  );
+  const [selectedModels, setSelectedModels] = useState<PlaygroundModel[]>([]);
+
+  useEffect(() => {
+    if (selectedModels.find((model) => model.name === singleModel?.name)) {
+      return;
+    }
+    if (singleModel) {
+      setSelectedModels((prev) => [
+        ...prev,
+        {
+          ...singleModel,
+        },
+      ]);
+    }
+  }, [selectedModels, singleModel]);
 
   const { setNotification } = useNotification();
 
@@ -113,6 +119,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     initialMessages: requestOptionsFromOpenAI({
       model: selectedModels?.[0]?.name || "gpt-3.5-turbo",
       messages: chat as any,
+      tools: currentTools,
     }).messages,
   });
 
@@ -555,7 +562,6 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
           </div>
         </div>
       )}
-
       <ThemedModal open={infoOpen} setOpen={setInfoOpen}>
         <div className="w-[450px] flex flex-col space-y-4">
           <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
