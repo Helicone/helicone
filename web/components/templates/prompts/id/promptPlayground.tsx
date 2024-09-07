@@ -65,10 +65,13 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
     }
 
     const promptObject = promptInput as PromptObject;
+    console.log("promptObj", promptObject);
     return promptObject.messages.map((msg, index) => ({
       id: `msg-${index}`,
       role: msg.role as "user" | "assistant" | "system",
-      content: msg.content.map((c) => c.text).join("\n"),
+      content: Array.isArray(msg.content)
+        ? msg.content.map((c) => c.text).join("\n")
+        : msg.content,
     }));
   };
   const [mode, setMode] = useState<(typeof PROMPT_MODES)[number]>("Pretty");
@@ -114,14 +117,6 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
   };
 
   const allExpanded = Object.values(expandedChildren).every(Boolean);
-
-  const toggleAllExpanded = () => {
-    setExpandedChildren(
-      Object.fromEntries(
-        Object.keys(expandedChildren).map((key) => [key, !allExpanded])
-      )
-    );
-  };
 
   const renderMessages = () => {
     switch (mode) {
@@ -190,24 +185,39 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
             )}
           </div>
           <div className="flex space-x-4 w-full justify-end items-center">
-            <Select value={selectedModel} onValueChange={setSelectedModel}>
-              <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder="Select a model" />
-              </SelectTrigger>
-              <SelectContent>
-                {MODEL_LIST.map((model) => (
-                  <SelectItem key={model.value} value={model.value}>
-                    {model.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {isEditMode && (
+              <>
+                <div className="font-normal">Model</div>
+                <Select value={selectedModel} onValueChange={setSelectedModel}>
+                  <SelectTrigger className="w-[200px]">
+                    <SelectValue placeholder="Select a model" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {MODEL_LIST.map((model) => (
+                      <SelectItem key={model.value} value={model.value}>
+                        {model.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button
+                  onClick={() =>
+                    onSubmit && onSubmit(currentChat, selectedModel)
+                  }
+                  variant="outline"
+                  size="sm"
+                  className="px-4 font-normal"
+                >
+                  Save prompt
+                </Button>
+              </>
+            )}
             <Button
               onClick={() => onSubmit && onSubmit(currentChat, selectedModel)}
               variant="default"
               size="sm"
+              className="px-4"
             >
-              <PaperAirplaneIcon className="h-4 w-4 mr-2" />
               {submitText}
             </Button>
           </div>

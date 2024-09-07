@@ -223,6 +223,28 @@ export class PromptController extends Controller {
     return result;
   }
 
+  @Post("version/{promptVersionId}/promote")
+  public async promotePromptVersionToProduction(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() promptVersionId: string,
+    @Body()
+    requestBody: {
+      previousProductionVersionId: string;
+    }
+  ): Promise<Result<PromptVersionResult, string>> {
+    const promptManager = new PromptManager(request.authParams);
+    const result = await promptManager.promotePromptVersionToProduction(
+      promptVersionId,
+      requestBody.previousProductionVersionId
+    );
+    if (result.error || !result.data) {
+      console.log(result.error);
+      this.setStatus(500);
+    } else {
+      this.setStatus(201); // set return status 201
+    }
+    return result;
+  }
   @Post("version/{promptVersionId}/inputs/query")
   public async getInputs(
     @Body()

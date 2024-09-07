@@ -87,12 +87,51 @@ export class PromptManager extends BaseManager {
       ]
     );
 
-    console.log("result", result);
-    console.log("helicone template", params.newHeliconeTemplate);
-    console.log("parentPromptVersionId", parentPromptVersionId);
-    console.log("model", model);
-    console.log("isMajorVersion", isMajorVersion); // Log whether it's a major version
     return resultMap(result, (data) => data[0]);
+  }
+
+  async promotePromptVersionToProduction(
+    promptVersionId: string,
+    previousProductionVersionId: string
+  ): Promise<Result<PromptVersionResult, string>> {
+    const removeProductionFlagFromPreviousVersion = await dbExecute(
+      `
+    UPDATE prompts_versions
+    SET metadata = COALESCE(metadata, '{}'::jsonb) - 'isProduction'
+    WHERE id = $1 AND organization = $2
+    `,
+      [previousProductionVersionId, this.authParams.organizationId]
+    );
+
+    if (removeProductionFlagFromPreviousVersion.error) {
+      return err(
+        `Failed to remove production flag from previous version: ${removeProductionFlagFromPreviousVersion.error}`
+      );
+    }
+
+    const result = await dbExecute<PromptVersionResult>(
+      `
+    UPDATE prompts_versions
+    SET metadata = COALESCE(metadata, '{}'::jsonb) || '{"isProduction": true}'::jsonb
+    WHERE id = $1 AND organization = $2
+    RETURNING 
+      id,
+      minor_version,
+      major_version,
+      helicone_template,
+      prompt_v2,
+      model,
+      created_at,
+      metadata
+    `,
+      [promptVersionId, this.authParams.organizationId]
+    );
+
+    if (result.error || !result.data || result.data.length === 0) {
+      return err(`Failed to promote prompt version: ${result.error}`);
+    }
+
+    return ok(result.data[0]);
   }
 
   async getPromptVersions(
@@ -350,8 +389,8 @@ export class PromptManager extends BaseManager {
       id: string;
     }>(
       `
-    INSERT INTO prompts_versions (prompt_v2, organization, major_version, minor_version, helicone_template, model, created_at)
-    VALUES ($1, $2, $3, $4, $5, $6, NOW())
+    INSERT INTO prompts_versions (prompt_v2, organization, major_version, minor_version, helicone_template, model, created_at, metadata)
+    VALUES ($1, $2, $3, $4, $5, $6, NOW(), '{"isProduction": true}'::jsonb)
     RETURNING id
     `,
       [

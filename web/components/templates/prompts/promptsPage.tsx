@@ -70,6 +70,19 @@ const PromptsPage = (props: PromptsPageProps) => {
   );
   const jawn = useJawnClient();
 
+  const extractVariables = useCallback((content: string) => {
+    const regex = /\{\{([^}]+)\}\}/g;
+    const matches = content.match(regex);
+    return matches ? matches.map((match) => match.slice(2, -2).trim()) : [];
+  }, []);
+
+  const replaceVariablesWithTags = useCallback((content: string) => {
+    return content.replace(
+      /\{\{([^}]+)\}\}/g,
+      (match, p1) => `<helicone-prompt-input key="${p1.trim()}" />`
+    );
+  }, []);
+
   const createPrompt = async (userDefinedId: string) => {
     const promptData = {
       model: newPromptModel,
@@ -78,25 +91,13 @@ const PromptsPage = (props: PromptsPageProps) => {
           role: "user",
           content: [
             {
-              text: newPromptContent,
+              text: replaceVariablesWithTags(newPromptContent),
               type: "text",
             },
           ],
         },
       ],
     };
-
-    // Replace variables in the prompt content
-    promptVariables.forEach((variable) => {
-      const key = variable.match(/key="([^"]+)"/)?.[1];
-      if (key) {
-        promptData.messages[0].content[0].text =
-          promptData.messages[0].content[0].text.replace(
-            new RegExp(`\\{\\{\\s*${key}\\s*\\}\\}`, "g"),
-            variable
-          );
-      }
-    });
 
     const res = await jawn.POST("/v1/prompt/create", {
       body: {
@@ -112,20 +113,6 @@ const PromptsPage = (props: PromptsPageProps) => {
       router.push(`/prompts/${res.data.data?.id}`);
     }
   };
-
-  const extractVariables = useCallback((content: string) => {
-    const regex = /\{\{([^}]+)\}\}/g;
-    const matches = content.match(regex);
-    if (matches) {
-      const variables = matches.map((match) => {
-        const key = match.slice(2, -2).trim();
-        return `<helicone-prompt-input key="${key}" />`;
-      });
-      setPromptVariables(Array.from(new Set(variables)));
-    } else {
-      setPromptVariables([]);
-    }
-  }, []);
 
   return (
     <>
@@ -167,7 +154,7 @@ const PromptsPage = (props: PromptsPageProps) => {
                         icon={DocumentPlusIcon}
                       />
                     </DialogTrigger>
-                    <DialogContent className="w-[900px]">
+                    <DialogContent className="w-[900px] ">
                       <DialogHeader className="flex flex-row justify-between items-center">
                         <DialogTitle>Create a new prompt</DialogTitle>
                         <div className="flex items-center space-x-2">
@@ -181,72 +168,96 @@ const PromptsPage = (props: PromptsPageProps) => {
                           </Label>
                         </div>
                       </DialogHeader>
-                      <div className="flex flex-col space-y-4 h-[570px]">
+                      <div className="flex flex-col space-y-4 h-[570px] justify-between">
                         {imNotTechnical ? (
                           <>
-                            <div className="flex flex-col space-y-2">
-                              <Label htmlFor="new-prompt-name">Name</Label>
-                              <TextInput
-                                id="new-prompt-name"
-                                value={newPromptName}
-                                onChange={(e) =>
-                                  setNewPromptName(e.target.value)
-                                }
-                                ref={newPromptInputRef}
-                              />
-                            </div>
-                            <div className="flex flex-col space-y-2">
-                              <Label htmlFor="new-prompt-model">Model</Label>
-                              <Select
-                                value={newPromptModel}
-                                onValueChange={setNewPromptModel}
-                              >
-                                <SelectTrigger className="w-[200px]">
-                                  <SelectValue placeholder="Select a model" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {MODEL_LIST.map((model) => (
-                                    <SelectItem
-                                      key={model.value}
-                                      value={model.value}
-                                    >
-                                      {model.label}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </div>
-                            <div className="flex flex-col space-y-2">
-                              <Label htmlFor="new-prompt-content">
-                                Prompt Content
-                              </Label>
-                              <Textarea
-                                id="new-prompt-content"
-                                value={newPromptContent}
-                                onChange={(e) => {
-                                  setNewPromptContent(e.target.value);
-                                  extractVariables(e.target.value);
-                                }}
-                                placeholder="Type your prompt here"
-                                rows={4}
-                              />
-                              <p className="text-sm text-gray-500">
-                                Use &#123;&#123; sample_variable &#125;&#125; to
-                                insert variables into your prompt.
-                              </p>
-                            </div>
-                            {promptVariables.length > 0 && (
+                            <div className="flex flex-col space-y-6">
                               <div className="flex flex-col space-y-2">
-                                <Label>Your variables</Label>
-                                <div className="flex flex-wrap gap-2">
-                                  {promptVariables.map((variable, index) => (
-                                    <Badge key={index} variant="secondary">
-                                      {variable}
-                                    </Badge>
-                                  ))}
-                                </div>
+                                <Label
+                                  className="text-lg"
+                                  htmlFor="new-prompt-name"
+                                >
+                                  Name
+                                </Label>
+                                <TextInput
+                                  id="new-prompt-name"
+                                  value={newPromptName}
+                                  onChange={(e) =>
+                                    setNewPromptName(e.target.value)
+                                  }
+                                  ref={newPromptInputRef}
+                                />
                               </div>
-                            )}
+                              <div className="flex flex-col space-y-2">
+                                <Label
+                                  className="text-lg"
+                                  htmlFor="new-prompt-model"
+                                >
+                                  Model
+                                </Label>
+                                <Select
+                                  value={newPromptModel}
+                                  onValueChange={setNewPromptModel}
+                                >
+                                  <SelectTrigger className="w-[200px]">
+                                    <SelectValue placeholder="Select a model" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {MODEL_LIST.map((model) => (
+                                      <SelectItem
+                                        key={model.value}
+                                        value={model.value}
+                                      >
+                                        {model.label}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <div className="flex flex-col space-y-2">
+                                <Label
+                                  className="text-lg"
+                                  htmlFor="new-prompt-content"
+                                >
+                                  Prompt
+                                </Label>
+                                <Textarea
+                                  id="new-prompt-content"
+                                  value={newPromptContent}
+                                  onChange={(e) => {
+                                    const newContent = e.target.value;
+                                    setNewPromptContent(newContent);
+                                    setPromptVariables(
+                                      extractVariables(newContent)
+                                    );
+                                  }}
+                                  placeholder="Type your prompt here"
+                                  rows={4}
+                                />
+                                <p className="text-sm text-gray-500">
+                                  Use &#123;&#123; sample_variable &#125;&#125;
+                                  to insert variables into your prompt.
+                                </p>
+                              </div>
+                              {promptVariables.length > 0 && (
+                                <div className="flex flex-col space-y-2">
+                                  <Label className="text-lg">
+                                    Your variables
+                                  </Label>
+                                  <div className="flex flex-wrap gap-2">
+                                    {promptVariables.map((variable, index) => (
+                                      <Badge
+                                        key={index}
+                                        variant="secondary"
+                                        className="text-sm px-4 py-2 rounded-md"
+                                      >
+                                        {variable}
+                                      </Badge>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
                             <div className="flex justify-end items-center mt-4">
                               <Button
                                 className="w-auto"

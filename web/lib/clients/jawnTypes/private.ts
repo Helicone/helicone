@@ -24,6 +24,9 @@ export interface paths {
   "/v1/prompt/version/{promptVersionId}/subversion": {
     post: operations["CreateSubversion"];
   };
+  "/v1/prompt/version/{promptVersionId}/promote": {
+    post: operations["PromotePromptVersionToProduction"];
+  };
   "/v1/prompt/version/{promptVersionId}/inputs/query": {
     post: operations["GetInputs"];
   };
@@ -1091,6 +1094,28 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["PromptCreateSubversionParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_PromptVersionResult.string_"];
+        };
+      };
+    };
+  };
+  PromotePromptVersionToProduction: {
+    parameters: {
+      path: {
+        promptVersionId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          previousProductionVersionId: string;
+        };
       };
     };
     responses: {

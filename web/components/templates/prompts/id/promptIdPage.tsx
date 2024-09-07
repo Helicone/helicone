@@ -1,21 +1,3 @@
-import {
-  BookOpenIcon,
-  ChartBarIcon,
-  PencilIcon,
-} from "@heroicons/react/24/outline";
-import {
-  AreaChart,
-  MultiSelect,
-  MultiSelectItem,
-  Select,
-  SelectItem,
-  Tab,
-  TabGroup,
-  TabList,
-  TabPanel,
-  TabPanels,
-  TextInput,
-} from "@tremor/react";
 import { useEffect, useState } from "react";
 import {
   usePrompt,
@@ -23,27 +5,21 @@ import {
   usePromptVersions,
 } from "../../../../services/hooks/prompts/prompts";
 
-import { BeakerIcon } from "@heroicons/react/24/solid";
+import {
+  BeakerIcon,
+  BookOpenIcon,
+  ChartBarIcon,
+  BarsArrowUpIcon,
+} from "@heroicons/react/24/outline";
 import { useRouter } from "next/router";
 import { useExperiments } from "../../../../services/hooks/prompts/experiments";
 import { useInputs } from "../../../../services/hooks/prompts/inputs";
-import { SimpleTable } from "../../../shared/table/simpleTable";
-import { getUSDateFromString } from "../../../shared/utils/utils";
 import HcBadge from "../../../ui/hcBadge";
 import HcBreadcrumb from "../../../ui/hcBreadcrumb";
 import HcButton from "../../../ui/hcButton";
-import { Chat } from "../../requests/chatComponent/chat";
-import ModelPill from "../../requestsV2/modelPill";
-import StatusBadge from "../../requestsV2/statusBadge";
-import TableFooter from "../../requestsV2/tableFooter";
-import PromptPropertyCard from "./promptPropertyCard";
 import { useGetDataSets } from "../../../../services/hooks/prompts/datasets";
 import { MODEL_LIST } from "../../playground/new/modelList";
-import LoadingAnimation from "../../../shared/loadingAnimation";
 import { BackendMetricsCall } from "../../../../services/hooks/useBackendFunction";
-import ThemedTimeFilter from "../../../shared/themed/themedTimeFilter";
-import StyledAreaChart from "../../dashboard/styledAreaChart";
-import { getTimeMap } from "../../../../lib/timeCalculations/constants";
 import {
   TimeInterval,
   getTimeInterval,
@@ -51,7 +27,6 @@ import {
 } from "../../../../lib/timeCalculations/time";
 import { useSearchParams } from "next/navigation";
 import { TimeFilter } from "../../dashboard/dashboardPage";
-import { getTimeAgo } from "../../../../lib/sql/timeHelpers";
 import {
   FilterBranch,
   FilterLeaf,
@@ -61,10 +36,63 @@ import { useJawnClient } from "../../../../lib/clients/jawnHook";
 import useNotification from "../../../shared/notification/useNotification";
 import { Message } from "../../requests/chatComponent/types";
 
+import { Badge } from "../../../ui/badge";
+import { ScrollArea } from "../../../ui/scroll-area";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { EllipsisHorizontalIcon } from "@heroicons/react/24/solid";
+import {
+  TabGroup,
+  TabList,
+  Tab,
+  TabPanels,
+  TabPanel,
+  MultiSelect,
+  MultiSelectItem,
+  AreaChart,
+  TextInput,
+} from "@tremor/react";
+import { getTimeMap } from "../../../../lib/timeCalculations/constants";
+import LoadingAnimation from "../../../shared/loadingAnimation";
+import { SimpleTable } from "../../../shared/table/simpleTable";
+import ThemedTimeFilter from "../../../shared/themed/themedTimeFilter";
+import { getUSDateFromString } from "../../../shared/utils/utils";
+import StyledAreaChart from "../../dashboard/styledAreaChart";
+import ModelPill from "../../requestsV2/modelPill";
+import StatusBadge from "../../requestsV2/statusBadge";
+import PromptPropertyCard from "./promptPropertyCard";
+import TableFooter from "../../requestsV2/tableFooter";
+
 interface PromptIdPageProps {
   id: string;
   currentPage: number;
   pageSize: number;
+}
+
+export function getTimeAgo(date: Date): string {
+  const now = new Date();
+  const secondsPast = (now.getTime() - date.getTime()) / 1000;
+
+  if (secondsPast < 60) {
+    return "just now";
+  }
+  if (secondsPast < 3600) {
+    return `${Math.floor(secondsPast / 60)} minutes ago`;
+  }
+  if (secondsPast <= 86400) {
+    return `${Math.floor(secondsPast / 3600)} hours ago`;
+  }
+  if (secondsPast <= 2592000) {
+    return `${Math.floor(secondsPast / 86400)} days ago`;
+  }
+  if (secondsPast <= 31536000) {
+    return `${Math.floor(secondsPast / 2592000)} months ago`;
+  }
+  return `${Math.floor(secondsPast / 31536000)} years ago`;
 }
 
 export const RenderImageWithPrettyInputKeys = (props: {
@@ -221,7 +249,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
       notification.setNotification("Failed to create subversion", "error");
       return;
     }
-    notification.setNotification("Subversion created successfully", "success");
+    notification.setNotification("New version created successfully", "success");
     refetchPromptVersions();
     refetchPrompt();
   };
@@ -347,6 +375,37 @@ const PromptIdPage = (props: PromptIdPageProps) => {
     setSelectedInput(input);
   };
 
+  const promoteToProduction = async (promptVersionId: string) => {
+    const result = await jawn.POST(
+      "/v1/prompt/version/{promptVersionId}/promote",
+      {
+        params: {
+          path: {
+            promptVersionId: promptVersionId,
+          },
+        },
+        body: {
+          previousProductionVersionId:
+            prompts?.find((p) => p.metadata?.isProduction === true)?.id || "",
+        },
+      }
+    );
+
+    if (result.error || !result.data) {
+      notification.setNotification(
+        "Failed to promote version to production",
+        "error"
+      );
+      return;
+    }
+    notification.setNotification(
+      "Version promoted to production successfully",
+      "success"
+    );
+    refetchPromptVersions();
+    refetchPrompt();
+  };
+
   return (
     <div className="w-full h-full flex flex-col space-y-4">
       <div className="flex flex-row items-center justify-between">
@@ -363,7 +422,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
 
       <div className="flex justify-between items-center">
         <div className="flex items-center space-x-4">
-          <h1 className="font-semibold text-2xl text-black dark:text-white">
+          <h1 className="font-semibold text-4xl text-black dark:text-white">
             {prompt?.user_defined_id}
           </h1>
           <HcBadge title={`${prompt?.versions.length} versions`} size={"sm"} />
@@ -378,68 +437,337 @@ const PromptIdPage = (props: PromptIdPageProps) => {
       </div>
 
       <div className="flex items-center gap-2 text-sm text-gray-500">
-        <p>
+        <p className="">
           last used{" "}
           {prompt?.last_used && getTimeAgo(new Date(prompt?.last_used))}
         </p>
         <div className="rounded-full h-1 w-1 bg-slate-400" />
-        <p>
+        <p className="">
           created on{" "}
           {prompt?.created_at && new Date(prompt?.created_at).toDateString()}
         </p>
       </div>
-
-      <div className="flex space-x-4">
-        <div className="w-2/3">
-          <PromptPlayground
-            prompt={selectedPrompt?.helicone_template || ""}
-            selectedInput={selectedInput}
-            onSubmit={async (history, model) => {
-              console.log("Submitted history:", history);
-              console.log("Selected model:", model);
-              await createSubversion(history, model);
-            }}
-            submitText="Submit"
-            initialModel={selectedPrompt?.model || MODEL_LIST[0].value}
-          />
-        </div>
-        <div className="w-1/3">
-          <div className="border border-gray-300 dark:border-gray-700 rounded-lg p-4">
-            <h2 className="text-lg font-semibold mb-4">Versions</h2>
-            <div className="space-y-4 max-h-[calc(100vh-200px)] overflow-y-auto">
-              {sortedPrompts?.map((prompt) => (
-                <div
-                  key={prompt.id}
-                  className={`p-4 rounded-lg cursor-pointer ${
-                    selectedVersion ===
-                    `${prompt.major_version}.${prompt.minor_version}`
-                      ? "bg-blue-100 dark:bg-blue-900"
-                      : "bg-gray-100 dark:bg-gray-800"
-                  }`}
-                  onClick={() =>
-                    setSelectedVersion(
-                      `${prompt.major_version}.${prompt.minor_version}`
-                    )
-                  }
-                >
-                  <div className="flex justify-between items-center">
-                    <span className="font-medium">
-                      V{prompt.major_version}.{prompt.minor_version}
-                    </span>
-                    <span className="text-sm text-gray-500">
-                      {new Date(prompt.created_at).toLocaleDateString()}
-                    </span>
-                  </div>
-                  <div className="mt-2 text-sm">{prompt.model}</div>
-                  {prompt.is_production && (
-                    <HcBadge title="Prod" size="sm" className="mt-2" />
-                  )}
+      <TabGroup>
+        <TabList variant="line" defaultValue="1">
+          <Tab value="1" icon={ChartBarIcon}>
+            Overview
+          </Tab>
+          <Tab value="2" icon={BookOpenIcon}>
+            Prompt
+          </Tab>
+          <Tab value="3" icon={BarsArrowUpIcon}>
+            Inputs
+          </Tab>
+        </TabList>
+        <TabPanels>
+          <TabPanel>
+            <div className="flex flex-col space-y-16 py-4">
+              <div className="w-full h-full flex flex-col space-y-4">
+                <div className="flex items-center justify-between w-full">
+                  <ThemedTimeFilter
+                    timeFilterOptions={[
+                      { key: "24h", value: "24H" },
+                      { key: "7d", value: "7D" },
+                      { key: "1m", value: "1M" },
+                      { key: "3m", value: "3M" },
+                      // { key: "all", value: "All" },
+                    ]}
+                    custom={true}
+                    onSelect={function (key: string, value: string): void {
+                      onTimeSelectHandler(key as TimeInterval, value);
+                    }}
+                    isFetching={isPromptRequestsLoading}
+                    defaultValue={interval}
+                    currentTimeFilter={timeFilter}
+                  />
                 </div>
-              ))}
+
+                <div>
+                  <StyledAreaChart
+                    title={"Total Requests"}
+                    value={total}
+                    isDataOverTimeLoading={isPromptRequestsLoading}
+                    withAnimation={true}
+                  >
+                    <AreaChart
+                      className="h-[14rem]"
+                      data={
+                        data?.data?.map((r) => ({
+                          date: getTimeMap(timeIncrement)(r.time),
+                          count: r.count,
+                        })) ?? []
+                      }
+                      index="date"
+                      categories={["count"]}
+                      colors={["cyan"]}
+                      showYAxis={false}
+                      curveType="monotone"
+                      valueFormatter={(number: number | bigint) => {
+                        return `${new Intl.NumberFormat("us").format(
+                          Number(number)
+                        )}`;
+                      }}
+                    />
+                  </StyledAreaChart>
+                </div>
+              </div>
+              <div className="flex flex-col space-y-4 h-full w-full">
+                <h2 className="text-2xl font-semibold text-black dark:text-white">
+                  Experiment Logs
+                </h2>
+                <div className="flex items-center justify-between w-full">
+                  <div className="flex flex-wrap items-center space-x-2 w-full">
+                    <div className="w-full max-w-[16rem]">
+                      <MultiSelect
+                        placeholder="Dataset"
+                        value={selectedDatasets}
+                        onValueChange={(value) => {
+                          setSelectedDatasets(value);
+                        }}
+                      >
+                        {datasets.map((dataset) => (
+                          <MultiSelectItem value={dataset.id} key={dataset.id}>
+                            {dataset.name}
+                          </MultiSelectItem>
+                        ))}
+                      </MultiSelect>
+                    </div>
+                    <div className="w-full max-w-[16rem]">
+                      <MultiSelect
+                        placeholder="Model"
+                        value={selectedModels}
+                        onValueChange={(value) => {
+                          setSelectedModels(value);
+                        }}
+                      >
+                        {MODEL_LIST.map((model) => (
+                          <MultiSelectItem
+                            value={model.value}
+                            key={model.value}
+                          >
+                            {model.label}
+                          </MultiSelectItem>
+                        ))}
+                      </MultiSelect>
+                    </div>
+                    <div className="pl-2">
+                      <HcButton
+                        variant={"light"}
+                        size={"sm"}
+                        title={"Clear All"}
+                        onClick={() => {
+                          setSelectedDatasets([]);
+                          setSelectedModels([]);
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+                {isExperimentsLoading ? (
+                  <div className="h-48 flex justify-center items-center">
+                    <LoadingAnimation title="Loading Experiments..." />
+                  </div>
+                ) : (
+                  <SimpleTable
+                    data={filteredExperiments}
+                    columns={[
+                      {
+                        key: "id",
+                        header: "ID",
+                        render: (item) => (
+                          <span className="underline text-black dark:text-white">
+                            {item.id}
+                          </span>
+                        ),
+                      },
+                      {
+                        key: "status",
+                        header: "Status",
+                        render: (item) => (
+                          <StatusBadge statusType={item.status || "unknown"} />
+                        ),
+                      },
+                      {
+                        key: "createdAt",
+                        header: "Created At",
+                        render: (item) => (
+                          <span>{getUSDateFromString(item.createdAt)}</span>
+                        ),
+                      },
+                      {
+                        key: "datasetName",
+                        header: "Dataset",
+                        render: (item) => item.datasetName,
+                      },
+                      {
+                        key: "model",
+                        header: "Model",
+                        render: (item) => (
+                          <ModelPill model={item.model || "unknown"} />
+                        ),
+                      },
+                      {
+                        key: "runCount",
+                        header: "Run Count",
+                        render: (item) => item.runCount || 0,
+                      },
+                    ]}
+                    onSelect={(item) => {
+                      router.push(`/prompts/${id}/experiments/${item.id}`);
+                    }}
+                  />
+                )}
+
+                <TableFooter
+                  currentPage={currentPage}
+                  pageSize={100}
+                  count={experiments.length}
+                  isCountLoading={false}
+                  onPageChange={function (newPageNumber: number): void {
+                    // throw new Error("Function not implemented.");
+                  }}
+                  onPageSizeChange={function (newPageSize: number): void {
+                    // throw new Error("Function not implemented.");
+                  }}
+                  pageSizeOptions={[25, 50, 100]}
+                />
+              </div>
             </div>
-          </div>
-        </div>
-      </div>
+          </TabPanel>
+          <TabPanel>
+            <div className="flex items-start relative h-[75vh]">
+              <div className="py-4 flex flex-col space-y-4 w-full h-full">
+                <div className="flex space-x-4">
+                  <div className="w-2/3">
+                    <PromptPlayground
+                      prompt={selectedPrompt?.helicone_template || ""}
+                      selectedInput={selectedInput}
+                      onSubmit={async (history, model) => {
+                        console.log("Submitted history:", history);
+                        console.log("Selected model:", model);
+                        await createSubversion(history, model);
+                      }}
+                      submitText="Test"
+                      initialModel={
+                        selectedPrompt?.model || MODEL_LIST[0].value
+                      }
+                    />
+                  </div>
+                  <div className="w-1/3">
+                    <div className="border border-gray-300 dark:border-gray-700 rounded-lg bg-[#F9FAFB]">
+                      <h2 className="text-lg font-semibold m-4">Versions</h2>
+                      <ScrollArea className="h-[50vh]">
+                        <div>
+                          {sortedPrompts?.map((prompt) => (
+                            <div
+                              key={prompt.id}
+                              className={`p-4 cursor-pointer border border-gray-200 dark:border-gray-700 ${
+                                selectedVersion ===
+                                `${prompt.major_version}.${prompt.minor_version}`
+                                  ? "bg-white dark:bg-gray-800"
+                                  : "bg-gray-50 dark:bg-gray-900"
+                              }`}
+                              onClick={() =>
+                                setSelectedVersion(
+                                  `${prompt.major_version}.${prompt.minor_version}`
+                                )
+                              }
+                            >
+                              <div className="flex justify-between items-center">
+                                <span className="font-medium text-lg">
+                                  V{prompt.major_version}.{prompt.minor_version}
+                                </span>
+                                <div className="flex items-center space-x-2">
+                                  {prompt.metadata?.isProduction === true ? (
+                                    <Badge
+                                      variant={"default"}
+                                      className="bg-[#A6E9C1] text-[#14532D] text-md font-medium rounded-lg px-4"
+                                    >
+                                      Prod
+                                    </Badge>
+                                  ) : (
+                                    <DropdownMenu>
+                                      <DropdownMenuTrigger asChild>
+                                        <button className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full">
+                                          <EllipsisHorizontalIcon className="h-6 w-6 text-gray-500" />
+                                        </button>
+                                      </DropdownMenuTrigger>
+                                      <DropdownMenuContent>
+                                        <DropdownMenuItem
+                                          onClick={() =>
+                                            promoteToProduction(prompt.id)
+                                          }
+                                        >
+                                          Promote to prod
+                                        </DropdownMenuItem>
+                                      </DropdownMenuContent>
+                                    </DropdownMenu>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="flex justify-between items-center mt-2">
+                                <div className="text-md text-gray-600 dark:text-gray-400">
+                                  {prompt.model}
+                                </div>
+                                <span className="text-xs text-gray-500">
+                                  {getTimeAgo(new Date(prompt.created_at))}
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </ScrollArea>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </TabPanel>
+          <TabPanel>
+            <div className="flex items-start relative h-[75vh]">
+              <div className="min-w-[25rem] w-1/3 py-4 pr-4 flex flex-col space-y-4 h-full">
+                <div className="flex flex-col w-full space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <p className="font-semibold text-lg text-black dark:text-white">
+                      Inputs
+                    </p>
+                  </div>
+                  <TextInput
+                    placeholder="Search by request id..."
+                    value={searchRequestId}
+                    onValueChange={(value) => setSearchRequestId(value)}
+                  />
+                </div>
+                <ul className="flex flex-col space-y-4 overflow-auto h-full">
+                  {inputs
+                    ?.filter((input) =>
+                      input.source_request.includes(searchRequestId)
+                    )
+                    .map((input) => (
+                      <li key={input.id}>
+                        <PromptPropertyCard
+                          isSelected={selectedInput?.id === input.id}
+                          onSelect={function (): void {
+                            if (selectedInput?.id === input.id) {
+                              setSelectedInput(undefined);
+                            } else {
+                              setSelectedInput(input);
+                            }
+                          }}
+                          requestId={input.source_request}
+                          createdAt={input.created_at}
+                          properties={input.inputs}
+                          autoInputs={input.auto_prompt_inputs}
+                          view={inputView}
+                        />
+                      </li>
+                    ))}
+                </ul>
+              </div>
+            </div>
+          </TabPanel>
+        </TabPanels>
+      </TabGroup>
     </div>
   );
 };

@@ -5700,6 +5700,59 @@
 				}
 			}
 		},
+		"/v1/prompt/version/{promptVersionId}/promote": {
+			"post": {
+				"operationId": "PromotePromptVersionToProduction",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_PromptVersionResult.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Prompt"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "promptVersionId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"previousProductionVersionId": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"previousProductionVersionId"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
 		"/v1/prompt/version/{promptVersionId}/inputs/query": {
 			"post": {
 				"operationId": "GetInputs",
