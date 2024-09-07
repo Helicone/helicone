@@ -55,7 +55,8 @@ routes = [
 	{ pattern = "predibase.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
 	{ pattern = "api.worker.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
 	{ pattern = "qstash.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
-  { pattern = "firecrawl.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
+	{ pattern = "firecrawl.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
+	{ pattern = "llmmapper.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
 
 	{ pattern = "oai.us.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
 	{ pattern = "anthropic.us.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
@@ -140,6 +141,7 @@ routes = [
 	{ pattern = "hyperbolic.staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	# { pattern = "groq.staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "fireworks.staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
+	{ pattern = "llmmapper.staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 
 	{ pattern = "oai.staging.eu.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "anthropic.staging.eu.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
