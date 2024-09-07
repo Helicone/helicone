@@ -56,6 +56,7 @@ routes = [
 	{ pattern = "api.worker.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
 	{ pattern = "qstash.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
 	{ pattern = "firecrawl.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
+	{ pattern = "llmmapper.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
 
 	{ pattern = "oai.us.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
 	{ pattern = "anthropic.us.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
