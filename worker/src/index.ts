@@ -162,6 +162,22 @@ function modifyEnvBasedOnPath(env: Env, request: RequestWrapper): Env {
           GATEWAY_TARGET: "https://api.together.xyz",
         };
       }
+    } else if (hostParts[0].includes("llmmapper")) {
+      if (isRootPath(url) && request.getMethod() === "GET") {
+        return {
+          ...env,
+          WORKER_DEFINED_REDIRECT_URL: "https://together.xyz",
+        };
+      } else {
+        if (url.pathname.startsWith("/oai2ant")) {
+          return {
+            ...env,
+            WORKER_TYPE: "GATEWAY_API",
+            GATEWAY_TARGET: "https://gateway.llmmapper.com",
+          };
+        }
+        throw new Error("Unknown path");
+      }
     } else if (hostParts[0].includes("openrouter")) {
       if (isRootPath(url) && request.getMethod() === "GET") {
         return {
