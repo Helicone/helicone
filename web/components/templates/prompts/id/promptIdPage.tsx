@@ -66,6 +66,7 @@ import ModelPill from "../../requestsV2/modelPill";
 import StatusBadge from "../../requestsV2/statusBadge";
 import PromptPropertyCard from "./promptPropertyCard";
 import TableFooter from "../../requestsV2/tableFooter";
+import { CheckIcon } from "@heroicons/react/24/solid";
 
 interface PromptIdPageProps {
   id: string;
@@ -653,7 +654,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                       }
                     />
                   </div>
-                  <div className="w-1/3">
+                  <div className="w-1/3 ">
                     <div className="border border-gray-300 dark:border-gray-700 rounded-lg bg-[#F9FAFB]">
                       <h2 className="text-lg font-semibold m-4">Versions</h2>
                       <ScrollArea className="h-[50vh]">
@@ -674,14 +675,18 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                               }
                             >
                               <div className="flex justify-between items-center">
-                                <span className="font-medium text-lg">
+                                <span className="font-medium text-lg flex items-center">
                                   V{prompt.major_version}.{prompt.minor_version}
+                                  {selectedVersion ===
+                                    `${prompt.major_version}.${prompt.minor_version}` && (
+                                    <CheckIcon className="h-5 w-5 text-gray-500 ml-2" />
+                                  )}
                                 </span>
                                 <div className="flex items-center space-x-2">
                                   {prompt.metadata?.isProduction === true ? (
                                     <Badge
                                       variant={"default"}
-                                      className="bg-[#A6E9C1] text-[#14532D] text-md font-medium rounded-lg px-4"
+                                      className="bg-[#A6E9C1] text-[#14532D] text-md font-medium rounded-lg px-4 hover:bg-[#A6E9C1] hover:text-[#14532D]"
                                     >
                                       Prod
                                     </Badge>
@@ -724,7 +729,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
             </div>
           </TabPanel>
           <TabPanel>
-            <div className="flex items-start relative h-[75vh]">
+            <div className="flex items-start relative h-[75vh] flex-row justify-between">
               <div className="min-w-[25rem] w-1/3 py-4 pr-4 flex flex-col space-y-4 h-full">
                 <div className="flex flex-col w-full space-y-2">
                   <div className="flex items-center space-x-2">
@@ -763,6 +768,76 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                       </li>
                     ))}
                 </ul>
+              </div>
+              <div className="w-1/3 pt-4">
+                <div className="border border-gray-300 dark:border-gray-700 rounded-lg bg-[#F9FAFB]">
+                  <h2 className="text-lg font-semibold m-4">Versions</h2>
+                  <ScrollArea className="h-[50vh]">
+                    <div>
+                      {sortedPrompts?.map((prompt) => (
+                        <div
+                          key={prompt.id}
+                          className={`p-4 cursor-pointer border border-gray-200 dark:border-gray-700 ${
+                            selectedVersion ===
+                            `${prompt.major_version}.${prompt.minor_version}`
+                              ? "bg-white dark:bg-gray-800"
+                              : "bg-gray-50 dark:bg-gray-900"
+                          }`}
+                          onClick={() =>
+                            setSelectedVersion(
+                              `${prompt.major_version}.${prompt.minor_version}`
+                            )
+                          }
+                        >
+                          <div className="flex justify-between items-center">
+                            <span className="font-medium text-lg flex items-center">
+                              V{prompt.major_version}.{prompt.minor_version}
+                              {selectedVersion ===
+                                `${prompt.major_version}.${prompt.minor_version}` && (
+                                <CheckIcon className="h-5 w-5 text-gray-500 ml-2" />
+                              )}
+                            </span>
+                            <div className="flex items-center space-x-2">
+                              {prompt.metadata?.isProduction === true ? (
+                                <Badge
+                                  variant={"default"}
+                                  className="bg-[#A6E9C1] text-[#14532D] text-md font-medium rounded-lg px-4 hover:bg-[#A6E9C1] hover:text-[#14532D]"
+                                >
+                                  Prod
+                                </Badge>
+                              ) : (
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <button className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full">
+                                      <EllipsisHorizontalIcon className="h-6 w-6 text-gray-500" />
+                                    </button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent>
+                                    <DropdownMenuItem
+                                      onClick={() =>
+                                        promoteToProduction(prompt.id)
+                                      }
+                                    >
+                                      Promote to prod
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex justify-between items-center mt-2">
+                            <div className="text-md text-gray-600 dark:text-gray-400">
+                              {prompt.model}
+                            </div>
+                            <span className="text-xs text-gray-500">
+                              {getTimeAgo(new Date(prompt.created_at))}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </div>
               </div>
             </div>
           </TabPanel>
