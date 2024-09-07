@@ -95,6 +95,8 @@ interface PromptVersionResultBase {
 
 export interface PromptVersionResult extends PromptVersionResultBase {
   helicone_template: string;
+  created_at: string;
+  metadata: Record<string, any>;
 }
 
 export interface PromptVersionResultCompiled extends PromptVersionResultBase {
@@ -103,6 +105,7 @@ export interface PromptVersionResultCompiled extends PromptVersionResultBase {
 
 export interface PromptCreateSubversionParams {
   newHeliconeTemplate: any;
+  isMajorVersion?: boolean;
 }
 
 export interface PromptInputRecord {

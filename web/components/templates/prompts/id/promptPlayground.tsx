@@ -3,13 +3,17 @@ import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { Message } from "../../requests/chatComponent/types";
 import ChatRow from "../../playground/chatRow";
-import { RenderImageWithPrettyInputKeys } from "./promptIdPage";
-import {
-  ChatTopBar,
-  PROMPT_MODES,
-} from "../../requests/chatComponent/chatTopBar";
 import { JsonView } from "../../requests/chatComponent/jsonView";
 import { MessageRenderer } from "../../requests/chatComponent/MessageRenderer";
+import { PlaygroundChatTopBar, PROMPT_MODES } from "./playgroundChatTopBar";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { MODEL_LIST } from "../../playground/new/modelList";
 
 type Input = {
   id: string;
@@ -32,8 +36,9 @@ type PromptObject = {
 interface PromptPlaygroundProps {
   prompt: string | PromptObject;
   selectedInput: Input | undefined;
-  onSubmit?: (history: Message[]) => void;
+  onSubmit?: (history: Message[], model: string) => void;
   submitText: string;
+  initialModel?: string;
 }
 
 const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
@@ -41,6 +46,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
   selectedInput,
   onSubmit,
   submitText,
+  initialModel = MODEL_LIST[0].value,
 }) => {
   const parsePromptToMessages = (
     promptInput: string | PromptObject
@@ -66,12 +72,14 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
     }));
   };
   const [mode, setMode] = useState<(typeof PROMPT_MODES)[number]>("Pretty");
+  const [isEditMode, setIsEditMode] = useState(true);
   const [currentChat, setCurrentChat] = useState<Message[]>(() =>
     parsePromptToMessages(prompt)
   );
   const [expandedChildren, setExpandedChildren] = useState<
     Record<string, boolean>
   >({});
+  const [selectedModel, setSelectedModel] = useState(initialModel);
 
   useEffect(() => {
     setCurrentChat(parsePromptToMessages(prompt));
@@ -115,17 +123,6 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
     );
   };
 
-  const chatTopBarProps = {
-    allExpanded,
-    toggleAllExpanded,
-    requestMessages: currentChat,
-    requestId: "playground",
-    model: "playground",
-    setOpen: () => {},
-    mode,
-    setMode,
-  };
-
   const renderMessages = () => {
     switch (mode) {
       case "Pretty":
@@ -134,11 +131,12 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
             {currentChat.map((message, index) => (
               <li
                 key={message.id}
-                className=" border-gray-300 dark:border-gray-700 last:border-b-0"
+                className="border-gray-300 dark:border-gray-700 last:border-b-0"
               >
                 <ChatRow
                   message={message}
                   index={index}
+                  editMode={isEditMode}
                   callback={(userText, role) =>
                     handleUpdateMessage(index, userText, role)
                   }
@@ -170,23 +168,42 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
   };
 
   return (
-    <div className="flex flex-col space-y-4 ">
+    <div className="flex flex-col space-y-4">
       <div className="w-full border border-gray-300 dark:border-gray-700 rounded-md divide-y divide-gray-300 dark:divide-gray-700 h-full">
-        <ChatTopBar {...chatTopBarProps} />
+        <PlaygroundChatTopBar
+          mode={mode}
+          setMode={setMode}
+          isEditMode={isEditMode}
+          setIsEditMode={setIsEditMode}
+        />
 
         <div className="flex-grow overflow-auto">{renderMessages()}</div>
 
-        {/* Add message button and Submit */}
+        {/* Add message button, Model picker, and Submit */}
         <div className="flex justify-between items-center p-4 border-t border-gray-300 dark:border-gray-700 bg-white dark:bg-black rounded-b-lg">
           <div className="w-full flex space-x-2">
-            <Button onClick={handleAddMessage} variant="outline" size="sm">
-              <PlusIcon className="h-4 w-4 mr-2" />
-              Add Message
-            </Button>
+            {isEditMode && (
+              <Button onClick={handleAddMessage} variant="outline" size="sm">
+                <PlusIcon className="h-4 w-4 mr-2" />
+                Add Message
+              </Button>
+            )}
           </div>
-          <div className="flex space-x-4 w-full justify-end">
+          <div className="flex space-x-4 w-full justify-end items-center">
+            <Select value={selectedModel} onValueChange={setSelectedModel}>
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="Select a model" />
+              </SelectTrigger>
+              <SelectContent>
+                {MODEL_LIST.map((model) => (
+                  <SelectItem key={model.value} value={model.value}>
+                    {model.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <Button
-              onClick={() => onSubmit && onSubmit(currentChat)}
+              onClick={() => onSubmit && onSubmit(currentChat, selectedModel)}
               variant="default"
               size="sm"
             >
@@ -195,17 +212,6 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
             </Button>
           </div>
         </div>
-      </div>
-
-      {/* Preview section */}
-      <div className="w-full">
-        <h3 className="text-lg font-semibold mb-2">Preview</h3>
-        {selectedInput && (
-          <RenderImageWithPrettyInputKeys
-            text={typeof prompt === "string" ? prompt : JSON.stringify(prompt)}
-            selectedProperties={selectedInput.inputs}
-          />
-        )}
       </div>
     </div>
   );

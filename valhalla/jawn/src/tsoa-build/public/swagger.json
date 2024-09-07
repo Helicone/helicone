@@ -2373,6 +2373,12 @@
 					}
 				]
 			},
+			"Record_string.any_": {
+				"properties": {},
+				"additionalProperties": {},
+				"type": "object",
+				"description": "Construct a type with a set of properties K of type T"
+			},
 			"PromptVersionResult": {
 				"properties": {
 					"id": {
@@ -2394,6 +2400,12 @@
 					},
 					"helicone_template": {
 						"type": "string"
+					},
+					"created_at": {
+						"type": "string"
+					},
+					"metadata": {
+						"$ref": "#/components/schemas/Record_string.any_"
 					}
 				},
 				"required": [
@@ -2402,7 +2414,9 @@
 					"major_version",
 					"prompt_v2",
 					"model",
-					"helicone_template"
+					"helicone_template",
+					"created_at",
+					"metadata"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -2439,7 +2453,10 @@
 			},
 			"PromptCreateSubversionParams": {
 				"properties": {
-					"newHeliconeTemplate": {}
+					"newHeliconeTemplate": {},
+					"isMajorVersion": {
+						"type": "boolean"
+					}
 				},
 				"required": [
 					"newHeliconeTemplate"
@@ -2704,12 +2721,6 @@
 				],
 				"type": "object",
 				"additionalProperties": false
-			},
-			"Record_string.any_": {
-				"properties": {},
-				"additionalProperties": {},
-				"type": "object",
-				"description": "Construct a type with a set of properties K of type T"
 			},
 			"IntegrationCreateParams": {
 				"properties": {

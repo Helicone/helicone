@@ -841,6 +841,10 @@ export interface components {
       error: null;
     };
     "Result_CreatePromptResponse.string_": components["schemas"]["ResultSuccess_CreatePromptResponse_"] | components["schemas"]["ResultError_string_"];
+    /** @description Construct a type with a set of properties K of type T */
+    "Record_string.any_": {
+      [key: string]: unknown;
+    };
     PromptVersionResult: {
       id: string;
       /** Format: double */
@@ -850,6 +854,8 @@ export interface components {
       prompt_v2: string;
       model: string;
       helicone_template: string;
+      created_at: string;
+      metadata: components["schemas"]["Record_string.any_"];
     };
     ResultSuccess_PromptVersionResult_: {
       data: components["schemas"]["PromptVersionResult"];
@@ -859,6 +865,7 @@ export interface components {
     "Result_PromptVersionResult.string_": components["schemas"]["ResultSuccess_PromptVersionResult_"] | components["schemas"]["ResultError_string_"];
     PromptCreateSubversionParams: {
       newHeliconeTemplate: unknown;
+      isMajorVersion?: boolean;
     };
     PromptInputRecord: {
       id: string;
@@ -922,10 +929,6 @@ export interface components {
     PromptVersiosQueryParamsCompiled: {
       filter?: components["schemas"]["PromptVersionsFilterNode"];
       inputs: components["schemas"]["Record_string.string_"];
-    };
-    /** @description Construct a type with a set of properties K of type T */
-    "Record_string.any_": {
-      [key: string]: unknown;
     };
     IntegrationCreateParams: {
       integration_name: string;

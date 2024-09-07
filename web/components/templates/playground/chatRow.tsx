@@ -29,6 +29,7 @@ interface ChatRowProps {
     image: File | string | null
   ) => void;
   deleteRow: (rowId: string) => void;
+  editMode?: boolean;
 }
 
 export const hasImage = (content: string | any[] | null) => {
@@ -171,7 +172,7 @@ export const RenderWithPrettyInputKeys = (props: {
 };
 
 const ChatRow = (props: ChatRowProps) => {
-  const { index, message, callback, deleteRow } = props;
+  const { index, message, callback, deleteRow, editMode } = props;
 
   // on the initial render, if the current message is empty, set the mode to editing
   useEffect(() => {
@@ -415,26 +416,19 @@ const ChatRow = (props: ChatRowProps) => {
               }}
             />
             <div className="flex items-center space-x-2">
-              <Tooltip title="Edit" placement="top">
-                <button
-                  onClick={() => {
-                    if (isEditing) {
-                      setMinimize(false);
-                      setIsEditing(false);
-                    } else {
-                      setIsEditing(true);
-                    }
-                  }}
-                  className="text-gray-500 font-semibold"
-                >
-                  <PencilSquareIcon className="h-5 w-5" />
-                </button>
-              </Tooltip>
+              {!isEditing && !editMode && (
+                <Tooltip title="Edit" placement="top">
+                  <button
+                    onClick={() => setIsEditing(true)}
+                    className="text-gray-500 font-semibold"
+                  >
+                    <PencilSquareIcon className="h-5 w-5" />
+                  </button>
+                </Tooltip>
+              )}
               <Tooltip title={minimize ? "Expand" : "Shrink"} placement="top">
                 <button
-                  onClick={() => {
-                    setMinimize(!minimize);
-                  }}
+                  onClick={() => setMinimize(!minimize)}
                   className="text-gray-500 font-semibold"
                 >
                   {minimize ? (
@@ -455,16 +449,16 @@ const ChatRow = (props: ChatRowProps) => {
                   <ClipboardIcon className="h-5 w-5" />
                 </button>
               </Tooltip>
-              <Tooltip title="Delete" placement="top">
-                <button
-                  onClick={() => {
-                    deleteRow(currentMessage.id);
-                  }}
-                  className="text-red-500 font-semibold"
-                >
-                  <TrashIcon className="h-5 w-5" />
-                </button>
-              </Tooltip>
+              {!isEditing && !editMode && (
+                <Tooltip title="Delete" placement="top">
+                  <button
+                    onClick={() => deleteRow(currentMessage.id)}
+                    className="text-red-500 font-semibold"
+                  >
+                    <TrashIcon className="h-5 w-5" />
+                  </button>
+                </Tooltip>
+              )}
             </div>
           </div>
           <div>

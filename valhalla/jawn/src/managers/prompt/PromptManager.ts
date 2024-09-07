@@ -27,6 +27,17 @@ export class PromptManager extends BaseManager {
       return err("Helicone template too large");
     }
 
+    const isMajorVersion = params.isMajorVersion || false;
+
+    // Parse the newHeliconeTemplate to extract the model
+    let model = "";
+    try {
+      const templateObj = JSON.parse(params.newHeliconeTemplate);
+      model = templateObj.model || "";
+    } catch (error) {
+      console.error("Error parsing newHeliconeTemplate:", error);
+    }
+
     const result = await dbExecute<{
       id: string;
       minor_version: number;
@@ -34,6 +45,8 @@ export class PromptManager extends BaseManager {
       helicone_template: string;
       prompt_v2: string;
       model: string;
+      created_at: string;
+      metadata: Record<string, any>;
     }>(
       `
     WITH parent_prompt_version AS (
@@ -45,13 +58,16 @@ export class PromptManager extends BaseManager {
         $2, 
         $3,
         $4,
-        ppv.major_version,
-        (SELECT minor_version + 1
-         FROM prompts_versions pv1
-         WHERE pv1.major_version = ppv.major_version
-         AND pv1.prompt_v2 = ppv.prompt_v2
-         ORDER BY pv1.major_version DESC, pv1.minor_version DESC
-         LIMIT 1)
+        CASE WHEN $5 THEN ppv.major_version + 1 ELSE ppv.major_version END,
+        CASE 
+          WHEN $5 THEN 0
+          ELSE (SELECT minor_version + 1
+                FROM prompts_versions pv1
+                WHERE pv1.major_version = ppv.major_version
+                AND pv1.prompt_v2 = ppv.prompt_v2
+                ORDER BY pv1.major_version DESC, pv1.minor_version DESC
+                LIMIT 1)
+        END
     FROM parent_prompt_version ppv
     RETURNING 
         id,
@@ -65,14 +81,17 @@ export class PromptManager extends BaseManager {
       [
         parentPromptVersionId,
         params.newHeliconeTemplate,
-        "",
+        model,
         this.authParams.organizationId,
+        isMajorVersion, // New parameter for determining major/minor version
       ]
     );
 
     console.log("result", result);
     console.log("helicone template", params.newHeliconeTemplate);
     console.log("parentPromptVersionId", parentPromptVersionId);
+    console.log("model", model);
+    console.log("isMajorVersion", isMajorVersion); // Log whether it's a major version
     return resultMap(result, (data) => data[0]);
   }
 
@@ -91,6 +110,8 @@ export class PromptManager extends BaseManager {
       helicone_template: string;
       prompt_v2: string;
       model: string;
+      created_at: string;
+      metadata: Record<string, any>;
     }>(
       `
     SELECT 
@@ -99,7 +120,9 @@ export class PromptManager extends BaseManager {
       major_version,
       helicone_template,
       prompt_v2,
-      model
+      model,
+      prompts_versions.created_at,
+      metadata
     FROM prompts_versions
     left join prompt_v2 on prompt_v2.id = prompts_versions.prompt_v2
     WHERE prompt_v2.organization = $1
@@ -192,7 +215,7 @@ export class PromptManager extends BaseManager {
       user_defined_id,
       description,
       pretty_name,
-      created_at,
+      prompt_v2.created_at,
       (SELECT major_version FROM prompts_versions pv WHERE pv.prompt_v2 = prompt_v2.id ORDER BY major_version DESC LIMIT 1) as major_version
     FROM prompt_v2
     WHERE prompt_v2.organization = $1
@@ -266,6 +289,8 @@ export class PromptManager extends BaseManager {
       helicone_template: string;
       prompt_v2: string;
       model: string;
+      created_at: string;
+      metadata: Record<string, any>;
     }>(
       `
     SELECT 
@@ -274,7 +299,9 @@ export class PromptManager extends BaseManager {
       major_version,
       helicone_template,
       prompt_v2,
-      model
+      model,
+      prompts_versions.created_at,
+      metadata
     FROM prompts_versions
     WHERE prompts_versions.organization = $1
     AND prompts_versions.id = $2
