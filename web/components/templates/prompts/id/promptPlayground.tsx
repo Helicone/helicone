@@ -65,7 +65,6 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
     }
 
     const promptObject = promptInput as PromptObject;
-    console.log("promptObj", promptObject);
     return promptObject.messages.map((msg, index) => ({
       id: `msg-${index}`,
       role: msg.role as "user" | "assistant" | "system",
