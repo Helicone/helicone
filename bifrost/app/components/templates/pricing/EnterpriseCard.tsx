@@ -17,7 +17,6 @@ const EnterpriseCard: React.FC = () => {
             <h4 className="text-[18px]">
               Everything to <b>kickstart your AI project</b>.
             </h4>
-            <h5 className="font-light">Everthing in Scale, plus:</h5>
           </Col>
         </Col>
         <Col className="gap-[16px]">
@@ -29,10 +28,7 @@ const EnterpriseCard: React.FC = () => {
             title="On-prem support"
             description="Custom HELM charts and work with SREs"
           />
-          <FeatureItem
-            title="High availability and scaling"
-            description="For larger scale deployments or high availability requirements."
-          />
+          <FeatureItem title="High availability and scaling" description="" />
         </Col>
         <button className="bg-[#1E293B] text-white py-[12px] rounded-[4px] mt-[8px] text-[16px] font-semibold">
           Start for free

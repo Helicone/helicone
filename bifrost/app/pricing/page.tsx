@@ -4,6 +4,7 @@ import { Fragment, useState } from "react";
 import {
   AcademicCapIcon,
   CheckCircleIcon,
+  CheckIcon,
   ChevronDownIcon,
   ChevronUpIcon,
   CodeBracketIcon,
@@ -22,6 +23,7 @@ import FeatureTable from "@/components/templates/pricing/featureTable";
 import ScaleCard from "../components/templates/pricing/ScaleCard";
 import FreeCard from "../components/templates/pricing/FreeCard";
 import EnterpriseCard from "../components/templates/pricing/EnterpriseCard";
+import PricingComparisonTable from "../components/templates/pricing/PricingComparisonTable";
 
 import { renderLogCost } from "@/app/utils/pricingUtils";
 import { Col } from "@/components/common/col";
@@ -34,6 +36,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
+import { LockClosedIcon, LockOpenIcon } from "@heroicons/react/24/outline";
 
 const Slider = ({
   min,
@@ -159,19 +163,19 @@ export default function Example() {
               Get a demo
             </Link>
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 py-16 max-w-[500px]">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 py-16 max-w-[500px] lg:max-w-none lg:w-full">
             <FreeCard />
             <ScaleCard />
             <EnterpriseCard />
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-3 border rounded-lg max-w-[500px] bg-[#F9F9F9]">
+          <div className="grid grid-cols-1 lg:grid-cols-3 border rounded-lg max-w-[500px] lg:max-w-none lg:w-full bg-[#F9F9F9]">
             <div className=" h-[250px] w-full ">
               <Col className="h-full">
-                <Col className=" py-[36px] px-[24px] justify-between h-full">
+                <Col className=" py-[36px] px-[24px]  gap-[24px]  h-full">
+                  <div className="bg-blue-100 h-[43px] w-[175px]">LOGO</div>
                   <h1>
                     <b>386 hours</b> saved by using cached responses.
                   </h1>
-                  <div className="bg-blue-100 h-[43px] w-[175px]">LOGO</div>
                 </Col>
                 <Row className=" w-full h-[72px] px-[24px] items-center justify-between border-t">
                   <span>Developer</span>
@@ -179,13 +183,13 @@ export default function Example() {
                 </Row>
               </Col>
             </div>
-            <div className="bg-white h-[300px] w-full rounded-lg  border-[#0CA5EA] border-2">
+            <div className="bg-white h-[250px] w-full rounded-lg  border-[#0CA5EA] border-2">
               <Col className="h-full">
-                <Col className=" py-[36px] px-[24px] justify-between h-full">
+                <Col className=" py-[36px] px-[24px] gap-[24px] h-full">
+                  <div className="bg-blue-100 h-[43px] w-[175px]">LOGO</div>
                   <h1>
                     <b>2 days</b> saved combing through requests.
                   </h1>
-                  <div className="bg-blue-100 h-[43px] w-[175px]">LOGO</div>
                 </Col>
                 <Row className=" w-full h-[72px] px-[24px] items-center justify-between border-t">
                   <span>Scale</span>
@@ -195,13 +199,13 @@ export default function Example() {
                 </Row>
               </Col>
             </div>
-            <div className="h-[300px] w-full">
+            <div className="h-[250px] w-full">
               <Col className="h-full">
-                <Col className=" py-[36px] px-[24px] justify-between h-full">
+                <Col className=" py-[36px] px-[24px] gap-[24px] h-full">
+                  <div className="bg-blue-100 h-[43px] w-[175px]">LOGO</div>
                   <h1>
                     <b>Critical bug detected</b>, saved agent runtime by 30%.
                   </h1>
-                  <div className="bg-blue-100 h-[43px] w-[175px]">LOGO</div>
                 </Col>
                 <Row className=" w-full h-[72px] px-[24px] items-center justify-between border-t">
                   <span>Enterprise</span>
@@ -211,58 +215,8 @@ export default function Example() {
             </div>
           </div>
 
-          <div className="flex flex-col max-w-6xl mx-auto space-y-8 py-16 w-full">
-            <h2 className="text-lg sm:text-2xl font-bold tracking-tight max-w-4xl pt-8">
-              Compare plans
-            </h2>
+          <PricingComparisonTable />
 
-            <Tabs defaultValue="team" className="w-full">
-              <Row className="justify-between items-center">
-                <TabsList>
-                  <TabsTrigger value="developer">Developer</TabsTrigger>
-                  <TabsTrigger value="team">Team</TabsTrigger>
-                </TabsList>
-                {/* Add your content here */}
-                <div className="text-sm text-gray-500">
-                  Additional information or controls
-                </div>
-              </Row>
-              <TabsContent value="developer">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Developer</CardTitle>
-                    <CardDescription>
-                      For most startups under two years old, we offer 50% off
-                      for the first year.
-                    </CardDescription>
-                  </CardHeader>
-                </Card>
-              </TabsContent>
-              <TabsContent value="team">
-                <div className="w-full overflow-x-auto">
-                  <div className="min-w-[800px]">
-                    <Col className="gap-4 rounded-lg border">
-                      <Row className="justify-between p-[24px]">
-                        <h1 className="text-2xl font-bold">Team plan</h1>
-                        <Row className="items-center gap-[8px]">
-                          <Row className="text-[18px] text-black font-semibold line-through">
-                            $50/mo
-                          </Row>
-                          <Row className="text-[36px] font-extrabold text-[#0CA5EA] items-center">
-                            <Row>
-                              <span className="text-[24px] pt-[7px]">$</span>40
-                            </Row>
-
-                            <span className="text-[18px]">/mo</span>
-                          </Row>
-                        </Row>
-                      </Row>
-                    </Col>
-                  </div>
-                </div>
-              </TabsContent>
-            </Tabs>
-          </div>
           <div className="flex flex-col max-w-6xl mx-auto space-y-8 py-16 w-full">
             <h2 className="text-lg sm:text-2xl font-bold tracking-tight max-w-4xl pt-8">
               Available <span className=" text-sky-500">discounts</span>

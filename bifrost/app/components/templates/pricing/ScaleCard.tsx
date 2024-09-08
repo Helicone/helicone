@@ -11,7 +11,7 @@ const ScaleCard: React.FC = () => {
         <Col className="items-center text-[#0CA5EA]">
           <h3 className="text-[14px] font-extrabold ">Recommended</h3>
           <h4 className="text-[12px] whitespace-nowrap ">
-            for <u>serious</u> AI developers
+            for <u>production</u> AI applications
           </h4>
         </Col>
       </Card>
