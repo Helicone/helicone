@@ -1,3 +1,4 @@
+import { clsx } from "@/utils/clsx";
 import { CheckIcon, XMarkIcon } from "@heroicons/react/20/solid";
 
 const products = [
@@ -29,14 +30,10 @@ export default function ProductComparisonTable() {
           <thead>
             <tr className="">
               <th className="p-3 text-left font-semibold"></th>
-              {products.map((product, index) => (
+              {products.map((product) => (
                 <th
                   key={product.name}
-                  className={`p-3 text-center font-semibold ${
-                    index === products.length - 1
-                      ? "bg-blue-50 border-2 border-blue-200"
-                      : ""
-                  }`}
+                  className="p-3 text-center font-semibold last:bg-white last:border-2 last:border-blue-200 last:border-b-0"
                 >
                   <img
                     src={product.logo}
@@ -58,11 +55,11 @@ export default function ProductComparisonTable() {
                 {feature.support.map((supported, i) => (
                   <td
                     key={`${feature.name}-${products[i].name}`}
-                    className={`p-3 text-center ${
-                      i === products.length - 1
-                        ? "bg-blue-50 border-2 border-blue-200"
-                        : ""
-                    }`}
+                    className={clsx(
+                      "p-3 text-center last:bg-white last:border-r-2 last:border-r-blue-200 last:border-l-2 last:border-l-blue-200",
+                      index === featureMatrix.length - 1 &&
+                        "last:border-b-2 last:border-b-blue-200 last:rounded-br-lg"
+                    )}
                   >
                     {supported ? (
                       <CheckIcon className="w-6 h-6 text-green-500 mx-auto" />
