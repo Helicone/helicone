@@ -23,21 +23,26 @@ export function mapGeminiPro(
   request: HeliconeRequest,
   model: string
 ): LlmSchema {
-  const requestBody = request.request_body;
-  const generateConfig = requestBody?.generation_config;
-  const messages = Array.isArray(requestBody.contents)
-    ? requestBody.contents
-    : [requestBody.contents];
+  const requestBody = request.request_body || {};
+  const generateConfig = requestBody.generation_config || {};
+  const contents = requestBody.contents;
+  const messages = Array.isArray(contents)
+    ? contents
+    : [contents].filter(Boolean);
+
   const requestMessages = messages
     .map((content: any) => {
-      const partsArray = Array.isArray(content.parts)
-        ? content.parts
-        : [content.parts];
+      if (!content) return [];
 
-      const textParts = partsArray?.filter((part: any) => part.text);
+      const parts = Array.isArray(content.parts)
+        ? content.parts
+        : [content.parts].filter(Boolean);
+      const textParts = parts.filter(
+        (part: any) => part && typeof part.text === "string"
+      );
 
       return textParts.map((part: any) => ({
-        role: content.role ?? "user",
+        role: content.role || "user",
         content: part.text,
       }));
     })
@@ -45,54 +50,68 @@ export function mapGeminiPro(
 
   const responseBody = Array.isArray(request.response_body)
     ? request.response_body
-    : [request.response_body];
+    : [request.response_body].filter(Boolean);
 
   const combinedContent = responseBody
-    .map((response: any) =>
-      response.candidates
-        ?.map((candidate: any) => {
+    .map((response: any) => {
+      if (!response || !Array.isArray(response.candidates)) return "";
+
+      return response.candidates
+        .map((candidate: any) => {
+          if (!candidate) return "";
+
           const contents = Array.isArray(candidate.content)
             ? candidate.content
-            : [candidate.content];
+            : [candidate.content].filter(Boolean);
 
           return contents
             .map((content: any) => {
-              const partsArray = Array.isArray(content?.parts)
-                ? content.parts
-                : [content?.parts];
+              if (!content) return "";
 
-              return partsArray
-                .map((part: any) => part?.text || "")
-                .filter((text: string) => text)
+              const parts = Array.isArray(content.parts)
+                ? content.parts
+                : [content.parts].filter(Boolean);
+
+              return parts
+                .map((part: any) =>
+                  part && typeof part.text === "string" ? part.text : ""
+                )
+                .filter(Boolean)
                 .join("");
             })
             .join("");
         })
-        .join("")
-    )
+        .join("");
+    })
     .join("");
 
   const functionCall = responseBody
-    .map((response: any) =>
-      response.candidates
-        ?.map((candidate: any) => {
+    .map((response: any) => {
+      if (!response || !Array.isArray(response.candidates)) return null;
+
+      return response.candidates
+        .map((candidate: any) => {
+          if (!candidate) return null;
+
           const contents = Array.isArray(candidate.content)
             ? candidate.content
-            : [candidate.content];
+            : [candidate.content].filter(Boolean);
 
           return contents
             .map((content: any) => {
-              const partsArray = Array.isArray(content?.parts)
-                ? content.parts
-                : [content?.parts];
+              if (!content) return null;
 
-              return partsArray.find((part: any) => part?.functionCall)
+              const parts = Array.isArray(content.parts)
+                ? content.parts
+                : [content.parts].filter(Boolean);
+
+              return parts.find((part: any) => part && part.functionCall)
                 ?.functionCall;
             })
             .find((funcCall: any) => funcCall);
         })
-        .find((funcCall: any) => funcCall)
-    )
+        .find((funcCall: any) => funcCall);
+    })
     .find((funcCall: any) => funcCall);
 
   const firstContent = responseBody[0]?.candidates?.[0]?.content;
@@ -153,12 +172,12 @@ export function mapGeminiProJawn(
 ): components["schemas"]["LlmSchema"] {
   const requestBody = request.request_body;
   const generateConfig = requestBody?.generation_config;
-  const messages = Array.isArray(requestBody.contents)
+  const messages = Array.isArray(requestBody?.contents)
     ? requestBody.contents
     : [requestBody.contents];
   const requestMessages = messages
     .map((content: any) => {
-      const partsArray = Array.isArray(content.parts)
+      const partsArray = Array.isArray(content?.parts)
         ? content.parts
         : [content.parts];
 
