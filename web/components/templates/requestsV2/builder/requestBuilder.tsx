@@ -158,7 +158,6 @@ const getModelFromPath = (path: string) => {
 const getRequestBuilder = (request: HeliconeRequest) => {
   let model =
     request.request_model || getModelFromPath(request.target_url) || "";
-  console.log("isAssistantRequest", isAssistantRequest(request));
   const builderType = getBuilderType(
     model,
     request.provider,
@@ -167,7 +166,6 @@ const getRequestBuilder = (request: HeliconeRequest) => {
     isAssistantRequest(request)
   );
   let builder = builders[builderType];
-  console.log("builderType", builderType);
   return new builder(request, model);
 };
 
