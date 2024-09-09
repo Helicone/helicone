@@ -131,6 +131,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
               >
                 <ChatRow
                   message={message}
+                  promptMode={true}
                   index={index}
                   editMode={isEditMode}
                   callback={(userText, role) =>
