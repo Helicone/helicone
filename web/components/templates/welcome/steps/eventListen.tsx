@@ -22,6 +22,7 @@ const EventListen = (props: EventListenProps) => {
   const [openDemo, setOpenDemo] = useLocalStorage("openDemo", false);
   const [removedDemo, setRemovedDemo] = useLocalStorage("removedDemo", false);
   const [showWarning, setShowWarning] = useState(false);
+  const [showSupportModal, setShowSupportModal] = useState(false);
 
   const nextStepHandler = async () => {
     nextStep();
@@ -165,10 +166,11 @@ const EventListen = (props: EventListenProps) => {
             variant="primary"
             size="sm"
             title="Ask Support"
-            onClick={openSupportModal}
+            onClick={() => setShowSupportModal(true)}
           />
         </div>
       )}
+      {showSupportModal && openSupportModal()}
       <ThemedBubbleModal
         open={openDemo}
         setOpen={setOpenDemo}

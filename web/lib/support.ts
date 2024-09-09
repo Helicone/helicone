@@ -1,12 +1,8 @@
-import React from 'react';
-import { useState } from 'react';
 import ThemedModal from '../components/shared/themed/themedModal';
 
-export const SupportModal: React.FC = () => {
-  const [isOpen, setIsOpen] = useState(true);
-
+export const SupportModal = () => {
   return (
-    <ThemedModal open={isOpen} setOpen={setIsOpen}>
+    <ThemedModal open={true} setOpen={() => {}}>
       <div className="flex flex-col space-y-4 w-[400px]">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Need Help?</h2>
         <p className="text-sm text-gray-600 dark:text-gray-300">
@@ -32,5 +28,5 @@ export const SupportModal: React.FC = () => {
 };
 
 export const openSupportModal = () => {
-  return () => <SupportModal />;
+  return <SupportModal />;
 };
