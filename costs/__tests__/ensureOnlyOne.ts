@@ -660,6 +660,7 @@ WHEN (request_response_rmt.model ILIKE 'openai/gpt-3.5-turbo-0125') THEN 500 * r
 WHEN (request_response_rmt.model ILIKE 'openai/gpt-3.5-turbo-0301') THEN 1000 * request_response_rmt.prompt_tokens + 2000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'openai/gpt-4') THEN 30000 * request_response_rmt.prompt_tokens + 60000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'openai/gpt-4-0314') THEN 30000 * request_response_rmt.prompt_tokens + 60000 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model ILIKE 'openai/gpt-4o-mini') THEN 150 * request_response_rmt.prompt_tokens + 600 * request_response_rmt.completion_tokens
   ELSE 0
 END
 )
