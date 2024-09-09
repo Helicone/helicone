@@ -67,6 +67,7 @@ export const getBuilderType = (
   if (
     provider === "TOGETHER" ||
     (provider as any) === "TOGETHERAI" ||
+    path?.includes("oai2ant") ||
     model == "gpt-4-vision-preview" ||
     model == "gpt-4-1106-vision-preview"
   ) {
