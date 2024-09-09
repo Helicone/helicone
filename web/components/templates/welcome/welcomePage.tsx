@@ -85,7 +85,7 @@ const WelcomePageV2 = (props: WelcomePageV2Props) => {
         await jawn.POST("/v1/organization/onboard", {
           body: {
             userId: userId,
-          },
+          } as { userId: string },
         });
         router.push("/dashboard");
       }}
