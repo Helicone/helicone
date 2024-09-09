@@ -23,7 +23,6 @@ import ThemedTabs from "../../shared/themed/themedTabs";
 import useSearchParams from "../../shared/utils/useSearchParams";
 import AuthHeader from "../../shared/authHeader";
 import HcBadge from "../../ui/hcBadge";
-import { hpf, hpstatic } from "@helicone/prompts";
 
 interface PromptsPageProps {
   defaultIndex: number;

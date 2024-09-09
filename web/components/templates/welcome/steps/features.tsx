@@ -2,7 +2,6 @@ import { TabGroup, TabList, Tab, TabPanels, TabPanel } from "@tremor/react";
 import HcButton from "../../../ui/hcButton";
 import { DiffHighlight } from "../diffHighlight";
 import Link from "next/link";
-import { hpf, hpstatic } from "@helicone/prompts";
 
 interface FeaturesProps {
   apiKey?: string;
