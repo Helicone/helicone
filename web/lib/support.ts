@@ -1,7 +1,8 @@
+import React from 'react';
 import { useState } from 'react';
 import ThemedModal from '../components/shared/themed/themedModal';
 
-function SupportModal() {
+export const SupportModal: React.FC = () => {
   const [isOpen, setIsOpen] = useState(true);
 
   return (
@@ -28,6 +29,8 @@ function SupportModal() {
       </div>
     </ThemedModal>
   );
-}
+};
 
-export const openSupportModal = () => SupportModal;
+export const openSupportModal = () => {
+  return () => <SupportModal />;
+};
