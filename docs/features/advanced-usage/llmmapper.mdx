@@ -1,0 +1,75 @@
+---
+title: "LLMMapper"
+sidebarTitle: "LLMMapper"
+description: "Use OpenAI SDK with Anthropic's Claude models and integrate with Helicone for advanced logging and monitoring."
+"twitter:title": "LLMMapper - Helicone OSS LLM Observability"
+---
+
+import QuestionsSection from "/snippets/questions-section.mdx";
+
+## Background
+
+<Note>
+  LLMMapper is a powerful tool that allows you to seamlessly use Anthropic's
+  Claude models with your existing OpenAI API integration. For more information,
+  visit the [LLMMapper website](https://www.llmmapper.com/).
+</Note>
+
+LLMMapper acts as a bridge between your OpenAI API calls and Anthropic's Claude API. It translates your requests on-the-fly, allowing you to use Claude's capabilities without changing your existing code structure. This integration enables you to leverage the power of Claude models while maintaining compatibility with your OpenAI SDK-based codebase.
+
+## Using LLMMapper with Helicone Integration
+
+LLMMapper now offers seamless integration with Helicone, allowing you to log and monitor your API calls while using Anthropic's Claude models through the OpenAI SDK. Here's how to get started:
+
+### Step 1: Update your base URL
+
+Instead of using the standard LLMMapper URL, use the Helicone-integrated URL:
+
+```typescript
+const openai = new OpenAI({
+  apiKey: process.env.ANTHROPIC_API_KEY,
+  baseURL: "https://llmmapper.helicone.ai/oai2ant/v1",
+});
+```
+
+### Step 2: Add your Helicone API Key
+
+To enable logging with Helicone, add your Helicone API key to the request headers:
+
+```typescript
+const openai = new OpenAI({
+  apiKey: process.env.ANTHROPIC_API_KEY,
+  baseURL: "https://llmmapper.helicone.ai/oai2ant/v1",
+  defaultHeaders: {
+    "Helicone-Auth": "Bearer YOUR_HELICONE_API_KEY",
+  },
+});
+```
+
+Replace `YOUR_HELICONE_API_KEY` with your actual Helicone API key.
+
+### Step 3: Use as normal
+
+Now you can use the OpenAI SDK with Anthropic's Claude models as usual, and all your requests will be automatically logged in your Helicone dashboard.
+
+```typescript
+const chatCompletion = await openai.chat.completions.create({
+  model: "claude-3-opus-20240229",
+  messages: [
+    { role: "system", content: "You are a helpful assistant." },
+    { role: "user", content: "Tell me a short joke about programming." },
+  ],
+  max_tokens: 100,
+});
+```
+
+### Benefits of Helicone Integration
+
+By using LLMMapper with Helicone integration, you get:
+
+- Detailed logging of all your API calls
+- Real-time monitoring and analytics
+- Cost tracking and optimization insights
+- Advanced features like caching and retries
+
+Visit your [Helicone dashboard](https://www.helicone.ai/dashboard) to view logs, analytics, and more for your LLMMapper requests.
