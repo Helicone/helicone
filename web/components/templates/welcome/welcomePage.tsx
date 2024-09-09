@@ -21,6 +21,7 @@ const WelcomePageV2 = (props: WelcomePageV2Props) => {
 
   const [step, setStep] = useState<number>(currentStep);
   const [apiKey, setApiKey] = useState<string>("");
+  const [userId, setUserId] = useState<string>("");
   const router = useRouter();
   const [isDemo, setIsDemo] = useState<boolean>(false);
   const supabaseClient = useSupabaseClient();
@@ -42,6 +43,7 @@ const WelcomePageV2 = (props: WelcomePageV2Props) => {
       nextStep={function (): void {
         handleStepChange(2);
       }}
+      setUserId={setUserId}
     />,
     <GenerateAPIKey
       key={2}
@@ -81,7 +83,9 @@ const WelcomePageV2 = (props: WelcomePageV2Props) => {
       nextStep={async function () {
         const jawn = getJawnClient(orgContext?.currentOrg?.id ?? "");
         await jawn.POST("/v1/organization/onboard", {
-          body: {},
+          body: {
+            userId: userId,
+          },
         });
         router.push("/dashboard");
       }}

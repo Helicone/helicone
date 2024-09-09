@@ -71,17 +71,23 @@ export class OrganizationController extends Controller {
   @Post("onboard")
   public async onboardOrganization(
     @Body()
-    requestBody: {},
+    requestBody: { userId: string },
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<null, string>> {
-    await supabaseServer.client
-      .from("organization")
-      .update({
-        has_onboarded: true,
-      })
-      .eq("id", request.authParams.organizationId);
+    try {
+      await supabaseServer.client
+        .from("organization")
+        .update({
+          has_onboarded: true,
+          user_id: requestBody.userId,
+        })
+        .eq("id", request.authParams.organizationId);
 
-    return ok(null);
+      return ok(null);
+    } catch (error) {
+      this.setStatus(500);
+      return err("Error onboarding organization: " + error.message);
+    }
   }
 
   @Post("/{organizationId}/add_member")

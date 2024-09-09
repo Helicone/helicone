@@ -12,10 +12,11 @@ export const COMPANY_SIZES = ["Just me", "2-5", "5-25", "25-100", "100+"];
 
 interface CreateOrgProps {
   nextStep: () => void;
+  setUserId: (userId: string) => void;
 }
 
 const CreateOrg = (props: CreateOrgProps) => {
-  const { nextStep } = props;
+  const { nextStep, setUserId } = props;
 
   const user = useUser();
   const orgContext = useOrg();
@@ -31,6 +32,7 @@ const CreateOrg = (props: CreateOrgProps) => {
   );
   const [referralCode, setReferralCode] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [userId, setUserIdState] = useState<string>("");
   const { setNotification } = useNotification();
   const { t } = useTranslation();
 
@@ -63,6 +65,12 @@ const CreateOrg = (props: CreateOrgProps) => {
 
     if (referralType === "") {
       setNotification("Please select a referral source.", "info");
+      setIsLoading(false);
+      return;
+    }
+
+    if (userId.trim() === "") {
+      setNotification("Please enter a User ID.", "info");
       setIsLoading(false);
       return;
     }
@@ -135,6 +143,9 @@ const CreateOrg = (props: CreateOrgProps) => {
       orgContext?.refetchOrgs();
       nextStep();
     }
+
+    props.setUserId(userId);
+    nextStep();
   };
 
   return (
@@ -183,6 +194,24 @@ const CreateOrg = (props: CreateOrgProps) => {
                     </SelectItem>
                   ))}
                 </Select>
+              </div>
+            </div>
+            <div className="flex flex-col space-y-2">
+              <label
+                htmlFor="user-id"
+                className="block text-sm font-semibold leading-6"
+              >
+                User ID
+              </label>
+              <div>
+                <TextInput
+                  id="user-id"
+                  name="user-id"
+                  required
+                  placeholder="Enter your User ID"
+                  value={userId}
+                  onValueChange={(value) => setUserIdState(value)}
+                />
               </div>
             </div>
             <div className="flex flex-col space-y-2">
