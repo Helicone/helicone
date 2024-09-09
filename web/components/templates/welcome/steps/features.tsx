@@ -79,7 +79,10 @@ const openai = new OpenAI(configuration);
                 minHeight={false}
               />
               <p className="mt-4 text-sm text-gray-600">
-                Custom Properties allow you to add metadata to your requests, enabling advanced segmentation and analysis. Tag requests with session IDs, conversation context, or application data for deeper insights into your AI application performance.
+                Custom Properties allow you to add metadata to your requests,
+                enabling advanced segmentation and analysis. Tag requests with
+                session IDs, conversation context, or application data for
+                deeper insights into your AI application performance.
               </p>
             </TabPanel>
             <TabPanel>
@@ -112,7 +115,11 @@ const chatCompletion = await openai.chat.completions.create(
                 minHeight={false}
               />
               <p className="mt-4 text-sm text-gray-600">
-                Prompt Templating helps you manage and version your prompts effectively. This feature allows you to create reusable templates, track changes, and optimize your prompts over time. Maintain consistency across your AI interactions and easily experiment with different prompt variations.
+                Prompt Templating helps you manage and version your prompts
+                effectively. This feature allows you to create reusable
+                templates, track changes, and optimize your prompts over time.
+                Maintain consistency across your AI interactions and easily
+                experiment with different prompt variations.
               </p>
             </TabPanel>
             <TabPanel>
@@ -137,7 +144,10 @@ const openai = new OpenAI(configuration);
                 minHeight={false}
               />
               <p className="mt-4 text-sm text-gray-600">
-                Caching saves you time and money by storing and reusing responses for identical requests. This feature reduces API calls, lowers costs, and improves response times, making your AI application more efficient and cost-effective.
+                Caching saves you time and money by storing and reusing
+                responses for identical requests. This feature reduces API
+                calls, lowers costs, and improves response times, making your AI
+                application more efficient and cost-effective.
               </p>
             </TabPanel>
           </TabPanels>
