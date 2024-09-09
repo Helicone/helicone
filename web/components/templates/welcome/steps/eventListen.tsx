@@ -142,12 +142,12 @@ const EventListen = (props: EventListenProps) => {
         </p>
         <p className="text-center mt-4">
           <a
-            href="https://docs.helicone.ai/troubleshooting/my-event-isnt-registered"
+            href="https://docs.helicone.ai/troubleshooting/my-event-isn&apos;t-registered"
             className="text-blue-500 hover:text-blue-600 italic"
             target="_blank"
             rel="noopener noreferrer"
           >
-            Troubleshoot &gt; My event isn't registered
+            Troubleshoot &gt; My event isn&apos;t registered
           </a>
         </p>
       </div>
@@ -157,7 +157,7 @@ const EventListen = (props: EventListenProps) => {
             Do you need extra help?
           </h3>
           <p className="text-orange-700 mb-4">
-            If you're having trouble, our support team is here to assist you.
+            If you&apos;re having trouble, our support team is here to assist you.
           </p>
           <HcButton
             variant="primary"
