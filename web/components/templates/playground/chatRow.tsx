@@ -30,6 +30,7 @@ interface ChatRowProps {
   ) => void;
   deleteRow: (rowId: string) => void;
   editMode?: boolean;
+  promptMode?: boolean;
 }
 
 export const hasImage = (content: string | any[] | null) => {
@@ -172,7 +173,7 @@ export const RenderWithPrettyInputKeys = (props: {
 };
 
 const ChatRow = (props: ChatRowProps) => {
-  const { index, message, callback, deleteRow, editMode } = props;
+  const { index, message, callback, deleteRow, editMode, promptMode } = props;
 
   // on the initial render, if the current message is empty, set the mode to editing
   useEffect(() => {
@@ -560,10 +561,12 @@ const ChatRow = (props: ChatRowProps) => {
                       </div>
                     </div>
                   )}
-                  <p className="text-sm text-gray-500">
-                    Use &#123;&#123; sample_variable &#125;&#125; to insert
-                    variables into your prompt.
-                  </p>
+                  {promptMode && (
+                    <p className="text-sm text-gray-500">
+                      Use &#123;&#123; sample_variable &#125;&#125; to insert
+                      variables into your prompt.
+                    </p>
+                  )}
                 </div>
               ) : (
                 <>{getContent(currentMessage, minimize)}</>
