@@ -18,8 +18,8 @@ const SessionTracking: React.FC<SessionTrackingProps> = ({
       <h2 className="text-2xl font-bold">Set up Session Tracking</h2>
       <HcBadge title="Beta" size="sm" />
       <p>
-        Session tracking allows you to group related requests together. Here&apos;s
-        how to implement it:
+        Session tracking allows you to group related requests together.
+        Here&apos;s how to implement it:
       </p>
       <ol className="list-decimal list-inside space-y-2">
         <li>Generate a unique session ID for each user session</li>
@@ -73,11 +73,7 @@ openai.chat.completions.create(
         .
       </p>
       <div className="flex justify-between mt-4">
-        <Button
-          icon={ArrowLeftIcon}
-          variant="secondary"
-          onClick={previousStep}
-        >
+        <Button icon={ArrowLeftIcon} variant="secondary" onClick={previousStep}>
           Previous
         </Button>
         <Button icon={ArrowRightIcon} onClick={nextStep}>
