@@ -1,7 +1,7 @@
 import React from "react";
 import { Button } from "@tremor/react";
 import { ArrowLeftIcon, ArrowRightIcon } from "@heroicons/react/20/solid";
-import { DiffHighlight } from "../../diffHighlight";
+import { DiffHighlight } from "../diffHighlight";
 import HcBadge from "../../../ui/hcBadge";
 
 interface SessionTrackingProps {
