@@ -377,6 +377,23 @@ const PromptIdPage = (props: PromptIdPageProps) => {
   };
 
   const promoteToProduction = async (promptVersionId: string) => {
+    const getPreviousProductionId = () => {
+      const productionPrompt = prompts?.find(
+        (p) => p.metadata?.isProduction === true
+      );
+      if (productionPrompt) return productionPrompt.id;
+
+      // If no production prompt, find the one with the highest major version
+      const latestPrompt = prompts?.reduce((latest, current) => {
+        if (!latest || current.major_version > latest.major_version) {
+          return current;
+        }
+        return latest;
+      }, null as (typeof prompts extends (infer T)[] ? T : never) | null);
+
+      return latestPrompt?.id || "";
+    };
+
     const result = await jawn.POST(
       "/v1/prompt/version/{promptVersionId}/promote",
       {
@@ -386,8 +403,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
           },
         },
         body: {
-          previousProductionVersionId:
-            prompts?.find((p) => p.metadata?.isProduction === true)?.id || "",
+          previousProductionVersionId: getPreviousProductionId(),
         },
       }
     );
@@ -679,7 +695,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                                   V{prompt.major_version}.{prompt.minor_version}
                                   {selectedVersion ===
                                     `${prompt.major_version}.${prompt.minor_version}` && (
-                                    <CheckIcon className="h-5 w-5 text-gray-500 ml-2" />
+                                    <CheckIcon className="h-5 w-5 text-green-500 ml-2" />
                                   )}
                                 </span>
                                 <div className="flex items-center space-x-2">
@@ -794,7 +810,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                               V{prompt.major_version}.{prompt.minor_version}
                               {selectedVersion ===
                                 `${prompt.major_version}.${prompt.minor_version}` && (
-                                <CheckIcon className="h-5 w-5 text-gray-500 ml-2" />
+                                <CheckIcon className="h-5 w-5 text-green-500 ml-2" />
                               )}
                             </span>
                             <div className="flex items-center space-x-2">

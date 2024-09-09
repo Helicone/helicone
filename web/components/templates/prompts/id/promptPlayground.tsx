@@ -213,14 +213,14 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
                 </Button>
               </>
             )}
-            <Button
+            {/* <Button
               onClick={() => onSubmit && onSubmit(currentChat, selectedModel)}
               variant="default"
               size="sm"
               className="px-4"
             >
               {submitText}
-            </Button>
+            </Button> */}
           </div>
         </div>
       </div>
