@@ -18,13 +18,13 @@ const SessionTracking: React.FC<SessionTrackingProps> = ({
       <h2 className="text-2xl font-bold">Set up Session Tracking</h2>
       <HcBadge title="Beta" size="sm" />
       <p>
-        Session tracking allows you to group related requests together. Here's
+        Session tracking allows you to group related requests together. Here&apos;s
         how to implement it:
       </p>
       <ol className="list-decimal list-inside space-y-2">
         <li>Generate a unique session ID for each user session</li>
-        <li>Add the "Helicone-Session-Id" header to your requests</li>
-        <li>Optionally, add the "Helicone-Session-Path" header</li>
+        <li>Add the &quot;Helicone-Session-Id&quot; header to your requests</li>
+        <li>Optionally, add the &quot;Helicone-Session-Path&quot; header</li>
       </ol>
       <DiffHighlight
         code={`
