@@ -23,6 +23,7 @@ import ThemedTabs from "../../shared/themed/themedTabs";
 import useSearchParams from "../../shared/utils/useSearchParams";
 import AuthHeader from "../../shared/authHeader";
 import HcBadge from "../../ui/hcBadge";
+import { hpf, hpstatic } from "@helicone/prompts";
 
 interface PromptsPageProps {
   defaultIndex: number;
@@ -85,16 +86,15 @@ const PromptsPage = (props: PromptsPageProps) => {
                   </h3>
                   <DiffHighlight
                     code={`
-// 1. Add this line
-import { hprompt } from "@helicone/helicone";
- 
+import { hpf } from "@helicone/prompts";
+
 const chatCompletion = await openai.chat.completions.create(
   {
     messages: [
       {
         role: "user",
-        // 2: Add hprompt to any string, and nest any variable in additional brackets \`{}\`
-        content: hprompt\`Write a story about \${{ scene }}\`,
+        // Add hpf to any string, and nest any variable in additional brackets \`{}\`
+        content: hpf\`Write a story about \${{ scene }}\`,
       },
     ],
     model: "gpt-3.5-turbo",
@@ -238,16 +238,15 @@ const chatCompletion = await openai.chat.completions.create(
           <p className="text-gray-500 mt-4">TS/JS Quick Start</p>
           <DiffHighlight
             code={`
-// 1. Add this line
-import { hprompt } from "@helicone/helicone";
- 
+import { hpf } from "@helicone/prompts";
+
 const chatCompletion = await openai.chat.completions.create(
   {
     messages: [
       {
         role: "user",
-        // 2: Add hprompt to any string, and nest any variable in additional brackets \`{}\`
-        content: hprompt\`Write a story about \${{ scene }}\`,
+        // Add hpf to any string, and nest any variable in additional brackets \`{}\`
+        content: hpf\`Write a story about \${{ scene }}\`,
       },
     ],
     model: "gpt-3.5-turbo",

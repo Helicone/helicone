@@ -2,6 +2,7 @@ import { TabGroup, TabList, Tab, TabPanels, TabPanel } from "@tremor/react";
 import HcButton from "../../../ui/hcButton";
 import { DiffHighlight } from "../diffHighlight";
 import Link from "next/link";
+import { hpf, hpstatic } from "@helicone/prompts";
 
 interface FeaturesProps {
   apiKey?: string;
@@ -82,15 +83,15 @@ const openai = new OpenAI(configuration);
             <TabPanel>
               <DiffHighlight
                 code={`
-import { hprompt } from "@helicone/helicone";
+import { hpf } from "@helicone/prompts";
  
 const chatCompletion = await openai.chat.completions.create(
   {
     messages: [
       {
         role: "user",
-        // Add hprompt to any string, and nest any variable in additional brackets \`{}\`
-        content: hprompt\`Write a story about \${{ scene }}\`,
+        // Add hpf to any string, and nest any variable in additional brackets \`{}\`
+        content: hpf\`Write a story about \${{ scene }}\`,
       },
     ],
     model: "gpt-3.5-turbo",
