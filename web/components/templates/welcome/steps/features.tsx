@@ -88,15 +88,15 @@ const openai = new OpenAI(configuration);
             <TabPanel>
               <DiffHighlight
                 code={`
-import { hpf } from "@helicone/prompts";
+import { hprompt } from "@helicone/helicone";
  
 const chatCompletion = await openai.chat.completions.create(
   {
     messages: [
       {
         role: "user",
-        // Add hpf to any string, and nest any variable in additional brackets \`{}\`
-        content: hpf\`Write a story about \${{ scene }}\`,
+        // Add hprompt to any string, and nest any variable in additional brackets \`{}\`
+        content: hprompt\`Write a story about \${{ scene }}\`,
       },
     ],
     model: "gpt-3.5-turbo",
