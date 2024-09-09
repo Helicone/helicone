@@ -34,9 +34,15 @@ const PromptVersionSelector: React.FC<PromptVersionSelectorProps> = ({
       b.major_version - a.major_version || b.minor_version - a.minor_version
   );
 
-  const latestMajorVersion = sortedPrompts?.find(
-    (prompt) => prompt.minor_version === 0
+  // Find the production version based on metadata
+  const productionVersion = sortedPrompts?.find(
+    (prompt) => prompt.metadata?.isProduction === true
   );
+
+  // If no version is explicitly set as production, fall back to the legacy logic
+  const legacyProductionVersion = !productionVersion
+    ? sortedPrompts?.find((prompt) => prompt.minor_version === 0)
+    : null;
 
   const getTemplate = (prompt: Prompt) => {
     try {
@@ -89,6 +95,9 @@ const PromptVersionSelector: React.FC<PromptVersionSelectorProps> = ({
               })
               .map((prompt, index) => {
                 const template = getTemplate(prompt);
+                const isProduction =
+                  prompt.metadata?.isProduction === true ||
+                  (!productionVersion && prompt === legacyProductionVersion);
 
                 return (
                   <li
@@ -120,11 +129,9 @@ const PromptVersionSelector: React.FC<PromptVersionSelectorProps> = ({
                         <span className="font-semibold">
                           V{prompt.major_version}.{prompt.minor_version}
                         </span>
-                        {latestMajorVersion?.major_version ===
-                          prompt.major_version &&
-                          prompt.minor_version === 0 && (
-                            <HcBadge title={"Production"} size={"sm"} />
-                          )}
+                        {isProduction && (
+                          <HcBadge title={"Production"} size={"sm"} />
+                        )}
                       </div>
                     </div>
                     <div className="relative w-full">
