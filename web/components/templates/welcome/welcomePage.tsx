@@ -7,6 +7,7 @@ import GenerateAPIKey from "./steps/generateAPIKey";
 import Integrations from "./steps/integrations";
 import Features from "./steps/features";
 import EventListen from "./steps/eventListen";
+import SessionTracking from "./steps/sessionTracking";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useOrg } from "../../layout/organizationContext";
 import { getJawnClient } from "../../../lib/clients/jawn";
@@ -64,7 +65,7 @@ const WelcomePageV2 = (props: WelcomePageV2Props) => {
         handleStepChange(4);
       }}
     />,
-    <Features
+    <SessionTracking
       key={4}
       previousStep={function (): void {
         handleStepChange(3);
@@ -73,10 +74,19 @@ const WelcomePageV2 = (props: WelcomePageV2Props) => {
         handleStepChange(5);
       }}
     />,
-    <EventListen
+    <Features
       key={5}
       previousStep={function (): void {
         handleStepChange(4);
+      }}
+      nextStep={function (): void {
+        handleStepChange(6);
+      }}
+    />,
+    <EventListen
+      key={6}
+      previousStep={function (): void {
+        handleStepChange(5);
       }}
       nextStep={async function () {
         const jawn = getJawnClient(orgContext?.currentOrg?.id ?? "");

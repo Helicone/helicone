@@ -38,7 +38,7 @@ export default function StepList(props: {
           : "upcoming",
     },
     {
-      name: "Explore features and tooling",
+      name: "Set up session tracking",
       step: 4,
       status:
         currentStep === 4
@@ -48,12 +48,22 @@ export default function StepList(props: {
           : "upcoming",
     },
     {
-      name: "Send your first event",
+      name: "Explore features and tooling",
       step: 5,
       status:
         currentStep === 5
           ? "current"
           : currentStep > 5
+          ? "complete"
+          : "upcoming",
+    },
+    {
+      name: "Send your first event",
+      step: 6,
+      status:
+        currentStep === 6
+          ? "current"
+          : currentStep > 6
           ? "complete"
           : "upcoming",
     },
