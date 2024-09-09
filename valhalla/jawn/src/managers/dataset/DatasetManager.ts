@@ -157,6 +157,8 @@ export class DatasetManager extends BaseManager {
       helicone_template: string;
       prompt_v2: string;
       model: string;
+      created_at: string;
+      metadata: Record<string, any>;
     }>(
       `
     SELECT 
@@ -165,7 +167,9 @@ export class DatasetManager extends BaseManager {
       major_version,
       helicone_template,
       prompt_v2,
-      model
+      model,
+      created_at,
+      metadata
     FROM prompts_versions
     left join prompt_v2 on prompt_v2.id = prompts_versions.prompt_v2
     WHERE prompt_v2.organization = $1
@@ -274,6 +278,8 @@ export class DatasetManager extends BaseManager {
       helicone_template: string;
       prompt_v2: string;
       model: string;
+      created_at: string;
+      metadata: Record<string, any>;
     }>(
       `
     SELECT 
@@ -282,7 +288,9 @@ export class DatasetManager extends BaseManager {
       major_version,
       helicone_template,
       prompt_v2,
-      model
+      model,
+      created_at,
+      metadata
     FROM prompts_versions
     WHERE prompts_versions.organization = $1
     AND prompts_versions.id = $2

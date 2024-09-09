@@ -18,8 +18,14 @@ export interface paths {
   "/v1/prompt/{promptId}": {
     delete: operations["DeletePrompt"];
   };
+  "/v1/prompt/create": {
+    post: operations["CreatePrompt"];
+  };
   "/v1/prompt/version/{promptVersionId}/subversion": {
     post: operations["CreateSubversion"];
+  };
+  "/v1/prompt/version/{promptVersionId}/promote": {
+    post: operations["PromotePromptVersionToProduction"];
   };
   "/v1/prompt/version/{promptVersionId}/inputs/query": {
     post: operations["GetInputs"];
@@ -210,6 +216,19 @@ export interface components {
         start: string;
       };
     };
+    CreatePromptResponse: {
+      id: string;
+    };
+    ResultSuccess_CreatePromptResponse_: {
+      data: components["schemas"]["CreatePromptResponse"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_CreatePromptResponse.string_": components["schemas"]["ResultSuccess_CreatePromptResponse_"] | components["schemas"]["ResultError_string_"];
+    /** @description Construct a type with a set of properties K of type T */
+    "Record_string.any_": {
+      [key: string]: unknown;
+    };
     PromptVersionResult: {
       id: string;
       /** Format: double */
@@ -219,6 +238,8 @@ export interface components {
       prompt_v2: string;
       model: string;
       helicone_template: string;
+      created_at: string;
+      metadata: components["schemas"]["Record_string.any_"];
     };
     ResultSuccess_PromptVersionResult_: {
       data: components["schemas"]["PromptVersionResult"];
@@ -228,6 +249,7 @@ export interface components {
     "Result_PromptVersionResult.string_": components["schemas"]["ResultSuccess_PromptVersionResult_"] | components["schemas"]["ResultError_string_"];
     PromptCreateSubversionParams: {
       newHeliconeTemplate: unknown;
+      isMajorVersion?: boolean;
     };
     /** @description Construct a type with a set of properties K of type T */
     "Record_string.string_": {
@@ -1042,6 +1064,27 @@ export interface operations {
       };
     };
   };
+  CreatePrompt: {
+    requestBody: {
+      content: {
+        "application/json": {
+          prompt: {
+            messages: unknown[];
+            model: string;
+          };
+          userDefinedId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_CreatePromptResponse.string_"];
+        };
+      };
+    };
+  };
   CreateSubversion: {
     parameters: {
       path: {
@@ -1051,6 +1094,28 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["PromptCreateSubversionParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_PromptVersionResult.string_"];
+        };
+      };
+    };
+  };
+  PromotePromptVersionToProduction: {
+    parameters: {
+      path: {
+        promptVersionId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          previousProductionVersionId: string;
+        };
       };
     };
     responses: {
