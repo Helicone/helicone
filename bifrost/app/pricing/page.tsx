@@ -18,7 +18,13 @@ import ProductComparisonTable from "../components/templates/pricing/ProductCompa
 import { Col } from "@/components/common/col";
 import { Row } from "@/components/common/row";
 import { Button } from "@/components/ui/button";
-import { XMarkIcon } from "@heroicons/react/24/outline";
+import { BookOpenIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 export default function Example() {
   return (
@@ -68,7 +74,14 @@ export default function Example() {
             <div className=" h-[250px] w-full ">
               <Col className="h-full">
                 <Col className=" py-[36px] px-[24px]  gap-[24px]  h-full">
-                  <div className="bg-blue-100 h-[43px] w-[175px]">LOGO</div>
+                  <div className="h-[43px] w-[175px]">
+                    <Image
+                      src={"/static/other-logos/decipher.png"}
+                      alt={"dechipher ai"}
+                      width={1000}
+                      height={50}
+                    />
+                  </div>
                   <h1>
                     <b>386 hours</b> saved by using cached responses.
                   </h1>
@@ -82,7 +95,14 @@ export default function Example() {
             <div className="bg-white h-[250px] w-full rounded-lg  border-[#0CA5EA] border-2">
               <Col className="h-full">
                 <Col className=" py-[36px] px-[24px] gap-[24px] h-full">
-                  <div className="bg-blue-100 h-[43px] w-[175px]">LOGO</div>
+                  <div className="h-[43px] w-[175px]">
+                    <Image
+                      src={"/static/greptile.webp"}
+                      alt={"greptile ai"}
+                      width={1000}
+                      height={50}
+                    />
+                  </div>
                   <h1>
                     <b>2 days</b> saved combing through requests.
                   </h1>
@@ -98,7 +118,15 @@ export default function Example() {
             <div className="h-[250px] w-full">
               <Col className="h-full">
                 <Col className=" py-[36px] px-[24px] gap-[24px] h-full">
-                  <div className="bg-blue-100 h-[43px] w-[175px]">LOGO</div>
+                  <div className="h-[43px] w-[175px]">
+                    {" "}
+                    <Image
+                      src={"/static/qawolf.webp"}
+                      alt={"greptile ai"}
+                      width={1000}
+                      height={50}
+                    />
+                  </div>
                   <h1>
                     <b>Critical bug detected</b>, saved agent runtime by 30%.
                   </h1>
@@ -111,7 +139,6 @@ export default function Example() {
             </div>
           </div>
           <PricingComparisonTable />
-          <ProductComparisonTable />
 
           <div className="border grid grid-cols-1 lg:grid-cols-12 bg-white rounded-md">
             <div className="border col-span-5 p-[24px] font-bold">
@@ -136,6 +163,7 @@ export default function Example() {
               ))}
             </div>
           </div>
+          <ProductComparisonTable />
 
           <div className="py-10 grid grid-cols-1 lg:grid-cols-12 bg-white rounded-md">
             <Col className="col-span-5 p-[24px]">
@@ -198,6 +226,106 @@ export default function Example() {
                   <p className="text-sm text-gray-500 mt-2">
                     For most students and educators.
                   </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="py-16">
+            <h2 className="text-3xl font-bold mb-8">
+              Frequently asked questions
+            </h2>
+            <Accordion type="single" collapsible className="w-full">
+              <AccordionItem value="item-1">
+                <AccordionTrigger>
+                  Which Helicone plan is right for me?
+                </AccordionTrigger>
+                <AccordionContent>
+                  Yes. It&apos;s right for you.
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="item-2">
+                <AccordionTrigger>
+                  What are the limits for each plan?
+                </AccordionTrigger>
+                <AccordionContent>
+                  For the Developer plan, you have access to 10k free requests
+                  and dashboard analytics. For the Team plan, you have access to
+                  all features, such as Playground, Prompts, Exports, Evals and
+                  more. For each feature, you will pay as you go.
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="item-3">
+                <AccordionTrigger>
+                  I went over my limits. What can I do?
+                </AccordionTrigger>
+                <AccordionContent>
+                  You can switch to the Team plan. If you are already on the
+                  Team plan, you will be automatically charged for your usage.
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="item-4">
+                <AccordionTrigger>
+                  Am I eligible for any discounts?
+                </AccordionTrigger>
+                <AccordionContent>
+                  If you are a startup under 2 years old, a non-profit, an
+                  open-source company or a student, you may be eligible for
+                  discounts.{" "}
+                  <a href="/contact" className="text-blue-600 hover:underline">
+                    Apply here
+                  </a>
+                  .
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </div>
+
+          <div className="py-16 ">
+            <div className="">
+              <div className="lg:grid lg:grid-cols-2 lg:gap-8 items-center">
+                <div className="bg-gray-50 rounded-lg p-8">
+                  <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
+                    Understand your AI
+                    <span className="block text-[#0CA5EA]">
+                      performance bottleneck
+                    </span>
+                    with Helicone.
+                  </h2>
+                  <div className="mt-8 flex">
+                    <div className="inline-flex rounded-md shadow">
+                      <Link href="/signup">
+                        <Button className="bg-[#0CA5EA] hover:bg-[#0B94D3] text-white">
+                          Start for free
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-10 lg:mt-0 h-full">
+                  <Col className="bg-white p-6 rounded-lg shadow h-full">
+                    <h3 className="text-lg font-medium text-gray-900">
+                      Helicone or LangSmith?
+                    </h3>
+                    <p className="mt-2 text-base text-gray-500">
+                      More provider flexibility, cost-effective and transparent
+                      (open-source).
+                    </p>
+                    <div className="mt-auto">
+                      <Link href="/comparison">
+                        <Button
+                          variant="outline"
+                          className="text-black hover:text-blue-500"
+                        >
+                          <BookOpenIcon className="w-4 h-4 mr-2" />
+                          Read about key differences
+                        </Button>
+                      </Link>
+                    </div>
+                  </Col>
                 </div>
               </div>
             </div>

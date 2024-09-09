@@ -32,10 +32,7 @@ const FeatureRow: React.FC<FeatureRowProps> = ({
 }) => (
   <>
     <Col
-      className={clsx(
-        "p-[24px] gap-[12px]",
-        isAvailable ? "bg-white" : "bg-[#F9F9F9]"
-      )}
+      className={clsx("p-[24px] gap-[12px]", isAvailable ? "" : "bg-[#F9F9F9]")}
     >
       <Col className="gap-[4px]">
         <Row className="text-xl gap-[12px] items-center">
@@ -202,7 +199,7 @@ export default function PricingComparisonTable() {
           </div>
         </TabsContent>
         <TabsContent value="team">
-          <div className="w-full overflow-x-auto">
+          <div className="w-full overflow-x-auto bg-white">
             <div className="min-w-[800px]">
               <Col className="rounded-lg border">
                 <Row className="justify-between p-[24px] bg-[#F9F9F9] items-center">
