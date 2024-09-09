@@ -23,7 +23,7 @@ const Features = (props: FeaturesProps) => {
             className="underline text-blue-500"
             href="https://docs.helicone.ai/"
             target="_blank"
-            rel="noreferrer"
+            rel="noopener noreferrer"
           >
             documentation
           </Link>
@@ -156,6 +156,8 @@ const openai = new OpenAI(configuration);
       <Link
         href={"https://helicone.ai/community"}
         className="text-blue-500 underline text-center p-4"
+        target="_blank"
+        rel="noopener noreferrer"
       >
         Explore our many integrations 🚀
       </Link>
