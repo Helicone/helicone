@@ -10,7 +10,7 @@ import { DemoGame } from "../../../shared/themed/demo/demoGame";
 import { useEffect, useState } from "react";
 import ThemedBubbleModal from "../../../shared/themed/themedBubbleModal";
 import { useLocalStorage } from "../../../../services/hooks/localStorage";
-import { openSupportModal } from "../../../../utils/support";
+import { openSupportModal } from "../../../../lib/support";
 
 interface EventListenProps {
   previousStep: () => void;
