@@ -65,13 +65,15 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
     }
 
     const promptObject = promptInput as PromptObject;
-    return promptObject.messages.map((msg, index) => ({
-      id: `msg-${index}`,
-      role: msg.role as "user" | "assistant" | "system",
-      content: Array.isArray(msg.content)
-        ? msg.content.map((c) => c.text).join("\n")
-        : msg.content,
-    }));
+    return (
+      promptObject?.messages?.map((msg, index) => ({
+        id: `msg-${index}`,
+        role: msg.role as "user" | "assistant" | "system",
+        content: Array.isArray(msg.content)
+          ? msg.content.map((c) => c.text).join("\n")
+          : msg.content,
+      })) || []
+    );
   };
   const [mode, setMode] = useState<(typeof PROMPT_MODES)[number]>("Pretty");
   const [isEditMode, setIsEditMode] = useState(true);
