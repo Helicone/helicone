@@ -32,7 +32,7 @@ const WelcomePageV2 = (props: WelcomePageV2Props) => {
   }, []);
 
   const handleStepChange = (step: number) => {
-    router.replace(`/welcome?step=${step}}`);
+    router.replace(`/welcome?step=${step}`);
     setStep(step);
   };
 
@@ -118,7 +118,7 @@ const WelcomePageV2 = (props: WelcomePageV2Props) => {
                 await router.reload();
               }}
             >
-              Skip Onboarding
+              Go to Dashboard
             </button>
           </div>
           <Image

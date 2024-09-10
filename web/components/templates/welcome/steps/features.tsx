@@ -58,6 +58,7 @@ const Features = (props: FeaturesProps) => {
             <TabPanel>
               <DiffHighlight
                 code={`
+import { randomUUID } from "crypto";
 import { OpenAI } from "openai";
 
 const configuration = {
@@ -68,6 +69,9 @@ const configuration = {
     "Helicone-Property-Session": "24",
     "Helicone-Property-Conversation": "support_issue_2",
     "Helicone-Property-App": "mobile",
+    "Helicone-Session-Id": randomUUID(),
+    "Helicone-Session-Path": "/ticket/123/resolve",
+    "Helicone-Session-Name": "support_issue",
   },
 };
 
@@ -88,18 +92,20 @@ const openai = new OpenAI(configuration);
             <TabPanel>
               <DiffHighlight
                 code={`
-import { hprompt } from "@helicone/helicone";
+import { hpf } from "@helicone/prompts";
+
+const scene = "OpenAI";
  
 const chatCompletion = await openai.chat.completions.create(
   {
     messages: [
       {
         role: "user",
-        // Add hprompt to any string, and nest any variable in additional brackets \`{}\`
-        content: hprompt\`Write a story about \${{ scene }}\`,
+        // Add hpf to any string, and nest any variable in additional brackets \`{}\`
+        content: hpf\`Write a story about \${{ scene }}\`,
       },
     ],
-    model: "gpt-3.5-turbo",
+    model: "gpt-4o",
   },
   {
     // Add Prompt Id Header
