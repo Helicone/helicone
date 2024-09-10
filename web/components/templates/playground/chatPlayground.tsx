@@ -327,7 +327,6 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
             key={c.id}
             index={i}
             message={c}
-            editMode={true}
             callback={(
               userText: string,
               role: string,
@@ -386,7 +385,6 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
         renderRows.push(
           <ChatRow
             key={modelMessage[0].id}
-            editMode={true}
             index={currentChat.length - 1}
             message={modelMessage[0]}
             callback={(userText: string, role: string) => {
