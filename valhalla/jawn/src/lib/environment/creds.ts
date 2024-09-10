@@ -23,3 +23,10 @@ if (
 ) {
   throw new Error("No Supabase creds");
 }
+
+if (
+  !process.env.NEXT_PUBLIC_SLACK_CLIENT_ID ||
+  !process.env.SLACK_CLIENT_SECRET
+) {
+  throw new Error("No Slack creds");
+}

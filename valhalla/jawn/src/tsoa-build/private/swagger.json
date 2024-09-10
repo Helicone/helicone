@@ -2192,6 +2192,12 @@
 								"soft_delete": {
 									"type": "boolean"
 								},
+								"slack_channels": {
+									"items": {
+										"type": "string"
+									},
+									"type": "array"
+								},
 								"org_id": {
 									"type": "string"
 								},
@@ -2227,6 +2233,7 @@
 								"threshold",
 								"status",
 								"soft_delete",
+								"slack_channels",
 								"org_id",
 								"name",
 								"minimum_request_count",
@@ -2389,6 +2396,12 @@
 						},
 						"type": "array"
 					},
+					"slack_channels": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
 					"minimum_request_count": {
 						"type": "number",
 						"format": "double"
@@ -2399,7 +2412,8 @@
 					"metric",
 					"threshold",
 					"time_window",
-					"emails"
+					"emails",
+					"slack_channels"
 				],
 				"type": "object",
 				"additionalProperties": false

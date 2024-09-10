@@ -89,6 +89,12 @@ export interface paths {
     get: operations["GetIntegration"];
     post: operations["UpdateIntegration"];
   };
+  "/v1/integration/slack/settings": {
+    get: operations["GetSlackSettings"];
+  };
+  "/v1/integration/slack/channels": {
+    get: operations["GetSlackChannels"];
+  };
   "/v1/experiment/dataset": {
     post: operations["AddDataset"];
   };
@@ -943,6 +949,15 @@ export interface components {
       error: null;
     };
     "Result_Integration.string_": components["schemas"]["ResultSuccess_Integration_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess_Array__id-string--name-string___": {
+      data: {
+          name: string;
+          id: string;
+        }[];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Array__id-string--name-string__.string_": components["schemas"]["ResultSuccess_Array__id-string--name-string___"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess__datasetId-string__": {
       data: {
         datasetId: string;
@@ -1908,6 +1923,26 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  GetSlackSettings: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Integration.string_"];
+        };
+      };
+    };
+  };
+  GetSlackChannels: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Array__id-string--name-string__.string_"];
         };
       };
     };

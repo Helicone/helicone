@@ -30,6 +30,7 @@ const CreateAlertModal = (props: CreateAlertModalProps) => {
         threshold: req.threshold,
         time_window: req.time_window,
         emails: req.emails,
+        slack_channels: req.slack_channels,
         minimum_request_count: req.minimum_request_count,
       },
     });

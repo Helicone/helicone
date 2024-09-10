@@ -68,4 +68,20 @@ export class IntegrationController extends Controller {
     const integrationManager = new IntegrationManager(request.authParams);
     return await integrationManager.getIntegration(integrationId);
   }
+
+  @Get("/slack/settings")
+  public async getSlackSettings(
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<Integration, string>> {
+    const integrationManager = new IntegrationManager(request.authParams);
+    return await integrationManager.getIntegrationByType("slack");
+  }
+
+  @Get("/slack/channels")
+  public async getSlackChannels(
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<Array<{ id: string; name: string }>, string>> {
+    const integrationManager = new IntegrationManager(request.authParams);
+    return await integrationManager.getSlackChannels();
+  }
 }

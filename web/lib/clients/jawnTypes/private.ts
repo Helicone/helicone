@@ -909,6 +909,7 @@ Json: JsonObject;
           threshold: number;
           status: string;
           soft_delete: boolean;
+          slack_channels: string[];
           org_id: string;
           name: string;
           /** Format: double */
@@ -952,6 +953,7 @@ Json: JsonObject;
       threshold: number;
       time_window: string;
       emails: string[];
+      slack_channels: string[];
       /** Format: double */
       minimum_request_count?: number;
     };
