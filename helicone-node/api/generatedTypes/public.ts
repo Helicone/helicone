@@ -939,14 +939,15 @@ export interface components {
       filter?: components["schemas"]["PromptVersionsFilterNode"];
       inputs: components["schemas"]["Record_string.string_"];
     };
+Json: JsonObject;
     IntegrationCreateParams: {
       integration_name: string;
-      settings?: components["schemas"]["Record_string.any_"];
+      settings?: components["schemas"]["Json"];
       active?: boolean;
     };
     Integration: {
       integration_name?: string;
-      settings?: components["schemas"]["Record_string.any_"];
+      settings?: components["schemas"]["Json"];
       active?: boolean;
       id: string;
     };
@@ -958,7 +959,7 @@ export interface components {
     "Result_Array_Integration_.string_": components["schemas"]["ResultSuccess_Array_Integration__"] | components["schemas"]["ResultError_string_"];
     IntegrationUpdateParams: {
       integration_name?: string;
-      settings?: components["schemas"]["Record_string.any_"];
+      settings?: components["schemas"]["Json"];
       active?: boolean;
     };
     ResultSuccess_Integration_: {
@@ -1073,7 +1074,6 @@ export interface components {
       error: null;
     };
     "Result_number.string_": components["schemas"]["ResultSuccess_number_"] | components["schemas"]["ResultError_string_"];
-Json: JsonObject;
     HeliconeDataset: {
       created_at: string | null;
       dataset_type: string;

@@ -12,16 +12,17 @@ import {
 import { JawnAuthenticatedRequest } from "../../types/request";
 import { IntegrationManager } from "../../managers/IntegrationManager";
 import { Result } from "../../lib/shared/result";
+import { Json } from "../../lib/db/database.types";
 
 export interface IntegrationCreateParams {
   integration_name: string;
-  settings?: Record<string, any>;
+  settings?: Json;
   active?: boolean;
 }
 
 export interface IntegrationUpdateParams {
   integration_name?: string;
-  settings?: Record<string, any>;
+  settings?: Json;
   active?: boolean;
 }
 

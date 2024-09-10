@@ -6,6 +6,7 @@ import {
   IntegrationCreateParams,
   IntegrationUpdateParams,
 } from "../controllers/public/integrationController";
+import { Json } from "../lib/db/database.types";
 
 export class IntegrationManager extends BaseManager {
   constructor(authParams: AuthParams) {
@@ -100,7 +101,7 @@ export class IntegrationManager extends BaseManager {
       {
         id: string;
         integration_name: string;
-        settings: Record<string, any>;
+        settings: Json;
         active: boolean;
       },
       string
@@ -118,10 +119,10 @@ export class IntegrationManager extends BaseManager {
     }
 
     return ok(
-      data as {
+      data satisfies {
         id: string;
         integration_name: string;
-        settings: Record<string, any>;
+        settings: Json;
         active: boolean;
       }
     );

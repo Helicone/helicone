@@ -2722,13 +2722,41 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"Json": {
+				"anyOf": [
+					{
+						"type": "string"
+					},
+					{
+						"type": "number",
+						"format": "double"
+					},
+					{
+						"type": "boolean"
+					},
+					{
+						"properties": {},
+						"additionalProperties": {
+							"$ref": "#/components/schemas/Json"
+						},
+						"type": "object"
+					},
+					{
+						"items": {
+							"$ref": "#/components/schemas/Json"
+						},
+						"type": "array"
+					}
+				],
+				"nullable": true
+			},
 			"IntegrationCreateParams": {
 				"properties": {
 					"integration_name": {
 						"type": "string"
 					},
 					"settings": {
-						"$ref": "#/components/schemas/Record_string.any_"
+						"$ref": "#/components/schemas/Json"
 					},
 					"active": {
 						"type": "boolean"
@@ -2746,7 +2774,7 @@
 						"type": "string"
 					},
 					"settings": {
-						"$ref": "#/components/schemas/Record_string.any_"
+						"$ref": "#/components/schemas/Json"
 					},
 					"active": {
 						"type": "boolean"
@@ -2800,7 +2828,7 @@
 						"type": "string"
 					},
 					"settings": {
-						"$ref": "#/components/schemas/Record_string.any_"
+						"$ref": "#/components/schemas/Json"
 					},
 					"active": {
 						"type": "boolean"
@@ -3315,34 +3343,6 @@
 						"$ref": "#/components/schemas/ResultError_string_"
 					}
 				]
-			},
-			"Json": {
-				"anyOf": [
-					{
-						"type": "string"
-					},
-					{
-						"type": "number",
-						"format": "double"
-					},
-					{
-						"type": "boolean"
-					},
-					{
-						"properties": {},
-						"additionalProperties": {
-							"$ref": "#/components/schemas/Json"
-						},
-						"type": "object"
-					},
-					{
-						"items": {
-							"$ref": "#/components/schemas/Json"
-						},
-						"type": "array"
-					}
-				],
-				"nullable": true
 			},
 			"HeliconeDataset": {
 				"properties": {

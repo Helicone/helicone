@@ -943,11 +943,16 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Json": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"double"},{"dataType":"boolean"},{"dataType":"enum","enums":[null]},{"dataType":"nestedObjectLiteral","nestedProperties":{},"additionalProperties":{"dataType":"union","subSchemas":[{"ref":"Json"},{"dataType":"undefined"}]}},{"dataType":"array","array":{"dataType":"refAlias","ref":"Json"}}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "IntegrationCreateParams": {
         "dataType": "refObject",
         "properties": {
             "integration_name": {"dataType":"string","required":true},
-            "settings": {"ref":"Record_string.any_"},
+            "settings": {"ref":"Json"},
             "active": {"dataType":"boolean"},
         },
         "additionalProperties": false,
@@ -957,7 +962,7 @@ const models: TsoaRoute.Models = {
         "dataType": "refObject",
         "properties": {
             "integration_name": {"dataType":"string"},
-            "settings": {"ref":"Record_string.any_"},
+            "settings": {"ref":"Json"},
             "active": {"dataType":"boolean"},
             "id": {"dataType":"string","required":true},
         },
@@ -982,7 +987,7 @@ const models: TsoaRoute.Models = {
         "dataType": "refObject",
         "properties": {
             "integration_name": {"dataType":"string"},
-            "settings": {"ref":"Record_string.any_"},
+            "settings": {"ref":"Json"},
             "active": {"dataType":"boolean"},
         },
         "additionalProperties": false,
@@ -1200,11 +1205,6 @@ const models: TsoaRoute.Models = {
     "Result_number.string_": {
         "dataType": "refAlias",
         "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_number_"},{"ref":"ResultError_string_"}],"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "Json": {
-        "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"double"},{"dataType":"boolean"},{"dataType":"enum","enums":[null]},{"dataType":"nestedObjectLiteral","nestedProperties":{},"additionalProperties":{"dataType":"union","subSchemas":[{"ref":"Json"},{"dataType":"undefined"}]}},{"dataType":"array","array":{"dataType":"refAlias","ref":"Json"}}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "HeliconeDataset": {
