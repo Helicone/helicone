@@ -9,6 +9,7 @@ export interface AlertRequest {
   threshold: number;
   time_window: string;
   emails: string[];
+  slack_channels: string[];
   minimum_request_count: number | undefined;
 }
 

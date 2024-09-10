@@ -5,7 +5,12 @@ import { Database } from "../../../supabase/database.types";
 import { clickhousePriceCalc } from "../../packages/cost";
 
 type AlertStatus = "triggered" | "resolved";
-type Alert = Database["public"]["Tables"]["alert"]["Row"];
+export type Alert = Database["public"]["Tables"]["alert"]["Row"] & {
+  organization: {
+    integrations: Database["public"]["Tables"]["integrations"]["Row"][];
+  };
+};
+
 export type AlertState = {
   totalCount: number;
   errorCount?: number;
@@ -21,14 +26,16 @@ export class AlertStore {
   public async getAlerts(): Promise<Result<Alert[], string>> {
     const { data: alerts, error: alertsErr } = await this.supabaseClient
       .from("alert")
-      .select("*")
+      .select(
+        "*, organization (integrations (id, integration_name, settings, active))"
+      )
       .eq("soft_delete", false);
 
     if (alertsErr) {
       return err(`Failed to retrieve all alerts: ${alertsErr}`);
     }
 
-    return ok(alerts);
+    return ok(alerts as Alert[]);
   }
 
   public async updateAlertStatuses(

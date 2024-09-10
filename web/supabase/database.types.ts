@@ -54,6 +54,7 @@ export type Database = {
           minimum_request_count: number | null
           name: string
           org_id: string
+          slack_channels: string[]
           soft_delete: boolean
           status: string
           threshold: number
@@ -69,6 +70,7 @@ export type Database = {
           minimum_request_count?: number | null
           name: string
           org_id: string
+          slack_channels?: string[]
           soft_delete?: boolean
           status?: string
           threshold: number
@@ -84,6 +86,7 @@ export type Database = {
           minimum_request_count?: number | null
           name?: string
           org_id?: string
+          slack_channels?: string[]
           soft_delete?: boolean
           status?: string
           threshold?: number
@@ -896,6 +899,35 @@ export type Database = {
           settings?: Json
         }
         Relationships: []
+      }
+      hidden_properties: {
+        Row: {
+          created_at: string
+          id: number
+          org_id: string | null
+          property_to_hide: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          org_id?: string | null
+          property_to_hide?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          org_id?: string | null
+          property_to_hide?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "public_hidden_properties_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       integrations: {
         Row: {
@@ -2713,7 +2745,7 @@ export type Database = {
         Args: {
           name: string
         }
-        Returns: unknown
+        Returns: string[]
       }
       get_size_by_bucket: {
         Args: Record<PropertyKey, never>
@@ -2752,10 +2784,6 @@ export type Database = {
           metadata: Json
           updated_at: string
         }[]
-      }
-      operation: {
-        Args: Record<PropertyKey, never>
-        Returns: string
       }
       search: {
         Args: {

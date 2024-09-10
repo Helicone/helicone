@@ -12,16 +12,17 @@ import {
 import { JawnAuthenticatedRequest } from "../../types/request";
 import { IntegrationManager } from "../../managers/IntegrationManager";
 import { Result } from "../../lib/shared/result";
+import { Json } from "../../lib/db/database.types";
 
 export interface IntegrationCreateParams {
   integration_name: string;
-  settings?: Record<string, any>;
+  settings?: Json;
   active?: boolean;
 }
 
 export interface IntegrationUpdateParams {
   integration_name?: string;
-  settings?: Record<string, any>;
+  settings?: Json;
   active?: boolean;
 }
 
@@ -67,5 +68,21 @@ export class IntegrationController extends Controller {
   ): Promise<Result<Integration, string>> {
     const integrationManager = new IntegrationManager(request.authParams);
     return await integrationManager.getIntegration(integrationId);
+  }
+
+  @Get("/slack/settings")
+  public async getSlackSettings(
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<Integration, string>> {
+    const integrationManager = new IntegrationManager(request.authParams);
+    return await integrationManager.getIntegrationByType("slack");
+  }
+
+  @Get("/slack/channels")
+  public async getSlackChannels(
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<Array<{ id: string; name: string }>, string>> {
+    const integrationManager = new IntegrationManager(request.authParams);
+    return await integrationManager.getSlackChannels();
   }
 }
