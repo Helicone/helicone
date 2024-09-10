@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useMemo, useState } from "react";
 import { useOrg } from "../../layout/organizationContext";
 import { useUser } from "@supabase/auth-helpers-react";
 import {
@@ -44,12 +44,12 @@ interface AlertFormProps {
 
 const AlertForm = (props: AlertFormProps) => {
   const { handleSubmit, onCancel, initialValues } = props;
-  const [slackRedirectUrl, setSlackRedirectUrl] = useState<string | null>(null);
 
-  useEffect(() => {
+  const slackRedirectUrl = useMemo(() => {
     if (window) {
-      setSlackRedirectUrl(`${window.location.origin}/slack/redirect`);
+      return `${window.location.origin}/slack/redirect`;
     }
+    return null;
   }, []);
 
   const [selectedMetric, setSelectedMetric] = useState<string>(
