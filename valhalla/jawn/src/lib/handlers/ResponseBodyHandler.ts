@@ -81,6 +81,14 @@ export class ResponseBodyHandler extends AbstractLogHandler {
       ]);
       context.processedLog.response.body = responseBodyFinal;
 
+      const { responseModel, model } = this.determineAssistantModel(
+        responseBodyFinal,
+        context.processedLog.response.model
+      );
+
+      context.processedLog.response.model = responseModel;
+      context.processedLog.model = model;
+
       // Set usage
       const usage = processedResponseBody.data?.usage ?? {};
       context.usage.completionTokens = usage.completionTokens;
@@ -214,6 +222,34 @@ export class ResponseBodyHandler extends AbstractLogHandler {
     }
 
     return responseBody;
+  }
+
+  private isAssistantResponse(responseBody: any): boolean {
+    if (typeof responseBody !== "object" || responseBody === null) {
+      return false;
+    }
+    return (
+      responseBody.hasOwnProperty("assistant_id") ||
+      responseBody.hasOwnProperty("thread_id") ||
+      responseBody.data?.[0]?.hasOwnProperty("assistant_id") ||
+      responseBody.hasOwnProperty("metadata")
+    );
+  }
+
+  private determineAssistantModel(
+    responseBody: any,
+    currentModel?: string
+  ): { responseModel: string; model: string } {
+    if (
+      this.isAssistantResponse(responseBody) &&
+      responseBody.hasOwnProperty("status") &&
+      ["queued", "in_progress"].includes(responseBody.status)
+    ) {
+      return { responseModel: "Assistant Polling", model: "assistant-polling" };
+    } else if (this.isAssistantResponse(responseBody) && !currentModel) {
+      return { responseModel: "Assistant Call", model: "assistant-call" };
+    }
+    return { responseModel: currentModel || "", model: currentModel || "" };
   }
 
   getBodyProcessor(

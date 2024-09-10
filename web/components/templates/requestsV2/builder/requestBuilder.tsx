@@ -13,9 +13,11 @@ import CompletionBuilder from "./completionBuilder";
 import { LlmType } from "../../../../lib/api/models/requestResponseModel";
 import ChatBuilder from "./chatBuilder";
 import { DalleBuilder } from "./dalleBuilder";
+import OpenAIAssistantBuilder from "./OpenAIAssistantBuilder";
 
 export type BuilderType =
   | "ChatBuilder"
+  | "OpenAIAssistantBuilder"
   | "GeminiBuilder"
   | "CompletionBuilder"
   | "ChatGPTBuilder"
@@ -31,10 +33,15 @@ export const getBuilderType = (
   model: string,
   provider: Provider,
   path?: string | null,
-  llmType?: LlmType | null
+  llmType?: LlmType | null,
+  isAssistant?: boolean
 ): BuilderType => {
   if (provider === "OPENROUTER") {
     return "ChatGPTBuilder";
+  }
+
+  if (isAssistant) {
+    return "OpenAIAssistantBuilder";
   }
 
   if (model && model.toLowerCase().includes("gemini")) {
@@ -60,6 +67,7 @@ export const getBuilderType = (
   if (
     provider === "TOGETHER" ||
     (provider as any) === "TOGETHERAI" ||
+    path?.includes("oai2ant") ||
     model == "gpt-4-vision-preview" ||
     model == "gpt-4-1106-vision-preview"
   ) {
@@ -128,6 +136,7 @@ const builders: {
   CustomBuilder: CustomBuilder,
   DalleBuilder: DalleBuilder,
   UnknownBuilder: UnknownBuilder,
+  OpenAIAssistantBuilder: OpenAIAssistantBuilder,
 };
 
 const getModelFromPath = (path: string) => {
@@ -154,10 +163,23 @@ const getRequestBuilder = (request: HeliconeRequest) => {
     model,
     request.provider,
     request.target_url,
-    request.llmSchema?.request?.llm_type ?? null
+    request.llmSchema?.request?.llm_type ?? null,
+    isAssistantRequest(request)
   );
   let builder = builders[builderType];
   return new builder(request, model);
+};
+
+const isAssistantRequest = (request: HeliconeRequest) => {
+  return (
+    request.request_body.hasOwnProperty("assistant_id") ||
+    request.request_body.hasOwnProperty("metadata") ||
+    request.response_body.hasOwnProperty("metadata") ||
+    (Array.isArray(request.response_body.data) &&
+      request.response_body.data.some((item: any) =>
+        item.hasOwnProperty("metadata")
+      ))
+  );
 };
 
 const getNormalizedRequest = (request: HeliconeRequest): NormalizedRequest => {

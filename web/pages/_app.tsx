@@ -20,6 +20,12 @@ import { ThemeContextProvider } from "../components/shared/theme/themeContext";
 import Script from "next/script";
 import { PostHogProvider } from "posthog-js/react";
 
+declare global {
+  interface Window {
+    Atlas: any;
+  }
+}
+
 if (
   typeof window !== "undefined" &&
   process.env.NEXT_PUBLIC_POSTHOG_API_KEY &&

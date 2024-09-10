@@ -271,8 +271,8 @@ export class LogStore {
 
       try {
         const insertQuery = `
-        INSERT INTO prompts_versions (prompt_v2, organization, major_version, minor_version, helicone_template, model, created_at)
-        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        INSERT INTO prompts_versions (prompt_v2, organization, major_version, minor_version, helicone_template, model, created_at, metadata)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, '{"isProduction": true}'::jsonb)
         RETURNING id`;
 
         const insertResult = await t.one(insertQuery, [
@@ -283,6 +283,7 @@ export class LogStore {
           heliconeTemplate.template,
           model,
           newPromptRecord.createdAt,
+        
         ]);
 
         versionId = insertResult.id;

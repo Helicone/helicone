@@ -3,6 +3,7 @@ import {
   PaperAirplaneIcon,
   PlusIcon,
   TrashIcon,
+  EyeIcon,
 } from "@heroicons/react/24/outline";
 import { useState } from "react";
 import { clsx } from "../../shared/clsx";
@@ -21,6 +22,14 @@ import ModelPill from "../requestsV2/modelPill";
 import ChatRow from "./chatRow";
 import RoleButton from "./new/roleButton";
 import { PlaygroundModel } from "./playgroundPage";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 interface ChatPlaygroundProps {
   requestId: string;
@@ -55,6 +64,24 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
 
   const [currentChat, setCurrentChat] = useState<Message[]>(chat);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [previewPayload, setPreviewPayload] = useState<string>("");
+
+  const generatePayload = (history: Message[]) => {
+    const cleanMessages = history.filter((message) => !message.model);
+
+    return JSON.stringify(
+      {
+        messages: cleanMessages,
+        temperature,
+        model: models[0]?.name,
+        max_tokens: maxTokens,
+        tools,
+      },
+      null,
+      2
+    );
+  };
 
   const handleSubmit = async (history: Message[]) => {
     if (models.length < 1) {
@@ -72,17 +99,10 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
       models.map(async (model) => {
         // Filter and map the history as before
         const cleanMessages = (history: Message[]) => {
-          return history
-            .filter(
-              (message) =>
-                message.model === model.name ||
-                message.model === undefined ||
-                message.tool_calls
-            )
-            .map((message) => ({
-              content: message.content ?? "",
-              role: message.role,
-            }));
+          return history.filter(
+            (message) =>
+              message.model === model.name || message.model === undefined
+          );
         };
 
         const historyWithoutId = cleanMessages(history);
@@ -307,6 +327,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
             key={c.id}
             index={i}
             message={c}
+            editMode={true}
             callback={(
               userText: string,
               role: string,
@@ -365,6 +386,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
         renderRows.push(
           <ChatRow
             key={modelMessage[0].id}
+            editMode={true}
             index={currentChat.length - 1}
             message={modelMessage[0]}
             callback={(userText: string, role: string) => {
@@ -454,6 +476,12 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
     return renderRows;
   };
 
+  const handlePreviewPayload = () => {
+    const payload = generatePayload(currentChat);
+    setPreviewPayload(payload);
+    setIsPreviewOpen(true);
+  };
+
   return (
     <>
       <ul className="w-full border border-gray-300 dark:border-gray-700 rounded-lg relative h-fit">
@@ -477,8 +505,8 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
           </li>
         )}
         <li className="px-8 py-4 border-t border-gray-300 dark:border-gray-700 bg-white dark:bg-black rounded-b-lg justify-between space-x-4 flex">
-          <div className="w-full">
-            <button
+          <div className="w-full flex space-x-2">
+            <Button
               onClick={() => {
                 // check to see if the last message was a user
                 const lastMessage = currentChat[currentChat.length - 1];
@@ -508,34 +536,51 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
                   setCurrentChat(newChat);
                 }
               }}
-              className={clsx(
-                "bg-white hover:bg-gray-100 border border-gray-300 text-black dark:bg-black dark:hover:bg-gray-900 dark:border-gray-700 dark:text-white",
-                "items-center rounded-md px-3 py-1.5 text-sm flex flex-row font-semibold text-black dark:text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-              )}
+              variant="outline"
+              size="sm"
             >
-              <PlusIcon className="h-4 w-4 inline  text-black dark:text-white rounded-lg mr-2" />
+              <PlusIcon className="h-4 w-4 mr-2" />
               Add Message
-            </button>
+            </Button>
+            <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
+              <DialogTrigger asChild>
+                <Button
+                  onClick={handlePreviewPayload}
+                  variant="outline"
+                  size="sm"
+                >
+                  <EyeIcon className="h-4 w-4 mr-2" />
+                  Preview Payload
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Preview Payload</DialogTitle>
+                </DialogHeader>
+                <pre className="bg-gray-100 dark:bg-gray-700 p-4 rounded overflow-auto max-h-96 text-sm">
+                  {previewPayload}
+                </pre>
+              </DialogContent>
+            </Dialog>
           </div>
 
           <div className="flex space-x-4 w-full justify-end">
-            <button
+            <Button
               onClick={() => {
-                const originalCopy = chat.map((message, index) => {
-                  return { ...message, id: crypto.randomUUID() };
-                });
+                const originalCopy = chat.map((message) => ({
+                  ...message,
+                  id: crypto.randomUUID(),
+                }));
                 setCurrentChat(originalCopy);
               }}
-              className={clsx(
-                "bg-white hover:bg-gray-100 border border-gray-300 text-black dark:bg-black dark:hover:bg-gray-900 dark:border-gray-700 dark:text-white",
-                "items-center rounded-md px-3 py-1.5 text-sm flex flex-row font-semibold text-black dark:text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-              )}
+              variant="outline"
+              size="sm"
             >
-              <ArrowPathIcon className="h-4 w-4 inline text-black dark:text-white rounded-lg mr-2" />
+              <ArrowPathIcon className="h-4 w-4 mr-2" />
               Reset
-            </button>
+            </Button>
             {!customNavBar && (
-              <button
+              <Button
                 onClick={() => {
                   if (onSubmit) {
                     onSubmit(currentChat);
@@ -543,15 +588,12 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
                     handleSubmit(currentChat);
                   }
                 }}
-                className={clsx(
-                  "bg-sky-600 hover:bg-sky-700",
-                  "items-center rounded-md px-3 py-1.5 text-sm flex flex-row font-semibold text-white dark:text-black shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-                )}
+                variant="default"
+                size="sm"
               >
-                <PaperAirplaneIcon className="h-4 w-4 inline text-white dark:text-black rounded-lg mr-2" />
-
+                <PaperAirplaneIcon className="h-4 w-4 mr-2" />
                 {submitText}
-              </button>
+              </Button>
             )}
           </div>
         </li>

@@ -95,6 +95,8 @@ interface PromptVersionResultBase {
 
 export interface PromptVersionResult extends PromptVersionResultBase {
   helicone_template: string;
+  created_at: string;
+  metadata: Record<string, any>;
 }
 
 export interface PromptVersionResultCompiled extends PromptVersionResultBase {
@@ -103,6 +105,7 @@ export interface PromptVersionResultCompiled extends PromptVersionResultBase {
 
 export interface PromptCreateSubversionParams {
   newHeliconeTemplate: any;
+  isMajorVersion?: boolean;
 }
 
 export interface PromptInputRecord {
@@ -113,6 +116,10 @@ export interface PromptInputRecord {
   created_at: string;
   response_body: string;
   auto_prompt_inputs: any[];
+}
+
+export interface CreatePromptResponse {
+  id: string;
 }
 
 @Route("v1/prompt")
@@ -172,6 +179,28 @@ export class PromptController extends Controller {
     }
   }
 
+  @Post("create")
+  public async createPrompt(
+    @Body()
+    requestBody: {
+      userDefinedId: string;
+      prompt: {
+        model: string;
+        messages: any[];
+      };
+    },
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<CreatePromptResponse, string>> {
+    const promptManager = new PromptManager(request.authParams);
+
+    const result = await promptManager.createPrompt(requestBody);
+    if (result.error || !result.data) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(201); // set return status 201
+    }
+    return result;
+  }
   @Post("version/{promptVersionId}/subversion")
   public async createSubversion(
     @Body()
@@ -194,6 +223,28 @@ export class PromptController extends Controller {
     return result;
   }
 
+  @Post("version/{promptVersionId}/promote")
+  public async promotePromptVersionToProduction(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() promptVersionId: string,
+    @Body()
+    requestBody: {
+      previousProductionVersionId: string;
+    }
+  ): Promise<Result<PromptVersionResult, string>> {
+    const promptManager = new PromptManager(request.authParams);
+    const result = await promptManager.promotePromptVersionToProduction(
+      promptVersionId,
+      requestBody.previousProductionVersionId
+    );
+    if (result.error || !result.data) {
+      console.log(result.error);
+      this.setStatus(500);
+    } else {
+      this.setStatus(201); // set return status 201
+    }
+    return result;
+  }
   @Post("version/{promptVersionId}/inputs/query")
   public async getInputs(
     @Body()
