@@ -2,7 +2,6 @@ import { PlusIcon } from "@heroicons/react/24/outline";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { Message } from "../../requests/chatComponent/types";
-import ChatRow from "../../playground/chatRow";
 import { JsonView } from "../../requests/chatComponent/jsonView";
 import { MessageRenderer } from "../../requests/chatComponent/MessageRenderer";
 import { PlaygroundChatTopBar, PROMPT_MODES } from "./playgroundChatTopBar";
@@ -14,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { MODEL_LIST } from "../../playground/new/modelList";
+import PromptChatRow from "./promptChatRow";
 
 type Input = {
   id: string;
@@ -76,7 +76,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
     );
   };
   const [mode, setMode] = useState<(typeof PROMPT_MODES)[number]>("Pretty");
-  const [isEditMode, setIsEditMode] = useState(true);
+  const [isEditMode, setIsEditMode] = useState(false);
   const [currentChat, setCurrentChat] = useState<Message[]>(() =>
     parsePromptToMessages(prompt)
   );
@@ -129,11 +129,10 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
                 key={message.id}
                 className="border-gray-300 dark:border-gray-700 last:border-b-0"
               >
-                <ChatRow
+                <PromptChatRow
                   message={message}
-                  promptMode={true}
-                  index={index}
                   editMode={isEditMode}
+                  index={index}
                   callback={(userText, role) =>
                     handleUpdateMessage(index, userText, role)
                   }
@@ -175,55 +174,49 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
         />
 
         <div className="flex-grow overflow-auto">{renderMessages()}</div>
+        {isEditMode && (
+          <div className="flex justify-between items-center py-4 px-8 border-t border-gray-300 dark:border-gray-700 bg-white dark:bg-black rounded-b-lg">
+            {" "}
+            <p className="text-sm text-gray-500">
+              Use &#123;&#123; sample_variable &#125;&#125; to insert variables
+              into your prompt.
+            </p>
+          </div>
+        )}
 
-        {/* Add message button, Model picker, and Submit */}
-        <div className="flex justify-between items-center p-4 border-t border-gray-300 dark:border-gray-700 bg-white dark:bg-black rounded-b-lg">
-          <div className="w-full flex space-x-2">
-            {isEditMode && (
+        {isEditMode && (
+          <div className="flex justify-between items-center py-4 px-8 border-t border-gray-300 dark:border-gray-700 bg-white dark:bg-black rounded-b-lg">
+            <div className="w-full flex space-x-2">
               <Button onClick={handleAddMessage} variant="outline" size="sm">
                 <PlusIcon className="h-4 w-4 mr-2" />
                 Add Message
               </Button>
-            )}
+            </div>
+            <div className="flex space-x-4 w-full justify-end items-center">
+              <div className="font-normal">Model</div>
+              <Select value={selectedModel} onValueChange={setSelectedModel}>
+                <SelectTrigger className="w-[200px]">
+                  <SelectValue placeholder="Select a model" />
+                </SelectTrigger>
+                <SelectContent>
+                  {MODEL_LIST.map((model) => (
+                    <SelectItem key={model.value} value={model.value}>
+                      {model.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button
+                onClick={() => onSubmit && onSubmit(currentChat, selectedModel)}
+                variant="default"
+                size="sm"
+                className="px-4 font-normal"
+              >
+                Save prompt
+              </Button>
+            </div>
           </div>
-          <div className="flex space-x-4 w-full justify-end items-center">
-            {isEditMode && (
-              <>
-                <div className="font-normal">Model</div>
-                <Select value={selectedModel} onValueChange={setSelectedModel}>
-                  <SelectTrigger className="w-[200px]">
-                    <SelectValue placeholder="Select a model" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {MODEL_LIST.map((model) => (
-                      <SelectItem key={model.value} value={model.value}>
-                        {model.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Button
-                  onClick={() =>
-                    onSubmit && onSubmit(currentChat, selectedModel)
-                  }
-                  variant="outline"
-                  size="sm"
-                  className="px-4 font-normal"
-                >
-                  Save prompt
-                </Button>
-              </>
-            )}
-            {/* <Button
-              onClick={() => onSubmit && onSubmit(currentChat, selectedModel)}
-              variant="default"
-              size="sm"
-              className="px-4"
-            >
-              {submitText}
-            </Button> */}
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );

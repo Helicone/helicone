@@ -3,24 +3,23 @@ import {
   ClipboardIcon,
   EyeIcon,
   EyeSlashIcon,
-  PencilSquareIcon,
   TrashIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { useCallback, useEffect, useState } from "react";
-import { clsx } from "../../shared/clsx";
-import { removeLeadingWhitespace } from "../../shared/utils/utils";
+import { clsx } from "../../../shared/clsx";
+import { removeLeadingWhitespace } from "../../../shared/utils/utils";
 
-import RoleButton from "./new/roleButton";
-import useNotification from "../../shared/notification/useNotification";
+import RoleButton from "../../playground/new/roleButton";
+import useNotification from "../../../shared/notification/useNotification";
 import { Tooltip } from "@mui/material";
-import { enforceString } from "../../../lib/helpers/typeEnforcers";
-import AddFileButton from "./new/addFileButton";
-import ThemedModal from "../../shared/themed/themedModal";
-import MarkdownEditor from "../../shared/markdownEditor";
-import { Message } from "../requests/chatComponent/types";
+import { enforceString } from "../../../../lib/helpers/typeEnforcers";
+import AddFileButton from "../../playground/new/addFileButton";
+import ThemedModal from "../../../shared/themed/themedModal";
+import MarkdownEditor from "../../../shared/markdownEditor";
+import { Message } from "../../requests/chatComponent/types";
 
-interface ChatRowProps {
+interface PromptChatRowProps {
   index: number;
   message: Message;
   callback: (
@@ -172,15 +171,9 @@ export const RenderWithPrettyInputKeys = (props: {
   );
 };
 
-const ChatRow = (props: ChatRowProps) => {
+const PromptChatRow = (props: PromptChatRowProps) => {
   const { index, message, callback, deleteRow, editMode, promptMode } = props;
-
-  // on the initial render, if the current message is empty, set the mode to editing
-  useEffect(() => {
-    if (currentMessage.content === "") {
-      setIsEditing(true);
-    }
-  }, []);
+  console.log("editMode", editMode);
 
   const [currentMessage, setCurrentMessage] = useState(message);
   const [minimize, setMinimize] = useState(false);
@@ -189,7 +182,19 @@ const ChatRow = (props: ChatRowProps) => {
     "system" | "user" | "assistant" | "function"
   >(currentMessage.role);
 
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(editMode);
+
+  // Add this useEffect to update isEditing when editMode changes
+  useEffect(() => {
+    setIsEditing(editMode);
+  }, [editMode]);
+
+  // on the initial render, if the current message is empty, set the mode to editing
+  useEffect(() => {
+    if (currentMessage.content === "") {
+      setIsEditing(true);
+    }
+  }, []);
 
   const searchAndGetImage = (message: Message) => {
     if (Array.isArray(message.content) && hasImage(message.content)) {
@@ -278,12 +283,6 @@ const ChatRow = (props: ChatRowProps) => {
           <RenderWithPrettyInputKeys
             text={removeLeadingWhitespace(text)}
             selectedProperties={undefined}
-          />
-          <AddFileButton
-            file={file}
-            onFileChange={(file) => {
-              onFileChangeHandler(file, textMessage?.text);
-            }}
           />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           {hasImage(content) && (
@@ -381,12 +380,6 @@ const ChatRow = (props: ChatRowProps) => {
             }
             selectedProperties={undefined}
           />
-          <AddFileButton
-            file={file}
-            onFileChange={(file) => {
-              onFileChangeHandler(file, contentString);
-            }}
-          />
         </div>
       );
     }
@@ -454,60 +447,56 @@ const ChatRow = (props: ChatRowProps) => {
                 callback(contentAsString || "", newRole, file);
               }}
             />
-            <div className="flex items-center space-x-2">
-              {editMode && (
-                <Tooltip title="Edit" placement="top">
+            <div className="flex justify-end items-center space-x-2 w-full">
+              {!editMode && (
+                <Tooltip title={minimize ? "Expand" : "Shrink"} placement="top">
                   <button
                     onClick={() => {
-                      if (isEditing) {
-                        setMinimize(false);
-                        setIsEditing(false);
-                      } else {
-                        setIsEditing(true);
-                      }
+                      setMinimize(!minimize);
                     }}
                     className="text-gray-500 font-semibold"
                   >
-                    <PencilSquareIcon className="h-5 w-5" />
+                    {minimize ? (
+                      <EyeIcon className="h-5 w-5" />
+                    ) : (
+                      <EyeSlashIcon className="h-5 w-5" />
+                    )}
                   </button>
                 </Tooltip>
               )}
-              <Tooltip title={minimize ? "Expand" : "Shrink"} placement="top">
-                <button
-                  onClick={() => {
-                    setMinimize(!minimize);
-                  }}
-                  className="text-gray-500 font-semibold"
-                >
-                  {minimize ? (
-                    <EyeIcon className="h-5 w-5" />
-                  ) : (
-                    <EyeSlashIcon className="h-5 w-5" />
-                  )}
-                </button>
-              </Tooltip>
-              <Tooltip title="Copy" placement="top">
-                <button
-                  onClick={() => {
-                    navigator.clipboard.writeText(contentAsString || "");
-                    setNotification("Copied to clipboard", "success");
-                  }}
-                  className="text-gray-500 font-semibold"
-                >
-                  <ClipboardIcon className="h-5 w-5" />
-                </button>
-              </Tooltip>
-              {editMode && (
-                <Tooltip title="Delete" placement="top">
+              {!editMode && (
+                <Tooltip title="Copy" placement="top">
                   <button
                     onClick={() => {
-                      deleteRow(currentMessage.id);
+                      navigator.clipboard.writeText(contentAsString || "");
+                      setNotification("Copied to clipboard", "success");
                     }}
-                    className="text-red-500 font-semibold"
+                    className="text-gray-500 font-semibold"
                   >
-                    <TrashIcon className="h-5 w-5" />
+                    <ClipboardIcon className="h-5 w-5" />
                   </button>
                 </Tooltip>
+              )}
+              {editMode && (
+                <div className="flex w-full flex-row items-center justify-end space-x-2">
+                  <AddFileButton
+                    file={file}
+                    onFileChange={(file) => {
+                      onFileChangeHandler(file, contentAsString || "");
+                    }}
+                  />
+
+                  <Tooltip title="Delete" placement="top">
+                    <button
+                      onClick={() => {
+                        deleteRow(currentMessage.id);
+                      }}
+                      className="text-red-500 font-semibold"
+                    >
+                      <TrashIcon className="h-5 w-5" />
+                    </button>
+                  </Tooltip>
+                </div>
               )}
             </div>
           </div>
@@ -543,7 +532,7 @@ const ChatRow = (props: ChatRowProps) => {
                   {promptVariables.length > 0 && (
                     <div className="flex flex-col space-y-2">
                       <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Your variables
+                        Variables
                       </label>
                       <div className="flex flex-wrap gap-2">
                         {promptVariables.map(({ heliconeTag }, index) => {
@@ -561,10 +550,6 @@ const ChatRow = (props: ChatRowProps) => {
                       </div>
                     </div>
                   )}
-                  <p className="text-sm text-gray-500">
-                    Use &#123;&#123; sample_variable &#125;&#125; to insert
-                    variables into your prompt.
-                  </p>
                 </div>
               ) : (
                 <>{getContent(currentMessage, minimize)}</>
@@ -577,4 +562,4 @@ const ChatRow = (props: ChatRowProps) => {
   );
 };
 
-export default ChatRow;
+export default PromptChatRow;
