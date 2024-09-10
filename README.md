@@ -77,6 +77,10 @@ The fastest and most reliable way to get started with Helicone. Get started for 
 
 Helicone is simple to self-host and update. To get started locally, just use our [docker-compose](https://docs.helicone.ai/getting-started/self-deploy-docker) file.
 
+Pre-Request:
+- Copy the shared directory to the valhalla directory
+- Create a valhalla folder in the valhalla directory and put /valhalla/jawn in it
+
 ```bash
 # Clone the repository
 git clone https://github.com/Helicone/helicone.git
