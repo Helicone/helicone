@@ -47,7 +47,9 @@ const AlertForm = (props: AlertFormProps) => {
 
   const slackRedirectUrl = useMemo(() => {
     if (window) {
-      return `${window.location.origin}/slack/redirect`;
+      return `${
+        window.location.protocol === "http:" ? "https://redirectmeto.com/" : ""
+      }${window.location.origin}/slack/redirect`;
     }
     return null;
   }, []);
@@ -393,7 +395,7 @@ const AlertForm = (props: AlertFormProps) => {
                     process.env.NEXT_PUBLIC_SLACK_CLIENT_ID ?? ""
                   }&state=${
                     orgContext?.currentOrg?.id || ""
-                  }&redirect_uri=https://redirectmeto.com/${slackRedirectUrl}`}
+                  }&redirect_uri=${slackRedirectUrl}`}
                 >
                   Connect Slack
                 </a>

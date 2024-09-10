@@ -31,6 +31,7 @@ SlackRedirect.getLayout = function getLayout(page: ReactElement) {
 
 export const getServerSideProps = withAuthSSR(async (options) => {
   const { code, state } = options.context.query;
+  const host = options.context.req.headers.host;
 
   if (!code || !state) {
     return {
@@ -68,15 +69,32 @@ export const getServerSideProps = withAuthSSR(async (options) => {
 
   let responseData: Record<string, any> = {};
 
+  const environment = process.env.VERCEL_ENV ?? "development";
+  const slackRedirectUrl = host
+    ? environment === "development"
+      ? `https://redirectmeto.com/http://${host}/slack/redirect`
+      : `https://${host}/slack/redirect`
+    : null;
+
   try {
-    const response = await fetch(
-      `https://slack.com/api/oauth.v2.access?client_id=${process.env.NEXT_PUBLIC_SLACK_CLIENT_ID}&client_secret=${process.env.SLACK_CLIENT_SECRET}&code=${code}`
-    );
+    const response = await fetch(`https://slack.com/api/oauth.v2.access`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({
+        client_id: process.env.NEXT_PUBLIC_SLACK_CLIENT_ID ?? "",
+        client_secret: process.env.SLACK_CLIENT_SECRET ?? "",
+        code: code as string,
+        redirect_uri: slackRedirectUrl ?? "",
+      }),
+    });
     const data = await response.json();
 
     if (data.ok) {
       responseData = data;
     } else {
+      console.error("Failed to get access token", data);
       return {
         props: {
           user: options.userData.user,
@@ -85,6 +103,7 @@ export const getServerSideProps = withAuthSSR(async (options) => {
       };
     }
   } catch (error) {
+    console.error("Failed to get access token", error);
     return {
       props: {
         user: options.userData.user,
