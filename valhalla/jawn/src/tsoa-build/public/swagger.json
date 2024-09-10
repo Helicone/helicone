@@ -2722,13 +2722,41 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"Json": {
+				"anyOf": [
+					{
+						"type": "string"
+					},
+					{
+						"type": "number",
+						"format": "double"
+					},
+					{
+						"type": "boolean"
+					},
+					{
+						"properties": {},
+						"additionalProperties": {
+							"$ref": "#/components/schemas/Json"
+						},
+						"type": "object"
+					},
+					{
+						"items": {
+							"$ref": "#/components/schemas/Json"
+						},
+						"type": "array"
+					}
+				],
+				"nullable": true
+			},
 			"IntegrationCreateParams": {
 				"properties": {
 					"integration_name": {
 						"type": "string"
 					},
 					"settings": {
-						"$ref": "#/components/schemas/Record_string.any_"
+						"$ref": "#/components/schemas/Json"
 					},
 					"active": {
 						"type": "boolean"
@@ -2746,7 +2774,7 @@
 						"type": "string"
 					},
 					"settings": {
-						"$ref": "#/components/schemas/Record_string.any_"
+						"$ref": "#/components/schemas/Json"
 					},
 					"active": {
 						"type": "boolean"
@@ -2800,7 +2828,7 @@
 						"type": "string"
 					},
 					"settings": {
-						"$ref": "#/components/schemas/Record_string.any_"
+						"$ref": "#/components/schemas/Json"
 					},
 					"active": {
 						"type": "boolean"
@@ -2833,6 +2861,51 @@
 				"anyOf": [
 					{
 						"$ref": "#/components/schemas/ResultSuccess_Integration_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess_Array__id-string--name-string___": {
+				"properties": {
+					"data": {
+						"items": {
+							"properties": {
+								"name": {
+									"type": "string"
+								},
+								"id": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"name",
+								"id"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_Array__id-string--name-string__.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_Array__id-string--name-string___"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
@@ -3270,34 +3343,6 @@
 						"$ref": "#/components/schemas/ResultError_string_"
 					}
 				]
-			},
-			"Json": {
-				"anyOf": [
-					{
-						"type": "string"
-					},
-					{
-						"type": "number",
-						"format": "double"
-					},
-					{
-						"type": "boolean"
-					},
-					{
-						"properties": {},
-						"additionalProperties": {
-							"$ref": "#/components/schemas/Json"
-						},
-						"type": "object"
-					},
-					{
-						"items": {
-							"$ref": "#/components/schemas/Json"
-						},
-						"type": "array"
-					}
-				],
-				"nullable": true
 			},
 			"HeliconeDataset": {
 				"properties": {
@@ -6036,6 +6081,58 @@
 						}
 					}
 				]
+			}
+		},
+		"/v1/integration/slack/settings": {
+			"get": {
+				"operationId": "GetSlackSettings",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_Integration.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Integration"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/integration/slack/channels": {
+			"get": {
+				"operationId": "GetSlackChannels",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_Array__id-string--name-string__.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Integration"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
 			}
 		},
 		"/v1/experiment/dataset": {

@@ -11,6 +11,7 @@ import { Database } from "../../../supabase/database.types";
 import { getUSDate } from "../../shared/utils/utils";
 import { Tooltip } from "@mui/material";
 import EditAlertModal from "./editAlertModal";
+import { useGetOrgSlackChannels } from "@/services/hooks/organizations";
 
 interface AlertsPageProps {
   user: User;
@@ -38,6 +39,9 @@ const AlertsPage = (props: AlertsPageProps) => {
   const { alertHistory, alerts, isLoading, refetch } = useAlertsPage(
     orgContext?.currentOrg?.id || ""
   );
+
+  const { data: slackChannelsData, isLoading: isLoadingSlackChannels } =
+    useGetOrgSlackChannels(orgContext?.currentOrg?.id || "");
 
   function formatTimeWindow(milliseconds: number): string {
     // Define the time windows with an index signature
@@ -101,6 +105,11 @@ const AlertsPage = (props: AlertsPageProps) => {
                   hidden: false,
                 },
                 { name: "Emails", key: "emails", hidden: false },
+                {
+                  name: "Slack Channels",
+                  key: "slack_channels",
+                  hidden: false,
+                },
               ]}
               rows={alerts?.map((key) => {
                 return {
@@ -162,6 +171,18 @@ const AlertsPage = (props: AlertsPageProps) => {
                   emails: (
                     <div className="text-gray-900 dark:text-gray-100 flex">
                       {key.emails.join(", ")}
+                    </div>
+                  ),
+                  slack_channels: (
+                    <div className="text-gray-900 dark:text-gray-100 flex">
+                      {key.slack_channels
+                        .map(
+                          (channel) =>
+                            slackChannelsData?.find(
+                              (slackChannel) => slackChannel.id === channel
+                            )?.name
+                        )
+                        .join(", ")}
                     </div>
                   ),
                 };

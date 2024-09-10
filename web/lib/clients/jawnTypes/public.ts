@@ -95,6 +95,12 @@ export interface paths {
     get: operations["GetIntegration"];
     post: operations["UpdateIntegration"];
   };
+  "/v1/integration/slack/settings": {
+    get: operations["GetSlackSettings"];
+  };
+  "/v1/integration/slack/channels": {
+    get: operations["GetSlackChannels"];
+  };
   "/v1/experiment/dataset": {
     post: operations["AddDataset"];
   };
@@ -933,14 +939,15 @@ export interface components {
       filter?: components["schemas"]["PromptVersionsFilterNode"];
       inputs: components["schemas"]["Record_string.string_"];
     };
+Json: JsonObject;
     IntegrationCreateParams: {
       integration_name: string;
-      settings?: components["schemas"]["Record_string.any_"];
+      settings?: components["schemas"]["Json"];
       active?: boolean;
     };
     Integration: {
       integration_name?: string;
-      settings?: components["schemas"]["Record_string.any_"];
+      settings?: components["schemas"]["Json"];
       active?: boolean;
       id: string;
     };
@@ -952,7 +959,7 @@ export interface components {
     "Result_Array_Integration_.string_": components["schemas"]["ResultSuccess_Array_Integration__"] | components["schemas"]["ResultError_string_"];
     IntegrationUpdateParams: {
       integration_name?: string;
-      settings?: components["schemas"]["Record_string.any_"];
+      settings?: components["schemas"]["Json"];
       active?: boolean;
     };
     ResultSuccess_Integration_: {
@@ -961,6 +968,15 @@ export interface components {
       error: null;
     };
     "Result_Integration.string_": components["schemas"]["ResultSuccess_Integration_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess_Array__id-string--name-string___": {
+      data: {
+          name: string;
+          id: string;
+        }[];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Array__id-string--name-string__.string_": components["schemas"]["ResultSuccess_Array__id-string--name-string___"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess__datasetId-string__": {
       data: {
         datasetId: string;
@@ -1058,7 +1074,6 @@ export interface components {
       error: null;
     };
     "Result_number.string_": components["schemas"]["ResultSuccess_number_"] | components["schemas"]["ResultError_string_"];
-Json: JsonObject;
     HeliconeDataset: {
       created_at: string | null;
       dataset_type: string;
@@ -1969,6 +1984,26 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  GetSlackSettings: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Integration.string_"];
+        };
+      };
+    };
+  };
+  GetSlackChannels: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Array__id-string--name-string__.string_"];
         };
       };
     };

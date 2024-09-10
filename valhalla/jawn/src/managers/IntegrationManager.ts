@@ -6,6 +6,7 @@ import {
   IntegrationCreateParams,
   IntegrationUpdateParams,
 } from "../controllers/public/integrationController";
+import { Json } from "../lib/db/database.types";
 
 export class IntegrationManager extends BaseManager {
   constructor(authParams: AuthParams) {
@@ -93,5 +94,77 @@ export class IntegrationManager extends BaseManager {
         active: boolean;
       }
     );
+  }
+
+  public async getIntegrationByType(integrationType: string): Promise<
+    Result<
+      {
+        id: string;
+        integration_name: string;
+        settings: Json;
+        active: boolean;
+      },
+      string
+    >
+  > {
+    const { data, error } = await supabaseServer.client
+      .from("integrations")
+      .select("id, integration_name, settings, active")
+      .eq("organization_id", this.authParams.organizationId)
+      .eq("integration_name", integrationType)
+      .single();
+
+    if (error) {
+      return err(error.message);
+    }
+
+    return ok(
+      data satisfies {
+        id: string;
+        integration_name: string;
+        settings: Json;
+        active: boolean;
+      }
+    );
+  }
+
+  public async getSlackChannels(): Promise<
+    Result<Array<{ id: string; name: string }>, string>
+  > {
+    const { data, error } = await supabaseServer.client
+      .from("integrations")
+      .select("id, integration_name, settings, active")
+      .eq("integration_name", "slack")
+      .eq("organization_id", this.authParams.organizationId);
+
+    if (error) {
+      return err(error.message);
+    }
+
+    if (!data || data.length === 0) {
+      return err("No data found");
+    }
+
+    const slackSettings = data[0].settings as Record<string, any>;
+    try {
+      const response = await fetch(
+        "https://slack.com/api/conversations.list?limit=1000&types=public_channel,private_channel",
+        {
+          // TODO: implement pagination
+          headers: {
+            Authorization: `Bearer ${slackSettings.access_token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      const json = await response.json();
+      console.log("Slack channels", json);
+      return ok(json.channels as Array<{ id: string; name: string }>);
+    } catch (error) {
+      if (error instanceof Error) {
+        return err(error.message);
+      }
+      return err("An unknown error occurred");
+    }
   }
 }
