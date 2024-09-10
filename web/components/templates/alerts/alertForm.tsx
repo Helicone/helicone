@@ -318,7 +318,11 @@ const AlertForm = (props: AlertFormProps) => {
             <label htmlFor="alert-emails" className="text-gray-500">
               Emails
             </label>
-            <Switch checked={showEmails} onCheckedChange={setShowEmails} />
+            <Switch
+              size="md"
+              checked={showEmails}
+              onCheckedChange={setShowEmails}
+            />
           </div>
           {showEmails && (
             <MultiSelect
@@ -327,6 +331,7 @@ const AlertForm = (props: AlertFormProps) => {
               onValueChange={(values: string[]) => {
                 setSelectedEmails(values);
               }}
+              className="!mb-8"
             >
               {members.map((member, idx) => {
                 return (
@@ -348,6 +353,7 @@ const AlertForm = (props: AlertFormProps) => {
               Slack Channels
             </label>
             <Switch
+              size="md"
               checked={showSlackChannels}
               onCheckedChange={setShowSlackChannels}
             />
