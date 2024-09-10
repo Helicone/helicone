@@ -382,8 +382,8 @@ const AlertForm = (props: AlertFormProps) => {
                 </MultiSelect>
                 <small className="text-gray-500">
                   If the channel is private, you will need to add the bot to the
-                  channel by mentioning <strong>@Helicone Slackbot</strong> in
-                  the channel.
+                  channel by mentioning <strong>@Helicone</strong> in the
+                  channel.
                 </small>
               </>
             ) : (
