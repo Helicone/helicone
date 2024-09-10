@@ -49,6 +49,45 @@ const useGetOrgMembers = (orgId: string) => {
   };
 };
 
+const useGetOrgSlackIntegration = (orgId: string) => {
+  const jawn = getJawnClient(orgId);
+  const { data, isLoading } = useQuery({
+    queryKey: ["OrganizationsSlackIntegration", orgId],
+    queryFn: async (query) => {
+      const { data, error } = await jawn.GET("/v1/integration/slack/settings");
+
+      if (error) {
+        console.error("Error fetching slack integration:", error);
+        return null;
+      }
+      return data;
+    },
+  });
+  return {
+    data,
+    isLoading,
+  };
+};
+
+const useGetOrgSlackChannels = (orgId: string) => {
+  const jawn = getJawnClient(orgId);
+  const { data, isLoading } = useQuery({
+    queryKey: ["OrganizationsSlackChannels", orgId],
+    queryFn: async (query) => {
+      const { data, error } = await jawn.GET("/v1/integration/slack/channels");
+      if (error) {
+        console.error("Error fetching slack channels:", error);
+        return null;
+      }
+      return data.data || [];
+    },
+  });
+  return {
+    data,
+    isLoading,
+  };
+};
+
 const useGetOrgOwner = (orgId: string) => {
   const jawn = getJawnClient(orgId);
   const { data, isLoading } = useQuery({
@@ -271,4 +310,6 @@ export {
   setOrgCookie,
   useGetOrg,
   useGetOrgMembersAndOwner,
+  useGetOrgSlackIntegration,
+  useGetOrgSlackChannels,
 };

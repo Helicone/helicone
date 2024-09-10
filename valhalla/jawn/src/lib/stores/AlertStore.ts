@@ -52,8 +52,8 @@ export class AlertStore extends BaseStore {
     }
 
     const query = `
-      INSERT INTO alert (name, metric, threshold, time_window, emails, org_id, minimum_request_count, status)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      INSERT INTO alert (name, metric, threshold, time_window, emails, slack_channels, org_id, minimum_request_count, status)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
       RETURNING id
     `;
     const parameters = [
@@ -62,6 +62,7 @@ export class AlertStore extends BaseStore {
       alert.threshold,
       alert.time_window,
       alert.emails,
+      alert.slack_channels,
       alert.org_id,
       alert.minimum_request_count,
       alert.status,
@@ -124,6 +125,11 @@ export class AlertStore extends BaseStore {
     if (!isValidEmailArray(alert.emails))
       return { data: null, error: "Invalid emails" };
 
+    if (alert.emails.length === 0 && alert.slack_channels.length === 0)
+      return {
+        data: null,
+        error: "At least one notification method is required",
+      };
     return { data: null, error: null };
   }
 }
