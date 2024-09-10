@@ -107,9 +107,7 @@ export default function PricingComparisonTable() {
 
   return (
     <div className="flex flex-col max-w-6xl mx-auto space-y-8 py-16 w-full">
-      <h2 className="text-lg sm:text-2xl font-bold tracking-tight max-w-4xl pt-8">
-        Compare plans
-      </h2>
+      <h3 className="text-[36px] font-bold">Compare plans</h3>
 
       <Tabs
         defaultValue="developer"

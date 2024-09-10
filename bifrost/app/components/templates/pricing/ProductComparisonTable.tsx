@@ -45,8 +45,9 @@ export default function ProductComparisonTable() {
   }, []);
 
   return (
-    <div className="py-10">
-      <h2 className="text-3xl font-bold mb-6">Compare to similar products</h2>
+    <div className="flex flex-col max-w-6xl mx-auto space-y-8 py-16 w-full">
+      <h3 className="text-[36px] font-bold">Compare to similar products</h3>
+
       <div className="overflow-x-auto relative border rounded-lg">
         <div
           ref={overlayRef}

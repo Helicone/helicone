@@ -9,9 +9,9 @@ const ScaleCard: React.FC = () => {
     <Card className="relative p-[24px] bg-white h-[500px] border-[#0CA5EA] border-[2px] ">
       <Card className="absolute top-0 right-0 bg-[#E7F6FD] translate-x-[14px] -translate-y-[14px] rotate-[10.2deg] px-[12px] py-[6px]  border-[#0CA5EA] border-[2px] rounded-[4px]">
         <Col className="items-center text-[#0CA5EA]">
-          <h3 className="text-[14px] font-extrabold ">Recommended</h3>
-          <h4 className="text-[12px] whitespace-nowrap ">
-            for <u>production</u> AI applications
+          <h3 className="text-[16px] font-extrabold ">Recommended</h3>
+          <h4 className="text-[14px] font-bold whitespace-nowrap ">
+            for <u>production</u> AI apps
           </h4>
         </Col>
       </Card>
@@ -21,22 +21,23 @@ const ScaleCard: React.FC = () => {
             Team
           </div>
           <Col className="gap-[8px]">
-            <Row className="items-center gap-[8px]">
-              <Row className="text-[36px] font-extrabold text-[#0CA5EA] items-center">
+            <Row className="items-center">
+              <Row className="text-[36px] font-bold text-[#0CA5EA] items-center">
                 <Row>
                   <span className="text-[24px] pt-[7px]">$</span>40
                 </Row>
-
                 <span className="text-[18px]">/mo</span>
               </Row>
-
               <Row className="text-[18px] text-black font-semibold line-through">
                 $50/mo
               </Row>
             </Row>
 
-            <h4 className="text-[18px]">
-              Everything to <b>kickstart your AI project</b>.
+            <h4 className="text-[16px] text-gray-500">
+                All features <b>for the entire team</b>. 
+            </h4>
+            <h4 className="text-[14px] text-gray-500">
+              Everything in Developer, plus: 
             </h4>
           </Col>
         </Col>

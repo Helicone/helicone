@@ -57,14 +57,15 @@ export default function Example() {
             </span>{" "}
             that scales with your business when you need it.
           </p>
-          <div className="flex items-center gap-4 pt-4">
+          {/* <div className="flex items-center gap-4 pt-4">
             <Link
               href="https://us.helicone.ai/signup?demo=true"
               className="bg-sky-500 hover:bg-sky-600 border-2 border-sky-700 whitespace-nowrap rounded-md px-4 py-1.5 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
             >
               Get a demo
             </Link>
-          </div>
+          </div> */}
+
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 py-16 max-w-[500px] lg:max-w-none lg:w-full">
             <FreeCard />
             <ScaleCard />
@@ -166,7 +167,7 @@ export default function Example() {
           <ProductComparisonTable />
 
           <div className="py-10 grid grid-cols-1 lg:grid-cols-12 bg-white rounded-md">
-            <Col className="col-span-5 p-[24px]">
+            <Col className="col-span-5">
               <span className="text-[36px] font-bold">
                 Available <br />
                 discounts
@@ -231,57 +232,62 @@ export default function Example() {
             </div>
           </div>
 
-          <div className="py-16">
-            <h2 className="text-3xl font-bold mb-8">
-              Frequently asked questions
-            </h2>
-            <Accordion type="single" collapsible className="w-full">
-              <AccordionItem value="item-1">
-                <AccordionTrigger>
-                  Which Helicone plan is right for me?
-                </AccordionTrigger>
-                <AccordionContent>
-                  Yes. It&apos;s right for you.
-                </AccordionContent>
-              </AccordionItem>
+          <div className="py-16 flex flex-row justify-between">
+            <div className="w-1/2">
+              <h3 className="text-[36px] font-bold">
+                Frequently <br />
+                asked <br />
+                questions</h3>
+            </div>
+            <div className="w-1/2">
+              <Accordion type="single" collapsible className="w-full">
+                <AccordionItem value="item-1">
+                  <AccordionTrigger>
+                    Which Helicone plan is right for me?
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    Yes. It&apos;s right for you.
+                  </AccordionContent>
+                </AccordionItem>
 
-              <AccordionItem value="item-2">
-                <AccordionTrigger>
-                  What are the limits for each plan?
-                </AccordionTrigger>
-                <AccordionContent>
-                  For the Developer plan, you have access to 10k free requests
-                  and dashboard analytics. For the Team plan, you have access to
-                  all features, such as Playground, Prompts, Exports, Evals and
-                  more. For each feature, you will pay as you go.
-                </AccordionContent>
-              </AccordionItem>
+                <AccordionItem value="item-2">
+                  <AccordionTrigger>
+                    What are the limits for each plan?
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    For the Developer plan, you have access to 10k free requests
+                    and dashboard analytics. For the Team plan, you have access to
+                    all features, such as Playground, Prompts, Exports, Evals and
+                    more. For each feature, you will pay as you go.
+                  </AccordionContent>
+                </AccordionItem>
 
-              <AccordionItem value="item-3">
-                <AccordionTrigger>
-                  I went over my limits. What can I do?
-                </AccordionTrigger>
-                <AccordionContent>
-                  You can switch to the Team plan. If you are already on the
-                  Team plan, you will be automatically charged for your usage.
-                </AccordionContent>
-              </AccordionItem>
+                <AccordionItem value="item-3">
+                  <AccordionTrigger>
+                    I went over my limits. What can I do?
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    You can switch to the Team plan. If you are already on the
+                    Team plan, you will be automatically charged for your usage.
+                  </AccordionContent>
+                </AccordionItem>
 
-              <AccordionItem value="item-4">
-                <AccordionTrigger>
-                  Am I eligible for any discounts?
-                </AccordionTrigger>
-                <AccordionContent>
-                  If you are a startup under 2 years old, a non-profit, an
-                  open-source company or a student, you may be eligible for
-                  discounts.{" "}
-                  <a href="/contact" className="text-blue-600 hover:underline">
-                    Apply here
-                  </a>
-                  .
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
+                <AccordionItem value="item-4">
+                  <AccordionTrigger>
+                    Am I eligible for any discounts?
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    If you are a startup under 2 years old, a non-profit, an
+                    open-source company or a student, you may be eligible for
+                    discounts.{" "}
+                    <a href="/contact" className="text-blue-600 hover:underline">
+                      Apply here
+                    </a>
+                    .
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            </div>
           </div>
 
           <div className="py-16 ">
