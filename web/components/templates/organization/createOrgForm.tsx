@@ -7,7 +7,7 @@ import {
   RocketLaunchIcon,
   CpuChipIcon,
   ScaleIcon,
-  Square3Stack3DIcon
+  Square3Stack3DIcon,
 } from "@heroicons/react/24/outline";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { useState } from "react";
@@ -61,7 +61,15 @@ export const ORGANIZATION_COLORS = [
 ];
 
 type OrgIconType = {
-  name: "building" | "cake" | "cloud" | "rocket" | "code" | "chip" | "scale" | "stack";
+  name:
+    | "building"
+    | "cake"
+    | "cloud"
+    | "rocket"
+    | "code"
+    | "chip"
+    | "scale"
+    | "stack";
   icon: React.ForwardRefExoticComponent<
     React.SVGProps<SVGSVGElement> & {
       title?: string | undefined;
