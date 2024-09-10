@@ -502,10 +502,10 @@ export class AlertManager {
                     }%* in the last *${formatTimespan(alert.time_window)}*.`
                   : `Error rate is now back within *${alert.threshold}%*.`
                 : alertStatusUpdate.status === "triggered"
-                ? `Cost has exceeded *\$${
+                ? `Cost has exceeded *$${
                     alert.threshold
                   }* in the last *${formatTimespan(alert.time_window)}*.`
-                : `Cost is now under *\$${alert.threshold}*`) +
+                : `Cost is now under *$${alert.threshold}*`) +
               (alertStatusUpdate.status === "triggered"
                 ? `\nPlease take the necessary action.`
                 : `\nNo further action is required.`),
