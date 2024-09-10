@@ -298,6 +298,23 @@ export class PromptController extends Controller {
     }
     return result;
   }
+
+  @Delete("version/{promptVersionId}")
+  public async deletePromptVersion(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() promptVersionId: string
+  ): Promise<Result<null, string>> {
+    const promptManager = new PromptManager(request.authParams);
+    const result = await promptManager.deletePromptVersion(promptVersionId);
+    if (result.error) {
+      console.error(result.error);
+      this.setStatus(500);
+    } else {
+      this.setStatus(200); // set return status 201
+    }
+    return result;
+  }
+
   @Post("{user_defined_id}/compile")
   public async getPromptVersionsCompiled(
     @Body()

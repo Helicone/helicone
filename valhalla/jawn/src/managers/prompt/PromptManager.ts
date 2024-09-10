@@ -134,6 +134,44 @@ export class PromptManager extends BaseManager {
     return ok(result.data[0]);
   }
 
+  async deletePromptVersion(
+    promptVersionId: string
+  ): Promise<Result<null, string>> {
+    const promptVersion = await this.getPromptVersion({
+      promptVersionId,
+    });
+
+    if (
+      promptVersion.error ||
+      !promptVersion.data ||
+      promptVersion.data.length === 0
+    ) {
+      return err(`Failed to get prompt version: ${promptVersion.error}`);
+    }
+
+    if (
+      promptVersion.data[0].metadata &&
+      promptVersion.data[0].metadata.isProduction
+    ) {
+      return err("Cannot delete production version");
+    }
+
+    const result = await dbExecute(
+      `
+    UPDATE prompts_versions
+    SET soft_delete = true
+    WHERE id = $1 AND organization = $2
+    `,
+      [promptVersionId, this.authParams.organizationId]
+    );
+
+    if (result.error) {
+      return err(`Failed to delete prompt version: ${result.error}`);
+    }
+
+    return ok(null);
+  }
+
   async getPromptVersions(
     filter: FilterNode
   ): Promise<Result<PromptVersionResult[], string>> {
@@ -166,6 +204,7 @@ export class PromptManager extends BaseManager {
     left join prompt_v2 on prompt_v2.id = prompts_versions.prompt_v2
     WHERE prompt_v2.organization = $1
     AND prompt_v2.soft_delete = false
+    AND prompts_versions.soft_delete = false
     AND (${filterWithAuth.filter})
     `,
       filterWithAuth.argsAcc

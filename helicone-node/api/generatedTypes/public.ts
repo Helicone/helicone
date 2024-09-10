@@ -84,6 +84,9 @@ export interface paths {
   "/v1/prompt/{promptId}/versions/query": {
     post: operations["GetPromptVersions"];
   };
+  "/v1/prompt/version/{promptVersionId}": {
+    delete: operations["DeletePromptVersion"];
+  };
   "/v1/prompt/{user_defined_id}/compile": {
     post: operations["GetPromptVersionsCompiled"];
   };
@@ -1889,6 +1892,21 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_PromptVersionResult-Array.string_"];
+        };
+      };
+    };
+  };
+  DeletePromptVersion: {
+    parameters: {
+      path: {
+        promptVersionId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
         };
       };
     };

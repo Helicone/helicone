@@ -182,19 +182,13 @@ const PromptChatRow = (props: PromptChatRowProps) => {
     "system" | "user" | "assistant" | "function"
   >(currentMessage.role);
 
+  // Set isEditing to true by default
   const [isEditing, setIsEditing] = useState(editMode);
 
-  // Add this useEffect to update isEditing when editMode changes
+  // Update isEditing when editMode changes
   useEffect(() => {
     setIsEditing(editMode);
   }, [editMode]);
-
-  // on the initial render, if the current message is empty, set the mode to editing
-  useEffect(() => {
-    if (currentMessage.content === "") {
-      setIsEditing(true);
-    }
-  }, []);
 
   const searchAndGetImage = (message: Message) => {
     if (Array.isArray(message.content) && hasImage(message.content)) {

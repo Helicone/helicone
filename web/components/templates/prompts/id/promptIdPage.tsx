@@ -10,6 +10,8 @@ import {
   BookOpenIcon,
   ChartBarIcon,
   BarsArrowUpIcon,
+  ArrowTrendingUpIcon,
+  TrashIcon,
 } from "@heroicons/react/24/outline";
 import { useRouter } from "next/router";
 import { useExperiments } from "../../../../services/hooks/prompts/experiments";
@@ -423,6 +425,28 @@ const PromptIdPage = (props: PromptIdPageProps) => {
     refetchPrompt();
   };
 
+  const deletePromptVersion = async (promptVersionId: string) => {
+    const version = prompts?.find((p) => p.id === promptVersionId);
+    if (version?.metadata?.isProduction) {
+      notification.setNotification("Cannot delete production version", "error");
+      return;
+    }
+    const result = await jawn.DELETE("/v1/prompt/version/{promptVersionId}", {
+      params: {
+        path: {
+          promptVersionId: promptVersionId,
+        },
+      },
+    });
+    if (result.error || !result.data) {
+      notification.setNotification("Failed to delete version", "error");
+      return;
+    }
+    notification.setNotification("Version deleted successfully", "success");
+    refetchPromptVersions();
+    refetchPrompt();
+  };
+
   return (
     <div className="w-full h-full flex flex-col space-y-4">
       <div className="flex flex-row items-center justify-between">
@@ -719,7 +743,16 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                                             promoteToProduction(prompt.id)
                                           }
                                         >
+                                          <ArrowTrendingUpIcon className="h-4 w-4 mr-2" />
                                           Promote to prod
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem
+                                          onClick={() =>
+                                            deletePromptVersion(prompt.id)
+                                          }
+                                        >
+                                          <TrashIcon className="h-4 w-4 mr-2 text-red-500" />
+                                          <p className="text-red-500">Delete</p>
                                         </DropdownMenuItem>
                                       </DropdownMenuContent>
                                     </DropdownMenu>
@@ -834,7 +867,16 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                                         promoteToProduction(prompt.id)
                                       }
                                     >
+                                      <ArrowTrendingUpIcon className="h-4 w-4 mr-2" />
                                       Promote to prod
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                      onClick={() =>
+                                        deletePromptVersion(prompt.id)
+                                      }
+                                    >
+                                      <TrashIcon className="h-4 w-4 mr-2 text-red-500" />
+                                      <p className="text-red-500">Delete</p>
                                     </DropdownMenuItem>
                                   </DropdownMenuContent>
                                 </DropdownMenu>
