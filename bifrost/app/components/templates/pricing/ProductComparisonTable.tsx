@@ -11,15 +11,15 @@ const products = [
 ];
 
 const featureMatrix = [
-  { name: "Built for Scale", support: [false, false, false, false, true] },
+  { name: "Built for scale", support: [false, false, false, false, true] },
   { name: "1 line integration", support: [false, false, false, false, true] },
-  { name: "Flexible Pricing", support: [false, false, false, false, true] },
-  { name: "Open-source", support: [false, false, false, true, true] },
-  { name: "Prompts", support: [false, false, false, false, true] },
-  { name: "Evaluation", support: [false, true, false, false, true] },
-  { name: "Tracing", support: [false, false, false, false, true] },
-  { name: "Use tracking", support: [false, false, false, false, true] },
-  { name: "Exports", support: [false, false, false, false, true] },
+  { name: "Flexible pricing", support: [false, false, false, true, true] },
+  { name: "Open-source", support: [false, true, false, true, true] },
+  { name: "Prompts", support: [true, true, true, true, true] },
+  { name: "Evaluation", support: [true, true, false, false, true] },
+  { name: "Tracing", support: [true, true, true, true, true] },
+  { name: "Use tracking", support: [true, false, true, true, true] },
+  { name: "Exports", support: [true, true, true, true, true] },
 ];
 
 export default function ProductComparisonTable() {
@@ -53,19 +53,19 @@ export default function ProductComparisonTable() {
           ref={overlayRef}
           className="absolute top-0 right-0 h-full rounded-r-lg border-[#0CA5EA] border-2"
         ></div>
-        <table ref={tableRef} className="w-full border-collapse  bg-gray-100  ">
+        <table ref={tableRef} className="w-full border-collapse bg-gray-100">
           <thead>
-            <tr className="">
-              <th className="p-3 text-left font-semibold  bg-white"></th>
+            <tr>
+              <th className="p-2 text-left font-semibold bg-white"></th>
               {products.map((product) => (
                 <th
                   key={product.name}
-                  className="p-3 text-center font-semibold last:bg-white "
+                  className="p-2 text-center font-semibold last:bg-white"
                 >
                   <img
                     src={product.logo}
                     alt={product.logo}
-                    className="h-8 mx-auto mb-2"
+                    className="h-6 mx-auto mb-2 mt-2" // Added more padding above and below the image
                   />
                   {product.name}
                 </th>
@@ -77,17 +77,17 @@ export default function ProductComparisonTable() {
               <tr
                 key={feature.name}
                 className={clsx(
-                  "h-[96px]",
+                  "h-[48px]",
                   index % 2 === 0 ? "bg-gray-50" : "bg-white"
                 )}
               >
-                <td className={clsx("p-3 font-semibold", "bg-white border")}>
+                <td className={clsx("px-4 py-0 font-semibold", "bg-white border")}>
                   {feature.name}
                 </td>
                 {feature.support.map((supported, i) => (
                   <td
                     key={`${feature.name}-${products[i].name}`}
-                    className={clsx("p-3 text-center last:bg-white")}
+                    className={clsx("p-2 text-center last:bg-white")}
                   >
                     {supported ? (
                       <CheckIcon className="w-6 h-6 text-green-500 mx-auto" />

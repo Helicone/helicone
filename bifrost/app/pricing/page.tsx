@@ -166,7 +166,7 @@ export default function Example() {
           </div>
           <ProductComparisonTable />
 
-          <div className="py-10 grid grid-cols-1 lg:grid-cols-12 bg-white rounded-md">
+          <div className="py-10 p-8 grid grid-cols-1 lg:grid-cols-12 bg-white rounded-md">
             <Col className="col-span-5">
               <span className="text-[36px] font-bold">
                 Available <br />
@@ -232,7 +232,7 @@ export default function Example() {
             </div>
           </div>
 
-          <div className="py-16 flex flex-row justify-between">
+          <div className="py-16 p-8 flex flex-row justify-between">
             <div className="w-1/2">
               <h3 className="text-[36px] font-bold">
                 Frequently <br />
@@ -294,7 +294,7 @@ export default function Example() {
             <div className="">
               <div className="lg:grid lg:grid-cols-2 lg:gap-8 items-center">
                 <div className="bg-gray-50 rounded-lg p-8">
-                  <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
+                  <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl">
                     Understand your AI
                     <span className="block text-[#0CA5EA]">
                       performance bottleneck

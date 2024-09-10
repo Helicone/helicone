@@ -79,9 +79,9 @@ const FeatureRow: React.FC<FeatureRowProps> = ({
       )}
     >
       {isAvailable ? (
-        <CheckIcon className="w-5 h-5 text-[#6AA84F]" />
+        <CheckIcon className="w-6 h-6 text-[#6AA84F]" />
       ) : (
-        <XMarkIcon className="w-5 h-5 text-red-500" />
+        <XMarkIcon className="w-6 h-6 text-red-500" />
       )}
       {amount && (
         <div className="flex flex-col gap-[4px] text-[#7D7D7D]">
@@ -206,12 +206,12 @@ export default function PricingComparisonTable() {
                     <Row className="text-[18px] text-black font-semibold line-through">
                       {isAnnual ? "$50/mo" : ""}
                     </Row>
-                    <Row className="text-[36px] font-extrabold text-[#0CA5EA] items-center">
+                    <Row className="text-[36px] font-extrabold items-center">
                       <Row>
-                        <span className="text-[24px] pt-[7px]">$</span>
-                        {isAnnual ? "40" : "50"}
+                        <span className="text-[24px] pt-[4px]" style={{ color: isAnnual ? "#0CA5EA" : "black" }}>$</span>
+                        <span style={{ color: isAnnual ? "#0CA5EA" : "black" }}>{isAnnual ? "40" : "50"}</span>
                       </Row>
-                      <span className="text-[18px]">/mo</span>
+                      <span className="text-[18px]" style={{ color: isAnnual ? "#0CA5EA" : "black" }}>/mo</span>
                     </Row>
                   </Row>
                 </Row>
