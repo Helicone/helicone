@@ -93,8 +93,6 @@ const openai = new OpenAI(configuration);
               <DiffHighlight
                 code={`
 import { hpf } from "@helicone/prompts";
-
-const scene = "OpenAI";
  
 const chatCompletion = await openai.chat.completions.create(
   {
@@ -102,7 +100,7 @@ const chatCompletion = await openai.chat.completions.create(
       {
         role: "user",
         // Add hpf to any string, and nest any variable in additional brackets \`{}\`
-        content: hpf\`Write a story about \${{ scene }}\`,
+        content: hpf\`Write a story about \${{ scene: "OpenAI }}\`,
       },
     ],
     model: "gpt-4o",
