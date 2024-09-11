@@ -49,6 +49,7 @@ import ThemedBubbleModal from "../shared/themed/themedBubbleModal";
 import { ThemedSwitch } from "../shared/themed/themedSwitch";
 import { getUSDate, signOut } from "../shared/utils/utils";
 import MetaData from "./public/authMetaData";
+import { AlertTriangleIcon } from "lucide-react";
 interface AuthLayoutProps {
   children: React.ReactNode;
 }
@@ -622,6 +623,28 @@ const AuthLayout = (props: AuthLayoutProps) => {
             </div>
           </div>
           <main className="flex-1">
+            {org?.currentOrg?.tier === "growth" ||
+            org?.currentOrg?.tier === "pro" ? (
+              <div className="p-2">
+                <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-md flex items-center">
+                  <AlertTriangleIcon className="h-6 w-6 mr-4 flex-shrink-0" />
+                  <div>
+                    <p className="font-bold">Important: Pricing Changes</p>
+                    <p>
+                      We&apos;re updating our pricing structure. Please review
+                      and update your account before November 1st, 2024 to avoid
+                      service interruption.
+                      <a
+                        href="/settings?tab=1"
+                        className="underline ml-1 font-semibold"
+                      >
+                        Update your account now
+                      </a>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ) : null}
             {banner && (
               <div className="p-2">
                 <div className="w-full bg-sky-500 rounded-lg p-2 text-white flex items-center justify-center gap-2">
@@ -641,6 +664,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
                 </div>
               </div>
             )}
+
             <div
               className={clsx(
                 "mx-auto px-4 sm:px-8 bg-gray-100 dark:bg-[#17191d] h-full min-h-screen"
