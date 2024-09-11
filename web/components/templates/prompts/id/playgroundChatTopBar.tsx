@@ -25,14 +25,14 @@ export const PlaygroundChatTopBar: React.FC<PlaygroundChatTopBarProps> = ({
 }) => {
   return (
     <div className="h-12 px-2 rounded-t-md flex flex-row items-center justify-between w-full bg-gray-50 dark:bg-black text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">
-      <div className="flex flex-row items-center space-x-2 border-r border-l border-t border-gray-200 dark:border-gray-700 mt-2 py-2 bg-white dark:bg-black rounded-t-lg">
-        <div className="flex rounded-md overflow-hidden bg-white">
+      <div className="flex flex-row items-center space-x-2 py-2">
+        <div className="flex rounded-md overflow-hidden ">
           <button
             onClick={() => setIsEditMode(true)}
             className={`py-1 px-3 text-xs font-semibold ${
               !isEditMode
-                ? "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300"
-                : "bg-[#F1F5F9] dark:bg-black text-gray-700 dark:text-gray-300 py-2 ml-2 rounded-md"
+                ? " text-gray-700 dark:text-gray-300"
+                : "bg-[#F1F5F9] border border-[#CBD5E1] dark:border-gray-700 dark:bg-black text-gray-700 dark:text-gray-300 py-2 ml-2 rounded-md"
             }`}
           >
             Edit
@@ -41,8 +41,8 @@ export const PlaygroundChatTopBar: React.FC<PlaygroundChatTopBarProps> = ({
             onClick={() => setIsEditMode(false)}
             className={`py-1 px-3 text-xs font-semibold ${
               isEditMode
-                ? "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300"
-                : "bg-[#F1F5F9] dark:bg-black text-gray-700 dark:text-gray-300 py-2 mr-2 rounded-md"
+                ? " text-gray-700 dark:text-gray-300"
+                : "bg-[#F1F5F9] border border-[#CBD5E1] dark:border-gray-700 dark:bg-black text-gray-700 dark:text-gray-300 py-2 mr-2 rounded-md"
             }`}
           >
             Preview
