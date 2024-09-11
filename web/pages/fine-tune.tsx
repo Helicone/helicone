@@ -1,5 +1,5 @@
 import { ReactElement } from "react";
-import AuthLayout from "../components/layout/authLayout";
+import AuthLayout from "../components/layout/auth/authLayout";
 import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
 import { GetServerSidePropsContext } from "next";
 import FineTunePage from "../components/templates/fine-tune/fineTunePage";

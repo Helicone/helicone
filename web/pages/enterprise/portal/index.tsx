@@ -1,6 +1,6 @@
 import { User } from "@supabase/auth-helpers-nextjs";
 import { GetServerSidePropsContext } from "next";
-import AuthLayout from "../../../components/layout/authLayout";
+import AuthLayout from "../../../components/layout/auth/authLayout";
 import { SupabaseServerWrapper } from "../../../lib/wrappers/supabase";
 import PortalPage from "../../../components/templates/enterprise/portal/portalPage";
 import { ReactElement } from "react";

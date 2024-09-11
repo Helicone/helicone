@@ -1,4 +1,4 @@
-import AuthLayout from "@/components/layout/authLayout";
+import AuthLayout from "@/components/layout/auth/authLayout";
 import { Button } from "@/components/ui/button";
 import { withAuthSSR } from "@/lib/api/handlerWrappers";
 import { supabaseServer } from "@/lib/supabaseServer";

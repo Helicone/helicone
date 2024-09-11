@@ -1,7 +1,7 @@
 import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
 import { NextPageWithLayout } from "../_app";
 import SettingsPage from "../../components/templates/settings/settingsPage";
-import AuthLayout from "../../components/layout/authLayout";
+import AuthLayout from "../../components/layout/auth/authLayout";
 import { SupabaseServerWrapper } from "../../lib/wrappers/supabase";
 import { ReactElement } from "react";
 

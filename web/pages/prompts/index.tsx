@@ -2,7 +2,7 @@ import type { ReactElement } from "react";
 import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
 import PromptsPage from "../../components/templates/prompts/promptsPage";
 import { NextPageWithLayout } from "../_app";
-import AuthLayout from "../../components/layout/authLayout";
+import AuthLayout from "../../components/layout/auth/authLayout";
 import { SupabaseServerWrapper } from "../../lib/wrappers/supabase";
 
 const Prompts: NextPageWithLayout<

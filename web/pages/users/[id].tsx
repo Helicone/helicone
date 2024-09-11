@@ -2,7 +2,7 @@ import type { ReactElement } from "react";
 import { NextPageWithLayout } from "../_app";
 import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
 import UserIdPage from "../../components/templates/users/id/userIdPage";
-import AuthLayout from "../../components/layout/authLayout";
+import AuthLayout from "../../components/layout/auth/authLayout";
 import { SupabaseServerWrapper } from "../../lib/wrappers/supabase";
 
 const UserId: NextPageWithLayout<
