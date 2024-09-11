@@ -447,6 +447,7 @@ export class AlertManager {
     subject: string;
     text: string;
     html: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     slack_json: Record<string, any>;
   } {
     const alert = alertStatusUpdate.alert;
