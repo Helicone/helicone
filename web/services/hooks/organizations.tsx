@@ -254,6 +254,17 @@ const useOrgsContextManager = () => {
         organization_type: org.organization_type || "",
         date_joined: org.created_at || "",
       });
+
+      if (user) {
+        window.pylon = {
+          chat_settings: {
+            app_id: "f766dfd3-28f8-40a8-872f-351274cbd306",
+            email: user.email,
+            name: user.user_metadata?.name,
+            avatar_url: user.user_metadata?.avatar_url,
+          },
+        };
+      }
     }
   }, [user, org?.id]);
 
