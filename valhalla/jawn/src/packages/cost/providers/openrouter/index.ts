@@ -1816,7 +1816,6 @@ export const costs: ModelRow[] = [
       completion_token: 6e-5,
     },
   },
-  
   {
     model: {
       operator: "equals",
