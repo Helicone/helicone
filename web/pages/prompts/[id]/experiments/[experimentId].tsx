@@ -2,7 +2,7 @@ import { User } from "@supabase/auth-helpers-react";
 import { GetServerSidePropsContext } from "next";
 
 import { ReactElement } from "react";
-import AuthLayout from "../../../../components/layout/authLayout";
+import AuthLayout from "../../../../components/layout/auth/authLayout";
 import { SupabaseServerWrapper } from "../../../../lib/wrappers/supabase";
 import ExperimentIdPage from "../../../../components/templates/prompts/experiments/id/experimentIdPage";
 

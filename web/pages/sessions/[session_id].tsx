@@ -1,5 +1,5 @@
 import { ReactElement } from "react";
-import AuthLayout from "../../components/layout/authLayout";
+import AuthLayout from "../../components/layout/auth/authLayout";
 import { withAuthSSR } from "../../lib/api/handlerWrappers";
 
 import { useGetRequests } from "../../services/hooks/requests";

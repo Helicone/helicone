@@ -1,7 +1,7 @@
 import { User } from "@supabase/auth-helpers-nextjs";
 import { GetServerSidePropsContext } from "next";
 import MetaData from "../../../../components/layout/public/authMetaData";
-import AuthLayout from "../../../../components/layout/authLayout";
+import AuthLayout from "../../../../components/layout/auth/authLayout";
 import { SupabaseServerWrapper } from "../../../../lib/wrappers/supabase";
 
 import PortalIdPage from "../../../../components/templates/enterprise/portal/id/portalIdPage";

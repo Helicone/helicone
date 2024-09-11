@@ -1,5 +1,5 @@
 import { ReactElement } from "react";
-import AuthLayout from "../../../components/layout/authLayout";
+import AuthLayout from "../../../components/layout/auth/authLayout";
 import DatasetIdPage from "../../../components/templates/datasets/datasetsIdPage";
 import { withAuthSSR } from "../../../lib/api/handlerWrappers";
 

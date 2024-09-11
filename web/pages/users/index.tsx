@@ -4,7 +4,7 @@ import { GetServerSidePropsContext } from "next";
 import { ReactElement } from "react";
 import { SortDirection } from "../../services/lib/sorts/users/sorts";
 import UsersPageV2 from "../../components/templates/users/usersPageV2";
-import AuthLayout from "../../components/layout/authLayout";
+import AuthLayout from "../../components/layout/auth/authLayout";
 import { SupabaseServerWrapper } from "../../lib/wrappers/supabase";
 
 interface UsersProps {
