@@ -1,5 +1,5 @@
 import { User } from "@supabase/auth-helpers-nextjs";
-import AuthLayout from "../components/layout/authLayout";
+import AuthLayout from "../components/layout/auth/authLayout";
 import AuthHeader from "../components/shared/authHeader";
 import AlertsPage from "../components/templates/alerts/alertsPage";
 import { withAuthSSR } from "../lib/api/handlerWrappers";
