@@ -118,7 +118,7 @@ const WelcomePageV2 = (props: WelcomePageV2Props) => {
                 await router.reload();
               }}
             >
-              Go to Dashboard
+              Skip, go to Dashboard
             </button>
           </div>
           <Image

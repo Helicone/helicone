@@ -10,7 +10,6 @@ import PublicMetaData from "../components/layout/public/publicMetaData";
 import { GetServerSidePropsContext } from "next";
 import posthog from "posthog-js";
 import { InfoBanner } from "../components/shared/themed/themedDemoBanner";
-import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs";
 
 const SignUp = () => {
   const supabase = useSupabaseClient();
@@ -28,33 +27,9 @@ const SignUp = () => {
     }
   }, [router.query]);
 
-  const handleEmailSubmit = async (email: string, password: string) => {
-    const origin = window.location.origin;
-
-    const { data, error } = await supabase.auth.signUp({
-      email: email,
-      password: password,
-      options: {
-        emailRedirectTo: `${origin}/welcome?verified=true`,
-      },
-    });
-
-    if (error) {
-      setNotification(
-        "Error creating your account. Please try again.",
-        "error"
-      );
-      console.error(error);
-      return;
-    }
-
-    posthog.capture("user_signed_up", {
-      method: "email",
-      email: email,
-    });
-
-    setShowEmailConfirmation(true);
-  };
+  if (user && user.email !== DEMO_EMAIL) {
+    router.push(`/welcome`);
+  }
 
   return (
     <PublicMetaData
@@ -65,7 +40,33 @@ const SignUp = () => {
     >
       {demo === "true" && <InfoBanner />}
       <AuthForm
-        handleEmailSubmit={handleEmailSubmit}
+        handleEmailSubmit={async (email: string, password: string) => {
+          const origin = window.location.origin;
+
+          const { data, error } = await supabase.auth.signUp({
+            email: email,
+            password: password,
+            options: {
+              emailRedirectTo: `${origin}/welcome`,
+            },
+          });
+
+          if (error) {
+            setNotification(
+              "Error creating your account. Please try again.",
+              "error"
+            );
+            console.error(error);
+            return;
+          }
+
+          posthog.capture("user_signed_up", {
+            method: "email",
+            email: email,
+          });
+
+          setShowEmailConfirmation(true);
+        }}
         handleGoogleSubmit={async () => {
           const { error } = await supabase.auth.signInWithOAuth({
             provider: "google",
@@ -127,17 +128,9 @@ export default SignUp;
 export const getServerSideProps = async (
   context: GetServerSidePropsContext
 ) => {
-  const supabase = createServerSupabaseClient(context);
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (user && user.email !== DEMO_EMAIL) {
+  if (process.env.NEXT_PUBLIC_IS_ON_PREM === "true") {
     return {
-      redirect: {
-        destination: "/welcome",
-        permanent: false,
-      },
+      props: {},
     };
   }
 
