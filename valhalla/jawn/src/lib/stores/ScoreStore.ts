@@ -173,7 +173,10 @@ export class ScoreStore extends BaseStore {
             status: row.status,
             completion_tokens: row.completion_tokens,
             prompt_tokens: row.prompt_tokens,
-            model: row.model,
+            model:
+              row.model && row.model !== ""
+                ? row.model
+                : this.getModelFromPath(row.target_url),
             request_id: row.request_id,
             request_created_at: row.request_created_at,
             user_id: row.user_id,
@@ -205,6 +208,23 @@ export class ScoreStore extends BaseStore {
     }
 
     return ok(filteredRequestResponseLogs);
+  }
+
+  private getModelFromPath(path: string): string {
+    const regex1 = /\/engines\/([^/]+)/;
+    const regex2 = /models\/([^/:]+)/;
+
+    let match = path.match(regex1);
+
+    if (!match) {
+      match = path.match(regex2);
+    }
+
+    if (match && match[1]) {
+      return match[1];
+    }
+
+    return "";
   }
 
   public async bumpRequestVersion(
