@@ -37,7 +37,10 @@ export class VersionedRequestStore {
         status: row.status,
         completion_tokens: row.completion_tokens,
         prompt_tokens: row.prompt_tokens,
-        model: row.model,
+        model:
+          row.model && row.model !== ""
+            ? row.model
+            : this.getModelFromPath(row.target_url),
         request_id: row.request_id,
         request_created_at: row.request_created_at,
         user_id: row.user_id,
@@ -128,7 +131,10 @@ export class VersionedRequestStore {
         status: row.status,
         completion_tokens: row.completion_tokens,
         prompt_tokens: row.prompt_tokens,
-        model: row.model ?? this.getModelFromPath(row.target_url),
+        model:
+          row.model && row.model !== ""
+            ? row.model
+            : this.getModelFromPath(row.target_url),
         request_id: row.request_id,
         request_created_at: row.request_created_at,
         user_id: row.user_id,

@@ -374,7 +374,9 @@ export class LoggingHandler extends AbstractLogHandler {
       request_id: request.id,
       completion_tokens: usage.completionTokens ?? 0,
       latency: response.delayMs ?? 0,
-      model: context.processedLog.model ?? "",
+      model: context.processedLog.model && context.processedLog.model !== '' 
+        ? context.processedLog.model 
+        : this.getModelFromPath(request.path),
       prompt_tokens: usage.promptTokens ?? 0,
       request_created_at: formatTimeString(
         request.requestCreatedAt.toISOString()
@@ -405,6 +407,23 @@ export class LoggingHandler extends AbstractLogHandler {
     };
 
     return requestResponseLog;
+  }
+
+  private getModelFromPath(path: string): string {
+    const regex1 = /\/engines\/([^/]+)/;
+    const regex2 = /models\/([^/:]+)/;
+
+    let match = path.match(regex1);
+
+    if (!match) {
+      match = path.match(regex2);
+    }
+
+    if (match && match[1]) {
+      return match[1];
+    }
+
+    return "";
   }
 
   mapResponse(
