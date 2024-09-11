@@ -10,6 +10,7 @@ import PublicMetaData from "../components/layout/public/publicMetaData";
 import { GetServerSidePropsContext } from "next";
 import posthog from "posthog-js";
 import { InfoBanner } from "../components/shared/themed/themedDemoBanner";
+import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs";
 
 const SignUp = () => {
   const supabase = useSupabaseClient();
@@ -26,10 +27,6 @@ const SignUp = () => {
       localStorage.setItem("openDemo", "true");
     }
   }, [router.query]);
-
-  if (user && user.email !== DEMO_EMAIL) {
-    router.push(`/welcome`);
-  }
 
   return (
     <PublicMetaData
@@ -128,9 +125,19 @@ export default SignUp;
 export const getServerSideProps = async (
   context: GetServerSidePropsContext
 ) => {
-  if (process.env.NEXT_PUBLIC_IS_ON_PREM === "true") {
+  const supabase = createServerSupabaseClient(context);
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  console.log("user", user);
+
+  if (user && user.email !== DEMO_EMAIL) {
     return {
-      props: {},
+      redirect: {
+        destination: "/welcome",
+        permanent: true,
+      },
     };
   }
 
