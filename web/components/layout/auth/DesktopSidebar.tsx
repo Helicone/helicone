@@ -2,15 +2,22 @@ import { Menu, Transition } from "@headlessui/react";
 import {
   BookOpenIcon,
   CloudArrowUpIcon,
+  MoonIcon,
   QuestionMarkCircleIcon,
+  SunIcon,
   UserCircleIcon,
 } from "@heroicons/react/24/outline";
-import { useUser } from "@supabase/auth-helpers-react";
+import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import Link from "next/link";
 import { Fragment } from "react";
 import { clsx } from "../../shared/clsx";
 import { useOrg } from "../organizationContext";
 import OrgDropdown from "../orgDropdown";
+import { signOut } from "@/components/shared/utils/utils";
+import { ThemedSwitch } from "@/components/shared/themed/themedSwitch";
+import { useRouter } from "next/router";
+import { Database } from "@/supabase/database.types";
+import { useTheme } from "@/components/shared/theme/themeContext";
 
 interface SidebarProps {
   NAVIGATION: {
@@ -32,6 +39,9 @@ const DesktopSidebar = ({
   const user = useUser();
   const org = useOrg();
   const tier = org?.currentOrg?.tier;
+  const router = useRouter();
+  const supabaseClient = useSupabaseClient<Database>();
+  const themeContext = useTheme();
 
   return (
     <div className="hidden fixed md:inset-y-0 md:flex md:w-56 md:flex-col z-30 bg-white dark:bg-black">
@@ -57,8 +67,79 @@ const DesktopSidebar = ({
               leaveTo="transform opacity-0 scale-95"
             >
               <Menu.Items className="absolute -left-2 mt-2 w-[12.5rem] z-40 origin-top-left divide-y divide-gray-200 dark:divide-gray-800 rounded-md bg-white dark:bg-black border border-gray-300 dark:border-gray-700 shadow-2xl">
-                {/* User menu content */}
-                {/* ... (keep the existing menu items) */}
+                <div className="flex flex-row justify-between items-center divide-x divide-gray-300 dark:divide-gray-700">
+                  <p className="text-gray-900 dark:text-gray-100 text-sm w-full truncate pl-4 p-2">
+                    {user?.email}
+                  </p>
+                </div>
+                <div className="flex items-center w-full justify-between px-2">
+                  <p className="text-gray-900 dark:text-gray-100 text-sm w-full truncate p-2">
+                    Theme
+                  </p>
+                  <ThemedSwitch
+                    checked={themeContext?.theme === "dark" ? true : false}
+                    onChange={() => {
+                      themeContext?.theme === "dark"
+                        ? themeContext?.setTheme("light")
+                        : themeContext?.setTheme("dark");
+                    }}
+                    OnIcon={SunIcon}
+                    OffIcon={MoonIcon}
+                  />
+                </div>
+
+                <Menu.Item>
+                  <div className="p-1">
+                    <Link
+                      href={"https://docs.helicone.ai/introduction"}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={clsx(
+                        "flex items-center text-gray-700 hover:bg-sky-100 dark:text-gray-300 dark:hover:bg-sky-900 rounded-md text-sm pl-3 py-2 w-full truncate"
+                      )}
+                    >
+                      <p>Documentation</p>
+                    </Link>
+                    <Link
+                      href={"https://discord.gg/zsSTcH2qhG"}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={clsx(
+                        "flex items-center text-gray-700 hover:bg-sky-100 dark:text-gray-300 dark:hover:bg-sky-900 rounded-md text-sm pl-3 py-2 w-full truncate"
+                      )}
+                    >
+                      <p>Join Discord</p>
+                    </Link>
+                    <button
+                      onClick={() => {
+                        setReferOpen(true);
+                      }}
+                      className={clsx(
+                        "flex items-center text-gray-700 hover:bg-sky-100 dark:text-gray-300 dark:hover:bg-sky-900 rounded-md text-sm pl-3 py-2 w-full truncate"
+                      )}
+                    >
+                      <p>Refer a friend</p>
+                    </button>
+                  </div>
+                </Menu.Item>
+                <div className="p-1">
+                  <Menu.Item>
+                    {({ active }) => (
+                      <button
+                        className={clsx(
+                          "text-left block text-gray-700 hover:bg-red-100 dark:text-gray-300 dark:hover:bg-red-900 rounded-md text-sm pl-3 py-2 w-full truncate"
+                        )}
+                        onClick={async () => {
+                          signOut(supabaseClient).then(() => {
+                            router.push("/");
+                          });
+                        }}
+                      >
+                        Sign out
+                      </button>
+                    )}
+                  </Menu.Item>
+                </div>
               </Menu.Items>
             </Transition>
           </Menu>
@@ -74,7 +155,27 @@ const DesktopSidebar = ({
           )}
         >
           {/* Reseller button */}
-          {/* ... (keep the existing reseller button code) */}
+          {(org?.currentOrg?.organization_type === "reseller" ||
+            org?.isResellerOfCurrentCustomerOrg) && (
+            <div className="flex w-full">
+              <button
+                onClick={() => {
+                  router.push("/enterprise/portal");
+                  if (
+                    org.currentOrg?.organization_type === "customer" &&
+                    org.currentOrg?.reseller_id
+                  ) {
+                    org.setCurrentOrg(org.currentOrg.reseller_id);
+                  }
+                }}
+                className="border border-gray-300 dark:border-gray-700 dark:text-white w-full flex text-black px-4 py-1 text-sm font-medium items-center text-center justify-center mx-4 bg-gray-100 hover:bg-gray-200 dark:bg-gray-900 dark:hover:bg-gray-800 rounded-md"
+              >
+                {org.currentOrg?.organization_type === "customer"
+                  ? "Back to Portal"
+                  : "Customer Portal"}
+              </button>
+            </div>
+          )}
 
           {/* Navigation */}
           <nav className="p-2 flex flex-col text-sm space-y-1">
