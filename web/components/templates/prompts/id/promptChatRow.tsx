@@ -3,24 +3,23 @@ import {
   ClipboardIcon,
   EyeIcon,
   EyeSlashIcon,
-  PencilSquareIcon,
   TrashIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
-import { useEffect, useState } from "react";
-import { clsx } from "../../shared/clsx";
-import { removeLeadingWhitespace } from "../../shared/utils/utils";
+import { useCallback, useEffect, useState } from "react";
+import { clsx } from "../../../shared/clsx";
+import { removeLeadingWhitespace } from "../../../shared/utils/utils";
 
-import RoleButton from "./new/roleButton";
-import useNotification from "../../shared/notification/useNotification";
+import RoleButton from "../../playground/new/roleButton";
+import useNotification from "../../../shared/notification/useNotification";
 import { Tooltip } from "@mui/material";
-import { enforceString } from "../../../lib/helpers/typeEnforcers";
-import AddFileButton from "./new/addFileButton";
-import ThemedModal from "../../shared/themed/themedModal";
-import MarkdownEditor from "../../shared/markdownEditor";
-import { Message } from "../requests/chatComponent/types";
+import { enforceString } from "../../../../lib/helpers/typeEnforcers";
+import AddFileButton from "../../playground/new/addFileButton";
+import ThemedModal from "../../../shared/themed/themedModal";
+import MarkdownEditor from "../../../shared/markdownEditor";
+import { Message } from "../../requests/chatComponent/types";
 
-interface ChatRowProps {
+interface PromptChatRowProps {
   index: number;
   message: Message;
   callback: (
@@ -29,6 +28,8 @@ interface ChatRowProps {
     image: File | string | null
   ) => void;
   deleteRow: (rowId: string) => void;
+  editMode?: boolean;
+  promptMode?: boolean;
 }
 
 export const hasImage = (content: string | any[] | null) => {
@@ -170,15 +171,9 @@ export const RenderWithPrettyInputKeys = (props: {
   );
 };
 
-const ChatRow = (props: ChatRowProps) => {
-  const { index, message, callback, deleteRow } = props;
-
-  // on the initial render, if the current message is empty, set the mode to editing
-  useEffect(() => {
-    if (currentMessage.content === "") {
-      setIsEditing(true);
-    }
-  }, []);
+const PromptChatRow = (props: PromptChatRowProps) => {
+  const { index, message, callback, deleteRow, editMode, promptMode } = props;
+  console.log("editMode", editMode);
 
   const [currentMessage, setCurrentMessage] = useState(message);
   const [minimize, setMinimize] = useState(false);
@@ -187,7 +182,13 @@ const ChatRow = (props: ChatRowProps) => {
     "system" | "user" | "assistant" | "function"
   >(currentMessage.role);
 
-  const [isEditing, setIsEditing] = useState(false);
+  // Set isEditing to true by default
+  const [isEditing, setIsEditing] = useState(editMode);
+
+  // Update isEditing when editMode changes
+  useEffect(() => {
+    setIsEditing(editMode);
+  }, [editMode]);
 
   const searchAndGetImage = (message: Message) => {
     if (Array.isArray(message.content) && hasImage(message.content)) {
@@ -276,12 +277,6 @@ const ChatRow = (props: ChatRowProps) => {
           <RenderWithPrettyInputKeys
             text={removeLeadingWhitespace(text)}
             selectedProperties={undefined}
-          />
-          <AddFileButton
-            file={file}
-            onFileChange={(file) => {
-              onFileChangeHandler(file, textMessage?.text);
-            }}
           />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           {hasImage(content) && (
@@ -379,16 +374,48 @@ const ChatRow = (props: ChatRowProps) => {
             }
             selectedProperties={undefined}
           />
-          <AddFileButton
-            file={file}
-            onFileChange={(file) => {
-              onFileChangeHandler(file, contentString);
-            }}
-          />
         </div>
       );
     }
   };
+
+  const [promptVariables, setPromptVariables] = useState<
+    Array<{ original: string; heliconeTag: string }>
+  >([]);
+
+  const extractVariables = useCallback((content: string) => {
+    const regex =
+      /(?:\{\{([^}]+)\}\})|(?:<helicone-prompt-input key="([^"]+)"[^>]*\/>)/g;
+    const matches = Array.from(content.matchAll(regex));
+    return matches.map((match) => {
+      const key = match[1] || match[2];
+      return {
+        original: match[0],
+        heliconeTag: `<helicone-prompt-input key="${key.trim()}" />`,
+      };
+    });
+  }, []);
+
+  const replaceVariablesWithTags = useCallback(
+    (
+      content: string,
+      variables: Array<{ original: string; heliconeTag: string }>
+    ) => {
+      let newContent = content;
+      variables.forEach(({ original, heliconeTag }) => {
+        newContent = newContent.replace(original, heliconeTag);
+      });
+      return newContent;
+    },
+    []
+  );
+
+  useEffect(() => {
+    if (isEditing) {
+      const newVariables = extractVariables(contentAsString || "");
+      setPromptVariables(newVariables);
+    }
+  }, [isEditing, contentAsString, extractVariables]);
 
   return (
     <li
@@ -414,81 +441,110 @@ const ChatRow = (props: ChatRowProps) => {
                 callback(contentAsString || "", newRole, file);
               }}
             />
-            <div className="flex items-center space-x-2">
-              <Tooltip title="Edit" placement="top">
-                <button
-                  onClick={() => {
-                    if (isEditing) {
-                      setMinimize(false);
-                      setIsEditing(false);
-                    } else {
-                      setIsEditing(true);
-                    }
-                  }}
-                  className="text-gray-500 font-semibold"
-                >
-                  <PencilSquareIcon className="h-5 w-5" />
-                </button>
-              </Tooltip>
-              <Tooltip title={minimize ? "Expand" : "Shrink"} placement="top">
-                <button
-                  onClick={() => {
-                    setMinimize(!minimize);
-                  }}
-                  className="text-gray-500 font-semibold"
-                >
-                  {minimize ? (
-                    <EyeIcon className="h-5 w-5" />
-                  ) : (
-                    <EyeSlashIcon className="h-5 w-5" />
-                  )}
-                </button>
-              </Tooltip>
-              <Tooltip title="Copy" placement="top">
-                <button
-                  onClick={() => {
-                    navigator.clipboard.writeText(contentAsString || "");
-                    setNotification("Copied to clipboard", "success");
-                  }}
-                  className="text-gray-500 font-semibold"
-                >
-                  <ClipboardIcon className="h-5 w-5" />
-                </button>
-              </Tooltip>
-              <Tooltip title="Delete" placement="top">
-                <button
-                  onClick={() => {
-                    deleteRow(currentMessage.id);
-                  }}
-                  className="text-red-500 font-semibold"
-                >
-                  <TrashIcon className="h-5 w-5" />
-                </button>
-              </Tooltip>
+            <div className="flex justify-end items-center space-x-2 w-full">
+              {!editMode && (
+                <Tooltip title={minimize ? "Expand" : "Shrink"} placement="top">
+                  <button
+                    onClick={() => {
+                      setMinimize(!minimize);
+                    }}
+                    className="text-gray-500 font-semibold"
+                  >
+                    {minimize ? (
+                      <EyeIcon className="h-5 w-5" />
+                    ) : (
+                      <EyeSlashIcon className="h-5 w-5" />
+                    )}
+                  </button>
+                </Tooltip>
+              )}
+              {!editMode && (
+                <Tooltip title="Copy" placement="top">
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(contentAsString || "");
+                      setNotification("Copied to clipboard", "success");
+                    }}
+                    className="text-gray-500 font-semibold"
+                  >
+                    <ClipboardIcon className="h-5 w-5" />
+                  </button>
+                </Tooltip>
+              )}
+              {editMode && (
+                <div className="flex w-full flex-row items-center justify-end space-x-2">
+                  <AddFileButton
+                    file={file}
+                    onFileChange={(file) => {
+                      onFileChangeHandler(file, contentAsString || "");
+                    }}
+                  />
+
+                  <Tooltip title="Delete" placement="top">
+                    <button
+                      onClick={() => {
+                        deleteRow(currentMessage.id);
+                      }}
+                      className="text-red-500 font-semibold"
+                    >
+                      <TrashIcon className="h-5 w-5" />
+                    </button>
+                  </Tooltip>
+                </div>
+              )}
             </div>
           </div>
           <div>
             <div className="w-full px-8 pb-4">
               {isEditing ? (
-                <MarkdownEditor
-                  text={contentAsString || ""}
-                  setText={function (text: string): void {
-                    const newMessages = { ...currentMessage };
-                    const messageContent = newMessages.content;
-                    if (Array.isArray(messageContent)) {
-                      const textMessage = messageContent.find(
-                        (element) => element.type === "text"
+                <div className="space-y-4">
+                  <MarkdownEditor
+                    text={contentAsString || ""}
+                    setText={function (text: string): void {
+                      const newVariables = extractVariables(text);
+                      const replacedText = replaceVariablesWithTags(
+                        text,
+                        newVariables
                       );
-                      textMessage.text = text;
-                    } else {
-                      newMessages.content = text;
-                    }
+                      const newMessages = { ...currentMessage };
+                      const messageContent = newMessages.content;
+                      if (Array.isArray(messageContent)) {
+                        const textMessage = messageContent.find(
+                          (element) => element.type === "text"
+                        );
+                        textMessage.text = replacedText;
+                      } else {
+                        newMessages.content = replacedText;
+                      }
 
-                    setCurrentMessage(newMessages);
-                    callback(text, role, file);
-                  }}
-                  language="markdown"
-                />
+                      setCurrentMessage(newMessages);
+                      callback(replacedText, role, file);
+                      setPromptVariables(newVariables);
+                    }}
+                    language="markdown"
+                  />
+                  {promptVariables.length > 0 && (
+                    <div className="flex flex-col space-y-2">
+                      <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Variables
+                      </label>
+                      <div className="flex flex-wrap gap-2">
+                        {promptVariables.map(({ heliconeTag }, index) => {
+                          const key =
+                            heliconeTag.match(/key="([^"]+)"/)?.[1] || "";
+                          return (
+                            <span
+                              key={index}
+                              className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                            >
+                              {key}
+                            </span>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
               ) : (
                 <>{getContent(currentMessage, minimize)}</>
               )}
@@ -500,4 +556,4 @@ const ChatRow = (props: ChatRowProps) => {
   );
 };
 
-export default ChatRow;
+export default PromptChatRow;
