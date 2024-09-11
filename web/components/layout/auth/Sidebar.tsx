@@ -21,9 +21,9 @@ import { useRouter } from "next/router";
 import { useMemo, useState } from "react";
 import { GoRepoForked } from "react-icons/go";
 import DesktopSidebar from "./DesktopSidebar";
-import MobileSidebar from "./MobileSidebar";
 
 import { PiGraphLight } from "react-icons/pi";
+import MobileNavigation from "./MobileNavigation";
 
 interface SidebarProps {
   tier: string;
@@ -145,11 +145,9 @@ const Sidebar = ({ tier, setReferOpen, setOpen }: SidebarProps) => {
 
   return (
     <>
-      <MobileSidebar
-        sidebarOpen={sidebarOpen}
-        setSidebarOpen={setSidebarOpen}
+      <MobileNavigation
         NAVIGATION={NAVIGATION}
-        tier={tier ?? ""}
+        setReferOpen={setReferOpen}
         setOpen={setOpen}
       />
 

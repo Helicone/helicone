@@ -114,7 +114,9 @@ export default function OrgDropdown({ setReferOpen }: OrgDropdownProps) {
                 Your Organizations
                 {ownedOrgs.length > 7 && ` (${ownedOrgs.length})`}
               </DropdownMenuLabel>
-              <ScrollArea className="h-[200px]">
+              <ScrollArea
+                className={`h-[${Math.min(ownedOrgs.length * 36, 200)}px]`}
+              >
                 {ownedOrgs.map((org, idx) => {
                   const icon = ORGANIZATION_ICONS.find(
                     (icon) => icon.name === org.icon
@@ -150,7 +152,9 @@ export default function OrgDropdown({ setReferOpen }: OrgDropdownProps) {
                 Member Organizations
                 {memberOrgs.length > 7 && ` (${memberOrgs.length})`}
               </DropdownMenuLabel>
-              <ScrollArea className="h-[200px]">
+              <ScrollArea
+                className={`h-[${Math.min(memberOrgs.length * 36, 200)}px]`}
+              >
                 {memberOrgs.map((org, idx) => {
                   const icon = ORGANIZATION_ICONS.find(
                     (icon) => icon.name === org.icon
@@ -186,7 +190,9 @@ export default function OrgDropdown({ setReferOpen }: OrgDropdownProps) {
                 Customers
                 {customerOrgs.length > 7 && ` (${customerOrgs.length})`}
               </DropdownMenuLabel>
-              <ScrollArea className="h-[200px]">
+              <ScrollArea
+                className={`h-[${Math.min(customerOrgs.length * 36, 200)}px]`}
+              >
                 {customerOrgs.map((org, idx) => {
                   const icon = ORGANIZATION_ICONS.find(
                     (icon) => icon.name === org.icon

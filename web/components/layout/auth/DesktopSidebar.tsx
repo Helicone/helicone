@@ -1,4 +1,3 @@
-import { useTheme } from "@/components/shared/theme/themeContext";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Tooltip,
@@ -6,7 +5,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { Database } from "@/supabase/database.types";
+import { useLocalStorage } from "@/services/hooks/localStorage";
 import {
   BookOpenIcon,
   ChevronLeftIcon,
@@ -14,10 +13,8 @@ import {
   CloudArrowUpIcon,
   QuestionMarkCircleIcon,
 } from "@heroicons/react/24/outline";
-import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useState } from "react";
 import { useOrg } from "../organizationContext";
 import OrgDropdown from "../orgDropdown";
 
@@ -38,18 +35,18 @@ const DesktopSidebar = ({
   setReferOpen,
   setOpen,
 }: SidebarProps) => {
-  const user = useUser();
   const org = useOrg();
   const tier = org?.currentOrg?.tier;
   const router = useRouter();
-  const supabaseClient = useSupabaseClient<Database>();
-  const themeContext = useTheme();
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useLocalStorage(
+    "isSideBarCollapsed",
+    false
+  );
 
   return (
     <div
       className={cn(
-        "hidden fixed md:flex md:flex-col z-30 bg-background dark:bg-gray-900 transition-all duration-300 h-screen",
+        "hidden md:flex md:flex-col z-30 bg-background dark:bg-gray-900 transition-all duration-300 h-screen bg-white pb-4",
         isCollapsed ? "md:w-16" : "md:w-56"
       )}
     >
@@ -61,7 +58,7 @@ const DesktopSidebar = ({
               variant="ghost"
               size="icon"
               onClick={() => setIsCollapsed(!isCollapsed)}
-              className="w-full flex justify-center dark:hover:bg-gray-800"
+              className="w-full flex justify-center dark:hover:bg-gray-800 px-2"
             >
               {isCollapsed ? (
                 <ChevronRightIcon className="h-4 w-4" />
