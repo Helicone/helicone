@@ -8,7 +8,6 @@ import { supabaseServer } from "../lib/supabaseServer";
 import { Result, err, ok } from "../lib/result";
 import PublicMetaData from "../components/layout/public/publicMetaData";
 import { useEffect } from "react";
-import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs";
 
 export type CustomerPortalContent = {
   domain: string;
@@ -48,6 +47,10 @@ const SignIn = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [unauthorized]);
+
+  if (user) {
+    router.push("/dashboard");
+  }
 
   return (
     <PublicMetaData
@@ -103,20 +106,6 @@ const SignIn = ({
 export const getServerSideProps = async (
   context: GetServerSidePropsContext
 ) => {
-  const supabase = createServerSupabaseClient(context);
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-
-  if (session) {
-    return {
-      redirect: {
-        destination: "/dashboard",
-        permanent: false,
-      },
-    };
-  }
-
   if (process.env.NEXT_PUBLIC_IS_ON_PREM === "true") {
     return {
       props: {},

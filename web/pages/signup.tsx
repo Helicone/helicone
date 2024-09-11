@@ -130,13 +130,11 @@ export const getServerSideProps = async (
     data: { user },
   } = await supabase.auth.getUser();
 
-  console.log("user", user);
-
   if (user && user.email !== DEMO_EMAIL) {
     return {
       redirect: {
         destination: "/welcome",
-        permanent: true,
+        permanent: false,
       },
     };
   }
