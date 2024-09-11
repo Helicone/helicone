@@ -28,6 +28,34 @@ const SignUp = () => {
     }
   }, [router.query]);
 
+  const handleEmailSubmit = async (email: string, password: string) => {
+    const origin = window.location.origin;
+
+    const { data, error } = await supabase.auth.signUp({
+      email: email,
+      password: password,
+      options: {
+        emailRedirectTo: `${origin}/welcome?verified=true`,
+      },
+    });
+
+    if (error) {
+      setNotification(
+        "Error creating your account. Please try again.",
+        "error"
+      );
+      console.error(error);
+      return;
+    }
+
+    posthog.capture("user_signed_up", {
+      method: "email",
+      email: email,
+    });
+
+    setShowEmailConfirmation(true);
+  };
+
   return (
     <PublicMetaData
       description={
@@ -37,33 +65,7 @@ const SignUp = () => {
     >
       {demo === "true" && <InfoBanner />}
       <AuthForm
-        handleEmailSubmit={async (email: string, password: string) => {
-          const origin = window.location.origin;
-
-          const { data, error } = await supabase.auth.signUp({
-            email: email,
-            password: password,
-            options: {
-              emailRedirectTo: `${origin}/welcome`,
-            },
-          });
-
-          if (error) {
-            setNotification(
-              "Error creating your account. Please try again.",
-              "error"
-            );
-            console.error(error);
-            return;
-          }
-
-          posthog.capture("user_signed_up", {
-            method: "email",
-            email: email,
-          });
-
-          setShowEmailConfirmation(true);
-        }}
+        handleEmailSubmit={handleEmailSubmit}
         handleGoogleSubmit={async () => {
           const { error } = await supabase.auth.signInWithOAuth({
             provider: "google",
