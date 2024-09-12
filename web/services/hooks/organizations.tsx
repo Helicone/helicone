@@ -264,6 +264,12 @@ const useOrgsContextManager = () => {
             avatar_url: user.user_metadata?.avatar_url,
           },
         };
+
+        window.pylon("setNewIssueCustomFields", {
+          organization_id: org.id,
+          organization_name: org.name,
+          organization_tier: org.tier,
+        });
       }
     }
   }, [user, org?.id]);
