@@ -17,15 +17,19 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useOrg } from "../organizationContext";
 import OrgDropdown from "../orgDropdown";
+import { useState } from "react";
+
+interface NavigationItem {
+  name: string;
+  href: string;
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  current: boolean;
+  featured?: boolean;
+  subItems?: NavigationItem[];
+}
 
 interface SidebarProps {
-  NAVIGATION: {
-    name: string;
-    href: string;
-    icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
-    current: boolean;
-    featured?: boolean;
-  }[];
+  NAVIGATION: NavigationItem[];
   setReferOpen: (open: boolean) => void;
   setOpen: (open: boolean) => void;
 }
@@ -42,6 +46,104 @@ const DesktopSidebar = ({
     "isSideBarCollapsed",
     false
   );
+
+  const [expandedItems, setExpandedItems] = useLocalStorage<string[]>(
+    "expandedItems",
+    []
+  );
+
+  const toggleExpand = (name: string) => {
+    const prev = expandedItems || [];
+    setExpandedItems(
+      prev.includes(name)
+        ? prev.filter((item) => item !== name)
+        : [...prev, name]
+    );
+  };
+
+  const renderNavItem = (link: NavigationItem, isSubItem = false) => {
+    const hasSubItems = link.subItems && link.subItems.length > 0;
+
+    return (
+      <div key={link.name}>
+        {isCollapsed ? (
+          <Tooltip delayDuration={0}>
+            <TooltipTrigger asChild>
+              <Link
+                href={hasSubItems ? "#" : link.href}
+                onClick={
+                  hasSubItems ? () => toggleExpand(link.name) : undefined
+                }
+                className={cn(
+                  buttonVariants({
+                    variant: "ghost",
+                    size: "icon",
+                  }),
+                  "h-9 w-9",
+                  link.current && "bg-accent hover:bg-accent"
+                )}
+              >
+                <link.icon
+                  className={cn(
+                    "h-4 w-4",
+                    link.current && "text-accent-foreground"
+                  )}
+                />
+                <span className="sr-only">{link.name}</span>
+              </Link>
+            </TooltipTrigger>
+            <TooltipContent
+              side="right"
+              className="flex items-center gap-4 dark:bg-gray-800 dark:text-gray-200"
+            >
+              {link.name}
+              {link.featured && (
+                <span className="ml-auto text-muted-foreground">New</span>
+              )}
+            </TooltipContent>
+          </Tooltip>
+        ) : (
+          <div className={cn(isSubItem && "ml-4")}>
+            <Link
+              href={hasSubItems ? "#" : link.href}
+              onClick={hasSubItems ? () => toggleExpand(link.name) : undefined}
+              className={cn(
+                buttonVariants({
+                  variant: link.current ? "secondary" : "ghost",
+                  size: "sm",
+                }),
+                "justify-start w-full",
+                hasSubItems && "flex items-center justify-between"
+              )}
+            >
+              <div className="flex items-center">
+                <link.icon
+                  className={cn(
+                    "mr-2 h-4 w-4",
+                    link.current && "text-accent-foreground"
+                  )}
+                />
+                {link.name}
+              </div>
+              {hasSubItems && (
+                <ChevronRightIcon
+                  className={cn(
+                    "h-4 w-4 transition-transform",
+                    expandedItems.includes(link.name) && "rotate-90"
+                  )}
+                />
+              )}
+            </Link>
+          </div>
+        )}
+        {hasSubItems && expandedItems.includes(link.name) && !isCollapsed && (
+          <div className="ml-4 mt-1">
+            {link.subItems!.map((subItem) => renderNavItem(subItem, true))}
+          </div>
+        )}
+      </div>
+    );
+  };
 
   return (
     <>
@@ -108,77 +210,7 @@ const DesktopSidebar = ({
               className="group flex flex-col gap-4 py-2 data-[collapsed=true]:py-2 "
             >
               <nav className="grid gap-1 px-2 group-[[data-collapsed=true]]:justify-center group-[[data-collapsed=true]]:px-2">
-                {NAVIGATION.map((link, index) =>
-                  isCollapsed ? (
-                    <Tooltip key={index} delayDuration={0}>
-                      <TooltipTrigger asChild>
-                        <Link
-                          href={link.href}
-                          className={cn(
-                            buttonVariants({
-                              variant: "ghost",
-                              size: "icon",
-                            }),
-                            "h-9 w-9",
-                            link.current && "bg-accent hover:bg-accent" // Updated styling
-                          )}
-                        >
-                          <link.icon
-                            className={cn(
-                              "h-4 w-4",
-                              link.current && "text-accent-foreground"
-                            )}
-                          />
-                          <span className="sr-only">{link.name}</span>
-                        </Link>
-                      </TooltipTrigger>
-                      <TooltipContent
-                        side="right"
-                        className="flex items-center gap-4 dark:bg-gray-800 dark:text-gray-200"
-                      >
-                        {link.name}
-                        {link.featured && (
-                          <span className="ml-auto text-muted-foreground">
-                            New
-                          </span>
-                        )}
-                      </TooltipContent>
-                    </Tooltip>
-                  ) : (
-                    <Link
-                      key={index}
-                      href={link.href}
-                      className={cn(
-                        buttonVariants({
-                          variant: link.current ? "secondary" : "ghost",
-                          size: "sm",
-                        }),
-                        "justify-start"
-                      )}
-                    >
-                      <link.icon
-                        className={cn(
-                          "mr-2 h-4 w-4",
-                          link.current && "text-accent-foreground"
-                        )}
-                      />
-
-                      {link.name}
-                      {link.featured && (
-                        <span
-                          className={cn(
-                            "ml-auto",
-                            link.current
-                              ? "text-accent-foreground"
-                              : "text-muted-foreground"
-                          )}
-                        >
-                          New
-                        </span>
-                      )}
-                    </Link>
-                  )
-                )}
+                {NAVIGATION.map((link) => renderNavItem(link))}
               </nav>
             </div>
           </div>
