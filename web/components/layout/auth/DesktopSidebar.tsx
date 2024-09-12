@@ -70,7 +70,8 @@ const DesktopSidebar = ({
         </div>
 
         <div className="flex flex-grow flex-col">
-          {(org?.currentOrg?.organization_type === "reseller" ||
+          {((!isCollapsed &&
+            org?.currentOrg?.organization_type === "reseller") ||
             org?.isResellerOfCurrentCustomerOrg) && (
             <div className="flex w-full justify-center px-5 py-2">
               <Button
