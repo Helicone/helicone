@@ -92,7 +92,10 @@ export const getBuilderType = (
     return "GPT3Builder";
   }
 
-  if (/^(ft:)?gpt-(4|3\.5|35)(-turbo)?(-\d{2}k)?(-\d{4})?/.test(model)) {
+  if (
+    /^(ft:)?gpt-(4|3\.5|35)(-turbo)?(-\d{2}k)?(-\d{4})?/.test(model) ||
+    /^o1-(preview|mini)(-\d{4}-\d{2}-\d{2})?$/.test(model)
+  ) {
     return "ChatGPTBuilder";
   }
 
