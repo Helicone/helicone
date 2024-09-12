@@ -176,7 +176,7 @@ const openai = new OpenAI(configuration);
         <HcButton
           variant={"primary"}
           size={"sm"}
-          title={"Send first event"}
+          title={"Go to dashboard"}
           onClick={() => {
             nextStep();
           }}

@@ -5,7 +5,6 @@ import { clsx } from "../../../shared/clsx";
 import CodeSnippet from "./providerIntegrations.tsx/openAISnippets";
 import AzureSnippets from "./providerIntegrations.tsx/azureSnippets";
 import AnthropicSnippets from "./providerIntegrations.tsx/anthropicSnippets";
-import { useRouter } from "next/router";
 import Link from "next/link";
 
 interface IntegrationsProps {
@@ -21,14 +20,10 @@ const Integrations = (props: IntegrationsProps) => {
     "openai" | "azure" | "anthropic"
   >("openai");
 
-  const router = useRouter();
-
   const renderProviderObject = {
-    openai: <CodeSnippet apiKey={apiKey !== "" ? apiKey : undefined} />,
-    azure: <AzureSnippets apiKey={apiKey !== "" ? apiKey : undefined} />,
-    anthropic: (
-      <AnthropicSnippets apiKey={apiKey !== "" ? apiKey : undefined} />
-    ),
+    openai: <CodeSnippet apiKey={apiKey} />,
+    azure: <AzureSnippets apiKey={apiKey} />,
+    anthropic: <AnthropicSnippets apiKey={apiKey} />,
   };
 
   return (

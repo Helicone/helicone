@@ -4,7 +4,6 @@ import CreateOrg from "./steps/createOrg";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import GenerateAPIKey from "./steps/generateAPIKey";
-import Integrations from "./steps/integrations";
 import Features from "./steps/features";
 import EventListen from "./steps/eventListen";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
@@ -54,9 +53,18 @@ const WelcomePageV2 = (props: WelcomePageV2Props) => {
         handleStepChange(3);
       }}
     />,
-    <Integrations
+    // <Integrations
+    //   key={3}
+    //   apiKey={apiKey}
+    //   previousStep={function (): void {
+    //     handleStepChange(2);
+    //   }}
+    //   nextStep={function (): void {
+    //     handleStepChange(4);
+    //   }}
+    // />,
+    <EventListen
       key={3}
-      apiKey={apiKey}
       previousStep={function (): void {
         handleStepChange(2);
       }}
@@ -68,15 +76,6 @@ const WelcomePageV2 = (props: WelcomePageV2Props) => {
       key={4}
       previousStep={function (): void {
         handleStepChange(3);
-      }}
-      nextStep={function (): void {
-        handleStepChange(5);
-      }}
-    />,
-    <EventListen
-      key={5}
-      previousStep={function (): void {
-        handleStepChange(4);
       }}
       nextStep={async function () {
         const jawn = getJawnClient(orgContext?.currentOrg?.id ?? "");
@@ -143,7 +142,7 @@ const WelcomePageV2 = (props: WelcomePageV2Props) => {
           </div>
         </section>
 
-        <div className="overflow-auto lg:pt-32 flex flex-auto">
+        <div className="overflow-auto flex flex-auto">
           {stepArray[step - 1]}
         </div>
       </div>

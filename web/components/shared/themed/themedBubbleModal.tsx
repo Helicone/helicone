@@ -8,6 +8,7 @@ interface ThemedBubbleModalProps {
   removed: boolean;
   children: React.ReactNode;
   buttonText?: string;
+  showButton?: boolean;
 }
 
 const ThemedBubbleModal: React.FC<ThemedBubbleModalProps> = ({
@@ -17,6 +18,7 @@ const ThemedBubbleModal: React.FC<ThemedBubbleModalProps> = ({
   removed,
   children,
   buttonText = "Demo 🚀",
+  showButton = true,
 }) => {
   if (removed) return null;
 
@@ -24,19 +26,23 @@ const ThemedBubbleModal: React.FC<ThemedBubbleModalProps> = ({
     <>
       {!open && (
         <Row className="fixed bottom-4 right-4 z-50 items-center gap-2">
-          <button
-            className="z-50 w-8 h-8 rounded-full bg-red-500 shadow-lg cursor-pointer flex items-center justify-center text-white hover:bg-red-600 transition-colors"
-            onClick={() => setRemoved(true)}
-            aria-label="Remove demo"
-          >
-            <XMarkIcon className="w-4 h-4" />
-          </button>
-          <button
-            className="px-5 font-light h-12 rounded-full bg-blue-500 shadow-lg cursor-pointer flex items-center justify-center text-white hover:bg-blue-600 transition-colors"
-            onClick={() => setOpen(true)}
-          >
-            {buttonText}
-          </button>
+          {showButton && (
+            <>
+              <button
+                className="z-50 w-8 h-8 rounded-full bg-red-500 shadow-lg cursor-pointer flex items-center justify-center text-white hover:bg-red-600 transition-colors"
+                onClick={() => setRemoved(true)}
+                aria-label="Remove demo"
+              >
+                <XMarkIcon className="w-4 h-4" />
+              </button>
+              <button
+                className="px-5 font-light h-12 rounded-full bg-blue-500 shadow-lg cursor-pointer flex items-center justify-center text-white hover:bg-blue-600 transition-colors"
+                onClick={() => setOpen(true)}
+              >
+                {buttonText}
+              </button>
+            </>
+          )}
         </Row>
       )}
       {open && (
