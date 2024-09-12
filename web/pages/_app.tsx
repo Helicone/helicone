@@ -24,6 +24,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 declare global {
   interface Window {
     pylon?: any;
+    Pylon?: any;
   }
 }
 
