@@ -1,22 +1,25 @@
 Writing effective prompts has become a crucial skill for developers working with large language models (LLMs) like ChatGPT. This comprehensive guide will walk you through the essentials of prompt engineering. From basic techniques to advanced strategies, we will introduce you to the best tools for optimizing your AI prompts.
 
+![Prompt Engineering Tools](/static/blog/prompt-engineering-tools/cover.webp)
+
+
 ## What is Prompt Engineering?
-Prompt engineering is the art and science of crafting effective inputs for AI models to generate desired outputs. As highlighted in the official prompting guide from OpenAI, well-designed prompts can significantly improve the performance and reliability of AI-generated content.
+Prompt engineering is the art and science of crafting effective inputs for AI models to generate desired outputs. As highlighted in the [official prompting guide from OpenAI](https://platform.openai.com/docs/guides/prompt-engineering), **<span style={{color: '#0ea5e9'}}>well-designed prompts can significantly improve the performance and reliability of AI-generated content.</span>**
 
 ## Why is Prompt Engineering Important?
-Improves AI model performance
-Reduces errors and hallucinations
-Improves consistency in outputs
-Enables more complex and nuanced tasks
+1. Improves AI model performance
+2. Reduces errors and hallucinations
+3. Improves consistency in outputs
+4. Enables more complex and nuanced tasks
 
 
 ## How to be a Prompt Engineer in 2024: Key Skills and Knowledge
 To excel in prompt engineering in the era of generative ai, developers should:
 
-Understand the capabilities and limitations of AI models (more on this later)
-Develop strong communication and language skills
-Cultivate creativity for crafting prompts for different models
-Stay updated with the latest AI developments and best practices
+1. Understand the capabilities and limitations of AI models (more on this later)
+2. Develop strong communication and language skills
+3. Cultivate creativity for crafting prompts for different models
+4. Stay updated with the latest AI developments and best practices
 
 
 ### AI Model Limitations
@@ -33,7 +36,7 @@ Large language models analyze input data and generate output. Knowing how these 
 ### 1. Be Specific and Clear
 Provide detailed instructions and context to guide the AI's response.
 
-Example:
+**Example**
 
 ```
 Poor: "Write about dogs."
@@ -45,7 +48,7 @@ Better: "Write a 300-word article about the health benefits of owning a dog, inc
 ### 2. Use Structured Formats
 Organize your prompts with clear sections or steps.
 
-Example:
+**Example**
 
 ```
 Task: Write a product description
@@ -64,7 +67,7 @@ Length: 150 words
 ### 3. Leverage Role-Playing
 Assign a specific role or persona to the AI for more tailored responses.
 
-Example:
+**Example**
 
 ```
 Act as an experienced data scientist explaining the concept of neural networks to a junior developer. Include an analogy to help illustrate the concept.
@@ -74,7 +77,7 @@ Act as an experienced data scientist explaining the concept of neural networks t
 ### 4. Implement Few-Shot Learning
 Provide examples of desired inputs and outputs to guide the AI's response.
 
-Example:
+**Example**
 
 ```
 Convert the following sentences to past tense:
@@ -93,7 +96,7 @@ Output: They were studying for their exam.
 ### 5. Use Constrained Outputs
 Specify the desired format or structure of the AI's response.
 
-Example:
+**Example**
 
 ```
 Generate a list of 5 book recommendations for someone who enjoys science fiction. Format your response as a numbered list with the book title, author, and a one-sentence description for each recommendation.
@@ -101,30 +104,31 @@ Generate a list of 5 book recommendations for someone who enjoys science fiction
 
 
 ## Best Prompt Management Tools
-To streamline your prompt engineering workflow and improve your LLM outputs, here are some of the best prompting tools we recommend for your AI application development: 
 
-1. **<span style={{color: '#0ea5e9'}}>Helicone</span>**: An open-source platform offering comprehensive prompt versioning, optimization, experimentation, and analytics.
-2. **<span style={{color: '#0ea5e9'}}>OpenAI Playground</span>**: An interactive environment for testing and refining prompts with various GPT models.
-3. **<span style={{color: '#0ea5e9'}}>Prompt Perfect</span>**: An AI-powered tool that helps optimize and improve your prompts.
-4. **<span style={{color: '#0ea5e9'}}>LangChain</span>**: A framework for developing applications powered by LLMs, including prompt management features.
+To streamline your prompt engineering workflow and improve your LLM outputs, here are some of the **<span style={{color: '#0ea5e9'}}>best prompting tools</span>** we recommend for your AI application development: 
+
+1. **Helicone**: An open-source platform offering comprehensive prompt versioning, optimization, experimentation, and analytics.
+2. **OpenAI Playground**: An interactive environment for testing and refining prompts with various GPT models.
+3. **Pezzo**: An developer-first AI platform to manage prompts in one place. 
+4. **Agenta**: An collaborative LLM development platform to collaborate on prompts, evaluate, and monitor AI apps. 
+5. **LangChain**: A framework for developing applications powered by LLMs, including prompt management features.
 
 
 ## Improving Your Prompt Engineering Skills
 Helicone stands out as one of the best prompt engineering tools in 2024, designed to help developers test and iterate on their AI prompts quickly. 
 
 ### Without a dedicated prompt management tool
-- Fragmented Prompt Management: Prompts are often scattered across documents, spreadsheets, or multiple codebases, making it hard to keep track of all prompts and increasing the risk of errors.
-- Limited Insights: Without analytics, understanding how prompts perform is a guessing game. It's difficult to optimize prompts and get high-quality responses.
-- No Version Control: Tracking prompt changes manually is cumbersome. You might overwrite or lose valuable iterations. 
-- Reduced Collaboration: Team collaboration on prompt development is often done ad-hoc using email or chat. It becomes harder to gather feedback, leading to slower improvement cycles.
+- ⚠️ **Fragmented Prompt Management.** Prompts are scattered across documents, spreadsheets, or multiple codebases, making it hard to keep track of all prompts and increasing the risk of errors.
+- ⚠️ **Limited Analytics.** Without analytics, understanding how prompts perform is a guessing game. It's difficult to optimize prompts and get high-quality responses.
+- ⚠️ **No Version Control.** You have to track prompt changes manually and may overwrite or lose valuable iterations. 
+- ⚠️ **Reduced Collaboration.** Team collaboration on prompt development is often done ad-hoc using email or chat. It becomes harder to gather feedback, leading to slower improvement cycles.
 
 
 ### Helicone does it all, and more
-- Effortlessly track prompt versions and inputs as they evolve
-- Automatically record changes in your prompts
-- Maintain a history of old prompts and input/output datasets for each prompt template
-- Run experiments to test and improve your prompts or compare between models
-- Debug and test prompts in a sandbox environment (Currently supports ChatGPT and many other model providers)
+- ✅ **Automatic Prompt Versioning.** Effortlessly track prompt versions and qutomatically record changes in your prompts
+- ✅ **Prompt Templating & Input Tracking.** Maintain a history of old prompts and input/output datasets for each prompt template
+- ✅ **Experiments.** Run experiments to test and improve your prompts or compare between models
+- ✅ **Interactive Playground.** Debug and test prompts in a sandbox environment (Currently supports ChatGPT and many other model providers)
 
 ## Mastering the Art of Prompt Engineering
 As AI keeps evolving, knowing how to write great prompts is becoming a key skill for developers and non-technical team members. Just like learning any language, the more you practice, the better you get.
