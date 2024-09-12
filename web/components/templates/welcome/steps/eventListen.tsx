@@ -96,9 +96,9 @@ const EventListen = (props: EventListenProps) => {
         )}
       </div>
       <div className="flex justify-center h-full pb-4">
-        <div className="max-w-2xl w-full px-4 py-6 bg-sky-50 border border-sky-100 rounded-xl shadow-sm ">
+        <div className="max-w-2xl max-h-[225px] w-full px-4 py-6 bg-sky-50 border border-sky-100 rounded-xl shadow-sm ">
           <h2 className="text-xl font-semibold text-[#21496B] mb-4 flex items-center">
-            <LightBulbIcon className="w-5 h-5 mr-2 text-[#1B91CD" />
+            <LightBulbIcon className="w-5 h-5 mr-2 text-[#1B91CD]" />
             Help me troubleshoot
           </h2>
           <div className="flex flex-col md:flex-row gap-6 items-stretch px-6">
