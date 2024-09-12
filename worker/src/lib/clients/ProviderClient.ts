@@ -65,17 +65,26 @@ async function callWithMapper(
       }
 ): Promise<Response> {
   if (targetUrl.host === "gateway.llmmapper.com") {
-    if ("body" in init) {
-      const headers: Record<string, string> = {};
-      init.headers.forEach((value, key) => {
-        headers[key] = value;
-      });
-      return await llmmapper(targetUrl, {
-        body: init.body,
-        headers: headers,
-      });
-    } else {
-      return new Response("Unsupported, must have body", { status: 404 });
+    try {
+      if ("body" in init) {
+        const headers: Record<string, string> = {};
+        init.headers.forEach((value, key) => {
+          headers[key] = value;
+        });
+        return await llmmapper(targetUrl, {
+          body: init.body,
+          headers: headers,
+        });
+      } else {
+        return new Response("Unsupported, must have body", { status: 404 });
+      }
+    } catch (e) {
+      return new Response(
+        "Helicone LLMMapper gateway error" + JSON.stringify(e),
+        {
+          status: 50200,
+        }
+      );
     }
   } else {
     return await fetch(targetUrl.href, init);
