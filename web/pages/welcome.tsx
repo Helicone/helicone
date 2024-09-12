@@ -23,7 +23,7 @@ export const getServerSideProps = withAuthSSR(async (options) => {
   } = options;
   const { context } = options;
 
-  if (!orgHasOnboarded) {
+  if (orgHasOnboarded) {
     return {
       redirect: {
         destination: "/dashboard",
