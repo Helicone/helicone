@@ -13,7 +13,7 @@ export function oaiStream2antStream(
     start(controller) {
       let currentMessage = "";
 
-      const reader = stream
+      stream
         .pipeThrough(new TextDecoderStream())
         .pipeThrough(
           new TransformStream({
