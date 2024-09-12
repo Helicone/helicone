@@ -254,8 +254,25 @@ const useOrgsContextManager = () => {
         organization_type: org.organization_type || "",
         date_joined: org.created_at || "",
       });
+
+      if (user) {
+        window.pylon = {
+          chat_settings: {
+            app_id: "f766dfd3-28f8-40a8-872f-351274cbd306",
+            email: user.email,
+            name: user.user_metadata?.name,
+            avatar_url: user.user_metadata?.avatar_url,
+          },
+        };
+
+        window.Pylon("setNewIssueCustomFields", {
+          organization_id: org.id,
+          organization_name: org.name,
+          organization_tier: org.tier,
+        });
+      }
     }
-  }, [user, org?.id]);
+  }, [user, org?.id, org?.name, org?.tier]);
 
   useEffect(() => {
     if (orgs && orgs.length > 0) {

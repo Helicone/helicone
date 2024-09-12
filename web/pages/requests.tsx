@@ -1,5 +1,5 @@
 import { User } from "@supabase/auth-helpers-react";
-import AuthLayout from "../components/layout/authLayout";
+import AuthLayout from "../components/layout/auth/authLayout";
 import RequestsPageV2 from "../components/templates/requestsV2/requestsPageV2";
 import { SortDirection } from "../services/lib/sorts/requests/sorts";
 import { ReactElement, useEffect } from "react";

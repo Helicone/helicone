@@ -7,7 +7,7 @@ import {
   TrashIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { clsx } from "../../shared/clsx";
 import { removeLeadingWhitespace } from "../../shared/utils/utils";
 
@@ -29,8 +29,6 @@ interface ChatRowProps {
     image: File | string | null
   ) => void;
   deleteRow: (rowId: string) => void;
-  editMode?: boolean;
-  promptMode?: boolean;
 }
 
 export const hasImage = (content: string | any[] | null) => {
@@ -173,7 +171,7 @@ export const RenderWithPrettyInputKeys = (props: {
 };
 
 const ChatRow = (props: ChatRowProps) => {
-  const { index, message, callback, deleteRow, editMode, promptMode } = props;
+  const { index, message, callback, deleteRow } = props;
 
   // on the initial render, if the current message is empty, set the mode to editing
   useEffect(() => {
@@ -392,44 +390,6 @@ const ChatRow = (props: ChatRowProps) => {
     }
   };
 
-  const [promptVariables, setPromptVariables] = useState<
-    Array<{ original: string; heliconeTag: string }>
-  >([]);
-
-  const extractVariables = useCallback((content: string) => {
-    const regex =
-      /(?:\{\{([^}]+)\}\})|(?:<helicone-prompt-input key="([^"]+)"[^>]*\/>)/g;
-    const matches = Array.from(content.matchAll(regex));
-    return matches.map((match) => {
-      const key = match[1] || match[2];
-      return {
-        original: match[0],
-        heliconeTag: `<helicone-prompt-input key="${key.trim()}" />`,
-      };
-    });
-  }, []);
-
-  const replaceVariablesWithTags = useCallback(
-    (
-      content: string,
-      variables: Array<{ original: string; heliconeTag: string }>
-    ) => {
-      let newContent = content;
-      variables.forEach(({ original, heliconeTag }) => {
-        newContent = newContent.replace(original, heliconeTag);
-      });
-      return newContent;
-    },
-    []
-  );
-
-  useEffect(() => {
-    if (isEditing) {
-      const newVariables = extractVariables(contentAsString || "");
-      setPromptVariables(newVariables);
-    }
-  }, [isEditing, contentAsString, extractVariables]);
-
   return (
     <li
       className={clsx(
@@ -455,23 +415,21 @@ const ChatRow = (props: ChatRowProps) => {
               }}
             />
             <div className="flex items-center space-x-2">
-              {editMode && (
-                <Tooltip title="Edit" placement="top">
-                  <button
-                    onClick={() => {
-                      if (isEditing) {
-                        setMinimize(false);
-                        setIsEditing(false);
-                      } else {
-                        setIsEditing(true);
-                      }
-                    }}
-                    className="text-gray-500 font-semibold"
-                  >
-                    <PencilSquareIcon className="h-5 w-5" />
-                  </button>
-                </Tooltip>
-              )}
+              <Tooltip title="Edit" placement="top">
+                <button
+                  onClick={() => {
+                    if (isEditing) {
+                      setMinimize(false);
+                      setIsEditing(false);
+                    } else {
+                      setIsEditing(true);
+                    }
+                  }}
+                  className="text-gray-500 font-semibold"
+                >
+                  <PencilSquareIcon className="h-5 w-5" />
+                </button>
+              </Tooltip>
               <Tooltip title={minimize ? "Expand" : "Shrink"} placement="top">
                 <button
                   onClick={() => {
@@ -497,77 +455,40 @@ const ChatRow = (props: ChatRowProps) => {
                   <ClipboardIcon className="h-5 w-5" />
                 </button>
               </Tooltip>
-              {editMode && (
-                <Tooltip title="Delete" placement="top">
-                  <button
-                    onClick={() => {
-                      deleteRow(currentMessage.id);
-                    }}
-                    className="text-red-500 font-semibold"
-                  >
-                    <TrashIcon className="h-5 w-5" />
-                  </button>
-                </Tooltip>
-              )}
+              <Tooltip title="Delete" placement="top">
+                <button
+                  onClick={() => {
+                    deleteRow(currentMessage.id);
+                  }}
+                  className="text-red-500 font-semibold"
+                >
+                  <TrashIcon className="h-5 w-5" />
+                </button>
+              </Tooltip>
             </div>
           </div>
           <div>
             <div className="w-full px-8 pb-4">
               {isEditing ? (
-                <div className="space-y-4">
-                  <MarkdownEditor
-                    text={contentAsString || ""}
-                    setText={function (text: string): void {
-                      const newVariables = extractVariables(text);
-                      const replacedText = replaceVariablesWithTags(
-                        text,
-                        newVariables
+                <MarkdownEditor
+                  text={contentAsString || ""}
+                  setText={function (text: string): void {
+                    const newMessages = { ...currentMessage };
+                    const messageContent = newMessages.content;
+                    if (Array.isArray(messageContent)) {
+                      const textMessage = messageContent.find(
+                        (element) => element.type === "text"
                       );
-                      const newMessages = { ...currentMessage };
-                      const messageContent = newMessages.content;
-                      if (Array.isArray(messageContent)) {
-                        const textMessage = messageContent.find(
-                          (element) => element.type === "text"
-                        );
-                        textMessage.text = replacedText;
-                      } else {
-                        newMessages.content = replacedText;
-                      }
+                      textMessage.text = text;
+                    } else {
+                      newMessages.content = text;
+                    }
 
-                      setCurrentMessage(newMessages);
-                      callback(replacedText, role, file);
-                      setPromptVariables(newVariables);
-                    }}
-                    language="markdown"
-                  />
-                  {promptVariables.length > 0 && (
-                    <div className="flex flex-col space-y-2">
-                      <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Your variables
-                      </label>
-                      <div className="flex flex-wrap gap-2">
-                        {promptVariables.map(({ heliconeTag }, index) => {
-                          const key =
-                            heliconeTag.match(/key="([^"]+)"/)?.[1] || "";
-                          return (
-                            <span
-                              key={index}
-                              className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
-                            >
-                              {key}
-                            </span>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-                  {promptMode && (
-                    <p className="text-sm text-gray-500">
-                      Use &#123;&#123; sample_variable &#125;&#125; to insert
-                      variables into your prompt.
-                    </p>
-                  )}
-                </div>
+                    setCurrentMessage(newMessages);
+                    callback(text, role, file);
+                  }}
+                  language="markdown"
+                />
               ) : (
                 <>{getContent(currentMessage, minimize)}</>
               )}

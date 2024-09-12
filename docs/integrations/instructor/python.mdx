@@ -15,7 +15,7 @@ description: "Use Instructor's Python SDK to log your LLM calls in Helicone."
 
 ```python Instructor SDK
 client = instructor.from_openai(OpenAI(
-    base_url="https://oai.hconeai.com/v1",
+    base_url="https://oai.helicone.ai/v1",
     api_key=OPENAI_API_KEY,
     default_headers={
         "Helicone-Auth": "Bearer " + HELICONE_API_KEY

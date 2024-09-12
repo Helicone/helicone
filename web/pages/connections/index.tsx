@@ -1,5 +1,5 @@
 import { ReactElement } from "react";
-import AuthLayout from "../../components/layout/authLayout";
+import AuthLayout from "../../components/layout/auth/authLayout";
 import ConnectionsPage from "../../components/templates/connections/connectionsPage";
 import { withAuthSSR } from "../../lib/api/handlerWrappers";
 import { SortDirection } from "../../services/lib/sorts/requests/sorts";

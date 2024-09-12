@@ -8,7 +8,6 @@ import {
   ChartBarIcon,
   ChartPieIcon,
   CircleStackIcon,
-  CodeBracketIcon,
   Cog6ToothIcon,
   DocumentChartBarIcon,
   DocumentTextIcon,

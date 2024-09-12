@@ -1,4 +1,4 @@
-import AuthLayout from "../components/layout/authLayout";
+import AuthLayout from "../components/layout/auth/authLayout";
 
 import { ReactElement } from "react";
 import RateLimitPage from "../components/templates/rateLimit/rateLimitPage";
