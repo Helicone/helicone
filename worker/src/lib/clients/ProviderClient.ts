@@ -82,8 +82,9 @@ async function callWithMapper(
     } else {
       return new Response("Unsupported, must have body", { status: 404 });
     }
+  } else {
+    return await fetch(targetUrl.href, init);
   }
-  return await fetch(targetUrl.href, init);
 }
 
 export async function callProvider(props: CallProps): Promise<Response> {
