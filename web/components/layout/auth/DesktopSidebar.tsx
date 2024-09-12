@@ -51,9 +51,9 @@ const DesktopSidebar = ({
       )}
     >
       <div className="w-full flex flex-grow flex-col overflow-y-auto border-r dark:border-gray-700 justify-between">
-        <div className="flex items-center gap-4 h-14 border-b dark:border-gray-700">
+        <div className="flex items-center gap-2 h-14 border-b dark:border-gray-700">
           {!isCollapsed && <OrgDropdown setReferOpen={setReferOpen} />}
-          <div className={cn("mx-auto", !isCollapsed && "pr-4")}>
+          <div className={cn("mx-auto", !isCollapsed && "mr-2")}>
             <Button
               variant="ghost"
               size="icon"
@@ -72,7 +72,7 @@ const DesktopSidebar = ({
         <div className="flex flex-grow flex-col">
           {(org?.currentOrg?.organization_type === "reseller" ||
             org?.isResellerOfCurrentCustomerOrg) && (
-            <div className="flex w-full">
+            <div className="flex w-full justify-center px-5 py-2">
               <Button
                 variant="outline"
                 className="w-full"
