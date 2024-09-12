@@ -1,7 +1,8 @@
+import { GetServerSidePropsContext } from "next";
 import MetaData from "../components/layout/public/authMetaData";
+import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
 import WelcomePage from "../components/templates/welcome/welcomePage";
 import "prismjs/themes/prism.css";
-import { withAuthSSR } from "../lib/api/handlerWrappers";
 interface WelcomeProps {
   currentStep: number;
 }
@@ -17,13 +18,32 @@ const Welcome = (props: WelcomeProps) => {
 
 export default Welcome;
 
-export const getServerSideProps = withAuthSSR(async (options) => {
-  const {
-    userData: { user, orgHasOnboarded, orgId },
-  } = options;
-  const { context } = options;
+export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
+  const supabaseClient = new SupabaseServerWrapper(ctx);
+  const supabase = supabaseClient.getClient();
 
-  if (orgHasOnboarded) {
+  const currentSession = await supabase.auth.refreshSession();
+
+  if (!currentSession.data.session?.user)
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
+    };
+
+  const { data, error } = await supabaseClient.getUserAndOrg();
+
+  if (error !== null || !data.orgId || !data.userId) {
+    return {
+      redirect: {
+        destination: "/signin?unauthorized=true",
+        permanent: false,
+      },
+    };
+  }
+
+  if (data.orgHasOnboarded) {
     return {
       redirect: {
         destination: "/dashboard",
@@ -32,11 +52,13 @@ export const getServerSideProps = withAuthSSR(async (options) => {
     };
   }
 
-  const step = context.query.step as string;
+  const { step } = ctx.query;
 
   return {
     props: {
-      currentStep: step ? parseInt(step) : 1,
+      initialSession: currentSession,
+      user: currentSession.data.session?.user,
+      currentStep: step ? parseInt(step as string) : 1,
     },
   };
-});
+};
