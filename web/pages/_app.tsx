@@ -19,6 +19,7 @@ import { OrgContextProvider } from "../components/layout/organizationContext";
 import { ThemeContextProvider } from "../components/shared/theme/themeContext";
 import Script from "next/script";
 import { PostHogProvider } from "posthog-js/react";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 declare global {
   interface Window {
@@ -70,7 +71,9 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
               <DndProvider backend={HTML5Backend}>
                 <OrgContextProvider>
                   <ThemeContextProvider>
-                    {getLayout(<Component {...pageProps} />)}
+                    <TooltipProvider>
+                      {getLayout(<Component {...pageProps} />)}
+                    </TooltipProvider>
                   </ThemeContextProvider>
                   <Notification />
                 </OrgContextProvider>
