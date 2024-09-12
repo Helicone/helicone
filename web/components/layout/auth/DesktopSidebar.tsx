@@ -1,23 +1,22 @@
-import { Menu, Transition } from "@headlessui/react";
+import { Button, buttonVariants } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
+import { useLocalStorage } from "@/services/hooks/localStorage";
 import {
   BookOpenIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
   CloudArrowUpIcon,
-  MoonIcon,
   QuestionMarkCircleIcon,
-  SunIcon,
-  UserCircleIcon,
 } from "@heroicons/react/24/outline";
-import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import Link from "next/link";
-import { Fragment } from "react";
-import { clsx } from "../../shared/clsx";
+import { useRouter } from "next/router";
 import { useOrg } from "../organizationContext";
 import OrgDropdown from "../orgDropdown";
-import { signOut } from "@/components/shared/utils/utils";
-import { ThemedSwitch } from "@/components/shared/themed/themedSwitch";
-import { useRouter } from "next/router";
-import { Database } from "@/supabase/database.types";
-import { useTheme } from "@/components/shared/theme/themeContext";
 
 interface SidebarProps {
   NAVIGATION: {
@@ -36,129 +35,48 @@ const DesktopSidebar = ({
   setReferOpen,
   setOpen,
 }: SidebarProps) => {
-  const user = useUser();
   const org = useOrg();
   const tier = org?.currentOrg?.tier;
   const router = useRouter();
-  const supabaseClient = useSupabaseClient<Database>();
-  const themeContext = useTheme();
+  const [isCollapsed, setIsCollapsed] = useLocalStorage(
+    "isSideBarCollapsed",
+    false
+  );
 
   return (
-    <div className="hidden fixed md:inset-y-0 md:flex md:w-56 md:flex-col z-30 bg-white dark:bg-black">
-      <div className="w-full flex flex-grow flex-col overflow-y-auto border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-black">
-        <div className="p-2 flex items-center gap-4 h-14 border-b border-gray-300 dark:border-gray-700 absolute w-full  dark:bg-black">
-          <OrgDropdown />
-          <Menu as="div" className="relative">
-            {/* User menu button */}
-            <Menu.Button className="px-[7px] py-0.5 mr-2 text-sm bg-gray-900 dark:bg-gray-500 dark:text-gray-900 text-gray-50 rounded-full flex items-center justify-center focus:ring-sky-500 focus:outline-none focus:ring-2 focus:ring-offset-2">
-              <span className="sr-only">Open user menu</span>
-              {user?.email?.charAt(0).toUpperCase() || (
-                <UserCircleIcon className="h-8 w-8 text-black dark:text-white" />
-              )}
-            </Menu.Button>
-            {/* User menu dropdown */}
-            <Transition
-              as={Fragment}
-              enter="transition ease-out duration-100"
-              enterFrom="transform opacity-0 scale-95"
-              enterTo="transform opacity-100 scale-100"
-              leave="transition ease-in duration-75"
-              leaveFrom="transform opacity-100 scale-100"
-              leaveTo="transform opacity-0 scale-95"
+    <div
+      className={cn(
+        "hidden md:flex md:flex-col z-30 bg-background dark:bg-gray-900 transition-all duration-300 h-screen bg-white pb-4",
+        isCollapsed ? "md:w-16" : "md:w-56"
+      )}
+    >
+      <div className="w-full flex flex-grow flex-col overflow-y-auto border-r dark:border-gray-700 justify-between">
+        <div className="flex items-center gap-2 h-14 border-b dark:border-gray-700">
+          {!isCollapsed && <OrgDropdown setReferOpen={setReferOpen} />}
+          <div className={cn("mx-auto", !isCollapsed && "mr-2")}>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsCollapsed(!isCollapsed)}
+              className="w-full flex justify-center dark:hover:bg-gray-800 px-2"
             >
-              <Menu.Items className="absolute -left-2 mt-2 w-[12.5rem] z-40 origin-top-left divide-y divide-gray-200 dark:divide-gray-800 rounded-md bg-white dark:bg-black border border-gray-300 dark:border-gray-700 shadow-2xl">
-                <div className="flex flex-row justify-between items-center divide-x divide-gray-300 dark:divide-gray-700">
-                  <p className="text-gray-900 dark:text-gray-100 text-sm w-full truncate pl-4 p-2">
-                    {user?.email}
-                  </p>
-                </div>
-                <div className="flex items-center w-full justify-between px-2">
-                  <p className="text-gray-900 dark:text-gray-100 text-sm w-full truncate p-2">
-                    Theme
-                  </p>
-                  <ThemedSwitch
-                    checked={themeContext?.theme === "dark" ? true : false}
-                    onChange={() => {
-                      themeContext?.theme === "dark"
-                        ? themeContext?.setTheme("light")
-                        : themeContext?.setTheme("dark");
-                    }}
-                    OnIcon={SunIcon}
-                    OffIcon={MoonIcon}
-                  />
-                </div>
-
-                <Menu.Item>
-                  <div className="p-1">
-                    <Link
-                      href={"https://docs.helicone.ai/introduction"}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={clsx(
-                        "flex items-center text-gray-700 hover:bg-sky-100 dark:text-gray-300 dark:hover:bg-sky-900 rounded-md text-sm pl-3 py-2 w-full truncate"
-                      )}
-                    >
-                      <p>Documentation</p>
-                    </Link>
-                    <Link
-                      href={"https://discord.gg/zsSTcH2qhG"}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={clsx(
-                        "flex items-center text-gray-700 hover:bg-sky-100 dark:text-gray-300 dark:hover:bg-sky-900 rounded-md text-sm pl-3 py-2 w-full truncate"
-                      )}
-                    >
-                      <p>Join Discord</p>
-                    </Link>
-                    <button
-                      onClick={() => {
-                        setReferOpen(true);
-                      }}
-                      className={clsx(
-                        "flex items-center text-gray-700 hover:bg-sky-100 dark:text-gray-300 dark:hover:bg-sky-900 rounded-md text-sm pl-3 py-2 w-full truncate"
-                      )}
-                    >
-                      <p>Refer a friend</p>
-                    </button>
-                  </div>
-                </Menu.Item>
-                <div className="p-1">
-                  <Menu.Item>
-                    {({ active }) => (
-                      <button
-                        className={clsx(
-                          "text-left block text-gray-700 hover:bg-red-100 dark:text-gray-300 dark:hover:bg-red-900 rounded-md text-sm pl-3 py-2 w-full truncate"
-                        )}
-                        onClick={async () => {
-                          signOut(supabaseClient).then(() => {
-                            router.push("/");
-                          });
-                        }}
-                      >
-                        Sign out
-                      </button>
-                    )}
-                  </Menu.Item>
-                </div>
-              </Menu.Items>
-            </Transition>
-          </Menu>
+              {isCollapsed ? (
+                <ChevronRightIcon className="h-4 w-4" />
+              ) : (
+                <ChevronLeftIcon className="h-4 w-4" />
+              )}
+            </Button>
+          </div>
         </div>
 
-        <div
-          className={clsx(
-            org?.currentOrg?.organization_type === "reseller" ||
-              org?.isResellerOfCurrentCustomerOrg
-              ? "mt-16"
-              : "mt-14",
-            "flex flex-grow flex-col"
-          )}
-        >
-          {/* Reseller button */}
-          {(org?.currentOrg?.organization_type === "reseller" ||
+        <div className="flex flex-grow flex-col">
+          {((!isCollapsed &&
+            org?.currentOrg?.organization_type === "reseller") ||
             org?.isResellerOfCurrentCustomerOrg) && (
-            <div className="flex w-full">
-              <button
+            <div className="flex w-full justify-center px-5 py-2">
+              <Button
+                variant="outline"
+                className="w-full"
                 onClick={() => {
                   router.push("/enterprise/portal");
                   if (
@@ -168,77 +86,202 @@ const DesktopSidebar = ({
                     org.setCurrentOrg(org.currentOrg.reseller_id);
                   }
                 }}
-                className="border border-gray-300 dark:border-gray-700 dark:text-white w-full flex text-black px-4 py-1 text-sm font-medium items-center text-center justify-center mx-4 bg-gray-100 hover:bg-gray-200 dark:bg-gray-900 dark:hover:bg-gray-800 rounded-md"
               >
                 {org.currentOrg?.organization_type === "customer"
                   ? "Back to Portal"
                   : "Customer Portal"}
-              </button>
+              </Button>
             </div>
           )}
 
-          {/* Navigation */}
-          <nav className="p-2 flex flex-col text-sm space-y-1">
-            {NAVIGATION.map((nav) => (
-              <Link
-                key={nav.name}
-                href={nav.href}
-                className={clsx(
-                  nav.current ? "bg-gray-200 dark:bg-gray-800" : "",
-                  "flex items-center text-black dark:text-white px-2 py-1.5 gap-2 hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md font-medium"
-                )}
-              >
-                <nav.icon className="h-4 w-4" />
-                {nav.name}
-                {nav.featured && (
-                  <span className="-mt-1.5 -ml-0.5 h-2 w-2 rounded-full bg-sky-500 animate-pulse"></span>
-                )}
-              </Link>
-            ))}
-          </nav>
-        </div>
-
-        {/* Footer links */}
-        <div>
-          <Link
-            className="px-4 py-2 text-xs text-gray-500 dark:hover:text-gray-100 flex flex-row space-x-2 hover:text-gray-900 hover:underline hover:cursor-pointer"
-            href={"https://docs.helicone.ai/introduction"}
-            target="_blank"
-            rel="noopener noreferrer"
+          <div
+            data-collapsed={isCollapsed}
+            className="group flex flex-col gap-4 py-2 data-[collapsed=true]:py-2 "
           >
-            <BookOpenIcon className="h-4 w-4" />
-            <p>View Documentation</p>
-          </Link>
-          <Link
-            className="px-4 py-2 text-xs text-gray-500 dark:hover:text-gray-100 flex flex-row space-x-2 hover:text-gray-900 hover:underline hover:cursor-pointer"
-            href={"https://discord.gg/zsSTcH2qhG"}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <QuestionMarkCircleIcon className="h-4 w-4" />
-            <p>Help And Support</p>
-          </Link>
-        </div>
+            <nav className="grid gap-1 px-2 group-[[data-collapsed=true]]:justify-center group-[[data-collapsed=true]]:px-2">
+              {NAVIGATION.map((link, index) =>
+                isCollapsed ? (
+                  <Tooltip key={index} delayDuration={0}>
+                    <TooltipTrigger asChild>
+                      <Link
+                        href={link.href}
+                        className={cn(
+                          buttonVariants({
+                            variant: "ghost",
+                            size: "icon",
+                          }),
+                          "h-9 w-9",
+                          link.current && "bg-accent hover:bg-accent" // Updated styling
+                        )}
+                      >
+                        <link.icon
+                          className={cn(
+                            "h-4 w-4",
+                            link.current && "text-accent-foreground"
+                          )}
+                        />
+                        <span className="sr-only">{link.name}</span>
+                      </Link>
+                    </TooltipTrigger>
+                    <TooltipContent
+                      side="right"
+                      className="flex items-center gap-4 dark:bg-gray-800 dark:text-gray-200"
+                    >
+                      {link.name}
+                      {link.featured && (
+                        <span className="ml-auto text-muted-foreground">
+                          New
+                        </span>
+                      )}
+                    </TooltipContent>
+                  </Tooltip>
+                ) : (
+                  <Link
+                    key={index}
+                    href={link.href}
+                    className={cn(
+                      buttonVariants({
+                        variant: link.current ? "secondary" : "ghost",
+                        size: "sm",
+                      }),
+                      "justify-start"
+                    )}
+                  >
+                    <link.icon
+                      className={cn(
+                        "mr-2 h-4 w-4",
+                        link.current && "text-accent-foreground"
+                      )}
+                    />
 
-        {/* Free plan button */}
-        {tier === "free" &&
-        org?.currentOrg?.organization_type !== "customer" ? (
-          <div className="p-4 flex w-full justify-center">
-            <button
-              onClick={() => setOpen(true)}
-              className="bg-gray-100 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 dark:text-white text-black text-sm font-medium w-full rounded-md py-2 px-2.5 flex flex-row justify-between items-center"
-            >
-              <div className="flex flex-row items-center">
-                <CloudArrowUpIcon className="h-5 w-5 mr-1.5" />
-                <p>Free Plan</p>
-              </div>
-
-              <p className="text-xs font-normal text-sky-600">Learn More</p>
-            </button>
+                    {link.name}
+                    {link.featured && (
+                      <span
+                        className={cn(
+                          "ml-auto",
+                          link.current
+                            ? "text-accent-foreground"
+                            : "text-muted-foreground"
+                        )}
+                      >
+                        New
+                      </span>
+                    )}
+                  </Link>
+                )
+              )}
+            </nav>
           </div>
-        ) : (
-          <div className="h-4" />
-        )}
+        </div>
+
+        <div className="mt-auto">
+          {isCollapsed ? (
+            <>
+              <Tooltip delayDuration={0}>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="w-full dark:hover:bg-gray-800"
+                    asChild
+                  >
+                    <Link
+                      href="https://docs.helicone.ai/introduction"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <BookOpenIcon className="h-4 w-4" />
+                    </Link>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent
+                  side="right"
+                  className="dark:bg-gray-800 dark:text-gray-200"
+                >
+                  View Documentation
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip delayDuration={0}>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="w-full dark:hover:bg-gray-800"
+                    asChild
+                  >
+                    <Link
+                      href="https://discord.gg/zsSTcH2qhG"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <QuestionMarkCircleIcon className="h-4 w-4" />
+                    </Link>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent
+                  side="right"
+                  className="dark:bg-gray-800 dark:text-gray-200"
+                >
+                  Help And Support
+                </TooltipContent>
+              </Tooltip>
+            </>
+          ) : (
+            <>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full justify-start dark:hover:bg-gray-800"
+                asChild
+              >
+                <Link
+                  href="https://docs.helicone.ai/introduction"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-2"
+                >
+                  <BookOpenIcon className="h-4 w-4 mr-2" />
+                  View Documentation
+                </Link>
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full justify-start dark:hover:bg-gray-800"
+                asChild
+              >
+                <Link
+                  href="https://discord.gg/zsSTcH2qhG"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-2"
+                >
+                  <QuestionMarkCircleIcon className="h-4 w-4 mr-2" />
+                  Help And Support
+                </Link>
+              </Button>
+            </>
+          )}
+        </div>
+
+        {tier === "free" &&
+          org?.currentOrg?.organization_type !== "customer" && (
+            <div className={cn("p-4", isCollapsed && "hidden")}>
+              <Button
+                variant="outline"
+                className="w-full justify-between dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
+                onClick={() => setOpen(true)}
+              >
+                <div className="flex items-center">
+                  <CloudArrowUpIcon className="h-5 w-5 mr-1.5" />
+                  <span>Free Plan</span>
+                </div>
+                <span className="text-xs font-normal text-primary dark:text-gray-300">
+                  Learn More
+                </span>
+              </Button>
+            </div>
+          )}
       </div>
     </div>
   );
