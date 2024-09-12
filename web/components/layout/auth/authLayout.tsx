@@ -49,15 +49,18 @@ const AuthLayout = (props: AuthLayoutProps) => {
       <div>
         <DemoModal />
         <Row>
-          <Sidebar
-            tier={tier ?? ""}
-            setReferOpen={setReferOpen}
-            setOpen={setOpen}
-          />
-
-          <MainContent banner={banner} pathname={pathname}>
-            {children}
-          </MainContent>
+          <div className=" w-min">
+            <Sidebar
+              tier={tier ?? ""}
+              setReferOpen={setReferOpen}
+              setOpen={setOpen}
+            />
+          </div>
+          <div className="flex-grow">
+            <MainContent banner={banner} pathname={pathname}>
+              {children}
+            </MainContent>
+          </div>
         </Row>
       </div>
       <ReferralModal open={referOpen} setOpen={setReferOpen} />
