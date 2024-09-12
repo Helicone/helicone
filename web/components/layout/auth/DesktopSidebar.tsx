@@ -17,7 +17,6 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useOrg } from "../organizationContext";
 import OrgDropdown from "../orgDropdown";
-import { useState } from "react";
 
 interface NavigationItem {
   name: string;
