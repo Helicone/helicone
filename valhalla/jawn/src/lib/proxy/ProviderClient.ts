@@ -2,6 +2,7 @@ import retry from "async-retry";
 import { HeliconeProxyRequest, RetryOptions } from "./HeliconeProxyRequest";
 import fetch from "node-fetch";
 import { Headers, Response } from "node-fetch";
+import { llmmapper } from "./llmmapper/llmmapper";
 export interface CallProps {
   headers: Headers;
   method: string;
@@ -38,6 +39,41 @@ function removeHeliconeHeaders(request: Headers): Headers {
   return newHeaders;
 }
 
+async function callWithMapper(
+  targetUrl: URL,
+  init:
+    | {
+        method: string;
+        headers: Headers;
+      }
+    | {
+        body: string;
+        method: string;
+        headers: Headers;
+      }
+) {
+  if (targetUrl.host === "gateway.llmmapper.com") {
+    if ("body" in init) {
+      const headers: Record<string, string> = {};
+      init.headers.forEach((value, key) => {
+        headers[key] = value;
+      });
+      const result = await llmmapper(targetUrl, {
+        body: init.body,
+        headers: headers,
+      });
+      return new Response(result.body ?? "", {
+        status: result.status,
+        statusText: result.statusText,
+        headers: result.headers,
+      });
+    } else {
+      return new Response("Unsupported, must have body", { status: 404 });
+    }
+  }
+  return await fetch(targetUrl.href, init);
+}
+
 export async function callProvider(props: CallProps) {
   const { headers, method, apiBase, body, increaseTimeout, originalUrl } =
     props;
@@ -54,7 +90,8 @@ export async function callProvider(props: CallProps) {
   console.log(`Type of body: ${typeof body}`);
   console.log(`Fetching ${targetUrl.href}`);
   console.log(`Init: ${JSON.stringify(init)}`);
-  const result = await fetch(targetUrl.href, init);
+  const result = await callWithMapper(targetUrl, init);
+
   result.headers.delete("Content-Encoding");
   return result;
 }
