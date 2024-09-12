@@ -58,7 +58,6 @@ const Features = (props: FeaturesProps) => {
             <TabPanel>
               <DiffHighlight
                 code={`
-import { randomUUID } from "crypto";
 import { OpenAI } from "openai";
 
 const configuration = {
@@ -69,9 +68,6 @@ const configuration = {
     "Helicone-Property-Session": "24",
     "Helicone-Property-Conversation": "support_issue_2",
     "Helicone-Property-App": "mobile",
-    "Helicone-Session-Id": randomUUID(),
-    "Helicone-Session-Path": "/ticket/123/resolve",
-    "Helicone-Session-Name": "support_issue",
   },
 };
 
