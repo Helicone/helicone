@@ -48,15 +48,15 @@ const AuthLayout = (props: AuthLayoutProps) => {
     >
       <div>
         <DemoModal />
-        <Row>
-          <div className=" w-min">
+        <Row className="">
+          <div className=" w-min ">
             <Sidebar
               tier={tier ?? ""}
               setReferOpen={setReferOpen}
               setOpen={setOpen}
             />
           </div>
-          <div className="flex-grow">
+          <div className="flex-grow max-w-full overflow-hidden">
             <MainContent banner={banner} pathname={pathname}>
               {children}
             </MainContent>

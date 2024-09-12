@@ -32,7 +32,6 @@ interface SidebarProps {
 }
 
 const Sidebar = ({ tier, setReferOpen, setOpen }: SidebarProps) => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const router = useRouter();
   const { pathname } = router;
   const user = useUser();
