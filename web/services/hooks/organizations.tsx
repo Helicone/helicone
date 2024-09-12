@@ -272,7 +272,7 @@ const useOrgsContextManager = () => {
         });
       }
     }
-  }, [user, org?.id]);
+  }, [user, org?.id, org?.name, org?.tier]);
 
   useEffect(() => {
     if (orgs && orgs.length > 0) {
