@@ -106,7 +106,7 @@ export default function OrgDropdown({ setReferOpen }: OrgDropdownProps) {
             </div>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-[15rem]">
+        <DropdownMenuContent className="w-[15rem] ml-2 mt-1">
           <DropdownMenuLabel>Organizations</DropdownMenuLabel>
           {ownedOrgs && ownedOrgs.length > 0 && (
             <>
@@ -145,7 +145,6 @@ export default function OrgDropdown({ setReferOpen }: OrgDropdownProps) {
               </ScrollArea>
             </>
           )}
-
           {memberOrgs && memberOrgs.length > 0 && (
             <>
               <DropdownMenuLabel className="text-xs text-muted-foreground">
@@ -183,7 +182,6 @@ export default function OrgDropdown({ setReferOpen }: OrgDropdownProps) {
               </ScrollArea>
             </>
           )}
-
           {customerOrgs && customerOrgs.length > 0 && (
             <>
               <DropdownMenuLabel className="text-xs text-muted-foreground">
@@ -221,7 +219,6 @@ export default function OrgDropdown({ setReferOpen }: OrgDropdownProps) {
               </ScrollArea>
             </>
           )}
-
           <DropdownMenuSeparator />
           <DropdownMenuItem onSelect={() => createNewOrgHandler()}>
             Create New Org
@@ -229,7 +226,6 @@ export default function OrgDropdown({ setReferOpen }: OrgDropdownProps) {
           <DropdownMenuItem onSelect={() => setAddOpen(true)}>
             Invite Members
           </DropdownMenuItem>
-
           <DropdownMenuSeparator />
           <DropdownMenuLabel>User Settings</DropdownMenuLabel>
           <DropdownMenuItem
@@ -245,7 +241,6 @@ export default function OrgDropdown({ setReferOpen }: OrgDropdownProps) {
               />
             </div>
           </DropdownMenuItem>
-
           <DropdownMenuItem disableHover>
             <div className="flex items-center justify-between w-full">
               <span className="text-sm text-muted-foreground truncate">
@@ -253,7 +248,6 @@ export default function OrgDropdown({ setReferOpen }: OrgDropdownProps) {
               </span>
             </div>
           </DropdownMenuItem>
-
           <DropdownMenuSeparator />
           <DropdownMenuItem onSelect={handleSignOut}>Sign out</DropdownMenuItem>
         </DropdownMenuContent>
