@@ -63,21 +63,16 @@ async function callWithMapper(
         method: string;
         headers: Headers;
       }
-) {
+): Promise<Response> {
   if (targetUrl.host === "gateway.llmmapper.com") {
     if ("body" in init) {
       const headers: Record<string, string> = {};
       init.headers.forEach((value, key) => {
         headers[key] = value;
       });
-      const result = await llmmapper(targetUrl, {
+      return await llmmapper(targetUrl, {
         body: init.body,
         headers: headers,
-      });
-      return new Response(result.body ?? "", {
-        status: result.status,
-        statusText: result.statusText,
-        headers: result.headers,
       });
     } else {
       return new Response("Unsupported, must have body", { status: 404 });
@@ -102,7 +97,7 @@ export async function callProvider(props: CallProps): Promise<Response> {
   const baseInit = { method, headers: headersWithExtra };
   const init = method === "GET" ? { ...baseInit } : { ...baseInit, body };
 
-  let response;
+  let response: Response;
   if (increaseTimeout) {
     const controller = new AbortController();
     const signal = controller.signal;
