@@ -463,4 +463,48 @@ export const costs: ModelRow[] = [
       completion_token: 0.00001,
     },
   },
+  {
+    model: {
+      operator: "equals",
+      value: "o1-preview",
+    },
+    cost: {
+      prompt_token: 0.000015,
+      completion_token: 0.00006,
+    },
+    showInPlayground: true,
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "o1-preview-2024-09-12",
+    },
+    cost: {
+      prompt_token: 0.000015,
+      completion_token: 0.00006,
+    },
+    showInPlayground: true,
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "o1-mini",
+    },
+    cost: {
+      prompt_token: 0.000003,
+      completion_token: 0.000012,
+    },
+    showInPlayground: true,
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "o1-mini-2024-09-12",
+    },
+    cost: {
+      prompt_token: 0.000003,
+      completion_token: 0.000012,
+    },
+    showInPlayground: true,
+  },
 ];
