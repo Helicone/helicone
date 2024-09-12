@@ -1,8 +1,7 @@
-import { GetServerSidePropsContext } from "next";
 import MetaData from "../components/layout/public/authMetaData";
-import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
 import WelcomePage from "../components/templates/welcome/welcomePage";
 import "prismjs/themes/prism.css";
+import { withAuthSSR } from "../lib/api/handlerWrappers";
 interface WelcomeProps {
   currentStep: number;
 }
@@ -18,29 +17,26 @@ const Welcome = (props: WelcomeProps) => {
 
 export default Welcome;
 
-export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
-  // Create authenticated Supabase Client
-  const supabase = new SupabaseServerWrapper(ctx).getClient();
-  // Check if we have a session
+export const getServerSideProps = withAuthSSR(async (options) => {
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    userData: { user, orgHasOnboarded, orgId },
+  } = options;
+  const { context } = options;
 
-  if (!session)
+  if (!orgHasOnboarded) {
     return {
       redirect: {
-        destination: "/",
+        destination: "/dashboard",
         permanent: false,
       },
     };
+  }
 
-  const { step } = ctx.query;
+  const step = context.query.step as string;
 
   return {
     props: {
-      initialSession: session,
-      user: session.user,
-      currentStep: step ? parseInt(step as string) : 1,
+      currentStep: step ? parseInt(step) : 1,
     },
   };
-};
+});
