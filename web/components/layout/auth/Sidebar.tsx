@@ -139,21 +139,7 @@ const Sidebar = ({ tier, setReferOpen, setOpen }: SidebarProps) => {
         name: "Settings",
         href: "/settings",
         icon: Cog6ToothIcon,
-        current: false,
-        subItems: [
-          {
-            name: "Overview",
-            href: "/analytics/overview",
-            icon: ChartPieIcon,
-            current: false,
-          },
-          {
-            name: "Detailed Reports",
-            href: "/analytics/reports",
-            icon: DocumentChartBarIcon,
-            current: false,
-          },
-        ],
+        current: pathname.includes("/settings"),
       },
     ],
     [pathname, user?.email]
