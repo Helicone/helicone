@@ -89,7 +89,7 @@ export default function OrgDropdown({ setReferOpen }: OrgDropdownProps) {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="justify-between">
+          <Button variant="ghost" className="justify-between ml-2 w-full">
             <div className="flex items-center w-full">
               {currentIcon && (
                 <currentIcon.icon
