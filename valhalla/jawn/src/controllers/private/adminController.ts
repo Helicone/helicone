@@ -805,11 +805,11 @@ export class AdminController extends Controller {
       `
       SELECT
         count(*) as count,
-        date_trunc('${body.groupBy}', created_at) AS day
-      FROM organization
-      INNER JOIN auth.users u ON organization.owner = u.id
+        date_trunc('${body.groupBy}', o.created_at) AS day
+      FROM organization o
+      INNER JOIN auth.users u ON o.owner = u.id
       WHERE
-        created_at > now() - INTERVAL '${body.timeFilter}'
+        o.created_at > now() - INTERVAL '${body.timeFilter}'
         AND u.email NOT LIKE '%helicone.ai%'
       GROUP BY day
       ORDER BY day ASC
