@@ -265,7 +265,7 @@ const useOrgsContextManager = () => {
           },
         };
 
-        window.pylon("setNewIssueCustomFields", {
+        window.Pylon("setNewIssueCustomFields", {
           organization_id: org.id,
           organization_name: org.name,
           organization_tier: org.tier,
