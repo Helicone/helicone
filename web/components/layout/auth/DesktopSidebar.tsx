@@ -47,7 +47,8 @@ const DesktopSidebar = ({
     <div
       className={cn(
         "hidden md:flex md:flex-col z-30 bg-background dark:bg-gray-900 transition-all duration-300 h-screen bg-white pb-4",
-        isCollapsed ? "md:w-16" : "md:w-56"
+        isCollapsed ? "md:w-16" : "md:w-56",
+        "sticky top-0" // Add this line
       )}
     >
       <div className="w-full flex flex-grow flex-col overflow-y-auto border-r dark:border-gray-700 justify-between">
