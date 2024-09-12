@@ -107,9 +107,7 @@ export default async function Home() {
                         layout="responsive"
                       />
                     ) : (
-                      <div className="bg-gray-200 w-full h-64 flex items-center justify-center">
-                        <p>No image available</p>
-                      </div>
+                      <div className="bg-gray-200 w-full flex items-center justify-center"></div>
                     )}
                     <h1 className="text-sky-500 mt-16 md:mt-0 font-semibold">
                       {String(title)}

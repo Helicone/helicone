@@ -1,0 +1,4 @@
+{
+  "title": "Datasets",
+  "description": "Useful for LLM Training. Helicone introduces a new Datasets feature, empowering users to efficiently manage and organize their AI and LLM training data. This powerful tool allows for easy creation, export, and editing of datasets directly within the platform, supporting prompt engineering and fine-tuning workflows. With streamlined data handling, version control, and JSONL export capabilities, Datasets enhances AI and language model development processes. It optimizes data preparation for GPT models, improves prompt datasets, and supports various NLP tasks, saving time and improving overall model performance for chatbots, text generation, and other LLM applications."
+}
