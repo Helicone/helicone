@@ -82,7 +82,7 @@ async function callWithMapper(
       return new Response(
         "Helicone LLMMapper gateway error" + JSON.stringify(e),
         {
-          status: 50200,
+          status: 10_502,
         }
       );
     }
