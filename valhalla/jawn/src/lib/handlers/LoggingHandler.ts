@@ -374,9 +374,10 @@ export class LoggingHandler extends AbstractLogHandler {
       request_id: request.id,
       completion_tokens: usage.completionTokens ?? 0,
       latency: response.delayMs ?? 0,
-      model: context.processedLog.model && context.processedLog.model !== '' 
-        ? context.processedLog.model 
-        : this.getModelFromPath(request.path),
+      model:
+        context.processedLog.model && context.processedLog.model !== ""
+          ? context.processedLog.model
+          : this.getModelFromPath(request.path),
       prompt_tokens: usage.promptTokens ?? 0,
       request_created_at: formatTimeString(
         request.requestCreatedAt.toISOString()
@@ -485,21 +486,31 @@ export class LoggingHandler extends AbstractLogHandler {
 
   private extractRequestBodyMessage(requestBody: any): string {
     try {
-      const messagesArray = requestBody?.messages;
+      let systemPrompt = "";
+      let messagesArray = requestBody?.messages;
+
+      // Handle Anthropic-style system prompt
+      if (requestBody?.system && typeof requestBody.system === "string") {
+        systemPrompt = requestBody.system;
+      }
 
       if (!Array.isArray(messagesArray)) {
-        return "";
+        if (requestBody?.role && requestBody?.content) {
+          messagesArray = [requestBody];
+        } else {
+          return systemPrompt;
+        }
       }
 
       const allMessages = messagesArray
-        .filter((message) => {
-          return message?.role === "user";
-        })
-        .map((message) => {
+        .map((message: any) => {
           if (typeof message === "object" && message !== null) {
-            const content = message["content"];
+            const role = message.role;
+            const content = message.content;
+
+            let processedContent = "";
             if (Array.isArray(content)) {
-              return content
+              processedContent = content
                 .map((part) => {
                   if (part.type === "text") {
                     return part.text;
@@ -508,14 +519,17 @@ export class LoggingHandler extends AbstractLogHandler {
                 })
                 .join(" ");
             } else if (typeof content === "string") {
-              return content;
+              processedContent = content;
             }
+
+            return `${role}: ${processedContent}`;
           }
           return "";
         })
         .join(" ");
 
-      return this.ensureMaxVectorLength(this.cleanBody(allMessages.trim()));
+      const fullMessage = `${systemPrompt} ${allMessages}`;
+      return this.ensureMaxVectorLength(this.cleanBody(fullMessage.trim()));
     } catch (error) {
       console.error("Error pulling request body messages:", error);
       return "";
