@@ -232,6 +232,7 @@ export class DatasetManager extends BaseManager {
       created_at: string;
       last_used: string;
       versions: string[];
+      metadata: Record<string, any>;
     }>(
       `
     SELECT 
@@ -254,7 +255,8 @@ export class DatasetManager extends BaseManager {
           ORDER BY prompts_versions.major_version DESC, prompts_versions.minor_version DESC
           LIMIT 100
         ) as pv2
-      ) as versions
+      ) as versions,
+      prompt_v2.metadata
     FROM prompts_versions
     left join prompt_v2 on prompt_v2.id = prompts_versions.prompt_v2
     WHERE prompt_v2.organization = $1

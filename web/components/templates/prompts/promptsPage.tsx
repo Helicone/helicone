@@ -50,12 +50,8 @@ interface PromptsPageProps {
 }
 
 const PromptsPage = (props: PromptsPageProps) => {
-  const { defaultIndex } = props;
-
   const { prompts, isLoading, refetch } = usePrompts();
-
   const [searchName, setSearchName] = useState<string>("");
-  const [open, setOpen] = useState<boolean>(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const [imNotTechnical, setImNotTechnical] = useState<boolean>(false);
@@ -86,7 +82,8 @@ const PromptsPage = (props: PromptsPageProps) => {
   const createPrompt = async (userDefinedId: string) => {
     // Check if a prompt with this name already exists
     const existingPrompt = prompts?.find(
-      (prompt) => prompt.user_defined_id.toLowerCase() === userDefinedId.toLowerCase()
+      (prompt) =>
+        prompt.user_defined_id.toLowerCase() === userDefinedId.toLowerCase()
     );
 
     if (existingPrompt) {

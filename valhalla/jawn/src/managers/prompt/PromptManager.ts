@@ -32,6 +32,7 @@ export class PromptManager extends BaseManager {
 
     const metadata = {
       ...params.metadata,
+      isProduction: false, // Set isProduction to false for new versions
     };
 
     // Parse the newHeliconeTemplate to extract the model
@@ -206,7 +207,7 @@ export class PromptManager extends BaseManager {
       prompt_v2,
       model,
       prompts_versions.created_at,
-      metadata
+      prompts_versions.metadata
     FROM prompts_versions
     left join prompt_v2 on prompt_v2.id = prompts_versions.prompt_v2
     WHERE prompt_v2.organization = $1
@@ -395,6 +396,7 @@ export class PromptManager extends BaseManager {
       pretty_name: string;
       created_at: string;
       major_version: number;
+      metadata: Record<string, any>;
     }>(
       `
     SELECT 
@@ -403,7 +405,8 @@ export class PromptManager extends BaseManager {
       description,
       pretty_name,
       prompt_v2.created_at,
-      (SELECT major_version FROM prompts_versions pv WHERE pv.prompt_v2 = prompt_v2.id ORDER BY major_version DESC LIMIT 1) as major_version
+      (SELECT major_version FROM prompts_versions pv WHERE pv.prompt_v2 = prompt_v2.id ORDER BY major_version DESC LIMIT 1) as major_version,
+      metadata
     FROM prompt_v2
     WHERE prompt_v2.organization = $1
     AND prompt_v2.soft_delete = false
@@ -430,6 +433,7 @@ export class PromptManager extends BaseManager {
       created_at: string;
       last_used: string;
       versions: string[];
+      metadata: Record<string, any>;
     }>(
       `
     SELECT 
@@ -452,7 +456,8 @@ export class PromptManager extends BaseManager {
           ORDER BY prompts_versions.major_version DESC, prompts_versions.minor_version DESC
           LIMIT 100
         ) as pv2
-      ) as versions
+      ) as versions,
+      prompt_v2.metadata
     FROM prompts_versions
     left join prompt_v2 on prompt_v2.id = prompts_versions.prompt_v2
     WHERE prompt_v2.organization = $1
@@ -519,13 +524,20 @@ export class PromptManager extends BaseManager {
       return err(`Prompt with name ${params.userDefinedId} already exists`);
     }
 
+    const metadata = {
+      ...params.metadata,
+      createdFromUi: true,
+    };
+
     const result = await dbExecute<{
       id: string;
     }>(
       `
-    INSERT INTO prompt_v2 (organization, user_defined_id) VALUES ($1, $2) RETURNING id
+    INSERT INTO prompt_v2 (organization, user_defined_id, metadata) 
+    VALUES ($1, $2, $3) 
+    RETURNING id
     `,
-      [this.authParams.organizationId, params.userDefinedId]
+      [this.authParams.organizationId, params.userDefinedId, metadata]
     );
 
     if (result.error || !result.data) {
@@ -534,17 +546,12 @@ export class PromptManager extends BaseManager {
 
     const promptId = result.data[0].id;
 
-    const metadata = {
-      ...params.metadata,
-      isProduction: true,
-    };
-
     const insertVersionResult = await dbExecute<{
       id: string;
     }>(
       `
     INSERT INTO prompts_versions (prompt_v2, organization, major_version, minor_version, helicone_template, model, created_at, metadata)
-    VALUES ($1, $2, $3, $4, $5, $6, NOW(), $7)
+    VALUES ($1, $2, $3, $4, $5, $6, NOW(), '{"isProduction": true}'::jsonb)
     RETURNING id
     `,
       [
@@ -554,7 +561,6 @@ export class PromptManager extends BaseManager {
         0, // Starting with minor version 0
         JSON.stringify(params.prompt),
         params.prompt.model,
-        metadata,
       ]
     );
 

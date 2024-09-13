@@ -728,6 +728,11 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Record_string.any_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{},"additionalProperties":{"dataType":"any"},"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "PromptResult": {
         "dataType": "refObject",
         "properties": {
@@ -741,6 +746,7 @@ const models: TsoaRoute.Models = {
             "created_at": {"dataType":"string","required":true},
             "last_used": {"dataType":"string","required":true},
             "versions": {"dataType":"array","array":{"dataType":"string"},"required":true},
+            "metadata": {"ref":"Record_string.any_"},
         },
         "additionalProperties": false,
     },
@@ -787,11 +793,6 @@ const models: TsoaRoute.Models = {
     "Result_CreatePromptResponse.string_": {
         "dataType": "refAlias",
         "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_CreatePromptResponse_"},{"ref":"ResultError_string_"}],"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "Record_string.any_": {
-        "dataType": "refAlias",
-        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{},"additionalProperties":{"dataType":"any"},"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "PromptVersionResult": {

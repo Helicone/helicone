@@ -80,6 +80,7 @@ export interface PromptResult {
   created_at: string;
   last_used: string;
   versions: string[];
+  metadata?: Record<string, any>;
 }
 
 export interface PromptVersionQueryParams {}

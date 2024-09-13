@@ -220,17 +220,21 @@ export class LogStore {
     // Ensure the prompt exists or create it, and lock the row
     let existingPrompt = await t.oneOrNone<{
       id: string;
+      metadata: any;
     }>(
-      `SELECT id FROM prompt_v2 WHERE organization = $1 AND user_defined_id = $2`,
+      `SELECT id, metadata FROM prompt_v2 WHERE organization = $1 AND user_defined_id = $2`,
       [orgId, promptId]
     );
     if (!existingPrompt) {
       try {
         existingPrompt = await t.one<{
           id: string;
+          metadata: any;
         }>(
-          `INSERT INTO prompt_v2 (user_defined_id, organization, created_at) VALUES ($1, $2, $3) RETURNING id`,
-          [promptId, orgId, newPromptRecord.createdAt]
+          `INSERT INTO prompt_v2 (user_defined_id, organization, created_at, metadata) 
+           VALUES ($1, $2, $3, $4) 
+           RETURNING id, metadata`,
+          [promptId, orgId, newPromptRecord.createdAt, { createdFromUi: false }]
         );
       } catch (error) {
         console.error("Error inserting prompt", error);
@@ -239,8 +243,7 @@ export class LogStore {
     }
 
     // Check the latest version and decide whether to update
-
-    const existingProductionUIPromptVersion = await t.oneOrNone<{
+    const existingPromptVersion = await t.oneOrNone<{
       id: string;
       major_version: number;
       minor_version: number;
@@ -248,30 +251,16 @@ export class LogStore {
       created_at: Date;
       metadata: any;
     }>(
-      `SELECT id, major_version, minor_version, helicone_template, created_at, metadata FROM prompts_versions
-     WHERE organization = $1 AND prompt_v2 = $2 AND metadata->>'isProduction' = 'true' and metadata->>'createdFromUi' = 'true' ORDER BY major_version DESC, minor_version DESC LIMIT 1`,
+      `SELECT id, major_version, minor_version, helicone_template, created_at, metadata
+       FROM prompts_versions
+       WHERE organization = $1 AND prompt_v2 = $2 
+       ORDER BY major_version DESC, minor_version DESC LIMIT 1`,
       [orgId, existingPrompt.id]
     );
-
-    const existingDefaultPromptVersion = await t.oneOrNone<{
-      id: string;
-      major_version: number;
-      minor_version: number;
-      helicone_template: any;
-      created_at: Date;
-      metadata: any;
-    }>(
-      `SELECT id, major_version, minor_version, helicone_template, created_at, metadata FROM prompts_versions
-     WHERE organization = $1 AND prompt_v2 = $2 ORDER BY major_version DESC, minor_version DESC LIMIT 1`,
-      [orgId, existingPrompt.id]
-    );
-
-    const existingPromptVersion =
-      existingProductionUIPromptVersion ?? existingDefaultPromptVersion;
 
     let versionId = existingPromptVersion?.id ?? "";
 
-    const isCreatedFromUi = existingPromptVersion?.metadata?.createdFromUi as
+    const isCreatedFromUi = existingPrompt.metadata?.createdFromUi as
       | boolean
       | undefined;
 
@@ -293,18 +282,9 @@ export class LogStore {
         : 0;
 
       try {
-        await t.none(
-          `
-          UPDATE prompts_versions
-          SET metadata = metadata - 'isProduction'
-          WHERE prompt_v2 = $1 AND organization = $2 AND metadata->>'isProduction' = 'true'
-        `,
-          [existingPrompt.id, orgId]
-        );
-
         const insertQuery = `
         INSERT INTO prompts_versions (prompt_v2, organization, major_version, minor_version, helicone_template, model, created_at, metadata)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, '{"isProduction": true}'::jsonb)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
         RETURNING id`;
 
         const insertResult = await t.one(insertQuery, [
@@ -315,9 +295,20 @@ export class LogStore {
           heliconeTemplate.template,
           model,
           newPromptRecord.createdAt,
+          { isProduction: true },
         ]);
 
         versionId = insertResult.id;
+
+        // Update previous production version to not be production
+        if (existingPromptVersion) {
+          await t.none(
+            `UPDATE prompts_versions 
+             SET metadata = metadata - 'isProduction'
+             WHERE id = $1`,
+            [existingPromptVersion.id]
+          );
+        }
       } catch (error) {
         console.error("Error updating and inserting prompt version", error);
         throw error;
@@ -330,14 +321,14 @@ export class LogStore {
         WHERE id = $2
         RETURNING id`;
 
-        const insertResult = await t.one(updateQuery, [
+        const updateResult = await t.one(updateQuery, [
           sanitizeObject(heliconeTemplate.template),
           versionId,
         ]);
 
-        versionId = insertResult.id;
+        versionId = updateResult.id;
       } catch (error) {
-        console.error("Error inserting prompt version", error);
+        console.error("Error updating prompt version", error);
         throw error;
       }
     }

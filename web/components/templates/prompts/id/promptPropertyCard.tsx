@@ -47,7 +47,7 @@ const PromptPropertyCard = (props: PromptPropertyCardProps) => {
           isSelected
             ? "bg-sky-100 border-sky-500 dark:bg-sky-950"
             : "bg-white border-gray-300 dark:bg-black dark:border-gray-700",
-          "w-full border p-4 rounded-lg"
+          "w-full border px-4 py-2 "
         )}
       >
         <div className={clsx("flex flex-col w-full")}>

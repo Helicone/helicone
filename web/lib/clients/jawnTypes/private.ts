@@ -197,6 +197,10 @@ export interface components {
     PromptsQueryParams: {
       filter: components["schemas"]["PromptsFilterNode"];
     };
+    /** @description Construct a type with a set of properties K of type T */
+    "Record_string.any_": {
+      [key: string]: unknown;
+    };
     PromptResult: {
       id: string;
       user_defined_id: string;
@@ -209,6 +213,7 @@ export interface components {
       created_at: string;
       last_used: string;
       versions: string[];
+      metadata?: components["schemas"]["Record_string.any_"];
     };
     ResultSuccess_PromptResult_: {
       data: components["schemas"]["PromptResult"];
@@ -231,10 +236,6 @@ export interface components {
       error: null;
     };
     "Result_CreatePromptResponse.string_": components["schemas"]["ResultSuccess_CreatePromptResponse_"] | components["schemas"]["ResultError_string_"];
-    /** @description Construct a type with a set of properties K of type T */
-    "Record_string.any_": {
-      [key: string]: unknown;
-    };
     PromptVersionResult: {
       id: string;
       /** Format: double */
