@@ -1,14 +1,11 @@
-import { NextPageWithLayout } from "../_app";
-import AuthLayout from "../../components/layout/auth/authLayout";
 import { ReactElement } from "react";
-import OrgPlanPage from "../../components/templates/organization/plan/orgPlanPage";
-import { useOrg } from "../../components/layout/organizationContext";
+import AuthLayout from "../../components/layout/auth/authLayout";
+import BillingPlanPage from "@/components/templates/organization/plan/billingPage";
+import { withAuthSSR } from "../../lib/api/handlerWrappers";
+import { NextPageWithLayout } from "../_app";
 
 const PlanSettings: NextPageWithLayout = () => {
-  const orgContext = useOrg();
-  return orgContext?.currentOrg ? (
-    <OrgPlanPage org={orgContext.currentOrg} />
-  ) : null;
+  return <BillingPlanPage />;
 };
 
 PlanSettings.getLayout = function getLayout(page: ReactElement) {
@@ -16,3 +13,11 @@ PlanSettings.getLayout = function getLayout(page: ReactElement) {
 };
 
 export default PlanSettings;
+
+export const getServerSideProps = withAuthSSR(async (options) => {
+  return {
+    props: {
+      user: options.userData.user,
+    },
+  };
+});
