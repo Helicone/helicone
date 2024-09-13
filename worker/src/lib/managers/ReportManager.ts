@@ -49,7 +49,7 @@ export class ReportManager {
         );
         if (emailResErr) {
           console.error(`Error sending email: ${emailResErr}`);
-          throw new Error(emailResErr); // Throw the error to catch it outside
+          return err(emailResErr);
         }
       }
     });
@@ -151,7 +151,6 @@ export class ReportManager {
           blocks: JSON.stringify(slack_json.blocks),
         }),
       });
-      const data = await res.json();
 
       if (!res.ok) {
         return err(
@@ -161,14 +160,10 @@ export class ReportManager {
         );
       }
 
-      if (Object.keys(data || {}).includes("ok")) {
-        if (!(data as { ok: boolean }).ok) {
-          return err(
-            `Error sending slack messages: ${
-              (data as { error: string }).error
-            } ${(data as { message: string }).message}`
-          );
-        }
+      const data = (await res.json()) as { ok: boolean; error?: string };
+
+      if (!data.ok) {
+        return err(`Error sending slack messages: ${data.error}`);
       }
     }
 

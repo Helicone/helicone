@@ -257,8 +257,6 @@ export class ReportStore {
         this.getCostValue(organizationId, timeWindowMs),
         this.getCostValue(organizationId, timeWindowMs * 2),
       ]);
-      console.log("thisWeekCost", thisWeekCost);
-      console.log("prevTwoWeeksCost", prevTwoWeeksCost);
       const prevWeekCost = prevTwoWeeksCost.value - thisWeekCost.value;
 
       return ok({
