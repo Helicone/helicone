@@ -9,6 +9,8 @@ import { updateLoopUsers } from "./lib/managers/LoopsManager";
 import { RequestWrapper } from "./lib/RequestWrapper";
 import { ProviderName } from "./packages/cost/providers/mappings";
 import { buildRouter } from "./routers/routerFactory";
+import { ReportManager } from "./lib/managers/ReportManager";
+import { ReportStore } from "./lib/db/ReportStore";
 
 const FALLBACK_QUEUE = "fallback-queue";
 
@@ -349,20 +351,38 @@ export default {
       env.SUPABASE_SERVICE_ROLE_KEY
     );
     await updateLoopUsers(env);
-    if (controller.cron === "0 * * * *") {
-      // Do nothing
-      return;
-    } else {
-      const alertManager = new AlertManager(
-        new AlertStore(supabaseClient, new ClickhouseClientWrapper(env)),
-        env
-      );
+    switch (controller.cron) {
+      case "0 * * * *":
+        // Do nothing
+        return;
+      case "0 10 * * mon":
+        console.log("Sending reports");
+        const reportManager = new ReportManager(
+          new ReportStore(supabaseClient, new ClickhouseClientWrapper(env)),
+          env
+        );
 
-      const { error: checkAlertErr } = await alertManager.checkAlerts();
+        const { error: sendReportsErr } = await reportManager.sendReports();
 
-      if (checkAlertErr) {
-        console.error(`Failed to check alerts: ${checkAlertErr}`);
-      }
+        if (sendReportsErr) {
+          console.error(`Failed to check reports: ${sendReportsErr}`);
+        }
+        break;
+      case "* * * * *":
+        const alertManager = new AlertManager(
+          new AlertStore(supabaseClient, new ClickhouseClientWrapper(env)),
+          env
+        );
+
+        const { error: checkAlertErr } = await alertManager.checkAlerts();
+
+        if (checkAlertErr) {
+          console.error(`Failed to check alerts: ${checkAlertErr}`);
+        }
+        break;
+      default:
+        console.error(`Unknown cron: ${controller.cron}`);
+        break;
     }
   },
 };

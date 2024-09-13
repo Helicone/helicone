@@ -6118,6 +6118,41 @@
 				]
 			}
 		},
+		"/v1/integration/type/{type}": {
+			"get": {
+				"operationId": "GetIntegrationByType",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_Integration.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Integration"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "type",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
 		"/v1/integration/slack/settings": {
 			"get": {
 				"operationId": "GetSlackSettings",

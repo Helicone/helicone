@@ -429,7 +429,6 @@ export class AlertManager {
         }),
       });
       const data = await res.json();
-      console.log(data);
 
       if (!res.ok) {
         return err(
@@ -437,6 +436,16 @@ export class AlertManager {
             res.statusText
           } ${await res.text()}`
         );
+      }
+
+      if (Object.keys(data || {}).includes("ok")) {
+        if (!(data as { ok: boolean }).ok) {
+          return err(
+            `Error sending slack messages: ${
+              (data as { error: string }).error
+            } ${(data as { message: string }).message}`
+          );
+        }
       }
     }
 
