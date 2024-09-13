@@ -256,20 +256,22 @@ const useOrgsContextManager = () => {
       });
 
       if (user) {
-        window.pylon = {
-          chat_settings: {
-            app_id: "f766dfd3-28f8-40a8-872f-351274cbd306",
-            email: user.email,
-            name: user.user_metadata?.name,
-            avatar_url: user.user_metadata?.avatar_url,
-          },
-        };
+        if (typeof window !== "undefined" && window.Pylon) {
+          window.pylon = {
+            chat_settings: {
+              app_id: "f766dfd3-28f8-40a8-872f-351274cbd306",
+              email: user.email,
+              name: user.user_metadata?.name,
+              avatar_url: user.user_metadata?.avatar_url,
+            },
+          };
 
-        window.Pylon("setNewIssueCustomFields", {
-          organization_id: org.id,
-          organization_name: org.name,
-          organization_tier: org.tier,
-        });
+          window.Pylon("setNewIssueCustomFields", {
+            organization_id: org.id,
+            organization_name: org.name,
+            organization_tier: org.tier,
+          });
+        }
       }
     }
   }, [user, org?.id, org?.name, org?.tier]);
