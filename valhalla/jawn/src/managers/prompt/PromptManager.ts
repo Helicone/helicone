@@ -539,8 +539,6 @@ export class PromptManager extends BaseManager {
       isProduction: true,
     };
 
-    console.log("metadata", metadata);
-
     const insertVersionResult = await dbExecute<{
       id: string;
     }>(
