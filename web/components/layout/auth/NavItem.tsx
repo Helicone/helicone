@@ -12,7 +12,7 @@ import { useRouter } from "next/router";
 interface NavigationItem {
   name: string;
   href: string;
-  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>> | null;
   current: boolean;
   featured?: boolean;
   subItems?: NavigationItem[];
@@ -57,12 +57,14 @@ const NavItem: React.FC<NavItemProps> = ({
               link.current && "bg-accent hover:bg-accent"
             )}
           >
-            <link.icon
-              className={cn(
-                "h-4 w-4",
-                link.current && "text-accent-foreground"
-              )}
-            />
+            {link.icon && (
+              <link.icon
+                className={cn(
+                  "h-4 w-4",
+                  link.current && "text-accent-foreground"
+                )}
+              />
+            )}
             <span className="sr-only">{link.name}</span>
           </Link>
         </TooltipTrigger>
@@ -87,19 +89,21 @@ const NavItem: React.FC<NavItemProps> = ({
         className={cn(
           buttonVariants({
             variant: link.current ? "secondary" : "ghost",
-            size: "sm",
+            size: link.icon ? "sm" : "xs",
           }),
           "justify-start w-full",
           hasSubItems && "flex items-center justify-between"
         )}
       >
         <div className="flex items-center">
-          <link.icon
-            className={cn(
-              "mr-2 h-4 w-4",
-              link.current && "text-accent-foreground"
-            )}
-          />
+          {link.icon && (
+            <link.icon
+              className={cn(
+                "mr-2 h-4 w-4",
+                link.current && "text-accent-foreground"
+              )}
+            />
+          )}
           {link.name}
         </div>
         {hasSubItems && (

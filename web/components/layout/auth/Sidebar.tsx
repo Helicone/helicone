@@ -8,12 +8,14 @@ import {
   ChartBarIcon,
   ChartPieIcon,
   CircleStackIcon,
+  CodeBracketIcon,
   Cog6ToothIcon,
   DocumentChartBarIcon,
   DocumentTextIcon,
   GlobeAltIcon,
   HomeIcon,
   KeyIcon,
+  LightBulbIcon,
   LockClosedIcon,
   ShieldCheckIcon,
   SparklesIcon,
@@ -25,10 +27,11 @@ import { useUser } from "@supabase/auth-helpers-react";
 import { useRouter } from "next/router";
 import { useMemo, useState } from "react";
 import { GoRepoForked } from "react-icons/go";
-import DesktopSidebar from "./DesktopSidebar";
+import DesktopSidebar, { NavigationItem } from "./DesktopSidebar";
 
 import { PiGraphLight } from "react-icons/pi";
 import MobileNavigation from "./MobileNavigation";
+import { useOrg } from "../organizationContext";
 
 interface SidebarProps {
   tier: string;
@@ -41,8 +44,9 @@ const Sidebar = ({ tier, setReferOpen, setOpen }: SidebarProps) => {
   const router = useRouter();
   const { pathname } = router;
   const user = useUser();
+  const org = useOrg();
 
-  const NAVIGATION = useMemo(
+  const NAVIGATION: NavigationItem[] = useMemo(
     () => [
       {
         name: "Dashboard",
@@ -51,107 +55,133 @@ const Sidebar = ({ tier, setReferOpen, setOpen }: SidebarProps) => {
         current: pathname.includes("/dashboard"),
       },
       {
-        name: "Requests",
+        name: "Traces",
         href: "/requests",
         icon: TableCellsIcon,
         current: pathname.includes("/requests"),
       },
+
       {
-        name: "Datasets",
-        href: "/datasets",
-        icon: CircleStackIcon,
-        current: pathname.includes("/datasets"),
-      },
-      ...(!user?.email?.includes("@helicone.ai")
-        ? []
-        : [
-            {
-              name: "Evals",
-              href: "/evals",
-              icon: ChartBarIcon,
-              current: pathname.includes("/evals"),
-            },
-            {
-              name: "Connections",
-              href: "/connections",
-              icon: GoRepoForked,
-              current: pathname.includes("/connections"),
-            },
-          ]),
-      {
-        name: "Sessions",
-        href: "/sessions",
-        icon: PiGraphLight,
-        current: pathname.includes("/sessions"),
-      },
-      {
-        name: "Prompts",
-        href: "/prompts",
-        icon: DocumentTextIcon,
-        current: pathname.includes("/prompts"),
-      },
-      {
-        name: "Users",
-        href: "/users",
-        icon: UsersIcon,
-        current: pathname.includes("/users"),
-      },
-      {
-        name: "Alerts",
-        href: "/alerts",
-        icon: BellIcon,
-        current: pathname.includes("/alerts"),
-      },
-      {
-        name: "Fine-Tune",
-        href: "/fine-tune",
-        icon: SparklesIcon,
-        current: pathname.includes("/fine-tune"),
-      },
-      {
-        name: "Properties",
-        href: "/properties",
-        icon: TagIcon,
-        current: pathname.includes("/properties"),
-      },
-      {
-        name: "Cache",
-        href: "/cache",
-        icon: ArchiveBoxIcon,
-        current: pathname.includes("/cache"),
-      },
-      {
-        name: "Rate Limits",
-        href: "/rate-limit",
-        icon: ShieldCheckIcon,
-        current: pathname.includes("/rate-limit"),
-      },
-      {
-        name: "Playground",
-        href: "/playground",
-        icon: BeakerIcon,
-        current: pathname.includes("/playground"),
-      },
-      {
-        name: "Enterprise",
-        href: "/enterprise",
-        icon: BuildingLibraryIcon,
-        current: pathname.includes("/enterprise"),
+        name: "Segments",
+        href: "/segments",
+        icon: ChartPieIcon,
+        current: false,
         subItems: [
           {
-            name: "Webhooks",
-            href: "/enterprise/webhooks",
-            icon: GlobeAltIcon,
-            current: false,
+            name: "Sessions",
+            href: "/sessions",
+            icon: null,
+            current: pathname.includes("/sessions"),
           },
           {
-            name: "Vault",
-            href: "/enterprise/vault",
-            icon: LockClosedIcon,
-            current: false,
+            name: "Properties",
+            href: "/properties",
+            icon: null,
+            current: pathname.includes("/properties"),
+          },
+
+          {
+            name: "Users",
+            href: "/users",
+            icon: null,
+            current: pathname.includes("/users"),
           },
         ],
       },
+      {
+        name: "Improve",
+        href: "/improve",
+        icon: LightBulbIcon,
+        current: false,
+        subItems: [
+          {
+            name: "Playground",
+            href: "/playground",
+            icon: null,
+            current: pathname.includes("/playground"),
+          },
+          {
+            name: "Datasets",
+            href: "/datasets",
+            icon: null,
+            current: pathname.includes("/datasets"),
+          },
+          {
+            name: "Fine-Tune",
+            href: "/fine-tune",
+            icon: null,
+            current: pathname.includes("/fine-tune"),
+          },
+          {
+            name: "Prompts",
+            href: "/prompts",
+            icon: null,
+            current: pathname.includes("/prompts"),
+          },
+
+          ...(!user?.email?.includes("@helicone.ai")
+            ? []
+            : [
+                {
+                  name: "Evals",
+                  href: "/evals",
+                  icon: null,
+                  current: pathname.includes("/evals"),
+                },
+              ]),
+        ],
+      },
+
+      {
+        name: "Developer",
+        href: "/developer",
+        icon: CodeBracketIcon,
+        current: pathname.includes("/developer"),
+        subItems: [
+          {
+            name: "Cache",
+            href: "/cache",
+            icon: null,
+            current: pathname.includes("/cache"),
+          },
+          {
+            name: "Rate Limits",
+            href: "/rate-limit",
+            icon: null,
+            current: pathname.includes("/rate-limit"),
+          },
+          {
+            name: "Alerts",
+            href: "/alerts",
+            icon: null,
+            current: pathname.includes("/alerts"),
+          },
+        ],
+      },
+      ...(org?.currentOrg?.tier === "enterprise"
+        ? [
+            {
+              name: "Enterprise",
+              href: "/enterprise",
+              icon: BuildingLibraryIcon,
+              current: pathname.includes("/enterprise"),
+              subItems: [
+                {
+                  name: "Webhooks",
+                  href: "/enterprise/webhooks",
+                  icon: null,
+                  current: false,
+                },
+                {
+                  name: "Vault",
+                  href: "/enterprise/vault",
+                  icon: null,
+                  current: false,
+                },
+              ],
+            },
+          ]
+        : []),
       {
         name: "Settings",
         href: "/settings",
@@ -161,31 +191,41 @@ const Sidebar = ({ tier, setReferOpen, setOpen }: SidebarProps) => {
           {
             name: "Organization",
             href: "/settings/organization",
-            icon: ChartPieIcon,
+            icon: null,
             current: false,
           },
           {
             name: "API Keys",
             href: "/settings/api-keys",
-            icon: KeyIcon,
+            icon: null,
             current: false,
           },
+          ...(!user?.email?.includes("@helicone.ai")
+            ? []
+            : [
+                {
+                  name: "Connections",
+                  href: "/settings/connections",
+                  icon: null,
+                  current: pathname.includes("/settings/connections"),
+                },
+              ]),
           {
             name: "Detailed Reports",
             href: "/settings/billing",
-            icon: DocumentChartBarIcon,
+            icon: null,
             current: false,
           },
           {
             name: "Members",
             href: "/settings/members",
-            icon: UsersIcon,
+            icon: null,
             current: false,
           },
           {
             name: "Billing",
             href: "/settings/rate-limits",
-            icon: DocumentChartBarIcon,
+            icon: null,
             current: false,
           },
         ],

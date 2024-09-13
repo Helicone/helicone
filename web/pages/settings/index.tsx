@@ -7,8 +7,8 @@ import { ReactElement } from "react";
 
 const Settings: NextPageWithLayout<
   InferGetServerSidePropsType<typeof getServerSideProps>
-> = (props) => {
-  return <SettingsPage defaultIndex={props.defaultIndex} />;
+> = () => {
+  return <SettingsPage />;
 };
 
 Settings.getLayout = function getLayout(page: ReactElement) {
@@ -33,13 +33,10 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
       },
     };
 
-  const { tab } = ctx.query;
-
   return {
     props: {
       initialSession: session,
       user: session.user,
-      defaultIndex: tab ? parseInt(tab as string) : 0,
     },
   };
 };

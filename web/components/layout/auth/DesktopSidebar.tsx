@@ -19,10 +19,10 @@ import { useOrg } from "../organizationContext";
 import OrgDropdown from "../orgDropdown";
 import NavItem from "./NavItem";
 
-interface NavigationItem {
+export interface NavigationItem {
   name: string;
   href: string;
-  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>> | null;
   current: boolean;
   featured?: boolean;
   subItems?: NavigationItem[];
