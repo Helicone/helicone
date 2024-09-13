@@ -92,7 +92,8 @@ const NavItem: React.FC<NavItemProps> = ({
             size: link.icon ? "sm" : "xs",
           }),
           "justify-start w-full",
-          hasSubItems && "flex items-center justify-between"
+          hasSubItems && "flex items-center justify-between",
+          link.icon || "font-light text-gray-600"
         )}
       >
         <div className="flex items-center">

@@ -211,12 +211,6 @@ const Sidebar = ({ tier, setReferOpen, setOpen }: SidebarProps) => {
                 },
               ]),
           {
-            name: "Detailed Reports",
-            href: "/settings/billing",
-            icon: null,
-            current: false,
-          },
-          {
             name: "Members",
             href: "/settings/members",
             icon: null,
@@ -224,9 +218,9 @@ const Sidebar = ({ tier, setReferOpen, setOpen }: SidebarProps) => {
           },
           {
             name: "Billing",
-            href: "/settings/rate-limits",
+            href: "/settings/billing",
             icon: null,
-            current: false,
+            current: pathname.includes("/settings/billing"),
           },
         ],
       },
