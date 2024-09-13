@@ -351,39 +351,36 @@ export default {
       env.SUPABASE_SERVICE_ROLE_KEY
     );
     await updateLoopUsers(env);
-    switch (controller.cron) {
-      case "0 * * * *":
-        // Do nothing
-        return;
-      case "0 10 * * mon":
-        console.log("Sending reports");
-        const reportManager = new ReportManager(
-          new ReportStore(supabaseClient, new ClickhouseClientWrapper(env)),
-          env
-        );
-
-        const { error: sendReportsErr } = await reportManager.sendReports();
-
-        if (sendReportsErr) {
-          console.error(`Failed to check reports: ${sendReportsErr}`);
-        }
-        break;
-      case "* * * * *":
-        const alertManager = new AlertManager(
-          new AlertStore(supabaseClient, new ClickhouseClientWrapper(env)),
-          env
-        );
-
-        const { error: checkAlertErr } = await alertManager.checkAlerts();
-
-        if (checkAlertErr) {
-          console.error(`Failed to check alerts: ${checkAlertErr}`);
-        }
-        break;
-      default:
-        console.error(`Unknown cron: ${controller.cron}`);
-        break;
+    if (controller.cron === "0 * * * *") {
+      return;
     }
+    if (controller.cron === "0 10 * * mon") {
+      const reportManager = new ReportManager(
+        new ReportStore(supabaseClient, new ClickhouseClientWrapper(env)),
+        env
+      );
+
+      const { error: sendReportsErr } = await reportManager.sendReports();
+
+      if (sendReportsErr) {
+        console.error(`Failed to check reports: ${sendReportsErr}`);
+      }
+      return;
+    }
+    if (controller.cron === "* * * * *") {
+      const alertManager = new AlertManager(
+        new AlertStore(supabaseClient, new ClickhouseClientWrapper(env)),
+        env
+      );
+
+      const { error: checkAlertErr } = await alertManager.checkAlerts();
+
+      if (checkAlertErr) {
+        console.error(`Failed to check alerts: ${checkAlertErr}`);
+      }
+      return;
+    }
+    console.error(`Unknown cron: ${controller.cron}`);
   },
 };
 
