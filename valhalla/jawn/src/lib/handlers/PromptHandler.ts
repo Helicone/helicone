@@ -22,6 +22,8 @@ export class PromptHandler extends AbstractLogHandler {
         heliconeTemplate = context.message.log.request.heliconeTemplate;
       }
 
+      console.log("htemplate", heliconeTemplate);
+
       // If assets are present, replace the inputs with the asset ids
       if (assets) {
         const inverseAssets: Map<string, string> = new Map();

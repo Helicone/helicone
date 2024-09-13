@@ -206,6 +206,7 @@ const models: TsoaRoute.Models = {
         "properties": {
             "newHeliconeTemplate": {"dataType":"any","required":true},
             "isMajorVersion": {"dataType":"boolean"},
+            "metadata": {"ref":"Record_string.any_"},
         },
         "additionalProperties": false,
     },
@@ -343,6 +344,33 @@ const models: TsoaRoute.Models = {
             "inputs": {"ref":"Record_string.string_","required":true},
         },
         "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "PromptVersionResultFilled": {
+        "dataType": "refObject",
+        "properties": {
+            "id": {"dataType":"string","required":true},
+            "minor_version": {"dataType":"double","required":true},
+            "major_version": {"dataType":"double","required":true},
+            "prompt_v2": {"dataType":"string","required":true},
+            "model": {"dataType":"string","required":true},
+            "filled_helicone_template": {"dataType":"any","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ResultSuccess_PromptVersionResultFilled_": {
+        "dataType": "refObject",
+        "properties": {
+            "data": {"ref":"PromptVersionResultFilled","required":true},
+            "error": {"dataType":"enum","enums":[null],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Result_PromptVersionResultFilled.string_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_PromptVersionResultFilled_"},{"ref":"ResultError_string_"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Json": {
@@ -984,7 +1012,7 @@ export function RegisterRoutes(app: Router) {
 
             async function PromptController_createPrompt(request: ExRequest, response: ExResponse, next: any) {
             const args: Record<string, TsoaRoute.ParameterSchema> = {
-                    requestBody: {"in":"body","name":"requestBody","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"prompt":{"dataType":"nestedObjectLiteral","nestedProperties":{"messages":{"dataType":"array","array":{"dataType":"any"},"required":true},"model":{"dataType":"string","required":true}},"required":true},"userDefinedId":{"dataType":"string","required":true}}},
+                    requestBody: {"in":"body","name":"requestBody","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"metadata":{"ref":"Record_string.any_","required":true},"prompt":{"dataType":"nestedObjectLiteral","nestedProperties":{"messages":{"dataType":"array","array":{"dataType":"any"},"required":true},"model":{"dataType":"string","required":true}},"required":true},"userDefinedId":{"dataType":"string","required":true}}},
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
             };
 
@@ -1195,6 +1223,39 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'getPromptVersionsCompiled',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.post('/v1/prompt/:user_defined_id/template',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(PromptController)),
+            ...(fetchMiddlewares<RequestHandler>(PromptController.prototype.getPromptVersionTemplates)),
+
+            async function PromptController_getPromptVersionTemplates(request: ExRequest, response: ExResponse, next: any) {
+            const args: Record<string, TsoaRoute.ParameterSchema> = {
+                    requestBody: {"in":"body","name":"requestBody","required":true,"ref":"PromptVersiosQueryParamsCompiled"},
+                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
+                    user_defined_id: {"in":"path","name":"user_defined_id","required":true,"dataType":"string"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args, request, response });
+
+                const controller = new PromptController();
+
+              await templateService.apiHandler({
+                methodName: 'getPromptVersionTemplates',
                 controller,
                 response,
                 next,

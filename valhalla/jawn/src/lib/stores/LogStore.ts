@@ -239,19 +239,41 @@ export class LogStore {
     }
 
     // Check the latest version and decide whether to update
-    const existingPromptVersion = await t.oneOrNone<{
+
+    const existingProductionUIPromptVersion = await t.oneOrNone<{
       id: string;
       major_version: number;
       minor_version: number;
       helicone_template: any;
       created_at: Date;
+      metadata: any;
     }>(
-      `SELECT id, major_version, minor_version, helicone_template, created_at FROM prompts_versions
+      `SELECT id, major_version, minor_version, helicone_template, created_at, metadata FROM prompts_versions
+     WHERE organization = $1 AND prompt_v2 = $2 AND metadata->>'isProduction' = 'true' and metadata->>'createdFromUi' = 'true' ORDER BY major_version DESC, minor_version DESC LIMIT 1`,
+      [orgId, existingPrompt.id]
+    );
+
+    const existingDefaultPromptVersion = await t.oneOrNone<{
+      id: string;
+      major_version: number;
+      minor_version: number;
+      helicone_template: any;
+      created_at: Date;
+      metadata: any;
+    }>(
+      `SELECT id, major_version, minor_version, helicone_template, created_at, metadata FROM prompts_versions
      WHERE organization = $1 AND prompt_v2 = $2 ORDER BY major_version DESC, minor_version DESC LIMIT 1`,
       [orgId, existingPrompt.id]
     );
 
+    const existingPromptVersion =
+      existingProductionUIPromptVersion ?? existingDefaultPromptVersion;
+
     let versionId = existingPromptVersion?.id ?? "";
+
+    const isCreatedFromUi = existingPromptVersion?.metadata?.createdFromUi as
+      | boolean
+      | undefined;
 
     const shouldBump = shouldBumpVersion({
       old: existingPromptVersion?.helicone_template ?? {},
@@ -260,9 +282,10 @@ export class LogStore {
 
     // Check if an update is necessary based on template comparison
     if (
-      !existingPromptVersion ||
-      (shouldBump.shouldBump &&
-        existingPromptVersion.created_at <= newPromptRecord.createdAt)
+      !isCreatedFromUi &&
+      (!existingPromptVersion ||
+        (shouldBump.shouldBump &&
+          existingPromptVersion.created_at <= newPromptRecord.createdAt))
     ) {
       // Insert new record with incremented version
       const newMajorVersion = existingPromptVersion
@@ -270,6 +293,15 @@ export class LogStore {
         : 0;
 
       try {
+        await t.none(
+          `
+          UPDATE prompts_versions
+          SET metadata = metadata - 'isProduction'
+          WHERE prompt_v2 = $1 AND organization = $2 AND metadata->>'isProduction' = 'true'
+        `,
+          [existingPrompt.id, orgId]
+        );
+
         const insertQuery = `
         INSERT INTO prompts_versions (prompt_v2, organization, major_version, minor_version, helicone_template, model, created_at, metadata)
         VALUES ($1, $2, $3, $4, $5, $6, $7, '{"isProduction": true}'::jsonb)
@@ -283,12 +315,11 @@ export class LogStore {
           heliconeTemplate.template,
           model,
           newPromptRecord.createdAt,
-        
         ]);
 
         versionId = insertResult.id;
       } catch (error) {
-        console.error("Error inserting prompt version", error);
+        console.error("Error updating and inserting prompt version", error);
         throw error;
       }
     } else if (shouldBump.shouldUpdateNotBump) {

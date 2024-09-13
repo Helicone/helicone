@@ -39,6 +39,9 @@ export interface paths {
   "/v1/prompt/{user_defined_id}/compile": {
     post: operations["GetPromptVersionsCompiled"];
   };
+  "/v1/prompt/{user_defined_id}/template": {
+    post: operations["GetPromptVersionTemplates"];
+  };
   "/v1/settings/query": {
     get: operations["GetSettings"];
   };
@@ -253,6 +256,7 @@ export interface components {
     PromptCreateSubversionParams: {
       newHeliconeTemplate: unknown;
       isMajorVersion?: boolean;
+      metadata?: components["schemas"]["Record_string.any_"];
     };
     /** @description Construct a type with a set of properties K of type T */
     "Record_string.string_": {
@@ -343,6 +347,22 @@ export interface components {
       filter?: components["schemas"]["PromptVersionsFilterNode"];
       inputs: components["schemas"]["Record_string.string_"];
     };
+    PromptVersionResultFilled: {
+      id: string;
+      /** Format: double */
+      minor_version: number;
+      /** Format: double */
+      major_version: number;
+      prompt_v2: string;
+      model: string;
+      filled_helicone_template: unknown;
+    };
+    ResultSuccess_PromptVersionResultFilled_: {
+      data: components["schemas"]["PromptVersionResultFilled"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_PromptVersionResultFilled.string_": components["schemas"]["ResultSuccess_PromptVersionResultFilled_"] | components["schemas"]["ResultError_string_"];
 Json: JsonObject;
     NewOrganizationParams: {
       tier?: string | null;
@@ -1073,6 +1093,7 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": {
+          metadata: components["schemas"]["Record_string.any_"];
           prompt: {
             messages: unknown[];
             model: string;
@@ -1207,6 +1228,26 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_PromptVersionResultCompiled.string_"];
+        };
+      };
+    };
+  };
+  GetPromptVersionTemplates: {
+    parameters: {
+      path: {
+        user_defined_id: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PromptVersiosQueryParamsCompiled"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_PromptVersionResultFilled.string_"];
         };
       };
     };

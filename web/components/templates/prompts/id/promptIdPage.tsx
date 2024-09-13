@@ -244,6 +244,9 @@ const PromptIdPage = (props: PromptIdPageProps) => {
         body: {
           newHeliconeTemplate: JSON.stringify(promptData),
           isMajorVersion: true,
+          metadata: {
+            createdFromUi: true,
+          },
         },
       }
     );
@@ -684,8 +687,6 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                       prompt={selectedPrompt?.helicone_template || ""}
                       selectedInput={selectedInput}
                       onSubmit={async (history, model) => {
-                        console.log("Submitted history:", history);
-                        console.log("Selected model:", model);
                         await createSubversion(history, model);
                       }}
                       submitText="Test"

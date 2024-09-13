@@ -417,6 +417,12 @@ const PromptChatRow = (props: PromptChatRowProps) => {
     }
   }, [isEditing, contentAsString, extractVariables]);
 
+  // Update currentMessage when the prop message changes
+  useEffect(() => {
+    setCurrentMessage(message);
+    setRole(message.role);
+  }, [message]);
+
   return (
     <li
       className={clsx(
@@ -512,7 +518,9 @@ const PromptChatRow = (props: PromptChatRowProps) => {
                         const textMessage = messageContent.find(
                           (element) => element.type === "text"
                         );
-                        textMessage.text = replacedText;
+                        if (textMessage) {
+                          textMessage.text = replacedText;
+                        }
                       } else {
                         newMessages.content = replacedText;
                       }

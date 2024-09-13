@@ -84,6 +84,19 @@ const PromptsPage = (props: PromptsPageProps) => {
   }, []);
 
   const createPrompt = async (userDefinedId: string) => {
+    // Check if a prompt with this name already exists
+    const existingPrompt = prompts?.find(
+      (prompt) => prompt.user_defined_id.toLowerCase() === userDefinedId.toLowerCase()
+    );
+
+    if (existingPrompt) {
+      notification.setNotification(
+        `A prompt with the name "${userDefinedId}" already exists`,
+        "error"
+      );
+      return;
+    }
+
     const promptData = {
       model: newPromptModel,
       messages: [
@@ -103,6 +116,9 @@ const PromptsPage = (props: PromptsPageProps) => {
       body: {
         userDefinedId,
         prompt: promptData,
+        metadata: {
+          createdFromUi: true,
+        },
       },
     });
 
