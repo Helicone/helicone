@@ -19,10 +19,12 @@ import { OrgContextProvider } from "../components/layout/organizationContext";
 import { ThemeContextProvider } from "../components/shared/theme/themeContext";
 import Script from "next/script";
 import { PostHogProvider } from "posthog-js/react";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 declare global {
   interface Window {
-    Atlas: any;
+    pylon?: any;
+    Pylon?: any;
   }
 }
 
@@ -70,7 +72,9 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
               <DndProvider backend={HTML5Backend}>
                 <OrgContextProvider>
                   <ThemeContextProvider>
-                    {getLayout(<Component {...pageProps} />)}
+                    <TooltipProvider>
+                      {getLayout(<Component {...pageProps} />)}
+                    </TooltipProvider>
                   </ThemeContextProvider>
                   <Notification />
                 </OrgContextProvider>
@@ -85,6 +89,14 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
           id="koala-snippet"
           dangerouslySetInnerHTML={{
             __html: `!function(t){if(window.ko)return;window.ko=[],["identify","track","removeListeners","open","on","off","qualify","ready"].forEach(function(t){ko[t]=function(){var n=[].slice.call(arguments);return n.unshift(t),ko.push(n),ko}});var n=document.createElement("script");n.async=!0,n.setAttribute("src","https://cdn.getkoala.com/v1/pk_3d24ae9e69e18decfcb68b9d7b668c4501b5/sdk.js"),(document.body || document.head).appendChild(n)}();`,
+          }}
+        />
+      )}
+      {trackingEnabled && (
+        <Script
+          id="pylon-snippet"
+          dangerouslySetInnerHTML={{
+            __html: `(function(){var e=window;var t=document;var n=function(){n.e(arguments)};n.q=[];n.e=function(e){n.q.push(e)};e.Pylon=n;var r=function(){var e=t.createElement("script");e.setAttribute("type","text/javascript");e.setAttribute("async","true");e.setAttribute("src","https://widget.usepylon.com/widget/f766dfd3-28f8-40a8-872f-351274cbd306");var n=t.getElementsByTagName("script")[0];n.parentNode.insertBefore(e,n)};if(t.readyState==="complete"){r()}else if(e.addEventListener){e.addEventListener("load",r,false)}})();`,
           }}
         />
       )}

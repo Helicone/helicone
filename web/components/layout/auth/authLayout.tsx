@@ -13,6 +13,7 @@ import DemoModal from "./DemoModal";
 
 import MainContent from "./MainContent";
 import Sidebar from "./Sidebar";
+import { Row } from "../common";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -47,16 +48,20 @@ const AuthLayout = (props: AuthLayoutProps) => {
     >
       <div>
         <DemoModal />
-
-        <Sidebar
-          tier={tier ?? ""}
-          setReferOpen={setReferOpen}
-          setOpen={setOpen}
-        />
-
-        <MainContent banner={banner} pathname={pathname}>
-          {children}
-        </MainContent>
+        <Row className="flex-col md:flex-row">
+          <div className=" w-full md:w-min ">
+            <Sidebar
+              tier={tier ?? ""}
+              setReferOpen={setReferOpen}
+              setOpen={setOpen}
+            />
+          </div>
+          <div className="flex-grow max-w-full overflow-hidden">
+            <MainContent banner={banner} pathname={pathname}>
+              {children}
+            </MainContent>
+          </div>
+        </Row>
       </div>
       <ReferralModal open={referOpen} setOpen={setReferOpen} />
       <UpgradeProModal open={open} setOpen={setOpen} />
