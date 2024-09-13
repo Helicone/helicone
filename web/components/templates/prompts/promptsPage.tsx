@@ -2,6 +2,8 @@ import {
   BookOpenIcon,
   DocumentPlusIcon,
   DocumentTextIcon,
+  EyeIcon,
+  PencilIcon,
   Square2StackIcon,
   TableCellsIcon,
 } from "@heroicons/react/24/outline";
@@ -44,6 +46,7 @@ import {
   SelectValue,
 } from "../../ui/select";
 import { MODEL_LIST } from "../playground/new/modelList";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../../ui/tooltip";
 
 interface PromptsPageProps {
   defaultIndex: number;
@@ -387,6 +390,53 @@ const chatCompletion = await openai.chat.completions.create(
                         header: "Last 30 days",
                         render: (prompt) => (
                           <PromptUsageChart promptId={prompt.user_defined_id} />
+                        ),
+                      },
+                      {
+                        key: undefined,
+                        header: "Permission",
+                        render: (prompt) => (
+                          <div className="text-gray-500">
+                            {prompt.metadata?.createdFromUi === true ? (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <div className="flex items-center justify-center bg-[#F1F5F9] rounded-md p-2 border border-[#CBD5E1] text-black max-w-28">
+                                    <PencilIcon className="h-4 w-4 mr-1" />
+                                    <p>Edit / View</p>
+                                  </div>
+                                </TooltipTrigger>
+                                <TooltipContent align="center">
+                                  <p>
+                                    This prompt was created{" "}
+                                    <span className="font-semibold">
+                                      in the UI
+                                    </span>
+                                    . You can edit / delete them, or promote to
+                                    prod.
+                                  </p>
+                                </TooltipContent>
+                              </Tooltip>
+                            ) : (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <div className="flex items-center justify-center bg-[#F1F5F9] rounded-md p-2 border border-[#CBD5E1] text-black max-w-28">
+                                    <EyeIcon className="h-4 w-4 mr-1" />
+                                    <p>View only</p>
+                                  </div>
+                                </TooltipTrigger>
+                                <TooltipContent align="center">
+                                  <p>
+                                    This prompt was created{" "}
+                                    <span className="font-semibold">
+                                      in code
+                                    </span>
+                                    . You won't be able to edit this from the
+                                    UI.
+                                  </p>
+                                </TooltipContent>
+                              </Tooltip>
+                            )}
+                          </div>
                         ),
                       },
                       {

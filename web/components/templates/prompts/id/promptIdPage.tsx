@@ -11,6 +11,8 @@ import {
   ChartBarIcon,
   ArrowTrendingUpIcon,
   TrashIcon,
+  EyeIcon,
+  PencilIcon,
 } from "@heroicons/react/24/outline";
 import { useRouter } from "next/router";
 import { useExperiments } from "../../../../services/hooks/prompts/experiments";
@@ -67,6 +69,13 @@ import ModelPill from "../../requestsV2/modelPill";
 import StatusBadge from "../../requestsV2/statusBadge";
 import PromptPropertyCard from "./promptPropertyCard";
 import TableFooter from "../../requestsV2/tableFooter";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../../../ui/tooltip";
+import { Button } from "../../../ui/button";
 
 interface PromptIdPageProps {
   id: string;
@@ -489,6 +498,49 @@ const PromptIdPage = (props: PromptIdPageProps) => {
             {prompt?.user_defined_id}
           </h1>
           <HcBadge title={`${prompt?.versions.length} versions`} size={"sm"} />
+          <TooltipProvider>
+            {prompt?.metadata?.createdFromUi === true ? (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size={"sm"}
+                    className="h-6 bg-[#F1F5F9] border border-[#CBD5E1]"
+                  >
+                    <PencilIcon className="h-4 w-4 mr-2" />
+                    Edit / View
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-[15rem]" align="center">
+                  <p>
+                    This prompt was created{" "}
+                    <span className="font-semibold">in the UI</span>. You can
+                    edit / delete them, or promote to prod.
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            ) : (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size={"sm"}
+                    className="h-6 bg-[#F1F5F9] border border-[#CBD5E1]"
+                  >
+                    <EyeIcon className="h-4 w-4 mr-2" />
+                    View only
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-[15rem]" align="center">
+                  <p>
+                    This prompt was created{" "}
+                    <span className="font-semibold">in code</span>. You won’t be
+                    able to edit this from the UI.
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            )}
+          </TooltipProvider>
         </div>
         <HcButton
           onClick={() => router.push(`/prompts/${id}/new-experiment`)}
@@ -709,6 +761,9 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                       initialModel={
                         selectedPrompt?.model || MODEL_LIST[0].value
                       }
+                      isPromptCreatedFromUi={
+                        prompt?.metadata?.createdFromUi as boolean | undefined
+                      }
                     />
                   </div>
                   <div className="w-1/3 flex flex-col space-y-4">
@@ -718,18 +773,18 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                       </h2>
                       <ScrollArea className="h-[25vh]">
                         <div>
-                          {sortedPrompts?.map((prompt) => (
+                          {sortedPrompts?.map((promptVersion) => (
                             <div
-                              key={prompt.id}
+                              key={promptVersion.id}
                               className={`px-4 py-2 cursor-pointer border border-gray-200 dark:border-gray-700 ${
                                 selectedVersion ===
-                                `${prompt.major_version}.${prompt.minor_version}`
+                                `${promptVersion.major_version}.${promptVersion.minor_version}`
                                   ? "bg-sky-100 border-sky-500 dark:bg-sky-950"
                                   : "bg-gray-50 dark:bg-gray-900"
                               }`}
                               onClick={() =>
                                 setSelectedVersion(
-                                  `${prompt.major_version}.${prompt.minor_version}`
+                                  `${promptVersion.major_version}.${promptVersion.minor_version}`
                                 )
                               }
                             >
@@ -737,17 +792,18 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                                 <div className="flex items-center space-x-2">
                                   <div className="border rounded-full border-gray-500 bg-white dark:bg-black h-6 w-6 flex items-center justify-center">
                                     {selectedVersion ===
-                                      `${prompt.major_version}.${prompt.minor_version}` && (
+                                      `${promptVersion.major_version}.${promptVersion.minor_version}` && (
                                       <div className="bg-sky-500 rounded-full h-4 w-4" />
                                     )}
                                   </div>
                                   <span className="font-medium text-lg">
-                                    V{prompt.major_version}.
-                                    {prompt.minor_version}
+                                    V{promptVersion.major_version}.
+                                    {promptVersion.minor_version}
                                   </span>
                                 </div>
                                 <div className="flex items-center space-x-2">
-                                  {prompt.metadata?.isProduction === true ? (
+                                  {promptVersion.metadata?.isProduction ===
+                                  true ? (
                                     <Badge
                                       variant={"default"}
                                       className="bg-[#F1F5F9] border border-[#CBD5E1] text-[#14532D] text-sm font-medium rounded-lg px-4 hover:bg-[#F1F5F9] hover:text-[#14532D]"
@@ -755,40 +811,51 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                                       Prod
                                     </Badge>
                                   ) : (
-                                    <DropdownMenu>
-                                      <DropdownMenuTrigger asChild>
-                                        <button className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full">
-                                          <EllipsisHorizontalIcon className="h-6 w-6 text-gray-500" />
-                                        </button>
-                                      </DropdownMenuTrigger>
-                                      <DropdownMenuContent>
-                                        <DropdownMenuItem
-                                          onClick={() =>
-                                            promoteToProduction(prompt.id)
-                                          }
-                                        >
-                                          <ArrowTrendingUpIcon className="h-4 w-4 mr-2" />
-                                          Promote to prod
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem
-                                          onClick={() =>
-                                            deletePromptVersion(prompt.id)
-                                          }
-                                        >
-                                          <TrashIcon className="h-4 w-4 mr-2 text-red-500" />
-                                          <p className="text-red-500">Delete</p>
-                                        </DropdownMenuItem>
-                                      </DropdownMenuContent>
-                                    </DropdownMenu>
+                                    prompt?.metadata?.createdFromUi ===
+                                      true && (
+                                      <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                          <button className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full">
+                                            <EllipsisHorizontalIcon className="h-6 w-6 text-gray-500" />
+                                          </button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent>
+                                          <DropdownMenuItem
+                                            onClick={() =>
+                                              promoteToProduction(
+                                                promptVersion.id
+                                              )
+                                            }
+                                          >
+                                            <ArrowTrendingUpIcon className="h-4 w-4 mr-2" />
+                                            Promote to prod
+                                          </DropdownMenuItem>
+                                          <DropdownMenuItem
+                                            onClick={() =>
+                                              deletePromptVersion(
+                                                promptVersion.id
+                                              )
+                                            }
+                                          >
+                                            <TrashIcon className="h-4 w-4 mr-2 text-red-500" />
+                                            <p className="text-red-500">
+                                              Delete
+                                            </p>
+                                          </DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                      </DropdownMenu>
+                                    )
                                   )}
                                 </div>
                               </div>
                               <div className="flex justify-between items-center mt-2">
                                 <span className="text-xs text-gray-500">
-                                  {getTimeAgo(new Date(prompt.created_at))}
+                                  {getTimeAgo(
+                                    new Date(promptVersion.created_at)
+                                  )}
                                 </span>
                                 <div className="text-xs text-gray-500 dark:text-gray-400">
-                                  {prompt.model}
+                                  {promptVersion.model}
                                 </div>
                               </div>
                             </div>

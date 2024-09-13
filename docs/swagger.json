@@ -2084,6 +2084,12 @@
 					}
 				]
 			},
+			"Record_string.any_": {
+				"properties": {},
+				"additionalProperties": {},
+				"type": "object",
+				"description": "Construct a type with a set of properties K of type T"
+			},
 			"PromptsResult": {
 				"properties": {
 					"id": {
@@ -2104,6 +2110,9 @@
 					"major_version": {
 						"type": "number",
 						"format": "double"
+					},
+					"metadata": {
+						"$ref": "#/components/schemas/Record_string.any_"
 					}
 				},
 				"required": [
@@ -2224,12 +2233,6 @@
 				],
 				"type": "object",
 				"additionalProperties": false
-			},
-			"Record_string.any_": {
-				"properties": {},
-				"additionalProperties": {},
-				"type": "object",
-				"description": "Construct a type with a set of properties K of type T"
 			},
 			"PromptResult": {
 				"properties": {

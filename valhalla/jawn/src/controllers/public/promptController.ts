@@ -60,6 +60,7 @@ export interface PromptsResult {
   pretty_name: string;
   created_at: string;
   major_version: number;
+  metadata?: Record<string, any>;
 }
 
 export interface PromptQueryParams {

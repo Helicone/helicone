@@ -787,6 +787,10 @@ export interface components {
       error: null;
     };
     "Result_Property-Array.string_": components["schemas"]["ResultSuccess_Property-Array_"] | components["schemas"]["ResultError_string_"];
+    /** @description Construct a type with a set of properties K of type T */
+    "Record_string.any_": {
+      [key: string]: unknown;
+    };
     PromptsResult: {
       id: string;
       user_defined_id: string;
@@ -795,6 +799,7 @@ export interface components {
       created_at: string;
       /** Format: double */
       major_version: number;
+      metadata?: components["schemas"]["Record_string.any_"];
     };
     "ResultSuccess_PromptsResult-Array_": {
       data: components["schemas"]["PromptsResult"][];
@@ -821,10 +826,6 @@ export interface components {
     };
     PromptsQueryParams: {
       filter: components["schemas"]["PromptsFilterNode"];
-    };
-    /** @description Construct a type with a set of properties K of type T */
-    "Record_string.any_": {
-      [key: string]: unknown;
     };
     PromptResult: {
       id: string;
