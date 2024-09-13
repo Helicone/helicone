@@ -333,7 +333,7 @@ export class AlertManager {
         );
         if (emailResErr) {
           console.error(`Error sending email: ${emailResErr}`);
-          throw new Error(emailResErr); // Throw the error to catch it outside
+          return err(emailResErr);
         }
       }
     });
@@ -385,7 +385,7 @@ export class AlertManager {
         );
         if (slackResErr) {
           console.error(`Error sending slack: ${slackResErr}`);
-          throw new Error(slackResErr); // Throw the error to catch it outside
+          return err(slackResErr);
         }
       }
     });

@@ -65,8 +65,6 @@ export class ReportManager {
   ): Promise<Result<null, string>> {
     const { subject, text, html } = await this.formatReportNotification(report);
 
-    console.log("Sending email to", emails);
-
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
@@ -108,7 +106,7 @@ export class ReportManager {
         );
         if (slackResErr) {
           console.error(`Error sending slack: ${slackResErr}`);
-          throw new Error(slackResErr); // Throw the error to catch it outside
+          return err(slackResErr);
         }
       }
     });
@@ -691,9 +689,6 @@ export class ReportManager {
       previous === 0 || inPercentage
         ? `${current - previous}`
         : `${Math.abs(((current - previous) / previous) * 100).toFixed(2)}%`;
-
-    console.log("current", current);
-    console.log("previous", previous);
 
     return [change, current > previous ? "up" : "down"];
   }
