@@ -84,9 +84,6 @@ export interface paths {
   "/v1/prompt/{promptId}/versions/query": {
     post: operations["GetPromptVersions"];
   };
-  "/v1/prompt/version/{promptVersionId}/inputs": {
-    post: operations["CreateInputRecord"];
-  };
   "/v1/prompt/version/{promptVersionId}": {
     delete: operations["DeletePromptVersion"];
   };
@@ -115,6 +112,9 @@ export interface paths {
   };
   "/v1/experiment/dataset/query": {
     post: operations["GetDatasets"];
+  };
+  "/v1/experiment/dataset/{datasetId}/version/{promptVersionId}/inputs": {
+    post: operations["CreateInputRecord"];
   };
   "/v1/experiment/dataset/{datasetId}/query": {
     post: operations["GetDataset"];
@@ -925,12 +925,6 @@ export interface components {
     PromptVersionsQueryParams: {
       filter?: components["schemas"]["PromptVersionsFilterNode"];
     };
-    ResultSuccess_string_: {
-      data: string;
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_string.string_": components["schemas"]["ResultSuccess_string_"] | components["schemas"]["ResultError_string_"];
     PromptVersionResultCompiled: {
       id: string;
       /** Format: double */
@@ -1041,6 +1035,12 @@ Json: JsonObject;
       error: null;
     };
     "Result_DatasetResult-Array.string_": components["schemas"]["ResultSuccess_DatasetResult-Array_"] | components["schemas"]["ResultError_string_"];
+    ResultSuccess_string_: {
+      data: string;
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_string.string_": components["schemas"]["ResultSuccess_string_"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess___-Array_": {
       data: Record<string, never>[];
       /** @enum {number|null} */
@@ -1914,29 +1914,6 @@ export interface operations {
       };
     };
   };
-  CreateInputRecord: {
-    parameters: {
-      path: {
-        promptVersionId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          sourceRequest?: string;
-          inputs: components["schemas"]["Record_string.string_"];
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_string.string_"];
-        };
-      };
-    };
-  };
   DeletePromptVersion: {
     parameters: {
       path: {
@@ -2095,6 +2072,30 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_DatasetResult-Array.string_"];
+        };
+      };
+    };
+  };
+  CreateInputRecord: {
+    parameters: {
+      path: {
+        datasetId: string;
+        promptVersionId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          sourceRequest?: string;
+          inputs: components["schemas"]["Record_string.string_"];
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_string.string_"];
         };
       };
     };

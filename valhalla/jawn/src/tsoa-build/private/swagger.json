@@ -650,36 +650,6 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"ResultSuccess_string_": {
-				"properties": {
-					"data": {
-						"type": "string"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result_string.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess_string_"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
 			"ResultSuccess_null_": {
 				"properties": {
 					"data": {
@@ -2434,6 +2404,36 @@
 					}
 				]
 			},
+			"ResultSuccess_string_": {
+				"properties": {
+					"data": {
+						"type": "string"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_string.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_string_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
 			"AlertRequest": {
 				"properties": {
 					"name": {
@@ -2922,62 +2922,6 @@
 						"application/json": {
 							"schema": {
 								"$ref": "#/components/schemas/PromptVersionsQueryParams"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/v1/prompt/version/{promptVersionId}/inputs": {
-			"post": {
-				"operationId": "CreateInputRecord",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_string.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Prompt"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "promptVersionId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"properties": {
-									"sourceRequest": {
-										"type": "string"
-									},
-									"inputs": {
-										"$ref": "#/components/schemas/Record_string.string_"
-									}
-								},
-								"required": [
-									"inputs"
-								],
-								"type": "object"
 							}
 						}
 					}
