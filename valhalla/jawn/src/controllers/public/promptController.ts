@@ -3,6 +3,7 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   Path,
   Post,
   Request,
@@ -10,7 +11,7 @@ import {
   Security,
   Tags,
 } from "tsoa";
-import { Result } from "../../lib/shared/result";
+import { Result, resultMap } from "../../lib/shared/result";
 import {
   FilterLeafSubset,
   FilterNode,
@@ -112,10 +113,11 @@ export interface PromptCreateSubversionParams {
 export interface PromptInputRecord {
   id: string;
   inputs: Record<string, string>;
+  dataset_row_id?: string;
   source_request: string;
   prompt_version: string;
   created_at: string;
-  response_body: string;
+  response_body?: string;
   auto_prompt_inputs: any[];
 }
 
@@ -202,6 +204,7 @@ export class PromptController extends Controller {
     }
     return result;
   }
+
   @Post("version/{promptVersionId}/subversion")
   public async createSubversion(
     @Body()
@@ -298,6 +301,29 @@ export class PromptController extends Controller {
       this.setStatus(200); // set return status 201
     }
     return result;
+  }
+
+  @Get("version/{promptVersionId}")
+  public async getPromptVersion(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() promptVersionId: string
+  ): Promise<Result<PromptVersionResult, string>> {
+    const promptManager = new PromptManager(request.authParams);
+    const result = await promptManager.getPromptVersions({
+      prompts_versions: {
+        id: {
+          equals: promptVersionId,
+        },
+      },
+    });
+
+    if (result.error) {
+      console.error(result.error);
+      this.setStatus(500);
+    } else {
+      this.setStatus(200); // set return status 201
+    }
+    return resultMap(result, (data) => data?.[0]);
   }
 
   @Delete("version/{promptVersionId}")

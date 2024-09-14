@@ -112,6 +112,46 @@ export class InputsManager extends BaseManager {
     return ok(inputRecordId);
   }
 
+  async getInputsFromDataset(
+    datasetId: string,
+    limit: number
+  ): Promise<Result<PromptInputRecord[], string>> {
+    const result = await dbExecute<PromptInputRecord>(
+      `
+      SELECT
+        prompt_input_record.id as id,
+        experiment_dataset_v2_row.id as dataset_row_id,
+        prompt_input_record.inputs as inputs,
+        prompt_input_record.auto_prompt_inputs as auto_prompt_inputs,
+        prompt_input_record.source_request as source_request,
+        prompt_input_record.prompt_version as prompt_version,
+        prompt_input_record.created_at as created_at
+      FROM experiment_dataset_v2_row 
+        left join helicone_dataset on experiment_dataset_v2_row.dataset_id = helicone_dataset.id
+        left join prompt_input_record on experiment_dataset_v2_row.input_record = prompt_input_record.id
+      WHERE helicone_dataset.organization = $1 AND
+      experiment_dataset_v2_row.dataset_id = $2
+      LIMIT $3
+
+      `,
+      [this.authParams.organizationId, datasetId, limit]
+    );
+    return promiseResultMap(result, async (data) => {
+      return Promise.all(
+        data.map(async (record) => {
+          return {
+            ...record,
+            inputs: await getAllSignedURLsFromInputs(
+              record.inputs,
+              this.authParams.organizationId,
+              record.source_request
+            ),
+          };
+        })
+      );
+    });
+  }
+
   async getInputs(
     limit: number,
     promptVersion: string,

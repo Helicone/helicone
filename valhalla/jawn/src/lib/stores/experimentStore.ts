@@ -1,3 +1,4 @@
+import { NewExperimentParams } from "../../controllers/public/experimentController";
 import { getAllSignedURLsFromInputs } from "../../managers/inputs/InputsManager";
 import { costOfPrompt } from "../../packages/cost";
 import { dbExecute } from "../shared/db/dbExecute";

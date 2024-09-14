@@ -3,7 +3,7 @@ import { KeyIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { SecretInput } from "../../../../shared/themed/themedTable";
 import { useVaultPage } from "../../../vault/useVaultPage";
 import { clsx } from "../../../../shared/clsx";
-import { useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import CreateProviderKeyModal from "../../../vault/createProviderKeyModal";
 import { Tooltip } from "@mui/material";
 import ThemedModal from "../../../../shared/themed/themedModal";
@@ -45,27 +45,48 @@ const ProviderKeyList = (props: ProviderKeyListProps) => {
   const [selectedProviderKey, setSelectedProviderKey] =
     useState<DecryptedProviderKey>();
 
-  const changeProviderKeyHandler = async (newProviderKey: string) => {
-    if (setProviderKeyCallback) {
-      setProviderKeyCallback(newProviderKey);
-      return;
-    }
-
-    if (orgId) {
-      // update the current orgs provider key if the orgId is set
-      const { error } = await supabaseClient
-        .from("organization")
-        .update({ org_provider_key: newProviderKey })
-        .eq("id", orgId);
-
-      if (error) {
-        setNotification("Error Updating Provider Key", "error");
-      } else {
-        setNotification("Provider Key Updated", "success");
+  const changeProviderKeyHandler = useCallback(
+    async (newProviderKey: string) => {
+      if (setProviderKeyCallback) {
         setProviderKey(newProviderKey);
+        setProviderKeyCallback(newProviderKey);
+        return;
       }
+
+      if (orgId) {
+        // update the current orgs provider key if the orgId is set
+        const { error } = await supabaseClient
+          .from("organization")
+          .update({ org_provider_key: newProviderKey })
+          .eq("id", orgId);
+
+        if (error) {
+          setNotification("Error Updating Provider Key", "error");
+        } else {
+          setNotification("Provider Key Updated", "success");
+          setProviderKey(newProviderKey);
+        }
+      }
+    },
+    [
+      setProviderKeyCallback,
+      orgId,
+      supabaseClient,
+      setNotification,
+      setProviderKey,
+    ]
+  );
+
+  useEffect(() => {
+    if (!providerKey && providerKeys.length > 0 && providerKeys?.[0]?.id) {
+      changeProviderKeyHandler(providerKeys[0].id);
     }
-  };
+  }, [
+    providerKeys,
+    providerKeys.length,
+    providerKey,
+    changeProviderKeyHandler,
+  ]);
 
   const deleteProviderKey = async (id: string) => {
     fetch(`/api/provider_keys/${id}/delete`, { method: "DELETE" })

@@ -85,6 +85,7 @@ export interface paths {
     post: operations["GetPromptVersions"];
   };
   "/v1/prompt/version/{promptVersionId}": {
+    get: operations["GetPromptVersion"];
     delete: operations["DeletePromptVersion"];
   };
   "/v1/prompt/{user_defined_id}/compile": {
@@ -116,7 +117,7 @@ export interface paths {
   "/v1/experiment/dataset/{datasetId}/version/{promptVersionId}/row": {
     post: operations["CreateDatasetRow"];
   };
-  "/v1/experiment/dataset/{datasetId}/query": {
+  "/v1/experiment/dataset/{datasetId}/inputs/query": {
     post: operations["GetDataset"];
   };
   "/v1/experiment/dataset/{datasetId}/mutate": {
@@ -142,6 +143,9 @@ export interface paths {
   };
   "/v1/experiment": {
     post: operations["CreateNewExperiment"];
+  };
+  "/v1/experiment/hypothesis": {
+    post: operations["CreateNewExperimentHypothesis"];
   };
   "/v1/experiment/query": {
     post: operations["GetExperiments"];
@@ -888,10 +892,11 @@ export interface components {
     PromptInputRecord: {
       id: string;
       inputs: components["schemas"]["Record_string.string_"];
+      dataset_row_id?: string;
       source_request: string;
       prompt_version: string;
       created_at: string;
-      response_body: string;
+      response_body?: string;
       auto_prompt_inputs: unknown[];
     };
     "ResultSuccess_PromptInputRecord-Array_": {
@@ -1924,6 +1929,21 @@ export interface operations {
       };
     };
   };
+  GetPromptVersion: {
+    parameters: {
+      path: {
+        promptVersionId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_PromptVersionResult.string_"];
+        };
+      };
+    };
+  };
   DeletePromptVersion: {
     parameters: {
       path: {
@@ -2111,16 +2131,16 @@ export interface operations {
     };
   };
   GetDataset: {
-    requestBody: {
-      content: {
-        "application/json": Record<string, never>;
+    parameters: {
+      path: {
+        datasetId: string;
       };
     };
     responses: {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result___-Array.string_"];
+          "application/json": components["schemas"]["Result_PromptInputRecord-Array.string_"];
         };
       };
     };
@@ -2270,6 +2290,28 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result__experimentId-string_.string_"];
+        };
+      };
+    };
+  };
+  CreateNewExperimentHypothesis: {
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @enum {string} */
+          status: "PENDING" | "RUNNING" | "COMPLETED" | "FAILED";
+          providerKeyId: string;
+          promptVersion: string;
+          model: string;
+          experimentId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
         };
       };
     };

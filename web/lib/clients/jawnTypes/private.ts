@@ -9,6 +9,18 @@ interface JsonObject { [key: string]: JsonValue; }
 
 
 export interface paths {
+  "/v1/experiment": {
+    post: operations["CreateNewExperiment"];
+  };
+  "/v1/experiment/hypothesis": {
+    post: operations["CreateNewExperimentHypothesis"];
+  };
+  "/v1/experiment/query": {
+    post: operations["GetExperiments"];
+  };
+  "/v1/experiment/run": {
+    post: operations["RunExperiment"];
+  };
   "/v1/prompt/query": {
     post: operations["GetPrompts"];
   };
@@ -34,6 +46,7 @@ export interface paths {
     post: operations["GetPromptVersions"];
   };
   "/v1/prompt/version/{promptVersionId}": {
+    get: operations["GetPromptVersion"];
     delete: operations["DeletePromptVersion"];
   };
   "/v1/prompt/{user_defined_id}/compile": {
@@ -145,6 +158,161 @@ export type webhooks = Record<string, never>;
 
 export interface components {
   schemas: {
+    "ResultSuccess__experimentId-string__": {
+      data: {
+        experimentId: string;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    ResultError_string_: {
+      /** @enum {number|null} */
+      data: null;
+      error: string;
+    };
+    "Result__experimentId-string_.string_": components["schemas"]["ResultSuccess__experimentId-string__"] | components["schemas"]["ResultError_string_"];
+    NewExperimentParams: {
+      datasetId: string;
+      promptVersion: string;
+      model: string;
+      providerKeyId: string;
+      meta?: unknown;
+    };
+    ResultSuccess_null_: {
+      /** @enum {number|null} */
+      data: null;
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_null.string_": components["schemas"]["ResultSuccess_null_"] | components["schemas"]["ResultError_string_"];
+    /** @description Construct a type with a set of properties K of type T */
+    "Record_string.string_": {
+      [key: string]: string;
+    };
+    ResponseObj: {
+      body: unknown;
+      createdAt: string;
+      /** Format: double */
+      completionTokens: number;
+      /** Format: double */
+      promptTokens: number;
+      /** Format: double */
+      delayMs: number;
+      model: string;
+    };
+    RequestObj: {
+      id: string;
+      provider: string;
+    };
+    Score: {
+      valueType: string;
+      value: number | string;
+    };
+    /** @description Construct a type with a set of properties K of type T */
+    "Record_string.Score_": {
+      [key: string]: components["schemas"]["Score"];
+    };
+    ExperimentScores: {
+      dataset: {
+        scores: components["schemas"]["Record_string.Score_"];
+      };
+      hypothesis: {
+        scores: components["schemas"]["Record_string.Score_"];
+      };
+    };
+    Experiment: {
+      id: string;
+      organization: string;
+      dataset: {
+        rows: {
+            scores: components["schemas"]["Record_string.Score_"];
+            inputRecord?: {
+              request: components["schemas"]["RequestObj"];
+              response: components["schemas"]["ResponseObj"];
+              autoInputs: components["schemas"]["Record_string.string_"][];
+              inputs: components["schemas"]["Record_string.string_"];
+              requestPath: string;
+              requestId: string;
+            };
+            rowId: string;
+          }[];
+        name: string;
+        id: string;
+      };
+      meta: unknown;
+      createdAt: string;
+      hypotheses: {
+          runs: {
+              request?: components["schemas"]["RequestObj"];
+              scores: components["schemas"]["Record_string.Score_"];
+              response?: components["schemas"]["ResponseObj"];
+              resultRequestId: string;
+              datasetRowId: string;
+            }[];
+          providerKey: string;
+          createdAt: string;
+          status: string;
+          model: string;
+          parentPromptVersion?: {
+            template: unknown;
+          };
+          promptVersion?: {
+            template: unknown;
+          };
+          promptVersionId: string;
+          id: string;
+        }[];
+      scores: components["schemas"]["ExperimentScores"] | null;
+    };
+    "ResultSuccess_Experiment-Array_": {
+      data: components["schemas"]["Experiment"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Experiment-Array.string_": components["schemas"]["ResultSuccess_Experiment-Array_"] | components["schemas"]["ResultError_string_"];
+    /** @description Make all properties in T optional */
+    Partial_TextOperators_: {
+      "not-equals"?: string;
+      equals?: string;
+      like?: string;
+      ilike?: string;
+      contains?: string;
+      "not-contains"?: string;
+    };
+    /** @description Make all properties in T optional */
+    Partial_ExperimentToOperators_: {
+      id?: components["schemas"]["Partial_TextOperators_"];
+      prompt_v2?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description From T, pick a set of properties whose keys are in the union K */
+    "Pick_FilterLeaf.experiment_": {
+      experiment?: components["schemas"]["Partial_ExperimentToOperators_"];
+    };
+    FilterLeafSubset_experiment_: components["schemas"]["Pick_FilterLeaf.experiment_"];
+    ExperimentFilterNode: components["schemas"]["FilterLeafSubset_experiment_"] | components["schemas"]["ExperimentFilterBranch"] | "all";
+    ExperimentFilterBranch: {
+      right: components["schemas"]["ExperimentFilterNode"];
+      /** @enum {string} */
+      operator: "or" | "and";
+      left: components["schemas"]["ExperimentFilterNode"];
+    };
+    IncludeExperimentKeys: {
+      /** @enum {boolean} */
+      inputs?: true;
+      /** @enum {boolean} */
+      promptVersion?: true;
+      /** @enum {boolean} */
+      responseBodies?: true;
+      /** @enum {boolean} */
+      score?: true;
+    };
+    ExperimentRun: Record<string, never>;
+    ResultSuccess_ExperimentRun_: {
+      data: components["schemas"]["ExperimentRun"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ExperimentRun.string_": components["schemas"]["ResultSuccess_ExperimentRun_"] | components["schemas"]["ResultError_string_"];
     PromptsResult: {
       id: string;
       user_defined_id: string;
@@ -159,21 +327,7 @@ export interface components {
       /** @enum {number|null} */
       error: null;
     };
-    ResultError_string_: {
-      /** @enum {number|null} */
-      data: null;
-      error: string;
-    };
     "Result_PromptsResult-Array.string_": components["schemas"]["ResultSuccess_PromptsResult-Array_"] | components["schemas"]["ResultError_string_"];
-    /** @description Make all properties in T optional */
-    Partial_TextOperators_: {
-      "not-equals"?: string;
-      equals?: string;
-      like?: string;
-      ilike?: string;
-      contains?: string;
-      "not-contains"?: string;
-    };
     /** @description Make all properties in T optional */
     Partial_PromptToOperators_: {
       id?: components["schemas"]["Partial_TextOperators_"];
@@ -254,17 +408,14 @@ export interface components {
       newHeliconeTemplate: unknown;
       isMajorVersion?: boolean;
     };
-    /** @description Construct a type with a set of properties K of type T */
-    "Record_string.string_": {
-      [key: string]: string;
-    };
     PromptInputRecord: {
       id: string;
       inputs: components["schemas"]["Record_string.string_"];
+      dataset_row_id?: string;
       source_request: string;
       prompt_version: string;
       created_at: string;
-      response_body: string;
+      response_body?: string;
       auto_prompt_inputs: unknown[];
     };
     "ResultSuccess_PromptInputRecord-Array_": {
@@ -316,13 +467,6 @@ export interface components {
     PromptVersionsQueryParams: {
       filter?: components["schemas"]["PromptVersionsFilterNode"];
     };
-    ResultSuccess_null_: {
-      /** @enum {number|null} */
-      data: null;
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_null.string_": components["schemas"]["ResultSuccess_null_"] | components["schemas"]["ResultError_string_"];
     PromptVersionResultCompiled: {
       id: string;
       /** Format: double */
@@ -1021,6 +1165,80 @@ export type external = Record<string, never>;
 
 export interface operations {
 
+  CreateNewExperiment: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["NewExperimentParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__experimentId-string_.string_"];
+        };
+      };
+    };
+  };
+  CreateNewExperimentHypothesis: {
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @enum {string} */
+          status: "PENDING" | "RUNNING" | "COMPLETED" | "FAILED";
+          providerKeyId: string;
+          promptVersion: string;
+          model: string;
+          experimentId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  GetExperiments: {
+    requestBody: {
+      content: {
+        "application/json": {
+          include?: components["schemas"]["IncludeExperimentKeys"];
+          filter: components["schemas"]["ExperimentFilterNode"];
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Experiment-Array.string_"];
+        };
+      };
+    };
+  };
+  RunExperiment: {
+    requestBody: {
+      content: {
+        "application/json": {
+          datasetRowIds: string[];
+          hypothesisId: string;
+          experimentId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ExperimentRun.string_"];
+        };
+      };
+    };
+  };
   GetPrompts: {
     requestBody: {
       content: {
@@ -1172,6 +1390,21 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_PromptVersionResult-Array.string_"];
+        };
+      };
+    };
+  };
+  GetPromptVersion: {
+    parameters: {
+      path: {
+        promptVersionId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_PromptVersionResult.string_"];
         };
       };
     };

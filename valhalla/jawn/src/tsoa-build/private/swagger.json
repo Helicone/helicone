@@ -7,6 +7,619 @@
 		"requestBodies": {},
 		"responses": {},
 		"schemas": {
+			"ResultSuccess__experimentId-string__": {
+				"properties": {
+					"data": {
+						"properties": {
+							"experimentId": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"experimentId"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultError_string_": {
+				"properties": {
+					"data": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					},
+					"error": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__experimentId-string_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__experimentId-string__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"NewExperimentParams": {
+				"properties": {
+					"datasetId": {
+						"type": "string"
+					},
+					"promptVersion": {
+						"type": "string"
+					},
+					"model": {
+						"type": "string"
+					},
+					"providerKeyId": {
+						"type": "string"
+					},
+					"meta": {}
+				},
+				"required": [
+					"datasetId",
+					"promptVersion",
+					"model",
+					"providerKeyId"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_null_": {
+				"properties": {
+					"data": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_null.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_null_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"Record_string.string_": {
+				"properties": {},
+				"additionalProperties": {
+					"type": "string"
+				},
+				"type": "object",
+				"description": "Construct a type with a set of properties K of type T"
+			},
+			"ResponseObj": {
+				"properties": {
+					"body": {},
+					"createdAt": {
+						"type": "string"
+					},
+					"completionTokens": {
+						"type": "number",
+						"format": "double"
+					},
+					"promptTokens": {
+						"type": "number",
+						"format": "double"
+					},
+					"delayMs": {
+						"type": "number",
+						"format": "double"
+					},
+					"model": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"body",
+					"createdAt",
+					"completionTokens",
+					"promptTokens",
+					"delayMs",
+					"model"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"RequestObj": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"provider": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"id",
+					"provider"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Score": {
+				"properties": {
+					"valueType": {
+						"type": "string"
+					},
+					"value": {
+						"anyOf": [
+							{
+								"type": "number",
+								"format": "double"
+							},
+							{
+								"type": "string",
+								"format": "date-time"
+							},
+							{
+								"type": "string"
+							}
+						]
+					}
+				},
+				"required": [
+					"valueType",
+					"value"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Record_string.Score_": {
+				"properties": {},
+				"additionalProperties": {
+					"$ref": "#/components/schemas/Score"
+				},
+				"type": "object",
+				"description": "Construct a type with a set of properties K of type T"
+			},
+			"ExperimentScores": {
+				"properties": {
+					"dataset": {
+						"properties": {
+							"scores": {
+								"$ref": "#/components/schemas/Record_string.Score_"
+							}
+						},
+						"required": [
+							"scores"
+						],
+						"type": "object"
+					},
+					"hypothesis": {
+						"properties": {
+							"scores": {
+								"$ref": "#/components/schemas/Record_string.Score_"
+							}
+						},
+						"required": [
+							"scores"
+						],
+						"type": "object"
+					}
+				},
+				"required": [
+					"dataset",
+					"hypothesis"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Experiment": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"organization": {
+						"type": "string"
+					},
+					"dataset": {
+						"properties": {
+							"rows": {
+								"items": {
+									"properties": {
+										"scores": {
+											"$ref": "#/components/schemas/Record_string.Score_"
+										},
+										"inputRecord": {
+											"properties": {
+												"request": {
+													"$ref": "#/components/schemas/RequestObj"
+												},
+												"response": {
+													"$ref": "#/components/schemas/ResponseObj"
+												},
+												"autoInputs": {
+													"items": {
+														"$ref": "#/components/schemas/Record_string.string_"
+													},
+													"type": "array"
+												},
+												"inputs": {
+													"$ref": "#/components/schemas/Record_string.string_"
+												},
+												"requestPath": {
+													"type": "string"
+												},
+												"requestId": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"request",
+												"response",
+												"autoInputs",
+												"inputs",
+												"requestPath",
+												"requestId"
+											],
+											"type": "object"
+										},
+										"rowId": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"scores",
+										"rowId"
+									],
+									"type": "object"
+								},
+								"type": "array"
+							},
+							"name": {
+								"type": "string"
+							},
+							"id": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"rows",
+							"name",
+							"id"
+						],
+						"type": "object"
+					},
+					"meta": {},
+					"createdAt": {
+						"type": "string"
+					},
+					"hypotheses": {
+						"items": {
+							"properties": {
+								"runs": {
+									"items": {
+										"properties": {
+											"request": {
+												"$ref": "#/components/schemas/RequestObj"
+											},
+											"scores": {
+												"$ref": "#/components/schemas/Record_string.Score_"
+											},
+											"response": {
+												"$ref": "#/components/schemas/ResponseObj"
+											},
+											"resultRequestId": {
+												"type": "string"
+											},
+											"datasetRowId": {
+												"type": "string"
+											}
+										},
+										"required": [
+											"scores",
+											"resultRequestId",
+											"datasetRowId"
+										],
+										"type": "object"
+									},
+									"type": "array"
+								},
+								"providerKey": {
+									"type": "string"
+								},
+								"createdAt": {
+									"type": "string"
+								},
+								"status": {
+									"type": "string"
+								},
+								"model": {
+									"type": "string"
+								},
+								"parentPromptVersion": {
+									"properties": {
+										"template": {}
+									},
+									"required": [
+										"template"
+									],
+									"type": "object"
+								},
+								"promptVersion": {
+									"properties": {
+										"template": {}
+									},
+									"required": [
+										"template"
+									],
+									"type": "object"
+								},
+								"promptVersionId": {
+									"type": "string"
+								},
+								"id": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"runs",
+								"providerKey",
+								"createdAt",
+								"status",
+								"model",
+								"promptVersionId",
+								"id"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"scores": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/ExperimentScores"
+							}
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"id",
+					"organization",
+					"dataset",
+					"meta",
+					"createdAt",
+					"hypotheses",
+					"scores"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_Experiment-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/Experiment"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_Experiment-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_Experiment-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"Partial_TextOperators_": {
+				"properties": {
+					"not-equals": {
+						"type": "string"
+					},
+					"equals": {
+						"type": "string"
+					},
+					"like": {
+						"type": "string"
+					},
+					"ilike": {
+						"type": "string"
+					},
+					"contains": {
+						"type": "string"
+					},
+					"not-contains": {
+						"type": "string"
+					}
+				},
+				"type": "object",
+				"description": "Make all properties in T optional"
+			},
+			"Partial_ExperimentToOperators_": {
+				"properties": {
+					"id": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"prompt_v2": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					}
+				},
+				"type": "object",
+				"description": "Make all properties in T optional"
+			},
+			"Pick_FilterLeaf.experiment_": {
+				"properties": {
+					"experiment": {
+						"$ref": "#/components/schemas/Partial_ExperimentToOperators_"
+					}
+				},
+				"type": "object",
+				"description": "From T, pick a set of properties whose keys are in the union K"
+			},
+			"FilterLeafSubset_experiment_": {
+				"$ref": "#/components/schemas/Pick_FilterLeaf.experiment_"
+			},
+			"ExperimentFilterNode": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/FilterLeafSubset_experiment_"
+					},
+					{
+						"$ref": "#/components/schemas/ExperimentFilterBranch"
+					},
+					{
+						"type": "string",
+						"enum": [
+							"all"
+						]
+					}
+				]
+			},
+			"ExperimentFilterBranch": {
+				"properties": {
+					"right": {
+						"$ref": "#/components/schemas/ExperimentFilterNode"
+					},
+					"operator": {
+						"type": "string",
+						"enum": [
+							"or",
+							"and"
+						]
+					},
+					"left": {
+						"$ref": "#/components/schemas/ExperimentFilterNode"
+					}
+				},
+				"required": [
+					"right",
+					"operator",
+					"left"
+				],
+				"type": "object"
+			},
+			"IncludeExperimentKeys": {
+				"properties": {
+					"inputs": {
+						"type": "boolean",
+						"enum": [
+							true
+						],
+						"nullable": false
+					},
+					"promptVersion": {
+						"type": "boolean",
+						"enum": [
+							true
+						],
+						"nullable": false
+					},
+					"responseBodies": {
+						"type": "boolean",
+						"enum": [
+							true
+						],
+						"nullable": false
+					},
+					"score": {
+						"type": "boolean",
+						"enum": [
+							true
+						],
+						"nullable": false
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ExperimentRun": {
+				"properties": {},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_ExperimentRun_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/ExperimentRun"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_ExperimentRun.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_ExperimentRun_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
 			"PromptsResult": {
 				"properties": {
 					"id": {
@@ -63,26 +676,6 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"ResultError_string_": {
-				"properties": {
-					"data": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					},
-					"error": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
 			"Result_PromptsResult-Array.string_": {
 				"anyOf": [
 					{
@@ -92,30 +685,6 @@
 						"$ref": "#/components/schemas/ResultError_string_"
 					}
 				]
-			},
-			"Partial_TextOperators_": {
-				"properties": {
-					"not-equals": {
-						"type": "string"
-					},
-					"equals": {
-						"type": "string"
-					},
-					"like": {
-						"type": "string"
-					},
-					"ilike": {
-						"type": "string"
-					},
-					"contains": {
-						"type": "string"
-					},
-					"not-contains": {
-						"type": "string"
-					}
-				},
-				"type": "object",
-				"description": "Make all properties in T optional"
 			},
 			"Partial_PromptToOperators_": {
 				"properties": {
@@ -431,14 +1000,6 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"Record_string.string_": {
-				"properties": {},
-				"additionalProperties": {
-					"type": "string"
-				},
-				"type": "object",
-				"description": "Construct a type with a set of properties K of type T"
-			},
 			"PromptInputRecord": {
 				"properties": {
 					"id": {
@@ -446,6 +1007,9 @@
 					},
 					"inputs": {
 						"$ref": "#/components/schemas/Record_string.string_"
+					},
+					"dataset_row_id": {
+						"type": "string"
 					},
 					"source_request": {
 						"type": "string"
@@ -470,7 +1034,6 @@
 					"source_request",
 					"prompt_version",
 					"created_at",
-					"response_body",
 					"auto_prompt_inputs"
 				],
 				"type": "object",
@@ -649,40 +1212,6 @@
 				},
 				"type": "object",
 				"additionalProperties": false
-			},
-			"ResultSuccess_null_": {
-				"properties": {
-					"data": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result_null.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess_null_"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
 			},
 			"PromptVersionResultCompiled": {
 				"properties": {
@@ -2558,6 +3087,210 @@
 		"contact": {}
 	},
 	"paths": {
+		"/v1/experiment": {
+			"post": {
+				"operationId": "CreateNewExperiment",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__experimentId-string_.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Experiment"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/NewExperimentParams"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/experiment/hypothesis": {
+			"post": {
+				"operationId": "CreateNewExperimentHypothesis",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Experiment"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"status": {
+										"type": "string",
+										"enum": [
+											"PENDING",
+											"RUNNING",
+											"COMPLETED",
+											"FAILED"
+										]
+									},
+									"providerKeyId": {
+										"type": "string"
+									},
+									"promptVersion": {
+										"type": "string"
+									},
+									"model": {
+										"type": "string"
+									},
+									"experimentId": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"status",
+									"providerKeyId",
+									"promptVersion",
+									"model",
+									"experimentId"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/experiment/query": {
+			"post": {
+				"operationId": "GetExperiments",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_Experiment-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Experiment"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"include": {
+										"$ref": "#/components/schemas/IncludeExperimentKeys"
+									},
+									"filter": {
+										"$ref": "#/components/schemas/ExperimentFilterNode"
+									}
+								},
+								"required": [
+									"filter"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/experiment/run": {
+			"post": {
+				"operationId": "RunExperiment",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_ExperimentRun.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Experiment"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"datasetRowIds": {
+										"items": {
+											"type": "string"
+										},
+										"type": "array"
+									},
+									"hypothesisId": {
+										"type": "string"
+									},
+									"experimentId": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"datasetRowIds",
+									"hypothesisId",
+									"experimentId"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
 		"/v1/prompt/query": {
 			"post": {
 				"operationId": "GetPrompts",
@@ -2929,6 +3662,39 @@
 			}
 		},
 		"/v1/prompt/version/{promptVersionId}": {
+			"get": {
+				"operationId": "GetPromptVersion",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_PromptVersionResult.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Prompt"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "promptVersionId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
 			"delete": {
 				"operationId": "DeletePromptVersion",
 				"responses": {

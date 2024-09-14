@@ -2,20 +2,26 @@ import { User } from "@supabase/auth-helpers-react";
 import { GetServerSidePropsContext } from "next";
 
 import { ReactElement } from "react";
-import AuthLayout from "../../../../components/layout/auth/authLayout";
-import { SupabaseServerWrapper } from "../../../../lib/wrappers/supabase";
-import ExperimentIdPage from "../../../../components/templates/prompts/experiments/id/experimentIdPage";
+import AuthLayout from "../../../../../components/layout/auth/authLayout";
+import { SupabaseServerWrapper } from "../../../../../lib/wrappers/supabase";
+import ExperimentIdPage from "../../../../../components/templates/prompts/experiments/id/experimentIdPage";
+import ExperimentTablePage from "@/components/templates/prompts/experiments/experimentTablePage";
 
-interface PlaygroundProps {
+interface ExperimentPage {
   user: User;
   experimentId: string;
-  promptId: string;
+  promptSubversionId: string;
 }
 
-const Experiments = (props: PlaygroundProps) => {
-  const { user, experimentId, promptId } = props;
+const Experiments = (props: ExperimentPage) => {
+  const { user, experimentId, promptSubversionId } = props;
 
-  return <ExperimentIdPage id={experimentId} promptId={promptId} />;
+  return (
+    <ExperimentTablePage
+      experimentId={experimentId}
+      promptSubversionId={promptSubversionId}
+    />
+  );
 };
 
 export default Experiments;
@@ -41,14 +47,14 @@ export const getServerSideProps = async (
     };
 
   // get the id from the query params
-  const promptId = context.params?.id as string;
+  const promptSubversionId = context.params?.promptSubversionId as string;
   const experimentId = context.params?.experimentId as string;
 
   return {
     props: {
       initialSession: session,
       user: session.user,
-      promptId,
+      promptSubversionId,
       experimentId,
     },
   };

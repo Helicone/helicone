@@ -39,6 +39,7 @@ interface PromptPlaygroundProps {
   onSubmit?: (history: Message[], model: string) => void;
   submitText: string;
   initialModel?: string;
+  defaultEditMode?: boolean;
 }
 
 const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
@@ -47,6 +48,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
   onSubmit,
   submitText,
   initialModel = MODEL_LIST[0].value,
+  defaultEditMode = false,
 }) => {
   const parsePromptToMessages = (
     promptInput: string | PromptObject
@@ -76,7 +78,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
     );
   };
   const [mode, setMode] = useState<(typeof PROMPT_MODES)[number]>("Pretty");
-  const [isEditMode, setIsEditMode] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(defaultEditMode);
   const [currentChat, setCurrentChat] = useState<Message[]>(() =>
     parsePromptToMessages(prompt)
   );

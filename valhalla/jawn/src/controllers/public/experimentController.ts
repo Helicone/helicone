@@ -61,6 +61,34 @@ export class ExperimentController extends Controller {
     }
   }
 
+  @Post("/hypothesis")
+  public async createNewExperimentHypothesis(
+    @Body()
+    requestBody: {
+      experimentId: string;
+      model: string;
+      promptVersion: string;
+      providerKeyId: string;
+      status: "PENDING" | "RUNNING" | "COMPLETED" | "FAILED";
+    },
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<null, string>> {
+    const experimentManager = new ExperimentManager(request.authParams);
+
+    const result = await experimentManager.createNewExperimentHypothesis(
+      requestBody
+    );
+
+    if (result.error || !result.data) {
+      this.setStatus(500);
+      console.error(result.error);
+      return err(result.error);
+    } else {
+      this.setStatus(200);
+      return result;
+    }
+  }
+
   @Post("/query")
   public async getExperiments(
     @Body()
@@ -124,9 +152,16 @@ export class ExperimentController extends Controller {
       return err("Hypothesis not found");
     }
 
-    const datasetRows = experiment.dataset.rows.filter((row) =>
-      requestBody.datasetRowIds.includes(row.rowId)
-    );
+    const seen = new Set<string>();
+
+    const datasetRows = experiment.dataset.rows.filter((row) => {
+      if (!requestBody.datasetRowIds.includes(row.rowId)) {
+        return false;
+      }
+      const alreadyAdded = seen.has(row.rowId);
+      seen.add(row.rowId);
+      return !alreadyAdded;
+    });
 
     if (datasetRows.length !== requestBody.datasetRowIds.length) {
       this.setStatus(404);
@@ -137,7 +172,7 @@ export class ExperimentController extends Controller {
     experiment.dataset.rows = datasetRows;
     experiment.hypotheses = [hypothesis];
 
-    const runResult = await run(experiment);
+    const runResult = run(experiment);
 
     return runResult;
   }
