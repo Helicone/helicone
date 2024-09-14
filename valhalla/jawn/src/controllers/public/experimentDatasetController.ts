@@ -1,5 +1,14 @@
 // src/users/usersController.ts
-import { Body, Controller, Post, Request, Route, Security, Tags } from "tsoa";
+import {
+  Body,
+  Controller,
+  Path,
+  Post,
+  Request,
+  Route,
+  Security,
+  Tags,
+} from "tsoa";
 import { Result, err, ok } from "../../lib/shared/result";
 import {
   FilterLeafSubset,
@@ -7,6 +16,8 @@ import {
 } from "../../lib/shared/filters/filterDefs";
 import { DatasetManager } from "../../managers/dataset/DatasetManager";
 import { JawnAuthenticatedRequest } from "../../types/request";
+import { randomUUID } from "crypto";
+import { InputsManager } from "../../managers/inputs/InputsManager";
 
 export type DatasetFilterBranch = {
   left: DatasetFilterNode;
@@ -121,6 +132,46 @@ export class ExperimentDatasetController extends Controller {
       this.setStatus(200); // set return status 201
     }
     return result;
+  }
+
+  @Post("{datasetId}/version/{promptVersionId}/row")
+  public async createDatasetRow(
+    @Body()
+    requestBody: {
+      inputs: Record<string, string>;
+      sourceRequest?: string;
+    },
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() datasetId: string,
+    @Path() promptVersionId: string
+  ): Promise<Result<string, string>> {
+    const inputManager = new InputsManager(request.authParams);
+    const inputRecordResult = await inputManager.createInputRecord(
+      promptVersionId,
+      requestBody.inputs,
+      requestBody.sourceRequest
+    );
+
+    if (inputRecordResult.error || !inputRecordResult.data) {
+      console.error(inputRecordResult.error);
+      this.setStatus(500);
+      return inputRecordResult;
+    }
+
+    const datasetManager = new DatasetManager(request.authParams);
+    const datasetRowResult = await datasetManager.addDatasetRow(
+      datasetId,
+      inputRecordResult.data
+    );
+
+    if (datasetRowResult.error || !datasetRowResult.data) {
+      console.error(datasetRowResult.error);
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
+    }
+
+    return inputRecordResult;
   }
 
   @Post("/{datasetId}/query")

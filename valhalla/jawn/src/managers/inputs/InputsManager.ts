@@ -17,6 +17,7 @@ import { User } from "../../models/user";
 import { BaseManager } from "../BaseManager";
 import { S3Client } from "../../lib/shared/db/s3Client";
 import { RequestResponseBodyStore } from "../../lib/stores/request/RequestResponseBodyStore";
+import { randomUUID } from "crypto";
 
 async function fetchImageAsBase64(url: string): Promise<string> {
   try {
@@ -87,11 +88,11 @@ export async function getAllSignedURLsFromInputs(
 
 export class InputsManager extends BaseManager {
   async createInputRecord(
-    inputRecordId: string,
     promptVersionId: string,
     inputs: Record<string, string>,
     sourceRequest?: string
   ): Promise<Result<string, string>> {
+    const inputRecordId = randomUUID();
     const insertQuery = `
       INSERT INTO prompt_input_record (id, inputs, source_request, prompt_version)
       VALUES ($1, $2, $3, $4)
