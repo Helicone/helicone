@@ -6877,6 +6877,12 @@
 						"application/json": {
 							"schema": {
 								"properties": {
+									"datasetRowIds": {
+										"items": {
+											"type": "string"
+										},
+										"type": "array"
+									},
 									"hypothesisId": {
 										"type": "string"
 									},
@@ -6885,6 +6891,7 @@
 									}
 								},
 								"required": [
+									"datasetRowIds",
 									"hypothesisId",
 									"experimentId"
 								],
