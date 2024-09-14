@@ -300,35 +300,6 @@ export class PromptController extends Controller {
     return result;
   }
 
-  @Post("version/{promptVersionId}/inputs")
-  public async createInputRecord(
-    @Body()
-    requestBody: {
-      inputs: Record<string, string>;
-      sourceRequest?: string;
-    },
-    @Request() request: JawnAuthenticatedRequest,
-    @Path() promptVersionId: string
-  ): Promise<Result<string, string>> {
-    const inputRecordId = randomUUID();
-    const inputManager = new InputsManager(request.authParams);
-    const result = await inputManager.createInputRecord(
-      inputRecordId,
-      promptVersionId,
-      requestBody.inputs,
-      requestBody.sourceRequest
-    );
-
-    if (result.error) {
-      console.error(result.error);
-      this.setStatus(500);
-    } else {
-      this.setStatus(201);
-    }
-
-    return result;
-  }
-
   @Delete("version/{promptVersionId}")
   public async deletePromptVersion(
     @Request() request: JawnAuthenticatedRequest,
