@@ -6283,9 +6283,9 @@
 				}
 			}
 		},
-		"/v1/experiment/dataset/{datasetId}/version/{promptVersionId}/inputs": {
+		"/v1/experiment/dataset/{datasetId}/version/{promptVersionId}/row": {
 			"post": {
-				"operationId": "CreateInputRecord",
+				"operationId": "CreateDatasetRow",
 				"responses": {
 					"200": {
 						"description": "Ok",

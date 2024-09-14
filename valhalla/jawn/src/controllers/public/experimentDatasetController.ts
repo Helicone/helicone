@@ -134,8 +134,8 @@ export class ExperimentDatasetController extends Controller {
     return result;
   }
 
-  @Post("{datasetId}/version/{promptVersionId}/inputs")
-  public async createInputRecord(
+  @Post("{datasetId}/version/{promptVersionId}/row")
+  public async createDatasetRow(
     @Body()
     requestBody: {
       inputs: Record<string, string>;

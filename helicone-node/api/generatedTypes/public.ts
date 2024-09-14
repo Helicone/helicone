@@ -113,8 +113,8 @@ export interface paths {
   "/v1/experiment/dataset/query": {
     post: operations["GetDatasets"];
   };
-  "/v1/experiment/dataset/{datasetId}/version/{promptVersionId}/inputs": {
-    post: operations["CreateInputRecord"];
+  "/v1/experiment/dataset/{datasetId}/version/{promptVersionId}/row": {
+    post: operations["CreateDatasetRow"];
   };
   "/v1/experiment/dataset/{datasetId}/query": {
     post: operations["GetDataset"];
@@ -2076,7 +2076,7 @@ export interface operations {
       };
     };
   };
-  CreateInputRecord: {
+  CreateDatasetRow: {
     parameters: {
       path: {
         datasetId: string;

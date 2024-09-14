@@ -2848,12 +2848,12 @@ export function RegisterRoutes(app: Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.post('/v1/experiment/dataset/:datasetId/version/:promptVersionId/inputs',
+        app.post('/v1/experiment/dataset/:datasetId/version/:promptVersionId/row',
             authenticateMiddleware([{"api_key":[]}]),
             ...(fetchMiddlewares<RequestHandler>(ExperimentDatasetController)),
-            ...(fetchMiddlewares<RequestHandler>(ExperimentDatasetController.prototype.createInputRecord)),
+            ...(fetchMiddlewares<RequestHandler>(ExperimentDatasetController.prototype.createDatasetRow)),
 
-            async function ExperimentDatasetController_createInputRecord(request: ExRequest, response: ExResponse, next: any) {
+            async function ExperimentDatasetController_createDatasetRow(request: ExRequest, response: ExResponse, next: any) {
             const args: Record<string, TsoaRoute.ParameterSchema> = {
                     requestBody: {"in":"body","name":"requestBody","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"sourceRequest":{"dataType":"string"},"inputs":{"ref":"Record_string.string_","required":true}}},
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
@@ -2870,7 +2870,7 @@ export function RegisterRoutes(app: Router) {
                 const controller = new ExperimentDatasetController();
 
               await templateService.apiHandler({
-                methodName: 'createInputRecord',
+                methodName: 'createDatasetRow',
                 controller,
                 response,
                 next,
