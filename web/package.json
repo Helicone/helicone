@@ -119,7 +119,7 @@
     "react-simple-code-editor": "^0.13.1",
     "react-syntax-highlighter": "^15.5.0",
     "reactflow": "^11.8.3",
-    "stripe": "^11.8.0",
+    "stripe": "^16.11.0",
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",
     "typescript": "5.1.6",

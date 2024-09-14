@@ -704,7 +704,7 @@ const models: TsoaRoute.Models = {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "NewOrganizationParams": {
         "dataType": "refAlias",
-        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"tier":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},"subscription_status":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},"stripe_subscription_item_id":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},"stripe_subscription_id":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},"stripe_customer_id":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},"soft_delete":{"dataType":"boolean"},"size":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},"reseller_id":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},"request_limit":{"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}]},"referral":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},"percent_to_log":{"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}]},"owner":{"dataType":"string","required":true},"organization_type":{"dataType":"string"},"org_provider_key":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},"name":{"dataType":"string","required":true},"logo_path":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},"limits":{"dataType":"union","subSchemas":[{"ref":"Json"},{"dataType":"enum","enums":[null]}]},"is_personal":{"dataType":"boolean"},"id":{"dataType":"string"},"icon":{"dataType":"string"},"has_onboarded":{"dataType":"boolean"},"domain":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},"created_at":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},"color":{"dataType":"string"}},"validators":{}},
+        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"tier":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},"subscription_status":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},"stripe_subscription_item_id":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},"stripe_subscription_id":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},"stripe_metadata":{"ref":"Json"},"stripe_customer_id":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},"soft_delete":{"dataType":"boolean"},"size":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},"reseller_id":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},"request_limit":{"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}]},"referral":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},"percent_to_log":{"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}]},"owner":{"dataType":"string","required":true},"organization_type":{"dataType":"string"},"org_provider_key":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},"name":{"dataType":"string","required":true},"logo_path":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},"limits":{"dataType":"union","subSchemas":[{"ref":"Json"},{"dataType":"enum","enums":[null]}]},"is_personal":{"dataType":"boolean"},"id":{"dataType":"string"},"icon":{"dataType":"string"},"has_onboarded":{"dataType":"boolean"},"domain":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},"created_at":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},"color":{"dataType":"string"}},"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Pick_NewOrganizationParams.name-or-color-or-icon-or-org_provider_key-or-limits-or-reseller_id-or-organization_type_": {
@@ -1140,7 +1140,7 @@ const models: TsoaRoute.Models = {
     "AlertResponse": {
         "dataType": "refObject",
         "properties": {
-            "alerts": {"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"updated_at":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},"time_window":{"dataType":"double","required":true},"time_block_duration":{"dataType":"double","required":true},"threshold":{"dataType":"double","required":true},"status":{"dataType":"string","required":true},"soft_delete":{"dataType":"boolean","required":true},"slack_channels":{"dataType":"array","array":{"dataType":"string"},"required":true},"org_id":{"dataType":"string","required":true},"name":{"dataType":"string","required":true},"minimum_request_count":{"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},"metric":{"dataType":"string","required":true},"id":{"dataType":"string","required":true},"emails":{"dataType":"array","array":{"dataType":"string"},"required":true},"created_at":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true}}},"required":true},
+            "alerts": {"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"updated_at":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},"time_window":{"dataType":"double","required":true},"time_block_duration":{"dataType":"double","required":true},"threshold":{"dataType":"double","required":true},"status":{"dataType":"string","required":true},"soft_delete":{"dataType":"boolean","required":true},"org_id":{"dataType":"string","required":true},"name":{"dataType":"string","required":true},"minimum_request_count":{"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},"metric":{"dataType":"string","required":true},"id":{"dataType":"string","required":true},"emails":{"dataType":"array","array":{"dataType":"string"},"required":true},"created_at":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true}}},"required":true},
             "history": {"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"updated_at":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},"triggered_value":{"dataType":"string","required":true},"status":{"dataType":"string","required":true},"soft_delete":{"dataType":"boolean","required":true},"org_id":{"dataType":"string","required":true},"id":{"dataType":"string","required":true},"created_at":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},"alert_start_time":{"dataType":"string","required":true},"alert_name":{"dataType":"string","required":true},"alert_metric":{"dataType":"string","required":true},"alert_id":{"dataType":"string","required":true},"alert_end_time":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true}}},"required":true},
         },
         "additionalProperties": false,
@@ -2199,24 +2199,46 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Application": {
+    "stripe.Stripe.Invoice.Status": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["draft"]},{"dataType":"enum","enums":["open"]},{"dataType":"enum","enums":["paid"]},{"dataType":"enum","enums":["uncollectible"]},{"dataType":"enum","enums":["void"]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Address": {
         "dataType": "refObject",
         "properties": {
-            "id": {"dataType":"string","required":true},
-            "object": {"dataType":"enum","enums":["application"],"required":true},
-            "deleted": {"dataType":"void"},
-            "name": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "city": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "country": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "line1": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "line2": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "postal_code": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "state": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
         },
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.DeletedApplication": {
+    "stripe.Stripe.CashBalance.Settings.ReconciliationMode": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["automatic"]},{"dataType":"enum","enums":["manual"]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.CashBalance.Settings": {
         "dataType": "refObject",
         "properties": {
-            "id": {"dataType":"string","required":true},
-            "object": {"dataType":"enum","enums":["application"],"required":true},
-            "deleted": {"dataType":"enum","enums":[true],"required":true},
-            "name": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "reconciliation_mode": {"ref":"stripe.Stripe.CashBalance.Settings.ReconciliationMode","required":true},
+            "using_merchant_default": {"dataType":"boolean","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.CashBalance": {
+        "dataType": "refObject",
+        "properties": {
+            "object": {"dataType":"enum","enums":["cash_balance"],"required":true},
+            "available": {"dataType":"union","subSchemas":[{"dataType":"nestedObjectLiteral","nestedProperties":{},"additionalProperties":{"dataType":"double"}},{"dataType":"enum","enums":[null]}],"required":true},
+            "customer": {"dataType":"string","required":true},
+            "livemode": {"dataType":"boolean","required":true},
+            "settings": {"ref":"stripe.Stripe.CashBalance.Settings","required":true},
         },
         "additionalProperties": false,
     },
@@ -2236,19 +2258,6 @@ const models: TsoaRoute.Models = {
         "properties": {
             "amount": {"dataType":"double","required":true},
             "currency": {"dataType":"string","required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Address": {
-        "dataType": "refObject",
-        "properties": {
-            "city": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
-            "country": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
-            "line1": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
-            "line2": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
-            "postal_code": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
-            "state": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
         },
         "additionalProperties": false,
     },
@@ -2806,64 +2815,6 @@ const models: TsoaRoute.Models = {
         "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["instant"]},{"dataType":"enum","enums":["standard"]}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.CashBalance.Settings.ReconciliationMode": {
-        "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["automatic"]},{"dataType":"enum","enums":["manual"]}],"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.CashBalance.Settings": {
-        "dataType": "refObject",
-        "properties": {
-            "reconciliation_mode": {"ref":"stripe.Stripe.CashBalance.Settings.ReconciliationMode","required":true},
-            "using_merchant_default": {"dataType":"boolean","required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.CashBalance": {
-        "dataType": "refObject",
-        "properties": {
-            "object": {"dataType":"enum","enums":["cash_balance"],"required":true},
-            "available": {"dataType":"union","subSchemas":[{"dataType":"nestedObjectLiteral","nestedProperties":{},"additionalProperties":{"dataType":"double"}},{"dataType":"enum","enums":[null]}],"required":true},
-            "customer": {"dataType":"string","required":true},
-            "livemode": {"dataType":"boolean","required":true},
-            "settings": {"ref":"stripe.Stripe.CashBalance.Settings","required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.BankAccount": {
-        "dataType": "refObject",
-        "properties": {
-            "id": {"dataType":"string","required":true},
-            "object": {"dataType":"enum","enums":["bank_account"],"required":true},
-            "account": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Account"},{"dataType":"enum","enums":[null]}]},
-            "account_holder_name": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
-            "account_holder_type": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
-            "account_type": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
-            "available_payout_methods": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"refAlias","ref":"stripe.Stripe.BankAccount.AvailablePayoutMethod"}},{"dataType":"enum","enums":[null]}]},
-            "bank_name": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
-            "country": {"dataType":"string","required":true},
-            "currency": {"dataType":"string","required":true},
-            "customer": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Customer"},{"ref":"stripe.Stripe.DeletedCustomer"},{"dataType":"enum","enums":[null]}]},
-            "default_for_currency": {"dataType":"union","subSchemas":[{"dataType":"boolean"},{"dataType":"enum","enums":[null]}]},
-            "deleted": {"dataType":"void"},
-            "fingerprint": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
-            "future_requirements": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.BankAccount.FutureRequirements"},{"dataType":"enum","enums":[null]}]},
-            "last4": {"dataType":"string","required":true},
-            "metadata": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.Metadata"},{"dataType":"enum","enums":[null]}]},
-            "requirements": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.BankAccount.Requirements"},{"dataType":"enum","enums":[null]}]},
-            "routing_number": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
-            "status": {"dataType":"string","required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Card.AvailablePayoutMethod": {
-        "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["instant"]},{"dataType":"enum","enums":["standard"]}],"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "stripe.Stripe.Customer": {
         "dataType": "refObject",
         "properties": {
@@ -2908,6 +2859,90 @@ const models: TsoaRoute.Models = {
             "deleted": {"dataType":"enum","enums":[true],"required":true},
         },
         "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.BankAccount.FutureRequirements.Error.Code": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["invalid_address_city_state_postal_code"]},{"dataType":"enum","enums":["invalid_address_highway_contract_box"]},{"dataType":"enum","enums":["invalid_address_private_mailbox"]},{"dataType":"enum","enums":["invalid_business_profile_name"]},{"dataType":"enum","enums":["invalid_business_profile_name_denylisted"]},{"dataType":"enum","enums":["invalid_company_name_denylisted"]},{"dataType":"enum","enums":["invalid_dob_age_over_maximum"]},{"dataType":"enum","enums":["invalid_dob_age_under_18"]},{"dataType":"enum","enums":["invalid_dob_age_under_minimum"]},{"dataType":"enum","enums":["invalid_product_description_length"]},{"dataType":"enum","enums":["invalid_product_description_url_match"]},{"dataType":"enum","enums":["invalid_representative_country"]},{"dataType":"enum","enums":["invalid_statement_descriptor_business_mismatch"]},{"dataType":"enum","enums":["invalid_statement_descriptor_denylisted"]},{"dataType":"enum","enums":["invalid_statement_descriptor_length"]},{"dataType":"enum","enums":["invalid_statement_descriptor_prefix_denylisted"]},{"dataType":"enum","enums":["invalid_statement_descriptor_prefix_mismatch"]},{"dataType":"enum","enums":["invalid_street_address"]},{"dataType":"enum","enums":["invalid_tax_id"]},{"dataType":"enum","enums":["invalid_tax_id_format"]},{"dataType":"enum","enums":["invalid_tos_acceptance"]},{"dataType":"enum","enums":["invalid_url_denylisted"]},{"dataType":"enum","enums":["invalid_url_format"]},{"dataType":"enum","enums":["invalid_url_length"]},{"dataType":"enum","enums":["invalid_url_web_presence_detected"]},{"dataType":"enum","enums":["invalid_url_website_business_information_mismatch"]},{"dataType":"enum","enums":["invalid_url_website_empty"]},{"dataType":"enum","enums":["invalid_url_website_inaccessible"]},{"dataType":"enum","enums":["invalid_url_website_inaccessible_geoblocked"]},{"dataType":"enum","enums":["invalid_url_website_inaccessible_password_protected"]},{"dataType":"enum","enums":["invalid_url_website_incomplete"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_cancellation_policy"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_customer_service_details"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_legal_restrictions"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_refund_policy"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_return_policy"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_terms_and_conditions"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_under_construction"]},{"dataType":"enum","enums":["invalid_url_website_other"]},{"dataType":"enum","enums":["invalid_value_other"]},{"dataType":"enum","enums":["verification_directors_mismatch"]},{"dataType":"enum","enums":["verification_document_address_mismatch"]},{"dataType":"enum","enums":["verification_document_address_missing"]},{"dataType":"enum","enums":["verification_document_corrupt"]},{"dataType":"enum","enums":["verification_document_country_not_supported"]},{"dataType":"enum","enums":["verification_document_directors_mismatch"]},{"dataType":"enum","enums":["verification_document_dob_mismatch"]},{"dataType":"enum","enums":["verification_document_duplicate_type"]},{"dataType":"enum","enums":["verification_document_expired"]},{"dataType":"enum","enums":["verification_document_failed_copy"]},{"dataType":"enum","enums":["verification_document_failed_greyscale"]},{"dataType":"enum","enums":["verification_document_failed_other"]},{"dataType":"enum","enums":["verification_document_failed_test_mode"]},{"dataType":"enum","enums":["verification_document_fraudulent"]},{"dataType":"enum","enums":["verification_document_id_number_mismatch"]},{"dataType":"enum","enums":["verification_document_id_number_missing"]},{"dataType":"enum","enums":["verification_document_incomplete"]},{"dataType":"enum","enums":["verification_document_invalid"]},{"dataType":"enum","enums":["verification_document_issue_or_expiry_date_missing"]},{"dataType":"enum","enums":["verification_document_manipulated"]},{"dataType":"enum","enums":["verification_document_missing_back"]},{"dataType":"enum","enums":["verification_document_missing_front"]},{"dataType":"enum","enums":["verification_document_name_mismatch"]},{"dataType":"enum","enums":["verification_document_name_missing"]},{"dataType":"enum","enums":["verification_document_nationality_mismatch"]},{"dataType":"enum","enums":["verification_document_not_readable"]},{"dataType":"enum","enums":["verification_document_not_signed"]},{"dataType":"enum","enums":["verification_document_not_uploaded"]},{"dataType":"enum","enums":["verification_document_photo_mismatch"]},{"dataType":"enum","enums":["verification_document_too_large"]},{"dataType":"enum","enums":["verification_document_type_not_supported"]},{"dataType":"enum","enums":["verification_extraneous_directors"]},{"dataType":"enum","enums":["verification_failed_address_match"]},{"dataType":"enum","enums":["verification_failed_business_iec_number"]},{"dataType":"enum","enums":["verification_failed_document_match"]},{"dataType":"enum","enums":["verification_failed_id_number_match"]},{"dataType":"enum","enums":["verification_failed_keyed_identity"]},{"dataType":"enum","enums":["verification_failed_keyed_match"]},{"dataType":"enum","enums":["verification_failed_name_match"]},{"dataType":"enum","enums":["verification_failed_other"]},{"dataType":"enum","enums":["verification_failed_representative_authority"]},{"dataType":"enum","enums":["verification_failed_residential_address"]},{"dataType":"enum","enums":["verification_failed_tax_id_match"]},{"dataType":"enum","enums":["verification_failed_tax_id_not_issued"]},{"dataType":"enum","enums":["verification_missing_directors"]},{"dataType":"enum","enums":["verification_missing_executives"]},{"dataType":"enum","enums":["verification_missing_owners"]},{"dataType":"enum","enums":["verification_requires_additional_memorandum_of_associations"]},{"dataType":"enum","enums":["verification_requires_additional_proof_of_registration"]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.BankAccount.FutureRequirements.Error": {
+        "dataType": "refObject",
+        "properties": {
+            "code": {"ref":"stripe.Stripe.BankAccount.FutureRequirements.Error.Code","required":true},
+            "reason": {"dataType":"string","required":true},
+            "requirement": {"dataType":"string","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.BankAccount.FutureRequirements": {
+        "dataType": "refObject",
+        "properties": {
+            "currently_due": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"string"}},{"dataType":"enum","enums":[null]}],"required":true},
+            "errors": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"refObject","ref":"stripe.Stripe.BankAccount.FutureRequirements.Error"}},{"dataType":"enum","enums":[null]}],"required":true},
+            "past_due": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"string"}},{"dataType":"enum","enums":[null]}],"required":true},
+            "pending_verification": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"string"}},{"dataType":"enum","enums":[null]}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.BankAccount.Requirements.Error.Code": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["invalid_address_city_state_postal_code"]},{"dataType":"enum","enums":["invalid_address_highway_contract_box"]},{"dataType":"enum","enums":["invalid_address_private_mailbox"]},{"dataType":"enum","enums":["invalid_business_profile_name"]},{"dataType":"enum","enums":["invalid_business_profile_name_denylisted"]},{"dataType":"enum","enums":["invalid_company_name_denylisted"]},{"dataType":"enum","enums":["invalid_dob_age_over_maximum"]},{"dataType":"enum","enums":["invalid_dob_age_under_18"]},{"dataType":"enum","enums":["invalid_dob_age_under_minimum"]},{"dataType":"enum","enums":["invalid_product_description_length"]},{"dataType":"enum","enums":["invalid_product_description_url_match"]},{"dataType":"enum","enums":["invalid_representative_country"]},{"dataType":"enum","enums":["invalid_statement_descriptor_business_mismatch"]},{"dataType":"enum","enums":["invalid_statement_descriptor_denylisted"]},{"dataType":"enum","enums":["invalid_statement_descriptor_length"]},{"dataType":"enum","enums":["invalid_statement_descriptor_prefix_denylisted"]},{"dataType":"enum","enums":["invalid_statement_descriptor_prefix_mismatch"]},{"dataType":"enum","enums":["invalid_street_address"]},{"dataType":"enum","enums":["invalid_tax_id"]},{"dataType":"enum","enums":["invalid_tax_id_format"]},{"dataType":"enum","enums":["invalid_tos_acceptance"]},{"dataType":"enum","enums":["invalid_url_denylisted"]},{"dataType":"enum","enums":["invalid_url_format"]},{"dataType":"enum","enums":["invalid_url_length"]},{"dataType":"enum","enums":["invalid_url_web_presence_detected"]},{"dataType":"enum","enums":["invalid_url_website_business_information_mismatch"]},{"dataType":"enum","enums":["invalid_url_website_empty"]},{"dataType":"enum","enums":["invalid_url_website_inaccessible"]},{"dataType":"enum","enums":["invalid_url_website_inaccessible_geoblocked"]},{"dataType":"enum","enums":["invalid_url_website_inaccessible_password_protected"]},{"dataType":"enum","enums":["invalid_url_website_incomplete"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_cancellation_policy"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_customer_service_details"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_legal_restrictions"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_refund_policy"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_return_policy"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_terms_and_conditions"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_under_construction"]},{"dataType":"enum","enums":["invalid_url_website_other"]},{"dataType":"enum","enums":["invalid_value_other"]},{"dataType":"enum","enums":["verification_directors_mismatch"]},{"dataType":"enum","enums":["verification_document_address_mismatch"]},{"dataType":"enum","enums":["verification_document_address_missing"]},{"dataType":"enum","enums":["verification_document_corrupt"]},{"dataType":"enum","enums":["verification_document_country_not_supported"]},{"dataType":"enum","enums":["verification_document_directors_mismatch"]},{"dataType":"enum","enums":["verification_document_dob_mismatch"]},{"dataType":"enum","enums":["verification_document_duplicate_type"]},{"dataType":"enum","enums":["verification_document_expired"]},{"dataType":"enum","enums":["verification_document_failed_copy"]},{"dataType":"enum","enums":["verification_document_failed_greyscale"]},{"dataType":"enum","enums":["verification_document_failed_other"]},{"dataType":"enum","enums":["verification_document_failed_test_mode"]},{"dataType":"enum","enums":["verification_document_fraudulent"]},{"dataType":"enum","enums":["verification_document_id_number_mismatch"]},{"dataType":"enum","enums":["verification_document_id_number_missing"]},{"dataType":"enum","enums":["verification_document_incomplete"]},{"dataType":"enum","enums":["verification_document_invalid"]},{"dataType":"enum","enums":["verification_document_issue_or_expiry_date_missing"]},{"dataType":"enum","enums":["verification_document_manipulated"]},{"dataType":"enum","enums":["verification_document_missing_back"]},{"dataType":"enum","enums":["verification_document_missing_front"]},{"dataType":"enum","enums":["verification_document_name_mismatch"]},{"dataType":"enum","enums":["verification_document_name_missing"]},{"dataType":"enum","enums":["verification_document_nationality_mismatch"]},{"dataType":"enum","enums":["verification_document_not_readable"]},{"dataType":"enum","enums":["verification_document_not_signed"]},{"dataType":"enum","enums":["verification_document_not_uploaded"]},{"dataType":"enum","enums":["verification_document_photo_mismatch"]},{"dataType":"enum","enums":["verification_document_too_large"]},{"dataType":"enum","enums":["verification_document_type_not_supported"]},{"dataType":"enum","enums":["verification_extraneous_directors"]},{"dataType":"enum","enums":["verification_failed_address_match"]},{"dataType":"enum","enums":["verification_failed_business_iec_number"]},{"dataType":"enum","enums":["verification_failed_document_match"]},{"dataType":"enum","enums":["verification_failed_id_number_match"]},{"dataType":"enum","enums":["verification_failed_keyed_identity"]},{"dataType":"enum","enums":["verification_failed_keyed_match"]},{"dataType":"enum","enums":["verification_failed_name_match"]},{"dataType":"enum","enums":["verification_failed_other"]},{"dataType":"enum","enums":["verification_failed_representative_authority"]},{"dataType":"enum","enums":["verification_failed_residential_address"]},{"dataType":"enum","enums":["verification_failed_tax_id_match"]},{"dataType":"enum","enums":["verification_failed_tax_id_not_issued"]},{"dataType":"enum","enums":["verification_missing_directors"]},{"dataType":"enum","enums":["verification_missing_executives"]},{"dataType":"enum","enums":["verification_missing_owners"]},{"dataType":"enum","enums":["verification_requires_additional_memorandum_of_associations"]},{"dataType":"enum","enums":["verification_requires_additional_proof_of_registration"]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.BankAccount.Requirements.Error": {
+        "dataType": "refObject",
+        "properties": {
+            "code": {"ref":"stripe.Stripe.BankAccount.Requirements.Error.Code","required":true},
+            "reason": {"dataType":"string","required":true},
+            "requirement": {"dataType":"string","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.BankAccount.Requirements": {
+        "dataType": "refObject",
+        "properties": {
+            "currently_due": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"string"}},{"dataType":"enum","enums":[null]}],"required":true},
+            "errors": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"refObject","ref":"stripe.Stripe.BankAccount.Requirements.Error"}},{"dataType":"enum","enums":[null]}],"required":true},
+            "past_due": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"string"}},{"dataType":"enum","enums":[null]}],"required":true},
+            "pending_verification": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"string"}},{"dataType":"enum","enums":[null]}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.BankAccount": {
+        "dataType": "refObject",
+        "properties": {
+            "id": {"dataType":"string","required":true},
+            "object": {"dataType":"enum","enums":["bank_account"],"required":true},
+            "account": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Account"},{"dataType":"enum","enums":[null]}]},
+            "account_holder_name": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "account_holder_type": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "account_type": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "available_payout_methods": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"refAlias","ref":"stripe.Stripe.BankAccount.AvailablePayoutMethod"}},{"dataType":"enum","enums":[null]}]},
+            "bank_name": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "country": {"dataType":"string","required":true},
+            "currency": {"dataType":"string","required":true},
+            "customer": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Customer"},{"ref":"stripe.Stripe.DeletedCustomer"},{"dataType":"enum","enums":[null]}]},
+            "default_for_currency": {"dataType":"union","subSchemas":[{"dataType":"boolean"},{"dataType":"enum","enums":[null]}]},
+            "deleted": {"dataType":"void"},
+            "fingerprint": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "future_requirements": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.BankAccount.FutureRequirements"},{"dataType":"enum","enums":[null]}]},
+            "last4": {"dataType":"string","required":true},
+            "metadata": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.Metadata"},{"dataType":"enum","enums":[null]}]},
+            "requirements": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.BankAccount.Requirements"},{"dataType":"enum","enums":[null]}]},
+            "routing_number": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "status": {"dataType":"string","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Card.AvailablePayoutMethod": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["instant"]},{"dataType":"enum","enums":["standard"]}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "stripe.Stripe.Card.Networks": {
@@ -2956,6 +2991,507 @@ const models: TsoaRoute.Models = {
             "tokenization_method": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
         },
         "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.ExternalAccount": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.BankAccount"},{"ref":"stripe.Stripe.Card"}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.ApiList_stripe.Stripe.ExternalAccount_": {
+        "dataType": "refObject",
+        "properties": {
+            "object": {"dataType":"enum","enums":["list"],"required":true},
+            "data": {"dataType":"array","array":{"dataType":"refAlias","ref":"stripe.Stripe.ExternalAccount"},"required":true},
+            "has_more": {"dataType":"boolean","required":true},
+            "url": {"dataType":"string","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Account.FutureRequirements.Alternative": {
+        "dataType": "refObject",
+        "properties": {
+            "alternative_fields_due": {"dataType":"array","array":{"dataType":"string"},"required":true},
+            "original_fields_due": {"dataType":"array","array":{"dataType":"string"},"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Account.FutureRequirements.Error.Code": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["invalid_address_city_state_postal_code"]},{"dataType":"enum","enums":["invalid_address_highway_contract_box"]},{"dataType":"enum","enums":["invalid_address_private_mailbox"]},{"dataType":"enum","enums":["invalid_business_profile_name"]},{"dataType":"enum","enums":["invalid_business_profile_name_denylisted"]},{"dataType":"enum","enums":["invalid_company_name_denylisted"]},{"dataType":"enum","enums":["invalid_dob_age_over_maximum"]},{"dataType":"enum","enums":["invalid_dob_age_under_18"]},{"dataType":"enum","enums":["invalid_dob_age_under_minimum"]},{"dataType":"enum","enums":["invalid_product_description_length"]},{"dataType":"enum","enums":["invalid_product_description_url_match"]},{"dataType":"enum","enums":["invalid_representative_country"]},{"dataType":"enum","enums":["invalid_statement_descriptor_business_mismatch"]},{"dataType":"enum","enums":["invalid_statement_descriptor_denylisted"]},{"dataType":"enum","enums":["invalid_statement_descriptor_length"]},{"dataType":"enum","enums":["invalid_statement_descriptor_prefix_denylisted"]},{"dataType":"enum","enums":["invalid_statement_descriptor_prefix_mismatch"]},{"dataType":"enum","enums":["invalid_street_address"]},{"dataType":"enum","enums":["invalid_tax_id"]},{"dataType":"enum","enums":["invalid_tax_id_format"]},{"dataType":"enum","enums":["invalid_tos_acceptance"]},{"dataType":"enum","enums":["invalid_url_denylisted"]},{"dataType":"enum","enums":["invalid_url_format"]},{"dataType":"enum","enums":["invalid_url_length"]},{"dataType":"enum","enums":["invalid_url_web_presence_detected"]},{"dataType":"enum","enums":["invalid_url_website_business_information_mismatch"]},{"dataType":"enum","enums":["invalid_url_website_empty"]},{"dataType":"enum","enums":["invalid_url_website_inaccessible"]},{"dataType":"enum","enums":["invalid_url_website_inaccessible_geoblocked"]},{"dataType":"enum","enums":["invalid_url_website_inaccessible_password_protected"]},{"dataType":"enum","enums":["invalid_url_website_incomplete"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_cancellation_policy"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_customer_service_details"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_legal_restrictions"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_refund_policy"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_return_policy"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_terms_and_conditions"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_under_construction"]},{"dataType":"enum","enums":["invalid_url_website_other"]},{"dataType":"enum","enums":["invalid_value_other"]},{"dataType":"enum","enums":["verification_directors_mismatch"]},{"dataType":"enum","enums":["verification_document_address_mismatch"]},{"dataType":"enum","enums":["verification_document_address_missing"]},{"dataType":"enum","enums":["verification_document_corrupt"]},{"dataType":"enum","enums":["verification_document_country_not_supported"]},{"dataType":"enum","enums":["verification_document_directors_mismatch"]},{"dataType":"enum","enums":["verification_document_dob_mismatch"]},{"dataType":"enum","enums":["verification_document_duplicate_type"]},{"dataType":"enum","enums":["verification_document_expired"]},{"dataType":"enum","enums":["verification_document_failed_copy"]},{"dataType":"enum","enums":["verification_document_failed_greyscale"]},{"dataType":"enum","enums":["verification_document_failed_other"]},{"dataType":"enum","enums":["verification_document_failed_test_mode"]},{"dataType":"enum","enums":["verification_document_fraudulent"]},{"dataType":"enum","enums":["verification_document_id_number_mismatch"]},{"dataType":"enum","enums":["verification_document_id_number_missing"]},{"dataType":"enum","enums":["verification_document_incomplete"]},{"dataType":"enum","enums":["verification_document_invalid"]},{"dataType":"enum","enums":["verification_document_issue_or_expiry_date_missing"]},{"dataType":"enum","enums":["verification_document_manipulated"]},{"dataType":"enum","enums":["verification_document_missing_back"]},{"dataType":"enum","enums":["verification_document_missing_front"]},{"dataType":"enum","enums":["verification_document_name_mismatch"]},{"dataType":"enum","enums":["verification_document_name_missing"]},{"dataType":"enum","enums":["verification_document_nationality_mismatch"]},{"dataType":"enum","enums":["verification_document_not_readable"]},{"dataType":"enum","enums":["verification_document_not_signed"]},{"dataType":"enum","enums":["verification_document_not_uploaded"]},{"dataType":"enum","enums":["verification_document_photo_mismatch"]},{"dataType":"enum","enums":["verification_document_too_large"]},{"dataType":"enum","enums":["verification_document_type_not_supported"]},{"dataType":"enum","enums":["verification_extraneous_directors"]},{"dataType":"enum","enums":["verification_failed_address_match"]},{"dataType":"enum","enums":["verification_failed_business_iec_number"]},{"dataType":"enum","enums":["verification_failed_document_match"]},{"dataType":"enum","enums":["verification_failed_id_number_match"]},{"dataType":"enum","enums":["verification_failed_keyed_identity"]},{"dataType":"enum","enums":["verification_failed_keyed_match"]},{"dataType":"enum","enums":["verification_failed_name_match"]},{"dataType":"enum","enums":["verification_failed_other"]},{"dataType":"enum","enums":["verification_failed_representative_authority"]},{"dataType":"enum","enums":["verification_failed_residential_address"]},{"dataType":"enum","enums":["verification_failed_tax_id_match"]},{"dataType":"enum","enums":["verification_failed_tax_id_not_issued"]},{"dataType":"enum","enums":["verification_missing_directors"]},{"dataType":"enum","enums":["verification_missing_executives"]},{"dataType":"enum","enums":["verification_missing_owners"]},{"dataType":"enum","enums":["verification_requires_additional_memorandum_of_associations"]},{"dataType":"enum","enums":["verification_requires_additional_proof_of_registration"]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Account.FutureRequirements.Error": {
+        "dataType": "refObject",
+        "properties": {
+            "code": {"ref":"stripe.Stripe.Account.FutureRequirements.Error.Code","required":true},
+            "reason": {"dataType":"string","required":true},
+            "requirement": {"dataType":"string","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Account.FutureRequirements": {
+        "dataType": "refObject",
+        "properties": {
+            "alternatives": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"refObject","ref":"stripe.Stripe.Account.FutureRequirements.Alternative"}},{"dataType":"enum","enums":[null]}],"required":true},
+            "current_deadline": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
+            "currently_due": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"string"}},{"dataType":"enum","enums":[null]}],"required":true},
+            "disabled_reason": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "errors": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"refObject","ref":"stripe.Stripe.Account.FutureRequirements.Error"}},{"dataType":"enum","enums":[null]}],"required":true},
+            "eventually_due": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"string"}},{"dataType":"enum","enums":[null]}],"required":true},
+            "past_due": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"string"}},{"dataType":"enum","enums":[null]}],"required":true},
+            "pending_verification": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"string"}},{"dataType":"enum","enums":[null]}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Person.AdditionalTosAcceptances.Account": {
+        "dataType": "refObject",
+        "properties": {
+            "date": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
+            "ip": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "user_agent": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Person.AdditionalTosAcceptances": {
+        "dataType": "refObject",
+        "properties": {
+            "account": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.Person.AdditionalTosAcceptances.Account"},{"dataType":"enum","enums":[null]}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Person.AddressKana": {
+        "dataType": "refObject",
+        "properties": {
+            "city": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "country": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "line1": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "line2": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "postal_code": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "state": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "town": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Person.AddressKanji": {
+        "dataType": "refObject",
+        "properties": {
+            "city": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "country": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "line1": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "line2": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "postal_code": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "state": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "town": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Person.Dob": {
+        "dataType": "refObject",
+        "properties": {
+            "day": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
+            "month": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
+            "year": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Person.FutureRequirements.Alternative": {
+        "dataType": "refObject",
+        "properties": {
+            "alternative_fields_due": {"dataType":"array","array":{"dataType":"string"},"required":true},
+            "original_fields_due": {"dataType":"array","array":{"dataType":"string"},"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Person.FutureRequirements.Error.Code": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["invalid_address_city_state_postal_code"]},{"dataType":"enum","enums":["invalid_address_highway_contract_box"]},{"dataType":"enum","enums":["invalid_address_private_mailbox"]},{"dataType":"enum","enums":["invalid_business_profile_name"]},{"dataType":"enum","enums":["invalid_business_profile_name_denylisted"]},{"dataType":"enum","enums":["invalid_company_name_denylisted"]},{"dataType":"enum","enums":["invalid_dob_age_over_maximum"]},{"dataType":"enum","enums":["invalid_dob_age_under_18"]},{"dataType":"enum","enums":["invalid_dob_age_under_minimum"]},{"dataType":"enum","enums":["invalid_product_description_length"]},{"dataType":"enum","enums":["invalid_product_description_url_match"]},{"dataType":"enum","enums":["invalid_representative_country"]},{"dataType":"enum","enums":["invalid_statement_descriptor_business_mismatch"]},{"dataType":"enum","enums":["invalid_statement_descriptor_denylisted"]},{"dataType":"enum","enums":["invalid_statement_descriptor_length"]},{"dataType":"enum","enums":["invalid_statement_descriptor_prefix_denylisted"]},{"dataType":"enum","enums":["invalid_statement_descriptor_prefix_mismatch"]},{"dataType":"enum","enums":["invalid_street_address"]},{"dataType":"enum","enums":["invalid_tax_id"]},{"dataType":"enum","enums":["invalid_tax_id_format"]},{"dataType":"enum","enums":["invalid_tos_acceptance"]},{"dataType":"enum","enums":["invalid_url_denylisted"]},{"dataType":"enum","enums":["invalid_url_format"]},{"dataType":"enum","enums":["invalid_url_length"]},{"dataType":"enum","enums":["invalid_url_web_presence_detected"]},{"dataType":"enum","enums":["invalid_url_website_business_information_mismatch"]},{"dataType":"enum","enums":["invalid_url_website_empty"]},{"dataType":"enum","enums":["invalid_url_website_inaccessible"]},{"dataType":"enum","enums":["invalid_url_website_inaccessible_geoblocked"]},{"dataType":"enum","enums":["invalid_url_website_inaccessible_password_protected"]},{"dataType":"enum","enums":["invalid_url_website_incomplete"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_cancellation_policy"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_customer_service_details"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_legal_restrictions"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_refund_policy"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_return_policy"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_terms_and_conditions"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_under_construction"]},{"dataType":"enum","enums":["invalid_url_website_other"]},{"dataType":"enum","enums":["invalid_value_other"]},{"dataType":"enum","enums":["verification_directors_mismatch"]},{"dataType":"enum","enums":["verification_document_address_mismatch"]},{"dataType":"enum","enums":["verification_document_address_missing"]},{"dataType":"enum","enums":["verification_document_corrupt"]},{"dataType":"enum","enums":["verification_document_country_not_supported"]},{"dataType":"enum","enums":["verification_document_directors_mismatch"]},{"dataType":"enum","enums":["verification_document_dob_mismatch"]},{"dataType":"enum","enums":["verification_document_duplicate_type"]},{"dataType":"enum","enums":["verification_document_expired"]},{"dataType":"enum","enums":["verification_document_failed_copy"]},{"dataType":"enum","enums":["verification_document_failed_greyscale"]},{"dataType":"enum","enums":["verification_document_failed_other"]},{"dataType":"enum","enums":["verification_document_failed_test_mode"]},{"dataType":"enum","enums":["verification_document_fraudulent"]},{"dataType":"enum","enums":["verification_document_id_number_mismatch"]},{"dataType":"enum","enums":["verification_document_id_number_missing"]},{"dataType":"enum","enums":["verification_document_incomplete"]},{"dataType":"enum","enums":["verification_document_invalid"]},{"dataType":"enum","enums":["verification_document_issue_or_expiry_date_missing"]},{"dataType":"enum","enums":["verification_document_manipulated"]},{"dataType":"enum","enums":["verification_document_missing_back"]},{"dataType":"enum","enums":["verification_document_missing_front"]},{"dataType":"enum","enums":["verification_document_name_mismatch"]},{"dataType":"enum","enums":["verification_document_name_missing"]},{"dataType":"enum","enums":["verification_document_nationality_mismatch"]},{"dataType":"enum","enums":["verification_document_not_readable"]},{"dataType":"enum","enums":["verification_document_not_signed"]},{"dataType":"enum","enums":["verification_document_not_uploaded"]},{"dataType":"enum","enums":["verification_document_photo_mismatch"]},{"dataType":"enum","enums":["verification_document_too_large"]},{"dataType":"enum","enums":["verification_document_type_not_supported"]},{"dataType":"enum","enums":["verification_extraneous_directors"]},{"dataType":"enum","enums":["verification_failed_address_match"]},{"dataType":"enum","enums":["verification_failed_business_iec_number"]},{"dataType":"enum","enums":["verification_failed_document_match"]},{"dataType":"enum","enums":["verification_failed_id_number_match"]},{"dataType":"enum","enums":["verification_failed_keyed_identity"]},{"dataType":"enum","enums":["verification_failed_keyed_match"]},{"dataType":"enum","enums":["verification_failed_name_match"]},{"dataType":"enum","enums":["verification_failed_other"]},{"dataType":"enum","enums":["verification_failed_representative_authority"]},{"dataType":"enum","enums":["verification_failed_residential_address"]},{"dataType":"enum","enums":["verification_failed_tax_id_match"]},{"dataType":"enum","enums":["verification_failed_tax_id_not_issued"]},{"dataType":"enum","enums":["verification_missing_directors"]},{"dataType":"enum","enums":["verification_missing_executives"]},{"dataType":"enum","enums":["verification_missing_owners"]},{"dataType":"enum","enums":["verification_requires_additional_memorandum_of_associations"]},{"dataType":"enum","enums":["verification_requires_additional_proof_of_registration"]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Person.FutureRequirements.Error": {
+        "dataType": "refObject",
+        "properties": {
+            "code": {"ref":"stripe.Stripe.Person.FutureRequirements.Error.Code","required":true},
+            "reason": {"dataType":"string","required":true},
+            "requirement": {"dataType":"string","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Person.FutureRequirements": {
+        "dataType": "refObject",
+        "properties": {
+            "alternatives": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"refObject","ref":"stripe.Stripe.Person.FutureRequirements.Alternative"}},{"dataType":"enum","enums":[null]}],"required":true},
+            "currently_due": {"dataType":"array","array":{"dataType":"string"},"required":true},
+            "errors": {"dataType":"array","array":{"dataType":"refObject","ref":"stripe.Stripe.Person.FutureRequirements.Error"},"required":true},
+            "eventually_due": {"dataType":"array","array":{"dataType":"string"},"required":true},
+            "past_due": {"dataType":"array","array":{"dataType":"string"},"required":true},
+            "pending_verification": {"dataType":"array","array":{"dataType":"string"},"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Person.PoliticalExposure": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["existing"]},{"dataType":"enum","enums":["none"]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Person.Relationship": {
+        "dataType": "refObject",
+        "properties": {
+            "director": {"dataType":"union","subSchemas":[{"dataType":"boolean"},{"dataType":"enum","enums":[null]}],"required":true},
+            "executive": {"dataType":"union","subSchemas":[{"dataType":"boolean"},{"dataType":"enum","enums":[null]}],"required":true},
+            "legal_guardian": {"dataType":"union","subSchemas":[{"dataType":"boolean"},{"dataType":"enum","enums":[null]}],"required":true},
+            "owner": {"dataType":"union","subSchemas":[{"dataType":"boolean"},{"dataType":"enum","enums":[null]}],"required":true},
+            "percent_ownership": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
+            "representative": {"dataType":"union","subSchemas":[{"dataType":"boolean"},{"dataType":"enum","enums":[null]}],"required":true},
+            "title": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Person.Requirements.Alternative": {
+        "dataType": "refObject",
+        "properties": {
+            "alternative_fields_due": {"dataType":"array","array":{"dataType":"string"},"required":true},
+            "original_fields_due": {"dataType":"array","array":{"dataType":"string"},"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Person.Requirements.Error.Code": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["invalid_address_city_state_postal_code"]},{"dataType":"enum","enums":["invalid_address_highway_contract_box"]},{"dataType":"enum","enums":["invalid_address_private_mailbox"]},{"dataType":"enum","enums":["invalid_business_profile_name"]},{"dataType":"enum","enums":["invalid_business_profile_name_denylisted"]},{"dataType":"enum","enums":["invalid_company_name_denylisted"]},{"dataType":"enum","enums":["invalid_dob_age_over_maximum"]},{"dataType":"enum","enums":["invalid_dob_age_under_18"]},{"dataType":"enum","enums":["invalid_dob_age_under_minimum"]},{"dataType":"enum","enums":["invalid_product_description_length"]},{"dataType":"enum","enums":["invalid_product_description_url_match"]},{"dataType":"enum","enums":["invalid_representative_country"]},{"dataType":"enum","enums":["invalid_statement_descriptor_business_mismatch"]},{"dataType":"enum","enums":["invalid_statement_descriptor_denylisted"]},{"dataType":"enum","enums":["invalid_statement_descriptor_length"]},{"dataType":"enum","enums":["invalid_statement_descriptor_prefix_denylisted"]},{"dataType":"enum","enums":["invalid_statement_descriptor_prefix_mismatch"]},{"dataType":"enum","enums":["invalid_street_address"]},{"dataType":"enum","enums":["invalid_tax_id"]},{"dataType":"enum","enums":["invalid_tax_id_format"]},{"dataType":"enum","enums":["invalid_tos_acceptance"]},{"dataType":"enum","enums":["invalid_url_denylisted"]},{"dataType":"enum","enums":["invalid_url_format"]},{"dataType":"enum","enums":["invalid_url_length"]},{"dataType":"enum","enums":["invalid_url_web_presence_detected"]},{"dataType":"enum","enums":["invalid_url_website_business_information_mismatch"]},{"dataType":"enum","enums":["invalid_url_website_empty"]},{"dataType":"enum","enums":["invalid_url_website_inaccessible"]},{"dataType":"enum","enums":["invalid_url_website_inaccessible_geoblocked"]},{"dataType":"enum","enums":["invalid_url_website_inaccessible_password_protected"]},{"dataType":"enum","enums":["invalid_url_website_incomplete"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_cancellation_policy"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_customer_service_details"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_legal_restrictions"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_refund_policy"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_return_policy"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_terms_and_conditions"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_under_construction"]},{"dataType":"enum","enums":["invalid_url_website_other"]},{"dataType":"enum","enums":["invalid_value_other"]},{"dataType":"enum","enums":["verification_directors_mismatch"]},{"dataType":"enum","enums":["verification_document_address_mismatch"]},{"dataType":"enum","enums":["verification_document_address_missing"]},{"dataType":"enum","enums":["verification_document_corrupt"]},{"dataType":"enum","enums":["verification_document_country_not_supported"]},{"dataType":"enum","enums":["verification_document_directors_mismatch"]},{"dataType":"enum","enums":["verification_document_dob_mismatch"]},{"dataType":"enum","enums":["verification_document_duplicate_type"]},{"dataType":"enum","enums":["verification_document_expired"]},{"dataType":"enum","enums":["verification_document_failed_copy"]},{"dataType":"enum","enums":["verification_document_failed_greyscale"]},{"dataType":"enum","enums":["verification_document_failed_other"]},{"dataType":"enum","enums":["verification_document_failed_test_mode"]},{"dataType":"enum","enums":["verification_document_fraudulent"]},{"dataType":"enum","enums":["verification_document_id_number_mismatch"]},{"dataType":"enum","enums":["verification_document_id_number_missing"]},{"dataType":"enum","enums":["verification_document_incomplete"]},{"dataType":"enum","enums":["verification_document_invalid"]},{"dataType":"enum","enums":["verification_document_issue_or_expiry_date_missing"]},{"dataType":"enum","enums":["verification_document_manipulated"]},{"dataType":"enum","enums":["verification_document_missing_back"]},{"dataType":"enum","enums":["verification_document_missing_front"]},{"dataType":"enum","enums":["verification_document_name_mismatch"]},{"dataType":"enum","enums":["verification_document_name_missing"]},{"dataType":"enum","enums":["verification_document_nationality_mismatch"]},{"dataType":"enum","enums":["verification_document_not_readable"]},{"dataType":"enum","enums":["verification_document_not_signed"]},{"dataType":"enum","enums":["verification_document_not_uploaded"]},{"dataType":"enum","enums":["verification_document_photo_mismatch"]},{"dataType":"enum","enums":["verification_document_too_large"]},{"dataType":"enum","enums":["verification_document_type_not_supported"]},{"dataType":"enum","enums":["verification_extraneous_directors"]},{"dataType":"enum","enums":["verification_failed_address_match"]},{"dataType":"enum","enums":["verification_failed_business_iec_number"]},{"dataType":"enum","enums":["verification_failed_document_match"]},{"dataType":"enum","enums":["verification_failed_id_number_match"]},{"dataType":"enum","enums":["verification_failed_keyed_identity"]},{"dataType":"enum","enums":["verification_failed_keyed_match"]},{"dataType":"enum","enums":["verification_failed_name_match"]},{"dataType":"enum","enums":["verification_failed_other"]},{"dataType":"enum","enums":["verification_failed_representative_authority"]},{"dataType":"enum","enums":["verification_failed_residential_address"]},{"dataType":"enum","enums":["verification_failed_tax_id_match"]},{"dataType":"enum","enums":["verification_failed_tax_id_not_issued"]},{"dataType":"enum","enums":["verification_missing_directors"]},{"dataType":"enum","enums":["verification_missing_executives"]},{"dataType":"enum","enums":["verification_missing_owners"]},{"dataType":"enum","enums":["verification_requires_additional_memorandum_of_associations"]},{"dataType":"enum","enums":["verification_requires_additional_proof_of_registration"]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Person.Requirements.Error": {
+        "dataType": "refObject",
+        "properties": {
+            "code": {"ref":"stripe.Stripe.Person.Requirements.Error.Code","required":true},
+            "reason": {"dataType":"string","required":true},
+            "requirement": {"dataType":"string","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Person.Requirements": {
+        "dataType": "refObject",
+        "properties": {
+            "alternatives": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"refObject","ref":"stripe.Stripe.Person.Requirements.Alternative"}},{"dataType":"enum","enums":[null]}],"required":true},
+            "currently_due": {"dataType":"array","array":{"dataType":"string"},"required":true},
+            "errors": {"dataType":"array","array":{"dataType":"refObject","ref":"stripe.Stripe.Person.Requirements.Error"},"required":true},
+            "eventually_due": {"dataType":"array","array":{"dataType":"string"},"required":true},
+            "past_due": {"dataType":"array","array":{"dataType":"string"},"required":true},
+            "pending_verification": {"dataType":"array","array":{"dataType":"string"},"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Person.Verification.AdditionalDocument": {
+        "dataType": "refObject",
+        "properties": {
+            "back": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.File"},{"dataType":"enum","enums":[null]}],"required":true},
+            "details": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "details_code": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "front": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.File"},{"dataType":"enum","enums":[null]}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Person.Verification.Document": {
+        "dataType": "refObject",
+        "properties": {
+            "back": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.File"},{"dataType":"enum","enums":[null]}],"required":true},
+            "details": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "details_code": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "front": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.File"},{"dataType":"enum","enums":[null]}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Person.Verification": {
+        "dataType": "refObject",
+        "properties": {
+            "additional_document": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.Person.Verification.AdditionalDocument"},{"dataType":"enum","enums":[null]}]},
+            "details": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
+            "details_code": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
+            "document": {"ref":"stripe.Stripe.Person.Verification.Document"},
+            "status": {"dataType":"string","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Person": {
+        "dataType": "refObject",
+        "properties": {
+            "id": {"dataType":"string","required":true},
+            "object": {"dataType":"enum","enums":["person"],"required":true},
+            "account": {"dataType":"string","required":true},
+            "additional_tos_acceptances": {"ref":"stripe.Stripe.Person.AdditionalTosAcceptances"},
+            "address": {"ref":"stripe.Stripe.Address"},
+            "address_kana": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.Person.AddressKana"},{"dataType":"enum","enums":[null]}]},
+            "address_kanji": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.Person.AddressKanji"},{"dataType":"enum","enums":[null]}]},
+            "created": {"dataType":"double","required":true},
+            "deleted": {"dataType":"void"},
+            "dob": {"ref":"stripe.Stripe.Person.Dob"},
+            "email": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
+            "first_name": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
+            "first_name_kana": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
+            "first_name_kanji": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
+            "full_name_aliases": {"dataType":"array","array":{"dataType":"string"}},
+            "future_requirements": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.Person.FutureRequirements"},{"dataType":"enum","enums":[null]}]},
+            "gender": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
+            "id_number_provided": {"dataType":"boolean"},
+            "id_number_secondary_provided": {"dataType":"boolean"},
+            "last_name": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
+            "last_name_kana": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
+            "last_name_kanji": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
+            "maiden_name": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
+            "metadata": {"ref":"stripe.Stripe.Metadata"},
+            "nationality": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
+            "phone": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
+            "political_exposure": {"ref":"stripe.Stripe.Person.PoliticalExposure"},
+            "registered_address": {"ref":"stripe.Stripe.Address"},
+            "relationship": {"ref":"stripe.Stripe.Person.Relationship"},
+            "requirements": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.Person.Requirements"},{"dataType":"enum","enums":[null]}]},
+            "ssn_last_4_provided": {"dataType":"boolean"},
+            "verification": {"ref":"stripe.Stripe.Person.Verification"},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Account.Requirements.Alternative": {
+        "dataType": "refObject",
+        "properties": {
+            "alternative_fields_due": {"dataType":"array","array":{"dataType":"string"},"required":true},
+            "original_fields_due": {"dataType":"array","array":{"dataType":"string"},"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Account.Requirements.Error.Code": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["invalid_address_city_state_postal_code"]},{"dataType":"enum","enums":["invalid_address_highway_contract_box"]},{"dataType":"enum","enums":["invalid_address_private_mailbox"]},{"dataType":"enum","enums":["invalid_business_profile_name"]},{"dataType":"enum","enums":["invalid_business_profile_name_denylisted"]},{"dataType":"enum","enums":["invalid_company_name_denylisted"]},{"dataType":"enum","enums":["invalid_dob_age_over_maximum"]},{"dataType":"enum","enums":["invalid_dob_age_under_18"]},{"dataType":"enum","enums":["invalid_dob_age_under_minimum"]},{"dataType":"enum","enums":["invalid_product_description_length"]},{"dataType":"enum","enums":["invalid_product_description_url_match"]},{"dataType":"enum","enums":["invalid_representative_country"]},{"dataType":"enum","enums":["invalid_statement_descriptor_business_mismatch"]},{"dataType":"enum","enums":["invalid_statement_descriptor_denylisted"]},{"dataType":"enum","enums":["invalid_statement_descriptor_length"]},{"dataType":"enum","enums":["invalid_statement_descriptor_prefix_denylisted"]},{"dataType":"enum","enums":["invalid_statement_descriptor_prefix_mismatch"]},{"dataType":"enum","enums":["invalid_street_address"]},{"dataType":"enum","enums":["invalid_tax_id"]},{"dataType":"enum","enums":["invalid_tax_id_format"]},{"dataType":"enum","enums":["invalid_tos_acceptance"]},{"dataType":"enum","enums":["invalid_url_denylisted"]},{"dataType":"enum","enums":["invalid_url_format"]},{"dataType":"enum","enums":["invalid_url_length"]},{"dataType":"enum","enums":["invalid_url_web_presence_detected"]},{"dataType":"enum","enums":["invalid_url_website_business_information_mismatch"]},{"dataType":"enum","enums":["invalid_url_website_empty"]},{"dataType":"enum","enums":["invalid_url_website_inaccessible"]},{"dataType":"enum","enums":["invalid_url_website_inaccessible_geoblocked"]},{"dataType":"enum","enums":["invalid_url_website_inaccessible_password_protected"]},{"dataType":"enum","enums":["invalid_url_website_incomplete"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_cancellation_policy"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_customer_service_details"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_legal_restrictions"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_refund_policy"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_return_policy"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_terms_and_conditions"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_under_construction"]},{"dataType":"enum","enums":["invalid_url_website_other"]},{"dataType":"enum","enums":["invalid_value_other"]},{"dataType":"enum","enums":["verification_directors_mismatch"]},{"dataType":"enum","enums":["verification_document_address_mismatch"]},{"dataType":"enum","enums":["verification_document_address_missing"]},{"dataType":"enum","enums":["verification_document_corrupt"]},{"dataType":"enum","enums":["verification_document_country_not_supported"]},{"dataType":"enum","enums":["verification_document_directors_mismatch"]},{"dataType":"enum","enums":["verification_document_dob_mismatch"]},{"dataType":"enum","enums":["verification_document_duplicate_type"]},{"dataType":"enum","enums":["verification_document_expired"]},{"dataType":"enum","enums":["verification_document_failed_copy"]},{"dataType":"enum","enums":["verification_document_failed_greyscale"]},{"dataType":"enum","enums":["verification_document_failed_other"]},{"dataType":"enum","enums":["verification_document_failed_test_mode"]},{"dataType":"enum","enums":["verification_document_fraudulent"]},{"dataType":"enum","enums":["verification_document_id_number_mismatch"]},{"dataType":"enum","enums":["verification_document_id_number_missing"]},{"dataType":"enum","enums":["verification_document_incomplete"]},{"dataType":"enum","enums":["verification_document_invalid"]},{"dataType":"enum","enums":["verification_document_issue_or_expiry_date_missing"]},{"dataType":"enum","enums":["verification_document_manipulated"]},{"dataType":"enum","enums":["verification_document_missing_back"]},{"dataType":"enum","enums":["verification_document_missing_front"]},{"dataType":"enum","enums":["verification_document_name_mismatch"]},{"dataType":"enum","enums":["verification_document_name_missing"]},{"dataType":"enum","enums":["verification_document_nationality_mismatch"]},{"dataType":"enum","enums":["verification_document_not_readable"]},{"dataType":"enum","enums":["verification_document_not_signed"]},{"dataType":"enum","enums":["verification_document_not_uploaded"]},{"dataType":"enum","enums":["verification_document_photo_mismatch"]},{"dataType":"enum","enums":["verification_document_too_large"]},{"dataType":"enum","enums":["verification_document_type_not_supported"]},{"dataType":"enum","enums":["verification_extraneous_directors"]},{"dataType":"enum","enums":["verification_failed_address_match"]},{"dataType":"enum","enums":["verification_failed_business_iec_number"]},{"dataType":"enum","enums":["verification_failed_document_match"]},{"dataType":"enum","enums":["verification_failed_id_number_match"]},{"dataType":"enum","enums":["verification_failed_keyed_identity"]},{"dataType":"enum","enums":["verification_failed_keyed_match"]},{"dataType":"enum","enums":["verification_failed_name_match"]},{"dataType":"enum","enums":["verification_failed_other"]},{"dataType":"enum","enums":["verification_failed_representative_authority"]},{"dataType":"enum","enums":["verification_failed_residential_address"]},{"dataType":"enum","enums":["verification_failed_tax_id_match"]},{"dataType":"enum","enums":["verification_failed_tax_id_not_issued"]},{"dataType":"enum","enums":["verification_missing_directors"]},{"dataType":"enum","enums":["verification_missing_executives"]},{"dataType":"enum","enums":["verification_missing_owners"]},{"dataType":"enum","enums":["verification_requires_additional_memorandum_of_associations"]},{"dataType":"enum","enums":["verification_requires_additional_proof_of_registration"]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Account.Requirements.Error": {
+        "dataType": "refObject",
+        "properties": {
+            "code": {"ref":"stripe.Stripe.Account.Requirements.Error.Code","required":true},
+            "reason": {"dataType":"string","required":true},
+            "requirement": {"dataType":"string","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Account.Requirements": {
+        "dataType": "refObject",
+        "properties": {
+            "alternatives": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"refObject","ref":"stripe.Stripe.Account.Requirements.Alternative"}},{"dataType":"enum","enums":[null]}],"required":true},
+            "current_deadline": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
+            "currently_due": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"string"}},{"dataType":"enum","enums":[null]}],"required":true},
+            "disabled_reason": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "errors": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"refObject","ref":"stripe.Stripe.Account.Requirements.Error"}},{"dataType":"enum","enums":[null]}],"required":true},
+            "eventually_due": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"string"}},{"dataType":"enum","enums":[null]}],"required":true},
+            "past_due": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"string"}},{"dataType":"enum","enums":[null]}],"required":true},
+            "pending_verification": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"string"}},{"dataType":"enum","enums":[null]}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Account.Settings.BacsDebitPayments": {
+        "dataType": "refObject",
+        "properties": {
+            "display_name": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "service_user_number": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Account.Settings.Branding": {
+        "dataType": "refObject",
+        "properties": {
+            "icon": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.File"},{"dataType":"enum","enums":[null]}],"required":true},
+            "logo": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.File"},{"dataType":"enum","enums":[null]}],"required":true},
+            "primary_color": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "secondary_color": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Account.Settings.CardIssuing.TosAcceptance": {
+        "dataType": "refObject",
+        "properties": {
+            "date": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
+            "ip": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "user_agent": {"dataType":"string"},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Account.Settings.CardIssuing": {
+        "dataType": "refObject",
+        "properties": {
+            "tos_acceptance": {"ref":"stripe.Stripe.Account.Settings.CardIssuing.TosAcceptance"},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Account.Settings.CardPayments.DeclineOn": {
+        "dataType": "refObject",
+        "properties": {
+            "avs_failure": {"dataType":"boolean","required":true},
+            "cvc_failure": {"dataType":"boolean","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Account.Settings.CardPayments": {
+        "dataType": "refObject",
+        "properties": {
+            "decline_on": {"ref":"stripe.Stripe.Account.Settings.CardPayments.DeclineOn"},
+            "statement_descriptor_prefix": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "statement_descriptor_prefix_kana": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "statement_descriptor_prefix_kanji": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Account.Settings.Dashboard": {
+        "dataType": "refObject",
+        "properties": {
+            "display_name": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "timezone": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.TaxId": {
+        "dataType": "refObject",
+        "properties": {
+            "id": {"dataType":"string","required":true},
+            "object": {"dataType":"enum","enums":["tax_id"],"required":true},
+            "country": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "created": {"dataType":"double","required":true},
+            "customer": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Customer"},{"dataType":"enum","enums":[null]}],"required":true},
+            "deleted": {"dataType":"void"},
+            "livemode": {"dataType":"boolean","required":true},
+            "owner": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.TaxId.Owner"},{"dataType":"enum","enums":[null]}],"required":true},
+            "type": {"ref":"stripe.Stripe.TaxId.Type","required":true},
+            "value": {"dataType":"string","required":true},
+            "verification": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.TaxId.Verification"},{"dataType":"enum","enums":[null]}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Account.Settings.Invoices": {
+        "dataType": "refObject",
+        "properties": {
+            "default_account_tax_ids": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.TaxId"}]}},{"dataType":"enum","enums":[null]}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Account.Settings.Payments": {
+        "dataType": "refObject",
+        "properties": {
+            "statement_descriptor": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "statement_descriptor_kana": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "statement_descriptor_kanji": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "statement_descriptor_prefix_kana": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "statement_descriptor_prefix_kanji": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Account.Settings.Payouts.Schedule": {
+        "dataType": "refObject",
+        "properties": {
+            "delay_days": {"dataType":"double","required":true},
+            "interval": {"dataType":"string","required":true},
+            "monthly_anchor": {"dataType":"double"},
+            "weekly_anchor": {"dataType":"string"},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Account.Settings.Payouts": {
+        "dataType": "refObject",
+        "properties": {
+            "debit_negative_balances": {"dataType":"boolean","required":true},
+            "schedule": {"ref":"stripe.Stripe.Account.Settings.Payouts.Schedule","required":true},
+            "statement_descriptor": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Account.Settings.SepaDebitPayments": {
+        "dataType": "refObject",
+        "properties": {
+            "creditor_id": {"dataType":"string"},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Account.Settings.Treasury.TosAcceptance": {
+        "dataType": "refObject",
+        "properties": {
+            "date": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
+            "ip": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "user_agent": {"dataType":"string"},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Account.Settings.Treasury": {
+        "dataType": "refObject",
+        "properties": {
+            "tos_acceptance": {"ref":"stripe.Stripe.Account.Settings.Treasury.TosAcceptance"},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Account.Settings": {
+        "dataType": "refObject",
+        "properties": {
+            "bacs_debit_payments": {"ref":"stripe.Stripe.Account.Settings.BacsDebitPayments"},
+            "branding": {"ref":"stripe.Stripe.Account.Settings.Branding","required":true},
+            "card_issuing": {"ref":"stripe.Stripe.Account.Settings.CardIssuing"},
+            "card_payments": {"ref":"stripe.Stripe.Account.Settings.CardPayments","required":true},
+            "dashboard": {"ref":"stripe.Stripe.Account.Settings.Dashboard","required":true},
+            "invoices": {"ref":"stripe.Stripe.Account.Settings.Invoices"},
+            "payments": {"ref":"stripe.Stripe.Account.Settings.Payments","required":true},
+            "payouts": {"ref":"stripe.Stripe.Account.Settings.Payouts"},
+            "sepa_debit_payments": {"ref":"stripe.Stripe.Account.Settings.SepaDebitPayments"},
+            "treasury": {"ref":"stripe.Stripe.Account.Settings.Treasury"},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Account.TosAcceptance": {
+        "dataType": "refObject",
+        "properties": {
+            "date": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}]},
+            "ip": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
+            "service_agreement": {"dataType":"string"},
+            "user_agent": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Account.Type": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["custom"]},{"dataType":"enum","enums":["express"]},{"dataType":"enum","enums":["none"]},{"dataType":"enum","enums":["standard"]}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "stripe.Stripe.Source.AchCreditTransfer": {
@@ -3716,6 +4252,17 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Application": {
+        "dataType": "refObject",
+        "properties": {
+            "id": {"dataType":"string","required":true},
+            "object": {"dataType":"enum","enums":["application"],"required":true},
+            "deleted": {"dataType":"void"},
+            "name": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "stripe.Stripe.SetupAttempt.FlowDirection": {
         "dataType": "refAlias",
         "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["inbound"]},{"dataType":"enum","enums":["outbound"]}],"validators":{}},
@@ -4326,66 +4873,23 @@ const models: TsoaRoute.Models = {
         "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["automatic"]},{"dataType":"enum","enums":["manual"]}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.TaxId.Owner.Type": {
-        "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["account"]},{"dataType":"enum","enums":["application"]},{"dataType":"enum","enums":["customer"]},{"dataType":"enum","enums":["self"]}],"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.TaxId.Owner": {
-        "dataType": "refObject",
-        "properties": {
-            "account": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Account"}]},
-            "application": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Application"}]},
-            "customer": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Customer"}]},
-            "type": {"ref":"stripe.Stripe.TaxId.Owner.Type","required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.TaxId.Type": {
-        "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["ad_nrt"]},{"dataType":"enum","enums":["ae_trn"]},{"dataType":"enum","enums":["ar_cuit"]},{"dataType":"enum","enums":["au_abn"]},{"dataType":"enum","enums":["au_arn"]},{"dataType":"enum","enums":["bg_uic"]},{"dataType":"enum","enums":["bh_vat"]},{"dataType":"enum","enums":["bo_tin"]},{"dataType":"enum","enums":["br_cnpj"]},{"dataType":"enum","enums":["br_cpf"]},{"dataType":"enum","enums":["ca_bn"]},{"dataType":"enum","enums":["ca_gst_hst"]},{"dataType":"enum","enums":["ca_pst_bc"]},{"dataType":"enum","enums":["ca_pst_mb"]},{"dataType":"enum","enums":["ca_pst_sk"]},{"dataType":"enum","enums":["ca_qst"]},{"dataType":"enum","enums":["ch_uid"]},{"dataType":"enum","enums":["ch_vat"]},{"dataType":"enum","enums":["cl_tin"]},{"dataType":"enum","enums":["cn_tin"]},{"dataType":"enum","enums":["co_nit"]},{"dataType":"enum","enums":["cr_tin"]},{"dataType":"enum","enums":["de_stn"]},{"dataType":"enum","enums":["do_rcn"]},{"dataType":"enum","enums":["ec_ruc"]},{"dataType":"enum","enums":["eg_tin"]},{"dataType":"enum","enums":["es_cif"]},{"dataType":"enum","enums":["eu_oss_vat"]},{"dataType":"enum","enums":["eu_vat"]},{"dataType":"enum","enums":["gb_vat"]},{"dataType":"enum","enums":["ge_vat"]},{"dataType":"enum","enums":["hk_br"]},{"dataType":"enum","enums":["hr_oib"]},{"dataType":"enum","enums":["hu_tin"]},{"dataType":"enum","enums":["id_npwp"]},{"dataType":"enum","enums":["il_vat"]},{"dataType":"enum","enums":["in_gst"]},{"dataType":"enum","enums":["is_vat"]},{"dataType":"enum","enums":["jp_cn"]},{"dataType":"enum","enums":["jp_rn"]},{"dataType":"enum","enums":["jp_trn"]},{"dataType":"enum","enums":["ke_pin"]},{"dataType":"enum","enums":["kr_brn"]},{"dataType":"enum","enums":["kz_bin"]},{"dataType":"enum","enums":["li_uid"]},{"dataType":"enum","enums":["mx_rfc"]},{"dataType":"enum","enums":["my_frp"]},{"dataType":"enum","enums":["my_itn"]},{"dataType":"enum","enums":["my_sst"]},{"dataType":"enum","enums":["ng_tin"]},{"dataType":"enum","enums":["no_vat"]},{"dataType":"enum","enums":["no_voec"]},{"dataType":"enum","enums":["nz_gst"]},{"dataType":"enum","enums":["om_vat"]},{"dataType":"enum","enums":["pe_ruc"]},{"dataType":"enum","enums":["ph_tin"]},{"dataType":"enum","enums":["ro_tin"]},{"dataType":"enum","enums":["rs_pib"]},{"dataType":"enum","enums":["ru_inn"]},{"dataType":"enum","enums":["ru_kpp"]},{"dataType":"enum","enums":["sa_vat"]},{"dataType":"enum","enums":["sg_gst"]},{"dataType":"enum","enums":["sg_uen"]},{"dataType":"enum","enums":["si_tin"]},{"dataType":"enum","enums":["sv_nit"]},{"dataType":"enum","enums":["th_vat"]},{"dataType":"enum","enums":["tr_tin"]},{"dataType":"enum","enums":["tw_vat"]},{"dataType":"enum","enums":["ua_vat"]},{"dataType":"enum","enums":["unknown"]},{"dataType":"enum","enums":["us_ein"]},{"dataType":"enum","enums":["uy_ruc"]},{"dataType":"enum","enums":["ve_rif"]},{"dataType":"enum","enums":["vn_tin"]},{"dataType":"enum","enums":["za_vat"]}],"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.TaxId.Verification.Status": {
-        "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["pending"]},{"dataType":"enum","enums":["unavailable"]},{"dataType":"enum","enums":["unverified"]},{"dataType":"enum","enums":["verified"]}],"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.TaxId.Verification": {
-        "dataType": "refObject",
-        "properties": {
-            "status": {"ref":"stripe.Stripe.TaxId.Verification.Status","required":true},
-            "verified_address": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
-            "verified_name": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.TaxId": {
-        "dataType": "refObject",
-        "properties": {
-            "id": {"dataType":"string","required":true},
-            "object": {"dataType":"enum","enums":["tax_id"],"required":true},
-            "country": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
-            "created": {"dataType":"double","required":true},
-            "customer": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Customer"},{"dataType":"enum","enums":[null]}],"required":true},
-            "deleted": {"dataType":"void"},
-            "livemode": {"dataType":"boolean","required":true},
-            "owner": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.TaxId.Owner"},{"dataType":"enum","enums":[null]}],"required":true},
-            "type": {"ref":"stripe.Stripe.TaxId.Type","required":true},
-            "value": {"dataType":"string","required":true},
-            "verification": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.TaxId.Verification"},{"dataType":"enum","enums":[null]}],"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "stripe.Stripe.DeletedTaxId": {
         "dataType": "refObject",
         "properties": {
             "id": {"dataType":"string","required":true},
             "object": {"dataType":"enum","enums":["tax_id"],"required":true},
             "deleted": {"dataType":"enum","enums":[true],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.DeletedApplication": {
+        "dataType": "refObject",
+        "properties": {
+            "id": {"dataType":"string","required":true},
+            "object": {"dataType":"enum","enums":["application"],"required":true},
+            "deleted": {"dataType":"enum","enums":[true],"required":true},
+            "name": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
         },
         "additionalProperties": false,
     },
@@ -6572,11 +7076,6 @@ const models: TsoaRoute.Models = {
             "three_d_secure": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.Issuing.Authorization.VerificationData.ThreeDSecure"},{"dataType":"enum","enums":[null]}],"required":true},
         },
         "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.ExternalAccount": {
-        "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.BankAccount"},{"ref":"stripe.Stripe.Card"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "stripe.Stripe.DeletedBankAccount": {
@@ -8800,6 +9299,689 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Subscription.AutomaticTax.Liability.Type": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["account"]},{"dataType":"enum","enums":["self"]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Subscription.AutomaticTax.Liability": {
+        "dataType": "refObject",
+        "properties": {
+            "account": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Account"}]},
+            "type": {"ref":"stripe.Stripe.Subscription.AutomaticTax.Liability.Type","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Subscription.AutomaticTax": {
+        "dataType": "refObject",
+        "properties": {
+            "enabled": {"dataType":"boolean","required":true},
+            "liability": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.Subscription.AutomaticTax.Liability"},{"dataType":"enum","enums":[null]}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Subscription.BillingCycleAnchorConfig": {
+        "dataType": "refObject",
+        "properties": {
+            "day_of_month": {"dataType":"double","required":true},
+            "hour": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
+            "minute": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
+            "month": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
+            "second": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Subscription.BillingThresholds": {
+        "dataType": "refObject",
+        "properties": {
+            "amount_gte": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
+            "reset_billing_cycle_anchor": {"dataType":"union","subSchemas":[{"dataType":"boolean"},{"dataType":"enum","enums":[null]}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Subscription.CancellationDetails.Feedback": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["customer_service"]},{"dataType":"enum","enums":["low_quality"]},{"dataType":"enum","enums":["missing_features"]},{"dataType":"enum","enums":["other"]},{"dataType":"enum","enums":["switched_service"]},{"dataType":"enum","enums":["too_complex"]},{"dataType":"enum","enums":["too_expensive"]},{"dataType":"enum","enums":["unused"]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Subscription.CancellationDetails.Reason": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["cancellation_requested"]},{"dataType":"enum","enums":["payment_disputed"]},{"dataType":"enum","enums":["payment_failed"]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Subscription.CancellationDetails": {
+        "dataType": "refObject",
+        "properties": {
+            "comment": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "feedback": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.Subscription.CancellationDetails.Feedback"},{"dataType":"enum","enums":[null]}],"required":true},
+            "reason": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.Subscription.CancellationDetails.Reason"},{"dataType":"enum","enums":[null]}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Subscription.CollectionMethod": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["charge_automatically"]},{"dataType":"enum","enums":["send_invoice"]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Subscription.InvoiceSettings.Issuer.Type": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["account"]},{"dataType":"enum","enums":["self"]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Subscription.InvoiceSettings.Issuer": {
+        "dataType": "refObject",
+        "properties": {
+            "account": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Account"}]},
+            "type": {"ref":"stripe.Stripe.Subscription.InvoiceSettings.Issuer.Type","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Subscription.InvoiceSettings": {
+        "dataType": "refObject",
+        "properties": {
+            "account_tax_ids": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.TaxId"},{"ref":"stripe.Stripe.DeletedTaxId"}]}},{"dataType":"enum","enums":[null]}],"required":true},
+            "issuer": {"ref":"stripe.Stripe.Subscription.InvoiceSettings.Issuer","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.SubscriptionItem.BillingThresholds": {
+        "dataType": "refObject",
+        "properties": {
+            "usage_gte": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.SubscriptionItem": {
+        "dataType": "refObject",
+        "properties": {
+            "id": {"dataType":"string","required":true},
+            "object": {"dataType":"enum","enums":["subscription_item"],"required":true},
+            "billing_thresholds": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.SubscriptionItem.BillingThresholds"},{"dataType":"enum","enums":[null]}],"required":true},
+            "created": {"dataType":"double","required":true},
+            "deleted": {"dataType":"void"},
+            "discounts": {"dataType":"array","array":{"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Discount"}]},"required":true},
+            "metadata": {"ref":"stripe.Stripe.Metadata","required":true},
+            "plan": {"ref":"stripe.Stripe.Plan","required":true},
+            "price": {"ref":"stripe.Stripe.Price","required":true},
+            "quantity": {"dataType":"double"},
+            "subscription": {"dataType":"string","required":true},
+            "tax_rates": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"refObject","ref":"stripe.Stripe.TaxRate"}},{"dataType":"enum","enums":[null]}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.ApiList_stripe.Stripe.SubscriptionItem_": {
+        "dataType": "refObject",
+        "properties": {
+            "object": {"dataType":"enum","enums":["list"],"required":true},
+            "data": {"dataType":"array","array":{"dataType":"refObject","ref":"stripe.Stripe.SubscriptionItem"},"required":true},
+            "has_more": {"dataType":"boolean","required":true},
+            "url": {"dataType":"string","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Subscription.PauseCollection.Behavior": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["keep_as_draft"]},{"dataType":"enum","enums":["mark_uncollectible"]},{"dataType":"enum","enums":["void"]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Subscription.PauseCollection": {
+        "dataType": "refObject",
+        "properties": {
+            "behavior": {"ref":"stripe.Stripe.Subscription.PauseCollection.Behavior","required":true},
+            "resumes_at": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.AcssDebit.MandateOptions.TransactionType": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["business"]},{"dataType":"enum","enums":["personal"]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.AcssDebit.MandateOptions": {
+        "dataType": "refObject",
+        "properties": {
+            "transaction_type": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.AcssDebit.MandateOptions.TransactionType"},{"dataType":"enum","enums":[null]}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.AcssDebit.VerificationMethod": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["automatic"]},{"dataType":"enum","enums":["instant"]},{"dataType":"enum","enums":["microdeposits"]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.AcssDebit": {
+        "dataType": "refObject",
+        "properties": {
+            "mandate_options": {"ref":"stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.AcssDebit.MandateOptions"},
+            "verification_method": {"ref":"stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.AcssDebit.VerificationMethod"},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Bancontact.PreferredLanguage": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["de"]},{"dataType":"enum","enums":["en"]},{"dataType":"enum","enums":["fr"]},{"dataType":"enum","enums":["nl"]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Bancontact": {
+        "dataType": "refObject",
+        "properties": {
+            "preferred_language": {"ref":"stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Bancontact.PreferredLanguage","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Card.MandateOptions.AmountType": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["fixed"]},{"dataType":"enum","enums":["maximum"]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Card.MandateOptions": {
+        "dataType": "refObject",
+        "properties": {
+            "amount": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
+            "amount_type": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Card.MandateOptions.AmountType"},{"dataType":"enum","enums":[null]}],"required":true},
+            "description": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Card.Network": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["amex"]},{"dataType":"enum","enums":["cartes_bancaires"]},{"dataType":"enum","enums":["diners"]},{"dataType":"enum","enums":["discover"]},{"dataType":"enum","enums":["eftpos_au"]},{"dataType":"enum","enums":["girocard"]},{"dataType":"enum","enums":["interac"]},{"dataType":"enum","enums":["jcb"]},{"dataType":"enum","enums":["mastercard"]},{"dataType":"enum","enums":["unionpay"]},{"dataType":"enum","enums":["unknown"]},{"dataType":"enum","enums":["visa"]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Card.RequestThreeDSecure": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["any"]},{"dataType":"enum","enums":["automatic"]},{"dataType":"enum","enums":["challenge"]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Card": {
+        "dataType": "refObject",
+        "properties": {
+            "mandate_options": {"ref":"stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Card.MandateOptions"},
+            "network": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Card.Network"},{"dataType":"enum","enums":[null]}],"required":true},
+            "request_three_d_secure": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Card.RequestThreeDSecure"},{"dataType":"enum","enums":[null]}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.CustomerBalance.BankTransfer.EuBankTransfer.Country": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["BE"]},{"dataType":"enum","enums":["DE"]},{"dataType":"enum","enums":["ES"]},{"dataType":"enum","enums":["FR"]},{"dataType":"enum","enums":["IE"]},{"dataType":"enum","enums":["NL"]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.CustomerBalance.BankTransfer.EuBankTransfer": {
+        "dataType": "refObject",
+        "properties": {
+            "country": {"ref":"stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.CustomerBalance.BankTransfer.EuBankTransfer.Country","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.CustomerBalance.BankTransfer": {
+        "dataType": "refObject",
+        "properties": {
+            "eu_bank_transfer": {"ref":"stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.CustomerBalance.BankTransfer.EuBankTransfer"},
+            "type": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.CustomerBalance": {
+        "dataType": "refObject",
+        "properties": {
+            "bank_transfer": {"ref":"stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.CustomerBalance.BankTransfer"},
+            "funding_type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["bank_transfer"]},{"dataType":"enum","enums":[null]}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Konbini": {
+        "dataType": "refObject",
+        "properties": {
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.SepaDebit": {
+        "dataType": "refObject",
+        "properties": {
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.UsBankAccount.FinancialConnections.Filters.AccountSubcategory": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["checking"]},{"dataType":"enum","enums":["savings"]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.UsBankAccount.FinancialConnections.Filters": {
+        "dataType": "refObject",
+        "properties": {
+            "account_subcategories": {"dataType":"array","array":{"dataType":"refAlias","ref":"stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.UsBankAccount.FinancialConnections.Filters.AccountSubcategory"}},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.UsBankAccount.FinancialConnections.Permission": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["balances"]},{"dataType":"enum","enums":["ownership"]},{"dataType":"enum","enums":["payment_method"]},{"dataType":"enum","enums":["transactions"]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.UsBankAccount.FinancialConnections.Prefetch": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["balances"]},{"dataType":"enum","enums":["ownership"]},{"dataType":"enum","enums":["transactions"]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.UsBankAccount.FinancialConnections": {
+        "dataType": "refObject",
+        "properties": {
+            "filters": {"ref":"stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.UsBankAccount.FinancialConnections.Filters"},
+            "permissions": {"dataType":"array","array":{"dataType":"refAlias","ref":"stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.UsBankAccount.FinancialConnections.Permission"}},
+            "prefetch": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"refAlias","ref":"stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.UsBankAccount.FinancialConnections.Prefetch"}},{"dataType":"enum","enums":[null]}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.UsBankAccount.VerificationMethod": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["automatic"]},{"dataType":"enum","enums":["instant"]},{"dataType":"enum","enums":["microdeposits"]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.UsBankAccount": {
+        "dataType": "refObject",
+        "properties": {
+            "financial_connections": {"ref":"stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.UsBankAccount.FinancialConnections"},
+            "verification_method": {"ref":"stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.UsBankAccount.VerificationMethod"},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions": {
+        "dataType": "refObject",
+        "properties": {
+            "acss_debit": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.AcssDebit"},{"dataType":"enum","enums":[null]}],"required":true},
+            "bancontact": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Bancontact"},{"dataType":"enum","enums":[null]}],"required":true},
+            "card": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Card"},{"dataType":"enum","enums":[null]}],"required":true},
+            "customer_balance": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.CustomerBalance"},{"dataType":"enum","enums":[null]}],"required":true},
+            "konbini": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Konbini"},{"dataType":"enum","enums":[null]}],"required":true},
+            "sepa_debit": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.SepaDebit"},{"dataType":"enum","enums":[null]}],"required":true},
+            "us_bank_account": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.UsBankAccount"},{"dataType":"enum","enums":[null]}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodType": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["ach_credit_transfer"]},{"dataType":"enum","enums":["ach_debit"]},{"dataType":"enum","enums":["acss_debit"]},{"dataType":"enum","enums":["amazon_pay"]},{"dataType":"enum","enums":["au_becs_debit"]},{"dataType":"enum","enums":["bacs_debit"]},{"dataType":"enum","enums":["bancontact"]},{"dataType":"enum","enums":["boleto"]},{"dataType":"enum","enums":["card"]},{"dataType":"enum","enums":["cashapp"]},{"dataType":"enum","enums":["customer_balance"]},{"dataType":"enum","enums":["eps"]},{"dataType":"enum","enums":["fpx"]},{"dataType":"enum","enums":["giropay"]},{"dataType":"enum","enums":["grabpay"]},{"dataType":"enum","enums":["ideal"]},{"dataType":"enum","enums":["konbini"]},{"dataType":"enum","enums":["link"]},{"dataType":"enum","enums":["multibanco"]},{"dataType":"enum","enums":["p24"]},{"dataType":"enum","enums":["paynow"]},{"dataType":"enum","enums":["paypal"]},{"dataType":"enum","enums":["promptpay"]},{"dataType":"enum","enums":["revolut_pay"]},{"dataType":"enum","enums":["sepa_credit_transfer"]},{"dataType":"enum","enums":["sepa_debit"]},{"dataType":"enum","enums":["sofort"]},{"dataType":"enum","enums":["swish"]},{"dataType":"enum","enums":["us_bank_account"]},{"dataType":"enum","enums":["wechat_pay"]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Subscription.PaymentSettings.SaveDefaultPaymentMethod": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["off"]},{"dataType":"enum","enums":["on_subscription"]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Subscription.PaymentSettings": {
+        "dataType": "refObject",
+        "properties": {
+            "payment_method_options": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions"},{"dataType":"enum","enums":[null]}],"required":true},
+            "payment_method_types": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"refAlias","ref":"stripe.Stripe.Subscription.PaymentSettings.PaymentMethodType"}},{"dataType":"enum","enums":[null]}],"required":true},
+            "save_default_payment_method": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.Subscription.PaymentSettings.SaveDefaultPaymentMethod"},{"dataType":"enum","enums":[null]}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Subscription.PendingInvoiceItemInterval.Interval": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["day"]},{"dataType":"enum","enums":["month"]},{"dataType":"enum","enums":["week"]},{"dataType":"enum","enums":["year"]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Subscription.PendingInvoiceItemInterval": {
+        "dataType": "refObject",
+        "properties": {
+            "interval": {"ref":"stripe.Stripe.Subscription.PendingInvoiceItemInterval.Interval","required":true},
+            "interval_count": {"dataType":"double","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Subscription.PendingUpdate": {
+        "dataType": "refObject",
+        "properties": {
+            "billing_cycle_anchor": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
+            "expires_at": {"dataType":"double","required":true},
+            "subscription_items": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"refObject","ref":"stripe.Stripe.SubscriptionItem"}},{"dataType":"enum","enums":[null]}],"required":true},
+            "trial_end": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
+            "trial_from_plan": {"dataType":"union","subSchemas":[{"dataType":"boolean"},{"dataType":"enum","enums":[null]}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.SubscriptionSchedule.CurrentPhase": {
+        "dataType": "refObject",
+        "properties": {
+            "end_date": {"dataType":"double","required":true},
+            "start_date": {"dataType":"double","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.SubscriptionSchedule.DefaultSettings.AutomaticTax.Liability.Type": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["account"]},{"dataType":"enum","enums":["self"]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.SubscriptionSchedule.DefaultSettings.AutomaticTax.Liability": {
+        "dataType": "refObject",
+        "properties": {
+            "account": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Account"}]},
+            "type": {"ref":"stripe.Stripe.SubscriptionSchedule.DefaultSettings.AutomaticTax.Liability.Type","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.SubscriptionSchedule.DefaultSettings.AutomaticTax": {
+        "dataType": "refObject",
+        "properties": {
+            "enabled": {"dataType":"boolean","required":true},
+            "liability": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.SubscriptionSchedule.DefaultSettings.AutomaticTax.Liability"},{"dataType":"enum","enums":[null]}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.SubscriptionSchedule.DefaultSettings.BillingCycleAnchor": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["automatic"]},{"dataType":"enum","enums":["phase_start"]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.SubscriptionSchedule.DefaultSettings.BillingThresholds": {
+        "dataType": "refObject",
+        "properties": {
+            "amount_gte": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
+            "reset_billing_cycle_anchor": {"dataType":"union","subSchemas":[{"dataType":"boolean"},{"dataType":"enum","enums":[null]}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.SubscriptionSchedule.DefaultSettings.CollectionMethod": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["charge_automatically"]},{"dataType":"enum","enums":["send_invoice"]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.SubscriptionSchedule.DefaultSettings.InvoiceSettings.Issuer.Type": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["account"]},{"dataType":"enum","enums":["self"]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.SubscriptionSchedule.DefaultSettings.InvoiceSettings.Issuer": {
+        "dataType": "refObject",
+        "properties": {
+            "account": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Account"}]},
+            "type": {"ref":"stripe.Stripe.SubscriptionSchedule.DefaultSettings.InvoiceSettings.Issuer.Type","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.SubscriptionSchedule.DefaultSettings.InvoiceSettings": {
+        "dataType": "refObject",
+        "properties": {
+            "account_tax_ids": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.TaxId"},{"ref":"stripe.Stripe.DeletedTaxId"}]}},{"dataType":"enum","enums":[null]}],"required":true},
+            "days_until_due": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
+            "issuer": {"ref":"stripe.Stripe.SubscriptionSchedule.DefaultSettings.InvoiceSettings.Issuer","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.SubscriptionSchedule.DefaultSettings.TransferData": {
+        "dataType": "refObject",
+        "properties": {
+            "amount_percent": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
+            "destination": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Account"}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.SubscriptionSchedule.DefaultSettings": {
+        "dataType": "refObject",
+        "properties": {
+            "application_fee_percent": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
+            "automatic_tax": {"ref":"stripe.Stripe.SubscriptionSchedule.DefaultSettings.AutomaticTax"},
+            "billing_cycle_anchor": {"ref":"stripe.Stripe.SubscriptionSchedule.DefaultSettings.BillingCycleAnchor","required":true},
+            "billing_thresholds": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.SubscriptionSchedule.DefaultSettings.BillingThresholds"},{"dataType":"enum","enums":[null]}],"required":true},
+            "collection_method": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.SubscriptionSchedule.DefaultSettings.CollectionMethod"},{"dataType":"enum","enums":[null]}],"required":true},
+            "default_payment_method": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.PaymentMethod"},{"dataType":"enum","enums":[null]}],"required":true},
+            "description": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "invoice_settings": {"ref":"stripe.Stripe.SubscriptionSchedule.DefaultSettings.InvoiceSettings","required":true},
+            "on_behalf_of": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Account"},{"dataType":"enum","enums":[null]}],"required":true},
+            "transfer_data": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.SubscriptionSchedule.DefaultSettings.TransferData"},{"dataType":"enum","enums":[null]}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.SubscriptionSchedule.EndBehavior": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["cancel"]},{"dataType":"enum","enums":["none"]},{"dataType":"enum","enums":["release"]},{"dataType":"enum","enums":["renew"]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.SubscriptionSchedule.Phase.AddInvoiceItem.Discount": {
+        "dataType": "refObject",
+        "properties": {
+            "coupon": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Coupon"},{"dataType":"enum","enums":[null]}],"required":true},
+            "discount": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Discount"},{"dataType":"enum","enums":[null]}],"required":true},
+            "promotion_code": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.PromotionCode"},{"dataType":"enum","enums":[null]}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.DeletedPrice": {
+        "dataType": "refObject",
+        "properties": {
+            "id": {"dataType":"string","required":true},
+            "object": {"dataType":"enum","enums":["price"],"required":true},
+            "deleted": {"dataType":"enum","enums":[true],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.SubscriptionSchedule.Phase.AddInvoiceItem": {
+        "dataType": "refObject",
+        "properties": {
+            "discounts": {"dataType":"array","array":{"dataType":"refObject","ref":"stripe.Stripe.SubscriptionSchedule.Phase.AddInvoiceItem.Discount"},"required":true},
+            "price": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Price"},{"ref":"stripe.Stripe.DeletedPrice"}],"required":true},
+            "quantity": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
+            "tax_rates": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"refObject","ref":"stripe.Stripe.TaxRate"}},{"dataType":"enum","enums":[null]}]},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.SubscriptionSchedule.Phase.AutomaticTax.Liability.Type": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["account"]},{"dataType":"enum","enums":["self"]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.SubscriptionSchedule.Phase.AutomaticTax.Liability": {
+        "dataType": "refObject",
+        "properties": {
+            "account": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Account"}]},
+            "type": {"ref":"stripe.Stripe.SubscriptionSchedule.Phase.AutomaticTax.Liability.Type","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.SubscriptionSchedule.Phase.AutomaticTax": {
+        "dataType": "refObject",
+        "properties": {
+            "enabled": {"dataType":"boolean","required":true},
+            "liability": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.SubscriptionSchedule.Phase.AutomaticTax.Liability"},{"dataType":"enum","enums":[null]}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.SubscriptionSchedule.Phase.BillingCycleAnchor": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["automatic"]},{"dataType":"enum","enums":["phase_start"]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.SubscriptionSchedule.Phase.BillingThresholds": {
+        "dataType": "refObject",
+        "properties": {
+            "amount_gte": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
+            "reset_billing_cycle_anchor": {"dataType":"union","subSchemas":[{"dataType":"boolean"},{"dataType":"enum","enums":[null]}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.SubscriptionSchedule.Phase.CollectionMethod": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["charge_automatically"]},{"dataType":"enum","enums":["send_invoice"]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.DeletedCoupon": {
+        "dataType": "refObject",
+        "properties": {
+            "id": {"dataType":"string","required":true},
+            "object": {"dataType":"enum","enums":["coupon"],"required":true},
+            "deleted": {"dataType":"enum","enums":[true],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.SubscriptionSchedule.Phase.Discount": {
+        "dataType": "refObject",
+        "properties": {
+            "coupon": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Coupon"},{"dataType":"enum","enums":[null]}],"required":true},
+            "discount": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Discount"},{"dataType":"enum","enums":[null]}],"required":true},
+            "promotion_code": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.PromotionCode"},{"dataType":"enum","enums":[null]}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.SubscriptionSchedule.Phase.InvoiceSettings.Issuer.Type": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["account"]},{"dataType":"enum","enums":["self"]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.SubscriptionSchedule.Phase.InvoiceSettings.Issuer": {
+        "dataType": "refObject",
+        "properties": {
+            "account": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Account"}]},
+            "type": {"ref":"stripe.Stripe.SubscriptionSchedule.Phase.InvoiceSettings.Issuer.Type","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.SubscriptionSchedule.Phase.InvoiceSettings": {
+        "dataType": "refObject",
+        "properties": {
+            "account_tax_ids": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.TaxId"},{"ref":"stripe.Stripe.DeletedTaxId"}]}},{"dataType":"enum","enums":[null]}],"required":true},
+            "days_until_due": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
+            "issuer": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.SubscriptionSchedule.Phase.InvoiceSettings.Issuer"},{"dataType":"enum","enums":[null]}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.SubscriptionSchedule.Phase.Item.BillingThresholds": {
+        "dataType": "refObject",
+        "properties": {
+            "usage_gte": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.SubscriptionSchedule.Phase.Item.Discount": {
+        "dataType": "refObject",
+        "properties": {
+            "coupon": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Coupon"},{"dataType":"enum","enums":[null]}],"required":true},
+            "discount": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Discount"},{"dataType":"enum","enums":[null]}],"required":true},
+            "promotion_code": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.PromotionCode"},{"dataType":"enum","enums":[null]}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.DeletedPlan": {
+        "dataType": "refObject",
+        "properties": {
+            "id": {"dataType":"string","required":true},
+            "object": {"dataType":"enum","enums":["plan"],"required":true},
+            "deleted": {"dataType":"enum","enums":[true],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.SubscriptionSchedule.Phase.Item": {
+        "dataType": "refObject",
+        "properties": {
+            "billing_thresholds": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.SubscriptionSchedule.Phase.Item.BillingThresholds"},{"dataType":"enum","enums":[null]}],"required":true},
+            "discounts": {"dataType":"array","array":{"dataType":"refObject","ref":"stripe.Stripe.SubscriptionSchedule.Phase.Item.Discount"},"required":true},
+            "metadata": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.Metadata"},{"dataType":"enum","enums":[null]}],"required":true},
+            "plan": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Plan"},{"ref":"stripe.Stripe.DeletedPlan"}],"required":true},
+            "price": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Price"},{"ref":"stripe.Stripe.DeletedPrice"}],"required":true},
+            "quantity": {"dataType":"double"},
+            "tax_rates": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"refObject","ref":"stripe.Stripe.TaxRate"}},{"dataType":"enum","enums":[null]}]},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.SubscriptionSchedule.Phase.ProrationBehavior": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["always_invoice"]},{"dataType":"enum","enums":["create_prorations"]},{"dataType":"enum","enums":["none"]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.SubscriptionSchedule.Phase.TransferData": {
+        "dataType": "refObject",
+        "properties": {
+            "amount_percent": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
+            "destination": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Account"}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.SubscriptionSchedule.Phase": {
+        "dataType": "refObject",
+        "properties": {
+            "add_invoice_items": {"dataType":"array","array":{"dataType":"refObject","ref":"stripe.Stripe.SubscriptionSchedule.Phase.AddInvoiceItem"},"required":true},
+            "application_fee_percent": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
+            "automatic_tax": {"ref":"stripe.Stripe.SubscriptionSchedule.Phase.AutomaticTax"},
+            "billing_cycle_anchor": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.SubscriptionSchedule.Phase.BillingCycleAnchor"},{"dataType":"enum","enums":[null]}],"required":true},
+            "billing_thresholds": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.SubscriptionSchedule.Phase.BillingThresholds"},{"dataType":"enum","enums":[null]}],"required":true},
+            "collection_method": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.SubscriptionSchedule.Phase.CollectionMethod"},{"dataType":"enum","enums":[null]}],"required":true},
+            "coupon": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Coupon"},{"ref":"stripe.Stripe.DeletedCoupon"},{"dataType":"enum","enums":[null]}],"required":true},
+            "currency": {"dataType":"string","required":true},
+            "default_payment_method": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.PaymentMethod"},{"dataType":"enum","enums":[null]}],"required":true},
+            "default_tax_rates": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"refObject","ref":"stripe.Stripe.TaxRate"}},{"dataType":"enum","enums":[null]}]},
+            "description": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "discounts": {"dataType":"array","array":{"dataType":"refObject","ref":"stripe.Stripe.SubscriptionSchedule.Phase.Discount"},"required":true},
+            "end_date": {"dataType":"double","required":true},
+            "invoice_settings": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.SubscriptionSchedule.Phase.InvoiceSettings"},{"dataType":"enum","enums":[null]}],"required":true},
+            "items": {"dataType":"array","array":{"dataType":"refObject","ref":"stripe.Stripe.SubscriptionSchedule.Phase.Item"},"required":true},
+            "metadata": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.Metadata"},{"dataType":"enum","enums":[null]}],"required":true},
+            "on_behalf_of": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Account"},{"dataType":"enum","enums":[null]}],"required":true},
+            "proration_behavior": {"ref":"stripe.Stripe.SubscriptionSchedule.Phase.ProrationBehavior","required":true},
+            "start_date": {"dataType":"double","required":true},
+            "transfer_data": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.SubscriptionSchedule.Phase.TransferData"},{"dataType":"enum","enums":[null]}],"required":true},
+            "trial_end": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.SubscriptionSchedule.Status": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["active"]},{"dataType":"enum","enums":["canceled"]},{"dataType":"enum","enums":["completed"]},{"dataType":"enum","enums":["not_started"]},{"dataType":"enum","enums":["released"]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "stripe.Stripe.Subscription": {
         "dataType": "refObject",
         "properties": {
@@ -8891,6 +10073,66 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.SubscriptionSchedule": {
+        "dataType": "refObject",
+        "properties": {
+            "id": {"dataType":"string","required":true},
+            "object": {"dataType":"enum","enums":["subscription_schedule"],"required":true},
+            "application": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Application"},{"ref":"stripe.Stripe.DeletedApplication"},{"dataType":"enum","enums":[null]}],"required":true},
+            "canceled_at": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
+            "completed_at": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
+            "created": {"dataType":"double","required":true},
+            "current_phase": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.SubscriptionSchedule.CurrentPhase"},{"dataType":"enum","enums":[null]}],"required":true},
+            "customer": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Customer"},{"ref":"stripe.Stripe.DeletedCustomer"}],"required":true},
+            "default_settings": {"ref":"stripe.Stripe.SubscriptionSchedule.DefaultSettings","required":true},
+            "end_behavior": {"ref":"stripe.Stripe.SubscriptionSchedule.EndBehavior","required":true},
+            "livemode": {"dataType":"boolean","required":true},
+            "metadata": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.Metadata"},{"dataType":"enum","enums":[null]}],"required":true},
+            "phases": {"dataType":"array","array":{"dataType":"refObject","ref":"stripe.Stripe.SubscriptionSchedule.Phase"},"required":true},
+            "released_at": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
+            "released_subscription": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "status": {"ref":"stripe.Stripe.SubscriptionSchedule.Status","required":true},
+            "subscription": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Subscription"},{"dataType":"enum","enums":[null]}],"required":true},
+            "test_clock": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.TestHelpers.TestClock"},{"dataType":"enum","enums":[null]}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Subscription.Status": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["active"]},{"dataType":"enum","enums":["canceled"]},{"dataType":"enum","enums":["incomplete"]},{"dataType":"enum","enums":["incomplete_expired"]},{"dataType":"enum","enums":["past_due"]},{"dataType":"enum","enums":["paused"]},{"dataType":"enum","enums":["trialing"]},{"dataType":"enum","enums":["unpaid"]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Subscription.TransferData": {
+        "dataType": "refObject",
+        "properties": {
+            "amount_percent": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
+            "destination": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Account"}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Subscription.TrialSettings.EndBehavior.MissingPaymentMethod": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["cancel"]},{"dataType":"enum","enums":["create_invoice"]},{"dataType":"enum","enums":["pause"]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Subscription.TrialSettings.EndBehavior": {
+        "dataType": "refObject",
+        "properties": {
+            "missing_payment_method": {"ref":"stripe.Stripe.Subscription.TrialSettings.EndBehavior.MissingPaymentMethod","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.Subscription.TrialSettings": {
+        "dataType": "refObject",
+        "properties": {
+            "end_behavior": {"ref":"stripe.Stripe.Subscription.TrialSettings.EndBehavior","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "stripe.Stripe.InvoiceItem": {
         "dataType": "refObject",
         "properties": {
@@ -8944,33 +10186,6 @@ const models: TsoaRoute.Models = {
         "dataType": "refObject",
         "properties": {
             "credited_items": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.InvoiceLineItem.ProrationDetails.CreditedItems"},{"dataType":"enum","enums":[null]}],"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.SubscriptionItem.BillingThresholds": {
-        "dataType": "refObject",
-        "properties": {
-            "usage_gte": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.SubscriptionItem": {
-        "dataType": "refObject",
-        "properties": {
-            "id": {"dataType":"string","required":true},
-            "object": {"dataType":"enum","enums":["subscription_item"],"required":true},
-            "billing_thresholds": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.SubscriptionItem.BillingThresholds"},{"dataType":"enum","enums":[null]}],"required":true},
-            "created": {"dataType":"double","required":true},
-            "deleted": {"dataType":"void"},
-            "discounts": {"dataType":"array","array":{"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Discount"}]},"required":true},
-            "metadata": {"ref":"stripe.Stripe.Metadata","required":true},
-            "plan": {"ref":"stripe.Stripe.Plan","required":true},
-            "price": {"ref":"stripe.Stripe.Price","required":true},
-            "quantity": {"dataType":"double"},
-            "subscription": {"dataType":"string","required":true},
-            "tax_rates": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"refObject","ref":"stripe.Stripe.TaxRate"}},{"dataType":"enum","enums":[null]}],"required":true},
         },
         "additionalProperties": false,
     },
@@ -9549,343 +10764,6 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.SubscriptionSchedule.CurrentPhase": {
-        "dataType": "refObject",
-        "properties": {
-            "end_date": {"dataType":"double","required":true},
-            "start_date": {"dataType":"double","required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.SubscriptionSchedule.DefaultSettings.AutomaticTax.Liability.Type": {
-        "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["account"]},{"dataType":"enum","enums":["self"]}],"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.SubscriptionSchedule.DefaultSettings.AutomaticTax.Liability": {
-        "dataType": "refObject",
-        "properties": {
-            "account": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Account"}]},
-            "type": {"ref":"stripe.Stripe.SubscriptionSchedule.DefaultSettings.AutomaticTax.Liability.Type","required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.SubscriptionSchedule.DefaultSettings.AutomaticTax": {
-        "dataType": "refObject",
-        "properties": {
-            "enabled": {"dataType":"boolean","required":true},
-            "liability": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.SubscriptionSchedule.DefaultSettings.AutomaticTax.Liability"},{"dataType":"enum","enums":[null]}],"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.SubscriptionSchedule.DefaultSettings.BillingCycleAnchor": {
-        "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["automatic"]},{"dataType":"enum","enums":["phase_start"]}],"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.SubscriptionSchedule.DefaultSettings.BillingThresholds": {
-        "dataType": "refObject",
-        "properties": {
-            "amount_gte": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
-            "reset_billing_cycle_anchor": {"dataType":"union","subSchemas":[{"dataType":"boolean"},{"dataType":"enum","enums":[null]}],"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.SubscriptionSchedule.DefaultSettings.CollectionMethod": {
-        "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["charge_automatically"]},{"dataType":"enum","enums":["send_invoice"]}],"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.SubscriptionSchedule.DefaultSettings.InvoiceSettings.Issuer.Type": {
-        "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["account"]},{"dataType":"enum","enums":["self"]}],"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.SubscriptionSchedule.DefaultSettings.InvoiceSettings.Issuer": {
-        "dataType": "refObject",
-        "properties": {
-            "account": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Account"}]},
-            "type": {"ref":"stripe.Stripe.SubscriptionSchedule.DefaultSettings.InvoiceSettings.Issuer.Type","required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.SubscriptionSchedule.DefaultSettings.InvoiceSettings": {
-        "dataType": "refObject",
-        "properties": {
-            "account_tax_ids": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.TaxId"},{"ref":"stripe.Stripe.DeletedTaxId"}]}},{"dataType":"enum","enums":[null]}],"required":true},
-            "days_until_due": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
-            "issuer": {"ref":"stripe.Stripe.SubscriptionSchedule.DefaultSettings.InvoiceSettings.Issuer","required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.SubscriptionSchedule.DefaultSettings.TransferData": {
-        "dataType": "refObject",
-        "properties": {
-            "amount_percent": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
-            "destination": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Account"}],"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.SubscriptionSchedule.DefaultSettings": {
-        "dataType": "refObject",
-        "properties": {
-            "application_fee_percent": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
-            "automatic_tax": {"ref":"stripe.Stripe.SubscriptionSchedule.DefaultSettings.AutomaticTax"},
-            "billing_cycle_anchor": {"ref":"stripe.Stripe.SubscriptionSchedule.DefaultSettings.BillingCycleAnchor","required":true},
-            "billing_thresholds": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.SubscriptionSchedule.DefaultSettings.BillingThresholds"},{"dataType":"enum","enums":[null]}],"required":true},
-            "collection_method": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.SubscriptionSchedule.DefaultSettings.CollectionMethod"},{"dataType":"enum","enums":[null]}],"required":true},
-            "default_payment_method": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.PaymentMethod"},{"dataType":"enum","enums":[null]}],"required":true},
-            "description": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
-            "invoice_settings": {"ref":"stripe.Stripe.SubscriptionSchedule.DefaultSettings.InvoiceSettings","required":true},
-            "on_behalf_of": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Account"},{"dataType":"enum","enums":[null]}],"required":true},
-            "transfer_data": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.SubscriptionSchedule.DefaultSettings.TransferData"},{"dataType":"enum","enums":[null]}],"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.SubscriptionSchedule.EndBehavior": {
-        "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["cancel"]},{"dataType":"enum","enums":["none"]},{"dataType":"enum","enums":["release"]},{"dataType":"enum","enums":["renew"]}],"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.SubscriptionSchedule.Phase.AddInvoiceItem.Discount": {
-        "dataType": "refObject",
-        "properties": {
-            "coupon": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Coupon"},{"dataType":"enum","enums":[null]}],"required":true},
-            "discount": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Discount"},{"dataType":"enum","enums":[null]}],"required":true},
-            "promotion_code": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.PromotionCode"},{"dataType":"enum","enums":[null]}],"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.DeletedPrice": {
-        "dataType": "refObject",
-        "properties": {
-            "id": {"dataType":"string","required":true},
-            "object": {"dataType":"enum","enums":["price"],"required":true},
-            "deleted": {"dataType":"enum","enums":[true],"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.SubscriptionSchedule.Phase.AddInvoiceItem": {
-        "dataType": "refObject",
-        "properties": {
-            "discounts": {"dataType":"array","array":{"dataType":"refObject","ref":"stripe.Stripe.SubscriptionSchedule.Phase.AddInvoiceItem.Discount"},"required":true},
-            "price": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Price"},{"ref":"stripe.Stripe.DeletedPrice"}],"required":true},
-            "quantity": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
-            "tax_rates": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"refObject","ref":"stripe.Stripe.TaxRate"}},{"dataType":"enum","enums":[null]}]},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.SubscriptionSchedule.Phase.AutomaticTax.Liability.Type": {
-        "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["account"]},{"dataType":"enum","enums":["self"]}],"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.SubscriptionSchedule.Phase.AutomaticTax.Liability": {
-        "dataType": "refObject",
-        "properties": {
-            "account": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Account"}]},
-            "type": {"ref":"stripe.Stripe.SubscriptionSchedule.Phase.AutomaticTax.Liability.Type","required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.SubscriptionSchedule.Phase.AutomaticTax": {
-        "dataType": "refObject",
-        "properties": {
-            "enabled": {"dataType":"boolean","required":true},
-            "liability": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.SubscriptionSchedule.Phase.AutomaticTax.Liability"},{"dataType":"enum","enums":[null]}],"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.SubscriptionSchedule.Phase.BillingCycleAnchor": {
-        "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["automatic"]},{"dataType":"enum","enums":["phase_start"]}],"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.SubscriptionSchedule.Phase.BillingThresholds": {
-        "dataType": "refObject",
-        "properties": {
-            "amount_gte": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
-            "reset_billing_cycle_anchor": {"dataType":"union","subSchemas":[{"dataType":"boolean"},{"dataType":"enum","enums":[null]}],"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.SubscriptionSchedule.Phase.CollectionMethod": {
-        "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["charge_automatically"]},{"dataType":"enum","enums":["send_invoice"]}],"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.DeletedCoupon": {
-        "dataType": "refObject",
-        "properties": {
-            "id": {"dataType":"string","required":true},
-            "object": {"dataType":"enum","enums":["coupon"],"required":true},
-            "deleted": {"dataType":"enum","enums":[true],"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.SubscriptionSchedule.Phase.Discount": {
-        "dataType": "refObject",
-        "properties": {
-            "coupon": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Coupon"},{"dataType":"enum","enums":[null]}],"required":true},
-            "discount": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Discount"},{"dataType":"enum","enums":[null]}],"required":true},
-            "promotion_code": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.PromotionCode"},{"dataType":"enum","enums":[null]}],"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.SubscriptionSchedule.Phase.InvoiceSettings.Issuer.Type": {
-        "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["account"]},{"dataType":"enum","enums":["self"]}],"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.SubscriptionSchedule.Phase.InvoiceSettings.Issuer": {
-        "dataType": "refObject",
-        "properties": {
-            "account": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Account"}]},
-            "type": {"ref":"stripe.Stripe.SubscriptionSchedule.Phase.InvoiceSettings.Issuer.Type","required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.SubscriptionSchedule.Phase.InvoiceSettings": {
-        "dataType": "refObject",
-        "properties": {
-            "account_tax_ids": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.TaxId"},{"ref":"stripe.Stripe.DeletedTaxId"}]}},{"dataType":"enum","enums":[null]}],"required":true},
-            "days_until_due": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
-            "issuer": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.SubscriptionSchedule.Phase.InvoiceSettings.Issuer"},{"dataType":"enum","enums":[null]}],"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.SubscriptionSchedule.Phase.Item.BillingThresholds": {
-        "dataType": "refObject",
-        "properties": {
-            "usage_gte": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.SubscriptionSchedule.Phase.Item.Discount": {
-        "dataType": "refObject",
-        "properties": {
-            "coupon": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Coupon"},{"dataType":"enum","enums":[null]}],"required":true},
-            "discount": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Discount"},{"dataType":"enum","enums":[null]}],"required":true},
-            "promotion_code": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.PromotionCode"},{"dataType":"enum","enums":[null]}],"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.DeletedPlan": {
-        "dataType": "refObject",
-        "properties": {
-            "id": {"dataType":"string","required":true},
-            "object": {"dataType":"enum","enums":["plan"],"required":true},
-            "deleted": {"dataType":"enum","enums":[true],"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.SubscriptionSchedule.Phase.Item": {
-        "dataType": "refObject",
-        "properties": {
-            "billing_thresholds": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.SubscriptionSchedule.Phase.Item.BillingThresholds"},{"dataType":"enum","enums":[null]}],"required":true},
-            "discounts": {"dataType":"array","array":{"dataType":"refObject","ref":"stripe.Stripe.SubscriptionSchedule.Phase.Item.Discount"},"required":true},
-            "metadata": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.Metadata"},{"dataType":"enum","enums":[null]}],"required":true},
-            "plan": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Plan"},{"ref":"stripe.Stripe.DeletedPlan"}],"required":true},
-            "price": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Price"},{"ref":"stripe.Stripe.DeletedPrice"}],"required":true},
-            "quantity": {"dataType":"double"},
-            "tax_rates": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"refObject","ref":"stripe.Stripe.TaxRate"}},{"dataType":"enum","enums":[null]}]},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.SubscriptionSchedule.Phase.ProrationBehavior": {
-        "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["always_invoice"]},{"dataType":"enum","enums":["create_prorations"]},{"dataType":"enum","enums":["none"]}],"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.SubscriptionSchedule.Phase.TransferData": {
-        "dataType": "refObject",
-        "properties": {
-            "amount_percent": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
-            "destination": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Account"}],"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.SubscriptionSchedule.Phase": {
-        "dataType": "refObject",
-        "properties": {
-            "add_invoice_items": {"dataType":"array","array":{"dataType":"refObject","ref":"stripe.Stripe.SubscriptionSchedule.Phase.AddInvoiceItem"},"required":true},
-            "application_fee_percent": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
-            "automatic_tax": {"ref":"stripe.Stripe.SubscriptionSchedule.Phase.AutomaticTax"},
-            "billing_cycle_anchor": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.SubscriptionSchedule.Phase.BillingCycleAnchor"},{"dataType":"enum","enums":[null]}],"required":true},
-            "billing_thresholds": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.SubscriptionSchedule.Phase.BillingThresholds"},{"dataType":"enum","enums":[null]}],"required":true},
-            "collection_method": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.SubscriptionSchedule.Phase.CollectionMethod"},{"dataType":"enum","enums":[null]}],"required":true},
-            "coupon": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Coupon"},{"ref":"stripe.Stripe.DeletedCoupon"},{"dataType":"enum","enums":[null]}],"required":true},
-            "currency": {"dataType":"string","required":true},
-            "default_payment_method": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.PaymentMethod"},{"dataType":"enum","enums":[null]}],"required":true},
-            "default_tax_rates": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"refObject","ref":"stripe.Stripe.TaxRate"}},{"dataType":"enum","enums":[null]}]},
-            "description": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
-            "discounts": {"dataType":"array","array":{"dataType":"refObject","ref":"stripe.Stripe.SubscriptionSchedule.Phase.Discount"},"required":true},
-            "end_date": {"dataType":"double","required":true},
-            "invoice_settings": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.SubscriptionSchedule.Phase.InvoiceSettings"},{"dataType":"enum","enums":[null]}],"required":true},
-            "items": {"dataType":"array","array":{"dataType":"refObject","ref":"stripe.Stripe.SubscriptionSchedule.Phase.Item"},"required":true},
-            "metadata": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.Metadata"},{"dataType":"enum","enums":[null]}],"required":true},
-            "on_behalf_of": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Account"},{"dataType":"enum","enums":[null]}],"required":true},
-            "proration_behavior": {"ref":"stripe.Stripe.SubscriptionSchedule.Phase.ProrationBehavior","required":true},
-            "start_date": {"dataType":"double","required":true},
-            "transfer_data": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.SubscriptionSchedule.Phase.TransferData"},{"dataType":"enum","enums":[null]}],"required":true},
-            "trial_end": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.SubscriptionSchedule.Status": {
-        "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["active"]},{"dataType":"enum","enums":["canceled"]},{"dataType":"enum","enums":["completed"]},{"dataType":"enum","enums":["not_started"]},{"dataType":"enum","enums":["released"]}],"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.SubscriptionSchedule": {
-        "dataType": "refObject",
-        "properties": {
-            "id": {"dataType":"string","required":true},
-            "object": {"dataType":"enum","enums":["subscription_schedule"],"required":true},
-            "application": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Application"},{"ref":"stripe.Stripe.DeletedApplication"},{"dataType":"enum","enums":[null]}],"required":true},
-            "canceled_at": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
-            "completed_at": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
-            "created": {"dataType":"double","required":true},
-            "current_phase": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.SubscriptionSchedule.CurrentPhase"},{"dataType":"enum","enums":[null]}],"required":true},
-            "customer": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Customer"},{"ref":"stripe.Stripe.DeletedCustomer"}],"required":true},
-            "default_settings": {"ref":"stripe.Stripe.SubscriptionSchedule.DefaultSettings","required":true},
-            "end_behavior": {"ref":"stripe.Stripe.SubscriptionSchedule.EndBehavior","required":true},
-            "livemode": {"dataType":"boolean","required":true},
-            "metadata": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.Metadata"},{"dataType":"enum","enums":[null]}],"required":true},
-            "phases": {"dataType":"array","array":{"dataType":"refObject","ref":"stripe.Stripe.SubscriptionSchedule.Phase"},"required":true},
-            "released_at": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
-            "released_subscription": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
-            "status": {"ref":"stripe.Stripe.SubscriptionSchedule.Status","required":true},
-            "subscription": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Subscription"},{"dataType":"enum","enums":[null]}],"required":true},
-            "test_clock": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.TestHelpers.TestClock"},{"dataType":"enum","enums":[null]}],"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "stripe.Stripe.Quote.TotalDetails.Breakdown.Discount": {
         "dataType": "refObject",
         "properties": {
@@ -10086,11 +10964,6 @@ const models: TsoaRoute.Models = {
             "tracking_number": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
         },
         "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Invoice.Status": {
-        "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["draft"]},{"dataType":"enum","enums":["open"]},{"dataType":"enum","enums":["paid"]},{"dataType":"enum","enums":["uncollectible"]},{"dataType":"enum","enums":["void"]}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "stripe.Stripe.Invoice.StatusTransitions": {
@@ -12047,913 +12920,60 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.BankAccount.FutureRequirements.Error.Code": {
+    "stripe.Stripe.TaxId.Owner.Type": {
         "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["invalid_address_city_state_postal_code"]},{"dataType":"enum","enums":["invalid_address_highway_contract_box"]},{"dataType":"enum","enums":["invalid_address_private_mailbox"]},{"dataType":"enum","enums":["invalid_business_profile_name"]},{"dataType":"enum","enums":["invalid_business_profile_name_denylisted"]},{"dataType":"enum","enums":["invalid_company_name_denylisted"]},{"dataType":"enum","enums":["invalid_dob_age_over_maximum"]},{"dataType":"enum","enums":["invalid_dob_age_under_18"]},{"dataType":"enum","enums":["invalid_dob_age_under_minimum"]},{"dataType":"enum","enums":["invalid_product_description_length"]},{"dataType":"enum","enums":["invalid_product_description_url_match"]},{"dataType":"enum","enums":["invalid_representative_country"]},{"dataType":"enum","enums":["invalid_statement_descriptor_business_mismatch"]},{"dataType":"enum","enums":["invalid_statement_descriptor_denylisted"]},{"dataType":"enum","enums":["invalid_statement_descriptor_length"]},{"dataType":"enum","enums":["invalid_statement_descriptor_prefix_denylisted"]},{"dataType":"enum","enums":["invalid_statement_descriptor_prefix_mismatch"]},{"dataType":"enum","enums":["invalid_street_address"]},{"dataType":"enum","enums":["invalid_tax_id"]},{"dataType":"enum","enums":["invalid_tax_id_format"]},{"dataType":"enum","enums":["invalid_tos_acceptance"]},{"dataType":"enum","enums":["invalid_url_denylisted"]},{"dataType":"enum","enums":["invalid_url_format"]},{"dataType":"enum","enums":["invalid_url_length"]},{"dataType":"enum","enums":["invalid_url_web_presence_detected"]},{"dataType":"enum","enums":["invalid_url_website_business_information_mismatch"]},{"dataType":"enum","enums":["invalid_url_website_empty"]},{"dataType":"enum","enums":["invalid_url_website_inaccessible"]},{"dataType":"enum","enums":["invalid_url_website_inaccessible_geoblocked"]},{"dataType":"enum","enums":["invalid_url_website_inaccessible_password_protected"]},{"dataType":"enum","enums":["invalid_url_website_incomplete"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_cancellation_policy"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_customer_service_details"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_legal_restrictions"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_refund_policy"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_return_policy"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_terms_and_conditions"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_under_construction"]},{"dataType":"enum","enums":["invalid_url_website_other"]},{"dataType":"enum","enums":["invalid_value_other"]},{"dataType":"enum","enums":["verification_directors_mismatch"]},{"dataType":"enum","enums":["verification_document_address_mismatch"]},{"dataType":"enum","enums":["verification_document_address_missing"]},{"dataType":"enum","enums":["verification_document_corrupt"]},{"dataType":"enum","enums":["verification_document_country_not_supported"]},{"dataType":"enum","enums":["verification_document_directors_mismatch"]},{"dataType":"enum","enums":["verification_document_dob_mismatch"]},{"dataType":"enum","enums":["verification_document_duplicate_type"]},{"dataType":"enum","enums":["verification_document_expired"]},{"dataType":"enum","enums":["verification_document_failed_copy"]},{"dataType":"enum","enums":["verification_document_failed_greyscale"]},{"dataType":"enum","enums":["verification_document_failed_other"]},{"dataType":"enum","enums":["verification_document_failed_test_mode"]},{"dataType":"enum","enums":["verification_document_fraudulent"]},{"dataType":"enum","enums":["verification_document_id_number_mismatch"]},{"dataType":"enum","enums":["verification_document_id_number_missing"]},{"dataType":"enum","enums":["verification_document_incomplete"]},{"dataType":"enum","enums":["verification_document_invalid"]},{"dataType":"enum","enums":["verification_document_issue_or_expiry_date_missing"]},{"dataType":"enum","enums":["verification_document_manipulated"]},{"dataType":"enum","enums":["verification_document_missing_back"]},{"dataType":"enum","enums":["verification_document_missing_front"]},{"dataType":"enum","enums":["verification_document_name_mismatch"]},{"dataType":"enum","enums":["verification_document_name_missing"]},{"dataType":"enum","enums":["verification_document_nationality_mismatch"]},{"dataType":"enum","enums":["verification_document_not_readable"]},{"dataType":"enum","enums":["verification_document_not_signed"]},{"dataType":"enum","enums":["verification_document_not_uploaded"]},{"dataType":"enum","enums":["verification_document_photo_mismatch"]},{"dataType":"enum","enums":["verification_document_too_large"]},{"dataType":"enum","enums":["verification_document_type_not_supported"]},{"dataType":"enum","enums":["verification_extraneous_directors"]},{"dataType":"enum","enums":["verification_failed_address_match"]},{"dataType":"enum","enums":["verification_failed_business_iec_number"]},{"dataType":"enum","enums":["verification_failed_document_match"]},{"dataType":"enum","enums":["verification_failed_id_number_match"]},{"dataType":"enum","enums":["verification_failed_keyed_identity"]},{"dataType":"enum","enums":["verification_failed_keyed_match"]},{"dataType":"enum","enums":["verification_failed_name_match"]},{"dataType":"enum","enums":["verification_failed_other"]},{"dataType":"enum","enums":["verification_failed_representative_authority"]},{"dataType":"enum","enums":["verification_failed_residential_address"]},{"dataType":"enum","enums":["verification_failed_tax_id_match"]},{"dataType":"enum","enums":["verification_failed_tax_id_not_issued"]},{"dataType":"enum","enums":["verification_missing_directors"]},{"dataType":"enum","enums":["verification_missing_executives"]},{"dataType":"enum","enums":["verification_missing_owners"]},{"dataType":"enum","enums":["verification_requires_additional_memorandum_of_associations"]},{"dataType":"enum","enums":["verification_requires_additional_proof_of_registration"]}],"validators":{}},
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["account"]},{"dataType":"enum","enums":["application"]},{"dataType":"enum","enums":["customer"]},{"dataType":"enum","enums":["self"]}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.BankAccount.FutureRequirements.Error": {
-        "dataType": "refObject",
-        "properties": {
-            "code": {"ref":"stripe.Stripe.BankAccount.FutureRequirements.Error.Code","required":true},
-            "reason": {"dataType":"string","required":true},
-            "requirement": {"dataType":"string","required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.BankAccount.FutureRequirements": {
-        "dataType": "refObject",
-        "properties": {
-            "currently_due": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"string"}},{"dataType":"enum","enums":[null]}],"required":true},
-            "errors": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"refObject","ref":"stripe.Stripe.BankAccount.FutureRequirements.Error"}},{"dataType":"enum","enums":[null]}],"required":true},
-            "past_due": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"string"}},{"dataType":"enum","enums":[null]}],"required":true},
-            "pending_verification": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"string"}},{"dataType":"enum","enums":[null]}],"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.BankAccount.Requirements.Error.Code": {
-        "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["invalid_address_city_state_postal_code"]},{"dataType":"enum","enums":["invalid_address_highway_contract_box"]},{"dataType":"enum","enums":["invalid_address_private_mailbox"]},{"dataType":"enum","enums":["invalid_business_profile_name"]},{"dataType":"enum","enums":["invalid_business_profile_name_denylisted"]},{"dataType":"enum","enums":["invalid_company_name_denylisted"]},{"dataType":"enum","enums":["invalid_dob_age_over_maximum"]},{"dataType":"enum","enums":["invalid_dob_age_under_18"]},{"dataType":"enum","enums":["invalid_dob_age_under_minimum"]},{"dataType":"enum","enums":["invalid_product_description_length"]},{"dataType":"enum","enums":["invalid_product_description_url_match"]},{"dataType":"enum","enums":["invalid_representative_country"]},{"dataType":"enum","enums":["invalid_statement_descriptor_business_mismatch"]},{"dataType":"enum","enums":["invalid_statement_descriptor_denylisted"]},{"dataType":"enum","enums":["invalid_statement_descriptor_length"]},{"dataType":"enum","enums":["invalid_statement_descriptor_prefix_denylisted"]},{"dataType":"enum","enums":["invalid_statement_descriptor_prefix_mismatch"]},{"dataType":"enum","enums":["invalid_street_address"]},{"dataType":"enum","enums":["invalid_tax_id"]},{"dataType":"enum","enums":["invalid_tax_id_format"]},{"dataType":"enum","enums":["invalid_tos_acceptance"]},{"dataType":"enum","enums":["invalid_url_denylisted"]},{"dataType":"enum","enums":["invalid_url_format"]},{"dataType":"enum","enums":["invalid_url_length"]},{"dataType":"enum","enums":["invalid_url_web_presence_detected"]},{"dataType":"enum","enums":["invalid_url_website_business_information_mismatch"]},{"dataType":"enum","enums":["invalid_url_website_empty"]},{"dataType":"enum","enums":["invalid_url_website_inaccessible"]},{"dataType":"enum","enums":["invalid_url_website_inaccessible_geoblocked"]},{"dataType":"enum","enums":["invalid_url_website_inaccessible_password_protected"]},{"dataType":"enum","enums":["invalid_url_website_incomplete"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_cancellation_policy"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_customer_service_details"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_legal_restrictions"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_refund_policy"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_return_policy"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_terms_and_conditions"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_under_construction"]},{"dataType":"enum","enums":["invalid_url_website_other"]},{"dataType":"enum","enums":["invalid_value_other"]},{"dataType":"enum","enums":["verification_directors_mismatch"]},{"dataType":"enum","enums":["verification_document_address_mismatch"]},{"dataType":"enum","enums":["verification_document_address_missing"]},{"dataType":"enum","enums":["verification_document_corrupt"]},{"dataType":"enum","enums":["verification_document_country_not_supported"]},{"dataType":"enum","enums":["verification_document_directors_mismatch"]},{"dataType":"enum","enums":["verification_document_dob_mismatch"]},{"dataType":"enum","enums":["verification_document_duplicate_type"]},{"dataType":"enum","enums":["verification_document_expired"]},{"dataType":"enum","enums":["verification_document_failed_copy"]},{"dataType":"enum","enums":["verification_document_failed_greyscale"]},{"dataType":"enum","enums":["verification_document_failed_other"]},{"dataType":"enum","enums":["verification_document_failed_test_mode"]},{"dataType":"enum","enums":["verification_document_fraudulent"]},{"dataType":"enum","enums":["verification_document_id_number_mismatch"]},{"dataType":"enum","enums":["verification_document_id_number_missing"]},{"dataType":"enum","enums":["verification_document_incomplete"]},{"dataType":"enum","enums":["verification_document_invalid"]},{"dataType":"enum","enums":["verification_document_issue_or_expiry_date_missing"]},{"dataType":"enum","enums":["verification_document_manipulated"]},{"dataType":"enum","enums":["verification_document_missing_back"]},{"dataType":"enum","enums":["verification_document_missing_front"]},{"dataType":"enum","enums":["verification_document_name_mismatch"]},{"dataType":"enum","enums":["verification_document_name_missing"]},{"dataType":"enum","enums":["verification_document_nationality_mismatch"]},{"dataType":"enum","enums":["verification_document_not_readable"]},{"dataType":"enum","enums":["verification_document_not_signed"]},{"dataType":"enum","enums":["verification_document_not_uploaded"]},{"dataType":"enum","enums":["verification_document_photo_mismatch"]},{"dataType":"enum","enums":["verification_document_too_large"]},{"dataType":"enum","enums":["verification_document_type_not_supported"]},{"dataType":"enum","enums":["verification_extraneous_directors"]},{"dataType":"enum","enums":["verification_failed_address_match"]},{"dataType":"enum","enums":["verification_failed_business_iec_number"]},{"dataType":"enum","enums":["verification_failed_document_match"]},{"dataType":"enum","enums":["verification_failed_id_number_match"]},{"dataType":"enum","enums":["verification_failed_keyed_identity"]},{"dataType":"enum","enums":["verification_failed_keyed_match"]},{"dataType":"enum","enums":["verification_failed_name_match"]},{"dataType":"enum","enums":["verification_failed_other"]},{"dataType":"enum","enums":["verification_failed_representative_authority"]},{"dataType":"enum","enums":["verification_failed_residential_address"]},{"dataType":"enum","enums":["verification_failed_tax_id_match"]},{"dataType":"enum","enums":["verification_failed_tax_id_not_issued"]},{"dataType":"enum","enums":["verification_missing_directors"]},{"dataType":"enum","enums":["verification_missing_executives"]},{"dataType":"enum","enums":["verification_missing_owners"]},{"dataType":"enum","enums":["verification_requires_additional_memorandum_of_associations"]},{"dataType":"enum","enums":["verification_requires_additional_proof_of_registration"]}],"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.BankAccount.Requirements.Error": {
-        "dataType": "refObject",
-        "properties": {
-            "code": {"ref":"stripe.Stripe.BankAccount.Requirements.Error.Code","required":true},
-            "reason": {"dataType":"string","required":true},
-            "requirement": {"dataType":"string","required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.BankAccount.Requirements": {
-        "dataType": "refObject",
-        "properties": {
-            "currently_due": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"string"}},{"dataType":"enum","enums":[null]}],"required":true},
-            "errors": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"refObject","ref":"stripe.Stripe.BankAccount.Requirements.Error"}},{"dataType":"enum","enums":[null]}],"required":true},
-            "past_due": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"string"}},{"dataType":"enum","enums":[null]}],"required":true},
-            "pending_verification": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"string"}},{"dataType":"enum","enums":[null]}],"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.ApiList_stripe.Stripe.ExternalAccount_": {
-        "dataType": "refObject",
-        "properties": {
-            "object": {"dataType":"enum","enums":["list"],"required":true},
-            "data": {"dataType":"array","array":{"dataType":"refAlias","ref":"stripe.Stripe.ExternalAccount"},"required":true},
-            "has_more": {"dataType":"boolean","required":true},
-            "url": {"dataType":"string","required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Account.FutureRequirements.Alternative": {
-        "dataType": "refObject",
-        "properties": {
-            "alternative_fields_due": {"dataType":"array","array":{"dataType":"string"},"required":true},
-            "original_fields_due": {"dataType":"array","array":{"dataType":"string"},"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Account.FutureRequirements.Error.Code": {
-        "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["invalid_address_city_state_postal_code"]},{"dataType":"enum","enums":["invalid_address_highway_contract_box"]},{"dataType":"enum","enums":["invalid_address_private_mailbox"]},{"dataType":"enum","enums":["invalid_business_profile_name"]},{"dataType":"enum","enums":["invalid_business_profile_name_denylisted"]},{"dataType":"enum","enums":["invalid_company_name_denylisted"]},{"dataType":"enum","enums":["invalid_dob_age_over_maximum"]},{"dataType":"enum","enums":["invalid_dob_age_under_18"]},{"dataType":"enum","enums":["invalid_dob_age_under_minimum"]},{"dataType":"enum","enums":["invalid_product_description_length"]},{"dataType":"enum","enums":["invalid_product_description_url_match"]},{"dataType":"enum","enums":["invalid_representative_country"]},{"dataType":"enum","enums":["invalid_statement_descriptor_business_mismatch"]},{"dataType":"enum","enums":["invalid_statement_descriptor_denylisted"]},{"dataType":"enum","enums":["invalid_statement_descriptor_length"]},{"dataType":"enum","enums":["invalid_statement_descriptor_prefix_denylisted"]},{"dataType":"enum","enums":["invalid_statement_descriptor_prefix_mismatch"]},{"dataType":"enum","enums":["invalid_street_address"]},{"dataType":"enum","enums":["invalid_tax_id"]},{"dataType":"enum","enums":["invalid_tax_id_format"]},{"dataType":"enum","enums":["invalid_tos_acceptance"]},{"dataType":"enum","enums":["invalid_url_denylisted"]},{"dataType":"enum","enums":["invalid_url_format"]},{"dataType":"enum","enums":["invalid_url_length"]},{"dataType":"enum","enums":["invalid_url_web_presence_detected"]},{"dataType":"enum","enums":["invalid_url_website_business_information_mismatch"]},{"dataType":"enum","enums":["invalid_url_website_empty"]},{"dataType":"enum","enums":["invalid_url_website_inaccessible"]},{"dataType":"enum","enums":["invalid_url_website_inaccessible_geoblocked"]},{"dataType":"enum","enums":["invalid_url_website_inaccessible_password_protected"]},{"dataType":"enum","enums":["invalid_url_website_incomplete"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_cancellation_policy"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_customer_service_details"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_legal_restrictions"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_refund_policy"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_return_policy"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_terms_and_conditions"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_under_construction"]},{"dataType":"enum","enums":["invalid_url_website_other"]},{"dataType":"enum","enums":["invalid_value_other"]},{"dataType":"enum","enums":["verification_directors_mismatch"]},{"dataType":"enum","enums":["verification_document_address_mismatch"]},{"dataType":"enum","enums":["verification_document_address_missing"]},{"dataType":"enum","enums":["verification_document_corrupt"]},{"dataType":"enum","enums":["verification_document_country_not_supported"]},{"dataType":"enum","enums":["verification_document_directors_mismatch"]},{"dataType":"enum","enums":["verification_document_dob_mismatch"]},{"dataType":"enum","enums":["verification_document_duplicate_type"]},{"dataType":"enum","enums":["verification_document_expired"]},{"dataType":"enum","enums":["verification_document_failed_copy"]},{"dataType":"enum","enums":["verification_document_failed_greyscale"]},{"dataType":"enum","enums":["verification_document_failed_other"]},{"dataType":"enum","enums":["verification_document_failed_test_mode"]},{"dataType":"enum","enums":["verification_document_fraudulent"]},{"dataType":"enum","enums":["verification_document_id_number_mismatch"]},{"dataType":"enum","enums":["verification_document_id_number_missing"]},{"dataType":"enum","enums":["verification_document_incomplete"]},{"dataType":"enum","enums":["verification_document_invalid"]},{"dataType":"enum","enums":["verification_document_issue_or_expiry_date_missing"]},{"dataType":"enum","enums":["verification_document_manipulated"]},{"dataType":"enum","enums":["verification_document_missing_back"]},{"dataType":"enum","enums":["verification_document_missing_front"]},{"dataType":"enum","enums":["verification_document_name_mismatch"]},{"dataType":"enum","enums":["verification_document_name_missing"]},{"dataType":"enum","enums":["verification_document_nationality_mismatch"]},{"dataType":"enum","enums":["verification_document_not_readable"]},{"dataType":"enum","enums":["verification_document_not_signed"]},{"dataType":"enum","enums":["verification_document_not_uploaded"]},{"dataType":"enum","enums":["verification_document_photo_mismatch"]},{"dataType":"enum","enums":["verification_document_too_large"]},{"dataType":"enum","enums":["verification_document_type_not_supported"]},{"dataType":"enum","enums":["verification_extraneous_directors"]},{"dataType":"enum","enums":["verification_failed_address_match"]},{"dataType":"enum","enums":["verification_failed_business_iec_number"]},{"dataType":"enum","enums":["verification_failed_document_match"]},{"dataType":"enum","enums":["verification_failed_id_number_match"]},{"dataType":"enum","enums":["verification_failed_keyed_identity"]},{"dataType":"enum","enums":["verification_failed_keyed_match"]},{"dataType":"enum","enums":["verification_failed_name_match"]},{"dataType":"enum","enums":["verification_failed_other"]},{"dataType":"enum","enums":["verification_failed_representative_authority"]},{"dataType":"enum","enums":["verification_failed_residential_address"]},{"dataType":"enum","enums":["verification_failed_tax_id_match"]},{"dataType":"enum","enums":["verification_failed_tax_id_not_issued"]},{"dataType":"enum","enums":["verification_missing_directors"]},{"dataType":"enum","enums":["verification_missing_executives"]},{"dataType":"enum","enums":["verification_missing_owners"]},{"dataType":"enum","enums":["verification_requires_additional_memorandum_of_associations"]},{"dataType":"enum","enums":["verification_requires_additional_proof_of_registration"]}],"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Account.FutureRequirements.Error": {
-        "dataType": "refObject",
-        "properties": {
-            "code": {"ref":"stripe.Stripe.Account.FutureRequirements.Error.Code","required":true},
-            "reason": {"dataType":"string","required":true},
-            "requirement": {"dataType":"string","required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Account.FutureRequirements": {
-        "dataType": "refObject",
-        "properties": {
-            "alternatives": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"refObject","ref":"stripe.Stripe.Account.FutureRequirements.Alternative"}},{"dataType":"enum","enums":[null]}],"required":true},
-            "current_deadline": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
-            "currently_due": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"string"}},{"dataType":"enum","enums":[null]}],"required":true},
-            "disabled_reason": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
-            "errors": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"refObject","ref":"stripe.Stripe.Account.FutureRequirements.Error"}},{"dataType":"enum","enums":[null]}],"required":true},
-            "eventually_due": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"string"}},{"dataType":"enum","enums":[null]}],"required":true},
-            "past_due": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"string"}},{"dataType":"enum","enums":[null]}],"required":true},
-            "pending_verification": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"string"}},{"dataType":"enum","enums":[null]}],"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Person.AdditionalTosAcceptances.Account": {
-        "dataType": "refObject",
-        "properties": {
-            "date": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
-            "ip": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
-            "user_agent": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Person.AdditionalTosAcceptances": {
-        "dataType": "refObject",
-        "properties": {
-            "account": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.Person.AdditionalTosAcceptances.Account"},{"dataType":"enum","enums":[null]}],"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Person.AddressKana": {
-        "dataType": "refObject",
-        "properties": {
-            "city": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
-            "country": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
-            "line1": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
-            "line2": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
-            "postal_code": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
-            "state": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
-            "town": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Person.AddressKanji": {
-        "dataType": "refObject",
-        "properties": {
-            "city": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
-            "country": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
-            "line1": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
-            "line2": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
-            "postal_code": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
-            "state": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
-            "town": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Person.Dob": {
-        "dataType": "refObject",
-        "properties": {
-            "day": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
-            "month": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
-            "year": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Person.FutureRequirements.Alternative": {
-        "dataType": "refObject",
-        "properties": {
-            "alternative_fields_due": {"dataType":"array","array":{"dataType":"string"},"required":true},
-            "original_fields_due": {"dataType":"array","array":{"dataType":"string"},"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Person.FutureRequirements.Error.Code": {
-        "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["invalid_address_city_state_postal_code"]},{"dataType":"enum","enums":["invalid_address_highway_contract_box"]},{"dataType":"enum","enums":["invalid_address_private_mailbox"]},{"dataType":"enum","enums":["invalid_business_profile_name"]},{"dataType":"enum","enums":["invalid_business_profile_name_denylisted"]},{"dataType":"enum","enums":["invalid_company_name_denylisted"]},{"dataType":"enum","enums":["invalid_dob_age_over_maximum"]},{"dataType":"enum","enums":["invalid_dob_age_under_18"]},{"dataType":"enum","enums":["invalid_dob_age_under_minimum"]},{"dataType":"enum","enums":["invalid_product_description_length"]},{"dataType":"enum","enums":["invalid_product_description_url_match"]},{"dataType":"enum","enums":["invalid_representative_country"]},{"dataType":"enum","enums":["invalid_statement_descriptor_business_mismatch"]},{"dataType":"enum","enums":["invalid_statement_descriptor_denylisted"]},{"dataType":"enum","enums":["invalid_statement_descriptor_length"]},{"dataType":"enum","enums":["invalid_statement_descriptor_prefix_denylisted"]},{"dataType":"enum","enums":["invalid_statement_descriptor_prefix_mismatch"]},{"dataType":"enum","enums":["invalid_street_address"]},{"dataType":"enum","enums":["invalid_tax_id"]},{"dataType":"enum","enums":["invalid_tax_id_format"]},{"dataType":"enum","enums":["invalid_tos_acceptance"]},{"dataType":"enum","enums":["invalid_url_denylisted"]},{"dataType":"enum","enums":["invalid_url_format"]},{"dataType":"enum","enums":["invalid_url_length"]},{"dataType":"enum","enums":["invalid_url_web_presence_detected"]},{"dataType":"enum","enums":["invalid_url_website_business_information_mismatch"]},{"dataType":"enum","enums":["invalid_url_website_empty"]},{"dataType":"enum","enums":["invalid_url_website_inaccessible"]},{"dataType":"enum","enums":["invalid_url_website_inaccessible_geoblocked"]},{"dataType":"enum","enums":["invalid_url_website_inaccessible_password_protected"]},{"dataType":"enum","enums":["invalid_url_website_incomplete"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_cancellation_policy"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_customer_service_details"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_legal_restrictions"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_refund_policy"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_return_policy"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_terms_and_conditions"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_under_construction"]},{"dataType":"enum","enums":["invalid_url_website_other"]},{"dataType":"enum","enums":["invalid_value_other"]},{"dataType":"enum","enums":["verification_directors_mismatch"]},{"dataType":"enum","enums":["verification_document_address_mismatch"]},{"dataType":"enum","enums":["verification_document_address_missing"]},{"dataType":"enum","enums":["verification_document_corrupt"]},{"dataType":"enum","enums":["verification_document_country_not_supported"]},{"dataType":"enum","enums":["verification_document_directors_mismatch"]},{"dataType":"enum","enums":["verification_document_dob_mismatch"]},{"dataType":"enum","enums":["verification_document_duplicate_type"]},{"dataType":"enum","enums":["verification_document_expired"]},{"dataType":"enum","enums":["verification_document_failed_copy"]},{"dataType":"enum","enums":["verification_document_failed_greyscale"]},{"dataType":"enum","enums":["verification_document_failed_other"]},{"dataType":"enum","enums":["verification_document_failed_test_mode"]},{"dataType":"enum","enums":["verification_document_fraudulent"]},{"dataType":"enum","enums":["verification_document_id_number_mismatch"]},{"dataType":"enum","enums":["verification_document_id_number_missing"]},{"dataType":"enum","enums":["verification_document_incomplete"]},{"dataType":"enum","enums":["verification_document_invalid"]},{"dataType":"enum","enums":["verification_document_issue_or_expiry_date_missing"]},{"dataType":"enum","enums":["verification_document_manipulated"]},{"dataType":"enum","enums":["verification_document_missing_back"]},{"dataType":"enum","enums":["verification_document_missing_front"]},{"dataType":"enum","enums":["verification_document_name_mismatch"]},{"dataType":"enum","enums":["verification_document_name_missing"]},{"dataType":"enum","enums":["verification_document_nationality_mismatch"]},{"dataType":"enum","enums":["verification_document_not_readable"]},{"dataType":"enum","enums":["verification_document_not_signed"]},{"dataType":"enum","enums":["verification_document_not_uploaded"]},{"dataType":"enum","enums":["verification_document_photo_mismatch"]},{"dataType":"enum","enums":["verification_document_too_large"]},{"dataType":"enum","enums":["verification_document_type_not_supported"]},{"dataType":"enum","enums":["verification_extraneous_directors"]},{"dataType":"enum","enums":["verification_failed_address_match"]},{"dataType":"enum","enums":["verification_failed_business_iec_number"]},{"dataType":"enum","enums":["verification_failed_document_match"]},{"dataType":"enum","enums":["verification_failed_id_number_match"]},{"dataType":"enum","enums":["verification_failed_keyed_identity"]},{"dataType":"enum","enums":["verification_failed_keyed_match"]},{"dataType":"enum","enums":["verification_failed_name_match"]},{"dataType":"enum","enums":["verification_failed_other"]},{"dataType":"enum","enums":["verification_failed_representative_authority"]},{"dataType":"enum","enums":["verification_failed_residential_address"]},{"dataType":"enum","enums":["verification_failed_tax_id_match"]},{"dataType":"enum","enums":["verification_failed_tax_id_not_issued"]},{"dataType":"enum","enums":["verification_missing_directors"]},{"dataType":"enum","enums":["verification_missing_executives"]},{"dataType":"enum","enums":["verification_missing_owners"]},{"dataType":"enum","enums":["verification_requires_additional_memorandum_of_associations"]},{"dataType":"enum","enums":["verification_requires_additional_proof_of_registration"]}],"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Person.FutureRequirements.Error": {
-        "dataType": "refObject",
-        "properties": {
-            "code": {"ref":"stripe.Stripe.Person.FutureRequirements.Error.Code","required":true},
-            "reason": {"dataType":"string","required":true},
-            "requirement": {"dataType":"string","required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Person.FutureRequirements": {
-        "dataType": "refObject",
-        "properties": {
-            "alternatives": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"refObject","ref":"stripe.Stripe.Person.FutureRequirements.Alternative"}},{"dataType":"enum","enums":[null]}],"required":true},
-            "currently_due": {"dataType":"array","array":{"dataType":"string"},"required":true},
-            "errors": {"dataType":"array","array":{"dataType":"refObject","ref":"stripe.Stripe.Person.FutureRequirements.Error"},"required":true},
-            "eventually_due": {"dataType":"array","array":{"dataType":"string"},"required":true},
-            "past_due": {"dataType":"array","array":{"dataType":"string"},"required":true},
-            "pending_verification": {"dataType":"array","array":{"dataType":"string"},"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Person.PoliticalExposure": {
-        "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["existing"]},{"dataType":"enum","enums":["none"]}],"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Person.Relationship": {
-        "dataType": "refObject",
-        "properties": {
-            "director": {"dataType":"union","subSchemas":[{"dataType":"boolean"},{"dataType":"enum","enums":[null]}],"required":true},
-            "executive": {"dataType":"union","subSchemas":[{"dataType":"boolean"},{"dataType":"enum","enums":[null]}],"required":true},
-            "legal_guardian": {"dataType":"union","subSchemas":[{"dataType":"boolean"},{"dataType":"enum","enums":[null]}],"required":true},
-            "owner": {"dataType":"union","subSchemas":[{"dataType":"boolean"},{"dataType":"enum","enums":[null]}],"required":true},
-            "percent_ownership": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
-            "representative": {"dataType":"union","subSchemas":[{"dataType":"boolean"},{"dataType":"enum","enums":[null]}],"required":true},
-            "title": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Person.Requirements.Alternative": {
-        "dataType": "refObject",
-        "properties": {
-            "alternative_fields_due": {"dataType":"array","array":{"dataType":"string"},"required":true},
-            "original_fields_due": {"dataType":"array","array":{"dataType":"string"},"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Person.Requirements.Error.Code": {
-        "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["invalid_address_city_state_postal_code"]},{"dataType":"enum","enums":["invalid_address_highway_contract_box"]},{"dataType":"enum","enums":["invalid_address_private_mailbox"]},{"dataType":"enum","enums":["invalid_business_profile_name"]},{"dataType":"enum","enums":["invalid_business_profile_name_denylisted"]},{"dataType":"enum","enums":["invalid_company_name_denylisted"]},{"dataType":"enum","enums":["invalid_dob_age_over_maximum"]},{"dataType":"enum","enums":["invalid_dob_age_under_18"]},{"dataType":"enum","enums":["invalid_dob_age_under_minimum"]},{"dataType":"enum","enums":["invalid_product_description_length"]},{"dataType":"enum","enums":["invalid_product_description_url_match"]},{"dataType":"enum","enums":["invalid_representative_country"]},{"dataType":"enum","enums":["invalid_statement_descriptor_business_mismatch"]},{"dataType":"enum","enums":["invalid_statement_descriptor_denylisted"]},{"dataType":"enum","enums":["invalid_statement_descriptor_length"]},{"dataType":"enum","enums":["invalid_statement_descriptor_prefix_denylisted"]},{"dataType":"enum","enums":["invalid_statement_descriptor_prefix_mismatch"]},{"dataType":"enum","enums":["invalid_street_address"]},{"dataType":"enum","enums":["invalid_tax_id"]},{"dataType":"enum","enums":["invalid_tax_id_format"]},{"dataType":"enum","enums":["invalid_tos_acceptance"]},{"dataType":"enum","enums":["invalid_url_denylisted"]},{"dataType":"enum","enums":["invalid_url_format"]},{"dataType":"enum","enums":["invalid_url_length"]},{"dataType":"enum","enums":["invalid_url_web_presence_detected"]},{"dataType":"enum","enums":["invalid_url_website_business_information_mismatch"]},{"dataType":"enum","enums":["invalid_url_website_empty"]},{"dataType":"enum","enums":["invalid_url_website_inaccessible"]},{"dataType":"enum","enums":["invalid_url_website_inaccessible_geoblocked"]},{"dataType":"enum","enums":["invalid_url_website_inaccessible_password_protected"]},{"dataType":"enum","enums":["invalid_url_website_incomplete"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_cancellation_policy"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_customer_service_details"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_legal_restrictions"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_refund_policy"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_return_policy"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_terms_and_conditions"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_under_construction"]},{"dataType":"enum","enums":["invalid_url_website_other"]},{"dataType":"enum","enums":["invalid_value_other"]},{"dataType":"enum","enums":["verification_directors_mismatch"]},{"dataType":"enum","enums":["verification_document_address_mismatch"]},{"dataType":"enum","enums":["verification_document_address_missing"]},{"dataType":"enum","enums":["verification_document_corrupt"]},{"dataType":"enum","enums":["verification_document_country_not_supported"]},{"dataType":"enum","enums":["verification_document_directors_mismatch"]},{"dataType":"enum","enums":["verification_document_dob_mismatch"]},{"dataType":"enum","enums":["verification_document_duplicate_type"]},{"dataType":"enum","enums":["verification_document_expired"]},{"dataType":"enum","enums":["verification_document_failed_copy"]},{"dataType":"enum","enums":["verification_document_failed_greyscale"]},{"dataType":"enum","enums":["verification_document_failed_other"]},{"dataType":"enum","enums":["verification_document_failed_test_mode"]},{"dataType":"enum","enums":["verification_document_fraudulent"]},{"dataType":"enum","enums":["verification_document_id_number_mismatch"]},{"dataType":"enum","enums":["verification_document_id_number_missing"]},{"dataType":"enum","enums":["verification_document_incomplete"]},{"dataType":"enum","enums":["verification_document_invalid"]},{"dataType":"enum","enums":["verification_document_issue_or_expiry_date_missing"]},{"dataType":"enum","enums":["verification_document_manipulated"]},{"dataType":"enum","enums":["verification_document_missing_back"]},{"dataType":"enum","enums":["verification_document_missing_front"]},{"dataType":"enum","enums":["verification_document_name_mismatch"]},{"dataType":"enum","enums":["verification_document_name_missing"]},{"dataType":"enum","enums":["verification_document_nationality_mismatch"]},{"dataType":"enum","enums":["verification_document_not_readable"]},{"dataType":"enum","enums":["verification_document_not_signed"]},{"dataType":"enum","enums":["verification_document_not_uploaded"]},{"dataType":"enum","enums":["verification_document_photo_mismatch"]},{"dataType":"enum","enums":["verification_document_too_large"]},{"dataType":"enum","enums":["verification_document_type_not_supported"]},{"dataType":"enum","enums":["verification_extraneous_directors"]},{"dataType":"enum","enums":["verification_failed_address_match"]},{"dataType":"enum","enums":["verification_failed_business_iec_number"]},{"dataType":"enum","enums":["verification_failed_document_match"]},{"dataType":"enum","enums":["verification_failed_id_number_match"]},{"dataType":"enum","enums":["verification_failed_keyed_identity"]},{"dataType":"enum","enums":["verification_failed_keyed_match"]},{"dataType":"enum","enums":["verification_failed_name_match"]},{"dataType":"enum","enums":["verification_failed_other"]},{"dataType":"enum","enums":["verification_failed_representative_authority"]},{"dataType":"enum","enums":["verification_failed_residential_address"]},{"dataType":"enum","enums":["verification_failed_tax_id_match"]},{"dataType":"enum","enums":["verification_failed_tax_id_not_issued"]},{"dataType":"enum","enums":["verification_missing_directors"]},{"dataType":"enum","enums":["verification_missing_executives"]},{"dataType":"enum","enums":["verification_missing_owners"]},{"dataType":"enum","enums":["verification_requires_additional_memorandum_of_associations"]},{"dataType":"enum","enums":["verification_requires_additional_proof_of_registration"]}],"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Person.Requirements.Error": {
-        "dataType": "refObject",
-        "properties": {
-            "code": {"ref":"stripe.Stripe.Person.Requirements.Error.Code","required":true},
-            "reason": {"dataType":"string","required":true},
-            "requirement": {"dataType":"string","required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Person.Requirements": {
-        "dataType": "refObject",
-        "properties": {
-            "alternatives": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"refObject","ref":"stripe.Stripe.Person.Requirements.Alternative"}},{"dataType":"enum","enums":[null]}],"required":true},
-            "currently_due": {"dataType":"array","array":{"dataType":"string"},"required":true},
-            "errors": {"dataType":"array","array":{"dataType":"refObject","ref":"stripe.Stripe.Person.Requirements.Error"},"required":true},
-            "eventually_due": {"dataType":"array","array":{"dataType":"string"},"required":true},
-            "past_due": {"dataType":"array","array":{"dataType":"string"},"required":true},
-            "pending_verification": {"dataType":"array","array":{"dataType":"string"},"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Person.Verification.AdditionalDocument": {
-        "dataType": "refObject",
-        "properties": {
-            "back": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.File"},{"dataType":"enum","enums":[null]}],"required":true},
-            "details": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
-            "details_code": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
-            "front": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.File"},{"dataType":"enum","enums":[null]}],"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Person.Verification.Document": {
-        "dataType": "refObject",
-        "properties": {
-            "back": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.File"},{"dataType":"enum","enums":[null]}],"required":true},
-            "details": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
-            "details_code": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
-            "front": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.File"},{"dataType":"enum","enums":[null]}],"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Person.Verification": {
-        "dataType": "refObject",
-        "properties": {
-            "additional_document": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.Person.Verification.AdditionalDocument"},{"dataType":"enum","enums":[null]}]},
-            "details": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
-            "details_code": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
-            "document": {"ref":"stripe.Stripe.Person.Verification.Document"},
-            "status": {"dataType":"string","required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Person": {
-        "dataType": "refObject",
-        "properties": {
-            "id": {"dataType":"string","required":true},
-            "object": {"dataType":"enum","enums":["person"],"required":true},
-            "account": {"dataType":"string","required":true},
-            "additional_tos_acceptances": {"ref":"stripe.Stripe.Person.AdditionalTosAcceptances"},
-            "address": {"ref":"stripe.Stripe.Address"},
-            "address_kana": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.Person.AddressKana"},{"dataType":"enum","enums":[null]}]},
-            "address_kanji": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.Person.AddressKanji"},{"dataType":"enum","enums":[null]}]},
-            "created": {"dataType":"double","required":true},
-            "deleted": {"dataType":"void"},
-            "dob": {"ref":"stripe.Stripe.Person.Dob"},
-            "email": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
-            "first_name": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
-            "first_name_kana": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
-            "first_name_kanji": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
-            "full_name_aliases": {"dataType":"array","array":{"dataType":"string"}},
-            "future_requirements": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.Person.FutureRequirements"},{"dataType":"enum","enums":[null]}]},
-            "gender": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
-            "id_number_provided": {"dataType":"boolean"},
-            "id_number_secondary_provided": {"dataType":"boolean"},
-            "last_name": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
-            "last_name_kana": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
-            "last_name_kanji": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
-            "maiden_name": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
-            "metadata": {"ref":"stripe.Stripe.Metadata"},
-            "nationality": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
-            "phone": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
-            "political_exposure": {"ref":"stripe.Stripe.Person.PoliticalExposure"},
-            "registered_address": {"ref":"stripe.Stripe.Address"},
-            "relationship": {"ref":"stripe.Stripe.Person.Relationship"},
-            "requirements": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.Person.Requirements"},{"dataType":"enum","enums":[null]}]},
-            "ssn_last_4_provided": {"dataType":"boolean"},
-            "verification": {"ref":"stripe.Stripe.Person.Verification"},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Account.Requirements.Alternative": {
-        "dataType": "refObject",
-        "properties": {
-            "alternative_fields_due": {"dataType":"array","array":{"dataType":"string"},"required":true},
-            "original_fields_due": {"dataType":"array","array":{"dataType":"string"},"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Account.Requirements.Error.Code": {
-        "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["invalid_address_city_state_postal_code"]},{"dataType":"enum","enums":["invalid_address_highway_contract_box"]},{"dataType":"enum","enums":["invalid_address_private_mailbox"]},{"dataType":"enum","enums":["invalid_business_profile_name"]},{"dataType":"enum","enums":["invalid_business_profile_name_denylisted"]},{"dataType":"enum","enums":["invalid_company_name_denylisted"]},{"dataType":"enum","enums":["invalid_dob_age_over_maximum"]},{"dataType":"enum","enums":["invalid_dob_age_under_18"]},{"dataType":"enum","enums":["invalid_dob_age_under_minimum"]},{"dataType":"enum","enums":["invalid_product_description_length"]},{"dataType":"enum","enums":["invalid_product_description_url_match"]},{"dataType":"enum","enums":["invalid_representative_country"]},{"dataType":"enum","enums":["invalid_statement_descriptor_business_mismatch"]},{"dataType":"enum","enums":["invalid_statement_descriptor_denylisted"]},{"dataType":"enum","enums":["invalid_statement_descriptor_length"]},{"dataType":"enum","enums":["invalid_statement_descriptor_prefix_denylisted"]},{"dataType":"enum","enums":["invalid_statement_descriptor_prefix_mismatch"]},{"dataType":"enum","enums":["invalid_street_address"]},{"dataType":"enum","enums":["invalid_tax_id"]},{"dataType":"enum","enums":["invalid_tax_id_format"]},{"dataType":"enum","enums":["invalid_tos_acceptance"]},{"dataType":"enum","enums":["invalid_url_denylisted"]},{"dataType":"enum","enums":["invalid_url_format"]},{"dataType":"enum","enums":["invalid_url_length"]},{"dataType":"enum","enums":["invalid_url_web_presence_detected"]},{"dataType":"enum","enums":["invalid_url_website_business_information_mismatch"]},{"dataType":"enum","enums":["invalid_url_website_empty"]},{"dataType":"enum","enums":["invalid_url_website_inaccessible"]},{"dataType":"enum","enums":["invalid_url_website_inaccessible_geoblocked"]},{"dataType":"enum","enums":["invalid_url_website_inaccessible_password_protected"]},{"dataType":"enum","enums":["invalid_url_website_incomplete"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_cancellation_policy"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_customer_service_details"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_legal_restrictions"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_refund_policy"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_return_policy"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_terms_and_conditions"]},{"dataType":"enum","enums":["invalid_url_website_incomplete_under_construction"]},{"dataType":"enum","enums":["invalid_url_website_other"]},{"dataType":"enum","enums":["invalid_value_other"]},{"dataType":"enum","enums":["verification_directors_mismatch"]},{"dataType":"enum","enums":["verification_document_address_mismatch"]},{"dataType":"enum","enums":["verification_document_address_missing"]},{"dataType":"enum","enums":["verification_document_corrupt"]},{"dataType":"enum","enums":["verification_document_country_not_supported"]},{"dataType":"enum","enums":["verification_document_directors_mismatch"]},{"dataType":"enum","enums":["verification_document_dob_mismatch"]},{"dataType":"enum","enums":["verification_document_duplicate_type"]},{"dataType":"enum","enums":["verification_document_expired"]},{"dataType":"enum","enums":["verification_document_failed_copy"]},{"dataType":"enum","enums":["verification_document_failed_greyscale"]},{"dataType":"enum","enums":["verification_document_failed_other"]},{"dataType":"enum","enums":["verification_document_failed_test_mode"]},{"dataType":"enum","enums":["verification_document_fraudulent"]},{"dataType":"enum","enums":["verification_document_id_number_mismatch"]},{"dataType":"enum","enums":["verification_document_id_number_missing"]},{"dataType":"enum","enums":["verification_document_incomplete"]},{"dataType":"enum","enums":["verification_document_invalid"]},{"dataType":"enum","enums":["verification_document_issue_or_expiry_date_missing"]},{"dataType":"enum","enums":["verification_document_manipulated"]},{"dataType":"enum","enums":["verification_document_missing_back"]},{"dataType":"enum","enums":["verification_document_missing_front"]},{"dataType":"enum","enums":["verification_document_name_mismatch"]},{"dataType":"enum","enums":["verification_document_name_missing"]},{"dataType":"enum","enums":["verification_document_nationality_mismatch"]},{"dataType":"enum","enums":["verification_document_not_readable"]},{"dataType":"enum","enums":["verification_document_not_signed"]},{"dataType":"enum","enums":["verification_document_not_uploaded"]},{"dataType":"enum","enums":["verification_document_photo_mismatch"]},{"dataType":"enum","enums":["verification_document_too_large"]},{"dataType":"enum","enums":["verification_document_type_not_supported"]},{"dataType":"enum","enums":["verification_extraneous_directors"]},{"dataType":"enum","enums":["verification_failed_address_match"]},{"dataType":"enum","enums":["verification_failed_business_iec_number"]},{"dataType":"enum","enums":["verification_failed_document_match"]},{"dataType":"enum","enums":["verification_failed_id_number_match"]},{"dataType":"enum","enums":["verification_failed_keyed_identity"]},{"dataType":"enum","enums":["verification_failed_keyed_match"]},{"dataType":"enum","enums":["verification_failed_name_match"]},{"dataType":"enum","enums":["verification_failed_other"]},{"dataType":"enum","enums":["verification_failed_representative_authority"]},{"dataType":"enum","enums":["verification_failed_residential_address"]},{"dataType":"enum","enums":["verification_failed_tax_id_match"]},{"dataType":"enum","enums":["verification_failed_tax_id_not_issued"]},{"dataType":"enum","enums":["verification_missing_directors"]},{"dataType":"enum","enums":["verification_missing_executives"]},{"dataType":"enum","enums":["verification_missing_owners"]},{"dataType":"enum","enums":["verification_requires_additional_memorandum_of_associations"]},{"dataType":"enum","enums":["verification_requires_additional_proof_of_registration"]}],"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Account.Requirements.Error": {
-        "dataType": "refObject",
-        "properties": {
-            "code": {"ref":"stripe.Stripe.Account.Requirements.Error.Code","required":true},
-            "reason": {"dataType":"string","required":true},
-            "requirement": {"dataType":"string","required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Account.Requirements": {
-        "dataType": "refObject",
-        "properties": {
-            "alternatives": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"refObject","ref":"stripe.Stripe.Account.Requirements.Alternative"}},{"dataType":"enum","enums":[null]}],"required":true},
-            "current_deadline": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
-            "currently_due": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"string"}},{"dataType":"enum","enums":[null]}],"required":true},
-            "disabled_reason": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
-            "errors": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"refObject","ref":"stripe.Stripe.Account.Requirements.Error"}},{"dataType":"enum","enums":[null]}],"required":true},
-            "eventually_due": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"string"}},{"dataType":"enum","enums":[null]}],"required":true},
-            "past_due": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"string"}},{"dataType":"enum","enums":[null]}],"required":true},
-            "pending_verification": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"string"}},{"dataType":"enum","enums":[null]}],"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Account.Settings.BacsDebitPayments": {
-        "dataType": "refObject",
-        "properties": {
-            "display_name": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
-            "service_user_number": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Account.Settings.Branding": {
-        "dataType": "refObject",
-        "properties": {
-            "icon": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.File"},{"dataType":"enum","enums":[null]}],"required":true},
-            "logo": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.File"},{"dataType":"enum","enums":[null]}],"required":true},
-            "primary_color": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
-            "secondary_color": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Account.Settings.CardIssuing.TosAcceptance": {
-        "dataType": "refObject",
-        "properties": {
-            "date": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
-            "ip": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
-            "user_agent": {"dataType":"string"},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Account.Settings.CardIssuing": {
-        "dataType": "refObject",
-        "properties": {
-            "tos_acceptance": {"ref":"stripe.Stripe.Account.Settings.CardIssuing.TosAcceptance"},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Account.Settings.CardPayments.DeclineOn": {
-        "dataType": "refObject",
-        "properties": {
-            "avs_failure": {"dataType":"boolean","required":true},
-            "cvc_failure": {"dataType":"boolean","required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Account.Settings.CardPayments": {
-        "dataType": "refObject",
-        "properties": {
-            "decline_on": {"ref":"stripe.Stripe.Account.Settings.CardPayments.DeclineOn"},
-            "statement_descriptor_prefix": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
-            "statement_descriptor_prefix_kana": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
-            "statement_descriptor_prefix_kanji": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Account.Settings.Dashboard": {
-        "dataType": "refObject",
-        "properties": {
-            "display_name": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
-            "timezone": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Account.Settings.Invoices": {
-        "dataType": "refObject",
-        "properties": {
-            "default_account_tax_ids": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.TaxId"}]}},{"dataType":"enum","enums":[null]}],"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Account.Settings.Payments": {
-        "dataType": "refObject",
-        "properties": {
-            "statement_descriptor": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
-            "statement_descriptor_kana": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
-            "statement_descriptor_kanji": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
-            "statement_descriptor_prefix_kana": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
-            "statement_descriptor_prefix_kanji": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Account.Settings.Payouts.Schedule": {
-        "dataType": "refObject",
-        "properties": {
-            "delay_days": {"dataType":"double","required":true},
-            "interval": {"dataType":"string","required":true},
-            "monthly_anchor": {"dataType":"double"},
-            "weekly_anchor": {"dataType":"string"},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Account.Settings.Payouts": {
-        "dataType": "refObject",
-        "properties": {
-            "debit_negative_balances": {"dataType":"boolean","required":true},
-            "schedule": {"ref":"stripe.Stripe.Account.Settings.Payouts.Schedule","required":true},
-            "statement_descriptor": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Account.Settings.SepaDebitPayments": {
-        "dataType": "refObject",
-        "properties": {
-            "creditor_id": {"dataType":"string"},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Account.Settings.Treasury.TosAcceptance": {
-        "dataType": "refObject",
-        "properties": {
-            "date": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
-            "ip": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
-            "user_agent": {"dataType":"string"},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Account.Settings.Treasury": {
-        "dataType": "refObject",
-        "properties": {
-            "tos_acceptance": {"ref":"stripe.Stripe.Account.Settings.Treasury.TosAcceptance"},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Account.Settings": {
-        "dataType": "refObject",
-        "properties": {
-            "bacs_debit_payments": {"ref":"stripe.Stripe.Account.Settings.BacsDebitPayments"},
-            "branding": {"ref":"stripe.Stripe.Account.Settings.Branding","required":true},
-            "card_issuing": {"ref":"stripe.Stripe.Account.Settings.CardIssuing"},
-            "card_payments": {"ref":"stripe.Stripe.Account.Settings.CardPayments","required":true},
-            "dashboard": {"ref":"stripe.Stripe.Account.Settings.Dashboard","required":true},
-            "invoices": {"ref":"stripe.Stripe.Account.Settings.Invoices"},
-            "payments": {"ref":"stripe.Stripe.Account.Settings.Payments","required":true},
-            "payouts": {"ref":"stripe.Stripe.Account.Settings.Payouts"},
-            "sepa_debit_payments": {"ref":"stripe.Stripe.Account.Settings.SepaDebitPayments"},
-            "treasury": {"ref":"stripe.Stripe.Account.Settings.Treasury"},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Account.TosAcceptance": {
-        "dataType": "refObject",
-        "properties": {
-            "date": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}]},
-            "ip": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
-            "service_agreement": {"dataType":"string"},
-            "user_agent": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Account.Type": {
-        "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["custom"]},{"dataType":"enum","enums":["express"]},{"dataType":"enum","enums":["none"]},{"dataType":"enum","enums":["standard"]}],"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Subscription.AutomaticTax.Liability.Type": {
-        "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["account"]},{"dataType":"enum","enums":["self"]}],"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Subscription.AutomaticTax.Liability": {
+    "stripe.Stripe.TaxId.Owner": {
         "dataType": "refObject",
         "properties": {
             "account": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Account"}]},
-            "type": {"ref":"stripe.Stripe.Subscription.AutomaticTax.Liability.Type","required":true},
+            "application": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Application"}]},
+            "customer": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Customer"}]},
+            "type": {"ref":"stripe.Stripe.TaxId.Owner.Type","required":true},
         },
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Subscription.AutomaticTax": {
-        "dataType": "refObject",
-        "properties": {
-            "enabled": {"dataType":"boolean","required":true},
-            "liability": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.Subscription.AutomaticTax.Liability"},{"dataType":"enum","enums":[null]}],"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Subscription.BillingCycleAnchorConfig": {
-        "dataType": "refObject",
-        "properties": {
-            "day_of_month": {"dataType":"double","required":true},
-            "hour": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
-            "minute": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
-            "month": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
-            "second": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Subscription.BillingThresholds": {
-        "dataType": "refObject",
-        "properties": {
-            "amount_gte": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
-            "reset_billing_cycle_anchor": {"dataType":"union","subSchemas":[{"dataType":"boolean"},{"dataType":"enum","enums":[null]}],"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Subscription.CancellationDetails.Feedback": {
+    "stripe.Stripe.TaxId.Type": {
         "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["customer_service"]},{"dataType":"enum","enums":["low_quality"]},{"dataType":"enum","enums":["missing_features"]},{"dataType":"enum","enums":["other"]},{"dataType":"enum","enums":["switched_service"]},{"dataType":"enum","enums":["too_complex"]},{"dataType":"enum","enums":["too_expensive"]},{"dataType":"enum","enums":["unused"]}],"validators":{}},
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["ad_nrt"]},{"dataType":"enum","enums":["ae_trn"]},{"dataType":"enum","enums":["ar_cuit"]},{"dataType":"enum","enums":["au_abn"]},{"dataType":"enum","enums":["au_arn"]},{"dataType":"enum","enums":["bg_uic"]},{"dataType":"enum","enums":["bh_vat"]},{"dataType":"enum","enums":["bo_tin"]},{"dataType":"enum","enums":["br_cnpj"]},{"dataType":"enum","enums":["br_cpf"]},{"dataType":"enum","enums":["ca_bn"]},{"dataType":"enum","enums":["ca_gst_hst"]},{"dataType":"enum","enums":["ca_pst_bc"]},{"dataType":"enum","enums":["ca_pst_mb"]},{"dataType":"enum","enums":["ca_pst_sk"]},{"dataType":"enum","enums":["ca_qst"]},{"dataType":"enum","enums":["ch_uid"]},{"dataType":"enum","enums":["ch_vat"]},{"dataType":"enum","enums":["cl_tin"]},{"dataType":"enum","enums":["cn_tin"]},{"dataType":"enum","enums":["co_nit"]},{"dataType":"enum","enums":["cr_tin"]},{"dataType":"enum","enums":["de_stn"]},{"dataType":"enum","enums":["do_rcn"]},{"dataType":"enum","enums":["ec_ruc"]},{"dataType":"enum","enums":["eg_tin"]},{"dataType":"enum","enums":["es_cif"]},{"dataType":"enum","enums":["eu_oss_vat"]},{"dataType":"enum","enums":["eu_vat"]},{"dataType":"enum","enums":["gb_vat"]},{"dataType":"enum","enums":["ge_vat"]},{"dataType":"enum","enums":["hk_br"]},{"dataType":"enum","enums":["hr_oib"]},{"dataType":"enum","enums":["hu_tin"]},{"dataType":"enum","enums":["id_npwp"]},{"dataType":"enum","enums":["il_vat"]},{"dataType":"enum","enums":["in_gst"]},{"dataType":"enum","enums":["is_vat"]},{"dataType":"enum","enums":["jp_cn"]},{"dataType":"enum","enums":["jp_rn"]},{"dataType":"enum","enums":["jp_trn"]},{"dataType":"enum","enums":["ke_pin"]},{"dataType":"enum","enums":["kr_brn"]},{"dataType":"enum","enums":["kz_bin"]},{"dataType":"enum","enums":["li_uid"]},{"dataType":"enum","enums":["mx_rfc"]},{"dataType":"enum","enums":["my_frp"]},{"dataType":"enum","enums":["my_itn"]},{"dataType":"enum","enums":["my_sst"]},{"dataType":"enum","enums":["ng_tin"]},{"dataType":"enum","enums":["no_vat"]},{"dataType":"enum","enums":["no_voec"]},{"dataType":"enum","enums":["nz_gst"]},{"dataType":"enum","enums":["om_vat"]},{"dataType":"enum","enums":["pe_ruc"]},{"dataType":"enum","enums":["ph_tin"]},{"dataType":"enum","enums":["ro_tin"]},{"dataType":"enum","enums":["rs_pib"]},{"dataType":"enum","enums":["ru_inn"]},{"dataType":"enum","enums":["ru_kpp"]},{"dataType":"enum","enums":["sa_vat"]},{"dataType":"enum","enums":["sg_gst"]},{"dataType":"enum","enums":["sg_uen"]},{"dataType":"enum","enums":["si_tin"]},{"dataType":"enum","enums":["sv_nit"]},{"dataType":"enum","enums":["th_vat"]},{"dataType":"enum","enums":["tr_tin"]},{"dataType":"enum","enums":["tw_vat"]},{"dataType":"enum","enums":["ua_vat"]},{"dataType":"enum","enums":["unknown"]},{"dataType":"enum","enums":["us_ein"]},{"dataType":"enum","enums":["uy_ruc"]},{"dataType":"enum","enums":["ve_rif"]},{"dataType":"enum","enums":["vn_tin"]},{"dataType":"enum","enums":["za_vat"]}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Subscription.CancellationDetails.Reason": {
+    "stripe.Stripe.TaxId.Verification.Status": {
         "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["cancellation_requested"]},{"dataType":"enum","enums":["payment_disputed"]},{"dataType":"enum","enums":["payment_failed"]}],"validators":{}},
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["pending"]},{"dataType":"enum","enums":["unavailable"]},{"dataType":"enum","enums":["unverified"]},{"dataType":"enum","enums":["verified"]}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Subscription.CancellationDetails": {
+    "stripe.Stripe.TaxId.Verification": {
         "dataType": "refObject",
         "properties": {
-            "comment": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
-            "feedback": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.Subscription.CancellationDetails.Feedback"},{"dataType":"enum","enums":[null]}],"required":true},
-            "reason": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.Subscription.CancellationDetails.Reason"},{"dataType":"enum","enums":[null]}],"required":true},
+            "status": {"ref":"stripe.Stripe.TaxId.Verification.Status","required":true},
+            "verified_address": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "verified_name": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
         },
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Subscription.CollectionMethod": {
+    "Pick_stripe.Stripe.Invoice.Exclude_keyofstripe.Stripe.Invoice.id__": {
         "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["charge_automatically"]},{"dataType":"enum","enums":["send_invoice"]}],"validators":{}},
+        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"number":{"dataType":"string","required":true},"object":{"dataType":"enum","enums":["invoice"],"required":true},"status":{"ref":"stripe.Stripe.Invoice.Status","required":true},"account_country":{"dataType":"string","required":true},"account_name":{"dataType":"string","required":true},"account_tax_ids":{"dataType":"array","array":{"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.TaxId"},{"ref":"stripe.Stripe.DeletedTaxId"}]},"required":true},"amount_due":{"dataType":"double","required":true},"amount_paid":{"dataType":"double","required":true},"amount_remaining":{"dataType":"double","required":true},"amount_shipping":{"dataType":"double","required":true},"application":{"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Application"},{"ref":"stripe.Stripe.DeletedApplication"}],"required":true},"application_fee_amount":{"dataType":"double","required":true},"attempt_count":{"dataType":"double","required":true},"attempted":{"dataType":"boolean","required":true},"auto_advance":{"dataType":"boolean"},"automatic_tax":{"ref":"stripe.Stripe.Invoice.AutomaticTax","required":true},"billing_reason":{"ref":"stripe.Stripe.Invoice.BillingReason","required":true},"charge":{"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Charge"}],"required":true},"collection_method":{"ref":"stripe.Stripe.Invoice.CollectionMethod","required":true},"created":{"dataType":"double","required":true},"currency":{"dataType":"string","required":true},"custom_fields":{"dataType":"array","array":{"dataType":"refObject","ref":"stripe.Stripe.Invoice.CustomField"},"required":true},"customer":{"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Customer"},{"ref":"stripe.Stripe.DeletedCustomer"}],"required":true},"customer_address":{"ref":"stripe.Stripe.Address","required":true},"customer_email":{"dataType":"string","required":true},"customer_name":{"dataType":"string","required":true},"customer_phone":{"dataType":"string","required":true},"customer_shipping":{"ref":"stripe.Stripe.Invoice.CustomerShipping","required":true},"customer_tax_exempt":{"ref":"stripe.Stripe.Invoice.CustomerTaxExempt","required":true},"customer_tax_ids":{"dataType":"array","array":{"dataType":"refObject","ref":"stripe.Stripe.Invoice.CustomerTaxId"}},"default_payment_method":{"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.PaymentMethod"}],"required":true},"default_source":{"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.CustomerSource"}],"required":true},"default_tax_rates":{"dataType":"array","array":{"dataType":"refObject","ref":"stripe.Stripe.TaxRate"},"required":true},"deleted":{"dataType":"void"},"description":{"dataType":"string","required":true},"discount":{"ref":"stripe.Stripe.Discount","required":true},"discounts":{"dataType":"array","array":{"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Discount"},{"ref":"stripe.Stripe.DeletedDiscount"}]},"required":true},"due_date":{"dataType":"double","required":true},"effective_at":{"dataType":"double","required":true},"ending_balance":{"dataType":"double","required":true},"footer":{"dataType":"string","required":true},"from_invoice":{"ref":"stripe.Stripe.Invoice.FromInvoice","required":true},"hosted_invoice_url":{"dataType":"string"},"invoice_pdf":{"dataType":"string"},"issuer":{"ref":"stripe.Stripe.Invoice.Issuer","required":true},"last_finalization_error":{"ref":"stripe.Stripe.Invoice.LastFinalizationError","required":true},"latest_revision":{"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Invoice"}],"required":true},"lines":{"ref":"stripe.Stripe.ApiList_stripe.Stripe.InvoiceLineItem_","required":true},"livemode":{"dataType":"boolean","required":true},"metadata":{"ref":"stripe.Stripe.Metadata","required":true},"next_payment_attempt":{"dataType":"double","required":true},"on_behalf_of":{"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Account"}],"required":true},"paid":{"dataType":"boolean","required":true},"paid_out_of_band":{"dataType":"boolean","required":true},"payment_intent":{"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.PaymentIntent"}],"required":true},"payment_settings":{"ref":"stripe.Stripe.Invoice.PaymentSettings","required":true},"period_end":{"dataType":"double","required":true},"period_start":{"dataType":"double","required":true},"post_payment_credit_notes_amount":{"dataType":"double","required":true},"pre_payment_credit_notes_amount":{"dataType":"double","required":true},"quote":{"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Quote"}],"required":true},"receipt_number":{"dataType":"string","required":true},"rendering":{"ref":"stripe.Stripe.Invoice.Rendering","required":true},"shipping_cost":{"ref":"stripe.Stripe.Invoice.ShippingCost","required":true},"shipping_details":{"ref":"stripe.Stripe.Invoice.ShippingDetails","required":true},"starting_balance":{"dataType":"double","required":true},"statement_descriptor":{"dataType":"string","required":true},"status_transitions":{"ref":"stripe.Stripe.Invoice.StatusTransitions","required":true},"subscription":{"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Subscription"}],"required":true},"subscription_details":{"ref":"stripe.Stripe.Invoice.SubscriptionDetails","required":true},"subscription_proration_date":{"dataType":"double"},"subtotal":{"dataType":"double","required":true},"subtotal_excluding_tax":{"dataType":"double","required":true},"tax":{"dataType":"double","required":true},"test_clock":{"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.TestHelpers.TestClock"}],"required":true},"threshold_reason":{"ref":"stripe.Stripe.Invoice.ThresholdReason"},"total":{"dataType":"double","required":true},"total_discount_amounts":{"dataType":"array","array":{"dataType":"refObject","ref":"stripe.Stripe.Invoice.TotalDiscountAmount"},"required":true},"total_excluding_tax":{"dataType":"double","required":true},"total_tax_amounts":{"dataType":"array","array":{"dataType":"refObject","ref":"stripe.Stripe.Invoice.TotalTaxAmount"},"required":true},"transfer_data":{"ref":"stripe.Stripe.Invoice.TransferData","required":true},"webhooks_delivered_at":{"dataType":"double","required":true}},"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Subscription.InvoiceSettings.Issuer.Type": {
+    "Omit_stripe.Stripe.Invoice.id_": {
         "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["account"]},{"dataType":"enum","enums":["self"]}],"validators":{}},
+        "type": {"ref":"Pick_stripe.Stripe.Invoice.Exclude_keyofstripe.Stripe.Invoice.id__","validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Subscription.InvoiceSettings.Issuer": {
-        "dataType": "refObject",
-        "properties": {
-            "account": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Account"}]},
-            "type": {"ref":"stripe.Stripe.Subscription.InvoiceSettings.Issuer.Type","required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Subscription.InvoiceSettings": {
-        "dataType": "refObject",
-        "properties": {
-            "account_tax_ids": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.TaxId"},{"ref":"stripe.Stripe.DeletedTaxId"}]}},{"dataType":"enum","enums":[null]}],"required":true},
-            "issuer": {"ref":"stripe.Stripe.Subscription.InvoiceSettings.Issuer","required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.ApiList_stripe.Stripe.SubscriptionItem_": {
-        "dataType": "refObject",
-        "properties": {
-            "object": {"dataType":"enum","enums":["list"],"required":true},
-            "data": {"dataType":"array","array":{"dataType":"refObject","ref":"stripe.Stripe.SubscriptionItem"},"required":true},
-            "has_more": {"dataType":"boolean","required":true},
-            "url": {"dataType":"string","required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Subscription.PauseCollection.Behavior": {
+    "stripe.Stripe.UpcomingInvoice": {
         "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["keep_as_draft"]},{"dataType":"enum","enums":["mark_uncollectible"]},{"dataType":"enum","enums":["void"]}],"validators":{}},
+        "type": {"ref":"Omit_stripe.Stripe.Invoice.id_","validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Subscription.PauseCollection": {
-        "dataType": "refObject",
-        "properties": {
-            "behavior": {"ref":"stripe.Stripe.Subscription.PauseCollection.Behavior","required":true},
-            "resumes_at": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.AcssDebit.MandateOptions.TransactionType": {
+    "stripe.Stripe.Response_stripe.Stripe.UpcomingInvoice_": {
         "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["business"]},{"dataType":"enum","enums":["personal"]}],"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.AcssDebit.MandateOptions": {
-        "dataType": "refObject",
-        "properties": {
-            "transaction_type": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.AcssDebit.MandateOptions.TransactionType"},{"dataType":"enum","enums":[null]}],"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.AcssDebit.VerificationMethod": {
-        "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["automatic"]},{"dataType":"enum","enums":["instant"]},{"dataType":"enum","enums":["microdeposits"]}],"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.AcssDebit": {
-        "dataType": "refObject",
-        "properties": {
-            "mandate_options": {"ref":"stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.AcssDebit.MandateOptions"},
-            "verification_method": {"ref":"stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.AcssDebit.VerificationMethod"},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Bancontact.PreferredLanguage": {
-        "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["de"]},{"dataType":"enum","enums":["en"]},{"dataType":"enum","enums":["fr"]},{"dataType":"enum","enums":["nl"]}],"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Bancontact": {
-        "dataType": "refObject",
-        "properties": {
-            "preferred_language": {"ref":"stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Bancontact.PreferredLanguage","required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Card.MandateOptions.AmountType": {
-        "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["fixed"]},{"dataType":"enum","enums":["maximum"]}],"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Card.MandateOptions": {
-        "dataType": "refObject",
-        "properties": {
-            "amount": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
-            "amount_type": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Card.MandateOptions.AmountType"},{"dataType":"enum","enums":[null]}],"required":true},
-            "description": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Card.Network": {
-        "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["amex"]},{"dataType":"enum","enums":["cartes_bancaires"]},{"dataType":"enum","enums":["diners"]},{"dataType":"enum","enums":["discover"]},{"dataType":"enum","enums":["eftpos_au"]},{"dataType":"enum","enums":["girocard"]},{"dataType":"enum","enums":["interac"]},{"dataType":"enum","enums":["jcb"]},{"dataType":"enum","enums":["mastercard"]},{"dataType":"enum","enums":["unionpay"]},{"dataType":"enum","enums":["unknown"]},{"dataType":"enum","enums":["visa"]}],"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Card.RequestThreeDSecure": {
-        "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["any"]},{"dataType":"enum","enums":["automatic"]},{"dataType":"enum","enums":["challenge"]}],"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Card": {
-        "dataType": "refObject",
-        "properties": {
-            "mandate_options": {"ref":"stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Card.MandateOptions"},
-            "network": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Card.Network"},{"dataType":"enum","enums":[null]}],"required":true},
-            "request_three_d_secure": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Card.RequestThreeDSecure"},{"dataType":"enum","enums":[null]}],"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.CustomerBalance.BankTransfer.EuBankTransfer.Country": {
-        "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["BE"]},{"dataType":"enum","enums":["DE"]},{"dataType":"enum","enums":["ES"]},{"dataType":"enum","enums":["FR"]},{"dataType":"enum","enums":["IE"]},{"dataType":"enum","enums":["NL"]}],"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.CustomerBalance.BankTransfer.EuBankTransfer": {
-        "dataType": "refObject",
-        "properties": {
-            "country": {"ref":"stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.CustomerBalance.BankTransfer.EuBankTransfer.Country","required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.CustomerBalance.BankTransfer": {
-        "dataType": "refObject",
-        "properties": {
-            "eu_bank_transfer": {"ref":"stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.CustomerBalance.BankTransfer.EuBankTransfer"},
-            "type": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.CustomerBalance": {
-        "dataType": "refObject",
-        "properties": {
-            "bank_transfer": {"ref":"stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.CustomerBalance.BankTransfer"},
-            "funding_type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["bank_transfer"]},{"dataType":"enum","enums":[null]}],"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Konbini": {
-        "dataType": "refObject",
-        "properties": {
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.SepaDebit": {
-        "dataType": "refObject",
-        "properties": {
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.UsBankAccount.FinancialConnections.Filters.AccountSubcategory": {
-        "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["checking"]},{"dataType":"enum","enums":["savings"]}],"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.UsBankAccount.FinancialConnections.Filters": {
-        "dataType": "refObject",
-        "properties": {
-            "account_subcategories": {"dataType":"array","array":{"dataType":"refAlias","ref":"stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.UsBankAccount.FinancialConnections.Filters.AccountSubcategory"}},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.UsBankAccount.FinancialConnections.Permission": {
-        "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["balances"]},{"dataType":"enum","enums":["ownership"]},{"dataType":"enum","enums":["payment_method"]},{"dataType":"enum","enums":["transactions"]}],"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.UsBankAccount.FinancialConnections.Prefetch": {
-        "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["balances"]},{"dataType":"enum","enums":["ownership"]},{"dataType":"enum","enums":["transactions"]}],"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.UsBankAccount.FinancialConnections": {
-        "dataType": "refObject",
-        "properties": {
-            "filters": {"ref":"stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.UsBankAccount.FinancialConnections.Filters"},
-            "permissions": {"dataType":"array","array":{"dataType":"refAlias","ref":"stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.UsBankAccount.FinancialConnections.Permission"}},
-            "prefetch": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"refAlias","ref":"stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.UsBankAccount.FinancialConnections.Prefetch"}},{"dataType":"enum","enums":[null]}],"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.UsBankAccount.VerificationMethod": {
-        "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["automatic"]},{"dataType":"enum","enums":["instant"]},{"dataType":"enum","enums":["microdeposits"]}],"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.UsBankAccount": {
-        "dataType": "refObject",
-        "properties": {
-            "financial_connections": {"ref":"stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.UsBankAccount.FinancialConnections"},
-            "verification_method": {"ref":"stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.UsBankAccount.VerificationMethod"},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions": {
-        "dataType": "refObject",
-        "properties": {
-            "acss_debit": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.AcssDebit"},{"dataType":"enum","enums":[null]}],"required":true},
-            "bancontact": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Bancontact"},{"dataType":"enum","enums":[null]}],"required":true},
-            "card": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Card"},{"dataType":"enum","enums":[null]}],"required":true},
-            "customer_balance": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.CustomerBalance"},{"dataType":"enum","enums":[null]}],"required":true},
-            "konbini": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Konbini"},{"dataType":"enum","enums":[null]}],"required":true},
-            "sepa_debit": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.SepaDebit"},{"dataType":"enum","enums":[null]}],"required":true},
-            "us_bank_account": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.UsBankAccount"},{"dataType":"enum","enums":[null]}],"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodType": {
-        "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["ach_credit_transfer"]},{"dataType":"enum","enums":["ach_debit"]},{"dataType":"enum","enums":["acss_debit"]},{"dataType":"enum","enums":["amazon_pay"]},{"dataType":"enum","enums":["au_becs_debit"]},{"dataType":"enum","enums":["bacs_debit"]},{"dataType":"enum","enums":["bancontact"]},{"dataType":"enum","enums":["boleto"]},{"dataType":"enum","enums":["card"]},{"dataType":"enum","enums":["cashapp"]},{"dataType":"enum","enums":["customer_balance"]},{"dataType":"enum","enums":["eps"]},{"dataType":"enum","enums":["fpx"]},{"dataType":"enum","enums":["giropay"]},{"dataType":"enum","enums":["grabpay"]},{"dataType":"enum","enums":["ideal"]},{"dataType":"enum","enums":["konbini"]},{"dataType":"enum","enums":["link"]},{"dataType":"enum","enums":["multibanco"]},{"dataType":"enum","enums":["p24"]},{"dataType":"enum","enums":["paynow"]},{"dataType":"enum","enums":["paypal"]},{"dataType":"enum","enums":["promptpay"]},{"dataType":"enum","enums":["revolut_pay"]},{"dataType":"enum","enums":["sepa_credit_transfer"]},{"dataType":"enum","enums":["sepa_debit"]},{"dataType":"enum","enums":["sofort"]},{"dataType":"enum","enums":["swish"]},{"dataType":"enum","enums":["us_bank_account"]},{"dataType":"enum","enums":["wechat_pay"]}],"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Subscription.PaymentSettings.SaveDefaultPaymentMethod": {
-        "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["off"]},{"dataType":"enum","enums":["on_subscription"]}],"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Subscription.PaymentSettings": {
-        "dataType": "refObject",
-        "properties": {
-            "payment_method_options": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions"},{"dataType":"enum","enums":[null]}],"required":true},
-            "payment_method_types": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"refAlias","ref":"stripe.Stripe.Subscription.PaymentSettings.PaymentMethodType"}},{"dataType":"enum","enums":[null]}],"required":true},
-            "save_default_payment_method": {"dataType":"union","subSchemas":[{"ref":"stripe.Stripe.Subscription.PaymentSettings.SaveDefaultPaymentMethod"},{"dataType":"enum","enums":[null]}],"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Subscription.PendingInvoiceItemInterval.Interval": {
-        "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["day"]},{"dataType":"enum","enums":["month"]},{"dataType":"enum","enums":["week"]},{"dataType":"enum","enums":["year"]}],"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Subscription.PendingInvoiceItemInterval": {
-        "dataType": "refObject",
-        "properties": {
-            "interval": {"ref":"stripe.Stripe.Subscription.PendingInvoiceItemInterval.Interval","required":true},
-            "interval_count": {"dataType":"double","required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Subscription.PendingUpdate": {
-        "dataType": "refObject",
-        "properties": {
-            "billing_cycle_anchor": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
-            "expires_at": {"dataType":"double","required":true},
-            "subscription_items": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"refObject","ref":"stripe.Stripe.SubscriptionItem"}},{"dataType":"enum","enums":[null]}],"required":true},
-            "trial_end": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
-            "trial_from_plan": {"dataType":"union","subSchemas":[{"dataType":"boolean"},{"dataType":"enum","enums":[null]}],"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Subscription.Status": {
-        "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["active"]},{"dataType":"enum","enums":["canceled"]},{"dataType":"enum","enums":["incomplete"]},{"dataType":"enum","enums":["incomplete_expired"]},{"dataType":"enum","enums":["past_due"]},{"dataType":"enum","enums":["paused"]},{"dataType":"enum","enums":["trialing"]},{"dataType":"enum","enums":["unpaid"]}],"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Subscription.TransferData": {
-        "dataType": "refObject",
-        "properties": {
-            "amount_percent": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
-            "destination": {"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Account"}],"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Subscription.TrialSettings.EndBehavior.MissingPaymentMethod": {
-        "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["cancel"]},{"dataType":"enum","enums":["create_invoice"]},{"dataType":"enum","enums":["pause"]}],"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Subscription.TrialSettings.EndBehavior": {
-        "dataType": "refObject",
-        "properties": {
-            "missing_payment_method": {"ref":"stripe.Stripe.Subscription.TrialSettings.EndBehavior.MissingPaymentMethod","required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Subscription.TrialSettings": {
-        "dataType": "refObject",
-        "properties": {
-            "end_behavior": {"ref":"stripe.Stripe.Subscription.TrialSettings.EndBehavior","required":true},
-        },
-        "additionalProperties": false,
+        "type": {"dataType":"intersection","subSchemas":[{"ref":"stripe.Stripe.UpcomingInvoice"},{"dataType":"nestedObjectLiteral","nestedProperties":{"lastResponse":{"dataType":"nestedObjectLiteral","nestedProperties":{"stripeAccount":{"dataType":"string"},"idempotencyKey":{"dataType":"string"},"apiVersion":{"dataType":"string"},"statusCode":{"dataType":"double","required":true},"requestId":{"dataType":"string","required":true},"headers":{"dataType":"nestedObjectLiteral","nestedProperties":{},"additionalProperties":{"dataType":"string"},"required":true}},"required":true}}}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 };
@@ -16020,7 +16040,38 @@ export function RegisterRoutes(app: Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.post('/v1/stripe/subscription/upgrade-to-pro',
+        app.get('/v1/stripe/subscription/free/usage',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(StripeController)),
+            ...(fetchMiddlewares<RequestHandler>(StripeController.prototype.getFreeUsage)),
+
+            async function StripeController_getFreeUsage(request: ExRequest, response: ExResponse, next: any) {
+            const args: Record<string, TsoaRoute.ParameterSchema> = {
+                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args, request, response });
+
+                const controller = new StripeController();
+
+              await templateService.apiHandler({
+                methodName: 'getFreeUsage',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.post('/v1/stripe/subscription/new-customer/upgrade-to-pro',
             authenticateMiddleware([{"api_key":[]}]),
             ...(fetchMiddlewares<RequestHandler>(StripeController)),
             ...(fetchMiddlewares<RequestHandler>(StripeController.prototype.upgradeToPro)),
@@ -16040,6 +16091,225 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'upgradeToPro',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.post('/v1/stripe/subscription/existing-customer/upgrade-to-pro',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(StripeController)),
+            ...(fetchMiddlewares<RequestHandler>(StripeController.prototype.upgradeExistingCustomer)),
+
+            async function StripeController_upgradeExistingCustomer(request: ExRequest, response: ExResponse, next: any) {
+            const args: Record<string, TsoaRoute.ParameterSchema> = {
+                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args, request, response });
+
+                const controller = new StripeController();
+
+              await templateService.apiHandler({
+                methodName: 'upgradeExistingCustomer',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.post('/v1/stripe/subscription/manage-subscription',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(StripeController)),
+            ...(fetchMiddlewares<RequestHandler>(StripeController.prototype.manageSubscription)),
+
+            async function StripeController_manageSubscription(request: ExRequest, response: ExResponse, next: any) {
+            const args: Record<string, TsoaRoute.ParameterSchema> = {
+                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args, request, response });
+
+                const controller = new StripeController();
+
+              await templateService.apiHandler({
+                methodName: 'manageSubscription',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.post('/v1/stripe/subscription/undo-cancel-subscription',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(StripeController)),
+            ...(fetchMiddlewares<RequestHandler>(StripeController.prototype.undoCancelSubscription)),
+
+            async function StripeController_undoCancelSubscription(request: ExRequest, response: ExResponse, next: any) {
+            const args: Record<string, TsoaRoute.ParameterSchema> = {
+                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args, request, response });
+
+                const controller = new StripeController();
+
+              await templateService.apiHandler({
+                methodName: 'undoCancelSubscription',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.post('/v1/stripe/subscription/add-ons/:productType',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(StripeController)),
+            ...(fetchMiddlewares<RequestHandler>(StripeController.prototype.addOns)),
+
+            async function StripeController_addOns(request: ExRequest, response: ExResponse, next: any) {
+            const args: Record<string, TsoaRoute.ParameterSchema> = {
+                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
+                    productType: {"in":"path","name":"productType","required":true,"dataType":"union","subSchemas":[{"dataType":"enum","enums":["alerts"]},{"dataType":"enum","enums":["prompts"]}]},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args, request, response });
+
+                const controller = new StripeController();
+
+              await templateService.apiHandler({
+                methodName: 'addOns',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.delete('/v1/stripe/subscription/add-ons/:productType',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(StripeController)),
+            ...(fetchMiddlewares<RequestHandler>(StripeController.prototype.deleteAddOns)),
+
+            async function StripeController_deleteAddOns(request: ExRequest, response: ExResponse, next: any) {
+            const args: Record<string, TsoaRoute.ParameterSchema> = {
+                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
+                    productType: {"in":"path","name":"productType","required":true,"dataType":"union","subSchemas":[{"dataType":"enum","enums":["alerts"]},{"dataType":"enum","enums":["prompts"]}]},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args, request, response });
+
+                const controller = new StripeController();
+
+              await templateService.apiHandler({
+                methodName: 'deleteAddOns',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.get('/v1/stripe/subscription/preview-invoice',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(StripeController)),
+            ...(fetchMiddlewares<RequestHandler>(StripeController.prototype.previewInvoice)),
+
+            async function StripeController_previewInvoice(request: ExRequest, response: ExResponse, next: any) {
+            const args: Record<string, TsoaRoute.ParameterSchema> = {
+                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args, request, response });
+
+                const controller = new StripeController();
+
+              await templateService.apiHandler({
+                methodName: 'previewInvoice',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.post('/v1/stripe/subscription/cancel-subscription',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(StripeController)),
+            ...(fetchMiddlewares<RequestHandler>(StripeController.prototype.cancelSubscription)),
+
+            async function StripeController_cancelSubscription(request: ExRequest, response: ExResponse, next: any) {
+            const args: Record<string, TsoaRoute.ParameterSchema> = {
+                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args, request, response });
+
+                const controller = new StripeController();
+
+              await templateService.apiHandler({
+                methodName: 'cancelSubscription',
                 controller,
                 response,
                 next,

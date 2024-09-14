@@ -54,7 +54,6 @@ export type Database = {
           minimum_request_count: number | null
           name: string
           org_id: string
-          slack_channels: string[]
           soft_delete: boolean
           status: string
           threshold: number
@@ -70,7 +69,6 @@ export type Database = {
           minimum_request_count?: number | null
           name: string
           org_id: string
-          slack_channels?: string[]
           soft_delete?: boolean
           status?: string
           threshold: number
@@ -86,7 +84,6 @@ export type Database = {
           minimum_request_count?: number | null
           name?: string
           org_id?: string
-          slack_channels?: string[]
           soft_delete?: boolean
           status?: string
           threshold?: number
@@ -900,35 +897,6 @@ export type Database = {
         }
         Relationships: []
       }
-      hidden_properties: {
-        Row: {
-          created_at: string
-          id: number
-          org_id: string | null
-          property_to_hide: string | null
-        }
-        Insert: {
-          created_at?: string
-          id?: number
-          org_id?: string | null
-          property_to_hide?: string | null
-        }
-        Update: {
-          created_at?: string
-          id?: number
-          org_id?: string | null
-          property_to_hide?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "public_hidden_properties_org_id_fkey"
-            columns: ["org_id"]
-            isOneToOne: false
-            referencedRelation: "organization"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       integrations: {
         Row: {
           active: boolean
@@ -1247,6 +1215,7 @@ export type Database = {
           size: string | null
           soft_delete: boolean
           stripe_customer_id: string | null
+          stripe_metadata: Json
           stripe_subscription_id: string | null
           stripe_subscription_item_id: string | null
           subscription_status: string | null
@@ -1273,6 +1242,7 @@ export type Database = {
           size?: string | null
           soft_delete?: boolean
           stripe_customer_id?: string | null
+          stripe_metadata?: Json
           stripe_subscription_id?: string | null
           stripe_subscription_item_id?: string | null
           subscription_status?: string | null
@@ -1299,6 +1269,7 @@ export type Database = {
           size?: string | null
           soft_delete?: boolean
           stripe_customer_id?: string | null
+          stripe_metadata?: Json
           stripe_subscription_id?: string | null
           stripe_subscription_item_id?: string | null
           subscription_status?: string | null
@@ -1582,6 +1553,7 @@ export type Database = {
           helicone_template: Json | null
           id: string
           major_version: number
+          metadata: Json | null
           minor_version: number
           model: string | null
           organization: string
@@ -1593,6 +1565,7 @@ export type Database = {
           helicone_template?: Json | null
           id?: string
           major_version: number
+          metadata?: Json | null
           minor_version: number
           model?: string | null
           organization: string
@@ -1604,6 +1577,7 @@ export type Database = {
           helicone_template?: Json | null
           id?: string
           major_version?: number
+          metadata?: Json | null
           minor_version?: number
           model?: string | null
           organization?: string
@@ -2582,6 +2556,7 @@ export type Database = {
           owner_id: string | null
           path_tokens: string[] | null
           updated_at: string | null
+          user_metadata: Json | null
           version: string | null
         }
         Insert: {
@@ -2595,6 +2570,7 @@ export type Database = {
           owner_id?: string | null
           path_tokens?: string[] | null
           updated_at?: string | null
+          user_metadata?: Json | null
           version?: string | null
         }
         Update: {
@@ -2608,6 +2584,7 @@ export type Database = {
           owner_id?: string | null
           path_tokens?: string[] | null
           updated_at?: string | null
+          user_metadata?: Json | null
           version?: string | null
         }
         Relationships: [
@@ -2629,6 +2606,7 @@ export type Database = {
           key: string
           owner_id: string | null
           upload_signature: string
+          user_metadata: Json | null
           version: string
         }
         Insert: {
@@ -2639,6 +2617,7 @@ export type Database = {
           key: string
           owner_id?: string | null
           upload_signature: string
+          user_metadata?: Json | null
           version: string
         }
         Update: {
@@ -2649,6 +2628,7 @@ export type Database = {
           key?: string
           owner_id?: string | null
           upload_signature?: string
+          user_metadata?: Json | null
           version?: string
         }
         Relationships: [
@@ -2745,7 +2725,7 @@ export type Database = {
         Args: {
           name: string
         }
-        Returns: string[]
+        Returns: unknown
       }
       get_size_by_bucket: {
         Args: Record<PropertyKey, never>
@@ -2784,6 +2764,10 @@ export type Database = {
           metadata: Json
           updated_at: string
         }[]
+      }
+      operation: {
+        Args: Record<PropertyKey, never>
+        Returns: string
       }
       search: {
         Args: {

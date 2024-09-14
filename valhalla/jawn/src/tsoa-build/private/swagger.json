@@ -807,6 +807,9 @@
 						"type": "string",
 						"nullable": true
 					},
+					"stripe_metadata": {
+						"$ref": "#/components/schemas/Json"
+					},
 					"stripe_customer_id": {
 						"type": "string",
 						"nullable": true
@@ -2251,12 +2254,6 @@
 								"soft_delete": {
 									"type": "boolean"
 								},
-								"slack_channels": {
-									"items": {
-										"type": "string"
-									},
-									"type": "array"
-								},
 								"org_id": {
 									"type": "string"
 								},
@@ -2292,7 +2289,6 @@
 								"threshold",
 								"status",
 								"soft_delete",
-								"slack_channels",
 								"org_id",
 								"name",
 								"minimum_request_count",
