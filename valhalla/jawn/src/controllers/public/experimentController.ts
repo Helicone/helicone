@@ -8,6 +8,7 @@ import {
   Experiment,
   IncludeExperimentKeys,
 } from "../../lib/stores/experimentStore";
+import { run } from "../../lib/experiment/run";
 
 export type ExperimentFilterBranch = {
   left: ExperimentFilterNode;
@@ -84,5 +85,48 @@ export class ExperimentController extends Controller {
       this.setStatus(200); // set return status 201
       return result;
     }
+  }
+
+  @Post("/run")
+  public async runExperiment(
+    @Body()
+    requestBody: {
+      experimentId: string;
+      hypothesisId: string;
+    },
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<ExperimentRun, string>> {
+    const experimentManager = new ExperimentManager(request.authParams);
+    const result = await experimentManager.getExperimentById(
+      requestBody.experimentId,
+      {
+        inputs: true,
+        promptVersion: true,
+      }
+    );
+
+    if (result.error || !result.data) {
+      this.setStatus(500);
+      console.error(result.error);
+      return err("Not implemented");
+    }
+
+    const experiment = result.data;
+
+    const hypothesis = experiment.hypotheses.find(
+      (hypothesis) => hypothesis.id === requestBody.hypothesisId
+    );
+
+    if (!hypothesis) {
+      this.setStatus(404);
+      console.error("Hypothesis not found");
+      return err("Hypothesis not found");
+    }
+
+    experiment.hypotheses = [hypothesis];
+
+    const runResult = await run(experiment);
+
+    return runResult;
   }
 }

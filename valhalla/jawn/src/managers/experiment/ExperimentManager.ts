@@ -18,6 +18,13 @@ export class ExperimentManager extends BaseManager {
     this.ExperimentStore = new ExperimentStore(authParams.organizationId);
   }
 
+  async getExperimentById(
+    experimentId: string,
+    include: IncludeExperimentKeys
+  ): Promise<Result<Experiment, string>> {
+    return this.ExperimentStore.getExperimentById(experimentId, include);
+  }
+
   async getExperiments(
     filter: FilterNode,
     include: IncludeExperimentKeys
