@@ -44,11 +44,6 @@ export interface RandomDatasetParams {
   limit?: number;
 }
 
-export interface DatasetRowInput {
-  id: string;
-  inputRecord: Record<string, any>;
-}
-
 @Route("v1/experiment/dataset")
 @Tags("Dataset")
 @Security("api_key")
