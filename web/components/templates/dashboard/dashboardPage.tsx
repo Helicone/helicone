@@ -804,7 +804,11 @@ const DashboardPage = (props: DashboardPageProps) => {
               <div key="users">
                 <StyledAreaChart
                   title={"Users"}
-                  value={metrics.activeUsers.data?.data?.toString() ?? "0"}
+                  value={
+                    metrics.activeUsers.data?.data
+                      ? formatLargeNumber(metrics.activeUsers.data?.data)
+                      : "0"
+                  }
                   isDataOverTimeLoading={overTimeData.users.isLoading}
                 >
                   <BarChart
@@ -902,7 +906,9 @@ const DashboardPage = (props: DashboardPageProps) => {
               <div key="threats">
                 <StyledAreaChart
                   title={"Threats"}
-                  value={`${metrics.totalThreats.data?.data?.toFixed(0) ?? 0}`}
+                  value={`${formatLargeNumber(
+                    Number(metrics.totalThreats.data?.data?.toFixed(0) ?? 0)
+                  )}`}
                   isDataOverTimeLoading={overTimeData.threats.isLoading}
                 >
                   <AreaChart
@@ -950,13 +956,13 @@ const DashboardPage = (props: DashboardPageProps) => {
               <div key="tokens-per-min-over-time">
                 <StyledAreaChart
                   title={"Tokens / Minute"}
-                  value={`Max: ${(
+                  value={`Max: ${formatLargeNumber(
                     max(
                       overTimeData.promptTokensOverTime.data?.data
                         ?.map((d) => d.completion_tokens + d.prompt_tokens)
                         .filter((d) => d !== 0) ?? []
-                    ) / getIncrementAsMinutes(timeIncrement)
-                  ).toFixed(2)} tokens`}
+                    ) / Number(getIncrementAsMinutes(timeIncrement).toFixed(2))
+                  )} tokens`}
                   isDataOverTimeLoading={overTimeData.users.isLoading}
                 >
                   <AreaChart
