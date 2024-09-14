@@ -84,9 +84,6 @@ export interface paths {
   "/v1/prompt/{promptId}/versions/query": {
     post: operations["GetPromptVersions"];
   };
-  "/v1/prompt/version/{promptVersionId}/inputs": {
-    post: operations["CreateInputRecord"];
-  };
   "/v1/prompt/version/{promptVersionId}": {
     delete: operations["DeletePromptVersion"];
   };
@@ -928,12 +925,6 @@ export interface components {
     PromptVersionsQueryParams: {
       filter?: components["schemas"]["PromptVersionsFilterNode"];
     };
-    ResultSuccess_string_: {
-      data: string;
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_string.string_": components["schemas"]["ResultSuccess_string_"] | components["schemas"]["ResultError_string_"];
     PromptVersionResultCompiled: {
       id: string;
       /** Format: double */
@@ -1919,29 +1910,6 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_PromptVersionResult-Array.string_"];
-        };
-      };
-    };
-  };
-  CreateInputRecord: {
-    parameters: {
-      path: {
-        promptVersionId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          sourceRequest?: string;
-          inputs: components["schemas"]["Record_string.string_"];
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_string.string_"];
         };
       };
     };
