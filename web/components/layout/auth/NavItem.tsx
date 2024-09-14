@@ -82,7 +82,7 @@ const NavItem: React.FC<NavItemProps> = ({
   }
 
   return (
-    <div className={cn(isSubItem && "ml-4")}>
+    <div className={cn(isSubItem && "ml-[28px]")}>
       <Link
         href={hasSubItems ? "#" : link.href}
         onClick={hasSubItems ? () => toggleExpand(link.name) : undefined}

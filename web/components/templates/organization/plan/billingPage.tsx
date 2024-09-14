@@ -48,7 +48,7 @@ const BillingPlanPage = (props: OrgPlanPageProps) => {
   const upgradeToPro = useMutation({
     mutationFn: async () => {
       const jawn = getJawnClient(org?.currentOrg?.id);
-      const result = await jawn.GET("/v1/stripe/subscription/upgrade-to-pro");
+      const result = await jawn.POST("/v1/stripe/subscription/upgrade-to-pro");
       return result;
     },
   });
@@ -68,7 +68,7 @@ const BillingPlanPage = (props: OrgPlanPageProps) => {
         <Button
           onClick={async () => {
             const result = await upgradeToPro.mutateAsync();
-            result.data;
+            console.log(result);
           }}
         >
           Upgrade to Pro

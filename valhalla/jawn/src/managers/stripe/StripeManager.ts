@@ -4,6 +4,7 @@ import { supabaseServer } from "../../lib/db/supabase";
 import Stripe from "stripe";
 import { Result, ok, err } from "../../lib/shared/result";
 import { ENVIRONMENT } from "../..";
+import { dbExecute } from "../../lib/shared/db/dbExecute";
 
 const proProducts =
   ENVIRONMENT === "production"
@@ -15,7 +16,7 @@ const proProducts =
       }
     : {
         // TEST PRODUCTS
-        "request-volume": "prod_QpcGH3TN0povHu",
+        "request-volume": "price_1PLYSLFeVmeixR9wXRA9cX3c",
         "pro-users": "prod_Qpc6JzriahM4BN",
         prompts: "prod_QpH7PdPlTdjNcy",
         alerts: "prod_Qq94rgfIC3mw1m",
@@ -31,25 +32,86 @@ export class StripeManager extends BaseManager {
     });
   }
 
+  private async getOrCreateStripeCustomer(): Promise<Result<string, string>> {
+    const organization = await supabaseServer.client
+      .from("organization")
+      .select("*")
+      .eq("id", this.authParams.organizationId)
+      .single();
+
+    if (!organization.data?.stripe_customer_id) {
+      const user = await supabaseServer.client.auth.admin.getUserById(
+        this.authParams.userId ?? ""
+      );
+
+      console.log(user);
+      if (!user.data?.user?.email) {
+        return err("User does not have an email");
+      }
+
+      const getStripeCustomer = await this.stripe.customers.list({
+        email: user.data?.user?.email ?? "",
+      });
+      console.log(getStripeCustomer);
+      const customer = await this.stripe.customers.create({
+        email: user.data.user.email,
+      });
+
+      const updateOrganization = await supabaseServer.client
+        .from("organization")
+        .update({ stripe_customer_id: customer.id })
+        .eq("id", this.authParams.organizationId);
+
+      if (updateOrganization.error) {
+        return err("Error updating organization");
+      }
+
+      return ok(customer.id);
+    }
+
+    return ok(organization.data.stripe_customer_id);
+  }
+
   // Returns a link to upgrade to pro
   // If the user is already on pro, returns an error
-  public async upgradeToProLink(): Promise<Result<string, string>> {
+  public async upgradeToProLink(
+    origin: string
+  ): Promise<Result<string, string>> {
     try {
       const subscriptionResult = await this.getSubscription();
       if (subscriptionResult.data) {
         return err("User already has a pro subscription");
       }
 
+      const customerId = await this.getOrCreateStripeCustomer();
+
+      if (customerId.error || !customerId.data) {
+        return err("Error getting or creating stripe customer");
+      }
+      console.log("ORIGIN", origin);
+
       const session = await this.stripe.checkout.sessions.create({
-        mode: "subscription",
+        customer: customerId.data,
         payment_method_types: ["card"],
-        line_items: Object.values(proProducts).map((productId) => ({
-          price: productId,
-          quantity: 1,
-        })),
-        success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/settings?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/settings`,
-        client_reference_id: this.authParams.organizationId,
+        line_items: [
+          {
+            price: proProducts["request-volume"],
+            // No quantity for usage based pricing
+          },
+        ],
+        mode: "subscription",
+        success_url: `${origin}/dashboard`,
+        cancel_url: `${origin}/dashboard`,
+        metadata: {
+          orgId: this.authParams.organizationId,
+        },
+        subscription_data: {
+          metadata: {
+            orgId: this.authParams.organizationId,
+            tier: "growth",
+          },
+        },
+        allow_promotion_codes: true,
       });
 
       return ok(session.url!);

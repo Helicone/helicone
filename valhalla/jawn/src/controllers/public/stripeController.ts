@@ -16,10 +16,12 @@ import { StripeManager } from "../../managers/stripe/StripeManager";
 @Tags("Stripe")
 @Security("api_key")
 export class StripeController extends Controller {
-  @Get("/subscription/upgrade-to-pro")
+  @Post("/subscription/upgrade-to-pro")
   public async upgradeToPro(@Request() request: JawnAuthenticatedRequest) {
     const stripeManager = new StripeManager(request.authParams);
-    const result = await stripeManager.upgradeToProLink();
+
+    const clientOrigin = request.headers.origin;
+    const result = await stripeManager.upgradeToProLink(`${clientOrigin}`);
 
     if (result.error) {
       this.setStatus(400);
@@ -27,6 +29,12 @@ export class StripeController extends Controller {
     }
 
     return result.data;
+  }
+
+  @Post("/subscription/migrate-to-pro")
+  public async migrateToPro(@Request() request: JawnAuthenticatedRequest) {
+    const stripeManager = new StripeManager(request.authParams);
+    const result = await stripeManager.migrateToPro();
   }
 
   @Get("/subscription")
