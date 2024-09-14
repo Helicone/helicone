@@ -5,14 +5,7 @@ import {
   PresentationChartLineIcon,
 } from "@heroicons/react/24/outline";
 import { User } from "@supabase/auth-helpers-nextjs";
-import {
-  AreaChart,
-  BarChart,
-  BarList,
-  Card,
-  DonutChart,
-  Legend,
-} from "@tremor/react";
+import { AreaChart, BarChart, BarList, Card } from "@tremor/react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Responsive, WidthProvider } from "react-grid-layout";
