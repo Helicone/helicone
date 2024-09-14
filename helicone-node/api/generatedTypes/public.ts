@@ -146,6 +146,9 @@ export interface paths {
   "/v1/experiment/query": {
     post: operations["GetExperiments"];
   };
+  "/v1/experiment/run": {
+    post: operations["RunExperiment"];
+  };
   "/v1/evals/query": {
     post: operations["QueryEvals"];
   };
@@ -1229,6 +1232,13 @@ Json: JsonObject;
       /** @enum {boolean} */
       score?: true;
     };
+    ExperimentRun: Record<string, never>;
+    ResultSuccess_ExperimentRun_: {
+      data: components["schemas"]["ExperimentRun"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ExperimentRun.string_": components["schemas"]["ResultSuccess_ExperimentRun_"] | components["schemas"]["ResultError_string_"];
     Eval: {
       name: string;
       /** Format: double */
@@ -2278,6 +2288,24 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_Experiment-Array.string_"];
+        };
+      };
+    };
+  };
+  RunExperiment: {
+    requestBody: {
+      content: {
+        "application/json": {
+          hypothesisId: string;
+          experimentId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ExperimentRun.string_"];
         };
       };
     };
