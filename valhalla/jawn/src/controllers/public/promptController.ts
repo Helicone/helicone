@@ -18,6 +18,7 @@ import {
 import { PromptManager } from "../../managers/prompt/PromptManager";
 import { JawnAuthenticatedRequest } from "../../types/request";
 import { InputsManager } from "../../managers/inputs/InputsManager";
+import { randomUUID } from "crypto";
 
 export type PromptsFilterBranch = {
   left: PromptsFilterNode;
@@ -296,6 +297,35 @@ export class PromptController extends Controller {
     } else {
       this.setStatus(200); // set return status 201
     }
+    return result;
+  }
+
+  @Post("version/{promptVersionId}/inputs")
+  public async createInputRecord(
+    @Body()
+    requestBody: {
+      inputs: Record<string, string>;
+      sourceRequest?: string;
+    },
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() promptVersionId: string
+  ): Promise<Result<string, string>> {
+    const inputRecordId = randomUUID();
+    const inputManager = new InputsManager(request.authParams);
+    const result = await inputManager.createInputRecord(
+      inputRecordId,
+      promptVersionId,
+      requestBody.inputs,
+      requestBody.sourceRequest
+    );
+
+    if (result.error) {
+      console.error(result.error);
+      this.setStatus(500);
+    } else {
+      this.setStatus(201);
+    }
+
     return result;
   }
 
