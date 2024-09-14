@@ -50,8 +50,18 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
   initialModel = MODEL_LIST[0].value,
   isPromptCreatedFromUi,
 }) => {
+  const replaceTemplateVariables = (
+    content: string,
+    inputs: Record<string, string>
+  ) => {
+    return content.replace(/\{\{(\w+)\}\}/g, (match, key) => {
+      return inputs[key] || match;
+    });
+  };
+
   const parsePromptToMessages = (
-    promptInput: string | PromptObject
+    promptInput: string | PromptObject,
+    inputs?: Record<string, string>
   ): Message[] => {
     if (typeof promptInput === "string") {
       return promptInput
@@ -62,7 +72,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
           role: content.startsWith("<helicone-prompt-static>")
             ? "system"
             : "user",
-          content,
+          content: inputs ? replaceTemplateVariables(content, inputs) : content,
         }));
     }
 
@@ -71,16 +81,24 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
       promptObject?.messages?.map((msg, index) => ({
         id: `msg-${index}`,
         role: msg.role as "user" | "assistant" | "system",
-        content: Array.isArray(msg.content)
+        content: inputs
+          ? replaceTemplateVariables(
+              Array.isArray(msg.content)
+                ? msg.content.map((c) => c.text).join("\n")
+                : msg.content,
+              inputs
+            )
+          : Array.isArray(msg.content)
           ? msg.content.map((c) => c.text).join("\n")
           : msg.content,
       })) || []
     );
   };
+
   const [mode, setMode] = useState<(typeof PROMPT_MODES)[number]>("Pretty");
   const [isEditMode, setIsEditMode] = useState(false);
   const [currentChat, setCurrentChat] = useState<Message[]>(() =>
-    parsePromptToMessages(prompt)
+    parsePromptToMessages(prompt, selectedInput?.inputs)
   );
   const [expandedChildren, setExpandedChildren] = useState<
     Record<string, boolean>
@@ -88,8 +106,8 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
   const [selectedModel, setSelectedModel] = useState(initialModel);
 
   useEffect(() => {
-    setCurrentChat(parsePromptToMessages(prompt));
-  }, [prompt]);
+    setCurrentChat(parsePromptToMessages(prompt, selectedInput?.inputs));
+  }, [prompt, selectedInput]);
 
   const handleAddMessage = () => {
     const newMessage: Message = {
@@ -139,6 +157,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
                     handleUpdateMessage(index, userText, role)
                   }
                   deleteRow={() => handleDeleteMessage(index)}
+                  selectedProperties={selectedInput?.inputs}
                 />
               </li>
             ))}

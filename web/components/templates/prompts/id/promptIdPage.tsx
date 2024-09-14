@@ -372,6 +372,11 @@ const PromptIdPage = (props: PromptIdPageProps) => {
     return true;
   });
 
+  const setSelectedInputAndVersion = (version: string) => {
+    setSelectedVersion(version);
+    setSelectedInput(undefined);
+  };
+
   const onTimeSelectHandler = (key: TimeInterval, value: string) => {
     if ((key as string) === "custom") {
       value = value.replace("custom:", "");
@@ -783,7 +788,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                                   : "bg-gray-50 dark:bg-gray-900"
                               }`}
                               onClick={() =>
-                                setSelectedVersion(
+                                setSelectedInputAndVersion(
                                   `${promptVersion.major_version}.${promptVersion.minor_version}`
                                 )
                               }

@@ -30,6 +30,7 @@ interface PromptChatRowProps {
   deleteRow: (rowId: string) => void;
   editMode?: boolean;
   promptMode?: boolean;
+  selectedProperties: Record<string, string> | undefined;
 }
 
 export const hasImage = (content: string | any[] | null) => {
@@ -172,8 +173,7 @@ export const RenderWithPrettyInputKeys = (props: {
 };
 
 const PromptChatRow = (props: PromptChatRowProps) => {
-  const { index, message, callback, deleteRow, editMode, promptMode } = props;
-  console.log("editMode", editMode);
+  const { index, message, callback, deleteRow, editMode, selectedProperties } = props;
 
   const [currentMessage, setCurrentMessage] = useState(message);
   const [minimize, setMinimize] = useState(false);
@@ -276,7 +276,7 @@ const PromptChatRow = (props: PromptChatRowProps) => {
         <div className="flex flex-col space-y-4 whitespace-pre-wrap">
           <RenderWithPrettyInputKeys
             text={removeLeadingWhitespace(text)}
-            selectedProperties={undefined}
+            selectedProperties={selectedProperties}
           />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           {hasImage(content) && (
@@ -372,7 +372,7 @@ const PromptChatRow = (props: PromptChatRowProps) => {
                 ? `${contentString?.substring(0, 100)}...`
                 : contentString
             }
-            selectedProperties={undefined}
+            selectedProperties={selectedProperties}
           />
         </div>
       );
