@@ -8,7 +8,7 @@ import {
   PromptsQueryParams,
   PromptsResult,
 } from "../../controllers/public/promptController";
-import { Result, err, promiseResultMap } from "../../lib/shared/result";
+import { Result, err, ok, promiseResultMap } from "../../lib/shared/result";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { FilterNode } from "../../lib/shared/filters/filterDefs";
 import { buildFilterPostgres } from "../../lib/shared/filters/filters";
@@ -86,6 +86,31 @@ export async function getAllSignedURLsFromInputs(
 }
 
 export class InputsManager extends BaseManager {
+  async createInputRecord(
+    inputRecordId: string,
+    promptVersionId: string,
+    inputs: Record<string, string>,
+    sourceRequest?: string
+  ): Promise<Result<string, string>> {
+    const insertQuery = `
+      INSERT INTO prompt_input_record (id, inputs, source_request, prompt_version)
+      VALUES ($1, $2, $3, $4)
+    `;
+
+    const result = await dbExecute<PromptInputRecord>(insertQuery, [
+      inputRecordId,
+      JSON.stringify(inputs),
+      sourceRequest,
+      promptVersionId,
+    ]);
+
+    if (result.error) {
+      return err(result.error);
+    }
+
+    return ok(inputRecordId);
+  }
+
   async getInputs(
     limit: number,
     promptVersion: string,
@@ -93,7 +118,7 @@ export class InputsManager extends BaseManager {
   ): Promise<Result<PromptInputRecord[], string>> {
     const result = await dbExecute<PromptInputRecord>(
       `
-      SELECT 
+      SELECT
         prompt_input_record.id as id,
         prompt_input_record.inputs as inputs,
         prompt_input_record.auto_prompt_inputs as auto_prompt_inputs,

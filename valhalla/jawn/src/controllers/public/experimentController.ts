@@ -1,21 +1,7 @@
 // src/users/usersController.ts
-import {
-  Body,
-  Controller,
-  Path,
-  Post,
-  Request,
-  Route,
-  Security,
-  Tags,
-} from "tsoa";
-import {
-  FilterLeafSubset,
-  FilterNode,
-} from "../../lib/shared/filters/filterDefs";
+import { Body, Controller, Post, Request, Route, Security, Tags } from "tsoa";
+import { FilterLeafSubset } from "../../lib/shared/filters/filterDefs";
 import { Result, err } from "../../lib/shared/result";
-import { SortLeafRequest } from "../../lib/shared/sorts/requests/sorts";
-import { HeliconeRequest } from "../../lib/stores/request/request";
 import { ExperimentManager } from "../../managers/experiment/ExperimentManager";
 import { JawnAuthenticatedRequest } from "../../types/request";
 import {
