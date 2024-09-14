@@ -93,6 +93,7 @@ export class ExperimentController extends Controller {
     requestBody: {
       experimentId: string;
       hypothesisId: string;
+      datasetRowIds: string[];
     },
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<ExperimentRun, string>> {
@@ -123,6 +124,17 @@ export class ExperimentController extends Controller {
       return err("Hypothesis not found");
     }
 
+    const datasetRows = experiment.dataset.rows.filter((row) =>
+      requestBody.datasetRowIds.includes(row.rowId)
+    );
+
+    if (datasetRows.length !== requestBody.datasetRowIds.length) {
+      this.setStatus(404);
+      console.error("Row not found");
+      return err("Row not found");
+    }
+
+    experiment.dataset.rows = datasetRows;
     experiment.hypotheses = [hypothesis];
 
     const runResult = await run(experiment);

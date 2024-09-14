@@ -2296,6 +2296,7 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": {
+          datasetRowIds: string[];
           hypothesisId: string;
           experimentId: string;
         };
