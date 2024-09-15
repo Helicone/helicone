@@ -39,6 +39,16 @@ export class ExperimentManager extends BaseManager {
     providerKeyId: string;
     status: "PENDING" | "RUNNING" | "COMPLETED" | "FAILED";
   }): Promise<Result<null, string>> {
+    const hasAccess = await supabaseServer.client
+      .from("experiment_v2")
+      .select("id", { count: "exact" })
+      .eq("id", params.experimentId)
+      .eq("organization", this.authParams.organizationId);
+
+    if (hasAccess.count === 0) {
+      return err("Experiment not found");
+    }
+
     const result = await dbExecute(
       `
       INSERT INTO experiment_v2_hypothesis (

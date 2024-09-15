@@ -89,7 +89,8 @@ export class ExperimentController extends Controller {
     const result = await supabaseServer.client
       .from("experiment_v2")
       .update({ meta: requestBody.meta })
-      .eq("id", requestBody.experimentId);
+      .eq("id", requestBody.experimentId)
+      .eq("organization", request.authParams.organizationId);
 
     if (result.error || !result.data) {
       this.setStatus(500);
