@@ -5,7 +5,7 @@ import { ReactElement } from "react";
 import AuthLayout from "../../../../../components/layout/auth/authLayout";
 import { SupabaseServerWrapper } from "../../../../../lib/wrappers/supabase";
 import ExperimentIdPage from "../../../../../components/templates/prompts/experiments/id/experimentIdPage";
-import ExperimentTablePage from "@/components/templates/prompts/experiments/experimentTablePage";
+import ExperimentTablePage from "@/components/templates/prompts/experiments/table/experimentTablePage";
 
 interface ExperimentPage {
   user: User;

@@ -1,4 +1,4 @@
-import ExperimentTablePage from "@/components/templates/prompts/experiments/experimentTablePage";
+import ExperimentTablePage from "@/components/templates/prompts/experiments/table/experimentTablePage";
 import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
 import type { ReactElement } from "react";
 import AuthLayout from "../../components/layout/auth/authLayout";
