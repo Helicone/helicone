@@ -174,13 +174,14 @@ export class ExperimentDatasetController extends Controller {
     return inputRecordResult;
   }
 
-  @Post("/{datasetId}/query")
+  @Post("/{datasetId}/inputs/query")
   public async getDataset(
-    @Body()
-    requestBody: {},
-    @Request() request: JawnAuthenticatedRequest
-  ): Promise<Result<{}[], string>> {
-    return err("Not implemented");
+    // @Body() requestBody: {},
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() datasetId: string
+  ) {
+    const inputManager = new InputsManager(request.authParams);
+    return inputManager.getInputsFromDataset(datasetId, 1_000);
   }
 
   @Post("/{datasetId}/mutate")

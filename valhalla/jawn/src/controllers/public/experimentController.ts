@@ -9,6 +9,7 @@ import {
   IncludeExperimentKeys,
 } from "../../lib/stores/experimentStore";
 import { run } from "../../lib/experiment/run";
+import { supabaseServer } from "../../lib/db/supabase";
 
 export type ExperimentFilterBranch = {
   left: ExperimentFilterNode;
@@ -34,6 +35,73 @@ export interface ExperimentRun {}
 @Tags("Experiment")
 @Security("api_key")
 export class ExperimentController extends Controller {
+  @Post("/new-empty")
+  public async createNewEmptyExperiment(
+    @Body()
+    requestBody: {
+      metadata: Record<string, string>;
+      datasetId: string;
+    },
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<
+    Result<
+      {
+        experimentId: string;
+      },
+      string
+    >
+  > {
+    const result = await supabaseServer.client
+      .from("experiment_v2")
+      .insert({
+        dataset: requestBody.datasetId,
+        organization: request.authParams.organizationId,
+        meta: requestBody.metadata,
+      })
+      .select("*")
+      .single();
+
+    // const result = await promptManager.getPrompts(requestBody);
+    if (result.error || !result.data) {
+      this.setStatus(500);
+      console.error(result.error);
+      return err(result.error.message);
+    } else {
+      this.setStatus(200); // set return status 201
+      return {
+        data: {
+          experimentId: result.data.id,
+        },
+        error: null,
+      };
+    }
+  }
+
+  @Post("/update-meta")
+  public async updateExperimentMeta(
+    @Body()
+    requestBody: {
+      experimentId: string;
+      meta: Record<string, string>;
+    },
+    @Request() request: JawnAuthenticatedRequest
+  ) {
+    const result = await supabaseServer.client
+      .from("experiment_v2")
+      .update({ meta: requestBody.meta })
+      .eq("id", requestBody.experimentId)
+      .eq("organization", request.authParams.organizationId);
+
+    if (result.error || !result.data) {
+      this.setStatus(500);
+      console.error(result.error);
+      return err(result.error);
+    } else {
+      this.setStatus(200);
+      return result;
+    }
+  }
+
   @Post("/")
   public async createNewExperiment(
     @Body()
@@ -57,6 +125,34 @@ export class ExperimentController extends Controller {
       return err(result.error);
     } else {
       this.setStatus(200); // set return status 201
+      return result;
+    }
+  }
+
+  @Post("/hypothesis")
+  public async createNewExperimentHypothesis(
+    @Body()
+    requestBody: {
+      experimentId: string;
+      model: string;
+      promptVersion: string;
+      providerKeyId: string;
+      status: "PENDING" | "RUNNING" | "COMPLETED" | "FAILED";
+    },
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<null, string>> {
+    const experimentManager = new ExperimentManager(request.authParams);
+
+    const result = await experimentManager.createNewExperimentHypothesis(
+      requestBody
+    );
+
+    if (result.error || !result.data) {
+      this.setStatus(500);
+      console.error(result.error);
+      return err(result.error);
+    } else {
+      this.setStatus(200);
       return result;
     }
   }
@@ -124,9 +220,16 @@ export class ExperimentController extends Controller {
       return err("Hypothesis not found");
     }
 
-    const datasetRows = experiment.dataset.rows.filter((row) =>
-      requestBody.datasetRowIds.includes(row.rowId)
-    );
+    const seen = new Set<string>();
+
+    const datasetRows = experiment.dataset.rows.filter((row) => {
+      if (!requestBody.datasetRowIds.includes(row.rowId)) {
+        return false;
+      }
+      const alreadyAdded = seen.has(row.rowId);
+      seen.add(row.rowId);
+      return !alreadyAdded;
+    });
 
     if (datasetRows.length !== requestBody.datasetRowIds.length) {
       this.setStatus(404);
@@ -137,7 +240,7 @@ export class ExperimentController extends Controller {
     experiment.dataset.rows = datasetRows;
     experiment.hypotheses = [hypothesis];
 
-    const runResult = await run(experiment);
+    const runResult = run(experiment);
 
     return runResult;
   }

@@ -3,6 +3,7 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   Path,
   Post,
   Request,
@@ -10,7 +11,7 @@ import {
   Security,
   Tags,
 } from "tsoa";
-import { Result } from "../../lib/shared/result";
+import { Result, resultMap } from "../../lib/shared/result";
 import {
   FilterLeafSubset,
   FilterNode,
@@ -19,6 +20,7 @@ import { PromptManager } from "../../managers/prompt/PromptManager";
 import { JawnAuthenticatedRequest } from "../../types/request";
 import { InputsManager } from "../../managers/inputs/InputsManager";
 import { randomUUID } from "crypto";
+import { dbExecute } from "../../lib/shared/db/dbExecute";
 
 export type PromptsFilterBranch = {
   left: PromptsFilterNode;
@@ -112,10 +114,11 @@ export interface PromptCreateSubversionParams {
 export interface PromptInputRecord {
   id: string;
   inputs: Record<string, string>;
+  dataset_row_id?: string;
   source_request: string;
   prompt_version: string;
   created_at: string;
-  response_body: string;
+  response_body?: string;
   auto_prompt_inputs: any[];
 }
 
@@ -202,6 +205,7 @@ export class PromptController extends Controller {
     }
     return result;
   }
+
   @Post("version/{promptVersionId}/subversion")
   public async createSubversion(
     @Body()
@@ -272,6 +276,43 @@ export class PromptController extends Controller {
     return result;
   }
 
+  @Get("{promptId}/experiments")
+  public async getPromptExperiments(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() promptId: string
+  ) {
+    const result = await dbExecute<{
+      id: string;
+      created_at: string;
+      num_hypotheses: number;
+      dataset: string;
+      meta: Record<string, any>;
+    }>(
+      `
+      SELECT 
+        experiment_v2.id,
+        created_at,
+        (
+          SELECT count(*) from experiment_v2_hypothesis
+          WHERE experiment_v2_hypothesis.experiment_v2 = experiment_v2.id
+        ) as num_hypotheses,
+        dataset,
+        meta
+        FROM experiment_v2
+      WHERE experiment_v2.meta->>'prompt_id' = $1
+      AND experiment_v2.organization = $2
+      `,
+      [promptId, request.authParams.organizationId]
+    );
+    if (result.error || !result.data) {
+      console.error(result.error);
+      this.setStatus(500);
+    } else {
+      this.setStatus(200); // set return status 201
+    }
+    return result;
+  }
+
   @Post("{promptId}/versions/query")
   public async getPromptVersions(
     @Body()
@@ -298,6 +339,29 @@ export class PromptController extends Controller {
       this.setStatus(200); // set return status 201
     }
     return result;
+  }
+
+  @Get("version/{promptVersionId}")
+  public async getPromptVersion(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() promptVersionId: string
+  ): Promise<Result<PromptVersionResult, string>> {
+    const promptManager = new PromptManager(request.authParams);
+    const result = await promptManager.getPromptVersions({
+      prompts_versions: {
+        id: {
+          equals: promptVersionId,
+        },
+      },
+    });
+
+    if (result.error) {
+      console.error(result.error);
+      this.setStatus(500);
+    } else {
+      this.setStatus(200); // set return status 201
+    }
+    return resultMap(result, (data) => data?.[0]);
   }
 
   @Delete("version/{promptVersionId}")
