@@ -2472,6 +2472,9 @@
 					"inputs": {
 						"$ref": "#/components/schemas/Record_string.string_"
 					},
+					"dataset_row_id": {
+						"type": "string"
+					},
 					"source_request": {
 						"type": "string"
 					},
@@ -2495,7 +2498,6 @@
 					"source_request",
 					"prompt_version",
 					"created_at",
-					"response_body",
 					"auto_prompt_inputs"
 				],
 				"type": "object",
@@ -2528,6 +2530,64 @@
 				"anyOf": [
 					{
 						"$ref": "#/components/schemas/ResultSuccess_PromptInputRecord-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess__id-string--created_at-string--num_hypotheses-number--dataset-string--meta-Record_string.any__-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"properties": {
+								"meta": {
+									"$ref": "#/components/schemas/Record_string.any_"
+								},
+								"dataset": {
+									"type": "string"
+								},
+								"num_hypotheses": {
+									"type": "number",
+									"format": "double"
+								},
+								"created_at": {
+									"type": "string"
+								},
+								"id": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"meta",
+								"dataset",
+								"num_hypotheses",
+								"created_at",
+								"id"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__id-string--created_at-string--num_hypotheses-number--dataset-string--meta-Record_string.any__-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__id-string--created_at-string--num_hypotheses-number--dataset-string--meta-Record_string.any__-Array_"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
@@ -3494,6 +3554,68 @@
 						"$ref": "#/components/schemas/ResultError_string_"
 					}
 				]
+			},
+			"ResultSuccess_unknown_": {
+				"properties": {
+					"data": {},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"PostgrestError": {
+				"properties": {
+					"code": {
+						"type": "string"
+					},
+					"hint": {
+						"type": "string"
+					},
+					"details": {
+						"type": "string"
+					},
+					"message": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"code",
+					"hint",
+					"details",
+					"message"
+				],
+				"type": "object",
+				"description": "Error format\n\n{@link https://postgrest.org/en/stable/api.html?highlight=options#errors-and-http-status-codes}"
+			},
+			"ResultError_PostgrestError_": {
+				"properties": {
+					"data": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					},
+					"error": {
+						"$ref": "#/components/schemas/PostgrestError"
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
 			},
 			"NewExperimentParams": {
 				"properties": {
@@ -5890,6 +6012,41 @@
 				}
 			}
 		},
+		"/v1/prompt/{promptId}/experiments": {
+			"get": {
+				"operationId": "GetPromptExperiments",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__id-string--created_at-string--num_hypotheses-number--dataset-string--meta-Record_string.any__-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Prompt"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "promptId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
 		"/v1/prompt/{promptId}/versions/query": {
 			"post": {
 				"operationId": "GetPromptVersions",
@@ -5936,6 +6093,39 @@
 			}
 		},
 		"/v1/prompt/version/{promptVersionId}": {
+			"get": {
+				"operationId": "GetPromptVersion",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_PromptVersionResult.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Prompt"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "promptVersionId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
 			"delete": {
 				"operationId": "DeletePromptVersion",
 				"responses": {
@@ -6382,7 +6572,7 @@
 				}
 			}
 		},
-		"/v1/experiment/dataset/{datasetId}/query": {
+		"/v1/experiment/dataset/{datasetId}/inputs/query": {
 			"post": {
 				"operationId": "GetDataset",
 				"responses": {
@@ -6391,7 +6581,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Result___-Array.string_"
+									"$ref": "#/components/schemas/Result_PromptInputRecord-Array.string_"
 								}
 							}
 						}
@@ -6405,18 +6595,16 @@
 						"api_key": []
 					}
 				],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"properties": {},
-								"type": "object"
-							}
+				"parameters": [
+					{
+						"in": "path",
+						"name": "datasetId",
+						"required": true,
+						"schema": {
+							"type": "string"
 						}
 					}
-				}
+				]
 			}
 		},
 		"/v1/experiment/dataset/{datasetId}/mutate": {
@@ -6764,6 +6952,109 @@
 				}
 			}
 		},
+		"/v1/experiment/new-empty": {
+			"post": {
+				"operationId": "CreateNewEmptyExperiment",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__experimentId-string_.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Experiment"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"datasetId": {
+										"type": "string"
+									},
+									"metadata": {
+										"$ref": "#/components/schemas/Record_string.string_"
+									}
+								},
+								"required": [
+									"datasetId",
+									"metadata"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/experiment/update-meta": {
+			"post": {
+				"operationId": "UpdateExperimentMeta",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/ResultSuccess_unknown_"
+										},
+										{
+											"$ref": "#/components/schemas/ResultError_PostgrestError_"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Experiment"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"meta": {
+										"$ref": "#/components/schemas/Record_string.string_"
+									},
+									"experimentId": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"meta",
+									"experimentId"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
 		"/v1/experiment": {
 			"post": {
 				"operationId": "CreateNewExperiment",
@@ -6794,6 +7085,72 @@
 						"application/json": {
 							"schema": {
 								"$ref": "#/components/schemas/NewExperimentParams"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/experiment/hypothesis": {
+			"post": {
+				"operationId": "CreateNewExperimentHypothesis",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Experiment"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"status": {
+										"type": "string",
+										"enum": [
+											"PENDING",
+											"RUNNING",
+											"COMPLETED",
+											"FAILED"
+										]
+									},
+									"providerKeyId": {
+										"type": "string"
+									},
+									"promptVersion": {
+										"type": "string"
+									},
+									"model": {
+										"type": "string"
+									},
+									"experimentId": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"status",
+									"providerKeyId",
+									"promptVersion",
+									"model",
+									"experimentId"
+								],
+								"type": "object"
 							}
 						}
 					}
