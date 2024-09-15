@@ -9,6 +9,7 @@ import {
   IncludeExperimentKeys,
 } from "../../lib/stores/experimentStore";
 import { run } from "../../lib/experiment/run";
+import { supabaseServer } from "../../lib/db/supabase";
 
 export type ExperimentFilterBranch = {
   left: ExperimentFilterNode;
@@ -34,6 +35,72 @@ export interface ExperimentRun {}
 @Tags("Experiment")
 @Security("api_key")
 export class ExperimentController extends Controller {
+  @Post("/new-empty")
+  public async createNewEmptyExperiment(
+    @Body()
+    requestBody: {
+      metadata: Record<string, string>;
+      datasetId: string;
+    },
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<
+    Result<
+      {
+        experimentId: string;
+      },
+      string
+    >
+  > {
+    const result = await supabaseServer.client
+      .from("experiment_v2")
+      .insert({
+        dataset: requestBody.datasetId,
+        organization: request.authParams.organizationId,
+        meta: requestBody.metadata,
+      })
+      .select("*")
+      .single();
+
+    // const result = await promptManager.getPrompts(requestBody);
+    if (result.error || !result.data) {
+      this.setStatus(500);
+      console.error(result.error);
+      return err(result.error.message);
+    } else {
+      this.setStatus(200); // set return status 201
+      return {
+        data: {
+          experimentId: result.data.id,
+        },
+        error: null,
+      };
+    }
+  }
+
+  @Post("/update-meta")
+  public async updateExperimentMeta(
+    @Body()
+    requestBody: {
+      experimentId: string;
+      meta: Record<string, string>;
+    },
+    @Request() request: JawnAuthenticatedRequest
+  ) {
+    const result = await supabaseServer.client
+      .from("experiment_v2")
+      .update({ meta: requestBody.meta })
+      .eq("id", requestBody.experimentId);
+
+    if (result.error || !result.data) {
+      this.setStatus(500);
+      console.error(result.error);
+      return err(result.error);
+    } else {
+      this.setStatus(200);
+      return result;
+    }
+  }
+
   @Post("/")
   public async createNewExperiment(
     @Body()

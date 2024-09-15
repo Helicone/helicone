@@ -9,6 +9,12 @@ interface JsonObject { [key: string]: JsonValue; }
 
 
 export interface paths {
+  "/v1/experiment/new-empty": {
+    post: operations["CreateNewEmptyExperiment"];
+  };
+  "/v1/experiment/update-meta": {
+    post: operations["UpdateExperimentMeta"];
+  };
   "/v1/experiment": {
     post: operations["CreateNewExperiment"];
   };
@@ -41,6 +47,9 @@ export interface paths {
   };
   "/v1/prompt/version/{promptVersionId}/inputs/query": {
     post: operations["GetInputs"];
+  };
+  "/v1/prompt/{promptId}/experiments": {
+    get: operations["GetPromptExperiments"];
   };
   "/v1/prompt/{promptId}/versions/query": {
     post: operations["GetPromptVersions"];
@@ -171,6 +180,31 @@ export interface components {
       error: string;
     };
     "Result__experimentId-string_.string_": components["schemas"]["ResultSuccess__experimentId-string__"] | components["schemas"]["ResultError_string_"];
+    /** @description Construct a type with a set of properties K of type T */
+    "Record_string.string_": {
+      [key: string]: string;
+    };
+    ResultSuccess_unknown_: {
+      data: unknown;
+      /** @enum {number|null} */
+      error: null;
+    };
+    /**
+     * @description Error format
+     *
+     * {@link https://postgrest.org/en/stable/api.html?highlight=options#errors-and-http-status-codes}
+     */
+    PostgrestError: {
+      code: string;
+      hint: string;
+      details: string;
+      message: string;
+    };
+    ResultError_PostgrestError_: {
+      /** @enum {number|null} */
+      data: null;
+      error: components["schemas"]["PostgrestError"];
+    };
     NewExperimentParams: {
       datasetId: string;
       promptVersion: string;
@@ -185,10 +219,6 @@ export interface components {
       error: null;
     };
     "Result_null.string_": components["schemas"]["ResultSuccess_null_"] | components["schemas"]["ResultError_string_"];
-    /** @description Construct a type with a set of properties K of type T */
-    "Record_string.string_": {
-      [key: string]: string;
-    };
     ResponseObj: {
       body: unknown;
       createdAt: string;
@@ -424,6 +454,19 @@ export interface components {
       error: null;
     };
     "Result_PromptInputRecord-Array.string_": components["schemas"]["ResultSuccess_PromptInputRecord-Array_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__id-string--created_at-string--num_hypotheses-number--dataset-string--meta-Record_string.any__-Array_": {
+      data: {
+          meta: components["schemas"]["Record_string.any_"];
+          dataset: string;
+          /** Format: double */
+          num_hypotheses: number;
+          created_at: string;
+          id: string;
+        }[];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__id-string--created_at-string--num_hypotheses-number--dataset-string--meta-Record_string.any__-Array.string_": components["schemas"]["ResultSuccess__id-string--created_at-string--num_hypotheses-number--dataset-string--meta-Record_string.any__-Array_"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess_PromptVersionResult-Array_": {
       data: components["schemas"]["PromptVersionResult"][];
       /** @enum {number|null} */
@@ -521,10 +564,10 @@ Json: JsonObject;
       name: string;
       color?: string;
       icon?: string;
-      org_provider_key?: string;
       limits?: components["schemas"]["Json"];
-      reseller_id?: string;
+      org_provider_key?: string;
       organization_type?: string;
+      reseller_id?: string;
     };
     UpdateOrganizationParams: components["schemas"]["Pick_NewOrganizationParams.name-or-color-or-icon-or-org_provider_key-or-limits-or-reseller_id-or-organization_type_"] & {
       variant?: string;
@@ -1165,6 +1208,42 @@ export type external = Record<string, never>;
 
 export interface operations {
 
+  CreateNewEmptyExperiment: {
+    requestBody: {
+      content: {
+        "application/json": {
+          datasetId: string;
+          metadata: components["schemas"]["Record_string.string_"];
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__experimentId-string_.string_"];
+        };
+      };
+    };
+  };
+  UpdateExperimentMeta: {
+    requestBody: {
+      content: {
+        "application/json": {
+          meta: components["schemas"]["Record_string.string_"];
+          experimentId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ResultSuccess_unknown_"] | components["schemas"]["ResultError_PostgrestError_"];
+        };
+      };
+    };
+  };
   CreateNewExperiment: {
     requestBody: {
       content: {
@@ -1370,6 +1449,21 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_PromptInputRecord-Array.string_"];
+        };
+      };
+    };
+  };
+  GetPromptExperiments: {
+    parameters: {
+      path: {
+        promptId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__id-string--created_at-string--num_hypotheses-number--dataset-string--meta-Record_string.any__-Array.string_"];
         };
       };
     };

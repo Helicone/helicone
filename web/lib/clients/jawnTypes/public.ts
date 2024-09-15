@@ -81,6 +81,9 @@ export interface paths {
   "/v1/prompt/version/{promptVersionId}/inputs/query": {
     post: operations["GetInputs"];
   };
+  "/v1/prompt/{promptId}/experiments": {
+    get: operations["GetPromptExperiments"];
+  };
   "/v1/prompt/{promptId}/versions/query": {
     post: operations["GetPromptVersions"];
   };
@@ -140,6 +143,12 @@ export interface paths {
   };
   "/v1/helicone-dataset/{datasetId}/request/{requestId}": {
     post: operations["UpdateHeliconeDatasetRequest"];
+  };
+  "/v1/experiment/new-empty": {
+    post: operations["CreateNewEmptyExperiment"];
+  };
+  "/v1/experiment/update-meta": {
+    post: operations["UpdateExperimentMeta"];
   };
   "/v1/experiment": {
     post: operations["CreateNewExperiment"];
@@ -905,6 +914,19 @@ export interface components {
       error: null;
     };
     "Result_PromptInputRecord-Array.string_": components["schemas"]["ResultSuccess_PromptInputRecord-Array_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__id-string--created_at-string--num_hypotheses-number--dataset-string--meta-Record_string.any__-Array_": {
+      data: {
+          meta: components["schemas"]["Record_string.any_"];
+          dataset: string;
+          /** Format: double */
+          num_hypotheses: number;
+          created_at: string;
+          id: string;
+        }[];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__id-string--created_at-string--num_hypotheses-number--dataset-string--meta-Record_string.any__-Array.string_": components["schemas"]["ResultSuccess__id-string--created_at-string--num_hypotheses-number--dataset-string--meta-Record_string.any__-Array_"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess_PromptVersionResult-Array_": {
       data: components["schemas"]["PromptVersionResult"][];
       /** @enum {number|null} */
@@ -1122,6 +1144,27 @@ Json: JsonObject;
       error: null;
     };
     "Result__experimentId-string_.string_": components["schemas"]["ResultSuccess__experimentId-string__"] | components["schemas"]["ResultError_string_"];
+    ResultSuccess_unknown_: {
+      data: unknown;
+      /** @enum {number|null} */
+      error: null;
+    };
+    /**
+     * @description Error format
+     *
+     * {@link https://postgrest.org/en/stable/api.html?highlight=options#errors-and-http-status-codes}
+     */
+    PostgrestError: {
+      code: string;
+      hint: string;
+      details: string;
+      message: string;
+    };
+    ResultError_PostgrestError_: {
+      /** @enum {number|null} */
+      data: null;
+      error: components["schemas"]["PostgrestError"];
+    };
     NewExperimentParams: {
       datasetId: string;
       promptVersion: string;
@@ -1909,6 +1952,21 @@ export interface operations {
       };
     };
   };
+  GetPromptExperiments: {
+    parameters: {
+      path: {
+        promptId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__id-string--created_at-string--num_hypotheses-number--dataset-string--meta-Record_string.any__-Array.string_"];
+        };
+      };
+    };
+  };
   GetPromptVersions: {
     parameters: {
       path: {
@@ -2275,6 +2333,42 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["ResultSuccess_any_"] | components["schemas"]["ResultError_unknown_"];
+        };
+      };
+    };
+  };
+  CreateNewEmptyExperiment: {
+    requestBody: {
+      content: {
+        "application/json": {
+          datasetId: string;
+          metadata: components["schemas"]["Record_string.string_"];
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__experimentId-string_.string_"];
+        };
+      };
+    };
+  };
+  UpdateExperimentMeta: {
+    requestBody: {
+      content: {
+        "application/json": {
+          meta: components["schemas"]["Record_string.string_"];
+          experimentId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ResultSuccess_unknown_"] | components["schemas"]["ResultError_PostgrestError_"];
         };
       };
     };

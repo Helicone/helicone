@@ -20,6 +20,14 @@ import {
 import { Row } from "@/components/layout/common";
 import { ChevronDown } from "lucide-react"; // Import the ChevronDown icon
 import { cn } from "@/lib/utils"; // Import the cn function
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import ThemedDrawer from "@/components/shared/themed/themedDrawer";
 
 interface ExperimentTableProps {
   promptSubversionId: string;
@@ -31,43 +39,37 @@ interface SettingsPanelProps {
   setSelectedProviderKey: (key: string | null) => void;
   wrapText: boolean;
   setWrapText: (wrap: boolean) => void;
-  setOpen: (open: boolean) => void;
   open: boolean;
+  setOpen: (open: boolean) => void;
+  defaultProviderKey: string | null;
 }
 
 const SettingsPanel: React.FC<SettingsPanelProps> = ({
+  defaultProviderKey,
   setSelectedProviderKey,
   wrapText,
   setWrapText,
-  setOpen,
   open,
+  setOpen,
 }) => {
   return (
-    <div
-      className={cn(
-        "fixed top-0 right-0 h-full bg-white border-l border-gray-200 transition-all duration-300",
-        open ? "w-64" : "w-0",
-        "overflow-hidden"
-      )}
+    <ThemedDrawer
+      open={open}
+      setOpen={setOpen}
+      defaultWidth="md:min-w-[300px] w-full md:w-[400px]"
     >
-      <div className="p-4 space-y-4">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setOpen(false)}
-          className="mb-2"
-        >
-          Close
-        </Button>
+      <div className="py-4 space-y-4">
+        <h2 className="text-lg font-semibold mb-4">Settings</h2>
         <ProviderKeyList
           variant="basic"
           setProviderKeyCallback={setSelectedProviderKey}
+          defaultProviderKey={defaultProviderKey}
         />
         <Button className="w-full" onClick={() => setWrapText(!wrapText)}>
           {wrapText ? "Disable" : "Enable"} Word Wrap
         </Button>
       </div>
-    </div>
+    </ThemedDrawer>
   );
 };
 
@@ -79,9 +81,6 @@ export function ExperimentTable({
   const orgId = org?.currentOrg?.id;
   const jawn = useJawnClient();
 
-  const [selectedProviderKey, setSelectedProviderKey] = useState<string | null>(
-    null
-  );
   const [wrapText, setWrapText] = useState(false);
 
   const fetchExperiments = useCallback(async () => {
@@ -109,6 +108,10 @@ export function ExperimentTable({
     fetchExperiments
   );
 
+  const providerKey = useMemo(
+    () => (experimentData?.meta as any)?.provider_key,
+    [experimentData]
+  );
   const fetchInputRecords = useCallback(async () => {
     const datasetId = experimentData?.dataset.id;
     if (!orgId || !datasetId) return [];
@@ -267,7 +270,7 @@ export function ExperimentTable({
         <AddColumnHeader
           promptVersionId={promptSubversionId}
           experimentId={experimentId}
-          selectedProviderKey={selectedProviderKey}
+          selectedProviderKey={providerKey}
         />
       ),
     });
@@ -279,54 +282,54 @@ export function ExperimentTable({
     inputRecordsData,
     promptSubversionId,
     experimentId,
-    selectedProviderKey,
+    providerKey,
   ]);
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   return (
     <div className="relative w-full h-full">
-      <div
-        className={cn(
-          "transition-all duration-300",
-          settingsOpen ? "mr-64" : ""
-        )}
-      >
-        <Row>
-          <div className="flex flex-col space-y-2 w-full">
-            <div className="flex flex-row space-x-2 justify-end w-full">
-              <Button
-                variant="outline"
-                onClick={() => setSettingsOpen(!settingsOpen)}
-              >
-                Settings
-              </Button>
-            </div>
-            <div
-              className="ag-theme-alpine"
-              style={{ height: "80vh", width: "100%" }}
-            >
-              <AgGridReact
-                rowData={rowData}
-                columnDefs={columnDefs}
-                defaultColDef={defaultColDef}
-                onGridReady={onGridReady}
-                enableCellTextSelection={true}
-                suppressRowTransform={true}
-                getRowId={getRowId}
-              />
-            </div>
-            <Button variant="default" onClick={handleAddRow}>
-              Add row
-            </Button>
-          </div>
-        </Row>
+      <div className="flex flex-col space-y-2 w-full">
+        <div className="flex flex-row space-x-2 justify-end w-full">
+          <Button variant="outline" onClick={() => setSettingsOpen(true)}>
+            Settings
+          </Button>
+        </div>
+        <div
+          className="ag-theme-alpine"
+          style={{ height: "80vh", width: "100%" }}
+        >
+          <AgGridReact
+            rowData={rowData}
+            columnDefs={columnDefs}
+            defaultColDef={defaultColDef}
+            onGridReady={onGridReady}
+            enableCellTextSelection={true}
+            suppressRowTransform={true}
+            getRowId={getRowId}
+          />
+        </div>
+        <Button variant="default" onClick={handleAddRow}>
+          Add row
+        </Button>
       </div>
       <SettingsPanel
-        setSelectedProviderKey={setSelectedProviderKey}
+        defaultProviderKey={providerKey}
+        setSelectedProviderKey={async (key) => {
+          await jawn.POST("/v1/experiment/update-meta", {
+            body: {
+              experimentId,
+              meta: {
+                ...(experimentData?.meta ?? {}),
+                provider_key: key ?? "",
+              },
+            },
+          });
+          refetchExperiments();
+        }}
         wrapText={wrapText}
         setWrapText={setWrapText}
-        setOpen={setSettingsOpen}
         open={settingsOpen}
+        setOpen={setSettingsOpen}
       />
     </div>
   );

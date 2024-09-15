@@ -1,14 +1,16 @@
+import { usePrompt } from "@/services/hooks/prompts/prompts";
 import HcBreadcrumb from "../../../../ui/hcBreadcrumb";
 import { ExperimentTable } from "./ExperimentTable";
 
 interface PromptIdPageProps {
-  id: string;
+  promptId: string;
   promptSubversionId: string;
   experimentId: string;
 }
 
 const ExperimentTablePage = (props: PromptIdPageProps) => {
-  const { id, promptSubversionId, experimentId } = props;
+  const { promptId, promptSubversionId, experimentId } = props;
+  const { prompt } = usePrompt(promptId);
 
   return (
     <>
@@ -18,6 +20,14 @@ const ExperimentTablePage = (props: PromptIdPageProps) => {
             {
               href: "/prompts",
               name: "Prompts",
+            },
+            {
+              href: `/prompts/${promptId}`,
+              name: prompt?.user_defined_id || "Loading...",
+            },
+            {
+              href: `/prompts/${promptId}/subversion/${promptSubversionId}/experiment/${experimentId}`,
+              name: "Experiment",
             },
           ]}
         />

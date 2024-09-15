@@ -69,6 +69,7 @@ import StatusBadge from "../../requestsV2/statusBadge";
 import PromptPropertyCard from "./promptPropertyCard";
 import TableFooter from "../../requestsV2/tableFooter";
 import { CheckIcon } from "@heroicons/react/24/solid";
+import ExperimentPanel from "./experimentPanel";
 
 interface PromptIdPageProps {
   id: string;
@@ -490,17 +491,180 @@ const PromptIdPage = (props: PromptIdPageProps) => {
       </div>
       <TabGroup>
         <TabList variant="line" defaultValue="1">
-          <Tab value="1" icon={ChartBarIcon}>
-            Overview
-          </Tab>
-          <Tab value="2" icon={BookOpenIcon}>
+          <Tab value="1" icon={BookOpenIcon}>
             Prompt
           </Tab>
-          <Tab value="3" icon={BarsArrowUpIcon}>
+          <Tab value="2" icon={BeakerIcon}>
+            Experiments
+          </Tab>
+          <Tab value="3" icon={ChartBarIcon}>
+            Overview
+          </Tab>
+
+          <Tab value="4" icon={BarsArrowUpIcon}>
             Inputs
           </Tab>
         </TabList>
         <TabPanels>
+          <TabPanel>
+            <div className="flex items-start relative h-[75vh]">
+              <div className="py-4 flex flex-col space-y-4 w-full h-full">
+                <div className="flex space-x-4">
+                  <div className="w-2/3">
+                    <PromptPlayground
+                      prompt={selectedPrompt?.helicone_template || ""}
+                      selectedInput={selectedInput}
+                      onSubmit={async (history, model) => {
+                        console.log("Submitted history:", history);
+                        console.log("Selected model:", model);
+                        await createSubversion(history, model);
+                      }}
+                      submitText="Test"
+                      initialModel={
+                        selectedPrompt?.model || MODEL_LIST[0].value
+                      }
+                    />
+                  </div>
+                  <div className="w-1/3 ">
+                    <div className="border border-gray-300 dark:border-gray-700 rounded-lg bg-[#F9FAFB]">
+                      <h2 className="text-lg font-semibold m-4">Versions</h2>
+                      <ScrollArea className="h-[50vh]">
+                        <div>
+                          {sortedPrompts?.map((prompt) => (
+                            <div
+                              key={prompt.id}
+                              className={`p-4 cursor-pointer border border-gray-200 dark:border-gray-700 ${
+                                selectedVersion ===
+                                `${prompt.major_version}.${prompt.minor_version}`
+                                  ? "bg-white dark:bg-gray-800"
+                                  : "bg-gray-50 dark:bg-gray-900"
+                              }`}
+                              onClick={() =>
+                                setSelectedVersion(
+                                  `${prompt.major_version}.${prompt.minor_version}`
+                                )
+                              }
+                            >
+                              <div className="flex justify-between items-center">
+                                <span className="font-medium text-lg flex items-center">
+                                  V{prompt.major_version}.{prompt.minor_version}
+                                  {selectedVersion ===
+                                    `${prompt.major_version}.${prompt.minor_version}` && (
+                                    <CheckIcon className="h-5 w-5 text-green-500 ml-2" />
+                                  )}
+                                </span>
+                                <div className="flex items-center space-x-2">
+                                  {prompt.metadata?.isProduction === true ? (
+                                    <Badge
+                                      variant={"default"}
+                                      className="bg-[#A6E9C1] text-[#14532D] text-md font-medium rounded-lg px-4 hover:bg-[#A6E9C1] hover:text-[#14532D]"
+                                    >
+                                      Prod
+                                    </Badge>
+                                  ) : (
+                                    <DropdownMenu>
+                                      <DropdownMenuTrigger asChild>
+                                        <button className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full">
+                                          <EllipsisHorizontalIcon className="h-6 w-6 text-gray-500" />
+                                        </button>
+                                      </DropdownMenuTrigger>
+                                      <DropdownMenuContent>
+                                        <DropdownMenuItem
+                                          onClick={() =>
+                                            promoteToProduction(prompt.id)
+                                          }
+                                        >
+                                          <ArrowTrendingUpIcon className="h-4 w-4 mr-2" />
+                                          Promote to prod
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem
+                                          onClick={async () => {
+                                            const dataset = await jawn.POST(
+                                              "/v1/helicone-dataset",
+                                              {
+                                                body: {
+                                                  datasetName:
+                                                    "Dataset for Experiment",
+                                                  requestIds: [],
+                                                },
+                                              }
+                                            );
+                                            if (
+                                              !dataset.data?.data?.datasetId
+                                            ) {
+                                              notification.setNotification(
+                                                "Failed to create dataset",
+                                                "error"
+                                              );
+                                              return;
+                                            }
+                                            const experiment = await jawn.POST(
+                                              "/v1/experiment/new-empty",
+                                              {
+                                                body: {
+                                                  metadata: {
+                                                    prompt_id: id,
+                                                    prompt_version: prompt.id,
+                                                  },
+                                                  datasetId:
+                                                    dataset.data?.data
+                                                      ?.datasetId,
+                                                },
+                                              }
+                                            );
+                                            if (
+                                              !experiment.data?.data
+                                                ?.experimentId
+                                            ) {
+                                              notification.setNotification(
+                                                "Failed to create experiment",
+                                                "error"
+                                              );
+                                              return;
+                                            }
+                                            router.push(
+                                              `/prompts/${id}/subversion/${prompt.id}/experiment/${experiment.data?.data?.experimentId}`
+                                            );
+                                          }}
+                                        >
+                                          <BeakerIcon className="h-4 w-4 mr-2" />
+                                          Experiment
+                                        </DropdownMenuItem>
+
+                                        <DropdownMenuItem
+                                          onClick={() =>
+                                            deletePromptVersion(prompt.id)
+                                          }
+                                        >
+                                          <TrashIcon className="h-4 w-4 mr-2 text-red-500" />
+                                          <p className="text-red-500">Delete</p>
+                                        </DropdownMenuItem>
+                                      </DropdownMenuContent>
+                                    </DropdownMenu>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="flex justify-between items-center mt-2">
+                                <div className="text-md text-gray-600 dark:text-gray-400">
+                                  {prompt.model}
+                                </div>
+                                <span className="text-xs text-gray-500">
+                                  {getTimeAgo(new Date(prompt.created_at))}
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </ScrollArea>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </TabPanel>
+          <TabPanel>
+            <ExperimentPanel promptId={id} />
+          </TabPanel>
           <TabPanel>
             <div className="flex flex-col space-y-16 py-4">
               <div className="w-full h-full flex flex-col space-y-4">
@@ -676,108 +840,6 @@ const PromptIdPage = (props: PromptIdPageProps) => {
             </div>
           </TabPanel>
           <TabPanel>
-            <div className="flex items-start relative h-[75vh]">
-              <div className="py-4 flex flex-col space-y-4 w-full h-full">
-                <div className="flex space-x-4">
-                  <div className="w-2/3">
-                    <PromptPlayground
-                      prompt={selectedPrompt?.helicone_template || ""}
-                      selectedInput={selectedInput}
-                      onSubmit={async (history, model) => {
-                        console.log("Submitted history:", history);
-                        console.log("Selected model:", model);
-                        await createSubversion(history, model);
-                      }}
-                      submitText="Test"
-                      initialModel={
-                        selectedPrompt?.model || MODEL_LIST[0].value
-                      }
-                    />
-                  </div>
-                  <div className="w-1/3 ">
-                    <div className="border border-gray-300 dark:border-gray-700 rounded-lg bg-[#F9FAFB]">
-                      <h2 className="text-lg font-semibold m-4">Versions</h2>
-                      <ScrollArea className="h-[50vh]">
-                        <div>
-                          {sortedPrompts?.map((prompt) => (
-                            <div
-                              key={prompt.id}
-                              className={`p-4 cursor-pointer border border-gray-200 dark:border-gray-700 ${
-                                selectedVersion ===
-                                `${prompt.major_version}.${prompt.minor_version}`
-                                  ? "bg-white dark:bg-gray-800"
-                                  : "bg-gray-50 dark:bg-gray-900"
-                              }`}
-                              onClick={() =>
-                                setSelectedVersion(
-                                  `${prompt.major_version}.${prompt.minor_version}`
-                                )
-                              }
-                            >
-                              <div className="flex justify-between items-center">
-                                <span className="font-medium text-lg flex items-center">
-                                  V{prompt.major_version}.{prompt.minor_version}
-                                  {selectedVersion ===
-                                    `${prompt.major_version}.${prompt.minor_version}` && (
-                                    <CheckIcon className="h-5 w-5 text-green-500 ml-2" />
-                                  )}
-                                </span>
-                                <div className="flex items-center space-x-2">
-                                  {prompt.metadata?.isProduction === true ? (
-                                    <Badge
-                                      variant={"default"}
-                                      className="bg-[#A6E9C1] text-[#14532D] text-md font-medium rounded-lg px-4 hover:bg-[#A6E9C1] hover:text-[#14532D]"
-                                    >
-                                      Prod
-                                    </Badge>
-                                  ) : (
-                                    <DropdownMenu>
-                                      <DropdownMenuTrigger asChild>
-                                        <button className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full">
-                                          <EllipsisHorizontalIcon className="h-6 w-6 text-gray-500" />
-                                        </button>
-                                      </DropdownMenuTrigger>
-                                      <DropdownMenuContent>
-                                        <DropdownMenuItem
-                                          onClick={() =>
-                                            promoteToProduction(prompt.id)
-                                          }
-                                        >
-                                          <ArrowTrendingUpIcon className="h-4 w-4 mr-2" />
-                                          Promote to prod
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem
-                                          onClick={() =>
-                                            deletePromptVersion(prompt.id)
-                                          }
-                                        >
-                                          <TrashIcon className="h-4 w-4 mr-2 text-red-500" />
-                                          <p className="text-red-500">Delete</p>
-                                        </DropdownMenuItem>
-                                      </DropdownMenuContent>
-                                    </DropdownMenu>
-                                  )}
-                                </div>
-                              </div>
-                              <div className="flex justify-between items-center mt-2">
-                                <div className="text-md text-gray-600 dark:text-gray-400">
-                                  {prompt.model}
-                                </div>
-                                <span className="text-xs text-gray-500">
-                                  {getTimeAgo(new Date(prompt.created_at))}
-                                </span>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </ScrollArea>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </TabPanel>
-          <TabPanel>
             <div className="flex items-start relative h-[75vh] flex-row justify-between">
               <div className="min-w-[25rem] w-1/3 py-4 pr-4 flex flex-col space-y-4 h-full">
                 <div className="flex flex-col w-full space-y-2">
@@ -870,6 +932,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                                       <ArrowTrendingUpIcon className="h-4 w-4 mr-2" />
                                       Promote to prod
                                     </DropdownMenuItem>
+
                                     <DropdownMenuItem
                                       onClick={() =>
                                         deletePromptVersion(prompt.id)
