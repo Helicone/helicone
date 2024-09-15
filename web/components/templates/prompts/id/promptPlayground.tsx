@@ -21,7 +21,7 @@ type Input = {
   source_request: string;
   prompt_version: string;
   created_at: string;
-  response_body: string;
+  response_body?: string;
   auto_prompt_inputs: Record<string, string> | unknown[];
 };
 

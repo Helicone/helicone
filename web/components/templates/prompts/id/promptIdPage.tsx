@@ -159,13 +159,14 @@ export const RenderImageWithPrettyInputKeys = (props: {
 
 type NotNullOrUndefined<T> = T extends null | undefined ? never : T;
 
+// Update the Input type definition
 type Input = {
   id: string;
   inputs: { [key: string]: string };
   source_request: string;
   prompt_version: string;
   created_at: string;
-  response_body: string;
+  response_body?: string; // Make response_body optional
   auto_prompt_inputs: Record<string, string> | unknown[];
 };
 
