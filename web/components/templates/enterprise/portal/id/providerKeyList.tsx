@@ -1,17 +1,17 @@
 import { RadioGroup } from "@headlessui/react";
-import { KeyIcon, TrashIcon } from "@heroicons/react/24/outline";
-import { SecretInput } from "../../../../shared/themed/themedTable";
-import { useVaultPage } from "../../../vault/useVaultPage";
-import { clsx } from "../../../../shared/clsx";
-import { useEffect, useState, useCallback } from "react";
-import CreateProviderKeyModal from "../../../vault/createProviderKeyModal";
-import { Tooltip } from "@mui/material";
-import ThemedModal from "../../../../shared/themed/themedModal";
-import { DecryptedProviderKey } from "../../../../../services/lib/keys";
-import useNotification from "../../../../shared/notification/useNotification";
-import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { CheckCircleIcon, PlusIcon } from "@heroicons/react/20/solid";
+import { KeyIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { Tooltip } from "@mui/material";
+import { useSupabaseClient } from "@supabase/auth-helpers-react";
+import { useCallback, useState } from "react";
+import { DecryptedProviderKey } from "../../../../../services/lib/keys";
+import { clsx } from "../../../../shared/clsx";
+import useNotification from "../../../../shared/notification/useNotification";
+import ThemedModal from "../../../../shared/themed/themedModal";
+import { SecretInput } from "../../../../shared/themed/themedTable";
 import HcButton from "../../../../ui/hcButton";
+import CreateProviderKeyModal from "../../../vault/createProviderKeyModal";
+import { useVaultPage } from "../../../vault/useVaultPage";
 
 interface ProviderKeyListProps {
   variant?: "portal" | "basic";

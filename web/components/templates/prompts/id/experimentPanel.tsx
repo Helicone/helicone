@@ -1,9 +1,7 @@
 import { Row } from "@/components/layout/common";
 import { useOrg } from "@/components/layout/organizationContext";
 import { Button } from "@/components/ui/button";
-import HcBreadcrumb from "@/components/ui/hcBreadcrumb";
 import { getJawnClient } from "@/lib/clients/jawn";
-import { usePrompt } from "@/services/hooks/prompts/prompts";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 

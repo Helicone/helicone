@@ -1,6 +1,8 @@
 import { useOrg } from "@/components/layout/organizationContext";
+import ThemedDrawer from "@/components/shared/themed/themedDrawer";
 import { Button } from "@/components/ui/button";
 import { getJawnClient } from "@/lib/clients/jawn";
+import { useJawnClient } from "@/lib/clients/jawnHook";
 import { useQuery } from "@tanstack/react-query";
 import { ColDef, GridReadyEvent } from "ag-grid-community";
 import "ag-grid-community/styles/ag-grid.css";
@@ -11,23 +13,6 @@ import ProviderKeyList from "../../../enterprise/portal/id/providerKeyList";
 import AddColumnHeader from "./AddColumnHeader";
 import { HypothesisCellRenderer } from "./HypothesisCellRenderer";
 import { HypothesisHeaderComponent } from "./HypothesisHeaderComponent";
-import { useJawnClient } from "@/lib/clients/jawnHook";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import { Row } from "@/components/layout/common";
-import { ChevronDown } from "lucide-react"; // Import the ChevronDown icon
-import { cn } from "@/lib/utils"; // Import the cn function
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import ThemedDrawer from "@/components/shared/themed/themedDrawer";
 
 interface ExperimentTableProps {
   promptSubversionId: string;
