@@ -70,6 +70,7 @@ import PromptPropertyCard from "./promptPropertyCard";
 import TableFooter from "../../requestsV2/tableFooter";
 import { CheckIcon } from "@heroicons/react/24/solid";
 import ExperimentPanel from "./experimentPanel";
+import { useUser } from "@supabase/auth-helpers-react";
 
 interface PromptIdPageProps {
   id: string;
@@ -447,6 +448,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
     refetchPromptVersions();
     refetchPrompt();
   };
+  const user = useUser();
 
   return (
     <div className="w-full h-full flex flex-col space-y-4">
@@ -494,9 +496,13 @@ const PromptIdPage = (props: PromptIdPageProps) => {
           <Tab value="1" icon={BookOpenIcon}>
             Prompt
           </Tab>
-          <Tab value="2" icon={BeakerIcon}>
-            Experiments
-          </Tab>
+          {user?.email?.includes("helicone.ai") ? (
+            <Tab value="2" icon={BeakerIcon}>
+              Experiments
+            </Tab>
+          ) : (
+            <></>
+          )}
           <Tab value="3" icon={ChartBarIcon}>
             Overview
           </Tab>
@@ -577,59 +583,65 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                                           <ArrowTrendingUpIcon className="h-4 w-4 mr-2" />
                                           Promote to prod
                                         </DropdownMenuItem>
-                                        <DropdownMenuItem
-                                          onClick={async () => {
-                                            const dataset = await jawn.POST(
-                                              "/v1/helicone-dataset",
-                                              {
-                                                body: {
-                                                  datasetName:
-                                                    "Dataset for Experiment",
-                                                  requestIds: [],
-                                                },
-                                              }
-                                            );
-                                            if (
-                                              !dataset.data?.data?.datasetId
-                                            ) {
-                                              notification.setNotification(
-                                                "Failed to create dataset",
-                                                "error"
-                                              );
-                                              return;
-                                            }
-                                            const experiment = await jawn.POST(
-                                              "/v1/experiment/new-empty",
-                                              {
-                                                body: {
-                                                  metadata: {
-                                                    prompt_id: id,
-                                                    prompt_version: prompt.id,
+                                        {user?.email?.includes(
+                                          "helicone.ai"
+                                        ) && (
+                                          <DropdownMenuItem
+                                            onClick={async () => {
+                                              const dataset = await jawn.POST(
+                                                "/v1/helicone-dataset",
+                                                {
+                                                  body: {
+                                                    datasetName:
+                                                      "Dataset for Experiment",
+                                                    requestIds: [],
                                                   },
-                                                  datasetId:
-                                                    dataset.data?.data
-                                                      ?.datasetId,
-                                                },
-                                              }
-                                            );
-                                            if (
-                                              !experiment.data?.data
-                                                ?.experimentId
-                                            ) {
-                                              notification.setNotification(
-                                                "Failed to create experiment",
-                                                "error"
+                                                }
                                               );
-                                              return;
-                                            }
-                                            router.push(
-                                              `/prompts/${id}/subversion/${prompt.id}/experiment/${experiment.data?.data?.experimentId}`
-                                            );
-                                          }}
-                                        >
-                                          <BeakerIcon className="h-4 w-4 mr-2" />
-                                          Experiment
-                                        </DropdownMenuItem>
+                                              if (
+                                                !dataset.data?.data?.datasetId
+                                              ) {
+                                                notification.setNotification(
+                                                  "Failed to create dataset",
+                                                  "error"
+                                                );
+                                                return;
+                                              }
+                                              const experiment =
+                                                await jawn.POST(
+                                                  "/v1/experiment/new-empty",
+                                                  {
+                                                    body: {
+                                                      metadata: {
+                                                        prompt_id: id,
+                                                        prompt_version:
+                                                          prompt.id,
+                                                      },
+                                                      datasetId:
+                                                        dataset.data?.data
+                                                          ?.datasetId,
+                                                    },
+                                                  }
+                                                );
+                                              if (
+                                                !experiment.data?.data
+                                                  ?.experimentId
+                                              ) {
+                                                notification.setNotification(
+                                                  "Failed to create experiment",
+                                                  "error"
+                                                );
+                                                return;
+                                              }
+                                              router.push(
+                                                `/prompts/${id}/subversion/${prompt.id}/experiment/${experiment.data?.data?.experimentId}`
+                                              );
+                                            }}
+                                          >
+                                            <BeakerIcon className="h-4 w-4 mr-2" />
+                                            Experiment
+                                          </DropdownMenuItem>
+                                        )}
 
                                         <DropdownMenuItem
                                           onClick={() =>
@@ -662,9 +674,12 @@ const PromptIdPage = (props: PromptIdPageProps) => {
               </div>
             </div>
           </TabPanel>
-          <TabPanel>
-            <ExperimentPanel promptId={id} />
-          </TabPanel>
+          {user?.email?.includes("helicone.ai") && (
+            <TabPanel>
+              <ExperimentPanel promptId={id} />
+            </TabPanel>
+          )}
+
           <TabPanel>
             <div className="flex flex-col space-y-16 py-4">
               <div className="w-full h-full flex flex-col space-y-4">
