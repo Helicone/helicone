@@ -81,10 +81,14 @@ export interface paths {
   "/v1/prompt/version/{promptVersionId}/inputs/query": {
     post: operations["GetInputs"];
   };
+  "/v1/prompt/{promptId}/experiments": {
+    get: operations["GetPromptExperiments"];
+  };
   "/v1/prompt/{promptId}/versions/query": {
     post: operations["GetPromptVersions"];
   };
   "/v1/prompt/version/{promptVersionId}": {
+    get: operations["GetPromptVersion"];
     delete: operations["DeletePromptVersion"];
   };
   "/v1/prompt/{user_defined_id}/compile": {
@@ -116,7 +120,10 @@ export interface paths {
   "/v1/experiment/dataset/query": {
     post: operations["GetDatasets"];
   };
-  "/v1/experiment/dataset/{datasetId}/query": {
+  "/v1/experiment/dataset/{datasetId}/version/{promptVersionId}/row": {
+    post: operations["CreateDatasetRow"];
+  };
+  "/v1/experiment/dataset/{datasetId}/inputs/query": {
     post: operations["GetDataset"];
   };
   "/v1/experiment/dataset/{datasetId}/mutate": {
@@ -140,11 +147,23 @@ export interface paths {
   "/v1/helicone-dataset/{datasetId}/request/{requestId}": {
     post: operations["UpdateHeliconeDatasetRequest"];
   };
+  "/v1/experiment/new-empty": {
+    post: operations["CreateNewEmptyExperiment"];
+  };
+  "/v1/experiment/update-meta": {
+    post: operations["UpdateExperimentMeta"];
+  };
   "/v1/experiment": {
     post: operations["CreateNewExperiment"];
   };
+  "/v1/experiment/hypothesis": {
+    post: operations["CreateNewExperimentHypothesis"];
+  };
   "/v1/experiment/query": {
     post: operations["GetExperiments"];
+  };
+  "/v1/experiment/run": {
+    post: operations["RunExperiment"];
   };
   "/v1/evals/query": {
     post: operations["QueryEvals"];
@@ -888,10 +907,11 @@ export interface components {
     PromptInputRecord: {
       id: string;
       inputs: components["schemas"]["Record_string.string_"];
+      dataset_row_id?: string;
       source_request: string;
       prompt_version: string;
       created_at: string;
-      response_body: string;
+      response_body?: string;
       auto_prompt_inputs: unknown[];
     };
     "ResultSuccess_PromptInputRecord-Array_": {
@@ -900,6 +920,19 @@ export interface components {
       error: null;
     };
     "Result_PromptInputRecord-Array.string_": components["schemas"]["ResultSuccess_PromptInputRecord-Array_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__id-string--created_at-string--num_hypotheses-number--dataset-string--meta-Record_string.any__-Array_": {
+      data: {
+          meta: components["schemas"]["Record_string.any_"];
+          dataset: string;
+          /** Format: double */
+          num_hypotheses: number;
+          created_at: string;
+          id: string;
+        }[];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__id-string--created_at-string--num_hypotheses-number--dataset-string--meta-Record_string.any__-Array.string_": components["schemas"]["ResultSuccess__id-string--created_at-string--num_hypotheses-number--dataset-string--meta-Record_string.any__-Array_"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess_PromptVersionResult-Array_": {
       data: components["schemas"]["PromptVersionResult"][];
       /** @enum {number|null} */
@@ -1054,6 +1087,12 @@ Json: JsonObject;
       error: null;
     };
     "Result_DatasetResult-Array.string_": components["schemas"]["ResultSuccess_DatasetResult-Array_"] | components["schemas"]["ResultError_string_"];
+    ResultSuccess_string_: {
+      data: string;
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_string.string_": components["schemas"]["ResultSuccess_string_"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess___-Array_": {
       data: Record<string, never>[];
       /** @enum {number|null} */
@@ -1073,12 +1112,6 @@ Json: JsonObject;
       addRequests: string[];
       removeRequests: string[];
     };
-    ResultSuccess_string_: {
-      data: string;
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_string.string_": components["schemas"]["ResultSuccess_string_"] | components["schemas"]["ResultError_string_"];
     HeliconeDatasetRow: {
       id: string;
       origin_request_id: string;
@@ -1133,6 +1166,27 @@ Json: JsonObject;
       error: null;
     };
     "Result__experimentId-string_.string_": components["schemas"]["ResultSuccess__experimentId-string__"] | components["schemas"]["ResultError_string_"];
+    ResultSuccess_unknown_: {
+      data: unknown;
+      /** @enum {number|null} */
+      error: null;
+    };
+    /**
+     * @description Error format
+     *
+     * {@link https://postgrest.org/en/stable/api.html?highlight=options#errors-and-http-status-codes}
+     */
+    PostgrestError: {
+      code: string;
+      hint: string;
+      details: string;
+      message: string;
+    };
+    ResultError_PostgrestError_: {
+      /** @enum {number|null} */
+      data: null;
+      error: components["schemas"]["PostgrestError"];
+    };
     NewExperimentParams: {
       datasetId: string;
       promptVersion: string;
@@ -1248,6 +1302,13 @@ Json: JsonObject;
       /** @enum {boolean} */
       score?: true;
     };
+    ExperimentRun: Record<string, never>;
+    ResultSuccess_ExperimentRun_: {
+      data: components["schemas"]["ExperimentRun"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ExperimentRun.string_": components["schemas"]["ResultSuccess_ExperimentRun_"] | components["schemas"]["ResultError_string_"];
     Eval: {
       name: string;
       /** Format: double */
@@ -1914,6 +1975,21 @@ export interface operations {
       };
     };
   };
+  GetPromptExperiments: {
+    parameters: {
+      path: {
+        promptId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__id-string--created_at-string--num_hypotheses-number--dataset-string--meta-Record_string.any__-Array.string_"];
+        };
+      };
+    };
+  };
   GetPromptVersions: {
     parameters: {
       path: {
@@ -1930,6 +2006,21 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_PromptVersionResult-Array.string_"];
+        };
+      };
+    };
+  };
+  GetPromptVersion: {
+    parameters: {
+      path: {
+        promptVersionId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_PromptVersionResult.string_"];
         };
       };
     };
@@ -2116,17 +2207,41 @@ export interface operations {
       };
     };
   };
-  GetDataset: {
+  CreateDatasetRow: {
+    parameters: {
+      path: {
+        datasetId: string;
+        promptVersionId: string;
+      };
+    };
     requestBody: {
       content: {
-        "application/json": Record<string, never>;
+        "application/json": {
+          sourceRequest?: string;
+          inputs: components["schemas"]["Record_string.string_"];
+        };
       };
     };
     responses: {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result___-Array.string_"];
+          "application/json": components["schemas"]["Result_string.string_"];
+        };
+      };
+    };
+  };
+  GetDataset: {
+    parameters: {
+      path: {
+        datasetId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_PromptInputRecord-Array.string_"];
         };
       };
     };
@@ -2265,6 +2380,42 @@ export interface operations {
       };
     };
   };
+  CreateNewEmptyExperiment: {
+    requestBody: {
+      content: {
+        "application/json": {
+          datasetId: string;
+          metadata: components["schemas"]["Record_string.string_"];
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__experimentId-string_.string_"];
+        };
+      };
+    };
+  };
+  UpdateExperimentMeta: {
+    requestBody: {
+      content: {
+        "application/json": {
+          meta: components["schemas"]["Record_string.string_"];
+          experimentId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ResultSuccess_unknown_"] | components["schemas"]["ResultError_PostgrestError_"];
+        };
+      };
+    };
+  };
   CreateNewExperiment: {
     requestBody: {
       content: {
@@ -2276,6 +2427,28 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result__experimentId-string_.string_"];
+        };
+      };
+    };
+  };
+  CreateNewExperimentHypothesis: {
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @enum {string} */
+          status: "PENDING" | "RUNNING" | "COMPLETED" | "FAILED";
+          providerKeyId: string;
+          promptVersion: string;
+          model: string;
+          experimentId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
         };
       };
     };
@@ -2294,6 +2467,25 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_Experiment-Array.string_"];
+        };
+      };
+    };
+  };
+  RunExperiment: {
+    requestBody: {
+      content: {
+        "application/json": {
+          datasetRowIds: string[];
+          hypothesisId: string;
+          experimentId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ExperimentRun.string_"];
         };
       };
     };

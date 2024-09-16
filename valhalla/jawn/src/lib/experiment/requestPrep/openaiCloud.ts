@@ -36,7 +36,8 @@ export function prepareRequestOpenAIFull({
   });
 
   const { url: fetchUrl, headers } = prepareRequestOpenAI(
-    datasetRow.inputRecord!.requestPath,
+    datasetRow.inputRecord?.requestPath ??
+      "http://localhost:8787/v1/chat/completions",
     proxyKey,
     requestId
   );

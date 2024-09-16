@@ -30,10 +30,14 @@ export interface paths {
   "/v1/prompt/version/{promptVersionId}/inputs/query": {
     post: operations["GetInputs"];
   };
+  "/v1/prompt/{promptId}/experiments": {
+    get: operations["GetPromptExperiments"];
+  };
   "/v1/prompt/{promptId}/versions/query": {
     post: operations["GetPromptVersions"];
   };
   "/v1/prompt/version/{promptVersionId}": {
+    get: operations["GetPromptVersion"];
     delete: operations["DeletePromptVersion"];
   };
   "/v1/prompt/{user_defined_id}/compile": {
@@ -267,10 +271,11 @@ export interface components {
     PromptInputRecord: {
       id: string;
       inputs: components["schemas"]["Record_string.string_"];
+      dataset_row_id?: string;
       source_request: string;
       prompt_version: string;
       created_at: string;
-      response_body: string;
+      response_body?: string;
       auto_prompt_inputs: unknown[];
     };
     "ResultSuccess_PromptInputRecord-Array_": {
@@ -279,6 +284,19 @@ export interface components {
       error: null;
     };
     "Result_PromptInputRecord-Array.string_": components["schemas"]["ResultSuccess_PromptInputRecord-Array_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__id-string--created_at-string--num_hypotheses-number--dataset-string--meta-Record_string.any__-Array_": {
+      data: {
+          meta: components["schemas"]["Record_string.any_"];
+          dataset: string;
+          /** Format: double */
+          num_hypotheses: number;
+          created_at: string;
+          id: string;
+        }[];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__id-string--created_at-string--num_hypotheses-number--dataset-string--meta-Record_string.any__-Array.string_": components["schemas"]["ResultSuccess__id-string--created_at-string--num_hypotheses-number--dataset-string--meta-Record_string.any__-Array_"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess_PromptVersionResult-Array_": {
       data: components["schemas"]["PromptVersionResult"][];
       /** @enum {number|null} */
@@ -1179,6 +1197,21 @@ export interface operations {
       };
     };
   };
+  GetPromptExperiments: {
+    parameters: {
+      path: {
+        promptId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__id-string--created_at-string--num_hypotheses-number--dataset-string--meta-Record_string.any__-Array.string_"];
+        };
+      };
+    };
+  };
   GetPromptVersions: {
     parameters: {
       path: {
@@ -1195,6 +1228,21 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_PromptVersionResult-Array.string_"];
+        };
+      };
+    };
+  };
+  GetPromptVersion: {
+    parameters: {
+      path: {
+        promptVersionId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_PromptVersionResult.string_"];
         };
       };
     };

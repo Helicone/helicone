@@ -21,7 +21,7 @@ type Input = {
   source_request: string;
   prompt_version: string;
   created_at: string;
-  response_body: string;
+  response_body?: string;
   auto_prompt_inputs: Record<string, string> | unknown[];
 };
 
@@ -40,6 +40,7 @@ interface PromptPlaygroundProps {
   submitText: string;
   initialModel?: string;
   isPromptCreatedFromUi?: boolean;
+  defaultEditMode?: boolean;
 }
 
 const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
@@ -49,6 +50,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
   submitText,
   initialModel = MODEL_LIST[0].value,
   isPromptCreatedFromUi,
+  defaultEditMode = false,
 }) => {
   const replaceTemplateVariables = (
     content: string,
@@ -96,7 +98,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
   };
 
   const [mode, setMode] = useState<(typeof PROMPT_MODES)[number]>("Pretty");
-  const [isEditMode, setIsEditMode] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(defaultEditMode);
   const [currentChat, setCurrentChat] = useState<Message[]>(() =>
     parsePromptToMessages(prompt, selectedInput?.inputs)
   );
