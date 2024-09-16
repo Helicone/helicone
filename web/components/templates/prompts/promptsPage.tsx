@@ -400,9 +400,9 @@ const chatCompletion = await openai.chat.completions.create(
                             {prompt.metadata?.createdFromUi === true ? (
                               <Tooltip>
                                 <TooltipTrigger asChild>
-                                  <div className="flex items-center justify-center bg-[#F1F5F9] rounded-md p-2 border border-[#CBD5E1] text-black max-w-28">
+                                  <div className="flex items-center justify-center text-center bg-[#F1F5F9] rounded-md p-2 border border-[#CBD5E1] text-black max-w-28">
                                     <PencilIcon className="h-4 w-4 mr-1" />
-                                    <p>Edit / View</p>
+                                    <p>Editable</p>
                                   </div>
                                 </TooltipTrigger>
                                 <TooltipContent align="center">
