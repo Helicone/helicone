@@ -7,6 +7,12 @@
 		"requestBodies": {},
 		"responses": {},
 		"schemas": {
+			"Record_string.any_": {
+				"properties": {},
+				"additionalProperties": {},
+				"type": "object",
+				"description": "Construct a type with a set of properties K of type T"
+			},
 			"PromptsResult": {
 				"properties": {
 					"id": {
@@ -27,6 +33,9 @@
 					"major_version": {
 						"type": "number",
 						"format": "double"
+					},
+					"metadata": {
+						"$ref": "#/components/schemas/Record_string.any_"
 					}
 				},
 				"required": [
@@ -227,6 +236,9 @@
 							"type": "string"
 						},
 						"type": "array"
+					},
+					"metadata": {
+						"$ref": "#/components/schemas/Record_string.any_"
 					}
 				},
 				"required": [
@@ -340,12 +352,6 @@
 					}
 				]
 			},
-			"Record_string.any_": {
-				"properties": {},
-				"additionalProperties": {},
-				"type": "object",
-				"description": "Construct a type with a set of properties K of type T"
-			},
 			"PromptVersionResult": {
 				"properties": {
 					"id": {
@@ -423,6 +429,9 @@
 					"newHeliconeTemplate": {},
 					"isMajorVersion": {
 						"type": "boolean"
+					},
+					"metadata": {
+						"$ref": "#/components/schemas/Record_string.any_"
 					}
 				},
 				"required": [
@@ -820,6 +829,68 @@
 				],
 				"type": "object",
 				"additionalProperties": false
+			},
+			"PromptVersionResultFilled": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"minor_version": {
+						"type": "number",
+						"format": "double"
+					},
+					"major_version": {
+						"type": "number",
+						"format": "double"
+					},
+					"prompt_v2": {
+						"type": "string"
+					},
+					"model": {
+						"type": "string"
+					},
+					"filled_helicone_template": {}
+				},
+				"required": [
+					"id",
+					"minor_version",
+					"major_version",
+					"prompt_v2",
+					"model",
+					"filled_helicone_template"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_PromptVersionResultFilled_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/PromptVersionResultFilled"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_PromptVersionResultFilled.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_PromptVersionResultFilled_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
 			},
 			"Json": {
 				"anyOf": [
@@ -2757,6 +2828,9 @@
 						"application/json": {
 							"schema": {
 								"properties": {
+									"metadata": {
+										"$ref": "#/components/schemas/Record_string.any_"
+									},
 									"prompt": {
 										"properties": {
 											"messages": {
@@ -2778,6 +2852,7 @@
 									}
 								},
 								"required": [
+									"metadata",
 									"prompt",
 									"userDefinedId"
 								],
@@ -3101,6 +3176,51 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/Result_PromptVersionResultCompiled.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Prompt"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "user_defined_id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/PromptVersiosQueryParamsCompiled"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/prompt/{user_defined_id}/template": {
+			"post": {
+				"operationId": "GetPromptVersionTemplates",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_PromptVersionResultFilled.string_"
 								}
 							}
 						}
