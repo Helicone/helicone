@@ -468,12 +468,12 @@ const blogContent: BlogStructure[] = [
     time: "5 minute read",
   },
   {
-    title: "A Guide for Datadog Users Building with LLMs",
+    title: "An Open-Source Datadog Alternative for LLM Observability",
     description:
-      "Datadog has long been a favourite among developers for monitoring and observability. But recently, LLM developers have been exploring new options. Why? We have some answers.",
+      "Datadog has long been a favourite among developers for its application monitoring and observability capabilities. But recently, LLM developers have been exploring open-source observability options. Why? We have some answers.",
     badgeText: "Compare",
     date: "Apr 29, 2024",
-    href: "/blog/datadog",
+    href: "/blog/best-datadog-alternative-for-llm",
     imageUrl: "static/blog/datadog/title.webp",
     authors: [
       {
