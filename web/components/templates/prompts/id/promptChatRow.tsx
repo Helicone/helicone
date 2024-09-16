@@ -30,6 +30,7 @@ interface PromptChatRowProps {
   deleteRow: (rowId: string) => void;
   editMode?: boolean;
   promptMode?: boolean;
+  selectedProperties: Record<string, string> | undefined;
 }
 
 export const hasImage = (content: string | any[] | null) => {
@@ -172,8 +173,8 @@ export const RenderWithPrettyInputKeys = (props: {
 };
 
 const PromptChatRow = (props: PromptChatRowProps) => {
-  const { index, message, callback, deleteRow, editMode, promptMode } = props;
-  console.log("editMode", editMode);
+  const { index, message, callback, deleteRow, editMode, selectedProperties } =
+    props;
 
   const [currentMessage, setCurrentMessage] = useState(message);
   const [minimize, setMinimize] = useState(false);
@@ -276,7 +277,7 @@ const PromptChatRow = (props: PromptChatRowProps) => {
         <div className="flex flex-col space-y-4 whitespace-pre-wrap">
           <RenderWithPrettyInputKeys
             text={removeLeadingWhitespace(text)}
-            selectedProperties={undefined}
+            selectedProperties={selectedProperties}
           />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           {hasImage(content) && (
@@ -372,7 +373,7 @@ const PromptChatRow = (props: PromptChatRowProps) => {
                 ? `${contentString?.substring(0, 100)}...`
                 : contentString
             }
-            selectedProperties={undefined}
+            selectedProperties={selectedProperties}
           />
         </div>
       );
@@ -417,10 +418,16 @@ const PromptChatRow = (props: PromptChatRowProps) => {
     }
   }, [isEditing, contentAsString, extractVariables]);
 
+  // Update currentMessage when the prop message changes
+  useEffect(() => {
+    setCurrentMessage(message);
+    setRole(message.role);
+  }, [message]);
+
   return (
     <li
       className={clsx(
-        index === 0 ? "rounded-t-lg" : "border-t",
+        index === 0 ? "" : "border-t",
         "bg-white dark:bg-black",
         "flex flex-row justify-between gap-8 border-gray-300 dark:border-gray-700"
       )}
@@ -512,7 +519,9 @@ const PromptChatRow = (props: PromptChatRowProps) => {
                         const textMessage = messageContent.find(
                           (element) => element.type === "text"
                         );
-                        textMessage.text = replacedText;
+                        if (textMessage) {
+                          textMessage.text = replacedText;
+                        }
                       } else {
                         newMessages.content = replacedText;
                       }

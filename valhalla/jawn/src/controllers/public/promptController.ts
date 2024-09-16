@@ -63,6 +63,7 @@ export interface PromptsResult {
   pretty_name: string;
   created_at: string;
   major_version: number;
+  metadata?: Record<string, any>;
 }
 
 export interface PromptQueryParams {
@@ -83,6 +84,7 @@ export interface PromptResult {
   created_at: string;
   last_used: string;
   versions: string[];
+  metadata?: Record<string, any>;
 }
 
 export interface PromptVersionQueryParams {}
@@ -106,9 +108,14 @@ export interface PromptVersionResultCompiled extends PromptVersionResultBase {
   prompt_compiled: any;
 }
 
+export interface PromptVersionResultFilled extends PromptVersionResultBase {
+  filled_helicone_template: any;
+}
+
 export interface PromptCreateSubversionParams {
   newHeliconeTemplate: any;
   isMajorVersion?: boolean;
+  metadata?: Record<string, any>;
 }
 
 export interface PromptInputRecord {
@@ -192,6 +199,7 @@ export class PromptController extends Controller {
         model: string;
         messages: any[];
       };
+      metadata: Record<string, any>;
     },
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<CreatePromptResponse, string>> {
@@ -389,6 +397,37 @@ export class PromptController extends Controller {
   ): Promise<Result<PromptVersionResultCompiled, string>> {
     const promptManager = new PromptManager(request.authParams);
     const result = await promptManager.getCompiledPromptVersions(
+      {
+        left: requestBody.filter ?? "all",
+        operator: "and",
+        right: {
+          prompt_v2: {
+            user_defined_id: {
+              equals: user_defined_id,
+            },
+          },
+        },
+      },
+      requestBody.inputs
+    );
+    if (result.error || !result.data) {
+      console.error(result.error);
+      this.setStatus(500);
+    } else {
+      this.setStatus(200); // set return status 201
+    }
+    return result;
+  }
+
+  @Post("{user_defined_id}/template")
+  public async getPromptVersionTemplates(
+    @Body()
+    requestBody: PromptVersiosQueryParamsCompiled,
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() user_defined_id: string
+  ): Promise<Result<PromptVersionResultFilled, string>> {
+    const promptManager = new PromptManager(request.authParams);
+    const result = await promptManager.getPormptVersionsTemplates(
       {
         left: requestBody.filter ?? "all",
         operator: "and",
