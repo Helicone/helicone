@@ -13,6 +13,8 @@ import {
   TrashIcon,
   EyeIcon,
   PencilIcon,
+  BarsArrowUpIcon,
+  CheckIcon,
 } from "@heroicons/react/24/outline";
 import { useRouter } from "next/router";
 import { useExperiments } from "../../../../services/hooks/prompts/experiments";
@@ -574,7 +576,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
       <TabGroup>
         <TabList variant="line" defaultValue="1">
           <Tab value="1" icon={BookOpenIcon}>
-            Prompt
+            Prompt & Inputs
           </Tab>
           {user?.email?.includes("helicone.ai") ? (
             <Tab value="2" icon={BeakerIcon}>
@@ -585,10 +587,6 @@ const PromptIdPage = (props: PromptIdPageProps) => {
           )}
           <Tab value="3" icon={ChartBarIcon}>
             Overview
-          </Tab>
-
-          <Tab value="4" icon={BarsArrowUpIcon}>
-            Inputs
           </Tab>
         </TabList>
         <TabPanels>
@@ -601,152 +599,153 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                       prompt={selectedPrompt?.helicone_template || ""}
                       selectedInput={selectedInput}
                       onSubmit={async (history, model) => {
-                        console.log("Submitted history:", history);
-                        console.log("Selected model:", model);
                         await createSubversion(history, model);
                       }}
                       submitText="Test"
                       initialModel={
                         selectedPrompt?.model || MODEL_LIST[0].value
                       }
+                      isPromptCreatedFromUi={
+                        prompt?.metadata?.createdFromUi as boolean | undefined
+                      }
                     />
                   </div>
-                  <div className="w-1/3 ">
+                  <div className="w-1/3 flex flex-col space-y-4">
                     <div className="border border-gray-300 dark:border-gray-700 rounded-lg bg-[#F9FAFB]">
-                      <h2 className="text-lg font-semibold m-4">Versions</h2>
-                      <ScrollArea className="h-[50vh]">
+                      <div className="flex flex-row items-center justify-between px-4 h-12 ">
+                        <h2 className="text-lg font-medium ">Versions</h2>
+                      </div>
+
+                      <ScrollArea className="h-[25vh] rounded-b-lg">
                         <div>
-                          {sortedPrompts?.map((prompt) => (
+                          {sortedPrompts?.map((promptVersion) => (
                             <div
-                              key={prompt.id}
-                              className={`p-4 cursor-pointer border border-gray-200 dark:border-gray-700 ${
+                              key={promptVersion.id}
+                              className={`px-4 py-2 cursor-pointer border-t border-gray-200 dark:border-gray-700 ${
                                 selectedVersion ===
-                                `${prompt.major_version}.${prompt.minor_version}`
-                                  ? "bg-white dark:bg-gray-800"
+                                `${promptVersion.major_version}.${promptVersion.minor_version}`
+                                  ? "bg-sky-100 border-sky-500 dark:bg-sky-950 border-b"
                                   : "bg-gray-50 dark:bg-gray-900"
                               }`}
                               onClick={() =>
-                                setSelectedVersion(
-                                  `${prompt.major_version}.${prompt.minor_version}`
+                                setSelectedInputAndVersion(
+                                  `${promptVersion.major_version}.${promptVersion.minor_version}`
                                 )
                               }
                             >
                               <div className="flex justify-between items-center">
-                                <span className="font-medium text-lg flex items-center">
-                                  V{prompt.major_version}.{prompt.minor_version}
-                                  {selectedVersion ===
-                                    `${prompt.major_version}.${prompt.minor_version}` && (
-                                    <CheckIcon className="h-5 w-5 text-green-500 ml-2" />
-                                  )}
-                                </span>
                                 <div className="flex items-center space-x-2">
-                                  {prompt.metadata?.isProduction === true ? (
+                                  <div className="border rounded-full border-gray-500 bg-white dark:bg-black h-6 w-6 flex items-center justify-center">
+                                    {selectedVersion ===
+                                      `${promptVersion.major_version}.${promptVersion.minor_version}` && (
+                                      <div className="bg-sky-500 rounded-full h-4 w-4" />
+                                    )}
+                                  </div>
+                                  <span className="font-medium text-lg">
+                                    V{promptVersion.major_version}.
+                                    {promptVersion.minor_version}
+                                  </span>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                  {promptVersion.metadata?.isProduction ===
+                                  true ? (
                                     <Badge
                                       variant={"default"}
-                                      className="bg-[#A6E9C1] text-[#14532D] text-md font-medium rounded-lg px-4 hover:bg-[#A6E9C1] hover:text-[#14532D]"
+                                      className="bg-[#F1F5F9] border border-[#CBD5E1] text-[#14532D] text-sm font-medium rounded-lg px-4 hover:bg-[#F1F5F9] hover:text-[#14532D]"
                                     >
                                       Prod
                                     </Badge>
                                   ) : (
-                                    <DropdownMenu>
-                                      <DropdownMenuTrigger asChild>
-                                        <button className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full">
-                                          <EllipsisHorizontalIcon className="h-6 w-6 text-gray-500" />
-                                        </button>
-                                      </DropdownMenuTrigger>
-                                      <DropdownMenuContent>
-                                        <DropdownMenuItem
-                                          onClick={() =>
-                                            promoteToProduction(prompt.id)
-                                          }
-                                        >
-                                          <ArrowTrendingUpIcon className="h-4 w-4 mr-2" />
-                                          Promote to prod
-                                        </DropdownMenuItem>
-                                        {user?.email?.includes(
-                                          "helicone.ai"
-                                        ) && (
+                                    prompt?.metadata?.createdFromUi ===
+                                      true && (
+                                      <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                          <button className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full">
+                                            <EllipsisHorizontalIcon className="h-6 w-6 text-gray-500" />
+                                          </button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent>
                                           <DropdownMenuItem
-                                            onClick={async () => {
-                                              const dataset = await jawn.POST(
-                                                "/v1/helicone-dataset",
-                                                {
-                                                  body: {
-                                                    datasetName:
-                                                      "Dataset for Experiment",
-                                                    requestIds: [],
-                                                  },
-                                                }
-                                              );
-                                              if (
-                                                !dataset.data?.data?.datasetId
-                                              ) {
-                                                notification.setNotification(
-                                                  "Failed to create dataset",
-                                                  "error"
-                                                );
-                                                return;
-                                              }
-                                              const experiment =
-                                                await jawn.POST(
-                                                  "/v1/experiment/new-empty",
-                                                  {
-                                                    body: {
-                                                      metadata: {
-                                                        prompt_id: id,
-                                                        prompt_version:
-                                                          prompt.id,
-                                                      },
-                                                      datasetId:
-                                                        dataset.data?.data
-                                                          ?.datasetId,
-                                                    },
-                                                  }
-                                                );
-                                              if (
-                                                !experiment.data?.data
-                                                  ?.experimentId
-                                              ) {
-                                                notification.setNotification(
-                                                  "Failed to create experiment",
-                                                  "error"
-                                                );
-                                                return;
-                                              }
-                                              router.push(
-                                                `/prompts/${id}/subversion/${prompt.id}/experiment/${experiment.data?.data?.experimentId}`
-                                              );
-                                            }}
+                                            onClick={() =>
+                                              promoteToProduction(
+                                                promptVersion.id
+                                              )
+                                            }
                                           >
-                                            <BeakerIcon className="h-4 w-4 mr-2" />
-                                            Experiment
+                                            <ArrowTrendingUpIcon className="h-4 w-4 mr-2" />
+                                            Promote to prod
                                           </DropdownMenuItem>
-                                        )}
-
-                                        <DropdownMenuItem
-                                          onClick={() =>
-                                            deletePromptVersion(prompt.id)
-                                          }
-                                        >
-                                          <TrashIcon className="h-4 w-4 mr-2 text-red-500" />
-                                          <p className="text-red-500">Delete</p>
-                                        </DropdownMenuItem>
-                                      </DropdownMenuContent>
-                                    </DropdownMenu>
+                                          <DropdownMenuItem
+                                            onClick={() =>
+                                              deletePromptVersion(
+                                                promptVersion.id
+                                              )
+                                            }
+                                          >
+                                            <TrashIcon className="h-4 w-4 mr-2 text-red-500" />
+                                            <p className="text-red-500">
+                                              Delete
+                                            </p>
+                                          </DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                      </DropdownMenu>
+                                    )
                                   )}
                                 </div>
                               </div>
                               <div className="flex justify-between items-center mt-2">
-                                <div className="text-md text-gray-600 dark:text-gray-400">
-                                  {prompt.model}
-                                </div>
                                 <span className="text-xs text-gray-500">
-                                  {getTimeAgo(new Date(prompt.created_at))}
+                                  {getTimeAgo(
+                                    new Date(promptVersion.created_at)
+                                  )}
                                 </span>
+                                <div className="text-xs text-gray-500 dark:text-gray-400">
+                                  {promptVersion.model}
+                                </div>
                               </div>
                             </div>
                           ))}
                         </div>
+                      </ScrollArea>
+                    </div>
+                    <div className="border border-gray-300 dark:border-gray-700 rounded-lg bg-[#F9FAFB]">
+                      <div className="flex flex-row items-center justify-between mx-4 h-12">
+                        <h2 className="text-lg font-medium ">Inputs</h2>
+                        <div className="pl-4 w-full">
+                          <TextInput
+                            placeholder="Search by request id..."
+                            value={searchRequestId}
+                            onValueChange={(value) => setSearchRequestId(value)}
+                          />
+                        </div>
+                      </div>
+
+                      <ScrollArea className="h-[30vh] rounded-b-lg">
+                        <ul className="flex flex-col ">
+                          {inputs
+                            ?.filter((input) =>
+                              input.source_request.includes(searchRequestId)
+                            )
+                            .map((input) => (
+                              <li key={input.id}>
+                                <PromptPropertyCard
+                                  isSelected={selectedInput?.id === input.id}
+                                  onSelect={function (): void {
+                                    if (selectedInput?.id === input.id) {
+                                      setSelectedInput(undefined);
+                                    } else {
+                                      setSelectedInput(input);
+                                    }
+                                  }}
+                                  requestId={input.source_request}
+                                  createdAt={input.created_at}
+                                  properties={input.inputs}
+                                  autoInputs={input.auto_prompt_inputs}
+                                  view={inputView}
+                                />
+                              </li>
+                            ))}
+                        </ul>
                       </ScrollArea>
                     </div>
                   </div>
@@ -931,169 +930,6 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                   }}
                   pageSizeOptions={[25, 50, 100]}
                 />
-              </div>
-            </div>
-          </TabPanel>
-          <TabPanel>
-            <div className="flex items-start relative h-[75vh]">
-              <div className="py-4 flex flex-col space-y-4 w-full h-full">
-                <div className="flex space-x-4">
-                  <div className="w-2/3">
-                    <PromptPlayground
-                      prompt={selectedPrompt?.helicone_template || ""}
-                      selectedInput={selectedInput}
-                      onSubmit={async (history, model) => {
-                        await createSubversion(history, model);
-                      }}
-                      submitText="Test"
-                      initialModel={
-                        selectedPrompt?.model || MODEL_LIST[0].value
-                      }
-                      isPromptCreatedFromUi={
-                        prompt?.metadata?.createdFromUi as boolean | undefined
-                      }
-                    />
-                  </div>
-                  <div className="w-1/3 flex flex-col space-y-4">
-                    <div className="border border-gray-300 dark:border-gray-700 rounded-lg bg-[#F9FAFB]">
-                      <div className="flex flex-row items-center justify-between px-4 h-12 ">
-                        <h2 className="text-lg font-medium ">Versions</h2>
-                      </div>
-
-                      <ScrollArea className="h-[25vh] rounded-b-lg">
-                        <div>
-                          {sortedPrompts?.map((promptVersion) => (
-                            <div
-                              key={promptVersion.id}
-                              className={`px-4 py-2 cursor-pointer border-t border-gray-200 dark:border-gray-700 ${
-                                selectedVersion ===
-                                `${promptVersion.major_version}.${promptVersion.minor_version}`
-                                  ? "bg-sky-100 border-sky-500 dark:bg-sky-950 border-b"
-                                  : "bg-gray-50 dark:bg-gray-900"
-                              }`}
-                              onClick={() =>
-                                setSelectedInputAndVersion(
-                                  `${promptVersion.major_version}.${promptVersion.minor_version}`
-                                )
-                              }
-                            >
-                              <div className="flex justify-between items-center">
-                                <div className="flex items-center space-x-2">
-                                  <div className="border rounded-full border-gray-500 bg-white dark:bg-black h-6 w-6 flex items-center justify-center">
-                                    {selectedVersion ===
-                                      `${promptVersion.major_version}.${promptVersion.minor_version}` && (
-                                      <div className="bg-sky-500 rounded-full h-4 w-4" />
-                                    )}
-                                  </div>
-                                  <span className="font-medium text-lg">
-                                    V{promptVersion.major_version}.
-                                    {promptVersion.minor_version}
-                                  </span>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                  {promptVersion.metadata?.isProduction ===
-                                  true ? (
-                                    <Badge
-                                      variant={"default"}
-                                      className="bg-[#F1F5F9] border border-[#CBD5E1] text-[#14532D] text-sm font-medium rounded-lg px-4 hover:bg-[#F1F5F9] hover:text-[#14532D]"
-                                    >
-                                      Prod
-                                    </Badge>
-                                  ) : (
-                                    prompt?.metadata?.createdFromUi ===
-                                      true && (
-                                      <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                          <button className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full">
-                                            <EllipsisHorizontalIcon className="h-6 w-6 text-gray-500" />
-                                          </button>
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent>
-                                          <DropdownMenuItem
-                                            onClick={() =>
-                                              promoteToProduction(
-                                                promptVersion.id
-                                              )
-                                            }
-                                          >
-                                            <ArrowTrendingUpIcon className="h-4 w-4 mr-2" />
-                                            Promote to prod
-                                          </DropdownMenuItem>
-                                          <DropdownMenuItem
-                                            onClick={() =>
-                                              deletePromptVersion(
-                                                promptVersion.id
-                                              )
-                                            }
-                                          >
-                                            <TrashIcon className="h-4 w-4 mr-2 text-red-500" />
-                                            <p className="text-red-500">
-                                              Delete
-                                            </p>
-                                          </DropdownMenuItem>
-                                        </DropdownMenuContent>
-                                      </DropdownMenu>
-                                    )
-                                  )}
-                                </div>
-                              </div>
-                              <div className="flex justify-between items-center mt-2">
-                                <span className="text-xs text-gray-500">
-                                  {getTimeAgo(
-                                    new Date(promptVersion.created_at)
-                                  )}
-                                </span>
-                                <div className="text-xs text-gray-500 dark:text-gray-400">
-                                  {promptVersion.model}
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </ScrollArea>
-                    </div>
-                    <div className="border border-gray-300 dark:border-gray-700 rounded-lg bg-[#F9FAFB]">
-                      <div className="flex flex-row items-center justify-between mx-4 h-12">
-                        <h2 className="text-lg font-medium ">Inputs</h2>
-                        <div className="pl-4 w-full">
-                          <TextInput
-                            placeholder="Search by request id..."
-                            value={searchRequestId}
-                            onValueChange={(value) => setSearchRequestId(value)}
-                          />
-                        </div>
-                      </div>
-
-                      <ScrollArea className="h-[30vh] rounded-b-lg">
-                        <ul className="flex flex-col ">
-                          {inputs
-                            ?.filter((input) =>
-                              input.source_request.includes(searchRequestId)
-                            )
-                            .map((input) => (
-                              <li key={input.id}>
-                                <PromptPropertyCard
-                                  isSelected={selectedInput?.id === input.id}
-                                  onSelect={function (): void {
-                                    if (selectedInput?.id === input.id) {
-                                      setSelectedInput(undefined);
-                                    } else {
-                                      setSelectedInput(input);
-                                    }
-                                  }}
-                                  requestId={input.source_request}
-                                  createdAt={input.created_at}
-                                  properties={input.inputs}
-                                  autoInputs={input.auto_prompt_inputs}
-                                  view={inputView}
-                                />
-                              </li>
-                            ))}
-                        </ul>
-                      </ScrollArea>
-                    </div>
-                  </div>
-                </div>
               </div>
             </div>
           </TabPanel>
