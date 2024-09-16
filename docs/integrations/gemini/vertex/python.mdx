@@ -1,0 +1,64 @@
+---
+title: "Vertex AI Python SDK Integration"
+sidebarTitle: "Python"
+description: "Use Vertex AI's Python SDK to integrate with Helicone to log your Vertex AI usage."
+"twitter:title": "Vertex AI Python SDK Integration - Helicone OSS LLM Observability"
+icon: "python"
+iconType: "solid"
+---
+
+# Proxy Integration
+
+## Python SDK
+
+<Steps>
+  <Step title="Create an account + Generate an API Key">
+    Log into [helicone](https://www.helicone.ai) or create an account. Once you have an account, you can generate an [API key](https://helicone.ai/developer).
+  </Step>
+  <Step title="Set API keys as environment variables">
+    ```bash
+    export HELICONE_API_KEY=<your API key>
+    export PROJECT_ID=<your Google Cloud project ID>
+    export LOCATION=<your location>
+    ```
+  </Step>
+  <Step title="Install required packages">
+    Ensure you have the necessary packages installed in your Python environment:
+    ```bash
+    pip install google-cloud-aiplatform
+    ```
+  </Step>
+  <Step title="Import libraries">
+    ```python
+    from vertexai.generative_models import GenerativeModel
+    import vertexai
+    import os
+    ```
+  </Step>
+  <Step title="Initialize Vertex AI with Helicone">
+    ```python
+    HELICONE_API_KEY = os.environ.get("HELICONE_API_KEY")
+    PROJECT_ID = os.environ.get("PROJECT_ID")
+    LOCATION = os.environ.get("LOCATION")
+
+    vertexai.init(
+        project=PROJECT_ID,
+        location=LOCATION,
+        api_endpoint="gateway.helicone.ai",
+        api_transport="rest",  # Must be 'rest' or else it will not work
+        request_metadata=[
+            ('helicone-target-url', f'https://{LOCATION}-aiplatform.googleapis.com'),
+            ('helicone-auth', f'Bearer {HELICONE_API_KEY}')
+        ]
+    )
+    ```
+
+  </Step>
+  <Step title="Initialize the model and generate content">
+    ```python
+    model = GenerativeModel("gemini-1.5-flash-001")
+    response = model.generate_content("Tell me a fun fact about space.")
+    print(response.text)
+    ```
+  </Step>
+</Steps>
