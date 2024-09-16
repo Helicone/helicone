@@ -232,7 +232,7 @@ const CreateOrg = (props: CreateOrgProps) => {
             )}
           </div>
         </div>
-        <div className="sticky bottom-0  p-4 flex items-center justify-between">
+        <div className="sticky bottom-0 p-4 flex items-center justify-between">
           <HcButton variant={"secondary"} size={"sm"} title={"Back"} />
           <HcButton
             variant={"primary"}
