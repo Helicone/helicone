@@ -674,4 +674,49 @@ WHERE (${builtFilter.filter})`,
     // This might involve querying your database or other services
     return null;
   }
+  public async updateProUserCount(
+    count: number
+  ): Promise<Result<null, string>> {
+    try {
+      const subscriptionResult = await this.getSubscription();
+      if (!subscriptionResult.data) {
+        return err("No existing subscription found");
+      }
+
+      const subscription = subscriptionResult.data;
+      const proUsersPriceId = proProductPrices["pro-users"];
+
+      const proUsersItem = subscription.items.data.find(
+        (item) => item.price.id === proUsersPriceId
+      );
+
+      if (!proUsersItem) {
+        return err("Pro-users product not found in the subscription");
+      }
+
+      const updatedSubscription = await this.stripe.subscriptions.update(
+        subscription.id,
+        {
+          items: [
+            {
+              id: proUsersItem.id,
+              quantity: count,
+            },
+          ],
+          proration_behavior: "create_prorations",
+        }
+      );
+
+      console.log(
+        "Pro-user count updated in subscription:",
+        updatedSubscription.id
+      );
+
+      return ok(null);
+    } catch (error: any) {
+      return err(
+        `Error updating pro-user count in subscription: ${error.message}`
+      );
+    }
+  }
 }

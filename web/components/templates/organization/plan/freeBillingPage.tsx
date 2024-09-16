@@ -7,6 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { CardContent } from "@mui/material";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -78,9 +79,13 @@ export const FreePlanCard = () => {
                   {freeUsage.data?.data} / 10,000
                 </div>
                 <div className="text-sm text-gray-500">
-                  requests left in this month
+                  requests used this month
                 </div>
               </Row>
+              <Progress
+                value={(freeUsage.data?.data ?? 0) / 10_000}
+                className="w-[60%]"
+              />
               <Col className="gap-2">
                 {subscription.data?.data?.status === "canceled" && (
                   <div className="text-sm text-gray-500">
