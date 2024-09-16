@@ -430,8 +430,8 @@ const chatCompletion = await openai.chat.completions.create(
                                     <span className="font-semibold">
                                       in code
                                     </span>
-                                    . You won't be able to edit this from the
-                                    UI.
+                                    . You won&apos;t be able to edit this from
+                                    the UI.
                                   </p>
                                 </TooltipContent>
                               </Tooltip>

@@ -13,8 +13,6 @@ import {
   TrashIcon,
   EyeIcon,
   PencilIcon,
-  BarsArrowUpIcon,
-  CheckIcon,
 } from "@heroicons/react/24/outline";
 import { useRouter } from "next/router";
 import { useExperiments } from "../../../../services/hooks/prompts/experiments";
