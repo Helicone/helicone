@@ -147,7 +147,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
             {currentChat.map((message, index) => (
               <li
                 key={message.id}
-                className="border-gray-300 dark:border-gray-700 last:border-b-0"
+                className=" dark:border-gray-700 last:border-b-0 z-10 last:rounded-xl"
               >
                 <PromptChatRow
                   message={message}
@@ -195,7 +195,9 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
           setIsEditMode={setIsEditMode}
         />
 
-        <div className="flex-grow overflow-auto">{renderMessages()}</div>
+        <div className="flex-grow overflow-auto rounded-b-md">
+          {renderMessages()}
+        </div>
         {isEditMode && (
           <div className="flex justify-between items-center py-4 px-8 border-t border-gray-300 dark:border-gray-700 bg-white dark:bg-black rounded-b-lg">
             {" "}

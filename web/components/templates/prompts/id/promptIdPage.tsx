@@ -773,18 +773,19 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                   </div>
                   <div className="w-1/3 flex flex-col space-y-4">
                     <div className="border border-gray-300 dark:border-gray-700 rounded-lg bg-[#F9FAFB]">
-                      <h2 className="text-lg font-medium mx-4 my-2">
-                        Versions
-                      </h2>
-                      <ScrollArea className="h-[25vh]">
+                      <div className="flex flex-row items-center justify-between px-4 h-12 ">
+                        <h2 className="text-lg font-medium ">Versions</h2>
+                      </div>
+
+                      <ScrollArea className="h-[25vh] rounded-b-lg">
                         <div>
                           {sortedPrompts?.map((promptVersion) => (
                             <div
                               key={promptVersion.id}
-                              className={`px-4 py-2 cursor-pointer border border-gray-200 dark:border-gray-700 ${
+                              className={`px-4 py-2 cursor-pointer border-t border-gray-200 dark:border-gray-700 ${
                                 selectedVersion ===
                                 `${promptVersion.major_version}.${promptVersion.minor_version}`
-                                  ? "bg-sky-100 border-sky-500 dark:bg-sky-950"
+                                  ? "bg-sky-100 border-sky-500 dark:bg-sky-950 border-b"
                                   : "bg-gray-50 dark:bg-gray-900"
                               }`}
                               onClick={() =>
@@ -869,7 +870,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                       </ScrollArea>
                     </div>
                     <div className="border border-gray-300 dark:border-gray-700 rounded-lg bg-[#F9FAFB]">
-                      <div className="flex flex-row items-center justify-between mx-4 my-2">
+                      <div className="flex flex-row items-center justify-between mx-4 h-12">
                         <h2 className="text-lg font-medium ">Inputs</h2>
                         <div className="pl-4 w-full">
                           <TextInput
@@ -880,8 +881,8 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                         </div>
                       </div>
 
-                      <ScrollArea className="h-[30vh]">
-                        <ul className="flex flex-col">
+                      <ScrollArea className="h-[30vh] rounded-b-lg">
+                        <ul className="flex flex-col ">
                           {inputs
                             ?.filter((input) =>
                               input.source_request.includes(searchRequestId)

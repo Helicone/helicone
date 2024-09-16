@@ -26,7 +26,7 @@ export const PlaygroundChatTopBar: React.FC<PlaygroundChatTopBarProps> = ({
   isPromptCreatedFromUi,
 }) => {
   return (
-    <div className="h-12 px-2 rounded-t-md flex flex-row items-center justify-between w-full bg-gray-50 dark:bg-black text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">
+    <div className="h-12 px-2 rounded-t-md flex flex-row items-center justify-between w-full bg-gray-50 dark:bg-black text-gray-900 dark:text-gray-100  border-gray-200 dark:border-gray-700">
       <div className="flex flex-row items-center space-x-2 py-2">
         <div className="flex rounded-md overflow-hidden ">
           {isPromptCreatedFromUi && isPromptCreatedFromUi === true && (

@@ -173,7 +173,8 @@ export const RenderWithPrettyInputKeys = (props: {
 };
 
 const PromptChatRow = (props: PromptChatRowProps) => {
-  const { index, message, callback, deleteRow, editMode, selectedProperties } = props;
+  const { index, message, callback, deleteRow, editMode, selectedProperties } =
+    props;
 
   const [currentMessage, setCurrentMessage] = useState(message);
   const [minimize, setMinimize] = useState(false);
@@ -426,7 +427,7 @@ const PromptChatRow = (props: PromptChatRowProps) => {
   return (
     <li
       className={clsx(
-        index === 0 ? "rounded-t-lg" : "border-t",
+        index === 0 ? "" : "border-t",
         "bg-white dark:bg-black",
         "flex flex-row justify-between gap-8 border-gray-300 dark:border-gray-700"
       )}
