@@ -139,6 +139,7 @@
               "group": "Vertex AI (Enterprise)",
               "pages": [
                 "integrations/gemini/vertex/javascript",
+                "integrations/gemini/vertex/python",
                 "integrations/gemini/vertex/curl"
               ],
               "icon": "code",
