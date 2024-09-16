@@ -219,9 +219,6 @@ export default function OrgDropdown({ setReferOpen }: OrgDropdownProps) {
           <DropdownMenuItem onSelect={() => createNewOrgHandler()}>
             Create New Org
           </DropdownMenuItem>
-          <DropdownMenuItem onSelect={() => setAddOpen(true)}>
-            Invite Members
-          </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuLabel>User Settings</DropdownMenuLabel>
           <DropdownMenuItem

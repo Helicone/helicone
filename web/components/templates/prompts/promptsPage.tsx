@@ -8,7 +8,7 @@ import {
 import { Divider, TextInput } from "@tremor/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { Fragment, useRef, useState, useCallback } from "react";
+import { Fragment, useRef, useState, useCallback, useMemo } from "react";
 import { usePrompts } from "../../../services/hooks/prompts/prompts";
 import { DiffHighlight } from "../welcome/diffHighlight";
 import PromptCard from "./promptCard";
@@ -44,6 +44,9 @@ import {
   SelectValue,
 } from "../../ui/select";
 import { MODEL_LIST } from "../playground/new/modelList";
+import { ProFeatureWrapper } from "@/components/shared/ProBlockerComponents/ProFeatureWrapper";
+import { useOrg } from "@/components/layout/organizationContext";
+import { Col } from "@/components/layout/common";
 
 interface PromptsPageProps {
   defaultIndex: number;
@@ -113,6 +116,19 @@ const PromptsPage = (props: PromptsPageProps) => {
       router.push(`/prompts/${res.data.data?.id}`);
     }
   };
+  const org = useOrg();
+
+  const hasAccess = useMemo(() => {
+    return (
+      org?.currentOrg?.tier === "pro-20240913" &&
+      (org?.currentOrg?.stripe_metadata as { addons?: { prompts?: boolean } })
+        ?.addons?.prompts
+    );
+  }, [org?.currentOrg?.tier, org?.currentOrg?.stripe_metadata]);
+
+  const hasLimitedAccess = useMemo(() => {
+    return !hasAccess && (prompts?.length ?? 0) > 0;
+  }, [hasAccess, prompts?.length]);
 
   return (
     <>
@@ -124,7 +140,15 @@ const PromptsPage = (props: PromptsPageProps) => {
             </div>
           }
         />
-
+        {hasLimitedAccess && (
+          <p className="flex flex-row w-full mt-16 justify-center items-center whitespace-nowrap">
+            You have limited access to prompts. Please
+            <Link href="/settings/billing" className="underline mx-1">
+              upgrade
+            </Link>
+            to access all features.
+          </p>
+        )}
         <div className="flex flex-col space-y-4 w-full py-2">
           {isLoading ? (
             <div className="flex flex-col w-full mt-16 justify-center items-center">
@@ -145,13 +169,15 @@ const PromptsPage = (props: PromptsPageProps) => {
                       placeholder="Search prompts..."
                     />
                   </div>
+
                   <Dialog>
-                    <DialogTrigger asChild>
+                    <DialogTrigger asChild className="w-min">
                       <HcButton
                         variant={"primary"}
                         size={"sm"}
                         title={"Create new prompt"}
                         icon={DocumentPlusIcon}
+                        disabled={!hasAccess}
                       />
                     </DialogTrigger>
                     <DialogContent className="w-[900px] ">
@@ -307,6 +333,7 @@ const chatCompletion = await openai.chat.completions.create(
                     </DialogContent>
                   </Dialog>
                 </div>
+
                 <ThemedTabs
                   options={[
                     {
@@ -328,7 +355,13 @@ const chatCompletion = await openai.chat.completions.create(
                   initialIndex={searchParams.get("view") === "card" ? 1 : 0}
                 />
               </div>
-              {filteredPrompts && filteredPrompts.length > 0 ? (
+              {!hasAccess && (
+                <span className="text-gray-500 xs">
+                  Prompts are a pro add-on feature for $30/month
+                </span>
+              )}
+
+              {filteredPrompts && hasLimitedAccess ? (
                 searchParams.get("view") === "card" ? (
                   <ul className="w-full h-full grid grid-cols-2 xl:grid-cols-4 gap-4">
                     {filteredPrompts.map((prompt, i) => (

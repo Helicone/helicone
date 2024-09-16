@@ -22,7 +22,6 @@ export const DeleteOrgModal = (props: DeleteOrgModalProps) => {
   const orgContext = useOrg();
   const router = useRouter();
   const jawn = getJawnClient(orgId);
-  const supabaseClient = useSupabaseClient<Database>();
   const [confirmOrgName, setConfirmOrgName] = useState("");
 
   return (
@@ -65,6 +64,14 @@ export const DeleteOrgModal = (props: DeleteOrgModalProps) => {
           </button>
           <button
             onClick={async () => {
+              if (orgContext?.currentOrg?.tier === "pro-20240913") {
+                setNotification(
+                  "You cannot delete your organization while on the Pro plan",
+                  "error"
+                );
+                return;
+              }
+
               if (confirmOrgName !== orgName) {
                 setNotification("Organization name does not match", "error");
                 return;

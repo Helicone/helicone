@@ -232,19 +232,20 @@ const DesktopSidebar = ({
           {tier === "free" &&
             org?.currentOrg?.organization_type !== "customer" && (
               <div className={cn("p-4", isCollapsed && "hidden")}>
-                <Button
-                  variant="outline"
-                  className="w-full justify-between dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
-                  onClick={() => setOpen(true)}
-                >
-                  <div className="flex items-center">
-                    <CloudArrowUpIcon className="h-5 w-5 mr-1.5" />
-                    <span>Free Plan</span>
-                  </div>
-                  <span className="text-xs font-normal text-primary dark:text-gray-300">
-                    Learn More
-                  </span>
-                </Button>
+                <Link href="/settings/billing">
+                  <Button
+                    variant="outline"
+                    className="w-full justify-between dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
+                  >
+                    <div className="flex items-center">
+                      <CloudArrowUpIcon className="h-5 w-5 mr-1.5" />
+                      <span>Free Plan</span>
+                    </div>
+                    <span className="text-xs font-normal text-primary dark:text-gray-300">
+                      Learn More
+                    </span>
+                  </Button>
+                </Link>
               </div>
             )}
         </div>

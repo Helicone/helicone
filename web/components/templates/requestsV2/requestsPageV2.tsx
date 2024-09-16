@@ -54,6 +54,7 @@ import { useRouter } from "next/router";
 import ThemedModal from "../../shared/themed/themedModal";
 import NewDataset from "../datasets/NewDataset";
 import { useSelectMode } from "../../../services/hooks/dataset/selectMode";
+import { ProFeatureWrapper } from "@/components/shared/ProBlockerComponents/ProFeatureWrapper";
 
 interface RequestsPageV2Props {
   currentPage: number;
@@ -698,14 +699,12 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
               you upgrade.
             </p>
             <div className="mt-4">
-              <button
-                onClick={() => {
-                  setOpen(true);
-                }}
-                className="items-center rounded-lg bg-black dark:bg-white px-2.5 py-1.5 gap-2 text-sm flex font-medium text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              <Link
+                href="/settings/billing"
+                className="w-min  whitespace-nowrap items-center rounded-lg bg-black dark:bg-white px-2.5 py-1.5 gap-2 text-sm flex font-medium text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
               >
-                Upgrade
-              </button>
+                Upgrade - Start Free Trial
+              </Link>
             </div>
           </div>
         </div>
@@ -912,15 +911,17 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
                   </span>
                 </div>
                 {selectedIds.length > 0 && (
-                  <GenericButton
-                    onClick={() => {
-                      setModalOpen(true);
-                    }}
-                    icon={
-                      <PlusIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
-                    }
-                    text="Add to dataset"
-                  />
+                  <ProFeatureWrapper featureName="Add to dataset">
+                    <GenericButton
+                      onClick={() => {
+                        setModalOpen(true);
+                      }}
+                      icon={
+                        <PlusIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
+                      }
+                      text="Add to dataset"
+                    />
+                  </ProFeatureWrapper>
                 )}
               </Row>
             )}

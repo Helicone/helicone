@@ -12,6 +12,8 @@ import { getUSDate } from "../../shared/utils/utils";
 import { Tooltip } from "@mui/material";
 import EditAlertModal from "./editAlertModal";
 import { useGetOrgSlackChannels } from "@/services/hooks/organizations";
+import { ProFeatureWrapper } from "@/components/shared/ProBlockerComponents/ProFeatureWrapper";
+import { Col } from "@/components/layout/common";
 
 interface AlertsPageProps {
   user: User;
@@ -70,12 +72,35 @@ const AlertsPage = (props: AlertsPageProps) => {
               organization
             </p>
           </div>
-          <button
-            onClick={() => setCreateNewAlertModal(true)}
-            className="bg-gray-900 hover:bg-gray-700 dark:bg-gray-100 dark:hover:bg-gray-300 whitespace-nowrap rounded-md px-4 py-2 text-sm font-semibold text-white dark:text-black shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
-          >
-            Create a new alert
-          </button>
+
+          <Col className="items-end">
+            <ProFeatureWrapper
+              featureName="alert"
+              enabled={
+                (
+                  orgContext?.currentOrg?.stripe_metadata as {
+                    addons?: { alerts?: boolean };
+                  }
+                )?.addons?.alerts ?? false
+              }
+            >
+              <button
+                onClick={() => setCreateNewAlertModal(true)}
+                className="w-min bg-gray-900 hover:bg-gray-700 dark:bg-gray-100 dark:hover:bg-gray-300 whitespace-nowrap rounded-md px-4 py-2 text-sm font-semibold text-white dark:text-black shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+              >
+                Create a new alert
+              </button>
+            </ProFeatureWrapper>
+            {(
+              orgContext?.currentOrg?.stripe_metadata as {
+                addons?: { alerts?: boolean };
+              }
+            )?.addons?.alerts || (
+              <span className="text-gray-500 xs">
+                alerts are a pro add-on feature for $15/month
+              </span>
+            )}
+          </Col>
         </div>
         <ul className="">
           {alerts.length === 0 ? (

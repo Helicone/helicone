@@ -16,6 +16,8 @@ import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import { DiffHighlight } from "../welcome/diffHighlight";
 import SessionNameSelection from "./nameSelection";
 import SessionDetails from "./sessionDetails";
+import { useOrg } from "@/components/layout/organizationContext";
+import { Button } from "@/components/ui/button";
 
 interface SessionsPageProps {
   currentPage: number;
@@ -29,10 +31,6 @@ interface SessionsPageProps {
 }
 const SessionsPage = (props: SessionsPageProps) => {
   const { currentPage, pageSize, sort, defaultIndex } = props;
-
-  const [advancedFilters, setAdvancedFilters] = useState<UIFilterRow[]>([]);
-
-  const router = useRouter();
 
   const [interval, setInterval] = useState<TimeInterval>("24h");
 
@@ -58,6 +56,8 @@ const SessionsPage = (props: SessionsPageProps) => {
 
   const [hasSomeSessions, setHasSomeSessions] = useState<boolean | null>(null);
 
+  const org = useOrg();
+
   useEffect(() => {
     if (hasSomeSessions === null && !names.isLoading) {
       setHasSomeSessions(names.sessions.length > 0);
@@ -74,7 +74,9 @@ const SessionsPage = (props: SessionsPageProps) => {
         }
       />
       <div>
-        {hasSomeSessions || hasSomeSessions === null ? (
+        {!isLoading &&
+        org?.currentOrg?.tier !== "free" &&
+        (hasSomeSessions || hasSomeSessions === null) ? (
           <Row className="gap-5 ">
             <SessionNameSelection
               sessionIdSearch={sessionIdSearch}
@@ -115,13 +117,16 @@ const SessionsPage = (props: SessionsPageProps) => {
                   />
                 </svg>
               </div>
+
               <p className="text-xl text-black dark:text-white font-semibold mt-8">
-                No Sessions Created
+                {org?.currentOrg?.tier === "free"
+                  ? "Upgrade to Pro to start logging sessions"
+                  : "No Sessions Found"}
               </p>
               <p className="text-sm text-gray-500 max-w-sm mt-2">
                 View our documentation to learn how to log sessions.
               </p>
-              <div className="mt-4">
+              <div className="mt-4 flex gap-2">
                 <Link
                   href="https://docs.helicone.ai/features/sessions"
                   className="w-fit items-center rounded-lg bg-black dark:bg-white px-2.5 py-1.5 gap-2 text-sm flex font-medium text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
@@ -129,15 +134,40 @@ const SessionsPage = (props: SessionsPageProps) => {
                   <BookOpenIcon className="h-4 w-4" />
                   View Docs
                 </Link>
+                {
+                  <Link href="/settings/billing">
+                    <Button className="bg-sky-500 hover:bg-sky-600">
+                      Start free trial
+                    </Button>
+                  </Link>
+                }
               </div>
-              <Divider>Or</Divider>
+              <div className="mt-4 w-full max-w-lg">
+                <video
+                  width="100%"
+                  height="100%"
+                  autoPlay
+                  muted
+                  loop
+                  className="rounded-lg shadow-lg"
+                >
+                  <source
+                    src="https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/sessions.mp4"
+                    type="video/mp4"
+                  />
+                  Your browser does not support the video tag.
+                </video>
+              </div>
+              {org?.currentOrg?.tier !== "free" && (
+                <div>
+                  <Divider>Or</Divider>
 
-              <div className="mt-4">
-                <h3 className="text-xl text-black dark:text-white font-semibold">
-                  TS/JS Quick Start
-                </h3>
-                <DiffHighlight
-                  code={`
+                  <div className="mt-4">
+                    <h3 className="text-xl text-black dark:text-white font-semibold">
+                      TS/JS Quick Start
+                    </h3>
+                    <DiffHighlight
+                      code={`
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
   baseURL: "https://oai.helicone.ai/v1",
@@ -166,11 +196,13 @@ openai.chat.completions.create(
   }
 );
 `}
-                  language="typescript"
-                  newLines={[]}
-                  oldLines={[]}
-                />
-              </div>
+                      language="typescript"
+                      newLines={[]}
+                      oldLines={[]}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}

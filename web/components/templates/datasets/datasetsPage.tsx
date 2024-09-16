@@ -8,6 +8,7 @@ import { useGetHeliconeDatasets } from "../../../services/hooks/dataset/helicone
 import { SortDirection } from "../../../services/lib/sorts/users/sorts";
 import AuthHeader from "../../shared/authHeader";
 import ThemedTable from "../../shared/themed/table/themedTable";
+import { ProFeatureWrapper } from "@/components/shared/ProBlockerComponents/ProFeatureWrapper";
 
 interface DatasetsPageProps {
   currentPage: number;
@@ -66,13 +67,15 @@ const DatasetsPage = (props: DatasetsPageProps) => {
                 <BookOpenIcon className="h-4 w-4" />
                 View Docs
               </Link>
-              <Link
-                href="/requests"
-                className="w-fit items-center rounded-md bg-blue-600 px-3 py-2 gap-2 text-sm flex font-medium text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
-              >
-                <DatabaseIcon className="h-4 w-4" />
-                Create Dataset
-              </Link>
+              <ProFeatureWrapper featureName="Create dataset">
+                <Link
+                  href="/requests"
+                  className="w-fit items-center rounded-md bg-blue-600 px-3 py-2 gap-2 text-sm flex font-medium text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+                >
+                  <DatabaseIcon className="h-4 w-4" />
+                  Create Dataset
+                </Link>
+              </ProFeatureWrapper>
             </div>
           </div>
         </div>

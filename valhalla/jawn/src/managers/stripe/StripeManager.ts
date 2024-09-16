@@ -24,6 +24,8 @@ const proProductPrices =
         alerts: "price_1PySmZFeVmeixR9wKEemD7jP",
       };
 
+const EARLY_ADOPTER_COUPON = "0IPsIob0";
+
 export class StripeManager extends BaseManager {
   private stripe: Stripe;
 
@@ -101,7 +103,7 @@ export class StripeManager extends BaseManager {
 
     const result = await clickhouseDb.dbQuery<{ count: number }>(
       `
-SELECT count(*) 
+SELECT count(*) as count
 from request_response_rmt
 WHERE (${builtFilter.filter})`,
       builtFilter.argsAcc
@@ -110,7 +112,9 @@ WHERE (${builtFilter.filter})`,
       return err("Error getting free usage");
     }
 
-    return ok(result.data?.[0]?.count ?? -1);
+    return ok(
+      result.data?.[0]?.count === undefined ? -1 : +result.data?.[0]?.count
+    );
   }
 
   public async downgradeToFree(): Promise<Result<null, string>> {
@@ -216,13 +220,19 @@ WHERE (${builtFilter.filter})`,
     return ok(members.count!);
   }
 
+  private shouldApplyCoupon(): boolean {
+    const currentDate = new Date();
+    const cutoffDate = new Date("2023-10-10");
+    return currentDate < cutoffDate;
+  }
+
   private async portalLinkUpgradeToPro(
     origin: string,
     customerId: string,
     orgMemberCount: number,
     isNewCustomer: boolean
   ): Promise<Result<string, string>> {
-    const session = await this.stripe.checkout.sessions.create({
+    const sessionParams: Stripe.Checkout.SessionCreateParams = {
       customer: customerId,
       payment_method_types: ["card"],
       line_items: [
@@ -235,7 +245,6 @@ WHERE (${builtFilter.filter})`,
           quantity: orgMemberCount,
         },
       ],
-
       mode: "subscription",
       success_url: `${origin}/dashboard`,
       cancel_url: `${origin}/dashboard`,
@@ -251,7 +260,13 @@ WHERE (${builtFilter.filter})`,
         },
       },
       allow_promotion_codes: true,
-    });
+    };
+
+    if (this.shouldApplyCoupon()) {
+      sessionParams.discounts = [{ coupon: EARLY_ADOPTER_COUPON }];
+    }
+
+    const session = await this.stripe.checkout.sessions.create(sessionParams);
 
     return ok(session.url!);
   }
@@ -519,23 +534,52 @@ WHERE (${builtFilter.filter})`,
 
       const subscription = subscriptionResult.data;
       const existingProducts = subscription.items.data.map(
-        (item) => (item.price.product as Stripe.Product).id
+        (item) => item.price.id
       );
 
-      const missingProducts = Object.values(proProductPrices).filter(
-        (productId) => !existingProducts.includes(productId)
-      );
+      const missingProducts = Object.values([
+        proProductPrices["pro-users"],
+      ]).filter((productId) => !existingProducts.includes(productId));
 
       if (missingProducts.length === 0) {
         return ok(null); // All pro products are already in the subscription
       }
 
-      await this.stripe.subscriptions.update(subscription.id, {
+      const updateParams: Stripe.SubscriptionUpdateParams = {
         items: missingProducts.map((productId) => ({ price: productId })),
-      });
+        metadata: {
+          orgId: this.authParams.organizationId,
+          tier: "pro-20240913",
+        },
+        proration_behavior: "none",
+      };
+
+      if (this.shouldApplyCoupon()) {
+        updateParams.coupon = EARLY_ADOPTER_COUPON;
+      }
+
+      await this.stripe.subscriptions.update(subscription.id, updateParams);
+
+      await supabaseServer.client
+        .from("organization")
+        .update({
+          tier: "pro-20240913",
+        })
+        .eq("id", this.authParams.organizationId);
 
       return ok(null);
     } catch (error: any) {
+      if (
+        error.message.includes("is already using that Price") &&
+        error.message.includes("an existing Subscription")
+      ) {
+        await supabaseServer.client
+          .from("organization")
+          .update({
+            tier: "pro-20240913",
+          })
+          .eq("id", this.authParams.organizationId);
+      }
       return err(`Error migrating to pro: ${error.message}`);
     }
   }

@@ -21,6 +21,7 @@ import ThemedTabSelector from "../../shared/themed/themedTabSelector";
 import { INITIAL_COLUMNS } from "./initialColumns";
 
 import SessionMetrics from "./SessionMetrics";
+import { ProFeatureWrapper } from "@/components/shared/ProBlockerComponents/ProFeatureWrapper";
 
 const TABS = [
   {

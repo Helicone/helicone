@@ -107,12 +107,6 @@ const Sidebar = ({ tier, setReferOpen, setOpen }: SidebarProps) => {
             current: pathname.includes("/datasets"),
           },
           {
-            name: "Fine-Tune",
-            href: "/fine-tune",
-            icon: null,
-            current: pathname.includes("/fine-tune"),
-          },
-          {
             name: "Prompts",
             href: "/prompts",
             icon: null,
