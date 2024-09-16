@@ -88,18 +88,18 @@ const openai = new OpenAI(configuration);
             <TabPanel>
               <DiffHighlight
                 code={`
-import { hprompt } from "@helicone/helicone";
+import { hpf } from "@helicone/prompts";
  
 const chatCompletion = await openai.chat.completions.create(
   {
     messages: [
       {
         role: "user",
-        // Add hprompt to any string, and nest any variable in additional brackets \`{}\`
-        content: hprompt\`Write a story about \${{ scene }}\`,
+        // Add hpf to any string, and nest any variable in additional brackets \`{}\`
+        content: hpf\`Write a story about \${{ scene: "OpenAI }}\`,
       },
     ],
-    model: "gpt-3.5-turbo",
+    model: "gpt-4o",
   },
   {
     // Add Prompt Id Header
@@ -172,7 +172,7 @@ const openai = new OpenAI(configuration);
         <HcButton
           variant={"primary"}
           size={"sm"}
-          title={"Send first event"}
+          title={"Go to dashboard"}
           onClick={() => {
             nextStep();
           }}

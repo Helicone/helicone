@@ -139,8 +139,8 @@ const CreateOrg = (props: CreateOrgProps) => {
 
   return (
     <>
-      <div id="content" className="w-full flex flex-col space-y-4">
-        <div className="flex flex-col p-4">
+      <div id="content" className="w-full flex flex-col space-y-4 lg:pt-32 ">
+        <div className="flex flex-col p-4 h-full">
           <div className="flex flex-col space-y-8 w-full">
             <h2 className="text-2xl font-semibold">Create your organization</h2>
             <div className="flex flex-col space-y-2">
@@ -161,52 +161,54 @@ const CreateOrg = (props: CreateOrgProps) => {
                 />
               </div>
             </div>
-            <div className="flex flex-col space-y-2">
-              <label
-                htmlFor="org-size"
-                className="block text-sm font-semibold leading-6"
-              >
-                How large is your company?
-              </label>
-              <div>
-                <Select
-                  id="org-size"
-                  name="org-size"
-                  required
-                  placeholder="Select company size"
-                  value={orgSize}
-                  onValueChange={(value) => setOrgSize(value)}
+            <div className="flex flex-row space-x-2 w-full">
+              <div className="flex flex-col space-y-2 w-full">
+                <label
+                  htmlFor="org-size"
+                  className="block text-sm font-semibold leading-6"
                 >
-                  {COMPANY_SIZES.map((o) => (
-                    <SelectItem key={o} value={o}>
-                      {o}
-                    </SelectItem>
-                  ))}
-                </Select>
+                  How large is your company?
+                </label>
+                <div>
+                  <Select
+                    id="org-size"
+                    name="org-size"
+                    required
+                    placeholder="Select company size"
+                    value={orgSize}
+                    onValueChange={(value) => setOrgSize(value)}
+                  >
+                    {COMPANY_SIZES.map((o) => (
+                      <SelectItem key={o} value={o}>
+                        {o}
+                      </SelectItem>
+                    ))}
+                  </Select>
+                </div>
               </div>
-            </div>
-            <div className="flex flex-col space-y-2">
-              <label
-                htmlFor="org-referral"
-                className="block text-sm font-semibold leading-6"
-              >
-                How did you hear about us?
-              </label>
-              <div className="">
-                <Select
-                  id="org-referral"
-                  name="org-referral"
-                  required
-                  placeholder={t("Select referral source")}
-                  value={referralType}
-                  onValueChange={(value) => setReferralType(value)}
+              <div className="flex flex-col space-y-2 w-full">
+                <label
+                  htmlFor="org-referral"
+                  className="block text-sm font-semibold leading-6"
                 >
-                  {referralOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </Select>
+                  How did you hear about us?
+                </label>
+                <div className="">
+                  <Select
+                    id="org-referral"
+                    name="org-referral"
+                    required
+                    placeholder={t("Select referral source")}
+                    value={referralType}
+                    onValueChange={(value) => setReferralType(value)}
+                  >
+                    {referralOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </Select>
+                </div>
               </div>
             </div>
             {referralType === "friend_referral" && (
@@ -230,7 +232,7 @@ const CreateOrg = (props: CreateOrgProps) => {
             )}
           </div>
         </div>
-        <div className="flex items-center justify-between p-4">
+        <div className="sticky bottom-0  p-4 flex items-center justify-between">
           <HcButton variant={"secondary"} size={"sm"} title={"Back"} />
           <HcButton
             variant={"primary"}
