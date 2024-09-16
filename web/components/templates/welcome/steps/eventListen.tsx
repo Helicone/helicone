@@ -51,8 +51,8 @@ const EventListen = (props: EventListenProps) => {
   );
 
   return (
-    <div id="content" className="w-full flex flex-col lg:pt-16">
-      <div className="flex flex-col p-4 ">
+    <div id="content" className="w-full flex flex-col ">
+      <div className="flex flex-col p-4 h-full">
         {data && data.data ? (
           <>
             <LoadingAnimation animation={PartyParrot} height={75} width={75} />

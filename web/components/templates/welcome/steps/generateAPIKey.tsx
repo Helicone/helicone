@@ -73,8 +73,8 @@ const GenerateAPIKey = (props: GenerateAPIKeyProps) => {
   };
 
   return (
-    <div id="content" className="w-full flex flex-col min-h-screen lg:pt-16">
-      <div className="flex-grow p-4 pt-0">
+    <div id="content" className="w-full flex flex-col ">
+      <div className="flex flex-col p-4 h-full">
         <div className="flex flex-col space-y-4 w-full">
           <h2 className="text-2xl font-semibold">Integrate with Helicone</h2>
           <div className="flex flex-col space-y-2">
@@ -211,7 +211,7 @@ const GenerateAPIKey = (props: GenerateAPIKeyProps) => {
           </>
         </div>
       </div>
-      <div className="sticky bottom-0  p-4 flex items-center justify-between">
+      <div className="sticky bottom-0 p-4 flex items-center justify-between">
         <HcButton
           variant={"secondary"}
           size={"sm"}
