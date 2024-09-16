@@ -48,10 +48,11 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
   selectedInput,
   onSubmit,
   submitText,
-  initialModel = MODEL_LIST[0].value,
+  initialModel,
   isPromptCreatedFromUi,
   defaultEditMode = false,
 }) => {
+  console.log("initialModel", initialModel);
   const replaceTemplateVariables = (
     content: string,
     inputs: Record<string, string>
@@ -105,11 +106,17 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
   const [expandedChildren, setExpandedChildren] = useState<
     Record<string, boolean>
   >({});
+  console.log("initialModel", initialModel);
   const [selectedModel, setSelectedModel] = useState(initialModel);
 
   useEffect(() => {
     setCurrentChat(parsePromptToMessages(prompt, selectedInput?.inputs));
   }, [prompt, selectedInput]);
+
+  // Add this useEffect to update selectedModel when initialModel changes
+  useEffect(() => {
+    setSelectedModel(initialModel);
+  }, [initialModel]);
 
   const handleAddMessage = () => {
     const newMessage: Message = {
@@ -220,7 +227,11 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
             </div>
             <div className="flex space-x-4 w-full justify-end items-center">
               <div className="font-normal">Model</div>
-              <Select value={selectedModel} onValueChange={setSelectedModel}>
+              <Select
+                value={selectedModel}
+                onValueChange={setSelectedModel}
+                defaultValue={initialModel}
+              >
                 <SelectTrigger className="w-[200px]">
                   <SelectValue placeholder="Select a model" />
                 </SelectTrigger>
@@ -233,7 +244,9 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
                 </SelectContent>
               </Select>
               <Button
-                onClick={() => onSubmit && onSubmit(currentChat, selectedModel)}
+                onClick={() =>
+                  onSubmit && onSubmit(currentChat, selectedModel || "")
+                }
                 variant="default"
                 size="sm"
                 className="px-4 font-normal"

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   usePrompt,
   usePromptRequestsOverTime,
@@ -331,11 +331,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
     return b.major_version - a.major_version;
   });
 
-  const [selectedVersion, setSelectedVersion] = useState<string>(
-    `${sortedPrompts?.at(0)?.major_version}.${
-      sortedPrompts?.at(0)?.minor_version
-    }`
-  );
+  const [selectedVersion, setSelectedVersion] = useState<string>("");
 
   useEffect(() => {
     if (sortedPrompts?.length) {
@@ -345,11 +341,24 @@ const PromptIdPage = (props: PromptIdPageProps) => {
     }
   }, [sortedPrompts]);
 
-  const selectedPrompt = prompts?.find(
-    (p) =>
-      p.major_version === parseInt(selectedVersion.split(".")[0]) &&
-      p.minor_version === parseInt(selectedVersion.split(".")[1])
-  );
+  const selectedPrompt = useMemo(() => {
+    return prompts?.find(
+      (p) =>
+        p.major_version === parseInt(selectedVersion.split(".")[0]) &&
+        p.minor_version === parseInt(selectedVersion.split(".")[1])
+    );
+  }, [prompts, selectedVersion]);
+
+  const model = useMemo(() => {
+    try {
+      return (
+        (selectedPrompt?.helicone_template as any).model || MODEL_LIST[0].value
+      );
+    } catch (error) {
+      console.error("Error parsing helicone_template:", error);
+      return MODEL_LIST[0].value;
+    }
+  }, [selectedPrompt]);
 
   const { inputs } = useInputs(selectedPrompt?.id);
 
@@ -457,6 +466,35 @@ const PromptIdPage = (props: PromptIdPageProps) => {
     refetchPrompt();
   };
 
+  const startExperiment = async (promptVersionId: string) => {
+    const dataset = await jawn.POST("/v1/helicone-dataset", {
+      body: {
+        datasetName: "Dataset for Experiment",
+        requestIds: [],
+      },
+    });
+    if (!dataset.data?.data?.datasetId) {
+      notification.setNotification("Failed to create dataset", "error");
+      return;
+    }
+    const experiment = await jawn.POST("/v1/experiment/new-empty", {
+      body: {
+        metadata: {
+          prompt_id: id,
+          prompt_version: prompt?.id || "",
+        },
+        datasetId: dataset.data?.data?.datasetId,
+      },
+    });
+    if (!experiment.data?.data?.experimentId) {
+      notification.setNotification("Failed to create experiment", "error");
+      return;
+    }
+    router.push(
+      `/prompts/${id}/subversion/${prompt?.id}/experiment/${experiment.data?.data?.experimentId}`
+    );
+  };
+
   const deletePromptVersion = async (promptVersionId: string) => {
     if (prompt?.metadata?.createdFromUi === false) {
       notification.setNotification(
@@ -543,8 +581,8 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                 <TooltipContent className="max-w-[15rem]" align="center">
                   <p>
                     This prompt was created{" "}
-                    <span className="font-semibold">in code</span>. You won’t be
-                    able to edit this from the UI.
+                    <span className="font-semibold">in code</span>. You
+                    won&apos;t be able to edit this from the UI.
                   </p>
                 </TooltipContent>
               </Tooltip>
@@ -600,9 +638,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                         await createSubversion(history, model);
                       }}
                       submitText="Test"
-                      initialModel={
-                        selectedPrompt?.model || MODEL_LIST[0].value
-                      }
+                      initialModel={model}
                       isPromptCreatedFromUi={
                         prompt?.metadata?.createdFromUi as boolean | undefined
                       }
@@ -643,26 +679,31 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                                     V{promptVersion.major_version}.
                                     {promptVersion.minor_version}
                                   </span>
+                                  <span>
+                                    {promptVersion.metadata?.isProduction ===
+                                    true ? (
+                                      <Badge
+                                        variant={"default"}
+                                        className="bg-[#F1F5F9] border border-[#CBD5E1] text-[#14532D] text-sm font-medium rounded-lg px-4 hover:bg-[#F1F5F9] hover:text-[#14532D]"
+                                      >
+                                        Prod
+                                      </Badge>
+                                    ) : (
+                                      <></>
+                                    )}
+                                  </span>
                                 </div>
                                 <div className="flex items-center space-x-2">
-                                  {promptVersion.metadata?.isProduction ===
-                                  true ? (
-                                    <Badge
-                                      variant={"default"}
-                                      className="bg-[#F1F5F9] border border-[#CBD5E1] text-[#14532D] text-sm font-medium rounded-lg px-4 hover:bg-[#F1F5F9] hover:text-[#14532D]"
-                                    >
-                                      Prod
-                                    </Badge>
-                                  ) : (
-                                    prompt?.metadata?.createdFromUi ===
-                                      true && (
-                                      <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                          <button className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full">
-                                            <EllipsisHorizontalIcon className="h-6 w-6 text-gray-500" />
-                                          </button>
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent>
+                                  {prompt?.metadata?.createdFromUi === true && (
+                                    <DropdownMenu>
+                                      <DropdownMenuTrigger asChild>
+                                        <button className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full">
+                                          <EllipsisHorizontalIcon className="h-6 w-6 text-gray-500" />
+                                        </button>
+                                      </DropdownMenuTrigger>
+                                      <DropdownMenuContent>
+                                        {promptVersion.metadata
+                                          ?.isProduction !== true && (
                                           <DropdownMenuItem
                                             onClick={() =>
                                               promoteToProduction(
@@ -673,6 +714,18 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                                             <ArrowTrendingUpIcon className="h-4 w-4 mr-2" />
                                             Promote to prod
                                           </DropdownMenuItem>
+                                        )}
+                                        <DropdownMenuItem
+                                          onClick={() =>
+                                            startExperiment(promptVersion.id)
+                                          }
+                                        >
+                                          <BeakerIcon className="h-4 w-4 mr-2" />
+                                          Experiment
+                                        </DropdownMenuItem>
+                                        {}
+                                        {promptVersion.metadata
+                                          ?.isProduction !== true && (
                                           <DropdownMenuItem
                                             onClick={() =>
                                               deletePromptVersion(
@@ -685,9 +738,9 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                                               Delete
                                             </p>
                                           </DropdownMenuItem>
-                                        </DropdownMenuContent>
-                                      </DropdownMenu>
-                                    )
+                                        )}
+                                      </DropdownMenuContent>
+                                    </DropdownMenu>
                                   )}
                                 </div>
                               </div>
