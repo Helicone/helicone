@@ -192,6 +192,11 @@ export type BlogStructure =
 const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
+      folderName: "production-grade-llm-app",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "keywords-vs-helicone",
     },
   },

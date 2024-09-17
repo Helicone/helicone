@@ -1,0 +1,8 @@
+{
+  "title": "Building a Production-Grade LLM Application: A Developer's Journey",
+  "description": "Follow a developer's journey in building and scaling an LLM application from concept to production. Learn about the challenges faced and how the LLM Stack provides solutions at each step.",
+  "images": "/static/blog/llm-stack-guide/cover.webp",
+  "time": "14 minute read",
+  "author": "Justin Torre",
+  "date": "September 16, 2024"
+}
