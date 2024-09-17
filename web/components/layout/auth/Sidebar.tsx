@@ -18,7 +18,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { useUser } from "@supabase/auth-helpers-react";
 import { useRouter } from "next/router";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { GoRepoForked } from "react-icons/go";
 import DesktopSidebar from "./DesktopSidebar";
 
@@ -32,7 +32,6 @@ interface SidebarProps {
 }
 
 const Sidebar = ({ tier, setReferOpen, setOpen }: SidebarProps) => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const router = useRouter();
   const { pathname } = router;
   const user = useUser();

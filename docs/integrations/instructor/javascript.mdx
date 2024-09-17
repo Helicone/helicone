@@ -16,7 +16,7 @@ description: "Use Instructor's JavaScript SDK to log your LLM calls in Helicone.
 ```javascript Instructor SDK
 const oai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
-  baseURL: "https://oai.hconeai.com/v1",
+  baseURL: "https://oai.helicone.ai/v1",
   defaultHeaders: {
     "Helicone-Auth": "Bearer " + process.env.HELICONE_API_KEY
   }

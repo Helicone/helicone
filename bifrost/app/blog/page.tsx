@@ -120,7 +120,7 @@ const FeaturedBlogPost: React.FC<BlogPostProps> = async ({ blog }) => {
       className="flex flex-col md:flex-row items-start gap-8 w-full hover:bg-sky-50 rounded-lg p-8 col-span-2"
       href={blog.href}
     >
-      <div className="w-full md:w-[36rem] h-full rounded-lg flex flex-col space-y-4 text-left order-2 md:order-1">
+      <div className="w-full md:w-1/2 h-full rounded-lg flex flex-col space-y-4 text-left order-2 md:order-1">
         <div className="flex items-center gap-2">
           <span className="bg-blue-50 text-blue-700 ring-blue-200 w-max items-center rounded-lg px-2 py-1 -my-1 text-sm font-medium ring-1 ring-inset">
             / {blog.badgeText.toLowerCase()}
@@ -129,14 +129,14 @@ const FeaturedBlogPost: React.FC<BlogPostProps> = async ({ blog }) => {
           <span className="text-gray-400 text-sm">{blog.time}</span>
         </div>
 
-        <h2 className="font-semibold text-2xl pt-2">{blog.title}</h2>
-        <p className="text-gray-500 text-sm">{blog.description}</p>
+        <h2 className="font-semibold text-3xl pt-2">{blog.title}</h2>
+        <p className="text-gray-500 text-base">{blog.description}</p>
         <div className="flex flex-row justify-between gap-4 items-center py-4">
           <div className={clsx("flex items-center space-x-3 bottom-0")}>
             {blog.authors.map((author, i) => (
               <div className="flex items-center space-x-2" key={i}>
                 <img
-                  className="inline-block h-8 w-8 rounded-full"
+                  className="inline-block h-10 w-10 rounded-full"
                   src={author.imageUrl}
                   alt={author.imageAlt || ""}
                 />
@@ -154,12 +154,12 @@ const FeaturedBlogPost: React.FC<BlogPostProps> = async ({ blog }) => {
       <img
         src={blog.imageUrl}
         alt={blog.imageAlt || blog.title}
-        width={400}
-        height={300}
+        width={600}
+        height={400}
         style={{
           objectFit: "cover",
         }}
-        className="rounded-lg h-full md:h-96 w-full max-w-[30rem] border border-gray-300 order-1 md:order-2"
+        className="rounded-lg h-72 w-full md:w-1/2 border border-gray-300 order-1 md:order-2"
       />
     </Link>
   );
@@ -193,6 +193,16 @@ const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
       folderName: "prompt-engineering-tools",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "keywords-vs-helicone",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "langchain-qawolf",
     },
   },
   {
@@ -468,12 +478,12 @@ const blogContent: BlogStructure[] = [
     time: "5 minute read",
   },
   {
-    title: "A Guide for Datadog Users Building with LLMs",
+    title: "An Open-Source Datadog Alternative for LLM Observability",
     description:
-      "Datadog has long been a favourite among developers for monitoring and observability. But recently, LLM developers have been exploring new options. Why? We have some answers.",
+      "Datadog has long been a favourite among developers for its application monitoring and observability capabilities. But recently, LLM developers have been exploring open-source observability options. Why? We have some answers.",
     badgeText: "Compare",
     date: "Apr 29, 2024",
-    href: "/blog/datadog",
+    href: "/blog/best-datadog-alternative-for-llm",
     imageUrl: "static/blog/datadog/title.webp",
     authors: [
       {
@@ -609,7 +619,7 @@ const blogContent: BlogStructure[] = [
   {
     title: "(a16z) Emerging Architectures for LLM Applications",
     description:
-      "Large language models are a powerful new primitive for building software. But since they are so new—and behave so differently from normal computing resources—it’s not always obvious how to use them.",
+      "Large language models are a powerful new primitive for building software. But since they are so new—and behave so differently from normal computing resources—it's not always obvious how to use them.",
     badgeText: "External",
     date: "Jun 20, 2023",
     href: "https://a16z.com/2023/06/20/emerging-architectures-for-llm-applications",

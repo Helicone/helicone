@@ -50,7 +50,8 @@ curl https://oai.helicone.ai/v1/completions \
   -H 'Content-Type: application/json' \
   -H 'Authorization: Bearer <YOUR_API_KEY>' \
   -H 'Helicone-Property-IP: 111.1.1.1' \
-  -H 'Helicone-RateLimit-Policy: 10;w=1000;u=cents;s=user' \ # add this header and set the header value
+  -H 'Helicone-User-Id: user-123' \
+  -H 'Helicone-RateLimit-Policy: 10;w=1000;u=cents;s=user' \
   -d '{
     "model": "text-davinci-003",
     "prompt": "How do I enable custom rate limit policies?",

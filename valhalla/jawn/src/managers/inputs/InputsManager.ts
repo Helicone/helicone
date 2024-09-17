@@ -8,7 +8,7 @@ import {
   PromptsQueryParams,
   PromptsResult,
 } from "../../controllers/public/promptController";
-import { Result, err, promiseResultMap } from "../../lib/shared/result";
+import { Result, err, ok, promiseResultMap } from "../../lib/shared/result";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { FilterNode } from "../../lib/shared/filters/filterDefs";
 import { buildFilterPostgres } from "../../lib/shared/filters/filters";
@@ -17,6 +17,7 @@ import { User } from "../../models/user";
 import { BaseManager } from "../BaseManager";
 import { S3Client } from "../../lib/shared/db/s3Client";
 import { RequestResponseBodyStore } from "../../lib/stores/request/RequestResponseBodyStore";
+import { randomUUID } from "crypto";
 
 async function fetchImageAsBase64(url: string): Promise<string> {
   try {
@@ -86,6 +87,71 @@ export async function getAllSignedURLsFromInputs(
 }
 
 export class InputsManager extends BaseManager {
+  async createInputRecord(
+    promptVersionId: string,
+    inputs: Record<string, string>,
+    sourceRequest?: string
+  ): Promise<Result<string, string>> {
+    const inputRecordId = randomUUID();
+    const insertQuery = `
+      INSERT INTO prompt_input_record (id, inputs, source_request, prompt_version)
+      VALUES ($1, $2, $3, $4)
+    `;
+
+    const result = await dbExecute<PromptInputRecord>(insertQuery, [
+      inputRecordId,
+      JSON.stringify(inputs),
+      sourceRequest,
+      promptVersionId,
+    ]);
+
+    if (result.error) {
+      return err(result.error);
+    }
+
+    return ok(inputRecordId);
+  }
+
+  async getInputsFromDataset(
+    datasetId: string,
+    limit: number
+  ): Promise<Result<PromptInputRecord[], string>> {
+    const result = await dbExecute<PromptInputRecord>(
+      `
+      SELECT
+        prompt_input_record.id as id,
+        experiment_dataset_v2_row.id as dataset_row_id,
+        prompt_input_record.inputs as inputs,
+        prompt_input_record.auto_prompt_inputs as auto_prompt_inputs,
+        prompt_input_record.source_request as source_request,
+        prompt_input_record.prompt_version as prompt_version,
+        prompt_input_record.created_at as created_at
+      FROM experiment_dataset_v2_row 
+        left join helicone_dataset on experiment_dataset_v2_row.dataset_id = helicone_dataset.id
+        left join prompt_input_record on experiment_dataset_v2_row.input_record = prompt_input_record.id
+      WHERE helicone_dataset.organization = $1 AND
+      experiment_dataset_v2_row.dataset_id = $2
+      LIMIT $3
+
+      `,
+      [this.authParams.organizationId, datasetId, limit]
+    );
+    return promiseResultMap(result, async (data) => {
+      return Promise.all(
+        data.map(async (record) => {
+          return {
+            ...record,
+            inputs: await getAllSignedURLsFromInputs(
+              record.inputs,
+              this.authParams.organizationId,
+              record.source_request
+            ),
+          };
+        })
+      );
+    });
+  }
+
   async getInputs(
     limit: number,
     promptVersion: string,
@@ -93,7 +159,7 @@ export class InputsManager extends BaseManager {
   ): Promise<Result<PromptInputRecord[], string>> {
     const result = await dbExecute<PromptInputRecord>(
       `
-      SELECT 
+      SELECT
         prompt_input_record.id as id,
         prompt_input_record.inputs as inputs,
         prompt_input_record.auto_prompt_inputs as auto_prompt_inputs,

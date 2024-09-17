@@ -30,12 +30,12 @@ const Features = (props: FeaturesProps) => {
           .
         </p>
         <TabGroup>
-          <TabList className="mt-4" variant="solid">
+          <TabList className="pt-2" variant="solid">
             <Tab className="flex flex-col text-left">
               <p className="font-semibold text-md xl:text-lg">
                 Custom Properties
               </p>
-              <p className="text-xs xl:text-sm pt-1">
+              <p className="text-xs xl:text-sm ">
                 Label and segment your requests
               </p>
             </Tab>
@@ -43,13 +43,13 @@ const Features = (props: FeaturesProps) => {
               <p className="font-semibold text-md xl:text-lg">
                 Prompt Templating
               </p>
-              <p className="text-xs xl:text-sm pt-1">
+              <p className="text-xs xl:text-sm">
                 Version and visualize prompts
               </p>
             </Tab>
             <Tab className="flex flex-col text-left">
               <p className="font-semibold text-md xl:text-lg">Caching</p>
-              <p className="text-xs xl:text-sm pt-1">
+              <p className="text-xs xl:text-sm ">
                 Increase performance and save costs
               </p>
             </Tab>
@@ -70,7 +70,6 @@ const configuration = {
     "Helicone-Property-App": "mobile",
   },
 };
-
 const openai = new OpenAI(configuration);
 `}
                 language={"typescript"}
@@ -88,18 +87,18 @@ const openai = new OpenAI(configuration);
             <TabPanel>
               <DiffHighlight
                 code={`
-import { hprompt } from "@helicone/helicone";
+import { hpf } from "@helicone/prompts";
  
 const chatCompletion = await openai.chat.completions.create(
   {
     messages: [
       {
         role: "user",
-        // Add hprompt to any string, and nest any variable in additional brackets \`{}\`
-        content: hprompt\`Write a story about \${{ scene }}\`,
+        // Add hpf to any string, and nest any variable in additional brackets \`{}\`
+        content: hpf\`Write a story about \${{ scene: "OpenAI }}\`,
       },
     ],
-    model: "gpt-3.5-turbo",
+    model: "gpt-4o",
   },
   {
     // Add Prompt Id Header
@@ -135,7 +134,6 @@ const configuration = {
     "Helicone-Cache-Enabled": "true", // add this header and set to true
   },
 };
-
 const openai = new OpenAI(configuration);
 `}
                 language={"typescript"}
@@ -162,7 +160,7 @@ const openai = new OpenAI(configuration);
         Explore our many integrations 🚀
       </Link>
 
-      <div className="flex items-center justify-between p-4">
+      <div className="sticky bottom-12 p-4 flex items-center justify-between">
         <HcButton
           variant={"secondary"}
           size={"sm"}
@@ -172,7 +170,7 @@ const openai = new OpenAI(configuration);
         <HcButton
           variant={"primary"}
           size={"sm"}
-          title={"Send first event"}
+          title={"Go to dashboard"}
           onClick={() => {
             nextStep();
           }}

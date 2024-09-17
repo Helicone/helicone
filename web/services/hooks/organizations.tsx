@@ -255,7 +255,7 @@ const useOrgsContextManager = () => {
         date_joined: org.created_at || "",
       });
 
-      if (user) {
+      if (user && !process.env.NEXT_PUBLIC_IS_ON_PREM) {
         window.pylon = {
           chat_settings: {
             app_id: "f766dfd3-28f8-40a8-872f-351274cbd306",
@@ -265,11 +265,13 @@ const useOrgsContextManager = () => {
           },
         };
 
-        window.Pylon("setNewIssueCustomFields", {
-          organization_id: org.id,
-          organization_name: org.name,
-          organization_tier: org.tier,
-        });
+        if (window.Pylon) {
+          window.Pylon("setNewIssueCustomFields", {
+            organization_id: org.id,
+            organization_name: org.name,
+            organization_tier: org.tier,
+          });
+        }
       }
     }
   }, [user, org?.id, org?.name, org?.tier]);

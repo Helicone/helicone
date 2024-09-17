@@ -3,6 +3,7 @@ import {
   RetryOptions,
 } from "../models/HeliconeProxyRequest";
 import retry from "async-retry";
+import { llmmapper } from "./llmmapper/llmmapper";
 
 export interface CallProps {
   headers: Headers;
@@ -50,6 +51,46 @@ function joinHeaders(h1: Headers, h2: Headers): Headers {
   return newHeaders;
 }
 
+async function callWithMapper(
+  targetUrl: URL,
+  init:
+    | {
+        method: string;
+        headers: Headers;
+      }
+    | {
+        body: string;
+        method: string;
+        headers: Headers;
+      }
+): Promise<Response> {
+  if (targetUrl.host === "gateway.llmmapper.com") {
+    try {
+      if ("body" in init) {
+        const headers: Record<string, string> = {};
+        init.headers.forEach((value, key) => {
+          headers[key] = value;
+        });
+        return await llmmapper(targetUrl, {
+          body: init.body,
+          headers: headers,
+        });
+      } else {
+        return new Response("Unsupported, must have body", { status: 404 });
+      }
+    } catch (e) {
+      return new Response(
+        "Helicone LLMMapper gateway error" + JSON.stringify(e),
+        {
+          status: 10_502,
+        }
+      );
+    }
+  } else {
+    return await fetch(targetUrl.href, init);
+  }
+}
+
 export async function callProvider(props: CallProps): Promise<Response> {
   const { headers, method, apiBase, body, increaseTimeout, originalUrl } =
     props;
@@ -65,7 +106,7 @@ export async function callProvider(props: CallProps): Promise<Response> {
   const baseInit = { method, headers: headersWithExtra };
   const init = method === "GET" ? { ...baseInit } : { ...baseInit, body };
 
-  let response;
+  let response: Response;
   if (increaseTimeout) {
     const controller = new AbortController();
     const signal = controller.signal;
@@ -75,7 +116,7 @@ export async function callProvider(props: CallProps): Promise<Response> {
       signal,
     });
   } else {
-    response = await fetch(targetUrl.href, init);
+    response = await callWithMapper(targetUrl, init);
   }
   return response;
 }

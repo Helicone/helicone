@@ -30,14 +30,21 @@ export interface paths {
   "/v1/prompt/version/{promptVersionId}/inputs/query": {
     post: operations["GetInputs"];
   };
+  "/v1/prompt/{promptId}/experiments": {
+    get: operations["GetPromptExperiments"];
+  };
   "/v1/prompt/{promptId}/versions/query": {
     post: operations["GetPromptVersions"];
   };
   "/v1/prompt/version/{promptVersionId}": {
+    get: operations["GetPromptVersion"];
     delete: operations["DeletePromptVersion"];
   };
   "/v1/prompt/{user_defined_id}/compile": {
     post: operations["GetPromptVersionsCompiled"];
+  };
+  "/v1/prompt/{user_defined_id}/template": {
+    post: operations["GetPromptVersionTemplates"];
   };
   "/v1/settings/query": {
     get: operations["GetSettings"];
@@ -145,6 +152,10 @@ export type webhooks = Record<string, never>;
 
 export interface components {
   schemas: {
+    /** @description Construct a type with a set of properties K of type T */
+    "Record_string.any_": {
+      [key: string]: unknown;
+    };
     PromptsResult: {
       id: string;
       user_defined_id: string;
@@ -153,6 +164,7 @@ export interface components {
       created_at: string;
       /** Format: double */
       major_version: number;
+      metadata?: components["schemas"]["Record_string.any_"];
     };
     "ResultSuccess_PromptsResult-Array_": {
       data: components["schemas"]["PromptsResult"][];
@@ -206,6 +218,7 @@ export interface components {
       created_at: string;
       last_used: string;
       versions: string[];
+      metadata?: components["schemas"]["Record_string.any_"];
     };
     ResultSuccess_PromptResult_: {
       data: components["schemas"]["PromptResult"];
@@ -228,10 +241,6 @@ export interface components {
       error: null;
     };
     "Result_CreatePromptResponse.string_": components["schemas"]["ResultSuccess_CreatePromptResponse_"] | components["schemas"]["ResultError_string_"];
-    /** @description Construct a type with a set of properties K of type T */
-    "Record_string.any_": {
-      [key: string]: unknown;
-    };
     PromptVersionResult: {
       id: string;
       /** Format: double */
@@ -253,6 +262,7 @@ export interface components {
     PromptCreateSubversionParams: {
       newHeliconeTemplate: unknown;
       isMajorVersion?: boolean;
+      metadata?: components["schemas"]["Record_string.any_"];
     };
     /** @description Construct a type with a set of properties K of type T */
     "Record_string.string_": {
@@ -261,10 +271,11 @@ export interface components {
     PromptInputRecord: {
       id: string;
       inputs: components["schemas"]["Record_string.string_"];
+      dataset_row_id?: string;
       source_request: string;
       prompt_version: string;
       created_at: string;
-      response_body: string;
+      response_body?: string;
       auto_prompt_inputs: unknown[];
     };
     "ResultSuccess_PromptInputRecord-Array_": {
@@ -273,6 +284,19 @@ export interface components {
       error: null;
     };
     "Result_PromptInputRecord-Array.string_": components["schemas"]["ResultSuccess_PromptInputRecord-Array_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__id-string--created_at-string--num_hypotheses-number--dataset-string--meta-Record_string.any__-Array_": {
+      data: {
+          meta: components["schemas"]["Record_string.any_"];
+          dataset: string;
+          /** Format: double */
+          num_hypotheses: number;
+          created_at: string;
+          id: string;
+        }[];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__id-string--created_at-string--num_hypotheses-number--dataset-string--meta-Record_string.any__-Array.string_": components["schemas"]["ResultSuccess__id-string--created_at-string--num_hypotheses-number--dataset-string--meta-Record_string.any__-Array_"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess_PromptVersionResult-Array_": {
       data: components["schemas"]["PromptVersionResult"][];
       /** @enum {number|null} */
@@ -343,6 +367,22 @@ export interface components {
       filter?: components["schemas"]["PromptVersionsFilterNode"];
       inputs: components["schemas"]["Record_string.string_"];
     };
+    PromptVersionResultFilled: {
+      id: string;
+      /** Format: double */
+      minor_version: number;
+      /** Format: double */
+      major_version: number;
+      prompt_v2: string;
+      model: string;
+      filled_helicone_template: unknown;
+    };
+    ResultSuccess_PromptVersionResultFilled_: {
+      data: components["schemas"]["PromptVersionResultFilled"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_PromptVersionResultFilled.string_": components["schemas"]["ResultSuccess_PromptVersionResultFilled_"] | components["schemas"]["ResultError_string_"];
 Json: JsonObject;
     NewOrganizationParams: {
       tier?: string | null;
@@ -1073,6 +1113,7 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": {
+          metadata: components["schemas"]["Record_string.any_"];
           prompt: {
             messages: unknown[];
             model: string;
@@ -1156,6 +1197,21 @@ export interface operations {
       };
     };
   };
+  GetPromptExperiments: {
+    parameters: {
+      path: {
+        promptId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__id-string--created_at-string--num_hypotheses-number--dataset-string--meta-Record_string.any__-Array.string_"];
+        };
+      };
+    };
+  };
   GetPromptVersions: {
     parameters: {
       path: {
@@ -1172,6 +1228,21 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_PromptVersionResult-Array.string_"];
+        };
+      };
+    };
+  };
+  GetPromptVersion: {
+    parameters: {
+      path: {
+        promptVersionId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_PromptVersionResult.string_"];
         };
       };
     };
@@ -1207,6 +1278,26 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_PromptVersionResultCompiled.string_"];
+        };
+      };
+    };
+  };
+  GetPromptVersionTemplates: {
+    parameters: {
+      path: {
+        user_defined_id: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PromptVersiosQueryParamsCompiled"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_PromptVersionResultFilled.string_"];
         };
       };
     };
