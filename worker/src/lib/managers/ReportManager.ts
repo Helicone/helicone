@@ -683,7 +683,7 @@ export class ReportManager {
   private formatChangeData(
     current: number,
     previous: number,
-    inPercentage: boolean = false
+    inPercentage = false
   ): [string, "up" | "down"] {
     const change =
       previous === 0 || inPercentage
