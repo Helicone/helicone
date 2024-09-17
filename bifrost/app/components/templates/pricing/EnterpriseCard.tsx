@@ -14,13 +14,15 @@ const EnterpriseCard: React.FC = () => {
           </div>
           <Col className="gap-[8px]">
             <h3 className="text-[36px] font-bold text-slate-900">Contact us</h3>
-            <h4 className="text-[16px] text-slate-700 font-light">
-              For companies{" "}
-              <span className="font-semibold">looking to scale.</span>
-            </h4>
-            <h4 className="text-[14px] text-slate-700">
-              Everything in Pro, plus:
-            </h4>
+            <Col>
+              <h4 className="text-[16px] text-slate-700 font-light">
+                For companies{" "}
+                <span className="font-semibold">looking to scale.</span>
+              </h4>
+              <h4 className="text-[14px] text-slate-700">
+                Everything in Pro, plus:
+              </h4>
+            </Col>
           </Col>
         </Col>
         <Col className="gap-[16px]">

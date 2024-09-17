@@ -67,7 +67,7 @@ export default function ProductComparisonTable() {
                 <td
                   className={clsx(
                     "px-4 py-0 font-semibold",
-                    "first:border-t border-r border-slate-200 text-slate-900",
+                    "border-r border-slate-200 text-slate-900",
                     index % 2 === 1 ? "bg-slate-50" : "bg-white",
                     index === featureMatrix.length - 1
                       ? "rounded-bl-lg"

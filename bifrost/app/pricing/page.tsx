@@ -52,7 +52,7 @@ export default function Example() {
           </Col>
 
           <div
-            className="grid grid-cols-1 lg:grid-cols-3 gap-8 py-16 max-w-[500px] lg:max-w-none lg:w-full items-center"
+            className="grid grid-cols-1 lg:grid-cols-3 gap-6 py-16 max-w-[500px] lg:max-w-none lg:w-full items-center"
             id="plans"
           >
             <FreeCard />
@@ -60,7 +60,7 @@ export default function Example() {
             <EnterpriseCard />
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-3 max-w-[500px] lg:max-w-none lg:w-full items-center">
-            <div className=" h-[250px] w-full border lg:border-r-0 rounded-tl-lg rounded-tr-lg rounded-bl-none lg:rounded-tr-none lg:rounded-bl-lg border-slate-200">
+            <div className=" h-[250px] w-full border lg:border-r-0 rounded-tl-xl rounded-tr-xl rounded-bl-none lg:rounded-tr-none lg:rounded-bl-xl border-slate-200">
               <Col className="h-full">
                 <Col className=" py-[36px] px-[24px] justify-around h-full">
                   <p>
@@ -81,7 +81,7 @@ export default function Example() {
                 </Row>
               </Col>
             </div>
-            <div className="h-[280px] w-full rounded-none lg:rounded-lg border-brand border-2">
+            <div className="h-[280px] w-full rounded-none lg:rounded-xl border-brand border-2">
               <Col className="h-full">
                 <Col className="py-[36px] px-[24px] justify-around h-full">
                   <h1 className="text-lg">
@@ -96,7 +96,7 @@ export default function Example() {
                     />
                   </div>
                 </Col>
-                <Row className="w-full h-[72px] px-[24px] items-center justify-between border-t border-slate-200 text-slate-900 font-medium">
+                <Row className="w-full h-[97px] px-[24px] items-center justify-between border-t border-slate-200 text-slate-900 font-medium">
                   <span>Pro</span>
                   <Button className="bg-brand text-white font-bold">
                     Upgrade now
@@ -104,7 +104,7 @@ export default function Example() {
                 </Row>
               </Col>
             </div>
-            <div className="h-[250px] w-full border border-slate-200 lg:border-l-0 rounded-bl-lg rounded-br-lg rounded-tr-none lg:rounded-tr-lg lg:rounded-br-lg lg:rounded-bl-none">
+            <div className="h-[250px] w-full border border-slate-200 lg:border-l-0 rounded-bl-xl rounded-br-xl rounded-tr-none lg:rounded-tr-xl lg:rounded-br-xl lg:rounded-bl-none">
               <Col className="h-full">
                 <Col className=" py-[36px] px-[24px] justify-around h-full">
                   <h1>
@@ -300,7 +300,7 @@ export default function Example() {
                         variant="outline"
                         className="text-slate-900 hover:text-brand"
                       >
-                        <Link href="/comparison">
+                        <Link href="/blog/langsmith">
                           <BookOpenIcon className="w-4 h-4 mr-2" />
                           Read about key differences
                         </Link>
