@@ -29,7 +29,7 @@ const rows: FeatureRowProps[] = [
         <Accordion type="single" collapsible className="w-full">
           <AccordionItem value="item-1" className="border-none">
             <AccordionTrigger className="text-brand justify-start gap-[4px] hover:no-underline p-0">
-              Which Helicone plan is right for me?
+              How we calculate this
             </AccordionTrigger>
             <AccordionContent>
               <RequestLogTableV2 />

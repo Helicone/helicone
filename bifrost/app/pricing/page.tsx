@@ -251,8 +251,9 @@ export default function Example() {
                   </AccordionTrigger>
                   <AccordionContent>
                     You can switch to the Pro plan to keep logging after 10k
-                    requests per month. Don’t worry, we are still logging all
-                    your incoming requests, upgrade to Pro to view them. <br />
+                    requests per month. Don&apos;t worry, we are still logging
+                    all your incoming requests, upgrade to Pro to view them.
+                    <br />
                     <br />
                     If you are already on the Pro plan, you will be
                     automatically charged for your usage over 100k requests per
