@@ -6,7 +6,8 @@ import { XMarkIcon } from "@heroicons/react/24/outline";
 const rows: FeatureRowProps[] = [
   {
     title: "Prompts + Experiments",
-    description: "Visualize your LLM analytics, and watch your AI app improve.",
+    description:
+      "Version prompts, create templates, and run experiments to improve LLM outputs.",
     free: (
       <>
         <XMarkIcon className="w-6 h-6 text-red-500" />
@@ -37,7 +38,8 @@ const rows: FeatureRowProps[] = [
   },
   {
     title: "Alerts (Slack + Email)",
-    description: <>Include 10,000 free requests every month!</>,
+    description:
+      "Receive real-time alerts to Slack or email and stay on top of critical issues.",
     free: (
       <>
         <XMarkIcon className="w-6 h-6 text-red-500" />

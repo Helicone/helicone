@@ -217,7 +217,15 @@ export default function Example() {
                     Which Helicone plan is right for me?
                   </AccordionTrigger>
                   <AccordionContent>
-                    Yes. It&apos;s right for you.
+                    If you have a production ready application and you are
+                    looking to improve the quality and looking for an all-in-one
+                    observability platform; choose the Pro plan. Exploring or
+                    building a side project, the Free plan is a great start
+                    before it grows into a larger project.
+                    <br />
+                    <br />
+                    Security, on-prem, or extremely high usage, contact us for
+                    custom Enterprise pricing.
                   </AccordionContent>
                 </AccordionItem>
 
@@ -226,20 +234,29 @@ export default function Example() {
                     What are the limits for each plan?
                   </AccordionTrigger>
                   <AccordionContent>
-                    For the Developer plan, you have access to 10k free requests
-                    and dashboard analytics. For the Team plan, you have access
-                    to all features, such as Playground, Prompts, Exports, Evals
-                    and more. For each feature, you will pay as you go.
+                    For the Pro plan, you have access to 100k requests per month
+                    and all features such as Playground, Cache, Exports, Evals
+                    and more. You will also be able to enable Prompts and Alerts
+                    as add-ons.
+                    <br />
+                    <br />
+                    For the Free plan, you have access to 10k requests per month
+                    for free and dashboard analytics.
                   </AccordionContent>
                 </AccordionItem>
 
                 <AccordionItem value="item-3">
-                  <AccordionTrigger className="font-medium">
-                    I went over my limits. What can I do?
+                  <AccordionTrigger className="font-medium text-left">
+                    I need more requests on the Free plan. What can I do?
                   </AccordionTrigger>
                   <AccordionContent>
-                    You can switch to the Team plan. If you are already on the
-                    Team plan, you will be automatically charged for your usage.
+                    You can switch to the Pro plan to keep logging after 10k
+                    requests per month. Don’t worry, we are still logging all
+                    your incoming requests, upgrade to Pro to view them. <br />
+                    <br />
+                    If you are already on the Pro plan, you will be
+                    automatically charged for your usage over 100k requests per
+                    month.
                   </AccordionContent>
                 </AccordionItem>
 
@@ -251,12 +268,12 @@ export default function Example() {
                     If you are a startup under 2 years old, a non-profit, an
                     open-source company or a student, you may be eligible for
                     discounts.{" "}
-                    <a
+                    <Link
                       href="/contact"
-                      className="text-blue-600 hover:underline"
+                      className="underline hover:text-brand"
                     >
-                      Apply here
-                    </a>
+                      Contact us
+                    </Link>
                     .
                   </AccordionContent>
                 </AccordionItem>
@@ -267,7 +284,7 @@ export default function Example() {
           <div className="py-16 ">
             <div className="">
               <div className="lg:grid lg:grid-cols-3 lg:gap-8 items-center">
-                <div className="bg-gray-50 rounded-lg p-8 col-span-2">
+                <div className="bg-gray-50 rounded-lg p-8 col-span-1 lg:col-span-2">
                   <h2 className="text-3xl font-bold text-slate-900 sm:text-4xl">
                     Understand your AI
                     <span className="block text-brand">
@@ -294,7 +311,7 @@ export default function Example() {
                       More provider flexibility, cost-effective and transparent
                       (open-source).
                     </p>
-                    <div className="mt-auto">
+                    <div className="mt-4 lg:mt-auto">
                       <Button
                         asChild
                         variant="outline"

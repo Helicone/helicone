@@ -3,6 +3,13 @@ import { CheckIcon, XMarkIcon } from "@heroicons/react/20/solid";
 import { ChevronDownIcon } from "@radix-ui/react-icons";
 import Link from "next/link";
 import PlansTable, { FeatureRowProps } from "./PlansTable";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import RequestLogTableV2 from "./RequestLogTableV2";
 
 const rows: FeatureRowProps[] = [
   {
@@ -19,10 +26,20 @@ const rows: FeatureRowProps[] = [
         <p className="text-slate-500">
           Include 10,000 free requests every month!
         </p>
-        <Row className="items-center gap-[4px] text-brand">
+        <Accordion type="single" collapsible className="w-full">
+          <AccordionItem value="item-1" className="border-none">
+            <AccordionTrigger className="text-brand justify-start gap-[4px] hover:no-underline p-0">
+              Which Helicone plan is right for me?
+            </AccordionTrigger>
+            <AccordionContent>
+              <RequestLogTableV2 />
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+        {/* <Row className="items-center gap-[4px] text-brand">
           <div>How we calculate this</div>
           <ChevronDownIcon className="w-5 h-5" />
-        </Row>
+        </Row> */}
       </>
     ),
     free: (
@@ -58,56 +75,73 @@ const rows: FeatureRowProps[] = [
   },
   {
     title: "Log retention",
-    description: "Visualize your LLM analytics, and watch your AI app improve.",
+    description:
+      "Access your logs and analytics so you can track performance over time. ",
     free: <h3 className="font-bold text-xl">1 month</h3>,
     pro: <h3 className="font-bold text-xl">3 months</h3>,
     enterprise: <h3 className="font-bold text-xl">Forever</h3>,
   },
   {
     title: "Playground",
-    description: "Visualize your LLM analytics, and watch your AI app improve.",
+    description:
+      "Tweak prompts and model parameters in Helicone and see how different models responds to the changes.",
     free: <XMarkIcon className="w-6 h-6 text-red-500" />,
     pro: <CheckIcon className="w-6 h-6 text-[#6AA84F]" />,
     enterprise: <CheckIcon className="w-6 h-6 text-[#6AA84F]" />,
   },
   {
     title: "Cache",
-    description: "Visualize your LLM analytics, and watch your AI app improve.",
+    description:
+      "Reduce latency and save costs on LLM calls by caching responses on the edge. ",
     free: <XMarkIcon className="w-6 h-6 text-red-500" />,
     pro: <CheckIcon className="w-6 h-6 text-[#6AA84F]" />,
     enterprise: <CheckIcon className="w-6 h-6 text-[#6AA84F]" />,
   },
   {
     title: "Rate limits",
-    description: "Visualize your LLM analytics, and watch your AI app improve.",
+    description: "Enforce custom API usage restrictions. ",
     free: <XMarkIcon className="w-6 h-6 text-red-500" />,
     pro: <CheckIcon className="w-6 h-6 text-[#6AA84F]" />,
     enterprise: <CheckIcon className="w-6 h-6 text-[#6AA84F]" />,
   },
   {
     title: "Sessions",
-    description: "Visualize your LLM analytics, and watch your AI app improve.",
+    description: "Group and visualize multi-step LLM interactions. ",
     free: <XMarkIcon className="w-6 h-6 text-red-500" />,
     pro: <CheckIcon className="w-6 h-6 text-[#6AA84F]" />,
     enterprise: <CheckIcon className="w-6 h-6 text-[#6AA84F]" />,
   },
   {
     title: "User tracking",
-    description: "Visualize your LLM analytics, and watch your AI app improve.",
+    description: "Track per-user request volumes, costs, and usage patterns. ",
     free: <XMarkIcon className="w-6 h-6 text-red-500" />,
     pro: <CheckIcon className="w-6 h-6 text-[#6AA84F]" />,
     enterprise: <CheckIcon className="w-6 h-6 text-[#6AA84F]" />,
   },
   {
     title: "Datasets",
-    description: "Visualize your LLM analytics, and watch your AI app improve.",
+    description:
+      "Organize your requests into datasets for model training or fine-tuning. ",
     free: <XMarkIcon className="w-6 h-6 text-red-500" />,
     pro: <CheckIcon className="w-6 h-6 text-[#6AA84F]" />,
     enterprise: <CheckIcon className="w-6 h-6 text-[#6AA84F]" />,
   },
   {
     title: "API access",
-    description: "Visualize your LLM analytics, and watch your AI app improve.",
+    description: (
+      <>
+        <p className="text-slate-500">
+          Use our{" "}
+          <a
+            href="https://docs.helicone.ai/rest/user/post-v1userquery"
+            className="text-brand underline"
+          >
+            expansive API
+          </a>
+          .
+        </p>
+      </>
+    ),
     free: <XMarkIcon className="w-6 h-6 text-red-500" />,
     pro: (
       <Row className="items-center gap-[4px]">
@@ -124,7 +158,7 @@ const rows: FeatureRowProps[] = [
   },
   {
     title: "SOC-2 Type II Compliance",
-    description: "Visualize your LLM analytics, and watch your AI app improve.",
+    description: "",
     free: <XMarkIcon className="w-6 h-6 text-red-500" />,
     pro: <CheckIcon className="w-6 h-6 text-[#6AA84F]" />,
     enterprise: <CheckIcon className="w-6 h-6 text-[#6AA84F]" />,

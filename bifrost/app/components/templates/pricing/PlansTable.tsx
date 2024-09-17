@@ -31,7 +31,7 @@ const FeatureRow: React.FC<FeatureRowProps> = ({
         <h3 className="text-lg font-semibold gap-[12px] items-center">
           {title}
         </h3>
-        {title === "Requests" ? ( // doing this check to avoid hydration errors (div inside p)
+        {title === "Requests" || title === "API access" ? ( // doing this check to avoid hydration errors (div inside p)
           description
         ) : (
           <p className="text-slate-500">{description}</p>
