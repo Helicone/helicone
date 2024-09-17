@@ -627,7 +627,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
         </TabList>
         <TabPanels>
           <TabPanel>
-            <div className="flex items-start relative h-[75vh]">
+            <div className="flex items-start relative min-h-[75vh]">
               <div className="py-4 flex flex-col space-y-4 w-full h-full">
                 <div className="flex space-x-4">
                   <div className="w-2/3">
