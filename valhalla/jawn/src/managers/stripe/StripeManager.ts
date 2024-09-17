@@ -7,14 +7,15 @@ import { ENVIRONMENT } from "../..";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { clickhouseDb } from "../../lib/db/ClickhouseWrapper";
 import { buildFilterWithAuthClickHouse } from "../../lib/shared/filters/filters";
+import { UpgradeToProRequest } from "../../controllers/public/stripeController";
 
 const proProductPrices =
   ENVIRONMENT === "production"
     ? {
-        "request-volume": process.env.PROD_REQUEST_VOLUME_ID!,
-        "pro-users": process.env.PROD_PRO_USERS_ID!,
-        prompts: process.env.PROD_PROMPTS_ID!,
-        alerts: process.env.PROD_ALERTS_ID!,
+        "request-volume": process.env.PRICE_PROD_REQUEST_VOLUME_ID!,
+        "pro-users": process.env.PRICE_PROD_PRO_USERS_ID!,
+        prompts: process.env.PRICE_PROD_PROMPTS_ID!,
+        alerts: process.env.PRICE_PROD_ALERTS_ID!,
       }
     : {
         // TEST PRODUCTS
@@ -159,7 +160,8 @@ WHERE (${builtFilter.filter})`,
     }
   }
   public async upgradeToProExistingCustomer(
-    origin: string
+    origin: string,
+    body: UpgradeToProRequest
   ): Promise<Result<string, string>> {
     try {
       const customerId = await this.getOrCreateStripeCustomer();
@@ -176,7 +178,8 @@ WHERE (${builtFilter.filter})`,
         origin,
         customerId.data,
         orgMemberCount.data,
-        false
+        false,
+        body
       );
 
       return sessionUrl;
@@ -230,7 +233,8 @@ WHERE (${builtFilter.filter})`,
     origin: string,
     customerId: string,
     orgMemberCount: number,
-    isNewCustomer: boolean
+    isNewCustomer: boolean,
+    body: UpgradeToProRequest
   ): Promise<Result<string, string>> {
     const sessionParams: Stripe.Checkout.SessionCreateParams = {
       customer: customerId,
@@ -244,6 +248,22 @@ WHERE (${builtFilter.filter})`,
           price: proProductPrices["pro-users"],
           quantity: orgMemberCount,
         },
+        ...(body?.addons?.prompts
+          ? [
+              {
+                price: proProductPrices["prompts"],
+                quantity: 1,
+              },
+            ]
+          : []),
+        ...(body?.addons?.alerts
+          ? [
+              {
+                price: proProductPrices["alerts"],
+                quantity: 1,
+              },
+            ]
+          : []),
       ],
       mode: "subscription",
       success_url: `${origin}/dashboard`,
@@ -272,7 +292,8 @@ WHERE (${builtFilter.filter})`,
   }
 
   public async upgradeToProLink(
-    origin: string
+    origin: string,
+    body: UpgradeToProRequest
   ): Promise<Result<string, string>> {
     try {
       const subscriptionResult = await this.getSubscription();
@@ -295,7 +316,8 @@ WHERE (${builtFilter.filter})`,
         origin,
         customerId.data,
         orgMemberCount.data,
-        true
+        true,
+        body
       );
 
       return sessionUrl;

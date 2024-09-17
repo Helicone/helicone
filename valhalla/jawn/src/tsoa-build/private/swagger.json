@@ -6104,6 +6104,23 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"UpgradeToProRequest": {
+				"properties": {
+					"addons": {
+						"properties": {
+							"prompts": {
+								"type": "boolean"
+							},
+							"alerts": {
+								"type": "boolean"
+							}
+						},
+						"type": "object"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
 			"stripe.Stripe.Invoice.Status": {
 				"type": "string",
 				"enum": [
@@ -46409,7 +46426,17 @@
 						"api_key": []
 					}
 				],
-				"parameters": []
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UpgradeToProRequest"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/v1/stripe/subscription/existing-customer/upgrade-to-pro": {
@@ -46435,7 +46462,17 @@
 						"api_key": []
 					}
 				],
-				"parameters": []
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UpgradeToProRequest"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/v1/stripe/subscription/manage-subscription": {

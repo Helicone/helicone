@@ -14,6 +14,13 @@ import Stripe from "stripe";
 import { JawnAuthenticatedRequest } from "../../types/request";
 import { StripeManager } from "../../managers/stripe/StripeManager";
 
+export interface UpgradeToProRequest {
+  addons?: {
+    alerts?: boolean;
+    prompts?: boolean;
+  };
+}
+
 @Route("v1/stripe")
 @Tags("Stripe")
 @Security("api_key")
@@ -32,11 +39,17 @@ export class StripeController extends Controller {
   }
 
   @Post("/subscription/new-customer/upgrade-to-pro")
-  public async upgradeToPro(@Request() request: JawnAuthenticatedRequest) {
+  public async upgradeToPro(
+    @Request() request: JawnAuthenticatedRequest,
+    @Body() body: UpgradeToProRequest
+  ) {
     const stripeManager = new StripeManager(request.authParams);
 
     const clientOrigin = request.headers.origin;
-    const result = await stripeManager.upgradeToProLink(`${clientOrigin}`);
+    const result = await stripeManager.upgradeToProLink(
+      `${clientOrigin}`,
+      body
+    );
 
     if (result.error) {
       this.setStatus(400);
@@ -48,12 +61,14 @@ export class StripeController extends Controller {
 
   @Post("/subscription/existing-customer/upgrade-to-pro")
   public async upgradeExistingCustomer(
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
+    @Body() body: UpgradeToProRequest
   ) {
     const stripeManager = new StripeManager(request.authParams);
 
     const result = await stripeManager.upgradeToProExistingCustomer(
-      request.headers.origin ?? ""
+      request.headers.origin ?? "",
+      body
     );
 
     if (result.error) {
