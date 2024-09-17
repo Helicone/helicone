@@ -38,7 +38,7 @@ S3_SECRET_KEY = "minioadmin"
 S3_BUCKET_NAME = "request-response-storage"
 
 [triggers]
-crons = ["* * * * *", "0 * * * *"]
+crons = ["* * * * *", "0 * * * *", "0 10 * * mon"]
 
 [env.production]
 name = "helicone-worker-prod"

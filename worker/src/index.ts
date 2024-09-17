@@ -9,6 +9,8 @@ import { updateLoopUsers } from "./lib/managers/LoopsManager";
 import { RequestWrapper } from "./lib/RequestWrapper";
 import { ProviderName } from "./packages/cost/providers/mappings";
 import { buildRouter } from "./routers/routerFactory";
+import { ReportManager } from "./lib/managers/ReportManager";
+import { ReportStore } from "./lib/db/ReportStore";
 
 const FALLBACK_QUEUE = "fallback-queue";
 
@@ -350,9 +352,22 @@ export default {
     );
     await updateLoopUsers(env);
     if (controller.cron === "0 * * * *") {
-      // Do nothing
       return;
-    } else {
+    }
+    if (controller.cron === "0 10 * * mon") {
+      const reportManager = new ReportManager(
+        new ReportStore(supabaseClient, new ClickhouseClientWrapper(env)),
+        env
+      );
+
+      const { error: sendReportsErr } = await reportManager.sendReports();
+
+      if (sendReportsErr) {
+        console.error(`Failed to check reports: ${sendReportsErr}`);
+      }
+      return;
+    }
+    if (controller.cron === "* * * * *") {
       const alertManager = new AlertManager(
         new AlertStore(supabaseClient, new ClickhouseClientWrapper(env)),
         env
@@ -363,7 +378,9 @@ export default {
       if (checkAlertErr) {
         console.error(`Failed to check alerts: ${checkAlertErr}`);
       }
+      return;
     }
+    console.error(`Unknown cron: ${controller.cron}`);
   },
 };
 

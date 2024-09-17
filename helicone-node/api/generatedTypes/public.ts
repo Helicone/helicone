@@ -105,6 +105,9 @@ export interface paths {
     get: operations["GetIntegration"];
     post: operations["UpdateIntegration"];
   };
+  "/v1/integration/type/{type}": {
+    get: operations["GetIntegrationByType"];
+  };
   "/v1/integration/slack/settings": {
     get: operations["GetSlackSettings"];
   };
@@ -2136,6 +2139,21 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  GetIntegrationByType: {
+    parameters: {
+      path: {
+        type: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Integration.string_"];
         };
       };
     };

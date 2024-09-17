@@ -70,6 +70,15 @@ export class IntegrationController extends Controller {
     return await integrationManager.getIntegration(integrationId);
   }
 
+  @Get("/type/{type}")
+  public async getIntegrationByType(
+    @Path() type: string,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<Integration, string>> {
+    const integrationManager = new IntegrationManager(request.authParams);
+    return await integrationManager.getIntegrationByType(type);
+  }
+
   @Get("/slack/settings")
   public async getSlackSettings(
     @Request() request: JawnAuthenticatedRequest
