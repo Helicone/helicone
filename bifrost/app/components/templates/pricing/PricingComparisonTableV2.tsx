@@ -137,7 +137,7 @@ export default function PricingComparisonTableV2() {
       className="flex flex-col max-w-6xl mx-auto pt-16 pb-2 w-full"
       id="compare-plans"
     >
-      <h3 className="text-[36px] font-bold">Compare plans</h3>
+      <h3 className="text-[36px] font-bold text-slate-900">Compare plans</h3>
       <PlansTable rows={rows} isMain />
     </div>
   );
