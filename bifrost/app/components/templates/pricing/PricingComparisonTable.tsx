@@ -171,7 +171,7 @@ export default function PricingComparisonTable() {
               <h1 className="text-2xl font-bold">Team plan</h1>
               <Row className="items-center gap-[8px]">
                 <Row className="text-[18px] text-black font-semibold line-through">
-                  "$50/mo"
+                  $50/mo
                 </Row>
                 <Row className="text-[36px] font-extrabold items-center">
                   <Row>
