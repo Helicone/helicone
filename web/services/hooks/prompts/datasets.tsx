@@ -10,7 +10,6 @@ const useGetDataSets = (promptId?: string) => {
     queryFn: async (query) => {
       const orgId = query.queryKey[1] as string;
       const promptId = query.queryKey[2] as string;
-      console.log("promptId", promptId);
       const jawn = getJawnClient(orgId);
       return jawn.POST("/v1/experiment/dataset/query", {
         body: {

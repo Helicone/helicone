@@ -52,7 +52,6 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
   isPromptCreatedFromUi,
   defaultEditMode = false,
 }) => {
-  console.log("initialModel", initialModel);
   const replaceTemplateVariables = (
     content: string,
     inputs: Record<string, string>
@@ -81,20 +80,29 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
 
     const promptObject = promptInput as PromptObject;
     return (
-      promptObject?.messages?.map((msg, index) => ({
-        id: `msg-${index}`,
-        role: msg.role as "user" | "assistant" | "system",
-        content: inputs
-          ? replaceTemplateVariables(
-              Array.isArray(msg.content)
-                ? msg.content.map((c) => c.text).join("\n")
-                : msg.content,
-              inputs
-            )
-          : Array.isArray(msg.content)
-          ? msg.content.map((c) => c.text).join("\n")
-          : msg.content,
-      })) || []
+      promptObject?.messages
+        ?.filter((msg) => !isHeliconeAutoPromptInput(msg))
+        .map((msg, index) => ({
+          id: `msg-${index}`,
+          role: msg.role as "user" | "assistant" | "system",
+          content: inputs
+            ? replaceTemplateVariables(
+                Array.isArray(msg.content)
+                  ? msg.content.map((c) => c.text).join("\n")
+                  : msg.content,
+                inputs
+              )
+            : Array.isArray(msg.content)
+            ? msg.content.map((c) => c.text).join("\n")
+            : msg.content,
+        })) || []
+    );
+  };
+
+  // Helper function to check if a message is a Helicone auto-prompt input
+  const isHeliconeAutoPromptInput = (msg: any): boolean => {
+    return (
+      typeof msg === "string" && msg.startsWith("<helicone-auto-prompt-input")
     );
   };
 
@@ -106,7 +114,6 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
   const [expandedChildren, setExpandedChildren] = useState<
     Record<string, boolean>
   >({});
-  console.log("initialModel", initialModel);
   const [selectedModel, setSelectedModel] = useState(initialModel);
 
   useEffect(() => {
