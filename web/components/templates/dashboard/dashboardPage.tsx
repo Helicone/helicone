@@ -19,7 +19,10 @@ import {
   getTimeIntervalAgo,
   TimeInterval,
 } from "../../../lib/timeCalculations/time";
-import { useGetUnauthorized } from "../../../services/hooks/dashboard";
+import {
+  useGetReport,
+  useGetUnauthorized,
+} from "../../../services/hooks/dashboard";
 import { useDebounce } from "../../../services/hooks/debounce";
 import { useOrganizationLayout } from "../../../services/hooks/organization_layout";
 import {
@@ -45,6 +48,7 @@ import {
 import useNotification from "../../shared/notification/useNotification";
 import ThemedTableHeader from "../../shared/themed/themedHeader";
 import UpgradeProModal from "../../shared/upgradeProModal";
+import ReportsModal from "./reportsModal";
 import useSearchParams from "../../shared/utils/useSearchParams";
 import { INITIAL_LAYOUT, SMALL_LAYOUT } from "./gridLayouts";
 import CountryPanel from "./panels/countryPanel";
@@ -55,6 +59,7 @@ import { useDashboardPage } from "./useDashboardPage";
 import { formatLargeNumber } from "../../shared/utils/numberFormat";
 import { ThemedSwitch } from "../../shared/themed/themedSwitch";
 import { useLocalStorage } from "../../../services/hooks/localStorage";
+import { Button } from "@/components/ui/button";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -163,6 +168,13 @@ const DashboardPage = (props: DashboardPageProps) => {
   const [timeFilter, setTimeFilter] = useState<TimeFilter>(getTimeFilter());
 
   const [open, setOpen] = useState(false);
+  const [openReports, setOpenReports] = useState(false);
+
+  const {
+    data: report,
+    isLoading: isLoadingReport,
+    refetch: refetchReport,
+  } = useGetReport();
 
   const [advancedFilters, setAdvancedFilters] = useState<UIFilterRowTree>(
     getRootFilterNode()
@@ -540,7 +552,14 @@ const DashboardPage = (props: DashboardPageProps) => {
           </button>
         }
         actions={
-          <>
+          <div className="flex flex-row gap-2 items-center">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setOpenReports(true)}
+            >
+              Get Reports
+            </Button>
             <div>
               <ThemedSwitch
                 checked={isLive}
@@ -548,7 +567,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                 label="Live"
               />
             </div>
-          </>
+          </div>
         }
       />
       {unauthorized ? (
@@ -1006,6 +1025,14 @@ const DashboardPage = (props: DashboardPageProps) => {
       <SuggestionModal open={openSuggestGraph} setOpen={setOpenSuggestGraph} />
 
       <UpgradeProModal open={open} setOpen={setOpen} />
+      {!isLoadingReport && (
+        <ReportsModal
+          open={openReports}
+          setOpen={setOpenReports}
+          report={report}
+          refetchReport={refetchReport}
+        />
+      )}
     </>
   );
 };
