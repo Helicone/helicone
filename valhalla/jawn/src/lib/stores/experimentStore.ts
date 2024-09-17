@@ -161,7 +161,7 @@ function getExperimentsQuery(
                     'rowId', dsr.id,
                     'scores', (
                       SELECT jsonb_object_agg(
-                        sa.score_key, 
+                        sa.score_key,
                         jsonb_build_object(
                           'value', sv.int_value,
                           'valueType', sa.value_type
@@ -236,7 +236,7 @@ function getExperimentsQuery(
                                   'resultRequestId', hr.result_request_id,
                                   'scores', (
                                     SELECT jsonb_object_agg(
-                                      sa.score_key, 
+                                      sa.score_key,
                                       jsonb_build_object(
                                         'value', sv.int_value,
                                         'valueType', sa.value_type
@@ -352,6 +352,13 @@ export class ExperimentStore extends BaseStore {
     );
     return ok(experimentResults);
   }
+
+  async getExperimentById(
+    experimentId: string,
+    include: IncludeExperimentKeys
+  ): Promise<Result<Experiment, string>> {
+    return await ServerExperimentStore.getExperiment(experimentId, include);
+  }
 }
 
 export const ServerExperimentStore: {
@@ -417,7 +424,7 @@ export const ServerExperimentStore: {
       )
       SELECT experiment_v2 as experiment_id
       FROM updated_experiment_hypothesis
-      LIMIT 1;      
+      LIMIT 1;
     `,
         []
       ),

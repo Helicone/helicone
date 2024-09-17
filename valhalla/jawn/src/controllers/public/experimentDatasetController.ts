@@ -1,5 +1,14 @@
 // src/users/usersController.ts
-import { Body, Controller, Post, Request, Route, Security, Tags } from "tsoa";
+import {
+  Body,
+  Controller,
+  Path,
+  Post,
+  Request,
+  Route,
+  Security,
+  Tags,
+} from "tsoa";
 import { Result, err, ok } from "../../lib/shared/result";
 import {
   FilterLeafSubset,
@@ -7,6 +16,8 @@ import {
 } from "../../lib/shared/filters/filterDefs";
 import { DatasetManager } from "../../managers/dataset/DatasetManager";
 import { JawnAuthenticatedRequest } from "../../types/request";
+import { randomUUID } from "crypto";
+import { InputsManager } from "../../managers/inputs/InputsManager";
 
 export type DatasetFilterBranch = {
   left: DatasetFilterNode;
@@ -123,13 +134,54 @@ export class ExperimentDatasetController extends Controller {
     return result;
   }
 
-  @Post("/{datasetId}/query")
-  public async getDataset(
+  @Post("{datasetId}/version/{promptVersionId}/row")
+  public async createDatasetRow(
     @Body()
-    requestBody: {},
-    @Request() request: JawnAuthenticatedRequest
-  ): Promise<Result<{}[], string>> {
-    return err("Not implemented");
+    requestBody: {
+      inputs: Record<string, string>;
+      sourceRequest?: string;
+    },
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() datasetId: string,
+    @Path() promptVersionId: string
+  ): Promise<Result<string, string>> {
+    const inputManager = new InputsManager(request.authParams);
+    const inputRecordResult = await inputManager.createInputRecord(
+      promptVersionId,
+      requestBody.inputs,
+      requestBody.sourceRequest
+    );
+
+    if (inputRecordResult.error || !inputRecordResult.data) {
+      console.error(inputRecordResult.error);
+      this.setStatus(500);
+      return inputRecordResult;
+    }
+
+    const datasetManager = new DatasetManager(request.authParams);
+    const datasetRowResult = await datasetManager.addDatasetRow(
+      datasetId,
+      inputRecordResult.data
+    );
+
+    if (datasetRowResult.error || !datasetRowResult.data) {
+      console.error(datasetRowResult.error);
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
+    }
+
+    return inputRecordResult;
+  }
+
+  @Post("/{datasetId}/inputs/query")
+  public async getDataset(
+    // @Body() requestBody: {},
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() datasetId: string
+  ) {
+    const inputManager = new InputsManager(request.authParams);
+    return inputManager.getInputsFromDataset(datasetId, 1_000);
   }
 
   @Post("/{datasetId}/mutate")
