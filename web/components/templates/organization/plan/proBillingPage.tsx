@@ -23,6 +23,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useState } from "react";
+import { CalendarIcon } from "lucide-react";
+import { PlanFeatureCard } from "./PlanFeatureCard";
+import { InfoBox } from "@/components/ui/helicone/infoBox";
+import { useCallback } from "react";
 
 export const ProPlanCard = () => {
   const org = useOrg();
@@ -141,53 +145,92 @@ export const ProPlanCard = () => {
     subscription.refetch();
   };
 
+  const getBillingCycleDates = () => {
+    if (
+      subscription.data?.data?.current_period_start &&
+      subscription.data?.data?.current_period_end
+    ) {
+      const startDate = new Date(
+        subscription.data.data.current_period_start * 1000
+      );
+      const endDate = new Date(
+        subscription.data.data.current_period_end * 1000
+      );
+      return `${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}`;
+    }
+    return "N/A";
+  };
+
+  const getDialogDescription = useCallback(
+    (isEnabling: boolean, feature: string, price: string) => {
+      let description = isEnabling
+        ? `You are about to enable ${feature}. This will add ${price}/mo to your subscription.`
+        : `You are about to disable ${feature}. This will remove ${price}/mo from your subscription.`;
+
+      if (isTrialActive && isEnabling) {
+        description +=
+          " You will not be charged for this feature while on your trial.";
+      }
+
+      return description;
+    },
+    [isTrialActive]
+  );
+
   return (
-    <div className="max-w-lg">
-      <Card>
+    <div className="flex gap-6 lg:flex-row flex-col">
+      <Card className="max-w-3xl w-full h-fit">
         <CardHeader>
-          <CardTitle>Pro Plan</CardTitle>
+          <CardTitle className="text-lg font-medium flex items-end">
+            Pro{" "}
+            <span className="text-sm bg-[#DBE9FE] text-blue-700 px-2 py-1 rounded-md ml-2 font-medium">
+              Current plan
+            </span>
+          </CardTitle>
           <CardDescription>
-            You are currently on the Pro plan. Here&apos;s a summary of your
-            subscription.
+            Here's a summary of your subscription.
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <Col className="gap-6">
-            {isTrialActive && (
-              <div className="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mb-4">
-                <p className="font-bold">Trial Active</p>
+        <CardContent className="space-y-6">
+          {isTrialActive && (
+            <InfoBox icon={() => <></>}>
+              <p>
+                Your trial ends on:{" "}
+                {new Date(
+                  subscription.data!.data!.trial_end! * 1000
+                ).toLocaleDateString()}
+              </p>
+            </InfoBox>
+          )}
+          {subscription.data?.data?.current_period_start &&
+            subscription.data?.data?.current_period_end && (
+              <div className="text-sm text-gray-500">
                 <p>
-                  Your trial ends on:{" "}
+                  Current billing period:{" "}
                   {new Date(
-                    subscription.data!.data!.trial_end! * 1000
+                    subscription.data.data.current_period_start * 1000
+                  ).toLocaleDateString()}{" "}
+                  -{" "}
+                  {new Date(
+                    subscription.data.data.current_period_end * 1000
                   ).toLocaleDateString()}
                 </p>
-              </div>
-            )}
-            {subscription.data?.data?.current_period_start &&
-              subscription.data?.data?.current_period_end && (
-                <div className="text-sm text-gray-500">
-                  <p>
-                    Current billing period:{" "}
-                    {new Date(
-                      subscription.data.data.current_period_start * 1000
-                    ).toLocaleDateString()}{" "}
-                    -{" "}
+                {isSubscriptionEnding && (
+                  <p className="text-red-500 font-semibold mt-1">
+                    Your subscription will end on:{" "}
                     {new Date(
                       subscription.data.data.current_period_end * 1000
                     ).toLocaleDateString()}
                   </p>
-                  {isSubscriptionEnding && (
-                    <p className="text-red-500 font-semibold mt-1">
-                      Your subscription will end on:{" "}
-                      {new Date(
-                        subscription.data.data.current_period_end * 1000
-                      ).toLocaleDateString()}
-                    </p>
-                  )}
-                </div>
-              )}
-            <Col className="gap-4">
+                )}
+              </div>
+            )}
+          <div className="text-xs text-muted-foreground flex items-center text-slate-500">
+            <CalendarIcon className="w-4 h-4 mr-1" />
+            {getBillingCycleDates()}
+          </div>
+          <Col className="gap-4">
+            <div className="flex flex-col">
               <div className="flex items-center justify-between">
                 <Label htmlFor="alerts-toggle">Alerts ($15/mo)</Label>
                 <Switch
@@ -196,6 +239,13 @@ export const ProPlanCard = () => {
                   onCheckedChange={handleAlertsToggle}
                 />
               </div>
+              {isTrialActive && (
+                <span className="text-xs text-muted-foreground mt-1 text-slate-500">
+                  Included in trial (enable to start using)
+                </span>
+              )}
+            </div>
+            <div className="flex flex-col">
               <div className="flex items-center justify-between">
                 <Label htmlFor="prompts-toggle">Prompts ($30/mo)</Label>
                 <Switch
@@ -204,55 +254,74 @@ export const ProPlanCard = () => {
                   onCheckedChange={handlePromptsToggle}
                 />
               </div>
-            </Col>
-            <Col className="gap-2">
-              {isSubscriptionEnding ? (
-                <Button
-                  onClick={async () => {
-                    const result = await reactivateSubscription.mutateAsync();
-                    if (result.data) {
-                      subscription.refetch();
-                    } else {
-                      console.error("Failed to reactivate subscription");
-                    }
-                  }}
-                  disabled={reactivateSubscription.isLoading}
-                >
-                  {reactivateSubscription.isLoading
-                    ? "Reactivating..."
-                    : "Reactivate Subscription"}
-                </Button>
-              ) : (
-                <Button
-                  onClick={async () => {
-                    const result =
-                      await manageSubscriptionPaymentLink.mutateAsync();
-                    if (result.data) {
-                      window.open(result.data, "_blank");
-                    } else {
-                      console.error(
-                        "No URL returned from manage subscription mutation"
-                      );
-                    }
-                  }}
-                  disabled={manageSubscriptionPaymentLink.isLoading}
-                >
-                  {manageSubscriptionPaymentLink.isLoading
-                    ? "Loading..."
-                    : "Manage Subscription"}
-                </Button>
+              {isTrialActive && (
+                <span className="text-xs text-muted-foreground mt-1 text-slate-500">
+                  Included in trial (enable to start using)
+                </span>
               )}
-              <InvoiceSheet />
-              <Link
-                href="https://helicone.ai/pricing"
-                className="text-sm text-gray-500 underline"
+            </div>
+          </Col>
+          <Col className="gap-2">
+            {isSubscriptionEnding ? (
+              <Button
+                onClick={async () => {
+                  const result = await reactivateSubscription.mutateAsync();
+                  if (result.data) {
+                    subscription.refetch();
+                  } else {
+                    console.error("Failed to reactivate subscription");
+                  }
+                }}
+                disabled={reactivateSubscription.isLoading}
               >
-                View pricing page
-              </Link>
-            </Col>
+                {reactivateSubscription.isLoading
+                  ? "Reactivating..."
+                  : "Reactivate Subscription"}
+              </Button>
+            ) : (
+              <Button
+                onClick={async () => {
+                  const result =
+                    await manageSubscriptionPaymentLink.mutateAsync();
+                  if (result.data) {
+                    window.open(result.data, "_blank");
+                  } else {
+                    console.error(
+                      "No URL returned from manage subscription mutation"
+                    );
+                  }
+                }}
+                disabled={manageSubscriptionPaymentLink.isLoading}
+              >
+                {manageSubscriptionPaymentLink.isLoading
+                  ? "Loading..."
+                  : "Manage Subscription"}
+              </Button>
+            )}
+            <InvoiceSheet />
+            <Link
+              href="https://helicone.ai/pricing"
+              className="text-sm text-gray-500 underline"
+            >
+              View pricing page
+            </Link>
           </Col>
         </CardContent>
       </Card>
+
+      <div className="space-y-6 w-full lg:w-[450px]">
+        <PlanFeatureCard
+          title="Learn about our Enterprise plan"
+          description="Built for companies looking to scale. Includes everything in Pro, plus unlimited requests, prompts, experiments and more."
+          buttonText="Contact sales"
+        />
+
+        <PlanFeatureCard
+          title="Looking for something else?"
+          description="Need support, have a unique use case or want to say hi?"
+          buttonText="Contact us"
+        />
+      </div>
 
       <Dialog open={isAlertsDialogOpen} onOpenChange={setIsAlertsDialogOpen}>
         <DialogContent className="max-w-md">
@@ -261,9 +330,7 @@ export const ProPlanCard = () => {
               {isEnablingAlerts ? "Enable Alerts" : "Disable Alerts"}
             </DialogTitle>
             <DialogDescription>
-              {isEnablingAlerts
-                ? "You are about to enable Alerts. This will add $15/mo to your subscription."
-                : "You are about to disable Alerts. This will remove $15/mo from your subscription."}
+              {getDialogDescription(isEnablingAlerts, "Alerts", "$15")}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -285,9 +352,7 @@ export const ProPlanCard = () => {
               {isEnablingPrompts ? "Enable Prompts" : "Disable Prompts"}
             </DialogTitle>
             <DialogDescription>
-              {isEnablingPrompts
-                ? "You are about to enable Prompts. This will add $30/mo to your subscription."
-                : "You are about to disable Prompts. This will remove $30/mo from your subscription."}
+              {getDialogDescription(isEnablingPrompts, "Prompts", "$30")}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
