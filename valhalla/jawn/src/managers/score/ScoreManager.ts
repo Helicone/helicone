@@ -96,29 +96,15 @@ export class ScoreManager extends BaseManager {
           }, new Map<string, HeliconeScoresMessage>())
           .values()
       );
-      const bumpedVersions = await this.scoreStore.bumpRequestVersion(
-        filteredMessages.map((scoresMessage) => ({
-          id: scoresMessage.requestId,
-          organizationId: scoresMessage.organizationId,
-        }))
-      );
 
-      if (
-        bumpedVersions.error ||
-        !bumpedVersions.data ||
-        bumpedVersions.data.length === 0
-      ) {
-        return err(bumpedVersions.error);
-      }
       const scoresScoreResult = await this.scoreStore.putScoresIntoClickhouse(
-        bumpedVersions.data.map((scoresMessage) => {
+        filteredMessages.map((scoresMessage) => {
           return {
-            requestId: scoresMessage.id,
-            organizationId: scoresMessage.helicone_org_id,
-            provider: scoresMessage.provider,
+            requestId: scoresMessage.requestId,
+            organizationId: scoresMessage.organizationId,
             mappedScores:
               filteredMessages
-                .find((x) => x.requestId === scoresMessage.id)
+                .find((x) => x.requestId === scoresMessage.requestId)
                 ?.scores.map((score) => {
                   if (score.score_attribute_type === "boolean") {
                     return {
