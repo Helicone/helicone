@@ -49,6 +49,9 @@ export interface paths {
   "/v1/settings/query": {
     get: operations["GetSettings"];
   };
+  "/v1/organization/user/accept_terms": {
+    post: operations["AcceptTerms"];
+  };
   "/v1/organization/create": {
     post: operations["CreateNewOrganization"];
   };
@@ -1310,6 +1313,16 @@ export interface operations {
           "application/json": {
             useAzureForExperiment: boolean;
           };
+        };
+      };
+    };
+  };
+  AcceptTerms: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
         };
       };
     };

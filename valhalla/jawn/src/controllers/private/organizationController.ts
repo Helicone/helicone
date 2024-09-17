@@ -28,6 +28,30 @@ import { supabaseServer } from "../../lib/db/supabase";
 @Tags("Organization")
 @Security("api_key")
 export class OrganizationController extends Controller {
+  @Post("/user/accept_terms")
+  public async acceptTerms(
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<null, string>> {
+    if (!request.authParams.userId) {
+      return err("User not found");
+    }
+
+    const result = await supabaseServer.client.auth.admin.updateUserById(
+      request.authParams.userId,
+      {
+        user_metadata: {
+          accepted_terms_date: new Date().toISOString(),
+        },
+      }
+    );
+
+    if (result.error) {
+      return err(result.error.message);
+    }
+
+    return ok(null);
+  }
+
   @Post("/create")
   public async createNewOrganization(
     @Body()

@@ -43,15 +43,6 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
     };
   }
 
-  if (data.orgHasOnboarded) {
-    return {
-      redirect: {
-        destination: "/dashboard",
-        permanent: false,
-      },
-    };
-  }
-
   const { step } = ctx.query;
 
   return {
