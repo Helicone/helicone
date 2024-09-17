@@ -911,7 +911,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
                   </span>
                 </div>
                 {selectedIds.length > 0 && (
-                  <ProFeatureWrapper featureName="Add to dataset">
+                  <ProFeatureWrapper featureName="Datasets">
                     <GenericButton
                       onClick={() => {
                         setModalOpen(true);

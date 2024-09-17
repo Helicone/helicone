@@ -75,7 +75,7 @@ const AlertsPage = (props: AlertsPageProps) => {
 
           <Col className="items-end">
             <ProFeatureWrapper
-              featureName="alert"
+              featureName="Alerts"
               enabled={
                 (
                   orgContext?.currentOrg?.stripe_metadata as {
@@ -91,30 +91,32 @@ const AlertsPage = (props: AlertsPageProps) => {
                 Create a new alert
               </button>
             </ProFeatureWrapper>
-            {(
-              orgContext?.currentOrg?.stripe_metadata as {
-                addons?: { alerts?: boolean };
-              }
-            )?.addons?.alerts || (
-              <span className="text-gray-500 xs">
-                alerts are a pro add-on feature for $15/month
-              </span>
-            )}
           </Col>
         </div>
         <ul className="">
           {alerts.length === 0 ? (
-            <button
-              onClick={() => setCreateNewAlertModal(true)}
-              className="relative block w-full rounded-lg border-2 border-dashed bg-gray-200 hover:bg-gray-300 dark:bg-gray-800 dark:hover:bg-gray-700 hover:cursor-pointer border-gray-500 p-12 text-center focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+            <ProFeatureWrapper
+              featureName="Alerts"
+              enabled={
+                (
+                  orgContext?.currentOrg?.stripe_metadata as {
+                    addons?: { alerts?: boolean };
+                  }
+                )?.addons?.alerts ?? false
+              }
             >
-              <div className="w-full justify-center align-middle items-center">
-                <BellIcon className="h-10 w-10 mx-auto text-gray-900 dark:text-gray-100" />
-              </div>
-              <span className="mt-2 block text-sm font-medium text-gray-900 dark:text-gray-100">
-                Click here to generate a new alert
-              </span>
-            </button>
+              <button
+                onClick={() => setCreateNewAlertModal(true)}
+                className="relative block w-full rounded-lg border-2 border-dashed bg-gray-200 hover:bg-gray-300 dark:bg-gray-800 dark:hover:bg-gray-700 hover:cursor-pointer border-gray-500 p-12 text-center focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+              >
+                <div className="w-full justify-center align-middle items-center">
+                  <BellIcon className="h-10 w-10 mx-auto text-gray-900 dark:text-gray-100" />
+                </div>
+                <span className="mt-2 block text-sm font-medium text-gray-900 dark:text-gray-100">
+                  Click here to generate a new alert
+                </span>
+              </button>
+            </ProFeatureWrapper>
           ) : (
             <ThemedTable
               columns={[

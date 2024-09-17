@@ -28,7 +28,7 @@ const BillingPlanPage = (props: OrgPlanPageProps) => {
           !knownTiers.includes(org?.currentOrg?.tier) && (
             <UnknownTierCard tier={org?.currentOrg?.tier} />
           )}
-        <Card className="bg-[#F9F9F9] p-4 max-w-lg">
+        {/* <Card className="bg-[#F9F9F9] p-4 max-w-lg">
           <div className="text-[#334155] font-medium">
             Looking for something else?
           </div>
@@ -37,7 +37,7 @@ const BillingPlanPage = (props: OrgPlanPageProps) => {
             Observability needs, support, or just want to say hi?
           </h2>
           <Button className="mt-4">Contact us</Button>
-        </Card>
+        </Card> */}
       </Col>
     </>
   );

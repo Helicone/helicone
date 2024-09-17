@@ -132,7 +132,9 @@ const PricingVersion20240913 = {
     return;
   },
   handleCheckoutSessionCompleted: async (event: Stripe.Event) => {
-    throw new Error("Not implemented");
+    // We don't need to do anything here because the subscription is already active
+    // All update states are handled in the jawn StripeManager
+    return;
   },
   handleDelete: PricingVersionOld.handleDelete,
 };

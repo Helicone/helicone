@@ -2217,6 +2217,12 @@ Json: JsonObject;
       error: null;
     };
     "Result_OrganizationOwner-Array.string_": components["schemas"]["ResultSuccess_OrganizationOwner-Array_"] | components["schemas"]["ResultError_string_"];
+    UpgradeToProRequest: {
+      addons?: {
+        prompts?: boolean;
+        alerts?: boolean;
+      };
+    };
     /** @enum {string} */
     "stripe.Stripe.Invoice.Status": "draft" | "open" | "paid" | "uncollectible" | "void";
     /** @description The Address object. */
@@ -15837,6 +15843,11 @@ export interface operations {
     };
   };
   UpgradeToPro: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpgradeToProRequest"];
+      };
+    };
     responses: {
       /** @description Ok */
       200: {
@@ -15847,6 +15858,11 @@ export interface operations {
     };
   };
   UpgradeExistingCustomer: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpgradeToProRequest"];
+      };
+    };
     responses: {
       /** @description Ok */
       200: {

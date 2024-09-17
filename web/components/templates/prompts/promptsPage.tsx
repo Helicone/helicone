@@ -47,6 +47,16 @@ import { MODEL_LIST } from "../playground/new/modelList";
 import { ProFeatureWrapper } from "@/components/shared/ProBlockerComponents/ProFeatureWrapper";
 import { useOrg } from "@/components/layout/organizationContext";
 import { Col } from "@/components/layout/common";
+import { InfoBox } from "@/components/ui/helicone/infoBox";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "../../ui/card";
+import { ChevronDownIcon } from "@heroicons/react/24/outline";
+import { PricingCompare } from "../pricing/pricingCompare";
 
 interface PromptsPageProps {
   defaultIndex: number;
@@ -130,6 +140,8 @@ const PromptsPage = (props: PromptsPageProps) => {
     return !hasAccess && (prompts?.length ?? 0) > 0;
   }, [hasAccess, prompts?.length]);
 
+  const [showPricingCompare, setShowPricingCompare] = useState(false);
+
   return (
     <>
       <div className="flex flex-col space-y-4 w-full">
@@ -137,6 +149,16 @@ const PromptsPage = (props: PromptsPageProps) => {
           title={
             <div className="flex items-center gap-2">
               Prompts <HcBadge title="Beta" size="sm" />
+              <InfoBox className="ml-4">
+                <p className="text-sm font-medium flex gap-2">
+                  <b>Need to create new prompts?</b>
+                  <ProFeatureWrapper featureName="Prompts">
+                    <button className="underline">
+                      Get unlimited prompts & more.
+                    </button>
+                  </ProFeatureWrapper>
+                </p>
+              </InfoBox>
             </div>
           }
         />
@@ -156,150 +178,158 @@ const PromptsPage = (props: PromptsPageProps) => {
             </div>
           ) : (
             <>
-              <div
-                id="util"
-                className="flex flex-row justify-between items-center"
-              >
-                <div className="flex flex-row items-center space-x-2 w-full">
-                  <div className="max-w-xs w-full">
-                    <TextInput
-                      icon={MagnifyingGlassIcon}
-                      value={searchName}
-                      onValueChange={(value) => setSearchName(value)}
-                      placeholder="Search prompts..."
-                    />
-                  </div>
-
-                  <Dialog>
-                    <DialogTrigger asChild className="w-min">
-                      <HcButton
-                        variant={"primary"}
-                        size={"sm"}
-                        title={"Create new prompt"}
-                        icon={DocumentPlusIcon}
-                        disabled={!hasAccess}
+              {(hasAccess || hasLimitedAccess) && (
+                <div
+                  id="util"
+                  className="flex flex-row justify-between items-center"
+                >
+                  <div className="flex flex-row items-center space-x-2 w-full">
+                    <div className="max-w-xs w-full">
+                      <TextInput
+                        icon={MagnifyingGlassIcon}
+                        value={searchName}
+                        onValueChange={(value) => setSearchName(value)}
+                        placeholder="Search prompts..."
                       />
-                    </DialogTrigger>
-                    <DialogContent className="w-[900px] ">
-                      <DialogHeader className="flex flex-row justify-between items-center">
-                        <DialogTitle>Create a new prompt</DialogTitle>
-                        <div className="flex items-center space-x-2">
-                          <Switch
-                            id="im-not-technical"
-                            checked={imNotTechnical}
-                            onCheckedChange={setImNotTechnical}
+                    </div>
+
+                    <Dialog>
+                      <DialogTrigger asChild className="w-min">
+                        <ProFeatureWrapper
+                          featureName="Prompts"
+                          enabled={hasAccess}
+                        >
+                          <HcButton
+                            variant={"primary"}
+                            size={"sm"}
+                            title={"Create new prompt"}
+                            icon={DocumentPlusIcon}
                           />
-                          <Label htmlFor="im-not-technical">
-                            I&apos;m not technical
-                          </Label>
-                        </div>
-                      </DialogHeader>
-                      <div className="flex flex-col space-y-4 h-[570px] justify-between">
-                        {imNotTechnical ? (
-                          <>
-                            <div className="flex flex-col space-y-6">
-                              <div className="flex flex-col space-y-2">
-                                <Label
-                                  className="text-lg"
-                                  htmlFor="new-prompt-name"
-                                >
-                                  Name
-                                </Label>
-                                <TextInput
-                                  id="new-prompt-name"
-                                  value={newPromptName}
-                                  onChange={(e) =>
-                                    setNewPromptName(e.target.value)
-                                  }
-                                  ref={newPromptInputRef}
-                                />
-                              </div>
-                              <div className="flex flex-col space-y-2">
-                                <Label
-                                  className="text-lg"
-                                  htmlFor="new-prompt-model"
-                                >
-                                  Model
-                                </Label>
-                                <Select
-                                  value={newPromptModel}
-                                  onValueChange={setNewPromptModel}
-                                >
-                                  <SelectTrigger className="w-[200px]">
-                                    <SelectValue placeholder="Select a model" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    {MODEL_LIST.map((model) => (
-                                      <SelectItem
-                                        key={model.value}
-                                        value={model.value}
-                                      >
-                                        {model.label}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                              <div className="flex flex-col space-y-2">
-                                <Label
-                                  className="text-lg"
-                                  htmlFor="new-prompt-content"
-                                >
-                                  Prompt
-                                </Label>
-                                <Textarea
-                                  id="new-prompt-content"
-                                  value={newPromptContent}
-                                  onChange={(e) => {
-                                    const newContent = e.target.value;
-                                    setNewPromptContent(newContent);
-                                    setPromptVariables(
-                                      extractVariables(newContent)
-                                    );
-                                  }}
-                                  placeholder="Type your prompt here"
-                                  rows={4}
-                                />
-                                <p className="text-sm text-gray-500">
-                                  Use &#123;&#123; sample_variable &#125;&#125;
-                                  to insert variables into your prompt.
-                                </p>
-                              </div>
-                              {promptVariables.length > 0 && (
+                        </ProFeatureWrapper>
+                      </DialogTrigger>
+                      <DialogContent className="w-[900px] ">
+                        <DialogHeader className="flex flex-row justify-between items-center">
+                          <DialogTitle>Create a new prompt</DialogTitle>
+                          <div className="flex items-center space-x-2">
+                            <Switch
+                              id="im-not-technical"
+                              checked={imNotTechnical}
+                              onCheckedChange={setImNotTechnical}
+                            />
+                            <Label htmlFor="im-not-technical">
+                              I&apos;m not technical
+                            </Label>
+                          </div>
+                        </DialogHeader>
+                        <div className="flex flex-col space-y-4 h-[570px] justify-between">
+                          {imNotTechnical ? (
+                            <>
+                              <div className="flex flex-col space-y-6">
                                 <div className="flex flex-col space-y-2">
-                                  <Label className="text-lg">
-                                    Your variables
+                                  <Label
+                                    className="text-lg"
+                                    htmlFor="new-prompt-name"
+                                  >
+                                    Name
                                   </Label>
-                                  <div className="flex flex-wrap gap-2">
-                                    {promptVariables.map((variable, index) => (
-                                      <Badge
-                                        key={index}
-                                        variant="secondary"
-                                        className="text-sm px-4 py-2 rounded-md"
-                                      >
-                                        {variable}
-                                      </Badge>
-                                    ))}
-                                  </div>
+                                  <TextInput
+                                    id="new-prompt-name"
+                                    value={newPromptName}
+                                    onChange={(e) =>
+                                      setNewPromptName(e.target.value)
+                                    }
+                                    ref={newPromptInputRef}
+                                  />
                                 </div>
-                              )}
-                            </div>
-                            <div className="flex justify-end items-center mt-4">
-                              <Button
-                                className="w-auto"
-                                onClick={() => createPrompt(newPromptName)}
-                              >
-                                Create prompt
-                              </Button>
-                            </div>
-                          </>
-                        ) : (
-                          <>
-                            <p className="text-gray-500 mb-2">
-                              TS/JS Quick Start
-                            </p>
-                            <DiffHighlight
-                              code={`
+                                <div className="flex flex-col space-y-2">
+                                  <Label
+                                    className="text-lg"
+                                    htmlFor="new-prompt-model"
+                                  >
+                                    Model
+                                  </Label>
+                                  <Select
+                                    value={newPromptModel}
+                                    onValueChange={setNewPromptModel}
+                                  >
+                                    <SelectTrigger className="w-[200px]">
+                                      <SelectValue placeholder="Select a model" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {MODEL_LIST.map((model) => (
+                                        <SelectItem
+                                          key={model.value}
+                                          value={model.value}
+                                        >
+                                          {model.label}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                                <div className="flex flex-col space-y-2">
+                                  <Label
+                                    className="text-lg"
+                                    htmlFor="new-prompt-content"
+                                  >
+                                    Prompt
+                                  </Label>
+                                  <Textarea
+                                    id="new-prompt-content"
+                                    value={newPromptContent}
+                                    onChange={(e) => {
+                                      const newContent = e.target.value;
+                                      setNewPromptContent(newContent);
+                                      setPromptVariables(
+                                        extractVariables(newContent)
+                                      );
+                                    }}
+                                    placeholder="Type your prompt here"
+                                    rows={4}
+                                  />
+                                  <p className="text-sm text-gray-500">
+                                    Use &#123;&#123; sample_variable
+                                    &#125;&#125; to insert variables into your
+                                    prompt.
+                                  </p>
+                                </div>
+                                {promptVariables.length > 0 && (
+                                  <div className="flex flex-col space-y-2">
+                                    <Label className="text-lg">
+                                      Your variables
+                                    </Label>
+                                    <div className="flex flex-wrap gap-2">
+                                      {promptVariables.map(
+                                        (variable, index) => (
+                                          <Badge
+                                            key={index}
+                                            variant="secondary"
+                                            className="text-sm px-4 py-2 rounded-md"
+                                          >
+                                            {variable}
+                                          </Badge>
+                                        )
+                                      )}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                              <div className="flex justify-end items-center mt-4">
+                                <Button
+                                  className="w-auto"
+                                  onClick={() => createPrompt(newPromptName)}
+                                >
+                                  Create prompt
+                                </Button>
+                              </div>
+                            </>
+                          ) : (
+                            <>
+                              <p className="text-gray-500 mb-2">
+                                TS/JS Quick Start
+                              </p>
+                              <DiffHighlight
+                                code={`
 // 1. Add this line
 import { hprompt } from "@helicone/helicone";
 
@@ -322,43 +352,39 @@ const chatCompletion = await openai.chat.completions.create(
   }
 );
                               `}
-                              language="typescript"
-                              newLines={[]}
-                              oldLines={[]}
-                              minHeight={false}
-                            />
-                          </>
-                        )}
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-                </div>
+                                language="typescript"
+                                newLines={[]}
+                                oldLines={[]}
+                                minHeight={false}
+                              />
+                            </>
+                          )}
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
 
-                <ThemedTabs
-                  options={[
-                    {
-                      label: "table",
-                      icon: TableCellsIcon,
-                    },
-                    {
-                      label: "card",
-                      icon: Square2StackIcon,
-                    },
-                  ]}
-                  onOptionSelect={function (option: string): void {
-                    if (option === "table") {
-                      searchParams.set("view", "table");
-                    } else {
-                      searchParams.set("view", "card");
-                    }
-                  }}
-                  initialIndex={searchParams.get("view") === "card" ? 1 : 0}
-                />
-              </div>
-              {!hasAccess && (
-                <span className="text-gray-500 xs">
-                  Prompts are a pro add-on feature for $30/month
-                </span>
+                  <ThemedTabs
+                    options={[
+                      {
+                        label: "table",
+                        icon: TableCellsIcon,
+                      },
+                      {
+                        label: "card",
+                        icon: Square2StackIcon,
+                      },
+                    ]}
+                    onOptionSelect={function (option: string): void {
+                      if (option === "table") {
+                        searchParams.set("view", "table");
+                      } else {
+                        searchParams.set("view", "card");
+                      }
+                    }}
+                    initialIndex={searchParams.get("view") === "card" ? 1 : 0}
+                  />
+                </div>
               )}
 
               {filteredPrompts && hasLimitedAccess ? (
@@ -429,32 +455,31 @@ const chatCompletion = await openai.chat.completions.create(
                   />
                 )
               ) : (
-                <div className="flex flex-col w-full mt-16 justify-center items-center">
-                  <div className="flex flex-col">
-                    <DocumentTextIcon className="h-12 w-12 text-black dark:text-white border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-2 rounded-lg" />
-                    <p className="text-xl text-black dark:text-white font-semibold mt-8">
-                      No Prompts
-                    </p>
-                    <p className="text-sm text-gray-500 max-w-sm mt-2">
-                      View our documentation to learn how to create a prompt.
-                    </p>
-                    <div className="mt-4">
-                      <Link
-                        href="https://docs.helicone.ai/features/prompts"
-                        className="w-fit items-center rounded-lg bg-black dark:bg-white px-2.5 py-1.5 gap-2 text-sm flex font-medium text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-                      >
-                        <BookOpenIcon className="h-4 w-4" />
-                        View Docs
-                      </Link>
-                    </div>
-                    <Divider>Or</Divider>
+                <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
+                  <Card className="max-w-4xl">
+                    <CardHeader>
+                      <CardTitle>Need Prompts?</CardTitle>
+                      <p className="text-sm text-muted-foreground">
+                        The Free plan does not include the Prompts feature,
+                        upgrade to Pro to enable Prompts.
+                      </p>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <InfoBox>
+                        <p className="text-sm font-medium">
+                          Version prompts, create prompt templates, and run
+                          experiments to improve prompt outputs.
+                        </p>
+                      </InfoBox>
+                      <div className="bg-muted p-4 rounded-lg">
+                        <div className="flex space-x-2 mb-2">
+                          <Button variant="outline" size="sm">
+                            Code
+                          </Button>
+                        </div>
 
-                    <div className="mt-4">
-                      <h3 className="text-xl text-black dark:text-white font-semibold">
-                        TS/JS Quick Start
-                      </h3>
-                      <DiffHighlight
-                        code={`
+                        <DiffHighlight
+                          code={`
 // 1. Add this line
 import { hprompt } from "@helicone/helicone";
  
@@ -477,12 +502,46 @@ const chatCompletion = await openai.chat.completions.create(
   }
 );
  `}
-                        language="typescript"
-                        newLines={[]}
-                        oldLines={[]}
-                      />
-                    </div>
-                  </div>
+                          language="typescript"
+                          newLines={[]}
+                          oldLines={[]}
+                        />
+                      </div>
+                    </CardContent>
+                    <CardFooter className="flex flex-col items-start">
+                      <Button
+                        variant="link"
+                        className="px-0 mb-4"
+                        onClick={() =>
+                          setShowPricingCompare(!showPricingCompare)
+                        }
+                      >
+                        Compare my plan with Pro + Prompts{" "}
+                        <ChevronDownIcon
+                          className={`ml-1 h-4 w-4 transition-transform ${
+                            showPricingCompare ? "rotate-180" : ""
+                          }`}
+                        />
+                      </Button>
+                      {showPricingCompare && (
+                        <PricingCompare featureName="Prompts" />
+                      )}
+                      <div className="space-x-2 mt-5">
+                        <Button variant="outline" asChild>
+                          <Link href="https://docs.helicone.ai/features/prompts">
+                            View documentation
+                          </Link>
+                        </Button>
+                        {showPricingCompare || (
+                          <Button asChild>
+                            <Link href="/settings/billing">
+                              Start 14-day free trial
+                            </Link>
+                          </Button>
+                        )}
+                      </div>
+                    </CardFooter>
+                  </Card>
                 </div>
               )}
             </>

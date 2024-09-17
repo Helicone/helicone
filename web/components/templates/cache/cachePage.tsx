@@ -32,6 +32,7 @@ import { formatNumber } from "../users/initialColumns";
 import { useOrg } from "@/components/layout/organizationContext";
 import { Button } from "@/components/ui/button";
 import { DiffHighlight } from "../welcome/diffHighlight";
+import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
 
 interface CachePageProps {
   currentPage: number;
@@ -160,7 +161,17 @@ const CachePage = (props: CachePageProps) => {
         }
       />
 
-      {!isPro || (!hasCache && isPro) ? (
+      {!isPro ? (
+        <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
+          <FeatureUpgradeCard
+            title="Unlock Cache"
+            description="The Free plan does not include the Cache feature, but getting access is easy."
+            infoBoxText="Optimize your LLM usage by caching responses and reducing redundant API calls."
+            youtubeVideo="https://www.youtube.com/embed/qIOq_NbeQ28?autoplay=1&mute=1"
+            documentationLink="https://docs.helicone.ai/features/advanced-usage/caching"
+          />
+        </div>
+      ) : !hasCache ? (
         <div className="flex flex-col w-full mt-16 justify-center items-center">
           <div className="flex flex-col">
             <div className="w-fit pt-2 pl-0.5 bg-white border border-gray-300 rounded-md">
@@ -183,13 +194,6 @@ const CachePage = (props: CachePageProps) => {
                 <BookOpenIcon className="h-4 w-4" />
                 View Docs
               </Link>
-              {!isPro && (
-                <Link href="/settings/billing">
-                  <Button className="bg-sky-500 hover:bg-sky-600">
-                    Start free trial
-                  </Button>
-                </Link>
-              )}
             </div>
 
             {isPro && (

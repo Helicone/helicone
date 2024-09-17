@@ -67,7 +67,7 @@ const DatasetsPage = (props: DatasetsPageProps) => {
                 <BookOpenIcon className="h-4 w-4" />
                 View Docs
               </Link>
-              <ProFeatureWrapper featureName="Create dataset">
+              <ProFeatureWrapper featureName="Datasets">
                 <Link
                   href="/requests"
                   className="w-fit items-center rounded-md bg-blue-600 px-3 py-2 gap-2 text-sm flex font-medium text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
