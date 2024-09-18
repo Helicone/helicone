@@ -2310,6 +2310,7 @@ Json: JsonObject;
         alerts?: boolean;
       };
     };
+<<<<<<< HEAD
     /** @enum {string} */
     "stripe.Stripe.Invoice.Status": "draft" | "open" | "paid" | "uncollectible" | "void";
     /** @description Set of key-value pairs that you can attach to an object. This can be useful for storing additional information about the object in a structured format. */
@@ -14169,6 +14170,8 @@ Json: JsonObject;
         };
       };
     };
+=======
+>>>>>>> main
   };
   responses: {
   };
@@ -16181,7 +16184,11 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
+<<<<<<< HEAD
           "application/json": components["schemas"]["stripe.Stripe.Response_stripe.Stripe.UpcomingInvoice_"];
+=======
+          "application/json": unknown;
+>>>>>>> main
         };
       };
     };
@@ -16209,7 +16216,11 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
+<<<<<<< HEAD
           "application/json": components["schemas"]["stripe.Stripe.Subscription"];
+=======
+          "application/json": unknown;
+>>>>>>> main
         };
       };
     };

@@ -6744,6 +6744,7 @@
 				},
 				"type": "object",
 				"additionalProperties": false
+<<<<<<< HEAD
 			},
 			"stripe.Stripe.Invoice.Status": {
 				"type": "string",
@@ -42591,6 +42592,8 @@
 						"type": "object"
 					}
 				]
+=======
+>>>>>>> main
 			}
 		},
 		"securitySchemes": {
@@ -47834,9 +47837,13 @@
 						"description": "Ok",
 						"content": {
 							"application/json": {
+<<<<<<< HEAD
 								"schema": {
 									"$ref": "#/components/schemas/stripe.Stripe.Response_stripe.Stripe.UpcomingInvoice_"
 								}
+=======
+								"schema": {}
+>>>>>>> main
 							}
 						}
 					}
@@ -47909,9 +47916,13 @@
 						"description": "Ok",
 						"content": {
 							"application/json": {
+<<<<<<< HEAD
 								"schema": {
 									"$ref": "#/components/schemas/stripe.Stripe.Subscription"
 								}
+=======
+								"schema": {}
+>>>>>>> main
 							}
 						}
 					}

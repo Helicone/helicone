@@ -2296,6 +2296,7 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+<<<<<<< HEAD
     "stripe.Stripe.Invoice.Status": {
         "dataType": "refAlias",
         "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["draft"]},{"dataType":"enum","enums":["open"]},{"dataType":"enum","enums":["paid"]},{"dataType":"enum","enums":["uncollectible"]},{"dataType":"enum","enums":["void"]}],"validators":{}},
@@ -13073,6 +13074,8 @@ const models: TsoaRoute.Models = {
         "type": {"dataType":"intersection","subSchemas":[{"ref":"stripe.Stripe.UpcomingInvoice"},{"dataType":"nestedObjectLiteral","nestedProperties":{"lastResponse":{"dataType":"nestedObjectLiteral","nestedProperties":{"stripeAccount":{"dataType":"string"},"idempotencyKey":{"dataType":"string"},"apiVersion":{"dataType":"string"},"statusCode":{"dataType":"double","required":true},"requestId":{"dataType":"string","required":true},"headers":{"dataType":"nestedObjectLiteral","nestedProperties":{},"additionalProperties":{"dataType":"string"},"required":true}},"required":true}}}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+=======
+>>>>>>> main
 };
 const templateService = new ExpressTemplateService(models, {"noImplicitAdditionalProperties":"throw-on-extras","bodyCoercion":true});
 
