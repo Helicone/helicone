@@ -1,17 +1,17 @@
 type ShutdownHandler = () => Promise<void>;
 
-export class ShutdownManager {
-  private static instance: ShutdownManager;
+export class ShutdownService {
+  private static instance: ShutdownService;
   private handlers: ShutdownHandler[] = [];
-  private static readonly SHUTDOWN_TIMEOUT = 60000; // 60 seconds timeout
+  private static readonly SHUTDOWN_TIMEOUT = 60000;
 
   private constructor() {}
 
-  public static getInstance(): ShutdownManager {
-    if (!ShutdownManager.instance) {
-      ShutdownManager.instance = new ShutdownManager();
+  public static getInstance(): ShutdownService {
+    if (!ShutdownService.instance) {
+      ShutdownService.instance = new ShutdownService();
     }
-    return ShutdownManager.instance;
+    return ShutdownService.instance;
   }
 
   public addHandler(handler: ShutdownHandler): void {
@@ -26,7 +26,7 @@ export class ShutdownManager {
         new Promise((_, reject) =>
           setTimeout(
             () => reject(new Error("Shutdown timed out")),
-            ShutdownManager.SHUTDOWN_TIMEOUT
+            ShutdownService.SHUTDOWN_TIMEOUT
           )
         ),
       ]);
