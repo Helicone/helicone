@@ -6,8 +6,11 @@ import { dataDogClient } from "../../lib/clients/DataDogClient";
 import { KafkaProducer } from "../../lib/clients/KafkaProducer";
 import { HeliconeScoresMessage } from "../../lib/handlers/HandlerContext";
 import * as Sentry from "@sentry/node";
+import { ShutdownManager } from "../shutdown/ShutdownManager";
+import { clearTimeout } from "timers";
 
 type Scores = Record<string, number | boolean>;
+const delayMs = 10 * 60 * 1000; // 10 minutes in milliseconds
 
 export interface ScoreRequest {
   scores: Scores;
@@ -16,11 +19,22 @@ export interface ScoreRequest {
 export class ScoreManager extends BaseManager {
   private scoreStore: ScoreStore;
   private kafkaProducer: KafkaProducer;
+  private delayedOperations: Map<NodeJS.Timeout, () => Promise<void>> =
+    new Map();
+  private static readonly MAX_OPERATION_TIME = 10 * 60 * 1000; // 10 minutes in milliseconds
+  private static readonly SHUTDOWN_TIMEOUT = 30000; // 30 seconds timeout
+
   constructor(authParams: AuthParams) {
     super(authParams);
     this.scoreStore = new ScoreStore(authParams.organizationId);
     this.kafkaProducer = new KafkaProducer();
+
+    // Register shutdown handler
+    ShutdownManager.getInstance().addHandler(() =>
+      this.waitForDelayedOperations()
+    );
   }
+
   public async addScores(
     requestId: string,
     scores: Scores
@@ -46,31 +60,39 @@ export class ScoreManager extends BaseManager {
   ): Promise<Result<null, string>> {
     if (!this.kafkaProducer.isKafkaEnabled()) {
       console.log("Kafka is not enabled. Using score manager");
-      const scoreManager = new ScoreManager({
-        organizationId: this.authParams.organizationId,
-      });
-      return await scoreManager.handleScores(
-        {
-          batchId: "",
-          partition: 0,
-          lastOffset: "",
-          messageCount: 1,
-        },
-        scoresMessage
+      const delayedOperation = this.createDelayedOperation(() =>
+        this.handleScores(
+          {
+            batchId: "",
+            partition: 0,
+            lastOffset: "",
+            messageCount: 1,
+          },
+          scoresMessage
+        )
       );
+      return ok(null);
     }
     console.log("Sending scores message to Kafka");
 
-    const res = await this.kafkaProducer.sendScoresMessage(
-      scoresMessage,
-      "helicone-scores-prod"
-    );
+    // const delayedOperation = this.createDelayedOperation(() =>
+    //   this.kafkaProducer.sendScoresMessage(
+    //     scoresMessage,
+    //     "helicone-scores-prod"
+    //   )
+    // );
+    // this.delayedOperations.push(delayedOperation);
 
-    if (res.error) {
-      console.error(`Error sending scores message to Kafka: ${res.error}`);
-      return err(res.error);
-    }
     return ok(null);
+  }
+
+  private createDelayedOperation(operation: () => Promise<void>): void {
+    const timeoutId = setTimeout(() => {
+      operation().finally(() => {
+        this.delayedOperations.delete(timeoutId);
+      });
+    }, delayMs);
+    this.delayedOperations.set(timeoutId, operation);
   }
 
   private async procesScores(
@@ -160,7 +182,7 @@ export class ScoreManager extends BaseManager {
       messageCount: number;
     },
     scoresMessages: HeliconeScoresMessage[]
-  ): Promise<Result<null, string>> {
+  ): Promise<void> {
     console.log(`Handling scores for batch ${batchContext.batchId}`);
     const start = performance.now();
     const result = await this.procesScores(scoresMessages);
@@ -215,10 +237,8 @@ export class ScoreManager extends BaseManager {
           },
         });
       }
-      return err(result.error);
     }
     console.log("Successfully processed scores messages");
-    return ok(null);
   }
 
   private mapScores(scores: Scores): Score[] {
@@ -230,5 +250,43 @@ export class ScoreManager extends BaseManager {
           typeof value === "boolean" ? (value ? 1 : 0) : value,
       };
     });
+  }
+
+  public async waitForDelayedOperations(): Promise<void> {
+    if (this.delayedOperations.size > 0) {
+      console.log(
+        `Waiting for ${this.delayedOperations.size} delayed operations in ScoreManager...`
+      );
+      await Promise.all(Array.from(this.delayedOperations));
+      this.delayedOperations = new Map();
+      console.log("All delayed operations in ScoreManager completed.");
+    }
+  }
+
+  public async shutdown(): Promise<void> {
+    console.log(
+      `Executing ${this.delayedOperations.size} delayed operations in ScoreManager immediately...`
+    );
+    const operations = Array.from(this.delayedOperations.entries());
+    this.delayedOperations.clear();
+
+    for (const [timeoutId, operation] of operations) {
+      clearTimeout(timeoutId);
+    }
+
+    try {
+      await Promise.race([
+        Promise.all(operations.map(([_, op]) => op())),
+        new Promise((resolve) =>
+          setTimeout(resolve, ScoreManager.SHUTDOWN_TIMEOUT)
+        ),
+      ]);
+    } catch (error) {
+      console.error("Error during ScoreManager shutdown:", error);
+    }
+
+    console.log(
+      "All delayed operations in ScoreManager completed or timed out."
+    );
   }
 }

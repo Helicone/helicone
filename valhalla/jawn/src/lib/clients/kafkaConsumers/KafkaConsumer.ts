@@ -651,20 +651,16 @@ async function consumeMiniBatchScores(
     organizationId: "",
   });
 
-  const delayMs = 10 * 60 * 1000; // 10 minutes in milliseconds
-
   try {
-    setTimeout(async () => {
-      await scoresManager.handleScores(
-        {
-          batchId: miniBatchId,
-          partition: batchPartition,
-          lastOffset: lastOffset,
-          messageCount: messages.length,
-        },
-        messages
-      );
-    }, delayMs);
+    await scoresManager.handleScores(
+      {
+        batchId: miniBatchId,
+        partition: batchPartition,
+        lastOffset: lastOffset,
+        messageCount: messages.length,
+      },
+      messages
+    );
     return ok(miniBatchId);
   } catch (error) {
     // TODO: Should we skip or fail the batch?
