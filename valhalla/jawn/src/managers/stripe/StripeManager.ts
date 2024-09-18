@@ -216,7 +216,7 @@ WHERE (${builtFilter.filter})`,
 
   private shouldApplyCoupon(): boolean {
     const currentDate = new Date();
-    const cutoffDate = new Date("2023-10-10");
+    const cutoffDate = new Date("2024-10-15");
     return currentDate < cutoffDate;
   }
 
