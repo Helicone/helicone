@@ -16,7 +16,7 @@ const proProductPrices = {
   alerts: process.env.PRICE_PROD_ALERTS_ID!,
 };
 
-const EARLY_ADOPTER_COUPON = "0IPsIob0";
+const EARLY_ADOPTER_COUPON = "9ca5IeEs";
 
 export class StripeManager extends BaseManager {
   private stripe: Stripe;

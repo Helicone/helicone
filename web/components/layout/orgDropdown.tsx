@@ -87,21 +87,22 @@ export default function OrgDropdown({}: OrgDropdownProps) {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="justify-between ml-2 w-full">
-            <div className="flex items-center w-full">
-              {currentIcon && (
-                <currentIcon.icon
-                  className={clsx(
-                    `text-${currentColor?.name}-500`,
-                    "mr-3 flex-shrink-0 h-4 w-4"
-                  )}
-                  aria-hidden="true"
-                />
-              )}
-              <p className="text-sm font-semibold truncate w-fit max-w-[7.25rem] text-left">
-                {orgContext?.currentOrg?.name}
-              </p>
-            </div>
+          <Button
+            variant="ghost"
+            className="flex  items-center justify-between w-full ml-1 p-2"
+          >
+            {currentIcon && (
+              <currentIcon.icon
+                className={clsx(
+                  `text-${currentColor?.name}-500`,
+                  "mr-2 flex-shrink-0 h-4 w-4"
+                )}
+                aria-hidden="true"
+              />
+            )}
+            <p className="text-xs font-semibold truncate w-fit text-left">
+              {orgContext?.currentOrg?.name}
+            </p>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-[15rem] ml-2 mt-1 max-h-[90vh] flex flex-col">

@@ -64,6 +64,33 @@ const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
     [isCollapsed]
   );
 
+  const NAVIGATION_ITEMS = useMemo(() => {
+    if (isCollapsed) {
+      return NAVIGATION.flatMap((item) => {
+        if (item.subItems && expandedItems.includes(item.name)) {
+          return [
+            item,
+            ...item.subItems.filter((subItem) => subItem.icon !== null),
+          ];
+        }
+        return [item];
+      }).filter((item) => item.icon !== null);
+    }
+
+    return NAVIGATION.map((item) => {
+      if (item.subItems) {
+        return {
+          ...item,
+          subItems: item.subItems.map((subItem) => ({
+            ...subItem,
+            href: subItem.href,
+          })),
+        };
+      }
+      return item;
+    });
+  }, [NAVIGATION, isCollapsed, expandedItems]);
+
   return (
     <>
       <div
@@ -82,8 +109,10 @@ const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
       >
         <div className="w-full flex flex-grow flex-col overflow-y-auto border-r dark:border-gray-700 justify-between">
           <div className="flex items-center gap-2 h-14 border-b dark:border-gray-700">
-            {!isCollapsed && <OrgDropdown />}
-            <div className={cn("mx-auto", !isCollapsed && "mr-2")}>
+            <div className="flex items-center gap-2 w-fill">
+              {!isCollapsed && <OrgDropdown />}
+            </div>
+            <div className={cn("mx-auto", isCollapsed ? "w-fit" : "mr-2")}>
               <Button
                 variant="ghost"
                 size="icon"
@@ -128,7 +157,7 @@ const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
               className="group flex flex-col gap-4 py-2 data-[collapsed=true]:py-2 "
             >
               <nav className="grid gap-1 px-2 group-[[data-collapsed=true]]:justify-center group-[[data-collapsed=true]]:px-2">
-                {NAVIGATION.map((link) => (
+                {NAVIGATION_ITEMS.map((link) => (
                   <NavItem
                     key={link.name}
                     link={link}
@@ -145,11 +174,11 @@ const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
               <InfoBox icon={() => <></>} className="flex flex-col">
                 <div>
                   <span className="text-[#1c4ed8] text-xs font-semibold font-['Inter'] leading-tight">
-                    Early Adopter Exclusive: $300 Credit for the year. <br />
+                    Early Adopter Exclusive: $120 Credit for the year. <br />
                   </span>
                   <span className="text-[#1c4ed8] text-xs font-light font-['Inter'] leading-tight">
-                    Switch to Pro and get $25/mo credit on requests exceeding
-                    100k, as a thank you for your early support!{" "}
+                    Switch to Pro and get $10/mo credit for 1 year, as a thank
+                    you for your early support!
                   </span>
                 </div>
                 <Button className="bg-blue-700 mt-[10px] text-xs" size="xs">
