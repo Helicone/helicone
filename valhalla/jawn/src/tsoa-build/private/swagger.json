@@ -11449,7 +11449,105 @@
 						"description": "Ok",
 						"content": {
 							"application/json": {
-								"schema": {}
+								"schema": {
+									"properties": {
+										"total": {
+											"type": "number",
+											"format": "double"
+										},
+										"tax": {
+											"type": "number",
+											"format": "double",
+											"nullable": true
+										},
+										"subtotal": {
+											"type": "number",
+											"format": "double"
+										},
+										"discount": {
+											"properties": {
+												"coupon": {
+													"properties": {
+														"percent_off": {
+															"type": "number",
+															"format": "double",
+															"nullable": true
+														},
+														"name": {
+															"type": "string",
+															"nullable": true
+														}
+													},
+													"required": [
+														"percent_off",
+														"name"
+													],
+													"type": "object"
+												}
+											},
+											"required": [
+												"coupon"
+											],
+											"type": "object",
+											"nullable": true
+										},
+										"lines": {
+											"properties": {
+												"data": {
+													"items": {
+														"properties": {
+															"description": {
+																"type": "string",
+																"nullable": true
+															},
+															"amount": {
+																"type": "number",
+																"format": "double",
+																"nullable": true
+															},
+															"id": {
+																"type": "string",
+																"nullable": true
+															}
+														},
+														"required": [
+															"description",
+															"amount",
+															"id"
+														],
+														"type": "object"
+													},
+													"type": "array"
+												}
+											},
+											"required": [
+												"data"
+											],
+											"type": "object",
+											"nullable": true
+										},
+										"next_payment_attempt": {
+											"type": "number",
+											"format": "double",
+											"nullable": true
+										},
+										"currency": {
+											"type": "string",
+											"nullable": true
+										}
+									},
+									"required": [
+										"total",
+										"tax",
+										"subtotal",
+										"discount",
+										"lines",
+										"next_payment_attempt",
+										"currency"
+									],
+									"type": "object",
+									"nullable": true
+								}
 							}
 						}
 					}
@@ -11522,7 +11620,79 @@
 						"description": "Ok",
 						"content": {
 							"application/json": {
-								"schema": {}
+								"schema": {
+									"properties": {
+										"items": {
+											"items": {
+												"properties": {
+													"price": {
+														"properties": {
+															"product": {
+																"properties": {
+																	"name": {
+																		"type": "string",
+																		"nullable": true
+																	}
+																},
+																"required": [
+																	"name"
+																],
+																"type": "object",
+																"nullable": true
+															}
+														},
+														"required": [
+															"product"
+														],
+														"type": "object"
+													},
+													"quantity": {
+														"type": "number",
+														"format": "double"
+													}
+												},
+												"required": [
+													"price"
+												],
+												"type": "object"
+											},
+											"type": "array"
+										},
+										"trial_end": {
+											"type": "number",
+											"format": "double",
+											"nullable": true
+										},
+										"id": {
+											"type": "string"
+										},
+										"current_period_start": {
+											"type": "number",
+											"format": "double"
+										},
+										"current_period_end": {
+											"type": "number",
+											"format": "double"
+										},
+										"cancel_at_period_end": {
+											"type": "boolean"
+										},
+										"status": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"items",
+										"trial_end",
+										"id",
+										"current_period_start",
+										"current_period_end",
+										"cancel_at_period_end",
+										"status"
+									],
+									"type": "object",
+									"nullable": true
+								}
 							}
 						}
 					}
@@ -11563,6 +11733,32 @@
 						}
 					}
 				}
+			}
+		},
+		"/v1/organization/user/accept_terms": {
+			"post": {
+				"operationId": "AcceptTerms",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Organization"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
 			}
 		},
 		"/v1/organization/create": {
