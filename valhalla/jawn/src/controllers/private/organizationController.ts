@@ -23,6 +23,7 @@ import {
   UpdateOrganizationParams,
 } from "../../managers/organization/OrganizationManager";
 import { supabaseServer } from "../../lib/db/supabase";
+import { StripeManager } from "../../managers/stripe/StripeManager";
 
 @Route("v1/organization")
 @Tags("Organization")
@@ -92,11 +93,26 @@ export class OrganizationController extends Controller {
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<null, string>> {
     const organizationManager = new OrganizationManager(request.authParams);
+    const memberCount = await organizationManager.getMemberCount();
+    if (memberCount.error || !memberCount.data) {
+      return err(memberCount.error ?? "Error getting member count");
+    }
+
+    const stripeManager = new StripeManager(request.authParams);
+
+    const userCount = await stripeManager.updateProUserCount(
+      memberCount.data + 1
+    );
+
+    if (userCount.error) {
+      return err(userCount.error ?? "Error updating pro user count");
+    }
 
     const result = await organizationManager.addMember(
       organizationId,
       requestBody.email
     );
+
     if (result.error || !result.data) {
       this.setStatus(500);
       return err(result.error ?? "Error adding member to organization");
@@ -262,7 +278,21 @@ export class OrganizationController extends Controller {
     @Query() memberId: string,
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<null, string>> {
+    const stripeManager = new StripeManager(request.authParams);
     const organizationManager = new OrganizationManager(request.authParams);
+
+    const memberCount = await organizationManager.getMemberCount();
+    if (memberCount.error || !memberCount.data) {
+      return err(memberCount.error ?? "Error getting member count");
+    }
+
+    const userCount = await stripeManager.updateProUserCount(
+      memberCount.data - 1
+    );
+
+    if (userCount.error) {
+      return err(userCount.error ?? "Error updating pro user count");
+    }
 
     const result = await organizationManager.removeOrganizationMember(
       organizationId,
