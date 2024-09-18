@@ -1,14 +1,13 @@
-import React, { useState, forwardRef, useMemo, useCallback } from "react";
 import { useOrg } from "@/components/layout/organizationContext";
+import { UpgradeToProCTA } from "@/components/templates/pricing/upgradeToProCTA";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useRouter } from "next/router";
 import { CheckIcon } from "lucide-react";
-import { UpgradeToProCTA } from "@/components/templates/pricing/upgradeToProCTA";
+import React, { forwardRef, useCallback, useMemo, useState } from "react";
 
 interface ProFeatureWrapperProps {
   children: React.ReactElement;

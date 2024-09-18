@@ -45,24 +45,12 @@ export const EnterprisePlanCard = () => {
           title="Need to adjust your plan?"
           description="We're here to help you optimize your Enterprise plan for your evolving needs."
           buttonText="Schedule a Call"
-          onClick={() =>
-            window.open(
-              "https://cal.com/team/helicone/helicone-discovery",
-              "_blank"
-            )
-          }
         />
 
         <PlanFeatureCard
           title="Looking for documentation?"
           description="Access our comprehensive Enterprise documentation and guides."
           buttonText="View Enterprise Docs"
-          onClick={() =>
-            window.open(
-              "https://docs.helicone.ai/advanced-usage/enterprise-features",
-              "_blank"
-            )
-          }
         />
       </div>
     </div>

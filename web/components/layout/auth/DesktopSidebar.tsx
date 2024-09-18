@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { InfoBox } from "@/components/ui/helicone/infoBox";
 import {
   Tooltip,
   TooltipContent,
@@ -10,17 +11,15 @@ import {
   BookOpenIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
-  CloudArrowUpIcon,
   Cog6ToothIcon,
   QuestionMarkCircleIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { useMemo } from "react";
 import { useOrg } from "../organizationContext";
 import OrgDropdown from "../orgDropdown";
 import NavItem from "./NavItem";
-import { InfoBox } from "@/components/ui/helicone/infoBox";
-import { useMemo } from "react";
 
 export interface NavigationItem {
   name: string;
