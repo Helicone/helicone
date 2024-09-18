@@ -16,7 +16,7 @@ const proProductPrices = {
   alerts: process.env.PRICE_PROD_ALERTS_ID!,
 };
 
-const EARLY_ADOPTER_COUPON = "9ca5IeEs";
+const EARLY_ADOPTER_COUPON = "WlDg28Kf"; // WlDg28Kf | prod: 9ca5IeEs
 
 export class StripeManager extends BaseManager {
   private stripe: Stripe;
@@ -270,11 +270,12 @@ WHERE (${builtFilter.filter})`,
           tier: "pro-20240913",
         },
       },
-      allow_promotion_codes: true,
     };
 
     if (this.shouldApplyCoupon()) {
       sessionParams.discounts = [{ coupon: EARLY_ADOPTER_COUPON }];
+    } else {
+      sessionParams.allow_promotion_codes = true;
     }
 
     const session = await this.stripe.checkout.sessions.create(sessionParams);
