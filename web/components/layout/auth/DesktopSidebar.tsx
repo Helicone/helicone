@@ -109,7 +109,7 @@ const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
       >
         <div className="w-full flex flex-grow flex-col overflow-y-auto border-r dark:border-gray-700 justify-between">
           <div className="flex items-center gap-2 h-14 border-b dark:border-gray-700">
-            <div className="flex items-center gap-2 w-fill">
+            <div className="flex items-center gap-2 w-full">
               {!isCollapsed && <OrgDropdown />}
             </div>
             <div className={cn("mx-auto", isCollapsed ? "w-fit" : "mr-2")}>
@@ -276,7 +276,7 @@ const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
               </>
             )}
           </div>
-          {tier === "free" &&
+          {/* {tier === "free" &&
             org?.currentOrg?.organization_type !== "customer" && (
               <div className={cn("p-2", isCollapsed && "hidden")}>
                 <Link href="/settings/billing">
@@ -294,7 +294,7 @@ const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
                   </Button>
                 </Link>
               </div>
-            )}
+            )} */}
         </div>
       </div>
     </>

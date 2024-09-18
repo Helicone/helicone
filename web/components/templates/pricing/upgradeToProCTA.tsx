@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 export const UpgradeToProCTA = ({
   defaultPrompts = false,
@@ -42,6 +42,10 @@ export const UpgradeToProCTA = ({
       return result;
     },
   });
+
+  const isPro = useMemo(() => {
+    return org?.currentOrg?.tier === "pro-20240913";
+  }, [org?.currentOrg?.tier]);
 
   return (
     <div>
@@ -88,17 +92,25 @@ export const UpgradeToProCTA = ({
 
       <Button
         onClick={async () => {
-          const result = await upgradeToPro.mutateAsync();
-          if (result.data) {
-            window.open(result.data, "_blank");
+          if (isPro) {
+            window.open("/settings/billing", "_blank");
           } else {
-            console.error("No URL returned from upgrade mutation");
+            const result = await upgradeToPro.mutateAsync();
+            if (result.data) {
+              window.open(result.data, "_blank");
+            } else {
+              console.error("No URL returned from upgrade mutation");
+            }
           }
         }}
         className="w-full mt-4"
         disabled={upgradeToPro.isLoading}
       >
-        {upgradeToPro.isLoading ? "Loading..." : "Start 14-day free trial"}
+        {upgradeToPro.isLoading
+          ? "Loading..."
+          : isPro
+          ? "Upgrade"
+          : "Start 14-day free trial"}
       </Button>
     </div>
   );

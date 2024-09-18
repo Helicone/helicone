@@ -5,6 +5,7 @@ import { FreePlanCard } from "./freeBillingPage";
 import { ProPlanCard } from "./proBillingPage";
 import { MigrateGrowthToPro } from "./MigrateGrowthToPro";
 import { UnknownTierCard } from "./UnknownTierCard";
+import { EnterprisePlanCard } from "./EnterprisePlanCard";
 
 interface OrgPlanPageProps {}
 
@@ -26,6 +27,7 @@ const BillingPlanPage = (props: OrgPlanPageProps) => {
           !knownTiers.includes(org?.currentOrg?.tier) && (
             <UnknownTierCard tier={org?.currentOrg?.tier} />
           )}
+        {org?.currentOrg?.tier === "enterprise" && <EnterprisePlanCard />}
         {/* <Card className="bg-[#F9F9F9] p-4 max-w-lg">
           <div className="text-[#334155] font-medium">
             Looking for something else?

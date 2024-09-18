@@ -8,15 +8,16 @@ import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { clickhouseDb } from "../../lib/db/ClickhouseWrapper";
 import { buildFilterWithAuthClickHouse } from "../../lib/shared/filters/filters";
 import { UpgradeToProRequest } from "../../controllers/public/stripeController";
+import { OrganizationManager } from "../organization/OrganizationManager";
 
 const proProductPrices = {
-  "request-volume": process.env.PRICE_PROD_REQUEST_VOLUME_ID!,
+  "request-volume": process.env.PRICE_PROD_REQUEST_VOLUME_ID!, //(This is just growth)
   "pro-users": process.env.PRICE_PROD_PRO_USERS_ID!,
   prompts: process.env.PRICE_PROD_PROMPTS_ID!,
   alerts: process.env.PRICE_PROD_ALERTS_ID!,
 };
 
-const EARLY_ADOPTER_COUPON = "WlDg28Kf"; // WlDg28Kf | prod: 9ca5IeEs
+const EARLY_ADOPTER_COUPON = "9ca5IeEs"; // WlDg28Kf | prod: 9ca5IeEs
 
 export class StripeManager extends BaseManager {
   private stripe: Stripe;
@@ -45,10 +46,6 @@ export class StripeManager extends BaseManager {
         return err("User does not have an email");
       }
 
-      const getStripeCustomer = await this.stripe.customers.list({
-        email: user.data?.user?.email ?? "",
-      });
-      console.log(getStripeCustomer);
       const customer = await this.stripe.customers.create({
         email: user.data.user.email,
       });
@@ -201,17 +198,8 @@ WHERE (${builtFilter.filter})`,
     }
   }
   private async getOrgMemberCount(): Promise<Result<number, string>> {
-    const members = await supabaseServer.client
-      .from("organization_member")
-      .select("*", { count: "exact" })
-      .eq("organization", this.authParams.organizationId);
-
-    if (members.error) {
-      console.log(members.error);
-      return err("Error getting organization members");
-    }
-
-    return ok(members.count!);
+    const organizationManager = new OrganizationManager(this.authParams);
+    return await organizationManager.getMemberCount(true);
   }
 
   private shouldApplyCoupon(): boolean {

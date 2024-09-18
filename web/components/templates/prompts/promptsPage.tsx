@@ -144,10 +144,10 @@ const PromptsPage = (props: PromptsPageProps) => {
 
   const hasAccess = useMemo(() => {
     return (
-      org?.currentOrg?.tier === "pro-20240913" ||
       org?.currentOrg?.tier === "growth" ||
-      (org?.currentOrg?.stripe_metadata as { addons?: { prompts?: boolean } })
-        ?.addons?.prompts
+      (org?.currentOrg?.tier === "pro-20240913" &&
+        (org?.currentOrg?.stripe_metadata as { addons?: { prompts?: boolean } })
+          ?.addons?.prompts)
     );
   }, [org?.currentOrg?.tier, org?.currentOrg?.stripe_metadata]);
 
@@ -204,17 +204,26 @@ const PromptsPage = (props: PromptsPageProps) => {
 
                     <Dialog>
                       <DialogTrigger asChild className="w-min">
-                        <ProFeatureWrapper
-                          featureName="Prompts"
-                          enabled={hasAccess}
-                        >
+                        {hasAccess ? (
                           <HcButton
                             variant={"primary"}
                             size={"sm"}
                             title={"Create new prompt"}
                             icon={DocumentPlusIcon}
                           />
-                        </ProFeatureWrapper>
+                        ) : (
+                          <ProFeatureWrapper
+                            featureName="Prompts"
+                            enabled={false}
+                          >
+                            <HcButton
+                              variant={"primary"}
+                              size={"sm"}
+                              title={"Create new prompt"}
+                              icon={DocumentPlusIcon}
+                            />
+                          </ProFeatureWrapper>
+                        )}
                       </DialogTrigger>
                       <DialogContent className="w-[900px] ">
                         <DialogHeader className="flex flex-row justify-between items-center">

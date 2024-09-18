@@ -1,4 +1,4 @@
-import React, { useState, forwardRef, useMemo } from "react";
+import React, { useState, forwardRef, useMemo, useCallback } from "react";
 import { useOrg } from "@/components/layout/organizationContext";
 import {
   Dialog,
@@ -49,15 +49,18 @@ export const ProFeatureWrapper = forwardRef<
     );
   }, [org?.currentOrg?.tier, org?.currentOrg?.stripe_metadata, enabled]);
 
-  const handleClick = (e: React.MouseEvent) => {
-    if (!hasAccess) {
-      e.preventDefault();
-      e.stopPropagation();
-      setIsDialogOpen(true);
-    } else if (children.props.onClick) {
-      children.props.onClick(e);
-    }
-  };
+  const handleClick = useCallback(
+    (e: React.MouseEvent) => {
+      if (!hasAccess) {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDialogOpen(true);
+      } else if (children.props.onClick) {
+        children.props.onClick(e);
+      }
+    },
+    [hasAccess, children.props, setIsDialogOpen]
+  );
 
   const handleUpgrade = () => {
     setIsDialogOpen(false);
