@@ -29,6 +29,30 @@ import { StripeManager } from "../../managers/stripe/StripeManager";
 @Tags("Organization")
 @Security("api_key")
 export class OrganizationController extends Controller {
+  @Post("/user/accept_terms")
+  public async acceptTerms(
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<null, string>> {
+    if (!request.authParams.userId) {
+      return err("User not found");
+    }
+
+    const result = await supabaseServer.client.auth.admin.updateUserById(
+      request.authParams.userId,
+      {
+        user_metadata: {
+          accepted_terms_date: new Date().toISOString(),
+        },
+      }
+    );
+
+    if (result.error) {
+      return err(result.error.message);
+    }
+
+    return ok(null);
+  }
+
   @Post("/create")
   public async createNewOrganization(
     @Body()
@@ -93,7 +117,7 @@ export class OrganizationController extends Controller {
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<null, string>> {
     const organizationManager = new OrganizationManager(request.authParams);
-    const memberCount = await organizationManager.getMemberCount();
+    const memberCount = await organizationManager.getMemberCount(true);
     if (memberCount.error || !memberCount.data) {
       return err(memberCount.error ?? "Error getting member count");
     }
@@ -281,7 +305,7 @@ export class OrganizationController extends Controller {
     const stripeManager = new StripeManager(request.authParams);
     const organizationManager = new OrganizationManager(request.authParams);
 
-    const memberCount = await organizationManager.getMemberCount();
+    const memberCount = await organizationManager.getMemberCount(true);
     if (memberCount.error || !memberCount.data) {
       return err(memberCount.error ?? "Error getting member count");
     }
