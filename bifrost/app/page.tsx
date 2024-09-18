@@ -22,7 +22,7 @@ export default function Home() {
         <div className="flex flex-col items-center justify-between max-w-6xl mx-auto">
           <header className="text-center flex flex-col space-y-4 pb-[32px] md:pb-40 pt-8 md:pt-12 max-w-6xl mx-auto ">
             <div className="flex flex-col space-y-4 mx-[12px]">
-              <div className="flex flex-col space-y-4 w-full md:items-center items-start">
+              {/* <div className="flex flex-col space-y-4 w-full md:items-center items-start">
                 <Link
                   href="https://www.ycombinator.com/launches/I73-helicone-open-source-observability-platform-for-generative-ai"
                   target="_blank"
@@ -103,7 +103,7 @@ export default function Home() {
                   </svg>
                   <span>Combinator</span>
                 </Link>
-              </div>
+              </div> */}
 
               <h1 className="text-4xl md:text-5xl font-bold md:pt-4 md:text-center md:mx-0 text-start">
                 LLM-Observability for{" "}
@@ -142,22 +142,109 @@ export default function Home() {
               )}
             </div>
 
-            <ul className="self-center md:flex-row md:gap-16 md:justify-center px-4 pt-16 text-sm hidden md:flex w-fit">
-              <li className="flex items-center space-x-2">
-                <CheckCircleIcon className="h-6 w-6 text-sky-500" />
-                <span className="text-gray-600">
-                  Sub-millisecond latency impact
-                </span>
+            <ul className="self-center md:flex-row md:gap-6 md:justify-center md:items-center px-4 pt-16 text-sm hidden md:flex w-fit">
+              <li className="flex flex-col md:items-center items-start">
+                <Link
+                  href="https://www.ycombinator.com/launches/I73-helicone-open-source-observability-platform-for-generative-ai"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center space-x-2.5 bg-gray-50 rounded-md px-3.5 py-2 text-sm font-medium text-gray-600"
+                >
+                  <span>Backed by</span>
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="mr-1.5"
+                  >
+                    <g clipPath="url(#clip0_24_57)">
+                      <rect
+                        width="24"
+                        height="24"
+                        rx="5.4"
+                        fill="#FF5100"
+                      ></rect>
+                      <rect
+                        x="0.5"
+                        y="0.5"
+                        width="23"
+                        height="23"
+                        rx="4.9"
+                        stroke="#FF844B"
+                      ></rect>
+                      <path
+                        d="M7.54102 7.31818H9.28604L11.9458 11.9467H12.0552L14.715 7.31818H16.46L12.7662 13.5028V17.5H11.2349V13.5028L7.54102 7.31818Z"
+                        fill="white"
+                      ></path>
+                    </g>
+                    <rect
+                      x="0.5"
+                      y="0.5"
+                      width="23"
+                      height="23"
+                      rx="4.9"
+                      stroke="#FF5100"
+                      strokeOpacity="0.1"
+                    ></rect>
+                    <rect
+                      x="0.5"
+                      y="0.5"
+                      width="23"
+                      height="23"
+                      rx="4.9"
+                      stroke="url(#paint0_radial_24_57)"
+                    ></rect>
+                    <defs>
+                      <radialGradient
+                        id="paint0_radial_24_57"
+                        cx="0"
+                        cy="0"
+                        r="1"
+                        gradientUnits="userSpaceOnUse"
+                        gradientTransform="translate(7.35) rotate(58.475) scale(34.1384)"
+                      >
+                        <stop stopColor="white" stopOpacity="0.56"></stop>
+                        <stop
+                          offset="0.28125"
+                          stopColor="white"
+                          stopOpacity="0"
+                        ></stop>
+                      </radialGradient>
+                      <clipPath id="clip0_24_57">
+                        <rect
+                          width="24"
+                          height="24"
+                          rx="5.4"
+                          fill="white"
+                        ></rect>
+                      </clipPath>
+                    </defs>
+                  </svg>
+                  <span>Combinator</span>
+                </Link>
               </li>
-              <li className="flex items-center space-x-2">
-                <CheckCircleIcon className="h-6 w-6 text-sky-500" />
-                <span className="text-gray-600">100% log coverage</span>
+              <li>
+                <a
+                  href="https://www.producthunt.com/posts/helicone-ai?embed=true&utm_source=badge-top-post-badge&utm_medium=badge&utm_souce=badge-helicone&#0045;ai"
+                  target="_blank"
+                >
+                  <img
+                    src="https://api.producthunt.com/widgets/embed-image/v1/top-post-badge.svg?post_id=475050&theme=neutral&period=daily"
+                    alt="Helicone&#0032;AI - Open&#0045;source&#0032;LLM&#0032;Observability&#0032;for&#0032;Developers | Product Hunt"
+                    width="185"
+                    height="50"
+                  />
+                </a>
               </li>
-              <li className="flex items-center space-x-2">
-                <CheckCircleIcon className="h-6 w-6 text-sky-500" />
-                <span className="text-gray-600">
-                  Industry-leading query times
-                </span>
+              <li>
+                <iframe
+                  src="https://ghbtns.com/github-btn.html?user=helicone&repo=helicone&type=star&count=true"
+                  width="150"
+                  height="20"
+                  title="GitHub"
+                ></iframe>
               </li>
             </ul>
 

@@ -54,6 +54,7 @@ export type Database = {
           minimum_request_count: number | null
           name: string
           org_id: string
+          slack_channels: string[]
           soft_delete: boolean
           status: string
           threshold: number
@@ -69,6 +70,7 @@ export type Database = {
           minimum_request_count?: number | null
           name: string
           org_id: string
+          slack_channels?: string[]
           soft_delete?: boolean
           status?: string
           threshold: number
@@ -84,6 +86,7 @@ export type Database = {
           minimum_request_count?: number | null
           name?: string
           org_id?: string
+          slack_channels?: string[]
           soft_delete?: boolean
           status?: string
           threshold?: number
@@ -1514,6 +1517,7 @@ export type Database = {
           created_at: string | null
           description: string | null
           id: string
+          metadata: Json | null
           organization: string
           pretty_name: string | null
           soft_delete: boolean | null
@@ -1523,6 +1527,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           id?: string
+          metadata?: Json | null
           organization: string
           pretty_name?: string | null
           soft_delete?: boolean | null
@@ -1532,6 +1537,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           id?: string
+          metadata?: Json | null
           organization?: string
           pretty_name?: string | null
           soft_delete?: boolean | null

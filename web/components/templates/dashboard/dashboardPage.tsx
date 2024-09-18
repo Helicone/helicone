@@ -5,14 +5,7 @@ import {
   PresentationChartLineIcon,
 } from "@heroicons/react/24/outline";
 import { User } from "@supabase/auth-helpers-nextjs";
-import {
-  AreaChart,
-  BarChart,
-  BarList,
-  Card,
-  DonutChart,
-  Legend,
-} from "@tremor/react";
+import { AreaChart, BarChart, BarList, Card } from "@tremor/react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Responsive, WidthProvider } from "react-grid-layout";
@@ -26,7 +19,10 @@ import {
   getTimeIntervalAgo,
   TimeInterval,
 } from "../../../lib/timeCalculations/time";
-import { useGetUnauthorized } from "../../../services/hooks/dashboard";
+import {
+  useGetReport,
+  useGetUnauthorized,
+} from "../../../services/hooks/dashboard";
 import { useDebounce } from "../../../services/hooks/debounce";
 import { useOrganizationLayout } from "../../../services/hooks/organization_layout";
 import {
@@ -52,6 +48,7 @@ import {
 import useNotification from "../../shared/notification/useNotification";
 import ThemedTableHeader from "../../shared/themed/themedHeader";
 import UpgradeProModal from "../../shared/upgradeProModal";
+import ReportsModal from "./reportsModal";
 import useSearchParams from "../../shared/utils/useSearchParams";
 import { INITIAL_LAYOUT, SMALL_LAYOUT } from "./gridLayouts";
 import CountryPanel from "./panels/countryPanel";
@@ -62,6 +59,7 @@ import { useDashboardPage } from "./useDashboardPage";
 import { formatLargeNumber } from "../../shared/utils/numberFormat";
 import { ThemedSwitch } from "../../shared/themed/themedSwitch";
 import { useLocalStorage } from "../../../services/hooks/localStorage";
+import { Button } from "@/components/ui/button";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -170,6 +168,13 @@ const DashboardPage = (props: DashboardPageProps) => {
   const [timeFilter, setTimeFilter] = useState<TimeFilter>(getTimeFilter());
 
   const [open, setOpen] = useState(false);
+  const [openReports, setOpenReports] = useState(false);
+
+  const {
+    data: report,
+    isLoading: isLoadingReport,
+    refetch: refetchReport,
+  } = useGetReport();
 
   const [advancedFilters, setAdvancedFilters] = useState<UIFilterRowTree>(
     getRootFilterNode()
@@ -547,7 +552,14 @@ const DashboardPage = (props: DashboardPageProps) => {
           </button>
         }
         actions={
-          <>
+          <div className="flex flex-row gap-2 items-center">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setOpenReports(true)}
+            >
+              Get Reports
+            </Button>
             <div>
               <ThemedSwitch
                 checked={isLive}
@@ -555,7 +567,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                 label="Live"
               />
             </div>
-          </>
+          </div>
         }
       />
       {unauthorized ? (
@@ -678,24 +690,67 @@ const DashboardPage = (props: DashboardPageProps) => {
               </div>
               <div key="errors">
                 <Card className="h-full w-full flex flex-col">
-                  <div className="flex flex-col space-y-2">
-                    <h2 className="text-gray-500 text-sm">Errors</h2>
-                    <Legend
-                      categories={
-                        accumulatedStatusCounts.map((d) => d.name) ?? []
-                      }
-                      className="max-w-xs"
-                    />
-                  </div>
-                  <div className="h-full flex-1 pt-4">
-                    <DonutChart
-                      data={accumulatedStatusCounts}
-                      onValueChange={(v) => console.log(v)}
-                    />
+                  <div className="flex flex-col h-full">
+                    <h2 className="text-gray-500 text-sm mb-2">All Errors</h2>
+                    {(() => {
+                      const totalErrors = accumulatedStatusCounts.reduce(
+                        (sum, e) => sum + e.value,
+                        0
+                      );
+                      const errorPercentage =
+                        (totalErrors /
+                          (metrics.totalRequests?.data?.data ?? 1)) *
+                          100 || 0;
+                      return (
+                        <div className="mb-2 text-sm">
+                          <span className="font-semibold">
+                            {formatLargeNumber(totalErrors)}
+                          </span>{" "}
+                          total errors (
+                          <span className="font-semibold">
+                            {errorPercentage.toFixed(2)}%
+                          </span>{" "}
+                          of all requests)
+                        </div>
+                      );
+                    })()}
+                    <div className="flex-grow overflow-hidden flex flex-col">
+                      <div className="flex flex-row justify-between items-center pb-2">
+                        <p className="text-xs font-semibold text-gray-700">
+                          Error Type
+                        </p>
+                        <p className="text-xs font-semibold text-gray-700">
+                          Percentage
+                        </p>
+                      </div>
+                      <div className="overflow-y-auto flex-grow">
+                        <BarList
+                          data={(() => {
+                            const totalErrors = accumulatedStatusCounts.reduce(
+                              (sum, e) => sum + e.value,
+                              0
+                            );
+                            return accumulatedStatusCounts
+                              .sort((a, b) => b.value - a.value)
+                              .map((error, index) => ({
+                                name: `${error.name} (${formatLargeNumber(
+                                  error.value
+                                )})`,
+                                value: (error.value / totalErrors) * 100,
+                                color: listColors[index % listColors.length],
+                              }));
+                          })()}
+                          className="h-full"
+                          showAnimation={true}
+                          valueFormatter={(value: number) =>
+                            `${value.toFixed(1)}%`
+                          }
+                        />
+                      </div>
+                    </div>
                   </div>
                 </Card>
               </div>
-
               <div key="models">
                 <StyledAreaChart
                   title={`Top Models`}
@@ -758,11 +813,14 @@ const DashboardPage = (props: DashboardPageProps) => {
                   />
                 </StyledAreaChart>
               </div>
-
               <div key="users">
                 <StyledAreaChart
                   title={"Users"}
-                  value={metrics.activeUsers.data?.data?.toString() ?? "0"}
+                  value={
+                    metrics.activeUsers.data?.data
+                      ? formatLargeNumber(metrics.activeUsers.data?.data)
+                      : "0"
+                  }
                   isDataOverTimeLoading={overTimeData.users.isLoading}
                 >
                   <BarChart
@@ -818,7 +876,6 @@ const DashboardPage = (props: DashboardPageProps) => {
                   />
                 </StyledAreaChart>
               </div>
-
               <div key="quantiles">
                 <QuantilesGraph
                   uiFilters={filterUITreeToFilterNode(
@@ -829,7 +886,6 @@ const DashboardPage = (props: DashboardPageProps) => {
                   timeIncrement={timeIncrement}
                 />
               </div>
-
               <div key="time-to-first-token">
                 <StyledAreaChart
                   title={"Time to First Token"}
@@ -859,11 +915,12 @@ const DashboardPage = (props: DashboardPageProps) => {
                   />
                 </StyledAreaChart>
               </div>
-
               <div key="threats">
                 <StyledAreaChart
                   title={"Threats"}
-                  value={`${metrics.totalThreats.data?.data?.toFixed(0) ?? 0}`}
+                  value={`${formatLargeNumber(
+                    Number(metrics.totalThreats.data?.data?.toFixed(0) ?? 0)
+                  )}`}
                   isDataOverTimeLoading={overTimeData.threats.isLoading}
                 >
                   <AreaChart
@@ -882,7 +939,6 @@ const DashboardPage = (props: DashboardPageProps) => {
                   />
                 </StyledAreaChart>
               </div>
-
               <div key="suggest-more-graphs">
                 <div className="space-y-2 bg-white dark:bg-black border border-gray-900 dark:border-white border-dashed w-full h-full p-2 text-black dark:text-white shadow-sm rounded-lg flex flex-col items-center justify-center">
                   <PresentationChartLineIcon className="h-12 w-12 text-black dark:text-white" />
@@ -909,17 +965,16 @@ const DashboardPage = (props: DashboardPageProps) => {
                   </div>
                 </div>
               </div>
-
               <div key="tokens-per-min-over-time">
                 <StyledAreaChart
                   title={"Tokens / Minute"}
-                  value={`Max: ${(
+                  value={`Max: ${formatLargeNumber(
                     max(
                       overTimeData.promptTokensOverTime.data?.data
                         ?.map((d) => d.completion_tokens + d.prompt_tokens)
                         .filter((d) => d !== 0) ?? []
-                    ) / getIncrementAsMinutes(timeIncrement)
-                  ).toFixed(2)} tokens`}
+                    ) / Number(getIncrementAsMinutes(timeIncrement).toFixed(2))
+                  )} tokens`}
                   isDataOverTimeLoading={overTimeData.users.isLoading}
                 >
                   <AreaChart
@@ -970,6 +1025,14 @@ const DashboardPage = (props: DashboardPageProps) => {
       <SuggestionModal open={openSuggestGraph} setOpen={setOpenSuggestGraph} />
 
       <UpgradeProModal open={open} setOpen={setOpen} />
+      {!isLoadingReport && (
+        <ReportsModal
+          open={openReports}
+          setOpen={setOpenReports}
+          report={report}
+          refetchReport={refetchReport}
+        />
+      )}
     </>
   );
 };

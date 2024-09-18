@@ -342,7 +342,7 @@ const RequestRow = (props: {
         </ul>
       </div>
 
-      <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-4">
         <div className="font-semibold text-gray-900 dark:text-gray-100 text-sm items-center flex">
           <div className="flex flex-row items-center space-x-1">
             <span>Add to Dataset</span>
@@ -433,26 +433,26 @@ const RequestRow = (props: {
             </HcButton>
           </form>
         )}
-        <div className="flex flex-wrap gap-4 text-sm items-center pt-2">
-          {currentProperties?.map((property, i) => {
-            return (
-              <li
-                className="flex flex-col space-y-1 justify-between text-left p-2.5 shadow-sm border border-gray-300 dark:border-gray-700 rounded-lg min-w-[5rem]"
-                key={i}
-              >
-                <p className="font-semibold text-gray-900 dark:text-gray-100">
-                  {Object.keys(property)[0]}
-                </p>
-                <p className="text-gray-700 dark:text-gray-300">
-                  {property[Object.keys(property)[0]]}
-                </p>
-              </li>
-            );
-          })}
-        </div>
-      </div>
-
-      <div className="flex flex-col">
+        {currentProperties && currentProperties.length > 0 && (
+          <div className="flex flex-wrap gap-4 text-sm items-center pt-2">
+            {currentProperties.map((property, i) => {
+              const key = Object.keys(property)[0];
+              return (
+                <li
+                  className="flex flex-col space-y-1 justify-between text-left p-2.5 shadow-sm border border-gray-300 dark:border-gray-700 rounded-lg min-w-[5rem]"
+                  key={i}
+                >
+                  <p className="font-semibold text-gray-900 dark:text-gray-100">
+                    {key}
+                  </p>
+                  <p className="text-gray-700 dark:text-gray-300">
+                    {property[key]}
+                  </p>
+                </li>
+              );
+            })}
+          </div>
+        )}
         <div className="font-semibold text-gray-900 dark:text-gray-100 text-sm items-center flex">
           Scores{" "}
           <Tooltip title="Add a new score" placement="top">
@@ -531,10 +531,10 @@ const RequestRow = (props: {
           </form>
         )}
 
-        <div className="flex flex-wrap gap-4 text-sm items-center pt-2">
-          {currentScores &&
-            Object.entries(currentScores)
-              .filter((x) => x[0] !== "helicone-score-feedback")
+        {currentScores && Object.keys(currentScores).length > 0 && (
+          <div className="flex flex-wrap gap-4 text-sm items-center pt-2">
+            {Object.entries(currentScores)
+              .filter(([key]) => key !== "helicone-score-feedback")
               .map(([key, value]) => (
                 <li
                   className="flex flex-col space-y-1 justify-between text-left p-2.5 shadow-sm border border-gray-300 dark:border-gray-700 rounded-lg min-w-[5rem]"
@@ -552,8 +552,10 @@ const RequestRow = (props: {
                   </p>
                 </li>
               ))}
-        </div>
+          </div>
+        )}
       </div>
+
       {displayPreview && (
         <div className="flex flex-col space-y-8">
           <div className="flex w-full justify-end">

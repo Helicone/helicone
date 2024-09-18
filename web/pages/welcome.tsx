@@ -19,14 +19,12 @@ const Welcome = (props: WelcomeProps) => {
 export default Welcome;
 
 export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
-  // Create authenticated Supabase Client
-  const supabase = new SupabaseServerWrapper(ctx).getClient();
-  // Check if we have a session
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+  const supabaseClient = new SupabaseServerWrapper(ctx);
+  const supabase = supabaseClient.getClient();
 
-  if (!session)
+  const currentSession = await supabase.auth.refreshSession();
+
+  if (!currentSession.data.session?.user)
     return {
       redirect: {
         destination: "/",
@@ -34,12 +32,32 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
       },
     };
 
+  const { data, error } = await supabaseClient.getUserAndOrg();
+
+  if (error !== null || !data.orgId || !data.userId) {
+    return {
+      redirect: {
+        destination: "/signin?unauthorized=true",
+        permanent: false,
+      },
+    };
+  }
+
+  if (data.orgHasOnboarded) {
+    return {
+      redirect: {
+        destination: "/dashboard",
+        permanent: false,
+      },
+    };
+  }
+
   const { step } = ctx.query;
 
   return {
     props: {
-      initialSession: session,
-      user: session.user,
+      initialSession: currentSession,
+      user: currentSession.data.session?.user,
       currentStep: step ? parseInt(step as string) : 1,
     },
   };

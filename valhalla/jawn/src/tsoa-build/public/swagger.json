@@ -1212,6 +1212,12 @@
 				],
 				"type": "object"
 			},
+			"Record_string.any_": {
+				"properties": {},
+				"additionalProperties": {},
+				"type": "object",
+				"description": "Construct a type with a set of properties K of type T"
+			},
 			"PromptsResult": {
 				"properties": {
 					"id": {
@@ -1232,6 +1238,9 @@
 					"major_version": {
 						"type": "number",
 						"format": "double"
+					},
+					"metadata": {
+						"$ref": "#/components/schemas/Record_string.any_"
 					}
 				},
 				"required": [
@@ -1388,6 +1397,9 @@
 							"type": "string"
 						},
 						"type": "array"
+					},
+					"metadata": {
+						"$ref": "#/components/schemas/Record_string.any_"
 					}
 				},
 				"required": [
@@ -1501,12 +1513,6 @@
 					}
 				]
 			},
-			"Record_string.any_": {
-				"properties": {},
-				"additionalProperties": {},
-				"type": "object",
-				"description": "Construct a type with a set of properties K of type T"
-			},
 			"PromptVersionResult": {
 				"properties": {
 					"id": {
@@ -1584,6 +1590,9 @@
 					"newHeliconeTemplate": {},
 					"isMajorVersion": {
 						"type": "boolean"
+					},
+					"metadata": {
+						"$ref": "#/components/schemas/Record_string.any_"
 					}
 				},
 				"required": [
@@ -1608,6 +1617,9 @@
 					"inputs": {
 						"$ref": "#/components/schemas/Record_string.string_"
 					},
+					"dataset_row_id": {
+						"type": "string"
+					},
 					"source_request": {
 						"type": "string"
 					},
@@ -1631,7 +1643,6 @@
 					"source_request",
 					"prompt_version",
 					"created_at",
-					"response_body",
 					"auto_prompt_inputs"
 				],
 				"type": "object",
@@ -1664,6 +1675,64 @@
 				"anyOf": [
 					{
 						"$ref": "#/components/schemas/ResultSuccess_PromptInputRecord-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess__id-string--created_at-string--num_hypotheses-number--dataset-string--meta-Record_string.any__-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"properties": {
+								"meta": {
+									"$ref": "#/components/schemas/Record_string.any_"
+								},
+								"dataset": {
+									"type": "string"
+								},
+								"num_hypotheses": {
+									"type": "number",
+									"format": "double"
+								},
+								"created_at": {
+									"type": "string"
+								},
+								"id": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"meta",
+								"dataset",
+								"num_hypotheses",
+								"created_at",
+								"id"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__id-string--created_at-string--num_hypotheses-number--dataset-string--meta-Record_string.any__-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__id-string--created_at-string--num_hypotheses-number--dataset-string--meta-Record_string.any__-Array_"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
@@ -1857,6 +1926,68 @@
 				],
 				"type": "object",
 				"additionalProperties": false
+			},
+			"PromptVersionResultFilled": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"minor_version": {
+						"type": "number",
+						"format": "double"
+					},
+					"major_version": {
+						"type": "number",
+						"format": "double"
+					},
+					"prompt_v2": {
+						"type": "string"
+					},
+					"model": {
+						"type": "string"
+					},
+					"filled_helicone_template": {}
+				},
+				"required": [
+					"id",
+					"minor_version",
+					"major_version",
+					"prompt_v2",
+					"model",
+					"filled_helicone_template"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_PromptVersionResultFilled_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/PromptVersionResultFilled"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_PromptVersionResultFilled.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_PromptVersionResultFilled_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
 			},
 			"KafkaSettings": {
 				"properties": {
@@ -2997,6 +3128,12 @@
 								"soft_delete": {
 									"type": "boolean"
 								},
+								"slack_channels": {
+									"items": {
+										"type": "string"
+									},
+									"type": "array"
+								},
 								"org_id": {
 									"type": "string"
 								},
@@ -3032,6 +3169,7 @@
 								"threshold",
 								"status",
 								"soft_delete",
+								"slack_channels",
 								"org_id",
 								"name",
 								"minimum_request_count",
@@ -4812,6 +4950,68 @@
 					}
 				]
 			},
+			"ResultSuccess_unknown_": {
+				"properties": {
+					"data": {},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"PostgrestError": {
+				"properties": {
+					"code": {
+						"type": "string"
+					},
+					"hint": {
+						"type": "string"
+					},
+					"details": {
+						"type": "string"
+					},
+					"message": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"code",
+					"hint",
+					"details",
+					"message"
+				],
+				"type": "object",
+				"description": "Error format\n\n{@link https://postgrest.org/en/stable/api.html?highlight=options#errors-and-http-status-codes}"
+			},
+			"ResultError_PostgrestError_": {
+				"properties": {
+					"data": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					},
+					"error": {
+						"$ref": "#/components/schemas/PostgrestError"
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"NewExperimentParams": {
 				"properties": {
 					"datasetId": {
@@ -5265,6 +5465,41 @@
 				},
 				"type": "object",
 				"additionalProperties": false
+			},
+			"ExperimentRun": {
+				"properties": {},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_ExperimentRun_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/ExperimentRun"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_ExperimentRun.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_ExperimentRun_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
 			},
 			"Eval": {
 				"properties": {
@@ -6220,16 +6455,16 @@
 					"icon": {
 						"type": "string"
 					},
-					"org_provider_key": {
-						"type": "string"
-					},
 					"limits": {
 						"$ref": "#/components/schemas/Json"
 					},
-					"reseller_id": {
+					"org_provider_key": {
 						"type": "string"
 					},
 					"organization_type": {
+						"type": "string"
+					},
+					"reseller_id": {
 						"type": "string"
 					}
 				},
@@ -6519,6 +6754,14 @@
 					"uncollectible",
 					"void"
 				]
+			},
+			"stripe.Stripe.Metadata": {
+				"description": "Set of key-value pairs that you can attach to an object. This can be useful for storing additional information about the object in a structured format.",
+				"properties": {},
+				"type": "object",
+				"additionalProperties": {
+					"type": "string"
+				}
 			},
 			"stripe.Stripe.Address": {
 				"description": "The Address object.",
@@ -7571,14 +7814,6 @@
 				],
 				"type": "object",
 				"additionalProperties": false
-			},
-			"stripe.Stripe.Metadata": {
-				"description": "Set of key-value pairs that you can attach to an object. This can be useful for storing additional information about the object in a structured format.",
-				"properties": {},
-				"type": "object",
-				"additionalProperties": {
-					"type": "string"
-				}
 			},
 			"stripe.Stripe.FileLink": {
 				"description": "To share the contents of a `File` object with non-Stripe users, you can\ncreate a `FileLink`. `FileLink`s contain a URL that you can use to\nretrieve the contents of the file without authentication.",
@@ -41764,6 +41999,18 @@
 						"$ref": "#/components/schemas/stripe.Stripe.Invoice.Status",
 						"description": "The status of the invoice, one of `draft`, `open`, `paid`, `uncollectible`, or `void`. [Learn more](https://stripe.com/docs/billing/invoices/workflow#workflow-overview)"
 					},
+					"currency": {
+						"type": "string",
+						"description": "Three-letter [ISO currency code](https://www.iso.org/iso-4217-currency-codes.html), in lowercase. Must be a [supported currency](https://stripe.com/docs/currencies)."
+					},
+					"description": {
+						"type": "string",
+						"description": "An arbitrary string attached to the object. Often useful for displaying to users. Referenced as 'memo' in the Dashboard."
+					},
+					"metadata": {
+						"$ref": "#/components/schemas/stripe.Stripe.Metadata",
+						"description": "Set of [key-value pairs](https://stripe.com/docs/api/metadata) that you can attach to an object. This can be useful for storing additional information about the object in a structured format."
+					},
 					"account_country": {
 						"type": "string",
 						"description": "The country of the business associated with this invoice, most often the business creating the invoice."
@@ -41868,10 +42115,6 @@
 						"format": "double",
 						"description": "Time at which the object was created. Measured in seconds since the Unix epoch."
 					},
-					"currency": {
-						"type": "string",
-						"description": "Three-letter [ISO currency code](https://www.iso.org/iso-4217-currency-codes.html), in lowercase. Must be a [supported currency](https://stripe.com/docs/currencies)."
-					},
 					"custom_fields": {
 						"items": {
 							"$ref": "#/components/schemas/stripe.Stripe.Invoice.CustomField"
@@ -41956,10 +42199,6 @@
 					"deleted": {
 						"description": "Always true for a deleted object"
 					},
-					"description": {
-						"type": "string",
-						"description": "An arbitrary string attached to the object. Often useful for displaying to users. Referenced as 'memo' in the Dashboard."
-					},
 					"discount": {
 						"$ref": "#/components/schemas/stripe.Stripe.Discount",
 						"description": "Describes the current discount applied to this invoice, if there is one. Not populated if there are multiple discounts."
@@ -42037,10 +42276,6 @@
 					"livemode": {
 						"type": "boolean",
 						"description": "Has the value `true` if the object exists in live mode or the value `false` if the object exists in test mode."
-					},
-					"metadata": {
-						"$ref": "#/components/schemas/stripe.Stripe.Metadata",
-						"description": "Set of [key-value pairs](https://stripe.com/docs/api/metadata) that you can attach to an object. This can be useful for storing additional information about the object in a structured format."
 					},
 					"next_payment_attempt": {
 						"type": "number",
@@ -42226,6 +42461,9 @@
 					"number",
 					"object",
 					"status",
+					"currency",
+					"description",
+					"metadata",
 					"account_country",
 					"account_name",
 					"account_tax_ids",
@@ -42242,7 +42480,6 @@
 					"charge",
 					"collection_method",
 					"created",
-					"currency",
 					"custom_fields",
 					"customer",
 					"customer_address",
@@ -42254,7 +42491,6 @@
 					"default_payment_method",
 					"default_source",
 					"default_tax_rates",
-					"description",
 					"discount",
 					"discounts",
 					"due_date",
@@ -42267,7 +42503,6 @@
 					"latest_revision",
 					"lines",
 					"livemode",
-					"metadata",
 					"next_payment_attempt",
 					"on_behalf_of",
 					"paid",
@@ -42876,6 +43111,9 @@
 						"application/json": {
 							"schema": {
 								"properties": {
+									"metadata": {
+										"$ref": "#/components/schemas/Record_string.any_"
+									},
 									"prompt": {
 										"properties": {
 											"messages": {
@@ -42897,6 +43135,7 @@
 									}
 								},
 								"required": [
+									"metadata",
 									"prompt",
 									"userDefinedId"
 								],
@@ -43062,6 +43301,41 @@
 				}
 			}
 		},
+		"/v1/prompt/{promptId}/experiments": {
+			"get": {
+				"operationId": "GetPromptExperiments",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__id-string--created_at-string--num_hypotheses-number--dataset-string--meta-Record_string.any__-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Prompt"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "promptId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
 		"/v1/prompt/{promptId}/versions/query": {
 			"post": {
 				"operationId": "GetPromptVersions",
@@ -43108,6 +43382,39 @@
 			}
 		},
 		"/v1/prompt/version/{promptVersionId}": {
+			"get": {
+				"operationId": "GetPromptVersion",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_PromptVersionResult.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Prompt"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "promptVersionId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
 			"delete": {
 				"operationId": "DeletePromptVersion",
 				"responses": {
@@ -43152,6 +43459,51 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/Result_PromptVersionResultCompiled.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Prompt"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "user_defined_id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/PromptVersiosQueryParamsCompiled"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/prompt/{user_defined_id}/template": {
+			"post": {
+				"operationId": "GetPromptVersionTemplates",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_PromptVersionResultFilled.string_"
 								}
 							}
 						}
@@ -45205,6 +45557,41 @@
 				]
 			}
 		},
+		"/v1/integration/type/{type}": {
+			"get": {
+				"operationId": "GetIntegrationByType",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_Integration.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Integration"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "type",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
 		"/v1/integration/slack/settings": {
 			"get": {
 				"operationId": "GetSlackSettings",
@@ -45370,16 +45757,16 @@
 				}
 			}
 		},
-		"/v1/experiment/dataset/{datasetId}/query": {
+		"/v1/experiment/dataset/{datasetId}/version/{promptVersionId}/row": {
 			"post": {
-				"operationId": "GetDataset",
+				"operationId": "CreateDatasetRow",
 				"responses": {
 					"200": {
 						"description": "Ok",
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Result___-Array.string_"
+									"$ref": "#/components/schemas/Result_string.string_"
 								}
 							}
 						}
@@ -45393,18 +45780,80 @@
 						"api_key": []
 					}
 				],
-				"parameters": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "datasetId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "path",
+						"name": "promptVersionId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
 				"requestBody": {
 					"required": true,
 					"content": {
 						"application/json": {
 							"schema": {
-								"properties": {},
+								"properties": {
+									"sourceRequest": {
+										"type": "string"
+									},
+									"inputs": {
+										"$ref": "#/components/schemas/Record_string.string_"
+									}
+								},
+								"required": [
+									"inputs"
+								],
 								"type": "object"
 							}
 						}
 					}
 				}
+			}
+		},
+		"/v1/experiment/dataset/{datasetId}/inputs/query": {
+			"post": {
+				"operationId": "GetDataset",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_PromptInputRecord-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Dataset"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "datasetId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
 			}
 		},
 		"/v1/experiment/dataset/{datasetId}/mutate": {
@@ -45752,6 +46201,109 @@
 				}
 			}
 		},
+		"/v1/experiment/new-empty": {
+			"post": {
+				"operationId": "CreateNewEmptyExperiment",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__experimentId-string_.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Experiment"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"datasetId": {
+										"type": "string"
+									},
+									"metadata": {
+										"$ref": "#/components/schemas/Record_string.string_"
+									}
+								},
+								"required": [
+									"datasetId",
+									"metadata"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/experiment/update-meta": {
+			"post": {
+				"operationId": "UpdateExperimentMeta",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/ResultSuccess_unknown_"
+										},
+										{
+											"$ref": "#/components/schemas/ResultError_PostgrestError_"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Experiment"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"meta": {
+										"$ref": "#/components/schemas/Record_string.string_"
+									},
+									"experimentId": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"meta",
+									"experimentId"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
 		"/v1/experiment": {
 			"post": {
 				"operationId": "CreateNewExperiment",
@@ -45782,6 +46334,72 @@
 						"application/json": {
 							"schema": {
 								"$ref": "#/components/schemas/NewExperimentParams"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/experiment/hypothesis": {
+			"post": {
+				"operationId": "CreateNewExperimentHypothesis",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Experiment"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"status": {
+										"type": "string",
+										"enum": [
+											"PENDING",
+											"RUNNING",
+											"COMPLETED",
+											"FAILED"
+										]
+									},
+									"providerKeyId": {
+										"type": "string"
+									},
+									"promptVersion": {
+										"type": "string"
+									},
+									"model": {
+										"type": "string"
+									},
+									"experimentId": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"status",
+									"providerKeyId",
+									"promptVersion",
+									"model",
+									"experimentId"
+								],
+								"type": "object"
 							}
 						}
 					}
@@ -45827,6 +46445,61 @@
 								},
 								"required": [
 									"filter"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/experiment/run": {
+			"post": {
+				"operationId": "RunExperiment",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_ExperimentRun.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Experiment"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"datasetRowIds": {
+										"items": {
+											"type": "string"
+										},
+										"type": "array"
+									},
+									"hypothesisId": {
+										"type": "string"
+									},
+									"experimentId": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"datasetRowIds",
+									"hypothesisId",
+									"experimentId"
 								],
 								"type": "object"
 							}

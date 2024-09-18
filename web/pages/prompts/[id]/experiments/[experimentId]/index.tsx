@@ -2,17 +2,17 @@ import { User } from "@supabase/auth-helpers-react";
 import { GetServerSidePropsContext } from "next";
 
 import { ReactElement } from "react";
-import AuthLayout from "../../../../components/layout/auth/authLayout";
-import { SupabaseServerWrapper } from "../../../../lib/wrappers/supabase";
-import ExperimentIdPage from "../../../../components/templates/prompts/experiments/id/experimentIdPage";
+import AuthLayout from "../../../../../components/layout/auth/authLayout";
+import { SupabaseServerWrapper } from "../../../../../lib/wrappers/supabase";
+import ExperimentIdPage from "../../../../../components/templates/prompts/experiments/id/experimentIdPage";
 
-interface PlaygroundProps {
+interface ExperimentPage {
   user: User;
   experimentId: string;
   promptId: string;
 }
 
-const Experiments = (props: PlaygroundProps) => {
+const Experiments = (props: ExperimentPage) => {
   const { user, experimentId, promptId } = props;
 
   return <ExperimentIdPage id={experimentId} promptId={promptId} />;

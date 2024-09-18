@@ -1,51 +1,30 @@
+import { useOrg } from "@/components/layout/organizationContext";
+import { ProFeatureWrapper } from "@/components/shared/ProBlockerComponents/ProFeatureWrapper";
+import { InfoBox } from "@/components/ui/helicone/infoBox";
+import { MagnifyingGlassIcon } from "@heroicons/react/20/solid";
 import {
+  ChevronDownIcon,
   DocumentPlusIcon,
   DocumentTextIcon,
+  EyeIcon,
+  PencilIcon,
   Square2StackIcon,
   TableCellsIcon,
 } from "@heroicons/react/24/outline";
 import { TextInput } from "@tremor/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { Fragment, useRef, useState, useCallback, useMemo } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
+import { useJawnClient } from "../../../lib/clients/jawnHook";
 import { usePrompts } from "../../../services/hooks/prompts/prompts";
-import { DiffHighlight } from "../welcome/diffHighlight";
-import PromptCard from "./promptCard";
-import { SimpleTable } from "../../shared/table/simpleTable";
-import HcButton from "../../ui/hcButton";
-import { MagnifyingGlassIcon } from "@heroicons/react/20/solid";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "../../ui/dialog";
-import PromptDelete from "./promptDelete";
+import AuthHeader from "../../shared/authHeader";
 import LoadingAnimation from "../../shared/loadingAnimation";
-import PromptUsageChart from "./promptUsageChart";
+import useNotification from "../../shared/notification/useNotification";
+import { SimpleTable } from "../../shared/table/simpleTable";
 import ThemedTabs from "../../shared/themed/themedTabs";
 import useSearchParams from "../../shared/utils/useSearchParams";
-import AuthHeader from "../../shared/authHeader";
-import HcBadge from "../../ui/hcBadge";
-import { Switch } from "../../ui/switch";
-import { Label } from "../../ui/label";
-import { Button } from "../../ui/button";
-import { useJawnClient } from "../../../lib/clients/jawnHook";
-import useNotification from "../../shared/notification/useNotification";
-import { Textarea } from "../../ui/textarea";
 import { Badge } from "../../ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../../ui/select";
-import { MODEL_LIST } from "../playground/new/modelList";
-import { ProFeatureWrapper } from "@/components/shared/ProBlockerComponents/ProFeatureWrapper";
-import { useOrg } from "@/components/layout/organizationContext";
-import { InfoBox } from "@/components/ui/helicone/infoBox";
+import { Button } from "../../ui/button";
 import {
   Card,
   CardContent,
@@ -53,20 +32,40 @@ import {
   CardHeader,
   CardTitle,
 } from "../../ui/card";
-import { ChevronDownIcon } from "@heroicons/react/24/outline";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../../ui/dialog";
+import HcBadge from "../../ui/hcBadge";
+import HcButton from "../../ui/hcButton";
+import { Label } from "../../ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../ui/select";
+import { Switch } from "../../ui/switch";
+import { Textarea } from "../../ui/textarea";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../../ui/tooltip";
+import { MODEL_LIST } from "../playground/new/modelList";
 import { PricingCompare } from "../pricing/pricingCompare";
+import { DiffHighlight } from "../welcome/diffHighlight";
+import PromptCard from "./promptCard";
+import PromptDelete from "./promptDelete";
+import PromptUsageChart from "./promptUsageChart";
 
 interface PromptsPageProps {
   defaultIndex: number;
 }
 
 const PromptsPage = (props: PromptsPageProps) => {
-  const { defaultIndex } = props;
-
   const { prompts, isLoading, refetch } = usePrompts();
-
   const [searchName, setSearchName] = useState<string>("");
-  const [open, setOpen] = useState<boolean>(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const [imNotTechnical, setImNotTechnical] = useState<boolean>(false);
@@ -95,6 +94,20 @@ const PromptsPage = (props: PromptsPageProps) => {
   }, []);
 
   const createPrompt = async (userDefinedId: string) => {
+    // Check if a prompt with this name already exists
+    const existingPrompt = prompts?.find(
+      (prompt) =>
+        prompt.user_defined_id.toLowerCase() === userDefinedId.toLowerCase()
+    );
+
+    if (existingPrompt) {
+      notification.setNotification(
+        `A prompt with the name "${userDefinedId}" already exists`,
+        "error"
+      );
+      return;
+    }
+
     const promptData = {
       model: newPromptModel,
       messages: [
@@ -114,6 +127,9 @@ const PromptsPage = (props: PromptsPageProps) => {
       body: {
         userDefinedId,
         prompt: promptData,
+        metadata: {
+          createdFromUi: true,
+        },
       },
     });
 
@@ -425,6 +441,53 @@ const chatCompletion = await openai.chat.completions.create(
                         header: "Last 30 days",
                         render: (prompt) => (
                           <PromptUsageChart promptId={prompt.user_defined_id} />
+                        ),
+                      },
+                      {
+                        key: undefined,
+                        header: "Permission",
+                        render: (prompt) => (
+                          <div className="text-gray-500">
+                            {prompt.metadata?.createdFromUi === true ? (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <div className="flex items-center justify-center text-center bg-[#F1F5F9] rounded-md p-2 border border-[#CBD5E1] text-black max-w-28">
+                                    <PencilIcon className="h-4 w-4 mr-1" />
+                                    <p>Editable</p>
+                                  </div>
+                                </TooltipTrigger>
+                                <TooltipContent align="center">
+                                  <p>
+                                    This prompt was created{" "}
+                                    <span className="font-semibold">
+                                      in the UI
+                                    </span>
+                                    . You can edit / delete them, or promote to
+                                    prod.
+                                  </p>
+                                </TooltipContent>
+                              </Tooltip>
+                            ) : (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <div className="flex items-center justify-center bg-[#F1F5F9] rounded-md p-2 border border-[#CBD5E1] text-black max-w-28">
+                                    <EyeIcon className="h-4 w-4 mr-1" />
+                                    <p>View only</p>
+                                  </div>
+                                </TooltipTrigger>
+                                <TooltipContent align="center">
+                                  <p>
+                                    This prompt was created{" "}
+                                    <span className="font-semibold">
+                                      in code
+                                    </span>
+                                    . You won&apos;t be able to edit this from
+                                    the UI.
+                                  </p>
+                                </TooltipContent>
+                              </Tooltip>
+                            )}
+                          </div>
                         ),
                       },
                       {

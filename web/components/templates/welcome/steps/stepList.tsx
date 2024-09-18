@@ -18,7 +18,7 @@ export default function StepList(props: {
           : "upcoming",
     },
     {
-      name: "Generate API key",
+      name: "Integrate with Helicone",
       step: 2,
       status:
         currentStep === 2
@@ -28,7 +28,7 @@ export default function StepList(props: {
           : "upcoming",
     },
     {
-      name: "Integration your application",
+      name: "Send your first event",
       step: 3,
       status:
         currentStep === 3
@@ -44,16 +44,6 @@ export default function StepList(props: {
         currentStep === 4
           ? "current"
           : currentStep > 4
-          ? "complete"
-          : "upcoming",
-    },
-    {
-      name: "Send your first event",
-      step: 5,
-      status:
-        currentStep === 5
-          ? "current"
-          : currentStep > 5
           ? "complete"
           : "upcoming",
     },

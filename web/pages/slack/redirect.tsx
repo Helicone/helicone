@@ -136,7 +136,7 @@ export const getServerSideProps = withAuthSSR(async (options) => {
 
   return {
     redirect: {
-      destination: "/alerts",
+      destination: "/dashboard",
       permanent: false,
     },
   };

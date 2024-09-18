@@ -22,6 +22,7 @@ import { User } from "../../models/user";
 import { BaseManager } from "../BaseManager";
 import { Json } from "../../lib/db/database.types";
 import { HeliconeDatasetManager } from "./HeliconeDatasetManager";
+import { randomUUID } from "crypto";
 
 // A post request should not contain an id.
 export type UserCreationParams = Pick<User, "email" | "name" | "phoneNumbers">;
@@ -43,7 +44,7 @@ export class DatasetManager extends BaseManager {
       meta: DatasetMetadata;
     }>(
       `
-    SELECT 
+    SELECT
       id,
       name,
       created_at,
@@ -92,6 +93,25 @@ export class DatasetManager extends BaseManager {
     }
 
     return ok(dataset.data.id);
+  }
+
+  async addDatasetRow(
+    datasetId: string,
+    inputRecordId: string
+  ): Promise<Result<string, string>> {
+    const datasetRowId = randomUUID();
+    const dataset = await supabaseServer.client
+      .from("experiment_dataset_v2_row")
+      .insert({
+        dataset_id: datasetId,
+        input_record: inputRecordId,
+      });
+
+    if (dataset.error) {
+      return err(dataset.error.message);
+    }
+
+    return ok(datasetRowId);
   }
 
   async addRandomDataset(params: RandomDatasetParams): Promise<
@@ -161,7 +181,7 @@ export class DatasetManager extends BaseManager {
       metadata: Record<string, any>;
     }>(
       `
-    SELECT 
+    SELECT
       prompts_versions.id,
       minor_version,
       major_version,
@@ -200,7 +220,7 @@ export class DatasetManager extends BaseManager {
       major_version: number;
     }>(
       `
-    SELECT 
+    SELECT
       id,
       user_defined_id,
       description,
@@ -232,9 +252,10 @@ export class DatasetManager extends BaseManager {
       created_at: string;
       last_used: string;
       versions: string[];
+      metadata: Record<string, any>;
     }>(
       `
-    SELECT 
+    SELECT
       prompt_v2.id,
       prompt_v2.user_defined_id,
       prompt_v2.description,
@@ -246,7 +267,7 @@ export class DatasetManager extends BaseManager {
       (SELECT created_at FROM prompt_input_record WHERE prompt_version = prompts_versions.id ORDER BY created_at DESC LIMIT 1) as last_used,
       (
         SELECT array_agg(pv2.versions) as versions
-        FROM 
+        FROM
         (
           SELECT prompts_versions.id as versions
           from prompts_versions
@@ -254,7 +275,8 @@ export class DatasetManager extends BaseManager {
           ORDER BY prompts_versions.major_version DESC, prompts_versions.minor_version DESC
           LIMIT 100
         ) as pv2
-      ) as versions
+      ) as versions,
+      prompt_v2.metadata
     FROM prompts_versions
     left join prompt_v2 on prompt_v2.id = prompts_versions.prompt_v2
     WHERE prompt_v2.organization = $1
@@ -282,7 +304,7 @@ export class DatasetManager extends BaseManager {
       metadata: Record<string, any>;
     }>(
       `
-    SELECT 
+    SELECT
       id,
       minor_version,
       major_version,
