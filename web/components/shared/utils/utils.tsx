@@ -67,6 +67,27 @@ const getUSDateMin = (value: string) => {
     .slice(-2)}`;
 };
 
+const getLocalDateFormat = (date: string) => {
+  const dateObj = new Date(date);
+  const tzOffset = dateObj.getTimezoneOffset() * 60000;
+
+  const localDateObj = new Date(dateObj.getTime() - tzOffset);
+  const formattedDate =
+    [
+      ("0" + (localDateObj.getMonth() + 1)).slice(-2),
+      ("0" + localDateObj.getDate()).slice(-2),
+      localDateObj.getFullYear(),
+    ].join("/") +
+    " " +
+    [
+      ("0" + localDateObj.getHours()).slice(-2),
+      ("0" + localDateObj.getMinutes()).slice(-2),
+      ("0" + localDateObj.getSeconds()).slice(-2),
+    ].join(":");
+
+  return formattedDate;
+};
+
 const capitalizeWords = (str: string) => {
   // replace underscores with spaces
   const strWithSpaces = str.replace(/_/g, " ");
@@ -89,6 +110,7 @@ function removeLeadingWhitespace(str: string | null): string {
 }
 
 export {
+  getLocalDateFormat,
   getUSDateFromString,
   getUSDate,
   getUSDateShort,
