@@ -9,6 +9,7 @@ import {
   OrganizationLayout,
 } from "../services/lib/organization_layout/organization_layout";
 import { supabaseServer } from "../lib/supabaseServer";
+import { getHeliconeCookie } from "../lib/cookies";
 
 interface DashboardProps {
   user: User;
@@ -39,6 +40,9 @@ export const getServerSideProps = withAuthSSR(async (options) => {
     userData: { user, orgHasOnboarded, orgId },
   } = options;
   const { context } = options;
+
+  console.log(user, orgHasOnboarded, orgId);
+  console.log("cookie in dashboard", getHeliconeCookie());
 
   if (!orgHasOnboarded) {
     return {

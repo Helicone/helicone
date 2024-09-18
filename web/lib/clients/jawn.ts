@@ -9,7 +9,9 @@ export type JawnFilterNode = any;
 
 export function getJawnClient(orgId?: string | "none") {
   orgId = orgId || Cookies.get(ORG_ID_COOKIE_KEY);
+  console.log("orgId", orgId);
   const jwtToken = getHeliconeCookie().data?.jwtToken;
+  console.log("jwtToken", jwtToken);
   const headers =
     orgId !== "none"
       ? {

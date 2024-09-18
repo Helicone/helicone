@@ -100,9 +100,10 @@ const WelcomePageV2 = (props: WelcomePageV2Props) => {
               className="text-xs underline"
               onClick={async () => {
                 const jawn = getJawnClient(orgContext?.currentOrg?.id ?? "");
-                await jawn.POST("/v1/organization/onboard", {
+                const res = await jawn.POST("/v1/organization/onboard", {
                   body: {},
                 });
+                console.log("skipping", res);
                 await router.push("/dashboard");
                 await router.reload();
               }}

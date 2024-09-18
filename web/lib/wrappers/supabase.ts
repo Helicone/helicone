@@ -74,6 +74,7 @@ export class SupabaseServerWrapper<T> {
       };
     }
     const org = orgAccessCheck.data[0];
+    console.log(org);
 
     // If owner, return role as owner
     if (org.owner === user.data.user.id) {

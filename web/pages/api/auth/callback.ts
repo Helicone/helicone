@@ -1,28 +1,21 @@
 import { NextApiHandler } from "next";
 import { createPagesServerClient } from "@supabase/auth-helpers-nextjs";
-import { SupabaseServerWrapper } from "@/lib/wrappers/supabase";
+import { getHeliconeCookie } from "../../../lib/cookies";
 
 const handler: NextApiHandler = async (req, res) => {
   const { code } = req.query;
 
   console.log("CALLBACK URL IS CALLED WITH CODE:", code);
   if (code) {
-    const supabase = new SupabaseServerWrapper({ req, res });
-    const client = supabase.getClient();
-    await client.auth.exchangeCodeForSession(String(code));
+    const supabase = createPagesServerClient({ req, res });
+    console.log("cookie", getHeliconeCookie());
+    const data = await supabase.auth.exchangeCodeForSession(String(code));
+    console.log("cookie after exchange", getHeliconeCookie(), data.data);
 
-    const data = await supabase.getUserAndOrg();
-    if (data.error) {
-      console.error("Error getting user and org:", data.error);
-      res.redirect("/signin");
-    }
-    if (!data.data?.orgId) {
-      res.redirect("/welcome");
-    }
-    res.redirect("/dashboard");
+    return res.redirect("/dashboard");
   }
 
-  res.redirect("/signin");
+  return res.redirect("/signin");
 };
 
 export default handler;

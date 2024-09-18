@@ -20,17 +20,9 @@ export default Welcome;
 
 export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
   const supabaseClient = new SupabaseServerWrapper(ctx);
-  const supabase = supabaseClient.getClient();
+  const currentSession = await supabaseClient.client.auth.getSession();
 
-  const currentSession = await supabase.auth.refreshSession();
-
-  if (!currentSession.data.session?.user)
-    return {
-      redirect: {
-        destination: "/",
-        permanent: false,
-      },
-    };
+  console.log("currentSession", currentSession);
 
   const { data, error } = await supabaseClient.getUserAndOrg();
 

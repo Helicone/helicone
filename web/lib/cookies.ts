@@ -9,6 +9,7 @@ export function getHeliconeCookie(): Result<
   string
 > {
   const authFromCookie = Cookies.get(SUPABASE_AUTH_TOKEN);
+  console.log("authFromCookie", authFromCookie);
   if (!authFromCookie) {
     return err("No auth token found in cookie");
   }
