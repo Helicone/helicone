@@ -33,7 +33,7 @@ export const ProFeatureWrapper = forwardRef<
 >(({ children, featureName, enabled = true }, ref) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const org = useOrg();
-  const router = useRouter();
+
   const customDescription = useMemo(
     () => descriptions?.[featureName as keyof typeof descriptions],
     [featureName]
@@ -62,11 +62,9 @@ export const ProFeatureWrapper = forwardRef<
     [hasAccess, children.props, setIsDialogOpen]
   );
 
-  const handleUpgrade = () => {
-    setIsDialogOpen(false);
-    router.push("/settings/billing");
-  };
-
+  const isPro = useMemo(() => {
+    return org?.currentOrg?.tier === "pro-20240913";
+  }, [org?.currentOrg?.tier]);
   return (
     <>
       {React.cloneElement(children, {
@@ -89,9 +87,11 @@ export const ProFeatureWrapper = forwardRef<
           <div className="grid grid-cols-2 gap-4">
             <div className="border rounded-lg p-4">
               <h3 className="font-semibold mb-2">Free</h3>
-              <span className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
-                Current plan
-              </span>
+              {!isPro && (
+                <span className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
+                  Current plan
+                </span>
+              )}
               <ul className="mt-4 space-y-2">
                 <li className="flex items-center text-sm">
                   <CheckIcon className="mr-2 h-4 w-4 text-green-500" />
@@ -109,6 +109,11 @@ export const ProFeatureWrapper = forwardRef<
             </div>
             <div className="border rounded-lg p-4">
               <h3 className="font-semibold mb-2">Pro</h3>
+              {isPro && (
+                <span className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
+                  Current plan
+                </span>
+              )}
               <span className="text-sm">$20/user</span>
               <p className="text-sm mt-2">Everything in Free, plus:</p>
               <ul className="mt-4 space-y-2">
