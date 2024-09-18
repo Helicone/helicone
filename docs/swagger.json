@@ -1212,6 +1212,395 @@
 				],
 				"type": "object"
 			},
+			"Record_string.any_": {
+				"properties": {},
+				"additionalProperties": {},
+				"type": "object",
+				"description": "Construct a type with a set of properties K of type T"
+			},
+			"PromptsResult": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"user_defined_id": {
+						"type": "string"
+					},
+					"description": {
+						"type": "string"
+					},
+					"pretty_name": {
+						"type": "string"
+					},
+					"created_at": {
+						"type": "string"
+					},
+					"major_version": {
+						"type": "number",
+						"format": "double"
+					},
+					"metadata": {
+						"$ref": "#/components/schemas/Record_string.any_"
+					}
+				},
+				"required": [
+					"id",
+					"user_defined_id",
+					"description",
+					"pretty_name",
+					"created_at",
+					"major_version"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_PromptsResult-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/PromptsResult"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_PromptsResult-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_PromptsResult-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"Partial_PromptToOperators_": {
+				"properties": {
+					"id": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"user_defined_id": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					}
+				},
+				"type": "object",
+				"description": "Make all properties in T optional"
+			},
+			"Pick_FilterLeaf.prompt_v2_": {
+				"properties": {
+					"prompt_v2": {
+						"$ref": "#/components/schemas/Partial_PromptToOperators_"
+					}
+				},
+				"type": "object",
+				"description": "From T, pick a set of properties whose keys are in the union K"
+			},
+			"FilterLeafSubset_prompt_v2_": {
+				"$ref": "#/components/schemas/Pick_FilterLeaf.prompt_v2_"
+			},
+			"PromptsFilterNode": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/FilterLeafSubset_prompt_v2_"
+					},
+					{
+						"$ref": "#/components/schemas/PromptsFilterBranch"
+					},
+					{
+						"type": "string",
+						"enum": [
+							"all"
+						]
+					}
+				]
+			},
+			"PromptsFilterBranch": {
+				"properties": {
+					"right": {
+						"$ref": "#/components/schemas/PromptsFilterNode"
+					},
+					"operator": {
+						"type": "string",
+						"enum": [
+							"or",
+							"and"
+						]
+					},
+					"left": {
+						"$ref": "#/components/schemas/PromptsFilterNode"
+					}
+				},
+				"required": [
+					"right",
+					"operator",
+					"left"
+				],
+				"type": "object"
+			},
+			"PromptsQueryParams": {
+				"properties": {
+					"filter": {
+						"$ref": "#/components/schemas/PromptsFilterNode"
+					}
+				},
+				"required": [
+					"filter"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"PromptResult": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"user_defined_id": {
+						"type": "string"
+					},
+					"description": {
+						"type": "string"
+					},
+					"pretty_name": {
+						"type": "string"
+					},
+					"major_version": {
+						"type": "number",
+						"format": "double"
+					},
+					"latest_version_id": {
+						"type": "string"
+					},
+					"latest_model_used": {
+						"type": "string"
+					},
+					"created_at": {
+						"type": "string"
+					},
+					"last_used": {
+						"type": "string"
+					},
+					"versions": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"metadata": {
+						"$ref": "#/components/schemas/Record_string.any_"
+					}
+				},
+				"required": [
+					"id",
+					"user_defined_id",
+					"description",
+					"pretty_name",
+					"major_version",
+					"latest_version_id",
+					"latest_model_used",
+					"created_at",
+					"last_used",
+					"versions"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_PromptResult_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/PromptResult"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_PromptResult.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_PromptResult_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"PromptQueryParams": {
+				"properties": {
+					"timeFilter": {
+						"properties": {
+							"end": {
+								"type": "string"
+							},
+							"start": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"end",
+							"start"
+						],
+						"type": "object"
+					}
+				},
+				"required": [
+					"timeFilter"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"CreatePromptResponse": {
+				"properties": {
+					"id": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"id"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_CreatePromptResponse_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/CreatePromptResponse"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_CreatePromptResponse.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_CreatePromptResponse_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"PromptVersionResult": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"minor_version": {
+						"type": "number",
+						"format": "double"
+					},
+					"major_version": {
+						"type": "number",
+						"format": "double"
+					},
+					"prompt_v2": {
+						"type": "string"
+					},
+					"model": {
+						"type": "string"
+					},
+					"helicone_template": {
+						"type": "string"
+					},
+					"created_at": {
+						"type": "string"
+					},
+					"metadata": {
+						"$ref": "#/components/schemas/Record_string.any_"
+					}
+				},
+				"required": [
+					"id",
+					"minor_version",
+					"major_version",
+					"prompt_v2",
+					"model",
+					"helicone_template",
+					"created_at",
+					"metadata"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_PromptVersionResult_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/PromptVersionResult"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_PromptVersionResult.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_PromptVersionResult_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"PromptCreateSubversionParams": {
+				"properties": {
+					"newHeliconeTemplate": {},
+					"isMajorVersion": {
+						"type": "boolean"
+					},
+					"metadata": {
+						"$ref": "#/components/schemas/Record_string.any_"
+					}
+				},
+				"required": [
+					"newHeliconeTemplate"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"Record_string.string_": {
 				"properties": {},
 				"additionalProperties": {
@@ -1220,16 +1609,1750 @@
 				"type": "object",
 				"description": "Construct a type with a set of properties K of type T"
 			},
-			"Provider": {
+			"PromptInputRecord": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"inputs": {
+						"$ref": "#/components/schemas/Record_string.string_"
+					},
+					"dataset_row_id": {
+						"type": "string"
+					},
+					"source_request": {
+						"type": "string"
+					},
+					"prompt_version": {
+						"type": "string"
+					},
+					"created_at": {
+						"type": "string"
+					},
+					"response_body": {
+						"type": "string"
+					},
+					"auto_prompt_inputs": {
+						"items": {},
+						"type": "array"
+					}
+				},
+				"required": [
+					"id",
+					"inputs",
+					"source_request",
+					"prompt_version",
+					"created_at",
+					"auto_prompt_inputs"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_PromptInputRecord-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/PromptInputRecord"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_PromptInputRecord-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_PromptInputRecord-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess__id-string--created_at-string--num_hypotheses-number--dataset-string--meta-Record_string.any__-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"properties": {
+								"meta": {
+									"$ref": "#/components/schemas/Record_string.any_"
+								},
+								"dataset": {
+									"type": "string"
+								},
+								"num_hypotheses": {
+									"type": "number",
+									"format": "double"
+								},
+								"created_at": {
+									"type": "string"
+								},
+								"id": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"meta",
+								"dataset",
+								"num_hypotheses",
+								"created_at",
+								"id"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__id-string--created_at-string--num_hypotheses-number--dataset-string--meta-Record_string.any__-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__id-string--created_at-string--num_hypotheses-number--dataset-string--meta-Record_string.any__-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess_PromptVersionResult-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/PromptVersionResult"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_PromptVersionResult-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_PromptVersionResult-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"Partial_PromptVersionsToOperators_": {
+				"properties": {
+					"minor_version": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"major_version": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"id": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"prompt_v2": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					}
+				},
+				"type": "object",
+				"description": "Make all properties in T optional"
+			},
+			"Pick_FilterLeaf.prompts_versions_": {
+				"properties": {
+					"prompts_versions": {
+						"$ref": "#/components/schemas/Partial_PromptVersionsToOperators_"
+					}
+				},
+				"type": "object",
+				"description": "From T, pick a set of properties whose keys are in the union K"
+			},
+			"FilterLeafSubset_prompts_versions_": {
+				"$ref": "#/components/schemas/Pick_FilterLeaf.prompts_versions_"
+			},
+			"PromptVersionsFilterNode": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/FilterLeafSubset_prompts_versions_"
+					},
+					{
+						"$ref": "#/components/schemas/PromptVersionsFilterBranch"
+					},
+					{
+						"type": "string",
+						"enum": [
+							"all"
+						]
+					}
+				]
+			},
+			"PromptVersionsFilterBranch": {
+				"properties": {
+					"right": {
+						"$ref": "#/components/schemas/PromptVersionsFilterNode"
+					},
+					"operator": {
+						"type": "string",
+						"enum": [
+							"or",
+							"and"
+						]
+					},
+					"left": {
+						"$ref": "#/components/schemas/PromptVersionsFilterNode"
+					}
+				},
+				"required": [
+					"right",
+					"operator",
+					"left"
+				],
+				"type": "object"
+			},
+			"PromptVersionsQueryParams": {
+				"properties": {
+					"filter": {
+						"$ref": "#/components/schemas/PromptVersionsFilterNode"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"PromptVersionResultCompiled": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"minor_version": {
+						"type": "number",
+						"format": "double"
+					},
+					"major_version": {
+						"type": "number",
+						"format": "double"
+					},
+					"prompt_v2": {
+						"type": "string"
+					},
+					"model": {
+						"type": "string"
+					},
+					"prompt_compiled": {}
+				},
+				"required": [
+					"id",
+					"minor_version",
+					"major_version",
+					"prompt_v2",
+					"model",
+					"prompt_compiled"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_PromptVersionResultCompiled_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/PromptVersionResultCompiled"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_PromptVersionResultCompiled.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_PromptVersionResultCompiled_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"PromptVersiosQueryParamsCompiled": {
+				"properties": {
+					"filter": {
+						"$ref": "#/components/schemas/PromptVersionsFilterNode"
+					},
+					"inputs": {
+						"$ref": "#/components/schemas/Record_string.string_"
+					}
+				},
+				"required": [
+					"inputs"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"PromptVersionResultFilled": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"minor_version": {
+						"type": "number",
+						"format": "double"
+					},
+					"major_version": {
+						"type": "number",
+						"format": "double"
+					},
+					"prompt_v2": {
+						"type": "string"
+					},
+					"model": {
+						"type": "string"
+					},
+					"filled_helicone_template": {}
+				},
+				"required": [
+					"id",
+					"minor_version",
+					"major_version",
+					"prompt_v2",
+					"model",
+					"filled_helicone_template"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_PromptVersionResultFilled_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/PromptVersionResultFilled"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_PromptVersionResultFilled.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_PromptVersionResultFilled_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"KafkaSettings": {
+				"properties": {
+					"miniBatchSize": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"miniBatchSize"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"AzureExperiment": {
+				"properties": {
+					"azureBaseUri": {
+						"type": "string"
+					},
+					"azureApiVersion": {
+						"type": "string"
+					},
+					"azureDeploymentName": {
+						"type": "string"
+					},
+					"azureApiKey": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"azureBaseUri",
+					"azureApiVersion",
+					"azureDeploymentName",
+					"azureApiKey"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Setting": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/KafkaSettings"
+					},
+					{
+						"$ref": "#/components/schemas/AzureExperiment"
+					}
+				]
+			},
+			"SettingName": {
+				"type": "string",
+				"enum": [
+					"kafka:dlq",
+					"kafka:log",
+					"kafka:dlq:eu",
+					"kafka:log:eu",
+					"kafka:orgs-to-dlq",
+					"azure:experiment"
+				],
+				"nullable": false
+			},
+			"url.URL": {
+				"type": "string",
+				"description": "The URL interface represents an object providing static methods used for creating object URLs.\n\n[MDN Reference](https://developer.mozilla.org/docs/Web/API/URL)\n`URL` class is a global reference for `require('url').URL`\nhttps://nodejs.org/api/url.html#the-whatwg-url-api"
+			},
+			"HeliconeMeta": {
+				"properties": {
+					"lytixHost": {
+						"type": "string"
+					},
+					"lytixKey": {
+						"type": "string"
+					},
+					"posthogHost": {
+						"type": "string"
+					},
+					"posthogApiKey": {
+						"type": "string"
+					},
+					"webhookEnabled": {
+						"type": "boolean"
+					},
+					"omitResponseLog": {
+						"type": "boolean"
+					},
+					"omitRequestLog": {
+						"type": "boolean"
+					},
+					"modelOverride": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"webhookEnabled",
+					"omitResponseLog",
+					"omitRequestLog"
+				],
+				"type": "object"
+			},
+			"ProviderName": {
 				"type": "string",
 				"enum": [
 					"OPENAI",
 					"ANTHROPIC",
-					"TOGETHERAI",
-					"GROQ",
+					"AZURE",
+					"LOCAL",
+					"HELICONE",
+					"AMDBARTEK",
+					"ANYSCALE",
+					"CLOUDFLARE",
+					"2YFV",
+					"TOGETHER",
+					"LEMONFOX",
+					"FIREWORKS",
+					"PERPLEXITY",
 					"GOOGLE",
-					"CUSTOM"
+					"OPENROUTER",
+					"WISDOMINANUTSHELL",
+					"GROQ",
+					"COHERE",
+					"MISTRAL",
+					"DEEPINFRA",
+					"QSTASH",
+					"FIRECRAWL"
 				]
+			},
+			"Provider": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ProviderName"
+					},
+					{
+						"type": "string"
+					},
+					{
+						"type": "string",
+						"enum": [
+							"CUSTOM"
+						]
+					}
+				]
+			},
+			"TemplateWithInputs": {
+				"description": "Parses a string containing custom JSX-like tags and extracts information to produce two outputs:\n1. A version of the string with all JSX tags removed, leaving only the text content.\n2. An object representing a template with self-closing JSX tags and a separate mapping of keys to their\n   corresponding text content.\n\nThe function specifically targets `<helicone-prompt-input>` tags, which include a `key` attribute and enclosed text content.\nThese tags are transformed or removed based on the desired output structure. The process involves regular expressions\nto match and manipulate the input string to produce the outputs.\n\nParameters:\n- input: A string containing the text and JSX-like tags to be parsed.\n\nReturns:\nAn object with two properties:\n1. stringWithoutJSXTags: A string where all `<helicone-prompt-input>` tags are removed, and only their text content remains.\n2. templateWithInputs: An object containing:\n   - template: A version of the input string where `<helicone-prompt-input>` tags are replaced with self-closing versions,\n     preserving the `key` attributes but removing the text content.\n   - inputs: An object mapping the `key` attributes to their corresponding text content, effectively extracting\n     the data from the original tags.\n\nExample Usage:\n```ts\nconst input = `\nThe scene is <helicone-prompt-input key=\"scene\" >Harry Potter</helicone-prompt-input>.\n<helicone-prompt-input key=\"name\" >justin</helicone-prompt-input>  test`;\n\nconst expectedOutput = parseJSXString(input);\nconsole.log(expectedOutput);\n```\nThe function is useful for preprocessing strings with embedded custom JSX-like tags, extracting useful data,\nand preparing templates for further processing or rendering. It demonstrates a practical application of regular\nexpressions for text manipulation in TypeScript, specifically tailored to a custom JSX-like syntax.",
+				"properties": {
+					"template": {
+						"additionalProperties": false,
+						"type": "object"
+					},
+					"inputs": {
+						"properties": {},
+						"additionalProperties": {
+							"type": "string"
+						},
+						"type": "object"
+					},
+					"autoInputs": {
+						"items": {},
+						"type": "array"
+					}
+				},
+				"required": [
+					"template",
+					"inputs",
+					"autoInputs"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Log": {
+				"properties": {
+					"response": {
+						"properties": {
+							"delayMs": {
+								"type": "number",
+								"format": "double"
+							},
+							"responseCreatedAt": {
+								"type": "string",
+								"format": "date-time"
+							},
+							"timeToFirstToken": {
+								"type": "number",
+								"format": "double"
+							},
+							"bodySize": {
+								"type": "number",
+								"format": "double"
+							},
+							"status": {
+								"type": "number",
+								"format": "double"
+							},
+							"id": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"delayMs",
+							"responseCreatedAt",
+							"bodySize",
+							"status",
+							"id"
+						],
+						"type": "object"
+					},
+					"request": {
+						"properties": {
+							"heliconeTemplate": {
+								"$ref": "#/components/schemas/TemplateWithInputs"
+							},
+							"isStream": {
+								"type": "boolean"
+							},
+							"requestCreatedAt": {
+								"type": "string",
+								"format": "date-time"
+							},
+							"countryCode": {
+								"type": "string"
+							},
+							"threat": {
+								"type": "boolean"
+							},
+							"path": {
+								"type": "string"
+							},
+							"bodySize": {
+								"type": "number",
+								"format": "double"
+							},
+							"provider": {
+								"$ref": "#/components/schemas/Provider"
+							},
+							"targetUrl": {
+								"type": "string"
+							},
+							"heliconeProxyKeyId": {
+								"type": "string"
+							},
+							"heliconeApiKeyId": {
+								"type": "number",
+								"format": "double"
+							},
+							"properties": {
+								"$ref": "#/components/schemas/Record_string.string_"
+							},
+							"promptVersion": {
+								"type": "string"
+							},
+							"promptId": {
+								"type": "string"
+							},
+							"userId": {
+								"type": "string"
+							},
+							"id": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"isStream",
+							"requestCreatedAt",
+							"path",
+							"bodySize",
+							"provider",
+							"targetUrl",
+							"properties",
+							"userId",
+							"id"
+						],
+						"type": "object"
+					}
+				},
+				"required": [
+					"response",
+					"request"
+				],
+				"type": "object"
+			},
+			"Message": {
+				"properties": {
+					"log": {
+						"$ref": "#/components/schemas/Log"
+					},
+					"heliconeMeta": {
+						"$ref": "#/components/schemas/HeliconeMeta"
+					},
+					"authorization": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"log",
+					"heliconeMeta",
+					"authorization"
+				],
+				"type": "object"
+			},
+			"KeyPermissions": {
+				"type": "string",
+				"enum": [
+					"w",
+					"rw"
+				]
+			},
+			"GenerateHashQueryParams": {
+				"properties": {
+					"apiKey": {
+						"type": "string"
+					},
+					"userId": {
+						"type": "string"
+					},
+					"keyName": {
+						"type": "string"
+					},
+					"permissions": {
+						"$ref": "#/components/schemas/KeyPermissions"
+					}
+				},
+				"required": [
+					"apiKey",
+					"userId",
+					"keyName",
+					"permissions"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"FineTuneResult": {
+				"anyOf": [
+					{
+						"properties": {
+							"error": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"error"
+						],
+						"type": "object"
+					},
+					{
+						"properties": {
+							"data": {
+								"properties": {
+									"url": {
+										"type": "string"
+									},
+									"fineTuneJob": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"url",
+									"fineTuneJob"
+								],
+								"type": "object"
+							},
+							"success": {
+								"type": "boolean"
+							}
+						},
+						"required": [
+							"data",
+							"success"
+						],
+						"type": "object"
+					}
+				]
+			},
+			"FineTuneBodyParams": {
+				"properties": {
+					"providerKeyId": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"providerKeyId"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"FineTuneBody": {
+				"properties": {
+					"providerKeyId": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"providerKeyId"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ChatCompletionTokenLogprob.TopLogprob": {
+				"properties": {
+					"token": {
+						"type": "string",
+						"description": "The token."
+					},
+					"bytes": {
+						"items": {
+							"type": "number",
+							"format": "double"
+						},
+						"type": "array",
+						"nullable": true,
+						"description": "A list of integers representing the UTF-8 bytes representation of the token.\nUseful in instances where characters are represented by multiple tokens and\ntheir byte representations must be combined to generate the correct text\nrepresentation. Can be `null` if there is no bytes representation for the token."
+					},
+					"logprob": {
+						"type": "number",
+						"format": "double",
+						"description": "The log probability of this token, if it is within the top 20 most likely\ntokens. Otherwise, the value `-9999.0` is used to signify that the token is very\nunlikely."
+					}
+				},
+				"required": [
+					"token",
+					"bytes",
+					"logprob"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ChatCompletionTokenLogprob": {
+				"properties": {
+					"token": {
+						"type": "string",
+						"description": "The token."
+					},
+					"bytes": {
+						"items": {
+							"type": "number",
+							"format": "double"
+						},
+						"type": "array",
+						"nullable": true,
+						"description": "A list of integers representing the UTF-8 bytes representation of the token.\nUseful in instances where characters are represented by multiple tokens and\ntheir byte representations must be combined to generate the correct text\nrepresentation. Can be `null` if there is no bytes representation for the token."
+					},
+					"logprob": {
+						"type": "number",
+						"format": "double",
+						"description": "The log probability of this token, if it is within the top 20 most likely\ntokens. Otherwise, the value `-9999.0` is used to signify that the token is very\nunlikely."
+					},
+					"top_logprobs": {
+						"items": {
+							"$ref": "#/components/schemas/ChatCompletionTokenLogprob.TopLogprob"
+						},
+						"type": "array",
+						"description": "List of the most likely tokens and their log probability, at this token\nposition. In rare cases, there may be fewer than the number of requested\n`top_logprobs` returned."
+					}
+				},
+				"required": [
+					"token",
+					"bytes",
+					"logprob",
+					"top_logprobs"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ChatCompletion.Choice.Logprobs": {
+				"description": "Log probability information for the choice.",
+				"properties": {
+					"content": {
+						"items": {
+							"$ref": "#/components/schemas/ChatCompletionTokenLogprob"
+						},
+						"type": "array",
+						"nullable": true,
+						"description": "A list of message content tokens with log probability information."
+					}
+				},
+				"required": [
+					"content"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ChatCompletionMessage.FunctionCall": {
+				"properties": {
+					"arguments": {
+						"type": "string",
+						"description": "The arguments to call the function with, as generated by the model in JSON\nformat. Note that the model does not always generate valid JSON, and may\nhallucinate parameters not defined by your function schema. Validate the\narguments in your code before calling your function."
+					},
+					"name": {
+						"type": "string",
+						"description": "The name of the function to call."
+					}
+				},
+				"required": [
+					"arguments",
+					"name"
+				],
+				"type": "object",
+				"additionalProperties": false,
+				"deprecated": true
+			},
+			"ChatCompletionMessageToolCall.Function": {
+				"description": "The function that the model called.",
+				"properties": {
+					"arguments": {
+						"type": "string",
+						"description": "The arguments to call the function with, as generated by the model in JSON\nformat. Note that the model does not always generate valid JSON, and may\nhallucinate parameters not defined by your function schema. Validate the\narguments in your code before calling your function."
+					},
+					"name": {
+						"type": "string",
+						"description": "The name of the function to call."
+					}
+				},
+				"required": [
+					"arguments",
+					"name"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ChatCompletionMessageToolCall": {
+				"properties": {
+					"id": {
+						"type": "string",
+						"description": "The ID of the tool call."
+					},
+					"function": {
+						"$ref": "#/components/schemas/ChatCompletionMessageToolCall.Function",
+						"description": "The function that the model called."
+					},
+					"type": {
+						"type": "string",
+						"enum": [
+							"function"
+						],
+						"nullable": false,
+						"description": "The type of the tool. Currently, only `function` is supported."
+					}
+				},
+				"required": [
+					"id",
+					"function",
+					"type"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ChatCompletionMessage": {
+				"description": "A chat completion message generated by the model.",
+				"properties": {
+					"content": {
+						"type": "string",
+						"nullable": true,
+						"description": "The contents of the message."
+					},
+					"role": {
+						"type": "string",
+						"enum": [
+							"assistant"
+						],
+						"nullable": false,
+						"description": "The role of the author of this message."
+					},
+					"function_call": {
+						"$ref": "#/components/schemas/ChatCompletionMessage.FunctionCall",
+						"deprecated": true
+					},
+					"tool_calls": {
+						"items": {
+							"$ref": "#/components/schemas/ChatCompletionMessageToolCall"
+						},
+						"type": "array",
+						"description": "The tool calls generated by the model, such as function calls."
+					}
+				},
+				"required": [
+					"content",
+					"role"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ChatCompletion.Choice": {
+				"properties": {
+					"finish_reason": {
+						"type": "string",
+						"enum": [
+							"stop",
+							"length",
+							"tool_calls",
+							"content_filter",
+							"function_call"
+						],
+						"description": "The reason the model stopped generating tokens. This will be `stop` if the model\nhit a natural stop point or a provided stop sequence, `length` if the maximum\nnumber of tokens specified in the request was reached, `content_filter` if\ncontent was omitted due to a flag from our content filters, `tool_calls` if the\nmodel called a tool, or `function_call` (deprecated) if the model called a\nfunction."
+					},
+					"index": {
+						"type": "number",
+						"format": "double",
+						"description": "The index of the choice in the list of choices."
+					},
+					"logprobs": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/ChatCompletion.Choice.Logprobs"
+							}
+						],
+						"nullable": true,
+						"description": "Log probability information for the choice."
+					},
+					"message": {
+						"$ref": "#/components/schemas/ChatCompletionMessage",
+						"description": "A chat completion message generated by the model."
+					}
+				},
+				"required": [
+					"finish_reason",
+					"index",
+					"logprobs",
+					"message"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"CompletionUsage": {
+				"description": "Usage statistics for the completion request.",
+				"properties": {
+					"completion_tokens": {
+						"type": "number",
+						"format": "double",
+						"description": "Number of tokens in the generated completion."
+					},
+					"prompt_tokens": {
+						"type": "number",
+						"format": "double",
+						"description": "Number of tokens in the prompt."
+					},
+					"total_tokens": {
+						"type": "number",
+						"format": "double",
+						"description": "Total number of tokens used in the request (prompt + completion)."
+					}
+				},
+				"required": [
+					"completion_tokens",
+					"prompt_tokens",
+					"total_tokens"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ChatCompletion": {
+				"description": "Represents a chat completion response returned by model, based on the provided\ninput.",
+				"properties": {
+					"id": {
+						"type": "string",
+						"description": "A unique identifier for the chat completion."
+					},
+					"choices": {
+						"items": {
+							"$ref": "#/components/schemas/ChatCompletion.Choice"
+						},
+						"type": "array",
+						"description": "A list of chat completion choices. Can be more than one if `n` is greater\nthan 1."
+					},
+					"created": {
+						"type": "number",
+						"format": "double",
+						"description": "The Unix timestamp (in seconds) of when the chat completion was created."
+					},
+					"model": {
+						"type": "string",
+						"description": "The model used for the chat completion."
+					},
+					"object": {
+						"type": "string",
+						"enum": [
+							"chat.completion"
+						],
+						"nullable": false,
+						"description": "The object type, which is always `chat.completion`."
+					},
+					"service_tier": {
+						"type": "string",
+						"enum": [
+							"scale",
+							"default",
+							null
+						],
+						"nullable": true,
+						"description": "The service tier used for processing the request. This field is only included if\nthe `service_tier` parameter is specified in the request."
+					},
+					"system_fingerprint": {
+						"type": "string",
+						"description": "This fingerprint represents the backend configuration that the model runs with.\n\nCan be used in conjunction with the `seed` request parameter to understand when\nbackend changes have been made that might impact determinism."
+					},
+					"usage": {
+						"$ref": "#/components/schemas/CompletionUsage",
+						"description": "Usage statistics for the completion request."
+					}
+				},
+				"required": [
+					"id",
+					"choices",
+					"created",
+					"model",
+					"object"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_ChatCompletion_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/ChatCompletion"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_ChatCompletion.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_ChatCompletion_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ChatCompletionSystemMessageParam": {
+				"properties": {
+					"content": {
+						"type": "string",
+						"description": "The contents of the system message."
+					},
+					"role": {
+						"type": "string",
+						"enum": [
+							"system"
+						],
+						"nullable": false,
+						"description": "The role of the messages author, in this case `system`."
+					},
+					"name": {
+						"type": "string",
+						"description": "An optional name for the participant. Provides the model information to\ndifferentiate between participants of the same role."
+					}
+				},
+				"required": [
+					"content",
+					"role"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ChatCompletionContentPartText": {
+				"properties": {
+					"text": {
+						"type": "string",
+						"description": "The text content."
+					},
+					"type": {
+						"type": "string",
+						"enum": [
+							"text"
+						],
+						"nullable": false,
+						"description": "The type of the content part."
+					}
+				},
+				"required": [
+					"text",
+					"type"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ChatCompletionContentPartImage.ImageURL": {
+				"properties": {
+					"url": {
+						"type": "string",
+						"description": "Either a URL of the image or the base64 encoded image data."
+					},
+					"detail": {
+						"type": "string",
+						"enum": [
+							"auto",
+							"low",
+							"high"
+						],
+						"description": "Specifies the detail level of the image. Learn more in the\n[Vision guide](https://platform.openai.com/docs/guides/vision/low-or-high-fidelity-image-understanding)."
+					}
+				},
+				"required": [
+					"url"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ChatCompletionContentPartImage": {
+				"properties": {
+					"image_url": {
+						"$ref": "#/components/schemas/ChatCompletionContentPartImage.ImageURL"
+					},
+					"type": {
+						"type": "string",
+						"enum": [
+							"image_url"
+						],
+						"nullable": false,
+						"description": "The type of the content part."
+					}
+				},
+				"required": [
+					"image_url",
+					"type"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ChatCompletionContentPart": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ChatCompletionContentPartText"
+					},
+					{
+						"$ref": "#/components/schemas/ChatCompletionContentPartImage"
+					}
+				]
+			},
+			"ChatCompletionUserMessageParam": {
+				"properties": {
+					"content": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"items": {
+									"$ref": "#/components/schemas/ChatCompletionContentPart"
+								},
+								"type": "array"
+							}
+						],
+						"description": "The contents of the user message."
+					},
+					"role": {
+						"type": "string",
+						"enum": [
+							"user"
+						],
+						"nullable": false,
+						"description": "The role of the messages author, in this case `user`."
+					},
+					"name": {
+						"type": "string",
+						"description": "An optional name for the participant. Provides the model information to\ndifferentiate between participants of the same role."
+					}
+				},
+				"required": [
+					"content",
+					"role"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ChatCompletionAssistantMessageParam.FunctionCall": {
+				"properties": {
+					"arguments": {
+						"type": "string",
+						"description": "The arguments to call the function with, as generated by the model in JSON\nformat. Note that the model does not always generate valid JSON, and may\nhallucinate parameters not defined by your function schema. Validate the\narguments in your code before calling your function."
+					},
+					"name": {
+						"type": "string",
+						"description": "The name of the function to call."
+					}
+				},
+				"required": [
+					"arguments",
+					"name"
+				],
+				"type": "object",
+				"additionalProperties": false,
+				"deprecated": true
+			},
+			"ChatCompletionAssistantMessageParam": {
+				"properties": {
+					"role": {
+						"type": "string",
+						"enum": [
+							"assistant"
+						],
+						"nullable": false,
+						"description": "The role of the messages author, in this case `assistant`."
+					},
+					"content": {
+						"type": "string",
+						"nullable": true,
+						"description": "The contents of the assistant message. Required unless `tool_calls` or\n`function_call` is specified."
+					},
+					"function_call": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/ChatCompletionAssistantMessageParam.FunctionCall"
+							}
+						],
+						"nullable": true,
+						"deprecated": true
+					},
+					"name": {
+						"type": "string",
+						"description": "An optional name for the participant. Provides the model information to\ndifferentiate between participants of the same role."
+					},
+					"tool_calls": {
+						"items": {
+							"$ref": "#/components/schemas/ChatCompletionMessageToolCall"
+						},
+						"type": "array",
+						"description": "The tool calls generated by the model, such as function calls."
+					}
+				},
+				"required": [
+					"role"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ChatCompletionToolMessageParam": {
+				"properties": {
+					"content": {
+						"type": "string",
+						"description": "The contents of the tool message."
+					},
+					"role": {
+						"type": "string",
+						"enum": [
+							"tool"
+						],
+						"nullable": false,
+						"description": "The role of the messages author, in this case `tool`."
+					},
+					"tool_call_id": {
+						"type": "string",
+						"description": "Tool call that this message is responding to."
+					}
+				},
+				"required": [
+					"content",
+					"role",
+					"tool_call_id"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ChatCompletionFunctionMessageParam": {
+				"properties": {
+					"content": {
+						"type": "string",
+						"nullable": true,
+						"description": "The contents of the function message."
+					},
+					"name": {
+						"type": "string",
+						"description": "The name of the function to call."
+					},
+					"role": {
+						"type": "string",
+						"enum": [
+							"function"
+						],
+						"nullable": false,
+						"description": "The role of the messages author, in this case `function`."
+					}
+				},
+				"required": [
+					"content",
+					"name",
+					"role"
+				],
+				"type": "object",
+				"additionalProperties": false,
+				"deprecated": true
+			},
+			"ChatCompletionMessageParam": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ChatCompletionSystemMessageParam"
+					},
+					{
+						"$ref": "#/components/schemas/ChatCompletionUserMessageParam"
+					},
+					{
+						"$ref": "#/components/schemas/ChatCompletionAssistantMessageParam"
+					},
+					{
+						"$ref": "#/components/schemas/ChatCompletionToolMessageParam"
+					},
+					{
+						"$ref": "#/components/schemas/ChatCompletionFunctionMessageParam"
+					}
+				]
+			},
+			"Record_string.unknown_": {
+				"properties": {},
+				"additionalProperties": {},
+				"type": "object",
+				"description": "Construct a type with a set of properties K of type T"
+			},
+			"FunctionParameters": {
+				"$ref": "#/components/schemas/Record_string.unknown_",
+				"description": "The parameters the functions accepts, described as a JSON Schema object. See the\n[guide](https://platform.openai.com/docs/guides/function-calling) for examples,\nand the\n[JSON Schema reference](https://json-schema.org/understanding-json-schema/) for\ndocumentation about the format.\n\nOmitting `parameters` defines a function with an empty parameter list."
+			},
+			"FunctionDefinition": {
+				"properties": {
+					"name": {
+						"type": "string",
+						"description": "The name of the function to be called. Must be a-z, A-Z, 0-9, or contain\nunderscores and dashes, with a maximum length of 64."
+					},
+					"description": {
+						"type": "string",
+						"description": "A description of what the function does, used by the model to choose when and\nhow to call the function."
+					},
+					"parameters": {
+						"$ref": "#/components/schemas/FunctionParameters",
+						"description": "The parameters the functions accepts, described as a JSON Schema object. See the\n[guide](https://platform.openai.com/docs/guides/function-calling) for examples,\nand the\n[JSON Schema reference](https://json-schema.org/understanding-json-schema/) for\ndocumentation about the format.\n\nOmitting `parameters` defines a function with an empty parameter list."
+					}
+				},
+				"required": [
+					"name"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ChatCompletionTool": {
+				"properties": {
+					"function": {
+						"$ref": "#/components/schemas/FunctionDefinition"
+					},
+					"type": {
+						"type": "string",
+						"enum": [
+							"function"
+						],
+						"nullable": false,
+						"description": "The type of the tool. Currently, only `function` is supported."
+					}
+				},
+				"required": [
+					"function",
+					"type"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ChatCompletionNamedToolChoice.Function": {
+				"properties": {
+					"name": {
+						"type": "string",
+						"description": "The name of the function to call."
+					}
+				},
+				"required": [
+					"name"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ChatCompletionNamedToolChoice": {
+				"description": "Specifies a tool the model should use. Use to force the model to call a specific\nfunction.",
+				"properties": {
+					"function": {
+						"$ref": "#/components/schemas/ChatCompletionNamedToolChoice.Function"
+					},
+					"type": {
+						"type": "string",
+						"enum": [
+							"function"
+						],
+						"nullable": false,
+						"description": "The type of the tool. Currently, only `function` is supported."
+					}
+				},
+				"required": [
+					"function",
+					"type"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ChatCompletionToolChoiceOption": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ChatCompletionNamedToolChoice"
+					},
+					{
+						"type": "string",
+						"enum": [
+							"none",
+							"auto",
+							"required"
+						]
+					}
+				],
+				"description": "Controls which (if any) tool is called by the model. `none` means the model will\nnot call any tool and instead generates a message. `auto` means the model can\npick between generating a message or calling one or more tools. `required` means\nthe model must call one or more tools. Specifying a particular tool via\n`{\"type\": \"function\", \"function\": {\"name\": \"my_function\"}}` forces the model to\ncall that tool.\n\n`none` is the default when no tools are present. `auto` is the default if tools\nare present."
+			},
+			"AlertResponse": {
+				"properties": {
+					"alerts": {
+						"items": {
+							"properties": {
+								"updated_at": {
+									"type": "string",
+									"nullable": true
+								},
+								"time_window": {
+									"type": "number",
+									"format": "double"
+								},
+								"time_block_duration": {
+									"type": "number",
+									"format": "double"
+								},
+								"threshold": {
+									"type": "number",
+									"format": "double"
+								},
+								"status": {
+									"type": "string"
+								},
+								"soft_delete": {
+									"type": "boolean"
+								},
+								"slack_channels": {
+									"items": {
+										"type": "string"
+									},
+									"type": "array"
+								},
+								"org_id": {
+									"type": "string"
+								},
+								"name": {
+									"type": "string"
+								},
+								"minimum_request_count": {
+									"type": "number",
+									"format": "double",
+									"nullable": true
+								},
+								"metric": {
+									"type": "string"
+								},
+								"id": {
+									"type": "string"
+								},
+								"emails": {
+									"items": {
+										"type": "string"
+									},
+									"type": "array"
+								},
+								"created_at": {
+									"type": "string",
+									"nullable": true
+								}
+							},
+							"required": [
+								"updated_at",
+								"time_window",
+								"time_block_duration",
+								"threshold",
+								"status",
+								"soft_delete",
+								"slack_channels",
+								"org_id",
+								"name",
+								"minimum_request_count",
+								"metric",
+								"id",
+								"emails",
+								"created_at"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"history": {
+						"items": {
+							"properties": {
+								"updated_at": {
+									"type": "string",
+									"nullable": true
+								},
+								"triggered_value": {
+									"type": "string"
+								},
+								"status": {
+									"type": "string"
+								},
+								"soft_delete": {
+									"type": "boolean"
+								},
+								"org_id": {
+									"type": "string"
+								},
+								"id": {
+									"type": "string"
+								},
+								"created_at": {
+									"type": "string",
+									"nullable": true
+								},
+								"alert_start_time": {
+									"type": "string"
+								},
+								"alert_name": {
+									"type": "string"
+								},
+								"alert_metric": {
+									"type": "string"
+								},
+								"alert_id": {
+									"type": "string"
+								},
+								"alert_end_time": {
+									"type": "string",
+									"nullable": true
+								}
+							},
+							"required": [
+								"updated_at",
+								"triggered_value",
+								"status",
+								"soft_delete",
+								"org_id",
+								"id",
+								"created_at",
+								"alert_start_time",
+								"alert_name",
+								"alert_metric",
+								"alert_id",
+								"alert_end_time"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"alerts",
+					"history"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_AlertResponse_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/AlertResponse"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_AlertResponse.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_AlertResponse_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess_string_": {
+				"properties": {
+					"data": {
+						"type": "string"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_string.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_string_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"AlertRequest": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"metric": {
+						"type": "string"
+					},
+					"threshold": {
+						"type": "number",
+						"format": "double"
+					},
+					"time_window": {
+						"type": "string"
+					},
+					"emails": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"slack_channels": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"minimum_request_count": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"name",
+					"metric",
+					"threshold",
+					"time_window",
+					"emails",
+					"slack_channels"
+				],
+				"type": "object",
+				"additionalProperties": false
 			},
 			"LlmType": {
 				"type": "string",
@@ -1251,7 +3374,7 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"Message": {
+			"ChatMessage": {
 				"properties": {
 					"role": {
 						"type": "string"
@@ -1340,7 +3463,7 @@
 					},
 					"messages": {
 						"items": {
-							"$ref": "#/components/schemas/Message"
+							"$ref": "#/components/schemas/ChatMessage"
 						},
 						"type": "array",
 						"nullable": true
@@ -1390,7 +3513,7 @@
 					"message": {
 						"allOf": [
 							{
-								"$ref": "#/components/schemas/Message"
+								"$ref": "#/components/schemas/ChatMessage"
 							}
 						],
 						"nullable": true
@@ -2084,775 +4207,6 @@
 					}
 				]
 			},
-			"Record_string.any_": {
-				"properties": {},
-				"additionalProperties": {},
-				"type": "object",
-				"description": "Construct a type with a set of properties K of type T"
-			},
-			"PromptsResult": {
-				"properties": {
-					"id": {
-						"type": "string"
-					},
-					"user_defined_id": {
-						"type": "string"
-					},
-					"description": {
-						"type": "string"
-					},
-					"pretty_name": {
-						"type": "string"
-					},
-					"created_at": {
-						"type": "string"
-					},
-					"major_version": {
-						"type": "number",
-						"format": "double"
-					},
-					"metadata": {
-						"$ref": "#/components/schemas/Record_string.any_"
-					}
-				},
-				"required": [
-					"id",
-					"user_defined_id",
-					"description",
-					"pretty_name",
-					"created_at",
-					"major_version"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"ResultSuccess_PromptsResult-Array_": {
-				"properties": {
-					"data": {
-						"items": {
-							"$ref": "#/components/schemas/PromptsResult"
-						},
-						"type": "array"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result_PromptsResult-Array.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess_PromptsResult-Array_"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
-			"Partial_PromptToOperators_": {
-				"properties": {
-					"id": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					},
-					"user_defined_id": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					}
-				},
-				"type": "object",
-				"description": "Make all properties in T optional"
-			},
-			"Pick_FilterLeaf.prompt_v2_": {
-				"properties": {
-					"prompt_v2": {
-						"$ref": "#/components/schemas/Partial_PromptToOperators_"
-					}
-				},
-				"type": "object",
-				"description": "From T, pick a set of properties whose keys are in the union K"
-			},
-			"FilterLeafSubset_prompt_v2_": {
-				"$ref": "#/components/schemas/Pick_FilterLeaf.prompt_v2_"
-			},
-			"PromptsFilterNode": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/FilterLeafSubset_prompt_v2_"
-					},
-					{
-						"$ref": "#/components/schemas/PromptsFilterBranch"
-					},
-					{
-						"type": "string",
-						"enum": [
-							"all"
-						]
-					}
-				]
-			},
-			"PromptsFilterBranch": {
-				"properties": {
-					"right": {
-						"$ref": "#/components/schemas/PromptsFilterNode"
-					},
-					"operator": {
-						"type": "string",
-						"enum": [
-							"or",
-							"and"
-						]
-					},
-					"left": {
-						"$ref": "#/components/schemas/PromptsFilterNode"
-					}
-				},
-				"required": [
-					"right",
-					"operator",
-					"left"
-				],
-				"type": "object"
-			},
-			"PromptsQueryParams": {
-				"properties": {
-					"filter": {
-						"$ref": "#/components/schemas/PromptsFilterNode"
-					}
-				},
-				"required": [
-					"filter"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"PromptResult": {
-				"properties": {
-					"id": {
-						"type": "string"
-					},
-					"user_defined_id": {
-						"type": "string"
-					},
-					"description": {
-						"type": "string"
-					},
-					"pretty_name": {
-						"type": "string"
-					},
-					"major_version": {
-						"type": "number",
-						"format": "double"
-					},
-					"latest_version_id": {
-						"type": "string"
-					},
-					"latest_model_used": {
-						"type": "string"
-					},
-					"created_at": {
-						"type": "string"
-					},
-					"last_used": {
-						"type": "string"
-					},
-					"versions": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
-					},
-					"metadata": {
-						"$ref": "#/components/schemas/Record_string.any_"
-					}
-				},
-				"required": [
-					"id",
-					"user_defined_id",
-					"description",
-					"pretty_name",
-					"major_version",
-					"latest_version_id",
-					"latest_model_used",
-					"created_at",
-					"last_used",
-					"versions"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"ResultSuccess_PromptResult_": {
-				"properties": {
-					"data": {
-						"$ref": "#/components/schemas/PromptResult"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result_PromptResult.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess_PromptResult_"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
-			"PromptQueryParams": {
-				"properties": {
-					"timeFilter": {
-						"properties": {
-							"end": {
-								"type": "string"
-							},
-							"start": {
-								"type": "string"
-							}
-						},
-						"required": [
-							"end",
-							"start"
-						],
-						"type": "object"
-					}
-				},
-				"required": [
-					"timeFilter"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"CreatePromptResponse": {
-				"properties": {
-					"id": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"id"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"ResultSuccess_CreatePromptResponse_": {
-				"properties": {
-					"data": {
-						"$ref": "#/components/schemas/CreatePromptResponse"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result_CreatePromptResponse.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess_CreatePromptResponse_"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
-			"PromptVersionResult": {
-				"properties": {
-					"id": {
-						"type": "string"
-					},
-					"minor_version": {
-						"type": "number",
-						"format": "double"
-					},
-					"major_version": {
-						"type": "number",
-						"format": "double"
-					},
-					"prompt_v2": {
-						"type": "string"
-					},
-					"model": {
-						"type": "string"
-					},
-					"helicone_template": {
-						"type": "string"
-					},
-					"created_at": {
-						"type": "string"
-					},
-					"metadata": {
-						"$ref": "#/components/schemas/Record_string.any_"
-					}
-				},
-				"required": [
-					"id",
-					"minor_version",
-					"major_version",
-					"prompt_v2",
-					"model",
-					"helicone_template",
-					"created_at",
-					"metadata"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"ResultSuccess_PromptVersionResult_": {
-				"properties": {
-					"data": {
-						"$ref": "#/components/schemas/PromptVersionResult"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result_PromptVersionResult.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess_PromptVersionResult_"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
-			"PromptCreateSubversionParams": {
-				"properties": {
-					"newHeliconeTemplate": {},
-					"isMajorVersion": {
-						"type": "boolean"
-					},
-					"metadata": {
-						"$ref": "#/components/schemas/Record_string.any_"
-					}
-				},
-				"required": [
-					"newHeliconeTemplate"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"PromptInputRecord": {
-				"properties": {
-					"id": {
-						"type": "string"
-					},
-					"inputs": {
-						"$ref": "#/components/schemas/Record_string.string_"
-					},
-					"dataset_row_id": {
-						"type": "string"
-					},
-					"source_request": {
-						"type": "string"
-					},
-					"prompt_version": {
-						"type": "string"
-					},
-					"created_at": {
-						"type": "string"
-					},
-					"response_body": {
-						"type": "string"
-					},
-					"auto_prompt_inputs": {
-						"items": {},
-						"type": "array"
-					}
-				},
-				"required": [
-					"id",
-					"inputs",
-					"source_request",
-					"prompt_version",
-					"created_at",
-					"auto_prompt_inputs"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"ResultSuccess_PromptInputRecord-Array_": {
-				"properties": {
-					"data": {
-						"items": {
-							"$ref": "#/components/schemas/PromptInputRecord"
-						},
-						"type": "array"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result_PromptInputRecord-Array.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess_PromptInputRecord-Array_"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
-			"ResultSuccess__id-string--created_at-string--num_hypotheses-number--dataset-string--meta-Record_string.any__-Array_": {
-				"properties": {
-					"data": {
-						"items": {
-							"properties": {
-								"meta": {
-									"$ref": "#/components/schemas/Record_string.any_"
-								},
-								"dataset": {
-									"type": "string"
-								},
-								"num_hypotheses": {
-									"type": "number",
-									"format": "double"
-								},
-								"created_at": {
-									"type": "string"
-								},
-								"id": {
-									"type": "string"
-								}
-							},
-							"required": [
-								"meta",
-								"dataset",
-								"num_hypotheses",
-								"created_at",
-								"id"
-							],
-							"type": "object"
-						},
-						"type": "array"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result__id-string--created_at-string--num_hypotheses-number--dataset-string--meta-Record_string.any__-Array.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess__id-string--created_at-string--num_hypotheses-number--dataset-string--meta-Record_string.any__-Array_"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
-			"ResultSuccess_PromptVersionResult-Array_": {
-				"properties": {
-					"data": {
-						"items": {
-							"$ref": "#/components/schemas/PromptVersionResult"
-						},
-						"type": "array"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result_PromptVersionResult-Array.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess_PromptVersionResult-Array_"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
-			"Partial_PromptVersionsToOperators_": {
-				"properties": {
-					"minor_version": {
-						"$ref": "#/components/schemas/Partial_NumberOperators_"
-					},
-					"major_version": {
-						"$ref": "#/components/schemas/Partial_NumberOperators_"
-					},
-					"id": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					},
-					"prompt_v2": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					}
-				},
-				"type": "object",
-				"description": "Make all properties in T optional"
-			},
-			"Pick_FilterLeaf.prompts_versions_": {
-				"properties": {
-					"prompts_versions": {
-						"$ref": "#/components/schemas/Partial_PromptVersionsToOperators_"
-					}
-				},
-				"type": "object",
-				"description": "From T, pick a set of properties whose keys are in the union K"
-			},
-			"FilterLeafSubset_prompts_versions_": {
-				"$ref": "#/components/schemas/Pick_FilterLeaf.prompts_versions_"
-			},
-			"PromptVersionsFilterNode": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/FilterLeafSubset_prompts_versions_"
-					},
-					{
-						"$ref": "#/components/schemas/PromptVersionsFilterBranch"
-					},
-					{
-						"type": "string",
-						"enum": [
-							"all"
-						]
-					}
-				]
-			},
-			"PromptVersionsFilterBranch": {
-				"properties": {
-					"right": {
-						"$ref": "#/components/schemas/PromptVersionsFilterNode"
-					},
-					"operator": {
-						"type": "string",
-						"enum": [
-							"or",
-							"and"
-						]
-					},
-					"left": {
-						"$ref": "#/components/schemas/PromptVersionsFilterNode"
-					}
-				},
-				"required": [
-					"right",
-					"operator",
-					"left"
-				],
-				"type": "object"
-			},
-			"PromptVersionsQueryParams": {
-				"properties": {
-					"filter": {
-						"$ref": "#/components/schemas/PromptVersionsFilterNode"
-					}
-				},
-				"type": "object",
-				"additionalProperties": false
-			},
-			"PromptVersionResultCompiled": {
-				"properties": {
-					"id": {
-						"type": "string"
-					},
-					"minor_version": {
-						"type": "number",
-						"format": "double"
-					},
-					"major_version": {
-						"type": "number",
-						"format": "double"
-					},
-					"prompt_v2": {
-						"type": "string"
-					},
-					"model": {
-						"type": "string"
-					},
-					"prompt_compiled": {}
-				},
-				"required": [
-					"id",
-					"minor_version",
-					"major_version",
-					"prompt_v2",
-					"model",
-					"prompt_compiled"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"ResultSuccess_PromptVersionResultCompiled_": {
-				"properties": {
-					"data": {
-						"$ref": "#/components/schemas/PromptVersionResultCompiled"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result_PromptVersionResultCompiled.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess_PromptVersionResultCompiled_"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
-			"PromptVersiosQueryParamsCompiled": {
-				"properties": {
-					"filter": {
-						"$ref": "#/components/schemas/PromptVersionsFilterNode"
-					},
-					"inputs": {
-						"$ref": "#/components/schemas/Record_string.string_"
-					}
-				},
-				"required": [
-					"inputs"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"PromptVersionResultFilled": {
-				"properties": {
-					"id": {
-						"type": "string"
-					},
-					"minor_version": {
-						"type": "number",
-						"format": "double"
-					},
-					"major_version": {
-						"type": "number",
-						"format": "double"
-					},
-					"prompt_v2": {
-						"type": "string"
-					},
-					"model": {
-						"type": "string"
-					},
-					"filled_helicone_template": {}
-				},
-				"required": [
-					"id",
-					"minor_version",
-					"major_version",
-					"prompt_v2",
-					"model",
-					"filled_helicone_template"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"ResultSuccess_PromptVersionResultFilled_": {
-				"properties": {
-					"data": {
-						"$ref": "#/components/schemas/PromptVersionResultFilled"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result_PromptVersionResultFilled.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess_PromptVersionResultFilled_"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
 			"Json": {
 				"anyOf": [
 					{
@@ -3254,36 +4608,6 @@
 				"anyOf": [
 					{
 						"$ref": "#/components/schemas/ResultSuccess_DatasetResult-Array_"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
-			"ResultSuccess_string_": {
-				"properties": {
-					"data": {
-						"type": "string"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result_string.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess_string_"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
@@ -4660,20 +5984,20 @@
 					"anthropic/claude-3.5-sonnet"
 				]
 			},
-			"ProviderName": {
+			"OpenStatsProviderName": {
 				"type": "string",
 				"enum": [
 					"OPENAI",
 					"ANTHROPIC",
+					"OPENROUTER",
 					"MISTRAL",
-					"META",
-					"OPENROUTER"
+					"META"
 				]
 			},
 			"DataIsBeautifulRequestBody": {
 				"properties": {
 					"provider": {
-						"$ref": "#/components/schemas/ProviderName"
+						"$ref": "#/components/schemas/OpenStatsProviderName"
 					},
 					"models": {
 						"items": {
@@ -5012,6 +6336,412 @@
 					"id",
 					"name"
 				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"NewOrganizationParams": {
+				"properties": {
+					"tier": {
+						"type": "string",
+						"nullable": true
+					},
+					"subscription_status": {
+						"type": "string",
+						"nullable": true
+					},
+					"stripe_subscription_item_id": {
+						"type": "string",
+						"nullable": true
+					},
+					"stripe_subscription_id": {
+						"type": "string",
+						"nullable": true
+					},
+					"stripe_metadata": {
+						"$ref": "#/components/schemas/Json"
+					},
+					"stripe_customer_id": {
+						"type": "string",
+						"nullable": true
+					},
+					"soft_delete": {
+						"type": "boolean"
+					},
+					"size": {
+						"type": "string",
+						"nullable": true
+					},
+					"reseller_id": {
+						"type": "string",
+						"nullable": true
+					},
+					"request_limit": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"referral": {
+						"type": "string",
+						"nullable": true
+					},
+					"percent_to_log": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"owner": {
+						"type": "string"
+					},
+					"organization_type": {
+						"type": "string"
+					},
+					"org_provider_key": {
+						"type": "string",
+						"nullable": true
+					},
+					"name": {
+						"type": "string"
+					},
+					"logo_path": {
+						"type": "string",
+						"nullable": true
+					},
+					"limits": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/Json"
+							}
+						],
+						"nullable": true
+					},
+					"is_personal": {
+						"type": "boolean"
+					},
+					"id": {
+						"type": "string"
+					},
+					"icon": {
+						"type": "string"
+					},
+					"has_onboarded": {
+						"type": "boolean"
+					},
+					"domain": {
+						"type": "string",
+						"nullable": true
+					},
+					"created_at": {
+						"type": "string",
+						"nullable": true
+					},
+					"color": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"owner",
+					"name"
+				],
+				"type": "object"
+			},
+			"Pick_NewOrganizationParams.name-or-color-or-icon-or-org_provider_key-or-limits-or-reseller_id-or-organization_type_": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"color": {
+						"type": "string"
+					},
+					"icon": {
+						"type": "string"
+					},
+					"limits": {
+						"$ref": "#/components/schemas/Json"
+					},
+					"org_provider_key": {
+						"type": "string"
+					},
+					"organization_type": {
+						"type": "string"
+					},
+					"reseller_id": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"name"
+				],
+				"type": "object",
+				"description": "From T, pick a set of properties whose keys are in the union K"
+			},
+			"UpdateOrganizationParams": {
+				"allOf": [
+					{
+						"$ref": "#/components/schemas/Pick_NewOrganizationParams.name-or-color-or-icon-or-org_provider_key-or-limits-or-reseller_id-or-organization_type_"
+					},
+					{
+						"properties": {
+							"variant": {
+								"type": "string"
+							}
+						},
+						"type": "object"
+					}
+				]
+			},
+			"UIFilterRowTree": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/UIFilterRowNode"
+					},
+					{
+						"$ref": "#/components/schemas/FilterRow"
+					}
+				]
+			},
+			"UIFilterRowNode": {
+				"properties": {
+					"operator": {
+						"type": "string",
+						"enum": [
+							"and",
+							"or"
+						]
+					},
+					"rows": {
+						"items": {
+							"$ref": "#/components/schemas/UIFilterRowTree"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"operator",
+					"rows"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"FilterRow": {
+				"properties": {
+					"value": {
+						"type": "string"
+					},
+					"operatorIdx": {
+						"type": "number",
+						"format": "double"
+					},
+					"filterMapIdx": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"value",
+					"operatorIdx",
+					"filterMapIdx"
+				],
+				"type": "object"
+			},
+			"OrganizationFilter": {
+				"properties": {
+					"softDelete": {
+						"type": "boolean"
+					},
+					"createdAt": {
+						"type": "string"
+					},
+					"filter": {
+						"items": {
+							"$ref": "#/components/schemas/UIFilterRowTree"
+						},
+						"type": "array"
+					},
+					"name": {
+						"type": "string"
+					},
+					"id": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"softDelete",
+					"filter",
+					"name",
+					"id"
+				],
+				"type": "object"
+			},
+			"OrganizationLayout": {
+				"properties": {
+					"filters": {
+						"items": {
+							"$ref": "#/components/schemas/OrganizationFilter"
+						},
+						"type": "array"
+					},
+					"type": {
+						"type": "string"
+					},
+					"organization_id": {
+						"type": "string"
+					},
+					"id": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"filters",
+					"type",
+					"organization_id",
+					"id"
+				],
+				"type": "object"
+			},
+			"ResultSuccess_OrganizationLayout_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/OrganizationLayout"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_OrganizationLayout.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_OrganizationLayout_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"OrganizationMember": {
+				"properties": {
+					"org_role": {
+						"type": "string"
+					},
+					"member": {
+						"type": "string"
+					},
+					"email": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"org_role",
+					"member",
+					"email"
+				],
+				"type": "object"
+			},
+			"ResultSuccess_OrganizationMember-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/OrganizationMember"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_OrganizationMember-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_OrganizationMember-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"OrganizationOwner": {
+				"properties": {
+					"tier": {
+						"type": "string"
+					},
+					"email": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"tier",
+					"email"
+				],
+				"type": "object"
+			},
+			"ResultSuccess_OrganizationOwner-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/OrganizationOwner"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_OrganizationOwner-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_OrganizationOwner-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"UpgradeToProRequest": {
+				"properties": {
+					"addons": {
+						"properties": {
+							"prompts": {
+								"type": "boolean"
+							},
+							"alerts": {
+								"type": "boolean"
+							}
+						},
+						"type": "object"
+					}
+				},
 				"type": "object",
 				"additionalProperties": false
 			}
@@ -5389,369 +7119,6 @@
 						"application/json": {
 							"schema": {
 								"$ref": "#/components/schemas/OTELTrace"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/v1/request/query": {
-			"post": {
-				"operationId": "GetRequests",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_HeliconeRequest-Array.string_"
-								},
-								"examples": {
-									"Example 1": {
-										"value": {
-											"filter": "all",
-											"isCached": false,
-											"limit": 10,
-											"offset": 0,
-											"sort": {
-												"created_at": "desc"
-											},
-											"isScored": false,
-											"isPartOfExperiment": false
-										}
-									}
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Request"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [],
-				"requestBody": {
-					"description": "Request query filters",
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/RequestQueryParams",
-								"description": "Request query filters"
-							},
-							"example": {
-								"filter": "all",
-								"isCached": false,
-								"limit": 10,
-								"offset": 0,
-								"sort": {
-									"created_at": "desc"
-								},
-								"isScored": false,
-								"isPartOfExperiment": false
-							}
-						}
-					}
-				}
-			}
-		},
-		"/v1/request/query-clickhouse": {
-			"post": {
-				"operationId": "GetRequestsClickhouse",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_HeliconeRequest-Array.string_"
-								},
-								"examples": {
-									"Example 1": {
-										"value": {
-											"filter": "all",
-											"isCached": false,
-											"limit": 10,
-											"offset": 0,
-											"sort": {
-												"created_at": "desc"
-											},
-											"isScored": false,
-											"isPartOfExperiment": false
-										}
-									}
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Request"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [],
-				"requestBody": {
-					"description": "Request query filters",
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/RequestQueryParams",
-								"description": "Request query filters"
-							},
-							"example": {
-								"filter": "all",
-								"isCached": false,
-								"limit": 10,
-								"offset": 0,
-								"sort": {
-									"created_at": "desc"
-								},
-								"isScored": false,
-								"isPartOfExperiment": false
-							}
-						}
-					}
-				}
-			}
-		},
-		"/v1/request/{requestId}/feedback": {
-			"post": {
-				"operationId": "FeedbackRequest",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_null.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Request"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "requestId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"properties": {
-									"rating": {
-										"type": "boolean"
-									}
-								},
-								"required": [
-									"rating"
-								],
-								"type": "object"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/v1/request/{requestId}/property": {
-			"put": {
-				"operationId": "PutProperty",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_null.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Request"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "requestId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"properties": {
-									"value": {
-										"type": "string"
-									},
-									"key": {
-										"type": "string"
-									}
-								},
-								"required": [
-									"value",
-									"key"
-								],
-								"type": "object"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/v1/request/{requestId}/assets/{assetId}": {
-			"post": {
-				"operationId": "GetRequestAssetById",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_HeliconeRequestAsset.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Request"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "requestId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					},
-					{
-						"in": "path",
-						"name": "assetId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				]
-			}
-		},
-		"/v1/request/{requestId}/score": {
-			"post": {
-				"operationId": "AddScores",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_null.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Request"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "requestId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/ScoreRequest"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/v1/property/query": {
-			"post": {
-				"operationId": "GetProperties",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_Property-Array.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Property"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"properties": {},
-								"type": "object"
 							}
 						}
 					}
@@ -6325,6 +7692,1886 @@
 				}
 			}
 		},
+		"/v1/admin/orgs/top-usage": {
+			"post": {
+				"operationId": "GetTopOrgsByUsage",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"organizations": {
+											"items": {
+												"properties": {
+													"usage": {
+														"properties": {
+															"all_time_count": {
+																"type": "number",
+																"format": "double"
+															},
+															"monthly_usage": {
+																"items": {
+																	"properties": {
+																		"requestCount": {
+																			"type": "number",
+																			"format": "double"
+																		},
+																		"month": {
+																			"type": "string"
+																		}
+																	},
+																	"required": [
+																		"requestCount",
+																		"month"
+																	],
+																	"type": "object"
+																},
+																"type": "array"
+															},
+															"requests_last_30_days": {
+																"type": "number",
+																"format": "double"
+															},
+															"total_requests": {
+																"type": "number",
+																"format": "double"
+															}
+														},
+														"required": [
+															"all_time_count",
+															"monthly_usage",
+															"requests_last_30_days",
+															"total_requests"
+														],
+														"type": "object"
+													},
+													"organization": {
+														"properties": {
+															"members": {
+																"items": {
+																	"properties": {
+																		"last_sign_in_at": {
+																			"type": "string",
+																			"nullable": true
+																		},
+																		"role": {
+																			"type": "string"
+																		},
+																		"name": {
+																			"type": "string"
+																		},
+																		"email": {
+																			"type": "string"
+																		},
+																		"id": {
+																			"type": "string"
+																		}
+																	},
+																	"required": [
+																		"last_sign_in_at",
+																		"role",
+																		"name",
+																		"email",
+																		"id"
+																	],
+																	"type": "object"
+																},
+																"type": "array"
+															},
+															"subscription_status": {
+																"type": "string",
+																"nullable": true
+															},
+															"stripe_subscription_id": {
+																"type": "string",
+																"nullable": true
+															},
+															"stripe_customer_id": {
+																"type": "string",
+																"nullable": true
+															},
+															"tier": {
+																"type": "string"
+															},
+															"owner": {
+																"type": "string"
+															},
+															"created_at": {
+																"type": "string"
+															},
+															"name": {
+																"type": "string"
+															},
+															"id": {
+																"type": "string"
+															}
+														},
+														"required": [
+															"members",
+															"subscription_status",
+															"stripe_subscription_id",
+															"stripe_customer_id",
+															"tier",
+															"owner",
+															"created_at",
+															"name",
+															"id"
+														],
+														"type": "object"
+													}
+												},
+												"required": [
+													"usage",
+													"organization"
+												],
+												"type": "object"
+											},
+											"type": "array"
+										}
+									},
+									"required": [
+										"organizations"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"minRequests": {
+										"type": "number",
+										"format": "double"
+									},
+									"limit": {
+										"type": "number",
+										"format": "double"
+									}
+								},
+								"required": [
+									"minRequests",
+									"limit"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/admin/orgs/top": {
+			"post": {
+				"operationId": "GetTopOrgs",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"properties": {
+											"ct": {
+												"type": "number",
+												"format": "double"
+											},
+											"organization_id": {
+												"type": "string"
+											},
+											"members": {
+												"items": {
+													"properties": {
+														"last_active": {
+															"type": "string"
+														},
+														"role": {
+															"type": "string"
+														},
+														"email": {
+															"type": "string"
+														},
+														"id": {
+															"type": "string"
+														}
+													},
+													"required": [
+														"last_active",
+														"role",
+														"email",
+														"id"
+													],
+													"type": "object"
+												},
+												"type": "array"
+											},
+											"name": {
+												"type": "string"
+											},
+											"owner_last_login": {
+												"type": "string"
+											},
+											"owner_email": {
+												"type": "string"
+											},
+											"tier": {
+												"type": "string"
+											},
+											"id": {
+												"type": "string"
+											},
+											"overTime": {
+												"items": {
+													"properties": {
+														"organization_id": {
+															"type": "string"
+														},
+														"dt": {
+															"type": "string"
+														},
+														"count": {
+															"type": "number",
+															"format": "double"
+														}
+													},
+													"required": [
+														"organization_id",
+														"dt",
+														"count"
+													],
+													"type": "object"
+												},
+												"type": "array"
+											}
+										},
+										"required": [
+											"ct",
+											"organization_id",
+											"members",
+											"name",
+											"owner_last_login",
+											"owner_email",
+											"tier",
+											"id",
+											"overTime"
+										],
+										"type": "object"
+									},
+									"type": "array"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"emailContains": {
+										"items": {
+											"type": "string"
+										},
+										"type": "array"
+									},
+									"orgsNameContains": {
+										"items": {
+											"type": "string"
+										},
+										"type": "array"
+									},
+									"orgsId": {
+										"items": {
+											"type": "string"
+										},
+										"type": "array"
+									},
+									"tier": {
+										"type": "string",
+										"enum": [
+											"all",
+											"pro",
+											"free",
+											"growth",
+											"enterprise"
+										]
+									},
+									"endDate": {
+										"type": "string"
+									},
+									"startDate": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"tier",
+									"endDate",
+									"startDate"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/admin/admins/query": {
+			"get": {
+				"operationId": "GetAdmins",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"properties": {
+											"user_id": {
+												"type": "string",
+												"nullable": true
+											},
+											"user_email": {
+												"type": "string",
+												"nullable": true
+											},
+											"id": {
+												"type": "number",
+												"format": "double"
+											},
+											"created_at": {
+												"type": "string"
+											}
+										},
+										"required": [
+											"user_id",
+											"user_email",
+											"id",
+											"created_at"
+										],
+										"type": "object"
+									},
+									"type": "array"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/admin/whodis": {
+			"post": {
+				"operationId": "Whodis",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"organizations": {
+											"items": {
+												"properties": {
+													"usage": {
+														"properties": {
+															"all_time_count": {
+																"type": "number",
+																"format": "double"
+															},
+															"monthly_usage": {
+																"items": {
+																	"properties": {
+																		"requestCount": {
+																			"type": "number",
+																			"format": "double"
+																		},
+																		"month": {
+																			"type": "string"
+																		}
+																	},
+																	"required": [
+																		"requestCount",
+																		"month"
+																	],
+																	"type": "object"
+																},
+																"type": "array"
+															},
+															"requests_last_30_days": {
+																"type": "number",
+																"format": "double"
+															},
+															"total_requests": {
+																"type": "number",
+																"format": "double"
+															}
+														},
+														"required": [
+															"all_time_count",
+															"monthly_usage",
+															"requests_last_30_days",
+															"total_requests"
+														],
+														"type": "object"
+													},
+													"organization": {
+														"properties": {
+															"members": {
+																"items": {
+																	"properties": {
+																		"last_sign_in_at": {
+																			"type": "string",
+																			"nullable": true
+																		},
+																		"role": {
+																			"type": "string"
+																		},
+																		"name": {
+																			"type": "string"
+																		},
+																		"email": {
+																			"type": "string"
+																		},
+																		"id": {
+																			"type": "string"
+																		}
+																	},
+																	"required": [
+																		"last_sign_in_at",
+																		"role",
+																		"name",
+																		"email",
+																		"id"
+																	],
+																	"type": "object"
+																},
+																"type": "array"
+															},
+															"subscription_status": {
+																"type": "string",
+																"nullable": true
+															},
+															"stripe_subscription_id": {
+																"type": "string",
+																"nullable": true
+															},
+															"stripe_customer_id": {
+																"type": "string",
+																"nullable": true
+															},
+															"tier": {
+																"type": "string"
+															},
+															"owner": {
+																"type": "string"
+															},
+															"created_at": {
+																"type": "string"
+															},
+															"name": {
+																"type": "string"
+															},
+															"id": {
+																"type": "string"
+															}
+														},
+														"required": [
+															"members",
+															"subscription_status",
+															"stripe_subscription_id",
+															"stripe_customer_id",
+															"tier",
+															"owner",
+															"created_at",
+															"name",
+															"id"
+														],
+														"type": "object"
+													}
+												},
+												"required": [
+													"usage",
+													"organization"
+												],
+												"type": "object"
+											},
+											"type": "array"
+										}
+									},
+									"required": [
+										"organizations"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"email": {
+										"type": "string"
+									},
+									"userId": {
+										"type": "string"
+									},
+									"organizationId": {
+										"type": "string"
+									}
+								},
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/admin/settings/{name}": {
+			"get": {
+				"operationId": "GetSetting",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Setting"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "name",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/SettingName"
+						}
+					}
+				]
+			}
+		},
+		"/v1/admin/azure/run-test": {
+			"post": {
+				"operationId": "AzureTest",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"fetchParams": {
+											"properties": {
+												"body": {
+													"type": "string"
+												},
+												"headers": {
+													"properties": {},
+													"additionalProperties": {
+														"type": "string"
+													},
+													"type": "object"
+												},
+												"url": {
+													"$ref": "#/components/schemas/url.URL"
+												}
+											},
+											"required": [
+												"body",
+												"headers",
+												"url"
+											],
+											"type": "object"
+										},
+										"resultText": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"fetchParams",
+										"resultText"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"requestBody": {}
+								},
+								"required": [
+									"requestBody"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/admin/settings": {
+			"post": {
+				"operationId": "UpdateSetting",
+				"responses": {
+					"204": {
+						"description": "No content"
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"settings": {
+										"$ref": "#/components/schemas/Setting"
+									},
+									"name": {
+										"$ref": "#/components/schemas/SettingName"
+									}
+								},
+								"required": [
+									"settings",
+									"name"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/admin/orgs/query": {
+			"post": {
+				"operationId": "FindAllOrgs",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"orgs": {
+											"items": {
+												"properties": {
+													"id": {
+														"type": "string"
+													},
+													"name": {
+														"type": "string"
+													}
+												},
+												"required": [
+													"id",
+													"name"
+												],
+												"type": "object"
+											},
+											"type": "array"
+										}
+									},
+									"required": [
+										"orgs"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"orgName": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"orgName"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/admin/orgs/over-time/query": {
+			"post": {
+				"operationId": "NewOrgsOverTime",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"usersOverTime": {
+											"items": {
+												"properties": {
+													"day": {
+														"type": "string"
+													},
+													"count": {
+														"type": "string"
+													}
+												},
+												"required": [
+													"day",
+													"count"
+												],
+												"type": "object"
+											},
+											"type": "array"
+										},
+										"newUsersOvertime": {
+											"items": {
+												"properties": {
+													"day": {
+														"type": "string"
+													},
+													"count": {
+														"type": "string"
+													}
+												},
+												"required": [
+													"day",
+													"count"
+												],
+												"type": "object"
+											},
+											"type": "array"
+										},
+										"newOrgsOvertime": {
+											"items": {
+												"properties": {
+													"day": {
+														"type": "string"
+													},
+													"count": {
+														"type": "string"
+													}
+												},
+												"required": [
+													"day",
+													"count"
+												],
+												"type": "object"
+											},
+											"type": "array"
+										}
+									},
+									"required": [
+										"usersOverTime",
+										"newUsersOvertime",
+										"newOrgsOvertime"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"groupBy": {
+										"type": "string",
+										"enum": [
+											"hour",
+											"day",
+											"week",
+											"month"
+										]
+									},
+									"timeFilter": {
+										"type": "string",
+										"enum": [
+											"1 days",
+											"7 days",
+											"1 month",
+											"3 months",
+											"12 months",
+											"24 months"
+										]
+									}
+								},
+								"required": [
+									"groupBy",
+									"timeFilter"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/admin/admins/org/query": {
+			"post": {
+				"operationId": "AddAdminsToOrg",
+				"responses": {
+					"204": {
+						"description": "No content"
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"adminIds": {
+										"items": {
+											"type": "string"
+										},
+										"type": "array"
+									},
+									"orgId": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"adminIds",
+									"orgId"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/admin/alert_banners": {
+			"post": {
+				"operationId": "CreateAlertBanner",
+				"responses": {
+					"204": {
+						"description": "No content"
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"message": {
+										"type": "string"
+									},
+									"title": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"message",
+									"title"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			},
+			"patch": {
+				"operationId": "UpdateAlertBanner",
+				"responses": {
+					"204": {
+						"description": "No content"
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"active": {
+										"type": "boolean"
+									},
+									"id": {
+										"type": "number",
+										"format": "double"
+									}
+								},
+								"required": [
+									"active",
+									"id"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/settings/query": {
+			"get": {
+				"operationId": "GetSettings",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"useAzureForExperiment": {
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"useAzureForExperiment"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Settings"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/log/request": {
+			"post": {
+				"operationId": "GetRequests",
+				"responses": {
+					"204": {
+						"description": "No content"
+					}
+				},
+				"tags": [
+					"Log"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"description": "Log message to log",
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/Message",
+								"description": "Log message to log"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/key/generateHash": {
+			"post": {
+				"operationId": "GenerateHash",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"error": {
+											"properties": {
+												"details": {
+													"type": "string"
+												},
+												"message": {
+													"type": "string"
+												}
+											},
+											"type": "object"
+										},
+										"success": {
+											"type": "boolean"
+										}
+									},
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Utils"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/GenerateHashQueryParams"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/dataset/{datasetId}/fine-tune": {
+			"post": {
+				"operationId": "DatasetFineTune",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/FineTuneResult"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"FineTune",
+					"Dataset"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "datasetId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/FineTuneBodyParams"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/fine-tune": {
+			"post": {
+				"operationId": "FineTune",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"properties": {
+												"error": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"error"
+											],
+											"type": "object"
+										},
+										{
+											"properties": {
+												"data": {
+													"properties": {
+														"url": {
+															"type": "string"
+														},
+														"fineTuneJob": {
+															"type": "string"
+														}
+													},
+													"required": [
+														"url",
+														"fineTuneJob"
+													],
+													"type": "object"
+												},
+												"success": {
+													"type": "boolean"
+												}
+											},
+											"required": [
+												"data",
+												"success"
+											],
+											"type": "object"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"FineTune"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/FineTuneBody"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/fine-tune/{jobId}/stats": {
+			"get": {
+				"operationId": "FineTuneJobStats",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"properties": {
+												"error": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"error"
+											],
+											"type": "object"
+										},
+										{
+											"properties": {
+												"events": {},
+												"job": {}
+											},
+											"required": [
+												"events",
+												"job"
+											],
+											"type": "object"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"FineTune"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "jobId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/demo/completion": {
+			"post": {
+				"operationId": "DemoCompletion",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_ChatCompletion.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Demo",
+					"Demo"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"cache_enabled": {
+										"type": "boolean"
+									},
+									"max_tokens": {
+										"type": "number",
+										"format": "double"
+									},
+									"tool_choice": {
+										"$ref": "#/components/schemas/ChatCompletionToolChoiceOption"
+									},
+									"tools": {
+										"items": {
+											"$ref": "#/components/schemas/ChatCompletionTool"
+										},
+										"type": "array"
+									},
+									"sessionPath": {
+										"type": "string"
+									},
+									"sessionName": {
+										"type": "string"
+									},
+									"sessionId": {
+										"type": "string"
+									},
+									"userEmail": {
+										"type": "string"
+									},
+									"promptId": {
+										"type": "string"
+									},
+									"messages": {
+										"items": {
+											"$ref": "#/components/schemas/ChatCompletionMessageParam"
+										},
+										"type": "array"
+									}
+								},
+								"required": [
+									"promptId",
+									"messages"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/alert/query": {
+			"get": {
+				"operationId": "GetAlerts",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_AlertResponse.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Alert"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/alert/create": {
+			"post": {
+				"operationId": "CreateAlert",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_string.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Alert"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/AlertRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/alert/{alertId}": {
+			"delete": {
+				"operationId": "DeleteAlert",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Alert"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "alertId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/request/query": {
+			"post": {
+				"operationId": "GetRequests",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_HeliconeRequest-Array.string_"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"filter": "all",
+											"isCached": false,
+											"limit": 10,
+											"offset": 0,
+											"sort": {
+												"created_at": "desc"
+											},
+											"isScored": false,
+											"isPartOfExperiment": false
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Request"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"description": "Request query filters",
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/RequestQueryParams",
+								"description": "Request query filters"
+							},
+							"example": {
+								"filter": "all",
+								"isCached": false,
+								"limit": 10,
+								"offset": 0,
+								"sort": {
+									"created_at": "desc"
+								},
+								"isScored": false,
+								"isPartOfExperiment": false
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/request/query-clickhouse": {
+			"post": {
+				"operationId": "GetRequestsClickhouse",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_HeliconeRequest-Array.string_"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"filter": "all",
+											"isCached": false,
+											"limit": 10,
+											"offset": 0,
+											"sort": {
+												"created_at": "desc"
+											},
+											"isScored": false,
+											"isPartOfExperiment": false
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Request"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"description": "Request query filters",
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/RequestQueryParams",
+								"description": "Request query filters"
+							},
+							"example": {
+								"filter": "all",
+								"isCached": false,
+								"limit": 10,
+								"offset": 0,
+								"sort": {
+									"created_at": "desc"
+								},
+								"isScored": false,
+								"isPartOfExperiment": false
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/request/{requestId}/feedback": {
+			"post": {
+				"operationId": "FeedbackRequest",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Request"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "requestId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"rating": {
+										"type": "boolean"
+									}
+								},
+								"required": [
+									"rating"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/request/{requestId}/property": {
+			"put": {
+				"operationId": "PutProperty",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Request"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "requestId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"value": {
+										"type": "string"
+									},
+									"key": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"value",
+									"key"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/request/{requestId}/assets/{assetId}": {
+			"post": {
+				"operationId": "GetRequestAssetById",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_HeliconeRequestAsset.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Request"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "requestId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "path",
+						"name": "assetId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/request/{requestId}/score": {
+			"post": {
+				"operationId": "AddScores",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Request"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "requestId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ScoreRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/property/query": {
+			"post": {
+				"operationId": "GetProperties",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_Property-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Property"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {},
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
 		"/v1/integration": {
 			"post": {
 				"operationId": "CreateIntegration",
@@ -6455,6 +9702,41 @@
 					{
 						"in": "path",
 						"name": "integrationId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/integration/type/{type}": {
+			"get": {
+				"operationId": "GetIntegrationByType",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_Integration.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Integration"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "type",
 						"required": true,
 						"schema": {
 							"type": "string"
@@ -7915,6 +11197,933 @@
 								"properties": {},
 								"type": "object"
 							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/organization/user/accept_terms": {
+			"post": {
+				"operationId": "AcceptTerms",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Organization"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/organization/create": {
+			"post": {
+				"operationId": "CreateNewOrganization",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Organization"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/NewOrganizationParams"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/organization/{organizationId}/update": {
+			"post": {
+				"operationId": "UpdateOrganization",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Organization"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "organizationId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UpdateOrganizationParams"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/organization/onboard": {
+			"post": {
+				"operationId": "OnboardOrganization",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Organization"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {},
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/organization/{organizationId}/add_member": {
+			"post": {
+				"operationId": "AddMemberToOrganization",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Organization"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "organizationId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"email": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"email"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/organization/{organizationId}/create_filter": {
+			"post": {
+				"operationId": "CreateOrganizationFilter",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Organization"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "organizationId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"filterType": {
+										"type": "string",
+										"enum": [
+											"dashboard",
+											"requests"
+										]
+									},
+									"filters": {
+										"items": {
+											"$ref": "#/components/schemas/OrganizationFilter"
+										},
+										"type": "array"
+									}
+								},
+								"required": [
+									"filterType",
+									"filters"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/organization/{organizationId}/update_filter": {
+			"post": {
+				"operationId": "UpdateOrganizationFilter",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Organization"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "organizationId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"filterType": {
+										"type": "string",
+										"enum": [
+											"dashboard",
+											"requests"
+										]
+									},
+									"filters": {
+										"items": {
+											"$ref": "#/components/schemas/OrganizationFilter"
+										},
+										"type": "array"
+									}
+								},
+								"required": [
+									"filterType",
+									"filters"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/organization/delete": {
+			"delete": {
+				"operationId": "DeleteOrganization",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Organization"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/organization/{organizationId}/layout": {
+			"get": {
+				"operationId": "GetOrganizationLayout",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_OrganizationLayout.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Organization"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "organizationId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "filterType",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/organization/{organizationId}/members": {
+			"get": {
+				"operationId": "GetOrganizationMembers",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_OrganizationMember-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Organization"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "organizationId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/organization/{organizationId}/update_member": {
+			"post": {
+				"operationId": "UpdateOrganizationMember",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Organization"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "organizationId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"memberId": {
+										"type": "string"
+									},
+									"role": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"memberId",
+									"role"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/organization/{organizationId}/owner": {
+			"get": {
+				"operationId": "GetOrganizationOwner",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_OrganizationOwner-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Organization"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "organizationId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/organization/{organizationId}/remove_member": {
+			"delete": {
+				"operationId": "RemoveMemberFromOrganization",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Organization"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "organizationId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "memberId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/stripe/subscription/free/usage": {
+			"get": {
+				"operationId": "GetFreeUsage",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "number",
+									"format": "double"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Stripe"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/stripe/subscription/new-customer/upgrade-to-pro": {
+			"post": {
+				"operationId": "UpgradeToPro",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Stripe"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UpgradeToProRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/stripe/subscription/existing-customer/upgrade-to-pro": {
+			"post": {
+				"operationId": "UpgradeExistingCustomer",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Stripe"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UpgradeToProRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/stripe/subscription/manage-subscription": {
+			"post": {
+				"operationId": "ManageSubscription",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Stripe"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/stripe/subscription/undo-cancel-subscription": {
+			"post": {
+				"operationId": "UndoCancelSubscription",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "number",
+									"enum": [
+										null
+									],
+									"nullable": true
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Stripe"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/stripe/subscription/add-ons/{productType}": {
+			"post": {
+				"operationId": "AddOns",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "number",
+									"enum": [
+										null
+									],
+									"nullable": true
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Stripe"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "productType",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"enum": [
+								"alerts",
+								"prompts"
+							]
+						}
+					}
+				]
+			},
+			"delete": {
+				"operationId": "DeleteAddOns",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "number",
+									"enum": [
+										null
+									],
+									"nullable": true
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Stripe"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "productType",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"enum": [
+								"alerts",
+								"prompts"
+							]
+						}
+					}
+				]
+			}
+		},
+		"/v1/stripe/subscription/preview-invoice": {
+			"get": {
+				"operationId": "PreviewInvoice",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Stripe"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/stripe/subscription/cancel-subscription": {
+			"post": {
+				"operationId": "CancelSubscription",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "number",
+									"enum": [
+										null
+									],
+									"nullable": true
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Stripe"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/stripe/subscription/migrate-to-pro": {
+			"post": {
+				"operationId": "MigrateToPro",
+				"responses": {
+					"204": {
+						"description": "No content"
+					}
+				},
+				"tags": [
+					"Stripe"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/stripe/subscription": {
+			"get": {
+				"operationId": "GetSubscription",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Stripe"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/stripe/webhook": {
+			"post": {
+				"operationId": "HandleStripeWebhook",
+				"responses": {
+					"204": {
+						"description": "No content"
+					}
+				},
+				"tags": [
+					"Stripe"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {}
 						}
 					}
 				}

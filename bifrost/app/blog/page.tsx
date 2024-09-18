@@ -192,6 +192,21 @@ export type BlogStructure =
 const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
+      folderName: "helicone-recap",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "prompt-engineering-tools",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "keywords-vs-helicone",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "langchain-qawolf",
     },
   },

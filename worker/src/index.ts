@@ -9,6 +9,8 @@ import { updateLoopUsers } from "./lib/managers/LoopsManager";
 import { RequestWrapper } from "./lib/RequestWrapper";
 import { ProviderName } from "./packages/cost/providers/mappings";
 import { buildRouter } from "./routers/routerFactory";
+import { ReportManager } from "./lib/managers/ReportManager";
+import { ReportStore } from "./lib/db/ReportStore";
 
 const FALLBACK_QUEUE = "fallback-queue";
 
@@ -344,26 +346,93 @@ export default {
     env: Env,
     _ctx: ExecutionContext
   ): Promise<void> {
-    const supabaseClient = createClient<Database>(
+    const supabaseClientUS = createClient<Database>(
       env.SUPABASE_URL,
       env.SUPABASE_SERVICE_ROLE_KEY
     );
+    const supabaseClientEU = createClient<Database>(
+      env.EU_SUPABASE_URL,
+      env.EU_SUPABASE_SERVICE_ROLE_KEY
+    );
     await updateLoopUsers(env);
     if (controller.cron === "0 * * * *") {
-      // Do nothing
       return;
-    } else {
-      const alertManager = new AlertManager(
-        new AlertStore(supabaseClient, new ClickhouseClientWrapper(env)),
+    }
+    if (controller.cron === "0 10 * * mon") {
+      const reportManagerUS = new ReportManager(
+        new ReportStore(
+          supabaseClientUS,
+          new ClickhouseClientWrapper({
+            CLICKHOUSE_HOST: env.CLICKHOUSE_HOST,
+            CLICKHOUSE_USER: env.CLICKHOUSE_USER,
+            CLICKHOUSE_PASSWORD: env.CLICKHOUSE_PASSWORD,
+          })
+        ),
         env
       );
 
-      const { error: checkAlertErr } = await alertManager.checkAlerts();
+      const { error: sendReportsErrUS } = await reportManagerUS.sendReports();
 
-      if (checkAlertErr) {
-        console.error(`Failed to check alerts: ${checkAlertErr}`);
+      if (sendReportsErrUS) {
+        console.error(`Failed to check reports: ${sendReportsErrUS}`);
       }
+      const reportManagerEU = new ReportManager(
+        new ReportStore(
+          supabaseClientEU,
+          new ClickhouseClientWrapper({
+            CLICKHOUSE_HOST: env.EU_CLICKHOUSE_HOST,
+            CLICKHOUSE_USER: env.EU_CLICKHOUSE_USER,
+            CLICKHOUSE_PASSWORD: env.EU_CLICKHOUSE_PASSWORD,
+          })
+        ),
+        env
+      );
+      const { error: sendReportsErrEU } = await reportManagerEU.sendReports();
+
+      if (sendReportsErrEU) {
+        console.error(`Failed to check reports: ${sendReportsErrEU}`);
+      }
+      return;
     }
+    if (controller.cron === "* * * * *") {
+      const alertManagerUS = new AlertManager(
+        new AlertStore(
+          supabaseClientUS,
+          new ClickhouseClientWrapper({
+            CLICKHOUSE_HOST: env.CLICKHOUSE_HOST,
+            CLICKHOUSE_USER: env.CLICKHOUSE_USER,
+            CLICKHOUSE_PASSWORD: env.CLICKHOUSE_PASSWORD,
+          })
+        ),
+        env
+      );
+
+      const { error: checkAlertErrUS } = await alertManagerUS.checkAlerts();
+
+      if (checkAlertErrUS) {
+        console.error(`Failed to check alerts: ${checkAlertErrUS}`);
+      }
+
+      const alertManagerEU = new AlertManager(
+        new AlertStore(
+          supabaseClientEU,
+          new ClickhouseClientWrapper({
+            CLICKHOUSE_HOST: env.EU_CLICKHOUSE_HOST,
+            CLICKHOUSE_USER: env.EU_CLICKHOUSE_USER,
+            CLICKHOUSE_PASSWORD: env.EU_CLICKHOUSE_PASSWORD,
+          })
+        ),
+        env
+      );
+
+      const { error: checkAlertErrEU } = await alertManagerEU.checkAlerts();
+
+      if (checkAlertErrEU) {
+        console.error(`Failed to check alerts: ${checkAlertErrEU}`);
+      }
+      return;
+    }
+    console.error(`Unknown cron: ${controller.cron}`);
   },
 };
 

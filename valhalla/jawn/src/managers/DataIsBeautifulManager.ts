@@ -7,7 +7,7 @@ import {
   ModelName,
   ModelUsageOverTime,
   ProviderBreakdown,
-  ProviderName,
+  OpenStatsProviderName,
   ProviderUsageOverTime,
   TTFTvsPromptLength,
   TimeSpan,
@@ -88,7 +88,7 @@ export class DataIsBeautifulManager {
       AND provider IN (${(
         Array.from(
           new Set(modelNames.map((model) => model.provider))
-        ) as ProviderName[]
+        ) as OpenStatsProviderName[]
       )
         .map((provider) => `'${provider}'`)
         .join(", ")})
@@ -502,7 +502,7 @@ export class DataIsBeautifulManager {
 
   filterModelNames(
     models: ModelName[] | undefined,
-    provider: ProviderName | undefined
+    provider: OpenStatsProviderName | undefined
   ): ModelElement[] {
     return modelNames.filter(
       (model) =>
@@ -550,7 +550,7 @@ export class DataIsBeautifulManager {
       : "";
   }
 
-  getProviderCondition(providers?: ProviderName[]): string {
+  getProviderCondition(providers?: OpenStatsProviderName[]): string {
     if (!providers || providers.length === 0) return "";
     const providerList = providers
       .map((provider) => `'${provider}'`)

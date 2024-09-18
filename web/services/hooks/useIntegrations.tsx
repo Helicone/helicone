@@ -1,8 +1,16 @@
 import { useOrg } from "@/components/layout/organizationContext";
 import useNotification from "@/components/shared/notification/useNotification";
 import { getJawnClient } from "@/lib/clients/jawn";
+import { components } from "@/lib/clients/jawnTypes/public";
 
 import { useQuery, useMutation } from "@tanstack/react-query";
+
+export type Integration = {
+  integration_name?: string;
+  settings?: components["schemas"]["Json"];
+  active?: boolean;
+  id: string;
+};
 
 type IntegrationNames = "open_pipe";
 

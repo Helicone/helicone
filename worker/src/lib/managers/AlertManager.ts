@@ -333,7 +333,7 @@ export class AlertManager {
         );
         if (emailResErr) {
           console.error(`Error sending email: ${emailResErr}`);
-          throw new Error(emailResErr); // Throw the error to catch it outside
+          return err(emailResErr);
         }
       }
     });
@@ -385,7 +385,7 @@ export class AlertManager {
         );
         if (slackResErr) {
           console.error(`Error sending slack: ${slackResErr}`);
-          throw new Error(slackResErr); // Throw the error to catch it outside
+          return err(slackResErr);
         }
       }
     });
@@ -428,15 +428,19 @@ export class AlertManager {
           blocks: JSON.stringify(slack_json.blocks),
         }),
       });
-      const data = await res.json();
-      console.log(data);
 
       if (!res.ok) {
         return err(
-          `Error sending emails: ${res.status} ${
+          `Error sending slack messages: ${res.status} ${
             res.statusText
           } ${await res.text()}`
         );
+      }
+
+      const data = (await res.json()) as { ok: boolean; error?: string };
+
+      if (!data.ok) {
+        return err(`Error sending slack messages: ${data.error}`);
       }
     }
 
