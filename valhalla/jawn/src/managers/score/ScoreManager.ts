@@ -5,7 +5,7 @@ import { dataDogClient } from "../../lib/clients/DataDogClient";
 import { KafkaProducer } from "../../lib/clients/KafkaProducer";
 import { HeliconeScoresMessage } from "../../lib/handlers/HandlerContext";
 import * as Sentry from "@sentry/node";
-import { ShutdownService } from "../../lib/shared/ShutdownService";
+import { DelayedOperationService } from "../../lib/shared/delayedOperationService";
 import { BaseManager } from "../BaseManager";
 
 type Scores = Record<string, number | boolean>;
@@ -52,7 +52,7 @@ export class ScoreManager extends BaseManager {
       console.log("Kafka is not enabled. Using score manager");
 
       // Schedule the delayed operation and register it with ShutdownService
-      const timeoutId = ShutdownService.getTimeoutId(() => {
+      const timeoutId = DelayedOperationService.getTimeoutId(() => {
         return this.handleScores(
           {
             batchId: "",
@@ -65,7 +65,7 @@ export class ScoreManager extends BaseManager {
       }, delayMs);
 
       // Register the timeout and operation with ShutdownService
-      ShutdownService.getInstance().addDelayedOperation(timeoutId, () =>
+      DelayedOperationService.getInstance().addDelayedOperation(timeoutId, () =>
         this.handleScores(
           {
             batchId: "",
@@ -92,7 +92,7 @@ export class ScoreManager extends BaseManager {
     }, delayMs);
 
     // Register the timeout and operation with ShutdownService
-    ShutdownService.getInstance().addDelayedOperation(timeoutId, () =>
+    DelayedOperationService.getInstance().addDelayedOperation(timeoutId, () =>
       this.kafkaProducer.sendScoresMessage(
         scoresMessage,
         "helicone-scores-prod"

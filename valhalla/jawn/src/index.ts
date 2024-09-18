@@ -21,7 +21,7 @@ import * as publicSwaggerDoc from "./tsoa-build/public/swagger.json";
 import { initLogs } from "./utils/injectLogs";
 import { initSentry } from "./utils/injectSentry";
 import { startConsumers } from "./workers/consumerInterface";
-import { ShutdownService } from "./lib/shared/ShutdownService";
+import { DelayedOperationService } from "./lib/shared/delayedOperationService";
 
 export const ENVIRONMENT: "production" | "development" = (process.env
   .VERCEL_ENV ?? "development") as any;
@@ -211,7 +211,7 @@ async function gracefulShutdown(signal: string) {
   server.close(async () => {
     console.log("HTTP server closed.");
 
-    await ShutdownService.getInstance().executeShutdown();
+    await DelayedOperationService.getInstance().executeShutdown();
 
     console.log("Graceful shutdown completed.");
     process.exit(0);

@@ -1,15 +1,14 @@
-export class ShutdownService {
-  private static instance: ShutdownService;
+export class DelayedOperationService {
+  private static instance: DelayedOperationService;
   private delayedOperations: Map<NodeJS.Timeout, () => Promise<any>> =
     new Map();
   private static readonly SHUTDOWN_TIMEOUT = 120000; // 120 seconds timeout
-  
 
-  public static getInstance(): ShutdownService {
-    if (!ShutdownService.instance) {
-      ShutdownService.instance = new ShutdownService();
+  public static getInstance(): DelayedOperationService {
+    if (!DelayedOperationService.instance) {
+      DelayedOperationService.instance = new DelayedOperationService();
     }
-    return ShutdownService.instance;
+    return DelayedOperationService.instance;
   }
 
   public addDelayedOperation(
@@ -57,7 +56,7 @@ export class ShutdownService {
         new Promise((_, reject) =>
           setTimeout(
             () => reject(new Error("Shutdown timed out")),
-            ShutdownService.SHUTDOWN_TIMEOUT
+            DelayedOperationService.SHUTDOWN_TIMEOUT
           )
         ),
       ]);
