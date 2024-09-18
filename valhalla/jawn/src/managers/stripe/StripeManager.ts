@@ -9,21 +9,12 @@ import { clickhouseDb } from "../../lib/db/ClickhouseWrapper";
 import { buildFilterWithAuthClickHouse } from "../../lib/shared/filters/filters";
 import { UpgradeToProRequest } from "../../controllers/public/stripeController";
 
-const proProductPrices =
-  ENVIRONMENT === "production"
-    ? {
-        "request-volume": process.env.PRICE_PROD_REQUEST_VOLUME_ID!,
-        "pro-users": process.env.PRICE_PROD_PRO_USERS_ID!,
-        prompts: process.env.PRICE_PROD_PROMPTS_ID!,
-        alerts: process.env.PRICE_PROD_ALERTS_ID!,
-      }
-    : {
-        // TEST PRODUCTS
-        "request-volume": "price_1P0zwNFeVmeixR9wkrT3DYdi",
-        "pro-users": "price_1PxwrxFeVmeixR9wUhWdnEu6",
-        prompts: "price_1PyozaFeVmeixR9wqQoIV2Ur",
-        alerts: "price_1PySmZFeVmeixR9wKEemD7jP",
-      };
+const proProductPrices = {
+  "request-volume": process.env.PRICE_PROD_REQUEST_VOLUME_ID!,
+  "pro-users": process.env.PRICE_PROD_PRO_USERS_ID!,
+  prompts: process.env.PRICE_PROD_PROMPTS_ID!,
+  alerts: process.env.PRICE_PROD_ALERTS_ID!,
+};
 
 const EARLY_ADOPTER_COUPON = "0IPsIob0";
 
