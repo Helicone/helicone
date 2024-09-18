@@ -177,7 +177,15 @@ export class StripeController extends Controller {
       throw new Error(result.error);
     }
 
-    return result.data;
+    return {
+      currency: result.data?.currency ?? null,
+      next_payment_attempt: result.data?.next_payment_attempt ?? null,
+      lines: result.data?.lines ?? null,
+      discount: result.data?.discount ?? null,
+      subtotal: result.data?.subtotal ?? 0,
+      tax: result.data?.tax ?? null,
+      total: result.data?.total ?? 0,
+    };
   }
 
   @Post("/subscription/cancel-subscription")
@@ -211,6 +219,14 @@ export class StripeController extends Controller {
     current_period_start: number;
     id: string;
     trial_end: number | null;
+    items: {
+      quantity?: number;
+      price: {
+        product: {
+          name: string | null;
+        } | null;
+      };
+    }[];
   } | null> {
     const stripeManager = new StripeManager(request.authParams);
     const result = await stripeManager.getSubscription();
@@ -220,7 +236,24 @@ export class StripeController extends Controller {
       throw new Error(result.error);
     }
 
-    return result.data;
+    if (!result.data) return null;
+
+    return {
+      status: result.data.status,
+      cancel_at_period_end: result.data.cancel_at_period_end,
+      current_period_end: result.data.current_period_end,
+      current_period_start: result.data.current_period_start,
+      id: result.data.id,
+      trial_end: result.data.trial_end,
+      items: result.data.items.data.map((item) => ({
+        quantity: item.quantity,
+        price: {
+          product: {
+            name: ((item.price.product as any)?.name ?? null) as string | null,
+          },
+        },
+      })),
+    };
   }
 
   @Post("/webhook")

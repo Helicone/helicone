@@ -4157,6 +4157,15 @@ export interface operations {
       200: {
         content: {
           "application/json": ({
+            items: ({
+                price: {
+                  product: ({
+                    name: string | null;
+                  }) | null;
+                };
+                /** Format: double */
+                quantity?: number;
+              })[];
             /** Format: double */
             trial_end: number | null;
             id: string;

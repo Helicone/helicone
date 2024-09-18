@@ -11622,6 +11622,42 @@
 							"application/json": {
 								"schema": {
 									"properties": {
+										"items": {
+											"items": {
+												"properties": {
+													"price": {
+														"properties": {
+															"product": {
+																"properties": {
+																	"name": {
+																		"type": "string",
+																		"nullable": true
+																	}
+																},
+																"required": [
+																	"name"
+																],
+																"type": "object",
+																"nullable": true
+															}
+														},
+														"required": [
+															"product"
+														],
+														"type": "object"
+													},
+													"quantity": {
+														"type": "number",
+														"format": "double"
+													}
+												},
+												"required": [
+													"price"
+												],
+												"type": "object"
+											},
+											"type": "array"
+										},
 										"trial_end": {
 											"type": "number",
 											"format": "double",
@@ -11646,6 +11682,7 @@
 										}
 									},
 									"required": [
+										"items",
 										"trial_end",
 										"id",
 										"current_period_start",

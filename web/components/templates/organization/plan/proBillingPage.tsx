@@ -108,10 +108,10 @@ export const ProPlanCard = () => {
 
   const isSubscriptionEnding = subscription.data?.data?.cancel_at_period_end;
 
-  const hasAlerts = subscription.data?.data?.items.data.some(
+  const hasAlerts = subscription.data?.data?.items?.some(
     (item: any) => item.price.product?.name === "Alerts" && item.quantity > 0
   );
-  const hasPrompts = subscription.data?.data?.items.data.some(
+  const hasPrompts = subscription.data?.data?.items?.some(
     (item: any) => item.price.product?.name === "Prompts" && item.quantity > 0
   );
 
