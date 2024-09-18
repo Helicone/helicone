@@ -62,7 +62,10 @@ export const DeleteOrgModal = (props: DeleteOrgModalProps) => {
           </button>
           <button
             onClick={async () => {
-              if (orgContext?.currentOrg?.tier === "pro-20240913") {
+              if (
+                orgContext?.currentOrg?.tier === "pro-20240913" ||
+                orgContext?.currentOrg?.tier === "growth"
+              ) {
                 setNotification(
                   "You cannot delete your organization while on the Pro plan",
                   "error"

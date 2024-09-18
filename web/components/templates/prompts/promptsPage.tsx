@@ -144,7 +144,8 @@ const PromptsPage = (props: PromptsPageProps) => {
 
   const hasAccess = useMemo(() => {
     return (
-      org?.currentOrg?.tier === "pro-20240913" &&
+      org?.currentOrg?.tier === "pro-20240913" ||
+      org?.currentOrg?.tier === "growth" ||
       (org?.currentOrg?.stripe_metadata as { addons?: { prompts?: boolean } })
         ?.addons?.prompts
     );

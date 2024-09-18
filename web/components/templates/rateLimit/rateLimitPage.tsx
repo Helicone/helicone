@@ -40,7 +40,9 @@ const RateLimitPage = (props: {}) => {
   const { properties } = useGetPropertiesV2(getPropertyFiltersV2);
 
   const org = useOrg();
-  const isPro = org?.currentOrg?.tier === "pro-20240913";
+  const isPro =
+    org?.currentOrg?.tier === "pro-20240913" ||
+    org?.currentOrg?.tier === "growth";
 
   const rateLimitFilterLeaf = {
     request_response_rmt: {
