@@ -1,7 +1,7 @@
 import {
   SupabaseClient,
   User,
-  createServerSupabaseClient,
+  createPagesServerClient,
 } from "@supabase/auth-helpers-nextjs";
 import { Database } from "../../supabase/database.types";
 import {
@@ -26,7 +26,7 @@ export class SupabaseServerWrapper<T> {
   constructor(ctx: SSRContext<T>, options?: SupabaseServerWrapperOptions) {
     const supabaseUrl = options?.supabaseUrl ?? serverSupabaseUrl ?? "";
     this.ctx = ctx;
-    this.client = createServerSupabaseClient<Database>(ctx, {
+    this.client = createPagesServerClient<Database>(ctx, {
       supabaseUrl,
     });
   }

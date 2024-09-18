@@ -1,4 +1,4 @@
-import { createBrowserSupabaseClient } from "@supabase/auth-helpers-nextjs";
+import { createPagesBrowserClient } from "@supabase/auth-helpers-nextjs";
 import { SessionContextProvider } from "@supabase/auth-helpers-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AppProps } from "next/app";
@@ -54,7 +54,7 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
   const queryClient = new QueryClient();
 
   // Create a new supabase browser client on every first render.
-  const [supabaseClient] = useState(() => createBrowserSupabaseClient());
+  const [supabaseClient] = useState(() => createPagesBrowserClient());
 
   const getLayout = Component.getLayout ?? ((page) => page);
 

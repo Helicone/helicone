@@ -28,6 +28,7 @@ const SignUp = () => {
   }, [router.query]);
 
   if (user && user.email !== DEMO_EMAIL) {
+    console.log("we are here");
     router.push(`/welcome`);
   }
 
@@ -47,7 +48,7 @@ const SignUp = () => {
             email: email,
             password: password,
             options: {
-              emailRedirectTo: `${origin}/welcome`,
+              emailRedirectTo: `${origin}/api/auth/callback`,
             },
           });
 
