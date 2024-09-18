@@ -6,6 +6,7 @@ import { KafkaProducer } from "../../lib/clients/KafkaProducer";
 import { HeliconeScoresMessage } from "../../lib/handlers/HandlerContext";
 import * as Sentry from "@sentry/node";
 import { ShutdownService } from "../../lib/shared/ShutdownService";
+import { BaseManager } from "../BaseManager";
 
 type Scores = Record<string, number | boolean>;
 const delayMs = 10 * 60 * 1000; // 10 minutes in milliseconds
@@ -14,11 +15,12 @@ export interface ScoreRequest {
   scores: Scores;
 }
 
-export class ScoreManager {
+export class ScoreManager extends BaseManager {
   private scoreStore: ScoreStore;
   private kafkaProducer: KafkaProducer;
 
-  constructor(private authParams: AuthParams) {
+  constructor(authParams: AuthParams) {
+    super(authParams);
     this.scoreStore = new ScoreStore(authParams.organizationId);
     this.kafkaProducer = new KafkaProducer();
   }
