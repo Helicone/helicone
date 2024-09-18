@@ -1,5 +1,5 @@
 import { Worker } from "worker_threads";
-import { ShutdownManager } from "../managers/shutdown/ShutdownService";
+import { ShutdownService } from "../managers/shutdown/ShutdownService";
 
 export class ConsumerManager {
   private static instance: ConsumerManager;
@@ -7,7 +7,7 @@ export class ConsumerManager {
 
   private constructor() {
     // Register shutdown handler
-    ShutdownManager.getInstance().addHandler(() => this.shutdown());
+    ShutdownService.getInstance().addHandler(() => this.shutdown());
   }
 
   public static getInstance(): ConsumerManager {
