@@ -1,6 +1,6 @@
 export type LlmType = "chat" | "completion";
 
-interface Message {
+interface ChatMessage {
   role?: string;
   content?: string;
   function_call?: FunctionCall;
@@ -28,7 +28,7 @@ interface Request {
   best_of?: number | null;
   logit_bias?: object | null;
   user?: string | null;
-  messages?: Message[] | null;
+  messages?: ChatMessage[] | null;
   // Truncated state fields
   tooLarge?: boolean;
   heliconeMessage?: string;
@@ -40,7 +40,7 @@ interface ErrorInfo {
 
 interface Response {
   completions?: Record<number, string> | null;
-  message?: Message | null;
+  message?: ChatMessage | null;
   error?: ErrorInfo | null;
   model?: string | null;
   // Truncated state fields

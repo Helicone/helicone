@@ -358,6 +358,18 @@ export class OrganizationManager extends BaseManager {
     return ok(layout);
   }
 
+  async getMemberCount(): Promise<Result<number, string>> {
+    const { data: members, error: membersError } =
+      await this.organizationStore.getOrganizationMembers(
+        this.authParams.organizationId
+      );
+
+    if (membersError !== null) {
+      return err(membersError);
+    }
+    return ok(members.length);
+  }
+
   async getOrganizationMembers(
     organizationId: string
   ): Promise<Result<OrganizationMember[], string>> {
