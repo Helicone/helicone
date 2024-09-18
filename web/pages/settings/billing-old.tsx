@@ -3,6 +3,7 @@ import AuthLayout from "../../components/layout/auth/authLayout";
 import { ReactElement } from "react";
 import OrgPlanPage from "../../components/templates/organization/plan/orgPlanPage";
 import { useOrg } from "../../components/layout/organizationContext";
+import SettingsLayout from "@/components/templates/settings/settingsLayout";
 
 const PlanSettings: NextPageWithLayout = () => {
   const orgContext = useOrg();
@@ -12,7 +13,11 @@ const PlanSettings: NextPageWithLayout = () => {
 };
 
 PlanSettings.getLayout = function getLayout(page: ReactElement) {
-  return <AuthLayout>{page}</AuthLayout>;
+  return (
+    <AuthLayout>
+      <SettingsLayout>{page}</SettingsLayout>
+    </AuthLayout>
+  );
 };
 
 export default PlanSettings;

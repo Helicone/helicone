@@ -22,15 +22,10 @@ import { NavigationItem } from "./DesktopSidebar";
 
 interface MobileNavigationProps {
   NAVIGATION: NavigationItem[];
-  setReferOpen: (open: boolean) => void;
   setOpen: (open: boolean) => void;
 }
 
-const MobileNavigation = ({
-  NAVIGATION,
-  setReferOpen,
-  setOpen,
-}: MobileNavigationProps) => {
+const MobileNavigation = ({ NAVIGATION, setOpen }: MobileNavigationProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const router = useRouter();
   const supabaseClient = useSupabaseClient<Database>();

@@ -6,6 +6,7 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { ChevronRightIcon } from "@heroicons/react/24/outline";
+import { Triangle } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
@@ -82,18 +83,23 @@ const NavItem: React.FC<NavItemProps> = ({
   }
 
   return (
-    <div className={cn(isSubItem && "ml-[28px]")}>
+    <div className={cn(isSubItem)}>
       <Link
         href={hasSubItems ? "#" : link.href}
         onClick={hasSubItems ? () => toggleExpand(link.name) : undefined}
         className={cn(
-          buttonVariants({
-            variant: link.current ? "secondary" : "ghost",
-            size: link.icon ? "sm" : "xs",
-          }),
-          "justify-start w-full",
-          hasSubItems && "flex items-center justify-between",
-          link.icon || "font-light text-gray-600"
+          hasSubItems
+            ? "flex items-center gap-1 font-medium text-gray-400 text-xs mt-[10px] text-[11px]"
+            : cn(
+                buttonVariants({
+                  variant: link.current ? "secondary" : "ghost",
+                  size: "xs",
+                }),
+                "h-6",
+                "justify-start w-full",
+                "text-sm font-medium my-[2px] text-[12px]"
+              ),
+          ""
         )}
       >
         <div className="flex items-center">
@@ -110,7 +116,7 @@ const NavItem: React.FC<NavItemProps> = ({
         {hasSubItems && (
           <ChevronRightIcon
             className={cn(
-              "h-4 w-4 transition-transform",
+              "h-3 w-3 transition-transform fill-gray-400",
               expandedItems.includes(link.name) && "rotate-90"
             )}
           />

@@ -33,8 +33,8 @@ export const FeatureUpgradeCard: React.FC<FeatureUpgradeCardProps> = ({
   return (
     <Card className="max-w-2xl">
       <CardHeader>
-        <CardTitle>{title}</CardTitle>
-        <p className="text-sm text-muted-foreground text-gray-500">
+        <CardTitle className="text-lg font-medium">{title}</CardTitle>
+        <p className="text-sm text-muted-foreground text-slate-400">
           {description}
         </p>
       </CardHeader>

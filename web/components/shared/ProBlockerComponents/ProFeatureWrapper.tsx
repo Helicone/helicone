@@ -24,6 +24,10 @@ const descriptions = {
     "The Free plan does not include the Datasets feature, but getting access is easy.",
   Alerts:
     "Stay on top of critical issues by receiving real-time alerts directly to your Slack workspace or email. ",
+  time_filter:
+    "Free plan users can only access data up to 30 days old. Upgrade to Pro for unlimited access to 3m+ data.",
+  invite:
+    "The Free plan does not allow you to invite members to your organization. Upgrade to Pro to invite your team members.",
 };
 
 export const ProFeatureWrapper = forwardRef<

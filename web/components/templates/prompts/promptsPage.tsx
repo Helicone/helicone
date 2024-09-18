@@ -149,28 +149,22 @@ const PromptsPage = (props: PromptsPageProps) => {
           title={
             <div className="flex items-center gap-2">
               Prompts <HcBadge title="Beta" size="sm" />
-              <InfoBox className="ml-4">
-                <p className="text-sm font-medium flex gap-2">
-                  <b>Need to create new prompts?</b>
-                  <ProFeatureWrapper featureName="Prompts">
-                    <button className="underline">
-                      Get unlimited prompts & more.
-                    </button>
-                  </ProFeatureWrapper>
-                </p>
-              </InfoBox>
+              {hasLimitedAccess && (
+                <InfoBox className="ml-4">
+                  <p className="text-sm font-medium flex gap-2">
+                    <b>Need to create new prompts?</b>
+                    <ProFeatureWrapper featureName="Prompts">
+                      <button className="underline">
+                        Get unlimited prompts & more.
+                      </button>
+                    </ProFeatureWrapper>
+                  </p>
+                </InfoBox>
+              )}
             </div>
           }
         />
-        {hasLimitedAccess && (
-          <p className="flex flex-row w-full mt-16 justify-center items-center whitespace-nowrap">
-            You have limited access to prompts. Please
-            <Link href="/settings/billing" className="underline mx-1">
-              upgrade
-            </Link>
-            to access all features.
-          </p>
-        )}
+
         <div className="flex flex-col space-y-4 w-full py-2">
           {isLoading ? (
             <div className="flex flex-col w-full mt-16 justify-center items-center">
@@ -523,9 +517,11 @@ const chatCompletion = await openai.chat.completions.create(
                           }`}
                         />
                       </Button>
-                      {showPricingCompare && (
-                        <PricingCompare featureName="Prompts" />
-                      )}
+                      <div className="w-full">
+                        {showPricingCompare && (
+                          <PricingCompare featureName="Prompts" />
+                        )}
+                      </div>
                       <div className="space-x-2 mt-5">
                         <Button variant="outline" asChild>
                           <Link href="https://docs.helicone.ai/features/prompts">

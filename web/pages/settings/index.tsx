@@ -1,18 +1,28 @@
 import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
 import { NextPageWithLayout } from "../_app";
-import SettingsPage from "../../components/templates/settings/settingsPage";
+
 import AuthLayout from "../../components/layout/auth/authLayout";
 import { SupabaseServerWrapper } from "../../lib/wrappers/supabase";
 import { ReactElement } from "react";
+import SettingsLayout from "@/components/templates/settings/settingsLayout";
+import OrgSettingsPage from "@/components/templates/organization/settings/orgSettingsPage";
+import { useOrg } from "@/components/layout/organizationContext";
 
 const Settings: NextPageWithLayout<
   InferGetServerSidePropsType<typeof getServerSideProps>
 > = () => {
-  return <SettingsPage />;
+  const orgContext = useOrg();
+  return orgContext?.currentOrg ? (
+    <OrgSettingsPage org={orgContext.currentOrg} />
+  ) : null;
 };
 
 Settings.getLayout = function getLayout(page: ReactElement) {
-  return <AuthLayout>{page}</AuthLayout>;
+  return (
+    <AuthLayout>
+      <SettingsLayout>{page}</SettingsLayout>
+    </AuthLayout>
+  );
 };
 
 export default Settings;

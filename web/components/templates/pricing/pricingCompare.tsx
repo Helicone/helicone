@@ -54,7 +54,10 @@ export const PricingCompare = ({
           <a href="#" className="text-sm text-blue-600 mt-2 block">
             See all features →
           </a>
-          <UpgradeToProCTA defaultPrompts={featureName === "Prompts"} />
+          <UpgradeToProCTA
+            defaultPrompts={featureName === "Prompts"}
+            showAddons={featureName === "Prompts"}
+          />
         </div>
       </div>
     </>

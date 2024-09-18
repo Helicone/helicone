@@ -260,7 +260,7 @@ const ThemedTimeFilter = (props: ThemedTimeFilterProps) => {
 
       {timeFilterOptions.map((option, idx) =>
         ["3M", "All"].includes(option.value) ? (
-          <ProFeatureWrapper featureName="Advanced Analytics" key={option.key}>
+          <ProFeatureWrapper featureName="time_filter" key={option.key}>
             <button
               key={option.key}
               type="button"

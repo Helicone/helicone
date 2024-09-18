@@ -26,11 +26,9 @@ import CreateOrgForm, {
 } from "../templates/organization/createOrgForm";
 import { useOrg } from "./organizationContext";
 
-interface OrgDropdownProps {
-  setReferOpen: (open: boolean) => void;
-}
+interface OrgDropdownProps {}
 
-export default function OrgDropdown({ setReferOpen }: OrgDropdownProps) {
+export default function OrgDropdown({}: OrgDropdownProps) {
   const orgContext = useOrg();
   const user = useUser();
   const [createOpen, setCreateOpen] = useState(false);

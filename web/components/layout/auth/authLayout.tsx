@@ -24,8 +24,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
   const router = useRouter();
   const { pathname } = router;
   const org = useOrg();
-  const tier = org?.currentOrg?.tier;
-  const [referOpen, setReferOpen] = useState(false);
+
   const [open, setOpen] = useState(false);
 
   const currentPage = useMemo(() => {
@@ -50,11 +49,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
         <DemoModal />
         <Row className="flex-col md:flex-row">
           <div className=" w-full md:w-min ">
-            <Sidebar
-              tier={tier ?? ""}
-              setReferOpen={setReferOpen}
-              setOpen={setOpen}
-            />
+            <Sidebar setOpen={setOpen} />
           </div>
           <div className="flex-grow max-w-full overflow-hidden">
             <MainContent banner={banner} pathname={pathname}>
@@ -63,7 +58,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
           </div>
         </Row>
       </div>
-      <ReferralModal open={referOpen} setOpen={setReferOpen} />
+
       <UpgradeProModal open={open} setOpen={setOpen} />
     </MetaData>
   );

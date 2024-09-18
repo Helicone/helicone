@@ -78,7 +78,7 @@ const OrgMembersPage = (props: OrgMembersPageProps) => {
             <h3 className="text-lg font-semibold">Members</h3>
 
             <div className="flex flex-row space-x-4">
-              <ProFeatureWrapper featureName="Invite Members">
+              <ProFeatureWrapper featureName="invite">
                 <button
                   onClick={() => {
                     setAddOpen(true);

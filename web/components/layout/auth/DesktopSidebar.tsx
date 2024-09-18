@@ -11,6 +11,7 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   CloudArrowUpIcon,
+  Cog6ToothIcon,
   QuestionMarkCircleIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
@@ -18,6 +19,8 @@ import { useRouter } from "next/router";
 import { useOrg } from "../organizationContext";
 import OrgDropdown from "../orgDropdown";
 import NavItem from "./NavItem";
+import { InfoBox } from "@/components/ui/helicone/infoBox";
+import { useMemo } from "react";
 
 export interface NavigationItem {
   name: string;
@@ -30,15 +33,11 @@ export interface NavigationItem {
 
 interface SidebarProps {
   NAVIGATION: NavigationItem[];
-  setReferOpen: (open: boolean) => void;
+
   setOpen: (open: boolean) => void;
 }
 
-const DesktopSidebar = ({
-  NAVIGATION,
-  setReferOpen,
-  setOpen,
-}: SidebarProps) => {
+const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
   const org = useOrg();
   const tier = org?.currentOrg?.tier;
   const router = useRouter();
@@ -60,26 +59,30 @@ const DesktopSidebar = ({
         : [...prev, name]
     );
   };
+  const largeWith = useMemo(
+    () => cn(isCollapsed ? "w-16" : "w-52"),
+    [isCollapsed]
+  );
 
   return (
     <>
       <div
         className={cn(
           "hidden md:block",
-          isCollapsed ? "w-16" : "w-56",
+          largeWith,
           "transition-all duration-300"
         )}
       />
       <div
         className={cn(
           "hidden md:flex md:flex-col z-30 bg-background dark:bg-gray-900 transition-all duration-300 h-screen bg-white pb-4",
-          isCollapsed ? "md:w-16" : "md:w-56",
+          largeWith,
           "fixed top-0 left-0" // Changed from "sticky top-0" to "fixed top-0 left-0"
         )}
       >
         <div className="w-full flex flex-grow flex-col overflow-y-auto border-r dark:border-gray-700 justify-between">
           <div className="flex items-center gap-2 h-14 border-b dark:border-gray-700">
-            {!isCollapsed && <OrgDropdown setReferOpen={setReferOpen} />}
+            {!isCollapsed && <OrgDropdown />}
             <div className={cn("mx-auto", !isCollapsed && "mr-2")}>
               <Button
                 variant="ghost"
@@ -95,7 +98,6 @@ const DesktopSidebar = ({
               </Button>
             </div>
           </div>
-
           <div className="flex flex-grow flex-col">
             {((!isCollapsed &&
               org?.currentOrg?.organization_type === "reseller") ||
@@ -138,7 +140,24 @@ const DesktopSidebar = ({
               </nav>
             </div>
           </div>
-
+          {!isCollapsed && (
+            <div className="p-2">
+              <InfoBox icon={() => <></>} className="flex flex-col">
+                <div>
+                  <span className="text-[#1c4ed8] text-xs font-semibold font-['Inter'] leading-tight">
+                    Early Adopter Exclusive: $300 Credit for the year. <br />
+                  </span>
+                  <span className="text-[#1c4ed8] text-xs font-light font-['Inter'] leading-tight">
+                    Switch to Pro and get $25/mo credit on requests exceeding
+                    100k, as a thank you for your early support!{" "}
+                  </span>
+                </div>
+                <Button className="bg-blue-700 mt-[10px] text-xs" size="xs">
+                  <Link href="/settings/billing">Upgrade to Pro</Link>
+                </Button>
+              </InfoBox>
+            </div>
+          )}
           <div className="mt-auto">
             {isCollapsed ? (
               <>
@@ -196,7 +215,7 @@ const DesktopSidebar = ({
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="w-full justify-start dark:hover:bg-gray-800"
+                  className="w-full justify-start dark:hover:bg-gray-800 text-[12px]"
                   asChild
                 >
                   <Link
@@ -206,32 +225,31 @@ const DesktopSidebar = ({
                     className="px-2"
                   >
                     <BookOpenIcon className="h-4 w-4 mr-2" />
-                    View Documentation
+                    Documentation
                   </Link>
                 </Button>
+
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="w-full justify-start dark:hover:bg-gray-800"
+                  className="w-full justify-start dark:hover:bg-gray-800 text-[12px]"
                   asChild
                 >
                   <Link
-                    href="https://discord.gg/zsSTcH2qhG"
-                    target="_blank"
+                    href="/settings"
                     rel="noopener noreferrer"
                     className="px-2"
                   >
-                    <QuestionMarkCircleIcon className="h-4 w-4 mr-2" />
-                    Help And Support
+                    <Cog6ToothIcon className="h-4 w-4 mr-2" />
+                    Settings
                   </Link>
                 </Button>
               </>
             )}
           </div>
-
           {tier === "free" &&
             org?.currentOrg?.organization_type !== "customer" && (
-              <div className={cn("p-4", isCollapsed && "hidden")}>
+              <div className={cn("p-2", isCollapsed && "hidden")}>
                 <Link href="/settings/billing">
                   <Button
                     variant="outline"
@@ -242,7 +260,7 @@ const DesktopSidebar = ({
                       <span>Free Plan</span>
                     </div>
                     <span className="text-xs font-normal text-primary dark:text-gray-300">
-                      Learn More
+                      Upgrade
                     </span>
                   </Button>
                 </Link>
