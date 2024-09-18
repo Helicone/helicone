@@ -13,6 +13,7 @@ import {
 import Stripe from "stripe";
 import { JawnAuthenticatedRequest } from "../../types/request";
 import { StripeManager } from "../../managers/stripe/StripeManager";
+import { Result } from "../../lib/shared/result";
 
 export interface UpgradeToProRequest {
   addons?: {
@@ -148,7 +149,26 @@ export class StripeController extends Controller {
   @Get("/subscription/preview-invoice")
   public async previewInvoice(
     @Request() request: JawnAuthenticatedRequest
-  ): Promise<any> {
+  ): Promise<{
+    currency: string | null;
+    next_payment_attempt: number | null;
+    lines: {
+      data: {
+        id: string | null;
+        amount: number | null;
+        description: string | null;
+      }[];
+    } | null;
+    discount: {
+      coupon: {
+        name: string | null;
+        percent_off: number | null;
+      };
+    } | null;
+    subtotal: number;
+    tax: number;
+    total: number;
+  } | null> {
     const stripeManager = new StripeManager(request.authParams);
     const result = await stripeManager.getUpcomingInvoice();
 
@@ -184,7 +204,13 @@ export class StripeController extends Controller {
   @Get("/subscription")
   public async getSubscription(
     @Request() request: JawnAuthenticatedRequest
-  ): Promise<any> {
+  ): Promise<{
+    status: string;
+    cancel_at_period_end: boolean;
+    current_period_end: number;
+    current_period_start: number;
+    id: string;
+  } | null> {
     const stripeManager = new StripeManager(request.authParams);
     const result = await stripeManager.getSubscription();
 

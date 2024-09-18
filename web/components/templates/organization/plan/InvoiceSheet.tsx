@@ -61,13 +61,13 @@ export const InvoiceSheet: React.FC = () => {
               <div className="text-sm text-gray-500">
                 Due Date:{" "}
                 {new Date(
-                  upcomingInvoice.data.data.next_payment_attempt * 1000
+                  upcomingInvoice.data.data.next_payment_attempt! * 1000
                 ).toLocaleDateString()}
               </div>
               <div className="border-t pt-4">
                 <h3 className="font-semibold mb-2">Line Items:</h3>
                 <div className="space-y-3">
-                  {upcomingInvoice.data.data.lines.data.map(
+                  {upcomingInvoice.data.data.lines?.data.map(
                     (item: any, index: number) => (
                       <div
                         key={index}
