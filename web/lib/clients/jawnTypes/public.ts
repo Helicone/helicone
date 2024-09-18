@@ -4326,7 +4326,7 @@ export interface operations {
             /** Format: double */
             total: number;
             /** Format: double */
-            tax: number;
+            tax: number | null;
             /** Format: double */
             subtotal: number;
             discount: ({
@@ -4375,7 +4375,9 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": {
+          "application/json": ({
+            /** Format: double */
+            trial_end: number | null;
             id: string;
             /** Format: double */
             current_period_start: number;
@@ -4383,7 +4385,7 @@ export interface operations {
             current_period_end: number;
             cancel_at_period_end: boolean;
             status: string;
-          } | null;
+          }) | null;
         };
       };
     };

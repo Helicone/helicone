@@ -98,7 +98,9 @@ export const InvoiceSheet: React.FC = () => {
                 </div>
                 <div className="flex justify-between items-center text-sm">
                   <span>Tax:</span>
-                  <span>{formatCurrency(upcomingInvoice.data.data.tax)}</span>
+                  <span>
+                    {formatCurrency(upcomingInvoice.data.data.tax ?? 0)}
+                  </span>
                 </div>
                 <div className="flex justify-between items-center font-semibold">
                   <span>Total:</span>

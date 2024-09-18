@@ -11995,7 +11995,8 @@
 										},
 										"tax": {
 											"type": "number",
-											"format": "double"
+											"format": "double",
+											"nullable": true
 										},
 										"subtotal": {
 											"type": "number",
@@ -12159,6 +12160,11 @@
 							"application/json": {
 								"schema": {
 									"properties": {
+										"trial_end": {
+											"type": "number",
+											"format": "double",
+											"nullable": true
+										},
 										"id": {
 											"type": "string"
 										},
@@ -12178,6 +12184,7 @@
 										}
 									},
 									"required": [
+										"trial_end",
 										"id",
 										"current_period_start",
 										"current_period_end",

@@ -166,7 +166,7 @@ export class StripeController extends Controller {
       };
     } | null;
     subtotal: number;
-    tax: number;
+    tax: number | null;
     total: number;
   } | null> {
     const stripeManager = new StripeManager(request.authParams);
@@ -210,6 +210,7 @@ export class StripeController extends Controller {
     current_period_end: number;
     current_period_start: number;
     id: string;
+    trial_end: number | null;
   } | null> {
     const stripeManager = new StripeManager(request.authParams);
     const result = await stripeManager.getSubscription();
