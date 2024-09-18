@@ -4,7 +4,7 @@ import { Row } from "@/components/common/row";
 
 const ScaleCard = () => {
   return (
-    <div className="bg-white h-[300px] w-full rounded-lg border-[#0CA5EA] border-2">
+    <div className="bg-white h-[300px] w-full rounded-lg border-brand border-2">
       <Col className="h-full">
         <Col className="py-[36px] px-[24px] justify-between h-full">
           <h1>
@@ -14,7 +14,7 @@ const ScaleCard = () => {
         </Col>
         <Row className="w-full h-[72px] px-[24px] items-center justify-between border-t">
           <span>Scale</span>
-          <Button className="bg-[#0CA5EA] text-white">Upgrade now</Button>
+          <Button className="bg-brand text-white">Upgrade now</Button>
         </Row>
       </Col>
     </div>

@@ -9,7 +9,6 @@ import {
   XMarkIcon,
 } from "@heroicons/react/20/solid";
 import { LockClosedIcon, LockOpenIcon } from "@heroicons/react/24/outline";
-import { useState } from "react";
 
 interface FeatureRowProps {
   title: string;
@@ -45,7 +44,7 @@ const FeatureRow: React.FC<FeatureRowProps> = ({
                 <div
                   className={clsx(
                     "px-[12px] py-[4px] rounded-[3px] text-[14px] font-medium",
-                    "bg-[#E7F6FD] text-[#0CA5EA]  "
+                    "bg-[#E7F6FD] text-brand"
                   )}
                 >
                   full access
@@ -65,9 +64,9 @@ const FeatureRow: React.FC<FeatureRowProps> = ({
               </>
             ))}
         </Row>
-        <p className="text-[#7D7D7D]">{description}</p>
+        <p className="text-slate-500">{description}</p>
       </Col>
-      <Row className="items-center gap-[4px] text-[#0CA5EA]">
+      <Row className="items-center gap-[4px] text-brand">
         <div>How we calculate this</div>
         <ChevronDownIcon className="w-5 h-5" />
       </Row>
@@ -79,12 +78,12 @@ const FeatureRow: React.FC<FeatureRowProps> = ({
       )}
     >
       {isAvailable ? (
-        <CheckIcon className="w-5 h-5 text-[#6AA84F]" />
+        <CheckIcon className="w-6 h-6 text-[#6AA84F]" />
       ) : (
-        <XMarkIcon className="w-5 h-5 text-red-500" />
+        <XMarkIcon className="w-6 h-6 text-red-500" />
       )}
       {amount && (
-        <div className="flex flex-col gap-[4px] text-[#7D7D7D]">
+        <div className="flex flex-col gap-[4px] text-slate-500">
           <h3 className="text-[14px]">
             <b className="text-[18px] text-black font-bold">{amount}</b> {unit}
           </h3>
@@ -101,178 +100,149 @@ const FeatureRow: React.FC<FeatureRowProps> = ({
 );
 
 export default function PricingComparisonTable() {
-  const [isAnnual, setIsAnnual] = useState(true);
-
-  const [selectedPlan, setSelectedPlan] = useState("developer");
-
   return (
     <div className="flex flex-col max-w-6xl mx-auto space-y-8 py-16 w-full">
-      <h2 className="text-lg sm:text-2xl font-bold tracking-tight max-w-4xl pt-8">
-        Compare plans
-      </h2>
-
-      <Tabs
-        defaultValue="developer"
-        className="w-full"
-        value={selectedPlan}
-        onValueChange={setSelectedPlan}
-      >
-        <Row className="justify-between items-center">
-          <TabsList>
-            <TabsTrigger value="developer">Developer</TabsTrigger>
-            <TabsTrigger value="team">Team</TabsTrigger>
-          </TabsList>
-          {selectedPlan === "team" ? (
-            <div className="text-sm flex items-center gap-2">
-              <span>Monthly</span>
-              <Switch
-                className="data-[state=checked]:bg-[#0CA5EA] data-[state=unchecked]:bg-gray-300"
-                checked={isAnnual}
-                onCheckedChange={setIsAnnual}
+      <h3 className="text-[36px] font-bold">Compare plans</h3>
+      <div className="w-full overflow-x-auto">
+        <div className="min-w-[800px]">
+          <Col className="rounded-lg border">
+            <Row className="justify-between p-[24px] bg-[#F9F9F9] items-center">
+              <h1 className="text-2xl font-bold">Developer plan</h1>
+              <div className="text-2xl font-bold text-black">Free</div>
+            </Row>
+            <div className="grid grid-cols-[1fr,auto] divide-x divide-y border-t divide-slate-200">
+              <FeatureRow
+                title="Dashboard"
+                description="Visualize your LLM analytics, and watch your AI app improve."
+                isAvailable={true}
               />
-              <span>Annual</span>
-              <span className="text-gray-500">(Save $120)</span>
+              <FeatureRow
+                title="Requests"
+                description="First 10,000 requests free - every month!"
+                isAvailable={true}
+                amount="10k"
+                unit="/mo"
+                additionalInfo="$0.001 per request"
+              />
+              <FeatureRow
+                title="Prompts"
+                description="Requests individual requests logged within the Helicone platform. Blah blah blah this."
+                isAvailable={false}
+                fullAccess={true}
+                amount="3"
+                unit="/mo"
+                additionalInfo="$0.001 per prompt"
+              />
+              <FeatureRow
+                title="Exported requests"
+                description="Requests individual requests logged within the Helicone platform. Blah blah blah this."
+                isAvailable={false}
+                fullAccess={true}
+                amount="5k"
+                unit="/mo"
+                additionalInfo="$0.001 per requests"
+              />
+              <FeatureRow
+                title="Evals"
+                description="Requests individual requests logged within the Helicone platform. Blah blah blah this."
+                isAvailable={false}
+                fullAccess={true}
+                amount="1k"
+                unit="/mo"
+                additionalInfo="$0.001 per requests"
+              />
+              <FeatureRow
+                title="Datasets"
+                description="Requests individual requests logged within the Helicone platform. Blah blah blah this."
+                isAvailable={false}
+                fullAccess={true}
+                amount="1k"
+                unit="/mo"
+                additionalInfo="$0.001 per requests"
+              />
             </div>
-          ) : null}
-        </Row>
-        <TabsContent value="developer">
-          <div className="w-full overflow-x-auto">
-            <div className="min-w-[800px]">
-              <Col className="rounded-lg border">
-                <Row className="justify-between p-[24px] bg-[#F9F9F9] items-center">
-                  <h1 className="text-2xl font-bold">Developer plan</h1>
-                  <div className="text-2xl font-bold text-black">Free</div>
+          </Col>
+        </div>
+      </div>
+      <div className="w-full overflow-x-auto bg-white">
+        <div className="min-w-[800px]">
+          <Col className="rounded-lg border">
+            <Row className="justify-between p-[24px] bg-[#F9F9F9] items-center">
+              <h1 className="text-2xl font-bold">Team plan</h1>
+              <Row className="items-center gap-[8px]">
+                <Row className="text-[18px] text-black font-semibold line-through">
+                  $50/mo
                 </Row>
-                <div className="grid grid-cols-[1fr,auto] divide-x divide-y border-t">
-                  <FeatureRow
-                    title="Dashboard"
-                    description="Visualize your LLM analytics, and watch your AI app improve."
-                    isAvailable={true}
-                  />
-                  <FeatureRow
-                    title="Requests"
-                    description="First 10,000 requests free - every month!"
-                    isAvailable={true}
-                    amount="10k"
-                    unit="/mo"
-                    additionalInfo="$0.001 per request"
-                  />
-                  <FeatureRow
-                    title="Prompts"
-                    description="Requests individual requests logged within the Helicone platform. Blah blah blah this."
-                    isAvailable={false}
-                    fullAccess={true}
-                    amount="3"
-                    unit="/mo"
-                    additionalInfo="$0.001 per prompt"
-                  />
-                  <FeatureRow
-                    title="Exported requests"
-                    description="Requests individual requests logged within the Helicone platform. Blah blah blah this."
-                    isAvailable={false}
-                    fullAccess={true}
-                    amount="5k"
-                    unit="/mo"
-                    additionalInfo="$0.001 per requests"
-                  />
-                  <FeatureRow
-                    title="Evals"
-                    description="Requests individual requests logged within the Helicone platform. Blah blah blah this."
-                    isAvailable={false}
-                    fullAccess={true}
-                    amount="1k"
-                    unit="/mo"
-                    additionalInfo="$0.001 per requests"
-                  />
-                  <FeatureRow
-                    title="Datasets"
-                    description="Requests individual requests logged within the Helicone platform. Blah blah blah this."
-                    isAvailable={false}
-                    fullAccess={true}
-                    amount="1k"
-                    unit="/mo"
-                    additionalInfo="$0.001 per requests"
-                  />
-                </div>
-              </Col>
-            </div>
-          </div>
-        </TabsContent>
-        <TabsContent value="team">
-          <div className="w-full overflow-x-auto bg-white">
-            <div className="min-w-[800px]">
-              <Col className="rounded-lg border">
-                <Row className="justify-between p-[24px] bg-[#F9F9F9] items-center">
-                  <h1 className="text-2xl font-bold">Team plan</h1>
-                  <Row className="items-center gap-[8px]">
-                    <Row className="text-[18px] text-black font-semibold line-through">
-                      {isAnnual ? "$50/mo" : ""}
-                    </Row>
-                    <Row className="text-[36px] font-extrabold text-[#0CA5EA] items-center">
-                      <Row>
-                        <span className="text-[24px] pt-[7px]">$</span>
-                        {isAnnual ? "40" : "50"}
-                      </Row>
-                      <span className="text-[18px]">/mo</span>
-                    </Row>
+                <Row className="text-[36px] font-extrabold items-center">
+                  <Row>
+                    <span
+                      className="text-[24px] pt-[4px]"
+                      style={{ color: "black" }}
+                    >
+                      $
+                    </span>
+                    <span style={{ color: "black" }}>{"50"}</span>
                   </Row>
+                  <span className="text-[18px]" style={{ color: "black" }}>
+                    /mo
+                  </span>
                 </Row>
-                <div className="grid grid-cols-[1fr,auto] divide-x divide-y border-t">
-                  <FeatureRow
-                    title="Dashboard"
-                    description="Visualize your LLM analytics, and watch your AI app improve."
-                    isAvailable={true}
-                  />
-                  <FeatureRow
-                    title="Requests"
-                    description="First 10,000 requests free - every month!"
-                    isAvailable={true}
-                    amount="10k"
-                    unit="/mo"
-                    additionalInfo="$0.65 per 10k requests"
-                  />
-                  <FeatureRow
-                    title="Prompts"
-                    description="Requests individual requests logged within the Helicone platform. Blah blah blah this."
-                    isAvailable={true}
-                    fullAccess={true}
-                    amount="3"
-                    unit="/mo"
-                    additionalInfo="$0.001 per prompt"
-                  />
-                  <FeatureRow
-                    title="Exported requests"
-                    description="Requests individual requests logged within the Helicone platform. Blah blah blah this."
-                    isAvailable={true}
-                    fullAccess={true}
-                    amount="5k"
-                    unit="/mo"
-                    additionalInfo="$0.001 per requests"
-                  />
-                  <FeatureRow
-                    title="Evals"
-                    description="Requests individual requests logged within the Helicone platform. Blah blah blah this."
-                    isAvailable={true}
-                    fullAccess={true}
-                    amount="1k"
-                    unit="/mo"
-                    additionalInfo="$0.001 per requests"
-                  />
-                  <FeatureRow
-                    title="Datasets"
-                    description="Requests individual requests logged within the Helicone platform. Blah blah blah this."
-                    isAvailable={true}
-                    fullAccess={true}
-                    amount="1k"
-                    unit="/mo"
-                    additionalInfo="$0.001 per requests"
-                  />
-                </div>
-              </Col>
+              </Row>
+            </Row>
+            <div className="grid grid-cols-[1fr,auto] divide-x divide-y border-t divide-slate-200">
+              <FeatureRow
+                title="Dashboard"
+                description="Visualize your LLM analytics, and watch your AI app improve."
+                isAvailable={true}
+              />
+              <FeatureRow
+                title="Requests"
+                description="First 10,000 requests free - every month!"
+                isAvailable={true}
+                amount="10k"
+                unit="/mo"
+                additionalInfo="$0.65 per 10k requests"
+              />
+              <FeatureRow
+                title="Prompts"
+                description="Requests individual requests logged within the Helicone platform. Blah blah blah this."
+                isAvailable={true}
+                fullAccess={true}
+                amount="3"
+                unit="/mo"
+                additionalInfo="$0.001 per prompt"
+              />
+              <FeatureRow
+                title="Exported requests"
+                description="Requests individual requests logged within the Helicone platform. Blah blah blah this."
+                isAvailable={true}
+                fullAccess={true}
+                amount="5k"
+                unit="/mo"
+                additionalInfo="$0.001 per requests"
+              />
+              <FeatureRow
+                title="Evals"
+                description="Requests individual requests logged within the Helicone platform. Blah blah blah this."
+                isAvailable={true}
+                fullAccess={true}
+                amount="1k"
+                unit="/mo"
+                additionalInfo="$0.001 per requests"
+              />
+              <FeatureRow
+                title="Datasets"
+                description="Requests individual requests logged within the Helicone platform. Blah blah blah this."
+                isAvailable={true}
+                fullAccess={true}
+                amount="1k"
+                unit="/mo"
+                additionalInfo="$0.001 per requests"
+              />
             </div>
-          </div>
-        </TabsContent>
-      </Tabs>
+          </Col>
+        </div>
+      </div>
     </div>
   );
 }
