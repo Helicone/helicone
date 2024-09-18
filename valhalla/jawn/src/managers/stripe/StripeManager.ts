@@ -8,24 +8,16 @@ import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { clickhouseDb } from "../../lib/db/ClickhouseWrapper";
 import { buildFilterWithAuthClickHouse } from "../../lib/shared/filters/filters";
 import { UpgradeToProRequest } from "../../controllers/public/stripeController";
+import { OrganizationManager } from "../organization/OrganizationManager";
 
-const proProductPrices =
-  ENVIRONMENT === "production"
-    ? {
-        "request-volume": process.env.PRICE_PROD_REQUEST_VOLUME_ID!,
-        "pro-users": process.env.PRICE_PROD_PRO_USERS_ID!,
-        prompts: process.env.PRICE_PROD_PROMPTS_ID!,
-        alerts: process.env.PRICE_PROD_ALERTS_ID!,
-      }
-    : {
-        // TEST PRODUCTS
-        "request-volume": "price_1P0zwNFeVmeixR9wkrT3DYdi",
-        "pro-users": "price_1PxwrxFeVmeixR9wUhWdnEu6",
-        prompts: "price_1PyozaFeVmeixR9wqQoIV2Ur",
-        alerts: "price_1PySmZFeVmeixR9wKEemD7jP",
-      };
+const proProductPrices = {
+  "request-volume": process.env.PRICE_PROD_REQUEST_VOLUME_ID!, //(This is just growth)
+  "pro-users": process.env.PRICE_PROD_PRO_USERS_ID!,
+  prompts: process.env.PRICE_PROD_PROMPTS_ID!,
+  alerts: process.env.PRICE_PROD_ALERTS_ID!,
+};
 
-const EARLY_ADOPTER_COUPON = "0IPsIob0";
+const EARLY_ADOPTER_COUPON = "9ca5IeEs"; // WlDg28Kf | prod: 9ca5IeEs
 
 export class StripeManager extends BaseManager {
   private stripe: Stripe;
@@ -54,10 +46,6 @@ export class StripeManager extends BaseManager {
         return err("User does not have an email");
       }
 
-      const getStripeCustomer = await this.stripe.customers.list({
-        email: user.data?.user?.email ?? "",
-      });
-      console.log(getStripeCustomer);
       const customer = await this.stripe.customers.create({
         email: user.data.user.email,
       });
@@ -210,22 +198,13 @@ WHERE (${builtFilter.filter})`,
     }
   }
   private async getOrgMemberCount(): Promise<Result<number, string>> {
-    const members = await supabaseServer.client
-      .from("organization_member")
-      .select("*", { count: "exact" })
-      .eq("organization", this.authParams.organizationId);
-
-    if (members.error) {
-      console.log(members.error);
-      return err("Error getting organization members");
-    }
-
-    return ok(members.count!);
+    const organizationManager = new OrganizationManager(this.authParams);
+    return await organizationManager.getMemberCount(true);
   }
 
   private shouldApplyCoupon(): boolean {
     const currentDate = new Date();
-    const cutoffDate = new Date("2023-10-10");
+    const cutoffDate = new Date("2024-10-15");
     return currentDate < cutoffDate;
   }
 
@@ -279,11 +258,12 @@ WHERE (${builtFilter.filter})`,
           tier: "pro-20240913",
         },
       },
-      allow_promotion_codes: true,
     };
 
     if (this.shouldApplyCoupon()) {
       sessionParams.discounts = [{ coupon: EARLY_ADOPTER_COUPON }];
+    } else {
+      sessionParams.allow_promotion_codes = true;
     }
 
     const session = await this.stripe.checkout.sessions.create(sessionParams);

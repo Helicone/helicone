@@ -1,9 +1,9 @@
 import { User } from "@supabase/auth-helpers-nextjs";
 import { GetServerSidePropsContext } from "next";
-import AuthHeader from "../components/shared/authHeader";
-import MetaData from "../components/layout/public/authMetaData";
 import VaultPage from "../components/templates/vault/vaultPage";
 import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
+import AuthLayout from "../components/layout/auth/authLayout";
+import { ReactElement } from "react";
 
 interface VaultProps {
   user: User;
@@ -12,14 +12,11 @@ interface VaultProps {
 const Vault = (props: VaultProps) => {
   const { user } = props;
 
-  return (
-    <MetaData title="Vault">
-      {/* <AuthLayout user={user}> */}
-      <AuthHeader title={"Vault"} />
-      <VaultPage />
-      {/* </AuthLayout> */}
-    </MetaData>
-  );
+  return <VaultPage />;
+};
+
+Vault.getLayout = function getLayout(page: ReactElement) {
+  return <AuthLayout>{page}</AuthLayout>;
 };
 
 export default Vault;

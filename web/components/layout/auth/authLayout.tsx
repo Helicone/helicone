@@ -1,20 +1,16 @@
 /* eslint-disable @next/next/no-img-element */
 
 import { useRouter } from "next/router";
-import { useMemo, useState, useEffect } from "react";
-import { useOrg } from "../organizationContext";
+import { useMemo, useState } from "react";
 import { useAlertBanners } from "../../../services/hooks/admin";
-import ReferralModal from "../../shared/referralModal";
+import UpgradeProModal from "../../shared/upgradeProModal";
+import { Row } from "../common";
+import { useOrg } from "../organizationContext";
 import MetaData from "../public/authMetaData";
+import AcceptTermsModal from "./AcceptTermsModal";
 import DemoModal from "./DemoModal";
 import MainContent from "./MainContent";
 import Sidebar from "./Sidebar";
-import { Row } from "../common";
-import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
-import { useJawnClient } from "@/lib/clients/jawnHook";
-import { Database } from "@/supabase/database.types";
-import AcceptTermsModal from "./AcceptTermsModal";
-import UpgradeProModal from "../../shared/upgradeProModal";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -25,8 +21,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
   const router = useRouter();
   const { pathname } = router;
   const org = useOrg();
-  const tier = org?.currentOrg?.tier;
-  const [referOpen, setReferOpen] = useState(false);
+
   const [open, setOpen] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
 
@@ -51,12 +46,8 @@ const AuthLayout = (props: AuthLayoutProps) => {
       <div>
         <DemoModal />
         <Row className="flex-col md:flex-row">
-          <div className="w-full md:w-min">
-            <Sidebar
-              tier={tier ?? ""}
-              setReferOpen={setReferOpen}
-              setOpen={setOpen}
-            />
+          <div className=" w-full md:w-min ">
+            <Sidebar setOpen={setOpen} />
           </div>
           <div className="flex-grow max-w-full overflow-hidden">
             <MainContent banner={banner} pathname={pathname}>
@@ -65,7 +56,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
           </div>
         </Row>
       </div>
-      <ReferralModal open={referOpen} setOpen={setReferOpen} />
+
       <UpgradeProModal open={open} setOpen={setOpen} />
       <AcceptTermsModal />
     </MetaData>

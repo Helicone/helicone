@@ -13,6 +13,7 @@ import {
 import Stripe from "stripe";
 import { JawnAuthenticatedRequest } from "../../types/request";
 import { StripeManager } from "../../managers/stripe/StripeManager";
+import { Result } from "../../lib/shared/result";
 
 export interface UpgradeToProRequest {
   addons?: {
@@ -148,7 +149,26 @@ export class StripeController extends Controller {
   @Get("/subscription/preview-invoice")
   public async previewInvoice(
     @Request() request: JawnAuthenticatedRequest
-  ): Promise<any> {
+  ): Promise<{
+    currency: string | null;
+    next_payment_attempt: number | null;
+    lines: {
+      data: {
+        id: string | null;
+        amount: number | null;
+        description: string | null;
+      }[];
+    } | null;
+    discount: {
+      coupon: {
+        name: string | null;
+        percent_off: number | null;
+      };
+    } | null;
+    subtotal: number;
+    tax: number | null;
+    total: number;
+  } | null> {
     const stripeManager = new StripeManager(request.authParams);
     const result = await stripeManager.getUpcomingInvoice();
 
@@ -157,7 +177,15 @@ export class StripeController extends Controller {
       throw new Error(result.error);
     }
 
-    return result.data;
+    return {
+      currency: result.data?.currency ?? null,
+      next_payment_attempt: result.data?.next_payment_attempt ?? null,
+      lines: result.data?.lines ?? null,
+      discount: result.data?.discount ?? null,
+      subtotal: result.data?.subtotal ?? 0,
+      tax: result.data?.tax ?? null,
+      total: result.data?.total ?? 0,
+    };
   }
 
   @Post("/subscription/cancel-subscription")
@@ -184,7 +212,22 @@ export class StripeController extends Controller {
   @Get("/subscription")
   public async getSubscription(
     @Request() request: JawnAuthenticatedRequest
-  ): Promise<any> {
+  ): Promise<{
+    status: string;
+    cancel_at_period_end: boolean;
+    current_period_end: number;
+    current_period_start: number;
+    id: string;
+    trial_end: number | null;
+    items: {
+      quantity?: number;
+      price: {
+        product: {
+          name: string | null;
+        } | null;
+      };
+    }[];
+  } | null> {
     const stripeManager = new StripeManager(request.authParams);
     const result = await stripeManager.getSubscription();
 
@@ -193,7 +236,24 @@ export class StripeController extends Controller {
       throw new Error(result.error);
     }
 
-    return result.data;
+    if (!result.data) return null;
+
+    return {
+      status: result.data.status,
+      cancel_at_period_end: result.data.cancel_at_period_end,
+      current_period_end: result.data.current_period_end,
+      current_period_start: result.data.current_period_start,
+      id: result.data.id,
+      trial_end: result.data.trial_end,
+      items: result.data.items.data.map((item) => ({
+        quantity: item.quantity,
+        price: {
+          product: {
+            name: ((item.price.product as any)?.name ?? null) as string | null,
+          },
+        },
+      })),
+    };
   }
 
   @Post("/webhook")

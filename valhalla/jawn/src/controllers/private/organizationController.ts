@@ -117,7 +117,7 @@ export class OrganizationController extends Controller {
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<null, string>> {
     const organizationManager = new OrganizationManager(request.authParams);
-    const memberCount = await organizationManager.getMemberCount();
+    const memberCount = await organizationManager.getMemberCount(true);
     if (memberCount.error || !memberCount.data) {
       return err(memberCount.error ?? "Error getting member count");
     }
@@ -305,7 +305,7 @@ export class OrganizationController extends Controller {
     const stripeManager = new StripeManager(request.authParams);
     const organizationManager = new OrganizationManager(request.authParams);
 
-    const memberCount = await organizationManager.getMemberCount();
+    const memberCount = await organizationManager.getMemberCount(true);
     if (memberCount.error || !memberCount.data) {
       return err(memberCount.error ?? "Error getting member count");
     }

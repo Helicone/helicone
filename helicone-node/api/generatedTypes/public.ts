@@ -4335,7 +4335,32 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": unknown;
+          "application/json": ({
+            /** Format: double */
+            total: number;
+            /** Format: double */
+            tax: number | null;
+            /** Format: double */
+            subtotal: number;
+            discount: ({
+              coupon: {
+                /** Format: double */
+                percent_off: number | null;
+                name: string | null;
+              };
+            }) | null;
+            lines: ({
+              data: ({
+                  description: string | null;
+                  /** Format: double */
+                  amount: number | null;
+                  id: string | null;
+                })[];
+            }) | null;
+            /** Format: double */
+            next_payment_attempt: number | null;
+            currency: string | null;
+          }) | null;
         };
       };
     };
@@ -4363,7 +4388,26 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": unknown;
+          "application/json": ({
+            items: ({
+                price: {
+                  product: ({
+                    name: string | null;
+                  }) | null;
+                };
+                /** Format: double */
+                quantity?: number;
+              })[];
+            /** Format: double */
+            trial_end: number | null;
+            id: string;
+            /** Format: double */
+            current_period_start: number;
+            /** Format: double */
+            current_period_end: number;
+            cancel_at_period_end: boolean;
+            status: string;
+          }) | null;
         };
       };
     };
