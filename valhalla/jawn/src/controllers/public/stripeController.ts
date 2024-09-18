@@ -146,7 +146,9 @@ export class StripeController extends Controller {
   }
 
   @Get("/subscription/preview-invoice")
-  public async previewInvoice(@Request() request: JawnAuthenticatedRequest) {
+  public async previewInvoice(
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<any> {
     const stripeManager = new StripeManager(request.authParams);
     const result = await stripeManager.getUpcomingInvoice();
 
@@ -180,7 +182,9 @@ export class StripeController extends Controller {
   }
 
   @Get("/subscription")
-  public async getSubscription(@Request() request: JawnAuthenticatedRequest) {
+  public async getSubscription(
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<any> {
     const stripeManager = new StripeManager(request.authParams);
     const result = await stripeManager.getSubscription();
 
