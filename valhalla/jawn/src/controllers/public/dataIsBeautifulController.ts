@@ -11,7 +11,6 @@ import {
 import { Result, ok } from "../../lib/shared/result";
 import { JawnAuthenticatedRequest } from "../../types/request";
 import { DataIsBeautifulManager } from "../../managers/DataIsBeautifulManager";
-import { providersNames } from "../../packages/cost/providers/mappings";
 import { cacheResult } from "../../utils/cacheResult";
 
 /***
@@ -132,13 +131,13 @@ for (const model of modelNames) {
 
 export type ModelElement = (typeof modelNames)[number];
 export type ModelName = (typeof modelNames)[number]["model"];
-export type ProviderName = (typeof modelNames)[number]["provider"];
+export type OpenStatsProviderName = (typeof modelNames)[number]["provider"];
 
 // NOTE do not make any of these strings otherwise it will be a security risk
 export type DataIsBeautifulRequestBody = {
   timespan: TimeSpan;
   models?: ModelName[];
-  provider?: ProviderName;
+  provider?: OpenStatsProviderName;
 };
 
 export type ModelBreakdown = {

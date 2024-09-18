@@ -1,15 +1,15 @@
 // src/users/usersController.ts
 import { Body, Controller, Post, Request, Route, Security, Tags } from "tsoa";
+import { supabaseServer } from "../../lib/db/supabase";
+import { run } from "../../lib/experiment/run";
 import { FilterLeafSubset } from "../../lib/shared/filters/filterDefs";
 import { Result, err } from "../../lib/shared/result";
-import { ExperimentManager } from "../../managers/experiment/ExperimentManager";
-import { JawnAuthenticatedRequest } from "../../types/request";
 import {
   Experiment,
   IncludeExperimentKeys,
 } from "../../lib/stores/experimentStore";
-import { run } from "../../lib/experiment/run";
-import { supabaseServer } from "../../lib/db/supabase";
+import { ExperimentManager } from "../../managers/experiment/ExperimentManager";
+import { JawnAuthenticatedRequest } from "../../types/request";
 
 export type ExperimentFilterBranch = {
   left: ExperimentFilterNode;

@@ -18,14 +18,7 @@ import {
 import { LlmSchema } from "../../shared/requestResponseModel";
 import { mapGeminiPro } from "./mappers";
 import { S3Client } from "../../shared/db/s3Client";
-
-export type Provider =
-  | "OPENAI"
-  | "ANTHROPIC"
-  | "TOGETHERAI"
-  | "GROQ"
-  | "GOOGLE"
-  | "CUSTOM";
+import { Provider } from "../../../models/models";
 const MAX_TOTAL_BODY_SIZE = 1024 * 1024;
 
 export interface HeliconeRequestAsset {
