@@ -7,7 +7,6 @@ import { useOrg } from "../organizationContext";
 import UpgradeProModal from "../../shared/upgradeProModal";
 
 import { useAlertBanners } from "../../../services/hooks/admin";
-import ReferralModal from "../../shared/referralModal";
 import MetaData from "../public/authMetaData";
 import DemoModal from "./DemoModal";
 

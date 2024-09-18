@@ -1,11 +1,10 @@
 import {
-  BookOpenIcon,
   DocumentPlusIcon,
   DocumentTextIcon,
   Square2StackIcon,
   TableCellsIcon,
 } from "@heroicons/react/24/outline";
-import { Divider, TextInput } from "@tremor/react";
+import { TextInput } from "@tremor/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { Fragment, useRef, useState, useCallback, useMemo } from "react";
@@ -46,7 +45,6 @@ import {
 import { MODEL_LIST } from "../playground/new/modelList";
 import { ProFeatureWrapper } from "@/components/shared/ProBlockerComponents/ProFeatureWrapper";
 import { useOrg } from "@/components/layout/organizationContext";
-import { Col } from "@/components/layout/common";
 import { InfoBox } from "@/components/ui/helicone/infoBox";
 import {
   Card,

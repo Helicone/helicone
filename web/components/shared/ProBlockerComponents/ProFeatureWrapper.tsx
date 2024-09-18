@@ -6,11 +6,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { useRouter } from "next/router";
 import { CheckIcon } from "lucide-react";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { UpgradeToProCTA } from "@/components/templates/pricing/upgradeToProCTA";
 
 interface ProFeatureWrapperProps {

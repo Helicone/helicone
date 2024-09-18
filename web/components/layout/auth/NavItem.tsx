@@ -6,7 +6,6 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { ChevronRightIcon } from "@heroicons/react/24/outline";
-import { Triangle } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 

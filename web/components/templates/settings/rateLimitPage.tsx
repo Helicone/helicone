@@ -93,8 +93,8 @@ const RateLimitPage = () => {
             <span className="font-semibold">logged</span> occurrences for your
             organization last month. This simply indicates that some of your
             requests were processed but not logged in your dashboard due to
-            reaching a rate limit - If you'd like to increase your rate limit,
-            please feel free to reach out to us at{" "}
+            reaching a rate limit - If you&apos;d like to increase your rate
+            limit, please feel free to reach out to us at{" "}
             <Button
               variant="link"
               className="p-0 h-auto"

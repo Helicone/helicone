@@ -1,9 +1,7 @@
-import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { clsx } from "../../shared/clsx";
 import { useOrg } from "../../layout/organizationContext";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedModal from "../../shared/themed/themedModal";
-import { Database } from "../../../supabase/database.types";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { getJawnClient } from "../../../lib/clients/jawn";

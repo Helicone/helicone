@@ -2,21 +2,10 @@
 
 import {
   ArchiveBoxIcon,
-  ArrowRightOnRectangleIcon,
-  BeakerIcon,
   BellIcon,
   BuildingLibraryIcon,
-  ChartBarIcon,
-  ChartPieIcon,
   CircleStackIcon,
-  CodeBracketIcon,
-  Cog6ToothIcon,
-  DocumentChartBarIcon,
-  DocumentTextIcon,
-  GlobeAltIcon,
   HomeIcon,
-  KeyIcon,
-  LightBulbIcon,
   LockClosedIcon,
   ShieldCheckIcon,
   SparklesIcon,
@@ -26,20 +15,13 @@ import {
 } from "@heroicons/react/24/outline";
 import { useUser } from "@supabase/auth-helpers-react";
 import { useRouter } from "next/router";
-import { useMemo, useState } from "react";
-import { GoRepoForked } from "react-icons/go";
+import { useMemo } from "react";
 import DesktopSidebar, { NavigationItem } from "./DesktopSidebar";
 
 import { PiGraphLight } from "react-icons/pi";
 import MobileNavigation from "./MobileNavigation";
 import { useOrg } from "../organizationContext";
-import {
-  FileCog,
-  NotepadText,
-  TestTube,
-  TestTube2,
-  Webhook,
-} from "lucide-react";
+import { NotepadText, TestTube2, Webhook } from "lucide-react";
 
 interface SidebarProps {
   setOpen: (open: boolean) => void;

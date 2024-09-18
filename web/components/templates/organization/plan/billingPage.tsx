@@ -1,7 +1,5 @@
 import { useOrg } from "@/components/layout/organizationContext";
 import AuthHeader from "@/components/shared/authHeader";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Col } from "@/components/layout/common";
 import { FreePlanCard } from "./freeBillingPage";
 import { ProPlanCard } from "./proBillingPage";

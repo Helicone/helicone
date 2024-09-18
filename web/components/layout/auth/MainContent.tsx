@@ -1,8 +1,6 @@
-import { useMemo } from "react";
 import { clsx } from "../../shared/clsx";
 import { getUSDate } from "../../shared/utils/utils";
 import OrgContext, { useOrg } from "../organizationContext";
-import Link from "next/link";
 
 interface MainContentProps {
   children: React.ReactNode;

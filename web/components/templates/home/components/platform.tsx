@@ -119,6 +119,7 @@ export default function Platform() {
       </div>
       <div className="relative overflow-hidden pt-2">
         <div className="mx-auto max-w-8xl px-6 lg:px-8">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={
               tabs.find((tab) => tab.key === activeTab)?.src ||

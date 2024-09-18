@@ -30,7 +30,6 @@ import { useRouter } from "next/router";
 import AuthHeader from "../../shared/authHeader";
 import { formatNumber } from "../users/initialColumns";
 import { useOrg } from "@/components/layout/organizationContext";
-import { Button } from "@/components/ui/button";
 import { DiffHighlight } from "../welcome/diffHighlight";
 import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
 

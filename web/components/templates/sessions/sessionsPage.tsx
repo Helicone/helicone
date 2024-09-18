@@ -1,15 +1,6 @@
 import { useOrg } from "@/components/layout/organizationContext";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 
 import { Badge } from "@tremor/react";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
   getTimeIntervalAgo,
@@ -22,14 +13,6 @@ import { Row } from "../../layout/common/row";
 import AuthHeader from "../../shared/authHeader";
 import SessionNameSelection from "./nameSelection";
 import SessionDetails from "./sessionDetails";
-import { CheckIcon, LightbulbIcon } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { ChevronDownIcon, ChevronUpIcon } from "lucide-react";
-import { InfoBox } from "@/components/ui/helicone/infoBox";
 import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
 
 interface SessionsPageProps {

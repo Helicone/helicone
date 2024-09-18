@@ -188,7 +188,7 @@ export const ProPlanCard = () => {
             </span>
           </CardTitle>
           <CardDescription>
-            Here's a summary of your subscription.
+            Here&apos;s a summary of your subscription.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">

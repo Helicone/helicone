@@ -1,14 +1,8 @@
-import {
-  BookOpenIcon,
-  CircleStackIcon as DatabaseIcon,
-} from "@heroicons/react/24/outline";
-import Link from "next/link";
 import { useRouter } from "next/router";
 import { useGetHeliconeDatasets } from "../../../services/hooks/dataset/heliconeDataset";
 import { SortDirection } from "../../../services/lib/sorts/users/sorts";
 import AuthHeader from "../../shared/authHeader";
 import ThemedTable from "../../shared/themed/table/themedTable";
-import { ProFeatureWrapper } from "@/components/shared/ProBlockerComponents/ProFeatureWrapper";
 import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
 
 interface DatasetsPageProps {
