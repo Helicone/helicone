@@ -18,10 +18,6 @@ import Link from "next/link";
 export default function Home() {
   return (
     <>
-      <div className="bg-blue-200 text-blue-800 p-4 text-center">
-        Scheduled Maintenance: 10-min downtime (11:30-11:40 AM PST); no logs
-        will be lost, processed with slight delay.
-      </div>
       <main className="flex min-h-screen flex-col items-center justify-between text-black px-[12px] pt-[24px] pb-[24px]">
         <div className="flex flex-col items-center justify-between max-w-6xl mx-auto">
           <header className="text-center flex flex-col space-y-4 pb-[32px] md:pb-40 pt-8 md:pt-12 max-w-6xl mx-auto ">
