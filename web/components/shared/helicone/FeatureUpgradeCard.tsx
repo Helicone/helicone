@@ -63,7 +63,7 @@ export const FeatureUpgradeCard: React.FC<FeatureUpgradeCardProps> = ({
         )}
       </CardContent>
       {tier === "free" && (
-        <CardFooter className="flex flex-col justify-between">
+        <CardFooter className="flex flex-col justify-between w-full">
           <Button
             variant="link"
             className="px-0 w-full text-left flex justify-start"
@@ -125,11 +125,11 @@ export const FeatureUpgradeCard: React.FC<FeatureUpgradeCardProps> = ({
               </div>
             </div>
           )}
-          <div className="space-x-2 mt-4">
-            <Button variant="outline" asChild>
+          <div className="flex mt-4 flex-row w-full gap-4">
+            <Button variant="outline" asChild className="w-1/2">
               <Link href={documentationLink}>View documentation</Link>
             </Button>
-            <Button asChild>
+            <Button asChild className="w-1/2">
               <Link href="/settings/billing">Start 14-day free trial</Link>
             </Button>
           </div>
