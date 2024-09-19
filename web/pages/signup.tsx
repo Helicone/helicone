@@ -40,13 +40,6 @@ const SignUp = () => {
       ogImageUrl={"https://www.helicone.ai/static/helicone-og.webp"}
     >
       {demo === "true" && <InfoBanner />}
-      <div className="p-4 bg-[#F8FEFF]">
-        <InfoBox icon={() => <></>} className="flex flex-col">
-          <span className="text-red-600 text-sm font-semibold">
-            We are having issues with auth right now, we&apos;ll be back soon.
-          </span>
-        </InfoBox>
-      </div>
       <AuthForm
         handleEmailSubmit={async (email: string, password: string) => {
           const origin = window.location.origin;
