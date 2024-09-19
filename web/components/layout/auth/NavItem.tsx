@@ -24,6 +24,7 @@ interface NavItemProps {
   isSubItem?: boolean;
   expandedItems: string[];
   toggleExpand: (name: string) => void;
+  deep?: number;
 }
 
 const NavItem: React.FC<NavItemProps> = ({
@@ -32,6 +33,7 @@ const NavItem: React.FC<NavItemProps> = ({
   isSubItem = false,
   expandedItems,
   toggleExpand,
+  deep,
 }) => {
   const router = useRouter();
   const hasSubItems = link.subItems && link.subItems.length > 0;
@@ -94,9 +96,9 @@ const NavItem: React.FC<NavItemProps> = ({
                   variant: link.current ? "secondary" : "ghost",
                   size: "xs",
                 }),
-                "h-6",
+                deep && deep > 1 ? "h-6" : "h-8",
                 "justify-start w-full",
-                "text-sm font-medium my-[2px] text-[12px]"
+                "text-sm font-medium  text-[12px]"
               ),
           ""
         )}
@@ -131,6 +133,7 @@ const NavItem: React.FC<NavItemProps> = ({
               isSubItem={true}
               expandedItems={expandedItems}
               toggleExpand={toggleExpand}
+              deep={deep + 1}
             />
           ))}
         </div>

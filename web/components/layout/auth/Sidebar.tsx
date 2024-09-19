@@ -3,7 +3,6 @@
 import {
   ArchiveBoxIcon,
   BellIcon,
-  BuildingLibraryIcon,
   CircleStackIcon,
   HomeIcon,
   LockClosedIcon,
@@ -144,6 +143,7 @@ const Sidebar = ({ setOpen }: SidebarProps) => {
               name: "Enterprise",
               href: "/enterprise",
               current: pathname.includes("/enterprise"),
+              icon: null,
               subItems: [
                 {
                   name: "Webhooks",

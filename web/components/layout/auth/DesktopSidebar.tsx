@@ -153,9 +153,9 @@ const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
 
             <div
               data-collapsed={isCollapsed}
-              className="group flex flex-col gap-4 py-2 data-[collapsed=true]:py-2 "
+              className="group flex flex-col py-2 data-[collapsed=true]:py-2 "
             >
-              <nav className="grid gap-1 px-2 group-[[data-collapsed=true]]:justify-center group-[[data-collapsed=true]]:px-2">
+              <nav className="grid flex-grow overflow-y-auto px-2 group-[[data-collapsed=true]]:justify-center group-[[data-collapsed=true]]:px-2">
                 {NAVIGATION_ITEMS.map((link) => (
                   <NavItem
                     key={link.name}
@@ -163,6 +163,7 @@ const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
                     isCollapsed={isCollapsed}
                     expandedItems={expandedItems}
                     toggleExpand={toggleExpand}
+                    deep={0}
                   />
                 ))}
               </nav>
