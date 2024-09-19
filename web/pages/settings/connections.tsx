@@ -3,13 +3,18 @@ import AuthLayout from "../../components/layout/auth/authLayout";
 import ConnectionsPage from "../../components/templates/connections/connectionsPage";
 import { withAuthSSR } from "../../lib/api/handlerWrappers";
 import { SortDirection } from "../../services/lib/sorts/requests/sorts";
+import SettingsLayout from "@/components/templates/settings/settingsLayout";
 
 const Connections = () => {
   return <ConnectionsPage />;
 };
 
 Connections.getLayout = function getLayout(page: ReactElement) {
-  return <AuthLayout>{page}</AuthLayout>;
+  return (
+    <AuthLayout>
+      <SettingsLayout>{page}</SettingsLayout>
+    </AuthLayout>
+  );
 };
 
 export default Connections;

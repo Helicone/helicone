@@ -7,6 +7,11 @@ import { getJawnClient } from "../../../../lib/clients/jawn";
 import { useOrg } from "../../../layout/organizationContext";
 import useNotification from "../../../shared/notification/useNotification";
 import HcButton from "../../../ui/hcButton";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import Link from "next/link";
+import { useSupabaseClient } from "@supabase/auth-helpers-react";
+import { useJawnClient } from "@/lib/clients/jawnHook";
 
 export const COMPANY_SIZES = ["Just me", "2-5", "5-25", "25-100", "100+"];
 
@@ -33,6 +38,9 @@ const CreateOrg = (props: CreateOrgProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { setNotification } = useNotification();
   const { t } = useTranslation();
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const supabase = useSupabaseClient();
+  const jawn = useJawnClient();
 
   const referralOptions = [
     { value: "friend_referral", label: t("Friend (referral)") },
@@ -43,6 +51,11 @@ const CreateOrg = (props: CreateOrgProps) => {
     { value: "product_hunt", label: t("Product Hunt") },
     { value: "other", label: t("Other") },
   ];
+
+  const handleAcceptTerms = async () => {
+    await jawn.POST("/v1/organization/user/accept_terms");
+    supabase.auth.refreshSession();
+  };
 
   const handleOrgCreate = async () => {
     if (!user) return;
@@ -230,6 +243,38 @@ const CreateOrg = (props: CreateOrgProps) => {
                 </div>
               </div>
             )}
+            <div className="flex flex-col space-y-4">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="terms"
+                  checked={termsAccepted}
+                  onCheckedChange={(checked) =>
+                    setTermsAccepted(checked as boolean)
+                  }
+                />
+                <Label
+                  htmlFor="terms"
+                  className="text-sm font-medium leading-none flex items-center gap-2"
+                >
+                  I accept the
+                  <Link
+                    href="https://helicone.ai/terms"
+                    target="_blank"
+                    className="text-primary hover:underline underline"
+                  >
+                    Terms of Service
+                  </Link>
+                  and
+                  <Link
+                    href="https://helicone.ai/privacy"
+                    target="_blank"
+                    className="text-primary hover:underline underline"
+                  >
+                    Privacy Policy
+                  </Link>
+                </Label>
+              </div>
+            </div>
           </div>
         </div>
         <div className="sticky bottom-0 p-4 flex items-center justify-between">
@@ -237,8 +282,9 @@ const CreateOrg = (props: CreateOrgProps) => {
           <HcButton
             variant={"primary"}
             size={"sm"}
-            title={"Next"}
+            title={"Accept terms and next"}
             onClick={handleOrgCreate}
+            disabled={isLoading || !termsAccepted}
           />
         </div>
       </div>
