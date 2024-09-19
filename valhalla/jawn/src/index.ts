@@ -223,7 +223,7 @@ async function gracefulShutdown(signal: string) {
       "Could not close connections in time, forcefully shutting down"
     );
     process.exit(1);
-  }, 60000);
+  }, 60000 * 3);
 }
 
 process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
