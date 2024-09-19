@@ -555,7 +555,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                     className="h-6 bg-[#F1F5F9] border border-[#CBD5E1]"
                   >
                     <PencilIcon className="h-4 w-4 mr-2" />
-                    Edit / View
+                    Editable
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent className="max-w-[15rem]" align="center">
