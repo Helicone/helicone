@@ -45,6 +45,10 @@ const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
     false
   );
 
+  const shouldShowInfoBox = useMemo(() => {
+    return tier === "pro" || tier === "growth";
+  }, [tier]);
+
   const [expandedItems, setExpandedItems] = useLocalStorage<string[]>(
     "expandedItems",
     []
@@ -202,7 +206,7 @@ const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
               </nav>
             </div>
           </div>
-          {canShowInfoBox && !isCollapsed && (
+          {canShowInfoBox && !isCollapsed && shouldShowInfoBox && (
             <div className="p-2">
               <InfoBox icon={() => <></>} className="flex flex-col">
                 <div>
