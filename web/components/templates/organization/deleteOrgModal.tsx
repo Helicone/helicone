@@ -1,9 +1,7 @@
-import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { clsx } from "../../shared/clsx";
 import { useOrg } from "../../layout/organizationContext";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedModal from "../../shared/themed/themedModal";
-import { Database } from "../../../supabase/database.types";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { getJawnClient } from "../../../lib/clients/jawn";
@@ -22,7 +20,6 @@ export const DeleteOrgModal = (props: DeleteOrgModalProps) => {
   const orgContext = useOrg();
   const router = useRouter();
   const jawn = getJawnClient(orgId);
-  const supabaseClient = useSupabaseClient<Database>();
   const [confirmOrgName, setConfirmOrgName] = useState("");
 
   return (
@@ -65,6 +62,17 @@ export const DeleteOrgModal = (props: DeleteOrgModalProps) => {
           </button>
           <button
             onClick={async () => {
+              if (
+                orgContext?.currentOrg?.tier === "pro-20240913" ||
+                orgContext?.currentOrg?.tier === "growth"
+              ) {
+                setNotification(
+                  "You cannot delete your organization while on the Pro plan",
+                  "error"
+                );
+                return;
+              }
+
               if (confirmOrgName !== orgName) {
                 setNotification("Organization name does not match", "error");
                 return;

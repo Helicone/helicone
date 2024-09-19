@@ -128,6 +128,7 @@ const WelcomePageV2 = (props: WelcomePageV2Props) => {
               setStep={(step) => {
                 handleStepChange(step);
               }}
+              allowStepSelection={currentStep !== 1}
             />
           </div>
         </section>

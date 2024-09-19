@@ -4,95 +4,67 @@ import {
   CreditCardIcon,
   NoSymbolIcon,
 } from "@heroicons/react/24/outline";
-import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@tremor/react";
-import { useOrg } from "../../layout/organizationContext";
-import OrgSettingsPage from "../organization/settings/orgSettingsPage";
-import OrgPlanPage from "../organization/plan/orgPlanPage";
-import OrgMembersPage from "../organization/members/orgMembersPage";
-import { ElementType } from "react";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import AuthHeader from "../../shared/authHeader";
-import RateLimitPage from "./rateLimitPage";
 
-interface SettingsPageProps {
-  defaultIndex?: number;
-}
-
-const tabs: {
-  id: number;
-  title: string;
-  icon: ElementType<any>;
-}[] = [
+const tabs = [
   {
-    id: 0,
+    id: "organization",
     title: "Organization",
     icon: BuildingOfficeIcon,
+    href: "/settings/organization",
   },
   {
-    id: 1,
+    id: "plan",
     title: "Plan",
     icon: CreditCardIcon,
+    href: "/settings/plan",
   },
   {
-    id: 2,
+    id: "members",
     title: "Members",
     icon: UserGroupIcon,
+    href: "/settings/members",
   },
   {
-    id: 3,
+    id: "rate-limits",
     title: "Rate-Limits",
     icon: NoSymbolIcon,
+    href: "/settings/rate-limits",
   },
 ];
 
-const SettingsPage = (props: SettingsPageProps) => {
-  const { defaultIndex = 0 } = props;
-
-  const orgContext = useOrg();
+const SettingsPage = () => {
   const router = useRouter();
+  const currentPath = router.pathname;
 
   return (
     <>
       <AuthHeader title="Settings" />
-      <TabGroup>
-        <TabList className="font-semibold" variant="line">
+      <div className="border-b border-gray-200 dark:border-gray-700">
+        <nav className="-mb-px flex space-x-8" aria-label="Tabs">
           {tabs.map((tab) => (
-            <Tab
+            <Link
               key={tab.id}
-              icon={tab.icon}
-              onClick={() => {
-                router.push(
-                  {
-                    query: { tab: tab.id },
-                  },
-                  undefined,
-                  { shallow: true }
-                );
-              }}
+              href={tab.href}
+              className={`${
+                currentPath === tab.href
+                  ? "border-indigo-500 text-indigo-600"
+                  : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
+              } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
             >
-              <span>{tab.title}</span>
-            </Tab>
+              <tab.icon
+                className={`${
+                  currentPath === tab.href ? "text-indigo-500" : "text-gray-400"
+                } -ml-0.5 mr-2 h-5 w-5 inline-block`}
+                aria-hidden="true"
+              />
+              {tab.title}
+            </Link>
           ))}
-        </TabList>
-        {orgContext?.currentOrg ? (
-          <TabPanels>
-            <TabPanel>
-              <OrgSettingsPage org={orgContext?.currentOrg} />
-            </TabPanel>
-            <TabPanel>
-              <OrgPlanPage org={orgContext?.currentOrg} />
-            </TabPanel>
-            <TabPanel>
-              <OrgMembersPage org={orgContext?.currentOrg} />
-            </TabPanel>
-            <TabPanel>
-              <RateLimitPage />
-            </TabPanel>
-          </TabPanels>
-        ) : (
-          <></>
-        )}
-      </TabGroup>
+        </nav>
+      </div>
     </>
   );
 };

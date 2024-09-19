@@ -18,24 +18,14 @@ import {
 } from "@heroicons/react/24/outline";
 import { clsx } from "../../shared/clsx";
 import ThemedDropdown from "../../shared/themed/themedDropdown";
+import { NavigationItem } from "./DesktopSidebar";
 
 interface MobileNavigationProps {
-  NAVIGATION: {
-    name: string;
-    href: string;
-    icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
-    current: boolean;
-    featured?: boolean;
-  }[];
-  setReferOpen: (open: boolean) => void;
+  NAVIGATION: NavigationItem[];
   setOpen: (open: boolean) => void;
 }
 
-const MobileNavigation = ({
-  NAVIGATION,
-  setReferOpen,
-  setOpen,
-}: MobileNavigationProps) => {
+const MobileNavigation = ({ NAVIGATION, setOpen }: MobileNavigationProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const router = useRouter();
   const supabaseClient = useSupabaseClient<Database>();
@@ -198,12 +188,14 @@ const MobileNavigation = ({
                         )}
                         onClick={() => setSidebarOpen(false)}
                       >
-                        <link.icon
-                          className={clsx(
-                            "mr-3 h-6 w-6",
-                            link.current ? "text-gray-500" : "text-gray-400"
-                          )}
-                        />
+                        {link.icon && (
+                          <link.icon
+                            className={clsx(
+                              "mr-3 h-6 w-6",
+                              link.current ? "text-gray-500" : "text-gray-400"
+                            )}
+                          />
+                        )}
                         {link.name}
                         {link.featured && (
                           <span className="ml-auto text-xs font-normal text-gray-400">

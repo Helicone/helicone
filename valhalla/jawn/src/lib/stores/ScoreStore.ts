@@ -161,8 +161,33 @@ export class ScoreStore extends BaseStore {
       "request_response_rmt",
       filteredRequestResponseLogs.flatMap((row, index) => {
         const newVersion = newVersions[index];
+
+        // Merge existing scores with new scores
+        const combinedScores = {
+          ...(row.scores || {}),
+          ...newVersion.mappedScores.reduce((acc, score) => {
+            if (!Number.isInteger(score.score_attribute_value)) {
+              console.log(
+                `Skipping score ${score.score_attribute_key} with value ${score.score_attribute_value}`
+              );
+            } else {
+              acc[score.score_attribute_key] = score.score_attribute_value;
+            }
+            return acc;
+          }, {} as Record<string, number>),
+        };
+
+        // Validate and ensure the scores are in the correct format
+        const validScores = Object.entries(combinedScores).reduce(
+          (acc, [key, value]) => {
+            if (key && value !== null && value !== undefined) {
+              acc[key] = value;
+            }
+            return acc;
+          },
+          {} as Record<string, number>
+        );
         return [
-          // Insert the new version
           {
             response_id: row.response_id,
             response_created_at: row.response_created_at,
@@ -188,19 +213,14 @@ export class ScoreStore extends BaseStore {
             request_body: row.request_body,
             response_body: row.response_body,
             assets: row.assets,
-            scores: {
-              ...row.scores,
-              ...newVersion.mappedScores.reduce((acc, score) => {
-                acc[score.score_attribute_key] = score.score_attribute_value;
-                return acc;
-              }, {} as Record<string, number>),
-            },
+            scores: validScores,
           },
         ];
       })
     );
 
     if (res.error) {
+      console.error("dbInsertClickhouse Error:", res.error);
       return err(res.error);
     }
 

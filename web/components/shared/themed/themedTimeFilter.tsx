@@ -6,6 +6,7 @@ import useNotification from "../notification/useNotification";
 import useSearchParams from "../utils/useSearchParams";
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@tremor/react";
 import { TimeFilter } from "../../templates/dashboard/dashboardPage";
+import { ProFeatureWrapper } from "../ProBlockerComponents/ProFeatureWrapper";
 
 interface ThemedTimeFilterProps {
   timeFilterOptions: { key: string; value: string }[];
@@ -257,30 +258,57 @@ const ThemedTimeFilter = (props: ThemedTimeFilterProps) => {
         </>
       )}
 
-      {timeFilterOptions.map((option, idx) => (
-        <button
-          key={option.key}
-          type="button"
-          disabled={isFetching}
-          onClick={() => {
-            searchParams.set("t", option.key);
-            setActive(option.key);
-            onSelect(option.key, option.value);
-          }}
-          className={clsx(
-            "text-gray-900 dark:text-gray-100",
-            isActive(option.key)
-              ? "bg-sky-200 border-sky-300 border dark:bg-sky-800 dark:border-sky-700"
-              : "bg-white hover:bg-sky-50 border-gray-300 dark:bg-black dark:hover:bg-sky-900 dark:border-gray-700",
-            idx === timeFilterOptions.length - 1 ? "rounded-r-lg" : "",
-            !custom && idx === 0
-              ? "relative inline-flex items-center rounded-l-lg border px-3 py-1.5 text-sm font-medium focus:z-10 focus:border-sky-400 focus:outline-none focus:ring-1 focus:ring-sky-400"
-              : "relative -ml-px inline-flex items-center border px-3 py-1.5 text-sm font-medium focus:z-10 focus:border-sky-400 focus:outline-none focus:ring-1 focus:ring-sky-400"
-          )}
-        >
-          {option.value}
-        </button>
-      ))}
+      {timeFilterOptions.map((option, idx) =>
+        ["3M", "All"].includes(option.value) ? (
+          <ProFeatureWrapper featureName="time_filter" key={option.key}>
+            <button
+              key={option.key}
+              type="button"
+              disabled={isFetching}
+              onClick={() => {
+                searchParams.set("t", option.key);
+                setActive(option.key);
+                onSelect(option.key, option.value);
+              }}
+              className={clsx(
+                "text-gray-900 dark:text-gray-100",
+                isActive(option.key)
+                  ? "bg-sky-200 border-sky-300 border dark:bg-sky-800 dark:border-sky-700"
+                  : "bg-white hover:bg-sky-50 border-gray-300 dark:bg-black dark:hover:bg-sky-900 dark:border-gray-700",
+                idx === timeFilterOptions.length - 1 ? "rounded-r-lg" : "",
+                !custom && idx === 0
+                  ? "relative inline-flex items-center rounded-l-lg border px-3 py-1.5 text-sm font-medium focus:z-10 focus:border-sky-400 focus:outline-none focus:ring-1 focus:ring-sky-400"
+                  : "relative -ml-px inline-flex items-center border px-3 py-1.5 text-sm font-medium focus:z-10 focus:border-sky-400 focus:outline-none focus:ring-1 focus:ring-sky-400"
+              )}
+            >
+              {option.value}
+            </button>
+          </ProFeatureWrapper>
+        ) : (
+          <button
+            key={option.key}
+            type="button"
+            disabled={isFetching}
+            onClick={() => {
+              searchParams.set("t", option.key);
+              setActive(option.key);
+              onSelect(option.key, option.value);
+            }}
+            className={clsx(
+              "text-gray-900 dark:text-gray-100",
+              isActive(option.key)
+                ? "bg-sky-200 border-sky-300 border dark:bg-sky-800 dark:border-sky-700"
+                : "bg-white hover:bg-sky-50 border-gray-300 dark:bg-black dark:hover:bg-sky-900 dark:border-gray-700",
+              idx === timeFilterOptions.length - 1 ? "rounded-r-lg" : "",
+              !custom && idx === 0
+                ? "relative inline-flex items-center rounded-l-lg border px-3 py-1.5 text-sm font-medium focus:z-10 focus:border-sky-400 focus:outline-none focus:ring-1 focus:ring-sky-400"
+                : "relative -ml-px inline-flex items-center border px-3 py-1.5 text-sm font-medium focus:z-10 focus:border-sky-400 focus:outline-none focus:ring-1 focus:ring-sky-400"
+            )}
+          >
+            {option.value}
+          </button>
+        )
+      )}
     </Menu>
   );
 };

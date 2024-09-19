@@ -5,6 +5,7 @@ import sys
 import time
 import re
 import getpass
+import tabulate
 
 file_dir = os.path.dirname(os.path.realpath(__file__))
 schema_dir = os.path.join(file_dir, 'migrations')
@@ -15,7 +16,7 @@ all_schemas = [
 
 
 def schema_sort_key(filename):
-    match = re.search(r'schema_(\d+)', filename)
+    match = re.search(r'schema_(\d+)', os.path.basename(filename))
     return int(match.group(1)) if match else -1
 
 
@@ -31,13 +32,17 @@ def get_host(host: str):
 def run_curl_command(query, host, port, user=None, password=None, migration_file=None):
 
     if not query:
-        curl_cmd = f"cat \"{migration_file}\" | curl '{get_host(host)}:{port}/' --data-binary @-"
+        curl_cmd = f"cat \"{migration_file}\" | curl '{
+            get_host(host)}:{port}/' --data-binary @-"
         if user and password:
-            curl_cmd = f"cat \"{migration_file}\" | curl --user '{user}:{password}' '{get_host(host)}:{port}/' --data-binary @-"
+            curl_cmd = f"cat \"{migration_file}\" | curl --user '{user}:{
+                password}' '{get_host(host)}:{port}/' --data-binary @-"
     else:
-        curl_cmd = f"echo \"{query}\" | curl '{get_host(host)}:{port}/' --data-binary @-"
+        curl_cmd = f"echo \"{query}\" | curl '{
+            get_host(host)}:{port}/' --data-binary @-"
         if user and password:
-            curl_cmd = f"echo \"{query}\" | curl --user '{user}:{password}' '{get_host(host)}:{port}/' --data-binary @-"
+            curl_cmd = f"echo \"{
+                query}\" | curl --user '{user}:{password}' '{get_host(host)}:{port}/' --data-binary @-"
 
     result = subprocess.run(curl_cmd, shell=True,
                             capture_output=True, text=True)
@@ -110,6 +115,22 @@ def run_migrations(host, port, retries=5, user=None, password=None):
     print('Finished running migrations')
 
 
+def list_migrations(host, port, user=None, password=None):
+    query = '''
+    SELECT migration_name, applied_date
+    FROM helicone_migrations
+    ORDER BY migration_name;
+    '''
+    res = run_curl_command(query, host, port, user, password)
+    migrations = [line.split('\t') for line in res.stdout.strip().split('\n')]
+
+    # Sort migrations based on schema version number
+    migrations.sort(key=lambda x: schema_sort_key(x[0]))
+
+    headers = ['Migration Name', 'Applied Date']
+    print(tabulate.tabulate(migrations, headers=headers, tablefmt='grid'))
+
+
 def main():
     parser = argparse.ArgumentParser(
         description='Helicone CLI tool to manage migrations and start services'
@@ -129,6 +150,8 @@ def main():
     parser.add_argument('--port', default='18123',
                         help='ClickHouse server port')
     parser.add_argument('--user', help='ClickHouse server user')
+    parser.add_argument('--list-migrations', action='store_true',
+                        help='List applied migrations')
 
     args = parser.parse_args()
 
@@ -190,6 +213,10 @@ echo 'SELECT 1' | curl '{get_host(args.host)}:{args.port}/' --data-binary @-
         print('Applying all migrations')
         create_migration_table(args.host, args.port, args.user, password)
         run_migrations(args.host, args.port, user=args.user, password=password)
+
+    elif args.list_migrations:
+        print('Listing applied migrations')
+        list_migrations(args.host, args.port, args.user, password)
 
     else:
         print('No action specified')
