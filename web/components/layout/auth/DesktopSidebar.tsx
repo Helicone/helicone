@@ -16,7 +16,7 @@ import {
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useMemo } from "react";
+import { useMemo, useEffect, useRef, useState } from "react";
 import { useOrg } from "../organizationContext";
 import OrgDropdown from "../orgDropdown";
 import NavItem from "./NavItem";
@@ -90,6 +90,35 @@ const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
     });
   }, [NAVIGATION, isCollapsed, expandedItems]);
 
+  const sidebarRef = useRef<HTMLDivElement>(null);
+  const navItemsRef = useRef<HTMLDivElement>(null);
+  const [canShowInfoBox, setCanShowInfoBox] = useState(false);
+
+  // Function to calculate if there's enough space to show the InfoBox
+  const calculateAvailableSpace = () => {
+    if (sidebarRef.current && navItemsRef.current) {
+      const sidebarHeight = sidebarRef.current.offsetHeight;
+      const navItemsHeight = navItemsRef.current.offsetHeight;
+      const fixedContentHeight = 100; // Approximate height of fixed elements (header, footer)
+      const infoBoxHeight = 150; // Approximate height of the InfoBox
+
+      const availableHeight =
+        sidebarHeight - navItemsHeight - fixedContentHeight;
+
+      setCanShowInfoBox(availableHeight >= infoBoxHeight);
+    }
+  };
+
+  useEffect(() => {
+    calculateAvailableSpace();
+
+    // Add event listener for window resize
+    window.addEventListener("resize", calculateAvailableSpace);
+    return () => {
+      window.removeEventListener("resize", calculateAvailableSpace);
+    };
+  }, [isCollapsed, expandedItems]);
+
   return (
     <>
       <div
@@ -100,10 +129,11 @@ const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
         )}
       />
       <div
+        ref={sidebarRef}
         className={cn(
           "hidden md:flex md:flex-col z-30 bg-background dark:bg-gray-900 transition-all duration-300 h-screen bg-white pb-4",
           largeWith,
-          "fixed top-0 left-0" // Changed from "sticky top-0" to "fixed top-0 left-0"
+          "fixed top-0 left-0"
         )}
       >
         <div className="w-full flex flex-grow flex-col overflow-y-auto border-r dark:border-gray-700 justify-between">
@@ -111,7 +141,9 @@ const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
             <div className="flex items-center gap-2 w-full">
               {!isCollapsed && <OrgDropdown />}
             </div>
-            <div className={cn("mx-auto", isCollapsed ? "w-fit" : "mr-2")}>
+            <div
+              className={cn("mx-auto", isCollapsed ? "w-full mr-4" : "mr-2")}
+            >
               <Button
                 variant="ghost"
                 size="icon"
@@ -152,10 +184,11 @@ const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
             )}
 
             <div
+              ref={navItemsRef}
               data-collapsed={isCollapsed}
-              className="group flex flex-col gap-4 py-2 data-[collapsed=true]:py-2 "
+              className="group flex flex-col py-2 data-[collapsed=true]:py-2 "
             >
-              <nav className="grid gap-1 px-2 group-[[data-collapsed=true]]:justify-center group-[[data-collapsed=true]]:px-2">
+              <nav className="grid flex-grow overflow-y-auto px-2 group-[[data-collapsed=true]]:justify-center group-[[data-collapsed=true]]:px-2">
                 {NAVIGATION_ITEMS.map((link) => (
                   <NavItem
                     key={link.name}
@@ -163,19 +196,20 @@ const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
                     isCollapsed={isCollapsed}
                     expandedItems={expandedItems}
                     toggleExpand={toggleExpand}
+                    deep={0}
                   />
                 ))}
               </nav>
             </div>
           </div>
-          {!isCollapsed && (
+          {canShowInfoBox && !isCollapsed && (
             <div className="p-2">
               <InfoBox icon={() => <></>} className="flex flex-col">
                 <div>
-                  <span className="text-[#1c4ed8] text-xs font-semibold font-['Inter'] leading-tight">
+                  <span className="text-[#1c4ed8] text-xs font-semibold leading-tight">
                     Early Adopter Exclusive: $120 Credit for the year. <br />
                   </span>
-                  <span className="text-[#1c4ed8] text-xs font-light font-['Inter'] leading-tight">
+                  <span className="text-[#1c4ed8] text-xs font-light leading-tight">
                     Switch to Pro and get $10/mo credit for 1 year, as a thank
                     you for your early support!
                   </span>
@@ -275,25 +309,6 @@ const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
               </>
             )}
           </div>
-          {/* {tier === "free" &&
-            org?.currentOrg?.organization_type !== "customer" && (
-              <div className={cn("p-2", isCollapsed && "hidden")}>
-                <Link href="/settings/billing">
-                  <Button
-                    variant="outline"
-                    className="w-full justify-between dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
-                  >
-                    <div className="flex items-center">
-                      <CloudArrowUpIcon className="h-5 w-5 mr-1.5" />
-                      <span>Free Plan</span>
-                    </div>
-                    <span className="text-xs font-normal text-primary dark:text-gray-300">
-                      Upgrade
-                    </span>
-                  </Button>
-                </Link>
-              </div>
-            )} */}
         </div>
       </div>
     </>
