@@ -45,6 +45,10 @@ const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
     false
   );
 
+  const shouldShowInfoBox = useMemo(() => {
+    return tier === "pro" || tier === "growth";
+  }, [tier]);
+
   const [expandedItems, setExpandedItems] = useLocalStorage<string[]>(
     "expandedItems",
     []
@@ -202,26 +206,24 @@ const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
               </nav>
             </div>
           </div>
-          {canShowInfoBox &&
-            !isCollapsed &&
-            (tier === "free" || tier === "growth") && (
-              <div className="p-2">
-                <InfoBox icon={() => <></>} className="flex flex-col">
-                  <div>
-                    <span className="text-[#1c4ed8] text-xs font-semibold leading-tight">
-                      Early Adopter Exclusive: $120 Credit for the year. <br />
-                    </span>
-                    <span className="text-[#1c4ed8] text-xs font-light leading-tight">
-                      Switch to Pro and get $10/mo credit for 1 year, as a thank
-                      you for your early support!
-                    </span>
-                  </div>
-                  <Button className="bg-blue-700 mt-[10px] text-xs" size="xs">
-                    <Link href="/settings/billing">Upgrade to Pro</Link>
-                  </Button>
-                </InfoBox>
-              </div>
-            )}
+          {canShowInfoBox && !isCollapsed && shouldShowInfoBox && (
+            <div className="p-2">
+              <InfoBox icon={() => <></>} className="flex flex-col">
+                <div>
+                  <span className="text-[#1c4ed8] text-xs font-semibold leading-tight">
+                    Early Adopter Exclusive: $120 Credit for the year. <br />
+                  </span>
+                  <span className="text-[#1c4ed8] text-xs font-light leading-tight">
+                    Switch to Pro and get $10/mo credit for 1 year, as a thank
+                    you for your early support!
+                  </span>
+                </div>
+                <Button className="bg-blue-700 mt-[10px] text-xs" size="xs">
+                  <Link href="/settings/billing">Upgrade to Pro</Link>
+                </Button>
+              </InfoBox>
+            </div>
+          )}
           <div className="mt-auto">
             {isCollapsed ? (
               <>

@@ -65,8 +65,8 @@ const WebhooksPage = (props: WebhooksPageProps) => {
   return (
     <>
       <InfoBox variant="warning" className="mb-4 max-w-xl">
-        Vault is currently in beta. If you have any issues, please contact us at
-        support@helicone.ai.
+        Webhooks are currently in beta. If you have any issues, please contact
+        us at support@helicone.ai.
       </InfoBox>
       <div className="flex flex-col space-y-8">
         <div className="flex flex-row w-full justify-between items-center">
