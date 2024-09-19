@@ -53,6 +53,8 @@ export const ProFeatureWrapper = forwardRef<
       enabled &&
       (org?.currentOrg?.tier === "pro-20240913" ||
         org?.currentOrg?.tier === "growth" ||
+        org?.currentOrg?.tier === "pro" ||
+        org?.currentOrg?.tier === "enterprise" ||
         (org?.currentOrg?.stripe_metadata as { addons?: { prompts?: boolean } })
           ?.addons?.prompts)
     );
