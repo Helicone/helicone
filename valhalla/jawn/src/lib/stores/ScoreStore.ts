@@ -127,10 +127,10 @@ export class ScoreStore extends BaseStore {
     let rowContents = resultMap(
       await clickhouseDb.dbQuery<RequestResponseRMT>(
         `
-          SELECT *
-          FROM request_response_rmt
-          WHERE (request_id, organization_id, provider) IN (${queryPlaceholders})
-          `,
+        SELECT *
+        FROM request_response_rmt
+        WHERE (request_id, organization_id, provider) IN (${queryPlaceholders})
+        `,
         queryParams
       ),
       (x) => x
