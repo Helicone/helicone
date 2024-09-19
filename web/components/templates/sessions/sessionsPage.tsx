@@ -1,7 +1,7 @@
 import { useOrg } from "@/components/layout/organizationContext";
 
 import { Badge } from "@tremor/react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   getTimeIntervalAgo,
   TimeInterval,
@@ -14,6 +14,8 @@ import AuthHeader from "../../shared/authHeader";
 import SessionNameSelection from "./nameSelection";
 import SessionDetails from "./sessionDetails";
 import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
+import { InfoBox } from "@/components/ui/helicone/infoBox";
+import Link from "next/link";
 
 interface SessionsPageProps {
   currentPage: number;
@@ -62,6 +64,13 @@ const SessionsPage = (props: SessionsPageProps) => {
     }
   }, [hasSomeSessions, names.sessions.length, names.isLoading]);
 
+  const hasAccessToSessions = useMemo(() => {
+    return (
+      org?.currentOrg?.tier !== "free" ||
+      (hasSomeSessions &&
+        new Date().getTime() < new Date("2024-09-27").getTime())
+    );
+  }, [org?.currentOrg?.tier, hasSomeSessions]);
   return (
     <>
       <AuthHeader
@@ -71,9 +80,20 @@ const SessionsPage = (props: SessionsPageProps) => {
           </div>
         }
       />
+      {org?.currentOrg?.tier === "free" && (
+        <InfoBox title="Sessions are a Pro feature.">
+          <p>
+            Sessions are a Pro feature. In order to keep using them, you need to
+            upgrade your plan before September 27st, 2024.{" "}
+            <Link href="/settings/billing" className="text-blue-500 underline">
+              Upgrade to Pro
+            </Link>
+          </p>
+        </InfoBox>
+      )}
       <div>
         {!isLoading &&
-        org?.currentOrg?.tier !== "free" &&
+        hasAccessToSessions &&
         (hasSomeSessions || hasSomeSessions === null) ? (
           <Row className="gap-5 ">
             <SessionNameSelection
