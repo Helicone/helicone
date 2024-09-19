@@ -39,7 +39,8 @@ const SignUp = () => {
     >
       {demo === "true" && <InfoBanner />}
       <div className="bg-blue-200 text-blue-800 p-4 text-center">
-        Scheduled maintenance: We will be back in 10 minutes.
+        Scheduled Maintenance: 10-min downtime (11:30-11:40 AM PST); no logs
+        will be lost, processed with slight delay.
       </div>
       <AuthForm
         handleEmailSubmit={async (email: string, password: string) => {
