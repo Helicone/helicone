@@ -99,7 +99,7 @@ export const ProFeatureWrapper = forwardRef<
             <div className="border rounded-lg p-4">
               <h3 className="font-semibold mb-2">Free</h3>
               {!isPro && (
-                <span className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
+                <span className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-md">
                   Current plan
                 </span>
               )}
@@ -118,14 +118,21 @@ export const ProFeatureWrapper = forwardRef<
                 </li>
               </ul>
             </div>
-            <div className="border rounded-lg p-4">
-              <h3 className="font-semibold mb-2">Pro</h3>
-              {isPro && (
+            <div className="border rounded-lg p-4 ">
+              <div className="flex flex-row w-full justify-between items-center mb-2">
+                <h3 className="font-semibold">Pro</h3>
+
+                <span className="text-base font-semibold">$20/user</span>
+              </div>
+              {isPro ? (
                 <span className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
                   Current plan
                 </span>
+              ) : (
+                <span className="text-xs text-slate-500 border border-slate-200 bg-slate-50 px-2 py-1 rounded-md">
+                  Billed monthly
+                </span>
               )}
-              <span className="text-sm">$20/user</span>
               <p className="text-sm mt-2">Everything in Free, plus:</p>
               <ul className="mt-4 space-y-2">
                 <li className="flex items-center text-sm">
@@ -154,10 +161,12 @@ export const ProFeatureWrapper = forwardRef<
               />
             </div>
           </div>
-          <p className="text-sm text-gray-500 mt-4">
-            Don&apos;t worry, we are still processing all your incoming
-            requests. You will be able to see them when you upgrade to Pro.
-          </p>
+          {featureName === "time_filter" && (
+            <p className="text-sm text-gray-500 mt-4">
+              Don&apos;t worry, we are still processing all your incoming
+              requests. You will be able to see them when you upgrade to Pro.
+            </p>
+          )}
         </DialogContent>
       </Dialog>
     </>
