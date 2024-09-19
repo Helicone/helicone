@@ -111,7 +111,7 @@ const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
             <div className="flex items-center gap-2 w-full">
               {!isCollapsed && <OrgDropdown />}
             </div>
-            <div className={cn("mx-auto", isCollapsed ? "w-fit" : "mr-2")}>
+            <div className={cn("mx-auto", isCollapsed ? "w-full mr-4" : "mr-2")}>
               <Button
                 variant="ghost"
                 size="icon"
