@@ -15,7 +15,6 @@ const SignUp = () => {
   const supabase = useSupabaseClient();
   const { setNotification } = useNotification();
   const [showEmailConfirmation, setShowEmailConfirmation] = useState(false);
-
   const user = useUser();
   const router = useRouter();
   const { demo = "false" } = router.query;
