@@ -202,11 +202,6 @@ const blogContent: BlogStructure[] = [
   },
   {
     dynmaicEntry: {
-      folderName: "keywords-vs-helicone",
-    },
-  },
-  {
-    dynmaicEntry: {
       folderName: "langchain-qawolf",
     },
   },
