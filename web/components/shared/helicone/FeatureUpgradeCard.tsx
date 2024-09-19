@@ -18,6 +18,7 @@ interface FeatureUpgradeCardProps {
   videoSrc?: string;
   youtubeVideo?: string;
   documentationLink: string;
+  tier: string;
 }
 
 export const FeatureUpgradeCard: React.FC<FeatureUpgradeCardProps> = ({
@@ -27,6 +28,7 @@ export const FeatureUpgradeCard: React.FC<FeatureUpgradeCardProps> = ({
   videoSrc,
   youtubeVideo,
   documentationLink,
+  tier,
 }) => {
   const [isPlanComparisonVisible, setIsPlanComparisonVisible] = useState(false);
 
@@ -60,77 +62,79 @@ export const FeatureUpgradeCard: React.FC<FeatureUpgradeCardProps> = ({
           ></iframe>
         )}
       </CardContent>
-      <CardFooter className="flex flex-col justify-between">
-        <Button
-          variant="link"
-          className="px-0 w-full text-left flex justify-start"
-          onClick={() => setIsPlanComparisonVisible(!isPlanComparisonVisible)}
-        >
-          Compare my plan with Pro{" "}
-          {isPlanComparisonVisible ? (
-            <ChevronUpIcon className="ml-1 h-4 w-4" />
-          ) : (
-            <ChevronDownIcon className="ml-1 h-4 w-4" />
-          )}
-        </Button>
-        {isPlanComparisonVisible && (
-          <div className="mt-4 p-4 border rounded-md">
-            <h3 className="text-lg font-semibold mb-4">Plan Comparison</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="border rounded-lg p-4">
-                <h3 className="font-semibold mb-2">Free</h3>
-                <span className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
-                  Current plan
-                </span>
-                <ul className="mt-4 space-y-2">
-                  <li className="flex items-center text-sm">
-                    <CheckIcon className="mr-2 h-4 w-4 text-green-500" />
-                    10k free requests/month
-                  </li>
-                  <li className="flex items-center text-sm">
-                    <CheckIcon className="mr-2 h-4 w-4 text-green-500" />
-                    Access to Dashboard
-                  </li>
-                  <li className="flex items-center text-sm">
-                    <CheckIcon className="mr-2 h-4 w-4 text-green-500" />
-                    Free, truly
-                  </li>
-                </ul>
-              </div>
-              <div className="border rounded-lg p-4">
-                <h3 className="font-semibold mb-2">Pro</h3>
-                <span className="text-sm">$20/user</span>
-                <p className="text-sm mt-2">Everything in Free, plus:</p>
-                <ul className="mt-4 space-y-2">
-                  <li className="flex items-center text-sm">
-                    <CheckIcon className="mr-2 h-4 w-4 text-green-500" />
-                    Limitless requests (first 100k free)
-                  </li>
-                  <li className="flex items-center text-sm">
-                    <CheckIcon className="mr-2 h-4 w-4 text-green-500" />
-                    Access to all features
-                  </li>
-                  <li className="flex items-center text-sm">
-                    <CheckIcon className="mr-2 h-4 w-4 text-green-500" />
-                    Standard support
-                  </li>
-                </ul>
-                <a href="#" className="text-sm text-blue-600 mt-2 block">
-                  See all features →
-                </a>
+      {tier === "free" && (
+        <CardFooter className="flex flex-col justify-between">
+          <Button
+            variant="link"
+            className="px-0 w-full text-left flex justify-start"
+            onClick={() => setIsPlanComparisonVisible(!isPlanComparisonVisible)}
+          >
+            Compare my plan with Pro{" "}
+            {isPlanComparisonVisible ? (
+              <ChevronUpIcon className="ml-1 h-4 w-4" />
+            ) : (
+              <ChevronDownIcon className="ml-1 h-4 w-4" />
+            )}
+          </Button>
+          {isPlanComparisonVisible && (
+            <div className="mt-4 p-4 border rounded-md">
+              <h3 className="text-lg font-semibold mb-4">Plan Comparison</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="border rounded-lg p-4">
+                  <h3 className="font-semibold mb-2">Free</h3>
+                  <span className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
+                    Current plan
+                  </span>
+                  <ul className="mt-4 space-y-2">
+                    <li className="flex items-center text-sm">
+                      <CheckIcon className="mr-2 h-4 w-4 text-green-500" />
+                      10k free requests/month
+                    </li>
+                    <li className="flex items-center text-sm">
+                      <CheckIcon className="mr-2 h-4 w-4 text-green-500" />
+                      Access to Dashboard
+                    </li>
+                    <li className="flex items-center text-sm">
+                      <CheckIcon className="mr-2 h-4 w-4 text-green-500" />
+                      Free, truly
+                    </li>
+                  </ul>
+                </div>
+                <div className="border rounded-lg p-4">
+                  <h3 className="font-semibold mb-2">Pro</h3>
+                  <span className="text-sm">$20/user</span>
+                  <p className="text-sm mt-2">Everything in Free, plus:</p>
+                  <ul className="mt-4 space-y-2">
+                    <li className="flex items-center text-sm">
+                      <CheckIcon className="mr-2 h-4 w-4 text-green-500" />
+                      Limitless requests (first 100k free)
+                    </li>
+                    <li className="flex items-center text-sm">
+                      <CheckIcon className="mr-2 h-4 w-4 text-green-500" />
+                      Access to all features
+                    </li>
+                    <li className="flex items-center text-sm">
+                      <CheckIcon className="mr-2 h-4 w-4 text-green-500" />
+                      Standard support
+                    </li>
+                  </ul>
+                  <a href="#" className="text-sm text-blue-600 mt-2 block">
+                    See all features →
+                  </a>
+                </div>
               </div>
             </div>
+          )}
+          <div className="space-x-2 mt-4">
+            <Button variant="outline" asChild>
+              <Link href={documentationLink}>View documentation</Link>
+            </Button>
+            <Button asChild>
+              <Link href="/settings/billing">Start 14-day free trial</Link>
+            </Button>
           </div>
-        )}
-        <div className="space-x-2 mt-4">
-          <Button variant="outline" asChild>
-            <Link href={documentationLink}>View documentation</Link>
-          </Button>
-          <Button asChild>
-            <Link href="/settings/billing">Start 14-day free trial</Link>
-          </Button>
-        </div>
-      </CardFooter>
+        </CardFooter>
+      )}
     </Card>
   );
 };
