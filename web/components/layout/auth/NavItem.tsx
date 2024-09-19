@@ -133,7 +133,7 @@ const NavItem: React.FC<NavItemProps> = ({
               isSubItem={true}
               expandedItems={expandedItems}
               toggleExpand={toggleExpand}
-              deep={deep + 1}
+              deep={deep ? deep + 1 : 1}
             />
           ))}
         </div>
