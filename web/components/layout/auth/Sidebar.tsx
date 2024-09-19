@@ -136,18 +136,6 @@ const Sidebar = ({ setOpen }: SidebarProps) => {
             icon: BellIcon,
             current: pathname.includes("/alerts"),
           },
-          {
-            name: "Webhooks",
-            href: "/webhooks",
-            icon: Webhook,
-            current: pathname.includes("/webhooks"),
-          },
-          {
-            name: "Vault",
-            href: "/vault",
-            icon: LockClosedIcon,
-            current: pathname.includes("/vault"),
-          },
         ],
       },
       ...(org?.currentOrg?.tier === "enterprise"
@@ -155,20 +143,19 @@ const Sidebar = ({ setOpen }: SidebarProps) => {
             {
               name: "Enterprise",
               href: "/enterprise",
-              icon: BuildingLibraryIcon,
               current: pathname.includes("/enterprise"),
               subItems: [
                 {
                   name: "Webhooks",
-                  href: "/enterprise/webhooks",
-                  icon: null,
-                  current: false,
+                  href: "/webhooks",
+                  icon: Webhook,
+                  current: pathname.includes("/webhooks"),
                 },
                 {
                   name: "Vault",
-                  href: "/enterprise/vault",
-                  icon: null,
-                  current: false,
+                  href: "/vault",
+                  icon: LockClosedIcon,
+                  current: pathname.includes("/vault"),
                 },
               ],
             },

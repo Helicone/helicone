@@ -172,10 +172,10 @@ const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
             <div className="p-2">
               <InfoBox icon={() => <></>} className="flex flex-col">
                 <div>
-                  <span className="text-[#1c4ed8] text-xs font-semibold font-['Inter'] leading-tight">
+                  <span className="text-[#1c4ed8] text-xs font-semibold  leading-tight">
                     Early Adopter Exclusive: $120 Credit for the year. <br />
                   </span>
-                  <span className="text-[#1c4ed8] text-xs font-light font-['Inter'] leading-tight">
+                  <span className="text-[#1c4ed8] text-xs font-light  leading-tight">
                     Switch to Pro and get $10/mo credit for 1 year, as a thank
                     you for your early support!
                   </span>
