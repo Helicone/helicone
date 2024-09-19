@@ -6,7 +6,7 @@ import {
   UserGroupIcon,
 } from "@heroicons/react/24/outline";
 import { Divider } from "@tremor/react";
-import { LinkIcon } from "lucide-react";
+import { KeyIcon, LinkIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { ReactNode } from "react";
@@ -17,6 +17,12 @@ const tabs = [
     title: "Organization",
     icon: BuildingOfficeIcon,
     href: "/settings",
+  },
+  {
+    id: "api-keys",
+    title: "API Keys",
+    icon: KeyIcon,
+    href: "/settings/api-keys",
   },
   {
     id: "connections",
