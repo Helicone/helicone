@@ -61,7 +61,7 @@ export const FeatureUpgradeCard: React.FC<FeatureUpgradeCardProps> = ({
         )}
       </CardContent>
       <CardFooter className="flex flex-col justify-between w-full">
-        <Button 
+        <Button
           variant="link"
           className="px-0 w-full text-left flex justify-start"
           onClick={() => setIsPlanComparisonVisible(!isPlanComparisonVisible)}
