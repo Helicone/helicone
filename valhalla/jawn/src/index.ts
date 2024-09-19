@@ -64,7 +64,7 @@ if (KAFKA_ENABLED) {
     dlqCount: DLQ_WORKER_COUNT,
     normalCount: NORMAL_WORKER_COUNT,
     scoresCount: SCORES_WORKER_COUNT,
-    scoresDlqCount: 0,
+    scoresDlqCount: SCORES_WORKER_COUNT,
     backFillCount: 0,
   });
 }
