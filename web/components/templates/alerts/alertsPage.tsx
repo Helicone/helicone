@@ -45,6 +45,19 @@ const AlertsPage = (props: AlertsPageProps) => {
   const { data: slackChannelsData, isLoading: isLoadingSlackChannels } =
     useGetOrgSlackChannels(orgContext?.currentOrg?.id || "");
 
+  const isAlertsEnabled = () => {
+    const metadata = orgContext?.currentOrg?.stripe_metadata as {
+      addons?: { alerts?: boolean };
+    };
+    return (
+      (metadata?.addons?.alerts &&
+        orgContext?.currentOrg?.tier === "pro-20240913") ||
+      orgContext?.currentOrg?.tier === "enterprise" ||
+      orgContext?.currentOrg?.tier === "growth" ||
+      orgContext?.currentOrg?.tier === "pro"
+    );
+  };
+
   function formatTimeWindow(milliseconds: number): string {
     // Define the time windows with an index signature
 
@@ -61,7 +74,6 @@ const AlertsPage = (props: AlertsPageProps) => {
   return (
     <div className="flex flex-col space-y-16">
       <div className="flex flex-col space-y-8">
-        {/* Active Alerts */}
         <div className="flex flex-col sm:flex-row justify-between items-center">
           <div className="flex flex-col space-y-1">
             <h4 className="text-gray-800 text-xl font-semibold dark:text-gray-200">
@@ -74,16 +86,7 @@ const AlertsPage = (props: AlertsPageProps) => {
           </div>
 
           <Col className="items-end">
-            <ProFeatureWrapper
-              featureName="Alerts"
-              enabled={
-                (
-                  orgContext?.currentOrg?.stripe_metadata as {
-                    addons?: { alerts?: boolean };
-                  }
-                )?.addons?.alerts ?? false
-              }
-            >
+            <ProFeatureWrapper featureName="Alerts" enabled={isAlertsEnabled()}>
               <button
                 onClick={() => setCreateNewAlertModal(true)}
                 className="w-min bg-gray-900 hover:bg-gray-700 dark:bg-gray-100 dark:hover:bg-gray-300 whitespace-nowrap rounded-md px-4 py-2 text-sm font-semibold text-white dark:text-black shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
@@ -95,16 +98,7 @@ const AlertsPage = (props: AlertsPageProps) => {
         </div>
         <ul className="">
           {alerts.length === 0 ? (
-            <ProFeatureWrapper
-              featureName="Alerts"
-              enabled={
-                (
-                  orgContext?.currentOrg?.stripe_metadata as {
-                    addons?: { alerts?: boolean };
-                  }
-                )?.addons?.alerts ?? false
-              }
-            >
+            <ProFeatureWrapper featureName="Alerts" enabled={isAlertsEnabled()}>
               <button
                 onClick={() => setCreateNewAlertModal(true)}
                 className="relative block w-full rounded-lg border-2 border-dashed bg-gray-200 hover:bg-gray-300 dark:bg-gray-800 dark:hover:bg-gray-700 hover:cursor-pointer border-gray-500 p-12 text-center focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
