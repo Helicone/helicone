@@ -18,7 +18,7 @@ interface FeatureUpgradeCardProps {
   videoSrc?: string;
   youtubeVideo?: string;
   documentationLink: string;
-  tier: string;
+  tier?: string;
 }
 
 export const FeatureUpgradeCard: React.FC<FeatureUpgradeCardProps> = ({
@@ -28,7 +28,7 @@ export const FeatureUpgradeCard: React.FC<FeatureUpgradeCardProps> = ({
   videoSrc,
   youtubeVideo,
   documentationLink,
-  tier,
+  tier = "free",
 }) => {
   const [isPlanComparisonVisible, setIsPlanComparisonVisible] = useState(false);
 

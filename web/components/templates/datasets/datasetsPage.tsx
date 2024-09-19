@@ -4,6 +4,8 @@ import { SortDirection } from "../../../services/lib/sorts/users/sorts";
 import AuthHeader from "../../shared/authHeader";
 import ThemedTable from "../../shared/themed/table/themedTable";
 import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
+import { useMemo } from "react";
+import { useOrg } from "@/components/layout/organizationContext";
 
 interface DatasetsPageProps {
   currentPage: number;
@@ -23,10 +25,26 @@ const DatasetsPage = (props: DatasetsPageProps) => {
 
   const router = useRouter();
 
+  const org = useOrg();
+
+  const hasAccess = useMemo(() => {
+    return (
+      org?.currentOrg?.tier === "growth" ||
+      org?.currentOrg?.tier === "enterprise" ||
+      (org?.currentOrg?.tier === "pro-20240913" &&
+        (org?.currentOrg?.stripe_metadata as { addons?: { prompts?: boolean } })
+          ?.addons?.prompts)
+    );
+  }, [org?.currentOrg?.tier, org?.currentOrg?.stripe_metadata]);
+
+  const hasLimitedAccess = useMemo(() => {
+    return !hasAccess && (datasets?.length ?? 0) > 0;
+  }, [hasAccess, datasets?.length]);
+
   return (
     <>
       <AuthHeader title={"Datasets"} />
-      {!isLoading && datasets.length === 0 ? (
+      {!isLoading && org?.currentOrg?.tier === "free" ? (
         <div className="flex flex-col space-y-2 w-full items-center">
           <FeatureUpgradeCard
             title="Unlock Datasets"
@@ -34,6 +52,17 @@ const DatasetsPage = (props: DatasetsPageProps) => {
             infoBoxText="Organize your requests into datasets for evals or fine-tuning."
             videoSrc="https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/creating-dataset.mp4"
             documentationLink="https://docs.helicone.ai/features/sessions"
+          />
+        </div>
+      ) : datasets?.length === 0 ? (
+        <div className="flex flex-col space-y-2 w-full items-center">
+          <FeatureUpgradeCard
+            title="Get Started with Datasets"
+            description="You have access to Datasets, but haven't created any yet. It's easy to get started!"
+            infoBoxText="Organize your requests into datasets for evals or fine-tuning."
+            videoSrc="https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/creating-dataset.mp4"
+            documentationLink="https://docs.helicone.ai/features/sessions"
+            tier={org?.currentOrg?.tier ?? "free"}
           />
         </div>
       ) : (
