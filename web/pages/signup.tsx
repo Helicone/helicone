@@ -38,10 +38,7 @@ const SignUp = () => {
       ogImageUrl={"https://www.helicone.ai/static/helicone-og.webp"}
     >
       {demo === "true" && <InfoBanner />}
-      <div className="bg-blue-200 text-blue-800 p-4 text-center">
-        Scheduled Maintenance: 10-min downtime (11:30-11:40 AM PST); no logs
-        will be lost, processed with slight delay.
-      </div>
+
       <AuthForm
         handleEmailSubmit={async (email: string, password: string) => {
           const origin = window.location.origin;
