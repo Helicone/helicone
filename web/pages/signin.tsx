@@ -8,7 +8,6 @@ import { supabaseServer } from "../lib/supabaseServer";
 import { Result, err, ok } from "../lib/result";
 import PublicMetaData from "../components/layout/public/publicMetaData";
 import { useEffect } from "react";
-import { InfoBox } from "../components/ui/helicone/infoBox"; // Import InfoBox
 
 export type CustomerPortalContent = {
   domain: string;
