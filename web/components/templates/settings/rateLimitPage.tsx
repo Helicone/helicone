@@ -8,17 +8,22 @@ import {
   startOfMonth,
   subMonths,
 } from "date-fns";
-import StyledAreaChart from "../dashboard/styledAreaChart";
 import { BarChart } from "@tremor/react";
 import { getTimeMap } from "../../../lib/timeCalculations/constants";
-import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import useNotification from "../../shared/notification/useNotification";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
-interface RateLimitPageProps {}
-
-const RateLimitPage = (props: RateLimitPageProps) => {
-  const {} = props;
-
+const RateLimitPage = () => {
   const [currentMonth, setCurrentMonth] = useState(startOfMonth(new Date()));
   const timeIncrement = "day";
 
@@ -60,59 +65,57 @@ const RateLimitPage = (props: RateLimitPageProps) => {
   const { setNotification } = useNotification();
 
   return (
-    <div className="mt-8 flex flex-col text-gray-900 max-w-2xl space-y-8">
-      <div className="flex flex-col space-y-6">
-        <div className="flex flex-row space-x-4 items-center">
-          <button
-            onClick={prevMonth}
-            className="p-1 hover:bg-gray-200 rounded-md text-gray-500 hover:text-gray-700"
-          >
-            <ChevronLeftIcon className="h-5 w-5" />
-          </button>
-
-          <h1 className="text-4xl font-semibold tracking-wide text-black dark:text-white">
-            {getMonthName(startOfMonthFormatted + 1)}
-          </h1>
-          {!isNextMonthDisabled && (
-            <button
-              onClick={nextMonth}
-              className="p-1 hover:bg-gray-200 rounded-md text-gray-500 hover:text-gray-700"
+    <div className="container mx-auto py-10 space-y-8">
+      <Card>
+        <CardHeader>
+          <div className="flex items-center space-x-4">
+            <Button variant="outline" size="icon" onClick={prevMonth}>
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <CardTitle className="text-3xl font-bold">
+              {getMonthName(startOfMonthFormatted)}
+            </CardTitle>
+            {!isNextMonthDisabled && (
+              <Button variant="outline" size="icon" onClick={nextMonth}>
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="font-semibold">
+            Your requests are never dropped and will always be returned to the
+            client. Helicone will always do its best effort to make sure the
+            user gets their request.
+          </p>
+          <p className="text-muted-foreground">
+            Below is a summary of the rate-limiting{" "}
+            <span className="font-semibold">logged</span> occurrences for your
+            organization last month. This simply indicates that some of your
+            requests were processed but not logged in your dashboard due to
+            reaching a rate limit - If you&apos;d like to increase your rate
+            limit, please feel free to reach out to us at{" "}
+            <Button
+              variant="link"
+              className="p-0 h-auto"
+              onClick={() => {
+                navigator.clipboard.writeText("sales@helicone.ai");
+                setNotification("Email copied to clipboard", "success");
+              }}
             >
-              <ChevronRightIcon className="h-5 w-5" />
-            </button>
-          )}
-        </div>
-        <b>
-          Your requests are never dropped and will always be returned to the
-          client. Helicone will always do it{"'"}s best effort to make sure the
-          user gets their request.
-        </b>
-        <p className="text-md text-gray-900 dark:text-gray-100">
-          Below is a summary of the rate-limiting <b>logged</b> occurrences for
-          your organization last month. This simply indicates that some of your
-          requests were processed but not logged in your dashboard due to
-          reaching a rate limit - If you’d like to increase your rate limit,
-          please feel free to reach out to us at{" "}
-          <button
-            onClick={() => {
-              // copy the email to the clipboard
-              navigator.clipboard.writeText("sales@helicone.ai");
-              setNotification("Email copied to clipboard", "success");
-            }}
-            className="text-blue-500 underline"
-          >
-            sales@helicone.ai
-          </button>
-          .
-        </p>
-      </div>
+              sales@helicone.ai
+            </Button>
+            .
+          </p>
+        </CardContent>
+      </Card>
+
       {!isLoading && metrics.totalRateLimits.data && (
-        <div key="rate-limit">
-          <StyledAreaChart
-            title={"Rate-Limits this month"}
-            value={metrics.totalRateLimits.data.data?.toString() ?? ""}
-            isDataOverTimeLoading={false}
-          >
+        <Card>
+          <CardHeader>
+            <CardTitle>Rate-Limits this month</CardTitle>
+          </CardHeader>
+          <CardContent>
             <BarChart
               className="h-[14rem]"
               data={
@@ -126,40 +129,39 @@ const RateLimitPage = (props: RateLimitPageProps) => {
               colors={["cyan"]}
               showYAxis={false}
             />
-          </StyledAreaChart>
-        </div>
+          </CardContent>
+        </Card>
       )}
 
-      <table
-        className="w-full border-collapse border border-gray-200 dark:border-gray-800"
-        style={{ tableLayout: "fixed" }}
-      >
-        <thead>
-          <tr>
-            <th>Tier</th>
-            <th>Rate limits</th>
-          </tr>
-        </thead>
-        <tbody className="text-sm">
-          <tr className="border-t border-gray-200 dark:border-gray-800">
-            <td>Free</td>
-            <td>834 logs / 5 seconds</td>
-          </tr>
-          <tr className="border-t border-gray-200 dark:border-gray-800">
-            <td>Pro</td>
-            <td>8334 logs / 5 second</td>
-          </tr>
-          <tr className="border-t border-gray-200 dark:border-gray-800">
-            <td
-              className="border-b border-gray-200 dark:border-gray-800"
-              rowSpan={2}
-            >
-              Enterprise
-            </td>
-            <td>Custom</td>
-          </tr>
-        </tbody>
-      </table>
+      <Card>
+        <CardHeader>
+          <CardTitle>Rate Limit Tiers</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Tier</TableHead>
+                <TableHead>Rate limits</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableRow>
+                <TableCell>Free</TableCell>
+                <TableCell>834 logs / 5 seconds</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>Pro</TableCell>
+                <TableCell>8334 logs / 5 seconds</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>Enterprise</TableCell>
+                <TableCell>Custom</TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
     </div>
   );
 };

@@ -1,13 +1,9 @@
-import {
-  BookOpenIcon,
-  CircleStackIcon as DatabaseIcon,
-} from "@heroicons/react/24/outline";
-import Link from "next/link";
 import { useRouter } from "next/router";
 import { useGetHeliconeDatasets } from "../../../services/hooks/dataset/heliconeDataset";
 import { SortDirection } from "../../../services/lib/sorts/users/sorts";
 import AuthHeader from "../../shared/authHeader";
 import ThemedTable from "../../shared/themed/table/themedTable";
+import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
 
 interface DatasetsPageProps {
   currentPage: number;
@@ -31,50 +27,14 @@ const DatasetsPage = (props: DatasetsPageProps) => {
     <>
       <AuthHeader title={"Datasets"} />
       {!isLoading && datasets.length === 0 ? (
-        <div className="flex flex-col w-full mt-12 justify-center items-center">
-          <div className="flex flex-col items-center max-w-3xl">
-            <DatabaseIcon className="h-12 w-12 text-black dark:text-white" />
-            <p className="text-xl text-black dark:text-white font-semibold mt-6">
-              No Datasets
-            </p>
-
-            <p className="text-sm text-gray-500 max-w-sm mt-2 text-center">
-              Create your first dataset to get started. Here&apos;s a quick
-              tutorial:
-            </p>
-            <div className="mt-4 w-full">
-              <video
-                width="100%"
-                height="100%"
-                autoPlay
-                muted
-                loop
-                className="rounded-lg shadow-lg"
-              >
-                <source
-                  src="https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/creating-dataset.mp4"
-                  type="video/mp4"
-                />
-                Your browser does not support the video tag.
-              </video>
-            </div>
-            <div className="mt-6 flex gap-3">
-              <Link
-                href="https://docs.helicone.ai/features/datasets"
-                className="w-fit items-center rounded-md bg-black px-3 py-2 gap-2 text-sm flex font-medium text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
-              >
-                <BookOpenIcon className="h-4 w-4" />
-                View Docs
-              </Link>
-              <Link
-                href="/requests"
-                className="w-fit items-center rounded-md bg-blue-600 px-3 py-2 gap-2 text-sm flex font-medium text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
-              >
-                <DatabaseIcon className="h-4 w-4" />
-                Create Dataset
-              </Link>
-            </div>
-          </div>
+        <div className="flex flex-col space-y-2 w-full items-center">
+          <FeatureUpgradeCard
+            title="Unlock Datasets"
+            description="The Free plan does not include the Datasets feature, but getting access is easy."
+            infoBoxText="Organize your requests into datasets for evals or fine-tuning."
+            videoSrc="https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/creating-dataset.mp4"
+            documentationLink="https://docs.helicone.ai/features/sessions"
+          />
         </div>
       ) : (
         <ThemedTable

@@ -1,5 +1,5 @@
-import { BookOpenIcon, CircleStackIcon } from "@heroicons/react/24/outline";
-import { AreaChart } from "@tremor/react";
+import { BookOpenIcon, ShieldCheckIcon } from "@heroicons/react/24/outline";
+import { AreaChart, Badge, Divider } from "@tremor/react";
 import Link from "next/link";
 import { useState } from "react";
 import { TimeFilter } from "../../../lib/api/handlerWrappers";
@@ -18,6 +18,9 @@ import useSearchParams from "../../shared/utils/useSearchParams";
 import RequestsPageV2 from "../requestsV2/requestsPageV2";
 import { useGetPropertiesV2 } from "../../../services/hooks/propertiesV2";
 import { getPropertyFiltersV2 } from "../../../services/lib/filters/frontendFilterDefs";
+import { useOrg } from "@/components/layout/organizationContext";
+import { Button } from "@/components/ui/button";
+import { DiffHighlight } from "../welcome/diffHighlight";
 
 const RateLimitPage = (props: {}) => {
   const [timeFilter, setTimeFilter] = useState<TimeFilter>({
@@ -35,6 +38,11 @@ const RateLimitPage = (props: {}) => {
     }
   };
   const { properties } = useGetPropertiesV2(getPropertyFiltersV2);
+
+  const org = useOrg();
+  const isPro =
+    org?.currentOrg?.tier === "pro-20240913" ||
+    org?.currentOrg?.tier === "growth";
 
   const rateLimitFilterLeaf = {
     request_response_rmt: {
@@ -85,7 +93,11 @@ const RateLimitPage = (props: {}) => {
   return (
     <>
       <AuthHeader
-        title={"Rate limits"}
+        title={
+          <div className="flex items-center gap-2">
+            Rate limits <Badge size="sm">Beta</Badge>
+          </div>
+        }
         actions={
           <Link
             href="https://docs.helicone.ai/features/advanced-usage/custom-rate-limits"
@@ -97,32 +109,72 @@ const RateLimitPage = (props: {}) => {
           </Link>
         }
       />
-      {!properties.find((x) => x === "Helicone-Rate-Limit-Status") ? (
-        <>
-          <div className="flex flex-col w-full h-96 justify-center items-center">
-            <div className="flex flex-col w-2/5">
-              <CircleStackIcon className="h-12 w-12 text-black dark:text-white border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-2 rounded-lg" />
-              <p className="text-xl text-black dark:text-white font-semibold mt-8">
-                No Rate Limit data available
-              </p>
-              <p className="text-sm text-gray-500 max-w-sm mt-2">
-                Please view our documentation to learn how to enable rate limits
-                for your requests.
-              </p>
-              <div className="mt-4">
-                <Link
-                  href="https://docs.helicone.ai/features/advanced-usage/custom-rate-limits"
-                  target="_blank"
-                  rel="noreferrer noopener"
-                  className="w-fit items-center rounded-lg bg-black dark:bg-white px-2.5 py-1.5 gap-2 text-sm flex font-medium text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-                >
-                  <BookOpenIcon className="h-4 w-4" />
-                  View Docs
-                </Link>
-              </div>
+      {!isPro || !properties.find((x) => x === "Helicone-Rate-Limit-Status") ? (
+        <div className="flex flex-col w-full mt-16 justify-center items-center">
+          <div className="flex flex-col">
+            <div className="w-fit pt-2 pl-0.5 bg-white border border-gray-300 rounded-md">
+              <ShieldCheckIcon className="h-10 w-10 flex items-center justify-center ml-2 text-gray-500" />
             </div>
+
+            <p className="text-xl text-black dark:text-white font-semibold mt-8">
+              {!isPro
+                ? "Upgrade to Pro to start using Rate Limits"
+                : "No Rate Limit Data Found"}
+            </p>
+            <p className="text-sm text-gray-500 max-w-sm mt-2">
+              View our documentation to learn how to use rate limiting.
+            </p>
+            <div className="mt-4 flex gap-2">
+              <Link
+                href="https://docs.helicone.ai/features/advanced-usage/custom-rate-limits"
+                className="w-fit items-center rounded-lg bg-black dark:bg-white px-2.5 py-1.5 gap-2 text-sm flex font-medium text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              >
+                <BookOpenIcon className="h-4 w-4" />
+                View Docs
+              </Link>
+              {!isPro && (
+                <Link href="/settings/billing">
+                  <Button className="bg-sky-500 hover:bg-sky-600">
+                    Start free trial
+                  </Button>
+                </Link>
+              )}
+            </div>
+            {isPro && (
+              <div>
+                <Divider>Or</Divider>
+
+                <div className="mt-4">
+                  <h3 className="text-xl text-black dark:text-white font-semibold">
+                    TS/JS Quick Start
+                  </h3>
+                  <DiffHighlight
+                    code={`
+import { Configuration, OpenAIApi } from "openai";
+const configuration = new Configuration({
+  apiKey: process.env.OPENAI_API_KEY,
+  basePath: "https://oai.helicone.ai/v1",
+  defaultHeaders: {
+    "Helicone-Property-IP": "111.1.1.1",
+    "Helicone-RateLimit-Policy": "10;w=1000;u=cents;s=user", // add this header and set the header value
+  },
+});
+const openai = new OpenAIApi(configuration);
+
+const response = await openai.createCompletion({
+  model: "text-davinci-003",
+  prompt: "How do I set custom rate limits?",
+});
+`}
+                    language="typescript"
+                    newLines={[]}
+                    oldLines={[]}
+                  />
+                </div>
+              </div>
+            )}
           </div>
-        </>
+        </div>
       ) : (
         <Col className="gap-8">
           <ThemedTimeFilter

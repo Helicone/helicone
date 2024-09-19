@@ -5,7 +5,7 @@ import {
   ClockIcon,
   TableCellsIcon,
 } from "@heroicons/react/24/outline";
-import { ElementType, useState } from "react";
+import { ElementType, useMemo, useState } from "react";
 import {
   BarChart,
   Tab,
@@ -13,6 +13,8 @@ import {
   TabList,
   TabPanel,
   TabPanels,
+  Divider,
+  Badge,
 } from "@tremor/react";
 import ThemedDrawer from "../../shared/themed/themedDrawer";
 import ThemedListItem from "../../shared/themed/themedListItem";
@@ -27,6 +29,9 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import AuthHeader from "../../shared/authHeader";
 import { formatNumber } from "../users/initialColumns";
+import { useOrg } from "@/components/layout/organizationContext";
+import { DiffHighlight } from "../welcome/diffHighlight";
+import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
 
 interface CachePageProps {
   currentPage: number;
@@ -86,9 +91,12 @@ const CachePage = (props: CachePageProps) => {
   const [open, setOpen] = useState<boolean>(false);
   const [openUpgradeModal, setOpenUpgradeModal] = useState<boolean>(false);
 
-  const hasCache = chMetrics.totalCacheHits.data?.data
-    ? +chMetrics.totalCacheHits.data?.data > 0
-    : true;
+  const hasCache = useMemo(() => {
+    return chMetrics.totalCacheHits.data?.data !== undefined &&
+      chMetrics.totalCacheHits.data?.data !== null
+      ? +chMetrics.totalCacheHits.data?.data > 0
+      : true;
+  }, [chMetrics.totalCacheHits.data?.data]);
 
   const metrics = [
     {
@@ -129,10 +137,17 @@ const CachePage = (props: CachePageProps) => {
 
   cacheDist.sort((a: any, b: any) => a.name.localeCompare(b.name));
 
+  const org = useOrg();
+  const isPro = org?.currentOrg?.tier !== "free";
+
   return (
     <>
       <AuthHeader
-        title={"Cache"}
+        title={
+          <div className="flex items-center gap-2">
+            Cache <Badge size="sm">Beta</Badge>
+          </div>
+        }
         actions={
           <Link
             href="https://docs.helicone.ai/features/advanced-usage/caching"
@@ -145,28 +160,83 @@ const CachePage = (props: CachePageProps) => {
         }
       />
 
-      {!hasCache ? (
-        <div className="flex flex-col w-full h-96 justify-center items-center">
-          <div className="flex flex-col w-2/5">
-            <CircleStackIcon className="h-12 w-12 text-black dark:text-white border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-2 rounded-lg" />
+      {!isPro ? (
+        <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
+          <FeatureUpgradeCard
+            title="Unlock Cache"
+            description="The Free plan does not include the Cache feature, but getting access is easy."
+            infoBoxText="Optimize your LLM usage by caching responses and reducing redundant API calls."
+            youtubeVideo="https://www.youtube.com/embed/qIOq_NbeQ28?autoplay=1&mute=1"
+            documentationLink="https://docs.helicone.ai/features/advanced-usage/caching"
+          />
+        </div>
+      ) : !hasCache ? (
+        <div className="flex flex-col w-full mt-16 justify-center items-center">
+          <div className="flex flex-col">
+            <div className="w-fit pt-2 pl-0.5 bg-white border border-gray-300 rounded-md">
+              <CircleStackIcon className="h-10 w-10 flex items-center justify-center ml-2 text-gray-500" />
+            </div>
+
             <p className="text-xl text-black dark:text-white font-semibold mt-8">
-              No cache data available
+              {!isPro
+                ? "Upgrade to Pro to start using Cache"
+                : "No Cache Data Found"}
             </p>
             <p className="text-sm text-gray-500 max-w-sm mt-2">
-              Please view our documentation to learn how to enable cache for
-              your requests.
+              View our documentation to learn how to use caching.
             </p>
-            <div className="mt-4">
+            <div className="mt-4 flex gap-2">
               <Link
                 href="https://docs.helicone.ai/features/advanced-usage/caching"
-                target="_blank"
-                rel="noreferrer noopener"
                 className="w-fit items-center rounded-lg bg-black dark:bg-white px-2.5 py-1.5 gap-2 text-sm flex font-medium text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
               >
                 <BookOpenIcon className="h-4 w-4" />
                 View Docs
               </Link>
             </div>
+
+            {isPro && (
+              <div>
+                <Divider>Or</Divider>
+
+                <div className="mt-4">
+                  <h3 className="text-xl text-black dark:text-white font-semibold">
+                    TS/JS Quick Start
+                  </h3>
+                  <DiffHighlight
+                    code={`
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+  baseURL: "https://oai.helicone.ai/v1",
+  defaultHeaders: {
+    "Helicone-Auth": \`Bearer ${process.env.HELICONE_API_KEY}\`,
+  },
+});
+
+openai.chat.completions.create(
+  {
+    messages: [
+      {
+        role: "user",
+        content: "Generate an abstract for a course on space.",
+      },
+    ],
+    model: "gpt-4",
+  },
+  {
+    headers: {
+      "Helicone-Cache-Enabled": "true",
+    },
+  }
+);
+`}
+                    language="typescript"
+                    newLines={[]}
+                    oldLines={[]}
+                  />
+                </div>
+              </div>
+            )}
           </div>
         </div>
       ) : (

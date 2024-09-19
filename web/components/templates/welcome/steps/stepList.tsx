@@ -3,8 +3,9 @@ import { CheckCircleIcon } from "@heroicons/react/20/solid";
 export default function StepList(props: {
   currentStep: number;
   setStep: (value: number) => void;
+  allowStepSelection: boolean;
 }) {
-  const { currentStep, setStep } = props;
+  const { currentStep, setStep, allowStepSelection } = props;
 
   const steps = [
     {
@@ -50,16 +51,21 @@ export default function StepList(props: {
   ];
 
   return (
-    <nav className="flex" aria-label="Progress">
+    <nav className="flex flex-col space-y-4" aria-label="Progress">
       <ol role="list" className="space-y-6">
         {steps.map((step) => (
           <li key={step.name}>
             {step.status === "complete" ? (
               <button
                 onClick={() => {
-                  setStep(step.step);
+                  if (allowStepSelection) {
+                    setStep(step.step);
+                  }
                 }}
-                className="group"
+                className={`group ${
+                  !allowStepSelection ? "cursor-not-allowed opacity-50" : ""
+                }`}
+                disabled={!allowStepSelection}
               >
                 <span className="flex items-start">
                   <span className="relative flex h-5 w-5 flex-shrink-0 items-center justify-center">
@@ -76,10 +82,15 @@ export default function StepList(props: {
             ) : step.status === "current" ? (
               <button
                 onClick={() => {
-                  setStep(step.step);
+                  if (allowStepSelection) {
+                    setStep(step.step);
+                  }
                 }}
-                className="flex items-start"
+                className={`flex items-start ${
+                  !allowStepSelection ? "cursor-not-allowed opacity-50" : ""
+                }`}
                 aria-current="step"
+                disabled={!allowStepSelection}
               >
                 <span
                   className="relative flex h-5 w-5 flex-shrink-0 items-center justify-center"
@@ -95,9 +106,14 @@ export default function StepList(props: {
             ) : (
               <button
                 onClick={() => {
-                  setStep(step.step);
+                  if (allowStepSelection) {
+                    setStep(step.step);
+                  }
                 }}
-                className="group"
+                className={`group ${
+                  !allowStepSelection ? "cursor-not-allowed opacity-50" : ""
+                }`}
+                disabled={!allowStepSelection}
               >
                 <div className="flex items-start">
                   <div
@@ -115,6 +131,14 @@ export default function StepList(props: {
           </li>
         ))}
       </ol>
+      {currentStep > 1 && (
+        <button
+          onClick={() => setStep(currentStep - 1)}
+          className="self-start text-sm font-medium text-sky-600 hover:text-sky-800"
+        >
+          &larr; Back
+        </button>
+      )}
     </nav>
   );
 }
