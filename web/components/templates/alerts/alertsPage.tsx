@@ -74,16 +74,6 @@ const AlertsPage = (props: AlertsPageProps) => {
   return (
     <div className="flex flex-col space-y-16">
       <div className="flex flex-col space-y-8">
-        <div
-          className={`px-3 py-1 rounded-full text-sm font-medium ${
-            isAlertsEnabled()
-              ? "bg-green-100 text-green-800"
-              : "bg-red-100 text-red-800"
-          }`}
-        >
-          {isAlertsEnabled() ? "Alerts Enabled" : "Alerts Disabled"}
-        </div>
-        {/* Active Alerts */}
         <div className="flex flex-col sm:flex-row justify-between items-center">
           <div className="flex flex-col space-y-1">
             <h4 className="text-gray-800 text-xl font-semibold dark:text-gray-200">
