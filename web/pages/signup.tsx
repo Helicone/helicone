@@ -10,7 +10,6 @@ import PublicMetaData from "../components/layout/public/publicMetaData";
 import { GetServerSidePropsContext } from "next";
 import posthog from "posthog-js";
 import { InfoBanner } from "../components/shared/themed/themedDemoBanner";
-import { InfoBox } from "../components/ui/helicone/infoBox";
 
 const SignUp = () => {
   const supabase = useSupabaseClient();

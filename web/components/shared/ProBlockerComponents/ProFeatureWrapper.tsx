@@ -24,6 +24,16 @@ const descriptions = {
     "Free plan users can only access data up to 30 days old. Upgrade to Pro for unlimited access to 3m+ data.",
   invite:
     "The Free plan does not allow you to invite members to your organization. Upgrade to Pro to invite your team members.",
+  RateLimit:
+    "The Free plan does not allow you to set custom rate limits. Upgrade to Pro to set custom rate limits.",
+};
+
+const titles = {
+  Datasets: "Unlock Datasets",
+  Alerts: "Unlock Alerts",
+  time_filter: "Unlock Time Filter",
+  invite: "Unlock Invite",
+  RateLimit: "Unlock Rate Limits",
 };
 
 export const ProFeatureWrapper = forwardRef<
@@ -77,7 +87,9 @@ export const ProFeatureWrapper = forwardRef<
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-3xl">
           <DialogHeader>
-            <DialogTitle>Need more requests?</DialogTitle>
+            <DialogTitle>
+              {titles[featureName as keyof typeof titles]}
+            </DialogTitle>
           </DialogHeader>
           <p className="text-sm text-gray-500 mb-4">
             {customDescription ||
