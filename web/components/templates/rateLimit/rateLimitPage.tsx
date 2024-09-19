@@ -1,5 +1,5 @@
-import { BookOpenIcon, ShieldCheckIcon } from "@heroicons/react/24/outline";
-import { AreaChart, Badge, Divider } from "@tremor/react";
+import { BookOpenIcon } from "@heroicons/react/24/outline";
+import { AreaChart, Badge } from "@tremor/react";
 import Link from "next/link";
 import { useState } from "react";
 import { TimeFilter } from "../../../lib/api/handlerWrappers";
@@ -19,8 +19,7 @@ import RequestsPageV2 from "../requestsV2/requestsPageV2";
 import { useGetPropertiesV2 } from "../../../services/hooks/propertiesV2";
 import { getPropertyFiltersV2 } from "../../../services/lib/filters/frontendFilterDefs";
 import { useOrg } from "@/components/layout/organizationContext";
-import { Button } from "@/components/ui/button";
-import { DiffHighlight } from "../welcome/diffHighlight";
+
 import { FeatureUpgradeCard } from "../../shared/helicone/FeatureUpgradeCard";
 
 const RateLimitPage = (props: {}) => {
