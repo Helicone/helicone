@@ -60,6 +60,9 @@ const SignIn = ({
       ogImageUrl={"https://www.helicone.ai/static/helicone-og.webp"}
     >
       <div>
+        <div className="bg-blue-200 text-blue-800 p-4 text-center">
+          Scheduled maintenance: We will be back in 10 minutes.
+        </div>
         <AuthForm
           handleEmailSubmit={async (email: string, password: string) => {
             const { data, error } = await supabase.auth.signInWithPassword({
