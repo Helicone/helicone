@@ -6,6 +6,7 @@ import { dataDogClient } from "../../lib/clients/DataDogClient";
 import { KafkaProducer } from "../../lib/clients/KafkaProducer";
 import { HeliconeScoresMessage } from "../../lib/handlers/HandlerContext";
 import * as Sentry from "@sentry/node";
+import { validate as uuidValidate } from "uuid";
 
 type Scores = Record<string, number | boolean>;
 
@@ -80,9 +81,12 @@ export class ScoreManager extends BaseManager {
       if (scoresMessages.length === 0) {
         return ok(null);
       }
+      const validScoresMessages = scoresMessages.filter((message) =>
+        uuidValidate(message.requestId)
+      );
       // Filter out duplicate scores messages and only keep the latest one
       const filteredMessages = Array.from(
-        scoresMessages
+        validScoresMessages
           .reduce((map, message) => {
             const key = `${message.requestId}-${message.organizationId}`;
             const existingMessage = map.get(key);
