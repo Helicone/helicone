@@ -58,6 +58,7 @@ import { DiffHighlight } from "../welcome/diffHighlight";
 import PromptCard from "./promptCard";
 import PromptDelete from "./promptDelete";
 import PromptUsageChart from "./promptUsageChart";
+import { UpgradeToProCTA } from "../pricing/upgradeToProCTA";
 
 interface PromptsPageProps {
   defaultIndex: number;
@@ -519,6 +520,142 @@ const chatCompletion = await openai.chat.completions.create(
                     }}
                   />
                 )
+              ) : hasLimitedAccess ? (
+                <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
+                  <Card className="max-w-4xl">
+                    <CardHeader>
+                      <CardTitle>Get Started with Prompts</CardTitle>
+                      <p className="text-sm text-muted-foreground">
+                        You haven't created any prompts yet. Let's get started!
+                      </p>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <InfoBox>
+                        <p className="text-sm font-medium">
+                          Version prompts, create prompt templates, and run
+                          experiments to improve prompt outputs.
+                        </p>
+                      </InfoBox>
+                      <div className="bg-muted p-4 rounded-lg">
+                        <div className="flex space-x-2 mb-2">
+                          <Button variant="outline" size="sm">
+                            Code Example
+                          </Button>
+                        </div>
+
+                        <DiffHighlight
+                          code={`
+// 1. Add this line
+import { hprompt } from "@helicone/helicone";
+
+const chatCompletion = await openai.chat.completions.create(
+{
+  messages: [
+    {
+      role: "user",
+      // 2: Add hprompt to any string, and nest any variable in additional brackets \`{}\`
+      content: hprompt\`Write a story about \${{ scene }}\`,
+    },
+  ],
+  model: "gpt-3.5-turbo",
+},
+{
+  // 3. Add Prompt Id Header
+  headers: {
+    "Helicone-Prompt-Id": "prompt_story",
+  },
+}
+);
+`}
+                          language="typescript"
+                          newLines={[]}
+                          oldLines={[]}
+                        />
+                      </div>
+                    </CardContent>
+                    <CardFooter className="flex flex-col items-start">
+                      <div className="space-x-2 mt-5">
+                        <Button variant="outline" asChild>
+                          <Link href="https://docs.helicone.ai/features/prompts">
+                            View documentation
+                          </Link>
+                        </Button>
+                      </div>
+                    </CardFooter>
+                  </Card>
+                </div>
+              ) : org?.currentOrg?.tier === "pro-20240913" ? (
+                <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
+                  <Card className="max-w-4xl">
+                    <CardHeader>
+                      <CardTitle>Need Prompts?</CardTitle>
+                      <p className="text-sm text-muted-foreground">
+                        The Prompts feature is not included in the Pro plan by
+                        default. However, you can add it to your plan as an
+                        optional extra.
+                      </p>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <InfoBox>
+                        <p className="text-sm font-medium">
+                          Version prompts, create prompt templates, and run
+                          experiments to improve prompt outputs.
+                        </p>
+                      </InfoBox>
+                      <div className="bg-muted p-4 rounded-lg">
+                        <div className="flex space-x-2 mb-2">
+                          <Button variant="outline" size="sm">
+                            Code
+                          </Button>
+                        </div>
+
+                        <DiffHighlight
+                          code={`
+// 1. Add this line
+import { hprompt } from "@helicone/helicone";
+
+const chatCompletion = await openai.chat.completions.create(
+  {
+    messages: [
+      {
+        role: "user",
+        // 2: Add hprompt to any string, and nest any variable in additional brackets \`{}\`
+        content: hprompt\`Write a story about \${{ scene }}\`,
+      },
+    ],
+    model: "gpt-3.5-turbo",
+  },
+  {
+    // 3. Add Prompt Id Header
+    headers: {
+      "Helicone-Prompt-Id": "prompt_story",
+    },
+  }
+);
+ `}
+                          language="typescript"
+                          newLines={[]}
+                          oldLines={[]}
+                        />
+                      </div>
+                    </CardContent>
+                    <CardFooter className="flex flex-col items-center">
+                      <div className="w-full">
+                        <UpgradeToProCTA
+                          defaultPrompts={true}
+                          showAddons={true}
+                        />
+                      </div>
+                      <div className="space-x-2 mt-5">
+                        <Button variant="outline" asChild>
+                          <Link href="https://docs.helicone.ai/features/prompts">
+                            View documentation
+                          </Link>
+                        </Button>
+                      </div>
+                    </CardFooter>
+                  </Card>
+                </div>
               ) : (
                 <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
                   <Card className="max-w-4xl">
@@ -547,7 +684,7 @@ const chatCompletion = await openai.chat.completions.create(
                           code={`
 // 1. Add this line
 import { hprompt } from "@helicone/helicone";
- 
+
 const chatCompletion = await openai.chat.completions.create(
   {
     messages: [
