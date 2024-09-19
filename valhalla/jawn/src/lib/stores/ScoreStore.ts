@@ -105,7 +105,7 @@ export class ScoreStore extends BaseStore {
   ): Promise<Result<RequestResponseRMT[], string>> {
     const queryPlaceholders = newVersions
       .map((_, index) => {
-        const base = index * 3;
+        const base = index * 2;
         return `({val_${base} : String}, {val_${base + 1} : String})`;
       })
       .join(",\n    ");
