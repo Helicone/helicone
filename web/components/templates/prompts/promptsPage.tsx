@@ -527,7 +527,8 @@ const chatCompletion = await openai.chat.completions.create(
                     <CardHeader>
                       <CardTitle>Get Started with Prompts</CardTitle>
                       <p className="text-sm text-muted-foreground">
-                        You haven't created any prompts yet. Let's get started!
+                        You haven&apos;t created any prompts yet. Let&apos;s get
+                        started!
                       </p>
                     </CardHeader>
                     <CardContent className="space-y-4">
