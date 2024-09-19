@@ -146,6 +146,7 @@ const PromptsPage = (props: PromptsPageProps) => {
   const hasAccess = useMemo(() => {
     return (
       org?.currentOrg?.tier === "growth" ||
+      org?.currentOrg?.tier === "enterprise" ||
       (org?.currentOrg?.tier === "pro-20240913" &&
         (org?.currentOrg?.stripe_metadata as { addons?: { prompts?: boolean } })
           ?.addons?.prompts)
@@ -406,7 +407,7 @@ const chatCompletion = await openai.chat.completions.create(
                 </div>
               )}
 
-              {filteredPrompts && hasLimitedAccess ? (
+              {filteredPrompts && (hasLimitedAccess || hasAccess) ? (
                 searchParams.get("view") === "card" ? (
                   <ul className="w-full h-full grid grid-cols-2 xl:grid-cols-4 gap-4">
                     {filteredPrompts.map((prompt, i) => (
@@ -520,7 +521,7 @@ const chatCompletion = await openai.chat.completions.create(
                     }}
                   />
                 )
-              ) : hasLimitedAccess ? (
+              ) : hasAccess || hasLimitedAccess ? (
                 <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
                   <Card className="max-w-4xl">
                     <CardHeader>
