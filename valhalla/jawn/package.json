@@ -43,6 +43,7 @@
     "pg-promise": "^11.6.0",
     "posthog-node": "^4.0.1",
     "rate-limit-redis": "^4.2.0",
+    "stripe": "^16.12.0",
     "swagger-ui-express": "^5.0.0",
     "tiktoken": "^1.0.15",
     "typescript": "^5.2.2",
