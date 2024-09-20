@@ -20,6 +20,7 @@ import ModelPill from "./modelPill";
 import StatusBadge from "./statusBadge";
 import ThemedModal from "../../shared/themed/themedModal";
 import NewDataset from "../datasets/NewDataset";
+import { convertToUSDateFormat } from "../../shared/utils/dateConvertor";
 
 function getPathName(url: string) {
   try {
@@ -28,24 +29,6 @@ function getPathName(url: string) {
     return url;
   }
 }
-export const convertToUSDateFormat = (date: string) => {
-  const dateObj = new Date(date);
-
-  const formattedDate =
-    [
-      ("0" + (dateObj.getMonth() + 1)).slice(-2),
-      ("0" + dateObj.getDate()).slice(-2),
-      dateObj.getFullYear(),
-    ].join("/") +
-    " " +
-    [
-      ("0" + dateObj.getHours()).slice(-2),
-      ("0" + dateObj.getMinutes()).slice(-2),
-      ("0" + dateObj.getSeconds()).slice(-2),
-    ].join(":");
-
-  return formattedDate;
-};
 
 const RequestRow = (props: {
   request: NormalizedRequest;
