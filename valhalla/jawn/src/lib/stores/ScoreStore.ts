@@ -11,7 +11,6 @@ export type Score = {
 
 export interface BatchScores {
   requestId: string;
-  provider: string;
   organizationId: string;
   mappedScores: Score[];
 }
@@ -106,10 +105,8 @@ export class ScoreStore extends BaseStore {
   ): Promise<Result<RequestResponseRMT[], string>> {
     const queryPlaceholders = newVersions
       .map((_, index) => {
-        const base = index * 3;
-        return `({val_${base} : String}, {val_${base + 1} : String}, {val_${
-          base + 2
-        } : String})`;
+        const base = index * 2;
+        return `({val_${base} : String}, {val_${base + 1} : String})`;
       })
       .join(",\n    ");
 
@@ -118,7 +115,7 @@ export class ScoreStore extends BaseStore {
     }
 
     const queryParams: (string | number | boolean | Date)[] =
-      newVersions.flatMap((v) => [v.requestId, v.organizationId, v.provider]);
+      newVersions.flatMap((v) => [v.requestId, v.organizationId]);
 
     if (queryParams.length === 0) {
       return err("No query params");
@@ -129,7 +126,7 @@ export class ScoreStore extends BaseStore {
         `
         SELECT *
         FROM request_response_rmt
-        WHERE (request_id, organization_id, provider) IN (${queryPlaceholders})
+        WHERE (request_id, organization_id) IN (${queryPlaceholders})
         `,
         queryParams
       ),
@@ -283,6 +280,10 @@ export class ScoreStore extends BaseStore {
       (feedback) =>
         feedback.responseId !== "00000000-0000-0000-0000-000000000000"
     );
+
+    if (validFeedbacks.length === 0) {
+      return ok([]);
+    }
 
     console.log(
       `Upserting feedback for ${

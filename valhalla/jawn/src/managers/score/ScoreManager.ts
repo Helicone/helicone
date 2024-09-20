@@ -1,14 +1,16 @@
 import { err, ok, Result } from "../../lib/shared/result";
-import { BaseManager } from "../BaseManager";
 import { AuthParams } from "../../lib/db/supabase";
-import { BatchScores, Score, ScoreStore } from "../../lib/stores/ScoreStore";
+import { Score, ScoreStore } from "../../lib/stores/ScoreStore";
 import { dataDogClient } from "../../lib/clients/DataDogClient";
 import { KafkaProducer } from "../../lib/clients/KafkaProducer";
 import { HeliconeScoresMessage } from "../../lib/handlers/HandlerContext";
 import * as Sentry from "@sentry/node";
+import { DelayedOperationService } from "../../lib/shared/delayedOperationService";
+import { BaseManager } from "../BaseManager";
 import { validate as uuidValidate } from "uuid";
 
 type Scores = Record<string, number | boolean>;
+const delayMs = 10 * 60 * 1000; // 10 minutes in milliseconds
 
 export interface ScoreRequest {
   scores: Scores;
@@ -17,11 +19,13 @@ export interface ScoreRequest {
 export class ScoreManager extends BaseManager {
   private scoreStore: ScoreStore;
   private kafkaProducer: KafkaProducer;
+
   constructor(authParams: AuthParams) {
     super(authParams);
     this.scoreStore = new ScoreStore(authParams.organizationId);
     this.kafkaProducer = new KafkaProducer();
   }
+
   public async addScores(
     requestId: string,
     scores: Scores
@@ -47,30 +51,55 @@ export class ScoreManager extends BaseManager {
   ): Promise<Result<null, string>> {
     if (!this.kafkaProducer.isKafkaEnabled()) {
       console.log("Kafka is not enabled. Using score manager");
-      const scoreManager = new ScoreManager({
-        organizationId: this.authParams.organizationId,
-      });
-      return await scoreManager.handleScores(
-        {
-          batchId: "",
-          partition: 0,
-          lastOffset: "",
-          messageCount: 1,
-        },
-        scoresMessage
+
+      // Schedule the delayed operation and register it with ShutdownService
+      const timeoutId = DelayedOperationService.getTimeoutId(() => {
+        return this.handleScores(
+          {
+            batchId: "",
+            partition: 0,
+            lastOffset: "",
+            messageCount: 1,
+          },
+          scoresMessage
+        );
+      }, delayMs);
+
+      // Register the timeout and operation with ShutdownService
+      DelayedOperationService.getInstance().addDelayedOperation(timeoutId, () =>
+        this.handleScores(
+          {
+            batchId: "",
+            partition: 0,
+            lastOffset: "",
+            messageCount: 1,
+          },
+          scoresMessage
+        )
       );
+
+      return ok(null);
     }
+
     console.log("Sending scores message to Kafka");
 
-    const res = await this.kafkaProducer.sendScoresMessage(
-      scoresMessage,
-      "helicone-scores-prod"
+    // Schedule the Kafka send operation and register it with ShutdownService
+    const timeoutId = setTimeout(() => {
+      this.kafkaProducer
+        .sendScoresMessage(scoresMessage, "helicone-scores-prod")
+        .catch((error) => {
+          console.error("Error sending scores message to Kafka:", error);
+        });
+    }, delayMs);
+
+    // Register the timeout and operation with ShutdownService
+    DelayedOperationService.getInstance().addDelayedOperation(timeoutId, () =>
+      this.kafkaProducer.sendScoresMessage(
+        scoresMessage,
+        "helicone-scores-prod"
+      )
     );
 
-    if (res.error) {
-      console.error(`Error sending scores message to Kafka: ${res.error}`);
-      return err(res.error);
-    }
     return ok(null);
   }
 
@@ -100,29 +129,15 @@ export class ScoreManager extends BaseManager {
           }, new Map<string, HeliconeScoresMessage>())
           .values()
       );
-      const bumpedVersions = await this.scoreStore.bumpRequestVersion(
-        filteredMessages.map((scoresMessage) => ({
-          id: scoresMessage.requestId,
-          organizationId: scoresMessage.organizationId,
-        }))
-      );
 
-      if (
-        bumpedVersions.error ||
-        !bumpedVersions.data ||
-        bumpedVersions.data.length === 0
-      ) {
-        return err(bumpedVersions.error);
-      }
       const scoresScoreResult = await this.scoreStore.putScoresIntoClickhouse(
-        bumpedVersions.data.map((scoresMessage) => {
+        filteredMessages.map((scoresMessage) => {
           return {
-            requestId: scoresMessage.id,
-            organizationId: scoresMessage.helicone_org_id,
-            provider: scoresMessage.provider,
+            requestId: scoresMessage.requestId,
+            organizationId: scoresMessage.organizationId,
             mappedScores:
               filteredMessages
-                .find((x) => x.requestId === scoresMessage.id)
+                .find((x) => x.requestId === scoresMessage.requestId)
                 ?.scores.map((score) => {
                   if (score.score_attribute_type === "boolean") {
                     return {
@@ -178,7 +193,7 @@ export class ScoreManager extends BaseManager {
       messageCount: number;
     },
     scoresMessages: HeliconeScoresMessage[]
-  ): Promise<Result<null, string>> {
+  ): Promise<void> {
     console.log(`Handling scores for batch ${batchContext.batchId}`);
     const start = performance.now();
     const result = await this.procesScores(scoresMessages);
@@ -233,10 +248,8 @@ export class ScoreManager extends BaseManager {
           },
         });
       }
-      return err(result.error);
     }
     console.log("Successfully processed scores messages");
-    return ok(null);
   }
 
   private mapScores(scores: Scores): Score[] {
