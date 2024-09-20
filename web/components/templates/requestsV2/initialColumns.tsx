@@ -7,6 +7,7 @@ import { HandThumbDownIcon, HandThumbUpIcon } from "@heroicons/react/24/solid";
 import { clsx } from "../../shared/clsx";
 import CostPill from "./costPill";
 import { COUTNRY_CODE_DIRECTORY } from "./countryCodeDirectory";
+import { convertToUSDateFormat } from "../../shared/utils/dateConvertor";
 
 function formatNumber(num: number) {
   const numParts = num.toString().split(".");
@@ -24,27 +25,6 @@ function formatNumber(num: number) {
     return num.toFixed(2);
   }
 }
-
-const convertToUSDateFormat = (date: string) => {
-  const dateObj = new Date(date);
-  const tzOffset = dateObj.getTimezoneOffset() * 60000;
-
-  const localDateObj = new Date(dateObj.getTime() - tzOffset);
-  const formattedDate =
-    [
-      ("0" + (localDateObj.getMonth() + 1)).slice(-2),
-      ("0" + localDateObj.getDate()).slice(-2),
-      localDateObj.getFullYear(),
-    ].join("/") +
-    " " +
-    [
-      ("0" + localDateObj.getHours()).slice(-2),
-      ("0" + localDateObj.getMinutes()).slice(-2),
-      ("0" + localDateObj.getSeconds()).slice(-2),
-    ].join(":");
-
-  return formattedDate;
-};
 
 export const getInitialColumns: (
   isCached?: boolean

@@ -21,6 +21,14 @@ import { BaseManager } from "../BaseManager";
 import { ScoreManager } from "../score/ScoreManager";
 import { HeliconeScoresMessage } from "../../lib/handlers/HandlerContext";
 
+function toISOStringClickhousePatch(date: string): string {
+  const dateObj = new Date(date);
+  const tzOffset = dateObj.getTimezoneOffset() * 60000;
+
+  const localDateObj = new Date(dateObj.getTime() - tzOffset);
+  return localDateObj.toISOString();
+}
+
 export class RequestManager extends BaseManager {
   private versionedRequestStore: VersionedRequestStore;
   private s3Client: S3Client;
@@ -307,6 +315,15 @@ export class RequestManager extends BaseManager {
         .map((r) => {
           return {
             ...r,
+            request_created_at: toISOStringClickhousePatch(
+              r.request_created_at
+            ),
+            feedback_created_at: r.feedback_created_at
+              ? toISOStringClickhousePatch(r.feedback_created_at)
+              : null,
+            response_created_at: r.response_created_at
+              ? toISOStringClickhousePatch(r.response_created_at)
+              : null,
             costUSD: costOfPrompt({
               model: r.request_model ?? "",
               provider: r.provider ?? "",
