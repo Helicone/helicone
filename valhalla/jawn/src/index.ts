@@ -62,10 +62,10 @@ const KAFKA_ENABLED = (KAFKA_CREDS?.KAFKA_ENABLED ?? "false") === "true";
 
 if (KAFKA_ENABLED) {
   startConsumers({
-    dlqCount: 0,
-    normalCount: 0,
-    scoresCount: 0,
-    scoresDlqCount: 0,
+    dlqCount: DLQ_WORKER_COUNT,
+    normalCount: NORMAL_WORKER_COUNT,
+    scoresCount: SCORES_WORKER_COUNT,
+    scoresDlqCount: SCORES_WORKER_COUNT,
     backFillCount: 0,
   });
 }
@@ -205,6 +205,7 @@ server.on("error", console.error);
 
 server.setTimeout(1000 * 60 * 10); // 10 minutes
 
+//This shuts down the server and all delayed operations with delay only locally, on AWS it will be killed by the OS with no delay
 async function gracefulShutdown(signal: string) {
   console.log(`Received ${signal}. Starting graceful shutdown...`);
 
@@ -223,7 +224,7 @@ async function gracefulShutdown(signal: string) {
       "Could not close connections in time, forcefully shutting down"
     );
     process.exit(1);
-  }, 60000 * 3);
+  }, 30000);
 }
 
 process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));

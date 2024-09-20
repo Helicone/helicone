@@ -281,6 +281,10 @@ export class ScoreStore extends BaseStore {
         feedback.responseId !== "00000000-0000-0000-0000-000000000000"
     );
 
+    if (validFeedbacks.length === 0) {
+      return ok([]);
+    }
+
     console.log(
       `Upserting feedback for ${
         validFeedbacks.length

@@ -2,7 +2,7 @@ export class DelayedOperationService {
   private static instance: DelayedOperationService;
   private delayedOperations: Map<NodeJS.Timeout, () => Promise<any>> =
     new Map();
-  private static readonly SHUTDOWN_TIMEOUT = 60000 * 3; // 3 minutes timeout
+  private static readonly SHUTDOWN_TIMEOUT = 30000; // 30 seconds timeout
 
   public static getInstance(): DelayedOperationService {
     if (!DelayedOperationService.instance) {
