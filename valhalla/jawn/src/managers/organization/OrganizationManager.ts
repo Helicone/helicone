@@ -353,7 +353,7 @@ export class OrganizationManager extends BaseManager {
       );
 
     if (organizationLayoutError !== null) {
-      return err(organizationLayoutError);
+      return ok({ filters: [], id: "", organization_id: "", type: "" });
     }
     return ok(layout);
   }
