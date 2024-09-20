@@ -116,6 +116,7 @@ interface DBLoggableRequestFromAsyncLogModelProps {
   providerRequestHeaders: HeliconeHeaders;
   providerResponseHeaders: Headers;
   provider: Provider;
+  heliconeTemplate?: TemplateWithInputs;
 }
 
 function getResponseBodyFromJSON(json: Record<string, Json>): {
@@ -145,6 +146,7 @@ export async function dbLoggableRequestFromAsyncLogModel(
     providerRequestHeaders,
     providerResponseHeaders,
     provider,
+    heliconeTemplate,
   } = props;
 
   return new DBLoggable({
@@ -180,6 +182,7 @@ export async function dbLoggableRequestFromAsyncLogModel(
       flaggedForModeration: null,
       request_ip: null,
       country_code: (requestWrapper.cf?.country as string) ?? null,
+      heliconeTemplate: heliconeTemplate ?? undefined,
     },
     response: {
       responseId: crypto.randomUUID(),
