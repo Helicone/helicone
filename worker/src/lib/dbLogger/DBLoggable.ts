@@ -150,7 +150,18 @@ export async function dbLoggableRequestFromAsyncLogModel(
   return new DBLoggable({
     request: {
       requestId: providerRequestHeaders.requestId ?? crypto.randomUUID(),
-      promptSettings: requestWrapper.promptSettings,
+      promptSettings: providerRequestHeaders.promptHeaders.promptId
+        ? {
+            promptId: providerRequestHeaders.promptHeaders.promptId,
+            promptVersion:
+              providerRequestHeaders.promptHeaders.promptVersion ?? "",
+            promptMode: "production",
+          }
+        : {
+            promptId: undefined,
+            promptVersion: "",
+            promptMode: "deactivated",
+          },
       userId: providerRequestHeaders.userId ?? undefined,
       startTime: new Date(
         asyncLogModel.timing.startTime.seconds * 1000 +
