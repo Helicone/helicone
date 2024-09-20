@@ -115,13 +115,18 @@ export const ProPlanCard = () => {
     (item: any) => item.price.product?.name === "Prompts" && item.quantity > 0
   );
 
+  const [alertSwitchEnabled, setAlertSwitchEnabled] = useState(hasAlerts);
+  const [promptSwitchEnabled, setPromptSwitchEnabled] = useState(hasPrompts);
+
   const handleAlertsToggle = () => {
     setIsEnablingAlerts(!hasAlerts);
+    setAlertSwitchEnabled(!hasAlerts);
     setIsAlertsDialogOpen(true);
   };
 
   const handlePromptsToggle = () => {
     setIsEnablingPrompts(!hasPrompts);
+    setPromptSwitchEnabled(!hasPrompts);
     setIsPromptsDialogOpen(true);
   };
 
@@ -132,6 +137,7 @@ export const ProPlanCard = () => {
       await deleteProductFromSubscription.mutateAsync("alerts");
     }
     setIsAlertsDialogOpen(false);
+    setAlertSwitchEnabled(isEnablingAlerts);
     subscription.refetch();
   };
 
@@ -142,6 +148,7 @@ export const ProPlanCard = () => {
       await deleteProductFromSubscription.mutateAsync("prompts");
     }
     setIsPromptsDialogOpen(false);
+    setPromptSwitchEnabled(isEnablingPrompts);
     subscription.refetch();
   };
 
@@ -235,7 +242,7 @@ export const ProPlanCard = () => {
                 <Label htmlFor="alerts-toggle">Alerts ($15/mo)</Label>
                 <Switch
                   id="alerts-toggle"
-                  checked={hasAlerts}
+                  checked={alertSwitchEnabled}
                   onCheckedChange={handleAlertsToggle}
                 />
               </div>
@@ -250,7 +257,7 @@ export const ProPlanCard = () => {
                 <Label htmlFor="prompts-toggle">Prompts ($30/mo)</Label>
                 <Switch
                   id="prompts-toggle"
-                  checked={hasPrompts}
+                  checked={promptSwitchEnabled}
                   onCheckedChange={handlePromptsToggle}
                 />
               </div>
@@ -336,7 +343,10 @@ export const ProPlanCard = () => {
           <DialogFooter>
             <Button
               variant="outline"
-              onClick={() => setIsAlertsDialogOpen(false)}
+              onClick={() => {
+                setAlertSwitchEnabled(!isEnablingAlerts);
+                setIsAlertsDialogOpen(false);
+              }}
             >
               Cancel
             </Button>
@@ -358,7 +368,10 @@ export const ProPlanCard = () => {
           <DialogFooter>
             <Button
               variant="outline"
-              onClick={() => setIsPromptsDialogOpen(false)}
+              onClick={() => {
+                setPromptSwitchEnabled(!isEnablingPrompts);
+                setIsPromptsDialogOpen(false);
+              }}
             >
               Cancel
             </Button>
