@@ -16,6 +16,7 @@ import SessionDetails from "./sessionDetails";
 import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
 import { InfoBox } from "@/components/ui/helicone/infoBox";
 import Link from "next/link";
+import LoadingAnimation from "@/components/shared/loadingAnimation";
 
 interface SessionsPageProps {
   currentPage: number;
@@ -42,6 +43,7 @@ const SessionsPage = (props: SessionsPageProps) => {
 
   const [sessionIdSearch, setSessionIdSearch] = useState<string>("");
   const names = useSessionNames(sessionIdSearch ?? "");
+  const allNames = useSessionNames("");
 
   const debouncedSessionIdSearch = useDebounce(sessionIdSearch, 500); // 0.5 seconds
   const [selectedName, setSelectedName] = useState<string>("");
@@ -52,17 +54,11 @@ const SessionsPage = (props: SessionsPageProps) => {
     selectedName
   );
 
-  const [hasSomeSessions, setHasSomeSessions] = useState<boolean | null>(null);
-
   const org = useOrg();
 
-  const [isPlanComparisonVisible, setIsPlanComparisonVisible] = useState(false);
-
-  useEffect(() => {
-    if (hasSomeSessions === null && !names.isLoading) {
-      setHasSomeSessions(names.sessions.length > 0);
-    }
-  }, [hasSomeSessions, names.sessions.length, names.isLoading]);
+  const hasSomeSessions = useMemo(() => {
+    return allNames.sessions.length > 0;
+  }, [allNames.sessions.length]);
 
   const hasAccessToSessions = useMemo(() => {
     return (
@@ -92,9 +88,12 @@ const SessionsPage = (props: SessionsPageProps) => {
         </InfoBox>
       )}
       <div>
-        {!isLoading &&
-        hasAccessToSessions &&
-        (hasSomeSessions || hasSomeSessions === null) ? (
+        {allNames.isLoading ? (
+          <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
+            <LoadingAnimation />
+          </div>
+        ) : hasAccessToSessions &&
+          (hasSomeSessions || hasSomeSessions === null) ? (
           <Row className="gap-5 ">
             <SessionNameSelection
               sessionIdSearch={sessionIdSearch}
