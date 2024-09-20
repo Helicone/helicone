@@ -1,7 +1,7 @@
 import { useOrg } from "@/components/layout/organizationContext";
 
 import { Badge } from "@tremor/react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   getTimeIntervalAgo,
   TimeInterval,
