@@ -205,7 +205,8 @@ server.on("error", console.error);
 
 server.setTimeout(1000 * 60 * 10); // 10 minutes
 
-//This shuts down the server and all delayed operations with delay only locally, on AWS it will be killed by the OS with no delay
+// This shuts down the server and all delayed operations with delay only locally, on AWS it will be killed by the OS with no delay
+// Please wait few minutes before terminating the original task on AWS
 async function gracefulShutdown(signal: string) {
   console.log(`Received ${signal}. Starting graceful shutdown...`);
 
