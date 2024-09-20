@@ -522,7 +522,7 @@ export class LoggingHandler extends AbstractLogHandler {
               processedContent = content;
             }
 
-            return `${role}: ${processedContent}`;
+            return processedContent;
           }
           return "";
         })
