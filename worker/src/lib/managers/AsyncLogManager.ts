@@ -55,7 +55,7 @@ export async function logAsync(
 
   let templateWithInputs: TemplateWithInputs | undefined;
   try {
-    if (requestWrapper.heliconeHeaders.promptHeaders.promptId) {
+    if (heliconeHeaders?.promptHeaders?.promptId) {
       const parseResult = parseJSXObject(asyncLogModel.providerRequest.json);
       templateWithInputs = parseResult?.templateWithInputs;
     }
