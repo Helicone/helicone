@@ -45,7 +45,7 @@ const ScaleCard: React.FC = () => {
         <Col className="gap-[16px]">
           <FeatureItem
             title="Every feature you need"
-            description="From Playground, Prompts, Exports, Evals and more."
+            description="From Playground, Sessions, Exports, Evals and more."
           />
           {/* <FeatureItem
             title="Standard support"
