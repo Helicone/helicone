@@ -353,12 +353,14 @@ export class OrganizationManager extends BaseManager {
       );
 
     if (organizationLayoutError !== null) {
-      return err(organizationLayoutError);
+      return ok({ filters: [], id: "", organization_id: "", type: "" });
     }
     return ok(layout);
   }
 
-  async getMemberCount(): Promise<Result<number, string>> {
+  async getMemberCount(
+    filterHeliconeEmails: boolean = false
+  ): Promise<Result<number, string>> {
     const { data: members, error: membersError } =
       await this.organizationStore.getOrganizationMembers(
         this.authParams.organizationId
@@ -367,7 +369,12 @@ export class OrganizationManager extends BaseManager {
     if (membersError !== null) {
       return err(membersError);
     }
-    return ok(members.length);
+    return ok(
+      members.filter(
+        (member) =>
+          !filterHeliconeEmails || !member.email.endsWith("@helicone.ai")
+      ).length
+    );
   }
 
   async getOrganizationMembers(

@@ -236,7 +236,7 @@ export async function getRequestsClickhouse(
       country_code,
       scores,
       properties,
-      assets,
+      assets as asset_ids,
       target_url,
     FROM request_response_rmt FINAL
     WHERE (
@@ -315,7 +315,7 @@ export async function getRequestsCachedClickhouse(
     rmt.country_code,
     rmt.scores,
     rmt.properties,
-    rmt.assets,
+    rmt.assets as asset_ids,
     ch.created_at AS cache_hit_created_at,
     ch.latency AS cache_hit_latency
   FROM request_response_rmt rmt

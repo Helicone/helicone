@@ -1,10 +1,9 @@
 import { User } from "@supabase/auth-helpers-nextjs";
-
 import { GetServerSidePropsContext } from "next";
-import AuthHeader from "../components/shared/authHeader";
-import MetaData from "../components/layout/public/authMetaData";
-import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
+import { ReactElement } from "react";
+import AuthLayout from "../components/layout/auth/authLayout";
 import WebhooksPage from "../components/templates/webhooks/webhooksPage";
+import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
 
 interface WebhooksProps {
   user: User;
@@ -13,14 +12,10 @@ interface WebhooksProps {
 const Webhooks = (props: WebhooksProps) => {
   const { user } = props;
 
-  return (
-    <MetaData title="Webhook">
-      {/* <AuthLayout user={user}> */}
-      <AuthHeader title={"Webhooks"} />
-      <WebhooksPage user={user} />
-      {/* </AuthLayout> */}
-    </MetaData>
-  );
+  return <WebhooksPage user={user} />;
+};
+Webhooks.getLayout = function getLayout(page: ReactElement) {
+  return <AuthLayout>{page}</AuthLayout>;
 };
 
 export default Webhooks;

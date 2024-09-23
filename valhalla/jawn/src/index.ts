@@ -21,6 +21,7 @@ import * as publicSwaggerDoc from "./tsoa-build/public/swagger.json";
 import { initLogs } from "./utils/injectLogs";
 import { initSentry } from "./utils/injectSentry";
 import { startConsumers } from "./workers/consumerInterface";
+import { DelayedOperationService } from "./lib/shared/delayedOperationService";
 
 export const ENVIRONMENT: "production" | "development" = (process.env
   .VERCEL_ENV ?? "development") as any;
@@ -202,5 +203,30 @@ const server = app.listen(
 
 server.on("error", console.error);
 
-// Thisp
 server.setTimeout(1000 * 60 * 10); // 10 minutes
+
+// This shuts down the server and all delayed operations with delay only locally, on AWS it will be killed by the OS with no delay
+// Please wait few minutes before terminating the original task on AWS
+async function gracefulShutdown(signal: string) {
+  console.log(`Received ${signal}. Starting graceful shutdown...`);
+
+  server.close(async () => {
+    console.log("HTTP server closed.");
+
+    await DelayedOperationService.getInstance().executeShutdown();
+
+    console.log("Graceful shutdown completed.");
+    process.exit(0);
+  });
+
+  // If server hasn't closed in 30 seconds, force shutdown
+  setTimeout(() => {
+    console.error(
+      "Could not close connections in time, forcefully shutting down"
+    );
+    process.exit(1);
+  }, 30000);
+}
+
+process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
+process.on("SIGINT", () => gracefulShutdown("SIGINT"));
