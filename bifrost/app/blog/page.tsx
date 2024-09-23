@@ -192,6 +192,11 @@ export type BlogStructure =
 const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
+      folderName: "braintrust-alternatives",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "helicone-recap",
     },
   },
@@ -664,6 +669,11 @@ const blogContent: BlogStructure[] = [
       },
     ],
     time: "4 minute read",
+  },
+  {
+    dynmaicEntry: {
+      folderName: "braintrust-alternatives",
+    },
   },
 ];
 
