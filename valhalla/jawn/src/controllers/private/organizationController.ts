@@ -118,7 +118,7 @@ export class OrganizationController extends Controller {
   ): Promise<Result<null, string>> {
     const organizationManager = new OrganizationManager(request.authParams);
     const memberCount = await organizationManager.getMemberCount(true);
-    if (memberCount.error || !memberCount.data) {
+    if (memberCount.error || memberCount.data == null || memberCount.data < 0) {
       return err(memberCount.error ?? "Error getting member count");
     }
 
@@ -306,17 +306,17 @@ export class OrganizationController extends Controller {
     const organizationManager = new OrganizationManager(request.authParams);
 
     const memberCount = await organizationManager.getMemberCount(true);
-    if (memberCount.error || !memberCount.data) {
+    if (memberCount.error || memberCount.data == null || memberCount.data < 0) {
       return err(memberCount.error ?? "Error getting member count");
     }
 
-    const userCount = await stripeManager.updateProUserCount(
-      memberCount.data - 1
-    );
+    // const userCount = await stripeManager.updateProUserCount(
+    //   memberCount.data - 1
+    // );
 
-    if (userCount.error) {
-      return err(userCount.error ?? "Error updating pro user count");
-    }
+    // if (userCount.error) {
+    //   return err(userCount.error ?? "Error updating pro user count");
+    // }
 
     const result = await organizationManager.removeOrganizationMember(
       organizationId,
