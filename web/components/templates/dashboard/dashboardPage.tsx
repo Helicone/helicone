@@ -19,10 +19,7 @@ import {
   getTimeIntervalAgo,
   TimeInterval,
 } from "../../../lib/timeCalculations/time";
-import {
-  useGetReport,
-  useGetUnauthorized,
-} from "../../../services/hooks/dashboard";
+import { useGetUnauthorized } from "../../../services/hooks/dashboard";
 import { useDebounce } from "../../../services/hooks/debounce";
 import { useOrganizationLayout } from "../../../services/hooks/organization_layout";
 import {
@@ -59,7 +56,6 @@ import { useDashboardPage } from "./useDashboardPage";
 import { formatLargeNumber } from "../../shared/utils/numberFormat";
 import { ThemedSwitch } from "../../shared/themed/themedSwitch";
 import { useLocalStorage } from "../../../services/hooks/localStorage";
-import { Button } from "@/components/ui/button";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -168,13 +164,6 @@ const DashboardPage = (props: DashboardPageProps) => {
   const [timeFilter, setTimeFilter] = useState<TimeFilter>(getTimeFilter());
 
   const [open, setOpen] = useState(false);
-  const [openReports, setOpenReports] = useState(false);
-
-  const {
-    data: report,
-    isLoading: isLoadingReport,
-    refetch: refetchReport,
-  } = useGetReport();
 
   const [advancedFilters, setAdvancedFilters] = useState<UIFilterRowTree>(
     getRootFilterNode()
@@ -185,7 +174,6 @@ const DashboardPage = (props: DashboardPageProps) => {
   const timeIncrement = getTimeInterval(timeFilter);
 
   const { unauthorized, currentTier } = useGetUnauthorized(user.id);
-  const { setNotification } = useNotification();
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const encodeFilters = (filters: UIFilterRowTree): string => {
@@ -552,21 +540,8 @@ const DashboardPage = (props: DashboardPageProps) => {
           </button>
         }
         actions={
-          <div className="flex flex-row gap-2 items-center">
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => setOpenReports(true)}
-            >
-              Get Reports
-            </Button>
-            <div>
-              <ThemedSwitch
-                checked={isLive}
-                onChange={setIsLive}
-                label="Live"
-              />
-            </div>
+          <div>
+            <ThemedSwitch checked={isLive} onChange={setIsLive} label="Live" />
           </div>
         }
       />
@@ -1025,14 +1000,6 @@ const DashboardPage = (props: DashboardPageProps) => {
       <SuggestionModal open={openSuggestGraph} setOpen={setOpenSuggestGraph} />
 
       <UpgradeProModal open={open} setOpen={setOpen} />
-      {!isLoadingReport && (
-        <ReportsModal
-          open={openReports}
-          setOpen={setOpenReports}
-          report={report}
-          refetchReport={refetchReport}
-        />
-      )}
     </>
   );
 };
