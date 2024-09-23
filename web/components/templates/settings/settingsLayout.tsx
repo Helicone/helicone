@@ -2,6 +2,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   BuildingOfficeIcon,
   CreditCardIcon,
+  DocumentTextIcon,
   NoSymbolIcon,
   UserGroupIcon,
 } from "@heroicons/react/24/outline";
@@ -17,6 +18,12 @@ const tabs = [
     title: "Organization",
     icon: BuildingOfficeIcon,
     href: "/settings",
+  },
+  {
+    id: "reports",
+    title: "Reports",
+    icon: DocumentTextIcon,
+    href: "/settings/reports",
   },
   {
     id: "api-keys",
