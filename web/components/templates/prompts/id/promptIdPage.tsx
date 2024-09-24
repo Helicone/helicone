@@ -174,7 +174,7 @@ type Input = {
   prompt_version: string;
   created_at: string;
   response_body?: string; // Make response_body optional
-  auto_prompt_inputs: Record<string, string> | unknown[];
+  auto_prompt_inputs: Record<string, any>[] | unknown[];
 };
 
 const PromptIdPage = (props: PromptIdPageProps) => {
@@ -633,7 +633,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                   <div className="w-2/3">
                     <PromptPlayground
                       prompt={selectedPrompt?.helicone_template || ""}
-                      selectedInput={selectedInput}
+                      selectedInput={selectedInput || undefined}
                       onSubmit={async (history, model) => {
                         await createSubversion(history, model);
                       }}
