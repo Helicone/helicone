@@ -98,8 +98,10 @@ export default function Example() {
                 </Col>
                 <Row className="w-full h-[97px] px-[24px] items-center justify-between border-t border-slate-200 text-slate-900 font-medium">
                   <span>Pro</span>
-                  <Button className="bg-brand text-white font-bold">
-                    Upgrade now
+                  <Button className="bg-brand text-white font-bold" asChild>
+                    <Link href="https://us.helicone.ai/settings/billing">
+                      Upgrade now
+                    </Link>
                   </Button>
                 </Row>
               </Col>
