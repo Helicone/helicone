@@ -21,6 +21,7 @@ import {
 } from "../../../lib/timeCalculations/time";
 import { useGetUnauthorized } from "../../../services/hooks/dashboard";
 import { useDebounce } from "../../../services/hooks/debounce";
+import { useLocalStorage } from "../../../services/hooks/localStorage";
 import { useOrganizationLayout } from "../../../services/hooks/organization_layout";
 import {
   filterUITreeToFilterNode,
@@ -43,7 +44,9 @@ import {
   MetricsPanelProps,
 } from "../../shared/metrics/metricsPanel";
 import ThemedTableHeader from "../../shared/themed/themedHeader";
+import { ThemedSwitch } from "../../shared/themed/themedSwitch";
 import UpgradeProModal from "../../shared/upgradeProModal";
+import { formatLargeNumber } from "../../shared/utils/numberFormat";
 import useSearchParams from "../../shared/utils/useSearchParams";
 import { INITIAL_LAYOUT, SMALL_LAYOUT } from "./gridLayouts";
 import CountryPanel from "./panels/countryPanel";
@@ -51,9 +54,6 @@ import { QuantilesGraph } from "./quantilesGraph";
 import StyledAreaChart from "./styledAreaChart";
 import SuggestionModal from "./suggestionsModal";
 import { useDashboardPage } from "./useDashboardPage";
-import { formatLargeNumber } from "../../shared/utils/numberFormat";
-import { ThemedSwitch } from "../../shared/themed/themedSwitch";
-import { useLocalStorage } from "../../../services/hooks/localStorage";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
