@@ -76,17 +76,21 @@ const TreeView: React.FC<TreeViewProps> = ({
                   <ChevronDownIcon className="h-6 w-6 m-0 p-0" />
                   <span className="text-sm font-semibold">Hide Details</span>
                 </button>
-                <RequestRow
-                  displayPreview={false}
-                  wFull={false}
-                  request={
-                    session.traces.filter(
-                      (trace) => trace.request_id == selectedRequestId
-                    )[0].request
-                  }
-                  properties={[]}
-                  open={true}
-                />
+                {session.traces.filter(
+                  (trace) => trace.request_id == selectedRequestId
+                )?.[0]?.request && (
+                  <RequestRow
+                    displayPreview={false}
+                    wFull={false}
+                    request={
+                      session.traces.filter(
+                        (trace) => trace.request_id == selectedRequestId
+                      )?.[0]?.request
+                    }
+                    properties={[]}
+                    open={true}
+                  />
+                )}
               </div>
 
               <div
