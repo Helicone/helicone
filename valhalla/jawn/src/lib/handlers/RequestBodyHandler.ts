@@ -1,3 +1,4 @@
+import { consoleIntegration } from "@sentry/node";
 import { tryParse, unsupportedImage } from "../../utils/helpers";
 import {
   getModelFromRequest,
@@ -42,12 +43,16 @@ export class RequestBodyHandler extends AbstractLogHandler {
         context.processedLog.request.model = "assistant-call";
       }
 
+      console.log("requestBody type", requestBodyFinal._type);
+
       if (this.isVectorDBRequest(requestBodyFinal)) {
+        console.log("is vector db");
         context.processedLog.request.model = "vector_db";
       }
 
       if (this.isToolRequest(requestBodyFinal)) {
-        context.processedLog.request.model = `${requestBodyFinal._type}:${requestBodyFinal.toolName}`;
+        console.log("is tool", requestBodyFinal.toolName);
+        context.processedLog.request.model = `tool:${requestBodyFinal.toolName}`;
       }
 
       try {

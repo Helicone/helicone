@@ -261,11 +261,13 @@ export class ResponseBodyHandler extends AbstractLogHandler {
     } else if (this.isAssistantResponse(responseBody) && !currentModel) {
       return { responseModel: "Assistant Call", model: "assistant-call" };
     } else if (this.isVectorDBResponse(responseBody)) {
+      console.log("response is vector db");
       return { responseModel: "Vector DB", model: "vector_db" };
     } else if (this.isToolResponse(responseBody)) {
+      console.log("response is tool", responseBody.toolName);
       return {
         responseModel: "Tool",
-        model: `${responseBody.type}:${responseBody.toolName}`,
+        model: `tool:${responseBody.toolName}`,
       };
     }
     return { responseModel: currentModel || "", model: currentModel || "" };

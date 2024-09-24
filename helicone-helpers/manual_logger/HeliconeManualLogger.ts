@@ -10,7 +10,7 @@ export class HeliconeManualLogger {
   }
 
   public async logRequest<T>(
-    request: ILogRequest | HeliconeCustomEventRequest,
+    request: HeliconeLogRequest,
     operation: (resultRecorder: HeliconeResultRecorder) => Promise<T>,
     additionalHeaders?: Record<string, string>
   ): Promise<T> {
@@ -35,7 +35,7 @@ export class HeliconeManualLogger {
   }
 
   private async sendLog(
-    request: ILogRequest | HeliconeCustomEventRequest,
+    request: HeliconeLogRequest,
     response: Record<string, any>,
     options: {
       startTime: number;
@@ -49,7 +49,6 @@ export class HeliconeManualLogger {
       url: "custom-model-nopath",
       json: {
         ...request,
-        // model: this.getModelFromRequest(request),
       },
       meta: {},
     };
@@ -59,8 +58,8 @@ export class HeliconeManualLogger {
       status: 200,
       json: {
         ...response,
-        type: request._type,
-        // model: this.getModelFromRequest(request),
+        _type: request._type,
+        toolName: request.toolName,
       },
     };
 
@@ -160,17 +159,20 @@ interface HeliconeEventTool {
   _type: "tool";
   toolName: string;
   input: string;
+  [key: string]: any;
 }
 
 interface HeliconeEventVectorDB {
   _type: "vector_db";
-  operation: "search" | "insert" | "delete" | "update"; // this is very rough, not even needed, just there as dummy attributes for now
+  operation: "search" | "insert" | "delete" | "update";
   text?: string;
   vector?: number[];
   topK?: number;
   filter?: object;
-  [key: string]: any; // For any additional parameters
-  databaseName?: string; // Optional, to specify which vector DB is being used
+  [key: string]: any;
+  databaseName?: string;
 }
 
 type HeliconeCustomEventRequest = HeliconeEventTool | HeliconeEventVectorDB;
+
+type HeliconeLogRequest = ILogRequest | HeliconeCustomEventRequest;
