@@ -14,6 +14,22 @@ import {
 } from "@/components/ui/select";
 import { MODEL_LIST } from "../../playground/new/modelList";
 import PromptChatRow from "./promptChatRow";
+import { FunctionCall } from "../../requests/chatComponent/single/renderingUtils";
+
+const getContentType = (
+  autoInput: Record<string, any>
+): "function" | "functionCall" | "image" | "message" | "autoInput" => {
+  if (autoInput.type === "function") {
+    return "function";
+  }
+  if (autoInput.type === "functionCall") {
+    return "functionCall";
+  }
+  if (autoInput.type === "image") {
+    return "image";
+  }
+  return "autoInput";
+};
 
 type Input = {
   id: string;
@@ -22,7 +38,7 @@ type Input = {
   prompt_version: string;
   created_at: string;
   response_body?: string;
-  auto_prompt_inputs: Record<string, string> | unknown[];
+  auto_prompt_inputs: Record<string, any>[] | unknown[];
 };
 
 type PromptObject = {
@@ -153,8 +169,6 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
     setCurrentChat(updatedChat);
   };
 
-  const allExpanded = Object.values(expandedChildren).every(Boolean);
-
   const renderMessages = () => {
     switch (mode) {
       case "Pretty":
@@ -163,7 +177,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
             {currentChat.map((message, index) => (
               <li
                 key={message.id}
-                className=" dark:border-gray-700 last:border-b-0 z-10 last:rounded-xl"
+                className="dark:border-gray-700 last:border-b-0 z-10 last:rounded-xl"
               >
                 <PromptChatRow
                   message={message}
@@ -175,28 +189,50 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
                   deleteRow={() => handleDeleteMessage(index)}
                   selectedProperties={selectedInput?.inputs}
                 />
+                {selectedInput?.auto_prompt_inputs &&
+                  getContentType(selectedInput?.auto_prompt_inputs) ===
+                    "function" && <FunctionCall message={message} />}
               </li>
             ))}
+            {/* Render auto_prompt_inputs if they exist */}
           </ul>
         );
       case "Markdown":
         return (
-          <MessageRenderer
-            messages={currentChat}
-            showAllMessages={true}
-            expandedChildren={expandedChildren}
-            setExpandedChildren={setExpandedChildren}
-            selectedProperties={selectedInput?.inputs}
-            isHeliconeTemplate={false}
-            autoInputs={[]}
-            setShowAllMessages={() => {}}
-            mode={mode}
-          />
+          <>
+            <MessageRenderer
+              messages={currentChat}
+              showAllMessages={true}
+              expandedChildren={expandedChildren}
+              setExpandedChildren={setExpandedChildren}
+              selectedProperties={selectedInput?.inputs}
+              isHeliconeTemplate={false}
+              autoInputs={selectedInput?.auto_prompt_inputs}
+              setShowAllMessages={() => {}}
+              mode={mode}
+            />
+            {/* Render auto_prompt_inputs in Markdown */}
+            {selectedInput?.auto_prompt_inputs &&
+              selectedInput.auto_prompt_inputs.length > 0 &&
+              selectedInput.auto_prompt_inputs.map((autoInput, index) => (
+                <div key={`auto-markdown-${index}`} className="mt-2">
+                  <pre>{JSON.stringify(autoInput, null, 2)}</pre>
+                </div>
+              ))}
+          </>
         );
       case "JSON":
         return (
-          <JsonView requestBody={{ messages: currentChat }} responseBody={{}} />
+          <JsonView
+            requestBody={{
+              messages: currentChat,
+              auto_prompt_inputs: selectedInput?.auto_prompt_inputs || [],
+            }}
+            responseBody={{}}
+          />
         );
+      default:
+        return null;
     }
   };
 
@@ -216,7 +252,6 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
         </div>
         {isEditMode && (
           <div className="flex justify-between items-center py-4 px-8 border-t border-gray-300 dark:border-gray-700 bg-white dark:bg-black rounded-b-lg">
-            {" "}
             <p className="text-sm text-gray-500">
               Use &#123;&#123; sample_variable &#125;&#125; to insert variables
               into your prompt.
