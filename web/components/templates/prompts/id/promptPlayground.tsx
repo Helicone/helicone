@@ -157,8 +157,6 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
   };
 
   const renderMessages = () => {
-    console.log("selectedInput", selectedInput?.auto_prompt_inputs);
-    // console.log(getContentType(selectedInput?.auto_prompt_inputs));
     switch (mode) {
       case "Pretty":
         return (
