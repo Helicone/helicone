@@ -14,6 +14,9 @@ import {
 } from "@/components/ui/select";
 import { MODEL_LIST } from "../../playground/new/modelList";
 import PromptChatRow from "./promptChatRow";
+import { FunctionCall } from "./toolsRenderingUtils";
+
+import RoleButton from "../../playground/new/roleButton";
 
 type Input = {
   id: string;
@@ -22,7 +25,7 @@ type Input = {
   prompt_version: string;
   created_at: string;
   response_body?: string;
-  auto_prompt_inputs: Record<string, string> | unknown[];
+  auto_prompt_inputs: Record<string, any>[] | unknown[];
 };
 
 type PromptObject = {
@@ -153,8 +156,6 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
     setCurrentChat(updatedChat);
   };
 
-  const allExpanded = Object.values(expandedChildren).every(Boolean);
-
   const renderMessages = () => {
     switch (mode) {
       case "Pretty":
@@ -163,7 +164,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
             {currentChat.map((message, index) => (
               <li
                 key={message.id}
-                className=" dark:border-gray-700 last:border-b-0 z-10 last:rounded-xl"
+                className="dark:border-gray-700 last:border-b-0 z-10 last:rounded-xl"
               >
                 <PromptChatRow
                   message={message}
@@ -177,6 +178,32 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
                 />
               </li>
             ))}
+            {selectedInput?.auto_prompt_inputs &&
+              selectedInput?.auto_prompt_inputs.length > 0 && (
+                <div className="flex flex-col w-full h-full relative space-y-8 bg-white border-gray-300 dark:border-gray-700 pl-4 ">
+                  <div
+                    className={
+                      "items-start p-4 text-left flex flex-col space-y-4 text-black dark:text-white"
+                    }
+                  >
+                    <div className="flex items-center justify-center">
+                      <div className="w-20">
+                        <RoleButton
+                          role={"assistant"}
+                          onRoleChange={() => {}}
+                          disabled={true}
+                          size="medium"
+                        />
+                      </div>
+                    </div>
+                    <div className="overflow-auto w-full ">
+                      <FunctionCall
+                        auto_prompt_inputs={selectedInput.auto_prompt_inputs}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
           </ul>
         );
       case "Markdown":
@@ -188,15 +215,23 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
             setExpandedChildren={setExpandedChildren}
             selectedProperties={selectedInput?.inputs}
             isHeliconeTemplate={false}
-            autoInputs={[]}
+            autoInputs={selectedInput?.auto_prompt_inputs}
             setShowAllMessages={() => {}}
             mode={mode}
           />
         );
       case "JSON":
         return (
-          <JsonView requestBody={{ messages: currentChat }} responseBody={{}} />
+          <JsonView
+            requestBody={{
+              messages: currentChat,
+              auto_prompt_inputs: selectedInput?.auto_prompt_inputs || [],
+            }}
+            responseBody={{}}
+          />
         );
+      default:
+        return null;
     }
   };
 
@@ -216,7 +251,6 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
         </div>
         {isEditMode && (
           <div className="flex justify-between items-center py-4 px-8 border-t border-gray-300 dark:border-gray-700 bg-white dark:bg-black rounded-b-lg">
-            {" "}
             <p className="text-sm text-gray-500">
               Use &#123;&#123; sample_variable &#125;&#125; to insert variables
               into your prompt.

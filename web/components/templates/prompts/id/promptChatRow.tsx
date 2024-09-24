@@ -116,7 +116,7 @@ export const PrettyInput = ({
   );
 };
 
-export const RenderWithPrettyInputKeys = (props: {
+const RenderWithPrettyInputKeys = (props: {
   text: string;
 
   selectedProperties: Record<string, string> | undefined;
