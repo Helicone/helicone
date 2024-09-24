@@ -697,7 +697,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                                   </div>
                                   <div className="flex items-center space-x-2">
                                     {prompt?.metadata?.createdFromUi ===
-                                      true && (
+                                    true ? (
                                       <DropdownMenu>
                                         <DropdownMenuTrigger asChild>
                                           <button className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full">
@@ -739,6 +739,24 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                                               </p>
                                             </DropdownMenuItem>
                                           )}
+                                        </DropdownMenuContent>
+                                      </DropdownMenu>
+                                    ) : (
+                                      <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                          <button className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full">
+                                            <EllipsisHorizontalIcon className="h-6 w-6 text-gray-500" />
+                                          </button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent>
+                                          <DropdownMenuItem
+                                            onClick={() =>
+                                              startExperiment(promptVersion.id)
+                                            }
+                                          >
+                                            <BeakerIcon className="h-4 w-4 mr-2" />
+                                            Experiment
+                                          </DropdownMenuItem>
                                         </DropdownMenuContent>
                                       </DropdownMenu>
                                     )}
