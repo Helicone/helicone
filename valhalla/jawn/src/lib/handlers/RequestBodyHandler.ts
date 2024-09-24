@@ -41,6 +41,15 @@ export class RequestBodyHandler extends AbstractLogHandler {
       ) {
         context.processedLog.request.model = "assistant-call";
       }
+
+      if (this.isVectorDBRequest(requestBodyFinal)) {
+        context.processedLog.request.model = "vector_db";
+      }
+
+      if (this.isToolRequest(requestBodyFinal)) {
+        context.processedLog.request.model = `${requestBodyFinal._type}:${requestBodyFinal.toolName}`;
+      }
+
       try {
         context.processedLog.request.properties = Object.entries(
           context.message.log.request.properties
@@ -72,6 +81,16 @@ export class RequestBodyHandler extends AbstractLogHandler {
       requestBody.hasOwnProperty("assistant_id") ||
       requestBody.hasOwnProperty("metadata")
     );
+  }
+
+  private isVectorDBRequest(requestBody: any): boolean {
+    return (
+      requestBody.hasOwnProperty("_type") && requestBody._type === "vector_db"
+    );
+  }
+
+  private isToolRequest(requestBody: any): boolean {
+    return requestBody.hasOwnProperty("_type") && requestBody._type === "tool";
   }
 
   processRequestBody(context: HandlerContext): {

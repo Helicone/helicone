@@ -59,7 +59,7 @@ export class HeliconeManualLogger {
       status: 200,
       json: {
         ...response,
-        _type: request._type,
+        type: request._type,
         // model: this.getModelFromRequest(request),
       },
     };
@@ -165,13 +165,11 @@ interface HeliconeEventTool {
 interface HeliconeEventVectorDB {
   _type: "vector_db";
   operation: "search" | "insert" | "delete" | "update"; // this is very rough, not even needed, just there as dummy attributes for now
-  query: {
-    text?: string;
-    vector?: number[];
-    topK?: number;
-    filter?: object;
-    [key: string]: any; // For any additional parameters
-  };
+  text?: string;
+  vector?: number[];
+  topK?: number;
+  filter?: object;
+  [key: string]: any; // For any additional parameters
   databaseName?: string; // Optional, to specify which vector DB is being used
 }
 
