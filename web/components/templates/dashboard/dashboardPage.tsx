@@ -42,10 +42,8 @@ import {
   MetricsPanel,
   MetricsPanelProps,
 } from "../../shared/metrics/metricsPanel";
-import useNotification from "../../shared/notification/useNotification";
 import ThemedTableHeader from "../../shared/themed/themedHeader";
 import UpgradeProModal from "../../shared/upgradeProModal";
-import ReportsModal from "./reportsModal";
 import useSearchParams from "../../shared/utils/useSearchParams";
 import { INITIAL_LAYOUT, SMALL_LAYOUT } from "./gridLayouts";
 import CountryPanel from "./panels/countryPanel";
