@@ -1,4 +1,3 @@
-import { consoleIntegration } from "@sentry/node";
 import { tryParse, unsupportedImage } from "../../utils/helpers";
 import {
   getModelFromRequest,
