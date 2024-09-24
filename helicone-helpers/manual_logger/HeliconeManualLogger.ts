@@ -2,7 +2,7 @@ export class HeliconeManualLogger {
   private apiKey: string;
   private headers: Record<string, string>;
   private readonly LOGGING_ENDPOINT: string =
-    "hhttps://api.hconeai.com/custom/v1/log";
+    "https://api.hconeai.com/custom/v1/log";
 
   constructor(opts: IHeliconeManualLogger) {
     this.apiKey = opts.apiKey;
