@@ -1,185 +1,117 @@
 import React from "react";
-
-import { RenderWithPrettyInputKeys } from "./promptChatRow";
-import { RenderImageWithPrettyInputKeys } from "./promptIdPage";
 import { isJSON } from "../../requests/chatComponent/single/utils";
 
-export const FunctionCall: React.FC<{ auto_inputs: Record<string, any> }> = ({
-  auto_inputs,
+// Update the props to accept auto_prompt_inputs directly
+export const FunctionCall: React.FC<{ auto_prompt_inputs: any[] }> = ({
+  auto_prompt_inputs,
 }) => {
-  if (auto_inputs?.function_call) {
-    return renderFunctionCall(
-      auto_inputs.function_call.name,
-      auto_inputs.function_call.arguments
-    );
-  } else if (
-    Array.isArray(auto_inputs.tool_calls) &&
-    auto_inputs.tool_calls.length > 0
-  ) {
+  // Check if auto_prompt_inputs is an array
+  if (Array.isArray(auto_prompt_inputs) && auto_prompt_inputs.length > 0) {
     return (
-      <div className="flex flex-col space-y-2">
-        {auto_inputs.content !== null && auto_inputs.content !== "" && (
-          <div className="text-xs whitespace-pre-wrap font-semibold">
-            {typeof auto_inputs.content === "string" ? auto_inputs.content : ""}
-          </div>
-        )}
-        {auto_inputs.tool_calls.map((tool, index) =>
-          tool.function && typeof tool.function === "object"
-            ? renderFunctionCall(
-                tool.function.name,
-                tool.function.arguments,
-                index
-              )
-            : null
-        )}
+      <div className="flex flex-col space-y-4">
+        {auto_prompt_inputs.map((item, index) => {
+          // Handle 'function' type
+          if (
+            item.type === "function" &&
+            item.function &&
+            (item.function.parameters || item.function.arguments)
+          ) {
+            return renderFunctionCall(
+              item.function.name,
+              item.function.parameters || item.function.arguments,
+              index,
+              item.function.description
+            );
+          }
+          // Handle 'json_schema' type
+          else if (item.type === "json_schema" && item.json_schema) {
+            return renderJsonSchemaDefinition(item.json_schema, index);
+          } else {
+            return null;
+          }
+        })}
       </div>
     );
-  } else if (Array.isArray(auto_inputs.content)) {
-    const toolUses = auto_inputs.content.filter(
-      (
-        item
-      ): item is {
-        type: "tool_use";
-        name: string;
-        input: Record<string, any>;
-      } =>
-        typeof item === "object" &&
-        item !== null &&
-        "type" in item &&
-        item.type === "tool_use" &&
-        "name" in item &&
-        "input" in item
-    );
-    return (
-      <div className="flex flex-col space-y-2">
-        {toolUses.map((tool, index) =>
-          renderFunctionCall(tool.name, JSON.stringify(tool.input), index)
-        )}
-      </div>
-    );
+  } else {
+    return null;
   }
-  return null;
 };
 
-const renderFunctionCall = (name: string, args: string, key?: number) => (
-  <pre
-    key={key}
-    className="text-xs whitespace-pre-wrap rounded-lg overflow-auto"
-  >
-    {`${name}(${
-      isJSON(args) ? JSON.stringify(JSON.parse(args), null, 2) : args
-    })`}
-  </pre>
-);
+const renderFunctionCall = (
+  name: string,
+  args: any,
+  key?: number,
+  description?: string
+) => {
+  let argsString = "";
 
-export const ImageRow: React.FC<{
-  auto_inputs: Record<string, any>;
-  selectedProperties?: Record<string, string>;
-  isHeliconeTemplate?: boolean;
-}> = ({ auto_inputs, selectedProperties, isHeliconeTemplate }) => {
-  const arr = auto_inputs.content;
-  if (!Array.isArray(arr)) return null;
-
-  const textMessage = arr.find((item) => item.type === "text");
+  if (typeof args === "string") {
+    if (isJSON(args)) {
+      // Parse and pretty-print JSON strings
+      argsString = JSON.stringify(JSON.parse(args), null, 2);
+    } else {
+      // Use the string as-is
+      argsString = args;
+    }
+  } else if (typeof args === "object" && args !== null) {
+    // Pretty-print objects
+    argsString = JSON.stringify(args, null, 2);
+  } else {
+    // Fallback for other types (numbers, booleans, etc.)
+    argsString = String(args);
+  }
 
   return (
-    <div className="flex flex-col space-y-4 divide-y divide-gray-100 dark:divide-gray-900">
-      <RenderWithPrettyInputKeys
-        text={textMessage?.text}
-        selectedProperties={selectedProperties}
-      />
-      <div className="flex flex-wrap items-center pt-4">
-        {arr.map((item, index) => (
-          <ImageItem
-            key={index}
-            item={item}
-            selectedProperties={selectedProperties}
-            isHeliconeTemplate={isHeliconeTemplate}
-          />
-        ))}
+    <pre
+      key={key}
+      className="text-xs whitespace-pre-wrap rounded-lg overflow-auto"
+    >
+      <div className="flex flex-col space-y-4">
+        <div>{description}</div>
+        <div>{`${name}(${argsString})`}</div>
       </div>
+    </pre>
+  );
+};
+
+const renderJsonSchemaDefinition = (jsonSchema: any, key?: number) => {
+  const properties = jsonSchema.schema?.properties || {};
+
+  return (
+    <div key={key} className="flex flex-col space-y-2">
+      <div className="text-sm font-semibold">Schema: {jsonSchema.name}</div>
+
+      {jsonSchema.description && (
+        <div className="text-sm italic text-gray-500">
+          {jsonSchema.description}
+        </div>
+      )}
+      {Object.keys(properties).length > 0 ? (
+        <div className="text-sm">
+          <div className="font-semibold">Properties:</div>
+          <ul className="ml-4 list-disc">
+            {Object.entries(properties).map(([propName, propValue]) => (
+              <li key={propName}>
+                <span className="font-mono">{propName}</span>:{" "}
+                <span className="italic">{getTypeString(propValue)}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
     </div>
   );
 };
 
-const ImageItem: React.FC<{
-  item: any;
-  selectedProperties?: Record<string, string>;
-  isHeliconeTemplate?: boolean;
-}> = ({ item, selectedProperties, isHeliconeTemplate }) => {
-  if (
-    item.type === "image_url" &&
-    (typeof item.image_url === "string" || item.image_url?.url)
-  ) {
-    return (
-      <OpenAIImage
-        item={item}
-        selectedProperties={selectedProperties}
-        isHeliconeTemplate={isHeliconeTemplate}
-      />
-    );
-  } else if (item.type === "image" && item.source?.data) {
-    return (
-      <ClaudeImage
-        item={item}
-        selectedProperties={selectedProperties}
-        isHeliconeTemplate={isHeliconeTemplate}
-      />
-    );
-  } else if (item.type === "image_url" || item.type === "image") {
-    return <UnsupportedImage />;
+const getTypeString = (propValue: any): string => {
+  if (propValue.type) {
+    if (propValue.type === "array" && propValue.items) {
+      return `Array<${getTypeString(propValue.items)}>`;
+    } else if (typeof propValue.type === "string") {
+      return propValue.type;
+    } else if (Array.isArray(propValue.type)) {
+      return propValue.type.join(" | ");
+    }
   }
-  return null;
+  return "any";
 };
-
-const OpenAIImage: React.FC<{
-  item: any;
-  selectedProperties?: Record<string, string>;
-  isHeliconeTemplate?: boolean;
-}> = ({ item, selectedProperties, isHeliconeTemplate }) => {
-  const imageUrl =
-    typeof item.image_url === "string" ? item.image_url : item.image_url.url;
-
-  // eslint-disable-next-line @next/next/no-img-element
-  return <img src={imageUrl} alt="" width={600} height={600} />;
-};
-
-const ClaudeImage: React.FC<{
-  item: any;
-  selectedProperties?: Record<string, string>;
-  isHeliconeTemplate?: boolean;
-}> = ({ item, selectedProperties, isHeliconeTemplate }) => {
-  const imageUrl = item.source.data;
-  if (isHeliconeTemplate) {
-    return (
-      <RenderImageWithPrettyInputKeys
-        text={imageUrl}
-        selectedProperties={selectedProperties}
-      />
-    );
-  }
-  // eslint-disable-next-line @next/next/no-img-element
-  return <img src={imageUrl} alt="" width={600} height={600} />;
-};
-
-const UnsupportedImage: React.FC = () => (
-  <div className="h-[150px] w-[200px] bg-white dark:bg-black border border-gray-300 dark:border-gray-700 text-center items-center flex justify-center text-xs italic text-gray-500">
-    Unsupported Image Type
-  </div>
-);
-
-export const FunctionMessage: React.FC<{
-  auto_inputs: Record<string, any>;
-  formattedMessageContent: string;
-}> = ({ auto_inputs, formattedMessageContent }) => (
-  <div className="flex flex-col space-y-2">
-    <code className="text-xs whitespace-pre-wrap font-semibold">
-      {auto_inputs.name}
-    </code>
-    <pre className="text-xs whitespace-pre-wrap bg-gray-50 dark:bg-gray-950 p-2 rounded-lg overflow-auto">
-      {isJSON(formattedMessageContent)
-        ? JSON.stringify(JSON.parse(formattedMessageContent), null, 2)
-        : formattedMessageContent}
-    </pre>
-  </div>
-);

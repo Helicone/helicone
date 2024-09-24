@@ -107,7 +107,7 @@ export function getTimeAgo(date: Date): string {
   return `${Math.floor(secondsPast / 31536000)} years ago`;
 }
 
-export const RenderImageWithPrettyInputKeys = (props: {
+const RenderImageWithPrettyInputKeys = (props: {
   text: string;
   selectedProperties: Record<string, string> | undefined;
 }) => {

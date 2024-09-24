@@ -14,22 +14,9 @@ import {
 } from "@/components/ui/select";
 import { MODEL_LIST } from "../../playground/new/modelList";
 import PromptChatRow from "./promptChatRow";
-import { FunctionCall } from "../../requests/chatComponent/single/renderingUtils";
+import { FunctionCall } from "./toolsRenderingUtils";
 
-const getContentType = (
-  autoInput: Record<string, any>
-): "function" | "functionCall" | "image" | "message" | "autoInput" => {
-  if (autoInput.type === "function") {
-    return "function";
-  }
-  if (autoInput.type === "functionCall") {
-    return "functionCall";
-  }
-  if (autoInput.type === "image") {
-    return "image";
-  }
-  return "autoInput";
-};
+import RoleButton from "../../playground/new/roleButton";
 
 type Input = {
   id: string;
@@ -170,6 +157,8 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
   };
 
   const renderMessages = () => {
+    console.log("selectedInput", selectedInput?.auto_prompt_inputs);
+    // console.log(getContentType(selectedInput?.auto_prompt_inputs));
     switch (mode) {
       case "Pretty":
         return (
@@ -189,37 +178,49 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
                   deleteRow={() => handleDeleteMessage(index)}
                   selectedProperties={selectedInput?.inputs}
                 />
-                {selectedInput?.auto_prompt_inputs &&
-                  getContentType(selectedInput?.auto_prompt_inputs) ===
-                    "function" && <FunctionCall message={message} />}
               </li>
             ))}
-            {/* Render auto_prompt_inputs if they exist */}
+            {selectedInput?.auto_prompt_inputs &&
+              selectedInput?.auto_prompt_inputs.length > 0 && (
+                <div className="flex flex-col w-full h-full relative space-y-8 bg-white border-gray-300 dark:border-gray-700 pl-4 ">
+                  <div
+                    className={
+                      "items-start p-4 text-left flex flex-col space-y-4 text-black dark:text-white"
+                    }
+                  >
+                    <div className="flex items-center justify-center">
+                      <div className="w-20">
+                        <RoleButton
+                          role={"assistant"}
+                          onRoleChange={() => {}}
+                          disabled={true}
+                          size="medium"
+                        />
+                      </div>
+                    </div>
+                    <div className="overflow-auto w-full ">
+                      <FunctionCall
+                        auto_prompt_inputs={selectedInput.auto_prompt_inputs}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
           </ul>
         );
       case "Markdown":
         return (
-          <>
-            <MessageRenderer
-              messages={currentChat}
-              showAllMessages={true}
-              expandedChildren={expandedChildren}
-              setExpandedChildren={setExpandedChildren}
-              selectedProperties={selectedInput?.inputs}
-              isHeliconeTemplate={false}
-              autoInputs={selectedInput?.auto_prompt_inputs}
-              setShowAllMessages={() => {}}
-              mode={mode}
-            />
-            {/* Render auto_prompt_inputs in Markdown */}
-            {selectedInput?.auto_prompt_inputs &&
-              selectedInput.auto_prompt_inputs.length > 0 &&
-              selectedInput.auto_prompt_inputs.map((autoInput, index) => (
-                <div key={`auto-markdown-${index}`} className="mt-2">
-                  <pre>{JSON.stringify(autoInput, null, 2)}</pre>
-                </div>
-              ))}
-          </>
+          <MessageRenderer
+            messages={currentChat}
+            showAllMessages={true}
+            expandedChildren={expandedChildren}
+            setExpandedChildren={setExpandedChildren}
+            selectedProperties={selectedInput?.inputs}
+            isHeliconeTemplate={false}
+            autoInputs={selectedInput?.auto_prompt_inputs}
+            setShowAllMessages={() => {}}
+            mode={mode}
+          />
         );
       case "JSON":
         return (
