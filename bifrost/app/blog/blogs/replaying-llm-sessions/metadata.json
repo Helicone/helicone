@@ -1,0 +1,10 @@
+{
+  "title": "How to Replay LLM Sessions for Iterative Improvement with Helicone",
+  "title1": "Replay and Iterate on LLM Sessions Using Helicone",
+  "title2": "Replaying LLM Sessions for Improved Agent Workflows with Helicone",
+  "description": "Learn how to leverage Helicone to replay LLM sessions and iteratively improve your agent-based workflows. This guide walks through querying past sessions and replaying them with modifications to enhance performance.",
+  "images": "/static/blog/replaying-llm-sessions/cover.webp",
+  "time": "10 minute read",
+  "author": "Cole Gottdank",
+  "date": "September 24, 2024"
+}
