@@ -6,21 +6,25 @@ import { useJawnClient } from "@/lib/clients/jawnHook";
 import { useQuery } from "@tanstack/react-query";
 import { ColDef, GridReadyEvent } from "ag-grid-community";
 import "ag-grid-community/styles/ag-grid.css";
-import "ag-grid-community/styles/ag-theme-alpine.css";
 import { AgGridReact } from "ag-grid-react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import ProviderKeyList from "../../../enterprise/portal/id/providerKeyList";
 import AddColumnHeader from "./AddColumnHeader";
 import { HypothesisCellRenderer } from "./HypothesisCellRenderer";
 import { HypothesisHeaderComponent } from "./HypothesisHeaderComponent";
 import { PlusIcon } from "@heroicons/react/24/outline";
+import ExperimentInputSelector from "../experimentInputSelector";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "../../../../ui/popover";
 
 interface ExperimentTableProps {
   promptSubversionId: string;
   experimentId: string;
 }
 
-// Add this new component
 interface SettingsPanelProps {
   setSelectedProviderKey: (key: string | null) => void;
   wrapText: boolean;
@@ -68,6 +72,23 @@ export function ExperimentTable({
   const jawn = useJawnClient();
 
   const [wrapText, setWrapText] = useState(false);
+  const [popoverOpen, setPopoverOpen] = useState(false);
+  const [selectedCellPosition, setSelectedCellPosition] = useState<{
+    top: number;
+    left: number;
+  } | null>(null);
+
+  // Use useState to manage rowData
+  const [rowData, setRowData] = useState<any[]>([]);
+  // Keep track of all input keys
+  const [inputKeys, setInputKeys] = useState<Set<string>>(new Set());
+
+  // State to control ExperimentInputSelector
+  const [showExperimentInputSelector, setShowExperimentInputSelector] =
+    useState(false);
+
+  // Refs for the grid API
+  const gridRef = useRef<any>(null);
 
   const fetchExperiments = useCallback(async () => {
     if (!orgId || !experimentId) return null;
@@ -91,13 +112,21 @@ export function ExperimentTable({
 
   const { data: experimentData, refetch: refetchExperiments } = useQuery(
     ["experiments", orgId, experimentId],
-    fetchExperiments
+    fetchExperiments,
+    {
+      onSuccess: (data) => {
+        if (data && inputRecordsData) {
+          updateRowData(data, inputRecordsData);
+        }
+      },
+    }
   );
 
   const providerKey = useMemo(
     () => (experimentData?.meta as any)?.provider_key,
     [experimentData]
   );
+
   const fetchInputRecords = useCallback(async () => {
     const datasetId = experimentData?.dataset.id;
     if (!orgId || !datasetId) return [];
@@ -113,42 +142,98 @@ export function ExperimentTable({
       }
     );
     return res.data?.data;
-  }, [orgId, experimentData?.dataset.id]);
+  }, [orgId, experimentData?.dataset?.id]);
 
-  const { data: inputRecordsData } = useQuery(
-    ["inputRecords", orgId, experimentData?.dataset.id],
+  const fetchRandomInputRecords = useCallback(async () => {
+    const jawnClient = getJawnClient(orgId);
+    const res = await jawnClient.POST(
+      "/v1/prompt/version/{promptVersionId}/inputs/query",
+      {
+        params: {
+          path: {
+            promptVersionId: promptSubversionId,
+          },
+        },
+        body: {
+          limit: 100,
+          random: true,
+        },
+      }
+    );
+    return res.data?.data;
+  }, [orgId, promptSubversionId]);
+
+  const { data: inputRecordsData, refetch: refetchInputRecords } = useQuery(
+    ["inputRecords", orgId, experimentData?.dataset?.id],
     fetchInputRecords,
     {
-      enabled: !!experimentData?.dataset.id,
+      enabled: !!experimentData?.dataset?.id,
+      onSuccess: (data) => {
+        if (experimentData && data) {
+          updateRowData(experimentData, data);
+        }
+      },
     }
   );
 
-  const rowData = useMemo(() => {
-    return inputRecordsData?.map((row) => {
-      const hypothesisRowData: Record<string, string> = {};
+  const { data: randomInputRecordsData } = useQuery(
+    ["randomInputRecords", orgId, promptSubversionId],
+    fetchRandomInputRecords,
+    {
+      enabled: true,
+    }
+  );
 
-      experimentData?.hypotheses.forEach((hypothesis) => {
-        const hypothesisRun = hypothesis.runs?.find(
-          (r) => r.datasetRowId === row.dataset_row_id
-        );
+  const randomInputRecords = useMemo(() => {
+    return (
+      randomInputRecordsData?.map((row) => ({
+        id: row.id,
+        inputs: row.inputs,
+        source_request: row.source_request,
+        prompt_version: row.prompt_version,
+        created_at: row.created_at,
+      })) ?? []
+    );
+  }, [randomInputRecordsData]);
 
-        if (hypothesisRun) {
-          hypothesisRowData[hypothesis.id] = JSON.stringify(
-            hypothesisRun.response,
-            null,
-            2
+  // Function to update rowData based on fetched data
+  const updateRowData = useCallback(
+    (experimentData: any, inputRecordsData: any[]) => {
+      const newInputKeys = new Set<string>();
+      const newRowData = inputRecordsData.map((row) => {
+        const hypothesisRowData: Record<string, string> = {};
+
+        experimentData.hypotheses.forEach((hypothesis: any) => {
+          const hypothesisRun = hypothesis.runs?.find(
+            (r: any) => r.datasetRowId === row.dataset_row_id
           );
-        }
+
+          if (hypothesisRun) {
+            hypothesisRowData[hypothesis.id] = JSON.stringify(
+              hypothesisRun.response,
+              null,
+              2
+            );
+          }
+        });
+
+        // Collect all input keys
+        Object.keys(row.inputs).forEach((key) => newInputKeys.add(key));
+
+        return {
+          id: row.id,
+          dataset_row_id: row.dataset_row_id,
+          // Spread inputs to individual fields
+          ...row.inputs,
+          ...hypothesisRowData,
+        };
       });
 
-      return {
-        id: row.id,
-        dataset_row_id: row.dataset_row_id,
-        inputs: row.inputs,
-        ...hypothesisRowData,
-      };
-    });
-  }, [inputRecordsData, experimentData?.hypotheses]);
+      setInputKeys(newInputKeys); // Update the set of input keys
+      setRowData(newRowData);
+    },
+    []
+  );
 
   const defaultColDef = useMemo<ColDef>(
     () => ({
@@ -167,6 +252,7 @@ export function ExperimentTable({
 
   const onGridReady = useCallback((params: GridReadyEvent) => {
     params.api.sizeColumnsToFit();
+    gridRef.current = params.api;
   }, []);
 
   const getRowId = useCallback((params: any) => params.data.id, []);
@@ -184,45 +270,72 @@ export function ExperimentTable({
     [jawn, experimentId]
   );
 
-  const handleAddRow = useCallback(async () => {
-    if (!orgId || !experimentData?.dataset.id) return;
-    const jawnClient = getJawnClient(orgId);
-    await jawnClient.POST(
-      "/v1/experiment/dataset/{datasetId}/version/{promptVersionId}/row",
-      {
-        body: {
-          inputs: {
-            test: "test",
-          },
-        },
-        params: {
-          path: {
-            promptVersionId: promptSubversionId,
-            datasetId: experimentData.dataset.id,
-          },
-        },
+  const handleAddRow = useCallback(() => {
+    const newRowId = `temp-${Date.now()}`;
+
+    // Initialize input fields with empty strings
+    const inputFields = Array.from(inputKeys).reduce((acc, key) => {
+      acc[key] = "";
+      return acc;
+    }, {} as Record<string, string>);
+
+    // Create an empty row object
+    const newRow = {
+      id: newRowId,
+      dataset_row_id: null,
+      ...inputFields, // Include input fields
+      // Initialize hypothesis fields as empty strings
+      ...experimentData?.hypotheses.reduce((acc, hypothesis) => {
+        acc[hypothesis.id] = "";
+        return acc;
+      }, {} as Record<string, string>),
+    };
+
+    // Add the new row to the rowData state
+    setRowData((prevData) => [...prevData, newRow]);
+  }, [experimentData?.hypotheses, inputKeys]);
+
+  const handleCellClick = useCallback((params: any) => {
+    if (params.colDef.field !== "rowNumber") {
+      const cellElement = params.event.target.closest(".ag-cell");
+      if (cellElement) {
+        const rect = cellElement.getBoundingClientRect();
+        setSelectedCellPosition({
+          top: rect.top + window.scrollY + rect.height,
+          left: rect.left + window.scrollX,
+        });
+        setPopoverOpen(true);
       }
-    );
-    refetchExperiments();
-  }, [
-    orgId,
-    experimentData?.dataset.id,
-    promptSubversionId,
-    refetchExperiments,
-  ]);
+    }
+  }, []);
 
   const columnDefs = useMemo<ColDef[]>(() => {
     const columns: ColDef[] = [
       {
-        field: "inputs",
-        headerName: "Inputs",
-        width: 200,
-        suppressSizeToFit: true,
-        cellRenderer: (params: any) => (
-          <div>{JSON.stringify(params.data.inputs)}</div>
-        ),
+        headerName: "#",
+        field: "rowNumber",
+        width: 50,
+        valueGetter: (params) =>
+          params.node?.rowIndex !== undefined
+            ? (params.node?.rowIndex || 0) + 1
+            : "N/A",
+        pinned: "left",
+        cellClass: "border-r border-gray-200",
+        headerClass: "border-r border-gray-200",
       },
     ];
+
+    // Add columns for each input key
+    Array.from(inputKeys).forEach((key) => {
+      columns.push({
+        field: key,
+        headerName: key,
+        width: 150,
+        cellRenderer: (params: any) => <div>{params.data[key]}</div>,
+        cellClass: "border-r border-gray-200",
+        headerClass: "border-r border-gray-200",
+      });
+    });
 
     experimentData?.hypotheses?.forEach((hypothesis) => {
       columns.push({
@@ -241,6 +354,8 @@ export function ExperimentTable({
           handleRunHypothesis,
           inputRecordsData,
         },
+        cellClass: "border-r border-gray-200",
+        headerClass: "border-r border-gray-200",
       });
     });
 
@@ -269,7 +384,10 @@ export function ExperimentTable({
     promptSubversionId,
     experimentId,
     providerKey,
+    inputKeys,
+    randomInputRecords,
   ]);
+
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   return (
@@ -281,17 +399,39 @@ export function ExperimentTable({
           </Button>
         </div>
         <div
-          className="ag-theme-alpine"
-          style={{ height: "80vh", width: "100%" }}
+          className="ag-theme-alpine h-[80vh] w-full border border-gray-200 rounded-md overflow-hidden"
+          style={
+            {
+              "--ag-header-height": "40px",
+              "--ag-header-foreground-color": "#000",
+              "--ag-header-background-color": "#f3f4f6",
+              "--ag-header-cell-hover-background-color": "#e5e7eb",
+              "--ag-header-cell-moving-background-color": "#d1d5db",
+              "--ag-row-border-color": "#e5e7eb",
+              "--ag-row-hover-color": "#f9fafb",
+              "--ag-cell-horizontal-border": "none",
+              "--ag-borders": "none",
+              "--ag-border-color": "#e5e7eb",
+            } as React.CSSProperties
+          }
         >
           <AgGridReact
+            ref={gridRef}
             rowData={rowData}
             columnDefs={columnDefs}
-            defaultColDef={defaultColDef}
+            defaultColDef={{
+              ...defaultColDef,
+              cellClass: "border-r border-gray-200",
+              headerClass:
+                "border-r border-gray-200 bg-gray-100 text-gray-700 font-semibold",
+            }}
             onGridReady={onGridReady}
             enableCellTextSelection={true}
             suppressRowTransform={true}
             getRowId={getRowId}
+            onCellClicked={handleCellClick}
+            rowClass="border-b border-gray-200 hover:bg-gray-50"
+            headerHeight={40}
           />
         </div>
         <Button
@@ -303,6 +443,7 @@ export function ExperimentTable({
           Add row
         </Button>
       </div>
+
       <SettingsPanel
         defaultProviderKey={providerKey}
         setSelectedProviderKey={async (key) => {
@@ -321,6 +462,66 @@ export function ExperimentTable({
         setWrapText={setWrapText}
         open={settingsOpen}
         setOpen={setSettingsOpen}
+      />
+
+      {/* Replace custom input menu with shadcn Popover */}
+      {selectedCellPosition && (
+        <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+          <PopoverTrigger asChild>
+            {/* Invisible element to anchor the popover */}
+            <div
+              style={{
+                position: "absolute",
+                top: selectedCellPosition.top,
+                left: selectedCellPosition.left,
+                width: 0,
+                height: 0,
+              }}
+            />
+          </PopoverTrigger>
+          <PopoverContent align="start" className="w-56">
+            <div className="flex flex-col space-y-2">
+              <Button
+                onClick={() => {
+                  setPopoverOpen(false);
+                  setShowExperimentInputSelector(true);
+                }}
+                className="w-full"
+              >
+                Select an input set
+              </Button>
+              <Button
+                onClick={() => {
+                  /* Implement select dataset logic */
+                }}
+                className="w-full"
+              >
+                Select a dataset
+              </Button>
+              <Button onClick={() => setPopoverOpen(false)} className="w-full">
+                Cancel
+              </Button>
+            </div>
+          </PopoverContent>
+        </Popover>
+      )}
+
+      {/* Include the ExperimentInputSelector */}
+      <ExperimentInputSelector
+        open={showExperimentInputSelector}
+        setOpen={setShowExperimentInputSelector}
+        meta={{
+          promptVersionId: promptSubversionId,
+          datasetId: experimentData?.dataset?.id,
+        }}
+        requestIds={randomInputRecords}
+        onSuccess={(success) => {
+          if (success) {
+            // Handle success: Re-fetch experiments and input records
+            refetchExperiments();
+            refetchInputRecords();
+          }
+        }}
       />
     </div>
   );
