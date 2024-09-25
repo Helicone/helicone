@@ -147,7 +147,7 @@ export class ExperimentController extends Controller {
       requestBody
     );
 
-    if (result.error || !result.data) {
+    if (result.error) {
       this.setStatus(500);
       console.error(result.error);
       return err(result.error);
@@ -240,7 +240,7 @@ export class ExperimentController extends Controller {
     experiment.dataset.rows = datasetRows;
     experiment.hypotheses = [hypothesis];
 
-    const runResult = run(experiment);
+    const runResult = await run(experiment);
 
     return runResult;
   }
