@@ -491,7 +491,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
       return;
     }
     router.push(
-      `/prompts/${id}/subversion/${prompt?.id}/experiment/${experiment.data?.data?.experimentId}`
+      `/prompts/${id}/subversion/${promptVersionId}/experiment/${experiment.data?.data?.experimentId}`
     );
   };
 
