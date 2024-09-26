@@ -17,12 +17,14 @@ interface AddColumnHeaderProps {
   promptVersionId: string;
   experimentId: string;
   selectedProviderKey: string | null;
+  refetchData: () => void; // Add this line
 }
 
 const AddColumnHeader: React.FC<AddColumnHeaderProps> = ({
   promptVersionId,
   experimentId,
   selectedProviderKey,
+  refetchData, // Add this line
 }) => {
   const [open, setOpen] = useState(false);
   const jawn = useJawnClient();
@@ -103,7 +105,11 @@ const AddColumnHeader: React.FC<AddColumnHeaderProps> = ({
                     }
                   );
 
-                  promptVersion.refetch();
+                  promptVersion.refetch(); // Optional: Refetch prompt versions
+
+                  setOpen(false); // Close the drawer after adding the column
+
+                  refetchData(); // Refetch the table data
                 }}
                 submitText="Test"
                 initialModel={"gpt-4o"}

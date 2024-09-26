@@ -290,7 +290,7 @@ export function ExperimentTable({
     if (rowData.length === 0) {
       const inputFields = Array.from(inputKeys).reduce((acc, key) => {
         acc[key] = "";
-        return acc;
+        return acc as Record<string, string>;
       }, {} as Record<string, string>);
 
       const newRow = {
@@ -340,12 +340,6 @@ export function ExperimentTable({
       hypothesisId: string;
       datasetRowIds: string[];
     }) => {
-      console.log(
-        "Running hypothesis",
-        experimentId,
-        hypothesisId,
-        datasetRowIds
-      );
       await jawn.POST("/v1/experiment/run", {
         body: {
           experimentId,
@@ -429,6 +423,11 @@ export function ExperimentTable({
     setRowData((prevData) => [...prevData, newRow]);
   }, [experimentData?.hypotheses, inputKeys]);
 
+  const refetchData = () => {
+    refetchExperiments();
+    refetchInputRecords();
+  };
+
   const columnDefs = useMemo<ColDef[]>(() => {
     const columns: ColDef[] = [
       {
@@ -488,13 +487,13 @@ export function ExperimentTable({
       sortable: false,
       filter: false,
       resizable: false,
-      headerComponent: () => (
-        <AddColumnHeader
-          promptVersionId={promptSubversionId}
-          experimentId={experimentId}
-          selectedProviderKey={providerKey}
-        />
-      ),
+      headerComponent: AddColumnHeader,
+      headerComponentParams: {
+        promptVersionId: promptSubversionId,
+        experimentId,
+        selectedProviderKey: providerKey,
+        refetchData,
+      },
     });
 
     return columns;
@@ -507,6 +506,7 @@ export function ExperimentTable({
     providerKey,
     inputKeys,
     randomInputRecords,
+    refetchData,
   ]);
 
   const [settingsOpen, setSettingsOpen] = useState(false);
