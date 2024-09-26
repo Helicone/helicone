@@ -130,6 +130,7 @@
               "group": "API",
               "pages": [
                 "integrations/gemini/api/javascript",
+                "integrations/gemini/api/python",
                 "integrations/gemini/api/curl"
               ],
               "icon": "code",
