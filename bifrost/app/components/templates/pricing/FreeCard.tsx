@@ -3,6 +3,7 @@ import { Col } from "@/components/common/col";
 import { Row } from "@/components/common/row";
 import { CheckIcon } from "@heroicons/react/24/outline";
 import { FeatureItem } from "./FeaturedItem";
+import Link from "next/link";
 
 const FreeCard: React.FC = () => {
   return (
@@ -34,9 +35,12 @@ const FreeCard: React.FC = () => {
             description="No credit card required."
           />
         </Col>
-        <button className="bg-[#FFFFFF] text-slate-900 py-[12px] border border-slate-200 rounded-[4px] mt-[8px] text-[16px]">
+        <Link
+          className="bg-[#FFFFFF] text-slate-900 py-[12px] border border-slate-200 rounded-[4px] mt-[8px] text-[16px] text-center"
+          href="https://us.helicone.ai/signin"
+        >
           Get started
-        </button>
+        </Link>
       </Col>
     </Card>
   );

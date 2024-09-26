@@ -67,9 +67,12 @@ const ScaleCard: React.FC = () => {
             description="Support via email, Discord or Slack."
           />
         </Col>
-        <button className="bg-brand text-white py-[12px] rounded-[4px] mt-[8px] text-[16px] font-semibold">
+        <Link
+          href="https://us.helicone.ai/settings/billing"
+          className="bg-brand text-white py-[12px] rounded-[4px] mt-[8px] text-[16px] font-semibold text-center"
+        >
           Upgrade Now
-        </button>
+        </Link>
       </Col>
     </Card>
   );

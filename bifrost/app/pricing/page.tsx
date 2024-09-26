@@ -77,7 +77,11 @@ export default function Example() {
                 </Col>
                 <Row className="w-full h-[72px] px-[24px] items-center justify-between border-t text-slate-900 font-medium border-slate-200">
                   <span>Free</span>
-                  <Button variant={"outline"}>Start for Free</Button>
+                  <Button variant={"outline"} asChild>
+                    <Link href="https://us.helicone.ai/signin">
+                      Start for Free
+                    </Link>
+                  </Button>
                 </Row>
               </Col>
             </div>
@@ -123,7 +127,9 @@ export default function Example() {
                 </Col>
                 <Row className=" w-full h-[72px] px-[24px] items-center justify-between border-t border-slate-200 text-slate-900 font-medium">
                   <span>Enterprise</span>
-                  <Button variant={"outline"}>Contact Sales</Button>
+                  <Button variant={"outline"} asChild>
+                    <Link href="/contact">Contact Sales</Link>
+                  </Button>
                 </Row>
               </Col>
             </div>
