@@ -12,7 +12,7 @@ import ProviderKeyList from "../../../enterprise/portal/id/providerKeyList";
 import AddColumnHeader from "./AddColumnHeader";
 import { HypothesisCellRenderer } from "./HypothesisCellRenderer";
 import { HypothesisHeaderComponent } from "./HypothesisHeaderComponent";
-import { PlusIcon } from "@heroicons/react/24/outline";
+import { PlusIcon, TableCellsIcon } from "@heroicons/react/24/outline";
 import ExperimentInputSelector from "../experimentInputSelector";
 import {
   Popover,
@@ -81,8 +81,11 @@ const InputCellRenderer: React.FC<any> = (props) => {
           {props.value}
         </div>
       </PopoverTrigger>
-      <PopoverContent align="start" className="w-56">
-        <div className="flex flex-col space-y-2">
+      <PopoverContent align="start" className="w-56 p-0">
+        <h2 className="text-sm w-full font-semibold px-2 pt-2">
+          Enter manually, or:
+        </h2>
+        <div className="flex flex-col space-y-2 p-2">
           <Button
             onClick={() => {
               setPopoverOpen(false);
@@ -91,6 +94,7 @@ const InputCellRenderer: React.FC<any> = (props) => {
             className="w-full h-8"
             variant="ghost"
           >
+            <TableCellsIcon className="inline h-4 w-4 mr-2" />
             Select an input set
           </Button>
           {/* <Button
