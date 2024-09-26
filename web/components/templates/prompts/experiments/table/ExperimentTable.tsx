@@ -437,7 +437,7 @@ export function ExperimentTable({
             {
               "--ag-header-height": "40px",
               "--ag-header-foreground-color": "#000",
-              "--ag-header-background-color": "#f3f4f6",
+              "--ag-header-background-color": "#ffffff",
               "--ag-header-cell-hover-background-color": "#e5e7eb",
               "--ag-header-cell-moving-background-color": "#d1d5db",
               "--ag-row-border-color": "#e5e7eb",
