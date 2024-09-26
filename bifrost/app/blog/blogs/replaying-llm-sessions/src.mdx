@@ -1,20 +1,14 @@
-Experimenting with prompts in isolation, disconnected from real workflows, offers limited benefits. To **<span style={{color: '#0ea5e9'}}>truly understand how a prompt change impacts an entire session</span>**, you need to apply the changes directly and replay the session. This reveals how modifications affect subsequent interactions and the entire flow, providing insights that isolated testing can't offer.
+Experimenting with prompts in isolation **limits your understanding**. To truly grasp how a prompt change impacts an entire session, you need to **apply changes directly to real user interactions**. **<span style={{color: '#0ea5e9'}}>Replaying LLM sessions with Helicone unlocks this capability</span>**, providing insights unattainable through isolated testing.
 
-In this guide, we'll **<span style={{color: '#0ea5e9'}}>walk through the process</span>** of setting up an initial session, querying Helicone for session data, and replaying the session with improvements. Along the way, we'll share insights on tailoring this approach to suit your unique use cases.
+**Why is this powerful?**
 
----
+- **Authentic Context**: By leveraging actual production data, you see how changes affect real user experiences.
+- **Unveiling Hidden Effects**: Discover unintended consequences that only emerge over full sessions.
+- **Accelerated Iteration**: Automate testing with real inputs, streamlining your optimization process.
 
-## Replaying LLM Sessions
+**<span style={{color: '#0ea5e9'}}>Helicone empowers you to replay any complex session</span>**—a capability no other platform offers. Due to our adaptability, more mature product teams often build bespoke solutions atop Helicone to store, aggregate, and analyze their AI workflows, enhancing performance with genuine user data without reinventing the wheel.
 
-Imagine running an AI agent that plans and executes tasks. Adjusting a single prompt might seem minor, but without **<span style={{color: '#0ea5e9'}}>replaying the session</span>**, you'd miss how that tweak alters the agent's decisions downstream.
-
-By replaying sessions with modified prompts, models, and parameters, you can observe the **<span style={{color: '#0ea5e9'}}>real-world implications of your changes</span>**. You'll see how the AI's responses evolve, how it interacts differently, and whether those changes align with your goals. This approach provides a powerful feedback loop for more informed iterations.
-
-### The Importance of Context
-
-**<span style={{color: '#0ea5e9'}}>Testing prompts in isolation can be misleading</span>**. A prompt that works well on its own might not integrate smoothly with the broader system. Conversely, a prompt that seems less effective in isolation could enhance the overall workflow when applied in context.
-
-By integrating prompt changes and replaying sessions, you capture the nuanced interplay between components. **<span style={{color: '#0ea5e9'}}>You understand not just if a prompt works, but why it works within the system</span>**. This leads to more effective optimizations and a deeper understanding of your AI's behavior.
+In this guide, we'll **<span style={{color: '#0ea5e9'}}>demonstrate how to leverage Helicone to replay LLM sessions</span>**. You'll learn how to set up an initial session, query session data, and replay sessions with modifications. We'll also share tips on customizing this approach for your unique needs.
 
 ---
 
@@ -28,33 +22,59 @@ The process of replaying LLM sessions with Helicone involves three main steps:
 
 Let's explore each of these steps in detail by following an example.
 
----
+## Example: AI Debate Application
 
-# Example: Debate Session
+We'll walk through an example of a debate session between a user and an assistant. Between each argument, a impartial assistant scores the argument from 1 to 10.
 
-We'll walk through an example of a debate session between a user and an assistant. Between each argument, the assistant scores the user's argument from 1 to 10.
-
-## Step 1: Setting Up the Initial Session
+### Step 1: Setting Up the Initial Session
 
 Before you can replay sessions, you need to log them properly in Helicone. By adding **<span style={{color: '#0ea5e9'}}>only 3 headers</span>** to your LLM API requests, you can tag and group them into sessions.
 
-_Read more about how to implement Helicone sessions [here](https://docs.helicone.ai/features/sessions)._
+#### Instrumenting Your LLM Calls
 
-### Instrumenting Your LLM Calls
+1. **Configure the OpenAI API client with Helicone**
 
-1. **Set up the session headers**
-
-   This session is for a debate on climate change.
+   Set up the session headers, configure the OpenAI API client with Helicone, and include the necessary headers when making a request.
 
    ```javascript
+   const { OpenAI } = require("openai");
+   const { randomUUID } = require("crypto");
+
+   // Generate unique session identifiers
    const sessionId = randomUUID();
    const sessionName = "AI Debate";
    const sessionPath = "/debate/climate-change";
+
+   // Initialize OpenAI client with Helicone baseURL and auth header
+   const openai = new OpenAI({
+     apiKey: process.env.OPENAI_API_KEY,
+     baseURL: "https://oai.helicone.ai/v1",
+     defaultHeaders: {
+       "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+     },
+   });
+
+   // Include Helicone session headers when making requests
+   const response = await openai.chat.completions(
+     {
+       model: "gpt-4o-mini",
+       messages: conversation,
+     },
+     {
+       headers: {
+         "Helicone-Session-Id": sessionId,
+         "Helicone-Session-Name": sessionName,
+         "Helicone-Session-Path": sessionPath,
+       },
+     }
+   );
    ```
 
 2. **Initialize the conversation with the assistant**
 
    ```javascript
+   const topic = "The impact of climate change on global economies";
+
    const conversation = [
      {
        role: "system",
@@ -71,7 +91,9 @@ _Read more about how to implement Helicone sessions [here](https://docs.helicone
 3. **Loop through the debate turns**
 
    ```javascript
-   while (true) {
+   let turn = 1;
+
+   while (turn <= MAX_TURNS) {
      // Get user's argument
      const userArgument = await promptUser("Your argument: ");
      conversation.push({ role: "user", content: userArgument });
@@ -79,10 +101,10 @@ _Read more about how to implement Helicone sessions [here](https://docs.helicone
      // Score the user's argument
      await evaluateArgument(
        userArgument,
+       "Your Argument",
        sessionId,
        sessionName,
-       sessionPath,
-       "Your Argument"
+       sessionPath
      );
 
      // Assistant responds with a counter-argument
@@ -97,10 +119,10 @@ _Read more about how to implement Helicone sessions [here](https://docs.helicone
      // Score the assistant's argument
      await evaluateArgument(
        assistantResponse.content,
+       "Assistant's Argument",
        sessionId,
        sessionName,
-       sessionPath,
-       "Assistant's Argument"
+       sessionPath
      );
 
      turn++;
@@ -121,9 +143,9 @@ _Go fullscreen for the best experience._
   Your browser does not support the video tag.
 </video>
 
-## Step 2: Querying the Session Data from Helicone
+_Read more about how to implement Helicone sessions [here](https://docs.helicone.ai/features/sessions)._
 
-Read more about Helicone's API [here](https://docs.helicone.ai/rest/request/post-v1requestquery).
+### Step 2: Querying the Session Data from Helicone
 
 ```javascript
 const response = await fetch("https://api.helicone.ai/v1/request/query", {
@@ -145,7 +167,9 @@ const response = await fetch("https://api.helicone.ai/v1/request/query", {
 const data = await response.json();
 ```
 
-## Step 3: Processing and Modifying the Session Data
+Read more about Helicone's API [here](https://docs.helicone.ai/rest/request/post-v1requestquery).
+
+### Step 3: Processing and Modifying the Session Data
 
 Now that you have the session data, you'll need to process it.
 
@@ -160,6 +184,7 @@ Now that you have the session data, you'll need to process it.
      created_at: request.request_created_at,
      session: request.request_properties["Helicone-Session-Id"],
      signed_body_url: request.signed_body_url,
+     request_path: request.request_path,
      path: request.request_properties["Helicone-Session-Path"],
      prompt_id: request.request_properties["Helicone-Prompt-Id"],
      body: request.body,
@@ -205,35 +230,29 @@ Now that you have the session data, you'll need to process it.
      await handleChatCompletion(modifiedRequest);
    }
 
-   async function handleChatCompletion(request) {
-     const { body, path, prompt_id } = request;
+   async function handleChatCompletion(modifiedRequest) {
+     const { body, path, prompt_id, request_path } = modifiedRequest;
 
      // Send the modified request to the LLM
-     const response = await fetch(
-       "https://api.openai.com/v1/chat/completions",
-       {
-         method: "POST",
-         headers: {
-           "Content-Type": "application/json",
-           Authorization: `Bearer ${OPENAI_API_KEY}`,
-           // Reuse the session metadata for logging
-           "Helicone-Session-Id": replaySessionId,
-           "Helicone-Session-Name": sessionName,
-           "Helicone-Session-Path": path,
-           "Helicone-Prompt-Id": prompt_id,
-         },
-         body: JSON.stringify(body),
-       }
-     );
-
-     const responseData = await response.json();
-     console.log(`Response for ${path}:`, responseData);
+     const response = await fetch(request_path, {
+       method: "POST",
+       headers: {
+         Authorization: `Bearer ${OPENAI_API_KEY}`,
+         "Helicone-Auth": `Bearer ${HELICONE_API_KEY}`,
+         // Reuse the session metadata for logging
+         "Helicone-Session-Id": replaySessionId,
+         "Helicone-Session-Name": sessionName,
+         "Helicone-Session-Path": path,
+         "Helicone-Prompt-Id": prompt_id,
+       },
+       body: JSON.stringify(body),
+     });
    }
    ```
 
    **Note:** In the `handleChatCompletion` function, we send the modified request to the LLM. By reusing the same `session-name`, `session-path`, `prompt-id`, and `request path` from the original requests, we ensure that the replayed session is logged in Helicone under the same session metadata. This allows you to see the replayed requests in Helicone, grouped under the same session, making it easier to compare and analyze the effects of your modifications.
 
-## After running the replay, you can view it in Helicone:
+### After running the replay, you can view it in Helicone:
 
 _Go fullscreen for the best experience._
 
@@ -253,12 +272,18 @@ Additionally, leverage Helicone's [prompt versioning](https://docs.helicone.ai/f
 
 ---
 
-## Conclusion
+### Conclusion
 
-By replaying and modifying LLM sessions with Helicone, you gain deeper insights into how changes affect the entire workflow. This method allows for more effective optimization and understanding of your AI's behavior in context.
-
-You can view the full code and further details on [GitHub](#).
+By replaying and modifying LLM sessions with Helicone, you gain deeper insights into how changes affect the entire workflow. This method provides context-rich, real-world data that leads to more effective optimizations and a comprehensive understanding of your AI's behavior.
 
 ---
 
-Feel free to experiment with this approach and tailor it to your specific needs. By integrating Helicone into your development workflow, you enhance your ability to fine-tune and optimize AI interactions in a meaningful way.
+### Helicone Plug 🧊
+
+Helicone is the ultimate LLM observability platform built for developers to monitor, debug and improve their LLM applications. We're fully open source and built to handle high usage use-cases seamlessly. With over **1.8 billion requests** and **1.6 trillion tokens** logged, it's proven at scale. Check out our GitHub repository [here](https://github.com/Helicone/helicone).
+
+**Trusted by Industry Leaders**: Companies like **Sunrun**, **Michelin**, **QAWolf**, **Slate Magazine**, and many more rely on Helicone to enhance their AI models and workflows.
+
+You can view the full code and further details on [GitHub](https://github.com/Helicone/helicone).
+
+---
