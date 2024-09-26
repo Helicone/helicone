@@ -20,6 +20,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "../../../../ui/popover";
+import { Badge } from "@/components/ui/badge";
 
 interface ExperimentTableProps {
   promptSubversionId: string;
@@ -106,6 +107,16 @@ const InputCellRenderer: React.FC<any> = (props) => {
         </div>
       </PopoverContent>
     </Popover>
+  );
+};
+
+const CustomHeaderComponent: React.FC<any> = (props) => {
+  const { displayName, badgeText, badgeVariant = "secondary" } = props;
+  return (
+    <div className="flex items-center space-x-2">
+      <span>{displayName}</span>
+      <Badge variant={badgeVariant}>{badgeText}</Badge>
+    </div>
   );
 };
 
@@ -450,13 +461,18 @@ export function ExperimentTable({
         field: key,
         headerName: key,
         width: 150,
-        cellRenderer: InputCellRenderer, // Directly assign the component
+        cellRenderer: InputCellRenderer,
         cellClass: "border-r border-[#E2E8F0]",
         headerClass: "border-r border-[#E2E8F0]",
+        headerComponent: CustomHeaderComponent,
+        headerComponentParams: {
+          displayName: key,
+          badgeText: "Input",
+        },
       });
     });
 
-    experimentData?.hypotheses?.forEach((hypothesis) => {
+    experimentData?.hypotheses?.forEach((hypothesis, index) => {
       columns.push({
         field: hypothesis.id,
         headerName: hypothesis.id,
@@ -468,11 +484,11 @@ export function ExperimentTable({
           handleRunHypothesis,
           loadingStates,
         },
-        headerComponent: HypothesisHeaderComponent,
+        headerComponent: CustomHeaderComponent,
         headerComponentParams: {
-          hypothesisId: hypothesis.id,
-          handleRunHypothesis,
-          inputRecordsData,
+          displayName: index === 0 ? "Messages" : hypothesis.id,
+          badgeText: index === 0 ? "Input" : "Output",
+          badgeVariant: index === 0 ? "secondary" : "default",
         },
         cellClass: "border-r border-[#E2E8F0]",
         headerClass: "border-r border-[#E2E8F0]",
