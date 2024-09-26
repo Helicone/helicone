@@ -13,11 +13,13 @@ import { ChatTopBar, PROMPT_MODES } from "./chatTopBar";
 import { JsonView } from "./jsonView";
 import { LlmSchema } from "../../../../lib/api/models/requestResponseModel";
 import { useLocalStorage } from "../../../../services/hooks/localStorage";
+import { HeliconeRequest } from "@/lib/api/request/request";
 
 interface ChatProps {
   llmSchema?: LlmSchema;
   requestBody: any;
   responseBody: any;
+  request: HeliconeRequest;
   requestId: string;
   status: number;
   model: string;
@@ -31,6 +33,7 @@ interface ChatProps {
 }
 
 export const Chat: React.FC<ChatProps> = ({
+  request,
   requestBody,
   responseBody,
   requestId,
@@ -42,7 +45,7 @@ export const Chat: React.FC<ChatProps> = ({
   autoInputs,
   hideTopBar,
   messageSlice,
-  className = "bg-gray-50",
+  className = "bg-slate-50",
   status,
 }) => {
   const [open, setOpen] = useState(false);
@@ -84,6 +87,8 @@ export const Chat: React.FC<ChatProps> = ({
     setMode,
   };
 
+  console.log("open", open);
+
   const messagesToRender =
     messageSlice === "lastTwo" && messages.length > 2
       ? messages.slice(-2)
@@ -97,7 +102,7 @@ export const Chat: React.FC<ChatProps> = ({
           className
         )}
       >
-        <div className="w-full border border-gray-300 dark:border-gray-700 rounded-md divide-y divide-gray-300 dark:divide-gray-700 h-full">
+        <div className="w-full border border-slate-200 dark:border-gray-700 divide-y divide-gray-300 dark:divide-gray-700 h-full">
           {!hideTopBar && <ChatTopBar {...chatTopBarProps} />}
 
           {mode === "JSON" ? (
@@ -121,8 +126,48 @@ export const Chat: React.FC<ChatProps> = ({
           )}
         </div>
       </div>
+      {/* <RequestDrawerV2
+        request={getNormalizedRequest(request)}
+        open={open}
+        setOpen={() => setOpen(false)}
+        properties={[]}
+      /> */}
+      {/* <RequestDrawerV2
+        open={open}
+        setOpen={setOpen}
+        request={requestBody}
+        properties={selectedProperties}
+        hasPrevious={false}
+        hasNext={
+          selectedDataIndex !== undefined &&
+          selectedDataIndex < normalizedRequests.length - 1
+        }
+        onPrevHandler={() => {
+          if (selectedDataIndex !== undefined && selectedDataIndex > 0) {
+            setSelectedDataIndex(selectedDataIndex - 1);
+            setSelectedData(normalizedRequests[selectedDataIndex - 1]);
+            searchParams.set(
+              "requestId",
+              normalizedRequests[selectedDataIndex - 1].id
+            );
+          }
+        }}
+        onNextHandler={() => {
+          if (
+            selectedDataIndex !== undefined &&
+            selectedDataIndex < normalizedRequests.length - 1
+          ) {
+            setSelectedDataIndex(selectedDataIndex + 1);
+            setSelectedData(normalizedRequests[selectedDataIndex + 1]);
+            searchParams.set(
+              "requestId",
+              normalizedRequests[selectedDataIndex + 1].id
+            );
+          }
+        }}
+      /> */}
       <ThemedModal open={open} setOpen={setOpen}>
-        <div className="w-[80vw] border border-gray-300 dark:border-gray-700 rounded-md divide-y divide-gray-300 dark:divide-gray-700 h-full">
+        <div className="w-[80vw] rounded-md divide-y divide-gray-300 dark:divide-gray-700 h-full">
           <ChatTopBar {...chatTopBarProps} isModal={true} />
           {mode === "JSON" ? (
             <JsonView requestBody={requestBody} responseBody={responseBody} />
