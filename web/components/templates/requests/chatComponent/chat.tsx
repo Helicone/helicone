@@ -87,8 +87,6 @@ export const Chat: React.FC<ChatProps> = ({
     setMode,
   };
 
-  console.log("open", open);
-
   const messagesToRender =
     messageSlice === "lastTwo" && messages.length > 2
       ? messages.slice(-2)
@@ -126,46 +124,6 @@ export const Chat: React.FC<ChatProps> = ({
           )}
         </div>
       </div>
-      {/* <RequestDrawerV2
-        request={getNormalizedRequest(request)}
-        open={open}
-        setOpen={() => setOpen(false)}
-        properties={[]}
-      /> */}
-      {/* <RequestDrawerV2
-        open={open}
-        setOpen={setOpen}
-        request={requestBody}
-        properties={selectedProperties}
-        hasPrevious={false}
-        hasNext={
-          selectedDataIndex !== undefined &&
-          selectedDataIndex < normalizedRequests.length - 1
-        }
-        onPrevHandler={() => {
-          if (selectedDataIndex !== undefined && selectedDataIndex > 0) {
-            setSelectedDataIndex(selectedDataIndex - 1);
-            setSelectedData(normalizedRequests[selectedDataIndex - 1]);
-            searchParams.set(
-              "requestId",
-              normalizedRequests[selectedDataIndex - 1].id
-            );
-          }
-        }}
-        onNextHandler={() => {
-          if (
-            selectedDataIndex !== undefined &&
-            selectedDataIndex < normalizedRequests.length - 1
-          ) {
-            setSelectedDataIndex(selectedDataIndex + 1);
-            setSelectedData(normalizedRequests[selectedDataIndex + 1]);
-            searchParams.set(
-              "requestId",
-              normalizedRequests[selectedDataIndex + 1].id
-            );
-          }
-        }}
-      /> */}
       <ThemedModal open={open} setOpen={setOpen}>
         <div className="w-[80vw] rounded-md divide-y divide-gray-300 dark:divide-gray-700 h-full">
           <ChatTopBar {...chatTopBarProps} isModal={true} />

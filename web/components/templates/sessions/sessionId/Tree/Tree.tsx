@@ -156,24 +156,6 @@ const TreeNode: React.FC<TreeNodeProps> = ({
           />
         </Row>
       )}
-      {/* {!closeChildren ? (
-        node.children &&
-        node.children.map((child, index) => (
-          <TreeNode
-            key={index}
-            node={child}
-            selectedRequestIdDispatch={selectedRequestIdDispatch}
-            isLastChild={
-              node.children?.length
-                ? index === node.children?.length - 1
-                : false
-            }
-            level={level + 1}
-          />
-        ))
-      ) : (
-        <></>
-      )} */}
     </div>
   );
 };
