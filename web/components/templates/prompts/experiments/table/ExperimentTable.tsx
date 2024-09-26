@@ -13,6 +13,7 @@ import ProviderKeyList from "../../../enterprise/portal/id/providerKeyList";
 import AddColumnHeader from "./AddColumnHeader";
 import { HypothesisCellRenderer } from "./HypothesisCellRenderer";
 import { HypothesisHeaderComponent } from "./HypothesisHeaderComponent";
+import { PlusIcon } from "@heroicons/react/24/outline";
 
 interface ExperimentTableProps {
   promptSubversionId: string;
@@ -293,7 +294,12 @@ export function ExperimentTable({
             getRowId={getRowId}
           />
         </div>
-        <Button variant="default" onClick={handleAddRow}>
+        <Button
+          variant="ghost"
+          onClick={handleAddRow}
+          className="max-w-32 flex flex-row space-x-2 text-md"
+        >
+          <PlusIcon className="h-6 w-6" />
           Add row
         </Button>
       </div>
