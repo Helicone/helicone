@@ -128,6 +128,7 @@ const ExperimentInputSelector = (props: ExperimentInputSelectorProps) => {
                     {
                       body: {
                         inputs: request.inputs,
+                        sourceRequest: request.source_request,
                       },
                       params: {
                         path: {

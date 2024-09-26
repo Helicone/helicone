@@ -7,13 +7,14 @@ import { useQuery } from "@tanstack/react-query";
 import { ColDef, GridReadyEvent } from "ag-grid-community";
 import "ag-grid-community/styles/ag-grid.css";
 import { AgGridReact } from "ag-grid-react";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState, useEffect } from "react";
 import ProviderKeyList from "../../../enterprise/portal/id/providerKeyList";
 import AddColumnHeader from "./AddColumnHeader";
 import { HypothesisCellRenderer } from "./HypothesisCellRenderer";
 import { HypothesisHeaderComponent } from "./HypothesisHeaderComponent";
 import { PlusIcon, TableCellsIcon } from "@heroicons/react/24/outline";
 import ExperimentInputSelector from "../experimentInputSelector";
+import { useMutation } from "@tanstack/react-query";
 import {
   Popover,
   PopoverContent,
@@ -67,6 +68,9 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
 const InputCellRenderer: React.FC<any> = (props) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
 
+  // Determine the display value
+  const displayValue = props.value || "Click to add input";
+
   return (
     <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
       <PopoverTrigger asChild>
@@ -76,9 +80,11 @@ const InputCellRenderer: React.FC<any> = (props) => {
             whiteSpace: "inherit",
             overflow: "hidden",
             textOverflow: "ellipsis",
+            color: props.value ? "inherit" : "#6B7280", // Tailwind Gray-500
+            minHeight: "20px", // Ensure the div has height even when empty
           }}
         >
-          {props.value}
+          {displayValue}
         </div>
       </PopoverTrigger>
       <PopoverContent align="start" className="w-56 p-0">
@@ -97,18 +103,6 @@ const InputCellRenderer: React.FC<any> = (props) => {
             <TableCellsIcon className="inline h-4 w-4 mr-2" />
             Select an input set
           </Button>
-          {/* <Button
-            onClick={() => {
-              // Implement select dataset logic
-              setPopoverOpen(false);
-            }}
-            className="w-full"
-          >
-            Select a dataset
-          </Button>
-          <Button onClick={() => setPopoverOpen(false)} className="w-full">
-            Cancel
-          </Button> */}
         </div>
       </PopoverContent>
     </Popover>
@@ -241,12 +235,24 @@ export function ExperimentTable({
   // Use useState to manage rowData
   const [rowData, setRowData] = useState<any[]>([]);
   // Keep track of all input keys
-  const [inputKeys, setInputKeys] = useState<Set<string>>(new Set());
+  const [inputKeys, setInputKeys] = useState<Set<string>>(new Set(["Input 1"]));
 
   // Function to update rowData based on fetched data
   const updateRowData = useCallback(
     (experimentData: any, inputRecordsData: any[]) => {
       const newInputKeys = new Set<string>();
+      if (inputRecordsData && inputRecordsData.length > 0) {
+        inputRecordsData.forEach((row) => {
+          Object.keys(row.inputs).forEach((key) => newInputKeys.add(key));
+        });
+      }
+
+      if (newInputKeys.size === 0) {
+        newInputKeys.add("Input 1");
+      }
+
+      setInputKeys(newInputKeys);
+
       const newRowData = inputRecordsData.map((row) => {
         const hypothesisRowData: Record<string, string> = {};
 
@@ -264,23 +270,39 @@ export function ExperimentTable({
           }
         });
 
-        // Collect all input keys
-        Object.keys(row.inputs).forEach((key) => newInputKeys.add(key));
-
         return {
           id: row.id,
           dataset_row_id: row.dataset_row_id,
           // Spread inputs to individual fields
           ...row.inputs,
           ...hypothesisRowData,
+          isLoading: {},
         };
       });
 
-      setInputKeys(newInputKeys); // Update the set of input keys
       setRowData(newRowData);
     },
-    []
+    [setInputKeys, setRowData]
   );
+
+  // Add an empty row if rowData is empty
+  useEffect(() => {
+    if (rowData.length === 0) {
+      const inputFields = Array.from(inputKeys).reduce((acc, key) => {
+        acc[key] = "";
+        return acc;
+      }, {} as Record<string, string>);
+
+      const newRow = {
+        id: `temp-${Date.now()}`,
+        dataset_row_id: null,
+        ...inputFields,
+        isLoading: {},
+      };
+
+      setRowData([newRow]);
+    }
+  }, [inputKeys, rowData.length]);
 
   const defaultColDef = useMemo<ColDef>(
     () => ({
@@ -293,8 +315,14 @@ export function ExperimentTable({
         wordBreak: "normal",
         whiteSpace: wrapText ? "normal" : "nowrap",
       },
+      // Add cellClass and headerClass to apply borders
+      cellClass: "border-r border-[#E2E8F0]",
+      headerClass: "border-r border-[#E2E8F0]",
     }),
     [wrapText]
+  );
+  const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>(
+    {}
   );
 
   const onGridReady = useCallback((params: GridReadyEvent) => {
@@ -304,8 +332,20 @@ export function ExperimentTable({
 
   const getRowId = useCallback((params: any) => params.data.id, []);
 
-  const handleRunHypothesis = useCallback(
-    async (hypothesisId: string, datasetRowIds: string[]) => {
+  const runHypothesisMutation = useMutation(
+    async ({
+      hypothesisId,
+      datasetRowIds,
+    }: {
+      hypothesisId: string;
+      datasetRowIds: string[];
+    }) => {
+      console.log(
+        "Running hypothesis",
+        experimentId,
+        hypothesisId,
+        datasetRowIds
+      );
       await jawn.POST("/v1/experiment/run", {
         body: {
           experimentId,
@@ -314,16 +354,63 @@ export function ExperimentTable({
         },
       });
     },
-    [jawn, experimentId]
+    {
+      onMutate: ({ hypothesisId, datasetRowIds }) => {
+        // Set loading state in rowData
+        setRowData((prevData) =>
+          prevData.map((row) => {
+            if (datasetRowIds.includes(row.dataset_row_id)) {
+              return {
+                ...row,
+                isLoading: {
+                  ...(row.isLoading || {}),
+                  [hypothesisId]: true,
+                },
+              };
+            }
+            return row;
+          })
+        );
+      },
+      onSettled: async (_, __, { hypothesisId, datasetRowIds }) => {
+        // Refetch data
+        await refetchExperiments();
+        await refetchInputRecords();
+
+        // Reset loading state in rowData
+        setRowData((prevData) =>
+          prevData.map((row) => {
+            if (datasetRowIds.includes(row.dataset_row_id)) {
+              const newIsLoading = { ...(row.isLoading || {}) };
+              delete newIsLoading[hypothesisId];
+              return {
+                ...row,
+                isLoading: newIsLoading,
+              };
+            }
+            return row;
+          })
+        );
+      },
+      onError: (error) => {
+        console.error("Error running hypothesis:", error);
+      },
+    }
   );
 
+  const handleRunHypothesis = useCallback(
+    (hypothesisId: string, datasetRowIds: string[]) => {
+      runHypothesisMutation.mutate({ hypothesisId, datasetRowIds });
+    },
+    [runHypothesisMutation]
+  );
   const handleAddRow = useCallback(() => {
     const newRowId = `temp-${Date.now()}`;
 
     // Initialize input fields with empty strings
     const inputFields = Array.from(inputKeys).reduce((acc, key) => {
       acc[key] = "";
-      return acc;
+      return acc as Record<string, string>;
     }, {} as Record<string, string>);
 
     // Create an empty row object
@@ -353,8 +440,8 @@ export function ExperimentTable({
             ? (params.node?.rowIndex || 0) + 1
             : "N/A",
         pinned: "left",
-        cellClass: "border-r border-gray-200",
-        headerClass: "border-r border-gray-200",
+        cellClass: "border-r border-[#E2E8F0]",
+        headerClass: "border-r border-[#E2E8F0]",
       },
     ];
 
@@ -365,8 +452,8 @@ export function ExperimentTable({
         headerName: key,
         width: 150,
         cellRenderer: InputCellRenderer, // Directly assign the component
-        cellClass: "border-r border-gray-200",
-        headerClass: "border-r border-gray-200",
+        cellClass: "border-r border-[#E2E8F0]",
+        headerClass: "border-r border-[#E2E8F0]",
       });
     });
 
@@ -380,6 +467,7 @@ export function ExperimentTable({
         cellRendererParams: {
           hypothesisId: hypothesis.id,
           handleRunHypothesis,
+          loadingStates,
         },
         headerComponent: HypothesisHeaderComponent,
         headerComponentParams: {
@@ -387,8 +475,8 @@ export function ExperimentTable({
           handleRunHypothesis,
           inputRecordsData,
         },
-        cellClass: "border-r border-gray-200",
-        headerClass: "border-r border-gray-200",
+        cellClass: "border-r border-[#E2E8F0]",
+        headerClass: "border-r border-[#E2E8F0]",
       });
     });
 
@@ -433,31 +521,20 @@ export function ExperimentTable({
         </div>
         <div
           className="ag-theme-alpine h-[80vh] w-full border border-gray-200 rounded-md overflow-hidden"
-          style={
-            {
-              "--ag-header-height": "40px",
-              "--ag-header-foreground-color": "#000",
-              "--ag-header-background-color": "#ffffff",
-              "--ag-header-cell-hover-background-color": "#e5e7eb",
-              "--ag-header-cell-moving-background-color": "#d1d5db",
-              "--ag-row-border-color": "#e5e7eb",
-              "--ag-row-hover-color": "#f9fafb",
-              "--ag-cell-horizontal-border": "none",
-              "--ag-borders": "none",
-              "--ag-border-color": "#e5e7eb",
-            } as React.CSSProperties
-          }
+          // style={
+          //   {
+          //     "--ag-header-height": "40px",
+          //     "--ag-header-foreground-color": "#000",
+          //     "--ag-header-background-color": "#ffffff",
+          //     "--ag-header-cell-hover-background-color": "#e5e7eb",
+          //     "--ag-header-cell-moving-background-color": "#d1d5db",
+          //   } as React.CSSProperties
+          // }
         >
           <AgGridReact
             ref={gridRef}
             rowData={rowData}
             columnDefs={columnDefs}
-            defaultColDef={{
-              ...defaultColDef,
-              cellClass: "border-r border-gray-200",
-              headerClass:
-                "border-r border-gray-200 bg-gray-100 text-gray-700 font-semibold",
-            }}
             onGridReady={onGridReady}
             enableCellTextSelection={true}
             suppressRowTransform={true}
@@ -467,6 +544,7 @@ export function ExperimentTable({
             }}
             rowClass="border-b border-gray-200 hover:bg-gray-50"
             headerHeight={40}
+            rowHeight={50}
           />
         </div>
         <Button

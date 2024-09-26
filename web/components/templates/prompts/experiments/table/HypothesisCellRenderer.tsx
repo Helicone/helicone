@@ -2,21 +2,25 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { PlayIcon } from "@heroicons/react/24/outline";
 
-interface HypothesisCellRendererProps {
-  data: any;
-  hypothesisId: string;
-  handleRunHypothesis: (hypothesisId: string, datasetRowIds: string[]) => void;
-}
+export const HypothesisCellRenderer: React.FC<any> = (params) => {
+  const { data, colDef } = params;
 
-export const HypothesisCellRenderer: React.FC<HypothesisCellRendererProps> = ({
-  data,
-  hypothesisId,
-  handleRunHypothesis,
-}) => {
+  const hypothesisId = colDef.field;
+
   const responseData = data[hypothesisId];
   const content = responseData
     ? JSON.parse(responseData)?.body?.choices?.[0]?.message?.content
     : null;
+
+  const isLoading = data.isLoading?.[hypothesisId];
+
+  if (isLoading) {
+    return (
+      <div className="w-full h-full whitespace-pre-wrap">
+        <div>Generating...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full h-full whitespace-pre-wrap">
@@ -27,7 +31,7 @@ export const HypothesisCellRenderer: React.FC<HypothesisCellRendererProps> = ({
           <Button
             variant="ghost"
             onClick={() =>
-              handleRunHypothesis(hypothesisId, [data.dataset_row_id])
+              params.handleRunHypothesis(hypothesisId, [data.dataset_row_id])
             }
           >
             <PlayIcon className="w-4 h-4" />
