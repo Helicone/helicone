@@ -63,6 +63,54 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
   );
 };
 
+// Custom cell renderer with Popover
+const InputCellRenderer: React.FC<any> = (props) => {
+  const [popoverOpen, setPopoverOpen] = useState(false);
+
+  return (
+    <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+      <PopoverTrigger asChild>
+        <div
+          className="cursor-pointer"
+          style={{
+            whiteSpace: "inherit",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          }}
+        >
+          {props.value}
+        </div>
+      </PopoverTrigger>
+      <PopoverContent align="start" className="w-56">
+        <div className="flex flex-col space-y-2">
+          <Button
+            onClick={() => {
+              setPopoverOpen(false);
+              props.context.setShowExperimentInputSelector(true);
+            }}
+            className="w-full h-8"
+            variant="ghost"
+          >
+            Select an input set
+          </Button>
+          {/* <Button
+            onClick={() => {
+              // Implement select dataset logic
+              setPopoverOpen(false);
+            }}
+            className="w-full"
+          >
+            Select a dataset
+          </Button>
+          <Button onClick={() => setPopoverOpen(false)} className="w-full">
+            Cancel
+          </Button> */}
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+};
+
 export function ExperimentTable({
   promptSubversionId,
   experimentId,
@@ -72,22 +120,12 @@ export function ExperimentTable({
   const jawn = useJawnClient();
 
   const [wrapText, setWrapText] = useState(false);
-  const [popoverOpen, setPopoverOpen] = useState(false);
-  const [selectedCellPosition, setSelectedCellPosition] = useState<{
-    top: number;
-    left: number;
-  } | null>(null);
-
-  // Use useState to manage rowData
-  const [rowData, setRowData] = useState<any[]>([]);
-  // Keep track of all input keys
-  const [inputKeys, setInputKeys] = useState<Set<string>>(new Set());
 
   // State to control ExperimentInputSelector
   const [showExperimentInputSelector, setShowExperimentInputSelector] =
     useState(false);
 
-  // Refs for the grid API
+  // Reference for the grid API
   const gridRef = useRef<any>(null);
 
   const fetchExperiments = useCallback(async () => {
@@ -196,6 +234,11 @@ export function ExperimentTable({
     );
   }, [randomInputRecordsData]);
 
+  // Use useState to manage rowData
+  const [rowData, setRowData] = useState<any[]>([]);
+  // Keep track of all input keys
+  const [inputKeys, setInputKeys] = useState<Set<string>>(new Set());
+
   // Function to update rowData based on fetched data
   const updateRowData = useCallback(
     (experimentData: any, inputRecordsData: any[]) => {
@@ -295,20 +338,6 @@ export function ExperimentTable({
     setRowData((prevData) => [...prevData, newRow]);
   }, [experimentData?.hypotheses, inputKeys]);
 
-  const handleCellClick = useCallback((params: any) => {
-    if (params.colDef.field !== "rowNumber") {
-      const cellElement = params.event.target.closest(".ag-cell");
-      if (cellElement) {
-        const rect = cellElement.getBoundingClientRect();
-        setSelectedCellPosition({
-          top: rect.top + window.scrollY + rect.height,
-          left: rect.left + window.scrollX,
-        });
-        setPopoverOpen(true);
-      }
-    }
-  }, []);
-
   const columnDefs = useMemo<ColDef[]>(() => {
     const columns: ColDef[] = [
       {
@@ -331,7 +360,7 @@ export function ExperimentTable({
         field: key,
         headerName: key,
         width: 150,
-        cellRenderer: (params: any) => <div>{params.data[key]}</div>,
+        cellRenderer: InputCellRenderer, // Directly assign the component
         cellClass: "border-r border-gray-200",
         headerClass: "border-r border-gray-200",
       });
@@ -429,7 +458,9 @@ export function ExperimentTable({
             enableCellTextSelection={true}
             suppressRowTransform={true}
             getRowId={getRowId}
-            onCellClicked={handleCellClick}
+            context={{
+              setShowExperimentInputSelector,
+            }}
             rowClass="border-b border-gray-200 hover:bg-gray-50"
             headerHeight={40}
           />
@@ -463,48 +494,6 @@ export function ExperimentTable({
         open={settingsOpen}
         setOpen={setSettingsOpen}
       />
-
-      {/* Replace custom input menu with shadcn Popover */}
-      {selectedCellPosition && (
-        <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
-          <PopoverTrigger asChild>
-            {/* Invisible element to anchor the popover */}
-            <div
-              style={{
-                position: "absolute",
-                top: selectedCellPosition.top,
-                left: selectedCellPosition.left,
-                width: 0,
-                height: 0,
-              }}
-            />
-          </PopoverTrigger>
-          <PopoverContent align="start" className="w-56">
-            <div className="flex flex-col space-y-2">
-              <Button
-                onClick={() => {
-                  setPopoverOpen(false);
-                  setShowExperimentInputSelector(true);
-                }}
-                className="w-full"
-              >
-                Select an input set
-              </Button>
-              <Button
-                onClick={() => {
-                  /* Implement select dataset logic */
-                }}
-                className="w-full"
-              >
-                Select a dataset
-              </Button>
-              <Button onClick={() => setPopoverOpen(false)} className="w-full">
-                Cancel
-              </Button>
-            </div>
-          </PopoverContent>
-        </Popover>
-      )}
 
       {/* Include the ExperimentInputSelector */}
       <ExperimentInputSelector
