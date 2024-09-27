@@ -116,6 +116,9 @@ export class InputsManager extends BaseManager {
     datasetId: string,
     limit: number
   ): Promise<Result<PromptInputRecord[], string>> {
+    const bodyStore = new RequestResponseBodyStore(
+      this.authParams.organizationId
+    );
     const result = await dbExecute<PromptInputRecord>(
       `
       SELECT
@@ -146,6 +149,9 @@ export class InputsManager extends BaseManager {
               this.authParams.organizationId,
               record.source_request
             ),
+            request_response_body: await (
+              await bodyStore.getRequestResponseBody(record.source_request)
+            ).data?.response,
           };
         })
       );

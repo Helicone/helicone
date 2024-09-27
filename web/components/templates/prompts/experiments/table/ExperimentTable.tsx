@@ -220,6 +220,7 @@ export function ExperimentTable({
         },
       }
     );
+
     return res.data?.data;
   }, [orgId, promptSubversionId]);
 
@@ -265,6 +266,7 @@ export function ExperimentTable({
         source_request: row.source_request,
         prompt_version: row.prompt_version,
         created_at: row.created_at,
+        response: row.response_body,
       })) ?? []
     );
   }, [randomInputRecordsData]);
@@ -290,7 +292,7 @@ export function ExperimentTable({
 
       setInputKeys(newInputKeys);
 
-      const newRowData = inputRecordsData.map((row) => {
+      const newRowData = inputRecordsData.map((row, rowIdx) => {
         const hypothesisRowData: Record<string, string> = {};
 
         experimentData.hypotheses.forEach((hypothesis: any, index: number) => {
@@ -303,6 +305,13 @@ export function ExperimentTable({
             hypothesisRowData[hypothesis.id] = JSON.stringify(
               // @ts-ignore
               promptVersionTemplate?.helicone_template?.messages,
+              null,
+              2
+            );
+          } else if (index === 1) {
+            hypothesisRowData[hypothesis.id] = JSON.stringify(
+              // @ts-ignore
+              row?.request_response_body?.choices?.[0]?.message?.content,
               null,
               2
             );
@@ -517,6 +526,20 @@ export function ExperimentTable({
           headerComponentParams: {
             displayName: "Messages",
             badgeText: "Input",
+            badgeVariant: "secondary",
+          },
+          cellClass: "border-r border-[#E2E8F0]",
+          headerClass: "border-r border-[#E2E8F0]",
+        });
+      } else if (index === 1) {
+        columns.push({
+          field: hypothesis.id,
+          headerName: "Original",
+          width: 200,
+          headerComponent: CustomHeaderComponent,
+          headerComponentParams: {
+            displayName: "Original",
+            badgeText: "Output",
             badgeVariant: "secondary",
           },
           cellClass: "border-r border-[#E2E8F0]",
