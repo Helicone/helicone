@@ -77,10 +77,10 @@ const SessionsPage = (props: SessionsPageProps) => {
         }
       />
       {org?.currentOrg?.tier === "free" && (
-        <InfoBox title="Sessions are a Pro feature.">
+        <InfoBox title="Sessions is a Pro feature." className="mb-2">
           <p>
-            Sessions are a Pro feature. In order to keep using them, you need to
-            upgrade your plan before September 27st, 2024.{" "}
+            Sessions is a Pro feature. In order to keep using them, you need to
+            upgrade your plan before September 27th, 2024.{" "}
             <Link href="/settings/billing" className="text-blue-500 underline">
               Upgrade to Pro
             </Link>
