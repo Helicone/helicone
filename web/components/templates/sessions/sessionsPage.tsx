@@ -72,7 +72,7 @@ const SessionsPage = (props: SessionsPageProps) => {
       <AuthHeader
         title={
           <div className="flex items-center gap-2">
-            Sessions <Badge color="gray">Beta</Badge>
+            Sessions <Badge>Beta</Badge>
           </div>
         }
       />
