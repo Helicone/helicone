@@ -98,12 +98,14 @@ const AddColumnHeader: React.FC<AddColumnHeaderProps> = ({
                       body: {
                         experimentId: experimentId,
                         model: model,
-                        promptVersion: promptVersionId,
-                        providerKeyId: selectedProviderKey ?? "",
+                        promptVersion: result.data.data?.id ?? "",
+                        providerKeyId: selectedProviderKey ?? "NOKEY",
                         status: "RUNNING",
                       },
                     }
                   );
+
+                  console.log("New hypothesis:", newHypothesis.data);
 
                   promptVersion.refetch(); // Optional: Refetch prompt versions
 
