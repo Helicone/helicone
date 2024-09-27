@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Col } from "@/components/common/col";
 import { Row } from "@/components/common/row";
+import Link from "next/link";
 
 const EnterpriseCard = () => {
   return (
@@ -14,7 +15,9 @@ const EnterpriseCard = () => {
         </Col>
         <Row className="w-full h-[72px] px-[24px] items-center justify-between border-t">
           <span>Enterprise</span>
-          <Button variant={"outline"}>Contact Sales</Button>
+          <Button asChild variant={"outline"}>
+            <Link href="/contact">Contact Sales</Link>
+          </Button>
         </Row>
       </Col>
     </div>
