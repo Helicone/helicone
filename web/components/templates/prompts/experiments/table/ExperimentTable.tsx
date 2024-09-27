@@ -11,7 +11,6 @@ import { useCallback, useMemo, useRef, useState, useEffect } from "react";
 import ProviderKeyList from "../../../enterprise/portal/id/providerKeyList";
 import AddColumnHeader from "./AddColumnHeader";
 import { HypothesisCellRenderer } from "./HypothesisCellRenderer";
-import { HypothesisHeaderComponent } from "./HypothesisHeaderComponent";
 import { PlusIcon, TableCellsIcon } from "@heroicons/react/24/outline";
 import ExperimentInputSelector from "../experimentInputSelector";
 import { useMutation } from "@tanstack/react-query";
@@ -154,6 +153,7 @@ export function ExperimentTable({
         },
       },
     });
+
     return res.data?.data?.[0];
   }, [orgId, experimentId]);
 
@@ -162,6 +162,7 @@ export function ExperimentTable({
     fetchExperiments,
     {
       onSuccess: (data) => {
+        console.log("experimentData", data);
         if (data && inputRecordsData) {
           updateRowData(data, inputRecordsData);
         }
@@ -191,6 +192,18 @@ export function ExperimentTable({
     return res.data?.data;
   }, [orgId, experimentData?.dataset?.id]);
 
+  const fetchPromptVersionTemplate = useCallback(async () => {
+    const jawnClient = getJawnClient(orgId);
+    const res = await jawnClient.GET("/v1/prompt/version/{promptVersionId}", {
+      params: {
+        path: {
+          promptVersionId: promptSubversionId,
+        },
+      },
+    });
+    return res.data?.data;
+  }, [orgId, promptSubversionId]);
+
   const fetchRandomInputRecords = useCallback(async () => {
     const jawnClient = getJawnClient(orgId);
     const res = await jawnClient.POST(
@@ -216,6 +229,7 @@ export function ExperimentTable({
     {
       enabled: !!experimentData?.dataset?.id,
       onSuccess: (data) => {
+        console.log("inputRecordsData", data);
         if (experimentData && data) {
           updateRowData(experimentData, data);
         }
@@ -230,6 +244,18 @@ export function ExperimentTable({
       enabled: true,
     }
   );
+
+  const { data: promptVersionTemplateData } = useQuery(
+    ["promptVersionTemplate", orgId, promptSubversionId],
+    fetchPromptVersionTemplate,
+    {
+      enabled: true,
+    }
+  );
+
+  const promptVersionTemplate = useMemo(() => {
+    return promptVersionTemplateData;
+  }, [promptVersionTemplateData]);
 
   const randomInputRecords = useMemo(() => {
     return (
@@ -267,12 +293,19 @@ export function ExperimentTable({
       const newRowData = inputRecordsData.map((row) => {
         const hypothesisRowData: Record<string, string> = {};
 
-        experimentData.hypotheses.forEach((hypothesis: any) => {
+        experimentData.hypotheses.forEach((hypothesis: any, index: number) => {
           const hypothesisRun = hypothesis.runs?.find(
             (r: any) => r.datasetRowId === row.dataset_row_id
           );
 
-          if (hypothesisRun) {
+          if (index === 0) {
+            // For the first hypothesis, render only the messages array from promptVersionTemplate
+            hypothesisRowData[hypothesis.id] = JSON.stringify(
+              promptVersionTemplate?.helicone_template?.messages,
+              null,
+              2
+            );
+          } else if (hypothesisRun) {
             hypothesisRowData[hypothesis.id] = JSON.stringify(
               hypothesisRun.response,
               null,
@@ -293,7 +326,7 @@ export function ExperimentTable({
 
       setRowData(newRowData);
     },
-    [setInputKeys, setRowData]
+    [setInputKeys, setRowData, promptVersionTemplate]
   );
 
   // Add an empty row if rowData is empty
@@ -473,26 +506,43 @@ export function ExperimentTable({
     });
 
     experimentData?.hypotheses?.forEach((hypothesis, index) => {
-      columns.push({
-        field: hypothesis.id,
-        headerName: hypothesis.id,
-        width: 200,
-        suppressSizeToFit: true,
-        cellRenderer: HypothesisCellRenderer,
-        cellRendererParams: {
-          hypothesisId: hypothesis.id,
-          handleRunHypothesis,
-          loadingStates,
-        },
-        headerComponent: CustomHeaderComponent,
-        headerComponentParams: {
-          displayName: index === 0 ? "Messages" : hypothesis.id,
-          badgeText: index === 0 ? "Input" : "Output",
-          badgeVariant: index === 0 ? "secondary" : "default",
-        },
-        cellClass: "border-r border-[#E2E8F0]",
-        headerClass: "border-r border-[#E2E8F0]",
-      });
+      if (index === 0) {
+        // For the "Messages" column, render response_body directly
+        columns.push({
+          field: hypothesis.id,
+          headerName: "Messages",
+          width: 200,
+          headerComponent: CustomHeaderComponent,
+          headerComponentParams: {
+            displayName: "Messages",
+            badgeText: "Input",
+            badgeVariant: "secondary",
+          },
+          cellClass: "border-r border-[#E2E8F0]",
+          headerClass: "border-r border-[#E2E8F0]",
+        });
+      } else {
+        columns.push({
+          field: hypothesis.id,
+          headerName: hypothesis.id,
+          width: 200,
+          suppressSizeToFit: true,
+          cellRenderer: HypothesisCellRenderer,
+          cellRendererParams: {
+            hypothesisId: hypothesis.id,
+            handleRunHypothesis,
+            loadingStates,
+          },
+          headerComponent: CustomHeaderComponent,
+          headerComponentParams: {
+            displayName: hypothesis.id,
+            badgeText: "Output",
+            badgeVariant: "default",
+          },
+          cellClass: "border-r border-[#E2E8F0]",
+          headerClass: "border-r border-[#E2E8F0]",
+        });
+      }
     });
 
     columns.push({
@@ -516,12 +566,11 @@ export function ExperimentTable({
   }, [
     experimentData?.hypotheses,
     handleRunHypothesis,
-    inputRecordsData,
+    inputKeys,
+    loadingStates,
     promptSubversionId,
     experimentId,
     providerKey,
-    inputKeys,
-    randomInputRecords,
     refetchData,
   ]);
 

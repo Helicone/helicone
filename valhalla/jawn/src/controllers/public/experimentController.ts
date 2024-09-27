@@ -140,7 +140,7 @@ export class ExperimentController extends Controller {
       status: "PENDING" | "RUNNING" | "COMPLETED" | "FAILED";
     },
     @Request() request: JawnAuthenticatedRequest
-  ): Promise<Result<null, string>> {
+  ): Promise<Result<{ hypothesisId: string }, string>> {
     const experimentManager = new ExperimentManager(request.authParams);
 
     const result = await experimentManager.createNewExperimentHypothesis(

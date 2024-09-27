@@ -38,7 +38,7 @@ export class ExperimentManager extends BaseManager {
     promptVersion: string;
     providerKeyId: string;
     status: "PENDING" | "RUNNING" | "COMPLETED" | "FAILED";
-  }): Promise<Result<null, string>> {
+  }): Promise<Result<{ hypothesisId: string }, string>> {
     const hasAccess = await supabaseServer.client
       .from("experiment_v2")
       .select("id", { count: "exact" })
@@ -49,7 +49,7 @@ export class ExperimentManager extends BaseManager {
       return err("Experiment not found");
     }
 
-    const result = await dbExecute(
+    const result = await dbExecute<{ id: string }>(
       `
       INSERT INTO experiment_v2_hypothesis (
         prompt_version,
@@ -59,21 +59,24 @@ export class ExperimentManager extends BaseManager {
         provider_key
       )
       VALUES ($1, $2, $3, $4, $5)
+      RETURNING id
       `,
       [
         params.promptVersion,
         params.model,
         params.status,
         params.experimentId,
-        params.providerKeyId === "NOKEY" ? null : params.providerKeyId,
+        params.providerKeyId === "NOKEY"
+          ? "56a55b1d-328d-4c16-80ed-14a537b32a04"
+          : params.providerKeyId,
       ]
     );
 
-    if (result.error) {
+    if (result.error || !result.data) {
       return err(result.error);
     }
 
-    return ok(null);
+    return ok({ hypothesisId: result.data[0].id });
   }
 
   async addNewExperiment(
