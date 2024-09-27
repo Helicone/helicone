@@ -96,11 +96,13 @@ const SessionContentV2: React.FC<SessionContentV2Props> = ({
               .filter((user) => user !== "" && user != null)}
             models={session.traces.map((trace) => trace.request.model ?? "")}
             promptTokens={session.traces.reduce(
-              (acc, trace) => acc + (trace?.request?.promptTokens || 0),
+              (acc, trace) =>
+                acc + (parseInt(`${trace?.request?.promptTokens}`) || 0),
               0
             )}
             completionTokens={session.traces.reduce(
-              (acc, trace) => acc + (trace?.request?.promptTokens || 0),
+              (acc, trace) =>
+                acc + (parseInt(`${trace?.request?.completionTokens}`) || 0),
               0
             )}
             sessionId={session_id as string}

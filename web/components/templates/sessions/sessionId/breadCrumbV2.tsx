@@ -72,7 +72,11 @@ export const BreadCrumbV2 = ({
 
       <HoverCard>
         <HoverCardTrigger>
-          <InfoIcon width={16} height={16} className="text-slate-500" />
+          <InfoIcon
+            width={16}
+            height={16}
+            className="text-slate-500 cursor-pointer"
+          />
         </HoverCardTrigger>
         <HoverCardContent
           align="start"
