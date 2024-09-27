@@ -39,13 +39,11 @@ const TreeNode: React.FC<TreeNodeProps> = ({
 
   return (
     <div
-      className={
-        level === 0 ? "p-0 m-0 overflow-x-auto" : "relative flex flex-col"
-      }
+      className={level === 0 ? "p-0 m-0" : "relative flex flex-col"}
       key={`${node.name}-${node.trace?.request_id}`}
     >
       {node.children ? (
-        <Col className="overflow-x-auto">
+        <Col className="overflow-x-auto overflow-y-hidden">
           <Row className="w-full group">
             {new Array(level).fill(null).map((_, index) => (
               <div
