@@ -662,7 +662,7 @@ export function ExperimentTable({
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   return (
-    <div className="relative w-full h-full">
+    <div className="relative w-full">
       <div className="flex flex-col space-y-2 w-full">
         <div className="flex flex-row space-x-2 justify-end w-full">
           <Button variant="outline" onClick={() => setSettingsOpen(true)}>
@@ -670,7 +670,7 @@ export function ExperimentTable({
           </Button>
         </div>
         <div
-          className="ag-theme-alpine h-[80vh] w-full  rounded-md overflow-hidden"
+          className="ag-theme-alpine w-full rounded-md overflow-hidden"
           style={
             {
               "--ag-header-height": "40px",
@@ -692,9 +692,7 @@ export function ExperimentTable({
             enableCellTextSelection={true}
             colResizeDefault="shift"
             suppressRowTransform={true}
-            autoSizeStrategy={{
-              type: "fitCellContents",
-            }}
+            domLayout="autoHeight" // Added this line
             getRowId={getRowId}
             context={{
               setShowExperimentInputSelector,
