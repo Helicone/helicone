@@ -134,6 +134,7 @@ const SessionContent: React.FC<SessionContentProps> = ({
           selectedRequestId={selectedRequestId}
           setSelectedRequestId={handleRequestIdChange}
           requests={requests}
+          showSpan={false}
         />
       )}
 
