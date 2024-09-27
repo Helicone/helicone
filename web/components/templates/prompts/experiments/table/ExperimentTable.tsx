@@ -301,6 +301,7 @@ export function ExperimentTable({
           if (index === 0) {
             // For the first hypothesis, render only the messages array from promptVersionTemplate
             hypothesisRowData[hypothesis.id] = JSON.stringify(
+              // @ts-ignore
               promptVersionTemplate?.helicone_template?.messages,
               null,
               2
