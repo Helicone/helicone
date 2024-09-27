@@ -122,7 +122,7 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
       </span>
       <Badge
         variant={badgeVariant}
-        className="text-[#334155] bg-[#F8FAFC] border border-[#E2E8F0] rounded-md"
+        className="text-[#334155] bg-[#F8FAFC] border border-[#E2E8F0] rounded-md font-medium"
       >
         {badgeText}
       </Badge>
@@ -329,7 +329,7 @@ export function ExperimentTable({
             // For the first hypothesis, render only the messages array from promptVersionTemplate
             hypothesisRowData[hypothesis.id] = JSON.stringify(
               // @ts-ignore
-              promptVersionTemplate?.helicone_template?.messages,
+              promptVersionTemplate?.helicone_template?.messages?.[0],
               null,
               2
             );
@@ -393,6 +393,8 @@ export function ExperimentTable({
       cellStyle: {
         wordBreak: "normal",
         whiteSpace: wrapText ? "normal" : "nowrap",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
       },
       // Add cellClass and headerClass to apply borders
       cellClass: "border-r border-[#E2E8F0]",
@@ -565,13 +567,16 @@ export function ExperimentTable({
             badgeText: "Input",
             badgeVariant: "secondary",
           },
-          cellRenderer: PromptCellRenderer,
-          cellRendererParams: {
-            promptVersionTemplate,
-          },
           cellClass:
-            "border-r border-[#E2E8F0] text-slate-700 flex items-center justify-start mt-2.5",
+            "border-r border-[#E2E8F0] text-slate-700 flex items-center justify-start pt-2.5",
           headerClass: "border-r border-[#E2E8F0]",
+          cellStyle: {
+            verticalAlign: "middle", // Vertically center the text
+            textAlign: "left", // Left-align text horizontally
+            overflow: "hidden", // Hide overflow
+            textOverflow: "ellipsis", // Add ellipsis for overflowing text
+            whiteSpace: wrapText ? "normal" : "nowrap", // Handle text wrapping
+          },
         });
       } else if (index === 1) {
         columns.push({
@@ -584,7 +589,7 @@ export function ExperimentTable({
             badgeText: "Output",
             badgeVariant: "secondary",
           },
-          cellClass: "border-r border-[#E2E8F0] text-slate-700 mt-2.5",
+          cellClass: "border-r border-[#E2E8F0] text-slate-700 pt-2.5",
           headerClass: "border-r border-[#E2E8F0]",
         });
       } else {
@@ -601,11 +606,11 @@ export function ExperimentTable({
           },
           headerComponent: CustomHeaderComponent,
           headerComponentParams: {
-            displayName: hypothesis.id,
+            displayName: `Experiment ${index - 1}`,
             badgeText: "Output",
             badgeVariant: "default",
           },
-          cellClass: "border-r border-[#E2E8F0] text-slate-700",
+          cellClass: "border-r border-[#E2E8F0] text-slate-700 pt-2.5",
           headerClass: "border-r border-[#E2E8F0]",
         });
       }
@@ -638,6 +643,7 @@ export function ExperimentTable({
     experimentId,
     providerKey,
     refetchData,
+    wrapText,
   ]);
 
   const [settingsOpen, setSettingsOpen] = useState(false);
