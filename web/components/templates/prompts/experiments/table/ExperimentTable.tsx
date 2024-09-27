@@ -11,7 +11,11 @@ import { useCallback, useMemo, useRef, useState, useEffect } from "react";
 import ProviderKeyList from "../../../enterprise/portal/id/providerKeyList";
 import AddColumnHeader from "./AddColumnHeader";
 import { HypothesisCellRenderer } from "./HypothesisCellRenderer";
-import { PlusIcon, TableCellsIcon } from "@heroicons/react/24/outline";
+import {
+  ListBulletIcon,
+  PlusIcon,
+  TableCellsIcon,
+} from "@heroicons/react/24/outline";
 import ExperimentInputSelector from "../experimentInputSelector";
 import { useMutation } from "@tanstack/react-query";
 import {
@@ -113,9 +117,30 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
   const { displayName, badgeText, badgeVariant = "secondary" } = props;
   return (
     <div className="flex items-center space-x-2">
-      <span>{displayName}</span>
-      <Badge variant={badgeVariant}>{badgeText}</Badge>
+      <span className="text-sm font-semibold text-slate-900">
+        {displayName}
+      </span>
+      <Badge
+        variant={badgeVariant}
+        className="text-[#334155] bg-[#F8FAFC] border border-[#E2E8F0] rounded-md"
+      >
+        {badgeText}
+      </Badge>
     </div>
+  );
+};
+
+const RowNumberHeaderComponent: React.FC<any> = (props) => {
+  return (
+    <div className="flex-1 text-center items-center space-x-2 justify-center ml-1">
+      <ListBulletIcon className="h-5 w-5 text-slate-400" />
+    </div>
+  );
+};
+
+const PromptCellRenderer: React.FC<any> = (props) => {
+  return (
+    <div className="w-full h-full text-center items-center">{props.value}</div>
   );
 };
 
@@ -485,7 +510,7 @@ export function ExperimentTable({
   const columnDefs = useMemo<ColDef[]>(() => {
     const columns: ColDef[] = [
       {
-        headerName: "#",
+        headerComponent: RowNumberHeaderComponent,
         field: "rowNumber",
         width: 50,
         valueGetter: (params) =>
@@ -493,8 +518,15 @@ export function ExperimentTable({
             ? (params.node?.rowIndex || 0) + 1
             : "N/A",
         pinned: "left",
-        cellClass: "border-r border-[#E2E8F0]",
-        headerClass: "border-r border-[#E2E8F0]",
+        cellClass:
+          "border-r border-[#E2E8F0] text-center text-slate-700 justify-center flex-1 items-center",
+        headerClass:
+          "border-r border-[#E2E8F0] text-center  items-center justify-center ",
+        cellStyle: {
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        },
       },
     ];
 
@@ -505,12 +537,17 @@ export function ExperimentTable({
         headerName: key,
         width: 150,
         cellRenderer: InputCellRenderer,
-        cellClass: "border-r border-[#E2E8F0]",
+        cellClass: "border-r border-[#E2E8F0] text-slate-700",
         headerClass: "border-r border-[#E2E8F0]",
         headerComponent: CustomHeaderComponent,
         headerComponentParams: {
           displayName: key,
           badgeText: "Input",
+        },
+        cellStyle: {
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "start",
         },
       });
     });
@@ -528,7 +565,12 @@ export function ExperimentTable({
             badgeText: "Input",
             badgeVariant: "secondary",
           },
-          cellClass: "border-r border-[#E2E8F0]",
+          cellRenderer: PromptCellRenderer,
+          cellRendererParams: {
+            promptVersionTemplate,
+          },
+          cellClass:
+            "border-r border-[#E2E8F0] text-slate-700 flex items-center justify-start mt-2.5",
           headerClass: "border-r border-[#E2E8F0]",
         });
       } else if (index === 1) {
@@ -542,7 +584,7 @@ export function ExperimentTable({
             badgeText: "Output",
             badgeVariant: "secondary",
           },
-          cellClass: "border-r border-[#E2E8F0]",
+          cellClass: "border-r border-[#E2E8F0] text-slate-700 mt-2.5",
           headerClass: "border-r border-[#E2E8F0]",
         });
       } else {
@@ -563,7 +605,7 @@ export function ExperimentTable({
             badgeText: "Output",
             badgeVariant: "default",
           },
-          cellClass: "border-r border-[#E2E8F0]",
+          cellClass: "border-r border-[#E2E8F0] text-slate-700",
           headerClass: "border-r border-[#E2E8F0]",
         });
       }
@@ -609,16 +651,19 @@ export function ExperimentTable({
           </Button>
         </div>
         <div
-          className="ag-theme-alpine h-[80vh] w-full border border-gray-200 rounded-md overflow-hidden"
-          // style={
-          //   {
-          //     "--ag-header-height": "40px",
-          //     "--ag-header-foreground-color": "#000",
-          //     "--ag-header-background-color": "#ffffff",
-          //     "--ag-header-cell-hover-background-color": "#e5e7eb",
-          //     "--ag-header-cell-moving-background-color": "#d1d5db",
-          //   } as React.CSSProperties
-          // }
+          className="ag-theme-alpine h-[80vh] w-full  rounded-md overflow-hidden"
+          style={
+            {
+              "--ag-header-height": "40px",
+              "--ag-header-foreground-color": "#000",
+              "--ag-header-background-color": "#ffffff",
+              "--ag-header-cell-hover-background-color": "#e5e7eb",
+              "--ag-header-cell-moving-background-color": "#d1d5db",
+              "--ag-cell-horizontal-border": "solid #E2E8F0",
+              "--ag-border-radius": "8px",
+              "--ag-border-color": "#E2E8F0",
+            } as React.CSSProperties
+          }
         >
           <AgGridReact
             ref={gridRef}
@@ -626,7 +671,11 @@ export function ExperimentTable({
             columnDefs={columnDefs}
             onGridReady={onGridReady}
             enableCellTextSelection={true}
+            colResizeDefault="shift"
             suppressRowTransform={true}
+            autoSizeStrategy={{
+              type: "fitCellContents",
+            }}
             getRowId={getRowId}
             context={{
               setShowExperimentInputSelector,
