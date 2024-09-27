@@ -554,9 +554,20 @@ export function ExperimentTable({
       });
     });
 
-    experimentData?.hypotheses?.forEach((hypothesis, index) => {
+    // Sort the hypotheses array
+    const sortedHypotheses = experimentData?.hypotheses
+      ? [...experimentData.hypotheses].sort((a, b) => {
+          // Use the appropriate field to sort
+          return (
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+          );
+        })
+      : [];
+
+    // Iterate over the sorted hypotheses
+    sortedHypotheses.forEach((hypothesis, index) => {
       if (index === 0) {
-        // For the "Messages" column, render response_body directly
+        // "Messages" column
         columns.push({
           field: hypothesis.id,
           headerName: "Messages",
@@ -579,6 +590,7 @@ export function ExperimentTable({
           },
         });
       } else if (index === 1) {
+        // "Original" column
         columns.push({
           field: hypothesis.id,
           headerName: "Original",
@@ -593,6 +605,7 @@ export function ExperimentTable({
           headerClass: "border-r border-[#E2E8F0]",
         });
       } else {
+        const experimentNumber = index - 1;
         columns.push({
           field: hypothesis.id,
           headerName: hypothesis.id,
@@ -606,7 +619,7 @@ export function ExperimentTable({
           },
           headerComponent: CustomHeaderComponent,
           headerComponentParams: {
-            displayName: `Experiment ${index - 1}`,
+            displayName: `Experiment ${experimentNumber}`,
             badgeText: "Output",
             badgeVariant: "default",
           },
