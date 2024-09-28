@@ -566,27 +566,25 @@ export function ExperimentTable({
       const newRowData = inputRecordsData.map((row, rowIdx) => {
         const hypothesisRowData: Record<string, string> = {};
 
-        experimentData.hypotheses.forEach((hypothesis: any, index: number) => {
+        // Always populate "Messages" and "Original" columns
+        hypothesisRowData["messages"] = JSON.stringify(
+          //@ts-ignore
+          promptVersionTemplate?.helicone_template?.messages?.[0] || {},
+          null,
+          2
+        );
+        hypothesisRowData["original"] = JSON.stringify(
+          row?.request_response_body?.choices?.[0]?.message?.content || "",
+          null,
+          2
+        );
+
+        // Add data for other hypotheses if they exist
+        experimentData.hypotheses.slice(1).forEach((hypothesis: any) => {
           const hypothesisRun = hypothesis.runs?.find(
             (r: any) => r.datasetRowId === row.dataset_row_id
           );
-
-          if (index === 0) {
-            // For the first hypothesis, render only the messages array from promptVersionTemplate
-            hypothesisRowData[hypothesis.id] = JSON.stringify(
-              // @ts-ignore
-              promptVersionTemplate?.helicone_template?.messages?.[0],
-              null,
-              2
-            );
-          } else if (index === 1) {
-            hypothesisRowData[hypothesis.id] = JSON.stringify(
-              // @ts-ignore
-              row?.request_response_body?.choices?.[0]?.message?.content,
-              null,
-              2
-            );
-          } else if (hypothesisRun) {
+          if (hypothesisRun) {
             hypothesisRowData[hypothesis.id] = JSON.stringify(
               hypothesisRun.response,
               null,
@@ -755,9 +753,9 @@ export function ExperimentTable({
     refetchInputRecords();
   };
 
-  // Determine the hypotheses to run (excluding the first two)
+  // Determine the hypotheses to run (excluding the first one)
   const hypothesesToRun = useMemo(() => {
-    return experimentData?.hypotheses.slice(2).map((h: any) => h.id) || [];
+    return experimentData?.hypotheses.slice(1).map((h: any) => h.id) || [];
   }, [experimentData?.hypotheses]);
 
   // Define sortedHypotheses
@@ -773,11 +771,12 @@ export function ExperimentTable({
 
   const columnDefs = useMemo<ColDef[]>(() => {
     const columns: ColDef[] = [
+      // Row number column (keep as is)
       {
         headerComponent: RowNumberHeaderComponent,
         field: "rowNumber",
         width: 50,
-        cellRenderer: RowNumberCellRenderer, // Use the new cell renderer
+        cellRenderer: RowNumberCellRenderer,
         pinned: "left",
         cellClass:
           "border-r border-[#E2E8F0] text-center text-slate-700 justify-center flex-1 items-center",
@@ -793,89 +792,80 @@ export function ExperimentTable({
     ];
 
     // Add columns for each input key
-    if (columnView === "all" || columnView === "inputs") {
-      Array.from(inputKeys).forEach((key) => {
-        columns.push({
-          field: key,
-          headerName: key,
-          width: 150,
-          cellRenderer: InputCellRenderer,
-          cellClass: "border-r border-[#E2E8F0] text-slate-700",
-          headerClass: "border-r border-[#E2E8F0]",
-          headerComponent: CustomHeaderComponent,
-          headerComponentParams: {
-            displayName: key,
-            badgeText: "Input",
-          },
-          cellStyle: {
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "start",
-          },
-          autoHeight: wrapText,
-        });
+    Array.from(inputKeys).forEach((key) => {
+      columns.push({
+        field: key,
+        headerName: key,
+        width: 150,
+        cellRenderer: InputCellRenderer,
+        cellClass: "border-r border-[#E2E8F0] text-slate-700",
+        headerClass: "border-r border-[#E2E8F0]",
+        headerComponent: CustomHeaderComponent,
+        headerComponentParams: {
+          displayName: key,
+          badgeText: "Input",
+        },
+        cellStyle: {
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "start",
+        },
+        autoHeight: wrapText,
       });
-    }
+    });
 
-    // Use sortedHypotheses here
-    sortedHypotheses.forEach((hypothesis, index) => {
-      if (index === 0 && (columnView === "all" || columnView === "inputs")) {
-        // "Messages" column
-        columns.push({
-          field: hypothesis.id,
-          headerName: "Messages",
-          width: 200,
-          headerComponent: CustomHeaderComponent,
-          headerComponentParams: {
-            displayName: "Messages",
-            badgeText: "Input",
-            badgeVariant: "secondary",
-            hypothesis: hypothesis,
-          },
-          cellClass:
-            "border-r border-[#E2E8F0] text-slate-700 flex items-center justify-start pt-2.5",
-          headerClass: "border-r border-[#E2E8F0]",
-          cellStyle: {
-            verticalAlign: "middle", // Vertically center the text
-            textAlign: "left", // Left-align text horizontally
-            overflow: "hidden", // Hide overflow
-            textOverflow: "ellipsis", // Add ellipsis for overflowing text
-            whiteSpace: wrapText ? "normal" : "nowrap", // Handle text wrapping
-          },
-          autoHeight: wrapText,
-        });
-      } else if (
-        index === 1 &&
-        (columnView === "all" || columnView === "outputs")
-      ) {
-        // "Original" column
-        columns.push({
-          field: hypothesis.id,
-          headerName: "Original",
-          width: 200,
-          headerComponent: CustomHeaderComponent,
-          headerComponentParams: {
-            displayName: "Original",
-            badgeText: "Output",
-            badgeVariant: "secondary",
-            hypothesis: hypothesis,
-          },
-          cellClass: "border-r border-[#E2E8F0] text-slate-700 pt-2.5",
-          headerClass: "border-r border-[#E2E8F0]",
-          cellStyle: {
-            verticalAlign: "middle", // Vertically center the text
-            textAlign: "left", // Left-align text horizontally
-            overflow: "hidden", // Hide overflow
-            textOverflow: "ellipsis", // Add ellipsis for overflowing text
-            whiteSpace: wrapText ? "normal" : "nowrap", // Handle text wrapping
-          },
-          autoHeight: wrapText,
-        });
-      } else if (
-        index > 1 &&
-        (columnView === "all" || columnView === "outputs")
-      ) {
-        const experimentNumber = index - 1;
+    // Always add the "Messages" and "Original" columns
+    columns.push({
+      field: "messages",
+      headerName: "Messages",
+      width: 200,
+      headerComponent: CustomHeaderComponent,
+      headerComponentParams: {
+        displayName: "Messages",
+        badgeText: "Input",
+        badgeVariant: "secondary",
+        hypothesis: sortedHypotheses[0] || {},
+      },
+      cellClass:
+        "border-r border-[#E2E8F0] text-slate-700 flex items-center justify-start pt-2.5",
+      headerClass: "border-r border-[#E2E8F0]",
+      cellStyle: {
+        verticalAlign: "middle",
+        textAlign: "left",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        whiteSpace: wrapText ? "normal" : "nowrap",
+      },
+      autoHeight: wrapText,
+    });
+
+    columns.push({
+      field: "original",
+      headerName: "Original",
+      width: 200,
+      headerComponent: CustomHeaderComponent,
+      headerComponentParams: {
+        displayName: "Original",
+        badgeText: "Output",
+        badgeVariant: "secondary",
+        hypothesis: sortedHypotheses[1] || {},
+      },
+      cellClass: "border-r border-[#E2E8F0] text-slate-700 pt-2.5",
+      headerClass: "border-r border-[#E2E8F0]",
+      cellStyle: {
+        verticalAlign: "middle",
+        textAlign: "left",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        whiteSpace: wrapText ? "normal" : "nowrap",
+      },
+      autoHeight: wrapText,
+    });
+
+    // Add columns for additional experiments
+    if (columnView === "all" || columnView === "outputs") {
+      sortedHypotheses.slice(1).forEach((hypothesis, index) => {
+        const experimentNumber = index + 1;
         columns.push({
           field: hypothesis.id,
           headerName: hypothesis.id,
@@ -909,9 +899,10 @@ export function ExperimentTable({
           },
           autoHeight: wrapText,
         });
-      }
-    });
+      });
+    }
 
+    // Add the "Add Experiment" column
     columns.push({
       headerName: "Add Experiment",
       width: 150,
@@ -937,6 +928,8 @@ export function ExperimentTable({
     loadingStates,
     rowData,
     wrapText,
+    inputKeys,
+    // ... (other dependencies)
   ]);
 
   const [settingsOpen, setSettingsOpen] = useState(false);
