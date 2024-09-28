@@ -131,13 +131,24 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
     props;
   const [showPromptPlayground, setShowPromptPlayground] = useState(false);
 
+  const handleHeaderClick = (e: React.MouseEvent) => {
+    setShowPromptPlayground(true);
+  };
+
+  const handleRunClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onRunColumn) {
+      onRunColumn(props.column.colId);
+    }
+  };
+
   return (
-    <DropdownMenu
-      open={showPromptPlayground}
-      onOpenChange={setShowPromptPlayground}
-    >
-      <DropdownMenuTrigger asChild>
-        <div className="flex items-center justify-between w-full h-full px-2 cursor-pointer">
+    <Popover open={showPromptPlayground} onOpenChange={setShowPromptPlayground}>
+      <PopoverTrigger asChild>
+        <div
+          className="flex items-center justify-between w-full h-full px-2 cursor-pointer"
+          onClick={handleHeaderClick}
+        >
           <div className="flex items-center space-x-2">
             <span className="text-md font-semibold text-slate-900">
               {displayName}
@@ -148,22 +159,19 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
             >
               {badgeText}
             </Badge>
-            {onRunColumn && (
-              <Button
-                variant="ghost"
-                className="ml-2 p-0 border-slate-200 border rounded-md bg-slate-50 text-slate-500 h-[22px] w-[26px] flex items-center justify-center"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onRunColumn(props.column.colId);
-                }}
-              >
-                <PlayIcon className="w-4 h-4 text-gray-600 dark:text-gray-300" />
-              </Button>
-            )}
           </div>
+          {onRunColumn && (
+            <Button
+              variant="ghost"
+              className="ml-2 p-0 border-slate-200 border rounded-md bg-slate-50 text-slate-500 h-[22px] w-[26px] flex items-center justify-center"
+              onClick={handleRunClick}
+            >
+              <PlayIcon className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+            </Button>
+          )}
         </div>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-[800px] p-0">
+      </PopoverTrigger>
+      <PopoverContent className="w-[800px] p-0" side="bottom">
         <PromptPlayground
           prompt={props.hypothesis?.promptVersion?.template || ""}
           selectedInput={undefined}
@@ -176,8 +184,8 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
           isPromptCreatedFromUi={true}
           defaultEditMode={false}
         />
-      </DropdownMenuContent>
-    </DropdownMenu>
+      </PopoverContent>
+    </Popover>
   );
 };
 
@@ -751,6 +759,17 @@ export function ExperimentTable({
     return experimentData?.hypotheses.slice(2).map((h: any) => h.id) || [];
   }, [experimentData?.hypotheses]);
 
+  // Define sortedHypotheses
+  const sortedHypotheses = useMemo(() => {
+    return experimentData?.hypotheses
+      ? [...experimentData.hypotheses].sort((a, b) => {
+          return (
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+          );
+        })
+      : [];
+  }, [experimentData?.hypotheses]);
+
   const columnDefs = useMemo<ColDef[]>(() => {
     const columns: ColDef[] = [
       {
@@ -797,16 +816,7 @@ export function ExperimentTable({
       });
     }
 
-    // Sort the hypotheses array
-    const sortedHypotheses = experimentData?.hypotheses
-      ? [...experimentData.hypotheses].sort((a, b) => {
-          return (
-            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-          );
-        })
-      : [];
-
-    // Iterate over the sorted hypotheses
+    // Use sortedHypotheses here
     sortedHypotheses.forEach((hypothesis, index) => {
       if (index === 0 && (columnView === "all" || columnView === "inputs")) {
         // "Messages" column
@@ -920,17 +930,12 @@ export function ExperimentTable({
 
     return columns;
   }, [
-    experimentData?.hypotheses,
-    handleRunHypothesis,
-    inputKeys,
-    loadingStates,
-    promptSubversionId,
-    experimentId,
-    providerKey,
-    refetchData,
-    wrapText,
+    sortedHypotheses,
     columnView,
+    handleRunHypothesis,
+    loadingStates,
     rowData,
+    wrapText,
   ]);
 
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -983,7 +988,8 @@ export function ExperimentTable({
               setShowExperimentInputSelector,
               handleRunHypothesis,
               hypothesesToRun,
-              inputKeys: Array.from(inputKeys), // Pass inputKeys to context
+              inputKeys: Array.from(inputKeys),
+              hypotheses: sortedHypotheses, // Now this is properly defined
             }}
             rowClass="border-b border-gray-200 hover:bg-gray-50"
             headerHeight={40}

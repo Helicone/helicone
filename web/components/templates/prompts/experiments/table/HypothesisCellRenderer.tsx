@@ -1,16 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { PlayIcon } from "@heroicons/react/24/outline";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import PromptPlayground from "../../id/promptPlayground";
 
 export const HypothesisCellRenderer: React.FC<any> = (params) => {
   const { data, colDef, context } = params;
-
   const hypothesisId = colDef.field;
+  const inputKeys = context.inputKeys;
+  const [showPromptPlayground, setShowPromptPlayground] = useState(false);
 
   // Get the input keys from context
-  const inputKeys = context.inputKeys;
-
-  // Check if all input fields are empty
   const inputsAreEmpty = inputKeys?.every((key: string) => !data[key]);
 
   if (inputsAreEmpty) {
@@ -19,9 +23,29 @@ export const HypothesisCellRenderer: React.FC<any> = (params) => {
   }
 
   const responseData = data[hypothesisId];
-  const content = responseData
-    ? JSON.parse(responseData)?.body?.choices?.[0]?.message?.content
-    : null;
+  const parsedResponseData = responseData ? JSON.parse(responseData) : null;
+
+  const content =
+    parsedResponseData?.body?.choices?.[0]?.message?.content || null;
+
+  const formatPromptForPlayground = (): any => {
+    if (!parsedResponseData?.body?.choices?.[0]?.message) return null;
+
+    return {
+      model: parsedResponseData.model || "",
+      messages: [
+        {
+          role: parsedResponseData.body.choices[0].message.role || "assistant",
+          content: [
+            {
+              text: parsedResponseData.body.choices[0].message.content || "",
+              type: "text",
+            },
+          ],
+        },
+      ],
+    };
+  };
 
   const isLoading = data.isLoading?.[hypothesisId];
 
@@ -49,6 +73,12 @@ export const HypothesisCellRenderer: React.FC<any> = (params) => {
     };
   }, [isLoading]);
 
+  const handleCellClick = (e: React.MouseEvent) => {
+    console.log("some", content);
+    e.stopPropagation();
+    setShowPromptPlayground(true);
+  };
+
   if (isLoading) {
     if (loadingStatus === "queued") {
       return (
@@ -68,26 +98,48 @@ export const HypothesisCellRenderer: React.FC<any> = (params) => {
   }
 
   return (
-    <div
-      className={`w-full h-full items-center flex ${
-        content ? "justify-start" : "justify-end"
-      }`}
-    >
-      {content ? (
-        <div>{content}</div>
-      ) : (
-        <div>
-          <Button
-            variant="ghost"
-            className="w-6 h-6 p-0 border-slate-200 border rounded-md bg-slate-50 text-slate-500"
-            onClick={() =>
-              params.handleRunHypothesis(hypothesisId, [data.dataset_row_id])
-            }
-          >
-            <PlayIcon className="w-4 h-4" />
-          </Button>
+    <Popover open={showPromptPlayground} onOpenChange={setShowPromptPlayground}>
+      <PopoverTrigger asChild>
+        <div
+          className={`w-full h-full items-center flex ${
+            content ? "justify-start" : "justify-end"
+          }`}
+          onClick={handleCellClick}
+        >
+          {content ? (
+            <div>{content}</div>
+          ) : (
+            <div>
+              <Button
+                variant="ghost"
+                className="w-6 h-6 p-0 border-slate-200 border rounded-md bg-slate-50 text-slate-500"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  params.handleRunHypothesis(hypothesisId, [
+                    data.dataset_row_id,
+                  ]);
+                }}
+              >
+                <PlayIcon className="w-4 h-4" />
+              </Button>
+            </div>
+          )}
         </div>
-      )}
-    </div>
+      </PopoverTrigger>
+      <PopoverContent className="w-[800px] p-0" side="bottom" align="start">
+        <PromptPlayground
+          prompt={formatPromptForPlayground() || ""}
+          selectedInput={data}
+          onSubmit={(history, model) => {
+            console.log("Submitted:", history, model);
+            setShowPromptPlayground(false);
+          }}
+          submitText="Save"
+          initialModel={parsedResponseData?.model || ""}
+          isPromptCreatedFromUi={true}
+          defaultEditMode={false}
+        />
+      </PopoverContent>
+    </Popover>
   );
 };
