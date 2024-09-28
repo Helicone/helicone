@@ -122,7 +122,7 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
       </span>
       <Badge
         variant={badgeVariant}
-        className="text-[#334155] bg-[#F8FAFC] border border-[#E2E8F0] rounded-md font-medium"
+        className="text-[#334155] bg-[#F8FAFC] border border-[#E2E8F0] rounded-md font-medium hover:bg-slate-100"
       >
         {badgeText}
       </Badge>
@@ -705,7 +705,7 @@ export function ExperimentTable({
         <Button
           variant="ghost"
           onClick={handleAddRow}
-          className="max-w-32 flex flex-row space-x-2 text-md"
+          className="max-w-32 flex flex-row space-x-2 text-md text-[#334155]"
         >
           <PlusIcon className="h-6 w-6" />
           Add row
