@@ -50,7 +50,7 @@ export const HypothesisCellRenderer: React.FC<any> = (params) => {
       return (
         <div className="w-full h-full whitespace-pre-wrap flex flex-row items-center space-x-2 pl-4">
           <span className="animate-ping inline-flex rounded-full bg-green-700 h-2 w-2"></span>
-          <div className="italic">Running...</div>
+          <div className="itas">Running...</div>
         </div>
       );
     }

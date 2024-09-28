@@ -12,9 +12,13 @@ import ProviderKeyList from "../../../enterprise/portal/id/providerKeyList";
 import AddColumnHeader from "./AddColumnHeader";
 import { HypothesisCellRenderer } from "./HypothesisCellRenderer";
 import {
+  AdjustmentsHorizontalIcon,
   ListBulletIcon,
   PlusIcon,
   TableCellsIcon,
+  ChevronDownIcon,
+  Cog6ToothIcon,
+  ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
 import ExperimentInputSelector from "../experimentInputSelector";
 import { useMutation } from "@tanstack/react-query";
@@ -24,6 +28,19 @@ import {
   PopoverTrigger,
 } from "../../../../ui/popover";
 import { Badge } from "@/components/ui/badge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Switch } from "@/components/ui/switch";
+import { Check } from "lucide-react";
+import ProviderKeySelector from "./providerKeySelector";
+import { InfoBox } from "../../../../ui/helicone/infoBox";
 
 interface ExperimentTableProps {
   promptSubversionId: string;
@@ -32,8 +49,6 @@ interface ExperimentTableProps {
 
 interface SettingsPanelProps {
   setSelectedProviderKey: (key: string | null) => void;
-  wrapText: boolean;
-  setWrapText: (wrap: boolean) => void;
   open: boolean;
   setOpen: (open: boolean) => void;
   defaultProviderKey: string | null;
@@ -42,8 +57,6 @@ interface SettingsPanelProps {
 const SettingsPanel: React.FC<SettingsPanelProps> = ({
   defaultProviderKey,
   setSelectedProviderKey,
-  wrapText,
-  setWrapText,
   open,
   setOpen,
 }) => {
@@ -60,9 +73,6 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
           setProviderKeyCallback={setSelectedProviderKey}
           defaultProviderKey={defaultProviderKey}
         />
-        <Button className="w-full" onClick={() => setWrapText(!wrapText)}>
-          {wrapText ? "Disable" : "Enable"} Word Wrap
-        </Button>
       </div>
     </ThemedDrawer>
   );
@@ -144,6 +154,144 @@ const PromptCellRenderer: React.FC<any> = (props) => {
   );
 };
 
+const ColumnsDropdown: React.FC<{
+  wrapText: boolean;
+  setWrapText: (wrap: boolean) => void;
+  columnView: "all" | "inputs" | "outputs";
+  setColumnView: (view: "all" | "inputs" | "outputs") => void;
+}> = ({ wrapText, setWrapText, columnView, setColumnView }) => {
+  const [combineInputColumns, setCombineInputColumns] = useState(false);
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="outline"
+          className="py-0 px-2 border border-slate-200 h-8 flex items-center justify-center space-x-1"
+        >
+          <AdjustmentsHorizontalIcon className="h-4 w-4 text-slate-700" />
+          <ChevronDownIcon className="h-4 w-4 text-slate-700" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="w-60">
+        <DropdownMenuLabel>Columns</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuGroup>
+          <DropdownMenuItem
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setColumnView("all");
+            }}
+          >
+            {columnView === "all" && <Check className="h-4 w-4 mr-2" />}
+            <span className="flex-1">Show all</span>
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setColumnView("inputs");
+            }}
+          >
+            {columnView === "inputs" && <Check className="h-4 w-4 mr-2" />}
+            <span className="flex-1">Show inputs only</span>
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setColumnView("outputs");
+            }}
+          >
+            {columnView === "outputs" && <Check className="h-4 w-4 mr-2" />}
+            <span className="flex-1">Show outputs only</span>
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
+        <DropdownMenuSeparator />
+        <DropdownMenuLabel>Views</DropdownMenuLabel>
+        <DropdownMenuGroup>
+          <DropdownMenuItem>
+            <Switch
+              checked={combineInputColumns}
+              onClick={(event) => event.stopPropagation()}
+              onCheckedChange={setCombineInputColumns}
+              className="mr-2"
+            />
+            <span className="flex-1">Combine input columns</span>
+          </DropdownMenuItem>
+          <DropdownMenuItem>
+            <Switch
+              checked={wrapText}
+              onClick={(event) => event.stopPropagation()}
+              onCheckedChange={setWrapText}
+              className="mr-2"
+            />
+            <span className="flex-1">Wrap text</span>
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
+
+const ProviderKeyDropdown: React.FC<{
+  providerKey: string | null;
+  setProviderKey: (key: string) => void;
+}> = ({ providerKey, setProviderKey }) => {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <DropdownMenu open={open} onOpenChange={setOpen}>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="outline"
+          className="py-0 px-2 border border-slate-200 h-8 flex items-center justify-center space-x-1"
+        >
+          <Cog6ToothIcon className="h-4 w-4 mr-2 text-slate-700" />
+          {!providerKey && (
+            <ExclamationTriangleIcon className="h-4 w-4 text-yellow-700" />
+          )}
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        className="max-w-[320px]"
+        onClick={(e) => {
+          e.stopPropagation();
+          e.preventDefault();
+        }}
+        align="end"
+      >
+        <DropdownMenuLabel className="flex items-center space-x-2">
+          <Cog6ToothIcon className="h-6 w-6 mr-2" />
+          <span className="text-base font-medium">Settings</span>
+        </DropdownMenuLabel>
+        {!providerKey && (
+          <InfoBox variant="warning" className="p-2 ml-2">
+            <p className="text-sm font-medium flex gap-2">
+              <b>
+                Please select a provider key to run experiments. You can change
+                your mind at any time.
+              </b>
+            </p>
+          </InfoBox>
+        )}
+
+        <div className="p-2">
+          <ProviderKeySelector
+            variant="basic"
+            setProviderKeyCallback={(key) => {
+              setProviderKey(key);
+              // Don't close the dropdown
+              // setOpen(false);
+            }}
+            defaultProviderKey={providerKey}
+          />
+        </div>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
 export function ExperimentTable({
   promptSubversionId,
   experimentId,
@@ -153,6 +301,9 @@ export function ExperimentTable({
   const jawn = useJawnClient();
 
   const [wrapText, setWrapText] = useState(false);
+  const [columnView, setColumnView] = useState<"all" | "inputs" | "outputs">(
+    "all"
+  );
 
   // State to control ExperimentInputSelector
   const [showExperimentInputSelector, setShowExperimentInputSelector] =
@@ -529,30 +680,34 @@ export function ExperimentTable({
           alignItems: "center",
           justifyContent: "center",
         },
+        autoHeight: wrapText,
       },
     ];
 
     // Add columns for each input key
-    Array.from(inputKeys).forEach((key) => {
-      columns.push({
-        field: key,
-        headerName: key,
-        width: 150,
-        cellRenderer: InputCellRenderer,
-        cellClass: "border-r border-[#E2E8F0] text-slate-700",
-        headerClass: "border-r border-[#E2E8F0]",
-        headerComponent: CustomHeaderComponent,
-        headerComponentParams: {
-          displayName: key,
-          badgeText: "Input",
-        },
-        cellStyle: {
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "start",
-        },
+    if (columnView === "all" || columnView === "inputs") {
+      Array.from(inputKeys).forEach((key) => {
+        columns.push({
+          field: key,
+          headerName: key,
+          width: 150,
+          cellRenderer: InputCellRenderer,
+          cellClass: "border-r border-[#E2E8F0] text-slate-700",
+          headerClass: "border-r border-[#E2E8F0]",
+          headerComponent: CustomHeaderComponent,
+          headerComponentParams: {
+            displayName: key,
+            badgeText: "Input",
+          },
+          cellStyle: {
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "start",
+          },
+          autoHeight: wrapText,
+        });
       });
-    });
+    }
 
     // Sort the hypotheses array
     const sortedHypotheses = experimentData?.hypotheses
@@ -566,7 +721,7 @@ export function ExperimentTable({
 
     // Iterate over the sorted hypotheses
     sortedHypotheses.forEach((hypothesis, index) => {
-      if (index === 0) {
+      if (index === 0 && (columnView === "all" || columnView === "inputs")) {
         // "Messages" column
         columns.push({
           field: hypothesis.id,
@@ -588,8 +743,12 @@ export function ExperimentTable({
             textOverflow: "ellipsis", // Add ellipsis for overflowing text
             whiteSpace: wrapText ? "normal" : "nowrap", // Handle text wrapping
           },
+          autoHeight: wrapText,
         });
-      } else if (index === 1) {
+      } else if (
+        index === 1 &&
+        (columnView === "all" || columnView === "outputs")
+      ) {
         // "Original" column
         columns.push({
           field: hypothesis.id,
@@ -603,8 +762,19 @@ export function ExperimentTable({
           },
           cellClass: "border-r border-[#E2E8F0] text-slate-700 pt-2.5",
           headerClass: "border-r border-[#E2E8F0]",
+          cellStyle: {
+            verticalAlign: "middle", // Vertically center the text
+            textAlign: "left", // Left-align text horizontally
+            overflow: "hidden", // Hide overflow
+            textOverflow: "ellipsis", // Add ellipsis for overflowing text
+            whiteSpace: wrapText ? "normal" : "nowrap", // Handle text wrapping
+          },
+          autoHeight: wrapText,
         });
-      } else {
+      } else if (
+        index > 1 &&
+        (columnView === "all" || columnView === "outputs")
+      ) {
         const experimentNumber = index - 1;
         columns.push({
           field: hypothesis.id,
@@ -625,6 +795,14 @@ export function ExperimentTable({
           },
           cellClass: "border-r border-[#E2E8F0] text-slate-700 pt-2.5",
           headerClass: "border-r border-[#E2E8F0]",
+          cellStyle: {
+            verticalAlign: "middle", // Vertically center the text
+            textAlign: "left", // Left-align text horizontally
+            overflow: "hidden", // Hide overflow
+            textOverflow: "ellipsis", // Add ellipsis for overflowing text
+            whiteSpace: wrapText ? "normal" : "nowrap", // Handle text wrapping
+          },
+          autoHeight: wrapText,
         });
       }
     });
@@ -657,17 +835,29 @@ export function ExperimentTable({
     providerKey,
     refetchData,
     wrapText,
+    columnView,
   ]);
 
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [selectedProviderKey, setSelectedProviderKey] = useState(providerKey);
 
   return (
     <div className="relative w-full">
       <div className="flex flex-col space-y-2 w-full">
         <div className="flex flex-row space-x-2 justify-end w-full">
-          <Button variant="outline" onClick={() => setSettingsOpen(true)}>
+          <ColumnsDropdown
+            wrapText={wrapText}
+            setWrapText={setWrapText}
+            columnView={columnView}
+            setColumnView={setColumnView}
+          />
+          <ProviderKeyDropdown
+            providerKey={selectedProviderKey}
+            setProviderKey={setSelectedProviderKey}
+          />
+          {/* <Button variant="outline" onClick={() => setSettingsOpen(true)}>
             Settings
-          </Button>
+          </Button> */}
         </div>
         <div
           className="ag-theme-alpine w-full rounded-md overflow-hidden"
@@ -726,8 +916,6 @@ export function ExperimentTable({
           });
           refetchExperiments();
         }}
-        wrapText={wrapText}
-        setWrapText={setWrapText}
         open={settingsOpen}
         setOpen={setSettingsOpen}
       />
