@@ -151,36 +151,10 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
   );
 };
 
-const RowNumberCellRenderer: React.FC<any> = (props) => {
-  const [isHovered, setIsHovered] = useState(false);
-
-  const runRow = () => {
-    const hypothesisIds = props.columnApi.getColumns()
-      .filter((col: any) => col.colDef.cellRenderer === HypothesisCellRenderer)
-      .map((col: any) => col.colId);
-
-    hypothesisIds.forEach((hypothesisId: string) => {
-      props.context.handleRunHypothesis(hypothesisId, [props.data.dataset_row_id]);
-    });
-  };
-
+const RowNumberHeaderComponent: React.FC<any> = (props) => {
   return (
-    <div
-      className="w-full h-full flex items-center justify-center"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      {isHovered ? (
-        <Button
-          variant="ghost"
-          className="p-0 h-6 w-6 rounded-full flex items-center justify-center"
-          onClick={runRow}
-        >
-          <PlayIcon className="w-4 h-4 text-gray-600" />
-        </Button>
-      ) : (
-        <span>{props.rowIndex + 1}</span>
-      )}
+    <div className="flex-1 text-center items-center space-x-2 justify-center ml-1">
+      <ListBulletIcon className="h-5 w-5 text-slate-400" />
     </div>
   );
 };
@@ -517,14 +491,14 @@ export function ExperimentTable({
             // For the first hypothesis, render only the messages array from promptVersionTemplate
             hypothesisRowData[hypothesis.id] = JSON.stringify(
               // @ts-ignore
-              promptVersionTemplate?.helicone_template?.messages?.[0],
+              row?.request_response_body?.choices?.[0]?.message?.content,
               null,
               2
             );
           } else if (index === 1) {
             hypothesisRowData[hypothesis.id] = JSON.stringify(
               // @ts-ignore
-              row?.request_response_body?.choices?.[0]?.message?.content,
+              promptVersionTemplate?.helicone_template?.messages?.[0],
               null,
               2
             );
@@ -662,15 +636,11 @@ export function ExperimentTable({
   );
 
   const handleRunHypothesis = useCallback(
-    (hypothesisId: string | string[], datasetRowIds: string[]) => {
-      const hypothesisIds = Array.isArray(hypothesisId) ? hypothesisId : [hypothesisId];
-      hypothesisIds.forEach(id => {
-        runHypothesisMutation.mutate({ hypothesisId: id, datasetRowIds });
-      });
+    (hypothesisId: string, datasetRowIds: string[]) => {
+      runHypothesisMutation.mutate({ hypothesisId, datasetRowIds });
     },
     [runHypothesisMutation]
   );
-
   const handleAddRow = useCallback(() => {
     const newRowId = `temp-${Date.now()}`;
 
@@ -704,14 +674,25 @@ export function ExperimentTable({
   const columnDefs = useMemo<ColDef[]>(() => {
     const columns: ColDef[] = [
       {
-        headerName: "#",
-        width: 60,
-        cellRenderer: RowNumberCellRenderer,
-        cellClass: "border-r border-[#E2E8F0] text-slate-700",
-        headerClass: "border-r border-[#E2E8F0]",
+        headerComponent: RowNumberHeaderComponent,
+        field: "rowNumber",
+        width: 50,
+        valueGetter: (params) =>
+          params.node?.rowIndex !== undefined
+            ? (params.node?.rowIndex || 0) + 1
+            : "N/A",
         pinned: "left",
+        cellClass:
+          "border-r border-[#E2E8F0] text-center text-slate-700 justify-center flex-1 items-center",
+        headerClass:
+          "border-r border-[#E2E8F0] text-center  items-center justify-center ",
+        cellStyle: {
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        },
+        autoHeight: wrapText,
       },
-      // ... (rest of your column definitions)
     ];
 
     // Add columns for each input key
@@ -921,7 +902,6 @@ export function ExperimentTable({
             getRowId={getRowId}
             context={{
               setShowExperimentInputSelector,
-              handleRunHypothesis,
             }}
             rowClass="border-b border-gray-200 hover:bg-gray-50"
             headerHeight={40}
