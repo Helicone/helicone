@@ -913,8 +913,8 @@ export function ExperimentTable({
     });
 
     columns.push({
-      headerName: "",
-      width: 50,
+      headerName: "Add Experiment",
+      width: 150,
       suppressSizeToFit: true,
       suppressMenu: true,
       sortable: false,
