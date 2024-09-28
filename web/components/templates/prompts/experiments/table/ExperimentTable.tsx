@@ -20,6 +20,8 @@ import {
   Cog6ToothIcon,
   ExclamationTriangleIcon,
   PlayIcon,
+  ArrowDownTrayIcon,
+  FunnelIcon,
 } from "@heroicons/react/24/outline";
 import ExperimentInputSelector from "../experimentInputSelector";
 import { useMutation } from "@tanstack/react-query";
@@ -43,7 +45,6 @@ import { Check } from "lucide-react";
 import ProviderKeySelector from "./providerKeySelector";
 import { InfoBox } from "../../../../ui/helicone/infoBox";
 import PromptPlayground from "../../id/promptPlayground";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 interface ExperimentTableProps {
   promptSubversionId: string;
@@ -219,7 +220,7 @@ const ColumnsDropdown: React.FC<{
           className="py-0 px-2 border border-slate-200 h-8 flex items-center justify-center space-x-1"
         >
           <AdjustmentsHorizontalIcon className="h-4 w-4 text-slate-700" />
-          <ChevronDownIcon className="h-4 w-4 text-slate-700" />
+          <ChevronDownIcon className="h-4 w-4 text-slate-400" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-60">
@@ -951,6 +952,19 @@ export function ExperimentTable({
             columnView={columnView}
             setColumnView={setColumnView}
           />
+          <Button
+            variant="outline"
+            className="py-0 px-2 border border-slate-200 h-8 flex items-center justify-center space-x-1"
+          >
+            <FunnelIcon className="h-4 w-4 text-slate-700" />
+            <ChevronDownIcon className="h-4 w-4 text-slate-400" />
+          </Button>
+          <Button
+            variant="outline"
+            className="py-0 px-2 border border-slate-200 h-8 flex items-center justify-center space-x-1"
+          >
+            <ArrowDownTrayIcon className="h-4 w-4 text-slate-700" />
+          </Button>
           <ProviderKeyDropdown
             providerKey={selectedProviderKey}
             setProviderKey={setSelectedProviderKey}
