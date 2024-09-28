@@ -42,6 +42,8 @@ import { Switch } from "@/components/ui/switch";
 import { Check } from "lucide-react";
 import ProviderKeySelector from "./providerKeySelector";
 import { InfoBox } from "../../../../ui/helicone/infoBox";
+import PromptPlayground from "../../id/promptPlayground";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 interface ExperimentTableProps {
   promptSubversionId: string;
@@ -125,10 +127,14 @@ const InputCellRenderer: React.FC<any> = (props) => {
 };
 
 const CustomHeaderComponent: React.FC<any> = (props) => {
-  const { displayName, badgeText, badgeVariant, onRunColumn } = props;
+  const { displayName, badgeText, badgeVariant, onRunColumn, onHeaderClick } =
+    props;
 
   return (
-    <div className="flex items-center justify-between w-full h-full px-2">
+    <div
+      className="flex items-center justify-between w-full h-full px-2 cursor-pointer"
+      onClick={onHeaderClick}
+    >
       <div className="flex items-center space-x-2">
         <span>{displayName}</span>
         <Badge
@@ -141,7 +147,10 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
           <Button
             variant="ghost"
             className="ml-2 p-0 border-slate-200 border rounded-md bg-slate-50 text-slate-500 h-[22px] w-[26px] flex items-center justify-center"
-            onClick={() => onRunColumn(props.column.colId)}
+            onClick={(e) => {
+              e.stopPropagation();
+              onRunColumn(props.column.colId);
+            }}
           >
             <PlayIcon className="w-4 h-4 text-gray-600 dark:text-gray-300" />
           </Button>
@@ -367,6 +376,9 @@ export function ExperimentTable({
   // Reference for the grid API
   const gridRef = useRef<any>(null);
 
+  const [showPromptPlayground, setShowPromptPlayground] = useState(false);
+  const [selectedHypothesis, setSelectedHypothesis] = useState<any>(null);
+
   const fetchExperiments = useCallback(async () => {
     if (!orgId || !experimentId) return null;
     const jawnClient = getJawnClient(orgId);
@@ -381,6 +393,7 @@ export function ExperimentTable({
         },
         include: {
           responseBodies: true,
+          promptVersion: true,
         },
       },
     });
@@ -720,6 +733,21 @@ export function ExperimentTable({
     return experimentData?.hypotheses.slice(2).map((h: any) => h.id) || [];
   }, [experimentData?.hypotheses]);
 
+  const handleHeaderClick = useCallback(
+    (hypothesisId: string) => {
+      console.log("hypothesisId", hypothesisId);
+      const hypothesis = experimentData?.hypotheses.find(
+        (h) => h.id === hypothesisId
+      );
+      if (hypothesis) {
+        console.log("hypothesis", hypothesis.promptVersion?.template);
+        setSelectedHypothesis(hypothesis.promptVersion?.template);
+        setShowPromptPlayground(true);
+      }
+    },
+    [experimentData?.hypotheses]
+  );
+
   const columnDefs = useMemo<ColDef[]>(() => {
     const columns: ColDef[] = [
       {
@@ -789,6 +817,7 @@ export function ExperimentTable({
             displayName: "Messages",
             badgeText: "Input",
             badgeVariant: "secondary",
+            onHeaderClick: () => handleHeaderClick(hypothesis.id),
           },
           cellClass:
             "border-r border-[#E2E8F0] text-slate-700 flex items-center justify-start pt-2.5",
@@ -816,6 +845,7 @@ export function ExperimentTable({
             displayName: "Original",
             badgeText: "Output",
             badgeVariant: "secondary",
+            onHeaderClick: () => handleHeaderClick(hypothesis.id),
           },
           cellClass: "border-r border-[#E2E8F0] text-slate-700 pt-2.5",
           headerClass: "border-r border-[#E2E8F0]",
@@ -853,6 +883,7 @@ export function ExperimentTable({
               const datasetRowIds = rowData.map((row) => row.dataset_row_id);
               handleRunHypothesis(colId, datasetRowIds);
             },
+            onHeaderClick: () => handleHeaderClick(hypothesis.id),
           },
           cellClass: "border-r border-[#E2E8F0] text-slate-700 pt-2.5",
           headerClass: "border-r border-[#E2E8F0] bg-white dark:bg-gray-800",
@@ -898,6 +929,7 @@ export function ExperimentTable({
     wrapText,
     columnView,
     rowData,
+    handleHeaderClick,
   ]);
 
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -1002,6 +1034,27 @@ export function ExperimentTable({
           }
         }}
       />
+
+      <Dialog
+        open={showPromptPlayground}
+        onOpenChange={setShowPromptPlayground}
+      >
+        <DialogContent className="max-w-4xl">
+          <PromptPlayground
+            prompt={selectedHypothesis || ""}
+            selectedInput={undefined}
+            onSubmit={(history, model) => {
+              // Handle submit if needed
+              console.log("Submitted:", history, model);
+              setShowPromptPlayground(false);
+            }}
+            submitText="Save"
+            initialModel={selectedHypothesis?.model || ""}
+            isPromptCreatedFromUi={true}
+            defaultEditMode={true}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

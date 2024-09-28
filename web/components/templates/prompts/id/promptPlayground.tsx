@@ -55,6 +55,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
   isPromptCreatedFromUi,
   defaultEditMode = false,
 }) => {
+  console.log("prompt", prompt);
   const replaceTemplateVariables = (
     content: string,
     inputs: Record<string, string>
