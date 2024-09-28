@@ -303,6 +303,50 @@ const ProviderKeyDropdown: React.FC<{
     </DropdownMenu>
   );
 };
+
+const RowNumberCellRenderer: React.FC<any> = (props) => {
+  const [hovered, setHovered] = useState(false);
+
+  const rowNumber =
+    props.node?.rowIndex !== undefined
+      ? (props.node?.rowIndex || 0) + 1
+      : "N/A";
+
+  const handleRunClick = () => {
+    const hypothesesToRun = props.context.hypothesesToRun; // Get the hypotheses IDs to run
+    const datasetRowId = props.data.dataset_row_id; // Get the dataset row ID
+
+    if (!datasetRowId || !hypothesesToRun || hypothesesToRun.length === 0) {
+      return;
+    }
+
+    // Run each hypothesis for this dataset row
+    hypothesesToRun.forEach((hypothesisId: string) => {
+      props.context.handleRunHypothesis(hypothesisId, [datasetRowId]);
+    });
+  };
+
+  return (
+    <div
+      className="flex items-center justify-center w-full h-full"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      {!hovered ? (
+        <span>{rowNumber}</span>
+      ) : (
+        <Button
+          variant="ghost"
+          className="p-0 border-slate-200 border rounded-md bg-slate-50 text-slate-500 h-[22px] w-[26px] flex items-center justify-center"
+          onClick={handleRunClick}
+        >
+          <PlayIcon className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+        </Button>
+      )}
+    </div>
+  );
+};
+
 export function ExperimentTable({
   promptSubversionId,
   experimentId,
@@ -671,21 +715,23 @@ export function ExperimentTable({
     refetchInputRecords();
   };
 
+  // Determine the hypotheses to run (excluding the first two)
+  const hypothesesToRun = useMemo(() => {
+    return experimentData?.hypotheses.slice(2).map((h: any) => h.id) || [];
+  }, [experimentData?.hypotheses]);
+
   const columnDefs = useMemo<ColDef[]>(() => {
     const columns: ColDef[] = [
       {
         headerComponent: RowNumberHeaderComponent,
         field: "rowNumber",
         width: 50,
-        valueGetter: (params) =>
-          params.node?.rowIndex !== undefined
-            ? (params.node?.rowIndex || 0) + 1
-            : "N/A",
+        cellRenderer: RowNumberCellRenderer, // Use the new cell renderer
         pinned: "left",
         cellClass:
           "border-r border-[#E2E8F0] text-center text-slate-700 justify-center flex-1 items-center",
         headerClass:
-          "border-r border-[#E2E8F0] text-center  items-center justify-center ",
+          "border-r border-[#E2E8F0] text-center items-center justify-center",
         cellStyle: {
           display: "flex",
           alignItems: "center",
@@ -903,8 +949,7 @@ export function ExperimentTable({
             context={{
               setShowExperimentInputSelector,
               handleRunHypothesis,
-              hypothesisIds:
-                experimentData?.hypotheses.map((h: any) => h.id) || [],
+              hypothesesToRun, // Add this line
             }}
             rowClass="border-b border-gray-200 hover:bg-gray-50"
             headerHeight={40}
