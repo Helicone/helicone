@@ -944,12 +944,13 @@ export function ExperimentTable({
             enableCellTextSelection={true}
             colResizeDefault="shift"
             suppressRowTransform={true}
-            domLayout="autoHeight" // Added this line
+            domLayout="autoHeight"
             getRowId={getRowId}
             context={{
               setShowExperimentInputSelector,
               handleRunHypothesis,
-              hypothesesToRun, // Add this line
+              hypothesesToRun,
+              inputKeys: Array.from(inputKeys), // Pass inputKeys to context
             }}
             rowClass="border-b border-gray-200 hover:bg-gray-50"
             headerHeight={40}

@@ -3,9 +3,20 @@ import { Button } from "@/components/ui/button";
 import { PlayIcon } from "@heroicons/react/24/outline";
 
 export const HypothesisCellRenderer: React.FC<any> = (params) => {
-  const { data, colDef } = params;
+  const { data, colDef, context } = params;
 
   const hypothesisId = colDef.field;
+
+  // Get the input keys from context
+  const inputKeys = context.inputKeys;
+
+  // Check if all input fields are empty
+  const inputsAreEmpty = inputKeys?.every((key: string) => !data[key]);
+
+  if (inputsAreEmpty) {
+    // If inputs are empty, render an empty cell
+    return <div></div>;
+  }
 
   const responseData = data[hypothesisId];
   const content = responseData
@@ -50,7 +61,7 @@ export const HypothesisCellRenderer: React.FC<any> = (params) => {
       return (
         <div className="w-full h-full whitespace-pre-wrap flex flex-row items-center space-x-2 pl-4">
           <span className="animate-ping inline-flex rounded-full bg-green-700 h-2 w-2"></span>
-          <div className="itas">Running...</div>
+          <div className="italic">Running...</div>
         </div>
       );
     }
