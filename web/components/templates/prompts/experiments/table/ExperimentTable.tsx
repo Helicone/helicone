@@ -147,7 +147,7 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
     <Popover open={showPromptPlayground} onOpenChange={setShowPromptPlayground}>
       <PopoverTrigger asChild>
         <div
-          className="flex items-center justify-between w-full h-full px-2 cursor-pointer"
+          className="flex items-center justify-between w-full h-full pl-2 cursor-pointer"
           onClick={handleHeaderClick}
         >
           <div className="flex items-center space-x-2">
@@ -164,7 +164,7 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
           {onRunColumn && (
             <Button
               variant="ghost"
-              className="ml-2 p-0 border-slate-200 border rounded-md bg-slate-50 text-slate-500 h-[22px] w-[26px] flex items-center justify-center"
+              className="ml-2 p-0 border-slate-200 border rounded-md bg-slate-50 text-slate-500 h-[22px] w-[24px] flex items-center justify-center"
               onClick={handleRunClick}
             >
               <PlayIcon className="w-4 h-4 text-gray-600 dark:text-gray-300" />
@@ -869,7 +869,7 @@ export function ExperimentTable({
         columns.push({
           field: hypothesis.id,
           headerName: hypothesis.id,
-          width: 220,
+          width: 230,
           suppressSizeToFit: true,
           cellRenderer: HypothesisCellRenderer,
           cellRendererParams: {
