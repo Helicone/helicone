@@ -19,6 +19,7 @@ import {
   ChevronDownIcon,
   Cog6ToothIcon,
   ExclamationTriangleIcon,
+  PlayIcon,
 } from "@heroicons/react/24/outline";
 import ExperimentInputSelector from "../experimentInputSelector";
 import { useMutation } from "@tanstack/react-query";
@@ -124,26 +125,62 @@ const InputCellRenderer: React.FC<any> = (props) => {
 };
 
 const CustomHeaderComponent: React.FC<any> = (props) => {
-  const { displayName, badgeText, badgeVariant = "secondary" } = props;
+  const { displayName, badgeText, badgeVariant, onRunColumn } = props;
+
   return (
-    <div className="flex items-center space-x-2">
-      <span className="text-sm font-semibold text-slate-900">
-        {displayName}
-      </span>
-      <Badge
-        variant={badgeVariant}
-        className="text-[#334155] bg-[#F8FAFC] border border-[#E2E8F0] rounded-md font-medium hover:bg-slate-100"
-      >
-        {badgeText}
-      </Badge>
+    <div className="flex items-center justify-between w-full h-full px-2">
+      <div className="flex items-center space-x-2">
+        <span>{displayName}</span>
+        <Badge
+          variant={badgeVariant}
+          className="text-[#334155] bg-[#F8FAFC] border border-[#E2E8F0] rounded-md font-medium hover:bg-slate-100"
+        >
+          {badgeText}
+        </Badge>
+        {onRunColumn && (
+          <Button
+            variant="ghost"
+            className="ml-2 p-0 border-slate-200 border rounded-md bg-slate-50 text-slate-500 h-[22px] w-[26px] flex items-center justify-center"
+            onClick={() => onRunColumn(props.column.colId)}
+          >
+            <PlayIcon className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+          </Button>
+        )}
+      </div>
     </div>
   );
 };
 
-const RowNumberHeaderComponent: React.FC<any> = (props) => {
+const RowNumberCellRenderer: React.FC<any> = (props) => {
+  const [isHovered, setIsHovered] = useState(false);
+
+  const runRow = () => {
+    const hypothesisIds = props.columnApi.getColumns()
+      .filter((col: any) => col.colDef.cellRenderer === HypothesisCellRenderer)
+      .map((col: any) => col.colId);
+
+    hypothesisIds.forEach((hypothesisId: string) => {
+      props.context.handleRunHypothesis(hypothesisId, [props.data.dataset_row_id]);
+    });
+  };
+
   return (
-    <div className="flex-1 text-center items-center space-x-2 justify-center ml-1">
-      <ListBulletIcon className="h-5 w-5 text-slate-400" />
+    <div
+      className="w-full h-full flex items-center justify-center"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      {isHovered ? (
+        <Button
+          variant="ghost"
+          className="p-0 h-6 w-6 rounded-full flex items-center justify-center"
+          onClick={runRow}
+        >
+          <PlayIcon className="w-4 h-4 text-gray-600" />
+        </Button>
+      ) : (
+        <span>{props.rowIndex + 1}</span>
+      )}
     </div>
   );
 };
@@ -625,11 +662,15 @@ export function ExperimentTable({
   );
 
   const handleRunHypothesis = useCallback(
-    (hypothesisId: string, datasetRowIds: string[]) => {
-      runHypothesisMutation.mutate({ hypothesisId, datasetRowIds });
+    (hypothesisId: string | string[], datasetRowIds: string[]) => {
+      const hypothesisIds = Array.isArray(hypothesisId) ? hypothesisId : [hypothesisId];
+      hypothesisIds.forEach(id => {
+        runHypothesisMutation.mutate({ hypothesisId: id, datasetRowIds });
+      });
     },
     [runHypothesisMutation]
   );
+
   const handleAddRow = useCallback(() => {
     const newRowId = `temp-${Date.now()}`;
 
@@ -663,25 +704,14 @@ export function ExperimentTable({
   const columnDefs = useMemo<ColDef[]>(() => {
     const columns: ColDef[] = [
       {
-        headerComponent: RowNumberHeaderComponent,
-        field: "rowNumber",
-        width: 50,
-        valueGetter: (params) =>
-          params.node?.rowIndex !== undefined
-            ? (params.node?.rowIndex || 0) + 1
-            : "N/A",
+        headerName: "#",
+        width: 60,
+        cellRenderer: RowNumberCellRenderer,
+        cellClass: "border-r border-[#E2E8F0] text-slate-700",
+        headerClass: "border-r border-[#E2E8F0]",
         pinned: "left",
-        cellClass:
-          "border-r border-[#E2E8F0] text-center text-slate-700 justify-center flex-1 items-center",
-        headerClass:
-          "border-r border-[#E2E8F0] text-center  items-center justify-center ",
-        cellStyle: {
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        },
-        autoHeight: wrapText,
       },
+      // ... (rest of your column definitions)
     ];
 
     // Add columns for each input key
@@ -779,7 +809,7 @@ export function ExperimentTable({
         columns.push({
           field: hypothesis.id,
           headerName: hypothesis.id,
-          width: 200,
+          width: 220,
           suppressSizeToFit: true,
           cellRenderer: HypothesisCellRenderer,
           cellRendererParams: {
@@ -791,16 +821,20 @@ export function ExperimentTable({
           headerComponentParams: {
             displayName: `Experiment ${experimentNumber}`,
             badgeText: "Output",
-            badgeVariant: "default",
+            badgeVariant: "secondary",
+            onRunColumn: (colId: string) => {
+              const datasetRowIds = rowData.map((row) => row.dataset_row_id);
+              handleRunHypothesis(colId, datasetRowIds);
+            },
           },
           cellClass: "border-r border-[#E2E8F0] text-slate-700 pt-2.5",
-          headerClass: "border-r border-[#E2E8F0]",
+          headerClass: "border-r border-[#E2E8F0] bg-white dark:bg-gray-800",
           cellStyle: {
-            verticalAlign: "middle", // Vertically center the text
-            textAlign: "left", // Left-align text horizontally
-            overflow: "hidden", // Hide overflow
-            textOverflow: "ellipsis", // Add ellipsis for overflowing text
-            whiteSpace: wrapText ? "normal" : "nowrap", // Handle text wrapping
+            verticalAlign: "middle",
+            textAlign: "left",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: wrapText ? "normal" : "nowrap",
           },
           autoHeight: wrapText,
         });
@@ -836,6 +870,7 @@ export function ExperimentTable({
     refetchData,
     wrapText,
     columnView,
+    rowData,
   ]);
 
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -886,6 +921,7 @@ export function ExperimentTable({
             getRowId={getRowId}
             context={{
               setShowExperimentInputSelector,
+              handleRunHypothesis,
             }}
             rowClass="border-b border-gray-200 hover:bg-gray-50"
             headerHeight={40}
