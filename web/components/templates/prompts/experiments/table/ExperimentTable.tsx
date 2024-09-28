@@ -303,6 +303,40 @@ const ProviderKeyDropdown: React.FC<{
     </DropdownMenu>
   );
 };
+
+const RowNumberCellRenderer: React.FC<any> = (props) => {
+  const [isHovered, setIsHovered] = useState(false);
+
+  const handleRunRow = () => {
+    const hypothesisIds = props.context.hypothesisIds;
+    const datasetRowId = props.data.dataset_row_id;
+    if (datasetRowId) {
+      hypothesisIds.forEach((hypothesisId: string) => {
+        props.context.handleRunHypothesis(hypothesisId, [datasetRowId]);
+      });
+    }
+  };
+
+  return (
+    <div
+      className="w-full h-full flex items-center justify-center"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      {isHovered ? (
+        <button
+          onClick={handleRunRow}
+          className="p-1 rounded-full bg-blue-100 hover:bg-blue-200 transition-colors"
+        >
+          <PlayIcon className="w-4 h-4 text-blue-600" />
+        </button>
+      ) : (
+        <span>{props.value}</span>
+      )}
+    </div>
+  );
+};
+
 export function ExperimentTable({
   promptSubversionId,
   experimentId,
@@ -681,11 +715,12 @@ export function ExperimentTable({
           params.node?.rowIndex !== undefined
             ? (params.node?.rowIndex || 0) + 1
             : "N/A",
+        cellRenderer: RowNumberCellRenderer,
         pinned: "left",
         cellClass:
           "border-r border-[#E2E8F0] text-center text-slate-700 justify-center flex-1 items-center",
         headerClass:
-          "border-r border-[#E2E8F0] text-center  items-center justify-center ",
+          "border-r border-[#E2E8F0] text-center items-center justify-center",
         cellStyle: {
           display: "flex",
           alignItems: "center",
@@ -898,10 +933,13 @@ export function ExperimentTable({
             enableCellTextSelection={true}
             colResizeDefault="shift"
             suppressRowTransform={true}
-            domLayout="autoHeight" // Added this line
+            domLayout="autoHeight"
             getRowId={getRowId}
             context={{
               setShowExperimentInputSelector,
+              handleRunHypothesis,
+              hypothesisIds:
+                experimentData?.hypotheses.map((h: any) => h.id) || [],
             }}
             rowClass="border-b border-gray-200 hover:bg-gray-50"
             headerHeight={40}
