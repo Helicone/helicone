@@ -53,7 +53,7 @@ const AddColumnHeader: React.FC<AddColumnHeaderProps> = ({
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent size="large">
           <SheetHeader>
-            <SheetTitle>Add New Column</SheetTitle>
+            <SheetTitle>Add New Experiment</SheetTitle>
             <SheetDescription>
               <PromptPlayground
                 defaultEditMode={true}
