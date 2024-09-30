@@ -1,5 +1,4 @@
 import { useOrg } from "@/components/layout/organizationContext";
-
 import { Button } from "@/components/ui/button";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { useJawnClient } from "@/lib/clients/jawnHook";
@@ -8,13 +7,11 @@ import { ColDef, GridReadyEvent } from "ag-grid-community";
 import "ag-grid-community/styles/ag-grid.css";
 import { AgGridReact } from "ag-grid-react";
 import { useCallback, useMemo, useRef, useState, useEffect } from "react";
-
 import AddColumnHeader from "./AddColumnHeader";
 import { HypothesisCellRenderer } from "./HypothesisCellRenderer";
 import {
   PlusIcon,
   ChevronDownIcon,
-  PlayIcon,
   ArrowDownTrayIcon,
   FunnelIcon,
 } from "@heroicons/react/24/outline";

@@ -26,6 +26,7 @@ const AddColumnHeader: React.FC<AddColumnHeaderProps> = ({
   selectedProviderKey,
   refetchData, // Add this line
 }) => {
+  console.log("promptVersionId", promptVersionId);
   const [open, setOpen] = useState(false);
   const jawn = useJawnClient();
   const promptVersion = useQuery({
@@ -36,6 +37,11 @@ const AddColumnHeader: React.FC<AddColumnHeaderProps> = ({
       });
     },
   });
+
+  console.log(
+    "promptVersion",
+    promptVersion.data?.data?.data?.helicone_template
+  );
 
   return (
     <>

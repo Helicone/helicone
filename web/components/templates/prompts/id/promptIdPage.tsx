@@ -484,7 +484,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
       body: {
         metadata: {
           prompt_id: id,
-          prompt_version: prompt?.id || "",
+          prompt_version: promptVersionId || "",
         },
         datasetId: dataset.data?.data?.datasetId,
       },
@@ -522,7 +522,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
           },
         },
         body: {
-          limit: 100,
+          limit: 10,
           random: true,
         },
       }
