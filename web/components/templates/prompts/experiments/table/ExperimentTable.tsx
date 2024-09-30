@@ -1,5 +1,5 @@
 import { useOrg } from "@/components/layout/organizationContext";
-import ThemedDrawer from "@/components/shared/themed/themedDrawer";
+
 import { Button } from "@/components/ui/button";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { useJawnClient } from "@/lib/clients/jawnHook";
@@ -8,30 +8,22 @@ import { ColDef, GridReadyEvent } from "ag-grid-community";
 import "ag-grid-community/styles/ag-grid.css";
 import { AgGridReact } from "ag-grid-react";
 import { useCallback, useMemo, useRef, useState, useEffect } from "react";
-import ProviderKeyList from "../../../enterprise/portal/id/providerKeyList";
+
 import AddColumnHeader from "./AddColumnHeader";
 import { HypothesisCellRenderer } from "./HypothesisCellRenderer";
 import {
   AdjustmentsHorizontalIcon,
-  ListBulletIcon,
   PlusIcon,
-  TableCellsIcon,
   ChevronDownIcon,
   Cog6ToothIcon,
   ExclamationTriangleIcon,
   PlayIcon,
   ArrowDownTrayIcon,
   FunnelIcon,
-  FolderIcon,
 } from "@heroicons/react/24/outline";
 import ExperimentInputSelector from "../experimentInputSelector";
 import { useMutation } from "@tanstack/react-query";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "../../../../ui/popover";
-import { Badge } from "@/components/ui/badge";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -45,173 +37,18 @@ import { Switch } from "@/components/ui/switch";
 import { Check } from "lucide-react";
 import ProviderKeySelector from "./providerKeySelector";
 import { InfoBox } from "../../../../ui/helicone/infoBox";
-import PromptPlayground from "../../id/promptPlayground";
+
+import SettingsPanel from "./components/settingsPannel";
+import {
+  InputCellRenderer,
+  CustomHeaderComponent,
+  RowNumberHeaderComponent,
+} from "./components/inputCellRenderer";
 
 interface ExperimentTableProps {
   promptSubversionId: string;
   experimentId: string;
 }
-
-interface SettingsPanelProps {
-  setSelectedProviderKey: (key: string | null) => void;
-  open: boolean;
-  setOpen: (open: boolean) => void;
-  defaultProviderKey: string | null;
-}
-
-const SettingsPanel: React.FC<SettingsPanelProps> = ({
-  defaultProviderKey,
-  setSelectedProviderKey,
-  open,
-  setOpen,
-}) => {
-  return (
-    <ThemedDrawer
-      open={open}
-      setOpen={setOpen}
-      defaultWidth="md:min-w-[300px] w-full md:w-[400px]"
-    >
-      <div className="py-4 space-y-4">
-        <h2 className="text-lg font-semibold mb-4">Settings</h2>
-        <ProviderKeyList
-          variant="basic"
-          setProviderKeyCallback={setSelectedProviderKey}
-          defaultProviderKey={defaultProviderKey}
-        />
-      </div>
-    </ThemedDrawer>
-  );
-};
-
-// Custom cell renderer with Popover
-const InputCellRenderer: React.FC<any> = (props) => {
-  const [popoverOpen, setPopoverOpen] = useState(false);
-
-  // Determine the display value
-  const displayValue =
-    props.value || (props.index == 0 ? "Click to add input" : "");
-
-  return (
-    <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
-      <PopoverTrigger asChild>
-        <div
-          className="cursor-pointer"
-          style={{
-            whiteSpace: "inherit",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            color: props.value ? "inherit" : "#6B7280", // Tailwind Gray-500
-            minHeight: "20px", // Ensure the div has height even when empty
-          }}
-        >
-          {displayValue}
-        </div>
-      </PopoverTrigger>
-      <PopoverContent align="start" className="w-52 p-0">
-        <h2 className="text-sm w-full font-semibold px-2 pt-2">
-          Enter manually, or:
-        </h2>
-        <div className="flex flex-col space-y-2 p-2 items-start justify-start">
-          <Button
-            onClick={() => {
-              setPopoverOpen(false);
-              props.context.setShowExperimentInputSelector(true);
-            }}
-            className="h-8 w-full flex items-center justify-start"
-            variant="ghost"
-          >
-            <TableCellsIcon className="inline h-4 w-4 mr-2" />
-            Select an input set
-          </Button>
-          <Button
-            className="w-full h-8 flex items-center justify-start"
-            variant="ghost"
-          >
-            <FolderIcon className="inline h-4 w-4 mr-2" />
-            Select a dataset
-          </Button>
-        </div>
-      </PopoverContent>
-    </Popover>
-  );
-};
-
-const CustomHeaderComponent: React.FC<any> = (props) => {
-  const { displayName, badgeText, badgeVariant, onRunColumn, onHeaderClick } =
-    props;
-  const [showPromptPlayground, setShowPromptPlayground] = useState(false);
-
-  const handleHeaderClick = (e: React.MouseEvent) => {
-    setShowPromptPlayground(true);
-  };
-
-  const handleRunClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (onRunColumn) {
-      onRunColumn(props.column.colId);
-    }
-  };
-
-  return (
-    <Popover open={showPromptPlayground} onOpenChange={setShowPromptPlayground}>
-      <PopoverTrigger asChild>
-        <div
-          className="flex items-center justify-between w-full h-full pl-2 cursor-pointer"
-          onClick={handleHeaderClick}
-        >
-          <div className="flex items-center space-x-2">
-            <span className="text-md font-semibold text-slate-900">
-              {displayName}
-            </span>
-            <Badge
-              variant={badgeVariant}
-              className="text-[#334155] bg-[#F8FAFC] border border-[#E2E8F0] rounded-md font-medium hover:bg-slate-100"
-            >
-              {badgeText}
-            </Badge>
-          </div>
-          {onRunColumn && (
-            <Button
-              variant="ghost"
-              className="ml-2 p-0 border-slate-200 border rounded-md bg-slate-50 text-slate-500 h-[22px] w-[24px] flex items-center justify-center"
-              onClick={handleRunClick}
-            >
-              <PlayIcon className="w-4 h-4 text-gray-600 dark:text-gray-300" />
-            </Button>
-          )}
-        </div>
-      </PopoverTrigger>
-      <PopoverContent className="w-[800px] p-0" side="bottom">
-        <PromptPlayground
-          prompt={props.hypothesis?.promptVersion?.template || ""}
-          selectedInput={undefined}
-          onSubmit={(history, model) => {
-            console.log("Submitted:", history, model);
-            setShowPromptPlayground(false);
-          }}
-          submitText="Save"
-          initialModel={props.hypothesis?.promptVersion?.model || ""}
-          isPromptCreatedFromUi={true}
-          defaultEditMode={false}
-        />
-      </PopoverContent>
-    </Popover>
-  );
-};
-
-const RowNumberHeaderComponent: React.FC<any> = (props) => {
-  return (
-    <div className="flex-1 text-center items-center space-x-2 justify-center ml-1">
-      <ListBulletIcon className="h-5 w-5 text-slate-400" />
-    </div>
-  );
-};
-
-const PromptCellRenderer: React.FC<any> = (props) => {
-  return (
-    <div className="w-full h-full text-center items-center">{props.value}</div>
-  );
-};
 
 const ColumnsDropdown: React.FC<{
   wrapText: boolean;
