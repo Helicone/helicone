@@ -13,6 +13,10 @@ export const HypothesisCellRenderer: React.FC<any> = (params) => {
   const hypothesisId = colDef.field;
   const inputKeys = context.inputKeys;
   const [showPromptPlayground, setShowPromptPlayground] = useState(false);
+  // Add state for loading status
+  const [loadingStatus, setLoadingStatus] = useState<
+    "queued" | "running" | null
+  >(null);
 
   // Get the input keys from context
   const inputsAreEmpty = inputKeys?.every((key: string) => !data[key]);
@@ -48,11 +52,6 @@ export const HypothesisCellRenderer: React.FC<any> = (params) => {
   };
 
   const isLoading = data.isLoading?.[hypothesisId];
-
-  // Add state for loading status
-  const [loadingStatus, setLoadingStatus] = useState<
-    "queued" | "running" | null
-  >(null);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
