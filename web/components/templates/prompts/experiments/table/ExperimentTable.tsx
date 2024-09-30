@@ -22,6 +22,7 @@ import {
   PlayIcon,
   ArrowDownTrayIcon,
   FunnelIcon,
+  FolderIcon,
 } from "@heroicons/react/24/outline";
 import ExperimentInputSelector from "../experimentInputSelector";
 import { useMutation } from "@tanstack/react-query";
@@ -87,7 +88,8 @@ const InputCellRenderer: React.FC<any> = (props) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
 
   // Determine the display value
-  const displayValue = props.value || "Click to add input";
+  const displayValue =
+    props.value || (props.index == 0 ? "Click to add input" : "");
 
   return (
     <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
@@ -105,21 +107,28 @@ const InputCellRenderer: React.FC<any> = (props) => {
           {displayValue}
         </div>
       </PopoverTrigger>
-      <PopoverContent align="start" className="w-56 p-0">
+      <PopoverContent align="start" className="w-52 p-0">
         <h2 className="text-sm w-full font-semibold px-2 pt-2">
           Enter manually, or:
         </h2>
-        <div className="flex flex-col space-y-2 p-2">
+        <div className="flex flex-col space-y-2 p-2 items-start justify-start">
           <Button
             onClick={() => {
               setPopoverOpen(false);
               props.context.setShowExperimentInputSelector(true);
             }}
-            className="w-full h-8"
+            className="h-8 w-full flex items-center justify-start"
             variant="ghost"
           >
             <TableCellsIcon className="inline h-4 w-4 mr-2" />
             Select an input set
+          </Button>
+          <Button
+            className="w-full h-8 flex items-center justify-start"
+            variant="ghost"
+          >
+            <FolderIcon className="inline h-4 w-4 mr-2" />
+            Select a dataset
           </Button>
         </div>
       </PopoverContent>
@@ -785,16 +794,20 @@ export function ExperimentTable({
     ];
 
     // Add columns for each input key
-    Array.from(inputKeys).forEach((key) => {
+    Array.from(inputKeys).forEach((key, index) => {
       columns.push({
         field: key,
         headerName: key,
         width: 150,
         cellRenderer: InputCellRenderer,
+        cellRendererParams: {
+          index: index,
+        },
         cellClass: "border-r border-[#E2E8F0] text-slate-700",
         headerClass: "border-r border-[#E2E8F0]",
         headerComponent: CustomHeaderComponent,
         headerComponentParams: {
+          index: index,
           displayName: key,
           badgeText: "Input",
         },
