@@ -12,11 +12,8 @@ import { useCallback, useMemo, useRef, useState, useEffect } from "react";
 import AddColumnHeader from "./AddColumnHeader";
 import { HypothesisCellRenderer } from "./HypothesisCellRenderer";
 import {
-  AdjustmentsHorizontalIcon,
   PlusIcon,
   ChevronDownIcon,
-  Cog6ToothIcon,
-  ExclamationTriangleIcon,
   PlayIcon,
   ArrowDownTrayIcon,
   FunnelIcon,
@@ -24,213 +21,22 @@ import {
 import ExperimentInputSelector from "../experimentInputSelector";
 import { useMutation } from "@tanstack/react-query";
 
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Switch } from "@/components/ui/switch";
-import { Check } from "lucide-react";
-import ProviderKeySelector from "./providerKeySelector";
-import { InfoBox } from "../../../../ui/helicone/infoBox";
-
 import SettingsPanel from "./components/settingsPannel";
 import {
   InputCellRenderer,
   CustomHeaderComponent,
   RowNumberHeaderComponent,
-} from "./components/inputCellRenderer";
+  RowNumberCellRenderer,
+} from "./components/tableElementsRenderer";
+import {
+  ColumnsDropdown,
+  ProviderKeyDropdown,
+} from "./components/customButtonts";
 
 interface ExperimentTableProps {
   promptSubversionId: string;
   experimentId: string;
 }
-
-const ColumnsDropdown: React.FC<{
-  wrapText: boolean;
-  setWrapText: (wrap: boolean) => void;
-  columnView: "all" | "inputs" | "outputs";
-  setColumnView: (view: "all" | "inputs" | "outputs") => void;
-}> = ({ wrapText, setWrapText, columnView, setColumnView }) => {
-  const [combineInputColumns, setCombineInputColumns] = useState(false);
-
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="outline"
-          className="py-0 px-2 border border-slate-200 h-8 flex items-center justify-center space-x-1"
-        >
-          <AdjustmentsHorizontalIcon className="h-4 w-4 text-slate-700" />
-          <ChevronDownIcon className="h-4 w-4 text-slate-400" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-60">
-        <DropdownMenuLabel>Columns</DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuGroup>
-          <DropdownMenuItem
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              setColumnView("all");
-            }}
-          >
-            {columnView === "all" && <Check className="h-4 w-4 mr-2" />}
-            <span className="flex-1">Show all</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              setColumnView("inputs");
-            }}
-          >
-            {columnView === "inputs" && <Check className="h-4 w-4 mr-2" />}
-            <span className="flex-1">Show inputs only</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              setColumnView("outputs");
-            }}
-          >
-            {columnView === "outputs" && <Check className="h-4 w-4 mr-2" />}
-            <span className="flex-1">Show outputs only</span>
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-        <DropdownMenuLabel>Views</DropdownMenuLabel>
-        <DropdownMenuGroup>
-          <DropdownMenuItem>
-            <Switch
-              checked={combineInputColumns}
-              onClick={(event) => event.stopPropagation()}
-              onCheckedChange={setCombineInputColumns}
-              className="mr-2"
-            />
-            <span className="flex-1">Combine input columns</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            <Switch
-              checked={wrapText}
-              onClick={(event) => event.stopPropagation()}
-              onCheckedChange={setWrapText}
-              className="mr-2"
-            />
-            <span className="flex-1">Wrap text</span>
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-};
-
-const ProviderKeyDropdown: React.FC<{
-  providerKey: string | null;
-  setProviderKey: (key: string) => void;
-}> = ({ providerKey, setProviderKey }) => {
-  const [open, setOpen] = useState(false);
-
-  return (
-    <DropdownMenu open={open} onOpenChange={setOpen}>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="outline"
-          className="py-0 px-2 border border-slate-200 h-8 flex items-center justify-center space-x-1"
-        >
-          <Cog6ToothIcon className="h-4 w-4 mr-2 text-slate-700" />
-          {!providerKey && (
-            <ExclamationTriangleIcon className="h-4 w-4 text-yellow-700" />
-          )}
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent
-        className="max-w-[320px]"
-        onClick={(e) => {
-          e.stopPropagation();
-          e.preventDefault();
-        }}
-        align="end"
-      >
-        <DropdownMenuLabel className="flex items-center space-x-2">
-          <Cog6ToothIcon className="h-6 w-6 mr-2" />
-          <span className="text-base font-medium">Settings</span>
-        </DropdownMenuLabel>
-        {!providerKey && (
-          <InfoBox variant="warning" className="p-2 ml-2">
-            <p className="text-sm font-medium flex gap-2">
-              <b>
-                Please select a provider key to run experiments. You can change
-                your mind at any time.
-              </b>
-            </p>
-          </InfoBox>
-        )}
-
-        <div className="p-2">
-          <ProviderKeySelector
-            variant="basic"
-            setProviderKeyCallback={(key) => {
-              setProviderKey(key);
-              // Don't close the dropdown
-              // setOpen(false);
-            }}
-            defaultProviderKey={providerKey}
-          />
-        </div>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-};
-
-const RowNumberCellRenderer: React.FC<any> = (props) => {
-  const [hovered, setHovered] = useState(false);
-
-  const rowNumber =
-    props.node?.rowIndex !== undefined
-      ? (props.node?.rowIndex || 0) + 1
-      : "N/A";
-
-  const handleRunClick = () => {
-    const hypothesesToRun = props.context.hypothesesToRun; // Get the hypotheses IDs to run
-    const datasetRowId = props.data.dataset_row_id; // Get the dataset row ID
-
-    if (!datasetRowId || !hypothesesToRun || hypothesesToRun.length === 0) {
-      return;
-    }
-
-    // Run each hypothesis for this dataset row
-    hypothesesToRun.forEach((hypothesisId: string) => {
-      props.context.handleRunHypothesis(hypothesisId, [datasetRowId]);
-    });
-  };
-
-  return (
-    <div
-      className="flex items-center justify-center w-full h-full"
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-    >
-      {!hovered ? (
-        <span>{rowNumber}</span>
-      ) : (
-        <Button
-          variant="ghost"
-          className="p-0 border-slate-200 border rounded-md bg-slate-50 text-slate-500 h-[22px] w-[26px] flex items-center justify-center"
-          onClick={handleRunClick}
-        >
-          <PlayIcon className="w-4 h-4 text-gray-600 dark:text-gray-300" />
-        </Button>
-      )}
-    </div>
-  );
-};
 
 export function ExperimentTable({
   promptSubversionId,

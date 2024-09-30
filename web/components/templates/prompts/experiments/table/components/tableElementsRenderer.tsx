@@ -143,9 +143,53 @@ const PromptCellRenderer: React.FC<any> = (props) => {
   );
 };
 
+const RowNumberCellRenderer: React.FC<any> = (props) => {
+  const [hovered, setHovered] = useState(false);
+
+  const rowNumber =
+    props.node?.rowIndex !== undefined
+      ? (props.node?.rowIndex || 0) + 1
+      : "N/A";
+
+  const handleRunClick = () => {
+    const hypothesesToRun = props.context.hypothesesToRun; // Get the hypotheses IDs to run
+    const datasetRowId = props.data.dataset_row_id; // Get the dataset row ID
+
+    if (!datasetRowId || !hypothesesToRun || hypothesesToRun.length === 0) {
+      return;
+    }
+
+    // Run each hypothesis for this dataset row
+    hypothesesToRun.forEach((hypothesisId: string) => {
+      props.context.handleRunHypothesis(hypothesisId, [datasetRowId]);
+    });
+  };
+
+  return (
+    <div
+      className="flex items-center justify-center w-full h-full"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      {!hovered ? (
+        <span>{rowNumber}</span>
+      ) : (
+        <Button
+          variant="ghost"
+          className="p-0 border-slate-200 border rounded-md bg-slate-50 text-slate-500 h-[22px] w-[26px] flex items-center justify-center"
+          onClick={handleRunClick}
+        >
+          <PlayIcon className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+        </Button>
+      )}
+    </div>
+  );
+};
+
 export {
   InputCellRenderer,
   CustomHeaderComponent,
   RowNumberHeaderComponent,
   PromptCellRenderer,
+  RowNumberCellRenderer,
 };
