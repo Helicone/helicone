@@ -214,7 +214,6 @@ export class IntegrationManager extends BaseManager {
         nextCursor = nextJson.response_metadata?.next_cursor ?? null;
         iterations++;
       }
-      console.log("Fetched all Slack channels", channels.length);
 
       return ok(channels as Array<{ id: string; name: string }>);
     } catch (error) {
