@@ -146,9 +146,11 @@ export class IntegrationManager extends BaseManager {
     }
 
     const slackSettings = data[0].settings as Record<string, any>;
+    let channels: Array<{ id: string; name: string }> = [];
+    let nextCursor: string | null = null;
     try {
       const response = await fetch(
-        "https://slack.com/api/conversations.list?limit=1000&types=public_channel,private_channel",
+        "https://slack.com/api/conversations.list?limit=1000&types=public_channel,private_channel&exclude_archived=true",
         {
           // TODO: implement pagination
           headers: {
@@ -157,9 +159,64 @@ export class IntegrationManager extends BaseManager {
           },
         }
       );
+
+      if (!response.ok) {
+        return err("Failed to fetch Slack channels");
+      }
+
       const json = await response.json();
-      console.log("Slack channels", json);
-      return ok(json.channels as Array<{ id: string; name: string }>);
+
+      if (!json.ok) {
+        if (json.error === "ratelimited") {
+          return err("Rate limited");
+        }
+        return err("Failed to fetch Slack channels");
+      }
+
+      channels = json.channels.map((channel: { id: string; name: string }) => ({
+        id: channel.id,
+        name: channel.name,
+      }));
+      nextCursor = json.response_metadata?.next_cursor ?? null;
+      // this should be changed to a more scalable solution
+      const MAX_ITERATIONS = 10;
+      let iterations = 0;
+      while (nextCursor && iterations < MAX_ITERATIONS) {
+        const nextResponse = await fetch(
+          `https://slack.com/api/conversations.list?limit=1000&types=private_channel,public_channel&exclude_archived=true&cursor=${nextCursor}`,
+          {
+            headers: {
+              Authorization: `Bearer ${slackSettings.access_token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (!nextResponse.ok) {
+          return err("Failed to fetch Slack channels");
+        }
+
+        const nextJson = await nextResponse.json();
+
+        if (!nextJson.ok) {
+          if (nextJson.error === "ratelimited") {
+            return err("Rate limited");
+          }
+          return err("Failed to fetch Slack channels");
+        }
+
+        channels.push(
+          ...nextJson.channels.map((channel: { id: string; name: string }) => ({
+            id: channel.id,
+            name: channel.name,
+          }))
+        );
+        nextCursor = nextJson.response_metadata?.next_cursor ?? null;
+        iterations++;
+      }
+      console.log("Fetched all Slack channels", channels.length);
+
+      return ok(channels as Array<{ id: string; name: string }>);
     } catch (error) {
       if (error instanceof Error) {
         return err(error.message);
