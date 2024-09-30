@@ -5,6 +5,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { CheckIcon } from "lucide-react";
 import React, { forwardRef, useCallback, useMemo, useState } from "react";
@@ -13,6 +14,7 @@ interface ProFeatureWrapperProps {
   children: React.ReactElement;
   featureName: string;
   enabled?: boolean;
+  isNeedMoreRequestsPopup?: boolean;
 }
 
 const descriptions = {
@@ -39,7 +41,7 @@ const titles = {
 export const ProFeatureWrapper = forwardRef<
   HTMLElement,
   ProFeatureWrapperProps
->(({ children, featureName, enabled = true }, ref) => {
+>(({ children, featureName, enabled = true, isNeedMoreRequestsPopup = false }, ref) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const org = useOrg();
 
@@ -92,6 +94,11 @@ export const ProFeatureWrapper = forwardRef<
             <DialogTitle>
               {titles[featureName as keyof typeof titles]}
             </DialogTitle>
+            {featureName === "Alerts" && (
+              <DialogDescription className="text-sm text-blue-600 bg-blue-100 p-2 rounded">
+                The Free plan does not include the Alerts feature, upgrade to Pro to enable Alerts.
+              </DialogDescription>
+            )}
           </DialogHeader>
           <p className="text-sm text-gray-500 mb-4">
             {customDescription ||
@@ -156,10 +163,12 @@ export const ProFeatureWrapper = forwardRef<
               />
             </div>
           </div>
-          <p className="text-sm text-gray-500 mt-4">
-            Don&apos;t worry, we are still processing all your incoming
-            requests. You will be able to see them when you upgrade to Pro.
-          </p>
+          {isNeedMoreRequestsPopup && (
+            <p className="text-sm text-gray-500 mt-4">
+              Don&apos;t worry, we are still processing all your incoming
+              requests. You will be able to see them when you upgrade to Pro.
+            </p>
+          )}
         </DialogContent>
       </Dialog>
     </>
