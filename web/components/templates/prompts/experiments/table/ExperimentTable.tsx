@@ -568,11 +568,8 @@ export function ExperimentTable({
           null,
           2
         );
-        hypothesisRowData["original"] = JSON.stringify(
-          row?.request_response_body?.choices?.[0]?.message?.content || "",
-          null,
-          2
-        );
+        hypothesisRowData["original"] =
+          row?.request_response_body?.choices?.[0]?.message?.content || "";
 
         // Add data for other hypotheses if they exist
         experimentData.hypotheses.slice(1).forEach((hypothesis: any) => {
