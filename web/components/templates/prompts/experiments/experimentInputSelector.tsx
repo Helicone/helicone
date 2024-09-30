@@ -78,7 +78,7 @@ const ExperimentInputSelector = (props: ExperimentInputSelectorProps) => {
             Select the inputs you want to include in the dataset.
           </p>
 
-          <ul className="flex flex-col items-center space-y-4 w-full pt-4 max-h-96 overflow-y-auto">
+          <ul className="flex flex-col items-center space-y-4 w-full pt-4  overflow-y-auto">
             {requestIds?.map((request) => (
               <li key={request.id} className="w-full flex items-start">
                 <input

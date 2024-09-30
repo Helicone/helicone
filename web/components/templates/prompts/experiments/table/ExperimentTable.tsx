@@ -430,15 +430,7 @@ export function ExperimentTable({
 
   const { data: experimentData, refetch: refetchExperiments } = useQuery(
     ["experiments", orgId, experimentId],
-    fetchExperiments,
-    {
-      onSuccess: (data) => {
-        console.log("experimentData", data);
-        if (data && inputRecordsData) {
-          updateRowData(data, inputRecordsData);
-        }
-      },
-    }
+    fetchExperiments
   );
 
   const providerKey = useMemo(
@@ -500,12 +492,6 @@ export function ExperimentTable({
     fetchInputRecords,
     {
       enabled: !!experimentData?.dataset?.id,
-      onSuccess: (data) => {
-        console.log("inputRecordsData", data);
-        if (experimentData && data) {
-          updateRowData(experimentData, data);
-        }
-      },
     }
   );
 
@@ -607,6 +593,13 @@ export function ExperimentTable({
     },
     [setInputKeys, setRowData, promptVersionTemplate]
   );
+
+  // Add useEffect to update rowData when experimentData or inputRecordsData change
+  useEffect(() => {
+    if (experimentData && inputRecordsData) {
+      updateRowData(experimentData, inputRecordsData);
+    }
+  }, [experimentData, inputRecordsData, updateRowData]);
 
   // Add an empty row if rowData is empty
   useEffect(() => {
