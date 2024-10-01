@@ -83,9 +83,18 @@ export const InvoiceSheet: React.FC = () => {
               {upcomingInvoice.data.data.discount && (
                 <div className="border-t pt-4">
                   <h3 className="font-semibold mb-2">Discount:</h3>
-                  <div className="text-sm">
-                    {upcomingInvoice.data.data.discount.coupon.name} -
-                    {upcomingInvoice.data.data.discount.coupon.percent_off}% off
+                  <div className="text-sm flex items-center gap-2 justify-between">
+                    <span className="">
+                      {upcomingInvoice.data.data.discount.coupon.name}
+                    </span>
+                    <span>
+                      {upcomingInvoice.data.data.discount.coupon.amount_off
+                        ? `$${
+                            upcomingInvoice.data.data.discount.coupon
+                              .amount_off / 100
+                          } off`
+                        : `${upcomingInvoice.data.data.discount.coupon.percent_off}% off`}
+                    </span>
                   </div>
                 </div>
               )}

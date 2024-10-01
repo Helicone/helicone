@@ -4116,6 +4116,8 @@ export interface operations {
             discount: ({
               coupon: {
                 /** Format: double */
+                amount_off: number | null;
+                /** Format: double */
                 percent_off: number | null;
                 name: string | null;
               };

@@ -258,13 +258,8 @@ WHERE (${builtFilter.filter})`,
           tier: "pro-20240913",
         },
       },
+      allow_promotion_codes: true,
     };
-
-    if (this.shouldApplyCoupon()) {
-      sessionParams.discounts = [{ coupon: EARLY_ADOPTER_COUPON }];
-    } else {
-      sessionParams.allow_promotion_codes = true;
-    }
 
     const session = await this.stripe.checkout.sessions.create(sessionParams);
 
