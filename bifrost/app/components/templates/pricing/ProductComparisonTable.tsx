@@ -16,7 +16,7 @@ const featureMatrix = [
   { name: "Flexible pricing", support: [false, false, false, true, true] },
   { name: "Open-source", support: [false, true, false, true, true] },
   { name: "Prompts", support: [true, true, true, true, true] },
-  { name: "Evaluation", support: [true, true, false, false, true] },
+  { name: "Evaluation", support: [true, true, true, true, true] },
   { name: "Tracing", support: [true, true, true, true, true] },
   { name: "Use tracking", support: [true, false, true, true, true] },
   { name: "Exports", support: [true, true, true, true, true] },
