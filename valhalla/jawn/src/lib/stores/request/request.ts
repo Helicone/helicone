@@ -236,7 +236,7 @@ export async function getRequestsClickhouse(
       country_code,
       scores,
       properties,
-wi
+      assets as asset_ids,
       target_url,
     FROM request_response_rmt FINAL
     WHERE (
