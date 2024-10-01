@@ -2,6 +2,13 @@ import { memo } from "react";
 import { clsx } from "@/components/shared/clsx";
 import { ColDef } from "ag-grid-community";
 import { Badge } from "@/components/ui/badge";
+import { InfoIcon } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const ScoresTable = memo(
   ({
@@ -88,7 +95,20 @@ const ScoresTable = memo(
                 className="text-left p-2 border border-slate-200 bg-slate-50 rounded-tl-lg text-slate-900 font-semibold"
                 style={{ width: `${scoresColumnWidth}px` }}
               >
-                Scores
+                <div className="flex items-center gap-2 overflow-hidden">
+                  Scores
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <InfoIcon className="w-4 h-4 text-slate-500 cursor-pointer" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        The Scores table shows the average of the individual
+                        scores from the inputs listed below.
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
               </th>
               {sortedOutputColumns.map((col) => (
                 <th
