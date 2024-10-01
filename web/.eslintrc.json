@@ -1,12 +1,7 @@
 {
   "extends": ["next/core-web-vitals", "plugin:prettier/recommended"],
 
-  "ignorePatterns": [
-    "lib/api/graphql/schema/types/graphql.tsx",
-    "lib/api/graphql/client/fragment-masking.ts",
-    "lib/api/graphql/client/index.ts",
-    "lib/clients/jawnTypes/*.ts"
-  ],
+  "ignorePatterns": ["lib/clients/jawnTypes/*.ts"],
   "plugins": ["unused-imports"],
   "rules": {
     "unused-imports/no-unused-imports": "error"

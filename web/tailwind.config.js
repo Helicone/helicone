@@ -175,7 +175,6 @@ module.exports = {
     require("@assistant-ui/react/tailwindcss")({
       components: ["default-theme"],
     }),
-    require("@headlessui/tailwindcss"),
     require("@tailwindcss/typography"),
   ],
 };

@@ -1,4 +1,4 @@
-import { SVGProps } from "react";
+import { ReactNode, SVGProps } from "react";
 import { BsDiscord } from "react-icons/bs";
 import Footer from "./footer";
 import NavBarV2 from "./navbar/navBarV2";
@@ -40,7 +40,7 @@ const meta = {
 export type SocialMeta = (typeof meta.social)[number];
 
 interface BasePageV2Props {
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 const BasePageV2 = (props: BasePageV2Props) => {
