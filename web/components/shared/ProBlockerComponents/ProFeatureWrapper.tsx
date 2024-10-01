@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { CheckIcon } from "lucide-react";
 import React, { forwardRef, useCallback, useMemo, useState } from "react";
-import Link from 'next/link';
+import Link from "next/link";
 
 const descriptions = {
   Datasets:
@@ -144,8 +144,8 @@ export const ProFeatureWrapper = forwardRef<
                   Standard support
                 </li>
               </ul>
-              <Link 
-                href="https://www.helicone.ai/pricing" 
+              <Link
+                href="https://www.helicone.ai/pricing"
                 className="text-sm text-blue-600 mt-2 block"
                 target="_blank"
                 rel="noopener noreferrer"
