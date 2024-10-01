@@ -118,9 +118,14 @@ export const FeatureUpgradeCard: React.FC<FeatureUpgradeCardProps> = ({
                       Standard support
                     </li>
                   </ul>
-                  <a href="#" className="text-sm text-blue-600 mt-2 block">
+                  <Link
+                    href="https://www.helicone.ai/pricing"
+                    className="text-sm text-blue-600 mt-2 block"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     See all features →
-                  </a>
+                  </Link>
                 </div>
               </div>
             </div>
