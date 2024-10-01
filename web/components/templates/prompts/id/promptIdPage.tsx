@@ -557,15 +557,15 @@ const PromptIdPage = (props: PromptIdPageProps) => {
       })
     );
 
-    const hypothesis = await jawn.POST("/v1/experiment/hypothesis", {
-      body: {
-        experimentId: experiment.data?.data?.experimentId,
-        model: model,
-        promptVersion: promptVersionId,
-        providerKeyId: "NOKEY",
-        status: "RUNNING",
-      },
-    });
+    // const hypothesis = await jawn.POST("/v1/experiment/hypothesis", {
+    //   body: {
+    //     experimentId: experiment.data?.data?.experimentId,
+    //     model: model,
+    //     promptVersion: promptVersionId,
+    //     providerKeyId: "NOKEY",
+    //     status: "RUNNING",
+    //   },
+    // });
 
     // const runResult = await jawn.POST("/v1/experiment/run", {
     //   body: {

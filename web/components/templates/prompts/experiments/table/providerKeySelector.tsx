@@ -258,9 +258,9 @@ const ProviderKeySelector = (props: ProviderKeySelectorProps) => {
             <Button
               variant="default"
               onClick={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                setIsProviderOpen(true);
+                // e.stopPropagation();
+                // e.preventDefault();
+                // setIsProviderOpen(true);
               }}
             >
               Save preference
