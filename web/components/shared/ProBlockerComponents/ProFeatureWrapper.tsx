@@ -9,12 +9,6 @@ import {
 import { CheckIcon } from "lucide-react";
 import React, { forwardRef, useCallback, useMemo, useState } from "react";
 
-interface ProFeatureWrapperProps {
-  children: React.ReactElement;
-  featureName: string;
-  enabled?: boolean;
-}
-
 const descriptions = {
   Datasets:
     "The Free plan does not include the Datasets feature, but getting access is easy.",
@@ -26,7 +20,13 @@ const descriptions = {
     "The Free plan does not allow you to invite members to your organization. Upgrade to Pro to invite your team members.",
   RateLimit:
     "The Free plan does not allow you to set custom rate limits. Upgrade to Pro to set custom rate limits.",
+  Prompts: undefined,
 };
+interface ProFeatureWrapperProps {
+  children: React.ReactElement;
+  featureName: keyof typeof descriptions;
+  enabled?: boolean;
+}
 
 const titles = {
   Datasets: "Unlock Datasets",
@@ -156,10 +156,13 @@ export const ProFeatureWrapper = forwardRef<
               />
             </div>
           </div>
-          <p className="text-sm text-gray-500 mt-4">
-            Don&apos;t worry, we are still processing all your incoming
-            requests. You will be able to see them when you upgrade to Pro.
-          </p>
+
+          {featureName === "time_filter" && (
+            <p className="text-sm text-gray-500 mt-4">
+              Don&apos;t worry, we are still processing all your incoming
+              requests. You will be able to see them when you upgrade to Pro.
+            </p>
+          )}
         </DialogContent>
       </Dialog>
     </>
