@@ -16,7 +16,14 @@ import {
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useMemo, useEffect, useRef, useState } from "react";
+import {
+  useMemo,
+  useEffect,
+  useRef,
+  useState,
+  ComponentType,
+  SVGProps,
+} from "react";
 import { useOrg } from "../organizationContext";
 import OrgDropdown from "../orgDropdown";
 import NavItem from "./NavItem";
@@ -24,7 +31,7 @@ import NavItem from "./NavItem";
 export interface NavigationItem {
   name: string;
   href: string;
-  icon: React.ComponentType<React.SVGProps<SVGSVGElement>> | null;
+  icon: ComponentType<SVGProps<SVGSVGElement>> | null;
   current: boolean;
   featured?: boolean;
   subItems?: NavigationItem[];
