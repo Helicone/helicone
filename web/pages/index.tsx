@@ -1,7 +1,6 @@
 import { GetServerSidePropsContext } from "next";
 
 import PublicMetaData from "../components/layout/public/publicMetaData";
-import HomePage from "../components/templates/home/homePage";
 
 export const Home = () => {
   return (
@@ -12,7 +11,7 @@ export const Home = () => {
         }
         ogImageUrl={"https://www.helicone.ai/static/helicone-og.webp"}
       >
-        <HomePage />
+        Should not be here
       </PublicMetaData>
     </>
   );
