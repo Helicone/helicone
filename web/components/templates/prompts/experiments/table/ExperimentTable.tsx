@@ -1,12 +1,18 @@
+import React, { useRef, useEffect } from "react";
 import { useOrg } from "@/components/layout/organizationContext";
 import { Button } from "@/components/ui/button";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { useJawnClient } from "@/lib/clients/jawnHook";
 import { useQuery } from "@tanstack/react-query";
-import { ColDef, GridReadyEvent } from "ag-grid-community";
+import {
+  ColDef,
+  GridReadyEvent,
+  ColumnResizedEvent,
+  ColumnMovedEvent,
+} from "ag-grid-community";
 import "ag-grid-community/styles/ag-grid.css";
 import { AgGridReact } from "ag-grid-react";
-import { useCallback, useMemo, useRef, useState, useEffect } from "react";
+import { useCallback, useMemo, useState } from "react";
 import AddColumnHeader from "./AddColumnHeader";
 import { HypothesisCellRenderer } from "./HypothesisCellRenderer";
 import {
@@ -29,6 +35,7 @@ import {
   ColumnsDropdown,
   ProviderKeyDropdown,
 } from "./components/customButtonts";
+import ScoresTable from "./ScoresTable";
 
 interface ExperimentTableProps {
   promptSubversionId: string;
@@ -47,13 +54,19 @@ export function ExperimentTable({
   const [columnView, setColumnView] = useState<"all" | "inputs" | "outputs">(
     "all"
   );
+  const [showScoresTable, setShowScoresTable] = useState(false);
 
   // State to control ExperimentInputSelector
   const [showExperimentInputSelector, setShowExperimentInputSelector] =
     useState(false);
 
-  // Reference for the grid API
+  const experimentTableRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<any>(null);
+
+  const onGridReady = useCallback((params: GridReadyEvent) => {
+    params.api.sizeColumnsToFit();
+    gridRef.current = params.api;
+  }, []);
 
   const fetchExperiments = useCallback(async () => {
     if (!orgId || !experimentId) return null;
@@ -289,11 +302,6 @@ export function ExperimentTable({
     {}
   );
 
-  const onGridReady = useCallback((params: GridReadyEvent) => {
-    params.api.sizeColumnsToFit();
-    gridRef.current = params.api;
-  }, []);
-
   const getRowId = useCallback((params: any) => params.data.id, []);
 
   const runHypothesisMutation = useMutation(
@@ -408,8 +416,34 @@ export function ExperimentTable({
       : [];
   }, [experimentData?.hypotheses]);
 
+  const [columnWidths, setColumnWidths] = useState<{ [key: string]: number }>(
+    {}
+  );
+
+  const onColumnResized = useCallback((event: ColumnResizedEvent) => {
+    if (event.finished && event.columns && event.columns.length > 0) {
+      const newWidths: { [key: string]: number } = {};
+      event.columns.forEach((column) => {
+        if (column && column.getColId()) {
+          newWidths[column.getColId()] = column.getActualWidth();
+        }
+      });
+      setColumnWidths((prev) => ({
+        ...prev,
+        ...newWidths,
+      }));
+    }
+  }, []);
+
+  const [columnOrder, setColumnOrder] = useState<string[]>([]);
+
+  const onColumnMoved = useCallback((event: ColumnMovedEvent) => {
+    const newOrder = event.api.getAllGridColumns().map((col) => col.getColId());
+    setColumnOrder(newOrder);
+  }, []);
+
   const columnDefs = useMemo<ColDef[]>(() => {
-    const columns: ColDef[] = [
+    let columns: ColDef[] = [
       // Row number column (keep as is)
       {
         headerComponent: RowNumberHeaderComponent,
@@ -457,7 +491,7 @@ export function ExperimentTable({
       });
     });
 
-    // Always add the "Messages" and "Original" columns
+    // Add the "Messages" column
     columns.push({
       field: "messages",
       headerName: "Messages",
@@ -482,6 +516,7 @@ export function ExperimentTable({
       autoHeight: wrapText,
     });
 
+    // Add the "Original" column
     columns.push({
       field: "original",
       headerName: "Original",
@@ -563,6 +598,24 @@ export function ExperimentTable({
       },
     });
 
+    // Update column widths based on the columnWidths state
+    columns.forEach((col) => {
+      if (col.field && columnWidths[col.field]) {
+        col.width = columnWidths[col.field];
+      }
+    });
+
+    // Sort columns based on columnOrder if it's not empty
+    if (columnOrder.length > 0) {
+      columns = columns.sort((a, b) => {
+        const aIndex = columnOrder.indexOf(a.field!);
+        const bIndex = columnOrder.indexOf(b.field!);
+        if (aIndex === -1) return 1;
+        if (bIndex === -1) return -1;
+        return aIndex - bIndex;
+      });
+    }
+
     return columns;
   }, [
     sortedHypotheses,
@@ -572,7 +625,8 @@ export function ExperimentTable({
     rowData,
     wrapText,
     inputKeys,
-    // ... (other dependencies)
+    columnWidths,
+    columnOrder,
   ]);
 
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -582,6 +636,13 @@ export function ExperimentTable({
     <div className="relative w-full">
       <div className="flex flex-col space-y-2 w-full">
         <div className="flex flex-row space-x-2 justify-end w-full">
+          <Button
+            variant="outline"
+            className="py-0 px-2 border border-slate-200 h-8 flex items-center justify-center space-x-1 flex gap-2"
+            onClick={() => setShowScoresTable(!showScoresTable)}
+          >
+            <div>{"{ }"}</div> {showScoresTable ? "Hide" : "Show"} Scores
+          </Button>
           <ColumnsDropdown
             wrapText={wrapText}
             setWrapText={setWrapText}
@@ -609,8 +670,17 @@ export function ExperimentTable({
             Settings
           </Button> */}
         </div>
+        {showScoresTable && (
+          <ScoresTable
+            columnDefs={columnDefs}
+            wrapText={wrapText}
+            columnWidths={columnWidths}
+            columnOrder={columnOrder}
+          />
+        )}
         <div
           className="ag-theme-alpine w-full rounded-md overflow-hidden"
+          ref={experimentTableRef}
           style={
             {
               "--ag-header-height": "40px",
@@ -629,6 +699,8 @@ export function ExperimentTable({
             rowData={rowData}
             columnDefs={columnDefs}
             onGridReady={onGridReady}
+            onColumnResized={onColumnResized}
+            onColumnMoved={onColumnMoved}
             enableCellTextSelection={true}
             colResizeDefault="shift"
             suppressRowTransform={true}
@@ -639,7 +711,7 @@ export function ExperimentTable({
               handleRunHypothesis,
               hypothesesToRun,
               inputKeys: Array.from(inputKeys),
-              hypotheses: sortedHypotheses, // Now this is properly defined
+              hypotheses: sortedHypotheses,
             }}
             rowClass="border-b border-gray-200 hover:bg-gray-50"
             headerHeight={40}

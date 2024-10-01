@@ -502,7 +502,7 @@ function getExperimentHypothesisScores(
           value: validRuns.length > 0 ? totalLatency / validRuns.length : 0,
           valueType: "number",
         },
-        ...getCustomScores(hypothesis.runs.map((run) => run.scores)),
+        ...getCustomScores(hypothesis.runs?.map((run) => run.scores) ?? []),
       },
     }) as Result<ExperimentScores["hypothesis"], string>;
   } catch (error) {
