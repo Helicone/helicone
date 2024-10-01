@@ -72,15 +72,15 @@ const SessionsPage = (props: SessionsPageProps) => {
       <AuthHeader
         title={
           <div className="flex items-center gap-2">
-            Sessions <Badge color="gray">Beta</Badge>
+            Sessions <Badge>Beta</Badge>
           </div>
         }
       />
       {org?.currentOrg?.tier === "free" && (
-        <InfoBox title="Sessions are a Pro feature.">
+        <InfoBox title="Sessions is a Pro feature">
           <p>
-            Sessions are a Pro feature. In order to keep using them, you need to
-            upgrade your plan before September 27st, 2024.{" "}
+            Sessions is a Pro feature. In order to keep using it, you need to
+            upgrade your plan before September 27th, 2024.{" "}
             <Link href="/settings/billing" className="text-blue-500 underline">
               Upgrade to Pro
             </Link>

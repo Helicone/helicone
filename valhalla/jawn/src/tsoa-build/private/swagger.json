@@ -11468,6 +11468,11 @@
 											"properties": {
 												"coupon": {
 													"properties": {
+														"amount_off": {
+															"type": "number",
+															"format": "double",
+															"nullable": true
+														},
 														"percent_off": {
 															"type": "number",
 															"format": "double",
@@ -11479,6 +11484,7 @@
 														}
 													},
 													"required": [
+														"amount_off",
 														"percent_off",
 														"name"
 													],

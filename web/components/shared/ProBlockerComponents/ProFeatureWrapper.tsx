@@ -8,12 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { CheckIcon } from "lucide-react";
 import React, { forwardRef, useCallback, useMemo, useState } from "react";
-
-interface ProFeatureWrapperProps {
-  children: React.ReactElement;
-  featureName: string;
-  enabled?: boolean;
-}
+import Link from "next/link";
 
 const descriptions = {
   Datasets:
@@ -26,7 +21,13 @@ const descriptions = {
     "The Free plan does not allow you to invite members to your organization. Upgrade to Pro to invite your team members.",
   RateLimit:
     "The Free plan does not allow you to set custom rate limits. Upgrade to Pro to set custom rate limits.",
+  Prompts: undefined,
 };
+interface ProFeatureWrapperProps {
+  children: React.ReactElement;
+  featureName: keyof typeof descriptions;
+  enabled?: boolean;
+}
 
 const titles = {
   Datasets: "Unlock Datasets",
@@ -143,9 +144,14 @@ export const ProFeatureWrapper = forwardRef<
                   Standard support
                 </li>
               </ul>
-              <a href="#" className="text-sm text-blue-600 mt-2 block">
+              <Link
+                href="https://www.helicone.ai/pricing"
+                className="text-sm text-blue-600 mt-2 block"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 See all features →
-              </a>
+              </Link>
 
               <UpgradeToProCTA
                 defaultPrompts={featureName === "Prompts"}
@@ -156,10 +162,13 @@ export const ProFeatureWrapper = forwardRef<
               />
             </div>
           </div>
-          <p className="text-sm text-gray-500 mt-4">
-            Don&apos;t worry, we are still processing all your incoming
-            requests. You will be able to see them when you upgrade to Pro.
-          </p>
+
+          {featureName === "time_filter" && (
+            <p className="text-sm text-gray-500 mt-4">
+              Don&apos;t worry, we are still processing all your incoming
+              requests. You will be able to see them when you upgrade to Pro.
+            </p>
+          )}
         </DialogContent>
       </Dialog>
     </>
