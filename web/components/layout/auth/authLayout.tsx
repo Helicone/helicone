@@ -11,10 +11,9 @@ import AcceptTermsModal from "./AcceptTermsModal";
 import DemoModal from "./DemoModal";
 import MainContent from "./MainContent";
 import Sidebar from "./Sidebar";
-import { ReactNode } from "react";
 
 interface AuthLayoutProps {
-  children: ReactNode;
+  children: React.ReactNode;
 }
 
 const AuthLayout = (props: AuthLayoutProps) => {
