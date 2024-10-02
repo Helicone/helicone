@@ -42,15 +42,11 @@ export class RequestBodyHandler extends AbstractLogHandler {
         context.processedLog.request.model = "assistant-call";
       }
 
-      console.log("requestBody type", requestBodyFinal._type);
-
       if (this.isVectorDBRequest(requestBodyFinal)) {
-        console.log("is vector db");
         context.processedLog.request.model = "vector_db";
       }
 
       if (this.isToolRequest(requestBodyFinal)) {
-        console.log("is tool", requestBodyFinal.toolName);
         context.processedLog.request.model = `tool:${requestBodyFinal.toolName}`;
       }
 
