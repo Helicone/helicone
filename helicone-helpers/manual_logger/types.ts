@@ -28,6 +28,7 @@ export type Timing = {
 export type IHeliconeManualLogger = {
   apiKey: string;
   headers?: Record<string, string>;
+  loggingEndpoint?: string;
 };
 
 export type ILogRequest = {
@@ -53,6 +54,8 @@ export interface HeliconeEventVectorDB {
   databaseName?: string;
 }
 
-export type HeliconeCustomEventRequest = HeliconeEventTool | HeliconeEventVectorDB;
+export type HeliconeCustomEventRequest =
+  | HeliconeEventTool
+  | HeliconeEventVectorDB;
 
 export type HeliconeLogRequest = ILogRequest | HeliconeCustomEventRequest;
