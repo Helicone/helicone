@@ -6,11 +6,7 @@ import {
   TableCellsIcon,
 } from "@heroicons/react/24/outline";
 import { ElementType, useMemo, useState } from "react";
-import {
-  BarChart,
-  Divider,
-  Badge,
-} from "@tremor/react";
+import { BarChart, Divider, Badge } from "@tremor/react";
 import ThemedDrawer from "../../shared/themed/themedDrawer";
 import ThemedListItem from "../../shared/themed/themedListItem";
 import RequestsPageV2 from "../requestsV2/requestsPageV2";
@@ -307,8 +303,10 @@ openai.chat.completions.create(
                     </div>
                   </div>
                 </div>
-                <div className="flex flex-col w-full xl:w-1/2 
-space-y-4 py-6 bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg h-[30rem]">
+                <div
+                  className="flex flex-col w-full xl:w-1/2 
+space-y-4 py-6 bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg h-[30rem]"
+                >
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 text-center">
                     Top Requests
                   </h3>
