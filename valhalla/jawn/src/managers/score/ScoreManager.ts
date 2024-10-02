@@ -10,7 +10,7 @@ import { BaseManager } from "../BaseManager";
 import { validate as uuidValidate } from "uuid";
 
 type Scores = Record<string, number | boolean>;
-const delayMs = 10 * 60 * 1000; // 10 minutes in milliseconds
+const delayMs = process.env.NODE_ENV === "production" ? 10 * 60 * 1000 : 0; // 10 minutes in milliseconds
 
 export interface ScoreRequest {
   scores: Scores;
@@ -51,15 +51,6 @@ export class ScoreManager extends BaseManager {
   ): Promise<Result<null, string>> {
     if (!this.kafkaProducer.isKafkaEnabled()) {
       console.log("Kafka is not enabled. Using score manager");
-      this.handleScores(
-        {
-          batchId: "",
-          partition: 0,
-          lastOffset: "",
-          messageCount: 1,
-        },
-        scoresMessage
-      );
 
       // Schedule the delayed operation and register it with ShutdownService
       const timeoutId = DelayedOperationService.getTimeoutId(() => {
