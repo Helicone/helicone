@@ -496,6 +496,7 @@ export function ExperimentTable({
           display: "flex",
           alignItems: "center",
           justifyContent: "start",
+          whiteSpace: wrapText ? "normal" : "nowrap",
         },
         autoHeight: wrapText,
       });
