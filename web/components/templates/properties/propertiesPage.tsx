@@ -9,6 +9,7 @@ import { clsx } from "../../shared/clsx";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import PropertyPanel from "./propertyPanel";
 import { getPropertyFiltersV2 } from "../../../services/lib/filters/frontendFilterDefs";
+import { IslandContainer } from "@/components/ui/islandContainer";
 
 const PropertiesPage = (props: {}) => {
   const { properties, isLoading: isPropertiesLoading } =
@@ -17,7 +18,7 @@ const PropertiesPage = (props: {}) => {
   const [selectedProperty, setSelectedProperty] = useState<string>("");
 
   return (
-    <>
+    <IslandContainer>
       <AuthHeader title={"Properties"} />
       <div className="flex flex-col gap-4">
         <>
@@ -86,7 +87,7 @@ const PropertiesPage = (props: {}) => {
           )}
         </>
       </div>
-    </>
+    </IslandContainer>
   );
 };
 

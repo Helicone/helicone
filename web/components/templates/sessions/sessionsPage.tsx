@@ -2,10 +2,7 @@ import { useOrg } from "@/components/layout/organizationContext";
 
 import { Badge } from "@tremor/react";
 import { useMemo, useState } from "react";
-import {
-  getTimeIntervalAgo,
-  TimeInterval,
-} from "../../../lib/timeCalculations/time";
+import { getTimeIntervalAgo } from "../../../lib/timeCalculations/time";
 import { useDebounce } from "../../../services/hooks/debounce";
 import { useSessionNames, useSessions } from "../../../services/hooks/sessions";
 import { SortDirection } from "../../../services/lib/sorts/users/sorts";
@@ -17,6 +14,7 @@ import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeC
 import { InfoBox } from "@/components/ui/helicone/infoBox";
 import Link from "next/link";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
+import { IslandContainer } from "@/components/ui/islandContainer";
 
 interface SessionsPageProps {
   currentPage: number;
@@ -31,13 +29,11 @@ interface SessionsPageProps {
 const SessionsPage = (props: SessionsPageProps) => {
   const { currentPage, pageSize, sort, defaultIndex } = props;
 
-  const [interval, setInterval] = useState<TimeInterval>("24h");
-
   const [timeFilter, setTimeFilter] = useState<{
     start: Date;
     end: Date;
   }>({
-    start: getTimeIntervalAgo(interval),
+    start: getTimeIntervalAgo("1m"),
     end: new Date(),
   });
 
@@ -68,7 +64,7 @@ const SessionsPage = (props: SessionsPageProps) => {
     );
   }, [org?.currentOrg?.tier, hasSomeSessions]);
   return (
-    <>
+    <IslandContainer>
       <AuthHeader
         title={
           <div className="flex items-center gap-2">
@@ -115,7 +111,7 @@ const SessionsPage = (props: SessionsPageProps) => {
               sort={sort}
               timeFilter={timeFilter}
               setTimeFilter={setTimeFilter}
-              setInterval={setInterval}
+              setInterval={() => {}}
             />
           </Row>
         ) : org?.currentOrg?.tier === "free" ? (
@@ -142,7 +138,7 @@ const SessionsPage = (props: SessionsPageProps) => {
           </div>
         )}
       </div>
-    </>
+    </IslandContainer>
   );
 };
 

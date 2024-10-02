@@ -32,6 +32,7 @@ import { formatNumber } from "../users/initialColumns";
 import { useOrg } from "@/components/layout/organizationContext";
 import { DiffHighlight } from "../welcome/diffHighlight";
 import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
+import { IslandContainer } from "@/components/ui/islandContainer";
 
 interface CachePageProps {
   currentPage: number;
@@ -141,7 +142,7 @@ const CachePage = (props: CachePageProps) => {
   const isPro = org?.currentOrg?.tier !== "free";
 
   return (
-    <>
+    <IslandContainer>
       <AuthHeader
         title={
           <div className="flex items-center gap-2">
@@ -407,7 +408,7 @@ openai.chat.completions.create(
         </div>
       </ThemedDrawer>
       <UpgradeProModal open={openUpgradeModal} setOpen={setOpenUpgradeModal} />
-    </>
+    </IslandContainer>
   );
 };
 

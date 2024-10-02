@@ -177,6 +177,7 @@ const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
                 <Button
                   variant="outline"
                   className="w-full"
+                  size="sm_sleek"
                   onClick={() => {
                     router.push("/enterprise/portal");
                     if (

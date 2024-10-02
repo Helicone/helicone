@@ -59,6 +59,7 @@ import PromptCard from "./promptCard";
 import PromptDelete from "./promptDelete";
 import PromptUsageChart from "./promptUsageChart";
 import { UpgradeToProCTA } from "../pricing/upgradeToProCTA";
+import { IslandContainer } from "@/components/ui/islandContainer";
 
 interface PromptsPageProps {
   defaultIndex: number;
@@ -161,7 +162,7 @@ const PromptsPage = (props: PromptsPageProps) => {
   const [showPricingCompare, setShowPricingCompare] = useState(false);
 
   return (
-    <>
+    <IslandContainer>
       <div className="flex flex-col space-y-4 w-full">
         <AuthHeader
           title={
@@ -755,7 +756,7 @@ const chatCompletion = await openai.chat.completions.create(
           )}
         </div>
       </div>
-    </>
+    </IslandContainer>
   );
 };
 

@@ -16,6 +16,7 @@ import {
   DragColumnItem,
   DragList,
 } from "./DragList";
+import { Button } from "@/components/ui/button";
 
 interface ViewColumnsProps<T> {
   columns: Column<T, unknown>[];
@@ -55,16 +56,15 @@ export default function ViewColumns<T>(props: ViewColumnsProps<T>) {
   }));
 
   return (
-    <Menu as="div" className="relative inline-block text-left">
+    <Menu as="div" className="relative inline-block text-left ">
       <div>
-        <Menu.Button className="bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2">
-          <AdjustmentsHorizontalIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
-          <div className="text-sm font-medium items-center text-gray-900 dark:text-gray-100 hidden sm:flex gap-1">
-            Columns
-            <span className="text-gray-500 text-xs">{`( ${
-              activeColumns.filter((c) => c.shown).length
-            } / ${columns.length} )`}</span>
-          </div>
+        <Menu.Button
+          as={Button}
+          variant="ghost"
+          className="flex items-center gap-2"
+          size="xs"
+        >
+          <AdjustmentsHorizontalIcon className="h-4 w-4" />
         </Menu.Button>
       </div>
       <Transition
@@ -77,10 +77,10 @@ export default function ViewColumns<T>(props: ViewColumnsProps<T>) {
         leaveTo="transform opacity-0 scale-95"
       >
         <Menu.Items
-          className={`border border-gray-300 dark:border-gray-700 absolute z-10 right-0 sm:-right-40 mt-2 mx-auto w-[calc(100vw-2rem)] sm:w-[calc(100vw-4rem)] md:w-[calc(100vw-8rem)] max-w-4xl origin-top-right rounded-lg bg-white dark:bg-black shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none h-[66vh] overflow-hidden ${
+          className={`border border-gray-300 dark:border-gray-700 absolute z-10 right-0 sm:right-0 mt-2 mx-auto w-[calc(100vw-2rem)] sm:w-[calc(100vw-4rem)] md:w-[calc(100vw-8rem)] max-w-4xl origin-top-right rounded-lg bg-white dark:bg-black shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none h-[66vh] overflow-hidden ${
             isDatasetsPage
               ? "border border-gray-300 dark:border-gray-700 absolute z-10 right-0 sm:right-0 mt-2 mx-auto w-[calc(100vw-2rem)] sm:w-[calc(100vw-4rem)] md:w-[calc(100vw-8rem)] max-w-4xl origin-top-right rounded-lg bg-white dark:bg-black shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none h-[66vh] overflow-hidden"
-              : "border border-gray-300 dark:border-gray-700 absolute z-10 right-0 sm:-right-40 mt-2 mx-auto w-[calc(100vw-2rem)] sm:w-[calc(100vw-4rem)] md:w-[calc(100vw-8rem)] max-w-4xl origin-top-right rounded-lg bg-white dark:bg-black shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none h-[66vh] overflow-hidden"
+              : "border border-gray-300 dark:border-gray-700 absolute z-10 right-0 sm:right-0 mt-2 mx-auto w-[calc(100vw-2rem)] sm:w-[calc(100vw-4rem)] md:w-[calc(100vw-8rem)] max-w-4xl origin-top-right rounded-lg bg-white dark:bg-black shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none h-[66vh] overflow-hidden"
           }`}
         >
           <Row className="h-full">

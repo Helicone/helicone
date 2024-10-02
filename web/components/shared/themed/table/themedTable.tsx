@@ -8,7 +8,7 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Result } from "../../../../lib/result";
 import { TimeInterval } from "../../../../lib/timeCalculations/time";
 import { useLocalStorage } from "../../../../services/hooks/localStorage";
@@ -30,6 +30,11 @@ import RequestRowView from "./requestRowView";
 import ThemedTableHeader from "./themedTableHeader";
 
 import { Checkbox } from "@mui/material";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable";
 
 interface ThemedTableV5Props<T extends { id?: string }> {
   id: string;
@@ -81,6 +86,7 @@ interface ThemedTableV5Props<T extends { id?: string }> {
   selectedIds?: string[];
   fullWidth?: boolean;
   isDatasetsPage?: boolean;
+  rightPanel?: React.ReactNode;
 }
 
 export type RequestViews = "table" | "card" | "row";
@@ -107,13 +113,13 @@ export default function ThemedTable<T extends { id?: string }>(
     savedFilters,
     highlightedIds: checkedIds,
     showCheckboxes,
-
     customButtons,
     children,
     onSelectAll,
     selectedIds,
     fullWidth = false,
     isDatasetsPage,
+    rightPanel,
   } = props;
 
   const [view, setView] = useLocalStorage<RequestViews>("view", "table");
@@ -165,191 +171,234 @@ export default function ThemedTable<T extends { id?: string }>(
     onRowSelect?.(row, index);
   };
 
-  return (
-    <div className="flex flex-col space-y-4">
-      <ThemedTableHeader
-        onDataSet={onDataSet}
-        isDatasetsPage={isDatasetsPage}
-        advancedFilters={
-          advancedFilters
-            ? {
-                filterMap: advancedFilters.filterMap,
-                filters: advancedFilters.filters,
-                searchPropertyFilters: advancedFilters.searchPropertyFilters,
-                setAdvancedFilters: advancedFilters.setAdvancedFilters,
-                show: advancedFilters.show,
-              }
-            : undefined
-        }
-        savedFilters={savedFilters}
-        activeColumns={activeColumns}
-        setActiveColumns={setActiveColumns}
-        columns={hideView ? [] : table.getAllColumns()}
-        timeFilter={
-          timeFilter
-            ? {
-                defaultValue: timeFilter.defaultValue,
-                onTimeSelectHandler: timeFilter.onTimeSelectHandler,
-                currentTimeFilter: timeFilter.currentTimeFilter,
-              }
-            : undefined
-        }
-        viewToggle={
-          makeCard
-            ? {
-                currentView: view,
-                onViewChange: setView,
-              }
-            : undefined
-        }
-        rows={exportData}
-        customButtons={customButtons}
-      />
-      {children}
+  const [isPanelVisible, setIsPanelVisible] = useState(false);
 
-      {skeletonLoading ? (
-        <LoadingAnimation title="Loading Data..." />
-      ) : rows.length === 0 ? (
-        <div className="bg-white dark:bg-black h-48 w-full rounded-lg border border-gray-300 dark:border-gray-700 py-2 px-4 flex flex-col space-y-3 justify-center items-center">
-          <TableCellsIcon className="h-12 w-12 text-gray-900 dark:text-gray-100" />
-          <p className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-            No Data Found
-          </p>
-          {noDataCTA}
-        </div>
-      ) : table.getVisibleFlatColumns().length === 0 ? (
-        <div className="bg-white dark:bg-black h-48 w-full rounded-lg border border-gray-300 dark:border-gray-700 py-2 px-4 flex flex-col space-y-3 justify-center items-center">
-          <AdjustmentsHorizontalIcon className="h-12 w-12 text-gray-900 dark:text-gray-100" />
-          <p className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-            No Columns Selected
-          </p>
-        </div>
-      ) : makeCard && view === "card" ? (
-        <ul className="flex flex-col space-y-8 divide-y divide-gray-300 dark:divide-gray-700 bg-white dark:bg-black rounded-lg border border-gray-300 dark:border-gray-700">
-          {rows.map((row, i) => (
-            <li key={"expanded-row" + i}>{makeCard(row.original)}</li>
-          ))}
-        </ul>
-      ) : makeRow && view === "row" ? (
-        <RequestRowView
-          rows={rows.map((row) => row.original as unknown as NormalizedRequest)}
-          properties={makeRow.properties}
+  useEffect(() => {
+    if (rightPanel) {
+      // Delay the animation start slightly
+      const timer = setTimeout(() => {
+        setIsPanelVisible(true);
+      }, 50);
+      return () => clearTimeout(timer);
+    } else {
+      setIsPanelVisible(false);
+    }
+  }, [rightPanel]);
+
+  return (
+    <div className="h-full flex flex-col border-b divide-y divide-gray-300 dark:divide-gray-700">
+      <div className="py-2 px-1 flex-shrink-0">
+        <ThemedTableHeader
+          onDataSet={onDataSet}
+          isDatasetsPage={isDatasetsPage}
+          advancedFilters={
+            advancedFilters
+              ? {
+                  filterMap: advancedFilters.filterMap,
+                  filters: advancedFilters.filters,
+                  searchPropertyFilters: advancedFilters.searchPropertyFilters,
+                  setAdvancedFilters: advancedFilters.setAdvancedFilters,
+                  show: advancedFilters.show,
+                }
+              : undefined
+          }
+          savedFilters={savedFilters}
+          activeColumns={activeColumns}
+          setActiveColumns={setActiveColumns}
+          columns={hideView ? [] : table.getAllColumns()}
+          timeFilter={
+            timeFilter
+              ? {
+                  defaultValue: timeFilter.defaultValue,
+                  onTimeSelectHandler: timeFilter.onTimeSelectHandler,
+                  currentTimeFilter: timeFilter.currentTimeFilter,
+                }
+              : undefined
+          }
+          viewToggle={
+            makeCard
+              ? {
+                  currentView: view,
+                  onViewChange: setView,
+                }
+              : undefined
+          }
+          rows={exportData}
+          customButtons={customButtons}
         />
-      ) : (
-        <div className="bg-white dark:bg-black rounded-lg border border-gray-300 dark:border-gray-700 py-2 px-4">
-          <div
-            className="text-sm"
-            style={{
-              boxSizing: "border-box",
-              overflowX: "auto",
-              overflowY: "visible",
-            }}
-          >
-            <table
-              {...{
-                style: {
-                  width: fullWidth ? "100%" : table.getCenterTotalSize(),
-                },
-              }}
-            >
-              <thead>
-                {table.getHeaderGroups().map((headerGroup) => (
-                  <tr
-                    key={headerGroup.id}
-                    className="border-b border-gray-300 dark:border-gray-700"
-                  >
-                    {showCheckboxes && (
-                      <th className="w-8 px-2">
-                        <Checkbox
-                          onChange={(e) => handleSelectAll(e.target.checked)}
-                          checked={selectedIds?.length === rows.length}
-                          indeterminate={
-                            selectedIds &&
-                            selectedIds?.length > 0 &&
-                            selectedIds?.length < rows.length
-                          }
-                        />
-                      </th>
-                    )}
-                    {headerGroup.headers.map((header, index) => (
-                      <DraggableColumnHeader
-                        key={`header-${index}`}
-                        header={header}
-                        sortable={sortable}
-                      />
-                    ))}
-                  </tr>
+      </div>
+
+      {children && <div className="flex-shrink-0">{children}</div>}
+      <ResizablePanelGroup direction="horizontal">
+        <ResizablePanel>
+          {" "}
+          <div className="h-full overflow-x-auto">
+            {skeletonLoading ? (
+              <LoadingAnimation title="Loading Data..." />
+            ) : rows.length === 0 ? (
+              <div className="bg-white dark:bg-black h-48 w-full  border-gray-300 dark:border-gray-700 py-2 px-4 flex flex-col space-y-3 justify-center items-center">
+                <TableCellsIcon className="h-12 w-12 text-gray-900 dark:text-gray-100" />
+                <p className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+                  No Data Found
+                </p>
+                {noDataCTA}
+              </div>
+            ) : table.getVisibleFlatColumns().length === 0 ? (
+              <div className="bg-white dark:bg-black h-48 w-full  border-gray-300 dark:border-gray-700 py-2 px-4 flex flex-col space-y-3 justify-center items-center">
+                <AdjustmentsHorizontalIcon className="h-12 w-12 text-gray-900 dark:text-gray-100" />
+                <p className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+                  No Columns Selected
+                </p>
+              </div>
+            ) : makeCard && view === "card" ? (
+              <ul className="flex flex-col space-y-8 divide-y divide-gray-300 dark:divide-gray-700 bg-white dark:bg-black rounded-lg border border-gray-300 dark:border-gray-700">
+                {rows.map((row, i) => (
+                  <li key={"expanded-row" + i}>{makeCard(row.original)}</li>
                 ))}
-              </thead>
-              <tbody>
-                {rows.map((row, index) => (
-                  <tr
-                    key={row.id}
-                    className={clsx(
-                      "hover:bg-gray-100 dark:hover:bg-gray-900 hover:cursor-pointer",
-                      checkedIds?.includes(row.original?.id ?? "") &&
-                        "bg-blue-100 border-l border-blue-500 pl-2"
-                    )}
-                    onClick={
-                      onRowSelect &&
-                      (() => handleRowSelect(row.original, index))
-                    }
+              </ul>
+            ) : makeRow && view === "row" ? (
+              <RequestRowView
+                rows={rows.map(
+                  (row) => row.original as unknown as NormalizedRequest
+                )}
+                properties={makeRow.properties}
+              />
+            ) : (
+              <div className="bg-white dark:bg-black rounded-sm h-full">
+                <div
+                  className=""
+                  style={{
+                    boxSizing: "border-box",
+                  }}
+                >
+                  <table
+                    className="h-full"
+                    {...{
+                      style: {
+                        width: fullWidth ? "100%" : table.getCenterTotalSize(),
+                        overflow: "auto",
+                      },
+                    }}
                   >
-                    {showCheckboxes && (
-                      <td className="w-8 px-2">
-                        <Checkbox
-                          checked={selectedIds?.includes(
-                            row.original?.id ?? ""
+                    <thead className="text-[12px] bg-slate-50 dark:bg-slate-900 sticky top-0 z-10">
+                      {table.getHeaderGroups().map((headerGroup) => (
+                        <tr
+                          key={headerGroup.id}
+                          className="border-b border-gray-300 dark:border-gray-700 divide-x divide-gray-300 dark:divide-gray-700 divide-opacity-50"
+                        >
+                          {showCheckboxes && (
+                            <th className="w-8 px-2 sticky left-0 z-20 bg-slate-50 dark:bg-slate-900">
+                              <Checkbox
+                                onChange={(e) =>
+                                  handleSelectAll(e.target.checked)
+                                }
+                                checked={selectedIds?.length === rows.length}
+                                indeterminate={
+                                  selectedIds &&
+                                  selectedIds?.length > 0 &&
+                                  selectedIds?.length < rows.length
+                                }
+                              />
+                            </th>
                           )}
-                          onChange={() => {}} // Handle individual row selection
-                        />
-                      </td>
-                    )}
-                    {row.getVisibleCells().map((cell, i) => (
-                      <td
-                        key={i}
-                        className={clsx(
-                          "py-4 border-t border-gray-300 dark:border-gray-700 pr-4 text-gray-700 dark:text-gray-300"
-                        )}
-                        {...{
-                          style: {
-                            maxWidth: cell.column.getSize(),
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            whiteSpace: "nowrap",
-                          },
-                        }}
-                      >
-                        {dataLoading &&
-                        (cell.column.id == "requestText" ||
-                          cell.column.id == "responseText") ? (
-                          <span
-                            className={clsx(
-                              "w-full flex flex-grow",
+                          {headerGroup.headers.map((header, index) => (
+                            <DraggableColumnHeader
+                              key={`header-${index}`}
+                              header={header}
+                              sortable={sortable}
+                              index={index}
+                              totalColumns={headerGroup.headers.length}
+                            />
+                          ))}
+                        </tr>
+                      ))}
+                    </thead>
+                    <tbody className="text-[13px] ">
+                      {rows.map((row, index) => (
+                        <tr
+                          key={row.id}
+                          className={clsx(
+                            " dark:hover:bg-gray-900 hover:cursor-pointer",
+                            checkedIds?.includes(row.original?.id ?? "")
+                              ? "bg-sky-100 border-l border-sky-500 pl-2"
+                              : "hover:bg-sky-50"
+                          )}
+                          onClick={
+                            onRowSelect &&
+                            (() => handleRowSelect(row.original, index))
+                          }
+                        >
+                          {showCheckboxes && (
+                            <td className="w-8 px-2">
+                              <Checkbox
+                                checked={selectedIds?.includes(
+                                  row.original?.id ?? ""
+                                )}
+                                onChange={() => {}} // Handle individual row selection
+                              />
+                            </td>
+                          )}
+                          {row.getVisibleCells().map((cell, i) => (
+                            <td
+                              key={i}
+                              className={clsx(
+                                "py-3 border-t border-gray-300 dark:border-gray-700 px-2 text-gray-700 dark:text-gray-300",
+                                i === 0 && "pl-10", // Add left padding to the first column
+                                i === row.getVisibleCells().length - 1 &&
+                                  "pr-10"
+                              )}
+                              {...{
+                                style: {
+                                  maxWidth: cell.column.getSize(),
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                  whiteSpace: "nowrap",
+                                },
+                              }}
+                            >
+                              {dataLoading &&
                               (cell.column.id == "requestText" ||
-                                cell.column.id == "responseText") &&
-                                dataLoading
-                                ? "animate-pulse bg-gray-200 rounded-md"
-                                : "hidden"
-                            )}
-                          >
-                            &nbsp;
-                          </span>
-                        ) : (
-                          flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext()
-                          )
-                        )}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                                cell.column.id == "responseText") ? (
+                                <span
+                                  className={clsx(
+                                    "w-full flex flex-grow",
+                                    (cell.column.id == "requestText" ||
+                                      cell.column.id == "responseText") &&
+                                      dataLoading
+                                      ? "animate-pulse bg-gray-200 rounded-md"
+                                      : "hidden"
+                                  )}
+                                >
+                                  &nbsp;
+                                </span>
+                              ) : (
+                                flexRender(
+                                  cell.column.columnDef.cell,
+                                  cell.getContext()
+                                )
+                              )}
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
           </div>
-        </div>
-      )}
+        </ResizablePanel>
+        {rightPanel && (
+          <>
+            <ResizableHandle withHandle />
+            <ResizablePanel minSize={25} maxSize={75}>
+              <div className="h-full flex-shrink-0 transition-all duration-300 ease-in-out overflow-y-auto">
+                {rightPanel}
+              </div>
+            </ResizablePanel>
+          </>
+        )}
+      </ResizablePanelGroup>
     </div>
   );
 }
