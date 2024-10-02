@@ -6,4 +6,106 @@ icon: "code"
 iconType: "solid"
 ---
 
-<Info>This page is currently under construction.</Info>
+## Request Structure
+A typical request will have the following structure:
+
+### Endpoint
+```
+POST https://api.us.helicone.ai/custom/v1/log
+```
+
+### Headers
+
+| Name          | Value              |
+| ------------- | ------------------ |
+| Authorization | Bearer `{API_KEY}` |
+
+Replace `{API_KEY}` with your actual API Key.
+
+### Body
+```typescript
+export type HeliconeAsyncLogRequest = {
+  providerRequest: ProviderRequest;
+  providerResponse: ProviderResponse;
+  timing: Timing;
+};
+
+export type ProviderRequest = {
+  url: "custom-model-nopath";
+  json: {
+    _type: "tool"; 
+    toolName: string; 
+    input: any;
+    [key: string]: any; 
+  };
+  meta: Record<string, string>;
+  
+};
+
+export type ProviderResponse = {
+  json: {
+    _type?: "tool";
+    toolName: string;
+    [key: string]: any;
+  };
+  status: number;
+  headers: Record<string, string>;
+};
+
+export type Timing = {
+  // From Unix epoch in Milliseconds
+  startTime: {
+    seconds: number;
+    milliseconds: number;
+  };
+  endTime: {
+    seconds: number;
+    milliseconds: number;
+  };
+};
+```
+
+## Example Usage
+```bash
+curl -X POST https://api.us.helicone.ai/custom/v1/log \
+-H 'Authorization: Bearer your_api_key' \
+-H 'Content-Type: application/json' \
+-d '{
+  "providerRequest": {
+    "url": "custom-model-nopath",
+    "json": {
+      "_type": "tool",
+      "toolName": "toolName",
+      "input": "input",
+      ... // other data about the vector db request here
+    },
+    "meta": {
+      "metaKey1": "metaValue1",
+      "metaKey2": "metaValue2"
+    }
+  },
+  "providerResponse": {
+    "json": {
+      "_type": "tool",
+      "toolName": "toolName",
+      "responseKey1": "responseValue1",
+      "responseKey2": "responseValue2"
+    },
+    "status": 200,
+    "headers": {
+      "headerKey1": "headerValue1",
+      "headerKey2": "headerValue2"
+    }
+  },
+  "timing": {
+    "startTime": {
+      "seconds": 1625686222,
+      "milliseconds": 500
+    },
+    "endTime": {
+      "seconds": 1625686244,
+      "milliseconds": 750
+    }
+  }
+}'
+```

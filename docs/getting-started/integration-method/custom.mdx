@@ -236,12 +236,11 @@ export type HeliconeAsyncLogRequest = {
 };
 
 export type ProviderRequest = {
-  url: string; // should be set to "custom-model-nopath"
+  url: "custom-model-nopath";
   json: {
     [key: string]: any;
   };
   meta: Record<string, string>;
-  _type?: "vector_db" | "tool"; // Should not be set for custom model logging
 };
 
 export type ProviderResponse = {
@@ -250,7 +249,6 @@ export type ProviderResponse = {
   };
   status: number;
   headers: Record<string, string>;
-  _type?: "vector_db" | "tool"; // Should not be set for custom model logging
 };
 
 export type Timing = {
