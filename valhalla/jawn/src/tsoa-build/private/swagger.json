@@ -471,6 +471,9 @@
 					"response_body": {
 						"type": "string"
 					},
+					"request_body": {
+						"type": "string"
+					},
 					"auto_prompt_inputs": {
 						"items": {},
 						"type": "array"

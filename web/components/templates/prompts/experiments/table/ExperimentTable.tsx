@@ -14,7 +14,10 @@ import "ag-grid-community/styles/ag-grid.css";
 import { AgGridReact } from "ag-grid-react";
 import { useCallback, useMemo, useState } from "react";
 import AddColumnHeader from "./AddColumnHeader";
-import { HypothesisCellRenderer } from "./HypothesisCellRenderer";
+import {
+  HypothesisCellRenderer,
+  OriginalOutputCellRenderer,
+} from "./HypothesisCellRenderer";
 import {
   PlusIcon,
   ChevronDownIcon,
@@ -217,12 +220,12 @@ export function ExperimentTable({
         // Always populate "Messages" and "Original" columns
         hypothesisRowData["messages"] = JSON.stringify(
           //@ts-ignore
-          promptVersionTemplate?.helicone_template?.messages?.[0] || {},
+          row?.request_body?.messages || {},
           null,
           2
         );
         hypothesisRowData["original"] =
-          row?.request_response_body?.choices?.[0]?.message?.content || "";
+          row?.response_body?.choices?.[0]?.message?.content || "";
 
         // Add data for other hypotheses if they exist
         experimentData.hypotheses.forEach((hypothesis: any) => {
@@ -527,9 +530,14 @@ export function ExperimentTable({
         badgeText: "Output",
         badgeVariant: "secondary",
         hypothesis: sortedHypotheses[1] || {},
+        promptVersionTemplate: promptVersionTemplate,
       },
       cellClass: "border-r border-[#E2E8F0] text-slate-700 pt-2.5",
       headerClass: "border-r border-[#E2E8F0]",
+      cellRenderer: OriginalOutputCellRenderer,
+      cellRendererParams: {
+        prompt: promptVersionTemplate,
+      },
       cellStyle: {
         verticalAlign: "middle",
         textAlign: "left",

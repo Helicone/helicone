@@ -45,7 +45,6 @@ const AddColumnHeader: React.FC<AddColumnHeaderProps> = ({
   selectedProviderKey,
   refetchData, // Add this line
 }) => {
-  console.log("promptVersionId", promptVersionId);
   const [open, setOpen] = useState(false);
   const jawn = useJawnClient();
   const promptVersion = useQuery({

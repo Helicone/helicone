@@ -565,6 +565,7 @@ const models: TsoaRoute.Models = {
             "prompt_version": {"dataType":"string","required":true},
             "created_at": {"dataType":"string","required":true},
             "response_body": {"dataType":"string"},
+            "request_body": {"dataType":"string"},
             "auto_prompt_inputs": {"dataType":"array","array":{"dataType":"any"},"required":true},
         },
         "additionalProperties": false,

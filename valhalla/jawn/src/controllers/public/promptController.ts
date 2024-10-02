@@ -126,6 +126,7 @@ export interface PromptInputRecord {
   prompt_version: string;
   created_at: string;
   response_body?: string;
+  request_body?: string;
   auto_prompt_inputs: any[];
 }
 

@@ -480,6 +480,7 @@ export interface components {
       prompt_version: string;
       created_at: string;
       response_body?: string;
+      request_body?: string;
       auto_prompt_inputs: unknown[];
     };
     "ResultSuccess_PromptInputRecord-Array_": {

@@ -142,6 +142,9 @@ export class InputsManager extends BaseManager {
     return promiseResultMap(result, async (data) => {
       return Promise.all(
         data.map(async (record) => {
+          const requestResponseBody = await bodyStore.getRequestResponseBody(
+            record.source_request
+          );
           return {
             ...record,
             inputs: await getAllSignedURLsFromInputs(
@@ -149,9 +152,8 @@ export class InputsManager extends BaseManager {
               this.authParams.organizationId,
               record.source_request
             ),
-            request_response_body: await (
-              await bodyStore.getRequestResponseBody(record.source_request)
-            ).data?.response,
+            response_body: requestResponseBody.data?.response,
+            request_body: requestResponseBody.data?.request,
           };
         })
       );
@@ -195,11 +197,13 @@ export class InputsManager extends BaseManager {
     return promiseResultMap(result, async (data) => {
       return Promise.all(
         data.map(async (record) => {
+          const requestResponseBody = await bodyStore.getRequestResponseBody(
+            record.source_request
+          );
           return {
             ...record,
-            response_body:
-              (await bodyStore.getRequestResponseBody(record.source_request))
-                .data?.response ?? {},
+            response_body: requestResponseBody.data?.response ?? {},
+            request_body: requestResponseBody.data?.request ?? {},
             inputs: await getAllSignedURLsFromInputs(
               record.inputs,
               this.authParams.organizationId,

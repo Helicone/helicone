@@ -146,7 +146,7 @@ const PromptPropertyCard = (props: PromptPropertyCardProps) => {
               </li>
             ))}
           </ul>
-          {autoInputs && Object.keys(autoInputs).length > 0 && (
+          {/* {autoInputs && Object.keys(autoInputs).length > 0 && (
             <>
               <label className="text-sm text-gray-500 mt-4">Auto Inputs</label>
               <ul className="flex flex-col w-full divide-y divide-gray-300 dark:divide-gray-700 mt-2">
@@ -167,7 +167,7 @@ const PromptPropertyCard = (props: PromptPropertyCardProps) => {
                 ))}
               </ul>
             </>
-          )}
+          )} */}
         </Col>
       </div>
       <ThemedModal open={expanded} setOpen={setExpanded}>

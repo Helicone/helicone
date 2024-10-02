@@ -113,14 +113,21 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
       </PopoverTrigger>
       <PopoverContent className="w-[800px] p-0" side="bottom">
         <PromptPlayground
-          prompt={props.hypothesis?.promptVersion?.template || ""}
+          prompt={
+            props.promptVersionTemplate?.helicone_template ??
+            (props.hypothesis?.promptVersion?.template || "")
+          }
           selectedInput={undefined}
           onSubmit={(history, model) => {
             console.log("Submitted:", history, model);
             setShowPromptPlayground(false);
           }}
           submitText="Save"
-          initialModel={props.hypothesis?.promptVersion?.model || ""}
+          initialModel={
+            props.promptVersionTemplate?.model ||
+            props.hypothesis?.promptVersion?.model ||
+            ""
+          }
           isPromptCreatedFromUi={true}
           defaultEditMode={false}
         />
