@@ -5,7 +5,7 @@ import {
   ClockIcon,
   TableCellsIcon,
 } from "@heroicons/react/24/outline";
-import { ElementType, useMemo, useState } from "react";
+import { ElementType, useEffect, useMemo, useState } from "react";
 import {
   BarChart,
   Tab,
@@ -60,6 +60,15 @@ const tabs: {
     icon: TableCellsIcon,
   },
 ];
+
+const CustomTab: React.FC<{ icon: ElementType; isSelected: boolean; children: React.ReactNode }> = ({ icon: Icon, isSelected, children }) => (
+  <Tab>
+    <div className={`flex items-center ${isSelected ? 'text-sky-600 border-b-2 border-sky-600' : 'text-gray-500 hover:text-gray-700'}`}>
+      <Icon className="h-5 w-5 mr-2" />
+      {children}
+    </div>
+  </Tab>
+);
 
 const CachePage = (props: CachePageProps) => {
   const { currentPage, pageSize, sort, defaultIndex = 0 } = props;
@@ -139,6 +148,17 @@ const CachePage = (props: CachePageProps) => {
 
   const org = useOrg();
   const isPro = org?.currentOrg?.tier !== "free";
+
+  const [selectedTab, setSelectedTab] = useState<number>(defaultIndex);
+
+  useEffect(() => {
+    const tabFromQuery = Number(router.query.tab);
+    if (!isNaN(tabFromQuery) && tabFromQuery >= 0 && tabFromQuery < tabs.length) {
+      setSelectedTab(tabFromQuery);
+    } else if (defaultIndex !== undefined) {
+      setSelectedTab(defaultIndex);
+    }
+  }, [router.query.tab, defaultIndex, tabs.length]);
 
   return (
     <>
@@ -241,24 +261,28 @@ openai.chat.completions.create(
         </div>
       ) : (
         <div className="flex flex-col">
-          <TabGroup defaultIndex={defaultIndex}>
+          <TabGroup
+            index={selectedTab}
+            onIndexChange={(index) => {
+              setSelectedTab(index);
+              router.push(
+                {
+                  query: { ...router.query, tab: index },
+                },
+                undefined,
+                { shallow: true }
+              );
+            }}
+          >
             <TabList className="font-semibold" variant="line">
               {tabs.map((tab) => (
-                <Tab
+                <CustomTab
                   key={tab.id}
                   icon={tab.icon}
-                  onClick={() => {
-                    router.push(
-                      {
-                        query: { tab: tab.id },
-                      },
-                      undefined,
-                      { shallow: true }
-                    );
-                  }}
+                  isSelected={selectedTab === tab.id}
                 >
                   {tab.title}
-                </Tab>
+                </CustomTab>
               ))}
             </TabList>
             <TabPanels>
