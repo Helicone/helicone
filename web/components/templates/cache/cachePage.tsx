@@ -61,9 +61,19 @@ const tabs: {
   },
 ];
 
-const CustomTab: React.FC<{ icon: ElementType; isSelected: boolean; children: React.ReactNode }> = ({ icon: Icon, isSelected, children }) => (
+const CustomTab: React.FC<{
+  icon: ElementType;
+  isSelected: boolean;
+  children: React.ReactNode;
+}> = ({ icon: Icon, isSelected, children }) => (
   <Tab>
-    <div className={`flex items-center ${isSelected ? 'text-sky-600 border-b-2 border-sky-600' : 'text-gray-500 hover:text-gray-700'}`}>
+    <div
+      className={`flex items-center ${
+        isSelected
+          ? "text-sky-600 border-b-2 border-sky-600"
+          : "text-gray-500 hover:text-gray-700"
+      }`}
+    >
       <Icon className="h-5 w-5 mr-2" />
       {children}
     </div>
@@ -153,7 +163,11 @@ const CachePage = (props: CachePageProps) => {
 
   useEffect(() => {
     const tabFromQuery = Number(router.query.tab);
-    if (!isNaN(tabFromQuery) && tabFromQuery >= 0 && tabFromQuery < tabs.length) {
+    if (
+      !isNaN(tabFromQuery) &&
+      tabFromQuery >= 0 &&
+      tabFromQuery < tabs.length
+    ) {
       setSelectedTab(tabFromQuery);
     } else if (defaultIndex !== undefined) {
       setSelectedTab(defaultIndex);
