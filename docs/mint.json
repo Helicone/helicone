@@ -173,7 +173,18 @@
         "getting-started/integration-method/deepinfra",
         "getting-started/integration-method/openrouter",
         "getting-started/integration-method/litellm",
-        "getting-started/integration-method/fireworks"
+        "getting-started/integration-method/fireworks",
+        {
+          "group": "Vector DB",
+          "pages": [
+            "integrations/vectordb/javascript",
+            "integrations/vectordb/curl"
+          ]
+        },
+        {
+          "group": "Tools",
+          "pages": ["integrations/tools/javascript", "integrations/tools/curl"]
+        }
       ]
     },
     {
