@@ -3,7 +3,7 @@ import { CheckCircleIcon, PlusIcon } from "@heroicons/react/20/solid";
 import { KeyIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { Tooltip } from "@mui/material";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
-import { useCallback, useState, FormEvent } from "react";
+import { useCallback, useState } from "react";
 import { DecryptedProviderKey } from "../../../../../services/lib/keys";
 import { clsx } from "../../../../shared/clsx";
 import useNotification from "../../../../shared/notification/useNotification";
