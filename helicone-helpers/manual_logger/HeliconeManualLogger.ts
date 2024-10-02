@@ -1,4 +1,10 @@
-import { IHeliconeManualLogger, HeliconeLogRequest, ProviderRequest, ProviderResponse, Timing } from "./types";
+import {
+  IHeliconeManualLogger,
+  HeliconeLogRequest,
+  ProviderRequest,
+  ProviderResponse,
+  Timing,
+} from "./types";
 
 export class HeliconeManualLogger {
   private apiKey: string;
@@ -11,6 +17,13 @@ export class HeliconeManualLogger {
     this.headers = opts.headers || {};
   }
 
+  /**
+   * Logs a custom request to Helicone
+   * @param request - The request object to log
+   * @param operation - The operation which will be executed and logged
+   * @param additionalHeaders - Additional headers to send with the request
+   * @returns The result of the `operation` function
+   */
   public async logRequest<T>(
     request: HeliconeLogRequest,
     operation: (resultRecorder: HeliconeResultRecorder) => Promise<T>,
@@ -114,5 +127,3 @@ class HeliconeResultRecorder {
     return this.results;
   }
 }
-
-
