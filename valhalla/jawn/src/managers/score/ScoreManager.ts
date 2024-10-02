@@ -51,6 +51,15 @@ export class ScoreManager extends BaseManager {
   ): Promise<Result<null, string>> {
     if (!this.kafkaProducer.isKafkaEnabled()) {
       console.log("Kafka is not enabled. Using score manager");
+      this.handleScores(
+        {
+          batchId: "",
+          partition: 0,
+          lastOffset: "",
+          messageCount: 1,
+        },
+        scoresMessage
+      );
 
       // Schedule the delayed operation and register it with ShutdownService
       const timeoutId = DelayedOperationService.getTimeoutId(() => {

@@ -805,6 +805,9 @@
 						},
 						"type": "object"
 					},
+					"scores_column": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
 					"request_body": {
 						"$ref": "#/components/schemas/Partial_VectorOperators_"
 					},
