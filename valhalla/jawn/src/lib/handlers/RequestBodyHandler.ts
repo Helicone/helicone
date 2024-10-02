@@ -44,9 +44,7 @@ export class RequestBodyHandler extends AbstractLogHandler {
 
       if (this.isVectorDBRequest(requestBodyFinal)) {
         context.processedLog.request.model = "vector_db";
-      }
-
-      if (this.isToolRequest(requestBodyFinal)) {
+      } else if (this.isToolRequest(requestBodyFinal)) {
         context.processedLog.request.model = `tool:${requestBodyFinal.toolName}`;
       }
 
