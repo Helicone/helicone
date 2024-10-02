@@ -225,7 +225,7 @@ export function ExperimentTable({
           row?.request_response_body?.choices?.[0]?.message?.content || "";
 
         // Add data for other hypotheses if they exist
-        experimentData.hypotheses.slice(1).forEach((hypothesis: any) => {
+        experimentData.hypotheses.forEach((hypothesis: any) => {
           const hypothesisRun = hypothesis.runs?.find(
             (r: any) => r.datasetRowId === row.dataset_row_id
           );
@@ -402,7 +402,7 @@ export function ExperimentTable({
 
   // Determine the hypotheses to run (excluding the first one)
   const hypothesesToRun = useMemo(() => {
-    return experimentData?.hypotheses.slice(1).map((h: any) => h.id) || [];
+    return experimentData?.hypotheses.map((h: any) => h.id) || [];
   }, [experimentData?.hypotheses]);
 
   // Define sortedHypotheses
@@ -542,7 +542,7 @@ export function ExperimentTable({
 
     // Add columns for additional experiments
     if (columnView === "all" || columnView === "outputs") {
-      sortedHypotheses.slice(1).forEach((hypothesis, index) => {
+      sortedHypotheses.forEach((hypothesis, index) => {
         const experimentNumber = index + 1;
         columns.push({
           field: hypothesis.id,
