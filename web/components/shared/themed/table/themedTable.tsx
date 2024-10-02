@@ -280,14 +280,14 @@ export default function ThemedTable<T extends { id?: string }>(
                       },
                     }}
                   >
-                    <thead className="text-[12px] bg-slate-50 dark:bg-slate-900 sticky top-0 z-10">
+                    <thead className="text-[12px]">
                       {table.getHeaderGroups().map((headerGroup) => (
                         <tr
                           key={headerGroup.id}
-                          className="border-b border-gray-300 dark:border-gray-700 divide-x divide-gray-300 dark:divide-gray-700 divide-opacity-50"
+                          className="sticky top-0 z-10 bg-slate-50 dark:bg-slate-900 shadow-sm"
                         >
                           {showCheckboxes && (
-                            <th className="w-8 px-2 sticky left-0 z-20 bg-slate-50 dark:bg-slate-900">
+                            <th className="w-8 px-2 sticky left-0 z-20 bg-slate-50 dark:bg-slate-900 relative">
                               <Checkbox
                                 onChange={(e) =>
                                   handleSelectAll(e.target.checked)
@@ -299,16 +299,25 @@ export default function ThemedTable<T extends { id?: string }>(
                                   selectedIds?.length < rows.length
                                 }
                               />
+                              <div className="absolute bottom-0 left-0 right-0 h-px bg-gray-300 dark:bg-gray-700" />
                             </th>
                           )}
                           {headerGroup.headers.map((header, index) => (
-                            <DraggableColumnHeader
+                            <th
                               key={`header-${index}`}
-                              header={header}
-                              sortable={sortable}
-                              index={index}
-                              totalColumns={headerGroup.headers.length}
-                            />
+                              className={clsx("relative")}
+                            >
+                              <DraggableColumnHeader
+                                header={header}
+                                sortable={sortable}
+                                index={index}
+                                totalColumns={headerGroup.headers.length}
+                              />
+                              {index < headerGroup.headers.length - 1 && (
+                                <div className="absolute top-0 right-0 h-full w-px bg-gray-300 dark:bg-gray-700" />
+                              )}
+                              <div className="absolute bottom-0 left-0 right-0 h-[0.5px] bg-gray-300 dark:bg-gray-700" />
+                            </th>
                           ))}
                         </tr>
                       ))}
