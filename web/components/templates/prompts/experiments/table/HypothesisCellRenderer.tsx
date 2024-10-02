@@ -143,7 +143,7 @@ export const HypothesisCellRenderer: React.FC<any> = (params) => {
   );
 };
 
-export const OriginalOutputCellRenderer: React.FC<any> = (params) => {
+export const OriginalMessagesCellRenderer: React.FC<any> = (params) => {
   const { data, colDef, context, prompt } = params;
   const hypothesisId = colDef.field;
   const inputKeys = context.inputKeys;
@@ -160,7 +160,79 @@ export const OriginalOutputCellRenderer: React.FC<any> = (params) => {
   const formatPromptForPlayground = (): any => {
     return {
       model: prompt?.model || "",
-      messages: JSON.parse(parsedData),
+      messages: JSON.parse(parsedData || "[]"),
+    };
+  };
+
+  return (
+    <Popover open={showPromptPlayground} onOpenChange={setShowPromptPlayground}>
+      <PopoverTrigger asChild>
+        <div
+          className={`w-full h-full items-center flex ${
+            content ? "justify-start" : "justify-end"
+          }`}
+          onClick={handleCellClick}
+        >
+          {content ? (
+            <div>{content}</div>
+          ) : (
+            <div>
+              <Button
+                variant="ghost"
+                className="w-6 h-6 p-0 border-slate-200 border rounded-md bg-slate-50 text-slate-500"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  params.handleRunHypothesis(hypothesisId, [
+                    data.dataset_row_id,
+                  ]);
+                }}
+              >
+                <PlayIcon className="w-4 h-4" />
+              </Button>
+            </div>
+          )}
+        </div>
+      </PopoverTrigger>
+      <PopoverContent className="w-[800px] p-0" side="bottom" align="start">
+        <PromptPlayground
+          prompt={formatPromptForPlayground() || ""}
+          selectedInput={data}
+          onSubmit={(history, model) => {
+            console.log("Submitted:", history, model);
+            setShowPromptPlayground(false);
+          }}
+          submitText="Save"
+          initialModel={prompt?.model || ""}
+          isPromptCreatedFromUi={true}
+          defaultEditMode={false}
+        />
+      </PopoverContent>
+    </Popover>
+  );
+};
+export const OriginalOutputCellRenderer: React.FC<any> = (params) => {
+  const { data, colDef, context, prompt } = params;
+  const hypothesisId = colDef.field;
+  const inputKeys = context.inputKeys;
+  const [showPromptPlayground, setShowPromptPlayground] = useState(false);
+  const content = data[hypothesisId];
+  const parsedData = data.messages;
+  const handleCellClick = (e: React.MouseEvent) => {
+    console.log("some", content);
+    console.log("prompt", prompt);
+    e.stopPropagation();
+    setShowPromptPlayground(true);
+  };
+
+  const formatPromptForPlayground = (): any => {
+    return {
+      model: prompt?.model || "",
+      messages: [
+        {
+          role: "assistant",
+          content: content,
+        },
+      ],
     };
   };
 

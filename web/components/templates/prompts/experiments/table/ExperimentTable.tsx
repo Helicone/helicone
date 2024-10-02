@@ -16,6 +16,7 @@ import { useCallback, useMemo, useState } from "react";
 import AddColumnHeader from "./AddColumnHeader";
 import {
   HypothesisCellRenderer,
+  OriginalMessagesCellRenderer,
   OriginalOutputCellRenderer,
 } from "./HypothesisCellRenderer";
 import {
@@ -224,8 +225,14 @@ export function ExperimentTable({
           null,
           2
         );
-        hypothesisRowData["original"] =
-          row?.response_body?.choices?.[0]?.message?.content || "";
+        let content = row?.response_body?.choices?.[0]?.message?.content || "";
+
+        // Parse the content if it's a JSON string
+        try {
+          hypothesisRowData["original"] = JSON.parse(content);
+        } catch (error) {
+          hypothesisRowData["original"] = content; // Use original content if parsing fails
+        }
 
         // Add data for other hypotheses if they exist
         experimentData.hypotheses.forEach((hypothesis: any) => {
@@ -505,10 +512,15 @@ export function ExperimentTable({
         badgeText: "Input",
         badgeVariant: "secondary",
         hypothesis: sortedHypotheses[0] || {},
+        promptVersionTemplate: promptVersionTemplate,
       },
       cellClass:
         "border-r border-[#E2E8F0] text-slate-700 flex items-center justify-start pt-2.5",
       headerClass: "border-r border-[#E2E8F0]",
+      cellRenderer: OriginalMessagesCellRenderer,
+      cellRendererParams: {
+        prompt: promptVersionTemplate,
+      },
       cellStyle: {
         verticalAlign: "middle",
         textAlign: "left",
