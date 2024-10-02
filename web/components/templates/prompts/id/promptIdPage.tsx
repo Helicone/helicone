@@ -513,49 +513,49 @@ const PromptIdPage = (props: PromptIdPageProps) => {
       return;
     }
 
-    const randomInputData = await jawn.POST(
-      "/v1/prompt/version/{promptVersionId}/inputs/query",
-      {
-        params: {
-          path: {
-            promptVersionId: promptVersionId,
-          },
-        },
-        body: {
-          limit: 10,
-          random: true,
-        },
-      }
-    );
+    // const randomInputData = await jawn.POST(
+    //   "/v1/prompt/version/{promptVersionId}/inputs/query",
+    //   {
+    //     params: {
+    //       path: {
+    //         promptVersionId: promptVersionId,
+    //       },
+    //     },
+    //     body: {
+    //       limit: 10,
+    //       random: true,
+    //     },
+    //   }
+    // );
 
-    if (
-      randomInputData.error ||
-      !randomInputData.data ||
-      !randomInputData.data.data
-    ) {
-      notification.setNotification("Failed to get random inputs", "error");
-      return;
-    }
+    // if (
+    //   randomInputData.error ||
+    //   !randomInputData.data ||
+    //   !randomInputData.data.data
+    // ) {
+    //   notification.setNotification("Failed to get random inputs", "error");
+    //   return;
+    // }
 
-    await Promise.all(
-      randomInputData?.data?.data?.map((request) => {
-        return jawn.POST(
-          "/v1/experiment/dataset/{datasetId}/version/{promptVersionId}/row",
-          {
-            body: {
-              inputs: request.inputs,
-              sourceRequest: request.source_request,
-            },
-            params: {
-              path: {
-                promptVersionId: promptVersionId,
-                datasetId: dataset.data?.data?.datasetId ?? "",
-              },
-            },
-          }
-        );
-      })
-    );
+    // await Promise.all(
+    //   randomInputData?.data?.data?.map((request) => {
+    //     return jawn.POST(
+    //       "/v1/experiment/dataset/{datasetId}/version/{promptVersionId}/row",
+    //       {
+    //         body: {
+    //           inputs: request.inputs,
+    //           sourceRequest: request.source_request,
+    //         },
+    //         params: {
+    //           path: {
+    //             promptVersionId: promptVersionId,
+    //             datasetId: dataset.data?.data?.datasetId ?? "",
+    //           },
+    //         },
+    //       }
+    //     );
+    //   })
+    // );
 
     // const hypothesis = await jawn.POST("/v1/experiment/hypothesis", {
     //   body: {
