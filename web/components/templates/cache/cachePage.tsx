@@ -8,11 +8,6 @@ import {
 import { ElementType, useMemo, useState } from "react";
 import {
   BarChart,
-  Tab,
-  TabGroup,
-  TabList,
-  TabPanel,
-  TabPanels,
   Divider,
   Badge,
 } from "@tremor/react";
@@ -32,6 +27,7 @@ import { formatNumber } from "../users/initialColumns";
 import { useOrg } from "@/components/layout/organizationContext";
 import { DiffHighlight } from "../welcome/diffHighlight";
 import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 interface CachePageProps {
   currentPage: number;
@@ -41,7 +37,7 @@ interface CachePageProps {
     sortDirection: SortDirection | null;
     isCustomProperty: boolean;
   };
-  defaultIndex?: number;
+  defaultIndex: string;
 }
 
 const tabs: {
@@ -62,7 +58,7 @@ const tabs: {
 ];
 
 const CachePage = (props: CachePageProps) => {
-  const { currentPage, pageSize, sort, defaultIndex = 0 } = props;
+  const { currentPage, pageSize, sort, defaultIndex = "0" } = props;
   const [timeFilter, _] = useState<TimeFilter>({
     start: new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 30),
     end: new Date(),
@@ -241,121 +237,121 @@ openai.chat.completions.create(
         </div>
       ) : (
         <div className="flex flex-col">
-          <TabGroup defaultIndex={defaultIndex}>
-            <TabList className="font-semibold" variant="line">
+          <Tabs defaultValue={defaultIndex} className="w-full">
+            <TabsList className="font-semibold">
               {tabs.map((tab) => (
-                <Tab
+                <TabsTrigger
                   key={tab.id}
-                  icon={tab.icon}
+                  value={tab.id.toString()}
                   onClick={() => {
                     router.push(
                       {
-                        query: { tab: tab.id },
+                        query: { ...router.query, tab: tab.id },
                       },
                       undefined,
                       { shallow: true }
                     );
                   }}
                 >
+                  <tab.icon className="h-5 w-5 mr-2" />
                   {tab.title}
-                </Tab>
+                </TabsTrigger>
               ))}
-            </TabList>
-            <TabPanels>
-              <TabPanel>
-                <div className="flex flex-col xl:flex-row gap-4 w-full py-4">
-                  <div className="flex flex-col space-y-4 w-full xl:w-1/2">
-                    <ul className="flex flex-col sm:flex-row items-center gap-4 w-full">
-                      {metrics.map((metric, i) => (
-                        <li
-                          key={i}
-                          className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-4 flex flex-row rounded-lg items-center gap-4"
-                        >
-                          <metric.icon className="h-6 w-6 text-sky-500" />
-                          <div className="flex flex-col">
-                            <dt className="text-gray-500 text-sm">
-                              {metric.label}
-                            </dt>
-                            {metric.isLoading ? (
-                              <div className="animate-pulse h-7 w-24 bg-gray-200 dark:bg-gray-800 rounded-lg" />
-                            ) : (
-                              <dd className="text-gray-900 dark:text-gray-100 text-xl font-semibold">
-                                {metric.value}
-                              </dd>
-                            )}
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                    <div className="flex flex-col space-y-4 py-6 bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg">
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 text-center">
-                        Caches last 30 days
-                      </h3>
-                      <div className="h-72 px-4 ">
-                        {isAnyLoading ? (
-                          <div className="h-full w-full flex-col flex p-8">
-                            <div className="h-full w-full rounded-lg bg-gray-300 dark:bg-gray-700 animate-pulse" />
-                          </div>
-                        ) : (
-                          <div className="h-full w-full">
-                            <BarChart
-                              data={chartData}
-                              categories={["count"]}
-                              index={"date"}
-                              className="h-full -ml-4 pt-4"
-                              colors={["blue"]}
-                              showLegend={false}
-                            />
-                          </div>
-                        )}
-                      </div>
+            </TabsList>
+            <TabsContent value="0">
+              <div className="flex flex-col xl:flex-row gap-4 w-full py-4">
+                <div className="flex flex-col space-y-4 w-full xl:w-1/2">
+                  <ul className="flex flex-col sm:flex-row items-center gap-4 w-full">
+                    {metrics.map((metric, i) => (
+                      <li
+                        key={i}
+                        className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-4 flex flex-row rounded-lg items-center gap-4"
+                      >
+                        <metric.icon className="h-6 w-6 text-sky-500" />
+                        <div className="flex flex-col">
+                          <dt className="text-gray-500 text-sm">
+                            {metric.label}
+                          </dt>
+                          {metric.isLoading ? (
+                            <div className="animate-pulse h-7 w-24 bg-gray-200 dark:bg-gray-800 rounded-lg" />
+                          ) : (
+                            <dd className="text-gray-900 dark:text-gray-100 text-xl font-semibold">
+                              {metric.value}
+                            </dd>
+                          )}
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="flex flex-col space-y-4 py-6 bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 text-center">
+                      Caches last 30 days
+                    </h3>
+                    <div className="h-72 px-4 ">
+                      {isAnyLoading ? (
+                        <div className="h-full w-full flex-col flex p-8">
+                          <div className="h-full w-full rounded-lg bg-gray-300 dark:bg-gray-700 animate-pulse" />
+                        </div>
+                      ) : (
+                        <div className="h-full w-full">
+                          <BarChart
+                            data={chartData}
+                            categories={["count"]}
+                            index={"date"}
+                            className="h-full -ml-4 pt-4"
+                            colors={["blue"]}
+                            showLegend={false}
+                          />
+                        </div>
+                      )}
                     </div>
                   </div>
-                  <div className="flex flex-col w-full xl:w-1/2 space-y-4 py-6 bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg h-[30rem]">
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 text-center">
-                      Top Requests
-                    </h3>
-                    <ul className="h-auto px-4 overflow-auto divide-y divide-gray-300 dark:divide-gray-700">
-                      {chMetrics.topRequests.data?.data?.map(
-                        (request: any, i: any) => (
-                          <ThemedListItem
-                            key={i}
-                            onClickHandler={() => {
-                              setSelectedRequest(request);
-                              setOpen(true);
-                            }}
-                            title={request.prompt}
-                            subtitle={`Created: ${new Date(
-                              request.first_used
-                            ).toLocaleString()}`}
-                            icon={CircleStackIcon}
-                            value={request.count}
-                            pill={<ModelPill model={request.model} />}
-                            secondarySubtitle={`Recent: ${new Date(
-                              request.last_used
-                            ).toLocaleString()}`}
-                          />
-                        )
-                      )}
-                    </ul>
-                  </div>
                 </div>
-              </TabPanel>
-              <TabPanel>
-                <div className="py-4">
-                  <RequestsPageV2
-                    currentPage={currentPage}
-                    pageSize={pageSize}
-                    sort={sort}
-                    isCached={true}
-                    currentFilter={null}
-                    organizationLayout={null}
-                    organizationLayoutAvailable={false}
-                  />
+                <div className="flex flex-col w-full xl:w-1/2 
+space-y-4 py-6 bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg h-[30rem]">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 text-center">
+                    Top Requests
+                  </h3>
+                  <ul className="h-auto px-4 overflow-auto divide-y divide-gray-300 dark:divide-gray-700">
+                    {chMetrics.topRequests.data?.data?.map(
+                      (request: any, i: any) => (
+                        <ThemedListItem
+                          key={i}
+                          onClickHandler={() => {
+                            setSelectedRequest(request);
+                            setOpen(true);
+                          }}
+                          title={request.prompt}
+                          subtitle={`Created: ${new Date(
+                            request.first_used
+                          ).toLocaleString()}`}
+                          icon={CircleStackIcon}
+                          value={request.count}
+                          pill={<ModelPill model={request.model} />}
+                          secondarySubtitle={`Recent: ${new Date(
+                            request.last_used
+                          ).toLocaleString()}`}
+                        />
+                      )
+                    )}
+                  </ul>
                 </div>
-              </TabPanel>
-            </TabPanels>
-          </TabGroup>
+              </div>
+            </TabsContent>
+            <TabsContent value="1">
+              <div className="py-4">
+                <RequestsPageV2
+                  currentPage={currentPage}
+                  pageSize={pageSize}
+                  sort={sort}
+                  isCached={true}
+                  currentFilter={null}
+                  organizationLayout={null}
+                  organizationLayoutAvailable={false}
+                />
+              </div>
+            </TabsContent>
+          </Tabs>
         </div>
       )}
 
