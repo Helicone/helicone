@@ -39,7 +39,7 @@ export type ILogRequest = {
 export interface HeliconeEventTool {
   _type: "tool";
   toolName: string;
-  input: string;
+  input: any;
   [key: string]: any;
 }
 
@@ -50,8 +50,8 @@ export interface HeliconeEventVectorDB {
   vector?: number[];
   topK?: number;
   filter?: object;
-  [key: string]: any;
   databaseName?: string;
+  [key: string]: any;
 }
 
 export type HeliconeCustomEventRequest =
