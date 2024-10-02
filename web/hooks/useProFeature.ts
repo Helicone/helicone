@@ -15,15 +15,16 @@ export const descriptions = {
   Prompts: undefined,
 };
 
-export const titles = {
+export type FeatureName = keyof typeof descriptions;
+
+export const titles: Record<FeatureName, string> = {
   Datasets: "Unlock Datasets",
   Alerts: "Unlock Alerts",
   time_filter: "Unlock Time Filter",
   invite: "Unlock Invite",
   RateLimit: "Unlock Rate Limits",
+  Prompts: "",
 };
-
-export type FeatureName = keyof typeof descriptions;
 
 export function useProFeature(featureName: FeatureName, enabled = true) {
   const org = useOrg();
