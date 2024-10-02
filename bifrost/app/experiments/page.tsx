@@ -1,10 +1,10 @@
 "use client";
 
 import { clsx } from "@/utils/clsx";
-import { ArrowDownIcon, CheckIcon } from "@radix-ui/react-icons";
-import Link from "next/link";
-import { useState, useEffect, Fragment, ReactNode, useCallback } from "react";
+import { CheckIcon } from "@radix-ui/react-icons";
+import { useState, useEffect, ReactNode, useCallback } from "react";
 import toast, { Toaster } from "react-hot-toast";
+import { TwoBillion } from "./TwoBillion";
 
 const LightPurple = ({ className }: { className?: string }) => (
   <svg
@@ -222,18 +222,18 @@ const LightPurpleBottom = ({ className }: { className?: string }) => (
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
-    <g filter="url(#filter0_f_83_18643)">
+    <g filter="url(#filter0_f_203_10303)">
       <circle cx="815.5" cy="815.5" r="415.5" fill="#FFD5FF" />
     </g>
     <defs>
       <filter
-        id="filter0_f_83_18643"
+        id="filter0_f_203_10303"
         x="0"
         y="0"
         width="1631"
         height="1631"
         filterUnits="userSpaceOnUse"
-        colorInterpolationFilters="sRGB"
+        color-interpolation-filters="sRGB"
       >
         <feFlood flood-opacity="0" result="BackgroundImageFix" />
         <feBlend
@@ -244,7 +244,7 @@ const LightPurpleBottom = ({ className }: { className?: string }) => (
         />
         <feGaussianBlur
           stdDeviation="200"
-          result="effect1_foregroundBlur_83_18643"
+          result="effect1_foregroundBlur_203_10303"
         />
       </filter>
     </defs>
@@ -254,15 +254,15 @@ const LightPurpleBottom = ({ className }: { className?: string }) => (
 const BlueBottom = ({ className }: { className?: string }) => (
   <svg
     className={className}
-    width="1067"
-    height="943"
-    viewBox="0 0 1067 943"
+    width="1316"
+    height="1511"
+    viewBox="0 0 1316 1511"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
-    <g filter="url(#filter0_f_74_16508)">
+    <g filter="url(#filter0_f_203_10079)">
       <ellipse
-        cx="409"
+        cx="658"
         cy="755.5"
         rx="258"
         ry="355.5"
@@ -272,15 +272,15 @@ const BlueBottom = ({ className }: { className?: string }) => (
     </g>
     <defs>
       <filter
-        id="filter0_f_74_16508"
-        x="-249"
+        id="filter0_f_203_10079"
+        x="0"
         y="0"
         width="1316"
         height="1511"
         filterUnits="userSpaceOnUse"
-        colorInterpolationFilters="sRGB"
+        color-interpolation-filters="sRGB"
       >
-        <feFlood floodOpacity="0" result="BackgroundImageFix" />
+        <feFlood flood-opacity="0" result="BackgroundImageFix" />
         <feBlend
           mode="normal"
           in="SourceGraphic"
@@ -289,7 +289,7 @@ const BlueBottom = ({ className }: { className?: string }) => (
         />
         <feGaussianBlur
           stdDeviation="200"
-          result="effect1_foregroundBlur_74_16508"
+          result="effect1_foregroundBlur_203_10079"
         />
       </filter>
     </defs>
@@ -298,30 +298,30 @@ const BlueBottom = ({ className }: { className?: string }) => (
 
 const PinkBottom = ({ className }: { className?: string }) => (
   <svg
-    className={className}
-    width="1514"
-    height="943"
-    viewBox="0 0 1514 943"
+    width="1697"
+    height="1546"
+    viewBox="0 0 1697 1546"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
+    className={className}
   >
-    <g filter="url(#filter0_f_74_16507)">
+    <g filter="url(#filter0_f_203_10078)">
       <path
-        d="M358.779 864.404C434.001 812.131 893.91 684.357 972.64 445.277C1051.37 206.196 1396.55 985.527 1179.21 1116.05C963.667 1245.49 283.557 916.678 358.779 864.404Z"
-        fill="url(#paint0_linear_74_16507)"
+        d="M405.779 864.404C481.001 812.131 940.91 684.357 1019.64 445.277C1098.37 206.196 1443.55 985.527 1226.21 1116.05C1010.67 1245.49 330.557 916.678 405.779 864.404Z"
+        fill="url(#paint0_linear_203_10078)"
       />
     </g>
     <defs>
       <filter
-        id="filter0_f_74_16507"
-        x="-47"
+        id="filter0_f_203_10078"
+        x="0"
         y="0"
         width="1697"
         height="1546"
         filterUnits="userSpaceOnUse"
-        colorInterpolationFilters="sRGB"
+        color-interpolation-filters="sRGB"
       >
-        <feFlood floodOpacity="0" result="BackgroundImageFix" />
+        <feFlood flood-opacity="0" result="BackgroundImageFix" />
         <feBlend
           mode="normal"
           in="SourceGraphic"
@@ -330,19 +330,19 @@ const PinkBottom = ({ className }: { className?: string }) => (
         />
         <feGaussianBlur
           stdDeviation="200"
-          result="effect1_foregroundBlur_74_16507"
+          result="effect1_foregroundBlur_203_10078"
         />
       </filter>
       <linearGradient
-        id="paint0_linear_74_16507"
-        x1="801.5"
+        id="paint0_linear_203_10078"
+        x1="848.5"
         y1="400"
-        x2="801.5"
+        x2="848.5"
         y2="1146"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stopColor="#FF006B" />
-        <stop offset="1" stopColor="#FF6DC1" />
+        <stop stop-color="#FF006B" />
+        <stop offset="1" stop-color="#FF6DC1" />
       </linearGradient>
     </defs>
   </svg>
@@ -406,50 +406,41 @@ export default function ExperimentsWaitlist() {
               Experiments
             </div>
           </div>
-          <h1 className="text-5xl sm:text-7xl md:text-8xl font-medium mb-6 md:mb-20 lg:mb-28 w-full max-w-3xl text-wrap">
+          <h1 className="text-5xl sm:text-7xl md:text-8xl font-medium mb-6 lg:mb-10 w-full max-w-3xl text-wrap">
             A new way to improve your prompts.
           </h1>
-          <div className="flex flex-col gap-4">
-            <div className="flex gap-5 items-center">
-              <CheckIcon className="w-5 h-5 lg:w-6 lg:h-6 text-[#6233a9]" />
+          <div className="flex flex-col gap-4 mb-6 lg:mb-10">
+            <div className="flex gap-1.5 items-center">
+              <CheckIcon className="w-5 h-5 lg:w-6 lg:h-6 text-brand" />
               <p className="text-sm md:text-base lg:text-lg text-slate-700">
                 Test multiple prompts simultaneously over extensive datasets.
               </p>
             </div>
-            <div className="flex gap-5 items-center">
-              <CheckIcon className="w-5 h-5 lg:w-6 lg:h-6 text-[#6233a9]" />
+            <div className="flex gap-1.5 items-center">
+              <CheckIcon className="w-5 h-5 lg:w-6 lg:h-6 text-brand" />
               <p className="text-sm md:text-base lg:text-lg text-slate-700">
                 Utilize real-world data to improve relevance of results.
               </p>
             </div>
-            <div className="flex gap-5 items-center">
-              <CheckIcon className="w-5 h-5 lg:w-6 lg:h-6 text-[#6233a9]" />
+            <div className="flex gap-1.5 items-center">
+              <CheckIcon className="w-5 h-5 lg:w-6 lg:h-6 text-brand" />
               <p className="text-sm md:text-base lg:text-lg text-slate-700">
                 Move beyond subjective assessment.
               </p>
             </div>
           </div>
+          <button
+            onClick={scrollToForm}
+            className="bg-brand text-white border-2 border-[#0569A0] py-3 px-8 rounded-xl md:text-lg text-base font-semibold self-start"
+          >
+            Join the waitlist
+          </button>
         </div>
         <ExperimentsTable />
         <Purple className="absolute top-[-300px] right-0 z-[1]" />
         <Blue className="absolute -bottom-1/2 left-[35%] -translate-x-1/2 z-[1] w-screen h-[calc(100vh-65px)]" />
         <Pink className="absolute top-0 left-0 z-[1] w-screen h-[calc(100vh-65px)] opacity-90" />
         <LightPurple className="absolute -bottom-3/4 right-0 z-[1]" />
-
-        <div className="absolute bottom-10 right-6 lg:bottom-16 lg:right-20 flex gap-2 z-[4]">
-          <button
-            onClick={scrollToForm}
-            className="bg-[#FFFCFE] bg-opacity-20 py-3 px-8 rounded-[100px] font-medium text-md text-white"
-          >
-            Join the waitlist
-          </button>
-          <button
-            onClick={scrollToForm}
-            className="bg-white flex justify-center items-center rounded-full w-12 h-12"
-          >
-            <ArrowDownIcon className="w-6 h-6 text-slate-900" />
-          </button>
-        </div>
       </div>
       <div className="z-[5] mx-4 flex justify-center items-center lg:mb-52 mb-20">
         <div className="w-full max-w-7xl h-full z-[5]">
@@ -464,7 +455,7 @@ export default function ExperimentsWaitlist() {
       </div>
       <form
         onSubmit={handleSubmit}
-        className="flex justify-center items-center gap-3 z-[5] mb-12 sm:mb-60 md:mb-80 mx-4"
+        className="flex flex-col sm:flex-row justify-center items-stretch gap-3 z-[5] mb-60 md:mb-80 mx-4"
         id="waitlist-form"
       >
         <input
@@ -472,27 +463,19 @@ export default function ExperimentsWaitlist() {
           placeholder="Enter your email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="bg-white/20 py-4 px-8 border border-white w-[430px] text-white font-medium text-sm md:text-lg placeholder:text-white rounded-[100px] z-[5] focus:outline-none"
+          className="bg-black/10 py-4 px-8 border-2 border-white sm:w-[436px] w-full text-white font-medium text-sm md:text-lg placeholder:text-white rounded-xl z-[5] focus:outline-none"
         />
         <button
           type="submit"
-          className="bg-white text-slate-900 py-4 px-8 rounded-[100px] font-medium text-sm md:text-lg z-[5]"
+          className="bg-brand text-white border-2 border-[#0569A0] font-semibold py-4 px-8 rounded-xl font-medium text-sm md:text-lg z-[5]"
         >
           Join the waitlist
         </button>
       </form>
-      <LightPurpleBottom className="absolute lg:-bottom-[250px] -bottom-[300px] left-0 z-[1] w-screen h-[calc(100vh-65px)]" />
-      <BlueBottom className="absolute -bottom-[200px] lg:bottom-[0] -left-[200px] z-[1] w-screen h-[calc(100vh-65px)]" />
-      <PinkBottom className="absolute -bottom-[200px] lg:bottom-[0] left-[200px] z-[1] w-screen h-[calc(100vh-65px)]" />
-
-      <div className="absolute lg:-bottom-[60px] sm:-bottom-[30px] -bottom-[15px] left-1/2 -translate-x-1/2 z-[5] leading-none m-0 p-0 whitespace-nowrap hidden sm:block">
-        <h1 className="text-white/15 text-[20vw] font-bold z-[5] leading-none m-0 p-0 whitespace-nowrap">
-          2 billion
-        </h1>
-        <div className="absolute top-[8%] right-[2%] text-xs sm:text-[1.5vw] font-medium z-[5] leading-none m-0 whitespace-nowrap bg-[#fffcfe] bg-opacity-10 md:py-3 py-2 lg:px-10 md:px-8 sm:px-4 px-3 rounded-full text-white/50">
-          Requests logged so far
-        </div>
-      </div>
+      <LightPurpleBottom className="absolute lg:-bottom-[250px] left-[100px] z-[0] w-screen h-[calc(100vh-65px)]" />
+      <BlueBottom className="absolute -bottom-[320px] lg:-bottom-[250px] left-1/3 z-[0] w-screen h-[calc(100vh-65px)]" />
+      <PinkBottom className="absolute -bottom-[320px] lg:-bottom-[250px] -left-1/4 z-[0] w-screen h-[calc(100vh-65px)]" />
+      <TwoBillion className="absolute md:-bottom-[150px] -bottom-[180px] left-1/2 -translate-x-1/2 z-[5] leading-none m-0 p-0 whitespace-nowrap w-[90vw]" />
       <Toaster />
     </div>
   );
