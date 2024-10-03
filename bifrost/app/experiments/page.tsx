@@ -367,28 +367,33 @@ export default function ExperimentsWaitlist() {
       return;
     }
 
-    const response = await fetch(
-      "https://api.helicone.ai/v1/public/waitlist/experiments",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email }),
-      }
-    );
-
-    const result = await response.json();
-
-    if (response.ok) {
-      toast.success("Added to waitlist!");
-    } else {
-      console.error(result.error);
-      toast.error(
-        result.error.includes("duplicate")
-          ? "You're already on the waitlist"
-          : "Failed to add to waitlist"
+    try {
+      const response = await fetch(
+        "http://localhost:8585/v1/public/waitlist/experiments",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email }),
+        }
       );
+
+      const result = await response.json();
+
+      if (response.ok) {
+        toast.success("Added to waitlist!");
+      } else {
+        console.error(result.error);
+        toast.error(
+          result.error.includes("duplicate")
+            ? "You're already on the waitlist"
+            : "Failed to add to waitlist"
+        );
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to add to waitlist");
     }
   };
 

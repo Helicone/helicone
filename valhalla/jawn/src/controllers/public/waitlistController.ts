@@ -1,7 +1,7 @@
 import { Controller, Request, Route, Post, Tags, Security, Body } from "tsoa";
 import express from "express";
 import { supabaseServer } from "../../lib/db/supabase";
-import { err } from "../../lib/shared/result";
+import { err, ok } from "../../lib/shared/result";
 
 @Route("v1/public/waitlist")
 @Tags("Waitlist")
@@ -30,6 +30,7 @@ export class WaitlistController extends Controller {
       }
 
       this.setStatus(200);
+      return ok("Added to waitlist");
     } catch (error: any) {
       console.error(`Error adding to waitlist: ${error.message}`);
       this.setStatus(500);
