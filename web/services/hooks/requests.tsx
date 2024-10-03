@@ -151,7 +151,7 @@ const useGetRequestsWithBodies = (
   });
 
   useEffect(() => {
-    if (!isLoading) {
+    if (!isLoading && requests.length === 0) {
       setRequests(requestsWithSignedUrls);
     }
   }, [requestsWithSignedUrls, isLoading]);

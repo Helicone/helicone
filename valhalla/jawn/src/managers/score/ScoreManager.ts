@@ -10,7 +10,7 @@ import { BaseManager } from "../BaseManager";
 import { validate as uuidValidate } from "uuid";
 
 type Scores = Record<string, number | boolean>;
-const delayMs = 10 * 60 * 1000; // 10 minutes in milliseconds
+const delayMs = process.env.NODE_ENV === "production" ? 10 * 60 * 1000 : 0; // 10 minutes in milliseconds
 
 export interface ScoreRequest {
   scores: Scores;
