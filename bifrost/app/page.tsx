@@ -4,16 +4,11 @@ import Features from "@/components/templates/landing/features";
 import LandingFooterGraphic from "@/components/templates/landing/footer";
 import Integrations from "@/components/templates/landing/integrations";
 import OpenSource from "@/components/templates/landing/opensource";
-import PhHeader from "@/components/templates/landing/phheader";
-import PhNotifHeader from "@/components/templates/landing/phnotifheader";
 import Platform from "@/components/templates/landing/platform";
-import {
-  CheckCircleIcon,
-  ChevronRightIcon,
-  XMarkIcon,
-} from "@heroicons/react/24/outline";
+import { ChevronRightIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import Link from "next/link";
+import ExperimentsNotifHeader from "../components/templates/landing/experimentsnotifheader";
 
 export default function Home() {
   return (
@@ -104,6 +99,8 @@ export default function Home() {
                   <span>Combinator</span>
                 </Link>
               </div> */}
+
+              <ExperimentsNotifHeader />
 
               <h1 className="text-4xl md:text-5xl font-bold md:pt-4 md:text-center md:mx-0 text-start">
                 LLM-Observability for{" "}
