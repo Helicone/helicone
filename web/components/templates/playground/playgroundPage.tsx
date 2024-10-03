@@ -43,6 +43,7 @@ import { useLocalStorage } from "../../../services/hooks/localStorage";
 import Link from "next/link";
 import { Row } from "../../layout/common";
 import { useQuery } from "@tanstack/react-query";
+import { IslandContainer } from "@/components/ui/islandContainer";
 
 const PlaygroundPage = (props: PlaygroundPageProps) => {
   const { request, showNewButton } = props;
@@ -136,8 +137,9 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
   }, [chat]);
 
   return (
-    <>
+    <IslandContainer>
       <AuthHeader
+        isWithinIsland
         title={"Playground"}
         actions={
           <div id="toolbar" className="flex flex-row items-center gap-2 w-full">
@@ -596,7 +598,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
           properties={[]}
         />
       )}
-    </>
+    </IslandContainer>
   );
 };
 

@@ -90,6 +90,7 @@ const SessionContentV2: React.FC<SessionContentV2Props> = ({
       >
         <Row className="items-center justify-between">
           <BreadCrumbV2
+            className="mx-8 pt-10"
             // @ts-ignore
             users={session.traces
               .map((trace) => trace.request.user)

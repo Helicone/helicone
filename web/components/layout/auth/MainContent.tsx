@@ -34,13 +34,11 @@ const MainContent = ({ children, banner, pathname }: MainContentProps) => {
           </div>
         )}
         <div
-          className={clsx(
-            "mx-auto px-4 sm:px-8 bg-gray-100 dark:bg-[#17191d] h-full min-h-screen"
-          )}
+          className={clsx(" dark:bg-[#17191d] h-full min-h-screen bg-slate-50")}
         >
           <OrgContext.Provider value={org}>
             <div
-              className="py-4 sm:py-8 mr-auto w-full max-w-[100rem]"
+              className="mr-auto w-full min-h-screen"
               key={`${pathname}-${org?.renderKey}`}
             >
               {children}

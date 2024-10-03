@@ -1858,15 +1858,15 @@ Json: JsonObject;
       error: null;
     };
     "Result_HeliconeDataset-Array.string_": components["schemas"]["ResultSuccess_HeliconeDataset-Array_"] | components["schemas"]["ResultError_string_"];
-    ResultSuccess_any_: {
-      data: unknown;
-      /** @enum {number|null} */
-      error: null;
-    };
     ResultError_unknown_: {
       /** @enum {number|null} */
       data: null;
       error: unknown;
+    };
+    ResultSuccess_any_: {
+      data: unknown;
+      /** @enum {number|null} */
+      error: null;
     };
     "ResultSuccess__experimentId-string__": {
       data: {
@@ -3702,7 +3702,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["ResultSuccess_any_"] | components["schemas"]["ResultError_unknown_"];
+          "application/json": components["schemas"]["ResultError_unknown_"] | components["schemas"]["ResultSuccess_any_"];
         };
       };
     };

@@ -132,41 +132,44 @@ const SessionDetails = ({
           placeholder="Search session id..."
         />
       </Row>
-      {currentTab === "sessions" ? (
-        <ThemedTable
-          id="session-table"
-          defaultData={sessions || []}
-          defaultColumns={INITIAL_COLUMNS}
-          skeletonLoading={isLoading}
-          dataLoading={false}
-          sortable={sort}
-          timeFilter={{
-            currentTimeFilter: timeFilter,
-            defaultValue: "all",
-            onTimeSelectHandler: (key: TimeInterval, value: string) => {
-              if ((key as string) === "custom") {
-                const [startDate, endDate] = value.split("_");
 
-                const start = new Date(startDate);
-                const end = new Date(endDate);
-                setInterval(key);
-                setTimeFilter({
-                  start,
-                  end,
-                });
-              } else {
-                setInterval(key);
-                setTimeFilter({
-                  start: getTimeIntervalAgo(key),
-                  end: new Date(),
-                });
-              }
-            },
-          }}
-          onRowSelect={(row) => {
-            router.push(`/sessions/${row.session}`);
-          }}
-        />
+      {currentTab === "sessions" ? (
+        <div className="border rounded-lg">
+          <ThemedTable
+            id="session-table"
+            defaultData={sessions || []}
+            defaultColumns={INITIAL_COLUMNS}
+            skeletonLoading={isLoading}
+            dataLoading={false}
+            sortable={sort}
+            timeFilter={{
+              currentTimeFilter: timeFilter,
+              defaultValue: "all",
+              onTimeSelectHandler: (key: TimeInterval, value: string) => {
+                if ((key as string) === "custom") {
+                  const [startDate, endDate] = value.split("_");
+
+                  const start = new Date(startDate);
+                  const end = new Date(endDate);
+                  setInterval(key);
+                  setTimeFilter({
+                    start,
+                    end,
+                  });
+                } else {
+                  setInterval(key);
+                  setTimeFilter({
+                    start: getTimeIntervalAgo(key),
+                    end: new Date(),
+                  });
+                }
+              },
+            }}
+            onRowSelect={(row) => {
+              router.push(`/sessions/${row.session}`);
+            }}
+          />
+        </div>
       ) : (
         <SessionMetrics selectedSession={selectedSession} />
       )}
