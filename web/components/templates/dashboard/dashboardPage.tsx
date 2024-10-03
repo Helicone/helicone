@@ -522,6 +522,7 @@ const DashboardPage = (props: DashboardPageProps) => {
     <>
       <IslandContainer>
         <AuthHeader
+          isWithinIsland={true}
           title={"Dashboard"}
           headerActions={
             <button

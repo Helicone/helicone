@@ -1,6 +1,9 @@
 import * as React from "react";
 
 import { cn } from "@/lib/utils";
+import clsx from "clsx";
+
+export const ISLAND_MARGIN = clsx("mx-8 max-w-[100rem]");
 
 const IslandContainer = React.forwardRef<
   HTMLDivElement,
@@ -9,7 +12,7 @@ const IslandContainer = React.forwardRef<
   <div
     ref={ref}
     role="alert"
-    className={cn(className, "mx-8 max-w-[100rem]")}
+    className={cn(className, ISLAND_MARGIN)}
     {...props}
   />
 ));

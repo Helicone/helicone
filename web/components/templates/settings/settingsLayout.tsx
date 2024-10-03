@@ -1,3 +1,4 @@
+import AuthHeader from "@/components/shared/authHeader";
 import { IslandContainer } from "@/components/ui/islandContainer";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -67,7 +68,8 @@ const SettingsLayout = ({ children }: SettingsLayoutProps) => {
   const currentPath = router.pathname;
 
   return (
-    <IslandContainer className="space-y-6 pt-10">
+    <IslandContainer className="space-y-6 ">
+      <AuthHeader isWithinIsland={true} title={"Settings"} />
       <div className="flex flex-col space-y-8 items-start">
         <div className="flex flex-col space-y-2 items-start">
           <Tabs

@@ -1,6 +1,8 @@
 import { ChevronLeftIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { ReactNode } from "react";
+import { ISLAND_MARGIN } from "../ui/islandContainer";
+import { cn } from "@/lib/utils";
 
 interface AuthHeaderProps {
   title: React.ReactNode;
@@ -10,13 +12,19 @@ interface AuthHeaderProps {
   };
   headerActions?: ReactNode;
   actions?: ReactNode;
+  isWithinIsland?: boolean;
 }
 
 const AuthHeader = (props: AuthHeaderProps) => {
-  const { title, breadcrumb, headerActions, actions } = props;
+  const { title, breadcrumb, headerActions, actions, isWithinIsland } = props;
 
   return (
-    <div className="flex flex-row items-center justify-between py-4 px-2  w-full">
+    <div
+      className={cn(
+        "flex flex-row items-center justify-between py-4 w-full",
+        !isWithinIsland && ISLAND_MARGIN
+      )}
+    >
       <div className="flex flex-col items-start space-y-2">
         {breadcrumb ? (
           <Link

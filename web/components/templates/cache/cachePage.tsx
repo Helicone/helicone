@@ -144,6 +144,7 @@ const CachePage = (props: CachePageProps) => {
   return (
     <IslandContainer>
       <AuthHeader
+        isWithinIsland={true}
         title={
           <div className="flex items-center gap-2">
             Cache <Badge size="sm">Beta</Badge>

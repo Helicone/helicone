@@ -165,6 +165,7 @@ const PromptsPage = (props: PromptsPageProps) => {
     <IslandContainer>
       <div className="flex flex-col space-y-4 w-full">
         <AuthHeader
+          isWithinIsland={true}
           title={
             <div className="flex items-center gap-2">
               Prompts <HcBadge title="Beta" size="sm" />

@@ -38,7 +38,7 @@
     nanoid "3.3.6"
     secure-json-parse "2.7.0"
 
-"@ai-sdk/provider@0.0.13", "@ai-sdk/provider@^0.0.13":
+"@ai-sdk/provider@0.0.13":
   version "0.0.13"
   resolved "https://registry.yarnpkg.com/@ai-sdk/provider/-/provider-0.0.13.tgz#a0e7191efe5b12470da3c6b9eb12f58957fcfa28"
   integrity sha512-RBstpG/3RqVBBJgTvjZpou/+1fNQMDIwB9enqQPXqr0MoCrJHscLD2Zsfr6cKM5HFfY1D4KhdSPTycCDebVGlQ==
@@ -49,6 +49,13 @@
   version "0.0.14"
   resolved "https://registry.yarnpkg.com/@ai-sdk/provider/-/provider-0.0.14.tgz#a07569c39a8828aa8312cf1ac6f35ce6ee1b2fce"
   integrity sha512-gaQ5Y033nro9iX1YUjEDFDRhmMcEiCk56LJdIUbX5ozEiCNCfpiBpEqrjSp/Gp5RzBS2W0BVxfG7UGW6Ezcrzg==
+  dependencies:
+    json-schema "0.4.0"
+
+"@ai-sdk/provider@^0.0.24":
+  version "0.0.24"
+  resolved "https://registry.yarnpkg.com/@ai-sdk/provider/-/provider-0.0.24.tgz#e794f4255a833c47aeffcd8f6808a79b2a6b1f06"
+  integrity sha512-XMsNGJdGO+L0cxhhegtqZ8+T6nn4EoShS819OvCgI2kLbYTIvk0GWFGD0AXJmxkxs3DrpsJxKAFukFR7bvTkgQ==
   dependencies:
     json-schema "0.4.0"
 
@@ -84,12 +91,12 @@
     node-fetch "^2.6.7"
     web-streams-polyfill "^3.2.1"
 
-"@assistant-ui/react-playground@0.0.8":
-  version "0.0.8"
-  resolved "https://registry.yarnpkg.com/@assistant-ui/react-playground/-/react-playground-0.0.8.tgz#00d911f2b53973179d002b1c19f43cb4982f0f82"
-  integrity sha512-7Lyd2kFNhG5zQFrLUiI2dNN784nYzPBS+qUv6DR8BsihMWtDMjCaX3udPeDzxzTpe6QW7Os5REp7Q0PCKE5gJA==
+"@assistant-ui/react-playground@^0.0.34":
+  version "0.0.34"
+  resolved "https://registry.yarnpkg.com/@assistant-ui/react-playground/-/react-playground-0.0.34.tgz#bbab90adee5fbbb0a668a3f00c525c6b8955971b"
+  integrity sha512-aRLKlET8Xvh8arrJdFAZLNPAl20YXyLf9fUO0D5zSYncSjAV7yZtqZVMC/TUKKTFXEhT4F9jhcJI/thA4TFnmw==
   dependencies:
-    "@ai-sdk/provider" "^0.0.13"
+    "@ai-sdk/provider" "^0.0.24"
     "@radix-ui/react-avatar" "^1.1.0"
     "@radix-ui/react-dialog" "^1.1.1"
     "@radix-ui/react-dropdown-menu" "^2.1.1"
@@ -100,20 +107,20 @@
     class-variance-authority "^0.7.0"
     classnames "^2.5.1"
     clsx "^2.1.1"
-    lucide-react "^0.414.0"
-    openai "^4.53.0"
+    lucide-react "^0.446.0"
+    openai "^4.65.0"
     prismjs "^1.29.0"
     react-simple-code-editor "^0.14.1"
     react-textarea-autosize "^8.5.3"
-    tailwind-merge "^2.4.0"
-    zustand "^4.5.4"
+    tailwind-merge "^2.5.2"
+    zustand "^4.5.5"
 
-"@assistant-ui/react@^0.5.12":
-  version "0.5.12"
-  resolved "https://registry.yarnpkg.com/@assistant-ui/react/-/react-0.5.12.tgz#3318bc3f414c4559fbba79eb3121605e6c0f24b2"
-  integrity sha512-6gp2p6WOoSrRRV7Vd3mHYCQxTqGVAdBJ71duO6M+oMQKgP8uaMuFcVUc4e3THZLQ4Ys/9IEq3sDiryGBxRJYgA==
+"@assistant-ui/react@^0.5.70":
+  version "0.5.70"
+  resolved "https://registry.yarnpkg.com/@assistant-ui/react/-/react-0.5.70.tgz#e0ed2bf2b76769e0d15dab7e2dce3459ad1befd7"
+  integrity sha512-/F5uTFqfR/N9CcY36Z37hu3pTYCbz8lx0sydJFPRziHL2k48XkZMa+3FezWuckjI3QK/L9vapSgtnG1qM7OnGg==
   dependencies:
-    "@ai-sdk/provider" "^0.0.13"
+    "@ai-sdk/provider" "^0.0.24"
     "@radix-ui/primitive" "^1.1.0"
     "@radix-ui/react-avatar" "^1.1.0"
     "@radix-ui/react-compose-refs" "^1.1.0"
@@ -127,13 +134,13 @@
     class-variance-authority "^0.7.0"
     classnames "^2.5.1"
     json-schema "^0.4.0"
-    lucide-react "^0.414.0"
+    lucide-react "^0.446.0"
     nanoid "^5.0.7"
     react-textarea-autosize "^8.5.3"
     secure-json-parse "^2.7.0"
     zod "^3.23.8"
-    zod-to-json-schema "^3.23.1"
-    zustand "^4.5.4"
+    zod-to-json-schema "^3.23.3"
+    zustand "^4.5.5"
 
 "@aws-crypto/crc32@5.2.0":
   version "5.2.0"
@@ -5953,15 +5960,15 @@ lru-cache@^5.1.1:
   dependencies:
     yallist "^3.0.2"
 
-lucide-react@^0.414.0:
-  version "0.414.0"
-  resolved "https://registry.yarnpkg.com/lucide-react/-/lucide-react-0.414.0.tgz#15245174d3ea111c85eae571b0e903c1026ac1fd"
-  integrity sha512-Krr/MHg9AWoJc52qx8hyJ64X9++JNfS1wjaJviLM1EP/68VNB7Tv0VMldLCB1aUe6Ka9QxURPhQm/eB6cqOM3A==
-
 lucide-react@^0.436.0:
   version "0.436.0"
   resolved "https://registry.yarnpkg.com/lucide-react/-/lucide-react-0.436.0.tgz#020c75031fbba5e01f7188991fa5a50195098f50"
   integrity sha512-N292bIxoqm1aObAg0MzFtvhYwgQE6qnIOWx/GLj5ONgcTPH6N0fD9bVq/GfdeC9ZORBXozt/XeEKDpiB3x3vlQ==
+
+lucide-react@^0.446.0:
+  version "0.446.0"
+  resolved "https://registry.yarnpkg.com/lucide-react/-/lucide-react-0.446.0.tgz#b92bd0229ad79a11fff84d47f9351797fc0b904e"
+  integrity sha512-BU7gy8MfBMqvEdDPH79VhOXSEgyG8TSPOKWaExWGCQVqnGH7wGgDngPbofu+KdtVjPQBWbEmnfMTq90CTiiDRg==
 
 marked@^13.0.3:
   version "13.0.3"
@@ -6333,10 +6340,10 @@ openai@^4.24.7:
     node-fetch "^2.6.7"
     web-streams-polyfill "^3.2.1"
 
-openai@^4.53.0:
-  version "4.53.0"
-  resolved "https://registry.yarnpkg.com/openai/-/openai-4.53.0.tgz#5ac6fc2ba1bba239a31c910bd57d793814bea61d"
-  integrity sha512-XoMaJsSLuedW5eoMEMmZbdNoXgML3ujcU5KfwRnC6rnbmZkHE2Q4J/SArwhqCxQRqJwHnQUj1LpiROmKPExZJA==
+openai@^4.65.0:
+  version "4.67.1"
+  resolved "https://registry.yarnpkg.com/openai/-/openai-4.67.1.tgz#ed07c40bf24c5f4108dfb662de1471f0c75e890d"
+  integrity sha512-2YbRFy6qaYRJabK2zLMn4txrB2xBy0KP5g/eoqeSPTT31mIJMnkT75toagvfE555IKa2RdrzJrZwdDsUipsAMw==
   dependencies:
     "@types/node" "^18.11.18"
     "@types/node-fetch" "^2.6.4"
@@ -6345,7 +6352,6 @@ openai@^4.53.0:
     form-data-encoder "1.7.2"
     formdata-node "^4.3.2"
     node-fetch "^2.6.7"
-    web-streams-polyfill "^3.2.1"
 
 openapi-fetch@^0.9.3:
   version "0.9.8"
@@ -7566,11 +7572,6 @@ tailwind-merge@^1.14.0:
   resolved "https://registry.yarnpkg.com/tailwind-merge/-/tailwind-merge-1.14.0.tgz#e677f55d864edc6794562c63f5001f45093cdb8b"
   integrity sha512-3mFKyCo/MBcgyOTlrY8T7odzZFx+w+qKSMAmdFzRvqBfLlSigU6TZnlFHK0lkMwj9Bj8OYU+9yW9lmGuS0QEnQ==
 
-tailwind-merge@^2.4.0:
-  version "2.4.0"
-  resolved "https://registry.yarnpkg.com/tailwind-merge/-/tailwind-merge-2.4.0.tgz#1345209dc1f484f15159c9180610130587703042"
-  integrity sha512-49AwoOQNKdqKPd9CViyH5wJoSKsCDjUlzL8DxuGp3P1FsGY36NJDAa18jLZcaHAUUuTj+JB8IAo8zWgBNvBF7A==
-
 tailwind-merge@^2.5.2:
   version "2.5.2"
   resolved "https://registry.yarnpkg.com/tailwind-merge/-/tailwind-merge-2.5.2.tgz#000f05a703058f9f9f3829c644235f81d4c08a1f"
@@ -7875,12 +7876,7 @@ use-sidecar@^1.1.2:
     detect-node-es "^1.1.0"
     tslib "^2.0.0"
 
-use-sync-external-store@1.2.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/use-sync-external-store/-/use-sync-external-store-1.2.0.tgz#7dbefd6ef3fe4e767a0cf5d7287aacfb5846928a"
-  integrity sha512-eEgnFxGQ1Ife9bzYs6VLi8/4X6CObHMw9Qr9tPY43iKwsPw8xE8+EFsf/2cFZ5S3esXgpWgtSCtLNS41F+sKPA==
-
-use-sync-external-store@^1.2.0:
+use-sync-external-store@1.2.2, use-sync-external-store@^1.2.0:
   version "1.2.2"
   resolved "https://registry.yarnpkg.com/use-sync-external-store/-/use-sync-external-store-1.2.2.tgz#c3b6390f3a30eba13200d2302dcdf1e7b57b2ef9"
   integrity sha512-PElTlVMwpblvbNqQ82d2n6RjStvdSoNe9FG28kNfz3WiXilJm4DdNkEzRhCZuIDwY8U08WVihhGR5iRqAwfDiw==
@@ -8099,19 +8095,19 @@ yocto-queue@^0.1.0:
   resolved "https://registry.yarnpkg.com/yocto-queue/-/yocto-queue-0.1.0.tgz#0294eb3dee05028d31ee1a5fa2c556a6aaf10a1b"
   integrity sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==
 
-zod-to-json-schema@^3.23.1:
-  version "3.23.1"
-  resolved "https://registry.yarnpkg.com/zod-to-json-schema/-/zod-to-json-schema-3.23.1.tgz#5225925b8ed5fa20096bd99be076c4b29b53d309"
-  integrity sha512-oT9INvydob1XV0v1d2IadrR74rLtDInLvDFfAa1CG0Pmg/vxATk7I2gSelfj271mbzeM4Da0uuDQE/Nkj3DWNw==
+zod-to-json-schema@^3.23.3:
+  version "3.23.3"
+  resolved "https://registry.yarnpkg.com/zod-to-json-schema/-/zod-to-json-schema-3.23.3.tgz#56cf4e0bd5c4096ab46e63159e20998ec7b19c39"
+  integrity sha512-TYWChTxKQbRJp5ST22o/Irt9KC5nj7CdBKYB/AosCRdj/wxEMvv4NNaj9XVUHDOIp53ZxArGhnw5HMZziPFjog==
 
 zod@^3.20.2, zod@^3.23.8:
   version "3.23.8"
   resolved "https://registry.yarnpkg.com/zod/-/zod-3.23.8.tgz#e37b957b5d52079769fb8097099b592f0ef4067d"
   integrity sha512-XBx9AXhXktjUqnepgTiE5flcKIYWi/rme0Eaj+5Y0lftuGBq+jyRu/md4WnuxqgP1ubdpNCsYEYPxrzVHD8d6g==
 
-zustand@^4.5.4:
-  version "4.5.4"
-  resolved "https://registry.yarnpkg.com/zustand/-/zustand-4.5.4.tgz#63abdd81edfb190bc61e0bbae045cc4d52158a05"
-  integrity sha512-/BPMyLKJPtFEvVL0E9E9BTUM63MNyhPGlvxk1XjrfWTUlV+BR8jufjsovHzrtR6YNcBEcL7cMHovL1n9xHawEg==
+zustand@^4.5.5:
+  version "4.5.5"
+  resolved "https://registry.yarnpkg.com/zustand/-/zustand-4.5.5.tgz#f8c713041543715ec81a2adda0610e1dc82d4ad1"
+  integrity sha512-+0PALYNJNgK6hldkgDq2vLrw5f6g/jCInz52n9RTpropGgeAf/ioFUCdtsjCqu4gNhW9D01rUQBROoRjdzyn2Q==
   dependencies:
-    use-sync-external-store "1.2.0"
+    use-sync-external-store "1.2.2"

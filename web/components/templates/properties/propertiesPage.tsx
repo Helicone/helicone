@@ -19,7 +19,7 @@ const PropertiesPage = (props: {}) => {
 
   return (
     <IslandContainer>
-      <AuthHeader title={"Properties"} />
+      <AuthHeader isWithinIsland={true} title={"Properties"} />
       <div className="flex flex-col gap-4">
         <>
           {isPropertiesLoading ? (

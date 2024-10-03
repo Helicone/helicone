@@ -66,6 +66,7 @@ const SessionsPage = (props: SessionsPageProps) => {
   return (
     <IslandContainer>
       <AuthHeader
+        isWithinIsland={true}
         title={
           <div className="flex items-center gap-2">
             Sessions <Badge>Beta</Badge>

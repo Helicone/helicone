@@ -139,6 +139,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
   return (
     <IslandContainer>
       <AuthHeader
+        isWithinIsland
         title={"Playground"}
         actions={
           <div id="toolbar" className="flex flex-row items-center gap-2 w-full">
