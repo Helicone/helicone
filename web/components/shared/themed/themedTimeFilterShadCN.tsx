@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/select";
 import { useProFeature } from "@/hooks/useProFeature";
 import { ProFeatureDialog } from "../ProBlockerComponents/ProFeatureDialog";
+import { useEffect, useState } from "react";
 
 interface ThemedTimeFilterShadCNProps
   extends React.HTMLAttributes<HTMLDivElement> {
@@ -32,54 +33,57 @@ export function ThemedTimeFilterShadCN({
   onDateChange,
   initialDateRange,
 }: ThemedTimeFilterShadCNProps) {
-  const [date, setDate] = React.useState<DateRange | undefined>(
-    initialDateRange || {
-      from: new Date(),
-      to: new Date(),
-    }
-  );
-  const [isDialogOpen, setIsDialogOpen] = React.useState(false);
+  const [date, setDate] = useState<DateRange | undefined>(undefined);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { hasAccess } = useProFeature("time_filter");
+
+  useEffect(() => {
+    // Set the initial date range after the component mounts
+    setDate(
+      initialDateRange || {
+        from: new Date(),
+        to: new Date(),
+      }
+    );
+  }, [initialDateRange]);
 
   const predefinedRanges = [
     {
       label: "1h",
-      value: { from: addHours(new Date(), -1), to: new Date() },
+      value: () => ({ from: addHours(new Date(), -1), to: new Date() }),
     },
     {
       label: "3h",
-      value: { from: addHours(new Date(), -3), to: new Date() },
+      value: () => ({ from: addHours(new Date(), -3), to: new Date() }),
     },
     {
       label: "12h",
-      value: { from: addHours(new Date(), -12), to: new Date() },
+      value: () => ({ from: addHours(new Date(), -12), to: new Date() }),
     },
     {
       label: "1d",
-      value: { from: addDays(new Date(), -1), to: new Date() },
+      value: () => ({ from: addDays(new Date(), -1), to: new Date() }),
     },
     {
       label: "3d",
-      value: { from: addDays(new Date(), -3), to: new Date() },
+      value: () => ({ from: addDays(new Date(), -3), to: new Date() }),
     },
     {
       label: "7d",
-      value: { from: addDays(new Date(), -7), to: new Date() },
+      value: () => ({ from: addDays(new Date(), -7), to: new Date() }),
     },
     {
       label: "30d",
-      value: { from: addDays(new Date(), -30), to: new Date() },
+      value: () => ({ from: addDays(new Date(), -30), to: new Date() }),
     },
     {
       label: "90d",
-      value: { from: addDays(new Date(), -90), to: new Date() },
+      value: () => ({ from: addDays(new Date(), -90), to: new Date() }),
     },
   ];
 
-  const [customNumber, setCustomNumber] = React.useState<number>(1);
-  const [customUnit, setCustomUnit] = React.useState<"hour" | "day" | "week">(
-    "hour"
-  );
+  const [customNumber, setCustomNumber] = useState<number>(1);
+  const [customUnit, setCustomUnit] = useState<"hour" | "day" | "week">("hour");
 
   const handleDateChange = (newDate: DateRange | undefined) => {
     if (newDate?.from && newDate?.to) {
@@ -140,6 +144,10 @@ export function ThemedTimeFilterShadCN({
     return new Date(today.getFullYear(), today.getMonth() - 1, 1);
   };
 
+  const handlePredefinedRange = (rangeFunc: () => DateRange) => {
+    handleDateChange(rangeFunc());
+  };
+
   return (
     <div className={cn("grid gap-2", className)}>
       <Popover>
@@ -173,7 +181,7 @@ export function ThemedTimeFilterShadCN({
                 key={range.label}
                 variant="outline"
                 size="sm_sleek"
-                onClick={() => handleDateChange(range.value)}
+                onClick={() => handlePredefinedRange(range.value)}
               >
                 {range.label}
               </Button>
