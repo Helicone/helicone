@@ -17,10 +17,6 @@
   background: rgba(0, 0, 0, 0.1);
 }
 
-th:last-child .resizer {
-  display: none;
-}
-
 .hide {
   opacity: 0;
 }
