@@ -99,10 +99,6 @@ def run_openapi_typescript(input_file, output_file):
 
 def main():
     import argparse
-    # find the time it takes to run all this
-    start_time = time.time()
-    print("Starting to generate types...")
-
     # if --quick is passed, check if the controllers have changed
 
     parser = argparse.ArgumentParser(
@@ -114,10 +110,7 @@ def main():
     if args.quick:
         quick_check()
 
-    start_tsoa_time = time.time()
     os.system("bash tsoa_run.sh")
-    end_tsoa_time = time.time()
-    print(f"Time taken to run tsoa: {end_tsoa_time - start_tsoa_time} seconds")
 
     current_dir = os.path.dirname(os.path.realpath(__file__))
 
@@ -128,13 +121,9 @@ def main():
         (f"{current_dir}/src/tsoa-build/public/swagger.json", f"{current_dir}/../../helicone-node/api/generatedTypes/public.ts")
     ]
 
-    # Run the commands in parallel
-    with concurrent.futures.ProcessPoolExecutor() as executor:
+    with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = [executor.submit(run_openapi_typescript, input_file, output_file) for input_file, output_file in tasks]
         concurrent.futures.wait(futures)
-
-    end_time = time.time()
-    print(f"Time taken: {end_time - start_time} seconds")   
 
 
 if __name__ == "__main__":
