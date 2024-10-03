@@ -1,4 +1,6 @@
+@import "@assistant-ui/react/styles/themes/default.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-  
+
