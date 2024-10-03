@@ -1,5 +1,7 @@
 # Adjusting the script to replace the specific lines when it detects the start of the complex type definition.
 import os
+import time
+import concurrent.futures
 
 '''
 THIS IS A HACK UNTIL THIS CAN BE SOLVED: https://github.com/drwpow/openapi-typescript/issues/1603
@@ -90,8 +92,16 @@ def quick_check():
             file.write(tmp_controller_hash)
 
 
+def run_openapi_typescript(input_file, output_file):
+    os.system(f"npx openapi-typescript {input_file} -o {output_file}")
+    fixJsonType(output_file)
+
+
 def main():
     import argparse
+    # find the time it takes to run all this
+    start_time = time.time()
+    print("Starting to generate types...")
 
     # if --quick is passed, check if the controllers have changed
 
@@ -104,25 +114,27 @@ def main():
     if args.quick:
         quick_check()
 
+    start_tsoa_time = time.time()
     os.system("bash tsoa_run.sh")
+    end_tsoa_time = time.time()
+    print(f"Time taken to run tsoa: {end_tsoa_time - start_tsoa_time} seconds")
 
-    # Read the content of the TypeScript file
     current_dir = os.path.dirname(os.path.realpath(__file__))
 
-    # npx openapi-typescript  src/tsoa-build/swagger.json -o ../../web/lib/clients/jawnTypes.ts
-    os.system(
-        f"npx openapi-typescript {current_dir}/src/tsoa-build/public/swagger.json -o {current_dir}/../../web/lib/clients/jawnTypes/public.ts")
+    # Define the input and output files
+    tasks = [
+        (f"{current_dir}/src/tsoa-build/public/swagger.json", f"{current_dir}/../../web/lib/clients/jawnTypes/public.ts"),
+        (f"{current_dir}/src/tsoa-build/private/swagger.json", f"{current_dir}/../../web/lib/clients/jawnTypes/private.ts"),
+        (f"{current_dir}/src/tsoa-build/public/swagger.json", f"{current_dir}/../../helicone-node/api/generatedTypes/public.ts")
+    ]
 
-    os.system(
-        f"npx openapi-typescript {current_dir}/src/tsoa-build/private/swagger.json -o {current_dir}/../../web/lib/clients/jawnTypes/private.ts")
+    # Run the commands in parallel
+    with concurrent.futures.ProcessPoolExecutor() as executor:
+        futures = [executor.submit(run_openapi_typescript, input_file, output_file) for input_file, output_file in tasks]
+        concurrent.futures.wait(futures)
 
-    os.system(
-        f"npx openapi-typescript {current_dir}/src/tsoa-build/public/swagger.json -o {current_dir}/../../helicone-node/api/generatedTypes/public.ts")
-
-    fixJsonType(f"{current_dir}/../../web/lib/clients/jawnTypes/public.ts")
-    fixJsonType(f"{current_dir}/../../web/lib/clients/jawnTypes/private.ts")
-    fixJsonType(
-        f"{current_dir}/../../helicone-node/api/generatedTypes/public.ts")
+    end_time = time.time()
+    print(f"Time taken: {end_time - start_time} seconds")   
 
 
 if __name__ == "__main__":
