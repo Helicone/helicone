@@ -272,7 +272,7 @@ export default function ThemedTable<T extends { id?: string }>(
                   }}
                 >
                   <table
-                    className="h-full"
+                    className="h-full bg-white"
                     {...{
                       style: {
                         width: fullWidth ? "100%" : table.getCenterTotalSize(),
