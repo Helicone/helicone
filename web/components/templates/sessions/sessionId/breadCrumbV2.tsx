@@ -1,17 +1,17 @@
-import { useState } from "react";
-import { getTimeAgo } from "../../../../lib/sql/timeHelpers";
-import HcBreadcrumb from "../../../ui/hcBreadcrumb";
-import { formatLargeNumber } from "../../../shared/utils/numberFormat";
-import { CopyIcon, InfoIcon } from "lucide-react";
+import useNotification from "@/components/shared/notification/useNotification";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hoverCard";
-import { Button } from "@/components/ui/button";
-import useNotification from "@/components/shared/notification/useNotification";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+import { CopyIcon, InfoIcon } from "lucide-react";
+import { getTimeAgo } from "../../../../lib/sql/timeHelpers";
+import { formatLargeNumber } from "../../../shared/utils/numberFormat";
+import HcBreadcrumb from "../../../ui/hcBreadcrumb";
 
 function timeDiff(startTime: Date, endTime: Date): string {
   const diff = endTime.getTime() - startTime.getTime();
@@ -41,6 +41,7 @@ export const BreadCrumbV2 = ({
   completionTokens,
   models,
   users,
+  className,
 }: {
   sessionId: string;
   startTime?: Date;
@@ -51,12 +52,12 @@ export const BreadCrumbV2 = ({
   promptTokens: number;
   completionTokens: number;
   users: string[];
+  className?: string;
 }) => {
-  const [expanded, setExpanded] = useState(false);
   const { setNotification } = useNotification();
 
   return (
-    <div className="flex flex-row items-center space-x-2">
+    <div className={cn("flex flex-row items-center space-x-2", className)}>
       <HcBreadcrumb
         pages={[
           {

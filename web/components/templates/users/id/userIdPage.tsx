@@ -18,6 +18,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { useRouter } from "next/router";
 import HcBreadcrumb from "../../../ui/hcBreadcrumb";
+import { IslandContainer } from "@/components/ui/islandContainer";
 
 interface UserIdPageProps {
   userId: string;
@@ -48,7 +49,7 @@ const UserIdPage = (props: UserIdPageProps) => {
   const router = useRouter();
 
   return (
-    <>
+    <IslandContainer className=" py-10">
       <div className="flex flex-col items-start space-y-4 w-full">
         <HcBreadcrumb
           pages={[
@@ -221,7 +222,7 @@ const UserIdPage = (props: UserIdPageProps) => {
           </div>
         )}
       </>
-    </>
+    </IslandContainer>
   );
 };
 

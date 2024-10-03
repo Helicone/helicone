@@ -54,6 +54,7 @@ import { QuantilesGraph } from "./quantilesGraph";
 import StyledAreaChart from "./styledAreaChart";
 import SuggestionModal from "./suggestionsModal";
 import { useDashboardPage } from "./useDashboardPage";
+import { IslandContainer } from "@/components/ui/islandContainer";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -149,7 +150,7 @@ const DashboardPage = (props: DashboardPageProps) => {
       };
     } else {
       range = {
-        start: getTimeIntervalAgo((currentTimeFilter as TimeInterval) || "24h"),
+        start: getTimeIntervalAgo((currentTimeFilter as TimeInterval) || "1m"),
         end: new Date(),
       };
     }
@@ -519,485 +520,496 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   return (
     <>
-      <AuthHeader
-        title={"Dashboard"}
-        headerActions={
-          <button
-            onClick={() => {
-              remove();
-              refetch();
-            }}
-            className="font-semibold text-black dark:text-white text-sm items-center flex flex-row hover:text-sky-700"
-          >
-            <ArrowPathIcon
-              className={clsx(
-                isAnyLoading ? "animate-spin" : "",
-                "h-5 w-5 inline"
-              )}
-            />
-          </button>
-        }
-        actions={
-          <div>
-            <ThemedSwitch checked={isLive} onChange={setIsLive} label="Live" />
-          </div>
-        }
-      />
-      {unauthorized ? (
-        <>{renderUnauthorized()}</>
-      ) : (
-        <div className="space-y-4">
-          <ThemedTableHeader
-            isFetching={isAnyLoading || isModelsLoading}
-            timeFilter={{
-              currentTimeFilter: timeFilter,
-              customTimeFilter: true,
-              timeFilterOptions: [
-                { key: "24h", value: "24H" },
-                { key: "7d", value: "7D" },
-                { key: "1m", value: "1M" },
-                { key: "3m", value: "3M" },
-              ],
-              defaultTimeFilter: interval,
-              onTimeSelectHandler: (key: TimeInterval, value: string) => {
-                if ((key as string) === "custom") {
-                  value = value.replace("custom:", "");
-                  const start = new Date(value.split("_")[0]);
-                  const end = new Date(value.split("_")[1]);
-                  setInterval(key);
-                  setTimeFilter({
-                    start,
-                    end,
-                  });
-                } else {
-                  setInterval(key);
-                  setTimeFilter({
-                    start: getTimeIntervalAgo(key),
-                    end: new Date(),
-                  });
-                }
-              },
-            }}
-            advancedFilter={{
-              filterMap,
-              onAdvancedFilter: onSetAdvancedFiltersHandler,
-              filters: advancedFilters,
-              searchPropertyFilters: searchPropertyFilters,
-            }}
-            savedFilters={{
-              currentFilter: currFilter ?? undefined,
-              filters:
-                transformedFilters && orgLayout?.data?.id
-                  ? transformedFilters
-                  : undefined,
-              onFilterChange: onLayoutFilterChange,
-              onSaveFilterCallback: async () => {
-                await orgLayoutRefetch();
-              },
-              layoutPage: "dashboard",
-            }}
-          />
-          <section id="panels" className="-m-2">
-            <ResponsiveGridLayout
-              className="layout"
-              layouts={{
-                lg: INITIAL_LAYOUT,
-                md: INITIAL_LAYOUT,
-                sm: INITIAL_LAYOUT,
-                xs: SMALL_LAYOUT,
-                xxs: SMALL_LAYOUT,
+      <IslandContainer>
+        <AuthHeader
+          isWithinIsland={true}
+          title={"Dashboard"}
+          headerActions={
+            <button
+              onClick={() => {
+                remove();
+                refetch();
               }}
-              autoSize={true}
-              isBounded={true}
-              isDraggable={false}
-              breakpoints={{ lg: 1200, md: 996, sm: 600, xs: 360, xxs: 0 }}
-              cols={gridCols}
-              rowHeight={96}
-              onLayoutChange={(currentLayout, allLayouts) => {}}
+              className="font-semibold text-black dark:text-white text-sm items-center flex flex-row hover:text-sky-700"
             >
-              {metricsData.map((m, i) => (
-                <div key={m.id}>
-                  <MetricsPanel metric={m} />
+              <ArrowPathIcon
+                className={clsx(
+                  isAnyLoading ? "animate-spin" : "",
+                  "h-5 w-5 inline"
+                )}
+              />
+            </button>
+          }
+          actions={
+            <div>
+              <ThemedSwitch
+                checked={isLive}
+                onChange={setIsLive}
+                label="Live"
+              />
+            </div>
+          }
+        />
+        {unauthorized ? (
+          <>{renderUnauthorized()}</>
+        ) : (
+          <div className="space-y-4 mt-4">
+            <ThemedTableHeader
+              isFetching={isAnyLoading || isModelsLoading}
+              timeFilter={{
+                currentTimeFilter: timeFilter,
+                customTimeFilter: true,
+                timeFilterOptions: [],
+                defaultTimeFilter: interval,
+                onTimeSelectHandler: (key: TimeInterval, value: string) => {
+                  if ((key as string) === "custom") {
+                    value = value.replace("custom:", "");
+                    const start = new Date(value.split("_")[0]);
+                    const end = new Date(value.split("_")[1]);
+                    setInterval(key);
+                    setTimeFilter({
+                      start,
+                      end,
+                    });
+                  } else {
+                    setInterval(key);
+                    setTimeFilter({
+                      start: getTimeIntervalAgo(key),
+                      end: new Date(),
+                    });
+                  }
+                },
+              }}
+              advancedFilter={{
+                filterMap,
+                onAdvancedFilter: onSetAdvancedFiltersHandler,
+                filters: advancedFilters,
+                searchPropertyFilters: searchPropertyFilters,
+              }}
+              savedFilters={{
+                currentFilter: currFilter ?? undefined,
+                filters:
+                  transformedFilters && orgLayout?.data?.id
+                    ? transformedFilters
+                    : undefined,
+                onFilterChange: onLayoutFilterChange,
+                onSaveFilterCallback: async () => {
+                  await orgLayoutRefetch();
+                },
+                layoutPage: "dashboard",
+              }}
+            />
+            <section id="panels" className="-m-2">
+              <ResponsiveGridLayout
+                className="layout"
+                layouts={{
+                  lg: INITIAL_LAYOUT,
+                  md: INITIAL_LAYOUT,
+                  sm: INITIAL_LAYOUT,
+                  xs: SMALL_LAYOUT,
+                  xxs: SMALL_LAYOUT,
+                }}
+                autoSize={true}
+                isBounded={true}
+                isDraggable={false}
+                breakpoints={{ lg: 1200, md: 996, sm: 600, xs: 360, xxs: 0 }}
+                cols={gridCols}
+                rowHeight={96}
+                onLayoutChange={(currentLayout, allLayouts) => {}}
+              >
+                {metricsData.map((m, i) => (
+                  <div key={m.id}>
+                    <MetricsPanel metric={m} />
+                  </div>
+                ))}
+                <div key="requests">
+                  <Card>
+                    <div className="flex flex-row items-center justify-between">
+                      <div className="flex flex-col space-y-0.5">
+                        <p className="text-gray-500 text-sm">Requests</p>
+                        <p className="text-black dark:text-white text-xl font-semibold">
+                          {metrics.totalRequests?.data?.data
+                            ? `${formatNumberString(
+                                metrics.totalRequests?.data?.data.toFixed(2)
+                              )}`
+                            : "0"}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div
+                      className={clsx("p-2", "w-full")}
+                      style={{
+                        height: "212px",
+                      }}
+                    >
+                      {overTimeData.requests.isLoading ? (
+                        <div className="h-full w-full bg-gray-200 dark:bg-gray-800 rounded-md pt-4">
+                          <LoadingAnimation height={175} width={175} />
+                        </div>
+                      ) : (
+                        <AreaChart
+                          className="h-[14rem]"
+                          data={flattenedOverTime}
+                          index="date"
+                          categories={["success", "error"]}
+                          colors={["green", "red"]}
+                          showYAxis={false}
+                          curveType="monotone"
+                          animationDuration={1000}
+                          showAnimation={true}
+                        />
+                      )}
+                    </div>
+                  </Card>
                 </div>
-              ))}
-              <div key="requests">
-                <Card>
-                  <div className="flex flex-row items-center justify-between">
-                    <div className="flex flex-col space-y-0.5">
-                      <p className="text-gray-500 text-sm">Requests</p>
-                      <p className="text-black dark:text-white text-xl font-semibold">
-                        {metrics.totalRequests?.data?.data
-                          ? `${formatNumberString(
-                              metrics.totalRequests?.data?.data.toFixed(2)
-                            )}`
-                          : "0"}
+                <div key="errors">
+                  <Card className="h-full w-full flex flex-col">
+                    <div className="flex flex-col h-full">
+                      <h2 className="text-gray-500 text-sm mb-2">All Errors</h2>
+                      {(() => {
+                        const totalErrors = accumulatedStatusCounts.reduce(
+                          (sum, e) => sum + e.value,
+                          0
+                        );
+                        const errorPercentage =
+                          (totalErrors /
+                            (metrics.totalRequests?.data?.data ?? 1)) *
+                            100 || 0;
+                        return (
+                          <div className="mb-2 text-sm">
+                            <span className="font-semibold">
+                              {formatLargeNumber(totalErrors)}
+                            </span>{" "}
+                            total errors (
+                            <span className="font-semibold">
+                              {errorPercentage.toFixed(2)}%
+                            </span>{" "}
+                            of all requests)
+                          </div>
+                        );
+                      })()}
+                      <div className="flex-grow overflow-hidden flex flex-col">
+                        <div className="flex flex-row justify-between items-center pb-2">
+                          <p className="text-xs font-semibold text-gray-700">
+                            Error Type
+                          </p>
+                          <p className="text-xs font-semibold text-gray-700">
+                            Percentage
+                          </p>
+                        </div>
+                        <div className="overflow-y-auto flex-grow">
+                          <BarList
+                            data={(() => {
+                              const totalErrors =
+                                accumulatedStatusCounts.reduce(
+                                  (sum, e) => sum + e.value,
+                                  0
+                                );
+                              return accumulatedStatusCounts
+                                .sort((a, b) => b.value - a.value)
+                                .map((error, index) => ({
+                                  name: `${error.name} (${formatLargeNumber(
+                                    error.value
+                                  )})`,
+                                  value: (error.value / totalErrors) * 100,
+                                  color: listColors[index % listColors.length],
+                                }));
+                            })()}
+                            className="h-full"
+                            showAnimation={true}
+                            valueFormatter={(value: number) =>
+                              `${value.toFixed(1)}%`
+                            }
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+                </div>
+                <div key="models">
+                  <StyledAreaChart
+                    title={`Top Models`}
+                    value={undefined}
+                    isDataOverTimeLoading={isModelsLoading}
+                    withAnimation={true}
+                  >
+                    <div className="flex flex-row justify-between items-center pb-2">
+                      <p className="text-xs font-semibold text-gray-700">
+                        Name
+                      </p>
+                      <p className="text-xs font-semibold text-gray-700">
+                        Requests
                       </p>
                     </div>
-                  </div>
-
-                  <div
-                    className={clsx("p-2", "w-full")}
-                    style={{
-                      height: "212px",
-                    }}
+                    <BarList
+                      data={
+                        models?.data
+                          ?.map((model, index) => modelMapper(model, index))
+                          .sort(
+                            (a, b) =>
+                              b.value - a.value - (b.name === "n/a" ? 1 : 0)
+                          ) ?? []
+                      }
+                      className="overflow-auto h-full"
+                      showAnimation={true}
+                    />
+                  </StyledAreaChart>
+                </div>
+                <div key="costs">
+                  <StyledAreaChart
+                    title={"Costs"}
+                    value={
+                      metrics.totalCost.data?.data
+                        ? `$${formatNumberString(
+                            metrics.totalCost.data?.data < 0.02
+                              ? metrics.totalCost.data?.data.toFixed(7)
+                              : metrics.totalCost.data?.data.toFixed(2),
+                            true
+                          )}`
+                        : "$0.00"
+                    }
+                    isDataOverTimeLoading={overTimeData.costs.isLoading}
                   >
-                    {overTimeData.requests.isLoading ? (
-                      <div className="h-full w-full bg-gray-200 dark:bg-gray-800 rounded-md pt-4">
-                        <LoadingAnimation height={175} width={175} />
-                      </div>
-                    ) : (
-                      <AreaChart
-                        className="h-[14rem]"
-                        data={flattenedOverTime}
-                        index="date"
-                        categories={["success", "error"]}
-                        colors={["green", "red"]}
-                        showYAxis={false}
-                        curveType="monotone"
-                        animationDuration={1000}
-                        showAnimation={true}
-                      />
+                    <BarChart
+                      className="h-[14rem]"
+                      data={
+                        overTimeData.costs.data?.data?.map((r) => ({
+                          date: getTimeMap(timeIncrement)(r.time),
+                          costs: r.cost,
+                        })) ?? []
+                      }
+                      index="date"
+                      categories={["costs"]}
+                      colors={["blue"]}
+                      showYAxis={false}
+                      valueFormatter={(number: number | bigint) =>
+                        `$ ${new Intl.NumberFormat("us")
+                          .format(number)
+                          .toString()}`
+                      }
+                    />
+                  </StyledAreaChart>
+                </div>
+                <div key="users">
+                  <StyledAreaChart
+                    title={"Users"}
+                    value={
+                      metrics.activeUsers.data?.data
+                        ? formatLargeNumber(metrics.activeUsers.data?.data)
+                        : "0"
+                    }
+                    isDataOverTimeLoading={overTimeData.users.isLoading}
+                  >
+                    <BarChart
+                      className="h-[14rem]"
+                      data={
+                        overTimeData.users.data?.data?.map((r) => ({
+                          date: getTimeMap(timeIncrement)(r.time),
+                          users: r.count,
+                        })) ?? []
+                      }
+                      index="date"
+                      categories={["users"]}
+                      colors={["orange"]}
+                      showYAxis={false}
+                    />
+                  </StyledAreaChart>
+                </div>
+                <div key="countries">
+                  <CountryPanel
+                    timeFilter={timeFilter}
+                    userFilters={filterUITreeToFilterNode(
+                      filterMap,
+                      debouncedAdvancedFilter
                     )}
-                  </div>
-                </Card>
-              </div>
-              <div key="errors">
-                <Card className="h-full w-full flex flex-col">
-                  <div className="flex flex-col h-full">
-                    <h2 className="text-gray-500 text-sm mb-2">All Errors</h2>
-                    {(() => {
-                      const totalErrors = accumulatedStatusCounts.reduce(
-                        (sum, e) => sum + e.value,
-                        0
-                      );
-                      const errorPercentage =
-                        (totalErrors /
-                          (metrics.totalRequests?.data?.data ?? 1)) *
-                          100 || 0;
-                      return (
-                        <div className="mb-2 text-sm">
-                          <span className="font-semibold">
-                            {formatLargeNumber(totalErrors)}
-                          </span>{" "}
-                          total errors (
-                          <span className="font-semibold">
-                            {errorPercentage.toFixed(2)}%
-                          </span>{" "}
-                          of all requests)
-                        </div>
-                      );
-                    })()}
-                    <div className="flex-grow overflow-hidden flex flex-col">
-                      <div className="flex flex-row justify-between items-center pb-2">
-                        <p className="text-xs font-semibold text-gray-700">
-                          Error Type
-                        </p>
-                        <p className="text-xs font-semibold text-gray-700">
-                          Percentage
-                        </p>
-                      </div>
-                      <div className="overflow-y-auto flex-grow">
-                        <BarList
-                          data={(() => {
-                            const totalErrors = accumulatedStatusCounts.reduce(
-                              (sum, e) => sum + e.value,
-                              0
-                            );
-                            return accumulatedStatusCounts
-                              .sort((a, b) => b.value - a.value)
-                              .map((error, index) => ({
-                                name: `${error.name} (${formatLargeNumber(
-                                  error.value
-                                )})`,
-                                value: (error.value / totalErrors) * 100,
-                                color: listColors[index % listColors.length],
-                              }));
-                          })()}
-                          className="h-full"
-                          showAnimation={true}
-                          valueFormatter={(value: number) =>
-                            `${value.toFixed(1)}%`
-                          }
-                        />
-                      </div>
+                  />
+                </div>
+                <div key="latency">
+                  <StyledAreaChart
+                    title={"Latency"}
+                    value={`${new Intl.NumberFormat("us").format(
+                      (metrics.averageLatency.data?.data ?? 0) / 1000
+                    )} s / req`}
+                    isDataOverTimeLoading={overTimeData.latency.isLoading}
+                  >
+                    <AreaChart
+                      className="h-[14rem]"
+                      data={
+                        overTimeData.latency.data?.data?.map((r) => ({
+                          date: getTimeMap(timeIncrement)(r.time),
+                          latency: r.duration,
+                        })) ?? []
+                      }
+                      index="date"
+                      categories={["latency"]}
+                      colors={["cyan"]}
+                      showYAxis={false}
+                      curveType="monotone"
+                      valueFormatter={(number: number | bigint) => {
+                        return `${new Intl.NumberFormat("us").format(
+                          Number(number) / 1000
+                        )} s`;
+                      }}
+                    />
+                  </StyledAreaChart>
+                </div>
+                <div key="quantiles">
+                  <QuantilesGraph
+                    uiFilters={filterUITreeToFilterNode(
+                      filterMap,
+                      debouncedAdvancedFilter
+                    )}
+                    timeFilter={timeFilter}
+                    timeIncrement={timeIncrement}
+                  />
+                </div>
+                <div key="time-to-first-token">
+                  <StyledAreaChart
+                    title={"Time to First Token"}
+                    value={`Average: ${new Intl.NumberFormat("us").format(
+                      metrics.averageTimeToFirstToken.data?.data ?? 0
+                    )} ms`}
+                    isDataOverTimeLoading={
+                      overTimeData.timeToFirstToken.isLoading
+                    }
+                  >
+                    <AreaChart
+                      className="h-[14rem]"
+                      data={
+                        overTimeData.timeToFirstToken.data?.data?.map((r) => ({
+                          date: getTimeMap(timeIncrement)(r.time),
+                          time: r.ttft,
+                        })) ?? []
+                      }
+                      index="date"
+                      categories={["time"]}
+                      colors={["violet"]}
+                      showYAxis={false}
+                      curveType="monotone"
+                      valueFormatter={(number: number | bigint) => {
+                        return `${new Intl.NumberFormat("us").format(
+                          number
+                        )} ms`;
+                      }}
+                    />
+                  </StyledAreaChart>
+                </div>
+                <div key="threats">
+                  <StyledAreaChart
+                    title={"Threats"}
+                    value={`${formatLargeNumber(
+                      Number(metrics.totalThreats.data?.data?.toFixed(0) ?? 0)
+                    )}`}
+                    isDataOverTimeLoading={overTimeData.threats.isLoading}
+                  >
+                    <AreaChart
+                      className="h-[14rem]"
+                      data={
+                        overTimeData.threats.data?.data?.map((r) => ({
+                          date: getTimeMap(timeIncrement)(r.time),
+                          threats: r.count,
+                        })) ?? []
+                      }
+                      index="date"
+                      categories={["threats"]}
+                      colors={["amber"]}
+                      showYAxis={false}
+                      curveType="monotone"
+                    />
+                  </StyledAreaChart>
+                </div>
+                <div key="suggest-more-graphs">
+                  <div className="space-y-2 bg-white dark:bg-black border border-gray-900 dark:border-white border-dashed w-full h-full p-2 text-black dark:text-white shadow-sm rounded-lg flex flex-col items-center justify-center">
+                    <PresentationChartLineIcon className="h-12 w-12 text-black dark:text-white" />
+                    <button
+                      className="p-4 text-semibold text-lg"
+                      onClick={() => {
+                        setOpenSuggestGraph(true);
+                      }}
+                    >
+                      Request a new graph
+                    </button>
+                    <div className="text-sm text-gray-500 text-center max-w-xs">
+                      Or use our{" "}
+                      <a
+                        href="https://docs.helicone.ai/getting-started/integration-method/posthog"
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-blue-500 underline"
+                      >
+                        PostHog integration
+                      </a>{" "}
+                      to create custom graphs or get started with our pre-built
+                      template.
                     </div>
                   </div>
-                </Card>
-              </div>
-              <div key="models">
-                <StyledAreaChart
-                  title={`Top Models`}
-                  value={undefined}
-                  isDataOverTimeLoading={isModelsLoading}
-                  withAnimation={true}
-                >
-                  <div className="flex flex-row justify-between items-center pb-2">
-                    <p className="text-xs font-semibold text-gray-700">Name</p>
-                    <p className="text-xs font-semibold text-gray-700">
-                      Requests
-                    </p>
-                  </div>
-                  <BarList
-                    data={
-                      models?.data
-                        ?.map((model, index) => modelMapper(model, index))
-                        .sort(
-                          (a, b) =>
-                            b.value - a.value - (b.name === "n/a" ? 1 : 0)
-                        ) ?? []
-                    }
-                    className="overflow-auto h-full"
-                    showAnimation={true}
-                  />
-                </StyledAreaChart>
-              </div>
-              <div key="costs">
-                <StyledAreaChart
-                  title={"Costs"}
-                  value={
-                    metrics.totalCost.data?.data
-                      ? `$${formatNumberString(
-                          metrics.totalCost.data?.data < 0.02
-                            ? metrics.totalCost.data?.data.toFixed(7)
-                            : metrics.totalCost.data?.data.toFixed(2),
-                          true
-                        )}`
-                      : "$0.00"
-                  }
-                  isDataOverTimeLoading={overTimeData.costs.isLoading}
-                >
-                  <BarChart
-                    className="h-[14rem]"
-                    data={
-                      overTimeData.costs.data?.data?.map((r) => ({
-                        date: getTimeMap(timeIncrement)(r.time),
-                        costs: r.cost,
-                      })) ?? []
-                    }
-                    index="date"
-                    categories={["costs"]}
-                    colors={["blue"]}
-                    showYAxis={false}
-                    valueFormatter={(number: number | bigint) =>
-                      `$ ${new Intl.NumberFormat("us")
-                        .format(number)
-                        .toString()}`
-                    }
-                  />
-                </StyledAreaChart>
-              </div>
-              <div key="users">
-                <StyledAreaChart
-                  title={"Users"}
-                  value={
-                    metrics.activeUsers.data?.data
-                      ? formatLargeNumber(metrics.activeUsers.data?.data)
-                      : "0"
-                  }
-                  isDataOverTimeLoading={overTimeData.users.isLoading}
-                >
-                  <BarChart
-                    className="h-[14rem]"
-                    data={
-                      overTimeData.users.data?.data?.map((r) => ({
-                        date: getTimeMap(timeIncrement)(r.time),
-                        users: r.count,
-                      })) ?? []
-                    }
-                    index="date"
-                    categories={["users"]}
-                    colors={["orange"]}
-                    showYAxis={false}
-                  />
-                </StyledAreaChart>
-              </div>
-              <div key="countries">
-                <CountryPanel
-                  timeFilter={timeFilter}
-                  userFilters={filterUITreeToFilterNode(
-                    filterMap,
-                    debouncedAdvancedFilter
-                  )}
-                />
-              </div>
-              <div key="latency">
-                <StyledAreaChart
-                  title={"Latency"}
-                  value={`${new Intl.NumberFormat("us").format(
-                    (metrics.averageLatency.data?.data ?? 0) / 1000
-                  )} s / req`}
-                  isDataOverTimeLoading={overTimeData.latency.isLoading}
-                >
-                  <AreaChart
-                    className="h-[14rem]"
-                    data={
-                      overTimeData.latency.data?.data?.map((r) => ({
-                        date: getTimeMap(timeIncrement)(r.time),
-                        latency: r.duration,
-                      })) ?? []
-                    }
-                    index="date"
-                    categories={["latency"]}
-                    colors={["cyan"]}
-                    showYAxis={false}
-                    curveType="monotone"
-                    valueFormatter={(number: number | bigint) => {
-                      return `${new Intl.NumberFormat("us").format(
-                        Number(number) / 1000
-                      )} s`;
-                    }}
-                  />
-                </StyledAreaChart>
-              </div>
-              <div key="quantiles">
-                <QuantilesGraph
-                  uiFilters={filterUITreeToFilterNode(
-                    filterMap,
-                    debouncedAdvancedFilter
-                  )}
-                  timeFilter={timeFilter}
-                  timeIncrement={timeIncrement}
-                />
-              </div>
-              <div key="time-to-first-token">
-                <StyledAreaChart
-                  title={"Time to First Token"}
-                  value={`Average: ${new Intl.NumberFormat("us").format(
-                    metrics.averageTimeToFirstToken.data?.data ?? 0
-                  )} ms`}
-                  isDataOverTimeLoading={
-                    overTimeData.timeToFirstToken.isLoading
-                  }
-                >
-                  <AreaChart
-                    className="h-[14rem]"
-                    data={
-                      overTimeData.timeToFirstToken.data?.data?.map((r) => ({
-                        date: getTimeMap(timeIncrement)(r.time),
-                        time: r.ttft,
-                      })) ?? []
-                    }
-                    index="date"
-                    categories={["time"]}
-                    colors={["violet"]}
-                    showYAxis={false}
-                    curveType="monotone"
-                    valueFormatter={(number: number | bigint) => {
-                      return `${new Intl.NumberFormat("us").format(number)} ms`;
-                    }}
-                  />
-                </StyledAreaChart>
-              </div>
-              <div key="threats">
-                <StyledAreaChart
-                  title={"Threats"}
-                  value={`${formatLargeNumber(
-                    Number(metrics.totalThreats.data?.data?.toFixed(0) ?? 0)
-                  )}`}
-                  isDataOverTimeLoading={overTimeData.threats.isLoading}
-                >
-                  <AreaChart
-                    className="h-[14rem]"
-                    data={
-                      overTimeData.threats.data?.data?.map((r) => ({
-                        date: getTimeMap(timeIncrement)(r.time),
-                        threats: r.count,
-                      })) ?? []
-                    }
-                    index="date"
-                    categories={["threats"]}
-                    colors={["amber"]}
-                    showYAxis={false}
-                    curveType="monotone"
-                  />
-                </StyledAreaChart>
-              </div>
-              <div key="suggest-more-graphs">
-                <div className="space-y-2 bg-white dark:bg-black border border-gray-900 dark:border-white border-dashed w-full h-full p-2 text-black dark:text-white shadow-sm rounded-lg flex flex-col items-center justify-center">
-                  <PresentationChartLineIcon className="h-12 w-12 text-black dark:text-white" />
-                  <button
-                    className="p-4 text-semibold text-lg"
-                    onClick={() => {
-                      setOpenSuggestGraph(true);
-                    }}
-                  >
-                    Request a new graph
-                  </button>
-                  <div className="text-sm text-gray-500 text-center max-w-xs">
-                    Or use our{" "}
-                    <a
-                      href="https://docs.helicone.ai/getting-started/integration-method/posthog"
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-blue-500 underline"
-                    >
-                      PostHog integration
-                    </a>{" "}
-                    to create custom graphs or get started with our pre-built
-                    template.
-                  </div>
                 </div>
-              </div>
-              <div key="tokens-per-min-over-time">
-                <StyledAreaChart
-                  title={"Tokens / Minute"}
-                  value={`Max: ${formatLargeNumber(
-                    max(
-                      overTimeData.promptTokensOverTime.data?.data
-                        ?.map((d) => d.completion_tokens + d.prompt_tokens)
-                        .filter((d) => d !== 0) ?? []
-                    ) / Number(getIncrementAsMinutes(timeIncrement).toFixed(2))
-                  )} tokens`}
-                  isDataOverTimeLoading={overTimeData.users.isLoading}
-                >
-                  <AreaChart
-                    className="h-[14rem]"
-                    data={
-                      overTimeData.promptTokensOverTime.data?.data?.map(
-                        (r) => ({
-                          date: getTimeMap(timeIncrement)(r.time),
-                          "Prompt / min":
-                            (r.prompt_tokens + 0.0) /
-                            getIncrementAsMinutes(timeIncrement),
+                <div key="tokens-per-min-over-time">
+                  <StyledAreaChart
+                    title={"Tokens / Minute"}
+                    value={`Max: ${formatLargeNumber(
+                      max(
+                        overTimeData.promptTokensOverTime.data?.data
+                          ?.map((d) => d.completion_tokens + d.prompt_tokens)
+                          .filter((d) => d !== 0) ?? []
+                      ) /
+                        Number(getIncrementAsMinutes(timeIncrement).toFixed(2))
+                    )} tokens`}
+                    isDataOverTimeLoading={overTimeData.users.isLoading}
+                  >
+                    <AreaChart
+                      className="h-[14rem]"
+                      data={
+                        overTimeData.promptTokensOverTime.data?.data?.map(
+                          (r) => ({
+                            date: getTimeMap(timeIncrement)(r.time),
+                            "Prompt / min":
+                              (r.prompt_tokens + 0.0) /
+                              getIncrementAsMinutes(timeIncrement),
 
-                          "Completion / min":
-                            (r.completion_tokens + 0.0) /
-                            getIncrementAsMinutes(timeIncrement),
-                          "Total / min":
-                            (r.prompt_tokens + r.completion_tokens + 0.0) /
-                            getIncrementAsMinutes(timeIncrement),
-                        })
-                      ) ?? []
-                    }
-                    index="date"
-                    categories={[
-                      "Prompt / min",
-                      "Completion / min",
-                      "Total / min",
-                    ]}
-                    colors={[
-                      "cyan",
-                      "blue",
-                      "green",
-                      "indigo",
-                      "orange",
-                      "pink",
-                    ]}
-                    showYAxis={false}
-                    curveType="monotone"
-                    valueFormatter={(number: number | bigint) =>
-                      `${new Intl.NumberFormat("us").format(number)} tokens`
-                    }
-                  />
-                </StyledAreaChart>
-              </div>
-            </ResponsiveGridLayout>
-          </section>
-        </div>
-      )}
-      <SuggestionModal open={openSuggestGraph} setOpen={setOpenSuggestGraph} />
+                            "Completion / min":
+                              (r.completion_tokens + 0.0) /
+                              getIncrementAsMinutes(timeIncrement),
+                            "Total / min":
+                              (r.prompt_tokens + r.completion_tokens + 0.0) /
+                              getIncrementAsMinutes(timeIncrement),
+                          })
+                        ) ?? []
+                      }
+                      index="date"
+                      categories={[
+                        "Prompt / min",
+                        "Completion / min",
+                        "Total / min",
+                      ]}
+                      colors={[
+                        "cyan",
+                        "blue",
+                        "green",
+                        "indigo",
+                        "orange",
+                        "pink",
+                      ]}
+                      showYAxis={false}
+                      curveType="monotone"
+                      valueFormatter={(number: number | bigint) =>
+                        `${new Intl.NumberFormat("us").format(number)} tokens`
+                      }
+                    />
+                  </StyledAreaChart>
+                </div>
+              </ResponsiveGridLayout>
+            </section>
+          </div>
+        )}
+        <SuggestionModal
+          open={openSuggestGraph}
+          setOpen={setOpenSuggestGraph}
+        />
 
-      <UpgradeProModal open={open} setOpen={setOpen} />
+        <UpgradeProModal open={open} setOpen={setOpen} />
+      </IslandContainer>
     </>
   );
 };

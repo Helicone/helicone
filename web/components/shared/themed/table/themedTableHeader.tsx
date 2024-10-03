@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { Result } from "../../../../lib/result";
 import { TimeInterval } from "../../../../lib/timeCalculations/time";
 import { SingleFilterDef } from "../../../../services/lib/filters/frontendFilterDefs";
-import { clsx } from "../../clsx";
 import { AdvancedFilters } from "../themedAdvancedFilters";
 import ThemedTimeFilter from "../themedTimeFilter";
 import ExportButton from "./exportButton";
@@ -16,8 +15,8 @@ import { RequestViews } from "./themedTable";
 import { OrganizationFilter } from "../../../../services/lib/organization_layout/organization_layout";
 import FiltersButton from "./filtersButton";
 import { DragColumnItem } from "./columns/DragList";
-import SortButton from "./columns/sortButton";
 import { UIFilterRowTree } from "../../../../services/lib/filters/uiFilterRowTree";
+import { Button } from "@/components/ui/button";
 
 interface ThemedTableHeaderProps<T> {
   rows?: T[];
@@ -100,60 +99,55 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
   };
 
   return (
-    <div className="flex flex-col space-y-4">
-      <div className="flex flex-col gap-3 lg:flex-row justify-between">
-        {timeFilter !== undefined ? (
-          <ThemedTimeFilter
-            currentTimeFilter={timeFilter.currentTimeFilter}
-            timeFilterOptions={[
-              { key: "24h", value: "24H" },
-              { key: "7d", value: "7D" },
-              { key: "1m", value: "1M" },
-              { key: "3m", value: "3M" },
-              { key: "all", value: "All" },
-            ]}
-            onSelect={function (key: string, value: string): void {
-              timeFilter.onTimeSelectHandler(key as TimeInterval, value);
-            }}
-            isFetching={false}
-            defaultValue={getDefaultValue()}
-            custom={true}
-          />
-        ) : (
-          <div />
-        )}
-
-        <div className="flex flex-wrap justify-start lg:justify-end gap-2">
-          {advancedFilters && (
-            <button
-              onClick={showFilterHandler}
-              className={clsx(
-                "w-max bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2"
-              )}
-            >
-              <FunnelIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
-              <p className="text-sm font-medium text-gray-900 dark:text-gray-100 hidden sm:block">
-                {showFilters ? "Hide" : "Show"} Filters
-                {/* TODO {advancedFilters.filters.length > 0 &&
-                  ` (${advancedFilters.filters.length})`} */}
-              </p>
-            </button>
-          )}
-
-          {savedFilters && (
-            <FiltersButton
-              filters={savedFilters.filters}
-              currentFilter={savedFilters.currentFilter}
-              onFilterChange={savedFilters.onFilterChange}
-              onDeleteCallback={() => {
-                if (savedFilters.onSaveFilterCallback) {
-                  savedFilters.onSaveFilterCallback();
-                }
+    <div className="flex flex-col">
+      <div className="flex flex-col gap-3 lg:flex-row justify-between ">
+        <div className="flex flex-row gap-3 items-center">
+          {timeFilter !== undefined ? (
+            <ThemedTimeFilter
+              currentTimeFilter={timeFilter.currentTimeFilter}
+              timeFilterOptions={[]}
+              onSelect={function (key: string, value: string): void {
+                timeFilter.onTimeSelectHandler(key as TimeInterval, value);
               }}
-              layoutPage={savedFilters.layoutPage}
+              isFetching={false}
+              defaultValue={getDefaultValue()}
+              custom={true}
             />
+          ) : (
+            <div />
           )}
+          <div className="flex flex-row">
+            {advancedFilters && (
+              <Button
+                onClick={showFilterHandler}
+                variant="ghostLinear"
+                className="gap-2"
+                size="sm_sleek"
+              >
+                <FunnelIcon className="h-[13px] w-[13px] " />
+                <span className="hidden sm:inline font-normal text-[13px]">
+                  {showFilters ? "Hide" : ""} Filters
+                </span>
+              </Button>
+            )}
 
+            {savedFilters && (
+              <FiltersButton
+                filters={savedFilters.filters}
+                currentFilter={savedFilters.currentFilter}
+                onFilterChange={savedFilters.onFilterChange}
+                onDeleteCallback={() => {
+                  if (savedFilters.onSaveFilterCallback) {
+                    savedFilters.onSaveFilterCallback();
+                  }
+                }}
+                layoutPage={savedFilters.layoutPage}
+              />
+            )}
+          </div>
+        </div>
+
+        <div className="flex flex-wrap justify-start lg:justify-end">
           {columns && (
             <ViewColumns
               columns={columns}
@@ -163,9 +157,6 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
             />
           )}
 
-          {columns &&
-            columns.filter((column) => column.columnDef.meta?.sortKey).length >
-              0 && <SortButton columns={columns} />}
           {rows && <ExportButton rows={rows} />}
 
           {viewToggle && (
@@ -177,21 +168,19 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
             />
           )}
           {advancedFilters && props.onDataSet && (
-            <button
+            <Button
+              variant="ghost"
               onClick={() => {
                 if (props.onDataSet) {
                   props.onDataSet();
                 }
               }}
-              className={clsx(
-                "bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2"
-              )}
+              size="xs"
+              className="flex items-center gap-2"
             >
-              <CircleStackIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
-              <p className="text-sm font-medium text-gray-900 dark:text-gray-100 hidden sm:block">
-                {"Create Dataset"}
-              </p>
-            </button>
+              <CircleStackIcon className="h-4 w-4" />
+              <span className="hidden sm:inline">Create Dataset</span>
+            </Button>
           )}
           {customButtons && customButtons.map((button) => button)}
         </div>

@@ -33,6 +33,7 @@ import DatasetDrawerV2 from "./datasetDrawer";
 import RemoveRequestsModal from "./RemoveRequests";
 import { useIntegration } from "@/services/hooks/useIntegrations";
 import OpenPipeFineTuneButton from "../connections/openPipe/fineTuneDatasetButton";
+import { IslandContainer } from "@/components/ui/islandContainer";
 
 interface DatasetIdPageProps {
   id: string;
@@ -238,7 +239,7 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
   }, [id, org?.currentOrg?.id]);
 
   return (
-    <>
+    <IslandContainer className="pt-10">
       <div className="w-full h-full flex flex-col space-y-8">
         <div className="flex flex-row items-center justify-between">
           <div className="flex flex-col items-start space-y-4 w-full">
@@ -449,7 +450,7 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
           setShowRemoveModal(false);
         }}
       />
-    </>
+    </IslandContainer>
   );
 };
 
