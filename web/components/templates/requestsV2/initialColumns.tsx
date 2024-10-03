@@ -1,8 +1,5 @@
 import { ColumnDef } from "@tanstack/react-table";
-import {
-  getLocalDateFormat,
-  getUSDateFromString,
-} from "../../shared/utils/utils";
+import { getUSDateFromString } from "../../shared/utils/utils";
 import { NormalizedRequest } from "./builder/abstractRequestBuilder";
 import ModelPill from "./modelPill";
 import StatusBadge from "./statusBadge";
@@ -37,7 +34,7 @@ export const getInitialColumns: (
     header: "Created At",
     cell: (info) => (
       <span className="text-gray-900 dark:text-gray-100 font-medium">
-        {getUSDateFromString(getLocalDateFormat(info.getValue() as string))}
+        {getUSDateFromString(info.getValue() as string)}
       </span>
     ),
     meta: {

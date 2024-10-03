@@ -6,7 +6,7 @@ import { formatNumber } from "../../../templates/users/initialColumns";
 import { clsx } from "../../clsx";
 import { useState } from "react";
 import CostPill from "../../../templates/requestsV2/costPill";
-import { getLocalDateFormat, getUSDateFromString } from "../../utils/utils";
+import { getUSDateFromString } from "../../utils/utils";
 
 interface RequestRowProps {
   index: number;
@@ -43,7 +43,7 @@ const RequestRow = (props: RequestRowProps) => {
     >
       <div className="flex flex-row space-x-4 items-center ">
         <p className="text-sm font-semibold">
-          {getUSDateFromString(getLocalDateFormat(row.createdAt))}
+          {getUSDateFromString(row.createdAt)}
         </p>
         <StatusBadge
           statusType={row.status.statusType}
