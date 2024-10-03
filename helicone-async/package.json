@@ -1,29 +1,36 @@
 {
-  "name": "@helicone/helicone",
-  "version": "3.1.2",
-  "description": "A Node.js wrapper for the OpenAI API that logs all requests to Helicone.",
+  "name": "@helicone/async",
+  "version": "1.0.0",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "description": "A Node.js wrapper for logging llm traces directly to Helicone, by passing the proxy, with OpenLLMetry",
   "repository": {
     "type": "git",
     "url": "git@github.com:Helicone/helicone.git",
-    "directory": "helicone/helicone-node"
+    "directory": "helicone/helicone-async"
+  },
+  "scripts": {
+    "build": "tsc --outDir dist/",
+    "lint": "eslint --ext .ts . --fix"
   },
   "keywords": [
     "openai",
     "open",
     "ai",
+    "anthropic",
+    "azure",
+    "cohere",
+    "bedrock",
+    "google",
+    "google-ai",
     "gpt-3",
     "gpt3",
     "gpt4",
     "helicone",
-    "observability"
+    "observability",
+    "openllmetry",
+    "opentelemetry"
   ],
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "scripts": {
-    "build": "tsc --outDir dist/",
-    "test": "jest",
-    "lint": "eslint --ext .ts . --fix"
-  },
   "author": "Helicone, Inc.",
   "license": "Apache-2.0",
   "devDependencies": {
@@ -48,16 +55,12 @@
     "langchain": "^0.2.5",
     "next": "^13.3.1",
     "nock": "^13.5.4",
-    "openai": "^4.63.0",
+    "openai": "^4.48.3",
     "prettier": "^2.8.8",
     "ts-jest": "^29.1.0",
     "typescript": "^5.2.2"
   },
   "dependencies": {
-    "@traceloop/node-server-sdk": "^0.8.6",
-    "@types/uuid": "^9.0.1",
-    "@whatwg-node/fetch": "^0.9.14",
-    "openapi-fetch": "^0.9.7",
-    "uuid": "^9.0.1"
+    "@traceloop/node-server-sdk": "^0.11.2"
   }
 }

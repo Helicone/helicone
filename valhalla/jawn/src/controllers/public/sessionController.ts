@@ -23,6 +23,7 @@ export interface SessionNameQueryParams {
   pSize?: "p50" | "p75" | "p95" | "p99" | "p99.9";
   useInterquartile?: boolean;
 }
+
 @Route("v1/session")
 @Tags("Session")
 @Security("api_key")

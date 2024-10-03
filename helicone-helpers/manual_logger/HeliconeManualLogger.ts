@@ -1,16 +1,31 @@
+import {
+  IHeliconeManualLogger,
+  HeliconeLogRequest,
+  ProviderRequest,
+  ProviderResponse,
+  Timing,
+} from "./types";
+
 export class HeliconeManualLogger {
   private apiKey: string;
   private headers: Record<string, string>;
-  private readonly LOGGING_ENDPOINT: string =
-    "https://api.hconeai.com/custom/v1/log";
+  private LOGGING_ENDPOINT: string = "https://api.hconeai.com/custom/v1/log";
 
   constructor(opts: IHeliconeManualLogger) {
     this.apiKey = opts.apiKey;
     this.headers = opts.headers || {};
+    this.LOGGING_ENDPOINT = opts.loggingEndpoint || this.LOGGING_ENDPOINT;
   }
 
+  /**
+   * Logs a custom request to Helicone
+   * @param request - The request object to log
+   * @param operation - The operation which will be executed and logged
+   * @param additionalHeaders - Additional headers to send with the request
+   * @returns The result of the `operation` function
+   */
   public async logRequest<T>(
-    request: ILogRequest | HeliconeCustomEventRequest,
+    request: HeliconeLogRequest,
     operation: (resultRecorder: HeliconeResultRecorder) => Promise<T>,
     additionalHeaders?: Record<string, string>
   ): Promise<T> {
@@ -35,7 +50,7 @@ export class HeliconeManualLogger {
   }
 
   private async sendLog(
-    request: ILogRequest | HeliconeCustomEventRequest,
+    request: HeliconeLogRequest,
     response: Record<string, any>,
     options: {
       startTime: number;
@@ -49,7 +64,6 @@ export class HeliconeManualLogger {
       url: "custom-model-nopath",
       json: {
         ...request,
-        // model: this.getModelFromRequest(request),
       },
       meta: {},
     };
@@ -60,7 +74,7 @@ export class HeliconeManualLogger {
       json: {
         ...response,
         _type: request._type,
-        // model: this.getModelFromRequest(request),
+        toolName: request.toolName,
       },
     };
 
@@ -113,66 +127,3 @@ class HeliconeResultRecorder {
     return this.results;
   }
 }
-
-/*
- * Type Definitions
- *
- * */
-
-type ProviderRequest = {
-  url: string;
-  json: {
-    [key: string]: any;
-  };
-  meta: Record<string, string>;
-};
-
-type ProviderResponse = {
-  json: {
-    [key: string]: any;
-  };
-  status: number;
-  headers: Record<string, string>;
-};
-
-type Timing = {
-  startTime: {
-    seconds: number;
-    milliseconds: number;
-  };
-  endTime: {
-    seconds: number;
-    milliseconds: number;
-  };
-};
-
-type IHeliconeManualLogger = {
-  apiKey: string;
-  headers?: Record<string, string>;
-};
-
-type ILogRequest = {
-  model: string;
-  [key: string]: any;
-};
-
-interface HeliconeEventTool {
-  _type: "tool";
-  toolName: string;
-  input: string;
-}
-
-interface HeliconeEventVectorDB {
-  _type: "vector_db";
-  operation: "search" | "insert" | "delete" | "update"; // this is very rough, not even needed, just there as dummy attributes for now
-  query: {
-    text?: string;
-    vector?: number[];
-    topK?: number;
-    filter?: object;
-    [key: string]: any; // For any additional parameters
-  };
-  databaseName?: string; // Optional, to specify which vector DB is being used
-}
-
-type HeliconeCustomEventRequest = HeliconeEventTool | HeliconeEventVectorDB;
