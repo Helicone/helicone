@@ -232,6 +232,9 @@ export interface paths {
   "/v1/experiment/run": {
     post: operations["RunExperiment"];
   };
+  "/v1/experiment/{experimentId}/run-status": {
+    post: operations["GetExperimentRunStatus"];
+  };
   "/v1/evals/query": {
     post: operations["QueryEvals"];
   };
@@ -2015,6 +2018,14 @@ Json: JsonObject;
       error: null;
     };
     "Result_ExperimentRun.string_": components["schemas"]["ResultSuccess_ExperimentRun_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__status-string__": {
+      data: {
+        status: string;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__status-string_.string_": components["schemas"]["ResultSuccess__status-string__"] | components["schemas"]["ResultError_string_"];
     Eval: {
       name: string;
       /** Format: double */
@@ -3797,6 +3808,21 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_ExperimentRun.string_"];
+        };
+      };
+    };
+  };
+  GetExperimentRunStatus: {
+    parameters: {
+      path: {
+        experimentId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__status-string_.string_"];
         };
       };
     };

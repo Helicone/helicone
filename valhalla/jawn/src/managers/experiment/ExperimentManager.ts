@@ -124,4 +124,12 @@ export class ExperimentManager extends BaseManager {
 
     return ok({ experimentId: experiment.data.id });
   }
+
+  async getExperimentRunStatus(params: {
+    experimentId: string;
+  }): Promise<Result<{ status: string }, string>> {
+    return this.ExperimentStore.getExperimentRunStatus({
+      experimentId: params.experimentId,
+    });
+  }
 }

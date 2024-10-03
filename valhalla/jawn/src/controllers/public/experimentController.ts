@@ -1,5 +1,14 @@
 // src/users/usersController.ts
-import { Body, Controller, Post, Request, Route, Security, Tags } from "tsoa";
+import {
+  Body,
+  Controller,
+  Path,
+  Post,
+  Request,
+  Route,
+  Security,
+  Tags,
+} from "tsoa";
 import { supabaseServer } from "../../lib/db/supabase";
 import { run } from "../../lib/experiment/run";
 import { FilterLeafSubset } from "../../lib/shared/filters/filterDefs";
@@ -243,5 +252,28 @@ export class ExperimentController extends Controller {
     const runResult = await run(experiment);
 
     return runResult;
+  }
+
+  @Post("/{experimentId}/run-status")
+  public async getExperimentRunStatus(
+    @Path() experimentId: string,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<{ status: string }, string>> {
+    console.log("getExperimentRunStatus", experimentId);
+    const experimentManager = new ExperimentManager(request.authParams);
+
+    const result = await experimentManager.getExperimentRunStatus({
+      experimentId,
+    });
+    console.log("getExperimentRunStatusResult", result);
+
+    if (result.error || !result.data) {
+      this.setStatus(500);
+      console.error(result.error);
+      return err(result.error);
+    } else {
+      this.setStatus(200);
+      return result;
+    }
   }
 }

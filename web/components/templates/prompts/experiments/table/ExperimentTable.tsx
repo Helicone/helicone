@@ -121,6 +121,7 @@ export function ExperimentTable({
     return res.data?.data;
   }, [orgId, experimentData?.dataset?.id]);
 
+  // Define fetchPromptVersionTemplate
   const fetchPromptVersionTemplate = useCallback(async () => {
     const jawnClient = getJawnClient(orgId);
     const res = await jawnClient.GET("/v1/prompt/version/{promptVersionId}", {
@@ -132,6 +133,28 @@ export function ExperimentTable({
     });
     return res.data?.data;
   }, [orgId, promptSubversionId]);
+
+  // Use useQuery to fetch promptVersionTemplateData
+  const { data: promptVersionTemplateData } = useQuery(
+    ["promptVersionTemplate", promptSubversionId],
+    fetchPromptVersionTemplate,
+    {
+      staleTime: Infinity, // Data will never be considered stale
+      cacheTime: Infinity, // Keep the data in cache indefinitely
+      enabled: !!orgId && !!promptSubversionId, // Enable query only if values are available
+    }
+  );
+
+  // Memoize promptVersionTemplate
+  const promptVersionTemplate = promptVersionTemplateData;
+
+  // Store promptVersionTemplate in a ref
+  const promptVersionTemplateRef = useRef(promptVersionTemplate);
+
+  // Update the ref when promptVersionTemplate changes
+  useEffect(() => {
+    promptVersionTemplateRef.current = promptVersionTemplate;
+  }, [promptVersionTemplate]);
 
   const fetchRandomInputRecords = useCallback(async () => {
     const jawnClient = getJawnClient(orgId);
@@ -169,18 +192,6 @@ export function ExperimentTable({
     }
   );
 
-  const { data: promptVersionTemplateData } = useQuery(
-    ["promptVersionTemplate", orgId, promptSubversionId],
-    fetchPromptVersionTemplate,
-    {
-      enabled: true,
-    }
-  );
-
-  const promptVersionTemplate = useMemo(() => {
-    return promptVersionTemplateData;
-  }, [promptVersionTemplateData]);
-
   const randomInputRecords = useMemo(() => {
     return (
       randomInputRecordsData?.map((row) => ({
@@ -215,7 +226,7 @@ export function ExperimentTable({
 
       setInputKeys(newInputKeys);
 
-      const newRowData = inputRecordsData.map((row, rowIdx) => {
+      const newRowData = inputRecordsData.map((row) => {
         const hypothesisRowData: Record<string, string> = {};
 
         // Always populate "Messages" and "Original" columns
@@ -248,27 +259,33 @@ export function ExperimentTable({
           }
         });
 
+        // Find existing row to preserve isLoading state
+        const existingRow = rowData.find(
+          (existingRow) => existingRow.dataset_row_id === row.dataset_row_id
+        );
+
         return {
           id: row.id,
           dataset_row_id: row.dataset_row_id,
           // Spread inputs to individual fields
           ...row.inputs,
           ...hypothesisRowData,
-          isLoading: {},
+          isLoading: existingRow?.isLoading || {}, // Preserve isLoading state
         };
       });
 
       setRowData(newRowData);
     },
-    [setInputKeys, setRowData, promptVersionTemplate]
+    [experimentData, inputRecordsData]
   );
 
   // Add useEffect to update rowData when experimentData or inputRecordsData change
   useEffect(() => {
+    console.log("render");
     if (experimentData && inputRecordsData) {
       updateRowData(experimentData, inputRecordsData);
     }
-  }, [experimentData, inputRecordsData, updateRowData]);
+  }, [experimentData, inputRecordsData]);
 
   // Add an empty row if rowData is empty
   useEffect(() => {
@@ -332,7 +349,7 @@ export function ExperimentTable({
     },
     {
       onMutate: ({ hypothesisId, datasetRowIds }) => {
-        // Set loading state in rowData
+        // Update loading state in rowData
         setRowData((prevData) =>
           prevData.map((row) => {
             if (datasetRowIds.includes(row.dataset_row_id)) {
@@ -581,9 +598,13 @@ export function ExperimentTable({
             displayName: `Experiment ${experimentNumber}`,
             badgeText: "Output",
             badgeVariant: "secondary",
-            onRunColumn: (colId: string) => {
+            onRunColumn: async (colId: string) => {
               const datasetRowIds = rowData.map((row) => row.dataset_row_id);
-              handleRunHypothesis(colId, datasetRowIds);
+              await Promise.all(
+                datasetRowIds.map((datasetRowId) =>
+                  handleRunHypothesis(colId, [datasetRowId])
+                )
+              );
             },
             hypothesis: hypothesis,
           },
@@ -733,6 +754,10 @@ export function ExperimentTable({
               hypothesesToRun,
               inputKeys: Array.from(inputKeys),
               hypotheses: sortedHypotheses,
+              refetchExperiments, // Add refetchExperiments to context
+              experimentId, // Add experimentId to context
+              orgId, // If needed in the cell renderer
+              promptVersionTemplateRef, // Pass the ref instead
             }}
             rowClass="border-b border-gray-200 hover:bg-gray-50"
             headerHeight={40}

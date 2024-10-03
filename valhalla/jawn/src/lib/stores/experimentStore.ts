@@ -359,6 +359,12 @@ export class ExperimentStore extends BaseStore {
   ): Promise<Result<Experiment, string>> {
     return await ServerExperimentStore.getExperiment(experimentId, include);
   }
+
+  async getExperimentRunStatus(params: {
+    experimentId: string;
+  }): Promise<Result<{ status: string }, string>> {
+    return await getExperimentRunStatus(params);
+  }
 }
 
 export const ServerExperimentStore: {
@@ -377,6 +383,9 @@ export const ServerExperimentStore: {
       string
     >
   >;
+  getExperimentRunStatus: (
+    experimentId: string
+  ) => Promise<Result<{ status: string }, string>>;
 } = {
   experimentPop: async (include?: IncludeExperimentKeys) => {
     const { data: experimentId, error: experimentIdError } =
@@ -435,7 +444,31 @@ export const ServerExperimentStore: {
       }
     );
   },
+  getExperimentRunStatus: async (experimentId: string) => {
+    return await getExperimentRunStatus({ experimentId });
+  },
 };
+
+export async function getExperimentRunStatus(params: {
+  experimentId: string;
+}): Promise<Result<{ status: string }, string>> {
+  const { data, error } = await dbExecute<{ status: string }>(
+    `
+    SELECT status
+    FROM experiment_v2_hypothesis
+    WHERE experiment_v2 = $1
+    `,
+    [params.experimentId]
+  );
+
+  if (error || !data) {
+    return err(error);
+  }
+
+  return ok({
+    status: data[0].status,
+  });
+}
 
 function getExperimentScores(
   experiment: Experiment
