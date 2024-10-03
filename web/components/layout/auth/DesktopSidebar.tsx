@@ -169,7 +169,7 @@ const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
               <div className="flex w-full justify-center px-5 py-2">
                 <Button
                   variant="outline"
-                  className="w-full"
+                  className="w-full  dark:text-slate-400"
                   size="sm_sleek"
                   onClick={() => {
                     router.push("/enterprise/portal");
@@ -187,7 +187,6 @@ const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
                 </Button>
               </div>
             )}
-
             <div
               ref={navItemsRef}
               data-collapsed={isCollapsed}

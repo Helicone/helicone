@@ -272,7 +272,7 @@ export default function ThemedTable<T extends { id?: string }>(
                   }}
                 >
                   <table
-                    className="h-full bg-white"
+                    className="h-full bg-white dark:bg-black"
                     {...{
                       style: {
                         width: fullWidth ? "100%" : table.getCenterTotalSize(),
@@ -284,7 +284,7 @@ export default function ThemedTable<T extends { id?: string }>(
                       {table.getHeaderGroups().map((headerGroup) => (
                         <tr
                           key={headerGroup.id}
-                          className="sticky top-0 z-10 bg-slate-50 dark:bg-slate-900 shadow-sm"
+                          className="sticky top-0  bg-slate-50 dark:bg-slate-900 shadow-sm"
                         >
                           {showCheckboxes && (
                             <th className="w-8 px-2 sticky left-0 z-20 bg-slate-50 dark:bg-slate-900">
@@ -327,10 +327,10 @@ export default function ThemedTable<T extends { id?: string }>(
                         <tr
                           key={row.id}
                           className={clsx(
-                            " dark:hover:bg-gray-900 hover:cursor-pointer",
+                            " hover:cursor-pointer",
                             checkedIds?.includes(row.original?.id ?? "")
-                              ? "bg-sky-100 border-l border-sky-500 pl-2"
-                              : "hover:bg-sky-50"
+                              ? "bg-sky-100 border-l border-sky-500 pl-2 dark:bg-sky-900 dark:border-sky-900"
+                              : "hover:bg-sky-50 dark:hover:bg-sky-950"
                           )}
                           onClick={
                             onRowSelect &&

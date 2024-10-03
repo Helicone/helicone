@@ -6,6 +6,7 @@ import ThemedTable from "../../shared/themed/table/themedTable";
 import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
 import { useMemo } from "react";
 import { useOrg } from "@/components/layout/organizationContext";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface DatasetsPageProps {
   currentPage: number;
@@ -44,7 +45,12 @@ const DatasetsPage = (props: DatasetsPageProps) => {
   return (
     <>
       <AuthHeader title={"Datasets"} />
-      {!isLoading && org?.currentOrg?.tier === "free" ? (
+
+      {isLoading ? (
+        <div className="flex flex-col space-y-2 w-full items-center">
+          <Skeleton className="w-full h-full" />
+        </div>
+      ) : !isLoading && org?.currentOrg?.tier === "free" ? (
         <div className="flex flex-col space-y-2 w-full items-center">
           <FeatureUpgradeCard
             title="Unlock Datasets"

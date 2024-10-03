@@ -148,8 +148,8 @@ export function ThemedTimeFilterShadCN({
             id="date"
             variant={"outline"}
             className={cn(
-              "justify-start text-left font-normal",
-              !date && "text-muted-foreground"
+              " dark:text-slate-400",
+              "justify-start text-left font-normal"
             )}
             size="md_sleek"
           >

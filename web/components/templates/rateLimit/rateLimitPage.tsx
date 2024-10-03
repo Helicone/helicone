@@ -95,7 +95,6 @@ const RateLimitPage = (props: {}) => {
   return (
     <>
       <AuthHeader
-        isWithinIsland
         title={
           <div className="flex items-center gap-2">
             Rate limits <Badge size="sm">Beta</Badge>
