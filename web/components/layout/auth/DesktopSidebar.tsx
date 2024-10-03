@@ -208,13 +208,13 @@ const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
           </div>
 
           {tier !== "growth" && tier !== "pro" && canShowInfoBox && (
-            <div className="bg-sky-500/10 rounded-lg w-full border-l-4 border-l-sky-500 text-sky-500 flex flex-col md:flex-row md:gap-2 gap-4 justify-between md:justify-center md:items-center items-start p-2 mt-2 mx-0 mb-8">
-              <h1 className="text-md text-start font-medium tracking-tight">
+            <div className="bg-sky-500/10 rounded-lg border-l-4 border-l-sky-500 border-y border-r border-y-sky-200 border-r-sky-200 text-sky-500 flex flex-col md:flex-row md:gap-2 gap-4 justify-between md:justify-center md:items-center items-start p-2 mt-2 mx-2 mb-8">
+              <h1 className="text-xs text-start font-medium tracking-tight leading-tight">
                 🎉 Introducing a new way to perfect your prompts.{" "}
                 <Link
                   href="https://helicone.ai/experiments"
                   target="_blank"
-                  className="underline decoration-sky-400 decoration-1 underline-offset-2"
+                  className="underline decoration-sky-400 decoration-1 underline-offset-2 font-semibold"
                 >
                   Get early access here.
                 </Link>{" "}

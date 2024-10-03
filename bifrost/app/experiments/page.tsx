@@ -369,7 +369,7 @@ export default function ExperimentsWaitlist() {
 
     try {
       const response = await fetch(
-        "http://localhost:8585/v1/public/waitlist/experiments",
+        "https://api.helicone.ai/v1/public/waitlist/experiments",
         {
           method: "POST",
           headers: {
