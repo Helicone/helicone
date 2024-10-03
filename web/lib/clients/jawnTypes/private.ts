@@ -311,6 +311,9 @@ export interface paths {
   "/v1/stripe/webhook": {
     post: operations["HandleStripeWebhook"];
   };
+  "/v1/public/waitlist/experiments": {
+    post: operations["AddToWaitlist"];
+  };
   "/v1/organization/user/accept_terms": {
     post: operations["AcceptTerms"];
   };
@@ -2217,6 +2220,11 @@ Json: JsonObject;
         prompts?: boolean;
         alerts?: boolean;
       };
+    };
+    ResultError_any_: {
+      /** @enum {number|null} */
+      data: null;
+      error: unknown;
     };
     NewOrganizationParams: {
       tier?: string | null;
@@ -4195,6 +4203,23 @@ export interface operations {
       /** @description No content */
       204: {
         content: never;
+      };
+    };
+  };
+  AddToWaitlist: {
+    requestBody: {
+      content: {
+        "application/json": {
+          email: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ResultSuccess_unknown_"] | components["schemas"]["ResultError_any_"];
+        };
       };
     };
   };
