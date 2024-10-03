@@ -38,10 +38,6 @@ const DatasetsPage = (props: DatasetsPageProps) => {
     );
   }, [org?.currentOrg?.tier, org?.currentOrg?.stripe_metadata]);
 
-  const hasLimitedAccess = useMemo(() => {
-    return !hasAccess && (datasets?.length ?? 0) > 0;
-  }, [hasAccess, datasets?.length]);
-
   return (
     <>
       <AuthHeader title={"Datasets"} />
