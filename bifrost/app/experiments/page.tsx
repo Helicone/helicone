@@ -451,7 +451,7 @@ export default function ExperimentsWaitlist() {
         <div className="w-full max-w-7xl h-full z-[5]">
           <video controls autoPlay loop className="z-[5] rounded-lg">
             <source
-              src="/static/blog/ai-best-practices/1. Define Key Performance Metrics.mp4"
+              src="https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/experiments.mp4"
               type="video/mp4"
             />
             Your browser does not support the video tag.
@@ -677,10 +677,10 @@ const ExperimentsTable = () => {
   };
 
   return (
-    <div className="absolute top-1/2 right-0 -translate-y-1/2 min-w-[1200px] w-full overflow-visible z-[2]">
+    <div className="opacity-20 md:opacity-100 absolute top-1/2 right-0 -translate-y-1/2 min-w-[1200px] w-full overflow-visible z-[2]">
       <div className="rounded-lg overflow-visible relative">
         {/* Add a div for the glowing box shadow effect */}
-        <div className="absolute hidden lg:block top-0 bottom-0 left-[66.66%] right-[16.67%] z-[3] shadow-[0_0_50px_20px_#FF006B30] pointer-events-none rounded-lg"></div>
+        <div className="absolute top-0 bottom-0 left-[66.66%] right-[16.67%] z-[3] shadow-[0_0_50px_20px_#FF006B30] pointer-events-none rounded-lg"></div>
 
         <div className="grid grid-cols-6 relative z-[4]">
           {columns.map((column, index) => (
