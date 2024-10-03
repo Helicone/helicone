@@ -99,7 +99,7 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
   };
 
   return (
-    <div className="flex flex-col max-w-[100rem]">
+    <div className="flex flex-col">
       <div className="flex flex-col gap-3 lg:flex-row justify-between ">
         <div className="flex flex-row gap-3 items-center">
           {timeFilter !== undefined ? (

@@ -287,7 +287,7 @@ export default function ThemedTable<T extends { id?: string }>(
                           className="sticky top-0 z-10 bg-slate-50 dark:bg-slate-900 shadow-sm"
                         >
                           {showCheckboxes && (
-                            <th className="w-8 px-2 sticky left-0 z-20 bg-slate-50 dark:bg-slate-900 relative">
+                            <th className="w-8 px-2 sticky left-0 z-20 bg-slate-50 dark:bg-slate-900">
                               <Checkbox
                                 onChange={(e) =>
                                   handleSelectAll(e.target.checked)
