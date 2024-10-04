@@ -281,7 +281,6 @@ export function ExperimentTable({
 
   // Add useEffect to update rowData when experimentData or inputRecordsData change
   useEffect(() => {
-    console.log("render");
     if (experimentData && inputRecordsData) {
       updateRowData(experimentData, inputRecordsData);
     }
@@ -634,6 +633,7 @@ export function ExperimentTable({
       headerComponent: AddColumnHeader,
       headerComponentParams: {
         promptVersionId: promptSubversionId,
+        promptVersionTemplate: promptVersionTemplate,
         experimentId,
         selectedProviderKey: providerKey,
         refetchData,

@@ -27,6 +27,7 @@ import { Input } from "@/components/ui/input";
 interface AddColumnHeaderProps {
   promptVersionId: string;
   experimentId: string;
+  promptVersionTemplate: any;
   selectedProviderKey: string | null;
   refetchData: () => void; // Add this line
 }
@@ -41,20 +42,13 @@ const SCORES = [
 
 const AddColumnHeader: React.FC<AddColumnHeaderProps> = ({
   promptVersionId,
+  promptVersionTemplate,
   experimentId,
   selectedProviderKey,
   refetchData, // Add this line
 }) => {
   const [open, setOpen] = useState(false);
   const jawn = useJawnClient();
-  const promptVersion = useQuery({
-    queryKey: ["promptVersion", promptVersionId],
-    queryFn: async () => {
-      return await jawn.GET(`/v1/prompt/version/{promptVersionId}`, {
-        params: { path: { promptVersionId } },
-      });
-    },
-  });
 
   const [showSuggestionPanel, setShowSuggestionPanel] = useState(false);
   const [scoreCriterias, setScoreCriterias] = useState<
@@ -63,11 +57,6 @@ const AddColumnHeader: React.FC<AddColumnHeaderProps> = ({
       criteria?: string;
     }[]
   >([]);
-
-  console.log(
-    "promptVersion",
-    promptVersion.data?.data?.data?.helicone_template
-  );
 
   return (
     <>
@@ -207,7 +196,7 @@ const AddColumnHeader: React.FC<AddColumnHeaderProps> = ({
               )}
               <PromptPlayground
                 defaultEditMode={true}
-                prompt={promptVersion.data?.data?.data?.helicone_template ?? ""}
+                prompt={promptVersionTemplate?.helicone_template ?? ""}
                 selectedInput={undefined}
                 onSubmit={async (history, model) => {
                   console.log("Submitted history:", history);
@@ -259,8 +248,6 @@ const AddColumnHeader: React.FC<AddColumnHeaderProps> = ({
                   );
 
                   console.log("New hypothesis:", newHypothesis.data);
-
-                  promptVersion.refetch(); // Optional: Refetch prompt versions
 
                   setOpen(false); // Close the drawer after adding the column
 
