@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import { useJawnClient } from "@/lib/clients/jawnHook";
 import { Button } from "@/components/ui/button";
@@ -59,7 +58,7 @@ const AddColumnHeader: React.FC<AddColumnHeaderProps> = ({
   >([]);
 
   return (
-    <>
+    <div>
       <div className="flex items-center justify-center w-full h-full">
         <button
           className="p-1 text-gray-500 hover:text-gray-700 flex flex-row items-center space-x-2"
@@ -115,7 +114,9 @@ const AddColumnHeader: React.FC<AddColumnHeaderProps> = ({
                                   (c) => c.scoreType === score
                                 ) || criteria.scoreType === score
                             ).map((score) => (
-                              <SelectItem value={score}>{score}</SelectItem>
+                              <SelectItem key={score} value={score}>
+                                {score}
+                              </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
@@ -234,20 +235,15 @@ const AddColumnHeader: React.FC<AddColumnHeaderProps> = ({
                     return;
                   }
 
-                  const newHypothesis = await jawn.POST(
-                    "/v1/experiment/hypothesis",
-                    {
-                      body: {
-                        experimentId: experimentId,
-                        model: model,
-                        promptVersion: result.data.data?.id ?? "",
-                        providerKeyId: selectedProviderKey ?? "NOKEY",
-                        status: "RUNNING",
-                      },
-                    }
-                  );
-
-                  console.log("New hypothesis:", newHypothesis.data);
+                  await jawn.POST("/v1/experiment/hypothesis", {
+                    body: {
+                      experimentId: experimentId,
+                      model: model,
+                      promptVersion: result.data.data?.id ?? "",
+                      providerKeyId: selectedProviderKey ?? "NOKEY",
+                      status: "RUNNING",
+                    },
+                  });
 
                   setOpen(false); // Close the drawer after adding the column
 
@@ -263,7 +259,7 @@ const AddColumnHeader: React.FC<AddColumnHeaderProps> = ({
           </SheetFooter>
         </SheetContent>
       </Sheet>
-    </>
+    </div>
   );
 };
 
