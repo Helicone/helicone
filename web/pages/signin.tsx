@@ -8,7 +8,6 @@ import { supabaseServer } from "../lib/supabaseServer";
 import { Result, err, ok } from "../lib/result";
 import PublicMetaData from "../components/layout/public/publicMetaData";
 import { useEffect } from "react";
-import { Skeleton } from "@/components/ui/skeleton";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
 
 export type CustomerPortalContent = {
