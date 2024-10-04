@@ -1,10 +1,10 @@
 {
-  "title": "Replaying LLM Sessions for Iterative AI Agent Improvement",
-  "title1": "Replaying LLM Sessions for Iterative AI Agent Improvement",
-  "title2": "Replaying LLM Sessions for Iterative AI Agent Improvement",
-  "description": "Learn how to enhance your AI agents by replaying and modifying LLM sessions using Helicone. Apply changes directly to real user interactions to gain authentic context, reveal hidden effects, and accelerate iteration.",
+  "title": "Optimizing AI Agents: How Replaying LLM Sessions Enhances Performance",
+  "title1": "Optimizing AI Agents: How Replaying LLM Sessions Enhances Performance",
+  "title2": "Optimizing AI Agents: How Replaying LLM Sessions Enhances Performance",
+  "description": "Learn how to optimize your AI agents by replaying LLM sessions using Helicone. Enhance performance, uncover hidden issues, and accelerate AI agent development with this comprehensive guide.",
   "images": "/static/blog/replaying-llm-sessions/sessions.webp",
-  "time": "15 minute read",
+  "time": "15-minute read",
   "author": "Cole Gottdank",
-  "date": "September 26, 2024"
+  "date": "October 1, 2023"
 }
