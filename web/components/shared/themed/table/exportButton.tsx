@@ -5,6 +5,7 @@ import { useState } from "react";
 import { clsx } from "../../clsx";
 import useNotification from "../../notification/useNotification";
 import ThemedModal from "../themedModal";
+import { Button } from "@/components/ui/button";
 
 interface ExportButtonProps<T> {
   rows: T[];
@@ -71,15 +72,15 @@ export default function ExportButton<T>(props: ExportButtonProps<T>) {
 
   return (
     <>
-      <button
+      <Button
+        variant="ghost"
         onClick={() => setOpen(true)}
-        className="border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 bg-white dark:bg-black hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2"
+        className="flex items-center gap-2"
+        size="xs"
       >
-        <ArrowDownTrayIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
-        <p className="text-sm font-medium text-gray-900 dark:text-gray-100 hidden sm:block">
-          Export
-        </p>
-      </button>
+        <ArrowDownTrayIcon className="h-4 w-4" />
+      </Button>
+
       <ThemedModal open={open} setOpen={setOpen}>
         <div className="flex flex-col space-y-4 sm:space-y-8 min-w-[350px] max-w-sm w-full">
           <div className="flex flex-col space-y-8">

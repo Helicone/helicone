@@ -1,3 +1,5 @@
+import AuthHeader from "@/components/shared/authHeader";
+import { IslandContainer } from "@/components/ui/islandContainer";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   BuildingOfficeIcon,
@@ -66,7 +68,8 @@ const SettingsLayout = ({ children }: SettingsLayoutProps) => {
   const currentPath = router.pathname;
 
   return (
-    <div className="space-y-6">
+    <IslandContainer className="space-y-6 ">
+      <AuthHeader isWithinIsland={true} title={"Settings"} />
       <div className="flex flex-col space-y-8 items-start">
         <div className="flex flex-col space-y-2 items-start">
           <Tabs
@@ -99,7 +102,7 @@ const SettingsLayout = ({ children }: SettingsLayoutProps) => {
 
         <div className="flex-1 w-full">{children}</div>
       </div>
-    </div>
+    </IslandContainer>
   );
 };
 

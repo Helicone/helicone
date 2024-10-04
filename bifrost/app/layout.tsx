@@ -10,6 +10,7 @@ import { PHProvider } from "./providers";
 import dynamic from "next/dynamic";
 import Script from "next/script";
 import Head from "next/head";
+import { Layout } from "./components/Layout";
 const PostHogPageView = dynamic(() => import("./PostHogPageView"), {
   ssr: false,
 });
@@ -67,9 +68,7 @@ export default function RootLayout({
       <PHProvider>
         <body>
           <div className={`bg-[#f8feff] flex flex-col ${inter.className}`}>
-            <NavBar />
-            {children}
-            <Footer />
+            <Layout>{children}</Layout>
           </div>
           <PostHogPageView />
           <Analytics />

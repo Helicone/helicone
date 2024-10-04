@@ -48,7 +48,7 @@
     "langchain": "^0.2.5",
     "next": "^13.3.1",
     "nock": "^13.5.4",
-    "openai": "^4.48.3",
+    "openai": "^4.63.0",
     "prettier": "^2.8.8",
     "ts-jest": "^29.1.0",
     "typescript": "^5.2.2"

@@ -7,6 +7,42 @@
 		"requestBodies": {},
 		"responses": {},
 		"schemas": {
+			"ResultSuccess_unknown_": {
+				"properties": {
+					"data": {},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultError_any_": {
+				"properties": {
+					"data": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					},
+					"error": {}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"ResultSuccess__id-string__": {
 				"properties": {
 					"data": {
@@ -804,6 +840,9 @@
 							"$ref": "#/components/schemas/Partial_TextOperators_"
 						},
 						"type": "object"
+					},
+					"scores_column": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
 					},
 					"request_body": {
 						"$ref": "#/components/schemas/Partial_VectorOperators_"
@@ -3790,21 +3829,42 @@
 					}
 				]
 			},
-			"Partial_ResponseTableToOperators_": {
+			"Partial_CacheHitsTableToOperators_": {
 				"properties": {
-					"body_tokens": {
-						"$ref": "#/components/schemas/Partial_NumberOperators_"
-					},
-					"body_model": {
+					"organization_id": {
 						"$ref": "#/components/schemas/Partial_TextOperators_"
 					},
-					"body_completion": {
+					"request_id": {
 						"$ref": "#/components/schemas/Partial_TextOperators_"
 					},
-					"status": {
+					"latency": {
 						"$ref": "#/components/schemas/Partial_NumberOperators_"
 					},
-					"model": {
+					"completion_tokens": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"prompt_tokens": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"created_at": {
+						"$ref": "#/components/schemas/Partial_TimestampOperatorsTyped_"
+					}
+				},
+				"type": "object",
+				"description": "Make all properties in T optional"
+			},
+			"Partial_FeedbackTableToOperators_": {
+				"properties": {
+					"id": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"created_at": {
+						"$ref": "#/components/schemas/Partial_TimestampOperators_"
+					},
+					"rating": {
+						"$ref": "#/components/schemas/Partial_BooleanOperators_"
+					},
+					"response_id": {
 						"$ref": "#/components/schemas/Partial_TextOperators_"
 					}
 				},
@@ -3850,24 +3910,6 @@
 				"type": "object",
 				"description": "Make all properties in T optional"
 			},
-			"Partial_FeedbackTableToOperators_": {
-				"properties": {
-					"id": {
-						"$ref": "#/components/schemas/Partial_NumberOperators_"
-					},
-					"created_at": {
-						"$ref": "#/components/schemas/Partial_TimestampOperators_"
-					},
-					"rating": {
-						"$ref": "#/components/schemas/Partial_BooleanOperators_"
-					},
-					"response_id": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					}
-				},
-				"type": "object",
-				"description": "Make all properties in T optional"
-			},
 			"Partial_RequestResponseSearchToOperators_": {
 				"properties": {
 					"request_body_vector": {
@@ -3880,25 +3922,22 @@
 				"type": "object",
 				"description": "Make all properties in T optional"
 			},
-			"Partial_CacheHitsTableToOperators_": {
+			"Partial_ResponseTableToOperators_": {
 				"properties": {
-					"organization_id": {
+					"body_tokens": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"body_model": {
 						"$ref": "#/components/schemas/Partial_TextOperators_"
 					},
-					"request_id": {
+					"body_completion": {
 						"$ref": "#/components/schemas/Partial_TextOperators_"
 					},
-					"latency": {
+					"status": {
 						"$ref": "#/components/schemas/Partial_NumberOperators_"
 					},
-					"completion_tokens": {
-						"$ref": "#/components/schemas/Partial_NumberOperators_"
-					},
-					"prompt_tokens": {
-						"$ref": "#/components/schemas/Partial_NumberOperators_"
-					},
-					"created_at": {
-						"$ref": "#/components/schemas/Partial_TimestampOperatorsTyped_"
+					"model": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
 					}
 				},
 				"type": "object",
@@ -3906,23 +3945,11 @@
 			},
 			"Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits-or-request_response_rmt_": {
 				"properties": {
-					"request_response_rmt": {
-						"$ref": "#/components/schemas/Partial_RequestResponseRMTToOperators_"
-					},
-					"response": {
-						"$ref": "#/components/schemas/Partial_ResponseTableToOperators_"
-					},
-					"request": {
-						"$ref": "#/components/schemas/Partial_RequestTableToOperators_"
+					"cache_hits": {
+						"$ref": "#/components/schemas/Partial_CacheHitsTableToOperators_"
 					},
 					"feedback": {
 						"$ref": "#/components/schemas/Partial_FeedbackTableToOperators_"
-					},
-					"request_response_search": {
-						"$ref": "#/components/schemas/Partial_RequestResponseSearchToOperators_"
-					},
-					"cache_hits": {
-						"$ref": "#/components/schemas/Partial_CacheHitsTableToOperators_"
 					},
 					"properties": {
 						"properties": {},
@@ -3930,6 +3957,18 @@
 							"$ref": "#/components/schemas/Partial_TextOperators_"
 						},
 						"type": "object"
+					},
+					"request": {
+						"$ref": "#/components/schemas/Partial_RequestTableToOperators_"
+					},
+					"request_response_search": {
+						"$ref": "#/components/schemas/Partial_RequestResponseSearchToOperators_"
+					},
+					"response": {
+						"$ref": "#/components/schemas/Partial_ResponseTableToOperators_"
+					},
+					"request_response_rmt": {
+						"$ref": "#/components/schemas/Partial_RequestResponseRMTToOperators_"
 					},
 					"values": {
 						"properties": {},
@@ -4482,11 +4521,11 @@
 			},
 			"Pick_FilterLeaf.request-or-prompts_versions_": {
 				"properties": {
-					"request": {
-						"$ref": "#/components/schemas/Partial_RequestTableToOperators_"
-					},
 					"prompts_versions": {
 						"$ref": "#/components/schemas/Partial_PromptVersionsToOperators_"
+					},
+					"request": {
+						"$ref": "#/components/schemas/Partial_RequestTableToOperators_"
 					}
 				},
 				"type": "object",
@@ -4876,24 +4915,6 @@
 					}
 				]
 			},
-			"ResultSuccess_any_": {
-				"properties": {
-					"data": {},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
 			"ResultError_unknown_": {
 				"properties": {
 					"data": {
@@ -4904,6 +4925,24 @@
 						"nullable": true
 					},
 					"error": {}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_any_": {
+				"properties": {
+					"data": {},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
 				},
 				"required": [
 					"data",
@@ -4949,24 +4988,6 @@
 						"$ref": "#/components/schemas/ResultError_string_"
 					}
 				]
-			},
-			"ResultSuccess_unknown_": {
-				"properties": {
-					"data": {},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
 			},
 			"PostgrestError": {
 				"properties": {
@@ -6763,6 +6784,53 @@
 		"contact": {}
 	},
 	"paths": {
+		"/v1/public/waitlist/experiments": {
+			"post": {
+				"operationId": "AddToWaitlist",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/ResultSuccess_unknown_"
+										},
+										{
+											"$ref": "#/components/schemas/ResultError_any_"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Waitlist"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"email": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"email"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
 		"/v1/vault/add": {
 			"post": {
 				"operationId": "AddKey",
@@ -10293,10 +10361,10 @@
 								"schema": {
 									"anyOf": [
 										{
-											"$ref": "#/components/schemas/ResultSuccess_any_"
+											"$ref": "#/components/schemas/ResultError_unknown_"
 										},
 										{
-											"$ref": "#/components/schemas/ResultError_unknown_"
+											"$ref": "#/components/schemas/ResultSuccess_any_"
 										}
 									]
 								}

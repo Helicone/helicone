@@ -12,51 +12,55 @@ iconType: "solid"
 ## Walkthrough: logging chat completions
 
 <Steps>
-     <Step title="To get started, install the `@helicone/helicone` package">
+     <Step title="To get started, install the `@helicone/helpers` package">
      ```bash
-     npm install @helicone/helicone
+     npm install @helicone/helpers
      ```
      </Step>
      <Step title="Setup the logger">
      ```typescript
-       import { HeliconeManualLogger } from "@helicone/helicone";
+       import { HeliconeManualLogger } from "@helicone/helpers";
 
        const logger = new HeliconeManualLogger({
          apiKey: process.env.HELICONE_API_KEY
        });
      ```
      </Step>
-     <Step title="Register the request and call your LLM">
+     <Step title="Call your LLM and log the request">
      ```typescript
      const reqBody = {
-       "model": "phi3:mini",
-       "messages": [{
-       "role": "user",
-         "content": "Why is the sky blue?"
+       model: "phi3:mini",
+       messages: [{
+          role: "user",
+          content: "Why is the sky blue?"
        }],
-       "stream": false
+       stream: false
      }
 
-     logger.registerRequest(reqBody);
-
-     const r = await fetch("http://localhost:11434/api/chat", {
-       method: "POST",
-       headers: {
-         "Content-Type": "application/json",
-       },
-       body: JSON.stringify(reqBody)
+     const res = await logger.logRequest(reqBody, async (resultRecorder) => {
+        const r = await fetch("http://localhost:11434/api/chat", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(reqBody)
+        }) 
+        
+        const resBody = await r.json();
+        resultRecorder.appendResult(resBody);
+        return resBody;
      })
      ```
      </Step>
-     <Step title="Decode and send the logs!">
+     {/* <Step title="Decode and send the logs!">
      ```typescript
        const res = await r.json();
        console.log(res);
        logger.sendLog(res);
      ```
-     </Step>
+     </Step> */}
 
-     <Step title="Go to the Helicone Requests pgae and see your request!">
+     <Step title="Go to the Helicone Requests page and see your request!">
      </Step>
 
 </Steps>
@@ -73,17 +77,19 @@ const reqBody = {
   stream: false,
 };
 
-logger.registerRequest(reqBody);
-
-const r = await fetch("http://localhost:11434/api/generate", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-  },
-  body: JSON.stringify(reqBody),
-});
-
-logger.sendLog(res);
+const res = await logger.logRequest(reqBody, async (resultRecorder) => {
+  const r = await fetch("http://localhost:11434/api/generate", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(reqBody)
+  }) 
+  
+  const resBody = await r.json();
+  resultRecorder.appendResult(resBody);
+  return resBody;
+})
 ```
 
 # Resources

@@ -236,6 +236,18 @@ export class ResponseBodyHandler extends AbstractLogHandler {
     );
   }
 
+  private isVectorDBResponse(responseBody: any): boolean {
+    return (
+      responseBody.hasOwnProperty("_type") && responseBody._type === "vector_db"
+    );
+  }
+
+  private isToolResponse(responseBody: any): boolean {
+    return (
+      responseBody.hasOwnProperty("_type") && responseBody._type === "tool"
+    );
+  }
+
   private determineAssistantModel(
     responseBody: any,
     currentModel?: string
@@ -248,6 +260,13 @@ export class ResponseBodyHandler extends AbstractLogHandler {
       return { responseModel: "Assistant Polling", model: "assistant-polling" };
     } else if (this.isAssistantResponse(responseBody) && !currentModel) {
       return { responseModel: "Assistant Call", model: "assistant-call" };
+    } else if (this.isVectorDBResponse(responseBody)) {
+      return { responseModel: "Vector DB", model: "vector_db" };
+    } else if (this.isToolResponse(responseBody)) {
+      return {
+        responseModel: "Tool",
+        model: `tool:${responseBody.toolName}`,
+      };
     }
     return { responseModel: currentModel || "", model: currentModel || "" };
   }

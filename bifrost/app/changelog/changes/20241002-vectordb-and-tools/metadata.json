@@ -1,0 +1,4 @@
+{
+  "title": "Introducing new NPM packages for Helicone",
+  "description": "Introducing two new npm packages: `@helicone/async` and `@helicone/helpers` to help with async and manual logging."
+}

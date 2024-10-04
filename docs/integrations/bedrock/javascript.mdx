@@ -32,12 +32,12 @@ iconType: "solid"
   <Step title="Install necessary packages">
     Ensure you have the necessary packages installed in your JavaScript project:
     ```bash
-    npm install @helicone/helicone @aws-sdk/client-bedrock-runtime
+    npm install @helicone/async @aws-sdk/client-bedrock-runtime
     ```
   </Step>
   <Step title="Import required modules and initialize Helicone Logger">
     ```javascript
-    import { HeliconeAsyncLogger } from "@helicone/helicone";
+    import { HeliconeAsyncLogger } from "@helicone/async";
     import * as bedrock from "@aws-sdk/client-bedrock-runtime";
     import util from "util";
 
@@ -101,7 +101,7 @@ iconType: "solid"
 Here's a complete example that puts all the steps together:
 
 ```javascript
-import { HeliconeAsyncLogger } from "@helicone/helicone";
+import { HeliconeAsyncLogger } from "@helicone/async";
 import * as bedrock from "@aws-sdk/client-bedrock-runtime";
 import util from "util";
 

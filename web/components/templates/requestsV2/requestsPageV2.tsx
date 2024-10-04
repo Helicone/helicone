@@ -35,7 +35,6 @@ import AuthHeader from "../../shared/authHeader";
 import { clsx } from "../../shared/clsx";
 import ThemedTable from "../../shared/themed/table/themedTable";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
-import { ThemedSwitch } from "../../shared/themed/themedSwitch";
 import useSearchParams from "../../shared/utils/useSearchParams";
 import { TimeFilter } from "../dashboard/dashboardPage";
 import { NormalizedRequest } from "./builder/abstractRequestBuilder";
@@ -47,7 +46,6 @@ import getNormalizedRequest from "./builder/requestBuilder";
 import DatasetButton from "./buttons/datasetButton";
 import { getInitialColumns } from "./initialColumns";
 import RequestCard from "./requestCard";
-import RequestDrawerV2 from "./requestDrawerV2";
 import TableFooter from "./tableFooter";
 import useRequestsPageV2 from "./useRequestsPageV2";
 import { useRouter } from "next/router";
@@ -55,6 +53,8 @@ import ThemedModal from "../../shared/themed/themedModal";
 import NewDataset from "../datasets/NewDataset";
 import { useSelectMode } from "../../../services/hooks/dataset/selectMode";
 import { ProFeatureWrapper } from "@/components/shared/ProBlockerComponents/ProFeatureWrapper";
+import { Button } from "@/components/ui/button";
+import RequestDiv from "./requestDiv";
 
 interface RequestsPageV2Props {
   currentPage: number;
@@ -221,7 +221,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
       return filter;
     } else {
       const timeIntervalDate = getTimeIntervalAgo(
-        (currentTimeFilter as TimeInterval) || "24h"
+        (currentTimeFilter as TimeInterval) || "1m"
       );
       return {
         [tableName]: {
@@ -240,7 +240,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     if (currentTimeFilter && currentTimeFilter.split("_")[0] === "custom") {
       const start = currentTimeFilter.split("_")[1]
         ? new Date(currentTimeFilter.split("_")[1])
-        : getTimeIntervalAgo("24h");
+        : getTimeIntervalAgo("1m");
       const end = new Date(currentTimeFilter.split("_")[2] || new Date());
       range = {
         start,
@@ -248,7 +248,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
       };
     } else {
       range = {
-        start: getTimeIntervalAgo((currentTimeFilter as TimeInterval) || "24h"),
+        start: getTimeIntervalAgo((currentTimeFilter as TimeInterval) || "1m"),
         end: new Date(),
       };
     }
@@ -256,7 +256,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   };
 
   const [timeFilter, setTimeFilter] = useState<FilterNode>(getTimeFilter());
-  const [timeRange, setTimeRange] = useState<TimeFilter>(getTimeRange());
+  const timeRange = useMemo(getTimeRange, []);
 
   const [advancedFilters, setAdvancedFilters] = useState<UIFilterRowTree>(
     getRootFilterNode()
@@ -282,7 +282,6 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     refetch,
     filterMap,
     searchPropertyFilters,
-    remove,
   } = useRequestsPageV2(
     page,
     currentPageSize,
@@ -577,16 +576,15 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
         },
       };
       setTimeFilter(filter);
-      return;
-    }
-
-    setTimeFilter({
-      [tableName]: {
-        [createdAtColumn]: {
-          gte: new Date(getTimeIntervalAgo(key)).toISOString(),
+    } else {
+      setTimeFilter({
+        [tableName]: {
+          [createdAtColumn]: {
+            gte: new Date(getTimeIntervalAgo(key)).toISOString(),
+          },
         },
-      },
-    });
+      });
+    }
   };
 
   const columnsWithProperties = [...getInitialColumns(isCached)].concat(
@@ -738,240 +736,273 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   };
 
   return (
-    <div>
-      {requestWithoutStream && !isWarningHidden && (
-        <div className="alert alert-warning flex justify-between items-center">
-          <p className="text-yellow-800">
-            We are unable to calculate your cost accurately because the
-            &#39;stream_usage&#39; option is not included in your message.
-            Please refer to{" "}
-            <a
-              href="https://docs.helicone.ai/use-cases/enable-stream-usage"
-              className="text-blue-600 underline"
-            >
-              this documentation
-            </a>{" "}
-            for more information.
-          </p>
-          <button
-            onClick={() => setIsWarningHidden(true)}
-            className="text-yellow-800 hover:text-yellow-900"
-          >
-            <span className="sr-only">Close</span>
-            <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path
-                fillRule="evenodd"
-                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                clipRule="evenodd"
-              />
-            </svg>
-          </button>
-        </div>
-      )}
-      {!isCached && userId === undefined && (
-        <AuthHeader
-          title={isCached ? "Cached Requests" : "Requests"}
-          headerActions={
-            <div className="flex flex-row gap-2">
-              <button
-                onClick={() => {
-                  refetch();
-                }}
-                className="font-medium text-black dark:text-white text-sm items-center flex flex-row hover:text-sky-700 dark:hover:text-sky-300"
+    <>
+      <div className="h-screen flex flex-col">
+        {requestWithoutStream && !isWarningHidden && (
+          <div className="alert alert-warning flex justify-between items-center">
+            <p className="text-yellow-800">
+              We are unable to calculate your cost accurately because the
+              &#39;stream_usage&#39; option is not included in your message.
+              Please refer to{" "}
+              <a
+                href="https://docs.helicone.ai/use-cases/enable-stream-usage"
+                className="text-blue-600 underline"
               >
-                <ArrowPathIcon
+                this documentation
+              </a>{" "}
+              for more information.
+            </p>
+            <button
+              onClick={() => setIsWarningHidden(true)}
+              className="text-yellow-800 hover:text-yellow-900"
+            >
+              <span className="sr-only">Close</span>
+              <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path
+                  fillRule="evenodd"
+                  d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </button>
+          </div>
+        )}
+
+        {!isCached && userId === undefined && (
+          <AuthHeader
+            title={isCached ? "Cached Requests" : "Requests"}
+            headerActions={
+              <div className="flex flex-row gap-2 items-center">
+                <button
+                  onClick={() => {
+                    refetch();
+                  }}
+                  className="font-medium text-black dark:text-white text-sm items-center flex flex-row hover:text-sky-700 dark:hover:text-sky-300"
+                >
+                  <ArrowPathIcon
+                    className={clsx(
+                      isDataLoading || isRefetching ? "animate-spin" : "",
+                      "h-4 w-4 inline duration-500 ease-in-out"
+                    )}
+                  />
+                </button>
+                <Button
+                  variant="ghost"
                   className={clsx(
-                    isDataLoading || isRefetching ? "animate-spin" : "",
-                    "h-5 w-5 inline duration-500 ease-in-out"
+                    "flex flex-row gap-2 items-center",
+                    isLive ? "text-green-500 animate-pulse" : "text-gray-500"
                   )}
-                />
-              </button>
-            </div>
-          }
-          actions={
-            <>
-              <div>
-                <ThemedSwitch
-                  checked={isLive}
-                  onChange={setIsLive}
-                  label="Live"
-                />
+                  size="sm_sleek"
+                  onClick={() => setIsLive(!isLive)}
+                >
+                  <div
+                    className={clsx(
+                      isLive ? "bg-green-500" : "bg-gray-500",
+                      "h-2 w-2 rounded-full"
+                    )}
+                  ></div>
+                  <span className="text-xs italic font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap">
+                    {isLive ? "Live" : "Start Live"}
+                  </span>
+                </Button>
               </div>
-            </>
-          }
-        />
-      )}
-      {unauthorized ? (
-        <>{renderUnauthorized()}</>
-      ) : (
-        <div
-          className={clsx(
-            isShiftPressed && "no-select",
-            "flex flex-col space-y-4"
-          )}
-        >
-          <ThemedTable
-            id="requests-table"
-            highlightedIds={selectedIds}
-            showCheckboxes={selectMode}
-            defaultData={normalizedRequests}
-            defaultColumns={columnsWithProperties}
-            skeletonLoading={isDataLoading}
-            dataLoading={isBodyLoading}
-            sortable={sort}
-            advancedFilters={{
-              filterMap: filterMap,
-              filters: advancedFilters,
-              setAdvancedFilters: onSetAdvancedFiltersHandler,
-              searchPropertyFilters: searchPropertyFilters,
-              show: userId ? false : true,
-            }}
-            savedFilters={
-              organizationLayoutAvailable
-                ? {
-                    currentFilter: currFilter ?? undefined,
-                    filters:
-                      transformedFilters && orgLayout?.data?.id
-                        ? transformedFilters
-                        : undefined,
-                    onFilterChange: onLayoutFilterChange,
-                    onSaveFilterCallback: async () => {
-                      await orgLayoutRefetch();
-                    },
-                    layoutPage: "requests",
-                  }
-                : undefined
             }
-            exportData={normalizedRequests.map((request) => {
-              const flattenedRequest: any = {};
-              Object.entries(request).forEach(([key, value]) => {
-                // key is properties and value is not null
-                if (
-                  key === "customProperties" &&
-                  value !== null &&
-                  value !== undefined
-                ) {
-                  Object.entries(value).forEach(([key, value]) => {
-                    if (value !== null) {
+          />
+        )}
+
+        {/* Add this wrapper */}
+        {unauthorized ? (
+          <>{renderUnauthorized()}</>
+        ) : (
+          <div className="flex flex-col h-full overflow-hidden">
+            <div
+              className={clsx(
+                isShiftPressed && "no-select",
+                "flex-grow overflow-auto"
+              )}
+            >
+              <ThemedTable
+                id="requests-table"
+                highlightedIds={
+                  selectedData && open ? [selectedData.id] : selectedIds
+                }
+                showCheckboxes={selectMode}
+                defaultData={normalizedRequests}
+                defaultColumns={columnsWithProperties}
+                skeletonLoading={isDataLoading}
+                dataLoading={isBodyLoading}
+                sortable={sort}
+                advancedFilters={{
+                  filterMap: filterMap,
+                  filters: advancedFilters,
+                  setAdvancedFilters: onSetAdvancedFiltersHandler,
+                  searchPropertyFilters: searchPropertyFilters,
+                  show: userId ? false : true,
+                }}
+                savedFilters={
+                  organizationLayoutAvailable
+                    ? {
+                        currentFilter: currFilter ?? undefined,
+                        filters:
+                          transformedFilters && orgLayout?.data?.id
+                            ? transformedFilters
+                            : undefined,
+                        onFilterChange: onLayoutFilterChange,
+                        onSaveFilterCallback: async () => {
+                          await orgLayoutRefetch();
+                        },
+                        layoutPage: "requests",
+                      }
+                    : undefined
+                }
+                exportData={normalizedRequests.map((request) => {
+                  const flattenedRequest: any = {};
+                  Object.entries(request).forEach(([key, value]) => {
+                    // key is properties and value is not null
+                    if (
+                      key === "customProperties" &&
+                      value !== null &&
+                      value !== undefined
+                    ) {
+                      Object.entries(value).forEach(([key, value]) => {
+                        if (value !== null) {
+                          flattenedRequest[key] = value;
+                        }
+                      });
+                    } else {
                       flattenedRequest[key] = value;
                     }
                   });
-                } else {
-                  flattenedRequest[key] = value;
-                }
-              });
-              return flattenedRequest;
-            })}
-            timeFilter={{
-              currentTimeFilter: timeRange,
-              defaultValue: "24h",
-              onTimeSelectHandler: onTimeSelectHandler,
-            }}
-            onRowSelect={(row, index) => {
-              onRowSelectHandler(row, index);
-            }}
-            makeCard={
-              userId
-                ? undefined
-                : (row) => {
-                    return (
-                      <RequestCard request={row} properties={properties} />
-                    );
-                  }
-            }
-            makeRow={
-              userId
-                ? undefined
-                : {
-                    properties: properties,
-                  }
-            }
-            customButtons={[
-              <div key={"dataset-button"}>
-                <DatasetButton
-                  datasetMode={selectMode}
-                  setDatasetMode={toggleSelectMode}
-                  items={[]}
-                  onAddToDataset={() => {}}
-                  renderModal={undefined}
-                />
-              </div>,
-            ]}
-            onSelectAll={selectAll}
-            selectedIds={selectedIds}
-          >
-            {selectMode && (
-              <Row className="gap-5 items-center w-full justify-between bg-white dark:bg-black rounded-lg p-5 border border-gray-300 dark:border-gray-700">
-                <div className="flex flex-row gap-2 items-center">
-                  <span className="text-sm font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap">
-                    Select Mode:
-                  </span>
-                  <span className="text-sm p-2 rounded-md font-medium bg-[#F1F5F9] text-[#1876D2] dark:text-gray-100 whitespace-nowrap">
-                    {selectedIds.length} selected
-                  </span>
-                </div>
-                {selectedIds.length > 0 && (
-                  <ProFeatureWrapper featureName="Datasets">
-                    <GenericButton
-                      onClick={() => {
-                        setModalOpen(true);
-                      }}
-                      icon={
-                        <PlusIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
+                  return flattenedRequest;
+                })}
+                timeFilter={{
+                  currentTimeFilter: timeRange,
+                  defaultValue: "1m",
+                  onTimeSelectHandler: onTimeSelectHandler,
+                }}
+                onRowSelect={(row, index) => {
+                  onRowSelectHandler(row, index);
+                }}
+                makeCard={
+                  userId
+                    ? undefined
+                    : (row) => {
+                        return (
+                          <RequestCard request={row} properties={properties} />
+                        );
                       }
-                      text="Add to dataset"
+                }
+                makeRow={
+                  userId
+                    ? undefined
+                    : {
+                        properties: properties,
+                      }
+                }
+                customButtons={[
+                  <div key={"dataset-button"}>
+                    <DatasetButton
+                      datasetMode={selectMode}
+                      setDatasetMode={toggleSelectMode}
+                      items={[]}
+                      onAddToDataset={() => {}}
+                      renderModal={undefined}
                     />
-                  </ProFeatureWrapper>
+                  </div>,
+                ]}
+                onSelectAll={selectAll}
+                selectedIds={selectedIds}
+                rightPanel={
+                  open ? (
+                    <RequestDiv
+                      open={open}
+                      setOpen={setOpen}
+                      request={selectedData}
+                      properties={properties}
+                      hasPrevious={
+                        selectedDataIndex !== undefined && selectedDataIndex > 0
+                      }
+                      hasNext={
+                        selectedDataIndex !== undefined &&
+                        selectedDataIndex < normalizedRequests.length - 1
+                      }
+                      onPrevHandler={() => {
+                        if (
+                          selectedDataIndex !== undefined &&
+                          selectedDataIndex > 0
+                        ) {
+                          setSelectedDataIndex(selectedDataIndex - 1);
+                          setSelectedData(
+                            normalizedRequests[selectedDataIndex - 1]
+                          );
+                          searchParams.set(
+                            "requestId",
+                            normalizedRequests[selectedDataIndex - 1].id
+                          );
+                        }
+                      }}
+                      onNextHandler={() => {
+                        if (
+                          selectedDataIndex !== undefined &&
+                          selectedDataIndex < normalizedRequests.length - 1
+                        ) {
+                          setSelectedDataIndex(selectedDataIndex + 1);
+                          setSelectedData(
+                            normalizedRequests[selectedDataIndex + 1]
+                          );
+                          searchParams.set(
+                            "requestId",
+                            normalizedRequests[selectedDataIndex + 1].id
+                          );
+                        }
+                      }}
+                    />
+                  ) : undefined
+                }
+              >
+                {selectMode && (
+                  <Row className="gap-5 items-center w-full justify-between bg-white dark:bg-black rounded-lg p-5 border border-gray-300 dark:border-gray-700">
+                    <div className="flex flex-row gap-2 items-center">
+                      <span className="text-sm font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap">
+                        Select Mode:
+                      </span>
+                      <span className="text-sm p-2 rounded-md font-medium bg-[#F1F5F9] text-[#1876D2] dark:text-gray-100 whitespace-nowrap">
+                        {selectedIds.length} selected
+                      </span>
+                    </div>
+                    {selectedIds.length > 0 && (
+                      <ProFeatureWrapper featureName="Datasets">
+                        <GenericButton
+                          onClick={() => {
+                            setModalOpen(true);
+                          }}
+                          icon={
+                            <PlusIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
+                          }
+                          text="Add to dataset"
+                        />
+                      </ProFeatureWrapper>
+                    )}
+                  </Row>
                 )}
-              </Row>
-            )}
-          </ThemedTable>
+              </ThemedTable>
+            </div>
 
-          <TableFooter
-            currentPage={page}
-            pageSize={pageSize}
-            isCountLoading={isCountLoading}
-            count={count || 0}
-            onPageChange={(n) => handlePageChange(n)}
-            onPageSizeChange={(n) => setCurrentPageSize(n)}
-            pageSizeOptions={[25, 50, 100, 250, 500]}
-          />
-        </div>
-      )}
-      <RequestDrawerV2
-        open={open}
-        setOpen={setOpen}
-        request={selectedData}
-        properties={properties}
-        hasPrevious={selectedDataIndex !== undefined && selectedDataIndex > 0}
-        hasNext={
-          selectedDataIndex !== undefined &&
-          selectedDataIndex < normalizedRequests.length - 1
-        }
-        onPrevHandler={() => {
-          if (selectedDataIndex !== undefined && selectedDataIndex > 0) {
-            setSelectedDataIndex(selectedDataIndex - 1);
-            setSelectedData(normalizedRequests[selectedDataIndex - 1]);
-            searchParams.set(
-              "requestId",
-              normalizedRequests[selectedDataIndex - 1].id
-            );
-          }
-        }}
-        onNextHandler={() => {
-          if (
-            selectedDataIndex !== undefined &&
-            selectedDataIndex < normalizedRequests.length - 1
-          ) {
-            setSelectedDataIndex(selectedDataIndex + 1);
-            setSelectedData(normalizedRequests[selectedDataIndex + 1]);
-            searchParams.set(
-              "requestId",
-              normalizedRequests[selectedDataIndex + 1].id
-            );
-          }
-        }}
-      />
+            <div className="bg-white dark:bg-black border-t border-gray-200 dark:border-gray-700 py-2 flex-shrink-0 w-full">
+              <TableFooter
+                currentPage={page}
+                pageSize={pageSize}
+                isCountLoading={isCountLoading}
+                count={count || 0}
+                onPageChange={(n) => handlePageChange(n)}
+                onPageSizeChange={(n) => setCurrentPageSize(n)}
+                pageSizeOptions={[25, 50, 100, 250, 500]}
+              />
+            </div>
+          </div>
+        )}
+      </div>
+
       <ThemedModal open={modalOpen} setOpen={setModalOpen}>
         <NewDataset
           request_ids={selectedIds}
@@ -981,7 +1012,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
           }}
         />
       </ThemedModal>
-    </div>
+    </>
   );
 };
 

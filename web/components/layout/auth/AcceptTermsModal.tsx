@@ -14,11 +14,15 @@ import Link from "next/link";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { useJawnClient } from "@/lib/clients/jawnHook";
 import { Database } from "@/supabase/database.types";
+import { useLocalStorage } from "@/services/hooks/localStorage";
 
 const AcceptTermsModal = () => {
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useLocalStorage(
+    "termsAccepted",
+    false
+  );
 
   const user = useUser();
   const supabase = useSupabaseClient<Database>();
@@ -37,7 +41,7 @@ const AcceptTermsModal = () => {
   }, [handleAcceptTerms]);
 
   useEffect(() => {
-    if (user && !user.user_metadata.accepted_terms_date) {
+    if (user && !user.user_metadata.accepted_terms_date && !termsAccepted) {
       setShowTermsModal(true);
     }
   }, [user]);

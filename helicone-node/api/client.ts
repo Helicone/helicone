@@ -42,19 +42,22 @@ class ScoringListener {
     }
   ) {
     while (this.listenerActive) {
-      const responsesToScore = await this.client.POST("/v1/request/query", {
-        body: {
-          filter: options?.filter ?? "all",
-          isCached: false,
-          limit: 10,
-          offset: 0,
-          sort: {
-            created_at: "desc",
+      const responsesToScore = await this.client.POST(
+        "/v1/request/query-clickhouse",
+        {
+          body: {
+            filter: options?.filter ?? "all",
+            isCached: false,
+            limit: 10,
+            offset: 0,
+            sort: {
+              created_at: "desc",
+            },
+            isScored: options?.isScored ?? false,
+            isPartOfExperiment: undefined,
           },
-          isScored: options?.isScored ?? false,
-          isPartOfExperiment: options?.isPartOfExperiment ?? false,
-        },
-      });
+        }
+      );
 
       for (const response of responsesToScore.data?.data ?? []) {
         console.log("Scoring...", response.request_id);

@@ -24,6 +24,7 @@ import { useOrg } from "@/components/layout/organizationContext";
 import { DiffHighlight } from "../welcome/diffHighlight";
 import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { IslandContainer } from "@/components/ui/islandContainer";
 
 interface CachePageProps {
   currentPage: number;
@@ -133,8 +134,9 @@ const CachePage = (props: CachePageProps) => {
   const isPro = org?.currentOrg?.tier !== "free";
 
   return (
-    <>
+    <IslandContainer>
       <AuthHeader
+        isWithinIsland={true}
         title={
           <div className="flex items-center gap-2">
             Cache <Badge size="sm">Beta</Badge>
@@ -401,7 +403,7 @@ space-y-4 py-6 bg-white dark:bg-black border border-gray-300 dark:border-gray-70
         </div>
       </ThemedDrawer>
       <UpgradeProModal open={openUpgradeModal} setOpen={setOpenUpgradeModal} />
-    </>
+    </IslandContainer>
   );
 };
 
