@@ -39,12 +39,14 @@ export function ThemedTimeFilterShadCN({
 
   useEffect(() => {
     // Set the initial date range after the component mounts
-    setDate(
-      initialDateRange || {
-        from: new Date(),
-        to: new Date(),
-      }
-    );
+    if (!date) {
+      setDate(
+        initialDateRange || {
+          from: new Date(),
+          to: new Date(),
+        }
+      );
+    }
   }, [initialDateRange]);
 
   const predefinedRanges = [
@@ -93,14 +95,9 @@ export function ThemedTimeFilterShadCN({
         return;
       }
 
-      // Preserve the existing time if only the date has changed
-      if (date?.from && date?.to) {
-        newDate.from.setHours(date.from.getHours(), date.from.getMinutes());
-        newDate.to.setHours(date.to.getHours(), date.to.getMinutes());
-      }
+      setDate(newDate);
+      onDateChange(newDate);
     }
-    setDate(newDate);
-    onDateChange(newDate);
   };
 
   const handleCustomRangeChange = () => {
@@ -138,14 +135,9 @@ export function ThemedTimeFilterShadCN({
     }
   };
 
-  // Add this new function to get the first day of the previous month
-  const getFirstDayOfPreviousMonth = () => {
-    const today = new Date();
-    return new Date(today.getFullYear(), today.getMonth() - 1, 1);
-  };
-
   const handlePredefinedRange = (rangeFunc: () => DateRange) => {
-    handleDateChange(rangeFunc());
+    const newRange = rangeFunc();
+    handleDateChange(newRange);
   };
 
   return (
@@ -235,10 +227,13 @@ export function ThemedTimeFilterShadCN({
             <Calendar
               initialFocus
               mode="range"
-              defaultMonth={getFirstDayOfPreviousMonth()} // Update this line
+              defaultMonth={date?.from}
               selected={date}
-              onSelect={handleDateChange}
+              onSelect={setDate}
               numberOfMonths={2}
+              disabled={(date) =>
+                date > new Date() || date < new Date("1900-01-01")
+              }
               classNames={{
                 day_today: "",
               }}
