@@ -47,7 +47,6 @@ const useGetRequestsWithBodies = (
   isCached: boolean = false
 ) => {
   const org = useOrg();
-  const [requests, setRequests] = useState<HeliconeRequest[]>([]);
 
   const { data, isLoading, refetch, isRefetching } = useQuery({
     queryKey: [
@@ -88,7 +87,7 @@ const useGetRequestsWithBodies = (
   const requestsWithSignedUrls = useMemo(() => data?.data ?? [], [data]);
 
   const urlQueries = useQueries({
-    queries: requestsWithSignedUrls.map((request, index: number) => ({
+    queries: requestsWithSignedUrls.map((request) => ({
       queryKey: ["request-content", request.signed_body_url],
       queryFn: async () => {
         if (requestBodyCache.has(request.request_id)) {
@@ -112,49 +111,43 @@ const useGetRequestsWithBodies = (
       },
       keepPreviousData: true,
       enabled: !!request.signed_body_url,
-      onSuccess: (content: any) => {
-        if (content) {
-          setRequests((prev) => {
-            const newRequests = [...prev];
-            const model =
-              request.model_override ||
-              request.response_model ||
-              request.request_model ||
-              content.response?.model ||
-              content.request?.model ||
-              content.response?.body?.model ||
-              getModelFromPath(request.target_url) ||
-              "";
-
-            let updatedRequest = {
-              ...newRequests[index],
-              request_body: content.request,
-              response_body: content.response,
-            };
-
-            if (
-              request.provider === "GOOGLE" &&
-              model.toLowerCase().includes("gemini")
-            ) {
-              updatedRequest.llmSchema = mapGeminiPro(
-                updatedRequest as HeliconeRequest,
-                model
-              );
-            }
-
-            newRequests[index] = updatedRequest;
-            return newRequests;
-          });
-        }
-      },
     })),
   });
 
-  useEffect(() => {
-    if (!isLoading && requests.length === 0) {
-      setRequests(requestsWithSignedUrls);
-    }
-  }, [requestsWithSignedUrls, isLoading]);
+  const requests = useMemo(() => {
+    return requestsWithSignedUrls.map((request, index) => {
+      const content = urlQueries[index].data;
+      if (!content) return request;
+
+      const model =
+        request.model_override ||
+        request.response_model ||
+        request.request_model ||
+        content.response?.model ||
+        content.request?.model ||
+        content.response?.body?.model ||
+        getModelFromPath(request.target_url) ||
+        "";
+
+      let updatedRequest = {
+        ...request,
+        request_body: content.request,
+        response_body: content.response,
+      };
+
+      if (
+        request.provider === "GOOGLE" &&
+        model.toLowerCase().includes("gemini")
+      ) {
+        updatedRequest.llmSchema = mapGeminiPro(
+          updatedRequest as HeliconeRequest,
+          model
+        );
+      }
+
+      return updatedRequest;
+    });
+  }, [requestsWithSignedUrls, urlQueries]);
 
   const isUrlsFetching = urlQueries.some((query) => query.isFetching);
 
@@ -165,9 +158,6 @@ const useGetRequestsWithBodies = (
     requests: requests,
     completedQueries: urlQueries.filter((query) => query.isSuccess).length,
     totalQueries: requestsWithSignedUrls.length,
-    remove: () => {
-      setRequests([]);
-    },
   };
 };
 
