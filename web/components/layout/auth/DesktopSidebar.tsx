@@ -135,12 +135,12 @@ const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
       <div
         ref={sidebarRef}
         className={cn(
-          "hidden md:flex md:flex-col z-30 bg-background dark:bg-gray-900 transition-all duration-300 h-screen bg-white pb-4",
+          "hidden md:flex md:flex-col z-30 bg-background dark:bg-gray-900 transition-all duration-300 h-screen bg-white ",
           largeWith,
           "fixed top-0 left-0"
         )}
       >
-        <div className="w-full flex flex-grow flex-col overflow-y-auto border-r dark:border-gray-700 justify-between">
+        <div className="w-full flex flex-grow flex-col overflow-y-auto border-r  dark:border-gray-700 justify-between pb-4">
           <div className="flex items-center gap-2 h-14 border-b dark:border-gray-700">
             <div className="flex items-center gap-2 w-full">
               {!isCollapsed && <OrgDropdown />}
