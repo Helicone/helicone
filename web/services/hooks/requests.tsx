@@ -1,16 +1,16 @@
 import { useQueries, useQuery } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useOrg } from "../../components/layout/organizationContext";
+import {
+  getModelFromPath,
+  mapGeminiPro,
+} from "../../components/templates/requestsV2/builder/mappers/geminiMapper";
 import { HeliconeRequest } from "../../lib/api/request/request";
 import { getJawnClient } from "../../lib/clients/jawn";
 import { Result } from "../../lib/result";
 import { FilterNode } from "../lib/filters/filterDefs";
 import { placeAssetIdValues } from "../lib/requestTraverseHelper";
 import { SortLeafRequest } from "../lib/sorts/requests/sorts";
-import {
-  getModelFromPath,
-  mapGeminiPro,
-} from "../../components/templates/requestsV2/builder/mappers/geminiMapper";
 
 function formatDateForClickHouse(date: Date): string {
   return date.toISOString().slice(0, 19).replace("T", " ");
