@@ -234,6 +234,7 @@
         "getting-started/proxy-vs-async",
         "faq/how-we-calculate-cost",
         "faq/latency-affect",
+        "faq/availability",
         "helicone-headers/predefining-request-id",
         "faq/secret-vs-public-key",
         {
