@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { Button } from "@/components/ui/button";
 import { PlayIcon } from "@heroicons/react/24/outline";
