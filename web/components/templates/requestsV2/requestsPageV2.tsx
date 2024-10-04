@@ -282,7 +282,6 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     refetch,
     filterMap,
     searchPropertyFilters,
-    remove,
   } = useRequestsPageV2(
     page,
     currentPageSize,

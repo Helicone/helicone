@@ -8,6 +8,7 @@ import {
 } from "@tremor/react";
 import { useState } from "react";
 import { Result } from "../../../lib/result";
+import clsx from "clsx";
 
 interface ThemedTextDropDownProps {
   options: string[];
@@ -44,7 +45,12 @@ export function ThemedTextDropDown(props: ThemedTextDropDownProps) {
               <TabList variant="solid" defaultValue="1">
                 <Tab
                   value="1"
-                  className="text-xs px-2 py-0.5"
+                  className={clsx(
+                    tabMode === "smart"
+                      ? "bg-sky-100 dark:bg-sky-900"
+                      : "bg-gray-200",
+                    "text-xs px-2 py-0.5"
+                  )}
                   onClick={() => {
                     setTabMode("smart");
                   }}
@@ -53,7 +59,12 @@ export function ThemedTextDropDown(props: ThemedTextDropDownProps) {
                 </Tab>
                 <Tab
                   value="2"
-                  className="text-xs px-2 py-0.5"
+                  className={clsx(
+                    tabMode === "raw"
+                      ? "bg-sky-100 dark:bg-sky-900"
+                      : "bg-gray-200",
+                    "text-xs px-2 py-0.5"
+                  )}
                   onClick={() => {
                     setTabMode("raw");
                   }}
@@ -82,7 +93,7 @@ export function ThemedTextDropDown(props: ThemedTextDropDownProps) {
             await onSearchHandler?.(query);
           }}
         >
-          {[value, ...Array.from(new Set([...parentOptions, query]))]
+          {Array.from(new Set([value, ...parentOptions, query]))
             .filter(Boolean)
             .sort()
             .map((option, i) => (
