@@ -16,6 +16,7 @@ import {
   isFilterRowNode,
 } from "../../../services/lib/filters/uiFilterRowTree";
 import { BookmarkIcon } from "@heroicons/react/24/outline";
+import { Button } from "@/components/ui/button";
 
 interface SaveFilterButtonProps {
   filters: UIFilterRowTree;
@@ -156,19 +157,21 @@ const SaveFilterButton = (props: SaveFilterButtonProps) => {
 
   return (
     <>
-      <button
+      <Button
         onClick={() => {
           setIsSaveFiltersModalOpen(true);
         }}
         className={clsx(
           "bg-gray-100 dark:bg-[#17191d]   border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2"
         )}
+        size="md_sleek"
+        variant="default"
       >
         <BookmarkIcon className="h-4 w-4 text-gray-900 dark:text-gray-100" />
         <p className="text-sm font-medium text-gray-900 dark:text-gray-100 hidden sm:block">
           Save Filter
         </p>
-      </button>
+      </Button>
       <ThemedModal
         open={isSaveFiltersModalOpen}
         setOpen={() => setIsSaveFiltersModalOpen(false)}
