@@ -1,6 +1,6 @@
 import React from "react";
 import { PlusIcon } from "@heroicons/react/24/outline";
-import { Button } from "@tremor/react";
+
 import { Result } from "../../../lib/result";
 import { SingleFilterDef } from "../../../services/lib/filters/frontendFilterDefs";
 import { AdvancedFilterRow, UIFilterRow } from "./themedAdvancedFilters";
@@ -10,6 +10,7 @@ import {
 } from "../../../services/lib/filters/uiFilterRowTree";
 import SaveFilterButton from "../../templates/dashboard/saveFilterButton";
 import { OrganizationFilter } from "../../../services/lib/organization_layout/organization_layout";
+import { Button } from "@/components/ui/button";
 
 interface FilterTreeEditorProps {
   uiFilterRowTree: UIFilterRowTree;
@@ -134,28 +135,29 @@ const FilterTreeEditor: React.FC<FilterTreeEditorProps> = ({
         <>
           {node.rows.length > 1 && (
             <div
-              className={`flex items-center mb-4 ${
+              className={`flex items-center mb-1 ${
                 path.length === 1 && "ml-4"
               }`}
             >
               <Button
                 onClick={() => handleOperatorToggle(node)}
-                variant="secondary"
-                size="xs"
-                className="mr-2 uppercase bg-[#E5F3F9] border-[#6BB9EF]"
+                variant="outline"
+                size="sm_sleek"
               >
                 {node.operator}
               </Button>
             </div>
           )}
           {node.rows.map((childNode: UIFilterRowTree, childIndex: number) => (
-            <div key={childIndex} className="mb-2">
+            <div key={childIndex} className="mb-1">
               {renderNode(childNode, [...path, childIndex], false)}
             </div>
           ))}
           {isRoot && (
-            <div className="flex flex-row w-full items-center justify-between my-4">
-              <button
+            <div className="flex flex-row w-full items-center justify-between mt-2">
+              <Button
+                variant={"default"}
+                size="md_sleek"
                 onClick={() => handleAddFilter(node)}
                 className="bg-gray-100 dark:bg-[#17191d] border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2"
               >
@@ -163,10 +165,10 @@ const FilterTreeEditor: React.FC<FilterTreeEditorProps> = ({
                   className="mr-1 h-3.5 flex-none text-black dark:text-white hover:bg-sky-100 hover:text-sky-900 dark:hover:bg-sky-900 dark:hover:text-sky-100"
                   aria-hidden="true"
                 />
-                <p className="text-sm font-medium text-gray-900 dark:text-gray-100 hidden sm:block">
+                <p className="font-medium text-gray-900 dark:text-gray-100 hidden sm:block">
                   Add Filter
                 </p>
-              </button>
+              </Button>
               {onSaveFilterCallback && (
                 <SaveFilterButton
                   filters={filters}
@@ -184,7 +186,7 @@ const FilterTreeEditor: React.FC<FilterTreeEditorProps> = ({
       return isRoot ? (
         <div className="mb-4">{content}</div>
       ) : (
-        <div className="mb-4 flex flex-col bg-gray-100 dark:bg-black py-4 rounded-lg border border-gray-300 dark:border-gray-700">
+        <div className="mb-1 flex flex-col  dark:bg-black py-4 ml-4 border border-gray-300 dark:border-gray-700 rounded-sm">
           {content}
         </div>
       );
@@ -230,7 +232,7 @@ const FilterTreeEditor: React.FC<FilterTreeEditorProps> = ({
       );
 
       return path.length === 1 ? (
-        <div className="flex flex-col bg-gray-100 dark:bg-[#17191d] py-4 rounded-lg border border-gray-300 dark:border-gray-700 ">
+        <div className="flex flex-col  dark:bg-[#17191d] py-1  rounded-sm">
           {filterRow}
         </div>
       ) : (
@@ -267,7 +269,7 @@ const FilterTreeEditor: React.FC<FilterTreeEditorProps> = ({
   };
 
   return (
-    <div className="-mb-4 mt-4">{renderNode(uiFilterRowTree, [], true)}</div>
+    <div className="-mb-4 text-xs">{renderNode(uiFilterRowTree, [], true)}</div>
   );
 };
 
