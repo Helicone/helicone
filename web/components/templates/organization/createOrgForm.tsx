@@ -79,243 +79,247 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
 
   return (
     <>
-      <div className="flex flex-col gap-4 w-full space-y-8">
+      <div className="flex flex-col gap-4 w-full">
         {initialValues || variant === "reseller" ? (
           <></>
         ) : (
-          <p className="font-semibold text-lg text-gray-900 dark:text-gray-100">
+          <p className="font-semibold text-lg text-gray-900 dark:text-gray-100 mb-4">
             Create New Organization
           </p>
         )}
-        <div className="space-y-1.5 text-sm">
-          <label
-            htmlFor="org-name"
-            className="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100"
-          >
-            {
+        <div className="space-y-6">
+          <div className="space-y-1 text-sm">
+            <label
+              htmlFor="org-name"
+              className="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100"
+            >
               {
-                organization: "Organization Name",
-                reseller: "Customer Name",
-              }[variant]
-            }
-          </label>
-          <input
-            type="text"
-            name="org-name"
-            id="org-name"
-            value={orgName}
-            className="bg-gray-50 dark:bg-gray-950 text-black dark:text-white block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6"
-            placeholder={
-              variant === "organization"
-                ? "Your shiny new org name"
-                : "Customer name"
-            }
-            onChange={(e) => setOrgName(e.target.value)}
-          />
-        </div>
-        <RadioGroup value={selectedColor} onChange={setSelectedColor}>
-          <RadioGroup.Label className="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
-            Choose a color
-          </RadioGroup.Label>
-          <div className="mt-4 flex items-center justify-between px-8">
-            {ORGANIZATION_COLORS.map((color) => (
-              <RadioGroup.Option
-                key={color.name}
-                value={color}
-                className={({ active, checked }) =>
-                  clsx(
-                    color.selectedColor,
-                    active && checked ? "ring ring-offset-1" : "",
-                    !active && checked ? "ring-2" : "",
-                    "relative -m-0.5 flex cursor-pointer items-center justify-center rounded-full p-0.5 focus:outline-none"
-                  )
-                }
-              >
-                <RadioGroup.Label as="span" className="sr-only">
-                  {color.name}
-                </RadioGroup.Label>
-                <span
-                  aria-hidden="true"
-                  className={clsx(
-                    color.bgColor,
-                    "h-8 w-8 rounded-full border border-black dark:border-white border-opacity-10"
-                  )}
-                />
-              </RadioGroup.Option>
-            ))}
-          </div>
-        </RadioGroup>
-        <RadioGroup value={selectedIcon} onChange={setSelectedIcon}>
-          <RadioGroup.Label className="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
-            Choose an icon
-          </RadioGroup.Label>
-          <div className="mt-4 flex items-center justify-between px-8">
-            {ORGANIZATION_ICONS.map((icon) => (
-              <RadioGroup.Option
-                key={icon.name}
-                value={icon}
-                className={({ active, checked }) =>
-                  clsx(
-                    checked
-                      ? "ring-2 ring-offset-1 ring-sky-300 dark:ring-sky-700"
-                      : "ring-1 ring-gray-200 dark:ring-gray-800",
-                    "bg-white dark:bg-black rounded-md p-2"
-                  )
-                }
-              >
-                <RadioGroup.Label as="span" className="sr-only">
-                  {icon.name}
-                </RadioGroup.Label>
                 {
-                  <icon.icon className="h-6 w-6 hover:cursor-pointer text-black dark:text-white" />
-                }
-              </RadioGroup.Option>
-            ))}
+                  organization: "Organization Name",
+                  reseller: "Customer Name",
+                }[variant]
+              }
+            </label>
+            <input
+              type="text"
+              name="org-name"
+              id="org-name"
+              value={orgName}
+              className="bg-gray-50 dark:bg-gray-950 text-black dark:text-white block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6"
+              placeholder={
+                variant === "organization"
+                  ? "Your shiny new org name"
+                  : "Customer name"
+              }
+              onChange={(e) => setOrgName(e.target.value)}
+            />
           </div>
-        </RadioGroup>
-        {variant === "reseller" && (
-          <>
-            <div>
-              <label
-                htmlFor="org-limits"
-                className="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100"
-              >
-                Limits
-              </label>
-              <div className="flex flex-row mx-auto gap-4">
-                <div className="space-y-1 text-sm">
-                  <label
-                    htmlFor="org-costs"
-                    className="block text-xs leading-6 text-gray-500 "
-                  >
-                    Costs (USD)
-                  </label>
-                  <div className="flex flex-col gap-2">
-                    <input
-                      type="number"
-                      name="org-costs"
-                      id="org-costs"
-                      disabled={limits?.cost !== -1}
-                      value={limits?.cost === -1 ? 9999999 : limits?.cost ?? 0}
-                      className={clsx(
-                        "max-w-[10em] bg-gray-50 dark:bg-gray-950",
-                        " block w-full rounded-md border-0 py-1.5",
-                        "shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2",
-                        "focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6",
-                        limits?.cost === -1
-                          ? "text-gray-400"
-                          : "text-black dark:text-white"
-                      )}
-                      onChange={(e) =>
-                        setLimits((prev) =>
-                          prev ? { ...prev, cost: +e.target.value } : null
-                        )
-                      }
-                    />
-                    <div className="flex gap-2 items-center">
-                      <div>Unlimited</div>
+          <RadioGroup value={selectedColor} onChange={setSelectedColor} className="mb-4">
+            <RadioGroup.Label className="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
+              Choose a color
+            </RadioGroup.Label>
+            <div className="mt-4 flex items-center justify-between px-8">
+              {ORGANIZATION_COLORS.map((color) => (
+                <RadioGroup.Option
+                  key={color.name}
+                  value={color}
+                  className={({ active, checked }) =>
+                    clsx(
+                      color.selectedColor,
+                      active && checked ? "ring ring-offset-1" : "",
+                      !active && checked ? "ring-2" : "",
+                      "relative -m-0.5 flex cursor-pointer items-center justify-center rounded-full p-0.5 focus:outline-none"
+                    )
+                  }
+                >
+                  <RadioGroup.Label as="span" className="sr-only">
+                    {color.name}
+                  </RadioGroup.Label>
+                  <span
+                    aria-hidden="true"
+                    className={clsx(
+                      color.bgColor,
+                      "h-8 w-8 rounded-full border border-black dark:border-white border-opacity-10"
+                    )}
+                  />
+                </RadioGroup.Option>
+              ))}
+            </div>
+          </RadioGroup>
+          <RadioGroup value={selectedIcon} onChange={setSelectedIcon} className="mb-4">
+            <RadioGroup.Label className="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
+              Choose an icon
+            </RadioGroup.Label>
+            <div className="mt-4 flex items-center justify-between px-8">
+              {ORGANIZATION_ICONS.map((icon) => (
+                <RadioGroup.Option
+                  key={icon.name}
+                  value={icon}
+                  className={({ active, checked }) =>
+                    clsx(
+                      checked
+                        ? "ring-2 ring-offset-1 ring-sky-300 dark:ring-sky-700"
+                        : "ring-1 ring-gray-200 dark:ring-gray-800",
+                      "bg-white dark:bg-black rounded-md p-2"
+                    )
+                  }
+                >
+                  <RadioGroup.Label as="span" className="sr-only">
+                    {icon.name}
+                  </RadioGroup.Label>
+                  {
+                    <icon.icon className="h-6 w-6 hover:cursor-pointer text-black dark:text-white" />
+                  }
+                </RadioGroup.Option>
+              ))}
+            </div>
+          </RadioGroup>
+          {variant === "reseller" && (
+            <>
+              <div className="mb-4">
+                <label
+                  htmlFor="org-limits"
+                  className="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100"
+                >
+                  Limits
+                </label>
+                <div className="flex flex-row mx-auto gap-4">
+                  <div className="space-y-1 text-sm">
+                    <label
+                      htmlFor="org-costs"
+                      className="block text-xs leading-6 text-gray-500 "
+                    >
+                      Costs (USD)
+                    </label>
+                    <div className="flex flex-col gap-2">
                       <input
-                        type="checkbox"
+                        type="number"
                         name="org-costs"
                         id="org-costs"
-                        value={limits?.cost !== -1 ? 1 : 0}
-                        className=""
-                        onChange={(e) => {
-                          if (limits?.cost === -1) {
-                            setLimits((prev) =>
-                              prev ? { ...prev, cost: 1000 } : null
-                            );
-                          } else {
-                            setLimits((prev) =>
-                              prev ? { ...prev, cost: -1 } : null
-                            );
-                          }
-                        }}
+                        disabled={limits?.cost !== -1}
+                        value={limits?.cost === -1 ? 9999999 : limits?.cost ?? 0}
+                        className={clsx(
+                          "max-w-[10em] bg-gray-50 dark:bg-gray-950",
+                          " block w-full rounded-md border-0 py-1.5",
+                          "shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2",
+                          "focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6",
+                          limits?.cost === -1
+                            ? "text-gray-400"
+                            : "text-black dark:text-white"
+                        )}
+                        onChange={(e) =>
+                          setLimits((prev) =>
+                            prev ? { ...prev, cost: +e.target.value } : null
+                          )
+                        }
                       />
+                      <div className="flex gap-2 items-center">
+                        <div>Unlimited</div>
+                        <input
+                          type="checkbox"
+                          name="org-costs"
+                          id="org-costs"
+                          value={limits?.cost !== -1 ? 1 : 0}
+                          className=""
+                          onChange={(e) => {
+                            if (limits?.cost === -1) {
+                              setLimits((prev) =>
+                                prev ? { ...prev, cost: 1000 } : null
+                              );
+                            } else {
+                              setLimits((prev) =>
+                                prev ? { ...prev, cost: -1 } : null
+                              );
+                            }
+                          }}
+                        />
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div className="space-y-1 text-sm">
-                  <label
-                    htmlFor="org-costs"
-                    className="block text-xs leading-6 text-gray-500 "
-                  >
-                    Request
-                  </label>
-                  <div className="flex flex-col gap-2">
-                    <input
-                      type="number"
-                      name="org-request"
-                      id="org-request"
-                      disabled={limits?.requests !== -1}
-                      value={
-                        limits?.requests === -1
-                          ? 9999999
-                          : limits?.requests ?? 0
-                      }
-                      className={clsx(
-                        "max-w-[10em] bg-gray-50 dark:bg-gray-950",
-                        " block w-full rounded-md border-0 py-1.5",
-                        "shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2",
-                        "focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6",
-                        limits?.requests === -1
-                          ? "text-gray-400"
-                          : "text-black dark:text-white"
-                      )}
-                      onChange={(e) =>
-                        setLimits((prev) =>
-                          prev ? { ...prev, requests: +e.target.value } : null
-                        )
-                      }
-                    />
-                    <div className="flex gap-2 items-center">
-                      <div>Unlimited</div>
+                  <div className="space-y-1 text-sm">
+                    <label
+                      htmlFor="org-request"
+                      className="block text-xs leading-6 text-gray-500 "
+                    >
+                      Requests
+                    </label>
+                    <div className="flex flex-col gap-2">
                       <input
-                        type="checkbox"
-                        name="org-requests"
-                        id="org-requests"
-                        value={limits?.requests !== -1 ? 1 : 0}
-                        className=""
-                        onChange={(e) => {
-                          if (limits?.requests === -1) {
-                            setLimits((prev) =>
-                              prev ? { ...prev, requests: 1000 } : null
-                            );
-                          } else {
-                            setLimits((prev) =>
-                              prev ? { ...prev, requests: -1 } : null
-                            );
-                          }
-                        }}
+                        type="number"
+                        name="org-request"
+                        id="org-request"
+                        disabled={limits?.requests !== -1}
+                        value={
+                          limits?.requests === -1
+                            ? 9999999
+                            : limits?.requests ?? 0
+                        }
+                        className={clsx(
+                          "max-w-[10em] bg-gray-50 dark:bg-gray-950",
+                          " block w-full rounded-md border-0 py-1.5",
+                          "shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2",
+                          "focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6",
+                          limits?.requests === -1
+                            ? "text-gray-400"
+                            : "text-black dark:text-white"
+                        )}
+                        onChange={(e) =>
+                          setLimits((prev) =>
+                            prev ? { ...prev, requests: +e.target.value } : null
+                          )
+                        }
                       />
+                      <div className="flex gap-2 items-center">
+                        <div>Unlimited</div>
+                        <input
+                          type="checkbox"
+                          name="org-requests"
+                          id="org-requests"
+                          value={limits?.requests !== -1 ? 1 : 0}
+                          className=""
+                          onChange={(e) => {
+                            if (limits?.requests === -1) {
+                              setLimits((prev) =>
+                                prev ? { ...prev, requests: 1000 } : null
+                              );
+                            } else {
+                              setLimits((prev) =>
+                                prev ? { ...prev, requests: -1 } : null
+                              );
+                            }
+                          }}
+                        />
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="space-y-1 text-xs">
-                  <label
-                    htmlFor="org-time"
-                    className="block text-xs leading-6 text-gray-500"
-                  >
-                    Time Grain
-                  </label>
-                  <select
-                    id="org-size"
-                    name="org-size"
-                    className="max-w-[10em] bg-gray-50 dark:bg-gray-950 text-black dark:text-white block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6"
-                    required
-                  >
-                    <option value="word">monthly</option>
-                  </select>
+                  <div className="space-y-1 text-xs">
+                    <label
+                      htmlFor="org-time"
+                      className="block text-xs leading-6 text-gray-500"
+                    >
+                      Time Grain
+                    </label>
+                    <select
+                      id="org-size"
+                      name="org-size"
+                      className="max-w-[10em] bg-gray-50 dark:bg-gray-950 text-black dark:text-white block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6"
+                      required
+                    >
+                      <option value="word">monthly</option>
+                    </select>
+                  </div>
                 </div>
               </div>
-            </div>
-            <ProviderKeyList
-              orgProviderKey={initialValues?.providerKey || undefined}
-              setProviderKeyCallback={setProviderKey}
-            />
-          </>
-        )}
+              <div className="mb-4">
+                <ProviderKeyList
+                  orgProviderKey={initialValues?.providerKey || undefined}
+                  setProviderKeyCallback={setProviderKey}
+                />
+              </div>
+            </>
+          )}
+        </div>
         <div className="border-t border-gray-300 flex justify-end gap-2 pt-8">
           <button
             onClick={() => {
