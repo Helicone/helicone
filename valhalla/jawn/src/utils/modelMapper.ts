@@ -78,7 +78,11 @@ const requestModels = new Set<string>([
   "gpt-4o-2024-08-06",
 ]);
 
-const responseModels = new Set<string>(["dall-e-3", "dall-e-2"]);
+const responseModels = new Set<string>([
+  "dall-e-3",
+  "dall-e-2",
+  "black-forest-labs/FLUX.1-schnell",
+]);
 
 export const isRequestImageModel = (modelName: string): boolean => {
   return requestModels.has(modelName);
