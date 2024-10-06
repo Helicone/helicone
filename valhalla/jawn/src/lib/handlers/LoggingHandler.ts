@@ -200,6 +200,20 @@ export class LoggingHandler extends AbstractLogHandler {
     return ok("Images uploaded successfully");
   }
 
+  private isBase64Image(imageUrl: string): boolean {
+    const MIN_BASE64_LENGTH = 24;
+    const dataUriPattern = /^\s*data:image\/[a-zA-Z]+;base64,/;
+    const base64OnlyPattern = /^[A-Za-z0-9+/=]+\s*$/;
+
+    if (dataUriPattern.test(imageUrl)) {
+      return true;
+    }
+
+    return (
+      base64OnlyPattern.test(imageUrl) && imageUrl.length >= MIN_BASE64_LENGTH
+    );
+  }
+
   private async handleImageUpload(
     assetId: string,
     imageUrl: string,
@@ -207,7 +221,7 @@ export class LoggingHandler extends AbstractLogHandler {
     organizationId: string
   ): Promise<void> {
     try {
-      if (imageUrl.startsWith("data:image/")) {
+      if (this.isBase64Image(imageUrl)) {
         const [assetType, base64Data] = this.extractBase64Data(imageUrl);
         const buffer = Buffer.from(base64Data, "base64");
         await this.s3Client.uploadBase64ToS3(
@@ -241,14 +255,22 @@ export class LoggingHandler extends AbstractLogHandler {
   }
 
   private extractBase64Data(dataUri: string): [string, string] {
-    const matches = dataUri.match(
-      /^data:(image\/(?:png|jpeg|jpg|gif|webp));base64,(.*)$/
-    );
-    if (!matches || matches.length !== 3) {
-      console.error("Invalid base64 image data");
-      return ["", ""];
+    const dataUriRegex =
+      /^data:(image\/(?:png|jpeg|jpg|gif|webp|svg\+xml));base64,([A-Za-z0-9+/=]+)$/;
+    const base64Regex = /^([A-Za-z0-9+/=]+)$/;
+
+    let matches = dataUri.match(dataUriRegex);
+    if (matches && matches.length === 3) {
+      return [matches[1], matches[2]];
     }
-    return [matches[1], matches[2]];
+
+    matches = dataUri.match(base64Regex);
+    if (matches && matches.length === 2) {
+      return ["image/jpeg", matches[1]];
+    }
+
+    console.error("Invalid or unsupported base64 image data:", dataUri);
+    return ["", ""];
   }
 
   async logToClickhouse(): PromiseGenericResult<string> {
