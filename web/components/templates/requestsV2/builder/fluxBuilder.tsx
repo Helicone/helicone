@@ -40,26 +40,15 @@ export class FluxBuilder extends AbstractRequestBuilder {
     if ([0, null].includes(statusCode)) {
       return <p>Pending...</p>;
     } else if ([200, 201, -3].includes(statusCode)) {
-      // Extract the asset ID from b64_json
-      const b64Json = this.response.response_body?.data
-        ? this.response.response_body?.data[0]?.b64_json
-        : "";
-
-      // The b64_json field contains a placeholder like <helicone-asset-id key="assetId"/>
-      // We need to extract the assetId to construct the image URL
-      const assetIdMatch = b64Json.match(/key="([^"]+)"/);
-      const assetId = assetIdMatch ? assetIdMatch[1] : "";
-
-      // Construct the image URL using the assetId
-      const imageUrl = assetId ? `/api/asset/${assetId}` : "";
-
       return (
         <Completion
           request={this.getRequestText()}
           response={{
             title: "Response",
             text: "",
-            image_url: imageUrl,
+            image_url: this.response.response_body?.data
+              ? this.response.response_body?.data[0]?.b64_json
+              : "",
           }}
           rawRequest={this.response.request_body}
           rawResponse={this.response.response_body}
