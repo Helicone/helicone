@@ -41,7 +41,7 @@ export class ErrorBoundary extends Component<Props, State> {
               </h2>
               <p className="mt-2 text-center text-sm text-gray-600">
                 We apologize for the inconvenience. The error has been logged
-                and we'll look into it.
+                and we&apos;ll look into it.
               </p>
               {this.state.error && (
                 <div className="mt-4">
