@@ -201,10 +201,17 @@ export class LoggingHandler extends AbstractLogHandler {
   }
 
   private isBase64Image(imageUrl: string): boolean {
+    const MIN_BASE64_LENGTH = 24;
     const dataUriPattern = /^\s*data:image\/[a-zA-Z]+;base64,/;
     const base64OnlyPattern = /^[A-Za-z0-9+/=]+\s*$/;
 
-    return dataUriPattern.test(imageUrl) || base64OnlyPattern.test(imageUrl);
+    if (dataUriPattern.test(imageUrl)) {
+      return true;
+    }
+
+    return (
+      base64OnlyPattern.test(imageUrl) && imageUrl.length >= MIN_BASE64_LENGTH
+    );
   }
 
   private async handleImageUpload(
