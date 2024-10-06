@@ -66,6 +66,10 @@ export const getBuilderType = (
     return "ChatGPTBuilder";
   }
 
+  if (model == "black-forest-labs/FLUX.1-schnell") {
+    return "FluxBuilder";
+  }
+
   if (
     provider === "TOGETHER" ||
     (provider as any) === "TOGETHERAI" ||
@@ -119,10 +123,6 @@ export const getBuilderType = (
     } else {
       return "ClaudeBuilder";
     }
-  }
-
-  if (model === "black-forest-labs/FLUX.1-schnell") {
-    return "FluxBuilder";
   }
 
   return "UnknownBuilder";
