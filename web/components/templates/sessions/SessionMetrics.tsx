@@ -78,36 +78,40 @@ const SessionMetrics = ({ selectedSession }: SessionMetricsProps) => {
 
   return (
     <Col className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="percentile-select">Select Percentile</Label>
+      <div className="space-y-2 px-4 pb-4 border-b border-slate-200 dark:border-slate-800">
+        <Label
+          htmlFor="percentile-select"
+          className="text-slate-500 dark:text-slate-500"
+        >
+          Select Percentile
+        </Label>
         <Row className="items-center gap-2">
-          <Col>
-            <Select
-              onValueChange={(value) =>
-                setPSize(value as "p50" | "p75" | "p95" | "p99" | "p99.9")
-              }
-              value={pSize}
-            >
-              <SelectTrigger id="percentile-select" className="w-[100px]">
-                <SelectValue placeholder="Percentile" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="p50">p50</SelectItem>
-                <SelectItem value="p75">p75</SelectItem>
-                <SelectItem value="p95">p95</SelectItem>
-                <SelectItem value="p99">p99</SelectItem>
-                <SelectItem value="p99.9">p99.9</SelectItem>
-              </SelectContent>
-            </Select>
-          </Col>
+          <Select
+            onValueChange={(value) =>
+              setPSize(value as "p50" | "p75" | "p95" | "p99" | "p99.9")
+            }
+            value={pSize}
+          >
+            <SelectTrigger id="percentile-select" className="w-full">
+              <SelectValue placeholder="Percentile" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="p50">p50</SelectItem>
+              <SelectItem value="p75">p75</SelectItem>
+              <SelectItem value="p95">p95</SelectItem>
+              <SelectItem value="p99">p99</SelectItem>
+              <SelectItem value="p99.9">p99.9</SelectItem>
+            </SelectContent>
+          </Select>
           <Row className="items-center gap-2">
             <Checkbox
               checked={useInterquartile}
               onCheckedChange={(checked) =>
                 setUseInterquartile(checked as boolean)
               }
+              className="w-3 h-3 text-slate-500 dark:text-slate-500 border-slate-500 dark:border-slate-500"
             />
-            <Label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+            <Label className="text-xs text-slate-500 dark:text-slate-500 font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
               Interquartile
             </Label>
           </Row>

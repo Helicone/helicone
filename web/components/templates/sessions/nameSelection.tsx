@@ -113,10 +113,10 @@ const SessionNameSelection = ({
                     <div className="p-3 gap-3 flex flex-col border-b border-slate-200">
                       <div className="flex flex-col gap-1">
                         <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                          Last used
+                          Total sessions
                         </h3>
                         <p className="text-sm text-slate-500 truncate">
-                          {getTimeAgo(new Date(seshName.last_used))}
+                          {seshName.session_count}
                         </p>
                       </div>
                       <div className="flex flex-col gap-1">
@@ -142,10 +142,10 @@ const SessionNameSelection = ({
 
             <Row className="flex w-full justify-between items-center text-slate-500 dark:text-slate-500">
               <p className="text-xs">
+                Last used{" "}
                 <span className="font-medium text-slate-700 dark:text-slate-300">
-                  {seshName.session_count}
-                </span>{" "}
-                total sessions
+                  {getTimeAgo(new Date(seshName.last_used))}
+                </span>
               </p>
               <p className="text-xs">
                 Total cost $
