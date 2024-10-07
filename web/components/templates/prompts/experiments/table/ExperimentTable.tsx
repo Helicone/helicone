@@ -597,12 +597,10 @@ export function ExperimentTable({
             displayName: `Experiment ${experimentNumber}`,
             badgeText: "Output",
             badgeVariant: "secondary",
-            onRunColumn: async (colId: string) => {
+            onRunColumn: (colId: string) => {
               const datasetRowIds = rowData.map((row) => row.dataset_row_id);
-              await Promise.all(
-                datasetRowIds.map((datasetRowId) =>
-                  handleRunHypothesis(colId, [datasetRowId])
-                )
+              datasetRowIds.map((datasetRowId) =>
+                handleRunHypothesis(colId, [datasetRowId])
               );
             },
             hypothesis: hypothesis,

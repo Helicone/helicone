@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { getJawnClient } from "@/lib/clients/jawn";
 import { Button } from "@/components/ui/button";
 import { PlayIcon } from "@heroicons/react/24/outline";
 import {
@@ -13,13 +12,7 @@ export const HypothesisCellRenderer: React.FC<any> = (params) => {
   const { data, colDef, context } = params;
   const promptVersionTemplate = context.promptVersionTemplateRef.current;
   const hypothesisId = colDef.field;
-  const experimentId = context.experimentId;
-  const inputKeys = context.inputKeys;
-  const jawnClient = getJawnClient(context.orgId); // Use orgId if necessary
 
-  const [runStatus, setRunStatus] = useState<
-    "PENDING" | "RUNNING" | "COMPLETED" | null
-  >(null);
   const [showPromptPlayground, setShowPromptPlayground] = useState(false);
 
   // Parse the response data
@@ -38,7 +31,6 @@ export const HypothesisCellRenderer: React.FC<any> = (params) => {
 
   // Extract the model and messages from the promptVersionTemplate
   const initialModel = promptVersionTemplate?.model || "";
-  const promptTemplate = promptVersionTemplate?.template || "";
 
   const handleCellClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -56,44 +48,6 @@ export const HypothesisCellRenderer: React.FC<any> = (params) => {
       ],
     };
   };
-
-  // useEffect(() => {
-  //   let intervalId: NodeJS.Timeout;
-
-  //   const checkStatus = async () => {
-  //     const res = await jawnClient.POST(
-  //       "/v1/experiment/{experimentId}/run-status",
-  //       {
-  //         params: {
-  //           path: {
-  //             experimentId,
-  //           },
-  //         },
-  //       }
-  //     );
-
-  //     const status = res.data?.data?.status || null;
-  //     setRunStatus(status as "PENDING" | "RUNNING" | "COMPLETED" | null);
-
-  //     if (status === "COMPLETED") {
-  //       clearInterval(intervalId);
-  //       // Call refetchExperiments to update the data
-  //       if (context.refetchExperiments) {
-  //         await context.refetchExperiments();
-  //       }
-  //     }
-  //   };
-
-  //   if (runStatus !== "COMPLETED" && data.isLoading?.[hypothesisId]) {
-  //     intervalId = setInterval(checkStatus, 5000); // Poll every 5 seconds
-  //   }
-
-  //   return () => {
-  //     if (intervalId) {
-  //       clearInterval(intervalId);
-  //     }
-  //   };
-  // }, [runStatus, data, hypothesisId, experimentId, context, jawnClient]);
 
   if (data.isLoading?.[hypothesisId]) {
     return (
