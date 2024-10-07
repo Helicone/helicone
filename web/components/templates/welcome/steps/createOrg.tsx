@@ -154,9 +154,9 @@ const CreateOrg = (props: CreateOrgProps) => {
     <>
       <div id="content" className="w-full flex flex-col space-y-4 lg:pt-32 ">
         <div className="flex flex-col p-4 h-full">
-          <div className="flex flex-col space-y-8 w-full">
+          <div className="flex flex-col space-y-4 w-full">
             <h2 className="text-2xl font-semibold">Create your organization</h2>
-            <div className="flex flex-col space-y-2">
+            <div className="mb-4">
               <label
                 htmlFor="org-name"
                 className="block text-sm font-semibold leading-6"
@@ -174,7 +174,7 @@ const CreateOrg = (props: CreateOrgProps) => {
                 />
               </div>
             </div>
-            <div className="flex flex-row space-x-2 w-full">
+            <div className="flex flex-row space-x-2 w-full mb-4">
               <div className="flex flex-col space-y-2 w-full">
                 <label
                   htmlFor="org-size"
@@ -225,7 +225,7 @@ const CreateOrg = (props: CreateOrgProps) => {
               </div>
             </div>
             {referralType === "friend_referral" && (
-              <div className="flex flex-col space-y-2">
+              <div className="flex flex-col space-y-2 mb-4">
                 <label
                   htmlFor="referral-code"
                   className="block text-md font-semibold leading-6"
@@ -243,7 +243,7 @@ const CreateOrg = (props: CreateOrgProps) => {
                 </div>
               </div>
             )}
-            <div className="flex flex-col space-y-4">
+            <div className="mt-4">
               <div className="flex items-center space-x-2">
                 <Checkbox
                   id="terms"
