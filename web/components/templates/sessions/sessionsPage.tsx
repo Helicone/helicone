@@ -38,7 +38,10 @@ const SessionsPage = (props: SessionsPageProps) => {
   });
 
   const [sessionIdSearch, setSessionIdSearch] = useState<string>("");
-  const names = useSessionNames(sessionIdSearch ?? "");
+  const [sessionNameSearch, setSessionNameSearch] = useState<string>("");
+  const debouncedSessionNameSearch = useDebounce(sessionNameSearch, 500);
+
+  const names = useSessionNames(debouncedSessionNameSearch ?? "");
   const allNames = useSessionNames("");
 
   const debouncedSessionIdSearch = useDebounce(sessionIdSearch, 500); // 0.5 seconds
@@ -64,13 +67,15 @@ const SessionsPage = (props: SessionsPageProps) => {
     );
   }, [org?.currentOrg?.tier, hasSomeSessions]);
   return (
-    <IslandContainer>
+    <>
       <AuthHeader
         isWithinIsland={true}
         title={
-          <div className="flex items-center gap-2">
-            Sessions <Badge>Beta</Badge>
-          </div>
+          <IslandContainer>
+            <div className="flex items-center gap-2">
+              Sessions <Badge>Beta</Badge>
+            </div>
+          </IslandContainer>
         }
       />
       {org?.currentOrg?.tier === "free" && (
@@ -91,8 +96,10 @@ const SessionsPage = (props: SessionsPageProps) => {
           </div>
         ) : hasAccessToSessions &&
           (hasSomeSessions || hasSomeSessions === null) ? (
-          <Row className="gap-5 ">
+          <Row className="border-t border-slate-200 dark:border-slate-800">
             <SessionNameSelection
+              sessionNameSearch={sessionNameSearch}
+              setSessionNameSearch={setSessionNameSearch}
               sessionIdSearch={sessionIdSearch}
               setSessionIdSearch={setSessionIdSearch}
               selectedName={selectedName}
@@ -139,7 +146,7 @@ const SessionsPage = (props: SessionsPageProps) => {
           </div>
         )}
       </div>
-    </IslandContainer>
+    </>
   );
 };
 
