@@ -44,6 +44,7 @@ interface PromptPlaygroundProps {
   initialModel?: string;
   isPromptCreatedFromUi?: boolean;
   defaultEditMode?: boolean;
+  editMode?: boolean;
 }
 
 const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
@@ -54,6 +55,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
   initialModel,
   isPromptCreatedFromUi,
   defaultEditMode = false,
+  editMode = true,
 }) => {
   const replaceTemplateVariables = (
     content: string,
@@ -191,7 +193,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
                         <RoleButton
                           role={"assistant"}
                           onRoleChange={() => {}}
-                          disabled={true}
+                          disabled={!editMode}
                           size="medium"
                         />
                       </div>
@@ -244,6 +246,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
           setMode={setMode}
           isEditMode={isEditMode}
           setIsEditMode={setIsEditMode}
+          editMode={editMode}
         />
 
         <div className="flex-grow overflow-auto rounded-b-md">

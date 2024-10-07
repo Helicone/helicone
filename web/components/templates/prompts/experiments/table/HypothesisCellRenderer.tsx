@@ -99,6 +99,7 @@ export const HypothesisCellRenderer: React.FC<any> = (params) => {
           initialModel={initialModel}
           isPromptCreatedFromUi={true}
           defaultEditMode={false}
+          editMode={false}
         />
       </PopoverContent>
     </Popover>
@@ -167,6 +168,7 @@ export const OriginalMessagesCellRenderer: React.FC<any> = (params) => {
           initialModel={prompt?.model || ""}
           isPromptCreatedFromUi={true}
           defaultEditMode={false}
+          editMode={false}
         />
       </PopoverContent>
     </Popover>
@@ -239,6 +241,7 @@ export const OriginalOutputCellRenderer: React.FC<any> = (params) => {
           initialModel={prompt?.model || ""}
           isPromptCreatedFromUi={true}
           defaultEditMode={false}
+          editMode={false}
         />
       </PopoverContent>
     </Popover>

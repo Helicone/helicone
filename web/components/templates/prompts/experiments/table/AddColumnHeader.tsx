@@ -251,6 +251,7 @@ const AddColumnHeader: React.FC<AddColumnHeaderProps> = ({
                 }}
                 submitText="Test"
                 initialModel={"gpt-4o"}
+                editMode={false}
               />
             </SheetDescription>
           </SheetHeader>

@@ -447,6 +447,7 @@ const PromptChatRow = (props: PromptChatRowProps) => {
                 setCurrentMessage(newMessage);
                 callback(contentAsString || "", newRole, file);
               }}
+              disabled={!editMode}
             />
             <div className="flex justify-end items-center space-x-2 w-full">
               {!editMode && (

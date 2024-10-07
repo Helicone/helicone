@@ -119,7 +119,6 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
           }
           selectedInput={undefined}
           onSubmit={(history, model) => {
-            console.log("Submitted:", history, model);
             setShowPromptPlayground(false);
           }}
           submitText="Save"
@@ -130,6 +129,7 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
           }
           isPromptCreatedFromUi={true}
           defaultEditMode={false}
+          editMode={false}
         />
       </PopoverContent>
     </Popover>
