@@ -68,6 +68,8 @@ const InputCellRenderer: React.FC<any> = (props) => {
       props.context.activePopoverCell?.colId === props.column.colId;
     if (isActiveCell) {
       setPopoverOpen(true);
+    } else {
+      setPopoverOpen(false);
     }
   }, [
     props.context.activePopoverCell,

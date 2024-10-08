@@ -534,6 +534,9 @@ export function ExperimentTable({
       // Clear the current row inputs after successful submission
       setCurrentRowInputs({});
 
+      // Reset the activePopoverCell to prevent the popover from showing up
+      setActivePopoverCell(null);
+
       // Refetch input records to update the table
       refetchInputRecords();
     } catch (error) {
@@ -546,6 +549,7 @@ export function ExperimentTable({
     experimentData?.dataset?.id,
     inputKeys,
     refetchInputRecords,
+    setActivePopoverCell,
   ]);
 
   const columnDefs = useMemo<ColDef[]>(() => {
