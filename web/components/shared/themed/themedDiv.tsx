@@ -1,9 +1,6 @@
-import React, { useRef } from "react";
-import { clsx } from "../clsx";
-import { useTheme } from "../theme/themeContext";
-import { ChevronRightIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ChevronsRightIcon } from "lucide-react";
+import React, { useRef } from "react";
 
 interface ThemedDivProps {
   open: boolean;
