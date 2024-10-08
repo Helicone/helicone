@@ -34,6 +34,7 @@ import {
   CustomHeaderComponent,
   RowNumberHeaderComponent,
   RowNumberCellRenderer,
+  InputsHeaderComponent,
 } from "./components/tableElementsRenderer";
 import {
   ColumnsDropdown,
@@ -586,7 +587,7 @@ export function ExperimentTable({
         },
         cellClass: "border-r border-[#E2E8F0] text-slate-700",
         headerClass: "border-r border-[#E2E8F0]",
-        headerComponent: CustomHeaderComponent,
+        headerComponent: InputsHeaderComponent,
         headerComponentParams: {
           index: index,
           displayName: key,

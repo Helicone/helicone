@@ -198,6 +198,27 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
   );
 };
 
+const InputsHeaderComponent: React.FC<any> = (props) => {
+  const { displayName, badgeText, badgeVariant, onRunColumn, onHeaderClick } =
+    props;
+
+  return (
+    <div className="flex items-center justify-between w-full h-full pl-2 cursor-pointer">
+      <div className="flex items-center space-x-2">
+        <span className="text-md font-semibold text-slate-900">
+          {displayName}
+        </span>
+        <Badge
+          variant={badgeVariant}
+          className="text-[#334155] bg-[#F8FAFC] border border-[#E2E8F0] rounded-md font-medium hover:bg-slate-100"
+        >
+          {badgeText}
+        </Badge>
+      </div>
+    </div>
+  );
+};
+
 const RowNumberHeaderComponent: React.FC<any> = (props) => {
   return (
     <div className="flex-1 text-center items-center space-x-2 justify-center ml-1">
@@ -261,4 +282,5 @@ export {
   RowNumberHeaderComponent,
   PromptCellRenderer,
   RowNumberCellRenderer,
+  InputsHeaderComponent,
 };
