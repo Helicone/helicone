@@ -779,7 +779,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                                         {isProduction && (
                                           <Badge
                                             variant={"default"}
-                                            className="bg-[#F1F5F9] border border-[#CBD5E1] text-[#14532D] text-sm font-medium rounded-lg px-4 hover:bg-[#F1F5F9] hover:text-[#14532D]"
+                                            className="bg-[#F1F5F9] border border-[#CBD5E1] text-black text-sm font-medium rounded-lg px-4 hover:bg-[#F1F5F9] hover:text-black"
                                           >
                                             Prod
                                           </Badge>
@@ -1182,7 +1182,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                                         {isProduction && (
                                           <Badge
                                             variant={"default"}
-                                            className="bg-[#F1F5F9] border border-[#CBD5E1] text-[#14532D] text-sm font-medium rounded-lg px-4 hover:bg-[#F1F5F9] hover:text-[#14532D]"
+                                            className="bg-[#F1F5F9] border border-[#CBD5E1] text-black text-sm font-medium rounded-lg px-4 hover:bg-[#F1F5F9] hover:text-black"
                                           >
                                             Prod
                                           </Badge>
