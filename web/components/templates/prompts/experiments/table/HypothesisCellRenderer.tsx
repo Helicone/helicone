@@ -58,52 +58,54 @@ export const HypothesisCellRenderer: React.FC<any> = (params) => {
     );
   }
 
-  return (
-    <Popover open={showPromptPlayground} onOpenChange={setShowPromptPlayground}>
-      <PopoverTrigger asChild>
-        <div
-          className={`w-full h-full items-center flex ${
-            content ? "justify-start" : "justify-end"
-          }`}
-          onClick={handleCellClick}
-        >
-          {content ? (
+  if (content) {
+    return (
+      <Popover
+        open={showPromptPlayground}
+        onOpenChange={setShowPromptPlayground}
+      >
+        <PopoverTrigger asChild>
+          <div
+            className={`w-full h-full items-center flex justify-start`}
+            onClick={handleCellClick}
+          >
             <div>{content}</div>
-          ) : (
-            <div>
-              <Button
-                variant="ghost"
-                className="w-6 h-6 p-0 border-slate-200 border rounded-md bg-slate-50 text-slate-500"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  params.handleRunHypothesis(hypothesisId, [
-                    data.dataset_row_id,
-                  ]);
-                }}
-              >
-                <PlayIcon className="w-4 h-4" />
-              </Button>
-            </div>
-          )}
-        </div>
-      </PopoverTrigger>
-      <PopoverContent className="w-[800px] p-0" side="bottom" align="start">
-        <PromptPlayground
-          prompt={formatPromptForPlayground()}
-          selectedInput={data}
-          onSubmit={(history, model) => {
-            console.log("Submitted:", history, model);
-            setShowPromptPlayground(false);
+          </div>
+        </PopoverTrigger>
+        <PopoverContent className="w-[800px] p-0" side="bottom" align="start">
+          <PromptPlayground
+            prompt={formatPromptForPlayground()}
+            selectedInput={data}
+            onSubmit={(history, model) => {
+              console.log("Submitted:", history, model);
+              setShowPromptPlayground(false);
+            }}
+            submitText="Save"
+            initialModel={initialModel}
+            isPromptCreatedFromUi={true}
+            defaultEditMode={false}
+            editMode={false}
+            chatType="response"
+          />
+        </PopoverContent>
+      </Popover>
+    );
+  } else {
+    return (
+      <div className="w-full h-full items-center flex justify-end">
+        <Button
+          variant="ghost"
+          className="w-6 h-6 p-0 border-slate-200 border rounded-md bg-slate-50 text-slate-500"
+          onClick={(e) => {
+            e.stopPropagation();
+            params.handleRunHypothesis(hypothesisId, [data.dataset_row_id]);
           }}
-          submitText="Save"
-          initialModel={initialModel}
-          isPromptCreatedFromUi={true}
-          defaultEditMode={false}
-          editMode={false}
-        />
-      </PopoverContent>
-    </Popover>
-  );
+        >
+          <PlayIcon className="w-4 h-4" />
+        </Button>
+      </div>
+    );
+  }
 };
 
 export const OriginalMessagesCellRenderer: React.FC<any> = (params) => {
@@ -169,6 +171,7 @@ export const OriginalMessagesCellRenderer: React.FC<any> = (params) => {
           isPromptCreatedFromUi={true}
           defaultEditMode={false}
           editMode={false}
+          chatType="request"
         />
       </PopoverContent>
     </Popover>
@@ -242,6 +245,7 @@ export const OriginalOutputCellRenderer: React.FC<any> = (params) => {
           isPromptCreatedFromUi={true}
           defaultEditMode={false}
           editMode={false}
+          chatType="response"
         />
       </PopoverContent>
     </Popover>

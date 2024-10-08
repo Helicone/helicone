@@ -642,6 +642,7 @@ const models: TsoaRoute.Models = {
         "dataType": "refObject",
         "properties": {
             "filter": {"ref":"PromptVersionsFilterNode"},
+            "includeExperimentVersions": {"dataType":"boolean"},
         },
         "additionalProperties": false,
     },
@@ -677,6 +678,7 @@ const models: TsoaRoute.Models = {
         "dataType": "refObject",
         "properties": {
             "filter": {"ref":"PromptVersionsFilterNode"},
+            "includeExperimentVersions": {"dataType":"boolean"},
             "inputs": {"ref":"Record_string.string_","required":true},
         },
         "additionalProperties": false,

@@ -504,6 +504,9 @@ const PromptIdPage = (props: PromptIdPageProps) => {
         body: {
           newHeliconeTemplate: JSON.stringify(promptData),
           isMajorVersion: false,
+          metadata: {
+            experimentAssigned: true,
+          },
         },
       }
     );
@@ -633,7 +636,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
           <h1 className="font-semibold text-4xl text-black dark:text-white">
             {prompt?.user_defined_id}
           </h1>
-          <HcBadge title={`${prompt?.versions.length} versions`} size={"sm"} />
+          <HcBadge title={`${sortedPrompts?.length} versions`} size={"sm"} />
           <TooltipProvider>
             {prompt?.metadata?.createdFromUi === true ? (
               <Tooltip>

@@ -860,6 +860,7 @@ export interface components {
     };
     PromptVersionsQueryParams: {
       filter?: components["schemas"]["PromptVersionsFilterNode"];
+      includeExperimentVersions?: boolean;
     };
     PromptVersionResultCompiled: {
       id: string;
@@ -879,6 +880,7 @@ export interface components {
     "Result_PromptVersionResultCompiled.string_": components["schemas"]["ResultSuccess_PromptVersionResultCompiled_"] | components["schemas"]["ResultError_string_"];
     PromptVersiosQueryParamsCompiled: {
       filter?: components["schemas"]["PromptVersionsFilterNode"];
+      includeExperimentVersions?: boolean;
       inputs: components["schemas"]["Record_string.string_"];
     };
     PromptVersionResultFilled: {

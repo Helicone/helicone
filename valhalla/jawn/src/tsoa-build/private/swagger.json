@@ -717,6 +717,9 @@
 				"properties": {
 					"filter": {
 						"$ref": "#/components/schemas/PromptVersionsFilterNode"
+					},
+					"includeExperimentVersions": {
+						"type": "boolean"
 					}
 				},
 				"type": "object",
@@ -822,6 +825,9 @@
 				"properties": {
 					"filter": {
 						"$ref": "#/components/schemas/PromptVersionsFilterNode"
+					},
+					"includeExperimentVersions": {
+						"type": "boolean"
 					},
 					"inputs": {
 						"$ref": "#/components/schemas/Record_string.string_"
