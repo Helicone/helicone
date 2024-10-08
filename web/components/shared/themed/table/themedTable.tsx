@@ -87,6 +87,11 @@ interface ThemedTableV5Props<T extends { id?: string }> {
   fullWidth?: boolean;
   isDatasetsPage?: boolean;
   rightPanel?: React.ReactNode;
+  search?: {
+    value: string;
+    onChange: (value: string) => void;
+    placeholder: string;
+  };
 }
 
 export type RequestViews = "table" | "card" | "row";
@@ -120,6 +125,7 @@ export default function ThemedTable<T extends { id?: string }>(
     fullWidth = false,
     isDatasetsPage,
     rightPanel,
+    search,
   } = props;
 
   const [view, setView] = useLocalStorage<RequestViews>("view", "table");
@@ -189,6 +195,7 @@ export default function ThemedTable<T extends { id?: string }>(
     <div className="h-full flex flex-col border-b divide-y divide-gray-300 dark:divide-gray-700">
       <div className="py-2 px-1 flex-shrink-0">
         <ThemedTableHeader
+          search={search}
           onDataSet={onDataSet}
           isDatasetsPage={isDatasetsPage}
           advancedFilters={

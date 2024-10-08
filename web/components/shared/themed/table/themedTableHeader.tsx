@@ -1,6 +1,11 @@
-import { CircleStackIcon, FunnelIcon } from "@heroicons/react/24/outline";
+import {
+  CircleStackIcon,
+  FunnelIcon,
+  MagnifyingGlassIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
 import { Column } from "@tanstack/react-table";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Result } from "../../../../lib/result";
 import { TimeInterval } from "../../../../lib/timeCalculations/time";
 import { SingleFilterDef } from "../../../../services/lib/filters/frontendFilterDefs";
@@ -17,6 +22,8 @@ import FiltersButton from "./filtersButton";
 import { DragColumnItem } from "./columns/DragList";
 import { UIFilterRowTree } from "../../../../services/lib/filters/uiFilterRowTree";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import clsx from "clsx";
 
 interface ThemedTableHeaderProps<T> {
   rows?: T[];
@@ -58,6 +65,11 @@ interface ThemedTableHeaderProps<T> {
   setActiveColumns: (columns: DragColumnItem[]) => void;
   customButtons?: React.ReactNode[];
   isDatasetsPage?: boolean;
+  search?: {
+    value: string;
+    onChange: (value: string) => void;
+    placeholder: string;
+  };
 }
 
 export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
@@ -72,16 +84,25 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
     setActiveColumns,
     customButtons,
     isDatasetsPage,
+    search,
   } = props;
 
   const searchParams = useSearchParams();
 
   const [showFilters, setShowFilters] = useState(false);
+  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const displayFilters = window.sessionStorage.getItem("showFilters") || null;
     setShowFilters(displayFilters ? JSON.parse(displayFilters) : false);
   }, []);
+
+  useEffect(() => {
+    if (isSearchExpanded && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [isSearchExpanded]);
 
   const showFilterHandler = () => {
     setShowFilters(!showFilters);
@@ -147,7 +168,45 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
           </div>
         </div>
 
-        <div className="flex flex-wrap justify-start lg:justify-end">
+        <div className="flex flex-wrap justify-start lg:justify-end items-center">
+          {search && (
+            <div className="relative flex items-center">
+              <div
+                className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                  isSearchExpanded ? "w-40 sm:w-64" : "w-0"
+                }`}
+              >
+                <Input
+                  ref={searchInputRef}
+                  type="text"
+                  value={search.value}
+                  onChange={(e) => search.onChange(e.target.value)}
+                  placeholder={search.placeholder}
+                  className={clsx(
+                    "w-40 sm:w-64 text-sm pr-8 transition-transform duration-300 ease-in-out outline-none border-none ring-0",
+                    isSearchExpanded ? "translate-x-0" : "translate-x-full"
+                  )}
+                />
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                className={
+                  isSearchExpanded
+                    ? "absolute right-0 hover:bg-transparent"
+                    : ""
+                }
+                onClick={() => setIsSearchExpanded(!isSearchExpanded)}
+              >
+                {isSearchExpanded ? (
+                  <XMarkIcon className="h-4 w-4" />
+                ) : (
+                  <MagnifyingGlassIcon className="h-4 w-4" />
+                )}
+              </Button>
+            </div>
+          )}
+
           {columns && (
             <ViewColumns
               columns={columns}

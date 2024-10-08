@@ -15,6 +15,9 @@ import { InfoBox } from "@/components/ui/helicone/infoBox";
 import Link from "next/link";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
 import { IslandContainer } from "@/components/ui/islandContainer";
+import { Tabs, TabsTrigger, TabsList } from "@/components/ui/tabs";
+import { useLocalStorage } from "@/services/hooks/localStorage";
+import { ChartPieIcon, ListBulletIcon } from "@heroicons/react/24/outline";
 
 interface SessionsPageProps {
   currentPage: number;
@@ -26,6 +29,20 @@ interface SessionsPageProps {
   };
   defaultIndex: number;
 }
+
+const TABS = [
+  {
+    id: "sessions",
+    label: "Sessions",
+    icon: <ListBulletIcon className="w-4 h-4" />,
+  },
+  {
+    id: "metrics",
+    label: "Metrics",
+    icon: <ChartPieIcon className="w-4 h-4" />,
+  },
+];
+
 const SessionsPage = (props: SessionsPageProps) => {
   const { currentPage, pageSize, sort, defaultIndex } = props;
 
@@ -66,8 +83,17 @@ const SessionsPage = (props: SessionsPageProps) => {
         new Date().getTime() < new Date("2024-09-27").getTime())
     );
   }, [org?.currentOrg?.tier, hasSomeSessions]);
+
+  const [currentTab, setCurrentTab] = useLocalStorage<
+    (typeof TABS)[number]["id"]
+  >("session-details-tab", "sessions");
+
   return (
-    <>
+    <Tabs
+      value={currentTab}
+      onValueChange={(value) => setCurrentTab(value)}
+      className="w-full"
+    >
       <AuthHeader
         isWithinIsland={true}
         title={
@@ -76,6 +102,22 @@ const SessionsPage = (props: SessionsPageProps) => {
               Sessions <Badge>Beta</Badge>
             </div>
           </IslandContainer>
+        }
+        actions={
+          selectedName && (
+            <TabsList className="grid w-full grid-cols-2">
+              {TABS.map((tab) => (
+                <TabsTrigger
+                  key={tab.id}
+                  value={tab.id}
+                  className="flex items-center gap-2"
+                >
+                  {tab.icon}
+                  {tab.label}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          )
         }
       />
       {org?.currentOrg?.tier === "free" && (
@@ -107,6 +149,7 @@ const SessionsPage = (props: SessionsPageProps) => {
               sessionNames={names.sessions}
             />
             <SessionDetails
+              currentTab={currentTab}
               selectedSession={
                 names.sessions.find(
                   (session) => session.name === selectedName
@@ -146,7 +189,7 @@ const SessionsPage = (props: SessionsPageProps) => {
           </div>
         )}
       </div>
-    </>
+    </Tabs>
   );
 };
 

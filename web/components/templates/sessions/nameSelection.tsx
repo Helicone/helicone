@@ -43,20 +43,24 @@ const SessionNameSelection = ({
 
   return (
     <Col className="min-w-[20em] min-h-[calc(100vh-56px)] bg-slate-50 dark:bg-black border-r border-slate-200 dark:border-slate-800 place-items-stretch">
-      <Row className="items-center">
-        <Input
-          className="rounded-none focus-visible:ring-0 focus-visible:border-brand border-0 border-b"
-          placeholder="Search session..."
-          onChange={(e) => setSessionNameSearch(e.target.value)}
-          value={sessionNameSearch}
-        />
+      <Row className="items-center border-b">
+        <div className="w-full flex-1 pl-2 py-2 flex items-center">
+          {/* <SearchIcon className="h-4 w-4 text-slate-500 peer-focus-visible:bg-white h-full w" /> */}
+          <Input
+            className="focus-visible:border focus-visible:ring-1 focus-visible:ring-slate-300 focus-visible:outline-none focus-visible:border-0 border-0 bg-transparent focus-visible:bg-white mr-0 h-8"
+            placeholder="Search session..."
+            onChange={(e) => setSessionNameSearch(e.target.value)}
+            value={sessionNameSearch}
+          />
+        </div>
+
         <Tooltip>
           <TooltipTrigger>
             <Button
               asChild
-              variant="outline"
+              variant="ghost"
               size="icon"
-              className="hover:cursor-pointer rounded-none border-0 border-l border-b"
+              className="hover:cursor-pointer rounded-none hover:bg-transparent"
             >
               <Link
                 href="https://docs.helicone.ai/features/sessions"
@@ -87,7 +91,7 @@ const SessionNameSelection = ({
               setSelectedCard(seshName.name);
             }}
           >
-            <Row className="flex w-full justify-between items-center gap-2">
+            <Row className="flex w-full justify-between items-center gap-2 mb-2">
               <Row className="gap-2 items-center">
                 {seshName.name === "" ? (
                   <div className="text-slate-400 dark:text-slate-600 font-semibold text-sm">
