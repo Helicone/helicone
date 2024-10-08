@@ -211,6 +211,8 @@ export class ExperimentController extends Controller {
       }
     );
 
+    console.log("result", JSON.stringify(result));
+
     if (result.error || !result.data) {
       this.setStatus(500);
       console.error(result.error);
@@ -231,23 +233,29 @@ export class ExperimentController extends Controller {
 
     const seen = new Set<string>();
 
-    const datasetRows = experiment.dataset.rows.filter((row) => {
-      if (!requestBody.datasetRowIds.includes(row.rowId)) {
-        return false;
-      }
-      const alreadyAdded = seen.has(row.rowId);
-      seen.add(row.rowId);
-      return !alreadyAdded;
+    //TODO: Do not fetch all dataset rows!!!
+    const datasetRows = await experimentManager.getDatasetRowsByIds({
+      datasetRowIds: requestBody.datasetRowIds,
     });
 
-    if (datasetRows.length !== requestBody.datasetRowIds.length) {
+    console.log("datasetRows", datasetRows);
+
+    if (datasetRows.error || !datasetRows.data) {
+      this.setStatus(500);
+      console.error(datasetRows.error);
+      return err(datasetRows.error);
+    }
+
+    if (datasetRows.data.length !== requestBody.datasetRowIds.length) {
       this.setStatus(404);
       console.error("Row not found");
       return err("Row not found");
     }
 
-    experiment.dataset.rows = datasetRows;
+    experiment.dataset.rows = datasetRows.data;
     experiment.hypotheses = [hypothesis];
+
+    console.log("experiment", JSON.stringify(experiment));
 
     const runResult = await run(experiment);
 

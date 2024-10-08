@@ -26,24 +26,26 @@ export interface Score {
   value: number | Date | string;
 }
 
+export interface ExperimentDatasetRow {
+  rowId: string;
+  inputRecord: {
+    requestId: string;
+    requestPath: string;
+    inputs: Record<string, string>;
+    autoInputs: Record<string, string>[];
+    response: ResponseObj;
+    request: RequestObj;
+  };
+  scores: Record<string, Score>;
+}
+
 export interface Experiment {
   id: string;
   organization: string;
   dataset: {
     id: string;
     name: string;
-    rows: {
-      rowId: string;
-      inputRecord?: {
-        requestId: string;
-        requestPath: string;
-        inputs: Record<string, string>;
-        autoInputs: Record<string, string>[];
-        response: ResponseObj;
-        request: RequestObj;
-      };
-      scores: Record<string, Score>;
-    }[];
+    rows: ExperimentDatasetRow[];
   };
   meta: any;
   createdAt: string;
@@ -364,6 +366,115 @@ export class ExperimentStore extends BaseStore {
     experimentId: string;
   }): Promise<Result<{ status: string }, string>> {
     return await getExperimentRunStatus(params);
+  }
+
+  async getDatasetRowsByIds(params: {
+    datasetRowIds: string[];
+    include?: IncludeExperimentKeys;
+  }): Promise<Result<ExperimentDatasetRow[], string>> {
+    const { datasetRowIds, include } = params;
+
+    // Helper functions for building parts of the query
+    const responseObjectString = () => `
+    jsonb_build_object(
+      'body', COALESCE(resp.body, ''),
+      'createdAt', COALESCE(resp.created_at::text, ''),
+      'completionTokens', COALESCE(resp.completion_tokens, 0),
+      'promptTokens', COALESCE(resp.prompt_tokens, 0),
+      'delayMs', COALESCE(resp.delay_ms, 0),
+      'model', COALESCE(resp.model, '')
+    )
+  `;
+
+    const requestObjectString = () => `
+    jsonb_build_object(
+      'id', req.id,
+      'provider', COALESCE(req.provider, '')
+    )
+  `;
+
+    const query = `
+    SELECT jsonb_build_object(
+      'rowId', dsr.id,
+      'inputRecord', jsonb_build_object(
+        'requestId', pir.source_request,
+        'requestPath', COALESCE(req.path, ''),
+        'inputs', COALESCE(pir.inputs::jsonb, '{}'::jsonb),
+        'autoInputs', COALESCE(pir.auto_prompt_inputs::jsonb, '[]'::jsonb)
+        ${
+          include?.responseBodies
+            ? `
+        ,'response', ${responseObjectString()}
+        ,'request', ${requestObjectString()}
+        `
+            : ""
+        }
+      )
+      ${
+        include?.score
+          ? `
+      ,'scores', COALESCE((
+        SELECT jsonb_object_agg(
+          sa.score_key,
+          jsonb_build_object(
+            'value', 
+            CASE 
+              WHEN sa.value_type = 'int' THEN sv.int_value::text
+              WHEN sa.value_type = 'float' THEN sv.float_value::text
+              WHEN sa.value_type = 'string' THEN sv.string_value
+              WHEN sa.value_type = 'boolean' THEN sv.boolean_value::text
+              WHEN sa.value_type = 'date' THEN sv.date_value::text
+            END,
+            'valueType', sa.value_type
+          )
+        )
+        FROM score_value sv
+        JOIN score_attribute sa ON sa.id = sv.score_attribute
+        WHERE sv.request_id = pir.source_request
+      ), '{}'::jsonb)
+      `
+          : ""
+      }
+    ) AS row_data
+    FROM experiment_dataset_v2_row dsr
+    LEFT JOIN prompt_input_record pir ON pir.id = dsr.input_record
+    LEFT JOIN request req ON req.id = pir.source_request
+    ${
+      include?.responseBodies
+        ? "LEFT JOIN response resp ON resp.request = pir.source_request"
+        : ""
+    }
+    WHERE dsr.id = ANY($1::uuid[])
+  `;
+
+    try {
+      const { data, error } = await dbExecute<{
+        row_data: ExperimentDatasetRow;
+      }>(query, [datasetRowIds]);
+
+      if (error) {
+        console.error("Query Error:", error);
+        return err(error);
+      }
+
+      if (!data) {
+        return err("No data returned from the query");
+      }
+
+      return ok(
+        data.map((d) => {
+          const row = d.row_data;
+          row.inputRecord.requestPath =
+            row.inputRecord.requestPath === ""
+              ? "http://127.0.0.1:8787/v1/chat/completions"
+              : row.inputRecord.requestPath;
+          return row;
+        })
+      );
+    } catch (e) {
+      console.error("Exception:", e);
+      return err("An unexpected error occurred");
+    }
   }
 }
 

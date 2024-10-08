@@ -10,16 +10,70 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "../../../../../ui/popover";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Badge } from "../../../../../ui/badge";
 import PromptPlayground from "../../../id/promptPlayground";
+import { Input } from "../../../../../ui/input";
 
 const InputCellRenderer: React.FC<any> = (props) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
+  const [inputValue, setInputValue] = useState(props.value || "");
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // Determine the display value
-  const displayValue =
-    props.value || (props.index == 0 ? "Click to add input" : "");
+  const displayValue = inputValue || "Click to add input";
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value;
+    setInputValue(newValue);
+    props.context.handleInputChange(props.column.colId, newValue);
+  };
+
+  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleInputSubmit();
+    }
+  };
+
+  const handleInputSubmit = () => {
+    if (inputValue.trim() === "") {
+      // Don't submit if the value is empty
+      return;
+    }
+
+    setPopoverOpen(false);
+
+    const nextInputField = props.context.inputColumnFields[props.index + 1];
+    if (nextInputField) {
+      props.context.setActivePopoverCell({
+        rowIndex: props.node.rowIndex,
+        colId: nextInputField,
+      });
+    } else {
+      // This is the last input column
+      props.context.handleLastInputSubmit();
+    }
+  };
+
+  useEffect(() => {
+    if (popoverOpen && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [popoverOpen]);
+
+  useEffect(() => {
+    const isActiveCell =
+      props.context.activePopoverCell?.rowIndex === props.node.rowIndex &&
+      props.context.activePopoverCell?.colId === props.column.colId;
+    if (isActiveCell) {
+      setPopoverOpen(true);
+    }
+  }, [
+    props.context.activePopoverCell,
+    props.node.rowIndex,
+    props.column.colId,
+  ]);
 
   return (
     <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
@@ -30,17 +84,23 @@ const InputCellRenderer: React.FC<any> = (props) => {
             whiteSpace: "inherit",
             overflow: "hidden",
             textOverflow: "ellipsis",
-            color: props.value ? "inherit" : "#6B7280", // Tailwind Gray-500
-            minHeight: "20px", // Ensure the div has height even when empty
+            color: inputValue ? "inherit" : "#6B7280",
+            minHeight: "20px",
           }}
         >
           {displayValue}
         </div>
       </PopoverTrigger>
       <PopoverContent align="start" className="w-52 p-0">
-        <h2 className="text-sm w-full font-semibold px-2 pt-2">
-          Enter manually, or:
-        </h2>
+        <Input
+          ref={inputRef}
+          className="text-sm w-full font-semibold px-2 pt-2 border-none"
+          placeholder="Enter manually, or:"
+          value={inputValue}
+          onChange={handleInputChange}
+          onKeyDown={handleInputKeyDown}
+          onBlur={handleInputSubmit}
+        />
         <div className="flex flex-col space-y-2 p-2 items-start justify-start">
           <Button
             onClick={() => {

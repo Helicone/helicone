@@ -138,11 +138,11 @@ export const OriginalMessagesCellRenderer: React.FC<any> = (params) => {
           }`}
           onClick={handleCellClick}
         >
-          {content ? (
+          {content && content !== "{}" ? (
             <div>{content}</div>
           ) : (
             <div>
-              <Button
+              {/* <Button
                 variant="ghost"
                 className="w-6 h-6 p-0 border-slate-200 border rounded-md bg-slate-50 text-slate-500"
                 onClick={(e) => {
@@ -153,7 +153,7 @@ export const OriginalMessagesCellRenderer: React.FC<any> = (params) => {
                 }}
               >
                 <PlayIcon className="w-4 h-4" />
-              </Button>
+              </Button> */}
             </div>
           )}
         </div>
@@ -216,7 +216,7 @@ export const OriginalOutputCellRenderer: React.FC<any> = (params) => {
             <div>{content}</div>
           ) : (
             <div>
-              <Button
+              {/* <Button
                 variant="ghost"
                 className="w-6 h-6 p-0 border-slate-200 border rounded-md bg-slate-50 text-slate-500"
                 onClick={(e) => {
@@ -227,7 +227,7 @@ export const OriginalOutputCellRenderer: React.FC<any> = (params) => {
                 }}
               >
                 <PlayIcon className="w-4 h-4" />
-              </Button>
+              </Button> */}
             </div>
           )}
         </div>

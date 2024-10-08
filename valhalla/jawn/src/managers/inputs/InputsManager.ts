@@ -105,6 +105,8 @@ export class InputsManager extends BaseManager {
       promptVersionId,
     ]);
 
+    console.log("result", result);
+
     if (result.error) {
       return err(result.error);
     }

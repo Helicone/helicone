@@ -5169,6 +5169,57 @@
 				"type": "object",
 				"description": "Construct a type with a set of properties K of type T"
 			},
+			"ExperimentDatasetRow": {
+				"properties": {
+					"rowId": {
+						"type": "string"
+					},
+					"inputRecord": {
+						"properties": {
+							"request": {
+								"$ref": "#/components/schemas/RequestObj"
+							},
+							"response": {
+								"$ref": "#/components/schemas/ResponseObj"
+							},
+							"autoInputs": {
+								"items": {
+									"$ref": "#/components/schemas/Record_string.string_"
+								},
+								"type": "array"
+							},
+							"inputs": {
+								"$ref": "#/components/schemas/Record_string.string_"
+							},
+							"requestPath": {
+								"type": "string"
+							},
+							"requestId": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"request",
+							"response",
+							"autoInputs",
+							"inputs",
+							"requestPath",
+							"requestId"
+						],
+						"type": "object"
+					},
+					"scores": {
+						"$ref": "#/components/schemas/Record_string.Score_"
+					}
+				},
+				"required": [
+					"rowId",
+					"inputRecord",
+					"scores"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"ExperimentScores": {
 				"properties": {
 					"dataset": {
@@ -5213,53 +5264,7 @@
 						"properties": {
 							"rows": {
 								"items": {
-									"properties": {
-										"scores": {
-											"$ref": "#/components/schemas/Record_string.Score_"
-										},
-										"inputRecord": {
-											"properties": {
-												"request": {
-													"$ref": "#/components/schemas/RequestObj"
-												},
-												"response": {
-													"$ref": "#/components/schemas/ResponseObj"
-												},
-												"autoInputs": {
-													"items": {
-														"$ref": "#/components/schemas/Record_string.string_"
-													},
-													"type": "array"
-												},
-												"inputs": {
-													"$ref": "#/components/schemas/Record_string.string_"
-												},
-												"requestPath": {
-													"type": "string"
-												},
-												"requestId": {
-													"type": "string"
-												}
-											},
-											"required": [
-												"request",
-												"response",
-												"autoInputs",
-												"inputs",
-												"requestPath",
-												"requestId"
-											],
-											"type": "object"
-										},
-										"rowId": {
-											"type": "string"
-										}
-									},
-									"required": [
-										"scores",
-										"rowId"
-									],
-									"type": "object"
+									"$ref": "#/components/schemas/ExperimentDatasetRow"
 								},
 								"type": "array"
 							},

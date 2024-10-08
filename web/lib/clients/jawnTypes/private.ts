@@ -1931,6 +1931,18 @@ Json: JsonObject;
     "Record_string.Score_": {
       [key: string]: components["schemas"]["Score"];
     };
+    ExperimentDatasetRow: {
+      rowId: string;
+      inputRecord: {
+        request: components["schemas"]["RequestObj"];
+        response: components["schemas"]["ResponseObj"];
+        autoInputs: components["schemas"]["Record_string.string_"][];
+        inputs: components["schemas"]["Record_string.string_"];
+        requestPath: string;
+        requestId: string;
+      };
+      scores: components["schemas"]["Record_string.Score_"];
+    };
     ExperimentScores: {
       dataset: {
         scores: components["schemas"]["Record_string.Score_"];
@@ -1943,18 +1955,7 @@ Json: JsonObject;
       id: string;
       organization: string;
       dataset: {
-        rows: {
-            scores: components["schemas"]["Record_string.Score_"];
-            inputRecord?: {
-              request: components["schemas"]["RequestObj"];
-              response: components["schemas"]["ResponseObj"];
-              autoInputs: components["schemas"]["Record_string.string_"][];
-              inputs: components["schemas"]["Record_string.string_"];
-              requestPath: string;
-              requestId: string;
-            };
-            rowId: string;
-          }[];
+        rows: components["schemas"]["ExperimentDatasetRow"][];
         name: string;
         id: string;
       };

@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { useOrg } from "@/components/layout/organizationContext";
 import { Button } from "@/components/ui/button";
 import { getJawnClient } from "@/lib/clients/jawn";
@@ -12,7 +12,7 @@ import {
 } from "ag-grid-community";
 import "ag-grid-community/styles/ag-grid.css";
 import { AgGridReact } from "ag-grid-react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 import AddColumnHeader from "./AddColumnHeader";
 import {
   HypothesisCellRenderer,
@@ -65,7 +65,7 @@ export function ExperimentTable({
     useState(false);
 
   const experimentTableRef = useRef<HTMLDivElement>(null);
-  const gridRef = useRef<any>(null);
+  const gridRef = useRef<AgGridReact>(null);
 
   const onGridReady = useCallback((params: GridReadyEvent) => {
     params.api.sizeColumnsToFit();
@@ -210,6 +210,9 @@ export function ExperimentTable({
   const [rowData, setRowData] = useState<any[]>([]);
   // Keep track of all input keys
   const [inputKeys, setInputKeys] = useState<Set<string>>(new Set(["Input 1"]));
+
+  // After defining inputKeys
+  const inputColumnFields = Array.from(inputKeys);
 
   // Function to update rowData based on fetched data
   const updateRowData = useCallback(
@@ -469,6 +472,90 @@ export function ExperimentTable({
     setColumnOrder(newOrder);
   }, []);
 
+  const handleCellValueChanged = useCallback(
+    (event: any) => {
+      if (inputColumnFields.includes(event.colDef.field)) {
+        const updatedRow = { ...event.data };
+        setRowData((prevData) =>
+          prevData.map((row) => (row.id === updatedRow.id ? updatedRow : row))
+        );
+
+        // If this is the last input column, add a new row
+        if (
+          event.colDef.field === inputColumnFields[inputColumnFields.length - 1]
+        ) {
+          handleAddRow();
+        }
+      }
+    },
+    [inputColumnFields, handleAddRow]
+  );
+
+  const [activePopoverCell, setActivePopoverCell] = useState<{
+    rowIndex: number;
+    colId: string;
+  } | null>(null);
+
+  const [currentRowInputs, setCurrentRowInputs] = useState<
+    Record<string, string>
+  >({});
+
+  const handleInputChange = useCallback((key: string, value: string) => {
+    setCurrentRowInputs((prev) => ({ ...prev, [key]: value.trim() }));
+  }, []);
+
+  const handleLastInputSubmit = useCallback(async () => {
+    // Check if all inputs are filled
+    const allInputsFilled = Array.from(inputKeys).every(
+      (key) => currentRowInputs[key] && currentRowInputs[key].trim() !== ""
+    );
+
+    if (!allInputsFilled) {
+      console.log(
+        "Not all inputs are filled. Please fill all inputs before submitting."
+      );
+      return;
+    }
+
+    console.log("All inputs for this row:", currentRowInputs);
+
+    try {
+      console.log("Submitting row:", currentRowInputs);
+      console.log("Prompt subversion ID:", promptSubversionId);
+      console.log("Dataset ID:", experimentData?.dataset?.id);
+      const result = await jawn.POST(
+        "/v1/experiment/dataset/{datasetId}/version/{promptVersionId}/row/new",
+        {
+          body: {
+            inputs: currentRowInputs,
+          },
+          params: {
+            path: {
+              promptVersionId: promptSubversionId,
+              datasetId: experimentData?.dataset?.id ?? "",
+            },
+          },
+        }
+      );
+
+      console.log("API response:", result);
+
+      // Clear the current row inputs after successful submission
+      setCurrentRowInputs({});
+
+      // Here you can add any additional logic you want to perform with the result
+      // For example, you might want to update some state or trigger a refetch
+    } catch (error) {
+      console.error("Error submitting row:", error);
+    }
+  }, [
+    currentRowInputs,
+    jawn,
+    promptSubversionId,
+    experimentData?.dataset?.id,
+    inputKeys,
+  ]);
+
   const columnDefs = useMemo<ColDef[]>(() => {
     let columns: ColDef[] = [
       // Row number column (keep as is)
@@ -516,6 +603,7 @@ export function ExperimentTable({
           whiteSpace: wrapText ? "normal" : "nowrap",
         },
         autoHeight: wrapText,
+        editable: false, // Set this to false to prevent default editing
       });
     });
 
@@ -668,6 +756,8 @@ export function ExperimentTable({
     inputKeys,
     columnWidths,
     columnOrder,
+    activePopoverCell,
+    handleLastInputSubmit,
   ]);
 
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -752,15 +842,22 @@ export function ExperimentTable({
               handleRunHypothesis,
               hypothesesToRun,
               inputKeys: Array.from(inputKeys),
+              inputColumnFields,
               hypotheses: sortedHypotheses,
-              refetchExperiments, // Add refetchExperiments to context
-              experimentId, // Add experimentId to context
-              orgId, // If needed in the cell renderer
-              promptVersionTemplateRef, // Pass the ref instead
+              refetchExperiments,
+              experimentId,
+              orgId,
+              promptVersionTemplateRef,
+              // Add the activePopoverCell and setter
+              activePopoverCell,
+              setActivePopoverCell,
+              handleLastInputSubmit,
+              handleInputChange,
             }}
             rowClass="border-b border-gray-200 hover:bg-gray-50"
             headerHeight={40}
             rowHeight={50}
+            onCellValueChanged={handleCellValueChanged}
           />
         </div>
         <Button

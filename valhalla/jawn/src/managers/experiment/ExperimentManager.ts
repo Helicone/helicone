@@ -6,6 +6,7 @@ import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { BaseManager } from "../BaseManager";
 import {
   Experiment,
+  ExperimentDatasetRow,
   ExperimentStore,
   IncludeExperimentKeys,
 } from "../../lib/stores/experimentStore";
@@ -23,6 +24,12 @@ export class ExperimentManager extends BaseManager {
     include: IncludeExperimentKeys
   ): Promise<Result<Experiment, string>> {
     return this.ExperimentStore.getExperimentById(experimentId, include);
+  }
+
+  async getDatasetRowsByIds(params: {
+    datasetRowIds: string[];
+  }): Promise<Result<ExperimentDatasetRow[], string>> {
+    return this.ExperimentStore.getDatasetRowsByIds(params);
   }
 
   async getExperiments(
