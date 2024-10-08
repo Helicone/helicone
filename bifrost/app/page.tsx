@@ -302,7 +302,7 @@ export default function Home() {
                   ["/static/filevine.webp", "filevine", 142, 53],
                   ["/static/slate.webp", "slate", 98, 53],
                   ["/static/mintlify.svg", "mintlify", 151, 53],
-                  ["/static/upenn.jpg", "upenn", 133, 53],
+                  ["/static/upenn.webp", "upenn", 133, 53],
                   ["/static/together2.webp", "togetherai", 169, 53],
                   ["/static/swiss.webp", "swiss red cross", 170, 53],
                 ] as const
