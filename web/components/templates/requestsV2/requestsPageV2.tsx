@@ -258,7 +258,6 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
 
   const [timeFilter, setTimeFilter] = useState<FilterNode>(getTimeFilter());
   const timeRange = useMemo(getTimeRange, []);
-  const debouncedRefetch = useDebounce(refetch, 500);
 
   const [advancedFilters, setAdvancedFilters] = useState<UIFilterRowTree>(
     getRootFilterNode()
@@ -297,6 +296,8 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     isCached,
     isLive
   );
+
+  const debouncedRefetch = useDebounce(refetch, 500);
 
   const requestWithoutStream = normalizedRequests.find((r) => {
     return (

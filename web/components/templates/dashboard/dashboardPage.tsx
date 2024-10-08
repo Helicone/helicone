@@ -171,8 +171,6 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   const debouncedAdvancedFilter = useDebounce(advancedFilters, 500);
 
-  const debouncedRefetch = useDebounce(refetch, 500);
-
   const timeIncrement = getTimeInterval(timeFilter);
 
   const { unauthorized, currentTier } = useGetUnauthorized(user.id);
@@ -219,6 +217,8 @@ const DashboardPage = (props: DashboardPageProps) => {
     dbIncrement: timeIncrement,
     isLive,
   });
+
+  const debouncedRefetch = useDebounce(refetch, 500);
 
   const getAdvancedFilters = useCallback((): UIFilterRowTree => {
     const decodeFilter = (encoded: any): UIFilterRowTree => {
