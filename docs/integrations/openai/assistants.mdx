@@ -1,0 +1,216 @@
+---
+title: "OpenAI Assistants Integration"
+sidebarTitle: "Assistants"
+description: "Integrate OpenAI Assistants with Helicone to monitor and analyze your assistant usage."
+"twitter:title": "OpenAI Assistants Integration - Helicone OSS LLM Observability"
+icon: "robot"
+iconType: "solid"
+---
+
+## Introduction
+
+OpenAI Assistants enable you to create advanced conversational agents with specialized capabilities. By integrating them with Helicone, you can monitor performance, analyze interactions, and gain valuable insights into your assistant's usage.
+
+## Integration Steps
+
+<Steps>
+  <Step title="Create an Account and Generate an API Key">
+    Log into [Helicone](https://www.helicone.ai) or create a new account. Once logged in, generate a [Helicone API key](https://helicone.ai/developer).
+
+    <Note>
+      Keep your API keys secure and do not expose them publicly.
+    </Note>
+
+  </Step>
+
+  <Step title="Set Environment Variables">
+    Set your OpenAI and Helicone API keys as environment variables:
+
+    ```bash
+    export OPENAI_API_KEY=<your-openai-api-key>
+    export HELICONE_API_KEY=<your-helicone-api-key>
+    ```
+
+  </Step>
+
+  <Step title="Install the OpenAI SDK">
+    If you haven't already, install the OpenAI SDK:
+
+    ```bash
+    npm install openai
+    ```
+
+  </Step>
+
+  <Step title="Configure the OpenAI Client to Use Helicone Proxy">
+    Modify your OpenAI client configuration to route requests through the Helicone proxy and include the `Helicone-Auth` header:
+
+    ```typescript
+    import OpenAI from "openai";
+
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+      baseURL: "https://oai.helicone.ai/v1",
+      defaultHeaders: {
+        "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+      },
+    });
+    ```
+
+  </Step>
+
+  <Step title="Start Using OpenAI Assistants with Helicone">
+    With the above setup, any calls to OpenAI Assistants will automatically be logged and monitored by Helicone. You can now implement your assistant without any additional configuration.
+
+    Here's a basic example of creating and using an assistant:
+
+    ```typescript
+    // Create an assistant
+    const assistant = await openai.beta.assistants.create({
+      name: "MyAssistant",
+      instructions: "Provide helpful responses to user inquiries.",
+      model: "gpt-4-0613",
+    });
+
+    // Start a conversation thread
+    const thread = await openai.beta.threads.create();
+
+    // Send a message to the assistant
+    await openai.beta.threads.messages.create(thread.id, {
+      role: "user",
+      content: "Hello, can you help me with my account?",
+    });
+
+    // Run the assistant to get a response
+    const run = await openai.beta.threads.runs.createAndPoll(thread.id, {
+      assistant_id: assistant.id,
+    });
+
+    // Retrieve and print the assistant's response
+    if (run.status === "completed") {
+      const messages = await openai.beta.threads.messages.list(thread.id, {
+        run_id: run.id,
+      });
+
+      for (const message of messages.data.reverse()) {
+        console.log(`${message.role} > ${message.content[0]}`);
+      }
+    } else {
+      console.log(`Run status: ${run.status}`);
+    }
+    ```
+
+    <Note>
+      Replace the assistant's name, instructions, and messages with content relevant to your application.
+    </Note>
+
+  </Step>
+</Steps>
+
+## Optional: Grouping Calls with Helicone Sessions
+
+To group related API calls and analyze them collectively, you can use Helicone's session tracking features. This is useful for grouping all interactions within a single conversation or user session.
+
+<Steps>
+  <Step title="Generate a Session ID">
+    Generate a unique session ID that will be used to track the session:
+
+    ```typescript
+    import { randomUUID } from "crypto";
+
+    // Generate a unique session ID
+    export const session = randomUUID();
+    ```
+
+  </Step>
+
+  <Step title="Include Session Headers in Your Requests">
+    Include the session headers when you make API requests. This way, the session information is attached to each request, allowing Helicone to group and analyze them together.
+
+    **Include headers in your API requests:**
+
+    ```typescript
+    // When creating the assistant
+    const assistant = await openai.beta.assistants.create(
+      {
+        name: "VisaCalculator",
+        instructions:
+          "You are a visa application advisor with calculation capabilities. Provide information on visa processes and perform calculations related to visa fees, stay duration, and application processing times.",
+        tools: [{ type: "code_interpreter" }],
+        model: "gpt-4",
+      },
+      {
+        headers: {
+          "Helicone-Session-Id": session,
+          "Helicone-Session-Path": "/visa-calculator",
+          "Helicone-Session-Name": "VisaCalculation",
+        },
+      }
+    );
+
+    // When sending a message to the assistant
+    await openai.beta.threads.messages.create(
+      thread.id,
+      {
+        role: "user",
+        content:
+          "If a Schengen visa costs €80 and I'm staying for 15 days, what's my daily visa cost? Round to 2 decimal places.",
+      },
+      {
+        headers: {
+          "Helicone-Session-Id": session,
+          "Helicone-Session-Path": "/visa-calculator/cost-calculation",
+          "Helicone-Session-Name": "VisaCalculation",
+        },
+      }
+    );
+
+    // When running the assistant
+    const run = await openai.beta.threads.runs.createAndPoll(
+      thread.id,
+      {
+        assistant_id: assistant.id,
+        instructions:
+          "Use the code interpreter to perform calculations. Provide a detailed explanation of the calculation process. Address the user as Valued Applicant.",
+      },
+      {
+        headers: {
+          "Helicone-Session-Id": session,
+          "Helicone-Session-Path": "/visa-calculator/cost-calculation/polling",
+          "Helicone-Session-Name": "VisaCalculation",
+        },
+      }
+    );
+
+    // When retrieving the assistant's response
+    if (run.status === "completed") {
+      const messages = await openai.beta.threads.messages.list(
+        thread.id,
+        {
+          run_id: run.id,
+        },
+        {
+          headers: {
+            "Helicone-Session-Id": session,
+            "Helicone-Session-Path": "/visa-calculator/cost-calculation/result",
+            "Helicone-Session-Name": "VisaCalculation",
+          },
+        }
+      );
+
+      for (const message of messages.data.reverse()) {
+        console.log(`${message.role} > ${JSON.stringify(message.content[0])}`);
+      }
+    } else {
+      console.log(run.status);
+    }
+    ```
+
+  </Step>
+</Steps>
+
+<Note>
+  By including the session headers in each request, you have more granular
+  control over session tracking. This approach is especially useful if you want
+  to handle sessions dynamically or manage multiple sessions concurrently.
+</Note>
