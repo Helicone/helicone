@@ -83,7 +83,8 @@
             "integrations/openai/langchain",
             "integrations/openai/llamaindex",
             "integrations/openai/crewai",
-            "integrations/openai/curl"
+            "integrations/openai/curl",
+            "integrations/openai/assistants"
           ],
           "icon": "dice-d20",
           "iconType": "solid"
