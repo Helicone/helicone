@@ -1,30 +1,58 @@
 import { clsx } from "@/utils/clsx";
-import { CheckIcon, XMarkIcon } from "@heroicons/react/20/solid";
-import { useEffect, useRef } from "react";
+import {
+  CheckIcon,
+  XMarkIcon,
+  ExclamationTriangleIcon,
+} from "@heroicons/react/20/solid";
+import { useRef } from "react";
 
 const products = [
   { name: "langsmith", logo: "/static/other-logos/langsmith.png" },
+  { name: "braintrust", logo: "/static/other-logos/braintrust.webp" },
   { name: "arize ai", logo: "/static/other-logos/arize.png" },
-  { name: "honeyhive", logo: "/static/other-logos/honeyhive.png" },
   { name: "langfuse", logo: "/static/other-logos/langfuse.png" },
   { name: "helicone", logo: "/static/other-logos/helicone.png" },
 ];
 
 const featureMatrix = [
-  { name: "Built for scale", support: [false, false, false, false, true] },
-  { name: "1 line integration", support: [false, false, false, false, true] },
-  { name: "Flexible pricing", support: [false, false, false, true, true] },
-  { name: "Open-source", support: [false, true, false, true, true] },
-  { name: "Prompts", support: [true, true, true, true, true] },
-  { name: "Evaluation", support: [true, true, true, true, true] },
-  { name: "Tracing", support: [true, true, true, true, true] },
-  { name: "Use tracking", support: [true, false, true, true, true] },
-  { name: "Exports", support: [true, true, true, true, true] },
+  { name: "Built for scale", support: ["No", "No", "No", "No", "Yes"] },
+  { name: "1 line integration", support: ["No", "No", "No", "No", "Yes"] },
+  { name: "Flexible pricing", support: ["No", "No", "No", "Yes", "Yes"] },
+  { name: "Open-source", support: ["No", "No", "Yes", "Yes", "Yes"] },
+  { name: "Prompts", support: ["Yes", "Yes", "Yes", "Yes", "Yes"] },
+  {
+    name: "Experiments",
+    support: ["No", "Yes", "No", "No", "Yes"],
+  },
+  { name: "Evaluation", support: ["Limited", "Yes", "Yes", "Yes", "Yes"] },
+  { name: "Tracing", support: ["Yes", "Limited", "Yes", "Yes", "Yes"] },
+  { name: "User tracking", support: ["Yes", "No", "No", "Limited", "Yes"] },
 ];
 
 export default function ProductComparisonTable() {
   const tableRef = useRef<HTMLTableElement>(null);
-  const overlayRef = useRef<HTMLDivElement>(null);
+
+  const renderSupportCell = (value: string) => {
+    switch (value.toLowerCase()) {
+      case "yes":
+        return <CheckIcon className="w-6 h-6 text-green-500 mx-auto" />;
+      case "no":
+        return <XMarkIcon className="w-6 h-6 text-red-500 mx-auto" />;
+      case "limited":
+        return (
+          <div className="flex flex-col items-center">
+            <ExclamationTriangleIcon className="w-6 h-6 text-amber-500" />
+            <span className="text-xs font-medium text-amber-700 mt-1">
+              Limited
+            </span>
+          </div>
+        );
+      default:
+        return (
+          <span className="text-sm font-medium text-slate-700">{value}</span>
+        );
+    }
+  };
 
   return (
     <div className="flex flex-col max-w-6xl mx-auto space-y-8 py-16 w-full">
@@ -48,7 +76,7 @@ export default function ProductComparisonTable() {
                   <img
                     src={product.logo}
                     alt={product.logo}
-                    className="h-6 mx-auto mb-2 mt-2" // Added more padding above and below the image
+                    className="h-6 mx-auto mb-2 mt-2"
                   />
                   {product.name}
                 </th>
@@ -60,7 +88,7 @@ export default function ProductComparisonTable() {
               <tr
                 key={feature.name}
                 className={clsx(
-                  "h-[48px]",
+                  "h-[56px]",
                   index % 2 === 1 ? "bg-slate-50" : "bg-white"
                 )}
               >
@@ -86,11 +114,7 @@ export default function ProductComparisonTable() {
                         : "last:border-b-0"
                     )}
                   >
-                    {supported ? (
-                      <CheckIcon className="w-6 h-6 text-green-500 mx-auto" />
-                    ) : (
-                      <XMarkIcon className="w-6 h-6 text-red-500 mx-auto" />
-                    )}
+                    {renderSupportCell(supported)}
                   </td>
                 ))}
               </tr>
