@@ -335,7 +335,6 @@ const RequestRow = (props: {
             )}
         </ul>
       </div>
-
       <div className="flex flex-col gap-4">
         <div className="font-semibold text-gray-900 dark:text-gray-100 text-sm items-center flex">
           <div className="flex flex-row items-center space-x-1">
@@ -549,7 +548,6 @@ const RequestRow = (props: {
           </div>
         )}
       </div>
-
       {displayPreview && (
         <div className="flex flex-col space-y-8">
           <div className="flex w-full justify-end">
@@ -568,6 +566,7 @@ const RequestRow = (props: {
           <div className="flex flex-col space-y-2">{request.render()}</div>
         </div>
       )}
+      <div className="min-h-[100px]">{/* space */}</div>
       <ThemedModal open={newDatasetModalOpen} setOpen={setNewDatasetModalOpen}>
         <NewDataset
           request_ids={[request.id]}
