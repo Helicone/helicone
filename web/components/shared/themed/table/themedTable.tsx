@@ -28,6 +28,7 @@ import {
 import DraggableColumnHeader from "./columns/draggableColumnHeader";
 import RequestRowView from "./requestRowView";
 import ThemedTableHeader from "./themedTableHeader";
+import { DateRange } from "react-day-picker";
 
 import { Checkbox } from "@mui/material";
 import {
@@ -56,6 +57,7 @@ interface ThemedTableV5Props<T extends { id?: string }> {
     currentTimeFilter: TimeFilter;
     defaultValue: "24h" | "7d" | "1m" | "3m" | "all";
     onTimeSelectHandler: (key: TimeInterval, value: string) => void;
+    onDateChange: (date: DateRange | undefined) => void;
   };
   exportData?: any[];
   sortable?: {
@@ -212,6 +214,7 @@ export default function ThemedTable<T extends { id?: string }>(
                   defaultValue: timeFilter.defaultValue,
                   onTimeSelectHandler: timeFilter.onTimeSelectHandler,
                   currentTimeFilter: timeFilter.currentTimeFilter,
+                  onDateChange: timeFilter.onDateChange,
                 }
               : undefined
           }
