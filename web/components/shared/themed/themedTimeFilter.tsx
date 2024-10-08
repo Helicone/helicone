@@ -6,6 +6,7 @@ import useSearchParams from "../utils/useSearchParams";
 import { TimeFilter } from "../../templates/dashboard/dashboardPage";
 import { ProFeatureWrapper } from "../ProBlockerComponents/ProFeatureWrapper";
 import { ThemedTimeFilterShadCN } from "./themedTimeFilterShadCN";
+import { DateRange } from "react-day-picker";
 
 interface ThemedTimeFilterProps {
   timeFilterOptions: { key: string; value: string }[];
@@ -14,6 +15,7 @@ interface ThemedTimeFilterProps {
   defaultValue: string;
   currentTimeFilter: TimeFilter;
   custom?: boolean;
+  onDateChange: (date: DateRange | undefined) => void; // Add this line
 }
 
 function formatDateToInputString(date: Date): string {
@@ -99,6 +101,7 @@ const ThemedTimeFilter = (props: ThemedTimeFilterProps) => {
               );
               setActive("custom");
               onSelect("custom", `${start.toISOString()}_${end.toISOString()}`);
+              props.onDateChange(newDate); // Add this line
             }
           }}
           initialDateRange={{

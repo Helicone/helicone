@@ -17,6 +17,7 @@ import FiltersButton from "./filtersButton";
 import { DragColumnItem } from "./columns/DragList";
 import { UIFilterRowTree } from "../../../../services/lib/filters/uiFilterRowTree";
 import { Button } from "@/components/ui/button";
+import { DateRange } from "react-day-picker";
 
 interface ThemedTableHeaderProps<T> {
   rows?: T[];
@@ -39,6 +40,7 @@ interface ThemedTableHeaderProps<T> {
     currentTimeFilter: TimeFilter;
     defaultValue: "24h" | "7d" | "1m" | "3m" | "all";
     onTimeSelectHandler: (key: TimeInterval, value: string) => void;
+    onDateChange: (date: DateRange | undefined) => void; // Add this line
   };
 
   // define this if you want a table and view toggle
@@ -112,6 +114,7 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
               isFetching={false}
               defaultValue={getDefaultValue()}
               custom={true}
+              onDateChange={timeFilter.onDateChange} // Add this line
             />
           ) : (
             <div />

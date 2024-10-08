@@ -582,25 +582,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                 customTimeFilter: true,
                 timeFilterOptions: [],
                 defaultTimeFilter: interval,
-                onTimeSelectHandler: (key: TimeInterval, value: string) => {
-                  if ((key as string) === "custom") {
-                    value = value.replace("custom:", "");
-                    const start = new Date(value.split("_")[0]);
-                    const end = new Date(value.split("_")[1]);
-                    setInterval(key);
-                    setTimeFilter({
-                      start,
-                      end,
-                    });
-                  } else {
-                    setInterval(key);
-                    setTimeFilter({
-                      start: getTimeIntervalAgo(key),
-                      end: new Date(),
-                    });
-                  }
-                },
-                onDateChange: onTimeSelectHandler,
+                onTimeSelectHandler: onTimeSelectHandler,
               }}
               advancedFilter={{
                 filterMap,
