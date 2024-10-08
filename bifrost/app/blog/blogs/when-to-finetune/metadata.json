@@ -4,7 +4,7 @@
   "title2": "When to Fine-Tune Language Models: From Generalist to Specialist",
   "description": "Discover when and why you should fine-tune base language models like LLaMA to enhance performance for specialized tasks. Learn how fine-tuning transforms general models into experts tailored to your application's needs.",
   "images": "https://www.helicone.ai/static/blog/when-to-finetune.webp",
-  "time": "7 minute read",
+  "time": "15 minute read",
   "author": "Justin Torre",
   "date": "October 8, 2024"
 }
