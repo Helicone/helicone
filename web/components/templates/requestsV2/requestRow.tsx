@@ -21,7 +21,7 @@ import StatusBadge from "./statusBadge";
 import ThemedModal from "../../shared/themed/themedModal";
 import NewDataset from "../datasets/NewDataset";
 import { convertToUSDateFormat } from "../../shared/utils/dateConvertor";
-import { formatNumber } from "../../../shared/utils/formatNumber";
+import { formatNumber } from "../../shared/utils/formatNumber";
 
 function getPathName(url: string) {
   try {
