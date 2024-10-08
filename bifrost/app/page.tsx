@@ -298,13 +298,13 @@ export default function Home() {
               {(
                 [
                   ["/static/qawolf.webp", "qawolf", 160, 53],
-                  ["/static/other-logos/sunrun.webp", "sunrun", 133, 53],
+                  ["/static/sunrun.webp", "sunrun", 133, 53],
                   ["/static/filevine.webp", "filevine", 142, 53],
                   ["/static/slate.webp", "slate", 98, 53],
                   ["/static/mintlify.svg", "mintlify", 151, 53],
                   ["/static/upenn.webp", "upenn", 133, 53],
-                  ["/static/together2.webp", "togetherai", 169, 53],
-                  ["/static/swiss.webp", "swiss red cross", 170, 53],
+                  ["/static/togetherai.webp", "togetherai", 169, 53],
+                  ["/static/swiss.webp", "swiss red cross", 150, 53],
                 ] as const
               ).map((src, index) => (
                 <li
