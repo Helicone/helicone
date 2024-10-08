@@ -294,21 +294,21 @@ export default function Home() {
             <h2 className="hidden md:block text-gray-600 text-lg md:text-xl text-start md:text-center">
               Trusted by the thousands of companies and developers.
             </h2>
-            <ul className="grid grid-cols-2 md:grid-cols-4 gap-[12px] md:gap-20 px-0 md:px-8 grayscale opacity-80 items-center">
+            <ul className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 px-4 md:px-8 grayscale opacity-80 items-center">
               {(
                 [
-                  ["/static/filevine.webp", "filevine", 150, 150],
-                  ["/static/qawolf.webp", "qawolf", 150, 150],
-                  ["/static/mintlify.svg", "mintlify", 150, 150],
-                  ["/static/greptile.png", "greptile", 150, 150],
-                  ["/static/reworkd.svg", "reworkd", 150, 150],
-                  ["/static/codegen.png", "codegen", 150, 150],
-                  ["/static/sunrun.png", "sunrun", 150, 150],
-                  ["/static/lex.png", "lex", 50, 70],
+                  ["/static/qawolf.webp", "qawolf", 160, 53],
+                  ["/static/other-logos/sunrun.webp", "sunrun", 133, 53],
+                  ["/static/filevine.webp", "filevine", 142, 53],
+                  ["/static/slate.webp", "slate", 98, 53],
+                  ["/static/mintlify.svg", "mintlify", 151, 53],
+                  ["/static/upenn.webp", "upenn", 133, 53],
+                  ["/static/together2.webp", "togetherai", 169, 53],
+                  ["/static/swiss.webp", "swiss red cross", 170, 53],
                 ] as const
               ).map((src, index) => (
                 <li
-                  className="flex items-center justify-center p-[24px]"
+                  className="flex items-center justify-center p-2"
                   key={index}
                 >
                   <Image
@@ -316,11 +316,11 @@ export default function Home() {
                     alt={src[1]}
                     width={src[2]}
                     height={src[3]}
+                    objectFit="contain"
                   />
                 </li>
               ))}
             </ul>
-            <div className="grid grid-cols-4 gap-8"></div>
           </section>
 
           <section

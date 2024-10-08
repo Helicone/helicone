@@ -27,9 +27,9 @@ const EnterpriseCard: React.FC = () => {
           </Col>
         </Col>
         <Col className="gap-[16px]">
-          <FeatureItem title="Training and Optimization" />
           <FeatureItem title="SOC-2 Compliance" />
-          <FeatureItem title="Dedicated support" />
+          <FeatureItem title="SSO (Single Sign-On)" />
+          <FeatureItem title="Dedicated SLAs" />
         </Col>
         <Link
           href="/contact"

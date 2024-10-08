@@ -33,7 +33,7 @@ const ScaleCard: React.FC = () => {
 
             <Col>
               <h4 className="text-[16px] text-slate-700 font-light">
-                All features{" "}
+                Essential features{" "}
                 <span className="font-semibold">for the entire team</span>.
               </h4>
               <h4 className="text-[14px] text-slate-700 font-light">
@@ -45,7 +45,7 @@ const ScaleCard: React.FC = () => {
         <Col className="gap-[16px]">
           <FeatureItem
             title="Every feature you need"
-            description="From Playground, Prompts, Exports, Evals and more."
+            description="From Sessions, Datasets, Caching, Evals and more."
           />
           {/* <FeatureItem
             title="Standard support"
