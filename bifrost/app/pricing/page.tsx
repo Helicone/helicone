@@ -118,7 +118,7 @@ export default function Example() {
                   </h1>
                   <div className="h-[43px] w-[175px]">
                     <Image
-                      src={"/static/filevine.png"}
+                      src={"/static/filevine.webp"}
                       alt={"greptile ai"}
                       width={1000}
                       height={50}
