@@ -14,7 +14,8 @@ import RequestLogTableV2 from "./RequestLogTableV2";
 const rows: FeatureRowProps[] = [
   {
     title: "Dashboard",
-    description: "Visualize your LLM analytics, and watch your AI app improve.",
+    description:
+      "Visualize your LLM analytics, and watch your LLM app performance improve.",
     free: <CheckIcon className="w-6 h-6 text-[#6AA84F]" />,
     pro: <CheckIcon className="w-6 h-6 text-[#6AA84F]" />,
     enterprise: <CheckIcon className="w-6 h-6 text-[#6AA84F]" />,
@@ -60,7 +61,7 @@ const rows: FeatureRowProps[] = [
           <p className="text-slate-500">/mo</p>
         </Row>
         <p className="text-center text-sm font-light text-slate-500">
-          Starting at $0.32/1k requests after.
+          From $0.32 down to $0.02 per 1k requests.
         </p>
       </>
     ),
