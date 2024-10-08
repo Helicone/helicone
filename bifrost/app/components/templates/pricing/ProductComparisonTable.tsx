@@ -27,6 +27,14 @@ const featureMatrix = [
   { name: "Evaluation", support: ["Limited", "Yes", "Yes", "Yes", "Yes"] },
   { name: "Tracing", support: ["Yes", "Limited", "Yes", "Yes", "Yes"] },
   { name: "User tracking", support: ["Yes", "No", "No", "Limited", "Yes"] },
+  {
+    name: "Gateway Features",
+    support: ["No", "Limited", "No", "No", "Yes"],
+  },
+  {
+    name: "UI",
+    support: ["Confusing", "Confusing", "Average", "Average", "Intuitive"],
+  },
 ];
 
 export default function ProductComparisonTable() {
