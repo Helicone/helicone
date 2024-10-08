@@ -553,16 +553,17 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     }
   }, [router.query.page, page]);
 
-  const onTimeSelectHandler = (key: TimeInterval, value: string) => {
-    const tableName = getTableName(isCached);
-    const createdAtColumn = getCreatedAtColumn(isCached);
-    if (key === "custom") {
-      const [start, end] = value.split("_");
+  const onTimeSelectHandler = (newDate: DateRange | undefined) => {
+    if (newDate?.from && newDate?.to) {
+      const start = newDate.from;
+      const end = newDate.to;
+      const tableName = getTableName(isCached);
+      const createdAtColumn = getCreatedAtColumn(isCached);
       const filter: FilterNode = {
         left: {
           [tableName]: {
             [createdAtColumn]: {
-              gte: new Date(start).toISOString(),
+              gte: start.toISOString(),
             },
           },
         },
@@ -570,20 +571,13 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
         right: {
           [tableName]: {
             [createdAtColumn]: {
-              lte: new Date(end).toISOString(),
+              lte: end.toISOString(),
             },
           },
         },
       };
       setTimeFilter(filter);
-    } else {
-      setTimeFilter({
-        [tableName]: {
-          [createdAtColumn]: {
-            gte: new Date(getTimeIntervalAgo(key)).toISOString(),
-          },
-        },
-      });
+      debouncedRefetch(); // Use debounced refetch
     }
   };
 

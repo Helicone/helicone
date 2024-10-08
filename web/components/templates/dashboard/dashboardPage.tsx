@@ -299,6 +299,24 @@ const DashboardPage = (props: DashboardPageProps) => {
     },
     [encodeFilters, refetch]
   );
+
+  const onTimeSelectHandler = (newDate: DateRange | undefined) => {
+    if (newDate?.from && newDate?.to) {
+      const start = newDate.from;
+      const end = newDate.to;
+      searchParams.set(
+        "t",
+        `custom_${start.toISOString()}_${end.toISOString()}`
+      );
+      setInterval("custom");
+      setTimeFilter({
+        start,
+        end,
+      });
+      debouncedRefetch(); // Use debounced refetch
+    }
+  };
+
   const metricsData: MetricsPanelProps["metric"][] = [
     {
       id: "cost-req",
@@ -579,6 +597,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                     });
                   }
                 },
+                onDateChange: onTimeSelectHandler,
               }}
               advancedFilter={{
                 filterMap,

@@ -89,6 +89,10 @@ export function ThemedTimeFilterShadCN({
 
   const handleDateChange = (newDate: DateRange | undefined) => {
     if (newDate?.from && newDate?.to) {
+      if (newDate.from > newDate.to) {
+        // Swap dates if from is after to
+        [newDate.from, newDate.to] = [newDate.to, newDate.from];
+      }
       const daysDifference = differenceInDays(newDate.to, newDate.from);
       if (daysDifference > 31 && !hasAccess) {
         setIsDialogOpen(true);
@@ -188,14 +192,18 @@ export function ThemedTimeFilterShadCN({
                 type="number"
                 min="1"
                 value={customNumber}
-                onChange={(e) => setCustomNumber(parseInt(e.target.value) || 1)}
+                onChange={(e) => {
+                  setCustomNumber(parseInt(e.target.value) || 1);
+                  handleCustomRangeChange();
+                }}
                 className="w-16 px-2 py-1 border rounded text-xs"
               />
               <Select
                 value={customUnit}
-                onValueChange={(value: "hour" | "day" | "week") =>
-                  setCustomUnit(value)
-                }
+                onValueChange={(value: "hour" | "day" | "week") => {
+                  setCustomUnit(value);
+                  handleCustomRangeChange();
+                }}
               >
                 <SelectTrigger className="w-[100px] text-xs">
                   <SelectValue />
@@ -212,13 +220,6 @@ export function ThemedTimeFilterShadCN({
                   </SelectItem>
                 </SelectContent>
               </Select>
-              <Button
-                onClick={handleCustomRangeChange}
-                size="sm_sleek"
-                variant={"ghost"}
-              >
-                Apply
-              </Button>
             </div>
           </div>
 
