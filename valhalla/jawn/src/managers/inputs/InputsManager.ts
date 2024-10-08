@@ -136,6 +136,7 @@ export class InputsManager extends BaseManager {
         left join prompt_input_record on experiment_dataset_v2_row.input_record = prompt_input_record.id
       WHERE helicone_dataset.organization = $1 AND
       experiment_dataset_v2_row.dataset_id = $2
+      ORDER BY experiment_dataset_v2_row.created_at ASC
       LIMIT $3
 
       `,
