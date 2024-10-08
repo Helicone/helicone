@@ -21,6 +21,7 @@ import StatusBadge from "./statusBadge";
 import ThemedModal from "../../shared/themed/themedModal";
 import NewDataset from "../datasets/NewDataset";
 import { convertToUSDateFormat } from "../../shared/utils/dateConvertor";
+import { formatNumber } from "../../shared/utils/formatNumber";
 
 function getPathName(url: string) {
   try {
@@ -260,6 +261,18 @@ const RequestRow = (props: {
             </p>
             <p className="text-gray-700 dark:text-gray-300 truncate">
               <span>{Number(request.latency) / 1000}s</span>
+            </p>
+          </li>
+          <li className="flex flex-row justify-between items-center py-2 gap-4">
+            <p className="font-semibold text-gray-900 dark:text-gray-100">
+              Cost
+            </p>
+            <p className="text-gray-700 dark:text-gray-300 truncate">
+              {request.cost !== null && request.cost !== undefined
+                ? `$${formatNumber(request.cost)}`
+                : request.status.statusType === "success"
+                ? "Calculating..."
+                : "N/A"}
             </p>
           </li>
           <li className="flex flex-row justify-between items-center py-2 gap-4">
