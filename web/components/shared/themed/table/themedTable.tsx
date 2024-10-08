@@ -232,7 +232,7 @@ export default function ThemedTable<T extends { id?: string }>(
       <ResizablePanelGroup direction="horizontal">
         <ResizablePanel>
           {" "}
-          <div className="h-full overflow-x-auto">
+          <div className="h-full overflow-x-auto bg-white dark:bg-black">
             {skeletonLoading ? (
               <LoadingAnimation title="Loading Data..." />
             ) : rows.length === 0 ? (
@@ -401,7 +401,7 @@ export default function ThemedTable<T extends { id?: string }>(
           <>
             <ResizableHandle withHandle />
             <ResizablePanel minSize={25} maxSize={75}>
-              <div className="h-full flex-shrink-0 transition-all duration-300 ease-in-out overflow-y-auto">
+              <div className="h-full flex-shrink-0 flex flex-col">
                 {rightPanel}
               </div>
             </ResizablePanel>
