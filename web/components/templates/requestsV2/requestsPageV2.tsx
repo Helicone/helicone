@@ -1,4 +1,5 @@
 import { ArrowPathIcon, HomeIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { DateRange } from "react-day-picker";
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -257,6 +258,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
 
   const [timeFilter, setTimeFilter] = useState<FilterNode>(getTimeFilter());
   const timeRange = useMemo(getTimeRange, []);
+  const debouncedRefetch = useDebounce(refetch, 500);
 
   const [advancedFilters, setAdvancedFilters] = useState<UIFilterRowTree>(
     getRootFilterNode()
@@ -873,6 +875,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
                   currentTimeFilter: timeRange,
                   defaultValue: "1m",
                   onTimeSelectHandler: onTimeSelectHandler,
+                  onDateChange: onTimeSelectHandler,
                 }}
                 onRowSelect={(row, index) => {
                   onRowSelectHandler(row, index);

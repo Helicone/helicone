@@ -55,6 +55,7 @@ import StyledAreaChart from "./styledAreaChart";
 import SuggestionModal from "./suggestionsModal";
 import { useDashboardPage } from "./useDashboardPage";
 import { IslandContainer } from "@/components/ui/islandContainer";
+import { DateRange } from "react-day-picker";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -169,6 +170,8 @@ const DashboardPage = (props: DashboardPageProps) => {
   );
 
   const debouncedAdvancedFilter = useDebounce(advancedFilters, 500);
+
+  const debouncedRefetch = useDebounce(refetch, 500);
 
   const timeIncrement = getTimeInterval(timeFilter);
 
