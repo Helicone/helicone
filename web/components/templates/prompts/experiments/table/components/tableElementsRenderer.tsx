@@ -20,6 +20,8 @@ const InputCellRenderer: React.FC<any> = (props) => {
   const [inputValue, setInputValue] = useState(props.value || "");
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const isEmptyTable = props.context.rowData?.length === 1;
+
   // Determine the display value
   const displayValue = inputValue || "Click to add input";
 
@@ -94,15 +96,17 @@ const InputCellRenderer: React.FC<any> = (props) => {
         </div>
       </PopoverTrigger>
       <PopoverContent align="start" className="w-52 p-0">
-        <Input
-          ref={inputRef}
-          className="text-sm w-full font-semibold px-2 pt-2 border-none"
-          placeholder="Enter manually, or:"
-          value={inputValue}
-          onChange={handleInputChange}
-          onKeyDown={handleInputKeyDown}
-          onBlur={handleInputSubmit}
-        />
+        {!isEmptyTable && (
+          <Input
+            ref={inputRef}
+            className="text-sm w-full font-semibold px-2 pt-2 border-none"
+            placeholder="Enter manually, or:"
+            value={inputValue}
+            onChange={handleInputChange}
+            onKeyDown={handleInputKeyDown}
+            onBlur={handleInputSubmit}
+          />
+        )}
         <div className="flex flex-col space-y-2 p-2 items-start justify-start">
           <Button
             onClick={() => {

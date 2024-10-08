@@ -845,11 +845,11 @@ export function ExperimentTable({
               experimentId,
               orgId,
               promptVersionTemplateRef,
-              // Add the activePopoverCell and setter
               activePopoverCell,
               setActivePopoverCell,
               handleLastInputSubmit,
               handleInputChange,
+              rowData, // Add this line
             }}
             rowClass="border-b border-gray-200 hover:bg-gray-50"
             headerHeight={40}
