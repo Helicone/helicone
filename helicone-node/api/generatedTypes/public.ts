@@ -187,7 +187,10 @@ export interface paths {
   "/v1/experiment/dataset/query": {
     post: operations["GetDatasets"];
   };
-  "/v1/experiment/dataset/{datasetId}/version/{promptVersionId}/row": {
+  "/v1/experiment/dataset/{datasetId}/row/insert": {
+    post: operations["InsertDatasetRow"];
+  };
+  "/v1/experiment/dataset/{datasetId}/version/{promptVersionId}/row/new": {
     post: operations["CreateDatasetRow"];
   };
   "/v1/experiment/dataset/{datasetId}/inputs/query": {
@@ -3527,6 +3530,28 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_DatasetResult-Array.string_"];
+        };
+      };
+    };
+  };
+  InsertDatasetRow: {
+    parameters: {
+      path: {
+        datasetId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          inputRecordId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_string.string_"];
         };
       };
     };

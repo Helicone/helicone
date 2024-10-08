@@ -124,15 +124,13 @@ const ExperimentInputSelector = (props: ExperimentInputSelectorProps) => {
               await Promise.all(
                 selectedRequests.map((request) => {
                   return jawn.POST(
-                    "/v1/experiment/dataset/{datasetId}/version/{promptVersionId}/row",
+                    "/v1/experiment/dataset/{datasetId}/row/insert",
                     {
                       body: {
-                        inputs: request.inputs,
-                        sourceRequest: request.source_request,
+                        inputRecordId: request.id,
                       },
                       params: {
                         path: {
-                          promptVersionId: props.meta?.promptVersionId ?? "",
                           datasetId: props.meta?.datasetId ?? "",
                         },
                       },
@@ -141,30 +139,8 @@ const ExperimentInputSelector = (props: ExperimentInputSelectorProps) => {
                 })
               );
 
-              // const dataset = await jawn.POST("/v1/experiment/dataset", {
-              //   body: {
-              //     datasetName: `EXP-DATASET-${new Date().getTime()}`,
-              //     requestIds: selectedRequests
-              //       .map((request) => request.source_request)
-              //       .filter(Boolean) as string[],
-              //     meta: {
-              //       promptVersionId: props.meta?.promptVersionId,
-              //     },
-              //     datasetType: "experiment",
-              //   },
-              // });
-              // if (dataset.data?.error !== null) {
-              //   setNotification(
-              //     "Error creating dataset. Please try again",
-              //     "error"
-              //   );
-              //   return;
-              // }
               if (onSuccess) {
                 onSuccess(true);
-
-                // Pass selectedRequests to the onSuccess callback if needed
-                // onSuccess(dataset.data?.data?.datasetId, selectedRequests);
 
                 setNotification("Dataset created successfully", "success");
                 setOpen(false);
