@@ -192,6 +192,11 @@ export type BlogStructure =
 const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
+      folderName: "when-to-finetune",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "replaying-llm-sessions",
     },
   },
