@@ -25,7 +25,10 @@ const NavBar = (props: NavBarProps) => {
             />
           </Link>
 
-          <Link href="/pricing" className="text-md font-semibold text-gray-900">
+          <Link
+            href="https://helicone.ai/pricing"
+            className="text-md font-semibold text-gray-900"
+          >
             Pricing
           </Link>
           <Link
