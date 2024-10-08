@@ -74,7 +74,7 @@ export class ExperimentManager extends BaseManager {
         params.status,
         params.experimentId,
         params.providerKeyId === "NOKEY"
-          ? "a4a09ff5-0fee-4fc6-bb2e-63026f094133"
+          ? process.env.HELICONE_DEFAULT_PROVIDER_KEY_ID
           : params.providerKeyId,
       ]
     );
