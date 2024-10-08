@@ -210,6 +210,7 @@ export function ExperimentTable({
   const [rowData, setRowData] = useState<any[]>([]);
   // Keep track of all input keys
   const [inputKeys, setInputKeys] = useState<Set<string>>(new Set(["Input 1"]));
+  const [tempRowId, setTempRowId] = useState(0);
 
   // After defining inputKeys
   const inputColumnFields = Array.from(inputKeys);
@@ -269,7 +270,7 @@ export function ExperimentTable({
         );
 
         return {
-          id: row.id,
+          id: row.dataset_row_id,
           dataset_row_id: row.dataset_row_id,
           // Spread inputs to individual fields
           ...row.inputs,
@@ -400,30 +401,6 @@ export function ExperimentTable({
     },
     [runHypothesisMutation]
   );
-  const handleAddRow = useCallback(() => {
-    const newRowId = `temp-${Date.now()}`;
-
-    // Initialize input fields with empty strings
-    const inputFields = Array.from(inputKeys).reduce((acc, key) => {
-      acc[key] = "";
-      return acc as Record<string, string>;
-    }, {} as Record<string, string>);
-
-    // Create an empty row object
-    const newRow = {
-      id: newRowId,
-      dataset_row_id: null,
-      ...inputFields, // Include input fields
-      // Initialize hypothesis fields as empty strings
-      ...experimentData?.hypotheses.reduce((acc, hypothesis) => {
-        acc[hypothesis.id] = "";
-        return acc;
-      }, {} as Record<string, string>),
-    };
-
-    // Add the new row to the rowData state
-    setRowData((prevData) => [...prevData, newRow]);
-  }, [experimentData?.hypotheses, inputKeys]);
 
   const refetchData = () => {
     refetchExperiments();
@@ -472,12 +449,33 @@ export function ExperimentTable({
     setColumnOrder(newOrder);
   }, []);
 
+  const handleAddRow = useCallback(() => {
+    const newRowId = `temp-${tempRowId}`;
+    setTempRowId((prevId) => prevId + 1);
+
+    const inputFields = Array.from(inputKeys).reduce((acc, key) => {
+      acc[key] = "";
+      return acc as Record<string, string>;
+    }, {} as Record<string, string>);
+
+    const newRow = {
+      id: newRowId,
+      dataset_row_id: null,
+      ...inputFields,
+      isLoading: {},
+    };
+
+    setRowData((prevData) => [...prevData, newRow]);
+  }, [inputKeys, tempRowId]);
+
   const handleCellValueChanged = useCallback(
     (event: any) => {
       if (inputColumnFields.includes(event.colDef.field)) {
         const updatedRow = { ...event.data };
         setRowData((prevData) =>
-          prevData.map((row) => (row.id === updatedRow.id ? updatedRow : row))
+          prevData.map((row) =>
+            row.dataset_row_id === updatedRow.dataset_row_id ? updatedRow : row
+          )
         );
 
         // If this is the last input column, add a new row
@@ -517,13 +515,8 @@ export function ExperimentTable({
       return;
     }
 
-    console.log("All inputs for this row:", currentRowInputs);
-
     try {
-      console.log("Submitting row:", currentRowInputs);
-      console.log("Prompt subversion ID:", promptSubversionId);
-      console.log("Dataset ID:", experimentData?.dataset?.id);
-      const result = await jawn.POST(
+      await jawn.POST(
         "/v1/experiment/dataset/{datasetId}/version/{promptVersionId}/row/new",
         {
           body: {
@@ -538,13 +531,11 @@ export function ExperimentTable({
         }
       );
 
-      console.log("API response:", result);
-
       // Clear the current row inputs after successful submission
       setCurrentRowInputs({});
 
-      // Here you can add any additional logic you want to perform with the result
-      // For example, you might want to update some state or trigger a refetch
+      // Refetch input records to update the table
+      refetchInputRecords();
     } catch (error) {
       console.error("Error submitting row:", error);
     }
@@ -554,6 +545,7 @@ export function ExperimentTable({
     promptSubversionId,
     experimentData?.dataset?.id,
     inputKeys,
+    refetchInputRecords,
   ]);
 
   const columnDefs = useMemo<ColDef[]>(() => {
