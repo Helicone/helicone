@@ -114,7 +114,7 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
               isFetching={false}
               defaultValue={getDefaultValue()}
               custom={true}
-              onDateChange={timeFilter.onDateChange} // Add this line
+              onDateChange={timeFilter.onDateChange}
             />
           ) : (
             <div />

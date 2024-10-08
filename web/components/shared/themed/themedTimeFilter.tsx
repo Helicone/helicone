@@ -15,7 +15,7 @@ interface ThemedTimeFilterProps {
   defaultValue: string;
   currentTimeFilter: TimeFilter;
   custom?: boolean;
-  onDateChange: (date: DateRange | undefined) => void; // Add this line
+  onDateChange: (date: DateRange | undefined) => void;
 }
 
 function formatDateToInputString(date: Date): string {
@@ -101,7 +101,7 @@ const ThemedTimeFilter = (props: ThemedTimeFilterProps) => {
               );
               setActive("custom");
               onSelect("custom", `${start.toISOString()}_${end.toISOString()}`);
-              props.onDateChange(newDate); // Add this line
+              props.onDateChange(newDate);
             }
           }}
           initialDateRange={{

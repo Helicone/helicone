@@ -583,6 +583,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                 timeFilterOptions: [],
                 defaultTimeFilter: interval,
                 onTimeSelectHandler: onTimeSelectHandler,
+                onDateChange: onTimeSelectHandler,
               }}
               advancedFilter={{
                 filterMap,
