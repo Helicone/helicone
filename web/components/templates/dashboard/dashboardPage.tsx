@@ -55,6 +55,7 @@ import StyledAreaChart from "./styledAreaChart";
 import SuggestionModal from "./suggestionsModal";
 import { useDashboardPage } from "./useDashboardPage";
 import { IslandContainer } from "@/components/ui/islandContainer";
+import { DateRange } from "react-day-picker";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -217,6 +218,8 @@ const DashboardPage = (props: DashboardPageProps) => {
     isLive,
   });
 
+  const debouncedRefetch = useDebounce(refetch, 500);
+
   const getAdvancedFilters = useCallback((): UIFilterRowTree => {
     const decodeFilter = (encoded: any): UIFilterRowTree => {
       if (encoded.type === "node") {
@@ -299,6 +302,24 @@ const DashboardPage = (props: DashboardPageProps) => {
     },
     [encodeFilters, refetch]
   );
+
+  const onTimeSelectHandler = (newDate: DateRange | undefined) => {
+    if (newDate?.from && newDate?.to) {
+      const start = newDate.from;
+      const end = newDate.to;
+      searchParams.set(
+        "t",
+        `custom_${start.toISOString()}_${end.toISOString()}`
+      );
+      setInterval("custom");
+      setTimeFilter({
+        start,
+        end,
+      });
+      debouncedRefetch(); // Use debounced refetch
+    }
+  };
+
   const metricsData: MetricsPanelProps["metric"][] = [
     {
       id: "cost-req",
@@ -561,24 +582,8 @@ const DashboardPage = (props: DashboardPageProps) => {
                 customTimeFilter: true,
                 timeFilterOptions: [],
                 defaultTimeFilter: interval,
-                onTimeSelectHandler: (key: TimeInterval, value: string) => {
-                  if ((key as string) === "custom") {
-                    value = value.replace("custom:", "");
-                    const start = new Date(value.split("_")[0]);
-                    const end = new Date(value.split("_")[1]);
-                    setInterval(key);
-                    setTimeFilter({
-                      start,
-                      end,
-                    });
-                  } else {
-                    setInterval(key);
-                    setTimeFilter({
-                      start: getTimeIntervalAgo(key),
-                      end: new Date(),
-                    });
-                  }
-                },
+                onTimeSelectHandler: onTimeSelectHandler,
+                onDateChange: onTimeSelectHandler,
               }}
               advancedFilter={{
                 filterMap,

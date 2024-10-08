@@ -1,4 +1,5 @@
 import { ArrowPathIcon, HomeIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { DateRange } from "react-day-picker";
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -296,6 +297,8 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     isLive
   );
 
+  const debouncedRefetch = useDebounce(refetch, 500);
+
   const requestWithoutStream = normalizedRequests.find((r) => {
     return (
       (r.requestBody as any)?.stream &&
@@ -553,16 +556,17 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     }
   }, [router.query.page, page]);
 
-  const onTimeSelectHandler = (key: TimeInterval, value: string) => {
-    const tableName = getTableName(isCached);
-    const createdAtColumn = getCreatedAtColumn(isCached);
-    if (key === "custom") {
-      const [start, end] = value.split("_");
+  const onTimeSelectHandler = (newDate: DateRange | undefined) => {
+    if (newDate?.from && newDate?.to) {
+      const start = newDate.from;
+      const end = newDate.to;
+      const tableName = getTableName(isCached);
+      const createdAtColumn = getCreatedAtColumn(isCached);
       const filter: FilterNode = {
         left: {
           [tableName]: {
             [createdAtColumn]: {
-              gte: new Date(start).toISOString(),
+              gte: start.toISOString(),
             },
           },
         },
@@ -570,20 +574,13 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
         right: {
           [tableName]: {
             [createdAtColumn]: {
-              lte: new Date(end).toISOString(),
+              lte: end.toISOString(),
             },
           },
         },
       };
       setTimeFilter(filter);
-    } else {
-      setTimeFilter({
-        [tableName]: {
-          [createdAtColumn]: {
-            gte: new Date(getTimeIntervalAgo(key)).toISOString(),
-          },
-        },
-      });
+      debouncedRefetch(); // Use debounced refetch
     }
   };
 
@@ -879,6 +876,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
                   currentTimeFilter: timeRange,
                   defaultValue: "1m",
                   onTimeSelectHandler: onTimeSelectHandler,
+                  onDateChange: onTimeSelectHandler,
                 }}
                 onRowSelect={(row, index) => {
                   onRowSelectHandler(row, index);
