@@ -14,7 +14,6 @@ import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeC
 import { InfoBox } from "@/components/ui/helicone/infoBox";
 import Link from "next/link";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
-import { IslandContainer } from "@/components/ui/islandContainer";
 import { Tabs, TabsTrigger, TabsList } from "@/components/ui/tabs";
 import { useLocalStorage } from "@/services/hooks/localStorage";
 import { ChartPieIcon, ListBulletIcon } from "@heroicons/react/24/outline";
@@ -97,22 +96,19 @@ const SessionsPage = (props: SessionsPageProps) => {
       <AuthHeader
         isWithinIsland={true}
         title={
-          <IslandContainer>
-            <div className="flex items-center gap-2">
-              Sessions <Badge>Beta</Badge>
-            </div>
-          </IslandContainer>
+          <div className="flex items-center gap-2 ml-8">
+            Sessions <Badge>Beta</Badge>
+          </div>
         }
         actions={
           selectedName && (
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className="grid w-full grid-cols-2 mr-8">
               {TABS.map((tab) => (
                 <TabsTrigger
                   key={tab.id}
                   value={tab.id}
                   className="flex items-center gap-2"
                 >
-                  {tab.icon}
                   {tab.label}
                 </TabsTrigger>
               ))}
