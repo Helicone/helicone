@@ -24,7 +24,9 @@ export const usePromptVersions = (promptId: string) => {
             promptId: promptId,
           },
         },
-        body: {},
+        body: {
+          includeExperimentVersions: false,
+        },
       });
     },
     refetchOnWindowFocus: false,
