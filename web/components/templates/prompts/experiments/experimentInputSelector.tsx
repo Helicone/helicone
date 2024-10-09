@@ -43,9 +43,13 @@ const ExperimentInputSelector = (props: ExperimentInputSelectorProps) => {
     []
   );
 
+  // New state to track if all items are selected
+  const [isAllSelected, setIsAllSelected] = useState(false);
+
   useEffect(() => {
     if (requestIds) {
       setSelectedRequests([]); // Initialize with no requests selected
+      setIsAllSelected(false); // Reset the select all state
     }
   }, [requestIds]);
 
@@ -57,24 +61,55 @@ const ExperimentInputSelector = (props: ExperimentInputSelectorProps) => {
       const exists = prevSelected.some((req) => req.id === id);
       if (exists) {
         // Remove the request from selectedRequests
-        return prevSelected.filter((req) => req.id !== id);
+        const newSelected = prevSelected.filter((req) => req.id !== id);
+        // Update isAllSelected if not all items are selected
+        if (newSelected.length !== requestIds?.length) {
+          setIsAllSelected(false);
+        }
+        return newSelected;
       } else {
         // Add the request to selectedRequests
-        return [...prevSelected, request];
+        const newSelected = [...prevSelected, request];
+        // Update isAllSelected if all items are selected
+        if (newSelected.length === requestIds?.length) {
+          setIsAllSelected(true);
+        }
+        return newSelected;
       }
     });
+  };
+
+  // Handler for Select All button
+  const handleSelectAll = () => {
+    if (isAllSelected) {
+      // Deselect all
+      setSelectedRequests([]);
+      setIsAllSelected(false);
+    } else {
+      // Select all
+      if (requestIds) {
+        setSelectedRequests(requestIds);
+        setIsAllSelected(true);
+      }
+    }
   };
 
   return (
     <ThemedDrawer open={open} setOpen={setOpen}>
       <div className="h-full flex flex-col space-y-4 justify-between w-full">
         <div className="flex flex-col w-full">
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center justify-between mb-4">
             <h2 className="font-semibold text-xl">
               Select Inputs ({requestIds?.length})
             </h2>
+            <HcButton
+              variant="secondary"
+              size="sm"
+              title={isAllSelected ? "Deselect All" : "Select All"}
+              onClick={handleSelectAll}
+            />
           </div>
-          <p className="text-gray-500 text-sm pt-2">
+          <p className="text-gray-500 text-sm pb-4">
             Select the inputs you want to include in the dataset.
           </p>
 

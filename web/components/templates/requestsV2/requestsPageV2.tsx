@@ -592,8 +592,8 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
       return {
         id:
           `${property}`.toLowerCase() === "cost"
-            ? "cost"
-            : `property-${property}`,
+            ? `property-${property}`
+            : `${property}`,
         accessorFn: (row) => {
           const value = row.customProperties
             ? row.customProperties[property]
