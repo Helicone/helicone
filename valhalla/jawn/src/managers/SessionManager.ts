@@ -9,6 +9,7 @@ import { buildFilterWithAuthClickHouse } from "../lib/shared/filters/filters";
 import { err, ok, Result, resultMap } from "../lib/shared/result";
 import { clickhousePriceCalc } from "../packages/cost";
 import { isValidTimeZoneDifference } from "../utils/helpers";
+import { RequestManager } from "./request/RequestManager";
 
 export interface SessionResult {
   created_at: string;
@@ -363,5 +364,47 @@ WHERE ${buildWhereClause("duration")}
         total_tokens: +y.completion_tokens + +y.prompt_tokens,
       }))
     );
+  }
+
+  async updateSessionFeedback(
+    sessionId: string,
+    rating: boolean
+  ): Promise<Result<null, string>> {
+    const query = `
+    SELECT request_id
+    FROM request_response_rmt
+    WHERE properties['Helicone-Session-Id'] = '${sessionId}'
+    ORDER BY request_created_at ASC
+    LIMIT 1
+    `;
+
+    console.log({ query });
+
+    const results = await clickhouseDb.dbQuery<{ request_id: string }>(
+      query,
+      []
+    );
+
+    console.log({ results });
+
+    if (results.error || !results.data) {
+      return err("No request found");
+    }
+
+    const requestManager = new RequestManager(this.authParams);
+    console.log({ id: results.data[0].request_id });
+    const res = await requestManager.addPropertyToRequest(
+      results.data[0].request_id,
+      "Helicone-Session-Feedback",
+      rating ? "1" : "0"
+    );
+
+    console.log({ res });
+
+    if (res.error) {
+      return err(res.error);
+    }
+
+    return ok(null);
   }
 }
