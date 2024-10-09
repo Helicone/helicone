@@ -237,6 +237,7 @@ const whereKeyMappings: KeyMappings = {
       completion_tokens: "request_response_rmt.completion_tokens",
       request_body: "request_response_rmt.request_body",
       response_body: "request_response_rmt.response_body",
+      scores_column: "request_response_rmt.scores",
     })(filter, placeValueSafely);
   },
   request_response_search: (filter, placeValueSafely) => {

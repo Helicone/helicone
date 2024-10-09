@@ -55,12 +55,16 @@ const useRequestsPageV2 = (
     filterMap[modelFilterIdx] = {
       label: "Model",
       operators: textWithSuggestions(
-        models?.data
-          ?.filter((model) => model.model)
-          .map((model) => ({
-            key: model.model,
-            param: model.model,
-          })) || []
+        Array.from(
+          new Set(
+            models?.data
+              ?.filter((model) => model.model)
+              .map((model) => model.model)
+          )
+        ).map((modelName) => ({
+          key: modelName,
+          param: modelName,
+        })) || []
       ),
       table: "request_response_rmt",
       column: "model",
@@ -97,7 +101,6 @@ const useRequestsPageV2 = (
     isCountLoading: count.isLoading,
     properties,
     refetch: requests.refetch,
-    remove: requests.remove,
     searchPropertyFilters,
     filterMap,
     filter,

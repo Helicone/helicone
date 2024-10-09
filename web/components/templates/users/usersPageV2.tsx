@@ -17,23 +17,6 @@ import {
 import TableFooter from "../requestsV2/tableFooter";
 import { INITIAL_COLUMNS } from "./initialColumns";
 
-function formatNumber(num: number) {
-  const numParts = num.toString().split(".");
-
-  if (numParts.length > 1) {
-    const decimalPlaces = numParts[1].length;
-    if (decimalPlaces < 2) {
-      return num.toFixed(2);
-    } else if (decimalPlaces > 6) {
-      return num.toFixed(6);
-    } else {
-      return num;
-    }
-  } else {
-    return num.toFixed(2);
-  }
-}
-
 interface UsersPageV2Props {
   currentPage: number;
   pageSize: number;

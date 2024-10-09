@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState, FC, ChangeEvent } from "react";
 
 interface CheckBoxProps {
   id: string;
@@ -6,14 +6,14 @@ interface CheckBoxProps {
   value: boolean;
 }
 
-const CheckBox: React.FC<CheckBoxProps> = ({ id, onChange, value }) => {
+const CheckBox: FC<CheckBoxProps> = ({ id, onChange, value }) => {
   const [checked, setChecked] = useState(value);
 
   useEffect(() => {
     setChecked(value);
   }, [value]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setChecked(e.target.checked);
     onChange(id, e.target.checked);
   };

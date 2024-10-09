@@ -15,7 +15,7 @@ interface CacheProps {
     sortDirection: SortDirection | null;
     isCustomProperty: boolean;
   };
-  defaultIndex: number;
+  defaultIndex: string;
 }
 
 const Cache = (props: CacheProps) => {
@@ -55,7 +55,7 @@ export const getServerSideProps = withAuthSSR(async (options) => {
         sortDirection: sortDirection ? (sortDirection as SortDirection) : null,
         isCustomProperty: isCustomProperty === "true",
       },
-      defaultIndex: tab ? parseInt(tab as string) : 0,
+      defaultIndex: tab ? tab.toString() : "0",
     },
   };
 });

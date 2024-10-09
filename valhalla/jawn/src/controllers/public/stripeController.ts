@@ -1,19 +1,17 @@
 import {
-  Controller,
-  Route,
-  Tags,
-  Security,
-  Post,
   Body,
-  Request,
-  Get,
+  Controller,
   Delete,
+  Get,
   Path,
+  Post,
+  Request,
+  Route,
+  Security,
+  Tags,
 } from "tsoa";
-import Stripe from "stripe";
-import { JawnAuthenticatedRequest } from "../../types/request";
 import { StripeManager } from "../../managers/stripe/StripeManager";
-import { Result } from "../../lib/shared/result";
+import { JawnAuthenticatedRequest } from "../../types/request";
 
 export interface UpgradeToProRequest {
   addons?: {
@@ -163,6 +161,7 @@ export class StripeController extends Controller {
       coupon: {
         name: string | null;
         percent_off: number | null;
+        amount_off: number | null;
       };
     } | null;
     subtotal: number;

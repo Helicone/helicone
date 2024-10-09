@@ -1,0 +1,118 @@
+---
+title: "Tools Javascript SDK Integration"
+sidebarTitle: "Javascript"
+description: "Log any external tools used in your LLM applications to Helicone using Helicone's Javascript SDK."
+icon: "js"
+iconType: "solid"
+---
+
+The `HeliconeManualLogger` class can be used to log any external tools used in your LLM applications to Helicone.
+
+<Steps>
+  <Step title="To get started, install the `@helicone/helpers` package">
+  ```bash
+  npm install @helicone/helpers
+  ```
+  </Step>
+  <Step title="Set `HELICONE_API_KEY` as an environment variable">
+  ```bash
+  export HELICONE_API_KEY=sk-<your-api-key>
+  ```
+  <Info>You can also set the Helicone API Key in your code (See below)</Info>
+  </Step>
+  <Step title="Create a new HeliconeManualLogger instance">
+  ```typescript
+  import { HeliconeManualLogger } from "@helicone/helpers";
+
+  const heliconeLogger = new HeliconeManualLogger({
+    apiKey: process.env.HELICONE_API_KEY, // Can be set as env variable
+    headers: {} // Additional headers to be sent with the request
+  });
+  ```
+  </Step>
+  <Step title="Log your request">
+  ```typescript
+  const res = await heliconeLogger.logRequest(
+    {
+      _type: "tool",
+      toolName: "...", // The name of the tool used
+      input: ..., // The input to the tool
+      // other data which you want to store about the tool call
+    },
+    async (resultRecorder) => {
+      // your tool call here
+      resultRecorder.appendResults({
+        ... // The results of the operation (this will be logged to Helicone)
+      });
+      return results; // this will be returned by the logRequest function
+    },
+    {
+     // Additional headers to be sent with the request
+    }
+  );
+  ```
+</Step>
+</Steps>
+
+## API Reference
+
+### HeliconeManualLogger
+
+```typescript
+class HeliconeManualLogger {
+  constructor(opts: IHeliconeManualLogger)
+}
+
+type IHeliconeManualLogger = {
+  apiKey: string;
+  headers?: Record<string, string>;
+  loggingEndpoint?: string; // defaults to https://api.hconeai.com/custom/v1/log
+};
+```
+
+### logRequest
+
+```typescript
+logRequest<T>(
+    request: HeliconeLogRequest,
+    operation: (resultRecorder: HeliconeResultRecorder) => Promise<T>,
+    additionalHeaders?: Record<string, string>
+  ): Promise<T>
+```
+
+#### Parameters
+
+1. `request`: `HeliconeLogRequest` - The request object to log
+```typescript
+type HeliconeLogRequest = ILogRequest | HeliconeCustomEventRequest;
+type HeliconeCustomEventRequest = HeliconeEventTool | HeliconeEventVectorDB;
+
+// the following is the type for the request object for vector db logging
+export interface HeliconeEventTool {
+  _type: "tool";
+  toolName: string;
+  input: any;
+  [key: string]: any;
+}
+```
+
+2. `operation`: `(resultRecorder: HeliconeResultRecorder) => Promise<T>` - The operation to be executed and logged
+```typescript
+class HeliconeResultRecorder {
+  private results: Record<string, any> = {};
+
+  appendResults(data: Record<string, any>): void {
+    this.results = { ...this.results, ...data };
+  }
+
+  getResults(): Record<string, any> {
+    return this.results;
+  }
+}
+```
+
+3. `additionalHeaders`: `Record<string, string>`
+    - Additional headers to be sent with the request
+    - This can be used to use features like [session management](/features/sessions), [custom properties](/features/advanced-usage/custom-properties), etc.
+
+

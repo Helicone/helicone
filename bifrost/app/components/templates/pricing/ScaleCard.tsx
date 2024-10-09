@@ -33,7 +33,7 @@ const ScaleCard: React.FC = () => {
 
             <Col>
               <h4 className="text-[16px] text-slate-700 font-light">
-                All features{" "}
+                Essential features{" "}
                 <span className="font-semibold">for the entire team</span>.
               </h4>
               <h4 className="text-[14px] text-slate-700 font-light">
@@ -45,7 +45,7 @@ const ScaleCard: React.FC = () => {
         <Col className="gap-[16px]">
           <FeatureItem
             title="Every feature you need"
-            description="From Playground, Prompts, Exports, Evals and more."
+            description="From Sessions, Datasets, Caching, Evals and more."
           />
           {/* <FeatureItem
             title="Standard support"
@@ -67,9 +67,12 @@ const ScaleCard: React.FC = () => {
             description="Support via email, Discord or Slack."
           />
         </Col>
-        <button className="bg-brand text-white py-[12px] rounded-[4px] mt-[8px] text-[16px] font-semibold">
+        <Link
+          href="https://us.helicone.ai/settings/billing"
+          className="bg-brand text-white py-[12px] rounded-[4px] mt-[8px] text-[16px] font-semibold text-center"
+        >
           Upgrade Now
-        </button>
+        </Link>
       </Col>
     </Card>
   );

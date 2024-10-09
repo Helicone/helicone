@@ -76,6 +76,7 @@ class ChatBuilder extends AbstractRequestBuilder {
     const renderChat = () => {
       return (
         <Chat
+          request={this.response}
           llmSchema={this.response.llmSchema ?? undefined}
           requestBody={this.response.request_body}
           requestId={this.response.request_id}

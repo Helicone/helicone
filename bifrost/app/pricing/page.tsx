@@ -64,12 +64,12 @@ export default function Example() {
               <Col className="h-full">
                 <Col className=" py-[36px] px-[24px] justify-around h-full">
                   <p>
-                    <b>386 hours</b> saved by using cached responses.
+                    <b>2+ critical LLM production issues</b> caught and resolved
                   </p>
                   <div className="h-[43px] w-[175px]">
                     <Image
-                      src={"/static/other-logos/decipher.png"}
-                      alt={"dechipher ai"}
+                      src={"/static/other-logos/sunrun.webp"}
+                      alt={"sunrun"}
                       width={1000}
                       height={50}
                     />
@@ -77,7 +77,11 @@ export default function Example() {
                 </Col>
                 <Row className="w-full h-[72px] px-[24px] items-center justify-between border-t text-slate-900 font-medium border-slate-200">
                   <span>Free</span>
-                  <Button variant={"outline"}>Start for Free</Button>
+                  <Button variant={"outline"} asChild>
+                    <Link href="https://us.helicone.ai/signin">
+                      Start for Free
+                    </Link>
+                  </Button>
                 </Row>
               </Col>
             </div>
@@ -85,29 +89,6 @@ export default function Example() {
               <Col className="h-full">
                 <Col className="py-[36px] px-[24px] justify-around h-full">
                   <h1 className="text-lg">
-                    <b>2 days</b> saved combing through requests.
-                  </h1>
-                  <div className="h-[43px] w-[175px]">
-                    <Image
-                      src={"/static/greptile.webp"}
-                      alt={"greptile ai"}
-                      width={1000}
-                      height={50}
-                    />
-                  </div>
-                </Col>
-                <Row className="w-full h-[97px] px-[24px] items-center justify-between border-t border-slate-200 text-slate-900 font-medium">
-                  <span>Pro</span>
-                  <Button className="bg-brand text-white font-bold">
-                    Upgrade now
-                  </Button>
-                </Row>
-              </Col>
-            </div>
-            <div className="h-[250px] w-full border border-slate-200 lg:border-l-0 rounded-bl-xl rounded-br-xl rounded-tr-none lg:rounded-tr-xl lg:rounded-br-xl lg:rounded-bl-none">
-              <Col className="h-full">
-                <Col className=" py-[36px] px-[24px] justify-around h-full">
-                  <h1>
                     <b>Critical bug detected</b>, saved agent runtime by 30%.
                   </h1>
                   <div className="h-[43px] w-[175px]">
@@ -119,9 +100,36 @@ export default function Example() {
                     />
                   </div>
                 </Col>
+                <Row className="w-full h-[97px] px-[24px] items-center justify-between border-t border-slate-200 text-slate-900 font-medium">
+                  <span>Pro</span>
+                  <Button className="bg-brand text-white font-bold" asChild>
+                    <Link href="https://us.helicone.ai/settings/billing">
+                      Upgrade now
+                    </Link>
+                  </Button>
+                </Row>
+              </Col>
+            </div>
+            <div className="h-[250px] w-full border border-slate-200 lg:border-l-0 rounded-bl-xl rounded-br-xl rounded-tr-none lg:rounded-tr-xl lg:rounded-br-xl lg:rounded-bl-none">
+              <Col className="h-full">
+                <Col className=" py-[36px] px-[24px] justify-around h-full">
+                  <h1>
+                    <b>5+ projects with</b> detailed cost accounting
+                  </h1>
+                  <div className="h-[43px] w-[175px]">
+                    <Image
+                      src={"/static/filevine.webp"}
+                      alt={"greptile ai"}
+                      width={1000}
+                      height={50}
+                    />
+                  </div>
+                </Col>
                 <Row className=" w-full h-[72px] px-[24px] items-center justify-between border-t border-slate-200 text-slate-900 font-medium">
                   <span>Enterprise</span>
-                  <Button variant={"outline"}>Contact Sales</Button>
+                  <Button variant={"outline"} asChild>
+                    <Link href="/contact">Contact Sales</Link>
+                  </Button>
                 </Row>
               </Col>
             </div>
@@ -216,7 +224,7 @@ export default function Example() {
                   <AccordionTrigger className="font-medium">
                     Which Helicone plan is right for me?
                   </AccordionTrigger>
-                  <AccordionContent>
+                  <AccordionContent className="text-slate-600 text-sm">
                     If you have a production ready application and you are
                     looking to improve the quality and looking for an all-in-one
                     observability platform; choose the Pro plan. Exploring or
@@ -233,7 +241,7 @@ export default function Example() {
                   <AccordionTrigger className="font-medium">
                     What are the limits for each plan?
                   </AccordionTrigger>
-                  <AccordionContent>
+                  <AccordionContent className="text-slate-600 text-sm">
                     For the Pro plan, you have access to 100k requests per month
                     and all features such as Playground, Cache, Exports, Evals
                     and more. You will also be able to enable Prompts and Alerts
@@ -249,7 +257,7 @@ export default function Example() {
                   <AccordionTrigger className="font-medium text-left">
                     I need more requests on the Free plan. What can I do?
                   </AccordionTrigger>
-                  <AccordionContent>
+                  <AccordionContent className="text-slate-600 text-sm">
                     You can switch to the Pro plan to keep logging after 10k
                     requests per month. Don&apos;t worry, we are still logging
                     all your incoming requests, upgrade to Pro to view them.
@@ -265,10 +273,10 @@ export default function Example() {
                   <AccordionTrigger className="font-medium">
                     Am I eligible for any discounts?
                   </AccordionTrigger>
-                  <AccordionContent>
-                    If you are a startup under 2 years old, a non-profit, an
-                    open-source company or a student, you may be eligible for
-                    discounts.{" "}
+                  <AccordionContent className="text-slate-600 text-sm">
+                    If you are a startup under 2 years old with &lt;$5m in
+                    funding, a non-profit, an open-source company or a student,
+                    you may be eligible for discounts.{" "}
                     <Link
                       href="/contact"
                       className="underline hover:text-brand"

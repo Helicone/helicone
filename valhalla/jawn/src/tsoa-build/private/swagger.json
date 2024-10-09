@@ -2956,6 +2956,9 @@
 						},
 						"type": "object"
 					},
+					"scores_column": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
 					"request_body": {
 						"$ref": "#/components/schemas/Partial_VectorOperators_"
 					},
@@ -6443,6 +6446,24 @@
 						"type": "object"
 					}
 				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultError_any_": {
+				"properties": {
+					"data": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					},
+					"error": {}
+				},
+				"required": [
+					"data",
+					"error"
+				],
 				"type": "object",
 				"additionalProperties": false
 			},
@@ -11646,6 +11667,11 @@
 											"properties": {
 												"coupon": {
 													"properties": {
+														"amount_off": {
+															"type": "number",
+															"format": "double",
+															"nullable": true
+														},
 														"percent_off": {
 															"type": "number",
 															"format": "double",
@@ -11657,6 +11683,7 @@
 														}
 													},
 													"required": [
+														"amount_off",
 														"percent_off",
 														"name"
 													],
@@ -11908,6 +11935,53 @@
 					"content": {
 						"application/json": {
 							"schema": {}
+						}
+					}
+				}
+			}
+		},
+		"/v1/public/waitlist/experiments": {
+			"post": {
+				"operationId": "AddToWaitlist",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/ResultSuccess_unknown_"
+										},
+										{
+											"$ref": "#/components/schemas/ResultError_any_"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Waitlist"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"email": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"email"
+								],
+								"type": "object"
+							}
 						}
 					}
 				}

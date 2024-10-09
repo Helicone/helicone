@@ -175,6 +175,36 @@ export class RequestManager extends BaseManager {
       };
     }
   }
+  private addScoreFilterClickhouse(
+    isScored: boolean,
+    filter: FilterNode
+  ): FilterNode {
+    if (isScored) {
+      return {
+        left: filter,
+        operator: "and",
+        right: {
+          request_response_rmt: {
+            scores_column: {
+              "not-equals": "{}",
+            },
+          },
+        },
+      };
+    } else {
+      return {
+        left: filter,
+        operator: "and",
+        right: {
+          request_response_rmt: {
+            scores_column: {
+              equals: "{}",
+            },
+          },
+        },
+      };
+    }
+  }
 
   private addPartOfExperimentFilter(
     isPartOfExperiment: boolean,
@@ -284,11 +314,7 @@ export class RequestManager extends BaseManager {
     let newFilter = filter;
 
     if (isScored !== undefined) {
-      newFilter = this.addScoreFilter(isScored, newFilter);
-    }
-
-    if (isPartOfExperiment !== undefined) {
-      newFilter = this.addPartOfExperimentFilter(isPartOfExperiment, newFilter);
+      newFilter = this.addScoreFilterClickhouse(isScored, newFilter);
     }
 
     const requests = isCached

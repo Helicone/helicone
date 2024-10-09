@@ -83,8 +83,8 @@
             "integrations/openai/langchain",
             "integrations/openai/llamaindex",
             "integrations/openai/crewai",
-            "integrations/openai/async",
-            "integrations/openai/curl"
+            "integrations/openai/curl",
+            "integrations/openai/assistants"
           ],
           "icon": "dice-d20",
           "iconType": "solid"
@@ -130,6 +130,7 @@
               "group": "API",
               "pages": [
                 "integrations/gemini/api/javascript",
+                "integrations/gemini/api/python",
                 "integrations/gemini/api/curl"
               ],
               "icon": "code",
@@ -173,7 +174,18 @@
         "getting-started/integration-method/deepinfra",
         "getting-started/integration-method/openrouter",
         "getting-started/integration-method/litellm",
-        "getting-started/integration-method/fireworks"
+        "getting-started/integration-method/fireworks",
+        {
+          "group": "Vector DB",
+          "pages": [
+            "integrations/vectordb/javascript",
+            "integrations/vectordb/curl"
+          ]
+        },
+        {
+          "group": "Tools",
+          "pages": ["integrations/tools/javascript", "integrations/tools/curl"]
+        }
       ]
     },
     {
@@ -223,6 +235,7 @@
         "getting-started/proxy-vs-async",
         "faq/how-we-calculate-cost",
         "faq/latency-affect",
+        "faq/availability",
         "helicone-headers/predefining-request-id",
         "faq/secret-vs-public-key",
         {
@@ -245,7 +258,8 @@
         "use-cases/experiments",
         "use-cases/enable-stream-usage",
         "use-cases/resell-a-model",
-        "use-cases/bill-by-usage"
+        "use-cases/bill-by-usage",
+        "use-cases/replay-session"
       ]
     },
     {

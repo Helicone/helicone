@@ -11,6 +11,7 @@ import AcceptTermsModal from "./AcceptTermsModal";
 import DemoModal from "./DemoModal";
 import MainContent from "./MainContent";
 import Sidebar from "./Sidebar";
+import { ErrorBoundary } from "@/components/ui/error-boundary";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -51,7 +52,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
           </div>
           <div className="flex-grow max-w-full overflow-hidden">
             <MainContent banner={banner} pathname={pathname}>
-              {children}
+              <ErrorBoundary>{children}</ErrorBoundary>
             </MainContent>
           </div>
         </Row>

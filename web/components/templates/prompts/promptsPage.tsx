@@ -59,6 +59,7 @@ import PromptCard from "./promptCard";
 import PromptDelete from "./promptDelete";
 import PromptUsageChart from "./promptUsageChart";
 import { UpgradeToProCTA } from "../pricing/upgradeToProCTA";
+import { IslandContainer } from "@/components/ui/islandContainer";
 
 interface PromptsPageProps {
   defaultIndex: number;
@@ -161,9 +162,10 @@ const PromptsPage = (props: PromptsPageProps) => {
   const [showPricingCompare, setShowPricingCompare] = useState(false);
 
   return (
-    <>
+    <IslandContainer>
       <div className="flex flex-col space-y-4 w-full">
         <AuthHeader
+          isWithinIsland={true}
           title={
             <div className="flex items-center gap-2">
               Prompts <HcBadge title="Beta" size="sm" />
@@ -366,7 +368,7 @@ const chatCompletion = await openai.chat.completions.create(
     model: "gpt-3.5-turbo",
   },
   {
-    // 3. Add Prompt Id Header
+    // 4. Add Prompt Id Header
     headers: {
       "Helicone-Prompt-Id": "prompt_story",
     },
@@ -615,15 +617,20 @@ const chatCompletion = await openai.chat.completions.create(
                         <DiffHighlight
                           code={`
 // 1. Add this line
-import { hprompt } from "@helicone/helicone";
+import { hpf, hpstatic } from "@helicone/prompts";
 
 const chatCompletion = await openai.chat.completions.create(
   {
     messages: [
       {
+        role: "system",
+        // 2. Use hpstatic for static prompts
+        content: hpstatic\`You are a creative storyteller.\`,
+      },
+      {
         role: "user",
-        // 2: Add hprompt to any string, and nest any variable in additional brackets \`{}\`
-        content: hprompt\`Write a story about \${{ scene }}\`,
+        // 3: Add hpf to any string, and nest any variable in additional brackets \`{}\`
+        content: hpf\`Write a story about \${{ scene }}\`,
       },
     ],
     model: "gpt-3.5-turbo",
@@ -635,7 +642,7 @@ const chatCompletion = await openai.chat.completions.create(
     },
   }
 );
- `}
+  `}
                           language="typescript"
                           newLines={[]}
                           oldLines={[]}
@@ -686,21 +693,26 @@ const chatCompletion = await openai.chat.completions.create(
                         <DiffHighlight
                           code={`
 // 1. Add this line
-import { hprompt } from "@helicone/helicone";
+import { hpf, hpstatic } from "@helicone/prompts";
 
 const chatCompletion = await openai.chat.completions.create(
   {
     messages: [
       {
+        role: "system",
+        // 2. Use hpstatic for static prompts
+        content: hpstatic\`You are a creative storyteller.\`,
+      },
+      {
         role: "user",
-        // 2: Add hprompt to any string, and nest any variable in additional brackets \`{}\`
-        content: hprompt\`Write a story about \${{ scene }}\`,
+        // 3: Add hpf to any string, and nest any variable in additional brackets \`{}\`
+        content: hpf\`Write a story about \${{ scene }}\`,
       },
     ],
     model: "gpt-3.5-turbo",
   },
   {
-    // 3. Add Prompt Id Header
+    // 4. Add Prompt Id Header
     headers: {
       "Helicone-Prompt-Id": "prompt_story",
     },
@@ -755,7 +767,7 @@ const chatCompletion = await openai.chat.completions.create(
           )}
         </div>
       </div>
-    </>
+    </IslandContainer>
   );
 };
 

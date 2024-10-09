@@ -1,3 +1,4 @@
+import { ENVIRONMENT } from "../..";
 import { Database } from "../../lib/db/database.types";
 import { AuthParams, supabaseServer } from "../../lib/db/supabase";
 import { ok, err, Result } from "../../lib/shared/result";
@@ -369,12 +370,14 @@ export class OrganizationManager extends BaseManager {
     if (membersError !== null) {
       return err(membersError);
     }
-    return ok(
-      members.filter(
-        (member) =>
-          !filterHeliconeEmails || !member.email.endsWith("@helicone.ai")
-      ).length
-    );
+    if (filterHeliconeEmails && ENVIRONMENT === "production") {
+      return ok(
+        members.filter((member) => !member.email.endsWith("@helicone.ai"))
+          .length
+      );
+    } else {
+      return ok(members.length);
+    }
   }
 
   async getOrganizationMembers(
