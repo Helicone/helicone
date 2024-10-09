@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev:local": "next dev -p 3000",
+    "dev:local": "next dev --turbo -p 3000",
     "dev": "vercel env pull .env && next dev --turbo -p 3000",
     "dev:preview": "vercel env pull .env --environment preview && next dev -p 3001",
     "build": "next build",

@@ -219,7 +219,7 @@ WHERE ${buildWhereClause("duration")}
             request_response_rmt: {
               properties: {
                 "Helicone-Session-Name": {
-                  ilike: `'%${nameContains}%'`,
+                  ilike: `%${nameContains}%`,
                 },
               },
             },

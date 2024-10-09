@@ -87,6 +87,11 @@ interface ThemedTableV5Props<T extends { id?: string }> {
   fullWidth?: boolean;
   isDatasetsPage?: boolean;
   rightPanel?: React.ReactNode;
+  search?: {
+    value: string;
+    onChange: (value: string) => void;
+    placeholder: string;
+  };
 }
 
 export type RequestViews = "table" | "card" | "row";
@@ -120,6 +125,7 @@ export default function ThemedTable<T extends { id?: string }>(
     fullWidth = false,
     isDatasetsPage,
     rightPanel,
+    search,
   } = props;
 
   const [view, setView] = useLocalStorage<RequestViews>("view", "table");
@@ -186,9 +192,10 @@ export default function ThemedTable<T extends { id?: string }>(
   }, [rightPanel]);
 
   return (
-    <div className="h-full flex flex-col border-b divide-y divide-gray-300 dark:divide-gray-700">
-      <div className="py-2 px-1 flex-shrink-0">
+    <div className="h-full flex flex-col border-b divide-y divide-slate-300 dark:divide-slate-700">
+      <div className="p-1 flex-shrink-0">
         <ThemedTableHeader
+          search={search}
           onDataSet={onDataSet}
           isDatasetsPage={isDatasetsPage}
           advancedFilters={
@@ -236,22 +243,22 @@ export default function ThemedTable<T extends { id?: string }>(
             {skeletonLoading ? (
               <LoadingAnimation title="Loading Data..." />
             ) : rows.length === 0 ? (
-              <div className="bg-white dark:bg-black h-48 w-full  border-gray-300 dark:border-gray-700 py-2 px-4 flex flex-col space-y-3 justify-center items-center">
-                <TableCellsIcon className="h-12 w-12 text-gray-900 dark:text-gray-100" />
-                <p className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+              <div className="bg-white dark:bg-black h-48 w-full  border-slate-300 dark:border-slate-700 py-2 px-4 flex flex-col space-y-3 justify-center items-center">
+                <TableCellsIcon className="h-12 w-12 text-slate-900 dark:text-slate-100" />
+                <p className="text-xl font-semibold text-slate-900 dark:text-slate-100">
                   No Data Found
                 </p>
                 {noDataCTA}
               </div>
             ) : table.getVisibleFlatColumns().length === 0 ? (
-              <div className="bg-white dark:bg-black h-48 w-full  border-gray-300 dark:border-gray-700 py-2 px-4 flex flex-col space-y-3 justify-center items-center">
-                <AdjustmentsHorizontalIcon className="h-12 w-12 text-gray-900 dark:text-gray-100" />
-                <p className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+              <div className="bg-white dark:bg-black h-48 w-full  border-slate-300 dark:border-slate-700 py-2 px-4 flex flex-col space-y-3 justify-center items-center">
+                <AdjustmentsHorizontalIcon className="h-12 w-12 text-slate-900 dark:text-slate-100" />
+                <p className="text-xl font-semibold text-slate-900 dark:text-slate-100">
                   No Columns Selected
                 </p>
               </div>
             ) : makeCard && view === "card" ? (
-              <ul className="flex flex-col space-y-8 divide-y divide-gray-300 dark:divide-gray-700 bg-white dark:bg-black rounded-lg border border-gray-300 dark:border-gray-700">
+              <ul className="flex flex-col space-y-8 divide-y divide-slate-300 dark:divide-slate-700 bg-white dark:bg-black rounded-lg border border-slate-300 dark:border-slate-700">
                 {rows.map((row, i) => (
                   <li key={"expanded-row" + i}>{makeCard(row.original)}</li>
                 ))}
@@ -299,7 +306,7 @@ export default function ThemedTable<T extends { id?: string }>(
                                   selectedIds?.length < rows.length
                                 }
                               />
-                              <div className="absolute bottom-0 left-0 right-0 h-px bg-gray-300 dark:bg-gray-700" />
+                              <div className="absolute bottom-0 left-0 right-0 h-px bg-slate-300 dark:bg-slate-700" />
                             </th>
                           )}
                           {headerGroup.headers.map((header, index) => (
@@ -314,9 +321,9 @@ export default function ThemedTable<T extends { id?: string }>(
                                 totalColumns={headerGroup.headers.length}
                               />
                               {index < headerGroup.headers.length - 1 && (
-                                <div className="absolute top-0 right-0 h-full w-px bg-gray-300 dark:bg-gray-700" />
+                                <div className="absolute top-0 right-0 h-full w-px bg-slate-300 dark:bg-slate-700" />
                               )}
-                              <div className="absolute bottom-0 left-0 right-0 h-[0.5px] bg-gray-300 dark:bg-gray-700" />
+                              <div className="absolute bottom-0 left-0 right-0 h-[0.5px] bg-slate-300 dark:bg-slate-700" />
                             </th>
                           ))}
                         </tr>
@@ -351,7 +358,7 @@ export default function ThemedTable<T extends { id?: string }>(
                             <td
                               key={i}
                               className={clsx(
-                                "py-3 border-t border-gray-300 dark:border-gray-700 px-2 text-gray-700 dark:text-gray-300",
+                                "py-3 border-t border-slate-300 dark:border-slate-700 px-2 text-slate-700 dark:text-slate-300",
                                 i === 0 && "pl-10", // Add left padding to the first column
                                 i === row.getVisibleCells().length - 1 &&
                                   "pr-10"
@@ -374,7 +381,7 @@ export default function ThemedTable<T extends { id?: string }>(
                                     (cell.column.id == "requestText" ||
                                       cell.column.id == "responseText") &&
                                       dataLoading
-                                      ? "animate-pulse bg-gray-200 rounded-md"
+                                      ? "animate-pulse bg-slate-200 rounded-md"
                                       : "hidden"
                                   )}
                                 >
