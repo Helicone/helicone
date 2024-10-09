@@ -586,7 +586,7 @@ export function ExperimentTable({
         cellRendererParams: {
           index: index,
         },
-        cellClass: "border-r border-[#E2E8F0] text-slate-700",
+        cellClass: "border-r border-[#E2E8F0] text-slate-700 pt-3",
         headerClass: "border-r border-[#E2E8F0]",
         headerComponent: InputsHeaderComponent,
         headerComponentParams: {
@@ -595,9 +595,8 @@ export function ExperimentTable({
           badgeText: "Input",
         },
         cellStyle: {
-          display: "flex",
           alignItems: "center",
-          justifyContent: "start",
+          justifyContent: "center",
           whiteSpace: wrapText ? "normal" : "nowrap",
         },
         autoHeight: wrapText,
@@ -785,7 +784,7 @@ export function ExperimentTable({
             <FunnelIcon className="h-4 w-4 text-slate-700" />
             <ChevronDownIcon className="h-4 w-4 text-slate-400" />
           </Button>
-          <Button
+          {/* <Button
             variant="outline"
             className="py-0 px-2 border border-slate-200 h-8 flex items-center justify-center space-x-1"
           >
@@ -794,7 +793,7 @@ export function ExperimentTable({
           <ProviderKeyDropdown
             providerKey={selectedProviderKey}
             setProviderKey={setSelectedProviderKey}
-          />
+          /> */}
           {/* <Button variant="outline" onClick={() => setSettingsOpen(true)}>
             Settings
           </Button> */}
