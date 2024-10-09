@@ -325,7 +325,6 @@ export function ExperimentTable({
         overflow: "hidden",
         textOverflow: "ellipsis",
       },
-      // Add cellClass and headerClass to apply borders
       cellClass: "border-r border-[#E2E8F0]",
       headerClass: "border-r border-[#E2E8F0]",
     }),
@@ -597,6 +596,7 @@ export function ExperimentTable({
         cellStyle: {
           display: "flex",
           alignItems: "center",
+          overflow: "hidden",
           justifyContent: "start",
           whiteSpace: wrapText ? "normal" : "nowrap",
         },
