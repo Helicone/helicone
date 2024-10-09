@@ -20,7 +20,7 @@ import ModelPill from "./modelPill";
 import StatusBadge from "./statusBadge";
 import ThemedModal from "../../shared/themed/themedModal";
 import NewDataset from "../datasets/NewDataset";
-import { convertToUSDateFormat } from "../../shared/utils/dateConvertor";
+import { getUSDateFromString } from "@/components/shared/utils/utils";
 import { formatNumber } from "../../shared/utils/formatNumber";
 
 function getPathName(url: string) {
@@ -216,7 +216,7 @@ const RequestRow = (props: {
               Created At
             </p>
             <p className="text-gray-700 dark:text-gray-300 truncate">
-              {convertToUSDateFormat(request.createdAt)}
+              {getUSDateFromString(request.createdAt)}
             </p>
           </li>
           <li className="flex flex-row justify-between items-center py-2 gap-4">
