@@ -122,24 +122,6 @@ export interface paths {
   "/v1/vault/update/{id}": {
     patch: operations["UpdateKey"];
   };
-  "/v1/session/query": {
-    post: operations["GetSessions"];
-  };
-  "/v1/session/name/query": {
-    post: operations["GetNames"];
-  };
-  "/v1/session/metrics/query": {
-    post: operations["GetMetrics"];
-  };
-  "/v1/user/metrics/query": {
-    post: operations["GetUserMetrics"];
-  };
-  "/v1/user/query": {
-    post: operations["GetUsers"];
-  };
-  "/v1/trace/log": {
-    post: operations["LogTrace"];
-  };
   "/v1/request/query": {
     post: operations["GetRequests"];
   };
@@ -157,6 +139,27 @@ export interface paths {
   };
   "/v1/request/{requestId}/score": {
     post: operations["AddScores"];
+  };
+  "/v1/session/query": {
+    post: operations["GetSessions"];
+  };
+  "/v1/session/name/query": {
+    post: operations["GetNames"];
+  };
+  "/v1/session/metrics/query": {
+    post: operations["GetMetrics"];
+  };
+  "/v1/session/{sessionId}/feedback": {
+    post: operations["UpdateSessionFeedback"];
+  };
+  "/v1/user/metrics/query": {
+    post: operations["GetUserMetrics"];
+  };
+  "/v1/user/query": {
+    post: operations["GetUsers"];
+  };
+  "/v1/trace/log": {
+    post: operations["LogTrace"];
   };
   "/v1/property/query": {
     post: operations["GetProperties"];
@@ -1187,281 +1190,6 @@ export interface components {
       error: null;
     };
     "Result_DecryptedProviderKey.string_": components["schemas"]["ResultSuccess_DecryptedProviderKey_"] | components["schemas"]["ResultError_string_"];
-    SessionResult: {
-      created_at: string;
-      latest_request_created_at: string;
-      session: string;
-      /** Format: double */
-      total_cost: number;
-      /** Format: double */
-      total_requests: number;
-      /** Format: double */
-      prompt_tokens: number;
-      /** Format: double */
-      completion_tokens: number;
-      /** Format: double */
-      total_tokens: number;
-    };
-    "ResultSuccess_SessionResult-Array_": {
-      data: components["schemas"]["SessionResult"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_SessionResult-Array.string_": components["schemas"]["ResultSuccess_SessionResult-Array_"] | components["schemas"]["ResultError_string_"];
-    SessionQueryParams: {
-      sessionIdContains: string;
-      timeFilter: {
-        /** Format: double */
-        endTimeUnixMs: number;
-        /** Format: double */
-        startTimeUnixMs: number;
-      };
-      sessionName: string;
-      /** Format: double */
-      timezoneDifference: number;
-    };
-    SessionNameResult: {
-      name: string;
-      created_at: string;
-      /** Format: double */
-      total_cost: number;
-      last_used: string;
-      first_used: string;
-      /** Format: double */
-      session_count: number;
-    };
-    "ResultSuccess_SessionNameResult-Array_": {
-      data: components["schemas"]["SessionNameResult"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_SessionNameResult-Array.string_": components["schemas"]["ResultSuccess_SessionNameResult-Array_"] | components["schemas"]["ResultError_string_"];
-    SessionNameQueryParams: {
-      nameContains: string;
-      /** Format: double */
-      timezoneDifference: number;
-      /** @enum {string} */
-      pSize?: "p50" | "p75" | "p95" | "p99" | "p99.9";
-      useInterquartile?: boolean;
-    };
-    HistogramRow: {
-      range_start: string;
-      range_end: string;
-      /** Format: double */
-      value: number;
-    };
-    SessionMetrics: {
-      session_count: components["schemas"]["HistogramRow"][];
-      session_duration: components["schemas"]["HistogramRow"][];
-      session_cost: components["schemas"]["HistogramRow"][];
-    };
-    ResultSuccess_SessionMetrics_: {
-      data: components["schemas"]["SessionMetrics"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_SessionMetrics.string_": components["schemas"]["ResultSuccess_SessionMetrics_"] | components["schemas"]["ResultError_string_"];
-    UserMetricsResult: {
-      user_id: string;
-      /** Format: double */
-      active_for: number;
-      first_active: string;
-      last_active: string;
-      /** Format: double */
-      total_requests: number;
-      /** Format: double */
-      average_requests_per_day_active: number;
-      /** Format: double */
-      average_tokens_per_request: number;
-      /** Format: double */
-      total_completion_tokens: number;
-      /** Format: double */
-      total_prompt_tokens: number;
-      /** Format: double */
-      cost: number;
-    };
-    "ResultSuccess_UserMetricsResult-Array_": {
-      data: components["schemas"]["UserMetricsResult"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_UserMetricsResult-Array.string_": components["schemas"]["ResultSuccess_UserMetricsResult-Array_"] | components["schemas"]["ResultError_string_"];
-    /** @description Make all properties in T optional */
-    Partial_TimestampOperators_: {
-      gte?: string;
-      lte?: string;
-      lt?: string;
-      gt?: string;
-    };
-    /** @description Make all properties in T optional */
-    Partial_UserMetricsToOperators_: {
-      user_id?: components["schemas"]["Partial_TextOperators_"];
-      last_active?: components["schemas"]["Partial_TimestampOperators_"];
-      total_requests?: components["schemas"]["Partial_NumberOperators_"];
-      active_for?: components["schemas"]["Partial_NumberOperators_"];
-      average_requests_per_day_active?: components["schemas"]["Partial_NumberOperators_"];
-      average_tokens_per_request?: components["schemas"]["Partial_NumberOperators_"];
-      total_completion_tokens?: components["schemas"]["Partial_NumberOperators_"];
-      total_prompt_tokens?: components["schemas"]["Partial_NumberOperators_"];
-      cost?: components["schemas"]["Partial_NumberOperators_"];
-    };
-    /** @description Make all properties in T optional */
-    Partial_TimestampOperatorsTyped_: {
-      /** Format: date-time */
-      gte?: string;
-      /** Format: date-time */
-      lte?: string;
-      /** Format: date-time */
-      lt?: string;
-      /** Format: date-time */
-      gt?: string;
-    };
-    /** @description Make all properties in T optional */
-    Partial_BooleanOperators_: {
-      equals?: boolean;
-    };
-    /** @description Make all properties in T optional */
-    Partial_VectorOperators_: {
-      contains?: string;
-    };
-    /** @description Make all properties in T optional */
-    Partial_RequestResponseRMTToOperators_: {
-      latency?: components["schemas"]["Partial_NumberOperators_"];
-      status?: components["schemas"]["Partial_NumberOperators_"];
-      request_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
-      response_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
-      model?: components["schemas"]["Partial_TextOperators_"];
-      user_id?: components["schemas"]["Partial_TextOperators_"];
-      organization_id?: components["schemas"]["Partial_TextOperators_"];
-      node_id?: components["schemas"]["Partial_TextOperators_"];
-      job_id?: components["schemas"]["Partial_TextOperators_"];
-      threat?: components["schemas"]["Partial_BooleanOperators_"];
-      request_id?: components["schemas"]["Partial_TextOperators_"];
-      prompt_tokens?: components["schemas"]["Partial_NumberOperators_"];
-      completion_tokens?: components["schemas"]["Partial_NumberOperators_"];
-      target_url?: components["schemas"]["Partial_TextOperators_"];
-      properties?: {
-        [key: string]: components["schemas"]["Partial_TextOperators_"];
-      };
-      search_properties?: {
-        [key: string]: components["schemas"]["Partial_TextOperators_"];
-      };
-      scores?: {
-        [key: string]: components["schemas"]["Partial_TextOperators_"];
-      };
-      scores_column?: components["schemas"]["Partial_TextOperators_"];
-      request_body?: components["schemas"]["Partial_VectorOperators_"];
-      response_body?: components["schemas"]["Partial_VectorOperators_"];
-    };
-    /** @description From T, pick a set of properties whose keys are in the union K */
-    "Pick_FilterLeaf.user_metrics-or-request_response_rmt_": {
-      user_metrics?: components["schemas"]["Partial_UserMetricsToOperators_"];
-      request_response_rmt?: components["schemas"]["Partial_RequestResponseRMTToOperators_"];
-    };
-    "FilterLeafSubset_user_metrics-or-request_response_rmt_": components["schemas"]["Pick_FilterLeaf.user_metrics-or-request_response_rmt_"];
-    UserFilterNode: components["schemas"]["FilterLeafSubset_user_metrics-or-request_response_rmt_"] | components["schemas"]["UserFilterBranch"] | "all";
-    UserFilterBranch: {
-      right: components["schemas"]["UserFilterNode"];
-      /** @enum {string} */
-      operator: "or" | "and";
-      left: components["schemas"]["UserFilterNode"];
-    };
-    UserMetricsQueryParams: {
-      filter: components["schemas"]["UserFilterNode"];
-      /** Format: double */
-      offset: number;
-      /** Format: double */
-      limit: number;
-      timeFilter?: {
-        /** Format: double */
-        endTimeUnixSeconds: number;
-        /** Format: double */
-        startTimeUnixSeconds: number;
-      };
-      /** Format: double */
-      timeZoneDifferenceMinutes?: number;
-    };
-    "ResultSuccess__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array_": {
-      data: {
-          /** Format: double */
-          cost_usd: number;
-          user_id: string;
-          /** Format: double */
-          completion_tokens: number;
-          /** Format: double */
-          prompt_tokens: number;
-          /** Format: double */
-          count: number;
-        }[];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array.string_": components["schemas"]["ResultSuccess__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array_"] | components["schemas"]["ResultError_string_"];
-    UserQueryParams: {
-      userIds?: string[];
-      timeFilter?: {
-        /** Format: double */
-        endTimeUnixSeconds: number;
-        /** Format: double */
-        startTimeUnixSeconds: number;
-      };
-    };
-    OTELTrace: {
-      resourceSpans: {
-          scopeSpans: {
-              spans: {
-                  /** Format: double */
-                  droppedLinksCount: number;
-                  links: unknown[];
-                  status: {
-                    /** Format: double */
-                    code: number;
-                  };
-                  /** Format: double */
-                  droppedEventsCount: number;
-                  events: unknown[];
-                  /** Format: double */
-                  droppedAttributesCount: number;
-                  attributes: {
-                      value: {
-                        /** Format: double */
-                        intValue?: number;
-                        stringValue?: string;
-                      };
-                      key: string;
-                    }[];
-                  endTimeUnixNano: string;
-                  startTimeUnixNano: string;
-                  /** Format: double */
-                  kind: number;
-                  name: string;
-                  spanId: string;
-                  traceId: string;
-                }[];
-              scope: {
-                version: string;
-                name: string;
-              };
-            }[];
-          resource: {
-            /** Format: double */
-            droppedAttributesCount: number;
-            attributes: {
-                value: {
-                  arrayValue?: {
-                    values: {
-                        stringValue: string;
-                      }[];
-                  };
-                  /** Format: double */
-                  intValue?: number;
-                  stringValue?: string;
-                };
-                key: string;
-              }[];
-          };
-        }[];
-    };
     /** @enum {string} */
     LlmType: "chat" | "completion";
     FunctionCall: {
@@ -1585,6 +1313,13 @@ export interface components {
       model?: components["schemas"]["Partial_TextOperators_"];
     };
     /** @description Make all properties in T optional */
+    Partial_TimestampOperators_: {
+      gte?: string;
+      lte?: string;
+      lt?: string;
+      gt?: string;
+    };
+    /** @description Make all properties in T optional */
     Partial_RequestTableToOperators_: {
       prompt?: components["schemas"]["Partial_TextOperators_"];
       created_at?: components["schemas"]["Partial_TimestampOperators_"];
@@ -1599,6 +1334,10 @@ export interface components {
       prompt_id?: components["schemas"]["Partial_TextOperators_"];
     };
     /** @description Make all properties in T optional */
+    Partial_BooleanOperators_: {
+      equals?: boolean;
+    };
+    /** @description Make all properties in T optional */
     Partial_FeedbackTableToOperators_: {
       id?: components["schemas"]["Partial_NumberOperators_"];
       created_at?: components["schemas"]["Partial_TimestampOperators_"];
@@ -1606,9 +1345,53 @@ export interface components {
       response_id?: components["schemas"]["Partial_TextOperators_"];
     };
     /** @description Make all properties in T optional */
+    Partial_VectorOperators_: {
+      contains?: string;
+    };
+    /** @description Make all properties in T optional */
     Partial_RequestResponseSearchToOperators_: {
       request_body_vector?: components["schemas"]["Partial_VectorOperators_"];
       response_body_vector?: components["schemas"]["Partial_VectorOperators_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_TimestampOperatorsTyped_: {
+      /** Format: date-time */
+      gte?: string;
+      /** Format: date-time */
+      lte?: string;
+      /** Format: date-time */
+      lt?: string;
+      /** Format: date-time */
+      gt?: string;
+    };
+    /** @description Make all properties in T optional */
+    Partial_RequestResponseRMTToOperators_: {
+      latency?: components["schemas"]["Partial_NumberOperators_"];
+      status?: components["schemas"]["Partial_NumberOperators_"];
+      request_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
+      response_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
+      model?: components["schemas"]["Partial_TextOperators_"];
+      user_id?: components["schemas"]["Partial_TextOperators_"];
+      organization_id?: components["schemas"]["Partial_TextOperators_"];
+      node_id?: components["schemas"]["Partial_TextOperators_"];
+      job_id?: components["schemas"]["Partial_TextOperators_"];
+      threat?: components["schemas"]["Partial_BooleanOperators_"];
+      request_id?: components["schemas"]["Partial_TextOperators_"];
+      prompt_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      completion_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      target_url?: components["schemas"]["Partial_TextOperators_"];
+      properties?: {
+        [key: string]: components["schemas"]["Partial_TextOperators_"];
+      };
+      search_properties?: {
+        [key: string]: components["schemas"]["Partial_TextOperators_"];
+      };
+      scores?: {
+        [key: string]: components["schemas"]["Partial_TextOperators_"];
+      };
+      scores_column?: components["schemas"]["Partial_TextOperators_"];
+      request_body?: components["schemas"]["Partial_VectorOperators_"];
+      response_body?: components["schemas"]["Partial_VectorOperators_"];
     };
     /** @description Make all properties in T optional */
     Partial_CacheHitsTableToOperators_: {
@@ -1694,6 +1477,226 @@ export interface components {
     Scores: components["schemas"]["Record_string.number-or-boolean_"];
     ScoreRequest: {
       scores: components["schemas"]["Scores"];
+    };
+    SessionResult: {
+      created_at: string;
+      latest_request_created_at: string;
+      session: string;
+      /** Format: double */
+      total_cost: number;
+      /** Format: double */
+      total_requests: number;
+      /** Format: double */
+      prompt_tokens: number;
+      /** Format: double */
+      completion_tokens: number;
+      /** Format: double */
+      total_tokens: number;
+    };
+    "ResultSuccess_SessionResult-Array_": {
+      data: components["schemas"]["SessionResult"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_SessionResult-Array.string_": components["schemas"]["ResultSuccess_SessionResult-Array_"] | components["schemas"]["ResultError_string_"];
+    SessionQueryParams: {
+      sessionIdContains: string;
+      timeFilter: {
+        /** Format: double */
+        endTimeUnixMs: number;
+        /** Format: double */
+        startTimeUnixMs: number;
+      };
+      sessionName: string;
+      /** Format: double */
+      timezoneDifference: number;
+    };
+    SessionNameResult: {
+      name: string;
+      created_at: string;
+      /** Format: double */
+      total_cost: number;
+      last_used: string;
+      first_used: string;
+      /** Format: double */
+      session_count: number;
+    };
+    "ResultSuccess_SessionNameResult-Array_": {
+      data: components["schemas"]["SessionNameResult"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_SessionNameResult-Array.string_": components["schemas"]["ResultSuccess_SessionNameResult-Array_"] | components["schemas"]["ResultError_string_"];
+    SessionNameQueryParams: {
+      nameContains: string;
+      /** Format: double */
+      timezoneDifference: number;
+      /** @enum {string} */
+      pSize?: "p50" | "p75" | "p95" | "p99" | "p99.9";
+      useInterquartile?: boolean;
+    };
+    HistogramRow: {
+      range_start: string;
+      range_end: string;
+      /** Format: double */
+      value: number;
+    };
+    SessionMetrics: {
+      session_count: components["schemas"]["HistogramRow"][];
+      session_duration: components["schemas"]["HistogramRow"][];
+      session_cost: components["schemas"]["HistogramRow"][];
+    };
+    ResultSuccess_SessionMetrics_: {
+      data: components["schemas"]["SessionMetrics"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_SessionMetrics.string_": components["schemas"]["ResultSuccess_SessionMetrics_"] | components["schemas"]["ResultError_string_"];
+    UserMetricsResult: {
+      user_id: string;
+      /** Format: double */
+      active_for: number;
+      first_active: string;
+      last_active: string;
+      /** Format: double */
+      total_requests: number;
+      /** Format: double */
+      average_requests_per_day_active: number;
+      /** Format: double */
+      average_tokens_per_request: number;
+      /** Format: double */
+      total_completion_tokens: number;
+      /** Format: double */
+      total_prompt_tokens: number;
+      /** Format: double */
+      cost: number;
+    };
+    "ResultSuccess_UserMetricsResult-Array_": {
+      data: components["schemas"]["UserMetricsResult"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_UserMetricsResult-Array.string_": components["schemas"]["ResultSuccess_UserMetricsResult-Array_"] | components["schemas"]["ResultError_string_"];
+    /** @description Make all properties in T optional */
+    Partial_UserMetricsToOperators_: {
+      user_id?: components["schemas"]["Partial_TextOperators_"];
+      last_active?: components["schemas"]["Partial_TimestampOperators_"];
+      total_requests?: components["schemas"]["Partial_NumberOperators_"];
+      active_for?: components["schemas"]["Partial_NumberOperators_"];
+      average_requests_per_day_active?: components["schemas"]["Partial_NumberOperators_"];
+      average_tokens_per_request?: components["schemas"]["Partial_NumberOperators_"];
+      total_completion_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      total_prompt_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      cost?: components["schemas"]["Partial_NumberOperators_"];
+    };
+    /** @description From T, pick a set of properties whose keys are in the union K */
+    "Pick_FilterLeaf.user_metrics-or-request_response_rmt_": {
+      user_metrics?: components["schemas"]["Partial_UserMetricsToOperators_"];
+      request_response_rmt?: components["schemas"]["Partial_RequestResponseRMTToOperators_"];
+    };
+    "FilterLeafSubset_user_metrics-or-request_response_rmt_": components["schemas"]["Pick_FilterLeaf.user_metrics-or-request_response_rmt_"];
+    UserFilterNode: components["schemas"]["FilterLeafSubset_user_metrics-or-request_response_rmt_"] | components["schemas"]["UserFilterBranch"] | "all";
+    UserFilterBranch: {
+      right: components["schemas"]["UserFilterNode"];
+      /** @enum {string} */
+      operator: "or" | "and";
+      left: components["schemas"]["UserFilterNode"];
+    };
+    UserMetricsQueryParams: {
+      filter: components["schemas"]["UserFilterNode"];
+      /** Format: double */
+      offset: number;
+      /** Format: double */
+      limit: number;
+      timeFilter?: {
+        /** Format: double */
+        endTimeUnixSeconds: number;
+        /** Format: double */
+        startTimeUnixSeconds: number;
+      };
+      /** Format: double */
+      timeZoneDifferenceMinutes?: number;
+    };
+    "ResultSuccess__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array_": {
+      data: {
+          /** Format: double */
+          cost_usd: number;
+          user_id: string;
+          /** Format: double */
+          completion_tokens: number;
+          /** Format: double */
+          prompt_tokens: number;
+          /** Format: double */
+          count: number;
+        }[];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array.string_": components["schemas"]["ResultSuccess__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array_"] | components["schemas"]["ResultError_string_"];
+    UserQueryParams: {
+      userIds?: string[];
+      timeFilter?: {
+        /** Format: double */
+        endTimeUnixSeconds: number;
+        /** Format: double */
+        startTimeUnixSeconds: number;
+      };
+    };
+    OTELTrace: {
+      resourceSpans: {
+          scopeSpans: {
+              spans: {
+                  /** Format: double */
+                  droppedLinksCount: number;
+                  links: unknown[];
+                  status: {
+                    /** Format: double */
+                    code: number;
+                  };
+                  /** Format: double */
+                  droppedEventsCount: number;
+                  events: unknown[];
+                  /** Format: double */
+                  droppedAttributesCount: number;
+                  attributes: {
+                      value: {
+                        /** Format: double */
+                        intValue?: number;
+                        stringValue?: string;
+                      };
+                      key: string;
+                    }[];
+                  endTimeUnixNano: string;
+                  startTimeUnixNano: string;
+                  /** Format: double */
+                  kind: number;
+                  name: string;
+                  spanId: string;
+                  traceId: string;
+                }[];
+              scope: {
+                version: string;
+                name: string;
+              };
+            }[];
+          resource: {
+            /** Format: double */
+            droppedAttributesCount: number;
+            attributes: {
+                value: {
+                  arrayValue?: {
+                    values: {
+                        stringValue: string;
+                      }[];
+                  };
+                  /** Format: double */
+                  intValue?: number;
+                  stringValue?: string;
+                };
+                key: string;
+              }[];
+          };
+        }[];
     };
     Property: {
       property: string;
@@ -3163,94 +3166,6 @@ export interface operations {
       };
     };
   };
-  GetSessions: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["SessionQueryParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_SessionResult-Array.string_"];
-        };
-      };
-    };
-  };
-  GetNames: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["SessionNameQueryParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_SessionNameResult-Array.string_"];
-        };
-      };
-    };
-  };
-  GetMetrics: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["SessionNameQueryParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_SessionMetrics.string_"];
-        };
-      };
-    };
-  };
-  GetUserMetrics: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UserMetricsQueryParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_UserMetricsResult-Array.string_"];
-        };
-      };
-    };
-  };
-  GetUsers: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UserQueryParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array.string_"];
-        };
-      };
-    };
-  };
-  LogTrace: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["OTELTrace"];
-      };
-    };
-    responses: {
-      /** @description No content */
-      204: {
-        content: never;
-      };
-    };
-  };
   GetRequestsClickhouse: {
     /** @description Request query filters */
     requestBody: {
@@ -3358,6 +3273,116 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["Result_null.string_"];
         };
+      };
+    };
+  };
+  GetSessions: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SessionQueryParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_SessionResult-Array.string_"];
+        };
+      };
+    };
+  };
+  GetNames: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SessionNameQueryParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_SessionNameResult-Array.string_"];
+        };
+      };
+    };
+  };
+  GetMetrics: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SessionNameQueryParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_SessionMetrics.string_"];
+        };
+      };
+    };
+  };
+  UpdateSessionFeedback: {
+    parameters: {
+      path: {
+        sessionId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          rating: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  GetUserMetrics: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UserMetricsQueryParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_UserMetricsResult-Array.string_"];
+        };
+      };
+    };
+  };
+  GetUsers: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UserQueryParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array.string_"];
+        };
+      };
+    };
+  };
+  LogTrace: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["OTELTrace"];
+      };
+    };
+    responses: {
+      /** @description No content */
+      204: {
+        content: never;
       };
     };
   };
