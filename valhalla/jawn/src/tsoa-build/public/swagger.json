@@ -1671,6 +1671,9 @@
 					"response_body": {
 						"type": "string"
 					},
+					"request_body": {
+						"type": "string"
+					},
 					"auto_prompt_inputs": {
 						"items": {},
 						"type": "array"
@@ -1884,6 +1887,9 @@
 				"properties": {
 					"filter": {
 						"$ref": "#/components/schemas/PromptVersionsFilterNode"
+					},
+					"includeExperimentVersions": {
+						"type": "boolean"
 					}
 				},
 				"type": "object",
@@ -1955,6 +1961,9 @@
 				"properties": {
 					"filter": {
 						"$ref": "#/components/schemas/PromptVersionsFilterNode"
+					},
+					"includeExperimentVersions": {
+						"type": "boolean"
 					},
 					"inputs": {
 						"$ref": "#/components/schemas/Record_string.string_"
@@ -5058,6 +5067,44 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"ResultSuccess__hypothesisId-string__": {
+				"properties": {
+					"data": {
+						"properties": {
+							"hypothesisId": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"hypothesisId"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__hypothesisId-string_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__hypothesisId-string__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
 			"ResponseObj": {
 				"properties": {
 					"body": {},
@@ -5143,6 +5190,57 @@
 				"type": "object",
 				"description": "Construct a type with a set of properties K of type T"
 			},
+			"ExperimentDatasetRow": {
+				"properties": {
+					"rowId": {
+						"type": "string"
+					},
+					"inputRecord": {
+						"properties": {
+							"request": {
+								"$ref": "#/components/schemas/RequestObj"
+							},
+							"response": {
+								"$ref": "#/components/schemas/ResponseObj"
+							},
+							"autoInputs": {
+								"items": {
+									"$ref": "#/components/schemas/Record_string.string_"
+								},
+								"type": "array"
+							},
+							"inputs": {
+								"$ref": "#/components/schemas/Record_string.string_"
+							},
+							"requestPath": {
+								"type": "string"
+							},
+							"requestId": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"request",
+							"response",
+							"autoInputs",
+							"inputs",
+							"requestPath",
+							"requestId"
+						],
+						"type": "object"
+					},
+					"scores": {
+						"$ref": "#/components/schemas/Record_string.Score_"
+					}
+				},
+				"required": [
+					"rowId",
+					"inputRecord",
+					"scores"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"ExperimentScores": {
 				"properties": {
 					"dataset": {
@@ -5187,53 +5285,7 @@
 						"properties": {
 							"rows": {
 								"items": {
-									"properties": {
-										"scores": {
-											"$ref": "#/components/schemas/Record_string.Score_"
-										},
-										"inputRecord": {
-											"properties": {
-												"request": {
-													"$ref": "#/components/schemas/RequestObj"
-												},
-												"response": {
-													"$ref": "#/components/schemas/ResponseObj"
-												},
-												"autoInputs": {
-													"items": {
-														"$ref": "#/components/schemas/Record_string.string_"
-													},
-													"type": "array"
-												},
-												"inputs": {
-													"$ref": "#/components/schemas/Record_string.string_"
-												},
-												"requestPath": {
-													"type": "string"
-												},
-												"requestId": {
-													"type": "string"
-												}
-											},
-											"required": [
-												"request",
-												"response",
-												"autoInputs",
-												"inputs",
-												"requestPath",
-												"requestId"
-											],
-											"type": "object"
-										},
-										"rowId": {
-											"type": "string"
-										}
-									},
-									"required": [
-										"scores",
-										"rowId"
-									],
-									"type": "object"
+									"$ref": "#/components/schemas/ExperimentDatasetRow"
 								},
 								"type": "array"
 							},
@@ -8804,40 +8856,6 @@
 				}
 			}
 		},
-		"/v1/settings/query": {
-			"get": {
-				"operationId": "GetSettings",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"properties": {
-										"useAzureForExperiment": {
-											"type": "boolean"
-										}
-									},
-									"required": [
-										"useAzureForExperiment"
-									],
-									"type": "object"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Settings"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": []
-			}
-		},
 		"/v1/log/request": {
 			"post": {
 				"operationId": "GetRequests",
@@ -9978,7 +9996,60 @@
 				}
 			}
 		},
-		"/v1/experiment/dataset/{datasetId}/version/{promptVersionId}/row": {
+		"/v1/experiment/dataset/{datasetId}/row/insert": {
+			"post": {
+				"operationId": "InsertDatasetRow",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_string.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Dataset"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "datasetId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"inputRecordId": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"inputRecordId"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/experiment/dataset/{datasetId}/version/{promptVersionId}/row/new": {
 			"post": {
 				"operationId": "CreateDatasetRow",
 				"responses": {
@@ -10570,7 +10641,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Result_null.string_"
+									"$ref": "#/components/schemas/Result__hypothesisId-string_.string_"
 								}
 							}
 						}
@@ -11832,6 +11903,40 @@
 						}
 					}
 				]
+			}
+		},
+		"/v1/settings/query": {
+			"get": {
+				"operationId": "GetSettings",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"useAzureForExperiment": {
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"useAzureForExperiment"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Settings"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
 			}
 		},
 		"/v1/stripe/subscription/free/usage": {

@@ -18,6 +18,7 @@ import { BaseManager } from "../BaseManager";
 import { S3Client } from "../../lib/shared/db/s3Client";
 import { RequestResponseBodyStore } from "../../lib/stores/request/RequestResponseBodyStore";
 import { randomUUID } from "crypto";
+import { supabaseServer } from "../../lib/db/supabase";
 
 async function fetchImageAsBase64(url: string): Promise<string> {
   try {
@@ -93,6 +94,17 @@ export class InputsManager extends BaseManager {
     sourceRequest?: string
   ): Promise<Result<string, string>> {
     const inputRecordId = randomUUID();
+    const existingPrompt = await supabaseServer.client
+      .from("prompts_versions")
+      .select("*")
+      .eq("id", promptVersionId)
+      .eq("organization", this.authParams.organizationId)
+      .single();
+
+    if (existingPrompt.error || !existingPrompt.data) {
+      return err(existingPrompt.error?.message ?? "Prompt version not found");
+    }
+
     const insertQuery = `
       INSERT INTO prompt_input_record (id, inputs, source_request, prompt_version)
       VALUES ($1, $2, $3, $4)
@@ -116,6 +128,9 @@ export class InputsManager extends BaseManager {
     datasetId: string,
     limit: number
   ): Promise<Result<PromptInputRecord[], string>> {
+    const bodyStore = new RequestResponseBodyStore(
+      this.authParams.organizationId
+    );
     const result = await dbExecute<PromptInputRecord>(
       `
       SELECT
@@ -131,6 +146,7 @@ export class InputsManager extends BaseManager {
         left join prompt_input_record on experiment_dataset_v2_row.input_record = prompt_input_record.id
       WHERE helicone_dataset.organization = $1 AND
       experiment_dataset_v2_row.dataset_id = $2
+      ORDER BY experiment_dataset_v2_row.created_at ASC
       LIMIT $3
 
       `,
@@ -139,6 +155,9 @@ export class InputsManager extends BaseManager {
     return promiseResultMap(result, async (data) => {
       return Promise.all(
         data.map(async (record) => {
+          const requestResponseBody = await bodyStore.getRequestResponseBody(
+            record.source_request
+          );
           return {
             ...record,
             inputs: await getAllSignedURLsFromInputs(
@@ -146,6 +165,8 @@ export class InputsManager extends BaseManager {
               this.authParams.organizationId,
               record.source_request
             ),
+            response_body: requestResponseBody.data?.response,
+            request_body: requestResponseBody.data?.request,
           };
         })
       );
@@ -189,11 +210,13 @@ export class InputsManager extends BaseManager {
     return promiseResultMap(result, async (data) => {
       return Promise.all(
         data.map(async (record) => {
+          const requestResponseBody = await bodyStore.getRequestResponseBody(
+            record.source_request
+          );
           return {
             ...record,
-            response_body:
-              (await bodyStore.getRequestResponseBody(record.source_request))
-                .data?.response ?? {},
+            response_body: requestResponseBody.data?.response ?? {},
+            request_body: requestResponseBody.data?.request ?? {},
             inputs: await getAllSignedURLsFromInputs(
               record.inputs,
               this.authParams.organizationId,

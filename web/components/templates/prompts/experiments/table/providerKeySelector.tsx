@@ -7,13 +7,24 @@ import { useCallback, useState } from "react";
 import { DecryptedProviderKey } from "../../../../../services/lib/keys";
 import { clsx } from "../../../../shared/clsx";
 import useNotification from "../../../../shared/notification/useNotification";
-import ThemedModal from "../../../../shared/themed/themedModal";
 import { SecretInput } from "../../../../shared/themed/themedTable";
 import HcButton from "../../../../ui/hcButton";
-import CreateProviderKeyModal from "../../../vault/createProviderKeyModal";
 import { useVaultPage } from "../../../vault/useVaultPage";
+import { Button } from "../../../../ui/button";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { DialogHeader } from "@/components/ui/dialog";
+import ThemedModal from "../../../../shared/themed/themedModal";
+import { Result } from "../../../../../lib/result";
+import {
+  ArrowPathIcon,
+  InformationCircleIcon,
+} from "@heroicons/react/24/outline";
+import { useOrg } from "../../../../layout/organizationContext";
+import { Select, SelectItem, TextInput } from "@tremor/react";
+import { useGetOrgMembers } from "../../../../../services/hooks/organizations";
+import { useUser } from "@supabase/auth-helpers-react";
 
-interface ProviderKeyListProps {
+interface ProviderKeySelectorProps {
   variant?: "portal" | "basic";
   setProviderKeyCallback?: (key: string) => void;
   orgId?: string; // the id of the org that we want to change provider keys for
@@ -23,7 +34,7 @@ interface ProviderKeyListProps {
   defaultProviderKey?: string | null;
 }
 
-const ProviderKeyList = (props: ProviderKeyListProps) => {
+const ProviderKeySelector = (props: ProviderKeySelectorProps) => {
   const {
     setProviderKeyCallback,
     setDecryptedKey,
@@ -48,6 +59,20 @@ const ProviderKeyList = (props: ProviderKeyListProps) => {
 
   const [selectedProviderKey, setSelectedProviderKey] =
     useState<DecryptedProviderKey>();
+
+  const [isLoading, setIsLoading] = useState(false);
+  const org = useOrg();
+  const user = useUser();
+
+  const {
+    data: orgMembers,
+    isLoading: isMembersLoading,
+    refetch: refetchOrgMembers,
+  } = useGetOrgMembers(org?.currentOrg?.id || "");
+
+  const currentUserRole = orgMembers?.find(
+    (d) => d.email === user?.email
+  )?.org_role;
 
   const changeProviderKeyHandler = useCallback(
     async (newProviderKey: string) => {
@@ -98,15 +123,13 @@ const ProviderKeyList = (props: ProviderKeyListProps) => {
   return (
     <>
       <div className="w-full">
-        <div className="mx-auto w-full space-y-2">
-          {defaultProviderKey}
-          {providerKey}
+        <div className="mx-auto w-full space-y-4">
           <div className="flex flex-row justify-between items-center">
             <div className="flex items-center space-x-1">
               <Tooltip title="Provider Keys are used to authenticate your requests to the API. This key is securely stored using our vault technologies, with the state of the art encryption.">
                 <label
                   htmlFor="alert-metric"
-                  className="text-gray-900 dark:text-gray-100 text-xs font-semibold"
+                  className="text-gray-900 dark:text-gray-100 text-base font-semibold"
                 >
                   Provider Keys
                 </label>
@@ -210,7 +233,7 @@ const ProviderKeyList = (props: ProviderKeyListProps) => {
           )}
           <HcButton
             variant={"secondary"}
-            size={"xs"}
+            size={"sm"}
             title={"Add new key"}
             onClick={(e) => {
               e.stopPropagation();
@@ -218,17 +241,167 @@ const ProviderKeyList = (props: ProviderKeyListProps) => {
               setIsProviderOpen(true);
             }}
             icon={PlusIcon}
+            className="w-full"
           />
+
+          <div className="flex justify-between mt-4">
+            <Button
+              variant="outline"
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                setIsProviderOpen(true);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="default"
+              onClick={(e) => {
+                // e.stopPropagation();
+                // e.preventDefault();
+                // setIsProviderOpen(true);
+              }}
+            >
+              Save preference
+            </Button>
+          </div>
         </div>
       </div>
-      <CreateProviderKeyModal
-        open={isProviderOpen}
-        variant={variant}
-        setOpen={setIsProviderOpen}
-        onSuccess={() => refetchProviderKeys()}
-      />
+
+      <Dialog open={isProviderOpen} onOpenChange={setIsProviderOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Create Provider Key</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col space-y-8 w-full text-gray-900 dark:text-gray-100">
+            <div className="w-full space-y-1.5 text-sm">
+              <label htmlFor="api-key">Provider</label>
+              <Select defaultValue="openai" disabled enableClear={false}>
+                <SelectItem value="openai">
+                  {variant === "portal" ? "Custom" : "OpenAI"}
+                </SelectItem>
+              </Select>
+            </div>
+
+            <div className="w-full space-y-1.5 text-sm">
+              <label htmlFor="provider-key" className="flex items-center gap-1">
+                Provider Key
+                <Tooltip
+                  title={
+                    "This is the secret key that you get from the provider. It is used to authenticate and make requests to the provider's API."
+                  }
+                >
+                  <InformationCircleIcon
+                    className={clsx("w-4 h-4 text-gray-500")}
+                  />
+                </Tooltip>
+              </label>
+              <div className="text-gray-500 text-xs italic">
+                This will be placed in the{" "}
+                <code className="not-italic">authorization</code> header with
+                the <code className="not-italic">Bearer</code> prefix.
+              </div>
+              <TextInput
+                type="password"
+                name="provider-key"
+                id="provider-key"
+                required
+                placeholder="sk-"
+              />
+            </div>
+            <div className="w-full space-y-1.5 text-sm">
+              <label htmlFor="key-name">Key Name</label>
+              <TextInput
+                name="key-name"
+                id="key-name"
+                required
+                placeholder="Provider Key Name"
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setIsProviderOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => {
+                  const providerKeyInput = document.getElementById(
+                    "provider-key"
+                  ) as HTMLInputElement;
+                  const keyNameInput = document.getElementById(
+                    "key-name"
+                  ) as HTMLInputElement;
+
+                  if (
+                    (!keyNameInput || keyNameInput.value === "") &&
+                    variant !== "portal"
+                  ) {
+                    setNotification("Please enter in a key name", "error");
+                    return;
+                  }
+                  if (!providerKeyInput || providerKeyInput.value === "") {
+                    setNotification("Please enter in a provider key", "error");
+                    return;
+                  }
+
+                  setIsLoading(true);
+                  fetch("/api/provider_keys/create", {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                      providerKey: providerKeyInput.value,
+                      providerName: variant === "portal" ? "portal" : "openai",
+                      providerKeyName: keyNameInput.value,
+                    }),
+                  })
+                    .then(
+                      (res) =>
+                        res.json() as Promise<
+                          Result<DecryptedProviderKey, string>
+                        >
+                    )
+                    .then(({ data }) => {
+                      if (data !== null) {
+                        setNotification(
+                          "Successfully created provider key",
+                          "success"
+                        );
+                        setIsProviderOpen(false);
+                        refetchProviderKeys();
+                      } else {
+                        setNotification(
+                          "Failed to create provider key, you are only allowed 1 provider key",
+                          "error"
+                        );
+                      }
+                    })
+                    .catch((err) => {
+                      setNotification(`Error: ${err}`, "error");
+                    })
+                    .finally(() => setIsLoading(false));
+                }}
+                disabled={isLoading}
+              >
+                {isLoading && (
+                  <ArrowPathIcon className="w-4 h-4 mr-1.5 animate-spin" />
+                )}
+                Create Provider Key
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <ThemedModal open={deleteProviderOpen} setOpen={setDeleteProviderOpen}>
-        <div className="flex flex-col gap-4 w-full">
+        <div
+          className="flex flex-col gap-4 w-full"
+          onClick={(e) => e.stopPropagation()}
+        >
           <p className="font-semibold text-lg text-gray-900 dark:text-gray-100">
             Delete Provider Key
           </p>
@@ -239,16 +412,20 @@ const ProviderKeyList = (props: ProviderKeyListProps) => {
           </p>
           <div className="flex justify-end gap-2">
             <button
-              onClick={() => setDeleteProviderOpen(false)}
+              onClick={(e) => {
+                e.stopPropagation();
+                setDeleteProviderOpen(false);
+              }}
               type="button"
               className="flex flex-row items-center rounded-md bg-white dark:bg-black px-4 py-2 text-sm font-semibold border border-gray-300 dark:border-gray-700 hover:bg-gray-50 text-gray-900 dark:hover:bg-gray-900 dark:text-gray-100 shadow-sm hover:text-gray-700 dark:hover:text-gray-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
             >
               Cancel
             </button>
             <button
-              onClick={async () => {
+              onClick={async (e) => {
+                e.stopPropagation();
                 if (selectedProviderKey?.id) {
-                  await deleteProviderKey(selectedProviderKey.id!);
+                  await deleteProviderKey(selectedProviderKey.id);
                 }
               }}
               className="items-center rounded-md bg-red-500 px-4 py-2 text-sm flex font-semibold text-white dark:text-black shadow-sm hover:bg-red-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
@@ -262,4 +439,4 @@ const ProviderKeyList = (props: ProviderKeyListProps) => {
   );
 };
 
-export default ProviderKeyList;
+export default ProviderKeySelector;

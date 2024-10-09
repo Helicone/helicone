@@ -6,6 +6,7 @@ import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { BaseManager } from "../BaseManager";
 import {
   Experiment,
+  ExperimentDatasetRow,
   ExperimentStore,
   IncludeExperimentKeys,
 } from "../../lib/stores/experimentStore";
@@ -25,6 +26,12 @@ export class ExperimentManager extends BaseManager {
     return this.ExperimentStore.getExperimentById(experimentId, include);
   }
 
+  async getDatasetRowsByIds(params: {
+    datasetRowIds: string[];
+  }): Promise<Result<ExperimentDatasetRow[], string>> {
+    return this.ExperimentStore.getDatasetRowsByIds(params);
+  }
+
   async getExperiments(
     filter: FilterNode,
     include: IncludeExperimentKeys
@@ -38,7 +45,7 @@ export class ExperimentManager extends BaseManager {
     promptVersion: string;
     providerKeyId: string;
     status: "PENDING" | "RUNNING" | "COMPLETED" | "FAILED";
-  }): Promise<Result<null, string>> {
+  }): Promise<Result<{ hypothesisId: string }, string>> {
     const hasAccess = await supabaseServer.client
       .from("experiment_v2")
       .select("id", { count: "exact" })
@@ -49,7 +56,7 @@ export class ExperimentManager extends BaseManager {
       return err("Experiment not found");
     }
 
-    const result = await dbExecute(
+    const result = await dbExecute<{ id: string }>(
       `
       INSERT INTO experiment_v2_hypothesis (
         prompt_version,
@@ -59,21 +66,24 @@ export class ExperimentManager extends BaseManager {
         provider_key
       )
       VALUES ($1, $2, $3, $4, $5)
+      RETURNING id
       `,
       [
         params.promptVersion,
         params.model,
         params.status,
         params.experimentId,
-        params.providerKeyId === "NOKEY" ? null : params.providerKeyId,
+        params.providerKeyId === "NOKEY"
+          ? null
+          : params.providerKeyId,
       ]
     );
 
-    if (result.error) {
+    if (result.error || !result.data) {
       return err(result.error);
     }
 
-    return ok(null);
+    return ok({ hypothesisId: result.data[0].id });
   }
 
   async addNewExperiment(

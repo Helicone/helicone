@@ -9,6 +9,40 @@ interface JsonObject { [key: string]: JsonValue; }
 
 
 export interface paths {
+  "/v1/admin/orgs/top-usage": {
+    post: operations["GetTopOrgsByUsage"];
+  };
+  "/v1/admin/orgs/top": {
+    post: operations["GetTopOrgs"];
+  };
+  "/v1/admin/admins/query": {
+    get: operations["GetAdmins"];
+  };
+  "/v1/admin/whodis": {
+    post: operations["Whodis"];
+  };
+  "/v1/admin/settings/{name}": {
+    get: operations["GetSetting"];
+  };
+  "/v1/admin/azure/run-test": {
+    post: operations["AzureTest"];
+  };
+  "/v1/admin/settings": {
+    post: operations["UpdateSetting"];
+  };
+  "/v1/admin/orgs/query": {
+    post: operations["FindAllOrgs"];
+  };
+  "/v1/admin/orgs/over-time/query": {
+    post: operations["NewOrgsOverTime"];
+  };
+  "/v1/admin/admins/org/query": {
+    post: operations["AddAdminsToOrg"];
+  };
+  "/v1/admin/alert_banners": {
+    post: operations["CreateAlertBanner"];
+    patch: operations["UpdateAlertBanner"];
+  };
   "/v1/prompt/query": {
     post: operations["GetPrompts"];
   };
@@ -45,43 +79,6 @@ export interface paths {
   };
   "/v1/prompt/{user_defined_id}/template": {
     post: operations["GetPromptVersionTemplates"];
-  };
-  "/v1/settings/query": {
-    get: operations["GetSettings"];
-  };
-  "/v1/admin/orgs/top-usage": {
-    post: operations["GetTopOrgsByUsage"];
-  };
-  "/v1/admin/orgs/top": {
-    post: operations["GetTopOrgs"];
-  };
-  "/v1/admin/admins/query": {
-    get: operations["GetAdmins"];
-  };
-  "/v1/admin/whodis": {
-    post: operations["Whodis"];
-  };
-  "/v1/admin/settings/{name}": {
-    get: operations["GetSetting"];
-  };
-  "/v1/admin/azure/run-test": {
-    post: operations["AzureTest"];
-  };
-  "/v1/admin/settings": {
-    post: operations["UpdateSetting"];
-  };
-  "/v1/admin/orgs/query": {
-    post: operations["FindAllOrgs"];
-  };
-  "/v1/admin/orgs/over-time/query": {
-    post: operations["NewOrgsOverTime"];
-  };
-  "/v1/admin/admins/org/query": {
-    post: operations["AddAdminsToOrg"];
-  };
-  "/v1/admin/alert_banners": {
-    post: operations["CreateAlertBanner"];
-    patch: operations["UpdateAlertBanner"];
   };
   "/v1/log/request": {
     post: operations["GetRequests"];
@@ -187,7 +184,10 @@ export interface paths {
   "/v1/experiment/dataset/query": {
     post: operations["GetDatasets"];
   };
-  "/v1/experiment/dataset/{datasetId}/version/{promptVersionId}/row": {
+  "/v1/experiment/dataset/{datasetId}/row/insert": {
+    post: operations["InsertDatasetRow"];
+  };
+  "/v1/experiment/dataset/{datasetId}/version/{promptVersionId}/row/new": {
     post: operations["CreateDatasetRow"];
   };
   "/v1/experiment/dataset/{datasetId}/inputs/query": {
@@ -353,12 +353,36 @@ export interface paths {
   "/v1/organization/{organizationId}/remove_member": {
     delete: operations["RemoveMemberFromOrganization"];
   };
+  "/v1/settings/query": {
+    get: operations["GetSettings"];
+  };
 }
 
 export type webhooks = Record<string, never>;
 
 export interface components {
   schemas: {
+    KafkaSettings: {
+      /** Format: double */
+      miniBatchSize: number;
+    };
+    AzureExperiment: {
+      azureBaseUri: string;
+      azureApiVersion: string;
+      azureDeploymentName: string;
+      azureApiKey: string;
+    };
+    Setting: components["schemas"]["KafkaSettings"] | components["schemas"]["AzureExperiment"];
+    /** @enum {string} */
+    SettingName: "kafka:dlq" | "kafka:log" | "kafka:dlq:eu" | "kafka:log:eu" | "kafka:orgs-to-dlq" | "azure:experiment";
+    /**
+     * @description The URL interface represents an object providing static methods used for creating object URLs.
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/API/URL)
+     * `URL` class is a global reference for `require('url').URL`
+     * https://nodejs.org/api/url.html#the-whatwg-url-api
+     */
+    "url.URL": string;
     /** @description Construct a type with a set of properties K of type T */
     "Record_string.any_": {
       [key: string]: unknown;
@@ -483,6 +507,7 @@ export interface components {
       prompt_version: string;
       created_at: string;
       response_body?: string;
+      request_body?: string;
       auto_prompt_inputs: unknown[];
     };
     "ResultSuccess_PromptInputRecord-Array_": {
@@ -546,6 +571,7 @@ export interface components {
     };
     PromptVersionsQueryParams: {
       filter?: components["schemas"]["PromptVersionsFilterNode"];
+      includeExperimentVersions?: boolean;
     };
     ResultSuccess_null_: {
       /** @enum {number|null} */
@@ -572,6 +598,7 @@ export interface components {
     "Result_PromptVersionResultCompiled.string_": components["schemas"]["ResultSuccess_PromptVersionResultCompiled_"] | components["schemas"]["ResultError_string_"];
     PromptVersiosQueryParamsCompiled: {
       filter?: components["schemas"]["PromptVersionsFilterNode"];
+      includeExperimentVersions?: boolean;
       inputs: components["schemas"]["Record_string.string_"];
     };
     PromptVersionResultFilled: {
@@ -590,27 +617,6 @@ export interface components {
       error: null;
     };
     "Result_PromptVersionResultFilled.string_": components["schemas"]["ResultSuccess_PromptVersionResultFilled_"] | components["schemas"]["ResultError_string_"];
-    KafkaSettings: {
-      /** Format: double */
-      miniBatchSize: number;
-    };
-    AzureExperiment: {
-      azureBaseUri: string;
-      azureApiVersion: string;
-      azureDeploymentName: string;
-      azureApiKey: string;
-    };
-    Setting: components["schemas"]["KafkaSettings"] | components["schemas"]["AzureExperiment"];
-    /** @enum {string} */
-    SettingName: "kafka:dlq" | "kafka:log" | "kafka:dlq:eu" | "kafka:log:eu" | "kafka:orgs-to-dlq" | "azure:experiment";
-    /**
-     * @description The URL interface represents an object providing static methods used for creating object URLs.
-     *
-     * [MDN Reference](https://developer.mozilla.org/docs/Web/API/URL)
-     * `URL` class is a global reference for `require('url').URL`
-     * https://nodejs.org/api/url.html#the-whatwg-url-api
-     */
-    "url.URL": string;
     HeliconeMeta: {
       lytixHost?: string;
       lytixKey?: string;
@@ -1621,6 +1627,9 @@ export interface components {
     };
     /** @description From T, pick a set of properties whose keys are in the union K */
     "Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits-or-request_response_rmt_": {
+      values?: {
+        [key: string]: components["schemas"]["Partial_TextOperators_"];
+      };
       response?: components["schemas"]["Partial_ResponseTableToOperators_"];
       request?: components["schemas"]["Partial_RequestTableToOperators_"];
       feedback?: components["schemas"]["Partial_FeedbackTableToOperators_"];
@@ -1628,9 +1637,6 @@ export interface components {
       request_response_rmt?: components["schemas"]["Partial_RequestResponseRMTToOperators_"];
       cache_hits?: components["schemas"]["Partial_CacheHitsTableToOperators_"];
       properties?: {
-        [key: string]: components["schemas"]["Partial_TextOperators_"];
-      };
-      values?: {
         [key: string]: components["schemas"]["Partial_TextOperators_"];
       };
     };
@@ -1895,6 +1901,14 @@ Json: JsonObject;
       providerKeyId: string;
       meta?: unknown;
     };
+    "ResultSuccess__hypothesisId-string__": {
+      data: {
+        hypothesisId: string;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__hypothesisId-string_.string_": components["schemas"]["ResultSuccess__hypothesisId-string__"] | components["schemas"]["ResultError_string_"];
     ResponseObj: {
       body: unknown;
       createdAt: string;
@@ -1918,6 +1932,18 @@ Json: JsonObject;
     "Record_string.Score_": {
       [key: string]: components["schemas"]["Score"];
     };
+    ExperimentDatasetRow: {
+      rowId: string;
+      inputRecord: {
+        request: components["schemas"]["RequestObj"];
+        response: components["schemas"]["ResponseObj"];
+        autoInputs: components["schemas"]["Record_string.string_"][];
+        inputs: components["schemas"]["Record_string.string_"];
+        requestPath: string;
+        requestId: string;
+      };
+      scores: components["schemas"]["Record_string.Score_"];
+    };
     ExperimentScores: {
       dataset: {
         scores: components["schemas"]["Record_string.Score_"];
@@ -1930,18 +1956,7 @@ Json: JsonObject;
       id: string;
       organization: string;
       dataset: {
-        rows: {
-            scores: components["schemas"]["Record_string.Score_"];
-            inputRecord?: {
-              request: components["schemas"]["RequestObj"];
-              response: components["schemas"]["ResponseObj"];
-              autoInputs: components["schemas"]["Record_string.string_"][];
-              inputs: components["schemas"]["Record_string.string_"];
-              requestPath: string;
-              requestId: string;
-            };
-            rowId: string;
-          }[];
+        rows: components["schemas"]["ExperimentDatasetRow"][];
         name: string;
         id: string;
       };
@@ -2340,259 +2355,6 @@ export type external = Record<string, never>;
 
 export interface operations {
 
-  GetPrompts: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["PromptsQueryParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_PromptsResult-Array.string_"];
-        };
-      };
-    };
-  };
-  GetPrompt: {
-    parameters: {
-      path: {
-        promptId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["PromptQueryParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_PromptResult.string_"];
-        };
-      };
-    };
-  };
-  DeletePrompt: {
-    parameters: {
-      path: {
-        promptId: string;
-      };
-    };
-    responses: {
-      /** @description No content */
-      204: {
-        content: never;
-      };
-    };
-  };
-  CreatePrompt: {
-    requestBody: {
-      content: {
-        "application/json": {
-          metadata: components["schemas"]["Record_string.any_"];
-          prompt: {
-            messages: unknown[];
-            model: string;
-          };
-          userDefinedId: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_CreatePromptResponse.string_"];
-        };
-      };
-    };
-  };
-  CreateSubversion: {
-    parameters: {
-      path: {
-        promptVersionId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["PromptCreateSubversionParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_PromptVersionResult.string_"];
-        };
-      };
-    };
-  };
-  PromotePromptVersionToProduction: {
-    parameters: {
-      path: {
-        promptVersionId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          previousProductionVersionId: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_PromptVersionResult.string_"];
-        };
-      };
-    };
-  };
-  GetInputs: {
-    parameters: {
-      path: {
-        promptVersionId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          random?: boolean;
-          /** Format: double */
-          limit: number;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_PromptInputRecord-Array.string_"];
-        };
-      };
-    };
-  };
-  GetPromptExperiments: {
-    parameters: {
-      path: {
-        promptId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__id-string--created_at-string--num_hypotheses-number--dataset-string--meta-Record_string.any__-Array.string_"];
-        };
-      };
-    };
-  };
-  GetPromptVersions: {
-    parameters: {
-      path: {
-        promptId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["PromptVersionsQueryParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_PromptVersionResult-Array.string_"];
-        };
-      };
-    };
-  };
-  GetPromptVersion: {
-    parameters: {
-      path: {
-        promptVersionId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_PromptVersionResult.string_"];
-        };
-      };
-    };
-  };
-  DeletePromptVersion: {
-    parameters: {
-      path: {
-        promptVersionId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  GetPromptVersionsCompiled: {
-    parameters: {
-      path: {
-        user_defined_id: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["PromptVersiosQueryParamsCompiled"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_PromptVersionResultCompiled.string_"];
-        };
-      };
-    };
-  };
-  GetPromptVersionTemplates: {
-    parameters: {
-      path: {
-        user_defined_id: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["PromptVersiosQueryParamsCompiled"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_PromptVersionResultFilled.string_"];
-        };
-      };
-    };
-  };
-  GetSettings: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": {
-            useAzureForExperiment: boolean;
-          };
-        };
-      };
-    };
-  };
   GetTopOrgsByUsage: {
     requestBody: {
       content: {
@@ -2916,6 +2678,247 @@ export interface operations {
       /** @description No content */
       204: {
         content: never;
+      };
+    };
+  };
+  GetPrompts: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PromptsQueryParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_PromptsResult-Array.string_"];
+        };
+      };
+    };
+  };
+  GetPrompt: {
+    parameters: {
+      path: {
+        promptId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PromptQueryParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_PromptResult.string_"];
+        };
+      };
+    };
+  };
+  DeletePrompt: {
+    parameters: {
+      path: {
+        promptId: string;
+      };
+    };
+    responses: {
+      /** @description No content */
+      204: {
+        content: never;
+      };
+    };
+  };
+  CreatePrompt: {
+    requestBody: {
+      content: {
+        "application/json": {
+          metadata: components["schemas"]["Record_string.any_"];
+          prompt: {
+            messages: unknown[];
+            model: string;
+          };
+          userDefinedId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_CreatePromptResponse.string_"];
+        };
+      };
+    };
+  };
+  CreateSubversion: {
+    parameters: {
+      path: {
+        promptVersionId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PromptCreateSubversionParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_PromptVersionResult.string_"];
+        };
+      };
+    };
+  };
+  PromotePromptVersionToProduction: {
+    parameters: {
+      path: {
+        promptVersionId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          previousProductionVersionId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_PromptVersionResult.string_"];
+        };
+      };
+    };
+  };
+  GetInputs: {
+    parameters: {
+      path: {
+        promptVersionId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          random?: boolean;
+          /** Format: double */
+          limit: number;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_PromptInputRecord-Array.string_"];
+        };
+      };
+    };
+  };
+  GetPromptExperiments: {
+    parameters: {
+      path: {
+        promptId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__id-string--created_at-string--num_hypotheses-number--dataset-string--meta-Record_string.any__-Array.string_"];
+        };
+      };
+    };
+  };
+  GetPromptVersions: {
+    parameters: {
+      path: {
+        promptId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PromptVersionsQueryParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_PromptVersionResult-Array.string_"];
+        };
+      };
+    };
+  };
+  GetPromptVersion: {
+    parameters: {
+      path: {
+        promptVersionId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_PromptVersionResult.string_"];
+        };
+      };
+    };
+  };
+  DeletePromptVersion: {
+    parameters: {
+      path: {
+        promptVersionId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  GetPromptVersionsCompiled: {
+    parameters: {
+      path: {
+        user_defined_id: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PromptVersiosQueryParamsCompiled"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_PromptVersionResultCompiled.string_"];
+        };
+      };
+    };
+  };
+  GetPromptVersionTemplates: {
+    parameters: {
+      path: {
+        user_defined_id: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PromptVersiosQueryParamsCompiled"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_PromptVersionResultFilled.string_"];
+        };
       };
     };
   };
@@ -3518,6 +3521,28 @@ export interface operations {
       };
     };
   };
+  InsertDatasetRow: {
+    parameters: {
+      path: {
+        datasetId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          inputRecordId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_string.string_"];
+        };
+      };
+    };
+  };
   CreateDatasetRow: {
     parameters: {
       path: {
@@ -3759,7 +3784,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result_null.string_"];
+          "application/json": components["schemas"]["Result__hypothesisId-string_.string_"];
         };
       };
     };
@@ -4449,6 +4474,18 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  GetSettings: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            useAzureForExperiment: boolean;
+          };
         };
       };
     };

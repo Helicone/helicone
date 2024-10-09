@@ -1,5 +1,14 @@
 // src/users/usersController.ts
-import { Body, Controller, Post, Request, Route, Security, Tags } from "tsoa";
+import {
+  Body,
+  Controller,
+  Path,
+  Post,
+  Request,
+  Route,
+  Security,
+  Tags,
+} from "tsoa";
 import { supabaseServer } from "../../lib/db/supabase";
 import { run } from "../../lib/experiment/run";
 import { FilterLeafSubset } from "../../lib/shared/filters/filterDefs";
@@ -140,7 +149,7 @@ export class ExperimentController extends Controller {
       status: "PENDING" | "RUNNING" | "COMPLETED" | "FAILED";
     },
     @Request() request: JawnAuthenticatedRequest
-  ): Promise<Result<null, string>> {
+  ): Promise<Result<{ hypothesisId: string }, string>> {
     const experimentManager = new ExperimentManager(request.authParams);
 
     const result = await experimentManager.createNewExperimentHypothesis(
@@ -220,24 +229,24 @@ export class ExperimentController extends Controller {
       return err("Hypothesis not found");
     }
 
-    const seen = new Set<string>();
-
-    const datasetRows = experiment.dataset.rows.filter((row) => {
-      if (!requestBody.datasetRowIds.includes(row.rowId)) {
-        return false;
-      }
-      const alreadyAdded = seen.has(row.rowId);
-      seen.add(row.rowId);
-      return !alreadyAdded;
+    const datasetRows = await experimentManager.getDatasetRowsByIds({
+      datasetRowIds: requestBody.datasetRowIds,
     });
 
-    if (datasetRows.length !== requestBody.datasetRowIds.length) {
+
+    if (datasetRows.error || !datasetRows.data) {
+      this.setStatus(500);
+      console.error(datasetRows.error);
+      return err(datasetRows.error);
+    }
+
+    if (datasetRows.data.length !== requestBody.datasetRowIds.length) {
       this.setStatus(404);
       console.error("Row not found");
       return err("Row not found");
     }
 
-    experiment.dataset.rows = datasetRows;
+    experiment.dataset.rows = datasetRows.data;
     experiment.hypotheses = [hypothesis];
 
     const runResult = await run(experiment);
