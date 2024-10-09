@@ -1,12 +1,5 @@
 import { ChartBarIcon, PlusIcon } from "@heroicons/react/24/outline";
 import { useQuery } from "@tanstack/react-query";
-import {
-  BarChart,
-  Card,
-  LineChart,
-  MultiSelect,
-  MultiSelectItem,
-} from "@tremor/react";
 import Link from "next/link";
 import { useState } from "react";
 import { getJawnClient } from "../../../lib/clients/jawn";
@@ -20,7 +13,6 @@ import {
   UIFilterRowTree,
   getRootFilterNode,
 } from "../../../services/lib/filters/uiFilterRowTree";
-import { Col, Row } from "../../layout/common";
 import { useOrg } from "../../layout/organizationContext";
 import AuthHeader from "../../shared/authHeader";
 import LoadingAnimation from "../../shared/loadingAnimation";
@@ -28,6 +20,157 @@ import ThemedTableHeader from "../../shared/themed/themedHeader";
 import useSearchParams from "../../shared/utils/useSearchParams";
 import { TimeFilter } from "../dashboard/dashboardPage";
 import { useUIFilterConvert } from "../dashboard/useDashboardPage";
+import { Badge } from "@/components/ui/badge";
+
+// Import shadcn components
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+// Import Recharts components
+import {
+  BarChart,
+  Bar,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
+import { Col, Row } from "@/components/layout/common";
+import { ArrowRightIcon, PencilIcon } from "lucide-react";
+import { ScoreDistributionChart } from "./charts/ScoreDistributionChart";
+import { TracesChart } from "./charts/TracesChart";
+import { AverageScoreChart } from "./charts/AverageScoreChart";
+import { formatNumber } from "@/components/shared/utils/formatNumber";
+import ThemedTable from "@/components/shared/themed/table/themedTable";
+import { ColumnDef } from "@tanstack/react-table";
+import { ScoreDistributionChartPie } from "./charts/ScoreDistributionChartPie";
+
+type EvalMetric = {
+  name: string;
+  type: string;
+  valueType: string;
+  averageScore: number;
+  minScore: number;
+  maxScore: number;
+  count: number;
+  overTime: { date: string; count: number }[];
+  scoreDistribution: { lower: number; upper: number; value: number }[];
+  averageOverTime: { date: string; value: number }[];
+};
+export const INITIAL_COLUMNS: ColumnDef<EvalMetric>[] = [
+  {
+    accessorKey: "name",
+    header: "Eval Name",
+    cell: (info) => (
+      <span className="text-gray-900 dark:text-gray-100 font-medium">
+        {info.getValue()
+          ? `${info.getValue()}`.replaceAll("-hcone-bool", " ")
+          : "No Eval Name"}
+      </span>
+    ),
+    minSize: 300,
+  },
+  {
+    accessorKey: "overTime",
+    header: "Traces",
+    cell: (info) => (
+      <TracesChart
+        overTime={info.getValue() as { date: string; count: number }[]}
+      />
+    ),
+    minSize: 200,
+  },
+  {
+    accessorKey: "averageOverTime",
+    header: "Average Score",
+    cell: (info) => (
+      <AverageScoreChart
+        averageOverTime={info.getValue() as { date: string; count: number }[]}
+      />
+    ),
+    minSize: 200,
+  },
+  {
+    accessorKey: "scoreDistribution",
+    header: "Score Distribution",
+    cell: (info) =>
+      info.row.original.valueType !== "Boolean" ? (
+        <ScoreDistributionChart
+          distribution={
+            info.getValue() as { lower: number; upper: number; value: number }[]
+          }
+        />
+      ) : (
+        <ScoreDistributionChartPie
+          distribution={
+            info.getValue() as { lower: number; upper: number; value: number }[]
+          }
+        />
+      ),
+    minSize: 100,
+  },
+  {
+    accessorKey: "type",
+    header: "Type",
+    cell: (info) => (
+      <Badge variant={"outline"}>{info.getValue() as string}</Badge>
+    ),
+    minSize: 300,
+  },
+  {
+    accessorKey: "valueType",
+    header: "Value Type",
+    cell: (info) => (
+      <Badge variant={"outline"}>{info.getValue() as string}</Badge>
+    ),
+    minSize: 300,
+  },
+  {
+    accessorKey: "count",
+    header: "Count",
+    cell: (info) => <span>{Number(info.getValue()).toLocaleString()}</span>,
+    meta: {
+      sortKey: "count",
+    },
+  },
+  {
+    accessorKey: "averageScore",
+    header: "Average Score",
+    cell: (info) => <span>{Number(info.getValue()).toFixed(2)}</span>,
+    meta: {
+      sortKey: "averageScore",
+    },
+  },
+
+  {
+    accessorKey: "minScore",
+    header: "Min Score",
+    cell: (info) => Number(info.getValue()).toLocaleString(),
+    meta: {
+      sortKey: "minScore",
+    },
+  },
+  {
+    accessorKey: "maxScore",
+    header: "Max Score",
+    cell: (info) => Number(info.getValue()).toLocaleString(),
+    meta: {
+      sortKey: "maxScore",
+    },
+    minSize: 200,
+  },
+];
 
 const EvalsPage = () => {
   const org = useOrg();
@@ -149,48 +292,73 @@ const EvalsPage = () => {
   return (
     <>
       <AuthHeader
-        title="Evals"
+        title="Evaluators"
         actions={[
-          <>
-            <div className="flex items-center space-x-2">
-              <MultiSelect
-                value={evalsToShow}
-                onValueChange={(value) => {
-                  setEvalsToShow(value);
-                }}
-                className="max-w-[300px]"
-              >
+          <div key="select-evals" className="flex items-center space-x-2">
+            <Select
+              value={evalsToShow}
+              onValueChange={(value) => setEvalsToShow(value)}
+            >
+              <SelectTrigger className="w-[300px]">
+                <SelectValue placeholder="Select evals" />
+              </SelectTrigger>
+              <SelectContent>
                 {allEvalScores.map((evalScore) => (
-                  <MultiSelectItem key={evalScore} value={evalScore}>
+                  <SelectItem key={evalScore} value={evalScore}>
                     {evalScore}
-                  </MultiSelectItem>
+                  </SelectItem>
                 ))}
-              </MultiSelect>
-              <button
-                className="text-blue-600 hover:underline whitespace-nowrap"
-                onClick={
-                  evalsToShow.length > 0 ? handleDeselectAll : handleSelectAll
-                }
-              >
-                {evalsToShow.length > 0 ? "Deselect All" : "Select All"}
-              </button>
-            </div>
-          </>,
+              </SelectContent>
+            </Select>
+            <Button
+              variant="link"
+              onClick={
+                evalsToShow.length > 0 ? handleDeselectAll : handleSelectAll
+              }
+            >
+              {evalsToShow.length > 0 ? "Deselect All" : "Select All"}
+            </Button>
+          </div>,
         ]}
       />
-      <Col className="space-y-4">
-        <ThemedTableHeader
-          isFetching={isLoading}
+      <div className="space-y-4">
+        {isLoading && <LoadingAnimation />}
+        {!isLoading && evals.length === 0 && (
+          <div className="flex flex-col w-full mt-12 justify-center items-center">
+            <div className="flex flex-col items-center max-w-3xl">
+              <ChartBarIcon className="h-12 w-12 text-black dark:text-white" />
+              <p className="text-xl text-black dark:text-white font-semibold mt-6">
+                No Evals
+              </p>
+              <p className="text-sm text-gray-500 max-w-sm mt-2 text-center">
+                Start adding evals to your requests to see them here.
+              </p>
+              <div className="mt-6 flex gap-3">
+                <Button variant="outline" asChild>
+                  <Link href="https://docs.helicone.ai/features/advanced-usage/evals">
+                    View Docs
+                  </Link>
+                </Button>
+                <Button asChild>
+                  <Link href="/requests">
+                    <PlusIcon className="h-4 w-4 mr-2" />
+                    Add Evals
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+        <ThemedTable
+          advancedFilters={{
+            filterMap: filterMap,
+            setAdvancedFilters: setAdvancedFilters,
+            filters: advancedFilters,
+            searchPropertyFilters: searchPropertyFilters,
+          }}
           timeFilter={{
             currentTimeFilter: timeFilter,
-            customTimeFilter: true,
-            timeFilterOptions: [
-              { key: "24h", value: "24H" },
-              { key: "7d", value: "7D" },
-              { key: "1m", value: "1M" },
-              { key: "3m", value: "3M" },
-            ],
-            defaultTimeFilter: interval,
+            defaultValue: "all",
             onTimeSelectHandler: (key: TimeInterval, value: string) => {
               if ((key as string) === "custom") {
                 value = value.replace("custom:", "");
@@ -210,132 +378,22 @@ const EvalsPage = () => {
               }
             },
           }}
-          advancedFilter={{
-            filterMap,
-            onAdvancedFilter: setAdvancedFilters,
-            filters: advancedFilters,
-            searchPropertyFilters: searchPropertyFilters,
-          }}
+          id="evals-table"
+          defaultColumns={INITIAL_COLUMNS}
+          defaultData={evals.map((evalRow) => ({
+            ...evalRow,
+            scoreDistribution:
+              scoreDistributions?.data?.data?.find(
+                (s) => s.name === evalRow.name
+              )?.distribution ?? [],
+            type: evalRow.name.includes("-laj-") ? "LLM as a judge" : "Default",
+            valueType: evalRow.name.includes("-hcone-bool")
+              ? "Boolean"
+              : "Numeric",
+            id: evalRow.name,
+          }))}
         />
-        {isLoading && <LoadingAnimation />}
-        {!isLoading && evals.length === 0 && (
-          <div className="flex flex-col w-full mt-12 justify-center items-center">
-            <div className="flex flex-col items-center max-w-3xl">
-              <ChartBarIcon className="h-12 w-12 text-black dark:text-white" />
-              <p className="text-xl text-black dark:text-white font-semibold mt-6">
-                No Evals
-              </p>
-              <p className="text-sm text-gray-500 max-w-sm mt-2 text-center">
-                Start adding evals to your requests to see them here.
-              </p>
-              <div className="mt-6 flex gap-3">
-                <Link
-                  href="https://docs.helicone.ai/features/advanced-usage/evals"
-                  className="w-fit items-center rounded-md bg-black px-3 py-2 gap-2 text-sm flex font-medium text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
-                >
-                  View Docs
-                </Link>
-                <Link
-                  href="/requests"
-                  className="w-fit items-center rounded-md bg-blue-600 px-3 py-2 gap-2 text-sm flex font-medium text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
-                >
-                  <PlusIcon className="h-4 w-4" />
-                  Add Evals
-                </Link>
-              </div>
-            </div>
-          </div>
-        )}
-        {evals.length > 0 && (
-          <div className="space-y-4">
-            {evals
-              .sort((a, b) => b.count - a.count)
-              .map((evalRow, index) => {
-                return (
-                  <Card key={evalRow.name + index} className="w-full ">
-                    <Row className="flex gap-10 justify-between">
-                      <Col className="space-y-2">
-                        <h2 className="text-xl font-semibold">
-                          {evalRow.name}
-                        </h2>
-                        <p>{evalRow.count} traces</p>
-                        <button className="text-blue-600 hover:underline">
-                          View Traces
-                        </button>
-                      </Col>
-                      <Col className="w-[300px]">
-                        <span className="text-sm font-semibold">
-                          Score Distribution
-                        </span>
-                        <Card>
-                          <BarChart
-                            data={
-                              scoreDistributions?.data?.data
-                                ?.find((s) => s.name === evalRow.name)
-                                ?.distribution.map((d) => ({
-                                  range: `${d.lower} - ${d.upper}`,
-                                  count: d.value,
-                                })) ?? []
-                            }
-                            index="range"
-                            categories={["count"]}
-                            colors={["blue"]}
-                            yAxisWidth={48}
-                          />
-                        </Card>
-                      </Col>
-                      <Col className="w-[600px]">
-                        <span className="text-sm font-semibold">Traces</span>
-                        <Card>
-                          <LineChart
-                            data={evalRow.overTime.map((o) => ({
-                              date: new Date(o.date).toLocaleDateString(),
-                              count: o.count,
-                            }))}
-                            index="date"
-                            categories={["count"]}
-                            colors={["blue"]}
-                            className="min-h-max"
-                            yAxisWidth={40}
-                            animationDuration={1000}
-                            showAnimation={true}
-                          />
-                        </Card>
-                      </Col>
-                      <Col className="w-[600px]">
-                        <span className="text-sm font-semibold">
-                          Average Score
-                        </span>
-                        <Card>
-                          <LineChart
-                            data={evalRow.averageOverTime.map((o) => ({
-                              date: new Date(o.date).toLocaleDateString(),
-                              value: o.value,
-                            }))}
-                            index="date"
-                            categories={["value"]}
-                            colors={["blue"]}
-                            className="min-h-max"
-                            yAxisWidth={40}
-                            animationDuration={1000}
-                            showAnimation={true}
-                          />
-                        </Card>
-                      </Col>
-                      <Col className="space-y-2  flex flex-col justify-center min-h-max">
-                        <Card className="text-sm">Max: {evalRow.maxScore}</Card>
-                        <Card className="text-sm">Min: {evalRow.minScore}</Card>
-                        <Card className="text-sm">
-                          Average: {evalRow.averageScore}
-                        </Card>
-                      </Col>
-                    </Row>
-                  </Card>
-                );
-              })}
-          </div>
-        )}
-      </Col>
+      </div>
     </>
   );
 };
