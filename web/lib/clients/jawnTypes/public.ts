@@ -113,9 +113,6 @@ export interface paths {
     post: operations["CreateAlertBanner"];
     patch: operations["UpdateAlertBanner"];
   };
-  "/v1/settings/query": {
-    get: operations["GetSettings"];
-  };
   "/v1/log/request": {
     post: operations["GetRequests"];
   };
@@ -238,9 +235,6 @@ export interface paths {
   "/v1/experiment/run": {
     post: operations["RunExperiment"];
   };
-  "/v1/experiment/{experimentId}/run-status": {
-    post: operations["GetExperimentRunStatus"];
-  };
   "/v1/evals/query": {
     post: operations["QueryEvals"];
   };
@@ -324,6 +318,9 @@ export interface paths {
   };
   "/v1/organization/{organizationId}/remove_member": {
     delete: operations["RemoveMemberFromOrganization"];
+  };
+  "/v1/settings/query": {
+    get: operations["GetSettings"];
   };
   "/v1/stripe/subscription/free/usage": {
     get: operations["GetFreeUsage"];
@@ -2033,14 +2030,6 @@ Json: JsonObject;
       error: null;
     };
     "Result_ExperimentRun.string_": components["schemas"]["ResultSuccess_ExperimentRun_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess__status-string__": {
-      data: {
-        status: string;
-      };
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__status-string_.string_": components["schemas"]["ResultSuccess__status-string__"] | components["schemas"]["ResultError_string_"];
     Eval: {
       name: string;
       /** Format: double */
@@ -3102,18 +3091,6 @@ export interface operations {
       };
     };
   };
-  GetSettings: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": {
-            useAzureForExperiment: boolean;
-          };
-        };
-      };
-    };
-  };
   GetRequests: {
     /** @description Request query filters */
     requestBody: {
@@ -3866,21 +3843,6 @@ export interface operations {
       };
     };
   };
-  GetExperimentRunStatus: {
-    parameters: {
-      path: {
-        experimentId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__status-string_.string_"];
-        };
-      };
-    };
-  };
   QueryEvals: {
     requestBody: {
       content: {
@@ -4325,6 +4287,18 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  GetSettings: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            useAzureForExperiment: boolean;
+          };
         };
       };
     };

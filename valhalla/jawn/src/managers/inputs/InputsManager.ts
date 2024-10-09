@@ -18,6 +18,7 @@ import { BaseManager } from "../BaseManager";
 import { S3Client } from "../../lib/shared/db/s3Client";
 import { RequestResponseBodyStore } from "../../lib/stores/request/RequestResponseBodyStore";
 import { randomUUID } from "crypto";
+import { supabaseServer } from "../../lib/db/supabase";
 
 async function fetchImageAsBase64(url: string): Promise<string> {
   try {
@@ -93,6 +94,17 @@ export class InputsManager extends BaseManager {
     sourceRequest?: string
   ): Promise<Result<string, string>> {
     const inputRecordId = randomUUID();
+    const existingPrompt = await supabaseServer.client
+      .from("prompts_versions")
+      .select("*")
+      .eq("id", promptVersionId)
+      .eq("organization", this.authParams.organizationId)
+      .single();
+
+    if (existingPrompt.error || !existingPrompt.data) {
+      return err(existingPrompt.error?.message ?? "Prompt version not found");
+    }
+
     const insertQuery = `
       INSERT INTO prompt_input_record (id, inputs, source_request, prompt_version)
       VALUES ($1, $2, $3, $4)

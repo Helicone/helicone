@@ -1,3 +1,4 @@
+import { ENVIRONMENT } from "../..";
 import { getAllSignedURLsFromInputs } from "../../managers/inputs/InputsManager";
 import { costOfPrompt } from "../../packages/cost";
 import { dbExecute } from "../shared/db/dbExecute";
@@ -362,12 +363,6 @@ export class ExperimentStore extends BaseStore {
     return await ServerExperimentStore.getExperiment(experimentId, include);
   }
 
-  async getExperimentRunStatus(params: {
-    experimentId: string;
-  }): Promise<Result<{ status: string }, string>> {
-    return await getExperimentRunStatus(params);
-  }
-
   async getDatasetRowsByIds(params: {
     datasetRowIds: string[];
     include?: IncludeExperimentKeys;
@@ -466,7 +461,9 @@ export class ExperimentStore extends BaseStore {
           const row = d.row_data;
           row.inputRecord.requestPath =
             row.inputRecord.requestPath === ""
-              ? "http://127.0.0.1:8787/v1/chat/completions"
+              ? ENVIRONMENT === "production"
+                ? "https://oai.helicone.ai/v1/chat/completions"
+                : "http://127.0.0.1:8787/v1/chat/completions"
               : row.inputRecord.requestPath;
           return row;
         })
@@ -494,9 +491,6 @@ export const ServerExperimentStore: {
       string
     >
   >;
-  getExperimentRunStatus: (
-    experimentId: string
-  ) => Promise<Result<{ status: string }, string>>;
 } = {
   experimentPop: async (include?: IncludeExperimentKeys) => {
     const { data: experimentId, error: experimentIdError } =
@@ -555,31 +549,7 @@ export const ServerExperimentStore: {
       }
     );
   },
-  getExperimentRunStatus: async (experimentId: string) => {
-    return await getExperimentRunStatus({ experimentId });
-  },
 };
-
-export async function getExperimentRunStatus(params: {
-  experimentId: string;
-}): Promise<Result<{ status: string }, string>> {
-  const { data, error } = await dbExecute<{ status: string }>(
-    `
-    SELECT status
-    FROM experiment_v2_hypothesis
-    WHERE experiment_v2 = $1
-    `,
-    [params.experimentId]
-  );
-
-  if (error || !data) {
-    return err(error);
-  }
-
-  return ok({
-    status: data[0].status,
-  });
-}
 
 function getExperimentScores(
   experiment: Experiment

@@ -74,7 +74,7 @@ export class ExperimentManager extends BaseManager {
         params.status,
         params.experimentId,
         params.providerKeyId === "NOKEY"
-          ? process.env.HELICONE_DEFAULT_PROVIDER_KEY_ID
+          ? null
           : params.providerKeyId,
       ]
     );
@@ -130,13 +130,5 @@ export class ExperimentManager extends BaseManager {
     }
 
     return ok({ experimentId: experiment.data.id });
-  }
-
-  async getExperimentRunStatus(params: {
-    experimentId: string;
-  }): Promise<Result<{ status: string }, string>> {
-    return this.ExperimentStore.getExperimentRunStatus({
-      experimentId: params.experimentId,
-    });
   }
 }

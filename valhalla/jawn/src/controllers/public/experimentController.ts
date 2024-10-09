@@ -229,9 +229,6 @@ export class ExperimentController extends Controller {
       return err("Hypothesis not found");
     }
 
-    const seen = new Set<string>();
-
-    //TODO: Do not fetch all dataset rows!!!
     const datasetRows = await experimentManager.getDatasetRowsByIds({
       datasetRowIds: requestBody.datasetRowIds,
     });
@@ -255,26 +252,5 @@ export class ExperimentController extends Controller {
     const runResult = await run(experiment);
 
     return runResult;
-  }
-
-  @Post("/{experimentId}/run-status")
-  public async getExperimentRunStatus(
-    @Path() experimentId: string,
-    @Request() request: JawnAuthenticatedRequest
-  ): Promise<Result<{ status: string }, string>> {
-    const experimentManager = new ExperimentManager(request.authParams);
-
-    const result = await experimentManager.getExperimentRunStatus({
-      experimentId,
-    });
-
-    if (result.error || !result.data) {
-      this.setStatus(500);
-      console.error(result.error);
-      return err(result.error);
-    } else {
-      this.setStatus(200);
-      return result;
-    }
   }
 }

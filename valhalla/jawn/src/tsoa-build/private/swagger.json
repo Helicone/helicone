@@ -7,6 +7,69 @@
 		"requestBodies": {},
 		"responses": {},
 		"schemas": {
+			"KafkaSettings": {
+				"properties": {
+					"miniBatchSize": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"miniBatchSize"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"AzureExperiment": {
+				"properties": {
+					"azureBaseUri": {
+						"type": "string"
+					},
+					"azureApiVersion": {
+						"type": "string"
+					},
+					"azureDeploymentName": {
+						"type": "string"
+					},
+					"azureApiKey": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"azureBaseUri",
+					"azureApiVersion",
+					"azureDeploymentName",
+					"azureApiKey"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Setting": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/KafkaSettings"
+					},
+					{
+						"$ref": "#/components/schemas/AzureExperiment"
+					}
+				]
+			},
+			"SettingName": {
+				"type": "string",
+				"enum": [
+					"kafka:dlq",
+					"kafka:log",
+					"kafka:dlq:eu",
+					"kafka:log:eu",
+					"kafka:orgs-to-dlq",
+					"azure:experiment"
+				],
+				"nullable": false
+			},
+			"url.URL": {
+				"type": "string",
+				"description": "The URL interface represents an object providing static methods used for creating object URLs.\n\n[MDN Reference](https://developer.mozilla.org/docs/Web/API/URL)\n`URL` class is a global reference for `require('url').URL`\nhttps://nodejs.org/api/url.html#the-whatwg-url-api"
+			},
 			"Record_string.any_": {
 				"properties": {},
 				"additionalProperties": {},
@@ -900,69 +963,6 @@
 						"$ref": "#/components/schemas/ResultError_string_"
 					}
 				]
-			},
-			"KafkaSettings": {
-				"properties": {
-					"miniBatchSize": {
-						"type": "number",
-						"format": "double"
-					}
-				},
-				"required": [
-					"miniBatchSize"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"AzureExperiment": {
-				"properties": {
-					"azureBaseUri": {
-						"type": "string"
-					},
-					"azureApiVersion": {
-						"type": "string"
-					},
-					"azureDeploymentName": {
-						"type": "string"
-					},
-					"azureApiKey": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"azureBaseUri",
-					"azureApiVersion",
-					"azureDeploymentName",
-					"azureApiKey"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Setting": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/KafkaSettings"
-					},
-					{
-						"$ref": "#/components/schemas/AzureExperiment"
-					}
-				]
-			},
-			"SettingName": {
-				"type": "string",
-				"enum": [
-					"kafka:dlq",
-					"kafka:log",
-					"kafka:dlq:eu",
-					"kafka:log:eu",
-					"kafka:orgs-to-dlq",
-					"azure:experiment"
-				],
-				"nullable": false
-			},
-			"url.URL": {
-				"type": "string",
-				"description": "The URL interface represents an object providing static methods used for creating object URLs.\n\n[MDN Reference](https://developer.mozilla.org/docs/Web/API/URL)\n`URL` class is a global reference for `require('url').URL`\nhttps://nodejs.org/api/url.html#the-whatwg-url-api"
 			},
 			"HeliconeMeta": {
 				"properties": {
@@ -3918,6 +3918,13 @@
 			},
 			"Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits-or-request_response_rmt_": {
 				"properties": {
+					"values": {
+						"properties": {},
+						"additionalProperties": {
+							"$ref": "#/components/schemas/Partial_TextOperators_"
+						},
+						"type": "object"
+					},
 					"response": {
 						"$ref": "#/components/schemas/Partial_ResponseTableToOperators_"
 					},
@@ -3937,13 +3944,6 @@
 						"$ref": "#/components/schemas/Partial_CacheHitsTableToOperators_"
 					},
 					"properties": {
-						"properties": {},
-						"additionalProperties": {
-							"$ref": "#/components/schemas/Partial_TextOperators_"
-						},
-						"type": "object"
-					},
-					"values": {
 						"properties": {},
 						"additionalProperties": {
 							"$ref": "#/components/schemas/Partial_TextOperators_"
@@ -5556,44 +5556,6 @@
 					}
 				]
 			},
-			"ResultSuccess__status-string__": {
-				"properties": {
-					"data": {
-						"properties": {
-							"status": {
-								"type": "string"
-							}
-						},
-						"required": [
-							"status"
-						],
-						"type": "object"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result__status-string_.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess__status-string__"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
 			"Eval": {
 				"properties": {
 					"name": {
@@ -6874,607 +6836,6 @@
 		"contact": {}
 	},
 	"paths": {
-		"/v1/prompt/query": {
-			"post": {
-				"operationId": "GetPrompts",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_PromptsResult-Array.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Prompt"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/PromptsQueryParams"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/v1/prompt/{promptId}/query": {
-			"post": {
-				"operationId": "GetPrompt",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_PromptResult.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Prompt"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "promptId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/PromptQueryParams"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/v1/prompt/{promptId}": {
-			"delete": {
-				"operationId": "DeletePrompt",
-				"responses": {
-					"204": {
-						"description": "No content"
-					}
-				},
-				"tags": [
-					"Prompt"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "promptId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				]
-			}
-		},
-		"/v1/prompt/create": {
-			"post": {
-				"operationId": "CreatePrompt",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_CreatePromptResponse.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Prompt"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"properties": {
-									"metadata": {
-										"$ref": "#/components/schemas/Record_string.any_"
-									},
-									"prompt": {
-										"properties": {
-											"messages": {
-												"items": {},
-												"type": "array"
-											},
-											"model": {
-												"type": "string"
-											}
-										},
-										"required": [
-											"messages",
-											"model"
-										],
-										"type": "object"
-									},
-									"userDefinedId": {
-										"type": "string"
-									}
-								},
-								"required": [
-									"metadata",
-									"prompt",
-									"userDefinedId"
-								],
-								"type": "object"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/v1/prompt/version/{promptVersionId}/subversion": {
-			"post": {
-				"operationId": "CreateSubversion",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_PromptVersionResult.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Prompt"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "promptVersionId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/PromptCreateSubversionParams"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/v1/prompt/version/{promptVersionId}/promote": {
-			"post": {
-				"operationId": "PromotePromptVersionToProduction",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_PromptVersionResult.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Prompt"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "promptVersionId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"properties": {
-									"previousProductionVersionId": {
-										"type": "string"
-									}
-								},
-								"required": [
-									"previousProductionVersionId"
-								],
-								"type": "object"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/v1/prompt/version/{promptVersionId}/inputs/query": {
-			"post": {
-				"operationId": "GetInputs",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_PromptInputRecord-Array.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Prompt"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "promptVersionId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"properties": {
-									"random": {
-										"type": "boolean"
-									},
-									"limit": {
-										"type": "number",
-										"format": "double"
-									}
-								},
-								"required": [
-									"limit"
-								],
-								"type": "object"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/v1/prompt/{promptId}/experiments": {
-			"get": {
-				"operationId": "GetPromptExperiments",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result__id-string--created_at-string--num_hypotheses-number--dataset-string--meta-Record_string.any__-Array.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Prompt"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "promptId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				]
-			}
-		},
-		"/v1/prompt/{promptId}/versions/query": {
-			"post": {
-				"operationId": "GetPromptVersions",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_PromptVersionResult-Array.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Prompt"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "promptId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/PromptVersionsQueryParams"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/v1/prompt/version/{promptVersionId}": {
-			"get": {
-				"operationId": "GetPromptVersion",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_PromptVersionResult.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Prompt"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "promptVersionId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				]
-			},
-			"delete": {
-				"operationId": "DeletePromptVersion",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_null.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Prompt"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "promptVersionId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				]
-			}
-		},
-		"/v1/prompt/{user_defined_id}/compile": {
-			"post": {
-				"operationId": "GetPromptVersionsCompiled",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_PromptVersionResultCompiled.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Prompt"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "user_defined_id",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/PromptVersiosQueryParamsCompiled"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/v1/prompt/{user_defined_id}/template": {
-			"post": {
-				"operationId": "GetPromptVersionTemplates",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_PromptVersionResultFilled.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Prompt"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "user_defined_id",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/PromptVersiosQueryParamsCompiled"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/v1/settings/query": {
-			"get": {
-				"operationId": "GetSettings",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"properties": {
-										"useAzureForExperiment": {
-											"type": "boolean"
-										}
-									},
-									"required": [
-										"useAzureForExperiment"
-									],
-									"type": "object"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Settings"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": []
-			}
-		},
 		"/v1/admin/orgs/top-usage": {
 			"post": {
 				"operationId": "GetTopOrgsByUsage",
@@ -8513,6 +7874,573 @@
 									"id"
 								],
 								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/prompt/query": {
+			"post": {
+				"operationId": "GetPrompts",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_PromptsResult-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Prompt"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/PromptsQueryParams"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/prompt/{promptId}/query": {
+			"post": {
+				"operationId": "GetPrompt",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_PromptResult.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Prompt"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "promptId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/PromptQueryParams"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/prompt/{promptId}": {
+			"delete": {
+				"operationId": "DeletePrompt",
+				"responses": {
+					"204": {
+						"description": "No content"
+					}
+				},
+				"tags": [
+					"Prompt"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "promptId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/prompt/create": {
+			"post": {
+				"operationId": "CreatePrompt",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_CreatePromptResponse.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Prompt"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"metadata": {
+										"$ref": "#/components/schemas/Record_string.any_"
+									},
+									"prompt": {
+										"properties": {
+											"messages": {
+												"items": {},
+												"type": "array"
+											},
+											"model": {
+												"type": "string"
+											}
+										},
+										"required": [
+											"messages",
+											"model"
+										],
+										"type": "object"
+									},
+									"userDefinedId": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"metadata",
+									"prompt",
+									"userDefinedId"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/prompt/version/{promptVersionId}/subversion": {
+			"post": {
+				"operationId": "CreateSubversion",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_PromptVersionResult.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Prompt"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "promptVersionId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/PromptCreateSubversionParams"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/prompt/version/{promptVersionId}/promote": {
+			"post": {
+				"operationId": "PromotePromptVersionToProduction",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_PromptVersionResult.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Prompt"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "promptVersionId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"previousProductionVersionId": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"previousProductionVersionId"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/prompt/version/{promptVersionId}/inputs/query": {
+			"post": {
+				"operationId": "GetInputs",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_PromptInputRecord-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Prompt"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "promptVersionId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"random": {
+										"type": "boolean"
+									},
+									"limit": {
+										"type": "number",
+										"format": "double"
+									}
+								},
+								"required": [
+									"limit"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/prompt/{promptId}/experiments": {
+			"get": {
+				"operationId": "GetPromptExperiments",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__id-string--created_at-string--num_hypotheses-number--dataset-string--meta-Record_string.any__-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Prompt"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "promptId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/prompt/{promptId}/versions/query": {
+			"post": {
+				"operationId": "GetPromptVersions",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_PromptVersionResult-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Prompt"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "promptId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/PromptVersionsQueryParams"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/prompt/version/{promptVersionId}": {
+			"get": {
+				"operationId": "GetPromptVersion",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_PromptVersionResult.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Prompt"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "promptVersionId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"delete": {
+				"operationId": "DeletePromptVersion",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Prompt"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "promptVersionId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/prompt/{user_defined_id}/compile": {
+			"post": {
+				"operationId": "GetPromptVersionsCompiled",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_PromptVersionResultCompiled.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Prompt"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "user_defined_id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/PromptVersiosQueryParamsCompiled"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/prompt/{user_defined_id}/template": {
+			"post": {
+				"operationId": "GetPromptVersionTemplates",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_PromptVersionResultFilled.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Prompt"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "user_defined_id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/PromptVersiosQueryParamsCompiled"
 							}
 						}
 					}
@@ -10825,41 +10753,6 @@
 				}
 			}
 		},
-		"/v1/experiment/{experimentId}/run-status": {
-			"post": {
-				"operationId": "GetExperimentRunStatus",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result__status-string_.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Experiment"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "experimentId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				]
-			}
-		},
 		"/v1/evals/query": {
 			"post": {
 				"operationId": "QueryEvals",
@@ -12549,6 +12442,40 @@
 						}
 					}
 				]
+			}
+		},
+		"/v1/settings/query": {
+			"get": {
+				"operationId": "GetSettings",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"useAzureForExperiment": {
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"useAzureForExperiment"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Settings"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
 			}
 		}
 	},
