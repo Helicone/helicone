@@ -77,7 +77,6 @@ export const HypothesisCellRenderer: React.FC<any> = (params) => {
             prompt={formatPromptForPlayground()}
             selectedInput={data}
             onSubmit={(history, model) => {
-              console.log("Submitted:", history, model);
               setShowPromptPlayground(false);
             }}
             submitText="Save"
@@ -116,8 +115,6 @@ export const OriginalMessagesCellRenderer: React.FC<any> = (params) => {
   const content = data[hypothesisId];
   const parsedData = data.messages;
   const handleCellClick = (e: React.MouseEvent) => {
-    console.log("some", parsedData);
-    console.log("prompt", prompt);
     e.stopPropagation();
     setShowPromptPlayground(true);
   };
@@ -163,7 +160,6 @@ export const OriginalMessagesCellRenderer: React.FC<any> = (params) => {
           prompt={formatPromptForPlayground() || ""}
           selectedInput={data}
           onSubmit={(history, model) => {
-            console.log("Submitted:", history, model);
             setShowPromptPlayground(false);
           }}
           submitText="Save"
@@ -185,8 +181,6 @@ export const OriginalOutputCellRenderer: React.FC<any> = (params) => {
   const content = data[hypothesisId];
   const parsedData = data.messages;
   const handleCellClick = (e: React.MouseEvent) => {
-    console.log("some", content);
-    console.log("prompt", prompt);
     e.stopPropagation();
     setShowPromptPlayground(true);
   };
@@ -237,7 +231,6 @@ export const OriginalOutputCellRenderer: React.FC<any> = (params) => {
           prompt={formatPromptForPlayground() || ""}
           selectedInput={data}
           onSubmit={(history, model) => {
-            console.log("Submitted:", history, model);
             setShowPromptPlayground(false);
           }}
           submitText="Save"

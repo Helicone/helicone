@@ -200,8 +200,6 @@ const AddColumnHeader: React.FC<AddColumnHeaderProps> = ({
                 prompt={promptVersionTemplate?.helicone_template ?? ""}
                 selectedInput={undefined}
                 onSubmit={async (history, model) => {
-                  console.log("Submitted history:", history);
-                  console.log("Selected model:", model);
                   const promptData = {
                     model: model,
                     messages: history.map((msg) => ({

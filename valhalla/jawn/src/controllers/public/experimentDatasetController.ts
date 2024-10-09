@@ -144,8 +144,6 @@ export class ExperimentDatasetController extends Controller {
     @Path() datasetId: string
   ): Promise<Result<string, string>> {
     const datasetManager = new DatasetManager(request.authParams);
-    console.log("datasetId", datasetId);
-    console.log("inputRecordId", requestBody.inputRecordId);
     const datasetRowResult = await datasetManager.addDatasetRow(
       datasetId,
       requestBody.inputRecordId
@@ -170,7 +168,6 @@ export class ExperimentDatasetController extends Controller {
     @Path() datasetId: string,
     @Path() promptVersionId: string
   ): Promise<Result<string, string>> {
-    console.log("requestBody", requestBody);
     const inputManager = new InputsManager(request.authParams);
     const inputRecordResult = await inputManager.createInputRecord(
       promptVersionId,
@@ -196,8 +193,6 @@ export class ExperimentDatasetController extends Controller {
     } else {
       this.setStatus(200);
     }
-
-    console.log("datasetRowResult", datasetRowResult);
 
     return inputRecordResult;
   }

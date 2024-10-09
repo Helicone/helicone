@@ -211,8 +211,6 @@ export class ExperimentController extends Controller {
       }
     );
 
-    console.log("result", JSON.stringify(result));
-
     if (result.error || !result.data) {
       this.setStatus(500);
       console.error(result.error);
@@ -238,7 +236,6 @@ export class ExperimentController extends Controller {
       datasetRowIds: requestBody.datasetRowIds,
     });
 
-    console.log("datasetRows", datasetRows);
 
     if (datasetRows.error || !datasetRows.data) {
       this.setStatus(500);
@@ -255,8 +252,6 @@ export class ExperimentController extends Controller {
     experiment.dataset.rows = datasetRows.data;
     experiment.hypotheses = [hypothesis];
 
-    console.log("experiment", JSON.stringify(experiment));
-
     const runResult = await run(experiment);
 
     return runResult;
@@ -267,13 +262,11 @@ export class ExperimentController extends Controller {
     @Path() experimentId: string,
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<{ status: string }, string>> {
-    console.log("getExperimentRunStatus", experimentId);
     const experimentManager = new ExperimentManager(request.authParams);
 
     const result = await experimentManager.getExperimentRunStatus({
       experimentId,
     });
-    console.log("getExperimentRunStatusResult", result);
 
     if (result.error || !result.data) {
       this.setStatus(500);

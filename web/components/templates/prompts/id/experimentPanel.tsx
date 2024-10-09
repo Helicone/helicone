@@ -28,8 +28,6 @@ const ExperimentPanel = (props: PromptIdPageProps) => {
     },
   });
 
-  console.log("experiments", experiments.data?.data?.data);
-
   return (
     <>
       <div className="flex flex-col w-full space-y-4">
