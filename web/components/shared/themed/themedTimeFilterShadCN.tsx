@@ -234,25 +234,29 @@ export function ThemedTimeFilterShadCN({
               defaultMonth={date?.from}
               selected={date}
               onSelect={(newDate) => {
-                if (newDate?.from && newDate?.to && date?.from && date?.to) {
+                if (newDate?.from || newDate?.to) {
                   const newDateRange = {
-                    from: new Date(
-                      newDate.from.getFullYear(),
-                      newDate.from.getMonth(),
-                      newDate.from.getDate(),
-                      date.from.getHours(),
-                      date.from.getMinutes()
-                    ),
-                    to: new Date(
-                      newDate.to.getFullYear(),
-                      newDate.to.getMonth(),
-                      newDate.to.getDate(),
-                      date.to.getHours(),
-                      date.to.getMinutes()
-                    ),
+                    from: newDate?.from
+                      ? new Date(
+                          newDate.from.getFullYear(),
+                          newDate.from.getMonth(),
+                          newDate.from.getDate(),
+                          date?.from?.getHours() ?? 0,
+                          date?.from?.getMinutes() ?? 0
+                        )
+                      : date?.from,
+                    to: newDate?.to
+                      ? new Date(
+                          newDate.to.getFullYear(),
+                          newDate.to.getMonth(),
+                          newDate.to.getDate(),
+                          date?.to?.getHours() ?? 23,
+                          date?.to?.getMinutes() ?? 59
+                        )
+                      : date?.to,
                   };
 
-                  handleDateChange(newDateRange);
+                  handleDateChange(newDateRange as DateRange);
                 }
               }}
               numberOfMonths={2}
