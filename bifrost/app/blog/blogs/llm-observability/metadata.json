@@ -1,7 +1,7 @@
 {
-  "title": "What is LLM Observability and Monitoring?",
-  "title1": "What is LLM Observability and Monitoring? - Helicone",
-  "title2": "What is LLM Observability and Monitoring? - Helicone",
+  "title": "What is LLM Observability & Monitoring?",
+  "title1": "What is LLM Observability & Monitoring? - Helicone",
+  "title2": "What is LLM Observability & Monitoring? - Helicone",
   "description": "Explore LLM observability and monitoring in production. Learn how it differs from traditional observability, key challenges in LLM systems, and common features of observability tools. Discover insights on ensuring reliability and improving AI applications.",
   "images": "https://www.helicone.ai/static/blog/llm-observability-cover.webp",
   "time": "3 minute read",
