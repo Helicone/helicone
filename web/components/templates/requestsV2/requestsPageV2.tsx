@@ -590,7 +590,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   const columnsWithProperties = [...getInitialColumns(isCached)].concat(
     properties.map((property) => {
       return {
-        id: `${property}`,
+        id: `property-${property}`,
         accessorFn: (row) => {
           const value = row.customProperties
             ? row.customProperties[property]
