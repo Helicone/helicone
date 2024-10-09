@@ -9,6 +9,7 @@ import {
   GridReadyEvent,
   ColumnResizedEvent,
   ColumnMovedEvent,
+  GridApi,
 } from "ag-grid-community";
 import "ag-grid-community/styles/ag-grid.css";
 import { AgGridReact } from "ag-grid-react";
@@ -66,7 +67,7 @@ export function ExperimentTable({
     useState(false);
 
   const experimentTableRef = useRef<HTMLDivElement>(null);
-  const gridRef = useRef<AgGridReact>(null);
+  const gridRef = useRef<GridApi | null>(null);
 
   const onGridReady = useCallback((params: GridReadyEvent) => {
     params.api.sizeColumnsToFit();
@@ -823,7 +824,7 @@ export function ExperimentTable({
           }
         >
           <AgGridReact
-            ref={gridRef}
+            ref={gridRef as any}
             rowData={rowData}
             columnDefs={columnDefs}
             onGridReady={onGridReady}

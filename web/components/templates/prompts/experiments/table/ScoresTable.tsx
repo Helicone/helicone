@@ -191,4 +191,6 @@ const ScoresTable = memo(
   }
 );
 
+ScoresTable.displayName = "ScoresTable";
+
 export default ScoresTable;
