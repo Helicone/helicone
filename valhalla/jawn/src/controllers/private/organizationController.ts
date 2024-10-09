@@ -117,19 +117,37 @@ export class OrganizationController extends Controller {
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<null, string>> {
     const organizationManager = new OrganizationManager(request.authParams);
-    const memberCount = await organizationManager.getMemberCount(true);
-    if (memberCount.error || !memberCount.data) {
-      return err(memberCount.error ?? "Error getting member count");
+    const org = await organizationManager.getOrg();
+    if (org.error || !org.data) {
+      return err(`Error getting organization: ${org.error}`);
     }
 
-    const stripeManager = new StripeManager(request.authParams);
+    if (org.data.tier === "enterprise") {
+      // Enterprise tier: Proceed to add member without additional checks
+    } else if (org.data.tier === "pro-20240913") {
+      // Pro tier: Update Stripe user count before adding member
+      const memberCount = await organizationManager.getMemberCount(true);
+      if (
+        memberCount.error ||
+        memberCount.data == null ||
+        memberCount.data < 0
+      ) {
+        return err(memberCount.error ?? "Error getting member count");
+      }
 
-    const userCount = await stripeManager.updateProUserCount(
-      memberCount.data + 1
-    );
+      const stripeManager = new StripeManager(request.authParams);
 
-    if (userCount.error) {
-      return err(userCount.error ?? "Error updating pro user count");
+      const userCount = await stripeManager.updateProUserCount(
+        memberCount.data + 1
+      );
+
+      if (userCount.error) {
+        return err(userCount.error ?? "Error updating pro user count");
+      }
+    } else {
+      return err(
+        "Your current tier does not allow adding members. Please upgrade to Pro to add members."
+      );
     }
 
     const result = await organizationManager.addMember(
@@ -306,17 +324,17 @@ export class OrganizationController extends Controller {
     const organizationManager = new OrganizationManager(request.authParams);
 
     const memberCount = await organizationManager.getMemberCount(true);
-    if (memberCount.error || !memberCount.data) {
+    if (memberCount.error || memberCount.data == null || memberCount.data < 0) {
       return err(memberCount.error ?? "Error getting member count");
     }
 
-    const userCount = await stripeManager.updateProUserCount(
-      memberCount.data - 1
-    );
+    // const userCount = await stripeManager.updateProUserCount(
+    //   memberCount.data - 1
+    // );
 
-    if (userCount.error) {
-      return err(userCount.error ?? "Error updating pro user count");
-    }
+    // if (userCount.error) {
+    //   return err(userCount.error ?? "Error updating pro user count");
+    // }
 
     const result = await organizationManager.removeOrganizationMember(
       organizationId,

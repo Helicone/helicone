@@ -20,11 +20,12 @@ import { useRouter } from "next/router";
 import { useCallback, useMemo, useState } from "react";
 import { clsx } from "../shared/clsx";
 import AddMemberModal from "../templates/organization/addMemberModal";
-import CreateOrgForm, {
+import CreateOrgForm from "../templates/organization/createOrgForm";
+import { useOrg } from "./organizationContext";
+import {
   ORGANIZATION_COLORS,
   ORGANIZATION_ICONS,
-} from "../templates/organization/createOrgForm";
-import { useOrg } from "./organizationContext";
+} from "../templates/organization/orgConstants";
 
 interface OrgDropdownProps {}
 

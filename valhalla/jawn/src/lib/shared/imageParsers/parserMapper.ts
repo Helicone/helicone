@@ -3,6 +3,7 @@ import { GptVisionImageParser } from "./gptVisionImageParser";
 import { ImageModelRequestBodyParser } from "./core/modelRequestBodyParser";
 import { DalleImageParser } from "./dalleImageParser";
 import { ImageModelResponseBodyParser } from "./core/modelResponseBodyParser";
+import { FluxImageParser } from "./fluxImageParser";
 
 export function getRequestImageModelParser(
   modelName: string,
@@ -34,6 +35,8 @@ export function getResponseImageModelParser(
     case "dall-e-3":
     case "dall-e-2":
       return new DalleImageParser(modelName, responseId);
+    case "black-forest-labs/FLUX.1-schnell":
+      return new FluxImageParser(modelName, responseId);
     default:
       return null;
   }

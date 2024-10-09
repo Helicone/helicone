@@ -3,6 +3,7 @@ import { Col } from "@/components/common/col";
 import { Row } from "@/components/common/row";
 import { CheckIcon } from "@heroicons/react/24/outline";
 import { FeatureItem } from "./FeaturedItem";
+import Link from "next/link";
 
 const EnterpriseCard: React.FC = () => {
   return (
@@ -26,13 +27,16 @@ const EnterpriseCard: React.FC = () => {
           </Col>
         </Col>
         <Col className="gap-[16px]">
-          <FeatureItem title="Training and Optimization" />
           <FeatureItem title="SOC-2 Compliance" />
-          <FeatureItem title="Dedicated support" />
+          <FeatureItem title="SSO (Single Sign-On)" />
+          <FeatureItem title="Dedicated SLAs" />
         </Col>
-        <button className="bg-[#FFFFFF] text-slate-900 py-[12px] border border-slate-200 rounded-[4px] mt-[8px] text-[16px]">
+        <Link
+          href="/contact"
+          className="bg-[#FFFFFF] text-slate-900 py-[12px] border border-slate-200 rounded-[4px] mt-[8px] text-[16px] text-center"
+        >
           Contact sales
-        </button>
+        </Link>
       </Col>
     </Card>
   );

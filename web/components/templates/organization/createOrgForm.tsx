@@ -1,117 +1,16 @@
 import { RadioGroup } from "@headlessui/react";
-import {
-  BuildingOfficeIcon,
-  CakeIcon,
-  CloudIcon,
-  CommandLineIcon,
-  RocketLaunchIcon,
-  CpuChipIcon,
-  ScaleIcon,
-  Square3Stack3DIcon,
-} from "@heroicons/react/24/outline";
-import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
+
+import { useUser } from "@supabase/auth-helpers-react";
 import { useState } from "react";
+import { getJawnClient } from "../../../lib/clients/jawn";
 import { DEMO_EMAIL } from "../../../lib/constants";
-import { Database } from "../../../supabase/database.types";
-import { clsx } from "../../shared/clsx";
 import { useOrg } from "../../layout/organizationContext";
+import { clsx } from "../../shared/clsx";
 import useNotification from "../../shared/notification/useNotification";
 import ProviderKeyList from "../enterprise/portal/id/providerKeyList";
 import CreateProviderKeyModal from "../vault/createProviderKeyModal";
 import { useVaultPage } from "../vault/useVaultPage";
-import { getJawnClient } from "../../../lib/clients/jawn";
-
-export const ORGANIZATION_COLORS = [
-  {
-    name: "gray",
-    bgColor: "bg-gray-200",
-    textColor: "text-gray-800",
-    selectedColor: "ring-gray-500",
-  },
-  {
-    name: "red",
-    bgColor: "bg-red-300",
-    textColor: "text-red-800",
-    selectedColor: "ring-red-500",
-  },
-  {
-    name: "yellow",
-    bgColor: "bg-yellow-200",
-    textColor: "text-yellow-800",
-    selectedColor: "ring-yellow-500",
-  },
-  {
-    name: "green",
-    bgColor: "bg-green-300",
-    textColor: "text-green-800",
-    selectedColor: "ring-green-500",
-  },
-  {
-    name: "blue",
-    bgColor: "bg-blue-300",
-    textColor: "text-blue-800",
-    selectedColor: "ring-blue-500",
-  },
-  {
-    name: "purple",
-    bgColor: "bg-purple-300",
-    textColor: "text-purple-800",
-    selectedColor: "ring-purple-500",
-  },
-];
-
-type OrgIconType = {
-  name:
-    | "building"
-    | "cake"
-    | "cloud"
-    | "rocket"
-    | "code"
-    | "chip"
-    | "scale"
-    | "stack";
-  icon: React.ForwardRefExoticComponent<
-    React.SVGProps<SVGSVGElement> & {
-      title?: string | undefined;
-      titleId?: string | undefined;
-    }
-  >;
-};
-
-export const ORGANIZATION_ICONS: OrgIconType[] = [
-  {
-    name: "building",
-    icon: BuildingOfficeIcon,
-  },
-  {
-    name: "cake",
-    icon: CakeIcon,
-  },
-  {
-    name: "cloud",
-    icon: CloudIcon,
-  },
-  {
-    name: "rocket",
-    icon: RocketLaunchIcon,
-  },
-  {
-    name: "code",
-    icon: CommandLineIcon,
-  },
-  {
-    name: "chip",
-    icon: CpuChipIcon,
-  },
-  {
-    name: "scale",
-    icon: ScaleIcon,
-  },
-  {
-    name: "stack",
-    icon: Square3Stack3DIcon,
-  },
-];
+import { ORGANIZATION_COLORS, ORGANIZATION_ICONS } from "./orgConstants";
 
 interface CreateOrgFormProps {
   variant?: "organization" | "reseller";
@@ -170,13 +69,12 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
   const user = useUser();
   const orgContext = useOrg();
   const { setNotification } = useNotification();
-  const supabaseClient = useSupabaseClient<Database>();
   const [providerKey, setProviderKey] = useState(
     initialValues?.providerKey || ""
   );
 
   const { providerKeys, refetchProviderKeys } = useVaultPage();
-  const [deleteOpen, setDeleteOpen] = useState(false);
+
   const [isProviderOpen, setIsProviderOpen] = useState(false);
 
   return (
@@ -251,7 +149,7 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
           <RadioGroup.Label className="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
             Choose an icon
           </RadioGroup.Label>
-          <div className="mt-4 flex items-center justify-between px-8">
+          <div className="mt-4 grid grid-cols-5 gap-4">
             {ORGANIZATION_ICONS.map((icon) => (
               <RadioGroup.Option
                 key={icon.name}
@@ -261,7 +159,7 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
                     checked
                       ? "ring-2 ring-offset-1 ring-sky-300 dark:ring-sky-700"
                       : "ring-1 ring-gray-200 dark:ring-gray-800",
-                    "bg-white dark:bg-black rounded-md p-2"
+                    "bg-white dark:bg-black rounded-md p-2 flex items-center justify-center"
                   )
                 }
               >

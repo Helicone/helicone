@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Col } from "@/components/common/col";
 import { Row } from "@/components/common/row";
+import Link from "next/link";
 
 const ScaleCard = () => {
   return (
@@ -14,7 +15,11 @@ const ScaleCard = () => {
         </Col>
         <Row className="w-full h-[72px] px-[24px] items-center justify-between border-t">
           <span>Scale</span>
-          <Button className="bg-brand text-white">Upgrade now</Button>
+          <Button className="bg-brand text-white" asChild>
+            <Link href="https://us.helicone.ai/settings/billing">
+              Upgrade now
+            </Link>
+          </Button>
         </Row>
       </Col>
     </div>

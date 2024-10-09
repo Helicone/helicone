@@ -14,8 +14,10 @@ export default function DraggableColumnHeader<T>(props: {
         isCustomProperty: boolean;
       }
     | undefined;
+  index: number;
+  totalColumns: number;
 }) {
-  const { header, sortable } = props;
+  const { header, sortable, index, totalColumns } = props;
   const router = useRouter();
 
   const meta = header.column.columnDef?.meta as any;
@@ -29,9 +31,13 @@ export default function DraggableColumnHeader<T>(props: {
           width: header.getSize(),
         },
       }}
-      className="text-left py-2 font-semibold text-gray-900 dark:text-gray-100 relative"
+      className={clsx(
+        "text-left py-2 font-semibold text-gray-900 dark:text-gray-100 relative px-2",
+        index === 0 && "pl-10",
+        index === totalColumns - 1 && "pr-10"
+      )}
     >
-      <div className="flex flex-row items-center gap-0.5">
+      <div className="flex flex-row items-center justify-between">
         <button className="flex flex-row items-center py-1 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 rounded-lg">
           <span className="text-gray-900 dark:text-gray-100">
             {header.isPlaceholder
@@ -48,12 +54,12 @@ export default function DraggableColumnHeader<T>(props: {
                   {meta.sortKey === sortable.sortKey ? (
                     sortable.sortDirection === "asc" ? (
                       <BarsArrowUpIcon
-                        className="h-4 w-4 text-sky-500"
+                        className="h-3 w-3 text-sky-500"
                         aria-hidden="true"
                       />
                     ) : (
                       <BarsArrowDownIcon
-                        className="h-4 w-4 text-sky-500"
+                        className="h-3 w-3 text-sky-500"
                         aria-hidden="true"
                       />
                     )
@@ -91,7 +97,7 @@ export default function DraggableColumnHeader<T>(props: {
                           }}
                         >
                           <BarsArrowUpIcon
-                            className="h-4 w-4"
+                            className="h-3 w-3"
                             aria-hidden="true"
                           />
                           ASC
@@ -132,7 +138,7 @@ export default function DraggableColumnHeader<T>(props: {
         onClick={() => header.column.getToggleSortingHandler()}
         className={clsx(
           header.column.getCanSort() ? "cursor-pointer select-none" : "",
-          "resizer pl-4 pr-2 mr-4 w-4"
+          "resizer absolute right-0 top-0 h-full w-4 cursor-col-resize"
         )}
         {...{
           onMouseDown: header.getResizeHandler(),

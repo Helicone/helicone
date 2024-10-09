@@ -2,11 +2,7 @@ import {
   useGetOrg,
   useGetOrgMembers,
 } from "../../../../../services/hooks/organizations";
-import {
-  ORGANIZATION_COLORS,
-  ORGANIZATION_ICONS,
-  OrgLimits,
-} from "../../../organization/createOrgForm";
+import { OrgLimits } from "../../../organization/createOrgForm";
 import { getUSDateFromString } from "../../../../shared/utils/utils";
 import { clsx } from "../../../../shared/clsx";
 import OrgMembersPage from "../../../organization/members/orgMembersPage";
@@ -29,6 +25,10 @@ import HcBreadcrumb from "../../../../ui/hcBreadcrumb";
 import { formatISO } from "date-fns";
 import { useRequestsOverTime } from "../../../organization/plan/renderOrgPlan";
 import StyledAreaChart from "../../../dashboard/styledAreaChart";
+import {
+  ORGANIZATION_COLORS,
+  ORGANIZATION_ICONS,
+} from "@/components/templates/organization/orgConstants";
 
 interface PortalIdPageProps {
   orgId: string | null;

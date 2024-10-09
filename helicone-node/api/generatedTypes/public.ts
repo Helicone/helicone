@@ -9,6 +9,9 @@ interface JsonObject { [key: string]: JsonValue; }
 
 
 export interface paths {
+  "/v1/public/waitlist/experiments": {
+    post: operations["AddToWaitlist"];
+  };
   "/v1/vault/add": {
     post: operations["AddKey"];
   };
@@ -356,6 +359,16 @@ export type webhooks = Record<string, never>;
 
 export interface components {
   schemas: {
+    ResultSuccess_unknown_: {
+      data: unknown;
+      /** @enum {number|null} */
+      error: null;
+    };
+    ResultError_any_: {
+      /** @enum {number|null} */
+      data: null;
+      error: unknown;
+    };
     "ResultSuccess__id-string__": {
       data: {
         id: string;
@@ -586,6 +599,7 @@ export interface components {
       scores?: {
         [key: string]: components["schemas"]["Partial_TextOperators_"];
       };
+      scores_column?: components["schemas"]["Partial_TextOperators_"];
       request_body?: components["schemas"]["Partial_VectorOperators_"];
       response_body?: components["schemas"]["Partial_VectorOperators_"];
     };
@@ -1573,12 +1587,20 @@ export interface components {
     };
     "Result_HeliconeRequest-Array.string_": components["schemas"]["ResultSuccess_HeliconeRequest-Array_"] | components["schemas"]["ResultError_string_"];
     /** @description Make all properties in T optional */
-    Partial_ResponseTableToOperators_: {
-      body_tokens?: components["schemas"]["Partial_NumberOperators_"];
-      body_model?: components["schemas"]["Partial_TextOperators_"];
-      body_completion?: components["schemas"]["Partial_TextOperators_"];
-      status?: components["schemas"]["Partial_NumberOperators_"];
-      model?: components["schemas"]["Partial_TextOperators_"];
+    Partial_CacheHitsTableToOperators_: {
+      organization_id?: components["schemas"]["Partial_TextOperators_"];
+      request_id?: components["schemas"]["Partial_TextOperators_"];
+      latency?: components["schemas"]["Partial_NumberOperators_"];
+      completion_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      prompt_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_FeedbackTableToOperators_: {
+      id?: components["schemas"]["Partial_NumberOperators_"];
+      created_at?: components["schemas"]["Partial_TimestampOperators_"];
+      rating?: components["schemas"]["Partial_BooleanOperators_"];
+      response_id?: components["schemas"]["Partial_TextOperators_"];
     };
     /** @description Make all properties in T optional */
     Partial_RequestTableToOperators_: {
@@ -1595,37 +1617,29 @@ export interface components {
       prompt_id?: components["schemas"]["Partial_TextOperators_"];
     };
     /** @description Make all properties in T optional */
-    Partial_FeedbackTableToOperators_: {
-      id?: components["schemas"]["Partial_NumberOperators_"];
-      created_at?: components["schemas"]["Partial_TimestampOperators_"];
-      rating?: components["schemas"]["Partial_BooleanOperators_"];
-      response_id?: components["schemas"]["Partial_TextOperators_"];
-    };
-    /** @description Make all properties in T optional */
     Partial_RequestResponseSearchToOperators_: {
       request_body_vector?: components["schemas"]["Partial_VectorOperators_"];
       response_body_vector?: components["schemas"]["Partial_VectorOperators_"];
     };
     /** @description Make all properties in T optional */
-    Partial_CacheHitsTableToOperators_: {
-      organization_id?: components["schemas"]["Partial_TextOperators_"];
-      request_id?: components["schemas"]["Partial_TextOperators_"];
-      latency?: components["schemas"]["Partial_NumberOperators_"];
-      completion_tokens?: components["schemas"]["Partial_NumberOperators_"];
-      prompt_tokens?: components["schemas"]["Partial_NumberOperators_"];
-      created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
+    Partial_ResponseTableToOperators_: {
+      body_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      body_model?: components["schemas"]["Partial_TextOperators_"];
+      body_completion?: components["schemas"]["Partial_TextOperators_"];
+      status?: components["schemas"]["Partial_NumberOperators_"];
+      model?: components["schemas"]["Partial_TextOperators_"];
     };
     /** @description From T, pick a set of properties whose keys are in the union K */
     "Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits-or-request_response_rmt_": {
-      request_response_rmt?: components["schemas"]["Partial_RequestResponseRMTToOperators_"];
-      response?: components["schemas"]["Partial_ResponseTableToOperators_"];
-      request?: components["schemas"]["Partial_RequestTableToOperators_"];
-      feedback?: components["schemas"]["Partial_FeedbackTableToOperators_"];
-      request_response_search?: components["schemas"]["Partial_RequestResponseSearchToOperators_"];
       cache_hits?: components["schemas"]["Partial_CacheHitsTableToOperators_"];
+      feedback?: components["schemas"]["Partial_FeedbackTableToOperators_"];
       properties?: {
         [key: string]: components["schemas"]["Partial_TextOperators_"];
       };
+      request?: components["schemas"]["Partial_RequestTableToOperators_"];
+      request_response_search?: components["schemas"]["Partial_RequestResponseSearchToOperators_"];
+      response?: components["schemas"]["Partial_ResponseTableToOperators_"];
+      request_response_rmt?: components["schemas"]["Partial_RequestResponseRMTToOperators_"];
       values?: {
         [key: string]: components["schemas"]["Partial_TextOperators_"];
       };
@@ -1759,8 +1773,8 @@ Json: JsonObject;
     };
     /** @description From T, pick a set of properties whose keys are in the union K */
     "Pick_FilterLeaf.request-or-prompts_versions_": {
-      request?: components["schemas"]["Partial_RequestTableToOperators_"];
       prompts_versions?: components["schemas"]["Partial_PromptVersionsToOperators_"];
+      request?: components["schemas"]["Partial_RequestTableToOperators_"];
     };
     "FilterLeafSubset_request-or-prompts_versions_": components["schemas"]["Pick_FilterLeaf.request-or-prompts_versions_"];
     DatasetFilterNode: components["schemas"]["FilterLeafSubset_request-or-prompts_versions_"] | components["schemas"]["DatasetFilterBranch"] | "all";
@@ -1845,15 +1859,15 @@ Json: JsonObject;
       error: null;
     };
     "Result_HeliconeDataset-Array.string_": components["schemas"]["ResultSuccess_HeliconeDataset-Array_"] | components["schemas"]["ResultError_string_"];
-    ResultSuccess_any_: {
-      data: unknown;
-      /** @enum {number|null} */
-      error: null;
-    };
     ResultError_unknown_: {
       /** @enum {number|null} */
       data: null;
       error: unknown;
+    };
+    ResultSuccess_any_: {
+      data: unknown;
+      /** @enum {number|null} */
+      error: null;
     };
     "ResultSuccess__experimentId-string__": {
       data: {
@@ -1863,11 +1877,6 @@ Json: JsonObject;
       error: null;
     };
     "Result__experimentId-string_.string_": components["schemas"]["ResultSuccess__experimentId-string__"] | components["schemas"]["ResultError_string_"];
-    ResultSuccess_unknown_: {
-      data: unknown;
-      /** @enum {number|null} */
-      error: null;
-    };
     /**
      * @description Error format
      *
@@ -2331,6 +2340,23 @@ export type external = Record<string, never>;
 
 export interface operations {
 
+  AddToWaitlist: {
+    requestBody: {
+      content: {
+        "application/json": {
+          email: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ResultSuccess_unknown_"] | components["schemas"]["ResultError_any_"];
+        };
+      };
+    };
+  };
   AddKey: {
     requestBody: {
       content: {
@@ -3677,7 +3703,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["ResultSuccess_any_"] | components["schemas"]["ResultError_unknown_"];
+          "application/json": components["schemas"]["ResultError_unknown_"] | components["schemas"]["ResultSuccess_any_"];
         };
       };
     };
@@ -4344,6 +4370,8 @@ export interface operations {
             subtotal: number;
             discount: ({
               coupon: {
+                /** Format: double */
+                amount_off: number | null;
                 /** Format: double */
                 percent_off: number | null;
                 name: string | null;

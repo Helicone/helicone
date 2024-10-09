@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import { useContext, createContext, ReactNode } from "react";
 import { Database } from "../../supabase/database.types";
 import { useOrgsContextManager } from "../../services/hooks/organizations";
 
@@ -15,13 +15,9 @@ export interface OrgContextValue {
   isResellerOfCurrentCustomerOrg: boolean;
 }
 
-const OrgContext = React.createContext<OrgContextValue | null>(null);
+const OrgContext = createContext<OrgContextValue | null>(null);
 
-export const OrgContextProvider = ({
-  children,
-}: {
-  children: React.ReactNode;
-}) => {
+export const OrgContextProvider = ({ children }: { children: ReactNode }) => {
   const orgContextValue = useOrgsContextManager();
   return (
     <OrgContext.Provider value={orgContextValue}>

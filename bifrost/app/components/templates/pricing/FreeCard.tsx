@@ -3,6 +3,7 @@ import { Col } from "@/components/common/col";
 import { Row } from "@/components/common/row";
 import { CheckIcon } from "@heroicons/react/24/outline";
 import { FeatureItem } from "./FeaturedItem";
+import Link from "next/link";
 
 const FreeCard: React.FC = () => {
   return (
@@ -23,20 +24,23 @@ const FreeCard: React.FC = () => {
         <Col className="gap-[16px] ">
           <FeatureItem
             title="Generous free monthly tier"
-            description="10k free requests/month."
+            description="10k free requests per month."
           />
           <FeatureItem
-            title="Access to Dashboard"
-            description="Watch your AI app improve."
+            title="Access to Requests & Dashboard"
+            description="Trace and monitor your app's performance."
           />
           <FeatureItem
-            title="Free, truly."
+            title="Free forever"
             description="No credit card required."
           />
         </Col>
-        <button className="bg-[#FFFFFF] text-slate-900 py-[12px] border border-slate-200 rounded-[4px] mt-[8px] text-[16px]">
+        <Link
+          className="bg-[#FFFFFF] text-slate-900 py-[12px] border border-slate-200 rounded-[4px] mt-[8px] text-[16px] text-center"
+          href="https://us.helicone.ai/signin"
+        >
           Get started
-        </button>
+        </Link>
       </Col>
     </Card>
   );

@@ -14,6 +14,7 @@ import { LlmType } from "../../../../lib/api/models/requestResponseModel";
 import ChatBuilder from "./chatBuilder";
 import { DalleBuilder } from "./dalleBuilder";
 import OpenAIAssistantBuilder from "./OpenAIAssistantBuilder";
+import { FluxBuilder } from "./fluxBuilder";
 
 export type BuilderType =
   | "ChatBuilder"
@@ -27,6 +28,7 @@ export type BuilderType =
   | "ClaudeBuilder"
   | "CustomBuilder"
   | "DalleBuilder"
+  | "FluxBuilder"
   | "UnknownBuilder";
 
 export const getBuilderType = (
@@ -62,6 +64,10 @@ export const getBuilderType = (
 
   if (provider === "GROQ") {
     return "ChatGPTBuilder";
+  }
+
+  if (model == "black-forest-labs/FLUX.1-schnell") {
+    return "FluxBuilder";
   }
 
   if (
@@ -138,6 +144,7 @@ const builders: {
   ClaudeBuilder: ClaudeBuilder,
   CustomBuilder: CustomBuilder,
   DalleBuilder: DalleBuilder,
+  FluxBuilder: FluxBuilder,
   UnknownBuilder: UnknownBuilder,
   OpenAIAssistantBuilder: OpenAIAssistantBuilder,
 };

@@ -36,6 +36,7 @@ import { TimeFilter } from "../../templates/dashboard/dashboardPage";
 import FiltersButton from "./table/filtersButton";
 import { OrganizationFilter } from "../../../services/lib/organization_layout/organization_layout";
 import { UIFilterRowTree } from "../../../services/lib/filters/uiFilterRowTree";
+import { Button } from "@/components/ui/button";
 
 export function escapeCSVString(s: string | undefined): string | undefined {
   if (s === undefined) {
@@ -118,7 +119,7 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
         <h2 id="filter-heading" className="sr-only">
           Filters
         </h2>
-        <div className="flex flex-col lg:flex-row items-start gap-4 lg:gap-2 justify-between lg:items-center">
+        <div className="flex flex-col lg:flex-row items-start gap-4 lg:gap-2 lg:items-center">
           <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-2 sm:items-center">
             {timeFilter && (
               <ThemedTimeFilter
@@ -137,24 +138,21 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
             <div className="flex flex-wrap space-x-2 items-center">
               {advancedFilter && (
                 <>
-                  <div className="mx-auto flex text-sm">
-                    <button
+                  {advancedFilter && (
+                    <Button
                       onClick={() =>
                         setShowAdvancedFilters(!showAdvancedFilters)
                       }
-                      className="border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 bg-white hover:bg-sky-50 dark:bg-black dark:hover:bg-sky-900 flex flex-row items-center gap-2"
+                      variant="ghostLinear"
+                      className="gap-2"
+                      size="sm_sleek"
                     >
-                      <FunnelIcon
-                        className="h-5 w-5 text-gray-900 dark:text-gray-100"
-                        aria-hidden="true"
-                      />
-                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100 hidden sm:block">
-                        {showAdvancedFilters ? "Hide Filters" : "Show Filters"}{" "}
-                        {advencedFiltersLength > 0 &&
-                          `(${advencedFiltersLength})`}
-                      </p>
-                    </button>
-                  </div>
+                      <FunnelIcon className="h-[13px] w-[13px] text-slate-500" />
+                      <span className="hidden sm:inline text-slate-700 dark:text-slate-300 font-normal text-[13px]">
+                        {showAdvancedFilters ? "Hide" : ""} Filters
+                      </span>
+                    </Button>
+                  )}
                   {savedFilters && (
                     <>
                       <div className="mx-auto flex text-sm">

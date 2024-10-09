@@ -46,11 +46,24 @@ const SessionContent: React.FC<SessionContentProps> = ({
   session_id,
   requests,
 }) => {
-  const [selectedRequestId, setSelectedRequestId] = useState<string>("");
-
   const router = useRouter();
+  const { view, requestId } = router.query;
 
-  const { view } = router.query;
+  const [selectedRequestId, setSelectedRequestId] = useState<string>(
+    (requestId as string) || ""
+  );
+
+  const handleRequestIdChange = (newRequestId: string) => {
+    setSelectedRequestId(newRequestId);
+    router.push(
+      {
+        pathname: router.pathname,
+        query: { ...router.query, requestId: newRequestId },
+      },
+      undefined,
+      { shallow: true }
+    );
+  };
 
   const [currentTopView, setCurrentTopView] = useLocalStorage(
     "currentTopView",
@@ -109,7 +122,7 @@ const SessionContent: React.FC<SessionContentProps> = ({
             session={session}
             selectedRequestIdDispatch={[
               selectedRequestId,
-              setSelectedRequestId,
+              handleRequestIdChange,
             ]}
           />
         </div>
@@ -119,8 +132,9 @@ const SessionContent: React.FC<SessionContentProps> = ({
         <TreeView
           session={session}
           selectedRequestId={selectedRequestId}
-          setSelectedRequestId={setSelectedRequestId}
+          setSelectedRequestId={handleRequestIdChange}
           requests={requests}
+          showSpan={false}
         />
       )}
 
@@ -137,7 +151,7 @@ const SessionContent: React.FC<SessionContentProps> = ({
           )
         }
         open={selectedRequestId !== "" && currentTopView === "span"}
-        setOpen={(open) => setSelectedRequestId("")}
+        setOpen={(open) => handleRequestIdChange("")}
         properties={[]}
       />
     </Col>

@@ -1,0 +1,21 @@
+We are thrilled to announce the addition of two essential npm packages: `@helicone/async` and `@helicone/helpers`. Additionally, we are also deprecating the `@helicone/helicone` package.
+
+### Why These Changes?
+
+- **Optimized Package Size:** The previous `@helicone/helicone` was wrapped around OpenAI, resulting in a bulky package size.
+- **Enhanced Function Utilization:** Many functions within the old package were unused and outdated. The new approach ensures that only necessary functions are included and are up to date.
+
+### Detailed Changes
+
+- **Deprecated `@helicone/helicone`:**
+  - This package is officially deprecated and will no longer receive updates.
+  - Existing functions within this package will continue to operate as expected to ensure a smooth transition.
+
+- **Added `@helicone/async`:**
+  - **HeliconeAsyncLogger Class:** Previously part of `@helicone/helicone`, this class is now housed within `@helicone/async`. It retains all existing functionalities, offering robust asynchronous logging capabilities.
+
+- **Added `@helicone/helpers`:**
+  - **HeliconeManualLogger Class:** Moved from `@helicone/helicone` to `@helicone/helpers`, this class now adopts a more functional approach. Visit the [docs](https://docs.helicone.ai/getting-started/integration-method/custom) to learn more.
+  - **Enhanced Features:**
+    - **[Vector Database Support](https://docs.helicone.ai/integrations/vectordb/javascript):** Added request logging support for vector databases.
+    - **[External Tools](https://docs.helicone.ai/integrations/tools/javascript):** You can also log your external tool calls.

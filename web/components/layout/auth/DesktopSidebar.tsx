@@ -135,12 +135,12 @@ const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
       <div
         ref={sidebarRef}
         className={cn(
-          "hidden md:flex md:flex-col z-30 bg-background dark:bg-gray-900 transition-all duration-300 h-screen bg-white pb-4",
+          "hidden md:flex md:flex-col z-30 bg-background dark:bg-gray-900 transition-all duration-300 h-screen bg-white ",
           largeWith,
           "fixed top-0 left-0"
         )}
       >
-        <div className="w-full flex flex-grow flex-col overflow-y-auto border-r dark:border-gray-700 justify-between">
+        <div className="w-full flex flex-grow flex-col overflow-y-auto border-r  dark:border-gray-700 justify-between pb-4">
           <div className="flex items-center gap-2 h-14 border-b dark:border-gray-700">
             <div className="flex items-center gap-2 w-full">
               {!isCollapsed && <OrgDropdown />}
@@ -169,7 +169,8 @@ const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
               <div className="flex w-full justify-center px-5 py-2">
                 <Button
                   variant="outline"
-                  className="w-full"
+                  className="w-full  dark:text-slate-400"
+                  size="sm_sleek"
                   onClick={() => {
                     router.push("/enterprise/portal");
                     if (
@@ -186,7 +187,6 @@ const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
                 </Button>
               </div>
             )}
-
             <div
               ref={navItemsRef}
               data-collapsed={isCollapsed}
@@ -206,6 +206,24 @@ const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
               </nav>
             </div>
           </div>
+
+          {tier !== "growth" &&
+            tier !== "pro" &&
+            canShowInfoBox &&
+            !isCollapsed && (
+              <div className="bg-sky-500/10 rounded-lg border-l-4 border-l-sky-500 border-y border-r border-y-sky-200 border-r-sky-200 text-sky-500 flex flex-col md:flex-row md:gap-2 gap-4 justify-between md:justify-center md:items-center items-start p-2 mt-2 mx-2 mb-8">
+                <h1 className="text-xs text-start font-medium tracking-tight leading-tight">
+                  🎉 Introducing a new way to perfect your prompts.{" "}
+                  <Link
+                    href="https://helicone.ai/experiments"
+                    target="_blank"
+                    className="underline decoration-sky-400 decoration-1 underline-offset-2 font-semibold"
+                  >
+                    Get early access here.
+                  </Link>{" "}
+                </h1>
+              </div>
+            )}
           {canShowInfoBox && !isCollapsed && shouldShowInfoBox && (
             <div className="p-2">
               <InfoBox icon={() => <></>} className="flex flex-col">
