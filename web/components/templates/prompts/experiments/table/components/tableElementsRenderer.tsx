@@ -20,7 +20,9 @@ const InputCellRenderer: React.FC<any> = (props) => {
   const [inputValue, setInputValue] = useState(props.value || "");
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const isEmptyTable = props.context.rowData?.length === 1;
+  const isEmptyTable =
+    props.context.rowData?.length === 0 ||
+    !props.context.rowData?.some((row: any) => row.dataset_row_id);
 
   // Determine the display value
   const displayValue = inputValue || "Click to add input";
