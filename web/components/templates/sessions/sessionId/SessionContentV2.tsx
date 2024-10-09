@@ -78,6 +78,12 @@ const SessionContentV2: React.FC<SessionContentV2Props> = ({
     return dates.sort((a, b) => b.getTime() - a.getTime())?.[0] ?? undefined;
   }, [requests.requests.requests]);
 
+  const requestWithFeedback = useMemo(() => {
+    return requests.requests.requests?.find(
+      (r) => r.properties["Helicone-Session-Feedback"]
+    );
+  }, [requests.requests.requests]);
+
   const [showSpan, setShowSpan] = useLocalStorage("showSpan-TreeView", true);
 
   return (
@@ -111,6 +117,16 @@ const SessionContentV2: React.FC<SessionContentV2Props> = ({
             sessionCost={session.session_cost_usd}
             startTime={startTime}
             endTime={endTime}
+            sessionFeedback={
+              requestWithFeedback?.properties["Helicone-Session-Feedback"] ===
+              "1"
+                ? true
+                : requestWithFeedback?.properties[
+                    "Helicone-Session-Feedback"
+                  ] === "0"
+                ? false
+                : null
+            }
           />
 
           <Row className="gap-2 items-center">
