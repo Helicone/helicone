@@ -461,9 +461,7 @@ export class ExperimentStore extends BaseStore {
           const row = d.row_data;
           row.inputRecord.requestPath =
             row.inputRecord.requestPath === ""
-              ? ENVIRONMENT === "production"
-                ? "https://oai.helicone.ai/v1/chat/completions"
-                : "http://127.0.0.1:8787/v1/chat/completions"
+              ? `${process.env.HELICONE_WORKER_URL}/v1/chat/completions`
               : row.inputRecord.requestPath;
           return row;
         })

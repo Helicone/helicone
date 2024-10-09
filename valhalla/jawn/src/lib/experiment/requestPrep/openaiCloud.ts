@@ -38,9 +38,7 @@ export function prepareRequestOpenAIFull({
 
   const { url: fetchUrl, headers } = prepareRequestOpenAI(
     datasetRow.inputRecord?.requestPath ??
-      (ENVIRONMENT === "production"
-        ? "https://oai.helicone.ai/v1/chat/completions"
-        : "http://127.0.0.1:8787/v1/chat/completions"),
+      `${process.env.HELICONE_WORKER_URL}/v1/chat/completions`,
     proxyKey,
     requestId
   );
