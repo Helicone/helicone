@@ -256,7 +256,7 @@ export function ThemedTimeFilterShadCN({
                       : date?.to,
                   };
 
-                  handleDateChange(newDateRange as DateRange);
+                  handleDateChange(newDateRange satisfies DateRange);
                 }
               }}
               numberOfMonths={2}
