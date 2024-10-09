@@ -1,3 +1,4 @@
+import { Badge } from "@/components/ui/badge";
 import { ChartBarIcon, PlusIcon } from "@heroicons/react/24/outline";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
@@ -16,45 +17,45 @@ import {
 import { useOrg } from "../../layout/organizationContext";
 import AuthHeader from "../../shared/authHeader";
 import LoadingAnimation from "../../shared/loadingAnimation";
-import ThemedTableHeader from "../../shared/themed/themedHeader";
 import useSearchParams from "../../shared/utils/useSearchParams";
 import { TimeFilter } from "../dashboard/dashboardPage";
 import { useUIFilterConvert } from "../dashboard/useDashboardPage";
-import { Badge } from "@/components/ui/badge";
 
 // Import shadcn components
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // Import Recharts components
-import {
-  BarChart,
-  Bar,
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
-import { Col, Row } from "@/components/layout/common";
-import { ArrowRightIcon, PencilIcon } from "lucide-react";
-import { ScoreDistributionChart } from "./charts/ScoreDistributionChart";
-import { TracesChart } from "./charts/TracesChart";
-import { AverageScoreChart } from "./charts/AverageScoreChart";
-import { formatNumber } from "@/components/shared/utils/formatNumber";
 import ThemedTable from "@/components/shared/themed/table/themedTable";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 import { ColumnDef } from "@tanstack/react-table";
+import { Check, ChevronsUpDown } from "lucide-react";
+import { AverageScoreChart } from "./charts/AverageScoreChart";
+import { ScoreDistributionChart } from "./charts/ScoreDistributionChart";
 import { ScoreDistributionChartPie } from "./charts/ScoreDistributionChartPie";
+import { TracesChart } from "./charts/TracesChart";
+import { useRouter } from "next/router";
+
+// Import Shadcn UI components for dropdown
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { ChevronDownIcon } from "@heroicons/react/24/outline";
+import { CreateNewEvaluator } from "@/components/shared/CreateNewEvaluator";
 
 type EvalMetric = {
   name: string;
@@ -67,6 +68,7 @@ type EvalMetric = {
   overTime: { date: string; count: number }[];
   scoreDistribution: { lower: number; upper: number; value: number }[];
   averageOverTime: { date: string; value: number }[];
+  id?: string;
 };
 export const INITIAL_COLUMNS: ColumnDef<EvalMetric>[] = [
   {
@@ -96,7 +98,7 @@ export const INITIAL_COLUMNS: ColumnDef<EvalMetric>[] = [
     header: "Average Score",
     cell: (info) => (
       <AverageScoreChart
-        averageOverTime={info.getValue() as { date: string; count: number }[]}
+        averageOverTime={info.getValue() as { date: string; value: number }[]}
       />
     ),
     minSize: 200,
@@ -289,27 +291,54 @@ const EvalsPage = () => {
     setEvalsToShow([]);
   };
 
+  const router = useRouter();
+
   return (
     <>
       <AuthHeader
         title="Evaluators"
         actions={[
           <div key="select-evals" className="flex items-center space-x-2">
-            <Select
-              value={evalsToShow}
-              onValueChange={(value) => setEvalsToShow(value)}
-            >
-              <SelectTrigger className="w-[300px]">
-                <SelectValue placeholder="Select evals" />
-              </SelectTrigger>
-              <SelectContent>
-                {allEvalScores.map((evalScore) => (
-                  <SelectItem key={evalScore} value={evalScore}>
-                    {evalScore}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="w-[300px] justify-between">
+                  {evalsToShow.length > 0
+                    ? `${evalsToShow.length} selected`
+                    : "Select evals"}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[300px] p-0">
+                <Command>
+                  <CommandInput placeholder="Search evals..." />
+                  <CommandEmpty>No eval found.</CommandEmpty>
+                  <CommandGroup>
+                    {allEvalScores.map((evalScore) => (
+                      <CommandItem
+                        key={evalScore}
+                        onSelect={() => {
+                          setEvalsToShow((prev) =>
+                            prev.includes(evalScore)
+                              ? prev.filter((item) => item !== evalScore)
+                              : [...prev, evalScore]
+                          );
+                        }}
+                      >
+                        <Check
+                          className={cn(
+                            "mr-2 h-4 w-4",
+                            evalsToShow.includes(evalScore)
+                              ? "opacity-100"
+                              : "opacity-0"
+                          )}
+                        />
+                        {evalScore}
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </Command>
+              </PopoverContent>
+            </Popover>
             <Button
               variant="link"
               onClick={
@@ -378,6 +407,12 @@ const EvalsPage = () => {
               }
             },
           }}
+          onRowSelect={(row) => {
+            router.push(`/evaluators/${row.name}`);
+          }}
+          customButtons={[<CreateNewEvaluator key="create-new-evaluator" />]}
+          dataLoading={isLoading}
+          skeletonLoading={isLoading}
           id="evals-table"
           defaultColumns={INITIAL_COLUMNS}
           defaultData={evals.map((evalRow) => ({
