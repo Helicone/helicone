@@ -7,6 +7,10 @@ import { HeliconeAuth } from "../requestWrapper";
 import { redisClient } from "../clients/redisClient";
 import { KeyPermissions, Role } from "../../models/models";
 
+require("dotenv").config({
+  path: `${__dirname}/../../../.env`,
+});
+
 // SINGLETON
 class SupabaseAuthCache extends InMemoryCache {
   private static instance: SupabaseAuthCache;
