@@ -9,7 +9,7 @@ const useSearchParams = () => {
   return searchParams;
 };
 
-class SearchParams {
+export class SearchParams {
   router: NextRouter;
   query: ParsedUrlQuery;
 

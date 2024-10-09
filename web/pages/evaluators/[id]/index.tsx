@@ -2,6 +2,7 @@ import { ReactElement } from "react";
 import AuthLayout from "../../../components/layout/auth/authLayout";
 import DatasetIdPage from "../../../components/templates/datasets/datasetsIdPage";
 import { withAuthSSR } from "../../../lib/api/handlerWrappers";
+import EvaluatorPage from "@/components/templates/evals/id/EvaluatorPage";
 
 interface DatasetProps {
   id: string;
@@ -12,9 +13,7 @@ interface DatasetProps {
 const Dataset = (props: DatasetProps) => {
   const { id, currentPage, pageSize } = props;
 
-  return (
-    <DatasetIdPage id={id} currentPage={currentPage} pageSize={pageSize} />
-  );
+  return <EvaluatorPage />;
 };
 
 export default Dataset;

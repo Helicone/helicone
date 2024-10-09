@@ -14,29 +14,31 @@ const openai = new OpenAI({
 });
 
 async function main() {
-  const requestId = uuid();
+  while (true) {
+    //sleep for 1 second
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    const requestId = uuid();
 
-  const chatCompletion = await openai.chat.completions.create(
-    {
-      messages: [
-        {
-          role: "user",
-          content: hprompt`
-Are you a cat?
-          `,
-        },
-      ],
-      model: "gpt-4o",
-    },
-    {
-      headers: {
-        "Helicone-Request-Id": requestId,
-        "Helicone-Property-testing": "true",
-        "Helicone-Prompt-Id": "taxes_assistant",
+    const chatCompletion = await openai.chat.completions.create(
+      {
+        messages: [
+          {
+            role: "user",
+            content: `Respond only hello world`,
+          },
+        ],
+        model: "gpt-3.5-turbo",
       },
-    }
-  );
-  console.log(chatCompletion);
+      {
+        headers: {
+          "Helicone-Request-Id": requestId,
+          // "Helicone-Property-testing": "true",
+          // "Helicone-Prompt-Id": "taxes_assistant",
+        },
+      }
+    );
+    console.log(chatCompletion);
+  }
 }
 
 const heliconeClient = new HeliconeAPIClient({
@@ -49,16 +51,15 @@ async function scoreAnyUnscoredRequestsForHypothesesRuns() {
 
   await worker.start(
     async (request, requestAndResponse) => {
-      request.response_status;
-      console.log("Scoring...", request.request_id);
       const responseText =
         requestAndResponse.response.choices[0].message.content;
 
-      const containsReasoning = responseText.includes("<reasoning>");
+      const containsReasoning = Math.random() > 0.5;
       return {
         scores: {
-          containsReasoning,
-          contentNewLineCount: responseText.split("\n").length,
+          "Contains Reasoning": containsReasoning,
+          "Contains New-Line": responseText.split("\n").length,
+          "Random Score": Math.floor(Math.random() * 100),
         },
       };
     },

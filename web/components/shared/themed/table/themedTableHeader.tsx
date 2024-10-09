@@ -147,7 +147,7 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
           </div>
         </div>
 
-        <div className="flex flex-wrap justify-start lg:justify-end">
+        <div className="flex flex-wrap justify-start lg:justify-end items-center">
           {columns && (
             <ViewColumns
               columns={columns}

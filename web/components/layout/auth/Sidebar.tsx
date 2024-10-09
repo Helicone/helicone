@@ -96,10 +96,10 @@ const Sidebar = ({ setOpen }: SidebarProps) => {
             ? []
             : [
                 {
-                  name: "Evals",
-                  href: "/evals",
+                  name: "Evaluators",
+                  href: "/evaluators",
                   icon: SparklesIcon,
-                  current: pathname.includes("/evals"),
+                  current: pathname.includes("/evaluators"),
                 },
               ]),
           {
