@@ -5,16 +5,20 @@
     "light": "/logo/light.png",
     "dark": "/logo/dark.svg"
   },
-
   "anchors": [
     {
-      "name": "User Guides",
+      "name": "API Reference",
+      "icon": "code",
+      "url": "rest"
+    },
+    {
+      "name": "Guides",
       "icon": "file-lines",
       "url": "guides"
     },
     {
       "name": "FAQ",
-      "icon": "code",
+      "icon": "circle-question",
       "url": "faq"
     }
   ],
@@ -39,7 +43,7 @@
     "default": "light"
   },
   "topbarCtaButton": {
-    "name": "Console",
+    "name": "Dashboard",
     "url": "https://us.helicone.ai/#:~:text=Discord-,Sign,-In"
   },
 
@@ -252,14 +256,20 @@
     {
       "group": "Developer Guides",
       "pages": [
-        "guides/developer/getting-user-requests",
+        "guides/overview",
+        {
+          "group": "API Guides",
+          "pages": [
+            "guides/developer/getting-user-requests",
+            "guides/developer/etl",
+            "guides/developer/replay-session"
+          ]
+        },
         "guides/developer/environment-tracking",
         "guides/developer/segmentation",
         "guides/developer/experiments",
-        "guides/developer/replay-session",
         "guides/developer/github-actions",
         "guides/developer/debugging",
-        "guides/developer/etl",
         "guides/developer/labeling-request-data"
       ]
     },
@@ -270,6 +280,7 @@
         "guides/use-cases/bill-by-usage"
       ]
     },
+
     {
       "group": "User",
       "pages": [
