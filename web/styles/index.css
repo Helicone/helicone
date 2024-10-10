@@ -101,5 +101,28 @@ input[type="number"] {
 #sessions-trace-span .recharts-xAxis .recharts-label {
   font-size: 12px;
 }
+/* web/components/templates/prompts/experiments/table/ExperimentTable.module.css */
 
+@keyframes zoom-out {
+  0% {
+    transform: scale(4);
+  }
+  100% {
+    transform: scale(0.5);
+  }
+}
 
+.zoom-container {
+  transform-origin: top left;
+  animation: zoom-out 15s forwards; /* 15s duration, adjust if needed */
+  /* animation-play-state: paused; */
+}
+
+.compact-cells :global(.ag-cell) {
+  padding-left: 2px !important;
+  padding-right: 2px !important;
+}
+
+.compact-cells :global(.ag-cell-value) {
+  padding: 0 !important;
+}

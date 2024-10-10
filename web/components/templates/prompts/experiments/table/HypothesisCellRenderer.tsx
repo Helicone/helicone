@@ -51,9 +51,9 @@ export const HypothesisCellRenderer: React.FC<any> = (params) => {
 
   if (data.isLoading?.[hypothesisId]) {
     return (
-      <div className="w-full h-full whitespace-pre-wrap flex flex-row items-center space-x-2 pl-4">
-        <span className="animate-ping inline-flex rounded-full bg-green-700 h-2 w-2"></span>
-        <div className="italic">Generating...</div>
+      <div className="w-full h-full flex items-center space-x-0.5 pl-0.5">
+        <span className="animate-ping inline-flex rounded-full bg-green-700 h-1 w-1"></span>
+        <div className="italic text-[0.4rem] text-gray-600">Running.</div>
       </div>
     );
   }
@@ -130,13 +130,13 @@ export const OriginalMessagesCellRenderer: React.FC<any> = (params) => {
     <Popover open={showPromptPlayground} onOpenChange={setShowPromptPlayground}>
       <PopoverTrigger asChild>
         <div
-          className={`w-full h-full items-center flex ${
+          className={`w-full h-full items-center flex text-[0.5rem] ${
             content ? "justify-start" : "justify-end"
           }`}
           onClick={handleCellClick}
         >
           {content && content !== "{}" ? (
-            <div>{content}</div>
+            <div className="truncate">{content}</div>
           ) : (
             <div>
               {/* <Button
@@ -173,6 +173,7 @@ export const OriginalMessagesCellRenderer: React.FC<any> = (params) => {
     </Popover>
   );
 };
+
 export const OriginalOutputCellRenderer: React.FC<any> = (params) => {
   const { data, colDef, context, prompt } = params;
   const hypothesisId = colDef.field;
@@ -201,7 +202,7 @@ export const OriginalOutputCellRenderer: React.FC<any> = (params) => {
     <Popover open={showPromptPlayground} onOpenChange={setShowPromptPlayground}>
       <PopoverTrigger asChild>
         <div
-          className={`w-full h-full items-center flex ${
+          className={`w-full h-full items-center flex text-[0.5rem] ${
             content ? "justify-start" : "justify-end"
           }`}
           onClick={handleCellClick}

@@ -248,7 +248,7 @@ const AddColumnHeader: React.FC<AddColumnHeaderProps> = ({
                   refetchData(); // Refetch the table data
                 }}
                 submitText="Test"
-                initialModel={"gpt-4o"}
+                initialModel={"gpt-3.5-turbo"}
                 editMode={false}
               />
             </SheetDescription>

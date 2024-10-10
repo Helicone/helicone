@@ -17,7 +17,6 @@ import { useCallback, useMemo } from "react";
 import AddColumnHeader from "./AddColumnHeader";
 import {
   HypothesisCellRenderer,
-  OriginalMessagesCellRenderer,
   OriginalOutputCellRenderer,
 } from "./HypothesisCellRenderer";
 import {
@@ -397,8 +396,8 @@ export function ExperimentTable({
   );
 
   const handleRunHypothesis = useCallback(
-    (hypothesisId: string, datasetRowIds: string[]) => {
-      runHypothesisMutation.mutate({ hypothesisId, datasetRowIds });
+    async (hypothesisId: string, datasetRowIds: string[]) => {
+      return runHypothesisMutation.mutateAsync({ hypothesisId, datasetRowIds });
     },
     [runHypothesisMutation]
   );
@@ -559,7 +558,7 @@ export function ExperimentTable({
       {
         headerComponent: RowNumberHeaderComponent,
         field: "rowNumber",
-        width: 50,
+        width: 35,
         cellRenderer: RowNumberCellRenderer,
         pinned: "left",
         cellClass:
@@ -580,7 +579,7 @@ export function ExperimentTable({
       columns.push({
         field: key,
         headerName: key,
-        width: 150,
+        width: 80,
         cellRenderer: InputCellRenderer,
         cellRendererParams: {
           index: index,
@@ -606,45 +605,45 @@ export function ExperimentTable({
     });
 
     // Add the "Messages" column
-    columns.push({
-      field: "messages",
-      headerName: "Messages",
-      width: 200,
-      headerComponent: CustomHeaderComponent,
-      headerComponentParams: {
-        displayName: "Messages",
-        badgeText: "Input",
-        badgeVariant: "secondary",
-        hypothesis: sortedHypotheses[0] || {},
-        promptVersionTemplate: promptVersionTemplate,
-      },
-      cellClass:
-        "border-r border-[#E2E8F0] text-slate-700 flex items-center justify-start pt-2.5",
-      headerClass: "border-r border-[#E2E8F0]",
-      cellRenderer: OriginalMessagesCellRenderer,
-      cellRendererParams: {
-        prompt: promptVersionTemplate,
-      },
-      cellStyle: {
-        verticalAlign: "middle",
-        textAlign: "left",
-        overflow: "hidden",
-        textOverflow: "ellipsis",
-        whiteSpace: wrapText ? "normal" : "nowrap",
-      },
-      autoHeight: wrapText,
-    });
+    // columns.push({
+    //   field: "messages",
+    //   headerName: "Messages",
+    //   width: 200,
+    //   headerComponent: CustomHeaderComponent,
+    //   headerComponentParams: {
+    //     displayName: "Messages",
+    //     badgeText: "Input",
+    //     badgeVariant: "secondary",
+    //     hypothesis: sortedHypotheses[0] || {},
+    //     promptVersionTemplate: promptVersionTemplate,
+    //   },
+    //   cellClass:
+    //     "border-r border-[#E2E8F0] text-slate-700 flex items-center justify-start pt-2.5",
+    //   headerClass: "border-r border-[#E2E8F0]",
+    //   cellRenderer: OriginalMessagesCellRenderer,
+    //   cellRendererParams: {
+    //     prompt: promptVersionTemplate,
+    //   },
+    //   cellStyle: {
+    //     verticalAlign: "middle",
+    //     textAlign: "left",
+    //     overflow: "hidden",
+    //     textOverflow: "ellipsis",
+    //     whiteSpace: wrapText ? "normal" : "nowrap",
+    //   },
+    //   autoHeight: wrapText,
+    // });
 
     // Add the "Original" column
     columns.push({
       field: "original",
       headerName: "Original",
-      width: 200,
+      width: 60,
       headerComponent: CustomHeaderComponent,
       headerComponentParams: {
         displayName: "Original",
-        badgeText: "Output",
-        badgeVariant: "secondary",
+        // badgeText: "Output",
+        // badgeVariant: "secondary",
         hypothesis: sortedHypotheses[1] || {},
         promptVersionTemplate: promptVersionTemplate,
       },
@@ -671,7 +670,7 @@ export function ExperimentTable({
         columns.push({
           field: hypothesis.id,
           headerName: hypothesis.id,
-          width: 230,
+          width: 60,
           suppressSizeToFit: true,
           cellRenderer: HypothesisCellRenderer,
           cellRendererParams: {
@@ -681,9 +680,9 @@ export function ExperimentTable({
           },
           headerComponent: CustomHeaderComponent,
           headerComponentParams: {
-            displayName: `Experiment ${experimentNumber}`,
-            badgeText: "Output",
-            badgeVariant: "secondary",
+            displayName: `${experimentNumber}`,
+            badgeText: "Exp",
+            // badgeVariant: "secondary",
             onRunColumn: (colId: string) => {
               const datasetRowIds = rowData.map((row) => row.dataset_row_id);
               datasetRowIds.map((datasetRowId) =>
@@ -695,11 +694,11 @@ export function ExperimentTable({
           cellClass: "border-r border-[#E2E8F0] text-slate-700 pt-2.5",
           headerClass: "border-r border-[#E2E8F0] bg-white dark:bg-gray-800",
           cellStyle: {
-            verticalAlign: "middle",
+            verticalAlign: "left",
             textAlign: "left",
             overflow: "hidden",
             textOverflow: "ellipsis",
-            whiteSpace: wrapText ? "normal" : "nowrap",
+            whiteSpace: "nowrap",
           },
           autoHeight: wrapText,
         });
@@ -761,17 +760,80 @@ export function ExperimentTable({
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [selectedProviderKey, setSelectedProviderKey] = useState(providerKey);
 
+  // Function to handle running all hypotheses
+  const handleRunAllHypotheses = useCallback(async () => {
+    if (!sortedHypotheses || sortedHypotheses.length === 0) return;
+    const datasetRowIds = rowData
+      .map((row) => row.dataset_row_id)
+      .filter((id): id is string => !!id);
+
+    setIsRunningAll(true); // Set loading state
+
+    try {
+      // Run all hypotheses in parallel
+      await Promise.all(
+        sortedHypotheses.map((hypothesis) =>
+          handleRunHypothesis(hypothesis.id, datasetRowIds)
+        )
+      );
+    } catch (error) {
+      console.error("Error running all hypotheses:", error);
+    } finally {
+      setIsRunningAll(false); // Reset loading state
+    }
+  }, [sortedHypotheses, rowData, handleRunHypothesis]);
+
+  // State to manage loading status
+  const [isRunningAll, setIsRunningAll] = useState(false);
+
   return (
     <div className="relative w-full">
       <div className="flex flex-col space-y-2 w-full">
+        {/* Add the "Run All" Button */}
         <div className="flex flex-row space-x-2 justify-end w-full">
           <Button
             variant="outline"
-            className="py-0 px-2 border border-slate-200 h-8 flex items-center justify-center space-x-1 flex gap-2"
+            className="py-1 px-3 border border-slate-200 h-8 flex items-center justify-center space-x-1 flex gap-2"
+            onClick={handleRunAllHypotheses}
+            disabled={isRunningAll}
+          >
+            {isRunningAll ? (
+              <>
+                <svg
+                  className="animate-spin h-4 w-4 text-slate-700"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8v8H4z"
+                  ></path>
+                </svg>
+                Running...
+              </>
+            ) : (
+              "Run All"
+            )}
+          </Button>
+
+          <Button
+            variant="outline"
+            className="py-1 px-3 border border-slate-200 h-8 flex items-center justify-center space-x-1 flex gap-2"
             onClick={() => setShowScoresTable(!showScoresTable)}
           >
             <div>{"{ }"}</div> {showScoresTable ? "Hide" : "Show"} Scores
           </Button>
+
           <ColumnsDropdown
             wrapText={wrapText}
             setWrapText={setWrapText}
@@ -807,56 +869,58 @@ export function ExperimentTable({
             columnOrder={columnOrder}
           />
         )}
-        <div
-          className="ag-theme-alpine w-full rounded-md overflow-hidden"
-          ref={experimentTableRef}
-          style={
-            {
-              "--ag-header-height": "40px",
-              "--ag-header-foreground-color": "#000",
-              "--ag-header-background-color": "#ffffff",
-              "--ag-header-cell-hover-background-color": "#e5e7eb",
-              "--ag-header-cell-moving-background-color": "#d1d5db",
-              "--ag-cell-horizontal-border": "solid #E2E8F0",
-              "--ag-border-radius": "8px",
-              "--ag-border-color": "#E2E8F0",
-            } as React.CSSProperties
-          }
-        >
-          <AgGridReact
-            ref={gridRef as any}
-            rowData={rowData}
-            columnDefs={columnDefs}
-            onGridReady={onGridReady}
-            onColumnResized={onColumnResized}
-            onColumnMoved={onColumnMoved}
-            enableCellTextSelection={true}
-            colResizeDefault="shift"
-            suppressRowTransform={true}
-            domLayout="autoHeight"
-            getRowId={getRowId}
-            context={{
-              setShowExperimentInputSelector,
-              handleRunHypothesis,
-              hypothesesToRun,
-              inputKeys: Array.from(inputKeys),
-              inputColumnFields,
-              hypotheses: sortedHypotheses,
-              refetchExperiments,
-              experimentId,
-              orgId,
-              promptVersionTemplateRef,
-              activePopoverCell,
-              setActivePopoverCell,
-              handleLastInputSubmit,
-              handleInputChange,
-              rowData, // Add this line
-            }}
-            rowClass="border-b border-gray-200 hover:bg-gray-50"
-            headerHeight={40}
-            rowHeight={50}
-            onCellValueChanged={handleCellValueChanged}
-          />
+        <div className="zoom-container">
+          <div
+            className="ag-theme-alpine w-full rounded-md overflow-hidden"
+            ref={experimentTableRef}
+            style={
+              {
+                "--ag-header-height": "40px",
+                "--ag-header-foreground-color": "#000",
+                "--ag-header-background-color": "#ffffff",
+                "--ag-header-cell-hover-background-color": "#e5e7eb",
+                "--ag-header-cell-moving-background-color": "#d1d5db",
+                "--ag-cell-horizontal-border": "solid #E2E8F0",
+                "--ag-border-radius": "8px",
+                "--ag-border-color": "#E2E8F0",
+              } as React.CSSProperties
+            }
+          >
+            <AgGridReact
+              ref={gridRef as any}
+              rowData={rowData}
+              columnDefs={columnDefs}
+              onGridReady={onGridReady}
+              onColumnResized={onColumnResized}
+              onColumnMoved={onColumnMoved}
+              enableCellTextSelection={true}
+              colResizeDefault="shift"
+              suppressRowTransform={true}
+              domLayout="autoHeight"
+              getRowId={getRowId}
+              context={{
+                setShowExperimentInputSelector,
+                handleRunHypothesis,
+                hypothesesToRun,
+                inputKeys: Array.from(inputKeys),
+                inputColumnFields,
+                hypotheses: sortedHypotheses,
+                refetchExperiments,
+                experimentId,
+                orgId,
+                promptVersionTemplateRef,
+                activePopoverCell,
+                setActivePopoverCell,
+                handleLastInputSubmit,
+                handleInputChange,
+                rowData, // Add this line
+              }}
+              rowClass="border-b border-gray-200 hover:bg-gray-50"
+              headerHeight={40}
+              rowHeight={50}
+              onCellValueChanged={handleCellValueChanged}
+            />
+          </div>
         </div>
         <Button
           variant="ghost"
