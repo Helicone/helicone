@@ -3,7 +3,7 @@ import { useOrg } from "@/components/layout/organizationContext";
 import { Button } from "@/components/ui/button";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { useJawnClient } from "@/lib/clients/jawnHook";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import {
   ColDef,
   GridReadyEvent,
@@ -27,7 +27,6 @@ import {
   FunnelIcon,
 } from "@heroicons/react/24/outline";
 import ExperimentInputSelector from "../experimentInputSelector";
-import { useMutation } from "@tanstack/react-query";
 
 import SettingsPanel from "./components/settingsPannel";
 import {
@@ -73,6 +72,9 @@ export function ExperimentTable({
     params.api.sizeColumnsToFit();
     gridRef.current = params.api;
   }, []);
+
+  // Add state to track if any hypotheses are running
+  const [isHypothesisRunning, setIsHypothesisRunning] = useState(false);
 
   const fetchExperiments = useCallback(async () => {
     if (!orgId || !experimentId) return null;
@@ -160,7 +162,6 @@ export function ExperimentTable({
 
   const fetchRandomInputRecords = useCallback(async () => {
     const jawnClient = getJawnClient(orgId);
-    console.log("promptVersionIdRandom", promptSubversionId);
     const res = await jawnClient.POST(
       "/v1/prompt/version/{promptVersionId}/inputs/query",
       {
@@ -283,7 +284,7 @@ export function ExperimentTable({
 
       setRowData(newRowData);
     },
-    [experimentData, inputRecordsData]
+    [experimentData, inputRecordsData, rowData]
   );
 
   // Add useEffect to update rowData when experimentData or inputRecordsData change
@@ -291,7 +292,7 @@ export function ExperimentTable({
     if (experimentData && inputRecordsData) {
       updateRowData(experimentData, inputRecordsData);
     }
-  }, [experimentData, inputRecordsData]);
+  }, [experimentData, inputRecordsData, updateRowData]);
 
   // Add an empty row if rowData is empty
   useEffect(() => {
@@ -330,9 +331,6 @@ export function ExperimentTable({
     }),
     [wrapText]
   );
-  const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>(
-    {}
-  );
 
   const getRowId = useCallback((params: any) => params.data.id, []);
 
@@ -369,6 +367,8 @@ export function ExperimentTable({
             return row;
           })
         );
+        // Set isHypothesisRunning to true
+        setIsHypothesisRunning(true);
       },
       onSettled: async (_, __, { hypothesisId, datasetRowIds }) => {
         // Refetch data
@@ -389,9 +389,24 @@ export function ExperimentTable({
             return row;
           })
         );
+
+        // Check if any rows are still loading
+        const anyLoading = rowData.some((row) =>
+          Object.values(row.isLoading || {}).some((loading) => loading)
+        );
+
+        if (!anyLoading) {
+          // No hypotheses are running
+          setIsHypothesisRunning(false);
+        }
+
+        // Refresh the grid cells
+        gridRef.current?.refreshCells();
       },
       onError: (error) => {
         console.error("Error running hypothesis:", error);
+        // In case of error, set isHypothesisRunning to false
+        setIsHypothesisRunning(false);
       },
     }
   );
@@ -408,7 +423,27 @@ export function ExperimentTable({
     refetchInputRecords();
   };
 
-  // Determine the hypotheses to run (excluding the first one)
+  // Set up effect to refresh grid while hypotheses are running
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout | null = null;
+
+    if (isHypothesisRunning) {
+      intervalId = setInterval(() => {
+        // Refetch data and refresh the grid
+        refetchExperiments();
+        refetchInputRecords();
+        gridRef.current?.refreshCells();
+      }, 1000);
+    }
+
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [isHypothesisRunning, refetchExperiments, refetchInputRecords]);
+
+  // Determine the hypotheses to run
   const hypothesesToRun = useMemo(() => {
     return experimentData?.hypotheses.map((h: any) => h.id) || [];
   }, [experimentData?.hypotheses]);
@@ -676,7 +711,6 @@ export function ExperimentTable({
           cellRendererParams: {
             hypothesisId: hypothesis.id,
             handleRunHypothesis,
-            loadingStates,
           },
           headerComponent: CustomHeaderComponent,
           headerComponentParams: {
@@ -747,7 +781,6 @@ export function ExperimentTable({
     sortedHypotheses,
     columnView,
     handleRunHypothesis,
-    loadingStates,
     rowData,
     wrapText,
     inputKeys,
@@ -755,6 +788,11 @@ export function ExperimentTable({
     columnOrder,
     activePopoverCell,
     handleLastInputSubmit,
+    promptVersionTemplate,
+    experimentId,
+    promptSubversionId,
+    providerKey,
+    refetchData,
   ]);
 
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -784,19 +822,6 @@ export function ExperimentTable({
             <FunnelIcon className="h-4 w-4 text-slate-700" />
             <ChevronDownIcon className="h-4 w-4 text-slate-400" />
           </Button>
-          {/* <Button
-            variant="outline"
-            className="py-0 px-2 border border-slate-200 h-8 flex items-center justify-center space-x-1"
-          >
-            <ArrowDownTrayIcon className="h-4 w-4 text-slate-700" />
-          </Button>
-          <ProviderKeyDropdown
-            providerKey={selectedProviderKey}
-            setProviderKey={setSelectedProviderKey}
-          /> */}
-          {/* <Button variant="outline" onClick={() => setSettingsOpen(true)}>
-            Settings
-          </Button> */}
         </div>
         {showScoresTable && (
           <ScoresTable
@@ -826,6 +851,7 @@ export function ExperimentTable({
             ref={gridRef as any}
             rowData={rowData}
             columnDefs={columnDefs}
+            defaultColDef={defaultColDef}
             onGridReady={onGridReady}
             onColumnResized={onColumnResized}
             onColumnMoved={onColumnMoved}
@@ -849,7 +875,7 @@ export function ExperimentTable({
               setActivePopoverCell,
               handleLastInputSubmit,
               handleInputChange,
-              rowData, // Add this line
+              rowData,
             }}
             rowClass="border-b border-gray-200 hover:bg-gray-50"
             headerHeight={40}
