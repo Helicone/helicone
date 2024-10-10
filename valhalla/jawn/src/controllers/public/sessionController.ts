@@ -6,6 +6,7 @@ import {
   SessionNameResult,
   SessionResult,
 } from "../../managers/SessionManager";
+import { RequestFilterNode } from "./requestController";
 
 export interface SessionQueryParams {
   sessionIdContains: string;
@@ -15,6 +16,7 @@ export interface SessionQueryParams {
   };
   sessionName: string;
   timezoneDifference: number;
+  filter: RequestFilterNode;
 }
 
 export interface SessionNameQueryParams {
