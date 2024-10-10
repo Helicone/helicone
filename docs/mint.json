@@ -255,6 +255,20 @@
     {
       "group": "Guides",
       "pages": [
+        {
+          "group": "Prompt Engineering",
+          "pages": [
+            "use-cases/prompt-engineering/overview",
+            "use-cases/prompt-engineering/be-specific-and-clear",
+            "use-cases/prompt-engineering/use-structured-formats",
+            "use-cases/prompt-engineering/leverage-role-playing",
+            "use-cases/prompt-engineering/implement-few-shot-learning",
+            "use-cases/prompt-engineering/use-constrained-outputs",
+            "use-cases/prompt-engineering/use-chain-of-thought-prompting"
+          ],
+          "icon": "square-code",
+          "iconType": "solid"
+        },
         "use-cases/experiments",
         "use-cases/enable-stream-usage",
         "use-cases/resell-a-model",
