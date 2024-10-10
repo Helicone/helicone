@@ -17,7 +17,7 @@ import LoadingAnimation from "@/components/shared/loadingAnimation";
 import { Tabs, TabsTrigger, TabsList } from "@/components/ui/tabs";
 import { useLocalStorage } from "@/services/hooks/localStorage";
 import { ChartPieIcon, ListBulletIcon } from "@heroicons/react/24/outline";
-import { REQUEST_TABLE_FILTERS } from "@/services/lib/filters/frontendFilterDefs";
+import { SESSIONS_TABLE_FILTERS } from "@/services/lib/filters/frontendFilterDefs";
 import {
   filterUITreeToFilterNode,
   getRootFilterNode,
@@ -77,7 +77,7 @@ const SessionsPage = (props: SessionsPageProps) => {
   console.log(
     "advancedFilters",
     advancedFilters,
-    filterUITreeToFilterNode(REQUEST_TABLE_FILTERS, debouncedAdvancedFilters)
+    filterUITreeToFilterNode(SESSIONS_TABLE_FILTERS, debouncedAdvancedFilters)
   );
 
   const onSetAdvancedFiltersHandler = useCallback(
@@ -92,7 +92,7 @@ const SessionsPage = (props: SessionsPageProps) => {
     debouncedSessionIdSearch,
     selectedName,
     filterUITreeToFilterNode(
-      REQUEST_TABLE_FILTERS,
+      SESSIONS_TABLE_FILTERS,
       debouncedAdvancedFilters
     ) as any
   );

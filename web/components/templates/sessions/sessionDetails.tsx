@@ -14,7 +14,7 @@ import SessionMetrics from "./SessionMetrics";
 import { PiGraphLight } from "react-icons/pi";
 import { TabsContent } from "@/components/ui/tabs";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
-import { REQUEST_TABLE_FILTERS } from "@/services/lib/filters/frontendFilterDefs";
+import { SESSIONS_TABLE_FILTERS } from "@/services/lib/filters/frontendFilterDefs";
 import { UIFilterRowTree } from "@/services/lib/filters/uiFilterRowTree";
 
 type TSessions = {
@@ -92,7 +92,7 @@ const SessionDetails = ({
             dataLoading={false}
             sortable={sort}
             advancedFilters={{
-              filterMap: REQUEST_TABLE_FILTERS,
+              filterMap: SESSIONS_TABLE_FILTERS,
               setAdvancedFilters: onSetAdvancedFiltersHandler,
               filters: advancedFilters,
               searchPropertyFilters: async () => ({

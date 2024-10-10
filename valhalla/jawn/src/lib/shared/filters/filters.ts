@@ -233,6 +233,7 @@ const whereKeyMappings: KeyMappings = {
       node_id: "request_response_rmt.node_id",
       job_id: "request_response_rmt.job_id",
       threat: "request_response_rmt.threat",
+      total_tokens: "total_tokens",
       prompt_tokens: "request_response_rmt.prompt_tokens",
       completion_tokens: "request_response_rmt.completion_tokens",
       request_body: "request_response_rmt.request_body",
@@ -282,6 +283,8 @@ const whereKeyMappings: KeyMappings = {
   experiment_hypothesis_run: easyKeyMappings<"experiment_hypothesis_run">({
     result_request_id: "experiment_v2_hypothesis_run.result_request_id",
   }),
+  sessions_request_response_rmt:
+    easyKeyMappings<"sessions_request_response_rmt">({}),
 
   // Deprecated
   values: NOT_IMPLEMENTED,
@@ -314,6 +317,11 @@ const havingKeyMappings: KeyMappings = {
     total_prompt_token: "total_prompt_token",
     cost: "cost",
   }),
+  sessions_request_response_rmt:
+    easyKeyMappings<"sessions_request_response_rmt">({
+      total_cost: "total_cost",
+      total_tokens: "total_tokens",
+    }),
   request_response_rmt: easyKeyMappings<"request_response_rmt">({}),
   request_response_search: NOT_IMPLEMENTED,
   score_value: NOT_IMPLEMENTED,
