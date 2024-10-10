@@ -1,4 +1,10 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, {
+  useRef,
+  useEffect,
+  useState,
+  useCallback,
+  useMemo,
+} from "react";
 import { useOrg } from "@/components/layout/organizationContext";
 import { Button } from "@/components/ui/button";
 import { getJawnClient } from "@/lib/clients/jawn";
@@ -13,7 +19,18 @@ import {
 } from "ag-grid-community";
 import "ag-grid-community/styles/ag-grid.css";
 import { AgGridReact } from "ag-grid-react";
-import { useCallback, useMemo } from "react";
+import { useMutation } from "@tanstack/react-query";
+
+import SettingsPanel from "./components/settingsPannel";
+import {
+  InputCellRenderer,
+  CustomHeaderComponent,
+  RowNumberHeaderComponent,
+  RowNumberCellRenderer,
+  InputsHeaderComponent,
+} from "./components/tableElementsRenderer";
+import { ColumnsDropdown } from "./components/customButtonts";
+import ScoresTable from "./ScoresTable";
 import AddColumnHeader from "./AddColumnHeader";
 import {
   HypothesisCellRenderer,
@@ -27,18 +44,9 @@ import {
   FunnelIcon,
 } from "@heroicons/react/24/outline";
 import ExperimentInputSelector from "../experimentInputSelector";
-import { useMutation } from "@tanstack/react-query";
 
-import SettingsPanel from "./components/settingsPannel";
-import {
-  InputCellRenderer,
-  CustomHeaderComponent,
-  RowNumberHeaderComponent,
-  RowNumberCellRenderer,
-  InputsHeaderComponent,
-} from "./components/tableElementsRenderer";
-import { ColumnsDropdown } from "./components/customButtonts";
-import ScoresTable from "./ScoresTable";
+// Import your LoadingAnimation component
+import LoadingAnimation from "../../../../shared/loadingAnimation";
 
 interface ExperimentTableProps {
   promptSubversionId: string;
@@ -215,9 +223,13 @@ export function ExperimentTable({
   // After defining inputKeys
   const inputColumnFields = Array.from(inputKeys);
 
+  const [isDataLoading, setIsDataLoading] = useState(true); // Initialize loading state
+
   // Function to update rowData based on fetched data
   const updateRowData = useCallback(
     (experimentData: any, inputRecordsData: any[]) => {
+      setIsDataLoading(true); // Start loading
+
       const newInputKeys = new Set<string>();
       if (inputRecordsData && inputRecordsData.length > 0) {
         inputRecordsData.forEach((row) => {
@@ -280,11 +292,11 @@ export function ExperimentTable({
       });
 
       setRowData(newRowData);
+      setIsDataLoading(false); // End loading
     },
     [experimentData, inputRecordsData]
   );
 
-  // Add useEffect to update rowData when experimentData or inputRecordsData change
   useEffect(() => {
     if (experimentData && inputRecordsData) {
       updateRowData(experimentData, inputRecordsData);
@@ -783,6 +795,15 @@ export function ExperimentTable({
 
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [selectedProviderKey, setSelectedProviderKey] = useState(providerKey);
+
+  if (isDataLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen flex-col">
+        <LoadingAnimation />
+        <h1 className="text-4xl font-semibold">Getting your experiments</h1>
+      </div>
+    );
+  }
 
   return (
     <div className="relative w-full">
