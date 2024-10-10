@@ -8,14 +8,14 @@
 
   "anchors": [
     {
-      "name": "API References",
-      "icon": "code",
-      "url": "rest"
+      "name": "User Guides",
+      "icon": "file-lines",
+      "url": "guides"
     },
     {
-      "name": "Use Cases",
-      "icon": "list-ul",
-      "url": "use-cases"
+      "name": "FAQ",
+      "icon": "code",
+      "url": "faq"
     }
   ],
   "analytics": {
@@ -232,6 +232,7 @@
     {
       "group": "Resources",
       "pages": [
+        "references/api",
         "getting-started/proxy-vs-async",
         "faq/how-we-calculate-cost",
         "faq/latency-affect",
@@ -249,29 +250,24 @@
       ]
     },
     {
-      "group": "Observability",
-      "pages": ["use-cases/getting-user-requests", "use-cases/segmentation"]
-    },
-    {
-      "group": "Guides",
+      "group": "Developer Guides",
       "pages": [
-        "use-cases/experiments",
-        "use-cases/enable-stream-usage",
-        "use-cases/resell-a-model",
-        "use-cases/bill-by-usage",
-        "use-cases/replay-session"
+        "guides/developer/getting-user-requests",
+        "guides/developer/environment-tracking",
+        "guides/developer/segmentation",
+        "guides/developer/experiments",
+        "guides/developer/replay-session",
+        "guides/developer/github-actions",
+        "guides/developer/debugging",
+        "guides/developer/etl",
+        "guides/developer/labeling-request-data"
       ]
     },
     {
-      "group": "CI/CD",
-      "pages": ["use-cases/github-actions"]
-    },
-    {
-      "group": "Developer",
+      "group": "Use Cases",
       "pages": [
-        "use-cases/debugging",
-        "use-cases/etl",
-        "use-cases/data-autonomy"
+        "guides/use-cases/resell-a-model",
+        "guides/use-cases/bill-by-usage"
       ]
     },
     {
@@ -335,5 +331,59 @@
     "linkedin": "https://www.linkedin.com/company/helicone/about/",
     "github": "https://github.com/Helicone/helicone",
     "discord": "https://discord.com/invite/zsSTcH2qhG"
-  }
+  },
+  "redirects": [
+    {
+      "source": "/use-cases/bill-by-usage",
+      "destination": "/guides/bill-by-usage"
+    },
+    {
+      "source": "/use-cases/data-autonomy",
+      "destination": "/guides/data-autonomy"
+    },
+    {
+      "source": "/use-cases/debugging",
+      "destination": "/guides/debugging"
+    },
+    {
+      "source": "/use-cases/enable-stream-usage",
+      "destination": "/guides/enable-stream-usage"
+    },
+    {
+      "source": "/use-cases/environment-tracking",
+      "destination": "/guides/environment-tracking"
+    },
+    {
+      "source": "/use-cases/etl",
+      "destination": "/guides/etl"
+    },
+    {
+      "source": "/use-cases/experiments",
+      "destination": "/guides/experiments"
+    },
+    {
+      "source": "/use-cases/getting-user-requests",
+      "destination": "/guides/getting-user-requests"
+    },
+    {
+      "source": "/use-cases/github-actions",
+      "destination": "/guides/github-actions"
+    },
+    {
+      "source": "/use-cases/labeling-request-data",
+      "destination": "/guides/labeling-request-data"
+    },
+    {
+      "source": "/use-cases/replay-session",
+      "destination": "/guides/replay-session"
+    },
+    {
+      "source": "/use-cases/resell-a-model",
+      "destination": "/guides/resell-a-model"
+    },
+    {
+      "source": "/use-cases/segmentation",
+      "destination": "/guides/segmentation"
+    }
+  ]
 }
