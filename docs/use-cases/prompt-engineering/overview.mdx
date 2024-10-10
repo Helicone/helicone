@@ -1,7 +1,7 @@
 ---
 title: "Overview"
 sidebarTitle: "Overview"
-description: "Prompt engineering is effectively crafting prompts to guide Large Language Models (LLMs) like GPT-4 to produce desired outputs. It involves strategically designing input prompts to elicit accurate, relevant, and useful responses from the model."
+description: "Prompt engineering is the strategic crafting of prompts to guide Large Language Models (LLMs) like GPT-4 to produce accurate and desired outputs."
 "twitter:title": "Overview - Prompt Engineering Techniques"
 ---
 
@@ -12,12 +12,11 @@ import QuestionsSection from "/snippets/questions-section.mdx";
 
 Before you follow along, we assume that you: 
 - have a first draft of your prompt
-- have a clear idea of the success criteria
-- know who your audience are
+- know the audience that you are tailoring your prompt to
 - have some benchmark to measure prompt improvements
-- have some example inputs and desired outputs to test against your prompts
+- have some example inputs and desired outputs to test your prompts with
 
-We recommend taking a moment to brainstorm on these to make sure that the following recommendations are effective. 
+We recommend taking a moment to brainstorm on these points to make the most of the following suggestions. 
 
 
 ## How to prompt engineer 
@@ -26,15 +25,15 @@ We recommend taking a moment to brainstorm on these to make sure that the follow
 3. [Leverage role-playing](/use-cases/prompt-engineering/leverage-role-playing)
 4. [Implement few-shot learning](/use-cases/prompt-engineering/implement-few-shot-learning)
 5. [Use constrained outputs](/use-cases/prompt-engineering/use-constrained-outputs)
-6. [Use chain-of-thought prompting](/use-cases/prompt-engineering/use-chain-of-thought-prompting)
+6. [Use Chain-of-Thought prompting](/use-cases/prompt-engineering/use-chain-of-thought-prompting)
 
 
 ## When to start prompt engineering? 
 
 - **Start from the beginning.** It's never to early to think about how your prompt will affect the output.
-- **When you want to refine model outputs.**
-- **When you are expanding features,** prompt engineering ensures that the model adapts to the new use cases.
-- **When you are optimizing cost and performance,** an effective prompt can reduce token usage, lower latency, and improve performance.
+- **When you are refining model outputs** to meet your expectation. 
+- **When you are expanding features** and need the model adapts to the new use cases.
+- **When you want to optimize cost and performance** to reduce token usage, lower latency, and improve performance.
 
 ## Why prompt engineer? 
 - Get more accurate and relevant responses.
@@ -49,7 +48,7 @@ We recommend taking a moment to brainstorm on these to make sure that the follow
 <AccordionGroup>
 
   <Accordion title="How often should I update my prompts?">
-    - Regularly. Especially if you notice changes in the model's performance or after updates to the model. 
+    - Regularly: Especially if you notice changes in the model's performance or after updates to the model. 
     - After use feedback: Incorporate feedback to improve prompt effectiveness.
     - When introducing a new feature: Adjust the prompt to cover new functionalities or use cases.
   </Accordion> 
@@ -59,14 +58,13 @@ We recommend taking a moment to brainstorm on these to make sure that the follow
   </Accordion> 
 
   <Accordion title="What are some common mistakes with prompt engineering?">
-  - Vague Instructions: Leads to unpredictable outputs.
-  - Overcomplicating Prompts: Too much information can confuse the model.
-  - Ignoring Model Limitations: Expecting the model to perform tasks beyond its capabilities.
-  - Lack of Testing: Not validating prompts with various inputs can result in inconsistent performance.  
+  - **Vague instructions**: Leads to unpredictable outputs.
+  - **Overcomplicating prompts**: Too much information can confuse the model.
+  - **Ignoring model limitations**: Expecting the model to perform tasks beyond its capabilities.
+  - **Lack of testing**: Not validating prompts with various inputs can result in inconsistent performance.  
   </Accordion> 
 
   <Accordion title="How does prompt length affect model responses?">
-    The tradeoff is that: 
     - Short prompts can lead to ambiguous or generic answers because of a lack of context.
     - Long prompts provides more detail but can increase token usage and overwhelm the model.
 
