@@ -7,11 +7,12 @@ description: "Provide the model with a few examples of the desired output to gui
 
 import QuestionsSection from "/snippets/questions-section.mdx";
 
-## What is few-shot learning? 
+## What is few-shot learning
 
 Few-shot learning involves including a small number of input-output examples (usually between 1 to 5) within your prompt to demonstrate the task you want the model to perform. This approach helps the model understand the pattern or format you're seeking, effectively "teaching" it how to generate the desired output without the need for extensive training data or fine-tuning.
 
-## How to implement few-shot learning? 
+## How to implement few-shot learning
+
 1. Provide clear examples 
 2. Separate the example from the prompt using a delimiters (Example: Use lines like --- or phrases like Example: to separate sections). 
 3. Keep examples concise
@@ -121,6 +122,7 @@ Now, generate a new motivational quote in the style of Albert Einstein.
 </AccordionGroup>
 
 ## Tips for effective few-shot learning
+
 1. **Use relevant and high-quality examples.** Accuracy matters since incorrect examples can mislead the model. Make sure examples are clear and free of errors.
 2. **Maintain consistency in formatting.** Uniform structure: Consistent formatting helps the model recognize patterns. Use the same separators or markers throughout.
 3. **Limit the number of examples.** Be mindful of the model's context window (maximum token limit). Often, 1-3 examples are enough to guide the model effectively.
