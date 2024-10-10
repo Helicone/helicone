@@ -1,34 +1,129 @@
 ---
-title: "Implement Few-Shot Learning"
+title: "Implement few-shot learning"
 sidebarTitle: "Implement few-shot learning"
-description: "Helicone provides an efficient platform for identifying and rectifying errors in your LLM applications, offering insights into their occurrence."
-"twitter:title": "Debugging LLM Applications - Helicone OSS LLM Observability"
+description: "Provide the model with a few examples of the desired output to guide it to produce responses that closely align with your expectations."
+"twitter:title": "Implement few-shot learning - Prompt Engineering"
 ---
+
+import QuestionsSection from "/snippets/questions-section.mdx";
 
 ## What is few-shot learning? 
 
-Provide examples of desired inputs and outputs to guide the AI’s response.
+Few-shot learning involves including a small number of input-output examples (usually between 1 to 5) within your prompt to demonstrate the task you want the model to perform. This approach helps the model understand the pattern or format you're seeking, effectively "teaching" it how to generate the desired output without the need for extensive training data or fine-tuning.
 
-<Frame>
-  ![Filter web request results by status code on Helicone's request
-  page.](/images/use-cases/status-filter.png)
-</Frame>
+## How to implement few-shot learning? 
+1. Provide clear examples 
+2. Separate the example from the prompt using a delimiters (Example: Use lines like --- or phrases like Example: to separate sections). 
+3. Keep examples concise
+4. Use examples that are reflective of desired outputs
 
-## How does few-shot learning work? 
-
-We are currently developing dedicated error filters to further enhance your debugging experience. If you are interested in this feature, please support us by upvoting the feature request [here](https://www.helicone.ai/roadmap).
 
 ## Examples
 
+<AccordionGroup>
+  <Accordion title="Example 1: Email Response Generation.">
+  The examples show the assistant how to structure the responses, the tone to use, and how to address the customer's specific concerns.
+
+  **Prompt:** 
+```python
+You are an assistant helping to draft professional email responses.
+
+Example 1:
+Customer Inquiry: "I am interested in your software but have some questions about pricing."
+Response: "Dear [Customer Name], thank you for reaching out. I'd be happy to provide more details about our pricing plans..."
+
+Example 2:
+Customer Inquiry: "Can I schedule a demo of your product?"
+Response: "Hello [Customer Name], we'd be delighted to arrange a demo for you. Please let us know your availability..."
+
+Now, based on the customer's message below, compose an appropriate response.
+
+Customer Inquiry: "I'm experiencing issues with logging into my account. Can you assist?"
+Response:
+
 ```
-Convert the following sentences to past tense:
 
-Input: I eat an apple every day.
-Output: I ate an apple every day.
+  </Accordion>
+  
+  <Accordion title="Example 2: Data Extraction.">
+  The model learns to identify and extract specific pieces of information consistently across different job postings.
 
-Input: She runs five miles each morning.
-Output: She ran five miles each morning.
 
-Input: They are studying for their exam.
-Output: They were studying for their exam.
-```
+  **Prompt:** 
+  ```
+Extract key information from the following job postings.
+
+Example:
+Job Posting: "We are seeking a software engineer with 5 years of experience in Java and Python. Location: New York."
+Extracted Information: 
+- Position: Software Engineer
+- Experience: 5 years
+- Skills: Java, Python
+- Location: New York
+
+Job Posting: "Looking for a marketing manager skilled in SEO and content creation. Must have at least 3 years of experience. Location: Remote."
+Extracted Information:
+- Position: Marketing Manager
+- Experience: 3 years
+- Skills: SEO, Content Creation
+- Location: Remote
+
+Now, process the following job posting.
+
+Job Posting: "Wanted: Graphic designer proficient in Adobe Suite and illustration. Experience: 2 years minimum. Location: San Francisco."
+Extracted Information:
+
+  ```
+  </Accordion>
+
+  <Accordion title="Example 3: Sentiment Analysis.">
+The model learns to classify sentiments based on the examples provided, improving accuracy in its analysis.
+
+
+    **Prompt:** 
+    ```
+Determine the sentiment (Positive, Negative, Neutral) of the following customer reviews.
+
+Example 1:
+Review: "The product quality is outstanding and exceeded my expectations."
+Sentiment: Positive
+
+Example 2:
+Review: "I'm disappointed with the customer service I received."
+Sentiment: Negative
+
+Now analyze the following review.
+
+Review: "The delivery was on time, but the packaging was damaged."
+Sentiment:
+
+    ```
+  </Accordion>
+
+  <Accordion title="Example 4: Style imitation in writing.">
+  By providing examples, the model understands the style and themes characteristic of Einstein's quotes, enabling it to generate a similar statement.
+
+  **Prompt:**
+
+  ```
+Write a motivational quote in the style of Albert Einstein.
+
+Example 1:
+"Life is like riding a bicycle. To keep your balance, you must keep moving."
+
+Example 2:
+"Imagination is more important than knowledge. Knowledge is limited; imagination encircles the world."
+
+Now, generate a new motivational quote in the style of Albert Einstein.
+
+  ```
+  </Accordion>
+</AccordionGroup>
+
+## Tips for effective few-shot learning
+1. **Use relevant and high-quality examples.** Accuracy matters since incorrect examples can mislead the model. Make sure examples are clear and free of errors.
+2. **Maintain consistency in formatting.** Uniform structure: Consistent formatting helps the model recognize patterns. Use the same separators or markers throughout.
+3. **Limit the number of examples.** Be mindful of the model's context window (maximum token limit). Often, 1-3 examples are enough to guide the model effectively.
+4. **Position examples strategically.** Place examples before the main task instruction. Use phrases like "Now," "Based on the above," or "Your turn" to signal the shift to the new task.
+
+<QuestionsSection />
