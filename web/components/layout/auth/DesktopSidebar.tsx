@@ -138,7 +138,7 @@ const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
   return (
     <>
       {/* Mobile hamburger menu */}
-      <div className="sticky top-0 z-20 px-2 py-3 flex md:hidden flex-shrink-0 bg-white dark:bg-black border-b border-gray-300 dark:border-gray-70">
+      <div className="sticky top-0 z-20 px-2 py-3 flex md:hidden flex-shrink-0 bg-white dark:bg-black border-b border-slate-300 dark:border-slate-70">
         <Button
           variant="ghost"
           size="icon"
@@ -146,7 +146,7 @@ const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
             setIsCollapsed(false);
             setIsMobileMenuOpen(true);
           }}
-          className="text-gray-500 hover:text-gray-600"
+          className="text-slate-500 hover:text-slate-600"
         >
           <Bars3Icon className="h-6 w-6" />
         </Button>
@@ -176,7 +176,7 @@ const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
       <div
         ref={sidebarRef}
         className={cn(
-          "flex flex-col z-50 bg-background dark:bg-gray-900 transition-all duration-300 h-screen bg-white",
+          "flex flex-col z-50 bg-background dark:bg-slate-900 transition-all duration-300 h-screen bg-white",
           largeWith,
           "fixed top-0 left-0",
           "md:translate-x-0", // Always visible on desktop
@@ -191,15 +191,15 @@ const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
             variant="ghost"
             size="icon"
             onClick={() => setIsMobileMenuOpen(false)}
-            className="text-gray-500 hover:text-gray-600"
+            className="text-slate-500 hover:text-slate-600"
           >
             <XMarkIcon className="h-6 w-6" />
           </Button>
         </div> */}
 
         {/* Existing sidebar content */}
-        <div className="w-full flex flex-grow flex-col overflow-y-auto border-r dark:border-gray-700 justify-between pb-4">
-          <div className="flex items-center gap-2 h-14 border-b dark:border-gray-700">
+        <div className="w-full flex flex-grow flex-col overflow-y-auto border-r dark:border-slate-700 justify-between pb-4">
+          <div className="flex items-center gap-2 h-14 border-b dark:border-slate-700">
             <div className="flex items-center gap-2 w-full">
               {!isCollapsed && <OrgDropdown />}
             </div>
@@ -210,7 +210,7 @@ const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
                 variant="ghost"
                 size="icon"
                 onClick={handleCollapseToggle}
-                className="w-full flex justify-center dark:hover:bg-gray-800 px-2"
+                className="w-full flex justify-center dark:hover:bg-slate-800 px-2"
               >
                 {isCollapsed ? (
                   <ChevronRightIcon className="h-4 w-4" />
@@ -312,7 +312,7 @@ const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="w-full dark:hover:bg-gray-800"
+                      className="w-full dark:hover:bg-slate-800"
                       asChild
                     >
                       <Link
@@ -326,7 +326,7 @@ const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
                   </TooltipTrigger>
                   <TooltipContent
                     side="right"
-                    className="dark:bg-gray-800 dark:text-gray-200"
+                    className="dark:bg-slate-800 dark:text-slate-200"
                   >
                     View Documentation
                   </TooltipContent>
@@ -336,7 +336,7 @@ const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="w-full dark:hover:bg-gray-800"
+                      className="w-full dark:hover:bg-slate-800"
                       asChild
                     >
                       <Link
@@ -350,7 +350,7 @@ const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
                   </TooltipTrigger>
                   <TooltipContent
                     side="right"
-                    className="dark:bg-gray-800 dark:text-gray-200"
+                    className="dark:bg-slate-800 dark:text-slate-200"
                   >
                     Help And Support
                   </TooltipContent>
@@ -361,7 +361,7 @@ const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="w-full justify-start dark:hover:bg-gray-800 text-[12px]"
+                  className="w-full justify-start dark:hover:bg-slate-800 text-[12px]"
                   asChild
                 >
                   <Link
@@ -378,7 +378,7 @@ const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="w-full justify-start dark:hover:bg-gray-800 text-[12px]"
+                  className="w-full justify-start dark:hover:bg-slate-800 text-[12px]"
                   asChild
                 >
                   <Link
