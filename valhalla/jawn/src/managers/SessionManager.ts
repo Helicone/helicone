@@ -378,28 +378,21 @@ WHERE ${buildWhereClause("duration")}
     LIMIT 1
     `;
 
-    console.log({ query });
-
     const results = await clickhouseDb.dbQuery<{ request_id: string }>(
       query,
       []
     );
-
-    console.log({ results });
 
     if (results.error || !results.data) {
       return err("No request found");
     }
 
     const requestManager = new RequestManager(this.authParams);
-    console.log({ id: results.data[0].request_id });
     const res = await requestManager.addPropertyToRequest(
       results.data[0].request_id,
       "Helicone-Session-Feedback",
       rating ? "1" : "0"
     );
-
-    console.log({ res });
 
     if (res.error) {
       return err(res.error);
