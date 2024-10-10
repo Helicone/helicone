@@ -61,6 +61,7 @@ export function ExperimentTable({
     "all"
   );
   const [showScoresTable, setShowScoresTable] = useState(false);
+  const [isHypothesisRunning, setIsHypothesisRunning] = useState(false);
 
   // State to control ExperimentInputSelector
   const [showExperimentInputSelector, setShowExperimentInputSelector] =
@@ -389,6 +390,14 @@ export function ExperimentTable({
             return row;
           })
         );
+        const anyLoading = rowData.some((row) =>
+          Object.values(row.isLoading || {}).some((loading) => loading)
+        );
+
+        if (!anyLoading) {
+          // No hypotheses are running
+          setIsHypothesisRunning(false);
+        }
       },
       onError: (error) => {
         console.error("Error running hypothesis:", error);
@@ -407,6 +416,25 @@ export function ExperimentTable({
     refetchExperiments();
     refetchInputRecords();
   };
+
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout | null = null;
+
+    if (isHypothesisRunning) {
+      intervalId = setInterval(() => {
+        // Refetch data and refresh the grid
+        refetchExperiments();
+
+        gridRef.current?.refreshCells();
+      }, 1000);
+    }
+
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [isHypothesisRunning, refetchExperiments]);
 
   // Determine the hypotheses to run (excluding the first one)
   const hypothesesToRun = useMemo(() => {
