@@ -388,7 +388,7 @@ export function ExperimentTable({
           })
         );
         const anyLoading = rowData.some((row) =>
-          Object.values(row.isLoading || {}).some((loading) => loading)
+          Object.values(row.isLoading).some((loading) => loading)
         );
 
         if (!anyLoading) {
@@ -419,11 +419,9 @@ export function ExperimentTable({
 
     if (isHypothesisRunning) {
       intervalId = setInterval(() => {
-        // Refetch data and refresh the grid
         refetchExperiments();
-        // refetchInputRecords();
         gridRef.current?.refreshCells();
-      }, 1000);
+      }, 500);
     }
 
     return () => {
