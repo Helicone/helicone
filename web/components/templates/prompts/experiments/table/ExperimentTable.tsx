@@ -47,6 +47,7 @@ import ExperimentInputSelector from "../experimentInputSelector";
 
 // Import your LoadingAnimation component
 import LoadingAnimation from "../../../../shared/loadingAnimation";
+import ExportButton from "../../../../shared/themed/table/exportButton";
 
 interface ExperimentTableProps {
   promptSubversionId: string;
@@ -797,6 +798,33 @@ export function ExperimentTable({
     handleLastInputSubmit,
   ]);
 
+  const getExperimentExportData = useCallback(() => {
+    if (!rowData || rowData.length === 0) {
+      return [];
+    }
+
+    const exportedData = rowData.map((row) => {
+      const exportedRow: Record<string, any> = {};
+
+      inputColumnFields.forEach((field) => {
+        exportedRow[field] = row[field] || "";
+      });
+
+      exportedRow["messages"] = row["messages"] || "";
+
+      exportedRow["original"] = row["original"] || "";
+
+      sortedHypotheses.forEach((hypothesis, index) => {
+        const experimentLabel = `Experiment ${index + 1}`;
+        exportedRow[experimentLabel] = row[hypothesis.id] || "";
+      });
+
+      return exportedRow;
+    });
+
+    return exportedData;
+  }, [rowData, inputColumnFields, sortedHypotheses]);
+
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [selectedProviderKey, setSelectedProviderKey] = useState(providerKey);
 
@@ -833,12 +861,11 @@ export function ExperimentTable({
             <FunnelIcon className="h-4 w-4 text-slate-700" />
             <ChevronDownIcon className="h-4 w-4 text-slate-400" />
           </Button>
-          <Button
-            variant="outline"
-            className="py-0 px-2 border border-slate-200 h-8 flex items-center justify-center space-x-1"
-          >
-            <ArrowDownTrayIcon className="h-4 w-4 text-slate-700" />
-          </Button>
+          <ExportButton
+            className="py-0 px-2 border border-slate-200 h-8 flex items-center justify-center space-x-1 bg-white"
+            key="export-button"
+            rows={getExperimentExportData()}
+          />
           {/* <ProviderKeyDropdown
             providerKey={selectedProviderKey}
             setProviderKey={setSelectedProviderKey}
