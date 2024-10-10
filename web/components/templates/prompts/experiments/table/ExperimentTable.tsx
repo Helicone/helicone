@@ -610,97 +610,101 @@ export function ExperimentTable({
       },
     ];
 
-    // Add columns for each input key
-    Array.from(inputKeys).forEach((key, index) => {
+    // Add input columns if columnView is "all" or "inputs"
+    if (columnView === "all" || columnView === "inputs") {
+      // Add columns for each input key
+      Array.from(inputKeys).forEach((key, index) => {
+        columns.push({
+          field: key,
+          headerName: key,
+          width: 150,
+          cellRenderer: InputCellRenderer,
+          cellRendererParams: {
+            index: index,
+          },
+          cellClass: "border-r border-[#E2E8F0] text-slate-700",
+          headerClass: "border-r border-[#E2E8F0]",
+          headerComponent: InputsHeaderComponent,
+          headerComponentParams: {
+            index: index,
+            displayName: key,
+            badgeText: "Input",
+          },
+          cellStyle: {
+            display: "flex",
+            alignItems: "center",
+            overflow: "hidden",
+            justifyContent: "start",
+            whiteSpace: wrapText ? "normal" : "nowrap",
+          },
+          autoHeight: wrapText,
+          editable: false, // Set this to false to prevent default editing
+        });
+      });
+
+      // Add the "Messages" column
       columns.push({
-        field: key,
-        headerName: key,
-        width: 150,
-        cellRenderer: InputCellRenderer,
-        cellRendererParams: {
-          index: index,
-        },
-        cellClass: "border-r border-[#E2E8F0] text-slate-700",
-        headerClass: "border-r border-[#E2E8F0]",
-        headerComponent: InputsHeaderComponent,
+        field: "messages",
+        headerName: "Messages",
+        width: 200,
+        headerComponent: CustomHeaderComponent,
         headerComponentParams: {
-          index: index,
-          displayName: key,
+          displayName: "Messages",
           badgeText: "Input",
+          badgeVariant: "secondary",
+          hypothesis: sortedHypotheses[0] || {},
+          promptVersionTemplate: promptVersionTemplate,
+        },
+        cellClass:
+          "border-r border-[#E2E8F0] text-slate-700 flex items-center justify-start pt-2.5",
+        headerClass: "border-r border-[#E2E8F0]",
+        cellRenderer: OriginalMessagesCellRenderer,
+        cellRendererParams: {
+          prompt: promptVersionTemplate,
         },
         cellStyle: {
-          display: "flex",
-          alignItems: "center",
+          verticalAlign: "middle",
+          textAlign: "left",
           overflow: "hidden",
-          justifyContent: "start",
+          textOverflow: "ellipsis",
           whiteSpace: wrapText ? "normal" : "nowrap",
         },
         autoHeight: wrapText,
-        editable: false, // Set this to false to prevent default editing
       });
-    });
+    }
 
-    // Add the "Messages" column
-    columns.push({
-      field: "messages",
-      headerName: "Messages",
-      width: 200,
-      headerComponent: CustomHeaderComponent,
-      headerComponentParams: {
-        displayName: "Messages",
-        badgeText: "Input",
-        badgeVariant: "secondary",
-        hypothesis: sortedHypotheses[0] || {},
-        promptVersionTemplate: promptVersionTemplate,
-      },
-      cellClass:
-        "border-r border-[#E2E8F0] text-slate-700 flex items-center justify-start pt-2.5",
-      headerClass: "border-r border-[#E2E8F0]",
-      cellRenderer: OriginalMessagesCellRenderer,
-      cellRendererParams: {
-        prompt: promptVersionTemplate,
-      },
-      cellStyle: {
-        verticalAlign: "middle",
-        textAlign: "left",
-        overflow: "hidden",
-        textOverflow: "ellipsis",
-        whiteSpace: wrapText ? "normal" : "nowrap",
-      },
-      autoHeight: wrapText,
-    });
-
-    // Add the "Original" column
-    columns.push({
-      field: "original",
-      headerName: "Original",
-      width: 200,
-      headerComponent: CustomHeaderComponent,
-      headerComponentParams: {
-        displayName: "Original",
-        badgeText: "Output",
-        badgeVariant: "secondary",
-        hypothesis: sortedHypotheses[1] || {},
-        promptVersionTemplate: promptVersionTemplate,
-      },
-      cellClass: "border-r border-[#E2E8F0] text-slate-700 pt-2.5",
-      headerClass: "border-r border-[#E2E8F0]",
-      cellRenderer: OriginalOutputCellRenderer,
-      cellRendererParams: {
-        prompt: promptVersionTemplate,
-      },
-      cellStyle: {
-        verticalAlign: "middle",
-        textAlign: "left",
-        overflow: "hidden",
-        textOverflow: "ellipsis",
-        whiteSpace: wrapText ? "normal" : "nowrap",
-      },
-      autoHeight: wrapText,
-    });
-
-    // Add columns for additional experiments
+    // Add output columns if columnView is "all" or "outputs"
     if (columnView === "all" || columnView === "outputs") {
+      // Add the "Original" column
+      columns.push({
+        field: "original",
+        headerName: "Original",
+        width: 200,
+        headerComponent: CustomHeaderComponent,
+        headerComponentParams: {
+          displayName: "Original",
+          badgeText: "Output",
+          badgeVariant: "secondary",
+          hypothesis: sortedHypotheses[1] || {},
+          promptVersionTemplate: promptVersionTemplate,
+        },
+        cellClass: "border-r border-[#E2E8F0] text-slate-700 pt-2.5",
+        headerClass: "border-r border-[#E2E8F0]",
+        cellRenderer: OriginalOutputCellRenderer,
+        cellRendererParams: {
+          prompt: promptVersionTemplate,
+        },
+        cellStyle: {
+          verticalAlign: "middle",
+          textAlign: "left",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: wrapText ? "normal" : "nowrap",
+        },
+        autoHeight: wrapText,
+      });
+
+      // Add columns for additional experiments (hypotheses)
       sortedHypotheses.forEach((hypothesis, index) => {
         const experimentNumber = index + 1;
         columns.push({
@@ -741,7 +745,7 @@ export function ExperimentTable({
       });
     }
 
-    // Add the "Add Experiment" column
+    // Add the "Add Experiment" column (always)
     columns.push({
       headerName: "Add Experiment",
       width: 150,
