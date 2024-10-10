@@ -424,7 +424,7 @@ export function ExperimentTable({
       intervalId = setInterval(() => {
         // Refetch data and refresh the grid
         refetchExperiments();
-
+        // refetchInputRecords();
         gridRef.current?.refreshCells();
       }, 1000);
     }
@@ -434,7 +434,7 @@ export function ExperimentTable({
         clearInterval(intervalId);
       }
     };
-  }, [isHypothesisRunning, refetchExperiments]);
+  }, [isHypothesisRunning, refetchExperiments, refetchInputRecords]);
 
   // Determine the hypotheses to run (excluding the first one)
   const hypothesesToRun = useMemo(() => {
