@@ -58,7 +58,16 @@
       "pages": [
         "getting-started/quick-start",
         "helicone-headers/header-directory",
-        "helicone-headers/helicone-auth"
+        "helicone-headers/helicone-auth",
+        {
+          "group": "Self Host",
+          "pages": [
+            "getting-started/self-deploy-cloud",
+            "getting-started/self-deploy-docker",
+            "getting-started/self-deploy-kubernetes",
+            "getting-started/self-deploy"
+          ]
+        }
       ]
     },
     {
@@ -234,23 +243,13 @@
       ]
     },
     {
-      "group": "Resources",
+      "group": "References",
       "pages": [
-        "references/api",
-        "getting-started/proxy-vs-async",
-        "faq/how-we-calculate-cost",
-        "faq/latency-affect",
-        "faq/availability",
-        "helicone-headers/predefining-request-id",
-        "faq/secret-vs-public-key",
-        {
-          "group": "Deployment",
-          "pages": [
-            "getting-started/self-deploy-cloud",
-            "getting-started/self-deploy-docker",
-            "getting-started/self-deploy"
-          ]
-        }
+        "references/availability",
+        "references/latency-affect",
+        "references/data-autonomy",
+        "references/proxy-vs-async",
+        "references/how-we-calculate-cost"
       ]
     },
     {
@@ -265,6 +264,7 @@
             "guides/developer/replay-session"
           ]
         },
+        "guides/developer/predefining-request-id",
         "guides/developer/environment-tracking",
         "guides/developer/segmentation",
         "guides/developer/experiments",
@@ -272,6 +272,10 @@
         "guides/developer/debugging",
         "guides/developer/labeling-request-data"
       ]
+    },
+    {
+      "group": "faq",
+      "pages": ["faq/secret-vs-public-key"]
     },
     {
       "group": "Use Cases",
@@ -344,6 +348,10 @@
     "discord": "https://discord.com/invite/zsSTcH2qhG"
   },
   "redirects": [
+    {
+      "source": "/getting-started/proxy-vs",
+      "destination": "/references/proxy-vs-async"
+    },
     {
       "source": "/use-cases/bill-by-usage",
       "destination": "/guides/bill-by-usage"
