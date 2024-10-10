@@ -1,0 +1,282 @@
+---
+title: "Replaying LLM Sessions"
+sidebarTitle: "Replay Sessions"
+description: "Learn how to replay and modify LLM sessions using Helicone to optimize your AI agents and improve their performance."
+"twitter:title": "Replaying LLM Sessions - Helicone OSS LLM Observability"
+---
+
+import QuestionsSection from "/snippets/questions-section.mdx";
+
+Understanding how changes impact your AI agents in real-world interactions is crucial. By **replaying LLM sessions** with Helicone, you can apply modifications to actual AI agent sessions, providing valuable insights that traditional isolated testing may miss.
+
+## Use Cases
+
+- **Optimize AI Agents**: Enhance agent performance by testing modifications on real session data.
+- **Debug Complex Interactions**: Identify issues that only arise during full session interactions.
+- **Accelerate Development**: Streamline your AI agent development process by efficiently testing changes.
+
+<Steps>
+  <Step title="Record Sessions with Helicone Metadata">
+
+    Instrument your AI agent’s LLM calls to include Helicone session metadata for tracking and logging.
+
+    **Example: Setting Up Session Metadata**
+
+    ````javascript Setting Up Session Metadata
+    const { Configuration, OpenAIApi } = require("openai");
+    const { randomUUID } = require("crypto");
+
+    // Generate unique session identifiers
+    const sessionId = randomUUID();
+    const sessionName = "AI Debate";
+    const sessionPath = "/debate/climate-change";
+
+    // Initialize OpenAI client with Helicone baseURL and auth header
+    const configuration = new Configuration({
+      apiKey: process.env.OPENAI_API_KEY,
+      basePath: "https://oai.helicone.ai/v1",
+      baseOptions: {
+        headers: {
+          "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+        },
+      },
+    });
+    const openai = new OpenAIApi(configuration);
+    ````
+
+    **Include the Helicone session headers in your requests:**
+
+    ````javascript Including Helicone Session Headers
+    const completionParams = {
+      model: "gpt-3.5-turbo",
+      messages: conversation,
+    };
+
+    const response = await openai.createChatCompletion(completionParams, {
+      headers: {
+        "Helicone-Session-Id": sessionId,
+        "Helicone-Session-Name": sessionName,
+        "Helicone-Session-Path": sessionPath,
+        "Helicone-Prompt-Id": "assistant-response",
+      },
+    });
+    ````
+
+    **Initialize the conversation with the assistant:**
+
+    ````javascript Initializing Conversation
+    const topic = "The impact of climate change on global economies";
+
+    const conversation = [
+      {
+        role: "system",
+        content:
+          "You're an AI debate assistant. Engage with the user by presenting arguments for or against the topic. Keep responses concise and insightful.",
+      },
+      {
+        role: "assistant",
+        content: `Welcome to our debate! Today's topic is: "${topic}". I will argue in favor, and you will argue against. Please present your opening argument.`,
+      },
+    ];
+    ````
+
+    **Loop through the debate turns:**
+
+    ````javascript Looping Through Debate Turns
+    const MAX_TURNS = 3;
+    let turn = 1;
+
+    while (turn <= MAX_TURNS) {
+      // Get user's argument (simulate user input)
+      const userArgument = await getUserArgument();
+      conversation.push({ role: "user", content: userArgument });
+
+      // Assistant responds with a counter-argument
+      const assistantResponse = await generateAssistantResponse(
+        conversation,
+        sessionId,
+        sessionName,
+        sessionPath
+      );
+      conversation.push(assistantResponse);
+
+      turn++;
+    }
+
+    // Function to simulate user input
+    async function getUserArgument() {
+      // Simulate user input or fetch from an input source
+      const userArguments = [
+        "I believe climate change is a natural cycle and not significantly influenced by human activities.",
+        "Economic resources should focus on immediate human needs rather than combating climate change.",
+        "Strict environmental regulations can hinder economic growth and affect employment rates.",
+      ];
+      // Return the next argument
+      return userArguments.shift();
+    }
+
+    // Function to generate assistant's response
+    async function generateAssistantResponse(
+      conversation,
+      sessionId,
+      sessionName,
+      sessionPath
+    ) {
+      const completionParams = {
+        model: "gpt-3.5-turbo",
+        messages: conversation,
+      };
+
+      const response = await openai.createChatCompletion(completionParams, {
+        headers: {
+          "Helicone-Session-Id": sessionId,
+          "Helicone-Session-Name": sessionName,
+          "Helicone-Session-Path": sessionPath,
+          "Helicone-Prompt-Id": "assistant-response",
+        },
+      });
+
+      const assistantMessage = response.data.choices[0].message;
+      return assistantMessage;
+    }
+    ````
+
+    **After setting up and running your session through Helicone, you can view it in Helicone:**
+
+    <Frame>
+      <video width="100%" controls>
+        <source
+          src="https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/session_debate.mp4"
+          type="video/mp4"
+        />
+        Your browser does not support the video tag.
+      </video>
+    </Frame>
+
+    *Go fullscreen for the best experience.*
+
+  </Step>
+
+  <Step title="Retrieve Session Data">
+
+    Use Helicone's [Request API](/rest/request/post-v1requestquery) to fetch session data.
+
+    **Example: Querying Session Data**
+
+    ````bash Querying Session Data
+    curl --request POST \
+      --url https://api.helicone.ai/v1/request/query \
+      --header 'Content-Type: application/json' \
+      --header 'authorization: Bearer sk-<your-helicone-api-key>' \
+      --data '{
+        "limit": 100,
+        "offset": 0,
+        "sort_by": {
+          "key": "request_created_at",
+          "direction": "asc"
+        },
+        "filter": {
+          "properties": {
+            "Helicone-Session-Id": {
+              "equals": "<session-id>"
+            }
+          }
+        }
+      }'
+    ````
+
+  </Step>
+
+  <Step title="Modify and Replay the Session">
+
+    Retrieve the original requests, apply modifications, and resend them to observe the impact.
+
+    **Example: Modifying Requests and Replaying**
+
+    ````javascript Modifying Requests and Replaying
+    const fetch = require("node-fetch");
+    const { randomUUID } = require("crypto");
+
+    const HELICONE_API_KEY = process.env.HELICONE_API_KEY;
+    const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+    const REPLAY_SESSION_ID = randomUUID();
+
+    async function replaySession(requests) {
+      for (const request of requests) {
+        const modifiedRequest = modifyRequestBody(request);
+
+        await sendRequest(modifiedRequest);
+      }
+    }
+
+    function modifyRequestBody(request) {
+      // Implement modifications to the request body as needed
+      // For example, enhancing the system prompt for better responses
+      if (request.prompt_id === "assistant-response") {
+        const systemMessage = request.body.messages.find(
+          (msg) => msg.role === "system"
+        );
+        if (systemMessage) {
+          systemMessage.content +=
+            " Take the persona of a field expert and provide more persuasive arguments.";
+        }
+      }
+      return request;
+    }
+
+    async function sendRequest(modifiedRequest) {
+      const { body, request_path, path, prompt_id } = modifiedRequest;
+
+      const response = await fetch(request_path, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${OPENAI_API_KEY}`,
+          "Helicone-Auth": `Bearer ${HELICONE_API_KEY}`,
+          "Helicone-Session-Id": REPLAY_SESSION_ID,
+          "Helicone-Session-Name": "Replayed Session",
+          "Helicone-Session-Path": path,
+          "Helicone-Prompt-Id": prompt_id,
+        },
+        body: JSON.stringify(body),
+      });
+
+      const data = await response.json();
+      // Handle the response as needed
+    }
+    ````
+
+    **Note:** In the `modifyRequestBody` function, we're enhancing the assistant's system prompt to make the responses more persuasive by taking the persona of a field expert.
+
+  </Step>
+
+  <Step title="Analyze the Replayed Session">
+
+    After replaying, use Helicone's dashboard to compare the original and modified sessions to evaluate improvements.
+
+    <Frame>
+      <video width="100%" controls>
+        <source
+          src="https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/session_debate_replay.mp4"
+          type="video/mp4"
+        />
+        Your browser does not support the video tag.
+      </video>
+    </Frame>
+
+    *Go fullscreen for the best experience.*
+
+  </Step>
+</Steps>
+
+## Additional Tips
+
+- **Version Control Prompts**: Keep track of different prompt versions to see which yields the best results.
+- **Use Evaluations**: Utilize Helicone's [Evaluation Features](/features/evaluation) to score and compare responses.
+- **Prompt Versioning**: Use Helicone's [Prompt Versioning](/features/prompts) to manage and compare different prompt versions effectively.
+
+## Conclusion
+
+By replaying LLM sessions with Helicone, you can effectively **optimize your AI agents**, leading to improved performance and better user experiences.
+
+<QuestionsSection />

@@ -12,6 +12,11 @@ import QuestionsSection from "/snippets/questions-section.mdx";
   [plan](https://www.helicone.ai/pricing).
 </Info>
 
+<Warning>
+  Scores will be ingested with a **10 minutes delay** to ensure there is enough
+  time to process the request.
+</Warning>
+
 ## Introduction
 
 Helicone's scores [API](https://docs.helicone.ai/rest/request/post-v1request-score) allows you to score your requests and experiments. You can use this feature to evaluate the performance of your prompts and compare different experiments and datasets. E.g., if you are building an image classification application, you might need a variety of scores to help you determine how accurate the outputs are compared to what you expect. For example, an image classification app might have one score that tells you how accurate the model classifies images into the correct categories, and another that measures the confidence level of the model's predictions.

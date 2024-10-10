@@ -134,7 +134,30 @@ export class ExperimentDatasetController extends Controller {
     return result;
   }
 
-  @Post("{datasetId}/version/{promptVersionId}/row")
+  @Post("{datasetId}/row/insert")
+  public async insertDatasetRow(
+    @Body()
+    requestBody: {
+      inputRecordId: string;
+    },
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() datasetId: string
+  ): Promise<Result<string, string>> {
+    const datasetManager = new DatasetManager(request.authParams);
+    const datasetRowResult = await datasetManager.addDatasetRow(
+      datasetId,
+      requestBody.inputRecordId
+    );
+    if (datasetRowResult.error || !datasetRowResult.data) {
+      console.error(datasetRowResult.error);
+      this.setStatus(500);
+      return datasetRowResult;
+    }
+    this.setStatus(200);
+    return ok(requestBody.inputRecordId);
+  }
+
+  @Post("{datasetId}/version/{promptVersionId}/row/new")
   public async createDatasetRow(
     @Body()
     requestBody: {

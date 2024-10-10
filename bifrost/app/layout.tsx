@@ -10,6 +10,7 @@ import { PHProvider } from "./providers";
 import dynamic from "next/dynamic";
 import Script from "next/script";
 import Head from "next/head";
+import { Layout } from "./components/Layout";
 const PostHogPageView = dynamic(() => import("./PostHogPageView"), {
   ssr: false,
 });
@@ -67,9 +68,7 @@ export default function RootLayout({
       <PHProvider>
         <body>
           <div className={`bg-[#f8feff] flex flex-col ${inter.className}`}>
-            <NavBar />
-            {children}
-            <Footer />
+            <Layout>{children}</Layout>
           </div>
           <PostHogPageView />
           <Analytics />
@@ -80,10 +79,6 @@ export default function RootLayout({
               __html: `!function(t){if(window.ko)return;window.ko=[],["identify","track","removeListeners","open","on","off","qualify","ready"].forEach(function(t){ko[t]=function(){var n=[].slice.call(arguments);return n.unshift(t),ko.push(n),ko}});var n=document.createElement("script");n.async=!0,n.setAttribute("src","https://cdn.getkoala.com/v1/pk_3d24ae9e69e18decfcb68b9d7b668c4501b5/sdk.js"),(document.body || document.head).appendChild(n)}();`,
             }}
           />
-          <script
-            src="https://app.joincharm.com/setup.js?id=MJibnfjF_EatbOHnyLMGp"
-            async
-          ></script>
           <Script
             id="google-analytics"
             strategy="afterInteractive"

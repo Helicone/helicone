@@ -21,6 +21,14 @@ import { BaseManager } from "../BaseManager";
 import { ScoreManager } from "../score/ScoreManager";
 import { HeliconeScoresMessage } from "../../lib/handlers/HandlerContext";
 
+function toISOStringClickhousePatch(date: string): string {
+  const dateObj = new Date(date);
+  const tzOffset = dateObj.getTimezoneOffset() * 60000;
+
+  const localDateObj = new Date(dateObj.getTime() - tzOffset);
+  return localDateObj.toISOString();
+}
+
 export class RequestManager extends BaseManager {
   private versionedRequestStore: VersionedRequestStore;
   private s3Client: S3Client;
@@ -167,6 +175,36 @@ export class RequestManager extends BaseManager {
       };
     }
   }
+  private addScoreFilterClickhouse(
+    isScored: boolean,
+    filter: FilterNode
+  ): FilterNode {
+    if (isScored) {
+      return {
+        left: filter,
+        operator: "and",
+        right: {
+          request_response_rmt: {
+            scores_column: {
+              "not-equals": "{}",
+            },
+          },
+        },
+      };
+    } else {
+      return {
+        left: filter,
+        operator: "and",
+        right: {
+          request_response_rmt: {
+            scores_column: {
+              equals: "{}",
+            },
+          },
+        },
+      };
+    }
+  }
 
   private addPartOfExperimentFilter(
     isPartOfExperiment: boolean,
@@ -276,11 +314,7 @@ export class RequestManager extends BaseManager {
     let newFilter = filter;
 
     if (isScored !== undefined) {
-      newFilter = this.addScoreFilter(isScored, newFilter);
-    }
-
-    if (isPartOfExperiment !== undefined) {
-      newFilter = this.addPartOfExperimentFilter(isPartOfExperiment, newFilter);
+      newFilter = this.addScoreFilterClickhouse(isScored, newFilter);
     }
 
     const requests = isCached
@@ -307,6 +341,15 @@ export class RequestManager extends BaseManager {
         .map((r) => {
           return {
             ...r,
+            request_created_at: toISOStringClickhousePatch(
+              r.request_created_at
+            ),
+            feedback_created_at: r.feedback_created_at
+              ? toISOStringClickhousePatch(r.feedback_created_at)
+              : null,
+            response_created_at: r.response_created_at
+              ? toISOStringClickhousePatch(r.response_created_at)
+              : null,
             costUSD: costOfPrompt({
               model: r.request_model ?? "",
               provider: r.provider ?? "",

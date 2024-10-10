@@ -20,6 +20,8 @@ import ModelPill from "./modelPill";
 import StatusBadge from "./statusBadge";
 import ThemedModal from "../../shared/themed/themedModal";
 import NewDataset from "../datasets/NewDataset";
+import { convertToUSDateFormat } from "../../shared/utils/dateConvertor";
+import { formatNumber } from "../../shared/utils/formatNumber";
 
 function getPathName(url: string) {
   try {
@@ -28,26 +30,6 @@ function getPathName(url: string) {
     return url;
   }
 }
-const convertToUSDateFormat = (date: string) => {
-  const dateObj = new Date(date);
-  const tzOffset = dateObj.getTimezoneOffset() * 60000;
-
-  const localDateObj = new Date(dateObj.getTime() - tzOffset);
-  const formattedDate =
-    [
-      ("0" + (localDateObj.getMonth() + 1)).slice(-2),
-      ("0" + localDateObj.getDate()).slice(-2),
-      localDateObj.getFullYear(),
-    ].join("/") +
-    " " +
-    [
-      ("0" + localDateObj.getHours()).slice(-2),
-      ("0" + localDateObj.getMinutes()).slice(-2),
-      ("0" + localDateObj.getSeconds()).slice(-2),
-    ].join(":");
-
-  return formattedDate;
-};
 
 const RequestRow = (props: {
   request: NormalizedRequest;
@@ -283,6 +265,18 @@ const RequestRow = (props: {
           </li>
           <li className="flex flex-row justify-between items-center py-2 gap-4">
             <p className="font-semibold text-gray-900 dark:text-gray-100">
+              Cost
+            </p>
+            <p className="text-gray-700 dark:text-gray-300 truncate">
+              {request.cost !== null && request.cost !== undefined
+                ? `$${formatNumber(request.cost)}`
+                : request.status.statusType === "success"
+                ? "Calculating..."
+                : "N/A"}
+            </p>
+          </li>
+          <li className="flex flex-row justify-between items-center py-2 gap-4">
+            <p className="font-semibold text-gray-900 dark:text-gray-100">
               Status
             </p>
             <StatusBadge
@@ -341,7 +335,6 @@ const RequestRow = (props: {
             )}
         </ul>
       </div>
-
       <div className="flex flex-col gap-4">
         <div className="font-semibold text-gray-900 dark:text-gray-100 text-sm items-center flex">
           <div className="flex flex-row items-center space-x-1">
@@ -555,7 +548,6 @@ const RequestRow = (props: {
           </div>
         )}
       </div>
-
       {displayPreview && (
         <div className="flex flex-col space-y-8">
           <div className="flex w-full justify-end">
@@ -574,6 +566,7 @@ const RequestRow = (props: {
           <div className="flex flex-col space-y-2">{request.render()}</div>
         </div>
       )}
+      <div className="min-h-[100px]">{/* space */}</div>
       <ThemedModal open={newDatasetModalOpen} setOpen={setNewDatasetModalOpen}>
         <NewDataset
           request_ids={[request.id]}

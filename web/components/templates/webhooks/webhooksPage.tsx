@@ -12,6 +12,8 @@ import AddWebhookForm from "./addWebhookForm";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import ThemedDrawer from "../../shared/themed/themedDrawer";
 import { ClipboardIcon } from "@heroicons/react/24/outline";
+import { InfoBox } from "@/components/ui/helicone/infoBox";
+import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
 
 interface WebhooksPageProps {
   user: User;
@@ -40,8 +42,32 @@ const WebhooksPage = (props: WebhooksPageProps) => {
     refetchOnWindowFocus: false,
   });
 
+  if (
+    org?.currentOrg?.tier !== "enterprise" &&
+    org?.currentOrg?.tier !== "pro-20240913"
+  ) {
+    return (
+      <div className="flex flex-col space-y-8 items-center min-h-[calc(100vh-200px)]">
+        <InfoBox variant="warning" className="mb-4 max-w-xl">
+          Webhooks are currently in beta. And are only available for Pro plans.
+          If you have any issues, please contact us at support@helicone.ai.
+        </InfoBox>
+        <FeatureUpgradeCard
+          title="Unlock Webhooks"
+          description="The Free plan does not include the BETA webhooks feature, but getting access is easy."
+          infoBoxText="Add webhooks to easily subscribe to API requests that come into Helicone."
+          documentationLink="https://docs.helicone.ai/features/sessions"
+        />
+      </div>
+    );
+  }
+
   return (
     <>
+      <InfoBox variant="warning" className="mb-4 max-w-xl">
+        Webhooks are currently in beta. If you have any issues, please contact
+        us at support@helicone.ai.
+      </InfoBox>
       <div className="flex flex-col space-y-8">
         <div className="flex flex-row w-full justify-between items-center">
           <h1 className="text-2xl font-semibold text-gray-900">

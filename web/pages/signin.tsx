@@ -8,6 +8,7 @@ import { supabaseServer } from "../lib/supabaseServer";
 import { Result, err, ok } from "../lib/result";
 import PublicMetaData from "../components/layout/public/publicMetaData";
 import { useEffect } from "react";
+import LoadingAnimation from "@/components/shared/loadingAnimation";
 
 export type CustomerPortalContent = {
   domain: string;
@@ -55,50 +56,59 @@ const SignIn = ({
   return (
     <PublicMetaData
       description={
-        "How developers build AI applications. Get observability, tooling, fine-tuning, and evaluations out of the box. "
+        "How developers build AI applications. Get observability, tooling, fine-tuning, and evaluations out of the box."
       }
       ogImageUrl={"https://www.helicone.ai/static/helicone-og.webp"}
     >
-      <AuthForm
-        handleEmailSubmit={async (email: string, password: string) => {
-          const { data, error } = await supabase.auth.signInWithPassword({
-            email: email,
-            password: password,
-          });
+      <div>
+        {user ? (
+          <div className="flex items-center justify-center h-screen flex-col">
+            <LoadingAnimation />
+            <h1 className="text-4xl font-semibold">Getting your dashboard</h1>
+          </div>
+        ) : (
+          <AuthForm
+            handleEmailSubmit={async (email: string, password: string) => {
+              const { data, error } = await supabase.auth.signInWithPassword({
+                email: email,
+                password: password,
+              });
 
-          if (error) {
-            setNotification("Error logging in. Please try again.", "error");
-            console.error(error);
-            return;
-          }
-          setNotification("Success. Redirecting...", "success");
-          router.push("/dashboard");
-        }}
-        handleGoogleSubmit={async () => {
-          const { error } = await supabase.auth.signInWithOAuth({
-            provider: "google",
-          });
-          if (error) {
-            setNotification("Error logging in. Please try again.", "error");
-            console.error(error);
-            return;
-          }
-          setNotification("Successfully signed in.", "success");
-        }}
-        handleGithubSubmit={async () => {
-          const { error } = await supabase.auth.signInWithOAuth({
-            provider: "github",
-          });
-          if (error) {
-            setNotification("Error logging in. Please try again.", "error");
-            console.error(error);
-            return;
-          }
-          setNotification("Successfully signed in.", "success");
-        }}
-        authFormType={"signin"}
-        customerPortalContent={customerPortalContent}
-      />
+              if (error) {
+                setNotification("Error logging in. Please try again.", "error");
+                console.error(error);
+                return;
+              }
+              setNotification("Success. Redirecting...", "success");
+              router.push("/dashboard");
+            }}
+            handleGoogleSubmit={async () => {
+              const { error } = await supabase.auth.signInWithOAuth({
+                provider: "google",
+              });
+              if (error) {
+                setNotification("Error logging in. Please try again.", "error");
+                console.error(error);
+                return;
+              }
+              setNotification("Successfully signed in.", "success");
+            }}
+            handleGithubSubmit={async () => {
+              const { error } = await supabase.auth.signInWithOAuth({
+                provider: "github",
+              });
+              if (error) {
+                setNotification("Error logging in. Please try again.", "error");
+                console.error(error);
+                return;
+              }
+              setNotification("Successfully signed in.", "success");
+            }}
+            authFormType={"signin"}
+            customerPortalContent={customerPortalContent}
+          />
+        )}
+      </div>
     </PublicMetaData>
   );
 };

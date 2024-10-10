@@ -191,6 +191,7 @@ interface RequestResponseRMTToOperators {
   scores: {
     [key: string]: SingleKey<TextOperators>;
   };
+  scores_column: SingleKey<TextOperators>;
   request_body: SingleKey<VectorOperators>;
   response_body: SingleKey<VectorOperators>;
 }

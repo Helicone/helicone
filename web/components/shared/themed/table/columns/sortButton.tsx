@@ -1,4 +1,17 @@
-import { Menu, Transition } from "@headlessui/react";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Switch } from "@/components/ui/switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   BarsArrowDownIcon,
   BarsArrowUpIcon,
@@ -6,10 +19,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { Column } from "@tanstack/react-table";
 import { useRouter } from "next/router";
-import { Fragment } from "react";
-import { Row } from "../../../../layout/common/row";
-import ThemedDropdown from "../../themedDropdown";
-import { ThemedSwitch } from "../../themedSwitch";
+import { Row } from "@/components/layout/common/row";
 
 interface SortButtonProps<T> {
   columns: Column<T, unknown>[];
@@ -17,83 +27,81 @@ interface SortButtonProps<T> {
 
 export default function SortButton<T>(props: SortButtonProps<T>) {
   const { columns } = props;
-
   const router = useRouter();
 
   return (
-    <Menu as="div" className="relative inline-block text-left">
-      <div>
-        <Menu.Button className="bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2">
-          <BarsArrowDownIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
-
-          <div className="text-sm font-medium items-center text-gray-900 dark:text-gray-100 hidden sm:flex gap-1">
-            Sort
-          </div>
-        </Menu.Button>
-      </div>
-      <Transition
-        as={Fragment}
-        enter="transition ease-out duration-100"
-        enterFrom="transform opacity-0 scale-95"
-        enterTo="transform opacity-100 scale-100"
-        leave="transition ease-in duration-75"
-        leaveFrom="transform opacity-100 scale-100"
-        leaveTo="transform opacity-0 scale-95"
-      >
-        <Menu.Items className="border border-gray-300 dark:border-gray-700 absolute z-10 right-0 mt-2 origin-top-right rounded-lg bg-white dark:bg-black shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none">
-          <Row className="p-4  gap-4">
-            <button
-              onClick={() => {
-                const { sortDirection, sortKey, ...restQuery } = router.query;
-                router.push({
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+          <BarsArrowDownIcon className="h-4 w-4" />
+          <span className="sr-only">Sort</span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-[200px]">
+        <Row className="p-2 gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => {
+              const { sortDirection, sortKey, ...restQuery } = router.query;
+              router.push({
+                pathname: router.pathname,
+                query: restQuery,
+              });
+            }}
+          >
+            <TrashIcon className="h-4 w-4" />
+          </Button>
+          <Select
+            onValueChange={(option) => {
+              router.push(
+                {
                   pathname: router.pathname,
-                  query: restQuery,
-                });
-              }}
-            >
-              <TrashIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
-            </button>
-            <ThemedDropdown
-              options={columns
+                  query: { ...router.query, sortKey: option },
+                },
+                undefined
+              );
+            }}
+            value={router.query.sortKey as string}
+          >
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Select a column" />
+            </SelectTrigger>
+            <SelectContent>
+              {columns
                 .filter((column) => column.columnDef.meta?.sortKey)
-                .map((column) => {
-                  return {
-                    label: column.columnDef.id ?? "",
-                    value: column.columnDef.meta?.sortKey!,
-                    sortKey: column.columnDef.meta?.sortKey!,
-                  };
-                })}
-              onSelect={(option) => {
-                router.push(
-                  {
-                    pathname: router.pathname,
-                    query: { ...router.query, sortKey: option },
+                .map((column) => (
+                  <SelectItem
+                    key={column.columnDef.meta?.sortKey}
+                    value={column.columnDef.meta?.sortKey!}
+                  >
+                    {column.columnDef.id ?? ""}
+                  </SelectItem>
+                ))}
+            </SelectContent>
+          </Select>
+          <Switch
+            checked={router.query.sortDirection === "asc"}
+            onCheckedChange={(checked) => {
+              router.push(
+                {
+                  pathname: router.pathname,
+                  query: {
+                    ...router.query,
+                    sortDirection: checked ? "asc" : "desc",
                   },
-                  undefined
-                );
-              }}
-              selectedValue={router.query.sortKey as string}
-            />
-            <ThemedSwitch
-              checked={router.query.sortDirection === "asc"}
-              onChange={(checked) => {
-                router.push(
-                  {
-                    pathname: router.pathname,
-                    query: {
-                      ...router.query,
-                      sortDirection: checked ? "asc" : "desc",
-                    },
-                  },
-                  undefined
-                );
-              }}
-              OffIcon={BarsArrowDownIcon}
-              OnIcon={BarsArrowUpIcon}
-            />
-          </Row>
-        </Menu.Items>
-      </Transition>
-    </Menu>
+                },
+                undefined
+              );
+            }}
+          />
+          {router.query.sortDirection === "asc" ? (
+            <BarsArrowUpIcon className="h-4 w-4" />
+          ) : (
+            <BarsArrowDownIcon className="h-4 w-4" />
+          )}
+        </Row>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

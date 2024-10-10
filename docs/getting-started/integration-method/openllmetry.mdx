@@ -12,40 +12,40 @@ iconType: "solid"
 Async Integration let's you log events and calls without placing Helicone in your app's critical
 path. This ensures that an issue with Helicone will not cause an outage to your app.
 
+
 <Tabs>
   <Tab title="Node.js">
   ```typescript
-  import { HeliconeAsyncLogger } from "@helicone/helicone";
-  import OpenAI from "openai";
+import { HeliconeAsyncLogger } from "@helicone/async";
+import OpenAI from "openai";
 
 const logger = new HeliconeAsyncLogger({
-apiKey: process.env.HELICONE_API_KEY,
-// pass in the providers you want logged
-providers: {
-openAI: OpenAI
-//anthropic: Anthropic,
-//cohere: Cohere
-// ...
-}
+    apiKey: process.env.HELICONE_API_KEY,
+    // pass in the providers you want logged
+    providers: {
+      openAI: OpenAI,
+      //anthropic: Anthropic,
+      //cohere: Cohere
+      // ...
+    }
 });
 logger.init();
 
 const openai = new OpenAI();
 
 async function main() {
-const completion = await openai.chat.completions.create({
-messages: [{"role": "system", "content": "You are a helpful assistant."},
-{"role": "user", "content": "Who won the world series in 2020?"},
-{"role": "assistant", "content": "The Los Angeles Dodgers won the World Series in 2020."},
-{"role": "user", "content": "Where was it played?"}],
-model: "gpt-3.5-turbo",
-});
+    const completion = await openai.chat.completions.create({
+      messages: [{"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": "Who won the world series in 2020?"},
+        {"role": "assistant", "content": "The Los Angeles Dodgers won the World Series in 2020."},
+        {"role": "user", "content": "Where was it played?"}],
+      model: "gpt-3.5-turbo",
+    });
 
-    console.log(completion.choices[0]);
-
+  console.log(completion.choices[0]);
 }
-main();
 
+main();
 ```
 </Tab>
 

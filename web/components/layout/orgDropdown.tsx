@@ -20,17 +20,16 @@ import { useRouter } from "next/router";
 import { useCallback, useMemo, useState } from "react";
 import { clsx } from "../shared/clsx";
 import AddMemberModal from "../templates/organization/addMemberModal";
-import CreateOrgForm, {
+import CreateOrgForm from "../templates/organization/createOrgForm";
+import { useOrg } from "./organizationContext";
+import {
   ORGANIZATION_COLORS,
   ORGANIZATION_ICONS,
-} from "../templates/organization/createOrgForm";
-import { useOrg } from "./organizationContext";
+} from "../templates/organization/orgConstants";
 
-interface OrgDropdownProps {
-  setReferOpen: (open: boolean) => void;
-}
+interface OrgDropdownProps {}
 
-export default function OrgDropdown({ setReferOpen }: OrgDropdownProps) {
+export default function OrgDropdown({}: OrgDropdownProps) {
   const orgContext = useOrg();
   const user = useUser();
   const [createOpen, setCreateOpen] = useState(false);
@@ -89,21 +88,22 @@ export default function OrgDropdown({ setReferOpen }: OrgDropdownProps) {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="justify-between ml-2 w-full">
-            <div className="flex items-center w-full">
-              {currentIcon && (
-                <currentIcon.icon
-                  className={clsx(
-                    `text-${currentColor?.name}-500`,
-                    "mr-3 flex-shrink-0 h-4 w-4"
-                  )}
-                  aria-hidden="true"
-                />
-              )}
-              <p className="text-sm font-semibold truncate w-fit max-w-[7.25rem] text-left">
-                {orgContext?.currentOrg?.name}
-              </p>
-            </div>
+          <Button
+            variant="ghost"
+            className="flex  items-center justify-start w-full ml-1 p-2"
+          >
+            {currentIcon && (
+              <currentIcon.icon
+                className={clsx(
+                  `text-${currentColor?.name}-500`,
+                  "mr-2 flex-shrink-0 h-4 w-4"
+                )}
+                aria-hidden="true"
+              />
+            )}
+            <p className="text-xs font-semibold truncate w-fit text-left">
+              {orgContext?.currentOrg?.name}
+            </p>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-[15rem] ml-2 mt-1 max-h-[90vh] flex flex-col">
@@ -218,9 +218,6 @@ export default function OrgDropdown({ setReferOpen }: OrgDropdownProps) {
           <DropdownMenuSeparator />
           <DropdownMenuItem onSelect={() => createNewOrgHandler()}>
             Create New Org
-          </DropdownMenuItem>
-          <DropdownMenuItem onSelect={() => setAddOpen(true)}>
-            Invite Members
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuLabel>User Settings</DropdownMenuLabel>

@@ -49,6 +49,7 @@ export interface PromptsQueryParams {
 }
 export interface PromptVersionsQueryParams {
   filter?: PromptVersionsFilterNode;
+  includeExperimentVersions?: boolean;
 }
 
 export interface PromptVersiosQueryParamsCompiled
@@ -126,6 +127,7 @@ export interface PromptInputRecord {
   prompt_version: string;
   created_at: string;
   response_body?: string;
+  request_body?: string;
   auto_prompt_inputs: any[];
 }
 
@@ -329,17 +331,20 @@ export class PromptController extends Controller {
     @Path() promptId: string
   ): Promise<Result<PromptVersionResult[], string>> {
     const promptManager = new PromptManager(request.authParams);
-    const result = await promptManager.getPromptVersions({
-      left: requestBody.filter ?? "all",
-      operator: "and",
-      right: {
-        prompt_v2: {
-          id: {
-            equals: promptId,
+    const result = await promptManager.getPromptVersions(
+      {
+        left: requestBody.filter ?? "all",
+        operator: "and",
+        right: {
+          prompt_v2: {
+            id: {
+              equals: promptId,
+            },
           },
         },
       },
-    });
+      requestBody.includeExperimentVersions
+    );
     if (result.error || !result.data) {
       console.error(result.error);
       this.setStatus(500);

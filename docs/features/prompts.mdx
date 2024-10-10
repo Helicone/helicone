@@ -286,6 +286,55 @@ Let's say we have an app that generates a short story, where users are able to i
   </Tab>
 </Tabs>
 
+## Using Prompts created on the UI
+If you've created a prompt on the UI, you can easily pull this prompt into your codebase by calling the following API endpoint:
+```javascript
+export async function getPrompt(
+  id: string,
+  variables: Record<string, any>
+): Promise<any> {
+  const getHeliconePrompt = async (id: string) => {
+    const res = await fetch(
+      `https://api.helicone.ai/v1/prompt/${id}/template`,
+      {
+        headers: {
+          Authorization: `Bearer ${YOUR_HELICONE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        method: "POST",
+        body: JSON.stringify({
+          inputs: variables,
+        }),
+      }
+    );
+
+    return (await res.json()) as Result<PromptVersionCompiled, any>;
+  };
+
+  const heliconePrompt = await getHeliconePrompt(id);
+  if (heliconePrompt.error) {
+    throw new Error(heliconePrompt.error);
+  }
+  return heliconePrompt.data?.filled_helicone_template;
+}
+
+async function pullPromptAndRunCompletion() {
+  const prompt = await getPrompt("my-prompt-id", {
+    color: "red",
+  });
+  console.log(prompt);
+
+  const openai = new OpenAI({
+    apiKey: "YOUR_OPENAI_API_KEY",
+    baseURL: `https://oai.helicone.ai/v1/${YOUR_HELICONE_API_KEY}`,
+  });
+  const response = await openai.chat.completions.create(
+    prompt satisfies OpenAI.Chat.Completions.ChatCompletionCreateParamsStreaming
+  );
+  console.log(response);
+}
+
+```
 ## Running Experiments
 
 Once you've set up prompt management, you can leverage Helicone's experimentation features to test and improve your prompts.

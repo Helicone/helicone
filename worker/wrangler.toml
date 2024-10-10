@@ -110,7 +110,7 @@ kv_namespaces = [
 ]
 
 [env.production.triggers]
-crons = ["* * * * *", "0 * * * *"]
+crons = ["* * * * *", "0 * * * *", "0 10 * * mon"]
 
 queues.producers = [
 	{ binding = "FALLBACK_QUEUE", queue = "fallback-queue-prod" },

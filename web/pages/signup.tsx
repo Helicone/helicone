@@ -15,7 +15,6 @@ const SignUp = () => {
   const supabase = useSupabaseClient();
   const { setNotification } = useNotification();
   const [showEmailConfirmation, setShowEmailConfirmation] = useState(false);
-
   const user = useUser();
   const router = useRouter();
   const { demo = "false" } = router.query;
@@ -39,6 +38,7 @@ const SignUp = () => {
       ogImageUrl={"https://www.helicone.ai/static/helicone-og.webp"}
     >
       {demo === "true" && <InfoBanner />}
+
       <AuthForm
         handleEmailSubmit={async (email: string, password: string) => {
           const origin = window.location.origin;

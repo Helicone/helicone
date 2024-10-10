@@ -197,12 +197,22 @@ const blogContent: BlogStructure[] = [
   },
   {
     dynmaicEntry: {
-      folderName: "prompt-engineering-tools",
+      folderName: "braintrust-alternatives",
     },
   },
   {
     dynmaicEntry: {
-      folderName: "keywords-vs-helicone",
+      folderName: "replaying-llm-sessions",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "helicone-recap",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "prompt-engineering-tools",
     },
   },
   {
