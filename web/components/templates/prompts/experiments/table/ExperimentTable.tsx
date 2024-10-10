@@ -77,7 +77,6 @@ export function ExperimentTable({
   const gridRef = useRef<GridApi | null>(null);
 
   const onGridReady = useCallback((params: GridReadyEvent) => {
-    params.api.sizeColumnsToFit();
     gridRef.current = params.api;
   }, []);
 
