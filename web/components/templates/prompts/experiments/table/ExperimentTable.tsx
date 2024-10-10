@@ -819,10 +819,10 @@ export function ExperimentTable({
           >
             <ArrowDownTrayIcon className="h-4 w-4 text-slate-700" />
           </Button>
-          <ProviderKeyDropdown
+          {/* <ProviderKeyDropdown
             providerKey={selectedProviderKey}
             setProviderKey={setSelectedProviderKey}
-          />
+          /> */}
           {/* <Button variant="outline" onClick={() => setSettingsOpen(true)}>
             Settings
           </Button> */}
