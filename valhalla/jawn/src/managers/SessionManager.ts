@@ -273,8 +273,13 @@ WHERE ${buildWhereClause("duration")}
   async getSessions(
     requestBody: SessionQueryParams
   ): Promise<Result<SessionResult[], string>> {
-    const { sessionIdContains, timeFilter, sessionName, timezoneDifference } =
-      requestBody;
+    const {
+      sessionIdContains,
+      timeFilter,
+      sessionName,
+      timezoneDifference,
+      filter: filterTree,
+    } = requestBody;
 
     if (!isValidTimeZoneDifference(timezoneDifference)) {
       return err("Invalid timezone difference");
@@ -295,6 +300,7 @@ WHERE ${buildWhereClause("duration")}
           },
         },
       },
+      filterTree,
     ];
 
     if (sessionName) {
@@ -327,6 +333,13 @@ WHERE ${buildWhereClause("duration")}
       argsAcc: [],
     });
 
+    const havingFilter = await buildFilterWithAuthClickHouse({
+      org_id: this.authParams.organizationId,
+      filter: filterListToTree(filters, "and"),
+      argsAcc: [],
+      having: true,
+    });
+
     // Step 1 get all the properties given this filter
     const query = `
     SELECT 
@@ -346,6 +359,7 @@ WHERE ${buildWhereClause("duration")}
         )
     )
     GROUP BY properties['Helicone-Session-Id']
+    HAVING (${havingFilter.filter})
     ORDER BY created_at DESC
     LIMIT 50
     `;
