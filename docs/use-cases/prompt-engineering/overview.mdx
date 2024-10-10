@@ -1,7 +1,7 @@
 ---
 title: "Overview"
 sidebarTitle: "Overview"
-description: "Prompt engineering is effective crafting prompts to guide Large Language Models (LLMs) like GPT-4 to produce desired outputs. It involves strategically designing input prompts to elicit accurate, relevant, and useful responses from the model."
+description: "Prompt engineering is effectively crafting prompts to guide Large Language Models (LLMs) like GPT-4 to produce desired outputs. It involves strategically designing input prompts to elicit accurate, relevant, and useful responses from the model."
 "twitter:title": "Debugging LLM Applications - Helicone OSS LLM Observability"
 ---
 
@@ -47,6 +47,24 @@ We recommend taking a moment to brainstorm on these to make sure that the follow
 ## FAQ 
 
 <AccordionGroup>
+
+  <Accordion title="How often should I update my prompts?">
+    - Regularly. Especially if you notice changes in the model's performance or after updates to the model. 
+    - After use feedback: Incorporate feedback to improve prompt effectiveness.
+    - When introducing a new feature: Adjust the prompt to cover new functionalities or use cases.
+  </Accordion> 
+
+  <Accordion title="What's the difference between prompt engineering vs. finetuning?">
+    Prompt engineering is modifying the input prompts to guide the model's responses without changing the model itself. Fine-tuning is training the model on additional data to adjust its internal parameters for specific tasks.
+  </Accordion> 
+
+  <Accordion title="What are some common mistakes with prompt engineering?">
+  - Vague Instructions: Leads to unpredictable outputs.
+  - Overcomplicating Prompts: Too much information can confuse the model.
+  - Ignoring Model Limitations: Expecting the model to perform tasks beyond its capabilities.
+  - Lack of Testing: Not validating prompts with various inputs can result in inconsistent performance.  
+  </Accordion> 
+
   <Accordion title="How does prompt length affect model responses?">
     The tradeoff is that: 
     - Short prompts can lead to ambiguous or generic answers because of a lack of context.
@@ -59,30 +77,14 @@ We recommend taking a moment to brainstorm on these to make sure that the follow
     Yes. When you carefully crafting prompts to avoid sensitive topics or by instructing the model to follow ethical guidelines, you can reduce the likelihood of biased or inappropriate responses.
   </Accordion>
 
-  <Accordion title="How often should I update my prompts?">
-    - Regularly. Especially if you notice changes in the model's performance or after updates to the model. 
-    - After use feedback: Incorporate feedback to improve prompt effectiveness.
-    - When introducing a new feature: Adjust the prompt to cover new functionalities or use cases.
-  </Accordion> 
 
   <Accordion title="Do I need to be technical to prompt engineer?">
     - For simple prompt adjustment, no extensive technical background is needed.
     - For complex tasks or with the intention to optimize performance, some familiarity with AI concepts is helpful. 
   </Accordion> 
 
-  <Accordion title="What's the difference between prompt engineering vs. finetuning?">
-    Prompt engineering is modifying the input prompts to guide the model's responses without changing the model itself. Fine-tuning is training the model on additional data to adjust its internal parameters for specific tasks.
-  </Accordion> 
-
   <Accordion title="Can you cut cost with prompt engineering?">
     Yes. A well-written prompt can minimize the number of tokens required for both the input and output, thereby reducing API usage costs.
-  </Accordion> 
-
-  <Accordion title="What are some common mistakes with prompt engineering?">
-  - Vague Instructions: Leads to unpredictable outputs.
-  - Overcomplicating Prompts: Too much information can confuse the model.
-  - Ignoring Model Limitations: Expecting the model to perform tasks beyond its capabilities.
-  - Lack of Testing: Not validating prompts with various inputs can result in inconsistent performance.  
   </Accordion> 
 
 </AccordionGroup>

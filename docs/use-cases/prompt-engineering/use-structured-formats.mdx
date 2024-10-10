@@ -1,34 +1,99 @@
 ---
-title: "Use Structured Formats"
+title: "Use structured formats"
 sidebarTitle: "Use structured formats"
-description: "Helicone provides an efficient platform for identifying and rectifying errors in your LLM applications, offering insights into their occurrence."
+description: "Make it easier to interpret, parse, and use the generated content, especially in applications where specific data extraction or standardized responses are required."
 "twitter:title": "Debugging LLM Applications - Helicone OSS LLM Observability"
 ---
 
-## What is a structured format? 
+import QuestionsSection from "/snippets/questions-section.mdx";
 
-Organize your prompts with clear sections or steps.
+## Common structured formats
+- **JSON/XML**: Ideal for data interchange between systems.
+- **Bullet points/lists**: Useful for summaries or step-by-step instructions.
+- **Tables**: Great for comparing data or presenting multiple related items.
+- **Headings and subheadings**: Organizes content for readability, especially in longer texts.
+- **Custom templates**: Tailored formats specific to your application's needs.
 
-## How does structured format work? 
-
-Helicone's request page allows you to filter results by status code, a unique identifier that corresponds to various states of web requests. This feature enables you to pinpoint errors, providing essential information about their timing and location.
-
-<Frame>
-  ![Filter web request results by status code on Helicone's request
-  page.](/images/use-cases/status-filter.png)
-</Frame>
+## How to use structured formats? 
+- Provide a template or example output. 
+- Use clear delimiters and labels. For example, label sections and use delimiters to separate different parts of the response.
+- Use formatting conventions. For example, generating a Markdown-formatted summary with headings and bullet points.
 
 ## Examples
 
-```
-Task: Write a product description
-Product: Wireless Bluetooth Headphones
+<AccordionGroup>
+  <Accordion title="Example 1: Customer support chatbot.">
+  A structured format allows the support team quickly identify the issue category (Billing), prioritize the request (High), and provides a ready-to-send response.
 
-Key Features:
-1. 30-hour battery life
-2. Active noise cancellation
-3. Water-resistant (IPX4)
+  **Prompt:** 
+    ```
+  Based on the customer's query, generate a response in the following format: 
+  
+  Issue Category: [Billing/Technical Support/General Inquiry]
+  Priority Level: [High/Medium/Low]
+  Suggested Response: [Your response to the customer]
 
-Tone: Professional and enthusiastic
-Length: 150 words
-```
+  Customer query: I was charged twice for my subscription this month. Can you help fix this?
+  ```
+
+  </Accordion>
+  
+  <Accordion title="Example 2: Data entry automation.">
+  By specifying CSV format, the extracted data can be directly imported into databases or spreadsheets, saving time on data entry.
+
+  **Prompt:** 
+  ```
+  Extract the following information from the email and present it in CSV format:
+
+  - First Name
+  - Last Name
+  - Email Address
+  - Company Name
+
+  Email: Hello, my name is Maria Gonzalez from Tech Innovators. You can reach me at maria.gonzalez@techinnovators.com.
+  ```
+  </Accordion>
+
+  <Accordion title="Example 3: Content creation for marketing.">
+    The structured prompt ensures all key marketing elements are included. 
+
+    **Prompt:** 
+    ```
+    Create a social media post promoting our new product using this structure:
+
+    Headline: Catchy headline
+    Body: Brief description (50 words max)
+    Call to Action: Encouraging users to visit our website
+    Hashtags: Include relevant hashtags
+
+    Product: UltraBoost Wireless Earbuds
+    ```
+  </Accordion>
+
+  <Accordion title="Example 4: Medical report summarization.">
+  The structured outputs help healthcare professionals quickly review critical patient information. 
+
+  **Prompt:**
+
+  ```
+  Summarize the patient's medical report using the following template:
+
+  Patient Name: [Name]
+  Age: [Age]
+  Diagnosis: [Diagnosis]
+  Prescribed Treatment: [Treatment Plan]
+  Follow-Up Instructions: [Instructions]
+
+  Medical Report: [Insert detailed medical report here]
+  ```
+  </Accordion>
+</AccordionGroup>
+
+
+## Additional tips
+- Opt for straightforward formats that the model can easily replicate.
+- Experiment with different prompts and refine them based on the model's outputs.
+- Include any necessary background information to help the model understand.
+- Implement checks to validate that the responses meet your format requirements.
+
+<QuestionsSection />
