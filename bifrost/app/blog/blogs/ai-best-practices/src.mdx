@@ -32,21 +32,18 @@ In the following section, we will go over the best practices when building with 
 
 ## Best Practices
 
-## 1. Define Key Performance Metrics
+### 1. Define Key Performance Metrics
 
 To effectively monitor the performance of your AI app, it's crucial to define key performance metrics (KPIs) that align with your goals.
 
-### Key Metrics
+You can use observability tools to track and visualize these essential metrics such as latency, usage and costs, to make sure the models you use in your AI application run optimally. Here are some key metrics to focus on:
 
 - **Latency**: Measure the time taken for the model to generate a response.
 - **Throughput**: Track the number of requests handled by the model per second.
 - **Accuracy**: Evaluate the correctness of the model's predictions.
 - **Error Rate**: Track the frequency of errors or failures in model predictions.
 
-
-### Segmentating Data on Helicone's Dashboard
-
-**Tip:** Look for a solution that provides a real-time dashboard to monitor key metrics and is **<span style={{color: '#0ea5e9'}}>capable of handling large data volumes</span>**.
+**<span style={{color: '#0ea5e9'}}>Video: Helicone's pre-built dashboard metrics and the ability to segment data.</span>**
 
 <video width="100%" controls autoplay loop>
   <source
@@ -56,29 +53,20 @@ To effectively monitor the performance of your AI app, it's crucial to define ke
   Your browser does not support the video tag.
 </video>
 
-**<span style={{color: '#0ea5e9'}}>How Helicone can help you:</span>**
-
-Use Helicone to track and visualize essential metrics such as latency, costs and Time To First Tokens (TTFT) on the Dashboard. By continuing to monitor key application performance metrics, you can make improvemnets to your AI application easily. 
-
-**<span style={{color: '#0ea5e9'}}>You might find this useful:</span>**
-
-- [5 Powerful Techniques to Reduce LLM Costs by Up to 90%](https://www.helicone.ai/blog/slash-llm-cost)
+**<span style={{color: '#0ea5e9'}}>Tip:</span>** Make sure to look for a solution that provides a real-time dashboard to monitor key metrics and is capable of handling large data volumes.
 
 ---
 
-## 2. Implement Comprehensive Logging
+### 2. Implement Comprehensive Logging
 
-Logging is a fundamental aspect of observability. It’s beneficial to implement detailed logging to capture critical events and data points throughout your app’s lifecycle. 
-
-### What to Log
+Logging is a fundamental aspect of observability. It’s beneficial to implement detailed logging to capture critical events and data points throughout your app’s lifecycle. Key logging practices include:
 
 - **Request and response**: Record the inputs and outputs of each request to track the model’s behavior over time.
 - **Errors**: Capture errors and exceptions for troubleshooting and debugging.
 - **Performance**: Log latency, errors, usage and costs to identify performance bottlenecks.
 - **User feedback**: For models interacting with users, log your user’s inputs and feedback to discover opportunities to improve your app’s performance in real-world scenarios.
 
-
-### Adding Custom Properties for Advanced Segmentation
+**<span style={{color: '#0ea5e9'}}>Video: Adding custom properties in Helicone for advanced segmentation of requests.</span>**
 
 <video width="100%" controls autoplay loop>
   <source src="/static/blog/ai-best-practices/2. Implement Comprehensive Logging.mp4" />
@@ -89,13 +77,9 @@ Logging is a fundamental aspect of observability. It’s beneficial to implement
 
 Helicone provides advanced filtering and search capabilities, allowing you to quickly pinpoint and resolve issues. The platform also supports customizable properties you can attach to your requests to meet your specific needs.
 
-**<span style={{color: '#0ea5e9'}}>You might find this useful:</span>**
-
-- [How to Use Custom Properties to Understand Your Users Better](https://www.helicone.ai/blog/custom-properties)
-
 ---
 
-## 3. Monitor Prompt Outputs
+### 3. **Monitor Prompt Outputs**
 
 As an AI app developer, it's vital to monitor the output every time you change a prompt. This requires a tool to validate that the new prompts not only perform better but also remain compatible with previous request inputs made by your users.
 
@@ -106,7 +90,7 @@ Without a proper monitoring tool to facilitate the regression testing so develop
 - **Applicable with previous inputs**: Your app likely has a history of user interactions and inputs. It's important that new prompts continue to work well with these historical inputs.
 - **Regular testing**: Make sure changes improve performance without unintended consequences by setting up alerts.
 
-### Create Experiments and Compare LLM Outputs
+**<span style={{color: '#0ea5e9'}}>Video: Experimenting with a new prompt on an existing set of data and comparing the output.</span>**
 
 <video width="100%" controls autoplay loop>
   <source src="/static/blog/ai-best-practices/3. Monitor Prompt Outputs .mp4" />
@@ -117,13 +101,9 @@ Without a proper monitoring tool to facilitate the regression testing so develop
 
 Helicone has a dedicated playground for prompt testing and experimentation without affecting production data. In the playground, you can test different configurations of models with your new prompts and datasets to check for improvements.
 
-**<span style={{color: '#0ea5e9'}}>You might find this useful:</span>**
-
-- [What to Look for in a Prompt Management Tool](https://www.helicone.ai/blog/prompt-management)
-
 ---
 
-## 4. Implement Safety and Security Measures
+### 4. **Implement Safety and Security Measures**
 
 Generative AI is quickly changing the cybersecurity landscape. When building LLMs, it’s crucial to protect against **<span style={{color: '#0ea5e9'}}>harmful user requests</span>** and **<span style={{color: '#0ea5e9'}}>prompt attacks</span>** that could bypass the safety guardrails of your models. It's essential to understand the risks and safety issues involved with LLMs.
 
@@ -148,18 +128,12 @@ Helicone provides <a href="https://docs.helicone.ai/features/advanced-usage/mode
 
 ---
 
-## Conclusion
+### Conclusion
 
 Keeping your AI app reliable hinges on effective observability and performance monitoring. This means defining important performance metrics, setting up thorough logging, monitoring your outputs regularly, and ensuring safety and security measures are in place. By following these best practices, you can boost the performance and reliability of your LLM deployments and accelerate your AI development.
 
-
 ---
 
-## Not sure where to start? 
-- 
-
----
-
-## Try Helicone for free.
+### Try Helicone for free.
 
     <a href="https://www.helicone.ai/" target="_blank" rel="noopener noreferrer">Sign up</a> or <a href="https://www.helicone.ai/contact" target="_blank" rel="noopener noreferrer">contact us</a>.
