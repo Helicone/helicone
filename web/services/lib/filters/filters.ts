@@ -239,6 +239,8 @@ const whereKeyMappings: KeyMappings = {
     organization_id: "rate_limit_log.organization_id",
     created_at: "rate_limit_log.created_at",
   }),
+  sessions_request_response_rmt:
+    easyKeyMappings<"sessions_request_response_rmt">({}),
 
   // Deprecated
   values: NOT_IMPLEMENTED,
@@ -262,6 +264,11 @@ const havingKeyMappings: KeyMappings = {
     total_prompt_token: "total_prompt_token",
     cost: "cost",
   }),
+  sessions_request_response_rmt:
+    easyKeyMappings<"sessions_request_response_rmt">({
+      total_cost: "total_cost",
+      total_tokens: "total_tokens",
+    }),
   user_api_keys: NOT_IMPLEMENTED,
   properties: NOT_IMPLEMENTED,
   request: NOT_IMPLEMENTED,
@@ -480,7 +487,11 @@ export function buildFilter(args: BuildFilterArgs): {
 
 export function clickhouseParam(index: number, parameter: any) {
   if (typeof parameter === "number") {
-    return `{val_${index} : Int32}`;
+    if (Number.isInteger(parameter)) {
+      return `{val_${index} : Int32}`;
+    } else {
+      return `{val_${index} : Float64}`;
+    }
   } else if (typeof parameter === "boolean") {
     return `{val_${index} : UInt8}`;
   } else if (parameter instanceof Date) {

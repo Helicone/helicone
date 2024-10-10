@@ -504,7 +504,11 @@ export function buildFilter(args: BuildFilterArgs): {
 
 export function clickhouseParam(index: number, parameter: any) {
   if (typeof parameter === "number") {
-    return `{val_${index} : Int32}`;
+    if (Number.isInteger(parameter)) {
+      return `{val_${index} : Int32}`;
+    } else {
+      return `{val_${index} : Float64}`;
+    }
   } else if (typeof parameter === "boolean") {
     return `{val_${index} : UInt8}`;
   } else if (parameter instanceof Date) {
