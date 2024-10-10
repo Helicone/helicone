@@ -1,23 +1,51 @@
 ---
-title: "Leverage Role-Playing"
+title: "Leverage role-playing"
 sidebarTitle: "Leverage role-playing"
-description: "Helicone provides an efficient platform for identifying and rectifying errors in your LLM applications, offering insights into their occurrence."
+description: "Assign a specific role or persona to the model as a system prompt can influence the style, tone, and content of the output."
 "twitter:title": "Debugging LLM Applications - Helicone OSS LLM Observability"
 ---
 
-## What is role-playing in AI? 
+import QuestionsSection from "/snippets/questions-section.mdx";
 
-Assign a specific role or persona to the AI for more tailored responses.
+## Why use role-prompting? 
 
-<Frame>
-  ![Filter web request results by status code on Helicone's request
-  page.](/images/use-cases/status-filter.png)
-</Frame>
+- **Targeted Responses**: The model can produce information that's more aligned with the desired perspective or expertise.
+- **Audience Alignment**: Helps ensure the content is suitable for the intended audience.
+- **Style Consistency**: Maintains a consistent tone and style throughout the response.
+- **Enhanced Engagement**: Makes the content more relatable and engaging, especially in creative or educational contexts.
 
-## How to assign a role to your model? 
+
+## How to implement role-playing
+
+1. Assign a specific role or persona 
+2. Set the task or goal 
+3. Include style and tone instructions
+
 
 ## Example
 
-```
-Act as an experienced data scientist explaining the concept of neural networks to a junior developer. Include an analogy to help illustrate the concept.
-```
+<AccordionGroup>
+  <Accordion title="Example 1: Customer service scenario.">
+  Assign the role of a customer service representative, the model is guided to respond in a professional manner appropriate for the hospitality industry.
+
+  **Prompt:** 
+  > You are a customer service representative for a luxury hotel chain. A guest has emailed complaining about a billing error on their recent stay. Compose a professional and apologetic email addressing their concerns and explaining the steps you will take to resolve the issue.
+  </Accordion>
+  
+  <Accordion title="Example 2: Medical advice.">
+  The role-playing helps the model provide information sensitively and appropriately for a non-expert audience.
+  **Prompt:** 
+
+  > You are a pediatrician explaining to a concerned parent the importance of vaccinations for their child. Use simple language and address common misconceptions.
+  </Accordion>
+
+  <Accordion title="Example 3: Technical writing.">
+    The model adopts the perspective of a professional who can explain complex concepts in an accessible way.
+
+    **Prompt:** 
+    > As an experienced software engineer, write documentation for the installation of a new software package, intended for users with basic technical knowledge.
+  </Accordion>
+
+</AccordionGroup>
+
+<QuestionsSection />
