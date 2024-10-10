@@ -23,7 +23,6 @@ import {
 import {
   PlusIcon,
   ChevronDownIcon,
-  ArrowDownTrayIcon,
   FunnelIcon,
 } from "@heroicons/react/24/outline";
 import ExperimentInputSelector from "../experimentInputSelector";
@@ -36,10 +35,7 @@ import {
   RowNumberCellRenderer,
   InputsHeaderComponent,
 } from "./components/tableElementsRenderer";
-import {
-  ColumnsDropdown,
-  ProviderKeyDropdown,
-} from "./components/customButtonts";
+import { ColumnsDropdown } from "./components/customButtonts";
 import ScoresTable from "./ScoresTable";
 
 interface ExperimentTableProps {
