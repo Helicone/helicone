@@ -14,12 +14,13 @@
     {
       "name": "Guides",
       "icon": "file-lines",
-      "url": "guides"
+      "url": "knowledge"
     },
+
     {
       "name": "FAQ",
-      "icon": "circle-question",
-      "url": "faq"
+      "icon": "lightbulb",
+      "url": "knowledge/faq"
     }
   ],
   "analytics": {
@@ -54,7 +55,7 @@
   "openapi": ["/swagger.json"],
   "navigation": [
     {
-      "group": "Welcome",
+      "group": "Getting Started",
       "pages": [
         "getting-started/quick-start",
         "helicone-headers/header-directory",
@@ -247,47 +248,62 @@
     {
       "group": "References",
       "pages": [
+        "references/api",
+        "references/proxy-vs-async",
         "references/availability",
         "references/latency-affect",
         "references/data-autonomy",
         "references/open-source",
-        "references/proxy-vs-async",
         "references/how-we-calculate-cost"
       ]
     },
     {
-      "group": "Developer Guides",
+      "group": "Guides",
       "pages": [
-        "guides/overview",
+        "knowledge/overview",
         {
-          "group": "API Guides",
+          "group": "Cookbooks",
           "pages": [
-            "guides/developer/getting-user-requests",
-            "guides/developer/etl",
-            "guides/developer/replay-session"
+            "knowledge/developer/experiments",
+            "knowledge/developer/getting-user-requests",
+            "knowledge/developer/etl",
+            "knowledge/developer/replay-session",
+            "knowledge/developer/predefining-request-id",
+            "knowledge/developer/environment-tracking",
+            "knowledge/developer/segmentation",
+            "knowledge/developer/github-actions",
+            "knowledge/developer/debugging",
+            "knowledge/developer/labeling-request-data"
           ]
-        },
-        "guides/developer/predefining-request-id",
-        "guides/developer/environment-tracking",
-        "guides/developer/segmentation",
-        "guides/developer/experiments",
-        "guides/developer/github-actions",
-        "guides/developer/debugging",
-        "guides/developer/labeling-request-data"
+        }
+      ]
+    },
+    {
+      "group": "Applications",
+      "pages": [
+        "knowledge/use-cases/overview",
+        {
+          "group": "Use Cases",
+          "pages": [
+            "knowledge/use-cases/resell-a-model",
+            "knowledge/use-cases/bill-by-usage"
+          ]
+        }
       ]
     },
     {
       "group": "FAQ",
-      "pages": ["faq/overview"]
-    },
-    {
-      "group": "Use Cases",
       "pages": [
-        "guides/use-cases/resell-a-model",
-        "guides/use-cases/bill-by-usage"
+        "knowledge/faq/overview",
+        {
+          "group": "FAQ",
+          "pages": [
+            "knowledge/faq/enable-stream-usage",
+            "knowledge/faq/secret-vs-public-key"
+          ]
+        }
       ]
     },
-
     {
       "group": "User",
       "pages": [
@@ -357,55 +373,55 @@
     },
     {
       "source": "/use-cases/bill-by-usage",
-      "destination": "/guides/bill-by-usage"
+      "destination": "/knowledge/bill-by-usage"
     },
     {
       "source": "/use-cases/data-autonomy",
-      "destination": "/guides/data-autonomy"
+      "destination": "/knowledge/data-autonomy"
     },
     {
       "source": "/use-cases/debugging",
-      "destination": "/guides/debugging"
+      "destination": "/knowledge/debugging"
     },
     {
       "source": "/use-cases/enable-stream-usage",
-      "destination": "/guides/enable-stream-usage"
+      "destination": "/knowledge/enable-stream-usage"
     },
     {
       "source": "/use-cases/environment-tracking",
-      "destination": "/guides/environment-tracking"
+      "destination": "/knowledge/environment-tracking"
     },
     {
       "source": "/use-cases/etl",
-      "destination": "/guides/etl"
+      "destination": "/knowledge/etl"
     },
     {
       "source": "/use-cases/experiments",
-      "destination": "/guides/experiments"
+      "destination": "/knowledge/experiments"
     },
     {
       "source": "/use-cases/getting-user-requests",
-      "destination": "/guides/getting-user-requests"
+      "destination": "/knowledge/getting-user-requests"
     },
     {
       "source": "/use-cases/github-actions",
-      "destination": "/guides/github-actions"
+      "destination": "/knowledge/github-actions"
     },
     {
       "source": "/use-cases/labeling-request-data",
-      "destination": "/guides/labeling-request-data"
+      "destination": "/knowledge/labeling-request-data"
     },
     {
       "source": "/use-cases/replay-session",
-      "destination": "/guides/replay-session"
+      "destination": "/knowledge/replay-session"
     },
     {
       "source": "/use-cases/resell-a-model",
-      "destination": "/guides/resell-a-model"
+      "destination": "/knowledge/resell-a-model"
     },
     {
       "source": "/use-cases/segmentation",
-      "destination": "/guides/segmentation"
+      "destination": "/knowledge/segmentation"
     }
   ]
 }
