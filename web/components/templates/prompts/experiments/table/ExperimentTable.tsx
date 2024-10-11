@@ -354,6 +354,20 @@ export function ExperimentTable({
       hypothesisId: string;
       datasetRowIds: string[];
     }) => {
+      setRowData((prevData) =>
+        prevData.map((row) => {
+          if (datasetRowIds.includes(row.dataset_row_id)) {
+            return {
+              ...row,
+              isLoading: {
+                ...(row.isLoading || {}),
+                [hypothesisId]: true,
+              },
+            };
+          }
+          return row;
+        })
+      );
       await jawn.POST("/v1/experiment/run", {
         body: {
           experimentId,
@@ -361,53 +375,33 @@ export function ExperimentTable({
           datasetRowIds,
         },
       });
+      await refetchExperiments();
+      await refetchInputRecords();
+
+      // Reset loading state in rowData
+      setRowData((prevData) =>
+        prevData.map((row) => {
+          if (datasetRowIds.includes(row.dataset_row_id)) {
+            const newIsLoading = { ...(row.isLoading || {}) };
+            delete newIsLoading[hypothesisId];
+            return {
+              ...row,
+              isLoading: newIsLoading,
+            };
+          }
+          return row;
+        })
+      );
+      const anyLoading = rowData.some((row) =>
+        Object.values(row.isLoading).some((loading) => loading)
+      );
+
+      if (!anyLoading) {
+        // No hypotheses are running
+        setIsHypothesisRunning(false);
+      }
     },
     {
-      onMutate: ({ hypothesisId, datasetRowIds }) => {
-        // Update loading state in rowData
-        setRowData((prevData) =>
-          prevData.map((row) => {
-            if (datasetRowIds.includes(row.dataset_row_id)) {
-              return {
-                ...row,
-                isLoading: {
-                  ...(row.isLoading || {}),
-                  [hypothesisId]: true,
-                },
-              };
-            }
-            return row;
-          })
-        );
-      },
-      onSettled: async (_, __, { hypothesisId, datasetRowIds }) => {
-        // Refetch data
-        await refetchExperiments();
-        await refetchInputRecords();
-
-        // Reset loading state in rowData
-        setRowData((prevData) =>
-          prevData.map((row) => {
-            if (datasetRowIds.includes(row.dataset_row_id)) {
-              const newIsLoading = { ...(row.isLoading || {}) };
-              delete newIsLoading[hypothesisId];
-              return {
-                ...row,
-                isLoading: newIsLoading,
-              };
-            }
-            return row;
-          })
-        );
-        const anyLoading = rowData.some((row) =>
-          Object.values(row.isLoading).some((loading) => loading)
-        );
-
-        if (!anyLoading) {
-          // No hypotheses are running
-          setIsHypothesisRunning(false);
-        }
-      },
       onError: (error) => {
         console.error("Error running hypothesis:", error);
       },
@@ -426,22 +420,22 @@ export function ExperimentTable({
     refetchInputRecords();
   };
 
-  useEffect(() => {
-    let intervalId: NodeJS.Timeout | null = null;
+  // useEffect(() => {
+  //   let intervalId: NodeJS.Timeout | null = null;
 
-    if (isHypothesisRunning) {
-      intervalId = setInterval(() => {
-        refetchExperiments();
-        gridRef.current?.refreshCells();
-      }, 500);
-    }
+  //   if (isHypothesisRunning) {
+  //     intervalId = setInterval(() => {
+  //       refetchExperiments();
+  //       gridRef.current?.refreshCells();
+  //     }, 500);
+  //   }
 
-    return () => {
-      if (intervalId) {
-        clearInterval(intervalId);
-      }
-    };
-  }, [isHypothesisRunning, refetchExperiments, refetchInputRecords]);
+  //   return () => {
+  //     if (intervalId) {
+  //       clearInterval(intervalId);
+  //     }
+  //   };
+  // }, [isHypothesisRunning, refetchExperiments, refetchInputRecords]);
 
   // Determine the hypotheses to run (excluding the first one)
   const hypothesesToRun = useMemo(() => {
