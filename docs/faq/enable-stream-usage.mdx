@@ -1,13 +1,9 @@
 ---
-title: "Correct cost calculation while streaming"
-description: "Get the most accurate and up-to-date pricing calculation."
+title: "Incorrect Cost Calculation While Streaming?"
+description: "Learn how to accurately calculate costs when using streaming features."
 ---
 
-Currently, Helicone is manually calculating model costs when using streaming, which may be sometimes be inaccurate and outdated.
-
-With the latest version of OpenAI, Helicone can now accurately captures cost and usage for you, by including a `include_usage` key in the body.
-
-
+To accurately calculate costs when using streaming features, you can include a `include_usage` key in the body of your request.
 
 ### Example
 
@@ -29,22 +25,19 @@ client.chat.completions.create(
 ```
 
 ```ts Typescript
-openai.chat.completions.create(
+openai.chat.completions.create({
+  messages: [
     {
-      messages: [
-        {
-          role: "user",
-          content: "Generate an abstract for a course on space.",
-        },
-      ],
-      model: "gpt-4",
-      stream=true,
-      stream_options: {
-        include_usage: true, // set to true
-      },
-    }
-  );
+      role: "user",
+      content: "Generate an abstract for a course on space.",
+    },
+  ],
+  model: "gpt-4",
+  stream = true,
+  stream_options: {
+    include_usage: true, // set to true
+  },
+});
 ```
 
 </CodeGroup>
-

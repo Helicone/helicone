@@ -297,12 +297,8 @@
       "pages": [
         "faq/overview",
         {
-          "group": "FAQ",
-          "pages": [
-            "faq/security/overview",
-            "faq/enable-stream-usage",
-            "faq/secret-vs-public-key"
-          ]
+          "group": "Categories",
+          "pages": ["faq/tag/platform", "faq/tag/security", "faq/tag/concepts"]
         }
       ]
     },
