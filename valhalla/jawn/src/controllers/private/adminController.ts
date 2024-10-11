@@ -2,6 +2,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Patch,
   Path,
@@ -41,6 +42,56 @@ export const authCheckThrow = async (userId: string | undefined) => {
 @Tags("Admin")
 @Security("api_key")
 export class AdminController extends Controller {
+  @Post("/feature-flags")
+  public async updateFeatureFlags(
+    @Request() request: JawnAuthenticatedRequest,
+    @Body() body: { flag: string; orgId: string }
+  ) {
+    await authCheckThrow(request.authParams.userId);
+
+    const { flag, orgId } = body;
+
+    await dbExecute(
+      `INSERT INTO feature_flags (org_id, feature) VALUES ($1, $2)`,
+      [orgId, flag]
+    );
+  }
+
+  @Delete("/feature-flags")
+  public async deleteFeatureFlag(
+    @Request() request: JawnAuthenticatedRequest,
+    @Body() body: { flag: string; orgId: string }
+  ) {
+    await authCheckThrow(request.authParams.userId);
+
+    await dbExecute(
+      `DELETE FROM feature_flags WHERE org_id = $1 AND feature = $2`,
+      [body.orgId, body.flag]
+    );
+  }
+
+  @Post("/feature-flags/query")
+  public async getFeatureFlags(@Request() request: JawnAuthenticatedRequest) {
+    await authCheckThrow(request.authParams.userId);
+
+    return await dbExecute<{
+      organization_id: string;
+      name: string;
+      flags: string[];
+    }>(
+      `
+      SELECT 
+        organization.id AS organization_id,
+        organization.name AS name,
+        array_agg(feature) as flags
+      FROM feature_flags 
+        LEFT JOIN organization ON feature_flags.org_id = organization.id
+      GROUP BY organization.id, organization.name
+      `,
+      []
+    );
+  }
+
   @Post("/orgs/top-usage")
   public async getTopOrgsByUsage(
     @Request() request: JawnAuthenticatedRequest,
