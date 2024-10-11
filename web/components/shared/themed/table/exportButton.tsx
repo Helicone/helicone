@@ -11,10 +11,11 @@ interface ExportButtonProps<T> {
   rows: T[];
   fetchRows?: () => Promise<T[]>;
   format?: "CSV" | "JSONL";
+  className?: string;
 }
 
 export default function ExportButton<T>(props: ExportButtonProps<T>) {
-  const { rows, fetchRows, format: initialFormat = "CSV" } = props;
+  const { rows, fetchRows, format: initialFormat = "CSV", className } = props;
   const [format, setFormat] = useState(initialFormat);
   const [open, setOpen] = useState(false);
   const [downloadingCSV, setDownloadingCSV] = useState(false);
@@ -75,7 +76,7 @@ export default function ExportButton<T>(props: ExportButtonProps<T>) {
       <Button
         variant="ghost"
         onClick={() => setOpen(true)}
-        className="flex items-center gap-2"
+        className={clsx("flex items-center gap-2", className)}
         size="xs"
       >
         <ArrowDownTrayIcon className="h-4 w-4" />
