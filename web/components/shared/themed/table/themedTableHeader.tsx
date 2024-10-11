@@ -158,17 +158,35 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
                 open={isFiltersPopoverOpen}
                 onOpenChange={setIsFiltersPopoverOpen}
               >
-                <PopoverTrigger asChild>
+                {!isFiltersPinned ? (
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="ghostLinear"
+                      className="gap-2"
+                      size="sm_sleek"
+                      onClick={() => {
+                        if (isFiltersPinned) {
+                          setShowFilters(!showFilters);
+                          setIsFiltersPopoverOpen(false);
+                        } else {
+                          setIsFiltersPopoverOpen(!isFiltersPopoverOpen);
+                          setShowFilters(false);
+                        }
+                      }}
+                    >
+                      <FunnelIcon className="h-[13px] w-[13px]" />
+                      <span className="hidden sm:inline font-normal text-[13px]">
+                        Filters
+                      </span>
+                    </Button>
+                  </PopoverTrigger>
+                ) : (
                   <Button
                     variant="ghostLinear"
                     className="gap-2"
                     size="sm_sleek"
                     onClick={() => {
-                      if (isFiltersPinned) {
-                        setShowFilters(!showFilters);
-                      } else {
-                        setIsFiltersPopoverOpen(!isFiltersPopoverOpen);
-                      }
+                      setShowFilters(!showFilters);
                     }}
                   >
                     <FunnelIcon className="h-[13px] w-[13px]" />
@@ -180,7 +198,7 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
                         : "Filters"}
                     </span>
                   </Button>
-                </PopoverTrigger>
+                )}
                 <PopoverContent
                   className="min-w-[40rem] w-[40vw] flex items-start p-0 mx-2 rounded-lg"
                   ref={popoverContentRef}
