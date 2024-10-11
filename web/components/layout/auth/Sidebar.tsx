@@ -86,6 +86,12 @@ const Sidebar = ({ setOpen }: SidebarProps) => {
             current: pathname.includes("/prompts"),
           },
           {
+            name: "Experiments",
+            href: "/experiments",
+            icon: NotepadText,
+            current: pathname.includes("/experiments"),
+          },
+          {
             name: "Playground",
             href: "/playground",
             icon: TestTube2,

@@ -36,10 +36,35 @@ import { ColumnsDropdown } from "./components/customButtonts";
 import ScoresTable from "./ScoresTable";
 import ExportButton from "../../../../shared/themed/table/exportButton";
 import LoadingAnimation from "../../../../shared/loadingAnimation";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { FileIcon } from "lucide-react";
+import {
+  usePrompts,
+  usePromptVersions,
+} from "../../../../../services/hooks/prompts/prompts";
+import { ScrollArea } from "../../../../ui/scroll-area";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../../../ui/select";
 
 interface ExperimentTableProps {
-  promptSubversionId: string;
-  experimentId: string;
+  promptSubversionId?: string;
+  experimentId?: string;
 }
 
 export function ExperimentTable({
@@ -50,6 +75,7 @@ export function ExperimentTable({
   const orgId = org?.currentOrg?.id;
   const jawn = useJawnClient();
   const [isDataLoading, setIsDataLoading] = useState(true);
+  const { prompts, isLoading, refetch } = usePrompts();
 
   const [wrapText, setWrapText] = useState(false);
   const [columnView, setColumnView] = useState<"all" | "inputs" | "outputs">(
@@ -70,17 +96,19 @@ export function ExperimentTable({
   }, []);
 
   const fetchExperiments = useCallback(async () => {
-    if (!orgId || !experimentId) return null;
+    if (!orgId) return null;
     const jawnClient = getJawnClient(orgId);
     const res = await jawnClient.POST("/v1/experiment/query", {
       body: {
-        filter: {
-          experiment: {
-            id: {
-              equals: experimentId,
-            },
-          },
-        },
+        filter: experimentId
+          ? {
+              experiment: {
+                id: {
+                  equals: experimentId,
+                },
+              },
+            }
+          : {},
         include: {
           responseBodies: true,
           promptVersion: true,
@@ -93,7 +121,10 @@ export function ExperimentTable({
 
   const { data: experimentData, refetch: refetchExperiments } = useQuery(
     ["experiments", orgId, experimentId],
-    fetchExperiments
+    fetchExperiments,
+    {
+      enabled: !!orgId && !!experimentId,
+    }
   );
 
   const providerKey = useMemo(
@@ -103,7 +134,7 @@ export function ExperimentTable({
 
   const fetchInputRecords = useCallback(async () => {
     const datasetId = experimentData?.dataset.id;
-    if (!orgId || !datasetId) return [];
+    if (!orgId || !datasetId || !promptSubversionId) return [];
     const jawnClient = getJawnClient(orgId);
     const res = await jawnClient.POST(
       "/v1/experiment/dataset/{datasetId}/inputs/query",
@@ -116,7 +147,7 @@ export function ExperimentTable({
       }
     );
     return res.data?.data;
-  }, [orgId, experimentData?.dataset?.id]);
+  }, [orgId, experimentData?.dataset?.id, promptSubversionId]);
 
   // Define fetchPromptVersionTemplate
   const fetchPromptVersionTemplate = useCallback(async () => {
@@ -124,7 +155,7 @@ export function ExperimentTable({
     const res = await jawnClient.GET("/v1/prompt/version/{promptVersionId}", {
       params: {
         path: {
-          promptVersionId: promptSubversionId,
+          promptVersionId: promptSubversionId ?? "",
         },
       },
     });
@@ -160,7 +191,7 @@ export function ExperimentTable({
       {
         params: {
           path: {
-            promptVersionId: promptSubversionId,
+            promptVersionId: promptSubversionId ?? "",
           },
         },
         body: {
@@ -177,7 +208,7 @@ export function ExperimentTable({
     ["inputRecords", orgId, experimentData?.dataset?.id],
     fetchInputRecords,
     {
-      enabled: !!experimentData?.dataset?.id,
+      enabled: !!experimentData?.dataset?.id && !!promptSubversionId,
     }
   );
 
@@ -282,12 +313,32 @@ export function ExperimentTable({
     [experimentData, inputRecordsData]
   );
 
-  // Add useEffect to update rowData when experimentData or inputRecordsData change
+  // Modify the useEffect that updates rowData
   useEffect(() => {
     if (experimentData && inputRecordsData) {
       updateRowData(experimentData, inputRecordsData);
+    } else if (!experimentId) {
+      // If there's no experimentId, set a default empty row
+      const defaultInputKey = "Input 1";
+      setInputKeys(new Set([defaultInputKey]));
+      setRowData([
+        {
+          id: `temp-${Date.now()}`,
+          dataset_row_id: null,
+          [defaultInputKey]: "",
+          isLoading: {},
+        },
+      ]);
+      setIsDataLoading(false); // Ensure we're not in a loading state
     }
-  }, [experimentData, inputRecordsData]);
+  }, [experimentData, inputRecordsData, experimentId]);
+
+  // Add a new useEffect to handle initial loading state
+  useEffect(() => {
+    if (!experimentId) {
+      setIsDataLoading(false);
+    }
+  }, [experimentId]);
 
   // Add an empty row if rowData is empty
   useEffect(() => {
@@ -342,7 +393,7 @@ export function ExperimentTable({
     }) => {
       await jawn.POST("/v1/experiment/run", {
         body: {
-          experimentId,
+          experimentId: experimentId ?? "",
           hypothesisId,
           datasetRowIds,
         },
@@ -548,7 +599,7 @@ export function ExperimentTable({
           },
           params: {
             path: {
-              promptVersionId: promptSubversionId,
+              promptVersionId: promptSubversionId ?? "",
               datasetId: experimentData?.dataset?.id ?? "",
             },
           },
@@ -813,6 +864,98 @@ export function ExperimentTable({
     return exportedData;
   }, [rowData, inputColumnFields, sortedHypotheses]);
 
+  // Add this new component
+  const NewExperimentPopover = () => {
+    const [selectedPromptId, setSelectedPromptId] = useState<string | null>(
+      null
+    );
+
+    const { prompts: promptVersions, isLoading: isLoadingVersions } =
+      usePromptVersions(selectedPromptId ?? "");
+
+    const handlePromptSelect = (promptId: string) => {
+      setSelectedPromptId(promptId);
+    };
+
+    return (
+      <PopoverContent className="w-[400px] p-4 bg-white shadow-lg rounded-md">
+        <div className="space-y-4">
+          <h2 className="text-xl font-semibold">Welcome to Experiments</h2>
+          <div>
+            <h3 className="font-semibold mb-2">Start with a template</h3>
+            <p className="text-sm text-gray-500 mb-2">
+              Includes a prompt, some sample inputs, and an improved prompt
+              (aka. an experiment).
+            </p>
+            <div className="space-y-2">
+              {[
+                "Text classification",
+                "Knowledge retrieval",
+                "Step-by-step instructions",
+              ].map((template) => (
+                <Button
+                  key={template}
+                  variant="outline"
+                  className="w-full justify-start"
+                >
+                  {template}
+                </Button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <h3 className="font-semibold mb-2">Start with a prompt</h3>
+            <p className="text-sm text-gray-500 mb-2">
+              Choose an existing prompt and select the version you want to
+              experiment on.
+            </p>
+            <ScrollArea className="flex flex-col overflow-y-auto max-h-[30vh] ">
+              {prompts &&
+                prompts?.map((prompt) => (
+                  <Button
+                    key={prompt.id}
+                    variant="outline"
+                    className="w-full justify-start mt-2"
+                    onClick={() => handlePromptSelect(prompt.id)}
+                  >
+                    <FileIcon className="mr-2 h-4 w-4" />
+                    {prompt.user_defined_id}
+                  </Button>
+                ))}
+            </ScrollArea>
+            {selectedPromptId &&
+              promptVersions &&
+              promptVersions.length > 0 && (
+                <div className="mt-4">
+                  <h4 className="font-semibold mb-2">Version</h4>
+                  <Select>
+                    <SelectTrigger>
+                      <SelectValue
+                        placeholder={
+                          isLoadingVersions
+                            ? "Loading versions..."
+                            : "Select the version"
+                        }
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {!isLoadingVersions &&
+                        promptVersions.map((version: any) => (
+                          <SelectItem key={version.id} value={version.id}>
+                            {version.name ||
+                              `V ${version.major_version}.${version.minor_version}`}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+          </div>
+        </div>
+      </PopoverContent>
+    );
+  };
+
   if (isDataLoading) {
     return (
       <div className="flex items-center justify-center h-screen flex-col">
@@ -839,26 +982,23 @@ export function ExperimentTable({
             columnView={columnView}
             setColumnView={setColumnView}
           />
-          {/* <Button
-            variant="outline"
-            className="py-0 px-2 border border-slate-200 h-8 flex items-center justify-center space-x-1"
-          >
-            <FunnelIcon className="h-4 w-4 text-slate-700" />
-            <ChevronDownIcon className="h-4 w-4 text-slate-400" />
-          </Button> */}
           <ExportButton
             className="py-0 px-2 border border-slate-200 h-8 flex items-center justify-center space-x-1 bg-white"
             key="export-button"
             rows={getExperimentExportData()}
           />
-
-          {/* <ProviderKeyDropdown
-            providerKey={selectedProviderKey}
-            setProviderKey={setSelectedProviderKey}
-          /> */}
-          {/* <Button variant="outline" onClick={() => setSettingsOpen(true)}>
-            Settings
-          </Button> */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className="py-0 px-2 border border-slate-200 h-8 flex items-center justify-center space-x-1 flex gap-2"
+              >
+                <PlusIcon className="h-4 w-4" />
+                New Experiment
+              </Button>
+            </PopoverTrigger>
+            <NewExperimentPopover />
+          </Popover>
         </div>
         {showScoresTable && (
           <ScoresTable
@@ -929,12 +1069,12 @@ export function ExperimentTable({
         </Button>
       </div>
 
-      <SettingsPanel
+      {/* <SettingsPanel
         defaultProviderKey={providerKey}
         setSelectedProviderKey={async (key) => {
           await jawn.POST("/v1/experiment/update-meta", {
             body: {
-              experimentId,
+              experimentId: experimentId ?? "",
               meta: {
                 ...(experimentData?.meta ?? {}),
                 provider_key: key ?? "",
@@ -945,7 +1085,7 @@ export function ExperimentTable({
         }}
         open={settingsOpen}
         setOpen={setSettingsOpen}
-      />
+      /> */}
 
       {/* Include the ExperimentInputSelector */}
       <ExperimentInputSelector
