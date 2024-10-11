@@ -7,10 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { InformationCircleIcon } from "@heroicons/react/24/outline";
-import { styled } from "@mui/material/styles";
-import Tooltip, { TooltipProps, tooltipClasses } from "@mui/material/Tooltip";
-import { Plus, Trash } from "lucide-react";
+import { Plus, Trash2Icon } from "lucide-react";
 import { Result } from "../../../lib/result";
 import {
   ColumnType,
@@ -20,6 +17,11 @@ import { OrganizationFilter } from "../../../services/lib/organization_layout/or
 import FilterTreeEditor from "./FilterTreeEditor";
 import ThemedNumberDropdown from "./themedNumberDropdown";
 import { ThemedTextDropDown } from "./themedTextDropDown";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface UIFilterRowNode {
   operator: "and" | "or";
@@ -51,13 +53,14 @@ export function AdvancedFilters({
   const [filterTree, setFilterTree] = [filters, setAdvancedFilters];
 
   return (
-    <div className="w-full flex flex-col bg-white dark:bg-black p-4 rounded-sm border border-gray-300 dark:border-gray-700">
-      <div className="w-full flex justify-end">
+    <div className="w-full flex flex-col bg-white p-4 dark:bg-black rounded-sm">
+      <div className="w-full flex items-center justify-between mb-3">
+        <h3 className="text-xs text-slate-900 font-semibold">Filters</h3>
         <button
           onClick={() => {
             setAdvancedFilters({ operator: "and", rows: [] });
           }}
-          className="text-xs text-gray-500 font-medium rounded-md hover:bg-gray-200 dark:hover:bg-gray-800"
+          className="text-xs text-slate-500 font-medium rounded-md"
         >
           Clear All
         </button>
@@ -104,6 +107,7 @@ function AdvancedFilterInput({
           onChange={(e) => {
             onChange(removeUnicodeCharacters(e.target.value));
           }}
+          className="text-xs text-slate-900 dark:text-slate-100"
           placeholder="text..."
           value={value}
         />
@@ -211,20 +215,9 @@ export function AdvancedFilterRow({
   onAddFilter: () => void;
   showAddFilter?: boolean;
 }) {
-  const BlackTooltip = styled(({ className, ...props }: TooltipProps) => (
-    <Tooltip {...props} classes={{ popper: className }} />
-  ))(({ theme }) => ({
-    [`& .${tooltipClasses.arrow}`]: {
-      color: theme.palette.common.black,
-    },
-    [`& .${tooltipClasses.tooltip}`]: {
-      backgroundColor: theme.palette.common.black,
-      fontSize: "0.8rem",
-    },
-  }));
   return (
-    <div className="w-full flex flex-col lg:grid lg:grid-cols-4 gap-3 items-left lg:items-end ml-4">
-      <div className="w-full max-w-[12.5rem] text-xs">
+    <div className="w-full flex flex-col md:grid md:grid-cols-4 gap-3 items-left md:items-center ml-4">
+      <div className="w-full text-xs">
         <Select
           value={filter.filterMapIdx.toString()}
           onValueChange={(value) => {
@@ -307,30 +300,35 @@ export function AdvancedFilterRow({
           }
         />
       </div>
-      <div className="flex flex-row w-full justify-between pr-4 items-center">
-        <div className="flex flex-row  justify-start items-center w-full pr-4 h-full">
-          <div className="w-full lg:w-fit mr-4 pb-1">
+      <div className="flex flex-row  justify-start items-center w-full pr-4 h-full">
+        {showAddFilter && showAddFilter === true && (
+          <Tooltip>
+            <TooltipTrigger>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => onAddFilter()}
+                className="text-slate-500 h-8 w-8 hover:border hover:border-slate-200 hover:text-slate-500"
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Add Filter</TooltipContent>
+          </Tooltip>
+        )}
+        <Tooltip>
+          <TooltipTrigger>
             <Button
-              variant="destructive"
+              variant="ghost"
               size="icon"
               onClick={onDeleteHandler}
-              className="h-6 w-6 "
+              className="flex items-center text-slate-500 h-8 w-8"
             >
-              <Trash className="h-3 w-3" />
+              <Trash2Icon className="h-5 w-5 text-red-700" />
             </Button>
-          </div>
-          {showAddFilter && showAddFilter === true && (
-            <Button
-              variant="outline"
-              size="sm_sleek"
-              onClick={() => onAddFilter()}
-              className="flex items-center"
-            >
-              <Plus className="h-4 w-4 mr-1" />
-              Add
-            </Button>
-          )}
-        </div>
+          </TooltipTrigger>
+          <TooltipContent>Delete Filter</TooltipContent>
+        </Tooltip>
       </div>
     </div>
   );

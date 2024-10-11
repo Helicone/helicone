@@ -158,7 +158,7 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent
-                  className="min-w-[50rem] w-[50vw] flex items-start"
+                  className="min-w-[40rem] w-[40vw] flex items-start p-0 mx-2 rounded-lg"
                   ref={popoverContentRef}
                   onInteractOutside={(e) => {}}
                   onClick={handlePopoverInteraction}
@@ -174,14 +174,15 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
                     onSaveFilterCallback={savedFilters?.onSaveFilterCallback}
                     layoutPage={savedFilters?.layoutPage ?? "requests"}
                   />
-                  <div className="flex justify-end">
+                  <div className="flex justify-end ml-4">
                     <Button
                       variant="ghostLinear"
                       onClick={() => {
                         setIsFiltersPinned(!isFiltersPinned);
-                        setIsFiltersPopoverOpen(false);
+                        setIsFiltersPopoverOpen(isFiltersPinned);
+                        setShowFilters(!isFiltersPinned);
                       }}
-                      className="text-gray-500 hover:text-gray-700"
+                      className="text-gray-500 hover:text-gray-700 p-0 mt-4 mr-4 h-auto w-auto"
                     >
                       {isFiltersPinned ? (
                         <PinIcon className="h-5 w-5 text-primary" />

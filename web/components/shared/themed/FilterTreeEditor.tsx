@@ -1,5 +1,4 @@
 import React from "react";
-import { PlusIcon } from "@heroicons/react/24/outline";
 
 import { Result } from "../../../lib/result";
 import { SingleFilterDef } from "../../../services/lib/filters/frontendFilterDefs";
@@ -11,6 +10,14 @@ import {
 import SaveFilterButton from "../../templates/dashboard/saveFilterButton";
 import { OrganizationFilter } from "../../../services/lib/organization_layout/organization_layout";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { PlusSquareIcon } from "lucide-react";
 
 interface FilterTreeEditorProps {
   uiFilterRowTree: UIFilterRowTree;
@@ -120,8 +127,8 @@ const FilterTreeEditor: React.FC<FilterTreeEditorProps> = ({
     return null;
   };
 
-  const handleOperatorToggle = (node: UIFilterRowNode) => {
-    node.operator = node.operator === "and" ? "or" : "and";
+  const handleOperatorChange = (node: UIFilterRowNode, value: string) => {
+    node.operator = value as "and" | "or";
     onUpdate({ ...uiFilterRowTree });
   };
 
@@ -134,19 +141,19 @@ const FilterTreeEditor: React.FC<FilterTreeEditorProps> = ({
       const content = (
         <>
           {node.rows.length > 1 && (
-            <div
-              className={`flex items-center mb-1 ${
-                path.length === 1 && "ml-4"
-              }`}
+            <Select
+              value={node.operator}
+              onValueChange={(value) => handleOperatorChange(node, value)}
+              defaultValue="and"
             >
-              <Button
-                onClick={() => handleOperatorToggle(node)}
-                variant="outline"
-                size="sm_sleek"
-              >
-                {node.operator}
-              </Button>
-            </div>
+              <SelectTrigger className="self-start w-auto mb-1 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 focus:ring-0 focus:ring-offset-0 ">
+                <SelectValue placeholder="Operator" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="and">And</SelectItem>
+                <SelectItem value="or">Or</SelectItem>
+              </SelectContent>
+            </Select>
           )}
           {node.rows.map((childNode: UIFilterRowTree, childIndex: number) => (
             <div key={childIndex} className="mb-1">
@@ -154,21 +161,7 @@ const FilterTreeEditor: React.FC<FilterTreeEditorProps> = ({
             </div>
           ))}
           {isRoot && (
-            <div className="flex flex-row w-full items-center justify-between mt-2">
-              <Button
-                variant={"default"}
-                size="md_sleek"
-                onClick={() => handleAddFilter(node)}
-                className="bg-gray-100 dark:bg-[#17191d] border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2"
-              >
-                <PlusIcon
-                  className="mr-1 h-3.5 flex-none text-black dark:text-white hover:bg-sky-100 hover:text-sky-900 dark:hover:bg-sky-900 dark:hover:text-sky-100"
-                  aria-hidden="true"
-                />
-                <p className="font-medium text-gray-900 dark:text-gray-100 hidden sm:block">
-                  Add Filter
-                </p>
-              </Button>
+            <div className="flex flex-row w-full items-center mt-2">
               {onSaveFilterCallback && (
                 <SaveFilterButton
                   filters={filters}
@@ -178,6 +171,20 @@ const FilterTreeEditor: React.FC<FilterTreeEditorProps> = ({
                   layoutPage={layoutPage}
                 />
               )}
+              <Button
+                variant={"outline"}
+                size="md_sleek"
+                onClick={() => handleAddFilter(node)}
+                className="flex-1 flex flex-row items-center gap-2.5"
+              >
+                <PlusSquareIcon
+                  className="h-4 flex-none text-slate-500 dark:text-slate-400"
+                  aria-hidden="true"
+                />
+                <p className="font-medium text-xs text-slate-700 dark:text-slate-300 hidden sm:block">
+                  Add Filter
+                </p>
+              </Button>
             </div>
           )}
         </>
@@ -186,7 +193,7 @@ const FilterTreeEditor: React.FC<FilterTreeEditorProps> = ({
       return isRoot ? (
         <div className="mb-4">{content}</div>
       ) : (
-        <div className="mb-1 flex flex-col  dark:bg-black py-4 ml-4 border border-gray-300 dark:border-gray-700 rounded-sm">
+        <div className="mb-1 flex flex-col bg-slate-50 dark:bg-slate-900 p-2 ml-4 border border-slate-200 dark:border-slate-800 rounded-lg">
           {content}
         </div>
       );
