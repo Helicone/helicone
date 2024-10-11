@@ -447,6 +447,19 @@
     {
       "source": "/use-cases/secret-vs-public-key",
       "destination": "/faq/secret-vs-public-key"
+    },
+
+    {
+      "source": "/getting-started/self-deploy-cloud",
+      "destination": "/getting-started/self-host/cloud"
+    },
+    {
+      "source": "/getting-started/self-deploy-docker",
+      "destination": "/getting-started/self-host/docker"
+    },
+    {
+      "source": "/getting-started/self-deploy",
+      "destination": "/getting-started/self-host/manual"
     }
   ]
 }
