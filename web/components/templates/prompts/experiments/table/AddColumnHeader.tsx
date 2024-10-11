@@ -28,7 +28,7 @@ interface AddColumnHeaderProps {
   experimentId: string;
   promptVersionTemplate: any;
   selectedProviderKey: string | null;
-  refetchData: () => void; // Add this line
+  refetchData: () => Promise<void>; // Add this line
 }
 
 const SCORES = [
@@ -245,7 +245,7 @@ const AddColumnHeader: React.FC<AddColumnHeaderProps> = ({
 
                   setOpen(false); // Close the drawer after adding the column
 
-                  refetchData(); // Refetch the table data
+                  await refetchData(); // Refetch the table data
                 }}
                 submitText="Test"
                 initialModel={"gpt-4o"}

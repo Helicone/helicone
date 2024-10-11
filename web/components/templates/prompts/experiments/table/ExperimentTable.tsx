@@ -1,10 +1,4 @@
-import React, {
-  useRef,
-  useEffect,
-  useState,
-  useCallback,
-  useMemo,
-} from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { useOrg } from "@/components/layout/organizationContext";
 import { Button } from "@/components/ui/button";
 import { getJawnClient } from "@/lib/clients/jawn";
@@ -19,18 +13,7 @@ import {
 } from "ag-grid-community";
 import "ag-grid-community/styles/ag-grid.css";
 import { AgGridReact } from "ag-grid-react";
-import { useMutation } from "@tanstack/react-query";
-
-import SettingsPanel from "./components/settingsPannel";
-import {
-  InputCellRenderer,
-  CustomHeaderComponent,
-  RowNumberHeaderComponent,
-  RowNumberCellRenderer,
-  InputsHeaderComponent,
-} from "./components/tableElementsRenderer";
-import { ColumnsDropdown } from "./components/customButtonts";
-import ScoresTable from "./ScoresTable";
+import { useCallback, useMemo } from "react";
 import AddColumnHeader from "./AddColumnHeader";
 import {
   HypothesisCellRenderer,
@@ -44,10 +27,20 @@ import {
   FunnelIcon,
 } from "@heroicons/react/24/outline";
 import ExperimentInputSelector from "../experimentInputSelector";
+import { useMutation } from "@tanstack/react-query";
 
-// Import your LoadingAnimation component
-import LoadingAnimation from "../../../../shared/loadingAnimation";
+import SettingsPanel from "./components/settingsPannel";
+import {
+  InputCellRenderer,
+  CustomHeaderComponent,
+  RowNumberHeaderComponent,
+  RowNumberCellRenderer,
+  InputsHeaderComponent,
+} from "./components/tableElementsRenderer";
+import { ColumnsDropdown } from "./components/customButtonts";
+import ScoresTable from "./ScoresTable";
 import ExportButton from "../../../../shared/themed/table/exportButton";
+import LoadingAnimation from "../../../../shared/loadingAnimation";
 
 interface ExperimentTableProps {
   promptSubversionId: string;
@@ -61,6 +54,7 @@ export function ExperimentTable({
   const org = useOrg();
   const orgId = org?.currentOrg?.id;
   const jawn = useJawnClient();
+  const [isDataLoading, setIsDataLoading] = useState(true);
 
   const [wrapText, setWrapText] = useState(false);
   const [columnView, setColumnView] = useState<"all" | "inputs" | "outputs">(
@@ -223,13 +217,10 @@ export function ExperimentTable({
   // After defining inputKeys
   const inputColumnFields = Array.from(inputKeys);
 
-  const [isDataLoading, setIsDataLoading] = useState(true); // Initialize loading state
-
   // Function to update rowData based on fetched data
   const updateRowData = useCallback(
     (experimentData: any, inputRecordsData: any[]) => {
-      setIsDataLoading(true); // Start loading
-
+      setIsDataLoading(true);
       const newInputKeys = new Set<string>();
       if (inputRecordsData && inputRecordsData.length > 0) {
         inputRecordsData.forEach((row) => {
@@ -292,11 +283,12 @@ export function ExperimentTable({
       });
 
       setRowData(newRowData);
-      setIsDataLoading(false); // End loading
+      setIsDataLoading(false);
     },
     [experimentData, inputRecordsData]
   );
 
+  // Add useEffect to update rowData when experimentData or inputRecordsData change
   useEffect(() => {
     if (experimentData && inputRecordsData) {
       updateRowData(experimentData, inputRecordsData);
@@ -354,20 +346,6 @@ export function ExperimentTable({
       hypothesisId: string;
       datasetRowIds: string[];
     }) => {
-      setRowData((prevData) =>
-        prevData.map((row) => {
-          if (datasetRowIds.includes(row.dataset_row_id)) {
-            return {
-              ...row,
-              isLoading: {
-                ...(row.isLoading || {}),
-                [hypothesisId]: true,
-              },
-            };
-          }
-          return row;
-        })
-      );
       await jawn.POST("/v1/experiment/run", {
         body: {
           experimentId,
@@ -375,33 +353,53 @@ export function ExperimentTable({
           datasetRowIds,
         },
       });
-      await refetchExperiments();
-      await refetchInputRecords();
-
-      // Reset loading state in rowData
-      setRowData((prevData) =>
-        prevData.map((row) => {
-          if (datasetRowIds.includes(row.dataset_row_id)) {
-            const newIsLoading = { ...(row.isLoading || {}) };
-            delete newIsLoading[hypothesisId];
-            return {
-              ...row,
-              isLoading: newIsLoading,
-            };
-          }
-          return row;
-        })
-      );
-      const anyLoading = rowData.some((row) =>
-        Object.values(row.isLoading).some((loading) => loading)
-      );
-
-      if (!anyLoading) {
-        // No hypotheses are running
-        setIsHypothesisRunning(false);
-      }
     },
     {
+      onMutate: ({ hypothesisId, datasetRowIds }) => {
+        // Update loading state in rowData
+        setRowData((prevData) =>
+          prevData.map((row) => {
+            if (datasetRowIds.includes(row.dataset_row_id)) {
+              return {
+                ...row,
+                isLoading: {
+                  ...(row.isLoading || {}),
+                  [hypothesisId]: true,
+                },
+              };
+            }
+            return row;
+          })
+        );
+      },
+      onSettled: async (_, __, { hypothesisId, datasetRowIds }) => {
+        // Refetch data
+        await refetchExperiments();
+        await refetchInputRecords();
+
+        // Reset loading state in rowData
+        setRowData((prevData) =>
+          prevData.map((row) => {
+            if (datasetRowIds.includes(row.dataset_row_id)) {
+              const newIsLoading = { ...(row.isLoading || {}) };
+              delete newIsLoading[hypothesisId];
+              return {
+                ...row,
+                isLoading: newIsLoading,
+              };
+            }
+            return row;
+          })
+        );
+        const anyLoading = rowData.some((row) =>
+          Object.values(row.isLoading || {}).some((loading) => loading)
+        );
+
+        if (!anyLoading) {
+          // No hypotheses are running
+          setIsHypothesisRunning(false);
+        }
+      },
       onError: (error) => {
         console.error("Error running hypothesis:", error);
       },
@@ -415,27 +413,29 @@ export function ExperimentTable({
     [runHypothesisMutation]
   );
 
-  const refetchData = () => {
-    refetchExperiments();
-    refetchInputRecords();
+  const refetchData = async () => {
+    await refetchExperiments();
+    await refetchInputRecords();
   };
 
-  // useEffect(() => {
-  //   let intervalId: NodeJS.Timeout | null = null;
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout | null = null;
 
-  //   if (isHypothesisRunning) {
-  //     intervalId = setInterval(() => {
-  //       refetchExperiments();
-  //       gridRef.current?.refreshCells();
-  //     }, 500);
-  //   }
+    if (isHypothesisRunning) {
+      intervalId = setInterval(() => {
+        // Refetch data and refresh the grid
+        refetchExperiments();
+        // refetchInputRecords();
+        gridRef.current?.refreshCells();
+      }, 1000);
+    }
 
-  //   return () => {
-  //     if (intervalId) {
-  //       clearInterval(intervalId);
-  //     }
-  //   };
-  // }, [isHypothesisRunning, refetchExperiments, refetchInputRecords]);
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [isHypothesisRunning, refetchExperiments, refetchInputRecords]);
 
   // Determine the hypotheses to run (excluding the first one)
   const hypothesesToRun = useMemo(() => {
@@ -604,101 +604,97 @@ export function ExperimentTable({
       },
     ];
 
-    // Add input columns if columnView is "all" or "inputs"
-    if (columnView === "all" || columnView === "inputs") {
-      // Add columns for each input key
-      Array.from(inputKeys).forEach((key, index) => {
-        columns.push({
-          field: key,
-          headerName: key,
-          width: 150,
-          cellRenderer: InputCellRenderer,
-          cellRendererParams: {
-            index: index,
-          },
-          cellClass: "border-r border-[#E2E8F0] text-slate-700",
-          headerClass: "border-r border-[#E2E8F0]",
-          headerComponent: InputsHeaderComponent,
-          headerComponentParams: {
-            index: index,
-            displayName: key,
-            badgeText: "Input",
-          },
-          cellStyle: {
-            display: "flex",
-            alignItems: "center",
-            overflow: "hidden",
-            justifyContent: "start",
-            whiteSpace: wrapText ? "normal" : "nowrap",
-          },
-          autoHeight: wrapText,
-          editable: false, // Set this to false to prevent default editing
-        });
-      });
-
-      // Add the "Messages" column
+    // Add columns for each input key
+    Array.from(inputKeys).forEach((key, index) => {
       columns.push({
-        field: "messages",
-        headerName: "Messages",
-        width: 200,
-        headerComponent: CustomHeaderComponent,
+        field: key,
+        headerName: key,
+        width: 150,
+        cellRenderer: InputCellRenderer,
+        cellRendererParams: {
+          index: index,
+        },
+        cellClass: "border-r border-[#E2E8F0] text-slate-700",
+        headerClass: "border-r border-[#E2E8F0]",
+        headerComponent: InputsHeaderComponent,
         headerComponentParams: {
-          displayName: "Messages",
+          index: index,
+          displayName: key,
           badgeText: "Input",
-          badgeVariant: "secondary",
-          hypothesis: sortedHypotheses[0] || {},
-          promptVersionTemplate: promptVersionTemplate,
-        },
-        cellClass:
-          "border-r border-[#E2E8F0] text-slate-700 flex items-center justify-start pt-2.5",
-        headerClass: "border-r border-[#E2E8F0]",
-        cellRenderer: OriginalMessagesCellRenderer,
-        cellRendererParams: {
-          prompt: promptVersionTemplate,
         },
         cellStyle: {
-          verticalAlign: "middle",
-          textAlign: "left",
+          display: "flex",
+          alignItems: "center",
           overflow: "hidden",
-          textOverflow: "ellipsis",
+          justifyContent: "start",
           whiteSpace: wrapText ? "normal" : "nowrap",
         },
         autoHeight: wrapText,
+        editable: false, // Set this to false to prevent default editing
       });
-    }
+    });
 
-    // Add output columns if columnView is "all" or "outputs"
+    // Add the "Messages" column
+    columns.push({
+      field: "messages",
+      headerName: "Messages",
+      width: 200,
+      headerComponent: CustomHeaderComponent,
+      headerComponentParams: {
+        displayName: "Messages",
+        badgeText: "Input",
+        badgeVariant: "secondary",
+        hypothesis: sortedHypotheses[0] || {},
+        promptVersionTemplate: promptVersionTemplate,
+      },
+      cellClass:
+        "border-r border-[#E2E8F0] text-slate-700 flex items-center justify-start pt-2.5",
+      headerClass: "border-r border-[#E2E8F0]",
+      cellRenderer: OriginalMessagesCellRenderer,
+      cellRendererParams: {
+        prompt: promptVersionTemplate,
+      },
+      cellStyle: {
+        verticalAlign: "middle",
+        textAlign: "left",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        whiteSpace: wrapText ? "normal" : "nowrap",
+      },
+      autoHeight: wrapText,
+    });
+
+    // Add the "Original" column
+    columns.push({
+      field: "original",
+      headerName: "Original",
+      width: 200,
+      headerComponent: CustomHeaderComponent,
+      headerComponentParams: {
+        displayName: "Original",
+        badgeText: "Output",
+        badgeVariant: "secondary",
+        hypothesis: sortedHypotheses[1] || {},
+        promptVersionTemplate: promptVersionTemplate,
+      },
+      cellClass: "border-r border-[#E2E8F0] text-slate-700 pt-2.5",
+      headerClass: "border-r border-[#E2E8F0]",
+      cellRenderer: OriginalOutputCellRenderer,
+      cellRendererParams: {
+        prompt: promptVersionTemplate,
+      },
+      cellStyle: {
+        verticalAlign: "middle",
+        textAlign: "left",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        whiteSpace: wrapText ? "normal" : "nowrap",
+      },
+      autoHeight: wrapText,
+    });
+
+    // Add columns for additional experiments
     if (columnView === "all" || columnView === "outputs") {
-      // Add the "Original" column
-      columns.push({
-        field: "original",
-        headerName: "Original",
-        width: 200,
-        headerComponent: CustomHeaderComponent,
-        headerComponentParams: {
-          displayName: "Original",
-          badgeText: "Output",
-          badgeVariant: "secondary",
-          hypothesis: sortedHypotheses[1] || {},
-          promptVersionTemplate: promptVersionTemplate,
-        },
-        cellClass: "border-r border-[#E2E8F0] text-slate-700 pt-2.5",
-        headerClass: "border-r border-[#E2E8F0]",
-        cellRenderer: OriginalOutputCellRenderer,
-        cellRendererParams: {
-          prompt: promptVersionTemplate,
-        },
-        cellStyle: {
-          verticalAlign: "middle",
-          textAlign: "left",
-          overflow: "hidden",
-          textOverflow: "ellipsis",
-          whiteSpace: wrapText ? "normal" : "nowrap",
-        },
-        autoHeight: wrapText,
-      });
-
-      // Add columns for additional experiments (hypotheses)
       sortedHypotheses.forEach((hypothesis, index) => {
         const experimentNumber = index + 1;
         columns.push({
@@ -717,10 +713,12 @@ export function ExperimentTable({
             displayName: `Experiment ${experimentNumber}`,
             badgeText: "Output",
             badgeVariant: "secondary",
-            onRunColumn: (colId: string) => {
+            onRunColumn: async (colId: string) => {
               const datasetRowIds = rowData.map((row) => row.dataset_row_id);
-              datasetRowIds.map((datasetRowId) =>
-                handleRunHypothesis(colId, [datasetRowId])
+              await Promise.all(
+                datasetRowIds.map((datasetRowId) =>
+                  handleRunHypothesis(colId, [datasetRowId])
+                )
               );
             },
             hypothesis: hypothesis,
@@ -739,7 +737,7 @@ export function ExperimentTable({
       });
     }
 
-    // Add the "Add Experiment" column (always)
+    // Add the "Add Experiment" column
     columns.push({
       headerName: "Add Experiment",
       width: 150,
@@ -791,6 +789,9 @@ export function ExperimentTable({
     handleLastInputSubmit,
   ]);
 
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [selectedProviderKey, setSelectedProviderKey] = useState(providerKey);
+
   const getExperimentExportData = useCallback(() => {
     if (!rowData || rowData.length === 0) {
       return [];
@@ -817,9 +818,6 @@ export function ExperimentTable({
 
     return exportedData;
   }, [rowData, inputColumnFields, sortedHypotheses]);
-
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const [selectedProviderKey, setSelectedProviderKey] = useState(providerKey);
 
   if (isDataLoading) {
     return (
@@ -859,6 +857,7 @@ export function ExperimentTable({
             key="export-button"
             rows={getExperimentExportData()}
           />
+
           {/* <ProviderKeyDropdown
             providerKey={selectedProviderKey}
             setProviderKey={setSelectedProviderKey}
@@ -963,11 +962,11 @@ export function ExperimentTable({
           datasetId: experimentData?.dataset?.id,
         }}
         requestIds={randomInputRecords}
-        onSuccess={(success) => {
+        onSuccess={async (success) => {
           if (success) {
             // Handle success: Re-fetch experiments and input records
-            refetchExperiments();
-            refetchInputRecords();
+            await refetchExperiments();
+            await refetchInputRecords();
           }
         }}
       />

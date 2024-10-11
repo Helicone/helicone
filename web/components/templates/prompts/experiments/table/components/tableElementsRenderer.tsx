@@ -152,10 +152,10 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
     setShowPromptPlayground(true);
   };
 
-  const handleRunClick = (e: React.MouseEvent) => {
+  const handleRunClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (onRunColumn) {
-      onRunColumn(props.column.colId);
+      await onRunColumn(props.column.colId);
     }
   };
 
