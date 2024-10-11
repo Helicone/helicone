@@ -66,7 +66,9 @@
             "getting-started/self-deploy-docker",
             "getting-started/self-deploy-kubernetes",
             "getting-started/self-deploy"
-          ]
+          ],
+          "icon": "server",
+          "iconType": "solid"
         }
       ]
     },
@@ -248,6 +250,7 @@
         "references/availability",
         "references/latency-affect",
         "references/data-autonomy",
+        "references/open-source",
         "references/proxy-vs-async",
         "references/how-we-calculate-cost"
       ]
@@ -274,8 +277,8 @@
       ]
     },
     {
-      "group": "faq",
-      "pages": ["faq/secret-vs-public-key"]
+      "group": "FAQ",
+      "pages": ["faq/overview"]
     },
     {
       "group": "Use Cases",
