@@ -20,11 +20,7 @@ import {
   OriginalMessagesCellRenderer,
   OriginalOutputCellRenderer,
 } from "./HypothesisCellRenderer";
-import {
-  PlusIcon,
-  ChevronDownIcon,
-  FunnelIcon,
-} from "@heroicons/react/24/outline";
+import { PlusIcon } from "@heroicons/react/24/outline";
 import ExperimentInputSelector from "../experimentInputSelector";
 import { useMutation } from "@tanstack/react-query";
 
@@ -843,13 +839,13 @@ export function ExperimentTable({
             columnView={columnView}
             setColumnView={setColumnView}
           />
-          <Button
+          {/* <Button
             variant="outline"
             className="py-0 px-2 border border-slate-200 h-8 flex items-center justify-center space-x-1"
           >
             <FunnelIcon className="h-4 w-4 text-slate-700" />
             <ChevronDownIcon className="h-4 w-4 text-slate-400" />
-          </Button>
+          </Button> */}
           <ExportButton
             className="py-0 px-2 border border-slate-200 h-8 flex items-center justify-center space-x-1 bg-white"
             key="export-button"
