@@ -742,7 +742,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     <>
       <div className="h-screen flex flex-col">
         {requestWithoutStream && !isWarningHidden && (
-          <div className="bg-sky-200 text-white text-[13px] flex justify-between items-center p-2">
+          <div className="bg-sky-400 text-white text-[13px] flex justify-between items-center p-2">
             <p>
               We are unable to calculate your cost accurately because the
               &#39;stream_usage&#39; option is not included in your message.
