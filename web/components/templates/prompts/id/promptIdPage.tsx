@@ -79,6 +79,8 @@ import { Button } from "../../../ui/button";
 import ExperimentPanel from "./experimentPanel";
 import { useUser } from "@supabase/auth-helpers-react";
 import { IslandContainer } from "../../../ui/islandContainer";
+import { useFeatureFlags } from "@/services/hooks/featureFlags";
+import { useOrg } from "@/components/layout/organizationContext";
 
 interface PromptIdPageProps {
   id: string;
@@ -471,6 +473,13 @@ const PromptIdPage = (props: PromptIdPageProps) => {
     promptVersionId: string,
     promptData: string
   ) => {
+    if (!experimentFlags?.hasFlag) {
+      notification.setNotification(
+        "Experiment feature is not enabled - sign up for the waitlist to use it",
+        "error"
+      );
+      return;
+    }
     const dataset = await jawn.POST("/v1/helicone-dataset", {
       body: {
         datasetName: "Dataset for Experiment",
@@ -617,6 +626,9 @@ const PromptIdPage = (props: PromptIdPageProps) => {
     refetchPrompt();
   };
   const user = useUser();
+  const org = useOrg();
+
+  const experimentFlags = useFeatureFlags("experiment", org?.currentOrg.id);
 
   return (
     <IslandContainer>
