@@ -154,7 +154,10 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
           )}
           <div className="flex flex-row">
             {advancedFilters && (
-              <Popover open={isFiltersPopoverOpen} onOpenChange={() => {}}>
+              <Popover
+                open={isFiltersPopoverOpen}
+                onOpenChange={setIsFiltersPopoverOpen}
+              >
                 <PopoverTrigger asChild>
                   <Button
                     variant="ghostLinear"
@@ -310,8 +313,8 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
       </div>
 
       {advancedFilters && showFilters && isFiltersPinned && (
-        <div className="flex justify-start min-w-[50rem] w-full">
-          <div>
+        <div className="flex justify-start min-w-[50rem] w-full mt-1">
+          <div className="flex-1 rounded-lg">
             <AdvancedFilters
               filterMap={advancedFilters.filterMap}
               filters={advancedFilters.filters}
@@ -324,7 +327,11 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
           </div>
           <Button
             variant="ghost"
-            onClick={() => setIsFiltersPinned(false)}
+            onClick={() => {
+              setIsFiltersPinned(false);
+              setShowFilters(false);
+              setIsFiltersPopoverOpen(true);
+            }}
             className="text-gray-500 hover:text-gray-700"
           >
             <PinIcon className="h-5 w-5 text-primary rotate-45 fill-gray-500" />
