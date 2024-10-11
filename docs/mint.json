@@ -63,10 +63,11 @@
         {
           "group": "Self Host",
           "pages": [
-            "getting-started/self-deploy-cloud",
-            "getting-started/self-deploy-docker",
-            "getting-started/self-deploy-kubernetes",
-            "getting-started/self-deploy"
+            "getting-started/self-host/overview",
+            "getting-started/self-host/cloud",
+            "getting-started/self-host/docker",
+            "getting-started/self-host/kubernetes",
+            "getting-started/self-host/manual"
           ],
           "icon": "server",
           "iconType": "solid"
