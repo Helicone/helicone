@@ -473,7 +473,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
     promptVersionId: string,
     promptData: string
   ) => {
-    if (!experimentFlags?.hasFlag) {
+    if (!(experimentFlags?.hasFlag || user?.email?.includes("helicone.ai"))) {
       notification.setNotification(
         "Experiment feature is not enabled - sign up for the waitlist to use it",
         "error"
@@ -628,7 +628,10 @@ const PromptIdPage = (props: PromptIdPageProps) => {
   const user = useUser();
   const org = useOrg();
 
-  const experimentFlags = useFeatureFlags("experiment", org?.currentOrg.id);
+  const experimentFlags = useFeatureFlags(
+    "experiment",
+    org?.currentOrg?.id ?? ""
+  );
 
   return (
     <IslandContainer>
