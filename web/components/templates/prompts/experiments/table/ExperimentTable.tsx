@@ -159,7 +159,6 @@ export function ExperimentTable({
 
   const fetchRandomInputRecords = useCallback(async () => {
     const jawnClient = getJawnClient(orgId);
-    console.log("promptVersionIdRandom", promptSubversionId);
     const res = await jawnClient.POST(
       "/v1/prompt/version/{promptVersionId}/inputs/query",
       {

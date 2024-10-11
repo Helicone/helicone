@@ -101,9 +101,6 @@ export const HypothesisCellRenderer: React.FC<any> = (params) => {
           className="w-6 h-6 p-0 border-slate-200 border rounded-md bg-slate-50 text-slate-500"
           onClick={(e) => {
             e.stopPropagation();
-            console.log("running hypothesis", hypothesisId);
-            console.log("data", data);
-            console.log("dataset_row_id", data.dataset_row_id);
             params.handleRunHypothesis(hypothesisId, [data.dataset_row_id]);
           }}
         >
