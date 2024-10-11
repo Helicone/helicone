@@ -742,14 +742,14 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     <>
       <div className="h-screen flex flex-col">
         {requestWithoutStream && !isWarningHidden && (
-          <div className="alert alert-warning flex justify-between items-center">
-            <p className="text-yellow-800">
+          <div className="bg-sky-500 text-white text-[13px] flex justify-between items-center p-2">
+            <p>
               We are unable to calculate your cost accurately because the
               &#39;stream_usage&#39; option is not included in your message.
               Please refer to{" "}
               <a
                 href="https://docs.helicone.ai/use-cases/enable-stream-usage"
-                className="text-blue-600 underline"
+                className="text-white underline"
               >
                 this documentation
               </a>{" "}
@@ -757,7 +757,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
             </p>
             <button
               onClick={() => setIsWarningHidden(true)}
-              className="text-yellow-800 hover:text-yellow-900"
+              className="text-white hover:text-gray-200"
             >
               <span className="sr-only">Close</span>
               <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
