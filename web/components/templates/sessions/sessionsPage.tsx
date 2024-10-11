@@ -74,12 +74,6 @@ const SessionsPage = (props: SessionsPageProps) => {
   );
   const debouncedAdvancedFilters = useDebounce(advancedFilters, 500); // 0.5 seconds
 
-  console.log(
-    "advancedFilters",
-    advancedFilters,
-    filterUITreeToFilterNode(SESSIONS_TABLE_FILTERS, debouncedAdvancedFilters)
-  );
-
   const onSetAdvancedFiltersHandler = useCallback(
     (filters: UIFilterRowTree) => {
       setAdvancedFilters(filters);

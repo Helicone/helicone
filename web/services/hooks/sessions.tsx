@@ -12,7 +12,6 @@ const useSessions = (
   sessionName: string,
   advancedFilters: UIFilterRowTree
 ) => {
-  console.log("over here", advancedFilters);
   const org = useOrg();
   const { data, isLoading, refetch, isRefetching } = useQuery({
     queryKey: [
