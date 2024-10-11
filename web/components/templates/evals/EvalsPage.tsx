@@ -41,21 +41,14 @@ import {
 import { cn } from "@/lib/utils";
 import { ColumnDef } from "@tanstack/react-table";
 import { Check, ChevronsUpDown } from "lucide-react";
+import { useRouter } from "next/router";
 import { AverageScoreChart } from "./charts/AverageScoreChart";
 import { ScoreDistributionChart } from "./charts/ScoreDistributionChart";
 import { ScoreDistributionChartPie } from "./charts/ScoreDistributionChartPie";
 import { TracesChart } from "./charts/TracesChart";
-import { useRouter } from "next/router";
 
 // Import Shadcn UI components for dropdown
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { ChevronDownIcon } from "@heroicons/react/24/outline";
-import { CreateNewEvaluator } from "@/components/shared/CreateNewEvaluator";
+import { CreateNewEvaluator } from "@/components/shared/CreateNewEvaluator/CreateNewEvaluator";
 
 type EvalMetric = {
   name: string;

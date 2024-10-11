@@ -805,6 +805,7 @@ export function ExperimentTable({
             wrapText={wrapText}
             columnWidths={columnWidths}
             columnOrder={columnOrder}
+            experimentId={experimentId}
           />
         )}
         <div

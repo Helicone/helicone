@@ -1,14 +1,39 @@
-import { memo } from "react";
+import { memo, useState } from "react";
 import { clsx } from "@/components/shared/clsx";
 import { ColDef } from "ag-grid-community";
 import { Badge } from "@/components/ui/badge";
-import { InfoIcon } from "lucide-react";
+import { InfoIcon, TrashIcon } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { getJawnClient } from "@/lib/clients/jawn";
+import { useOrg } from "@/components/layout/organizationContext";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Row } from "@/components/layout/common";
+import useNotification from "@/components/shared/notification/useNotification";
+import { Button } from "@/components/ui/button";
+import { CreateNewEvaluator } from "@/components/shared/CreateNewEvaluator/CreateNewEvaluator";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { EvaluatorTypeDropdown } from "@/components/shared/CreateNewEvaluator/EvaluatorTypeDropdown";
+import { EvaluatorConfigForm } from "@/components/shared/CreateNewEvaluator/EvaluatorConfigForm";
+import { CreateNewEvaluatorSheetContent } from "@/components/shared/CreateNewEvaluator/CreateNewEvaluatorSheetContent";
 
 const ScoresTable = memo(
   ({
@@ -16,11 +41,13 @@ const ScoresTable = memo(
     wrapText,
     columnWidths,
     columnOrder,
+    experimentId,
   }: {
     columnDefs: ColDef[];
     wrapText: boolean;
     columnWidths: { [key: string]: number };
     columnOrder: string[];
+    experimentId: string;
   }) => {
     const scoreCriterias = [
       "Sentiment",
@@ -79,8 +106,178 @@ const ScoresTable = memo(
       return columnOrder.indexOf(a.field!) - columnOrder.indexOf(b.field!);
     });
 
+    const org = useOrg();
+    const evaluators = useQuery({
+      queryKey: ["evaluators", org?.currentOrg?.id],
+      queryFn: async (query) => {
+        const currentOrgId = query.queryKey[1];
+        const jawn = getJawnClient(currentOrgId);
+        const evaluators = await jawn.GET(
+          "/v1/experiment/{experimentId}/evaluators",
+          {
+            params: {
+              path: {
+                experimentId: experimentId,
+              },
+            },
+          }
+        );
+        return evaluators;
+      },
+    });
+
+    const notification = useNotification();
+
+    const addEvaluator = useMutation({
+      mutationFn: async (evaluatorId: string) => {
+        const jawn = getJawnClient(org?.currentOrg?.id);
+        const evaluator = await jawn.POST(
+          "/v1/experiment/{experimentId}/evaluators",
+          {
+            params: {
+              path: {
+                experimentId: experimentId,
+              },
+            },
+            body: {
+              evaluatorId: evaluatorId,
+            },
+          }
+        );
+        if (!evaluator.response.ok) {
+          notification.setNotification(
+            `Failed to add evaluator: ${evaluator.response.statusText}`,
+            "error"
+          );
+        }
+      },
+      onSuccess: () => {
+        evaluators.refetch();
+        allEvaluators.refetch();
+      },
+    });
+
+    const allEvaluators = useQuery({
+      queryKey: ["all-evaluators", org?.currentOrg?.id],
+      queryFn: async (query) => {
+        const currentOrgId = query.queryKey[1];
+
+        const jawn = getJawnClient(currentOrgId);
+        const evaluators = await jawn.POST("/v1/evaluator/query");
+        return evaluators;
+      },
+    });
+
+    const deleteEvaluator = useMutation({
+      mutationFn: async (evaluatorId: string) => {
+        const jawn = getJawnClient(org?.currentOrg?.id);
+        const evaluator = await jawn.DELETE(
+          "/v1/experiment/{experimentId}/evaluators/{evaluatorId}",
+          {
+            params: {
+              path: {
+                experimentId: experimentId,
+                evaluatorId: evaluatorId,
+              },
+            },
+          }
+        );
+      },
+      onSuccess: () => {
+        evaluators.refetch();
+        allEvaluators.refetch();
+      },
+    });
+
+    const runEvaluators = useMutation({
+      mutationFn: async () => {
+        const jawn = getJawnClient(org?.currentOrg?.id);
+        const evaluators = await jawn.POST(
+          `/v1/experiment/{experimentId}/evaluators/run`,
+          {
+            params: {
+              path: {
+                experimentId: experimentId,
+              },
+            },
+          }
+        );
+      },
+    });
+
+    const [open, setOpen] = useState<boolean>(false);
     return (
-      <div className="overflow-auto">
+      <div className="overflow-auto ">
+        <Row className="gap-2 items-center bg-white p-1 w-full">
+          <Select
+            value={"default"}
+            onValueChange={(value) => {
+              if (value === "helicone-new-custom") {
+                // addEvaluator.mutate(value);/
+                setOpen(true);
+              } else {
+                addEvaluator.mutate(value);
+              }
+            }}
+          >
+            <SelectTrigger className="w-[200px]">
+              <SelectValue />
+            </SelectTrigger>
+
+            <SelectContent>
+              <SelectItem className="cursor-default hidden" value={"default"}>
+                Add an evaluator
+              </SelectItem>
+
+              <SelectItem
+                className="cursor-default"
+                value={"helicone-new-custom"}
+              >
+                Create New Custom Evaluator
+              </SelectItem>
+
+              {allEvaluators.data?.data?.data?.map((evaluator) => (
+                <SelectItem key={evaluator.id} value={evaluator.id}>
+                  + {evaluator.name} ({evaluator.scoring_type})
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Sheet open={open} onOpenChange={setOpen}>
+            <CreateNewEvaluatorSheetContent
+              onSubmit={(evaluatorId) => {
+                addEvaluator.mutate(evaluatorId);
+                setOpen(false);
+              }}
+              hideButton={true}
+            />
+          </Sheet>
+
+          <div className="grid grid-cols-8 gap-2 items-center text-xs mr-auto">
+            {evaluators.data?.data?.data?.map((evaluator, index) => {
+              return (
+                <Row
+                  key={`evaluator-${evaluator.id}-${index}`}
+                  className="gap-2 items-center border border-slate-200 rounded-sm p-2 bg-white"
+                >
+                  {evaluator.name}
+                  <TrashIcon
+                    className="w-3 h-3 text-red-500 cursor-pointer"
+                    onClick={() => deleteEvaluator.mutate(evaluator.id)}
+                  />
+                </Row>
+              );
+            })}
+          </div>
+          <Button
+            size="sm_sleek"
+            variant={"outline"}
+            onClick={() => runEvaluators.mutate()}
+          >
+            Run Evaluators
+          </Button>
+        </Row>
         <table
           className="w-full border-separate border-spacing-0 bg-white rounded-lg text-sm table-fixed"
           style={{
@@ -145,7 +342,7 @@ const ScoresTable = memo(
               <tr key={row.score_key} className="text-slate-700">
                 <td
                   className={clsx(
-                    "p-2 border-b border-r border-l border-slate-200 bg-slate-50",
+                    "p-2 border-b border-r border-slate-200 bg-slate-50",
                     index === rowData.length - 1 && "rounded-bl-lg"
                   )}
                   style={{ width: `${scoresColumnWidth}px` }}

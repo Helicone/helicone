@@ -2,6 +2,8 @@
 import {
   Body,
   Controller,
+  Delete,
+  Get,
   Path,
   Post,
   Request,
@@ -19,6 +21,8 @@ import {
 } from "../../lib/stores/experimentStore";
 import { ExperimentManager } from "../../managers/experiment/ExperimentManager";
 import { JawnAuthenticatedRequest } from "../../types/request";
+import { EvaluatorResult } from "./evaluatorController";
+import { EvaluatorManager } from "../../managers/evaluator/EvaluatorManager";
 
 export type ExperimentFilterBranch = {
   left: ExperimentFilterNode;
@@ -166,6 +170,59 @@ export class ExperimentController extends Controller {
     }
   }
 
+  @Get("/{experimentId}/evaluators")
+  public async getExperimentEvaluators(
+    @Path() experimentId: string,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<EvaluatorResult[], string>> {
+    const evaluatorManager = new EvaluatorManager(request.authParams);
+    const result = await evaluatorManager.getEvaluatorsForExperiment(
+      experimentId
+    );
+    return result;
+  }
+
+  @Post("/{experimentId}/evaluators/run")
+  public async runExperimentEvaluators(
+    @Path() experimentId: string,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<null, string>> {
+    const evaluatorManager = new EvaluatorManager(request.authParams);
+    const result = await evaluatorManager.runExperimentEvaluators(experimentId);
+    return result;
+  }
+
+  @Post("/{experimentId}/evaluators")
+  public async createExperimentEvaluator(
+    @Path() experimentId: string,
+    @Body()
+    requestBody: {
+      evaluatorId: string;
+    },
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<null, string>> {
+    const evaluatorManager = new EvaluatorManager(request.authParams);
+    const result = await evaluatorManager.createExperimentEvaluator(
+      experimentId,
+      requestBody.evaluatorId
+    );
+    return result;
+  }
+
+  @Delete("/{experimentId}/evaluators/{evaluatorId}")
+  public async deleteExperimentEvaluator(
+    @Path() experimentId: string,
+    @Path() evaluatorId: string,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<null, string>> {
+    const evaluatorManager = new EvaluatorManager(request.authParams);
+    const result = await evaluatorManager.deleteExperimentEvaluator(
+      experimentId,
+      evaluatorId
+    );
+    return result;
+  }
+
   @Post("/query")
   public async getExperiments(
     @Body()
@@ -232,7 +289,6 @@ export class ExperimentController extends Controller {
     const datasetRows = await experimentManager.getDatasetRowsByIds({
       datasetRowIds: requestBody.datasetRowIds,
     });
-
 
     if (datasetRows.error || !datasetRows.data) {
       this.setStatus(500);
