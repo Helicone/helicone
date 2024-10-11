@@ -1,6 +1,7 @@
 import { usePrompt } from "@/services/hooks/prompts/prompts";
 import HcBreadcrumb from "../../../../ui/hcBreadcrumb";
 import { ExperimentTable } from "./ExperimentTable";
+import { IslandContainer } from "../../../../ui/islandContainer";
 
 interface PromptIdPageProps {
   promptId: string;
@@ -13,8 +14,8 @@ const ExperimentTablePage = (props: PromptIdPageProps) => {
   const { prompt } = usePrompt(promptId);
 
   return (
-    <>
-      <div className="flex flex-col w-full space-y-4">
+    <IslandContainer>
+      <div className="flex flex-col w-full space-y-4 pt-4">
         <HcBreadcrumb
           pages={[
             {
@@ -36,7 +37,7 @@ const ExperimentTablePage = (props: PromptIdPageProps) => {
           experimentId={experimentId}
         />
       </div>
-    </>
+    </IslandContainer>
   );
 };
 

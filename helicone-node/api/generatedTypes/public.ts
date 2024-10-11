@@ -113,9 +113,6 @@ export interface paths {
     post: operations["CreateAlertBanner"];
     patch: operations["UpdateAlertBanner"];
   };
-  "/v1/settings/query": {
-    get: operations["GetSettings"];
-  };
   "/v1/log/request": {
     post: operations["GetRequests"];
   };
@@ -190,7 +187,10 @@ export interface paths {
   "/v1/experiment/dataset/query": {
     post: operations["GetDatasets"];
   };
-  "/v1/experiment/dataset/{datasetId}/version/{promptVersionId}/row": {
+  "/v1/experiment/dataset/{datasetId}/row/insert": {
+    post: operations["InsertDatasetRow"];
+  };
+  "/v1/experiment/dataset/{datasetId}/version/{promptVersionId}/row/new": {
     post: operations["CreateDatasetRow"];
   };
   "/v1/experiment/dataset/{datasetId}/inputs/query": {
@@ -318,6 +318,9 @@ export interface paths {
   };
   "/v1/organization/{organizationId}/remove_member": {
     delete: operations["RemoveMemberFromOrganization"];
+  };
+  "/v1/settings/query": {
+    get: operations["GetSettings"];
   };
   "/v1/stripe/subscription/free/usage": {
     get: operations["GetFreeUsage"];
@@ -822,6 +825,7 @@ export interface components {
       prompt_version: string;
       created_at: string;
       response_body?: string;
+      request_body?: string;
       auto_prompt_inputs: unknown[];
     };
     "ResultSuccess_PromptInputRecord-Array_": {
@@ -870,6 +874,7 @@ export interface components {
     };
     PromptVersionsQueryParams: {
       filter?: components["schemas"]["PromptVersionsFilterNode"];
+      includeExperimentVersions?: boolean;
     };
     PromptVersionResultCompiled: {
       id: string;
@@ -889,6 +894,7 @@ export interface components {
     "Result_PromptVersionResultCompiled.string_": components["schemas"]["ResultSuccess_PromptVersionResultCompiled_"] | components["schemas"]["ResultError_string_"];
     PromptVersiosQueryParamsCompiled: {
       filter?: components["schemas"]["PromptVersionsFilterNode"];
+      includeExperimentVersions?: boolean;
       inputs: components["schemas"]["Record_string.string_"];
     };
     PromptVersionResultFilled: {
@@ -1900,6 +1906,14 @@ Json: JsonObject;
       providerKeyId: string;
       meta?: unknown;
     };
+    "ResultSuccess__hypothesisId-string__": {
+      data: {
+        hypothesisId: string;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__hypothesisId-string_.string_": components["schemas"]["ResultSuccess__hypothesisId-string__"] | components["schemas"]["ResultError_string_"];
     ResponseObj: {
       body: unknown;
       createdAt: string;
@@ -1923,6 +1937,18 @@ Json: JsonObject;
     "Record_string.Score_": {
       [key: string]: components["schemas"]["Score"];
     };
+    ExperimentDatasetRow: {
+      rowId: string;
+      inputRecord: {
+        request: components["schemas"]["RequestObj"];
+        response: components["schemas"]["ResponseObj"];
+        autoInputs: components["schemas"]["Record_string.string_"][];
+        inputs: components["schemas"]["Record_string.string_"];
+        requestPath: string;
+        requestId: string;
+      };
+      scores: components["schemas"]["Record_string.Score_"];
+    };
     ExperimentScores: {
       dataset: {
         scores: components["schemas"]["Record_string.Score_"];
@@ -1935,18 +1961,7 @@ Json: JsonObject;
       id: string;
       organization: string;
       dataset: {
-        rows: {
-            scores: components["schemas"]["Record_string.Score_"];
-            inputRecord?: {
-              request: components["schemas"]["RequestObj"];
-              response: components["schemas"]["ResponseObj"];
-              autoInputs: components["schemas"]["Record_string.string_"][];
-              inputs: components["schemas"]["Record_string.string_"];
-              requestPath: string;
-              requestId: string;
-            };
-            rowId: string;
-          }[];
+        rows: components["schemas"]["ExperimentDatasetRow"][];
         name: string;
         id: string;
       };
@@ -3076,18 +3091,6 @@ export interface operations {
       };
     };
   };
-  GetSettings: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": {
-            useAzureForExperiment: boolean;
-          };
-        };
-      };
-    };
-  };
   GetRequests: {
     /** @description Request query filters */
     requestBody: {
@@ -3535,6 +3538,28 @@ export interface operations {
       };
     };
   };
+  InsertDatasetRow: {
+    parameters: {
+      path: {
+        datasetId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          inputRecordId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_string.string_"];
+        };
+      };
+    };
+  };
   CreateDatasetRow: {
     parameters: {
       path: {
@@ -3776,7 +3801,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result_null.string_"];
+          "application/json": components["schemas"]["Result__hypothesisId-string_.string_"];
         };
       };
     };
@@ -4262,6 +4287,18 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  GetSettings: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            useAzureForExperiment: boolean;
+          };
         };
       };
     };

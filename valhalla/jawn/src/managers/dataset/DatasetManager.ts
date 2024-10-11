@@ -99,6 +99,16 @@ export class DatasetManager extends BaseManager {
     datasetId: string,
     inputRecordId: string
   ): Promise<Result<string, string>> {
+    const existingDataset = await supabaseServer.client
+      .from("helicone_dataset")
+      .select("*")
+      .eq("organization", this.authParams.organizationId)
+      .eq("id", datasetId)
+      .single();
+
+    if (existingDataset.error || !existingDataset.data) {
+      return err(existingDataset.error?.message ?? "Dataset not found");
+    }
     const datasetRowId = randomUUID();
     const dataset = await supabaseServer.client
       .from("experiment_dataset_v2_row")

@@ -82,6 +82,10 @@ export function ThemedTimeFilterShadCN({
       label: "90d",
       value: () => ({ from: addDays(new Date(), -90), to: new Date() }),
     },
+    {
+      label: "1y",
+      value: () => ({ from: addDays(new Date(), -365), to: new Date() }),
+    },
   ];
 
   const [customNumber, setCustomNumber] = useState<number>(1);
@@ -229,7 +233,32 @@ export function ThemedTimeFilterShadCN({
               mode="range"
               defaultMonth={date?.from}
               selected={date}
-              onSelect={setDate}
+              onSelect={(newDate) => {
+                if (newDate?.from || newDate?.to) {
+                  const newDateRange = {
+                    from: newDate?.from
+                      ? new Date(
+                          newDate.from.getFullYear(),
+                          newDate.from.getMonth(),
+                          newDate.from.getDate(),
+                          date?.from?.getHours() ?? 0,
+                          date?.from?.getMinutes() ?? 0
+                        )
+                      : date?.from,
+                    to: newDate?.to
+                      ? new Date(
+                          newDate.to.getFullYear(),
+                          newDate.to.getMonth(),
+                          newDate.to.getDate(),
+                          date?.to?.getHours() ?? 23,
+                          date?.to?.getMinutes() ?? 59
+                        )
+                      : date?.to,
+                  };
+
+                  handleDateChange(newDateRange satisfies DateRange);
+                }
+              }}
               numberOfMonths={2}
               disabled={(date) =>
                 date > new Date() || date < new Date("1900-01-01")

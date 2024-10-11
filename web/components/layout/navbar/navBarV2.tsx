@@ -58,7 +58,7 @@ const NavBarV2 = (props: NavBarV2Props) => {
               Docs
             </Link>
             <Link
-              href="/pricing"
+              href="https://helicone.ai/pricing"
               className="flex flex-row items-center font-medium hover:text-black dark:hover:text-white rounded-md px-3 py-1.5 focus:outline-none text-gray-700 dark:text-gray-300"
             >
               Pricing
@@ -174,7 +174,7 @@ const NavBarV2 = (props: NavBarV2Props) => {
                 <div className="-my-6">
                   <div className="py-6 flex flex-col space-y-8">
                     <Link
-                      href="/pricing"
+                      href="https://helicone.ai/pricing"
                       className="text-md font-semibold text-gray-900 dark:text-gray-300"
                     >
                       Pricing

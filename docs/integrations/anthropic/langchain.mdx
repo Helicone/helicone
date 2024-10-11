@@ -51,3 +51,37 @@ anthropic = ChatAnthropic(
 
   </Step>
 </Steps>
+
+## Using AnthropicMultiModal with Helicone
+
+Enhance your integration by using **AnthropicMultiModal** with Helicone to process images and generate text descriptions. Follow the code below to add this functionality to your application.
+
+```python
+import os
+from llama_index.multi_modal_llms.anthropic import AnthropicMultiModal
+from llama_index.core.multi_modal_llms.generic_utils import load_image_urls
+
+# Initialize the AnthropicMultiModal class with your Anthropic API key
+anthropic_mm_llm = AnthropicMultiModal(
+    max_tokens=300,
+    default_headers={
+        "Helicone-Auth": f"Bearer {os.environ['HELICONE_API_KEY']}",
+    },
+    api_key="<your Anthropic API key>",
+    api_base="https://anthropic.helicone.ai",
+)
+
+# Provide image URLs
+image_urls = ["https://example.com/image1.png"]
+
+# Load image URLs into documents
+image_url_documents = load_image_urls(image_urls)
+
+# Generate a response based on the images
+response = anthropic_mm_llm.complete(
+    prompt="Describe the images as alternative text",
+    image_documents=image_url_documents,
+)
+
+print(response)
+```

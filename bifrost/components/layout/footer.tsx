@@ -142,7 +142,11 @@ const Footer = () => {
           >
             Helicone vs Langsmith
           </a>
-          <a className="hover:underline" href="/blog/datadog" target="_blank">
+          <a
+            className="hover:underline"
+            href="/blog/best-datadog-alternative-for-llm"
+            target="_blank"
+          >
             Helicone vs Datadog
           </a>
           <a

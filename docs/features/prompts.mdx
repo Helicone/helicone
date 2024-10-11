@@ -8,15 +8,9 @@ description: "Automatically version prompts from your codebase via our proxy, wi
 import QuestionsSection from "/snippets/questions-section.mdx";
 
 <Info>
-  **Who can use this feature**: Anyone on any
+  **Who can use this feature**: Prompts is an add-on feature for our Pro
   [plan](https://www.helicone.ai/pricing).
 </Info>
-
-<Warning>
-  **This feature is currently in beta.** While you're welcome to try it out,
-  please know that our team is still working to refine it. Your feedback is
-  valuable to help us improve!{" "}
-</Warning>
 
 <iframe
   width="100%"
@@ -287,7 +281,9 @@ Let's say we have an app that generates a short story, where users are able to i
 </Tabs>
 
 ## Using Prompts created on the UI
+
 If you've created a prompt on the UI, you can easily pull this prompt into your codebase by calling the following API endpoint:
+
 ```javascript
 export async function getPrompt(
   id: string,
@@ -335,6 +331,7 @@ async function pullPromptAndRunCompletion() {
 }
 
 ```
+
 ## Running Experiments
 
 Once you've set up prompt management, you can leverage Helicone's experimentation features to test and improve your prompts.

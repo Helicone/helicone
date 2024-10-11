@@ -1,5 +1,6 @@
 import { autoFillInputs } from "@helicone/prompts";
 import { PreparedRequest, PreparedRequestArgs } from "./PreparedRequest";
+import { ENVIRONMENT } from "../../..";
 
 function prepareRequestOpenAI(
   requestPath: string,
@@ -37,7 +38,7 @@ export function prepareRequestOpenAIFull({
 
   const { url: fetchUrl, headers } = prepareRequestOpenAI(
     datasetRow.inputRecord?.requestPath ??
-      "http://localhost:8787/v1/chat/completions",
+      `${process.env.HELICONE_WORKER_URL}/v1/chat/completions`,
     proxyKey,
     requestId
   );

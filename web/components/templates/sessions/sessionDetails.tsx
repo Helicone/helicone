@@ -1,39 +1,19 @@
-import { useLocalStorage } from "@/services/hooks/localStorage";
-import {
-  ChartPieIcon,
-  ListBulletIcon,
-  MagnifyingGlassIcon,
-} from "@heroicons/react/24/outline";
-import { TextInput } from "@tremor/react";
 import { useRouter } from "next/router";
 import { useMemo } from "react";
-import { getTimeAgo } from "../../../lib/sql/timeHelpers";
 import {
   getTimeIntervalAgo,
   TimeInterval,
 } from "../../../lib/timeCalculations/time";
 import { useSessionNames } from "../../../services/hooks/sessions";
 import { SortDirection } from "../../../services/lib/sorts/users/sorts";
-import { Row } from "../../layout/common";
 import { Col } from "../../layout/common/col";
 import ThemedTable from "../../shared/themed/table/themedTable";
-import ThemedTabSelector from "../../shared/themed/themedTabSelector";
 import { INITIAL_COLUMNS } from "./initialColumns";
 
 import SessionMetrics from "./SessionMetrics";
-
-const TABS = [
-  {
-    id: "sessions",
-    label: "Sessions",
-    icon: <ListBulletIcon className="w-4 h-4" />,
-  },
-  {
-    id: "metrics",
-    label: "Metrics",
-    icon: <ChartPieIcon className="w-4 h-4" />,
-  },
-];
+import { PiGraphLight } from "react-icons/pi";
+import { TabsContent } from "@/components/ui/tabs";
+import { Card, CardContent, CardTitle } from "@/components/ui/card";
 
 type TSessions = {
   created_at: string;
@@ -50,6 +30,7 @@ export type SessionResult = ReturnType<
   typeof useSessionNames
 >["sessions"][number];
 interface SessionDetailsProps {
+  currentTab: string;
   selectedSession: SessionResult | null;
   sessionIdSearch: string;
   setSessionIdSearch: (value: string) => void;
@@ -69,6 +50,7 @@ interface SessionDetailsProps {
 }
 
 const SessionDetails = ({
+  currentTab,
   selectedSession,
   sessionIdSearch,
   setSessionIdSearch,
@@ -87,59 +69,20 @@ const SessionDetails = ({
       .toFixed(3);
   }, [sessions]);
 
-  const [currentTab, setCurrentTab] = useLocalStorage<
-    (typeof TABS)[number]["id"]
-  >("session-details-tab", "sessions");
-
-  return (
-    <Col className="space-y-4 w-full max-w-2xl">
-      <div>
-        <div className="text-xl font-semibold">
-          {selectedSession?.name ?? "No Name"}
-        </div>
-        <ul className="text-xs mt-1 text-gray-500 flex flex-row gap-5 list-disc">
-          <p>
-            <span className="font-semibold text-sky-500">
-              Active:{" "}
-              {getTimeAgo(new Date(selectedSession?.last_used ?? Date.now()))}
-            </span>
-          </p>
-          <li className="font-semibold">{sessions.length} sessions</li>
-          <li>
-            Total cost: <span className="font-semibold">${totalCost}</span>
-          </li>
-          <li>
-            Created on:{" "}
-            {new Date(selectedSession?.created_at ?? Date.now())
-              .toDateString()
-              .slice(4)}
-          </li>
-        </ul>
-      </div>
-
-      <Row className="items-center justify-between gap-10">
-        <ThemedTabSelector
-          tabs={TABS}
-          currentTab={currentTab}
-          onTabChange={(tabId) =>
-            setCurrentTab(tabId as (typeof TABS)[number]["id"])
-          }
-        />
-        <TextInput
-          icon={MagnifyingGlassIcon}
-          value={sessionIdSearch}
-          onValueChange={(value) => setSessionIdSearch(value)}
-          placeholder="Search session id..."
-        />
-      </Row>
-
-      {currentTab === "sessions" ? (
-        <div className="border rounded-lg">
+  if (selectedSession)
+    return (
+      <Col className="space-y-4 w-full border-r border-slate-200 dark:border-slate-800 overflow-x-auto">
+        <TabsContent value="sessions" className="m-0">
           <ThemedTable
             id="session-table"
             defaultData={sessions || []}
             defaultColumns={INITIAL_COLUMNS}
             skeletonLoading={isLoading}
+            search={{
+              value: sessionIdSearch,
+              onChange: setSessionIdSearch,
+              placeholder: "Search session id...",
+            }}
             dataLoading={false}
             sortable={sort}
             timeFilter={{
@@ -169,11 +112,26 @@ const SessionDetails = ({
               router.push(`/sessions/${row.session}`);
             }}
           />
-        </div>
-      ) : (
-        <SessionMetrics selectedSession={selectedSession} />
-      )}
-    </Col>
+        </TabsContent>
+
+        <TabsContent value="metrics">
+          <SessionMetrics selectedSession={selectedSession} />
+        </TabsContent>
+      </Col>
+    );
+
+  return (
+    <div className="flex flex-col w-full h-96 justify-center items-center">
+      <Card className="w-full max-w-md">
+        <CardContent className="flex flex-col items-center pt-6">
+          <PiGraphLight className="h-12 w-12 text-primary mb-4" />
+          <CardTitle className="text-xl mb-2">No Session Selected</CardTitle>
+          <p className="text-sm text-muted-foreground text-center">
+            Please select a session to view its details
+          </p>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 

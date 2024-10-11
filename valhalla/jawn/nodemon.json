@@ -1,5 +1,5 @@
 {
-  "exec": "python3 genTypes.py && ts-node src/index.ts ",
+  "exec": "ts-node src/index.ts ",
   "watch": ["src", "../../shared"],
   "ignore": ["src/tsoa-build"],
   "ext": "ts"

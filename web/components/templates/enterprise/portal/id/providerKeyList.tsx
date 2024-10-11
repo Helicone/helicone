@@ -212,7 +212,11 @@ const ProviderKeyList = (props: ProviderKeyListProps) => {
             variant={"secondary"}
             size={"xs"}
             title={"Add new key"}
-            onClick={() => setIsProviderOpen(true)}
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              setIsProviderOpen(true);
+            }}
             icon={PlusIcon}
           />
         </div>

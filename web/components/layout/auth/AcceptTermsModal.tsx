@@ -24,15 +24,23 @@ const AcceptTermsModal = () => {
     false
   );
 
+  const [acceptedTermsLocalStorage, setAcceptedTermsLocalStorage] =
+    useLocalStorage("acceptedTermsLocalStorage", false);
+
   const user = useUser();
   const supabase = useSupabaseClient<Database>();
   const jawn = useJawnClient();
 
   const handleAcceptTerms = useCallback(async () => {
-    await jawn.POST("/v1/organization/user/accept_terms");
+    try {
+      await jawn.POST("/v1/organization/user/accept_terms");
+    } catch (e) {
+      console.error(e);
+    }
+    setAcceptedTermsLocalStorage(true);
     supabase.auth.refreshSession();
     setShowTermsModal(false);
-  }, [jawn, supabase]);
+  }, [jawn, supabase, setAcceptedTermsLocalStorage]);
 
   const handleAccept = useCallback(async () => {
     setLoading(true);
@@ -41,14 +49,21 @@ const AcceptTermsModal = () => {
   }, [handleAcceptTerms]);
 
   useEffect(() => {
-    if (user && !user.user_metadata.accepted_terms_date && !termsAccepted) {
+    if (
+      user &&
+      !user.user_metadata.accepted_terms_date &&
+      !acceptedTermsLocalStorage
+    ) {
       setShowTermsModal(true);
     }
-  }, [user]);
+  }, [acceptedTermsLocalStorage, user]);
 
-  const handleCheckedChange = useCallback((checked: boolean) => {
-    setTermsAccepted(checked);
-  }, []);
+  const handleCheckedChange = useCallback(
+    (checked: boolean) => {
+      setTermsAccepted(checked);
+    },
+    [setTermsAccepted]
+  );
 
   return (
     <Dialog open={showTermsModal} onOpenChange={() => {}}>

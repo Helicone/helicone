@@ -97,6 +97,12 @@ export default function ViewColumns<T>(props: ViewColumnsProps<T>) {
                   <InformationCircleIcon className="h-5 w-5 text-gray-500 inline" />
                 </BlackTooltip>
               </div>
+              <i className="text-xs text-gray-500">
+                Note: If something is not shown, or your columns are in an
+                unexpected state, please click{" "}
+                <span className="font-bold">Back to preset</span> on the bottom
+                left of the right panel
+              </i>
 
               <div className="overflow-y-auto h-[calc(100%-6rem)]">
                 <DragList items={activeColumns} setItems={setActiveColumns} />

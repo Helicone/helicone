@@ -44,6 +44,8 @@ interface PromptPlaygroundProps {
   initialModel?: string;
   isPromptCreatedFromUi?: boolean;
   defaultEditMode?: boolean;
+  editMode?: boolean;
+  chatType?: "request" | "response" | "request-response";
 }
 
 const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
@@ -54,6 +56,8 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
   initialModel,
   isPromptCreatedFromUi,
   defaultEditMode = false,
+  editMode = true,
+  chatType = "request",
 }) => {
   const replaceTemplateVariables = (
     content: string,
@@ -191,7 +195,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
                         <RoleButton
                           role={"assistant"}
                           onRoleChange={() => {}}
-                          disabled={true}
+                          disabled={!editMode}
                           size="medium"
                         />
                       </div>
@@ -221,15 +225,37 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
           />
         );
       case "JSON":
-        return (
-          <JsonView
-            requestBody={{
-              messages: currentChat,
-              auto_prompt_inputs: selectedInput?.auto_prompt_inputs || [],
-            }}
-            responseBody={{}}
-          />
-        );
+        if (chatType === "request") {
+          return (
+            <JsonView
+              requestBody={{
+                messages: currentChat,
+                auto_prompt_inputs: selectedInput?.auto_prompt_inputs || [],
+              }}
+              responseBody={{}}
+            />
+          );
+        } else if (chatType === "response") {
+          return (
+            <JsonView
+              requestBody={{}}
+              responseBody={{
+                messages: currentChat,
+                auto_prompt_inputs: selectedInput?.auto_prompt_inputs || [],
+              }}
+            />
+          );
+        } else {
+          return (
+            <JsonView
+              requestBody={{
+                messages: currentChat,
+                auto_prompt_inputs: selectedInput?.auto_prompt_inputs || [],
+              }}
+              responseBody={{}}
+            />
+          );
+        }
       default:
         return null;
     }
@@ -244,6 +270,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
           setMode={setMode}
           isEditMode={isEditMode}
           setIsEditMode={setIsEditMode}
+          editMode={editMode}
         />
 
         <div className="flex-grow overflow-auto rounded-b-md">
