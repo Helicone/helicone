@@ -22,6 +22,12 @@ import FiltersButton from "./filtersButton";
 import { DragColumnItem } from "./columns/DragList";
 import { UIFilterRowTree } from "../../../../services/lib/filters/uiFilterRowTree";
 import { Button } from "@/components/ui/button";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { PinIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import clsx from "clsx";
 
@@ -93,6 +99,11 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
+  // Add state variables to manage the popover's open state and pin status
+  const [isFiltersPopoverOpen, setIsFiltersPopoverOpen] = useState(false);
+  const [isFiltersPinned, setIsFiltersPinned] = useState(false);
+  const popoverContentRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     const displayFilters = window.sessionStorage.getItem("showFilters") || null;
     setShowFilters(displayFilters ? JSON.parse(displayFilters) : false);
@@ -119,6 +130,10 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
     }
   };
 
+  const handlePopoverInteraction = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
+
   return (
     <div className="flex flex-col">
       <div className="flex flex-col gap-3 lg:flex-row justify-between ">
@@ -139,17 +154,69 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
           )}
           <div className="flex flex-row">
             {advancedFilters && (
-              <Button
-                onClick={showFilterHandler}
-                variant="ghostLinear"
-                className="gap-2"
-                size="sm_sleek"
+              <Popover
+                open={isFiltersPopoverOpen}
+                onOpenChange={setIsFiltersPopoverOpen}
               >
-                <FunnelIcon className="h-[13px] w-[13px] " />
-                <span className="hidden sm:inline font-normal text-[13px]">
-                  {showFilters ? "Hide" : ""} Filters
-                </span>
-              </Button>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="ghostLinear"
+                    className="gap-2"
+                    size="sm_sleek"
+                    onClick={() => {
+                      if (isFiltersPinned) {
+                        setShowFilters(!showFilters);
+                      } else {
+                        setIsFiltersPopoverOpen(!isFiltersPopoverOpen);
+                      }
+                    }}
+                  >
+                    <FunnelIcon className="h-[13px] w-[13px]" />
+                    <span className="hidden sm:inline font-normal text-[13px]">
+                      {isFiltersPinned
+                        ? showFilters
+                          ? "Hide Filters"
+                          : "Show Filters"
+                        : "Filters"}
+                    </span>
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent
+                  className="min-w-[40rem] w-[40vw] flex items-start p-0 mx-2 rounded-lg"
+                  ref={popoverContentRef}
+                  onInteractOutside={(e) => {}}
+                  onClick={handlePopoverInteraction}
+                >
+                  <AdvancedFilters
+                    filterMap={advancedFilters.filterMap}
+                    filters={advancedFilters.filters}
+                    setAdvancedFilters={advancedFilters.setAdvancedFilters}
+                    searchPropertyFilters={
+                      advancedFilters.searchPropertyFilters
+                    }
+                    savedFilters={savedFilters?.filters}
+                    onSaveFilterCallback={savedFilters?.onSaveFilterCallback}
+                    layoutPage={savedFilters?.layoutPage ?? "requests"}
+                  />
+                  <div className="flex justify-end ml-4">
+                    <Button
+                      variant="ghostLinear"
+                      onClick={() => {
+                        setIsFiltersPinned(!isFiltersPinned);
+                        setIsFiltersPopoverOpen(isFiltersPinned);
+                        setShowFilters(!isFiltersPinned);
+                      }}
+                      className="text-gray-500 hover:text-gray-700 p-0 mt-4 mr-4 h-auto w-auto"
+                    >
+                      {isFiltersPinned ? (
+                        <PinIcon className="h-5 w-5 text-primary" />
+                      ) : (
+                        <PinIcon className="h-5 w-5 text-muted-foreground" />
+                      )}
+                    </Button>
+                  </div>
+                </PopoverContent>
+              </Popover>
             )}
 
             {savedFilters && (
@@ -245,16 +312,31 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
         </div>
       </div>
 
-      {advancedFilters && showFilters && (
-        <AdvancedFilters
-          filterMap={advancedFilters.filterMap}
-          filters={advancedFilters.filters}
-          setAdvancedFilters={advancedFilters.setAdvancedFilters}
-          searchPropertyFilters={advancedFilters.searchPropertyFilters}
-          savedFilters={savedFilters?.filters}
-          onSaveFilterCallback={savedFilters?.onSaveFilterCallback}
-          layoutPage={savedFilters?.layoutPage ?? "requests"}
-        />
+      {advancedFilters && showFilters && isFiltersPinned && (
+        <div className="flex justify-start min-w-[50rem] w-full mt-1">
+          <div className="flex-1 rounded-lg">
+            <AdvancedFilters
+              filterMap={advancedFilters.filterMap}
+              filters={advancedFilters.filters}
+              setAdvancedFilters={advancedFilters.setAdvancedFilters}
+              searchPropertyFilters={advancedFilters.searchPropertyFilters}
+              savedFilters={savedFilters?.filters}
+              onSaveFilterCallback={savedFilters?.onSaveFilterCallback}
+              layoutPage={savedFilters?.layoutPage ?? "requests"}
+            />
+          </div>
+          <Button
+            variant="ghost"
+            onClick={() => {
+              setIsFiltersPinned(false);
+              setShowFilters(false);
+              setIsFiltersPopoverOpen(true);
+            }}
+            className="text-gray-500 hover:text-gray-700"
+          >
+            <PinIcon className="h-5 w-5 text-primary rotate-45 fill-gray-500" />
+          </Button>
+        </div>
       )}
     </div>
   );
