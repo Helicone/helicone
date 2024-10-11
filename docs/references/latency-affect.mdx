@@ -5,6 +5,9 @@ description: "Helicone minimizes latency for your LLM applications using Cloudfl
 "twitter:title": "Latency Impact - Helicone OSS LLM Observability"
 ---
 
+import QuestionsSection from "/snippets/questions-section.mdx";
+import FaqHeader from "/snippets/faq-header.mdx";
+
 Helicone leverages [Cloudflare Workers](https://developers.cloudflare.com/workers), which run code instantly across the globe on [Cloudflare's global network](https://workers.cloudflare.com/), to provide a fast and reliable proxy for your LLM requests. By utilizing this extensive network of servers, Helicone minimizes latency by ensuring that requests are handled by the servers closest to your users.
 
 ### How Cloudflare Workers Minimize Latency
@@ -40,12 +43,8 @@ The metrics show that Helicone's latency **closely matches that of direct reques
   requests](/images/getting-started/openai-helicone.png)
 </Frame>
 
----
+<FaqHeader />
 
-<Info>
-  For a comprehensive overview of our system's reliability and performance,
-  check out our detailed post on [Availability and
-  Reliability](/references/availability).
-</Info>
+- [Concerns about reliability?](/references/availability)
 
-If you have any questions or need assistance setting up asynchronous logging, feel free to reach out in our [Discord](https://discord.gg/zsSTcH2qhG)!
+<QuestionsSection />
