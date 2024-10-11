@@ -14,13 +14,13 @@
     {
       "name": "Guides",
       "icon": "file-lines",
-      "url": "knowledge"
+      "url": "guides"
     },
 
     {
       "name": "FAQ",
       "icon": "lightbulb",
-      "url": "knowledge/faq"
+      "url": "faq"
     }
   ],
   "analytics": {
@@ -260,20 +260,20 @@
     {
       "group": "Guides",
       "pages": [
-        "knowledge/overview",
+        "guides/overview",
         {
           "group": "Cookbooks",
           "pages": [
-            "knowledge/developer/experiments",
-            "knowledge/developer/getting-user-requests",
-            "knowledge/developer/etl",
-            "knowledge/developer/replay-session",
-            "knowledge/developer/predefining-request-id",
-            "knowledge/developer/environment-tracking",
-            "knowledge/developer/segmentation",
-            "knowledge/developer/github-actions",
-            "knowledge/developer/debugging",
-            "knowledge/developer/labeling-request-data"
+            "guides/cookbooks/experiments",
+            "guides/cookbooks/getting-user-requests",
+            "guides/cookbooks/etl",
+            "guides/cookbooks/replay-session",
+            "guides/cookbooks/predefining-request-id",
+            "guides/cookbooks/environment-tracking",
+            "guides/cookbooks/segmentation",
+            "guides/cookbooks/github-actions",
+            "guides/cookbooks/debugging",
+            "guides/cookbooks/labeling-request-data"
           ]
         }
       ]
@@ -281,12 +281,12 @@
     {
       "group": "Applications",
       "pages": [
-        "knowledge/use-cases/overview",
+        "guides/applications/overview",
         {
           "group": "Use Cases",
           "pages": [
-            "knowledge/use-cases/resell-a-model",
-            "knowledge/use-cases/bill-by-usage"
+            "guides/applications/resell-a-model",
+            "guides/applications/bill-by-usage"
           ]
         }
       ]
@@ -294,13 +294,10 @@
     {
       "group": "FAQ",
       "pages": [
-        "knowledge/faq/overview",
+        "faq/overview",
         {
           "group": "FAQ",
-          "pages": [
-            "knowledge/faq/enable-stream-usage",
-            "knowledge/faq/secret-vs-public-key"
-          ]
+          "pages": ["faq/enable-stream-usage", "faq/secret-vs-public-key"]
         }
       ]
     },
@@ -368,60 +365,87 @@
   },
   "redirects": [
     {
-      "source": "/getting-started/proxy-vs",
+      "source": "/getting-started/proxy-vs-async",
       "destination": "/references/proxy-vs-async"
     },
     {
-      "source": "/use-cases/bill-by-usage",
-      "destination": "/knowledge/bill-by-usage"
+      "source": "/faq/availability",
+      "destination": "/references/availability"
+    },
+    {
+      "source": "/faq/how-encryption-works",
+      "destination": "/references/how-encryption-works"
+    },
+    {
+      "source": "/faq/how-we-calculate-cost",
+      "destination": "/references/how-we-calculate-cost"
+    },
+    {
+      "source": "/faq/latency-affect",
+      "destination": "/references/latency-affect"
     },
     {
       "source": "/use-cases/data-autonomy",
-      "destination": "/knowledge/data-autonomy"
+      "destination": "/references/data-autonomy"
     },
+
     {
-      "source": "/use-cases/debugging",
-      "destination": "/knowledge/debugging"
-    },
-    {
-      "source": "/use-cases/enable-stream-usage",
-      "destination": "/knowledge/enable-stream-usage"
-    },
-    {
-      "source": "/use-cases/environment-tracking",
-      "destination": "/knowledge/environment-tracking"
-    },
-    {
-      "source": "/use-cases/etl",
-      "destination": "/knowledge/etl"
-    },
-    {
-      "source": "/use-cases/experiments",
-      "destination": "/knowledge/experiments"
-    },
-    {
-      "source": "/use-cases/getting-user-requests",
-      "destination": "/knowledge/getting-user-requests"
-    },
-    {
-      "source": "/use-cases/github-actions",
-      "destination": "/knowledge/github-actions"
-    },
-    {
-      "source": "/use-cases/labeling-request-data",
-      "destination": "/knowledge/labeling-request-data"
-    },
-    {
-      "source": "/use-cases/replay-session",
-      "destination": "/knowledge/replay-session"
+      "source": "/use-cases/bill-by-usage",
+      "destination": "/guides/applications/bill-by-usage"
     },
     {
       "source": "/use-cases/resell-a-model",
-      "destination": "/knowledge/resell-a-model"
+      "destination": "/guides/applications/resell-a-model"
+    },
+
+    {
+      "source": "/use-cases/debugging",
+      "destination": "/guides/cookbooks/debugging"
+    },
+    {
+      "source": "/use-cases/environment-tracking",
+      "destination": "/guides/cookbooks/environment-tracking"
+    },
+    {
+      "source": "/use-cases/etl",
+      "destination": "/guides/cookbooks/etl"
+    },
+    {
+      "source": "/use-cases/experiments",
+      "destination": "/guides/cookbooks/experiments"
+    },
+    {
+      "source": "/use-cases/getting-user-requests",
+      "destination": "/guides/cookbooks/getting-user-requests"
+    },
+    {
+      "source": "/use-cases/github-actions",
+      "destination": "/guides/cookbooks/github-actions"
+    },
+    {
+      "source": "/use-cases/labeling-request-data",
+      "destination": "/guides/cookbooks/labeling-request-data"
+    },
+    {
+      "source": "/use-cases/predefining-request-id",
+      "destination": "/guides/cookbooks/predefining-request-id"
+    },
+    {
+      "source": "/use-cases/replay-session",
+      "destination": "/guides/cookbooks/replay-session"
     },
     {
       "source": "/use-cases/segmentation",
-      "destination": "/knowledge/segmentation"
+      "destination": "/guides/cookbooks/segmentation"
+    },
+
+    {
+      "source": "/use-cases/enable-stream-usage",
+      "destination": "/faq/enable-stream-usage"
+    },
+    {
+      "source": "/use-cases/secret-vs-public-key",
+      "destination": "/faq/secret-vs-public-key"
     }
   ]
 }
