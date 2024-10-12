@@ -21,7 +21,7 @@ export function MetricsPanel(props: MetricsPanelProps) {
   const { metric } = props;
 
   return (
-    <Card className="border border-slate-200 bg-white text-slate-950 !shadow-sm dark:border-slate-800 dark:bg-slate-950 dark:text-slate-50 rounded-lg h-full flex flex-col ring-0">
+    <Card className="border border-slate-200 bg-white text-slate-950 !shadow-sm dark:border-slate-800 dark:bg-black dark:text-slate-50 rounded-lg h-full flex flex-col ring-0">
       <dd className="text-slate-900 dark:text-slate-50 flex flex-col flex-grow">
         <div className="flex w-full items-center justify-between">
           <div className="text-slate-500 text-xs">{metric.label}</div>

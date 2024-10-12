@@ -33,7 +33,7 @@ const StyledAreaChart = (props: StyledAreaChartProps) => {
   };
 
   return (
-    <Card className="border border-slate-200 bg-white text-slate-950 !shadow-sm dark:border-slate-800 dark:bg-slate-950 dark:text-slate-50 rounded-lg ring-0">
+    <Card className="border border-slate-200 bg-white text-slate-950 !shadow-sm dark:border-slate-800 dark:bg-black dark:text-slate-50 rounded-lg ring-0">
       <div className="flex flex-col space-y-0.5">
         <p className="text-gray-500 text-sm">{title}</p>
         {value !== undefined && (
