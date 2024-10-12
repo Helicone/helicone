@@ -26,11 +26,11 @@ export function RequestNode(props: {
   return (
     <div
       className={clsx(
-        " flex flex-col dark:bg-gray-800 py-[8px] pl-4 pr-[31px] group-hover:cursor-pointer w-full min-w-[456px]",
+        " flex flex-col dark:bg-slate-900 py-[8px] pl-4 pr-[31px] group-hover:cursor-pointer w-full min-w-[456px]",
         "w-full",
         selectedRequestId === node.trace?.request_id
-          ? "bg-sky-100"
-          : "bg-white group-hover:bg-sky-50 dark:group-hover:bg-gray-700"
+          ? "bg-sky-100 dark:bg-slate-900 hover:bg-sky-100 dark:hover:bg-slate-800"
+          : "bg-white dark:bg-slate-950 group-hover:bg-sky-50 dark:group-hover:bg-slate-800"
       )}
       onClick={() =>
         node.children
@@ -40,13 +40,13 @@ export function RequestNode(props: {
     >
       <Row className="w-full justify-between items-center ">
         <Row className="items-center gap-2">
-          <div className="bg-sky-200 text-sky-700 px-2 py-1 text-xs font-medium rounded-md">
+          <div className="bg-sky-200 dark:bg-sky-900 text-sky-700 dark:text-sky-200 px-2 py-1 text-xs font-medium rounded-md">
             {node.trace?.request.model === "vector_db" ||
             node.trace?.request.model.startsWith("tool")
               ? node.trace?.request.model.split(":")[0]
               : node.name}
           </div>
-          <div className="bg-slate-50 border border-slate-200 text-slate-700 px-2 py-1 text-xs font-medium rounded-md">
+          <div className="bg-slate-50 dark:bg-black border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 px-2 py-1 text-xs font-medium rounded-md">
             {node.trace?.request.model}
           </div>
         </Row>
@@ -58,8 +58,14 @@ export function RequestNode(props: {
             />
           )}
           <Row className="items-center gap-1">
-            <Clock4Icon width={16} height={16} className="text-slate-500" />
-            <span className="text-slate-500 text-xs">{node.duration}</span>
+            <Clock4Icon
+              width={16}
+              height={16}
+              className="text-slate-500 dark:text-slate-200"
+            />
+            <span className="text-slate-500 dark:text-slate-200 text-xs">
+              {node.duration}
+            </span>
           </Row>
         </Row>
       </Row>
