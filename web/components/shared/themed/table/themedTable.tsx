@@ -338,7 +338,7 @@ export default function ThemedTable<T extends { id?: string }>(
                             " hover:cursor-pointer",
                             checkedIds?.includes(row.original?.id ?? "")
                               ? "bg-sky-100 border-l border-sky-500 pl-2 dark:bg-sky-900 dark:border-sky-900"
-                              : "hover:bg-sky-50 dark:hover:bg-sky-950"
+                              : "hover:bg-sky-50 dark:hover:bg-slate-800/50"
                           )}
                           onClick={
                             onRowSelect &&

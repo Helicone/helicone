@@ -7,6 +7,7 @@ import { NormalizedRequest } from "./builder/abstractRequestBuilder";
 import { ArrowDownIcon, ArrowUpIcon } from "@heroicons/react/20/solid";
 import { clsx } from "../../shared/clsx";
 import RequestRow from "./requestRow";
+import { useEffect } from "react";
 
 interface RequestDivProps {
   open: boolean;
@@ -44,6 +45,20 @@ const RequestDiv = (props: RequestDivProps) => {
       }
     }
   };
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      console.log(event.key);
+      if (event.key === "Escape") {
+        setOpen(false);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
 
   return (
     <ThemedDiv
