@@ -116,12 +116,22 @@ const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
   useEffect(() => {
     calculateAvailableSpace();
 
-    // Add event listener for window resize
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "b" && event.metaKey) {
+        setIsCollapsed(!isCollapsed);
+      }
+    };
+
+    // Add event listeners
     window.addEventListener("resize", calculateAvailableSpace);
+    window.addEventListener("keydown", handleKeyDown);
+
+    // Remove event listeners on cleanup
     return () => {
       window.removeEventListener("resize", calculateAvailableSpace);
+      window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isCollapsed, expandedItems]);
+  }, [isCollapsed, expandedItems, setIsCollapsed]);
 
   return (
     <>
@@ -135,13 +145,13 @@ const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
       <div
         ref={sidebarRef}
         className={cn(
-          "hidden md:flex md:flex-col z-30 bg-background dark:bg-gray-900 transition-all duration-300 h-screen bg-white ",
+          "hidden md:flex md:flex-col z-30 bg-background dark:bg-slate-950 transition-all duration-300 h-screen bg-white ",
           largeWith,
           "fixed top-0 left-0"
         )}
       >
-        <div className="w-full flex flex-grow flex-col overflow-y-auto border-r  dark:border-gray-700 justify-between pb-4">
-          <div className="flex items-center gap-2 h-14 border-b dark:border-gray-700">
+        <div className="w-full flex flex-grow flex-col overflow-y-auto border-r  dark:border-slate-700 justify-between pb-4">
+          <div className="flex items-center gap-2 h-14 border-b dark:border-slate-700">
             <div className="flex items-center gap-2 w-full">
               {!isCollapsed && <OrgDropdown />}
             </div>
@@ -152,7 +162,7 @@ const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
                 variant="ghost"
                 size="icon"
                 onClick={() => setIsCollapsed(!isCollapsed)}
-                className="w-full flex justify-center dark:hover:bg-gray-800 px-2"
+                className="w-full flex justify-center dark:hover:bg-slate-800 px-2"
               >
                 {isCollapsed ? (
                   <ChevronRightIcon className="h-4 w-4" />
@@ -250,7 +260,7 @@ const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="w-full dark:hover:bg-gray-800"
+                      className="w-full dark:hover:bg-slate-800"
                       asChild
                     >
                       <Link
@@ -264,7 +274,7 @@ const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
                   </TooltipTrigger>
                   <TooltipContent
                     side="right"
-                    className="dark:bg-gray-800 dark:text-gray-200"
+                    className="dark:bg-slate-800 dark:text-slate-200"
                   >
                     View Documentation
                   </TooltipContent>
@@ -274,7 +284,7 @@ const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="w-full dark:hover:bg-gray-800"
+                      className="w-full dark:hover:bg-slate-800"
                       asChild
                     >
                       <Link
@@ -288,7 +298,7 @@ const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
                   </TooltipTrigger>
                   <TooltipContent
                     side="right"
-                    className="dark:bg-gray-800 dark:text-gray-200"
+                    className="dark:bg-slate-800 dark:text-slate-200"
                   >
                     Help And Support
                   </TooltipContent>
@@ -299,7 +309,7 @@ const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="w-full justify-start dark:hover:bg-gray-800 text-[12px]"
+                  className="w-full justify-start dark:hover:bg-slate-800 text-[12px]"
                   asChild
                 >
                   <Link
@@ -316,7 +326,7 @@ const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="w-full justify-start dark:hover:bg-gray-800 text-[12px]"
+                  className="w-full justify-start dark:hover:bg-slate-800 text-[12px]"
                   asChild
                 >
                   <Link
