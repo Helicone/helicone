@@ -287,7 +287,7 @@ export default function ThemedTable<T extends { id?: string }>(
                       },
                     }}
                   >
-                    <thead className="text-[12px]">
+                    <thead className="text-[12px] z-[2]">
                       {table.getHeaderGroups().map((headerGroup) => (
                         <tr
                           key={headerGroup.id}
@@ -305,6 +305,7 @@ export default function ThemedTable<T extends { id?: string }>(
                                   selectedIds?.length > 0 &&
                                   selectedIds?.length < rows.length
                                 }
+                                className="text-slate-700 dark:text-slate-400"
                               />
                               <div className="absolute bottom-0 left-0 right-0 h-px bg-slate-300 dark:bg-slate-700" />
                             </th>
@@ -351,6 +352,7 @@ export default function ThemedTable<T extends { id?: string }>(
                                   row.original?.id ?? ""
                                 )}
                                 onChange={() => {}} // Handle individual row selection
+                                className="text-slate-700 dark:text-slate-400"
                               />
                             </td>
                           )}

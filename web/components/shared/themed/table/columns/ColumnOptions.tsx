@@ -41,7 +41,7 @@ export default function ColumnOptions<T>({
           })
           .map((category, idx) => (
             <Col key={`${category}-${idx}`} className="gap-2 mb-4">
-              <p className="text-xs text-gray-500 font-medium">
+              <p className="text-xs text-slate-500 font-medium">
                 {category === "Default" ? "All columns" : category}
               </p>
               <ul className="flex flex-wrap gap-2">
@@ -80,8 +80,8 @@ export default function ColumnOptions<T>({
                           className={clsx(
                             activeColumns.find((c) => c.id === column.id)?.shown
                               ? "bg-sky-100 border-[#73ACCF] dark:bg-sky-900 text-sky-700 font-medium hover:text-sky-900 dark:hover:text-sky-100 dark:text-sky-300"
-                              : "bg-white dark:bg-black text-gray-500 hover:bg-sky-50 dark:hover:bg-sky-900 hover:text-sky-900 dark:hover:text-sky-100",
-                            "text-xs border border-gray-300 dark:border-gray-700 w-fit px-2 py-1 rounded-md whitespace-pre-wrap text-left flex flex-row items-center space-x-2"
+                              : "bg-white dark:bg-black text-slate-500 hover:bg-sky-50 dark:hover:bg-sky-900 hover:text-sky-900 dark:hover:text-sky-100",
+                            "text-xs border border-slate-300 dark:border-slate-700 w-fit px-2 py-1 rounded-md whitespace-pre-wrap text-left flex flex-row items-center space-x-2"
                           )}
                         >
                           {header}{" "}

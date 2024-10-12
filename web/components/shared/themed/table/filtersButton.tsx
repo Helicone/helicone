@@ -64,7 +64,7 @@ export default function FiltersButton({
             <DropdownMenuTrigger asChild>
               <Button
                 variant={selectedFilter !== null ? "secondary" : "ghost"}
-                className="flex items-center gap-2 text-slate-700 dark:text-slate-300"
+                className="flex items-center gap-2 text-slate-700 dark:text-slate-400"
                 size="sm_sleek"
               >
                 <Square2StackIcon className="h-3 w-3" />

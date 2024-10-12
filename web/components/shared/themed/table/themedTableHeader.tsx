@@ -146,7 +146,7 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
                 size="sm_sleek"
               >
                 <FunnelIcon className="h-[13px] w-[13px] " />
-                <span className="hidden sm:inline font-normal text-[13px]">
+                <span className="hidden sm:inline font-normal text-xs text-slate-700 dark:text-slate-400">
                   {showFilters ? "Hide" : ""} Filters
                 </span>
               </Button>
@@ -235,7 +235,7 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
                 }
               }}
               size="xs"
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 text-slate-700 dark:text-slate-400"
             >
               <CircleStackIcon className="h-4 w-4" />
               <span className="hidden sm:inline">Create Dataset</span>
