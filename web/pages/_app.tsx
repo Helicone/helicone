@@ -16,7 +16,7 @@ import posthog from "posthog-js";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { OrgContextProvider } from "../components/layout/organizationContext";
-import { ThemeContextProvider } from "../components/shared/theme/themeContext";
+import ThemeProvider from "../components/shared/theme/themeContext";
 import Script from "next/script";
 import { PostHogProvider } from "posthog-js/react";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -71,11 +71,11 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
             <NotificationProvider>
               <DndProvider backend={HTML5Backend}>
                 <OrgContextProvider>
-                  <ThemeContextProvider>
+                  <ThemeProvider attribute="class" defaultTheme="light">
                     <TooltipProvider>
                       {getLayout(<Component {...pageProps} />)}
                     </TooltipProvider>
-                  </ThemeContextProvider>
+                  </ThemeProvider>
                   <Notification />
                 </OrgContextProvider>
               </DndProvider>

@@ -1,4 +1,4 @@
-import { useTheme } from "@/components/shared/theme/themeContext";
+import { useTheme } from "next-themes";
 import { signOut } from "@/components/shared/utils/utils";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -36,7 +36,7 @@ export default function OrgDropdown({}: OrgDropdownProps) {
   const [addOpen, setAddOpen] = useState(false);
   const router = useRouter();
   const supabaseClient = useSupabaseClient<Database>();
-  const themeContext = useTheme();
+  const { setTheme, theme } = useTheme();
 
   const org = useOrg();
 
@@ -77,8 +77,8 @@ export default function OrgDropdown({}: OrgDropdownProps) {
   }, []);
 
   const handleThemeChange = useCallback(() => {
-    themeContext?.setTheme(themeContext.theme === "dark" ? "light" : "dark");
-  }, [themeContext]);
+    setTheme(theme === "dark" ? "light" : "dark");
+  }, [theme, setTheme]);
 
   const handleSignOut = useCallback(() => {
     signOut(supabaseClient).then(() => router.push("/"));
@@ -229,7 +229,7 @@ export default function OrgDropdown({}: OrgDropdownProps) {
             <div className="flex items-center justify-between w-full">
               <span>Theme</span>
               <Switch
-                checked={themeContext?.theme === "dark"}
+                checked={theme === "dark"}
                 onCheckedChange={handleThemeChange}
               />
             </div>

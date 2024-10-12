@@ -1,7 +1,7 @@
 import { Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { clsx } from "../clsx";
-import { useTheme } from "../theme/themeContext";
+import { useTheme } from "next-themes";
 
 interface ThemedModalProps {
   open: boolean;
@@ -12,13 +12,13 @@ interface ThemedModalProps {
 const ThemedModal = (props: ThemedModalProps) => {
   const { open, setOpen, children } = props;
 
-  const themeContext = useTheme();
+  const { theme } = useTheme();
 
   return (
     <Transition.Root show={open} as={Fragment}>
       <Dialog
         as="div"
-        className={clsx(themeContext?.theme ?? "light", "relative z-40")}
+        className={clsx(theme ?? "light", "relative z-40")}
         onClick={(e) => e.stopPropagation()}
         onClose={() => setOpen(false)}
       >
