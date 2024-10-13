@@ -119,6 +119,16 @@ const SelectItem = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Item>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Item>
 >(({ className, children, ...props }, ref) => (
+  <SelectItemRawNotText ref={ref} className={className} {...props}>
+    <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
+  </SelectItemRawNotText>
+));
+SelectItem.displayName = SelectPrimitive.Item.displayName;
+
+const SelectItemRawNotText = React.forwardRef<
+  React.ElementRef<typeof SelectPrimitive.Item>,
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Item>
+>(({ className, children, ...props }, ref) => (
   <SelectPrimitive.Item
     ref={ref}
     className={cn(
@@ -133,10 +143,10 @@ const SelectItem = React.forwardRef<
       </SelectPrimitive.ItemIndicator>
     </span>
 
-    <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
+    {children}
   </SelectPrimitive.Item>
 ));
-SelectItem.displayName = SelectPrimitive.Item.displayName;
+SelectItemRawNotText.displayName = SelectPrimitive.Item.displayName;
 
 const SelectSeparator = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Separator>,
@@ -158,6 +168,7 @@ export {
   SelectContent,
   SelectLabel,
   SelectItem,
+  SelectItemRawNotText,
   SelectSeparator,
   SelectScrollUpButton,
   SelectScrollDownButton,

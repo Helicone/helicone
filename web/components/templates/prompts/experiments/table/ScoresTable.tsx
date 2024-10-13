@@ -16,6 +16,7 @@ import {
   Select,
   SelectContent,
   SelectItem,
+  SelectItemRawNotText,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -168,7 +169,7 @@ const ScoresTable = memo(
       },
     });
 
-    const deleteEvaluator = useMutation({
+    const removeEvaluator = useMutation({
       mutationFn: async (evaluatorId: string) => {
         const jawn = getJawnClient(org?.currentOrg?.id);
         const evaluator = await jawn.DELETE(
@@ -237,9 +238,17 @@ const ScoresTable = memo(
               </SelectItem>
 
               {allEvaluators.data?.data?.data?.map((evaluator) => (
-                <SelectItem key={evaluator.id} value={evaluator.id}>
-                  + {evaluator.name} ({evaluator.scoring_type})
-                </SelectItem>
+                <SelectItemRawNotText
+                  key={evaluator.id}
+                  value={evaluator.id}
+                  className=""
+                >
+                  <div className="flex flex-row items-center justify-between w-full gap-5">
+                    <span>
+                      + {evaluator.name} ({evaluator.scoring_type})
+                    </span>
+                  </div>
+                </SelectItemRawNotText>
               ))}
             </SelectContent>
           </Select>
@@ -264,7 +273,7 @@ const ScoresTable = memo(
                   {evaluator.name}
                   <TrashIcon
                     className="w-3 h-3 text-red-500 cursor-pointer"
-                    onClick={() => deleteEvaluator.mutate(evaluator.id)}
+                    onClick={() => removeEvaluator.mutate(evaluator.id)}
                   />
                 </Row>
               );

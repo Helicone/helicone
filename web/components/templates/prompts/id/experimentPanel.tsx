@@ -31,7 +31,7 @@ const ExperimentPanel = (props: PromptIdPageProps) => {
   return (
     <>
       <div className="flex flex-col w-full space-y-4">
-        {experiments.data?.data?.data?.map((experiment) => (
+        {experiments.evaluators?.data?.data?.map((experiment) => (
           <Row
             key={experiment.id}
             className="justify-between items-center max-w-md"

@@ -25,25 +25,31 @@ function getEvaluatorScoreName(evaluatorName: string) {
 
 export class EvaluatorManager extends BaseManager {
   private async runLLMEvaluator({
+    scoringType,
     evaluator,
     inputRecord,
     run,
   }: {
+    scoringType: "LLM-CHOICE" | "LLM-BOOLEAN" | "LLM-RANGE";
     evaluator: EvaluatorResult;
     inputRecord: ExperimentDatasetRow["inputRecord"];
     run: Experiment["hypotheses"][number]["runs"][number];
   }): Promise<Result<null, string>> {
-    const llmAsAJudge = new LLMAsAJudge(process.env.OPENAI_API_KEY!);
-    const result = await llmAsAJudge.evaluate(
-      evaluator.llm_template,
+    const llmAsAJudge = new LLMAsAJudge({
+      openAIApiKey: process.env.OPENAI_API_KEY!,
+      scoringType,
+      llmTemplate: evaluator.llm_template,
       inputRecord,
-      JSON.stringify(run.response?.body)
-    );
+      output: JSON.stringify(run.response?.body),
+      evaluatorName: evaluator.name,
+    });
+    const result = await llmAsAJudge.evaluate();
 
-    const apiKey = await generateHeliconeAPIKey(this.authParams.organizationId);
+    const scoreName = getEvaluatorScoreName(evaluator.name);
+
     const reqManager = new ScoreManager(this.authParams);
     const requestFeedback = await reqManager.addScores(run.resultRequestId, {
-      hello: 1,
+      [scoreName]: result.score,
     });
 
     return ok(null);
@@ -85,6 +91,10 @@ export class EvaluatorManager extends BaseManager {
 
                   if (datasetRow) {
                     const evaluatorResult = await this.runLLMEvaluator({
+                      scoringType: evaluator.scoring_type as
+                        | "LLM-CHOICE"
+                        | "LLM-BOOLEAN"
+                        | "LLM-RANGE",
                       evaluator: evaluator,
                       inputRecord: datasetRow.inputRecord,
                       run: run,

@@ -9,9 +9,8 @@ import {
 import PromptPlayground from "../../id/promptPlayground";
 
 export const HypothesisCellRenderer: React.FC<any> = (params) => {
-  const { data, colDef, context } = params;
+  const { data, colDef, context, hypothesisId } = params;
   const promptVersionTemplate = context.promptVersionTemplateRef.current;
-  const hypothesisId = colDef.field;
 
   const [showPromptPlayground, setShowPromptPlayground] = useState(false);
 
@@ -73,6 +72,7 @@ export const HypothesisCellRenderer: React.FC<any> = (params) => {
           </div>
         </PopoverTrigger>
         <PopoverContent className="w-[800px] p-0" side="bottom" align="start">
+          {JSON.stringify(data)}
           <PromptPlayground
             prompt={formatPromptForPlayground()}
             selectedInput={data}
@@ -110,7 +110,7 @@ export const HypothesisCellRenderer: React.FC<any> = (params) => {
 export const OriginalMessagesCellRenderer: React.FC<any> = (params) => {
   const { data, colDef, context, prompt } = params;
   const hypothesisId = colDef.field;
-  const inputKeys = context.inputKeys;
+
   const [showPromptPlayground, setShowPromptPlayground] = useState(false);
   const content = data[hypothesisId];
   const parsedData = data.messages;

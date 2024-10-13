@@ -42,6 +42,7 @@ import {
   ProviderKeyDropdown,
 } from "./components/customButtonts";
 import ScoresTable from "./ScoresTable";
+import { useLocalStorage } from "@/services/hooks/localStorage";
 
 interface ExperimentTableProps {
   promptSubversionId: string;
@@ -60,7 +61,10 @@ export function ExperimentTable({
   const [columnView, setColumnView] = useState<"all" | "inputs" | "outputs">(
     "all"
   );
-  const [showScoresTable, setShowScoresTable] = useState(false);
+  const [showScoresTable, setShowScoresTable] = useLocalStorage(
+    "showScoresTable",
+    true
+  );
 
   // State to control ExperimentInputSelector
   const [showExperimentInputSelector, setShowExperimentInputSelector] =
@@ -89,6 +93,7 @@ export function ExperimentTable({
         include: {
           responseBodies: true,
           promptVersion: true,
+          score: true,
         },
       },
     });
@@ -312,25 +317,6 @@ export function ExperimentTable({
     }
   }, [inputKeys, rowData.length]);
 
-  const defaultColDef = useMemo<ColDef>(
-    () => ({
-      sortable: true,
-      filter: false,
-      resizable: true,
-      wrapText: wrapText,
-      autoHeight: wrapText,
-      cellStyle: {
-        wordBreak: "normal",
-        whiteSpace: wrapText ? "normal" : "nowrap",
-        overflow: "hidden",
-        textOverflow: "ellipsis",
-      },
-      // Add cellClass and headerClass to apply borders
-      cellClass: "border-r border-[#E2E8F0]",
-      headerClass: "border-r border-[#E2E8F0]",
-    }),
-    [wrapText]
-  );
   const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>(
     {}
   );
@@ -808,6 +794,7 @@ export function ExperimentTable({
             experimentId={experimentId}
           />
         )}
+
         <div
           className="ag-theme-alpine w-full rounded-md overflow-hidden"
           ref={experimentTableRef}
