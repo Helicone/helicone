@@ -41,7 +41,7 @@ import {
   ColumnsDropdown,
   ProviderKeyDropdown,
 } from "./components/customButtonts";
-import ScoresTable from "./ScoresTable";
+import ScoresTable from "./scores/ScoresTable";
 import { useLocalStorage } from "@/services/hooks/localStorage";
 
 interface ExperimentTableProps {

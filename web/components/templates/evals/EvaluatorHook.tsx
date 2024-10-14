@@ -1,6 +1,4 @@
-import { ChartBarIcon, PlusIcon } from "@heroicons/react/24/outline";
 import { useQuery } from "@tanstack/react-query";
-import Link from "next/link";
 import { useCallback, useState } from "react";
 import { getJawnClient } from "../../../lib/clients/jawn";
 import {
@@ -14,38 +12,13 @@ import {
   getRootFilterNode,
 } from "../../../services/lib/filters/uiFilterRowTree";
 import { useOrg } from "../../layout/organizationContext";
-import AuthHeader from "../../shared/authHeader";
-import LoadingAnimation from "../../shared/loadingAnimation";
 import useSearchParams, {
   SearchParams,
 } from "../../shared/utils/useSearchParams";
 import { TimeFilter } from "../dashboard/dashboardPage";
 import { useUIFilterConvert } from "../dashboard/useDashboardPage";
 
-// Import shadcn components
-import { Button } from "@/components/ui/button";
-
-// Import Recharts components
-import ThemedTable from "@/components/shared/themed/table/themedTable";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-} from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
-import { Check, ChevronsUpDown } from "lucide-react";
-import { useRouter } from "next/router";
-
 // Import Shadcn UI components for dropdown
-import { CreateNewEvaluator } from "@/components/shared/CreateNewEvaluator/CreateNewEvaluator";
-import { INITIAL_COLUMNS } from "./EvaluratorColumns";
 const getTimeFilterWithSearchParams = (searchParams: SearchParams) => {
   const currentTimeFilter = searchParams.get("t");
   let range;
@@ -67,6 +40,7 @@ const getTimeFilterWithSearchParams = (searchParams: SearchParams) => {
   }
   return range;
 };
+
 export const useEvaluators = () => {
   const [advancedFilters, setAdvancedFilters] = useState<UIFilterRowTree>(
     getRootFilterNode()
@@ -86,6 +60,7 @@ export const useEvaluators = () => {
     filterMap,
     properties: { searchPropertyFilters },
   } = useUIFilterConvert(advancedFilters, timeFilter);
+
   const defaultEvaluators = useQuery({
     queryKey: ["evals", org?.currentOrg?.id, timeFilter, userFilters],
     queryFn: async (query) => {
@@ -129,6 +104,16 @@ export const useEvaluators = () => {
     },
   });
 
+  const evaluators = useQuery({
+    queryKey: ["evaluators", org?.currentOrg?.id],
+    queryFn: async () => {
+      const jawn = getJawnClient(org?.currentOrg?.id!);
+      return jawn.POST("/v1/evaluator/query", {
+        body: {},
+      });
+    },
+  });
+
   const evalScores = useQuery({
     queryKey: ["evalScores", org?.currentOrg?.id],
     queryFn: async () => {
@@ -138,6 +123,7 @@ export const useEvaluators = () => {
   });
 
   return {
+    evaluators,
     evalScores,
     scoreDistributions,
     defaultEvaluators,

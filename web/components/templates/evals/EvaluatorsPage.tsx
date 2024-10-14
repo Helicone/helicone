@@ -1,7 +1,7 @@
 import { ChartBarIcon, PlusIcon } from "@heroicons/react/24/outline";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { getJawnClient } from "../../../lib/clients/jawn";
 import {
   TimeInterval,
@@ -49,6 +49,7 @@ import { useEvaluators } from "./EvaluatorHook";
 const EvalsPage = () => {
   const {
     evalScores,
+    evaluators: LLMAsJudgeEvaluators,
     scoreDistributions,
     defaultEvaluators,
     filterMap,
@@ -59,7 +60,45 @@ const EvalsPage = () => {
     timeFilter,
   } = useEvaluators();
 
-  const evals = defaultEvaluators?.data?.data?.data || [];
+  const evals = useMemo(() => {
+    const allEvaluators =
+      defaultEvaluators?.data?.data?.data?.map((evalRow) => ({
+        ...evalRow,
+        scoreDistribution:
+          scoreDistributions?.data?.data?.data?.find(
+            (s) => s.name === evalRow.name
+          )?.distribution ?? [],
+        type: evalRow.name.includes("-laj-") ? "LLM as a judge" : "Default",
+        valueType: evalRow.name.includes("-hcone-bool") ? "Boolean" : "Numeric",
+        id: evalRow.name,
+      })) ?? [];
+
+    for (const evaluator of LLMAsJudgeEvaluators.data?.data?.data ?? []) {
+      if (allEvaluators.find((e) => e.name === evaluator.name)) {
+        continue;
+      } else {
+        allEvaluators.push({
+          averageOverTime: [],
+          averageScore: 0,
+          count: 0,
+          id: evaluator.name,
+          maxScore: 0,
+          minScore: 0,
+          name: evaluator.name,
+          overTime: [],
+          scoreDistribution: [],
+          type: "LLM as a judge",
+          valueType: "Numeric",
+        });
+      }
+    }
+
+    return allEvaluators;
+  }, [
+    defaultEvaluators?.data?.data?.data,
+    scoreDistributions?.data?.data?.data,
+    LLMAsJudgeEvaluators.data?.data?.data,
+  ]);
 
   const [evalsToShow, setEvalsToShow] = useState<string[]>([]);
   const allEvalScores = evalScores.data?.data?.data || [];
@@ -199,18 +238,7 @@ const EvalsPage = () => {
           skeletonLoading={defaultEvaluators.isLoading}
           id="evals-table"
           defaultColumns={INITIAL_COLUMNS}
-          defaultData={evals.map((evalRow) => ({
-            ...evalRow,
-            scoreDistribution:
-              scoreDistributions?.data?.data?.data?.find(
-                (s) => s.name === evalRow.name
-              )?.distribution ?? [],
-            type: evalRow.name.includes("-laj-") ? "LLM as a judge" : "Default",
-            valueType: evalRow.name.includes("-hcone-bool")
-              ? "Boolean"
-              : "Numeric",
-            id: evalRow.name,
-          }))}
+          defaultData={evals}
         />
       </div>
     </>
