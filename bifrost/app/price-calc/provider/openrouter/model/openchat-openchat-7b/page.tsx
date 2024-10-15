@@ -1,0 +1,11 @@
+"use client";
+
+import ModelPriceCalculator from "@/app/price-calc/ModelPriceCalculator";
+
+export default function OpenchatOpenchat7bPriceCalcPage() {
+  return (
+    <div className="container mx-auto py-8">
+      <ModelPriceCalculator model="openchat/openchat-7b" provider="openrouter" />
+    </div>
+  );
+}

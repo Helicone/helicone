@@ -4,8 +4,14 @@
  */
 
 import { ModelRow } from "./interfaces/Cost";
-import { allCosts, defaultProvider, providers } from "./providers/mappings";
+import {
+  allCosts,
+  defaultProvider,
+  providers,
+  modelNames,
+} from "./providers/mappings";
 
+export { modelNames };
 export function costOf({
   model,
   provider,
