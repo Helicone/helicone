@@ -18,7 +18,7 @@ export async function getTotalRequests(
     await buildFilterWithAuthClickHousePropertiesV2({
       org_id,
       filter: {
-        left: timeFilterToFilterNode(timeFilter, "request_response_versioned"),
+        left: timeFilterToFilterNode(timeFilter, "request_response_rmt"),
         right: filter,
         operator: "and",
       },
@@ -28,7 +28,7 @@ export async function getTotalRequests(
 
   WITH total_count AS (
     SELECT count(*) as count
-    FROM request_response_versioned
+    FROM request_response_rmt
     ARRAY JOIN mapKeys(properties) AS key
     WHERE (
       (${filterString})

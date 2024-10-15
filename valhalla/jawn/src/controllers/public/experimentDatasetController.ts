@@ -1,5 +1,14 @@
 // src/users/usersController.ts
-import { Body, Controller, Post, Request, Route, Security, Tags } from "tsoa";
+import {
+  Body,
+  Controller,
+  Path,
+  Post,
+  Request,
+  Route,
+  Security,
+  Tags,
+} from "tsoa";
 import { Result, err, ok } from "../../lib/shared/result";
 import {
   FilterLeafSubset,
@@ -7,6 +16,8 @@ import {
 } from "../../lib/shared/filters/filterDefs";
 import { DatasetManager } from "../../managers/dataset/DatasetManager";
 import { JawnAuthenticatedRequest } from "../../types/request";
+import { randomUUID } from "crypto";
+import { InputsManager } from "../../managers/inputs/InputsManager";
 
 export type DatasetFilterBranch = {
   left: DatasetFilterNode;
@@ -19,13 +30,14 @@ type DatasetFilterNode =
   | "all";
 
 export interface DatasetMetadata {
-  promptId?: string;
+  promptVersionId?: string;
   inputRecordsIds?: string[];
 }
 
 export interface NewDatasetParams {
   datasetName: string;
   requestIds: string[];
+  datasetType: "experiment" | "helicone";
   meta?: DatasetMetadata;
 }
 
@@ -106,12 +118,14 @@ export class ExperimentDatasetController extends Controller {
   public async getDatasets(
     @Body()
     requestBody: {
-      promptId?: string;
+      promptVersionId?: string;
     },
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<DatasetResult[], string>> {
     const datasetManager = new DatasetManager(request.authParams);
-    const result = await datasetManager.getDatasets(requestBody.promptId);
+    const result = await datasetManager.getDatasets(
+      requestBody.promptVersionId
+    );
     if (result.error || !result.data) {
       this.setStatus(500);
     } else {
@@ -120,13 +134,77 @@ export class ExperimentDatasetController extends Controller {
     return result;
   }
 
-  @Post("/{datasetId}/query")
-  public async getDataset(
+  @Post("{datasetId}/row/insert")
+  public async insertDatasetRow(
     @Body()
-    requestBody: {},
-    @Request() request: JawnAuthenticatedRequest
-  ): Promise<Result<{}[], string>> {
-    return err("Not implemented");
+    requestBody: {
+      inputRecordId: string;
+    },
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() datasetId: string
+  ): Promise<Result<string, string>> {
+    const datasetManager = new DatasetManager(request.authParams);
+    const datasetRowResult = await datasetManager.addDatasetRow(
+      datasetId,
+      requestBody.inputRecordId
+    );
+    if (datasetRowResult.error || !datasetRowResult.data) {
+      console.error(datasetRowResult.error);
+      this.setStatus(500);
+      return datasetRowResult;
+    }
+    this.setStatus(200);
+    return ok(requestBody.inputRecordId);
+  }
+
+  @Post("{datasetId}/version/{promptVersionId}/row/new")
+  public async createDatasetRow(
+    @Body()
+    requestBody: {
+      inputs: Record<string, string>;
+      sourceRequest?: string;
+    },
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() datasetId: string,
+    @Path() promptVersionId: string
+  ): Promise<Result<string, string>> {
+    const inputManager = new InputsManager(request.authParams);
+    const inputRecordResult = await inputManager.createInputRecord(
+      promptVersionId,
+      requestBody.inputs,
+      requestBody.sourceRequest
+    );
+
+    if (inputRecordResult.error || !inputRecordResult.data) {
+      console.error(inputRecordResult.error);
+      this.setStatus(500);
+      return inputRecordResult;
+    }
+
+    const datasetManager = new DatasetManager(request.authParams);
+    const datasetRowResult = await datasetManager.addDatasetRow(
+      datasetId,
+      inputRecordResult.data
+    );
+
+    if (datasetRowResult.error || !datasetRowResult.data) {
+      console.error(datasetRowResult.error);
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
+    }
+
+    return inputRecordResult;
+  }
+
+  @Post("/{datasetId}/inputs/query")
+  public async getDataset(
+    // @Body() requestBody: {},
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() datasetId: string
+  ) {
+    const inputManager = new InputsManager(request.authParams);
+    return inputManager.getInputsFromDataset(datasetId, 1_000);
   }
 
   @Post("/{datasetId}/mutate")

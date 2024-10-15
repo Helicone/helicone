@@ -8,7 +8,7 @@ export async function getLatencyOverTime(
 ): Promise<Result<LatencyOverTime[], string>> {
   const res = await getXOverTime<{
     latency: number;
-  }>(data, "avg(request_response_versioned.latency) as latency");
+  }>(data, "avg(request_response_rmt.latency) as latency");
   return resultMap(res, (resData) =>
     resData.map((d) => ({
       time: new Date(new Date(d.created_at_trunc).getTime()),

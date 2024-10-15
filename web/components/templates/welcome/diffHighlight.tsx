@@ -1,13 +1,24 @@
 import React from "react";
-import Prism, { defaultProps } from "prism-react-renderer";
+import "prismjs/themes/prism.css";
+import Prism, { defaultProps, Language } from "prism-react-renderer";
 import theme from "prism-react-renderer/themes/nightOwl";
 import { clsx } from "../../shared/clsx";
 import { ClipboardIcon } from "@heroicons/react/24/outline";
 import useNotification from "../../shared/notification/useNotification";
 
+const LANG_MAPPINGS: Record<string, Language> = {
+  typescript: "typescript",
+  javascript: "javascript",
+  bash: "bash",
+  python: "python",
+  langchain_python: "python",
+  langchain_javascript: "javascript",
+  langchain_typescript: "typescript",
+};
+
 interface DiffHighlightProps {
   code: string;
-  language: string;
+  language: keyof typeof LANG_MAPPINGS;
   newLines: number[];
   oldLines: number[];
   minHeight?: boolean; // should this code block have a min height?
@@ -20,18 +31,17 @@ export function DiffHighlight(props: DiffHighlightProps) {
   const { setNotification } = useNotification();
 
   return (
-    <div className={clsx("ph-no-capture w-full overflow-auto")}>
+    <div className={clsx("ph-no-capture w-full overflow-auto ")}>
       <Prism
         {...defaultProps}
         code={props.code.trim()}
-        language="typescript"
+        language={LANG_MAPPINGS[props.language] ?? "typescript"}
         theme={theme}
       >
         {({ className, style, tokens, getLineProps, getTokenProps }) => (
           <>
             <pre
               className={clsx(
-                className,
                 textSize === "sm" && "text-xs",
                 textSize === "md" && "text-xs md:text-sm",
                 textSize === "lg" && "text-md md:text-lg",
@@ -64,9 +74,14 @@ export function DiffHighlight(props: DiffHighlightProps) {
                       {lineNumber + 1}
                     </span>
                     <code className="flex-1">
-                      {line.map((token, key) => (
-                        <span key={key} {...getTokenProps({ token, key })} />
-                      ))}
+                      {line.map((token, key) => {
+                        const tokenProps = getTokenProps({ token, key });
+                        // Remove highlighting for '=' tokens
+                        if (token.content === "=" || token.content === ":") {
+                          tokenProps.className = "";
+                        }
+                        return <span key={key} {...tokenProps} />;
+                      })}
                     </code>
                   </div>
                 );

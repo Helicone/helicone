@@ -1,0 +1,24 @@
+# Twitterbot
+User-agent: Twitterbot
+Allow: /
+
+# *
+User-agent: *
+Allow: /
+Disallow: /*?
+Disallow: /*%
+Disallow: /v1*
+Disallow: /v2*
+Disallow: /help/
+Disallow: /oss/
+Disallow: /api/
+Disallow: /tags/
+Disallow: /devops/
+Disallow: /icon.ico
+
+# Host
+Host: https://www.helicone.ai
+
+# Sitemaps
+Sitemap: https://www.helicone.ai/sitemap.xml
+Sitemap: https://docs.helicone.ai/sitemap.xml

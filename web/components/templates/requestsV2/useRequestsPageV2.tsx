@@ -1,29 +1,29 @@
-import { useCallback, useState } from "react";
+import { useState } from "react";
 
+import { HeliconeRequest } from "../../../lib/api/request/request";
+import { getTimeIntervalAgo } from "../../../lib/timeCalculations/time";
+import { useModels } from "../../../services/hooks/models";
+import { useGetPropertiesV2 } from "../../../services/hooks/propertiesV2";
 import { useGetRequests } from "../../../services/hooks/requests";
+import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import {
-  filterListToTree,
-  FilterNode,
-  filterUIToFilterLeafs,
-} from "../../../services/lib/filters/filterDefs";
-import {
-  getPropertyFilters,
+  getPropertyFiltersV2,
   REQUEST_TABLE_FILTERS,
   SingleFilterDef,
   textWithSuggestions,
 } from "../../../services/lib/filters/frontendFilterDefs";
+import {
+  filterUITreeToFilterNode,
+  UIFilterRowTree,
+} from "../../../services/lib/filters/uiFilterRowTree";
 import { SortLeafRequest } from "../../../services/lib/sorts/requests/sorts";
-import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
-import getNormalizedRequest from "./builder/requestBuilder";
-import { useModels } from "../../../services/hooks/models";
-import { getTimeIntervalAgo } from "../../../lib/timeCalculations/time";
 import { TimeFilter } from "../dashboard/dashboardPage";
-import { useGetPropertiesV2 } from "../../../services/hooks/propertiesV2";
+import getNormalizedRequest from "./builder/requestBuilder";
 
 const useRequestsPageV2 = (
   currentPage: number,
   currentPageSize: number,
-  uiFilterIdxs: UIFilterRow[],
+  uiFilterIdxs: UIFilterRowTree,
   advancedFilter: FilterNode,
   sortLeaf: SortLeafRequest,
   isCached: boolean,
@@ -39,7 +39,7 @@ const useRequestsPageV2 = (
     isLoading: isPropertiesLoading,
     propertyFilters,
     searchPropertyFilters,
-  } = useGetPropertiesV2(getPropertyFilters);
+  } = useGetPropertiesV2(getPropertyFiltersV2);
 
   const { models, isLoading: isModelsLoading } = useModels(timeFilter, 50);
 
@@ -55,15 +55,19 @@ const useRequestsPageV2 = (
     filterMap[modelFilterIdx] = {
       label: "Model",
       operators: textWithSuggestions(
-        models?.data
-          ?.filter((model) => model.model)
-          .map((model) => ({
-            key: model.model,
-            param: model.model,
-          })) || []
+        Array.from(
+          new Set(
+            models?.data
+              ?.filter((model) => model.model)
+              .map((model) => model.model)
+          )
+        ).map((modelName) => ({
+          key: modelName,
+          param: modelName,
+        })) || []
       ),
-      table: "response",
-      column: "body_model",
+      table: "request_response_rmt",
+      column: "model",
       category: "request",
     };
   }
@@ -72,10 +76,7 @@ const useRequestsPageV2 = (
   models?.data?.sort((a, b) => a.model.localeCompare(b.model));
 
   const filter: FilterNode = {
-    left: filterListToTree(
-      filterUIToFilterLeafs(filterMap, uiFilterIdxs),
-      "and"
-    ),
+    left: filterUITreeToFilterNode(filterMap, uiFilterIdxs),
     right: advancedFilter,
     operator: "and",
   };
@@ -91,27 +92,23 @@ const useRequestsPageV2 = (
 
   const isDataLoading = requests.isLoading || isPropertiesLoading;
 
-  const getNormalizedRequests = useCallback(() => {
-    const rawRequests = requests.data?.data || [];
-    return rawRequests.map((request) => {
-      return getNormalizedRequest(request);
-    });
-  }, [requests]);
-
-  const normalizedRequests = getNormalizedRequests();
-
   return {
-    requests: normalizedRequests,
+    normalizedRequests: getNormalizedRequests(requests.requests),
     count: count.data?.data,
     isDataLoading,
+    isBodyLoading: requests.isLoading,
+    isRefetching: requests.isRefetching,
     isCountLoading: count.isLoading,
     properties,
     refetch: requests.refetch,
-    remove: requests.remove,
     searchPropertyFilters,
     filterMap,
     filter,
   };
 };
+
+export function getNormalizedRequests(requests: HeliconeRequest[]) {
+  return requests.map(getNormalizedRequest);
+}
 
 export default useRequestsPageV2;

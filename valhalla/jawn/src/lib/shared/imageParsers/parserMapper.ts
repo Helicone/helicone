@@ -3,6 +3,7 @@ import { GptVisionImageParser } from "./gptVisionImageParser";
 import { ImageModelRequestBodyParser } from "./core/modelRequestBodyParser";
 import { DalleImageParser } from "./dalleImageParser";
 import { ImageModelResponseBodyParser } from "./core/modelResponseBodyParser";
+import { FluxImageParser } from "./fluxImageParser";
 
 export function getRequestImageModelParser(
   modelName: string,
@@ -15,6 +16,7 @@ export function getRequestImageModelParser(
     case "gpt-4-1106-vision-preview":
     case "gpt-4o-2024-05-13":
     case "gpt-4o":
+    case "gpt-4o-2024-08-06":
       return new GptVisionImageParser(modelName, requestId);
     case "claude-3-opus-20240229":
     case "claude-3-sonnet-20240229":
@@ -33,6 +35,8 @@ export function getResponseImageModelParser(
     case "dall-e-3":
     case "dall-e-2":
       return new DalleImageParser(modelName, responseId);
+    case "black-forest-labs/FLUX.1-schnell":
+      return new FluxImageParser(modelName, responseId);
     default:
       return null;
   }

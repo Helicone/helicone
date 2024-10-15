@@ -1,6 +1,6 @@
 // src/users/usersController.ts
 import { Body, Controller, Post, Request, Route, Security, Tags } from "tsoa";
-import { hashAuth } from "../../lib/db/hash";
+import { hashAuth } from "../../utils/hash";
 import { supabaseServer } from "../../lib/routers/withAuth";
 import { JawnAuthenticatedRequest } from "../../types/request";
 import { KeyPermissions } from "../../models/models";

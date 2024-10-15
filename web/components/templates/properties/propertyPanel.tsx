@@ -33,7 +33,7 @@ import {
 import LoadingAnimation from "../../shared/loadingAnimation";
 import ExportButton from "../../shared/themed/table/exportButton";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
-import ThemedTableHeader from "../../shared/themed/themedTableHeader";
+import ThemedTableHeader from "../../shared/themed/themedHeader";
 import useSearchParams from "../../shared/utils/useSearchParams";
 import { formatNumber } from "../users/initialColumns";
 
@@ -64,7 +64,7 @@ const PropertyPanel = (props: PropertyPanelProps) => {
     start: Date;
     end: Date;
   }>({
-    start: getTimeIntervalAgo(interval),
+    start: getTimeIntervalAgo("1m"),
     end: new Date(),
   });
 
@@ -110,20 +110,14 @@ const PropertyPanel = (props: PropertyPanelProps) => {
   const cleanedValueData = getPropertyValueData();
 
   return (
-    <div className="flex flex-col space-y-4">
+    <div className="flex flex-col space-y-4 mt-4">
       <div className="flex flex-col md:flex-row justify-between items-center gap-8">
         <ThemedTableHeader
           isFetching={false}
           timeFilter={{
             currentTimeFilter: timeFilter,
             customTimeFilter: true,
-            timeFilterOptions: [
-              { key: "24h", value: "Today" },
-              { key: "7d", value: "7D" },
-              { key: "1m", value: "1M" },
-              { key: "3m", value: "3M" },
-              { key: "all", value: "All" },
-            ],
+            timeFilterOptions: [],
             defaultTimeFilter: interval,
             onTimeSelectHandler: (key: TimeInterval, value: string) => {
               if ((key as string) === "custom") {

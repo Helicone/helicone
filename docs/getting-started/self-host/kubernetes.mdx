@@ -1,0 +1,259 @@
+---
+title: "Kubernetes Self-Hosting"
+sidebarTitle: "Kubernetes"
+description: "Deploy Helicone using Kubernetes and Helm. Quick setup guide for running a containerized instance of the LLM observability platform on your Kubernetes cluster."
+"twitter:title": "Kubernetes Deployment - Helicone OSS LLM Observability"
+---
+
+At Helicone, we believe that open-source software makes the world a better place. We are committed to open-source and have made a guide to make it easy for you to deploy your own instance of Helicone using Kubernetes and Helm.
+
+## Prerequisites
+
+- A running Kubernetes cluster (local or cloud-based)
+- [Helm](https://helm.sh/docs/intro/install/) installed (version 3 or higher)
+- [kubectl](https://kubernetes.io/docs/tasks/tools/) command-line tool configured to communicate with your cluster
+
+## Installation Steps
+
+### 1. Add the Helicone Helm Repository
+
+First, add the Helicone Helm repository to your Helm repos:
+
+```bash
+helm repo add helicone https://helicone.github.io/helicone-helm-v2
+helm repo update
+```
+
+### 2. Create Required Kubernetes Secrets
+
+Helicone requires certain secrets to be set up for ClickHouse (the database) and S3-compatible storage. These secrets need to be created before installing the Helm chart.
+
+#### Create ClickHouse Secret
+
+If you don't specify custom credentials, default values will be used. To create a secret with default credentials:
+
+```bash
+kubectl create secret generic helicone-clickhouse \
+  --from-literal=CLICKHOUSE_USER='default' \
+  --from-literal=CLICKHOUSE_PASSWORD='default'
+```
+
+<Note>
+  You can replace `'default'` with your preferred username and password.
+</Note>
+
+#### Create S3 Secret
+
+Helicone requires S3-compatible storage for certain functionalities. Create a Kubernetes secret with your storage credentials:
+
+```bash
+kubectl create secret generic helicone-s3 \
+  --from-literal=access_key='YOUR_ACCESS_KEY' \
+  --from-literal=secret_key='YOUR_SECRET_KEY' \
+  --from-literal=bucket_name='YOUR_BUCKET_NAME' \
+  --from-literal=endpoint='YOUR_S3_ENDPOINT'
+```
+
+<Note>
+  Replace placeholders with your actual S3 credentials and bucket details. For
+  example, if you're using AWS S3, the endpoint would be
+  `https://s3.amazonaws.com`.
+</Note>
+
+### 3. Install the Helicone Helm Chart
+
+To install the chart with the release name `helicone`:
+
+```bash
+helm install helicone helicone/helicone
+```
+
+This command deploys Helicone on your Kubernetes cluster using the default configuration.
+
+### 4. Accessing the Helicone Web Interface
+
+By default, the Helicone web service is exposed internally within the cluster. To access it locally, set up port forwarding:
+
+```bash
+kubectl port-forward svc/helicone-web 3000:80
+```
+
+Now, you can access the Helicone web interface at `http://localhost:3000`.
+
+<Note>
+  To create a user, you need to access the Supabase Auth dashboard. Set up port forwarding for the Supabase service:
+
+```bash
+kubectl port-forward svc/helicone-supabase 8989:8989
+```
+
+Then, navigate to `http://localhost:8989/project/default/auth/users` in your browser and add your account. You can use this account to sign into Helicone at `http://localhost:3000`.
+
+</Note>
+
+**Default URLs:**
+
+- Helicone Web Interface: `http://localhost:3000`
+- Helicone Worker: `http://localhost:8787`
+
+## Configuration
+
+### Customizing the Deployment
+
+You can customize the Helm chart by specifying parameters using the `--set` flag when installing or upgrading the chart.
+
+For example, to change the service type to `LoadBalancer`:
+
+```bash
+helm install helicone helicone/helicone --set service.type=LoadBalancer
+```
+
+Alternatively, you can create a custom `values.yaml` file to override default settings.
+
+#### Using a Custom Values File
+
+1. Create a `custom-values.yaml` file with your desired configuration:
+
+   ```yaml
+   service:
+     type: LoadBalancer
+     port: 80
+   ```
+
+2. Install the Helm chart using your custom values:
+
+   ```bash
+   helm install helicone helicone/helicone -f custom-values.yaml
+   ```
+
+### Persistent Storage and Data
+
+If you need to retain data between pod restarts or upgrades, ensure that you configure persistent storage for the databases used by Helicone. You can specify PVCs (Persistent Volume Claims) in your `values.yaml`.
+
+## Additional Ingress & TLS Configuration
+
+To expose Helicone externally with a domain name and secure it with TLS certificates, follow these steps.
+
+### 1. Install an Ingress Controller
+
+Install an ingress controller suitable for your Kubernetes cluster. For example, to install NGINX Ingress Controller:
+
+```bash
+helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+helm repo update
+
+helm install nginx-ingress ingress-nginx/ingress-nginx \
+  --namespace ingress-nginx --create-namespace \
+  --set controller.publishService.enabled=true
+```
+
+### 2. Install Cert-Manager
+
+Cert-Manager automates the management and issuance of TLS certificates.
+
+```bash
+kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/latest/download/cert-manager.yaml
+```
+
+Create a ClusterIssuer for Let's Encrypt (production):
+
+```yaml
+# cluster-issuer.yaml
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+spec:
+  acme:
+    email: your-email@example.com
+    server: https://acme-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+      name: letsencrypt-prod-private-key
+    solvers:
+      - http01:
+          ingress:
+            class: nginx
+```
+
+Apply the ClusterIssuer:
+
+```bash
+kubectl apply -f cluster-issuer.yaml
+```
+
+<Note>Replace `your-email@example.com` with your actual email address.</Note>
+
+### 3. Configure Ingress in Helm Chart
+
+Modify your `custom-values.yaml` to enable ingress and TLS:
+
+```yaml
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  hosts:
+    - host: your-domain.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: helicone-tls
+      hosts:
+        - your-domain.example.com
+```
+
+<Note>
+  Replace `your-domain.example.com` with your actual domain name. Ensure your
+  domain's DNS records point to the ingress controller's external IP.
+</Note>
+
+### 4. Install or Upgrade Helicone with Ingress
+
+Install or upgrade Helicone using your custom values file:
+
+```bash
+helm install helicone helicone/helicone -f custom-values.yaml
+```
+
+Or, if upgrading:
+
+```bash
+helm upgrade helicone helicone/helicone -f custom-values.yaml
+```
+
+## Maintaining Your Instance
+
+### Upgrading the Helm Release
+
+To upgrade your Helicone deployment when a new chart version is available:
+
+```bash
+helm repo update
+helm upgrade helicone helicone/helicone
+```
+
+### Scaling the Deployment
+
+To scale the number of replicas for the Helicone web component, you can use:
+
+```bash
+kubectl scale deployment helicone-web --replicas=3
+```
+
+Adjust the number of replicas as needed.
+
+### Uninstalling the Helm Release
+
+To completely remove the Helicone deployment from your cluster:
+
+```bash
+helm uninstall helicone
+```
+
+## Background
+
+This Helm chart simplifies the deployment of Helicone on Kubernetes clusters, making it easier to manage and scale.
+
+For more detailed information, visit the [Helicone Helm Chart repository](https://github.com/Helicone/helicone-helm-v2).

@@ -1,9 +1,42 @@
-import { Body, Controller, Post, Route, Security, Tags, Request } from "tsoa";
+import {
+  Body,
+  Controller,
+  Post,
+  Route,
+  Security,
+  Tags,
+  Request,
+  Get,
+} from "tsoa";
 import { Result, ok } from "../../lib/shared/result";
 import { JawnAuthenticatedRequest } from "../../types/request";
 import { DataIsBeautifulManager } from "../../managers/DataIsBeautifulManager";
+import { cacheResult } from "../../utils/cacheResult";
 
-export type TimeSpan = "1m" | "3m" | "1yr";
+/***
+ * FUTURE HELICONE DEVS ALL THE ROUTES HERE ARE CACHE UNAUTHENTICATED!! PLEASE DO NOT USE THE AUTH PARAM
+ *
+ *
+ */
+
+export type TimeSpan = "7d" | "1m" | "3m";
+
+export const allProviders = [
+  "OPENAI",
+  "ANTHROPIC",
+  "AZURE",
+  "GOOGLE",
+  "OPENROUTER",
+  "TOGETHER",
+  "CLOUDFLARE",
+  "CUSTOM",
+  "DEEPINFRA",
+  "FIREWORKS",
+  "GROQ",
+  "META",
+  "MISTRAL",
+  "OTHER",
+] as const;
 
 export const modelNames = [
   {
@@ -19,6 +52,11 @@ export const modelNames = [
     model: "gpt-4o",
     provider: "OPENAI",
     variations: ["gpt-4o", "gpt-4o-2024-05-13"],
+  },
+  {
+    model: "gpt-4o-mini",
+    provider: "OPENAI",
+    variations: ["gpt-4o-mini", "gpt-4o-mini-2024-07-18"],
   },
   {
     model: "gpt-4",
@@ -42,17 +80,17 @@ export const modelNames = [
     ],
   },
   {
-    model: "claude-3-opus-20240229",
+    model: "claude-3-opus",
     provider: "ANTHROPIC",
     variations: ["claude-3-opus-20240229"],
   },
   {
-    model: "claude-3-sonnet-20240229",
+    model: "claude-3-sonnet",
     provider: "ANTHROPIC",
-    variations: ["claude-3-sonnet-20240229"],
+    variations: ["claude-3-sonnet-20240229", "claude-3-5-sonnet-20240620"],
   },
   {
-    model: "claude-3-haiku-20240307",
+    model: "claude-3-haiku",
     provider: "ANTHROPIC",
     variations: ["claude-3-haiku-20240307"],
   },
@@ -74,16 +112,32 @@ export const modelNames = [
       "text-embedding-ada-002",
     ],
   },
+  {
+    model: "anthropic/claude-3.5-sonnet",
+    provider: "OPENROUTER",
+    variations: ["anthropic/claude-3.5-sonnet"],
+  },
 ] as const;
+
+export const allModelVariations = modelNames.flatMap(
+  (model) => model.variations
+);
+
+for (const model of modelNames) {
+  if (!allProviders.includes(model.provider as any)) {
+    throw new Error(`Provider ${model.provider} is not a valid provider`);
+  }
+}
 
 export type ModelElement = (typeof modelNames)[number];
 export type ModelName = (typeof modelNames)[number]["model"];
-export type ProviderName = (typeof modelNames)[number]["provider"];
+export type OpenStatsProviderName = (typeof modelNames)[number]["provider"];
 
+// NOTE do not make any of these strings otherwise it will be a security risk
 export type DataIsBeautifulRequestBody = {
   timespan: TimeSpan;
   models?: ModelName[];
-  provider?: ProviderName;
+  provider?: OpenStatsProviderName;
 };
 
 export type ModelBreakdown = {
@@ -115,10 +169,103 @@ export type ProviderBreakdown = {
   percent: number;
 };
 
+export type ProviderUsageOverTime = {
+  provider: string;
+  date: string;
+  tokens: number;
+};
+
+export type ModelUsageOverTime = {
+  model: string;
+  date: string;
+  tokens: number;
+};
+
+export type TotalValuesForAllOfTime = {
+  total_requests: number;
+  total_tokens: number;
+  total_cost: number;
+};
+
 @Route("v1/public/dataisbeautiful")
 @Tags("DataIsBeautiful")
 @Security("api_key")
 export class DataIsBeautifulRouter extends Controller {
+  @Post("/total-values")
+  public async getTotalValues(
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<TotalValuesForAllOfTime, string>> {
+    const dataIsBeautifulManager = new DataIsBeautifulManager();
+
+    const result = await cacheResult("total-values", async () =>
+      dataIsBeautifulManager.getTotalValues()
+    );
+
+    if (result.error) {
+      this.setStatus(500);
+    }
+
+    this.setStatus(200);
+    return ok(result.data!);
+  }
+
+  @Post("/model/usage/overtime")
+  public async getModelUsageOverTime(
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<ModelUsageOverTime[], string>> {
+    const dataIsBeautifulManager = new DataIsBeautifulManager();
+
+    const result = await cacheResult("model-usage-overtime", async () =>
+      dataIsBeautifulManager.getModelUsageOverTime()
+    );
+
+    if (result.error) {
+      this.setStatus(500);
+    }
+
+    this.setStatus(200);
+    return ok(result.data ?? []);
+  }
+
+  @Post("/provider/usage/overtime")
+  public async getProviderUsageOverTime(
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<ProviderUsageOverTime[], string>> {
+    const dataIsBeautifulManager = new DataIsBeautifulManager();
+
+    const result = await cacheResult("provider-usage-overtime", async () =>
+      dataIsBeautifulManager.providerUsageOverTime()
+    );
+
+    if (result.error) {
+      this.setStatus(500);
+    }
+
+    this.setStatus(200);
+    return ok(result.data ?? []);
+  }
+
+  @Post("/total-requests")
+  public async getTotalRequests(
+    @Body()
+    requestBody: DataIsBeautifulRequestBody,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<number, string>> {
+    const dataIsBeautifulManager = new DataIsBeautifulManager();
+
+    const result = await cacheResult(
+      "total-requests" + JSON.stringify(requestBody),
+      async () => dataIsBeautifulManager.getTotalRequests(requestBody)
+    );
+
+    if (result.error) {
+      this.setStatus(500);
+    }
+
+    this.setStatus(200);
+    return ok(result.data ?? 0);
+  }
+
   @Post("/ttft-vs-prompt-length")
   public async getTTFTvsPromptInputLength(
     @Body()
@@ -127,8 +274,9 @@ export class DataIsBeautifulRouter extends Controller {
   ): Promise<Result<TTFTvsPromptLength[], string>> {
     const dataIsBeautifulManager = new DataIsBeautifulManager();
 
-    const result = await dataIsBeautifulManager.getTTFTvsPromptInputLength(
-      requestBody
+    const result = await cacheResult(
+      "ttft-vs-prompt-length" + JSON.stringify(requestBody),
+      async () => dataIsBeautifulManager.getTTFTvsPromptInputLength(requestBody)
     );
 
     if (result.error) {
@@ -147,7 +295,10 @@ export class DataIsBeautifulRouter extends Controller {
   ): Promise<Result<ModelBreakdown[], string>> {
     const dataIsBeautifulManager = new DataIsBeautifulManager();
 
-    const result = await dataIsBeautifulManager.getModelPercentage(requestBody);
+    const result = await cacheResult(
+      "model-percentage" + JSON.stringify(requestBody),
+      async () => dataIsBeautifulManager.getModelPercentage(requestBody)
+    );
 
     if (result.error) {
       this.setStatus(500);
@@ -165,7 +316,10 @@ export class DataIsBeautifulRouter extends Controller {
   ): Promise<Result<ModelCost[], string>> {
     const dataIsBeautifulManager = new DataIsBeautifulManager();
 
-    const result = await dataIsBeautifulManager.getModelCost(requestBody);
+    const result = await cacheResult(
+      "model-cost" + JSON.stringify(requestBody),
+      async () => dataIsBeautifulManager.getModelCost(requestBody)
+    );
 
     if (result.error) {
       this.setStatus(500);
@@ -183,8 +337,9 @@ export class DataIsBeautifulRouter extends Controller {
   ): Promise<Result<ProviderBreakdown[], string>> {
     const dataIsBeautifulManager = new DataIsBeautifulManager();
 
-    const result = await dataIsBeautifulManager.getProviderPercentage(
-      requestBody
+    const result = await cacheResult(
+      "provider-percentage" + JSON.stringify(requestBody),
+      async () => dataIsBeautifulManager.getProviderPercentage(requestBody)
     );
 
     if (result.error) {
@@ -203,8 +358,10 @@ export class DataIsBeautifulRouter extends Controller {
   ): Promise<Result<ModelBreakdownOverTime[], string>> {
     const dataIsBeautifulManager = new DataIsBeautifulManager();
 
-    const result = await dataIsBeautifulManager.getModelPercentageOverTime(
-      requestBody
+    const result = await cacheResult(
+      "model-percentage-overtime" + JSON.stringify(requestBody),
+      async () =>
+        await dataIsBeautifulManager.getModelPercentageOverTime(requestBody)
     );
 
     if (result.error) {

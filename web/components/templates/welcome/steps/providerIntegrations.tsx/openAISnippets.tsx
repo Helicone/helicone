@@ -71,6 +71,42 @@ const llm = new OpenAI({
   },
 });
 `,
+  asyncLogging: (key: string) => `
+import { HeliconeAsyncLogger } from "@helicone/helicone";
+import OpenAI from "openai";
+
+const logger = new HeliconeAsyncLogger({
+  apiKey: process.env.HELICONE_API_KEY,
+  providers: {
+    openAI: OpenAI
+  }
+});
+logger.init();
+
+const openai = new OpenAI();
+
+// Call OpenAI
+  `,
+  manualLogging: (key: string) => `
+import { HeliconeManualLogger } from "@helicone/helicone";
+
+const logger = new HeliconeManualLogger({
+  apiKey: process.env.HELICONE_API_KEY
+});
+
+const reqBody = {
+  "model": "text-embedding-ada-002",
+  "input": "The food was delicious and the waiter was very friendly.",
+  "encoding_format": "float"
+}
+
+logger.registerRequest(reqBody);
+// Call OpenAI using JS SDK / fetch
+const res = await r.json();
+console.log(res);
+
+logger.sendLog(res);
+  `,
 };
 
 type SupportedLanguages = keyof typeof CODE_CONVERTS;
@@ -83,6 +119,8 @@ const DIFF_LINES: {
   curl: [1, 3],
   langchain_python: [0, 5],
   langchain_typescript: [5, 7],
+  asyncLogging: [],
+  manualLogging: [],
 };
 
 const NAMES: {
@@ -93,6 +131,8 @@ const NAMES: {
   python: "Python",
   langchain_python: "LangChain",
   langchain_typescript: "LangChainJS",
+  asyncLogging: "OpenLLMetry",
+  manualLogging: "Custom",
 };
 
 interface OpenAISnippetsProps {
@@ -154,11 +194,29 @@ export default function OpenAISnippets(props: OpenAISnippetsProps) {
         >
           <h2 className="font-semibold">cURL</h2>
         </button>
+        <button
+          className={clsx(
+            lang === "asyncLogging" ? "bg-sky-100" : "bg-white",
+            "flex items-center gap-2 border border-gray-300 rounded-lg py-2 px-4"
+          )}
+          onClick={() => setLang("asyncLogging")}
+        >
+          <h2 className="font-semibold">OpenLLMetry</h2>
+        </button>
+        <button
+          className={clsx(
+            lang === "manualLogging" ? "bg-sky-100" : "bg-white",
+            "flex items-center gap-2 border border-gray-300 rounded-lg py-2 px-4"
+          )}
+          onClick={() => setLang("manualLogging")}
+        >
+          <h2 className="font-semibold">Custom</h2>
+        </button>
       </div>
 
       <DiffHighlight
         code={CODE_CONVERTS[lang](apiKey)}
-        language="bash"
+        language={lang}
         newLines={DIFF_LINES[lang]}
         oldLines={[]}
         minHeight={false}

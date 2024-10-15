@@ -33,7 +33,7 @@ export async function getCountries(
       operator: "and",
       right: {
         left: {
-          request_response_versioned: {
+          request_response_rmt: {
             request_created_at: {
               gte: new Date(timeFilter.start),
             },
@@ -41,7 +41,7 @@ export async function getCountries(
         },
         operator: "and",
         right: {
-          request_response_versioned: {
+          request_response_rmt: {
             request_created_at: {
               lte: new Date(timeFilter.end),
             },
@@ -61,11 +61,11 @@ export async function getCountries(
       country_code as country,
       count() as total_requests
     FROM
-      request_response_versioned
+      request_response_rmt
     WHERE
       ${builtFilter.filter} AND country IS NOT NULL
     GROUP BY
-      request_response_versioned.country_code
+      request_response_rmt.country_code
     ORDER BY
       total_requests DESC
     LIMIT

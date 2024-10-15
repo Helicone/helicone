@@ -7,6 +7,7 @@ import { useState } from "react";
 import ThemedModal from "../../../shared/themed/themedModal";
 import { Badge } from "@tremor/react";
 import { useRouter } from "next/router";
+import { Col } from "../../../layout/common";
 
 interface PromptPropertyCardProps {
   isSelected: boolean;
@@ -16,6 +17,7 @@ interface PromptPropertyCardProps {
   properties: Record<string, string>;
   onSelect?: () => void;
   onRemove?: () => void;
+  autoInputs: Record<string, any>;
   view?: "list" | "grid";
   index?: number;
   size?: "small" | "large";
@@ -31,6 +33,7 @@ const PromptPropertyCard = (props: PromptPropertyCardProps) => {
     properties,
     view = "list",
     index,
+    autoInputs,
     size = "large",
   } = props;
   const { setNotification } = useNotification();
@@ -44,7 +47,7 @@ const PromptPropertyCard = (props: PromptPropertyCardProps) => {
           isSelected
             ? "bg-sky-100 border-sky-500 dark:bg-sky-950"
             : "bg-white border-gray-300 dark:bg-black dark:border-gray-700",
-          "w-full border p-4 rounded-lg"
+          "w-full border-t px-4 py-2 "
         )}
       >
         <div className={clsx("flex flex-col w-full")}>
@@ -116,31 +119,56 @@ const PromptPropertyCard = (props: PromptPropertyCardProps) => {
             </p>
           </div>
         </div>
-        <ul className="divide-y divide-gray-300 dark:divide-gray-700 flex flex-col mt-4 w-full">
-          {Object.entries(properties).map(([key, value]) => (
-            <li
-              key={key}
-              className="flex items-center py-2 justify-between gap-8"
-            >
-              <p
-                className={clsx(
-                  size === "large" ? "text-sm" : "text-xs",
-                  "font-semibold text-black dark:text-white"
-                )}
+        <Col>
+          <label className="text-sm text-gray-500 mt-4">User Inputs</label>
+          <ul className="divide-y divide-gray-300 dark:divide-gray-700 flex flex-col w-full">
+            {Object.entries(properties).map(([key, value]) => (
+              <li
+                key={key}
+                className="flex items-center py-2 justify-between gap-8"
               >
-                {key}
-              </p>
-              <p
-                className={clsx(
-                  size === "large" ? "text-sm" : "text-xs",
-                  "text-sm text-gray-700 dark:text-gray-300 max-w-[22.5vw] truncate"
-                )}
-              >
-                {value}
-              </p>
-            </li>
-          ))}
-        </ul>
+                <p
+                  className={clsx(
+                    size === "large" ? "text-sm" : "text-xs",
+                    "font-semibold text-black dark:text-white"
+                  )}
+                >
+                  {key}
+                </p>
+                <p
+                  className={clsx(
+                    size === "large" ? "text-sm" : "text-xs",
+                    "text-sm text-gray-700 dark:text-gray-300 max-w-[22.5vw] truncate"
+                  )}
+                >
+                  {value}
+                </p>
+              </li>
+            ))}
+          </ul>
+          {/* {autoInputs && Object.keys(autoInputs).length > 0 && (
+            <>
+              <label className="text-sm text-gray-500 mt-4">Auto Inputs</label>
+              <ul className="flex flex-col w-full divide-y divide-gray-300 dark:divide-gray-700 mt-2">
+                {Object.entries(autoInputs).map(([key, value], idx) => (
+                  <li key={key} className="py-2">
+                    <Tooltip title="Click to copy">
+                      <span
+                        className="cursor-pointer hover:opacity-75 transition-opacity duration-300"
+                        onClick={() => {
+                          navigator.clipboard.writeText(JSON.stringify(value));
+                          setNotification("Copied to clipboard", "success");
+                        }}
+                      >
+                        {idx}: {JSON.stringify(value).substring(0, 25)}...
+                      </span>
+                    </Tooltip>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )} */}
+        </Col>
       </div>
       <ThemedModal open={expanded} setOpen={setExpanded}>
         <div className="w-[80vw] h-full flex flex-col items-start relative">

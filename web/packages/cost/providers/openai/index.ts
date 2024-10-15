@@ -282,6 +282,29 @@ export const costs: ModelRow[] = [
     },
     showInPlayground: true,
   },
+
+  {
+    model: {
+      operator: "equals",
+      value: "gpt-4o-mini",
+    },
+    cost: {
+      prompt_token: 0.00000015,
+      completion_token: 0.0000006,
+    },
+    showInPlayground: true,
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "gpt-4o-mini-2024-07-18",
+    },
+    cost: {
+      prompt_token: 0.00000015,
+      completion_token: 0.0000006,
+    },
+    showInPlayground: true,
+  },
   {
     model: {
       operator: "equals",
@@ -423,9 +446,65 @@ export const costs: ModelRow[] = [
       operator: "equals",
       value: "gpt-35-turbo-16k-0613",
     },
+    showInPlayground: true,
     cost: {
       prompt_token: 0.000003,
       completion_token: 0.000004,
     },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "gpt-4o-2024-08-06",
+    },
+    showInPlayground: true,
+    cost: {
+      prompt_token: 0.0000025,
+      completion_token: 0.00001,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "o1-preview",
+    },
+    cost: {
+      prompt_token: 0.000015,
+      completion_token: 0.00006,
+    },
+    showInPlayground: true,
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "o1-preview-2024-09-12",
+    },
+    cost: {
+      prompt_token: 0.000015,
+      completion_token: 0.00006,
+    },
+    showInPlayground: true,
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "o1-mini",
+    },
+    cost: {
+      prompt_token: 0.000003,
+      completion_token: 0.000012,
+    },
+    showInPlayground: true,
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "o1-mini-2024-09-12",
+    },
+    cost: {
+      prompt_token: 0.000003,
+      completion_token: 0.000012,
+    },
+    showInPlayground: true,
   },
 ];

@@ -193,7 +193,7 @@ export class DBWrapper {
     }
     const cacheKey = (await hash(JSON.stringify(this.auth))).substring(0, 32);
     const authParams = await getAndStoreInCache(
-      `authParams-${cacheKey}`,
+      `authParams2-${cacheKey}`,
       this.env,
       async () => await this._getAuthParams()
     );

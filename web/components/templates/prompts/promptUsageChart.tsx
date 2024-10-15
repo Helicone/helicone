@@ -27,19 +27,23 @@ const PromptUsageChart = (props: PromptUsageChartProps) => {
 
   const timeIncrement = getTimeInterval(timeFilter);
 
-  const params: BackendMetricsCall<any>["params"] = {
-    timeFilter: timeFilter,
-    userFilters: [
-      {
-        request_response_versioned: {
-          properties: {
-            "Helicone-Prompt-Id": {
-              equals: promptId,
-            },
-          },
+  const promptUsageFilterLeaf = {
+    request_response_rmt: {
+      properties: {
+        "Helicone-Prompt-Id": {
+          equals: promptId,
         },
       },
-    ],
+    },
+  };
+
+  const params: BackendMetricsCall<any>["params"] = {
+    timeFilter: timeFilter,
+    userFilters: {
+      left: promptUsageFilterLeaf,
+      operator: "and",
+      right: "all",
+    },
     dbIncrement: timeIncrement,
     timeZoneDifference: new Date().getTimezoneOffset(),
   };

@@ -64,7 +64,8 @@ async function rateLimitUnapprovedDomains(
 async function getProvider(
   targetBaseUrl: string | null,
   setBaseURLOverride: (url: string) => void,
-  rateLimitKV: KVNamespace
+  rateLimitKV: KVNamespace,
+  headers: Headers
 ): Promise<
   Result<
     {
@@ -115,9 +116,21 @@ async function getProvider(
   }
 
   setBaseURLOverride(targetBaseUrl);
+  let provider = getProviderFromTargetUrl(targetBaseUrl);
+
+  if (provider === "QSTASH") {
+    const callback = headers.get("Upstash-Callback");
+
+    if (callback) {
+      const callbackUrl = new URL(callback);
+      const targetBaseUrl = callbackUrl.origin;
+      setBaseURLOverride(targetBaseUrl);
+      provider = getProviderFromTargetUrl(targetBaseUrl);
+    }
+  }
 
   return ok({
-    provider: getProviderFromTargetUrl(targetBaseUrl),
+    provider,
   });
 }
 
@@ -149,7 +162,8 @@ const gatewayForwarder = async (
   const { data: provderResults, error } = await getProvider(
     targetProps.targetBaseUrl,
     targetProps.setBaseURLOverride,
-    env.RATE_LIMIT_KV
+    env.RATE_LIMIT_KV,
+    requestWrapper.headers
   );
 
   if (error) {

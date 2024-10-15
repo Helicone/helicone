@@ -1,4 +1,4 @@
-import { Chat } from "../../requests/chat";
+import { Chat } from "../../requests/chatComponent/chat";
 import AbstractRequestBuilder, {
   SpecificFields,
 } from "./abstractRequestBuilder";
@@ -116,7 +116,6 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
       try {
         const { response_status: statusCode, response_body: responseBody } =
           this.response;
-
         // Handle pending response or network error scenarios upfront
         if (statusCode === 0 || statusCode === null) return ""; // Pending response
         if (![200, 201, -3].includes(statusCode)) {
@@ -130,6 +129,47 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
         if (responseBody?.error) {
           // Check for an error from OpenAI
           return responseBody.error.message || "";
+        }
+
+        // Handle streaming response chunks
+        if (responseBody?.object === "chat.completion.chunk") {
+          const choice = responseBody.choices?.[0];
+          if (choice?.delta?.content) {
+            return choice.delta.content;
+          }
+          // If there's no content in the delta, it might be a function call or tool call
+          if (choice?.delta?.function_call) {
+            return `Function Call: ${JSON.stringify(
+              choice.delta.function_call
+            )}`;
+          }
+          if (choice?.delta?.tool_calls) {
+            return `Tool Calls: ${JSON.stringify(choice.delta.tool_calls)}`;
+          }
+          return ""; // Empty string for other cases in streaming
+        }
+
+        if (
+          /^claude/.test(this.model) &&
+          responseBody?.content?.[0].type === "tool_use"
+        ) {
+          // Check for tool_use in the content array
+          if (Array.isArray(this.response.response_body?.content)) {
+            const toolUse = this.response.response_body.content.find(
+              (item: any) => item.type === "tool_use"
+            );
+            if (toolUse) {
+              return `${toolUse.name}(${JSON.stringify(toolUse.input)})`;
+            }
+
+            // If no tool_use, find the text content
+            const textContent = this.response.response_body.content.find(
+              (item: any) => item.type === "text"
+            );
+            if (textContent) {
+              return textContent.text || "";
+            }
+          }
         }
 
         if (/^claude/.test(this.model) && responseBody?.content?.[0]?.text) {
@@ -190,27 +230,34 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
     return {
       requestText: getRequestText(),
       responseText: getResponseText(),
-      render: () => {
+      render: (props) => {
         return this.response.response_status === 0 ||
           this.response.response_status === null ? (
           <p>Pending...</p>
         ) : this.response.response_status === 200 ? (
           <Chat
+            request={this.response}
             requestBody={this.response.request_body}
             responseBody={this.response.response_body}
             status={this.response.response_status}
             requestId={this.response.request_id}
             model={this.model}
+            hideTopBar={props?.hideTopBar}
+            className={props?.className}
+            messageSlice={props?.messageSlice}
           />
         ) : (
           <div className="w-full flex flex-col text-left space-y-8 text-sm">
             {this.response.request_body.messages && (
               <Chat
+                request={this.response}
                 requestBody={this.response.request_body}
                 responseBody={this.response.response_body}
                 status={this.response.response_status}
                 requestId={this.response.request_id}
                 model={this.model}
+                hideTopBar={props?.hideTopBar}
+                messageSlice={props?.messageSlice}
               />
             )}
             {this.response.response_status !== -4 && (

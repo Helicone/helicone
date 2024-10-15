@@ -47,8 +47,13 @@ export const getInitialColumns: (
     accessorKey: "status",
     header: "Status",
     cell: (info) => {
-      const { code, statusType } =
-        info.getValue() as NormalizedRequest["status"];
+      const status = info.getValue() as NormalizedRequest["status"];
+
+      if (!status) {
+        return <span>{JSON.stringify(status)}</span>;
+      }
+
+      const { code, statusType } = status;
       return (
         <StatusBadge
           statusType={isCached ? "cached" : statusType}
@@ -162,12 +167,16 @@ export const getInitialColumns: (
   },
   {
     id: "feedback",
-    accessorKey: "feedback",
+    accessorKey: "scores",
     header: "Feedback",
     cell: (info) => {
-      const feedback = info.getValue() as NormalizedRequest["feedback"];
-      const rating = feedback?.rating;
-
+      const scores = info.getValue() as NormalizedRequest["scores"];
+      const rating =
+        scores && scores["helicone-score-feedback"]
+          ? Number(scores["helicone-score-feedback"]) === 1
+            ? true
+            : false
+          : null;
       if (rating === null) {
         return <span className="text-gray-500"></span>;
       }

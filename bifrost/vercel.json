@@ -1,10 +1,6 @@
 {
   "rewrites": [
     {
-      "source": "/api/:path*",
-      "destination": "https://us.helicone.ai/api/:path*"
-    },
-    {
       "source": "/ingest/:path*",
       "destination": "https://app.posthog.com/:path*"
     },
@@ -15,6 +11,16 @@
     {
       "source": "/closed-ai",
       "destination": "https://us.helicone.ai/closed-ai"
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/changelog/20240723-prompts-package",
+      "destination": "/changelog/20240722-prompts-package"
+    },
+    {
+      "source": "/open-stats",
+      "destination": "https://us.helicone.ai/open-stats"
     }
   ]
 }

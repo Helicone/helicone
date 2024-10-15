@@ -115,6 +115,7 @@ export class TraceManager {
       content: string;
     }[],
     completionChoices: TCompletionChoices,
+    heliconeProperties: Record<string, string>,
     authParams: AuthParams
   ): Log {
     return {
@@ -122,7 +123,7 @@ export class TraceManager {
         id: span.traceId,
         userId: authParams.userId ?? "",
         promptId: undefined,
-        properties: {},
+        properties: heliconeProperties,
         heliconeApiKeyId: authParams.heliconeApiKeyId ?? undefined,
         heliconeProxyKeyId: undefined,
         targetUrl: "",
@@ -185,6 +186,14 @@ export class TraceManager {
     for (const span of spans) {
       const promptMessages = this.constructMessages(span, "gen_ai.prompt");
       const completionChoices = this.extractCompletions(span);
+      
+      const heliconeProperties = Array.from(span.attributes.entries())
+        .filter(([key]) => key.startsWith("traceloop.association.properties.Helicone-Property-"))
+        .reduce((acc, [key, value]) => {
+          const propertyName = key.replace("traceloop.association.properties.Helicone-Property-", "");
+          acc[propertyName] = value;
+          return acc;
+        }, {} as Record<string, string>);
 
       const requestBody = {
         model: span.attributes.get("gen_ai.response.model"),
@@ -217,6 +226,7 @@ export class TraceManager {
         span,
         promptMessages,
         completionChoices,
+        heliconeProperties,
         authParams
       );
 

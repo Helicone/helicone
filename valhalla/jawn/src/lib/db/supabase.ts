@@ -2,10 +2,14 @@ import { SupabaseClient, createClient } from "@supabase/supabase-js";
 import { InMemoryCache } from "../cache/staticMemCache";
 import { PromiseGenericResult, err, ok } from "../shared/result";
 import { Database } from "./database.types";
-import { hashAuth } from "./hash";
+import { hashAuth } from "../../utils/hash";
 import { HeliconeAuth } from "../requestWrapper";
 import { redisClient } from "../clients/redisClient";
-import { KeyPermissions } from "../../models/models";
+import { KeyPermissions, Role } from "../../models/models";
+
+require("dotenv").config({
+  path: `${__dirname}/../../../.env`,
+});
 
 // SINGLETON
 class SupabaseAuthCache extends InMemoryCache {
@@ -51,6 +55,7 @@ export interface AuthParams {
   userId?: string;
   heliconeApiKeyId?: number;
   keyPermissions?: KeyPermissions;
+  role?: Role;
 }
 type AuthResult = PromiseGenericResult<AuthParams>;
 
@@ -125,12 +130,14 @@ export class SupabaseConnector {
       return ok({
         organizationId: member.data[0].organization,
         userId: data.user.id,
+        role: member.data[0].org_role as Role,
       });
     }
     if (owner.data.length !== 0) {
       return ok({
         organizationId: owner.data[0].id,
         userId: data.user.id,
+        role: "owner" as Role,
       });
     }
 
@@ -138,16 +145,30 @@ export class SupabaseConnector {
   }
 
   private async authenticateBearer(bearer: string): AuthResult {
-    const apiKey = await this.client
+    let apiKey = await this.client
       .from("helicone_api_keys")
       .select("*")
       .eq("api_key_hash", await hashAuth(bearer.replace("Bearer ", "")));
+
     if (apiKey.error) {
       return err(JSON.stringify(apiKey.error));
     }
+    // I dont know how we are getting in this case... but we are in some cases - Justin
+    if (apiKey.data.length === 0) {
+      apiKey = await this.client
+        .from("helicone_api_keys")
+        .select("*")
+        .eq("api_key_hash", await hashAuth(bearer));
+    }
+
+    if (apiKey.error) {
+      return err(JSON.stringify(apiKey.error));
+    }
+
     if (apiKey.data.length === 0) {
       return err("No API key found");
     }
+
     return ok({
       organizationId: apiKey.data[0].organization_id,
       userId: apiKey.data[0].user_id,
@@ -248,6 +269,7 @@ export class SupabaseConnector {
       userId,
       heliconeApiKeyId,
       keyPermissions,
+      role,
     } = result.data;
 
     if (!orgId) {
@@ -259,6 +281,7 @@ export class SupabaseConnector {
       userId,
       heliconeApiKeyId,
       keyPermissions,
+      role,
     };
 
     this.authCache.set(cacheKey, authParamsResult);

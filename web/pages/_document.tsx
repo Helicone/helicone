@@ -13,10 +13,13 @@ class MyDocument extends Document {
   }
 
   render() {
+    const pathname = this.props.__NEXT_DATA__.page;
+    const isOpenStatsPage = pathname === "/open-stats";
+
     return (
-      <Html>
+      <Html className={isOpenStatsPage ? "open-stats-html" : ""}>
         <Head />
-        <body>
+        <body className={isOpenStatsPage ? "open-stats-body" : ""}>
           <Main />
           <NextScript />
         </body>

@@ -1,22 +1,19 @@
 import { useQuery } from "@tanstack/react-query";
 import { TimeFilter } from "../../lib/api/handlerWrappers";
 import { TimeIncrement } from "../../lib/timeCalculations/fetchTimeData";
-import {
-  FilterLeaf,
-  FilterNode,
-  filterListToTree,
-} from "../lib/filters/filterDefs";
+import { FilterNode } from "../lib/filters/filterDefs";
 
 export interface BackendMetricsCall<T> {
   params: {
     timeFilter: TimeFilter;
-    userFilters: FilterLeaf[];
+    userFilters: FilterNode;
     dbIncrement?: TimeIncrement;
     timeZoneDifference: number;
     limit?: number;
   };
   endpoint: string;
   key?: string;
+  isLive?: boolean;
   postProcess?: (data: T) => T;
 }
 
@@ -36,10 +33,12 @@ export function useBackendMetricCall<T>({
   endpoint,
   key,
   postProcess,
+  isLive,
 }: BackendMetricsCall<T>) {
   return useQuery<T>({
     queryKey: [endpoint, params, "" + key],
     retry: false,
+    refetchInterval: isLive ? 5_000 : undefined,
     queryFn: async (query) => {
       const { timeFilter, userFilters, dbIncrement, timeZoneDifference } = query
         .queryKey[1] as BackendMetricsCall<T>["params"];
@@ -49,7 +48,7 @@ export function useBackendMetricCall<T>({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          filter: filterListToTree(userFilters, "and"),
+          filter: userFilters,
           // You cannot properly serialize Date on the wire. so we need to do this gross stuff
           timeFilter: {
             start: timeFilter.start.toISOString(),

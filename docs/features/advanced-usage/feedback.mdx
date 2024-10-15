@@ -1,6 +1,8 @@
 ---
 title: "User Feedback"
-description: "Enable user feedback on LLM responses."
+sidebarTitle: "User Feedback"
+description: "Collect and analyze user feedback on LLM responses. Evaluate output quality, identify trends, and optimize your AI application's performance based on user satisfaction."
+"twitter:title": "User Feedback - Helicone OSS LLM Observability"
 ---
 
 import QuestionsSection from "/snippets/questions-section.mdx";
@@ -69,7 +71,7 @@ import json
 HELICONE_AUTH = "Bearer <API_KEY>"
 
 def provide_feedback(heliconeId, rating):
-    url = f"https://api.helicone.ai/v1/{heliconeId}/feedback"
+    url = f"https://api.helicone.ai/v1/request/{heliconeId}/feedback"
     headers = {
         "Helicone-Auth": HELICONE_AUTH,
         "Content-Type": "application/json",
@@ -156,7 +158,7 @@ const options = {
 };
 
 const response = await fetch(
-  `https://api.helicone.ai/v1/${heliconeId}/feedback`,
+  `https://api.helicone.ai/v1/request/${heliconeId}/feedback`,
   options
 );
 ```

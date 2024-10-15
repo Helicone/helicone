@@ -7,21 +7,18 @@ import {
 import {
   SortLeafRequest,
   buildRequestSort,
+  buildRequestSortClickhouse,
 } from "../../shared/sorts/requests/sorts";
 import { Result, resultMap, ok, err } from "../../shared/result";
-import { dbExecute, dbQueryClickhouse } from "../../shared/db/dbExecute";
+import {
+  dbExecute,
+  dbQueryClickhouse,
+  printRunnableQuery,
+} from "../../shared/db/dbExecute";
 import { LlmSchema } from "../../shared/requestResponseModel";
-import { Json } from "../../db/database.types";
 import { mapGeminiPro } from "./mappers";
 import { S3Client } from "../../shared/db/s3Client";
-
-export type Provider =
-  | "OPENAI"
-  | "ANTHROPIC"
-  | "TOGETHERAI"
-  | "GROQ"
-  | "GOOGLE"
-  | "CUSTOM";
+import { Provider } from "../../../models/models";
 const MAX_TOTAL_BODY_SIZE = 1024 * 1024;
 
 export interface HeliconeRequestAsset {
@@ -39,35 +36,26 @@ export interface HeliconeRequest {
   /**
    * @example "Happy"
    */
-  response_id: string;
-  response_created_at: string;
+  response_id: string | null;
+  response_created_at: string | null;
   response_body?: any;
   response_status: number;
   response_model: string | null;
   request_id: string;
-  request_model: string | null;
-  model_override: string | null;
   request_created_at: string;
   request_body: any;
   request_path: string;
   request_user_id: string | null;
-  request_properties: {
-    [key: string]: Json;
-  } | null;
-  request_feedback: {
-    [key: string]: Json;
-  } | null;
+  request_properties: Record<string, string> | null;
+  request_model: string | null;
+  model_override: string | null;
   helicone_user: string | null;
-  prompt_name: string | null;
-  prompt_regex: string | null;
-  key_name: string;
+  provider: Provider;
   delay_ms: number | null;
   time_to_first_token: number | null;
   total_tokens: number | null;
   prompt_tokens: number | null;
   completion_tokens: number | null;
-  provider: Provider;
-  node_id: string | null;
   prompt_id: string | null;
   feedback_created_at?: string | null;
   feedback_id?: string | null;
@@ -79,6 +67,9 @@ export interface HeliconeRequest {
   asset_urls: Record<string, string> | null;
   scores: Record<string, number> | null;
   costUSD?: number | null;
+  properties: Record<string, string>;
+  assets: Array<string>;
+  target_url: string;
 }
 
 function addJoinQueries(joinQuery: string, filter: FilterNode): string {
@@ -135,11 +126,267 @@ export async function getRequests(
   const query = `
   SELECT response.id AS response_id,
     response.created_at as response_created_at,
-    '{"helicone_message": "Response body no longer supported. To retrieve response body, please contact engineering@helicone.ai"}'::jsonb AS response_body,
+    '{"helicone_message": "fetching body from signed_url... contact engineering@helicone.ai for more information"}'::jsonb AS response_body,
     response.status AS response_status,
     request.id AS request_id,
     request.created_at as request_created_at,
-    '{"helicone_message": "Request body no longer supported. To retrieve request body, please contact engineering@helicone.ai"}'::jsonb AS request_body,
+    '{"helicone_message": "fetching body from signed_url... contact engineering@helicone.ai for more information"}'::jsonb AS request_body,
+    request.country_code as country_code,
+    request.path AS request_path,
+    request.user_id AS request_user_id,
+    request.properties AS request_properties,
+    request.provider as provider,
+    request.model as request_model,
+    request.model_override as model_override,
+    response.model as response_model,
+    response.feedback as request_feedback,
+    request.helicone_user as helicone_user,
+    response.delay_ms as delay_ms,
+    response.time_to_first_token as time_to_first_token,
+    (response.prompt_tokens + response.completion_tokens) as total_tokens,
+    response.completion_tokens as completion_tokens,
+    response.prompt_tokens as prompt_tokens,
+    request.prompt_id as prompt_id,
+    feedback.created_at AS feedback_created_at,
+    feedback.id AS feedback_id,
+    feedback.rating AS feedback_rating,
+    (
+    SELECT ARRAY_AGG(asset.id)
+    FROM asset
+    WHERE asset.request_id = request.id
+    ) AS asset_ids,
+    (
+      SELECT jsonb_object_agg(
+        sa.score_key, 
+        jsonb_build_object(
+          'value', sv.int_value,
+          'valueType', sa.value_type
+        )
+      )
+      FROM score_value sv
+      JOIN score_attribute sa ON sv.score_attribute = sa.id
+      WHERE sv.request_id = request.id
+    ) AS scores
+  FROM request
+    left join response on request.id = response.request
+    left join feedback on response.id = feedback.response_id
+    ${joinQuery}
+  WHERE (
+    (${builtFilter.filter})
+  )
+  ${sortSQL !== undefined ? `ORDER BY ${sortSQL}` : ""}
+  LIMIT ${limit}
+  OFFSET ${offset}
+
+`;
+  const requests = await dbExecute<HeliconeRequest>(query, builtFilter.argsAcc);
+
+  const s3Client = new S3Client(
+    process.env.S3_ACCESS_KEY ?? "",
+    process.env.S3_SECRET_KEY ?? "",
+    process.env.S3_ENDPOINT_PUBLIC ?? process.env.S3_ENDPOINT ?? "",
+    process.env.S3_BUCKET_NAME ?? "",
+    (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
+  );
+  const results = await mapLLMCalls(requests.data, s3Client, orgId);
+  return resultMap(results, (data) => {
+    return data;
+  });
+}
+
+export async function getRequestsClickhouse(
+  orgId: string,
+  filter: FilterNode,
+  offset: number,
+  limit: number,
+  sort: SortLeafRequest
+): Promise<Result<HeliconeRequest[], string>> {
+  if (isNaN(offset) || isNaN(limit)) {
+    return { data: null, error: "Invalid offset or limit" };
+  }
+
+  const sortSQL = buildRequestSortClickhouse(sort);
+
+  if (limit < 0 || limit > 1_000) {
+    return err("invalid limit");
+  }
+  const builtFilter = await buildFilterWithAuthClickHouse({
+    org_id: orgId,
+    filter,
+    argsAcc: [],
+  });
+
+  const query = `
+    SELECT response_id,
+      map('helicone_message', 'fetching body from signed_url... contact engineering@helicone.ai for more information') as response_body,
+      response_created_at,
+      toInt32(status) AS response_status,
+      request_id,
+      map('helicone_message', 'fetching body from signed_url... contact engineering@helicone.ai for more information') as request_body,
+      request_created_at,
+      user_id AS request_user_id,
+      properties AS request_properties,
+      provider,
+      toInt32(latency) AS delay_ms,
+      model AS request_model,
+      time_to_first_token,
+      (prompt_tokens + completion_tokens) AS total_tokens,
+      completion_tokens,
+      prompt_tokens,
+      country_code,
+      scores,
+      properties,
+      assets as asset_ids,
+      target_url,
+    FROM request_response_rmt FINAL
+    WHERE (
+      (${builtFilter.filter})
+    )
+    ${sortSQL !== undefined ? `ORDER BY ${sortSQL}` : ""}
+    LIMIT ${limit}
+    OFFSET ${offset}
+  `;
+
+  const requests = await dbQueryClickhouse<HeliconeRequest>(
+    query,
+    builtFilter.argsAcc
+  );
+
+  const s3Client = new S3Client(
+    process.env.S3_ACCESS_KEY ?? "",
+    process.env.S3_SECRET_KEY ?? "",
+    process.env.S3_ENDPOINT_PUBLIC ?? process.env.S3_ENDPOINT ?? "",
+    process.env.S3_BUCKET_NAME ?? "",
+    (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
+  );
+
+  const mappedRequests = await mapLLMCalls(requests.data, s3Client, orgId);
+
+  return mappedRequests;
+}
+
+export async function getRequestsCachedClickhouse(
+  orgId: string,
+  filter: FilterNode,
+  offset: number,
+  limit: number,
+  sort: SortLeafRequest,
+  isPartOfExperiment?: boolean,
+  isScored?: boolean
+): Promise<Result<HeliconeRequest[], string>> {
+  if (isNaN(offset) || isNaN(limit)) {
+    return { data: null, error: "Invalid offset or limit" };
+  }
+
+  if (offset > 10_000 || offset < 0) {
+    return err("unsupported offset value");
+  }
+
+  if (limit < 0 || limit > 1_000) {
+    return err("invalid limit");
+  }
+
+  const builtFilter = await buildFilterWithAuthClickHouse({
+    org_id: orgId,
+    filter,
+    argsAcc: [],
+  });
+
+  const sortSQL = buildRequestSortClickhouse(sort);
+
+  const query = `
+  SELECT
+    rmt.response_id,
+          map('helicone_message', 'fetching body from signed_url... contact engineering@helicone.ai for more information') as response_body,
+    rmt.response_created_at,
+    rmt.status AS response_status,
+    rmt.request_id,
+          map('helicone_message', 'fetching body from signed_url... contact engineering@helicone.ai for more information') as request_body,
+    rmt.request_created_at,
+    rmt.user_id AS request_user_id,
+    rmt.properties AS request_properties,
+    rmt.provider,
+    rmt.target_url,
+    rmt.model AS request_model,
+    rmt.time_to_first_token,
+    rmt.prompt_tokens + rmt.completion_tokens AS total_tokens,
+    rmt.completion_tokens,
+    rmt.prompt_tokens,
+    rmt.country_code,
+    rmt.scores,
+    rmt.properties,
+    rmt.assets as asset_ids,
+    ch.created_at AS cache_hit_created_at,
+    ch.latency AS cache_hit_latency
+  FROM request_response_rmt rmt
+  INNER JOIN cache_hits ch ON rmt.request_id = ch.request_id
+  WHERE rmt.organization_id = '${orgId}'
+    AND (${builtFilter.filter})
+  ${
+    sortSQL !== undefined
+      ? `ORDER BY ${sortSQL}`
+      : "ORDER BY rmt.request_created_at DESC"
+  }
+  LIMIT ${limit}
+  OFFSET ${offset}
+  `;
+
+  const requests = await dbQueryClickhouse<HeliconeRequest>(
+    query,
+    builtFilter.argsAcc
+  );
+
+  const s3Client = new S3Client(
+    process.env.S3_ACCESS_KEY ?? "",
+    process.env.S3_SECRET_KEY ?? "",
+    process.env.S3_ENDPOINT_PUBLIC ?? process.env.S3_ENDPOINT ?? "",
+    process.env.S3_BUCKET_NAME ?? "",
+    (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
+  );
+
+  const results = await mapLLMCalls(requests.data, s3Client, orgId);
+
+  return resultMap(results, (data) => {
+    return data;
+  });
+}
+
+export async function getRequestsCached(
+  orgId: string,
+  filter: FilterNode,
+  offset: number,
+  limit: number,
+  sort: SortLeafRequest,
+  isPartOfExperiment?: boolean,
+  isScored?: boolean
+): Promise<Result<HeliconeRequest[], string>> {
+  if (isNaN(offset) || isNaN(limit)) {
+    return { data: null, error: "Invalid offset or limit" };
+  }
+
+  if (offset > 10_000 || offset < 0) {
+    return err("unsupport offset value");
+  }
+
+  if (limit < 0 || limit > 1_000) {
+    return err("invalid limit");
+  }
+
+  const joinQuery = addJoinQueries("", filter);
+  const builtFilter = await buildFilterWithAuthCacheHits({
+    org_id: orgId,
+    filter,
+    argsAcc: [],
+  });
+  const sortSQL = buildRequestSort(sort);
+  const query = `
+  SELECT response.id AS response_id,
+    cache_hits.created_at as response_created_at,
+    '{"helicone_message": "fetching body from signed_url... contact engineering@helicone.ai for more information"}'::jsonb AS response_body,
+    response.status AS response_status,
+    request.id AS request_id,
+    request.created_at as request_created_at,
+    '{"helicone_message": "fetching body from signed_url... contact engineering@helicone.ai for more information"}'::jsonb AS request_body,
     request.country_code as country_code,
     request.path AS request_path,
     request.user_id AS request_user_id,
@@ -170,8 +417,9 @@ export async function getRequests(
       JOIN score_attribute sa ON sv.score_attribute = sa.id
       WHERE sv.request_id = request.id
     ) AS scores
-  FROM request
-    left join response on request.id = response.request
+  FROM cache_hits
+    inner join request on cache_hits.request_id = request.id
+    inner join response on request.id = response.request
     left join feedback on response.id = feedback.response_id
     ${joinQuery}
   WHERE (
@@ -180,99 +428,14 @@ export async function getRequests(
   ${sortSQL !== undefined ? `ORDER BY ${sortSQL}` : ""}
   LIMIT ${limit}
   OFFSET ${offset}
-
 `;
+
   const requests = await dbExecute<HeliconeRequest>(query, builtFilter.argsAcc);
 
   const s3Client = new S3Client(
     process.env.S3_ACCESS_KEY ?? "",
     process.env.S3_SECRET_KEY ?? "",
-    process.env.S3_ENDPOINT ?? "",
-    process.env.S3_BUCKET_NAME ?? "",
-    (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
-  );
-  const results = await mapLLMCalls(requests.data, s3Client, orgId);
-  return resultMap(results, (data) => {
-    return data;
-  });
-}
-
-export async function getRequestsCached(
-  orgId: string,
-  filter: FilterNode,
-  offset: number,
-  limit: number,
-  sort: SortLeafRequest,
-  isPartOfExperiment?: boolean,
-  isScored?: boolean
-): Promise<Result<HeliconeRequest[], string>> {
-  if (isNaN(offset) || isNaN(limit)) {
-    return { data: null, error: "Invalid offset or limit" };
-  }
-
-  if (offset > 10_000 || offset < 0) {
-    return err("unsupport offset value");
-  }
-
-  if (limit < 0 || limit > 1_000) {
-    return err("invalid limit");
-  }
-
-  const builtFilter = await buildFilterWithAuthCacheHits({
-    org_id: orgId,
-    filter,
-    argsAcc: [],
-  });
-  const sortSQL = buildRequestSort(sort);
-  const query = `
-  SELECT response.id AS response_id,
-    cache_hits.created_at as response_created_at,
-    '{"helicone_message": "Response body no longer supported. To retrieve response body, please contact engineering@helicone.ai"}'::jsonb AS response_body,
-    request.country_code as country_code,
-    response.status AS response_status,
-    request.id AS request_id,
-    cache_hits.created_at as request_created_at,
-    '{"helicone_message": "Request body no longer supported. To retrieve request body, please contact engineering@helicone.ai"}'::jsonb AS request_body,
-    request.path AS request_path,
-    request.user_id AS request_user_id,
-    request.properties AS request_properties,
-    request.provider as provider,
-    request.model as request_model,
-    request.model_override as model_override,
-    response.model as response_model,
-    response.feedback as request_feedback,
-    request.helicone_user as helicone_user,
-    response.delay_ms as delay_ms,
-    response.time_to_first_token as time_to_first_token,
-    (response.prompt_tokens + response.completion_tokens) as total_tokens,
-    response.completion_tokens as completion_tokens,
-    response.prompt_tokens as prompt_tokens,
-    request.prompt_id as prompt_id,
-    feedback.created_at AS feedback_created_at,
-    feedback.id AS feedback_id,
-    feedback.rating AS feedback_rating,
-    (
-    SELECT ARRAY_AGG(asset.id)
-    FROM asset
-    WHERE asset.request_id = request.id
-    ) AS asset_ids
-  FROM cache_hits
-    inner join request on cache_hits.request_id = request.id
-    inner join response on request.id = response.request
-    left join feedback on response.id = feedback.response_id
-  WHERE (
-    (${builtFilter.filter})
-  )
-  ${sortSQL !== undefined ? `ORDER BY ${sortSQL}` : ""}
-  LIMIT ${limit}
-  OFFSET ${offset}
-`;
-
-  const requests = await dbExecute<HeliconeRequest>(query, builtFilter.argsAcc);
-  const s3Client = new S3Client(
-    process.env.S3_ACCESS_KEY ?? "",
-    process.env.S3_SECRET_KEY ?? "",
-    process.env.S3_ENDPOINT ?? "",
+    process.env.S3_ENDPOINT_PUBLIC ?? process.env.S3_ENDPOINT ?? "",
     process.env.S3_BUCKET_NAME ?? "",
     (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
   );
@@ -345,31 +508,6 @@ async function mapLLMCalls(
         }
       }
 
-      // Next map to standardized schema
-      // Extract the model from various possible locations.
-      const model =
-        heliconeRequest.model_override ||
-        heliconeRequest.response_model ||
-        heliconeRequest.request_model ||
-        heliconeRequest.response_body?.model ||
-        heliconeRequest.request_body?.model ||
-        heliconeRequest.response_body?.body?.model || // anthropic
-        getModelFromPath(heliconeRequest.request_path) ||
-        "";
-
-      try {
-        if (
-          model.toLowerCase().includes("gemini") &&
-          heliconeRequest.provider === "GOOGLE"
-        ) {
-          const mappedSchema = mapGeminiPro(heliconeRequest, model);
-          heliconeRequest.llmSchema = mappedSchema;
-          return heliconeRequest;
-        }
-      } catch (error: any) {
-        // Do nothing, FE will fall back to existing mappers
-      }
-
       return heliconeRequest;
     }) ?? [];
 
@@ -438,7 +576,6 @@ export async function getRequestCountCached(
   FROM cache_hits
     left join request on cache_hits.request_id = request.id
     left join response on request.id = response.request
-    left join prompt on request.formatted_prompt_id = prompt.id
   WHERE (
     (${builtFilter.filter})
   )
@@ -467,7 +604,6 @@ export async function getRequestCount(
   SELECT count(request.id)::bigint as count
   FROM request
     left join response on request.id = response.request
-    left join prompt on request.formatted_prompt_id = prompt.id
     left join feedback on response.id = feedback.response_id
     left join job_node_request on request.id = job_node_request.request_id
   WHERE (
@@ -482,32 +618,6 @@ export async function getRequestCount(
     return { data: null, error: error };
   }
   return { data: +data[0].count, error: null };
-}
-
-export async function getRequestCountClickhouse(
-  org_id: string,
-  filter: FilterNode
-): Promise<Result<number, string>> {
-  const builtFilter = await buildFilterWithAuthClickHouse({
-    org_id,
-    argsAcc: [],
-    filter,
-  });
-
-  const query = `
-SELECT
-  count(DISTINCT r.request_id) as count
-from request_response_versioned r
-WHERE (${builtFilter.filter})
-  `;
-  const { data, error } = await dbQueryClickhouse<{ count: number }>(
-    query,
-    builtFilter.argsAcc
-  );
-  if (error !== null) {
-    return { data: null, error: error };
-  }
-  return { data: data[0].count, error: null };
 }
 
 export async function getRequestAsset(

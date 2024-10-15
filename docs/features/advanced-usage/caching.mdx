@@ -1,7 +1,16 @@
 ---
-title: "Cache"
-description: "Reduce latency and save costs by caching on the edge"
+title: "LLM Caching"
+sidebarTitle: "Caching"
+description: "Reduce latency and save costs on LLM calls by caching responses on the edge. Configure cache duration, bucket sizes, and use cache seeds for consistent results across requests."
+"twitter:title": "LLM Cache - Helicone OSS LLM Observability"
 ---
+
+<Frame caption="Dashboard view of cache hits, cost and time saved. ">
+  <img
+    src="/images/example-cache.png"
+    alt="Helicone Dashboard showing the number of cache hits, cost, and time saved. "
+  />
+</Frame>
 
 import QuestionsSection from "/snippets/questions-section.mdx";
 
@@ -14,13 +23,13 @@ import QuestionsSection from "/snippets/questions-section.mdx";
 
 ## Introduction
 
-Caching, by temporarily storing data closer to the user at the edge, can significantly speed up access time and enhance your application performance.
+Helicone uses [Cloudflare Workers](https://www.cloudflare.com/network/) to temporarily store data closer to the user to ensure low latency, resulting in faster responses and reduced costs.
 
-Helicone uses [Cloudflare Workers](https://www.cloudflare.com/network/) to temporarily store data closer to the user to ensure low latency, resulting in faster responses and an efficient app development process.
-
-<Frame caption="Dashboard view of cache hits, cost and time saved. ">
-  <img src="/images/example-cache.png" alt="Helicone Dashboard showing the number of cache hits, cost, and time saved. " />
-</Frame>
+<iframe
+  width="100%"
+  height="420"
+  src="https://www.youtube.com/embed/qIOq_NbeQ28?autoplay=1&mute=1"
+></iframe>
 
 ## Why Cache
 
@@ -46,21 +55,13 @@ curl https://oai.helicone.ai/v1/completions \
 }'
 ```
 
-```python Python w/Package
-response = openai.Completion.create(
-	model="text-davinci-003",
-	prompt="How do I cache with helicone?",
-	cache=True,  # set cache to true
-)
-```
-
 ```python Python w/o Package
 openai.api_base = "https://oai.helicone.ai/v1"
 
-openai.Completion.create(
+client.chat.completions.create(
     model="text-davinci-003",
     prompt="How do I cache with helicone?",
-    headers={
+    extra_headers={
       "Helicone-Cache-Enabled": "true", # add this header and set to true
     }
 )
@@ -129,14 +130,14 @@ Simply add `Helicone-Cache-Bucket-Max-Size` with some number to choose how large
 ```python Python
 openai.api_base = "https://oai.helicone.ai/v1"
 
-openai.Completion.create(
-model="text-davinci-003",
-prompt="Say this is a test",
-headers={
-"Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
-"Helicone-Cache-Enabled": "true", # mandatory
-"Helicone-Cache-Bucket-Max-Size": "3", # set cache bucket size to 3
-}
+client.chat.completions.create(
+  model="text-davinci-003",
+  prompt="Say this is a test",
+  extra_headers={
+    "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
+    "Helicone-Cache-Enabled": "true", # mandatory
+    "Helicone-Cache-Bucket-Max-Size": "3", # set cache bucket size to 3
+  }
 )
 ```
 

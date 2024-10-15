@@ -9,6 +9,7 @@ import OrgMemberItem from "../orgMemberItem";
 import { useOrg } from "../../../layout/organizationContext";
 import AddMemberModal from "../addMemberModal";
 import { clsx } from "../../../shared/clsx";
+import { ProFeatureWrapper } from "@/components/shared/ProBlockerComponents/ProFeatureWrapper";
 
 interface OrgMembersPageProps {
   org: Database["public"]["Tables"]["organization"]["Row"];
@@ -42,8 +43,8 @@ const OrgMembersPage = (props: OrgMembersPageProps) => {
 
   const isOwner = org.owner === user?.id;
 
-  const members = data?.data
-    ? data?.data
+  const members = data
+    ? data
         .filter((d) => {
           // if the org is a customer org, remove all "owner" roles UNLESS the user is the owner
           if (orgContext?.currentOrg?.organization_type === "customer") {
@@ -77,14 +78,16 @@ const OrgMembersPage = (props: OrgMembersPageProps) => {
             <h3 className="text-lg font-semibold">Members</h3>
 
             <div className="flex flex-row space-x-4">
-              <button
-                onClick={() => {
-                  setAddOpen(true);
-                }}
-                className="items-center rounded-md bg-black dark:bg-white px-4 py-2 text-sm flex font-semibold text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-              >
-                Invite Members
-              </button>
+              <ProFeatureWrapper featureName="invite">
+                <button
+                  onClick={() => {
+                    setAddOpen(true);
+                  }}
+                  className="items-center rounded-md bg-black dark:bg-white px-4 py-2 text-sm flex font-semibold text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                >
+                  Invite Members
+                </button>
+              </ProFeatureWrapper>
             </div>
           </div>
           {isLoading || isOrgOwnerLoading ? (

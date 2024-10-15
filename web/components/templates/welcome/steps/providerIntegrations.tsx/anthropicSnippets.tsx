@@ -75,6 +75,46 @@ const llm = new ChatAnthropic({
   }
 });
 `,
+
+  asyncLogging: (key: string) => `
+import { HeliconeAsyncLogger } from "@helicone/helicone";
+import Anthropic from "@anthropic-ai/sdk";
+
+const logger = new HeliconeAsyncLogger({
+  apiKey: process.env.HELICONE_API_KEY,
+  providers: {
+    anthropic: Anthropic
+  }
+});
+logger.init();
+
+const anthropic = new Anthropic();
+
+// Call Anthropic
+  `,
+  manualLogging: (key: string) => `
+import { HeliconeManualLogger } from "@helicone/helicone";
+
+const logger = new HeliconeManualLogger({
+  apiKey: process.env.HELICONE_API_KEY
+});
+
+const reqBody = {
+  max_tokens: 100,
+  model: "claude-3-opus-20240229",
+  messages: [{
+    role: "user",
+    content: "What is the UNIX Epoch?",
+  }],
+}
+
+logger.registerRequest(reqBody);
+// Call Anthropic using JS SDK / fetch
+const res = await r.json();
+console.log(res);
+
+logger.sendLog(res);
+  `,
 };
 
 type SupportedLanguages = keyof typeof CODE_CONVERTS;
@@ -86,6 +126,8 @@ const DIFF_LINES: {
   python: [5, 7],
   langchain_python: [3, 7],
   langchain_typescript: [4, 6],
+  asyncLogging: [],
+  manualLogging: [],
 };
 
 const NAMES: {
@@ -95,6 +137,8 @@ const NAMES: {
   python: "Python",
   langchain_python: "LangChain",
   langchain_typescript: "LangChainJS",
+  asyncLogging: "OpenLLMetry",
+  manualLogging: "Custom",
 };
 
 interface AnthropicSnippetsProps {
@@ -147,11 +191,29 @@ export default function AnthropicSnippets(props: AnthropicSnippetsProps) {
         >
           <h2 className="font-semibold">LangchainJS</h2>
         </button>
+        <button
+          className={clsx(
+            lang === "asyncLogging" ? "bg-sky-100" : "bg-white",
+            "flex items-center gap-2 border border-gray-300 rounded-lg py-2 px-4"
+          )}
+          onClick={() => setLang("asyncLogging")}
+        >
+          <h2 className="font-semibold">OpenLLMetry</h2>
+        </button>
+        <button
+          className={clsx(
+            lang === "manualLogging" ? "bg-sky-100" : "bg-white",
+            "flex items-center gap-2 border border-gray-300 rounded-lg py-2 px-4"
+          )}
+          onClick={() => setLang("manualLogging")}
+        >
+          <h2 className="font-semibold">Custom</h2>
+        </button>
       </div>
 
       <DiffHighlight
         code={CODE_CONVERTS[lang](apiKey)}
-        language="bash"
+        language="lang"
         newLines={DIFF_LINES[lang]}
         oldLines={[]}
         minHeight={false}

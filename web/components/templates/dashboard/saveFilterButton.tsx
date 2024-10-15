@@ -6,15 +6,20 @@ import { TextInput } from "@tremor/react";
 import { v4 as uuidv4 } from "uuid";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import { SingleFilterDef } from "../../../services/lib/filters/frontendFilterDefs";
-import { FunnelIcon } from "@heroicons/react/24/outline";
 import { OrganizationFilter } from "../../../services/lib/organization_layout/organization_layout";
 import { useOrg } from "../../layout/organizationContext";
-import { PlusIcon } from "@heroicons/react/24/solid";
+import { FunnelIcon } from "@heroicons/react/24/solid";
 import useSearchParams from "../../shared/utils/useSearchParams";
 import { useJawnClient } from "../../../lib/clients/jawnHook";
+import {
+  UIFilterRowTree,
+  isFilterRowNode,
+} from "../../../services/lib/filters/uiFilterRowTree";
+import { Button } from "@/components/ui/button";
+import { SaveIcon } from "lucide-react";
 
 interface SaveFilterButtonProps {
-  filters: UIFilterRow[];
+  filters: UIFilterRowTree;
   onSaveFilterCallback: () => void;
   filterMap: SingleFilterDef<any>[];
   savedFilters?: OrganizationFilter[];
@@ -33,18 +38,33 @@ const SaveFilterButton = (props: SaveFilterButtonProps) => {
   const [isSaveFiltersModalOpen, setIsSaveFiltersModalOpen] = useState(false);
   const [filterName, setFilterName] = useState("");
 
-  function encodeFilter(filter: UIFilterRow): string {
-    return `${filterMap[filter.filterMapIdx].label}:${
-      filterMap[filter.filterMapIdx].operators[filter.operatorIdx].label
-    }:${encodeURIComponent(filter.value)}`;
-  }
+  const encodeFilters = (filters: UIFilterRowTree): string => {
+    const encode = (node: UIFilterRowTree): any => {
+      if (isFilterRowNode(node)) {
+        return {
+          type: "node",
+          operator: node.operator,
+          rows: node.rows.map(encode),
+        };
+      } else {
+        return {
+          type: "leaf",
+          filter: `${filterMap[node.filterMapIdx].label}:${
+            filterMap[node.filterMapIdx].operators[node.operatorIdx].label
+          }:${encodeURIComponent(node.value)}`,
+        };
+      }
+    };
+
+    return JSON.stringify(encode(filters));
+  };
 
   const onSaveFilter = async (name: string) => {
-    if (filters.length > 0) {
+    if (filters) {
       const saveFilter: OrganizationFilter = {
         id: uuidv4(),
         name: name,
-        filter: filters,
+        filter: [filters],
         createdAt: new Date().toISOString(),
         softDelete: false,
       };
@@ -60,7 +80,7 @@ const SaveFilterButton = (props: SaveFilterButtonProps) => {
             },
             body: {
               filterType: layoutPage,
-              filters: updatedFilters!,
+              filters: updatedFilters,
             },
           }
         );
@@ -71,9 +91,8 @@ const SaveFilterButton = (props: SaveFilterButtonProps) => {
         setNotification("Filter created successfully", "success");
         setIsSaveFiltersModalOpen(false);
         onSaveFilterCallback();
-        const currentAdvancedFilters = encodeURIComponent(
-          JSON.stringify(filters.map(encodeFilter).join("|"))
-        );
+        const currentAdvancedFilters = encodeFilters(filters);
+
         searchParams.set("filters", currentAdvancedFilters);
       } else {
         const { error: createFilterError } = await jawn.POST(
@@ -96,34 +115,61 @@ const SaveFilterButton = (props: SaveFilterButtonProps) => {
           setNotification("Filter created successfully", "success");
           setIsSaveFiltersModalOpen(false);
           onSaveFilterCallback();
-          const currentAdvancedFilters = encodeURIComponent(
-            JSON.stringify(filters.map(encodeFilter).join("|"))
-          );
+          const currentAdvancedFilters = encodeFilters(filters);
           searchParams.set("filters", currentAdvancedFilters);
         }
       }
     }
   };
 
+  const renderFilterTree = (filterTree: UIFilterRowTree) => {
+    if (isFilterRowNode(filterTree)) {
+      return (
+        <ul>
+          {filterTree.rows.map((row, index) => (
+            <li key={index}>
+              {isFilterRowNode(row)
+                ? renderFilterTree(row)
+                : renderFilterRow(row)}
+            </li>
+          ))}
+        </ul>
+      );
+    } else {
+      return renderFilterRow(filterTree);
+    }
+  };
+
+  const renderFilterRow = (filter: UIFilterRow) => (
+    <div className="flex flex-row gap-2 items-center">
+      <FunnelIcon className="h-4 w-4 text-gray-900 dark:text-gray-100" />
+      <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+        {filterMap[filter.filterMapIdx].label}
+      </p>
+      <p className="text-sm text-gray-500 dark:text-gray-400">
+        {filterMap[filter.filterMapIdx].operators[filter.operatorIdx].label}
+      </p>
+      <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+        {filter.value}
+      </p>
+    </div>
+  );
+
   return (
     <>
-      <button
+      <Button
         onClick={() => {
-          if (filters.length === 0) {
-            setNotification("Saved Filters can not be empty", "error");
-            return;
-          }
           setIsSaveFiltersModalOpen(true);
         }}
-        className={clsx(
-          "bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2"
-        )}
+        className={clsx("flex flex-row items-center gap-2")}
+        size="md_sleek"
+        variant="ghost"
       >
-        <PlusIcon className="h-4 w-4 text-gray-900 dark:text-gray-100" />
-        <p className="text-sm font-medium text-gray-900 dark:text-gray-100 hidden sm:block">
-          Create New Filter
+        <SaveIcon className="h-4 w-4 text-slate-500 dark:text-slate-400" />
+        <p className="text-sm font-medium text-slate-700 dark:text-slate-300 hidden sm:block text-xs">
+          Save as...
         </p>
-      </button>
+      </Button>
       <ThemedModal
         open={isSaveFiltersModalOpen}
         setOpen={() => setIsSaveFiltersModalOpen(false)}
@@ -148,30 +194,7 @@ const SaveFilterButton = (props: SaveFilterButtonProps) => {
               }}
             />
           </div>
-          <ul>
-            {filters.map((filter, index) => {
-              return (
-                <li key={index}>
-                  <div className="flex flex-row gap-2 items-center">
-                    <FunnelIcon className="h-4 w-4 text-gray-900 dark:text-gray-100" />
-                    <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                      {filterMap[filter.filterMapIdx].label}
-                    </p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                      {
-                        filterMap[filter.filterMapIdx].operators[
-                          filter.operatorIdx
-                        ].label
-                      }
-                    </p>
-                    <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                      {filter.value}
-                    </p>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
+          {renderFilterTree(filters)}
           <div className="col-span-4 flex justify-end gap-2 pt-4">
             <button
               type="button"

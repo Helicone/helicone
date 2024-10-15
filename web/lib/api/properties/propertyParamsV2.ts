@@ -16,7 +16,7 @@ function getFilterSearchFilterNodeV2(
   search: string
 ): FilterNode {
   const propertyFilter: FilterLeaf = {
-    request_response_versioned: {
+    request_response_rmt: {
       search_properties: {
         [property]: {
           equals: property,
@@ -28,8 +28,8 @@ function getFilterSearchFilterNodeV2(
     return propertyFilter;
   }
   const searchFilter: FilterLeaf = {
-    request_response_versioned: {
-      search_properties: {
+    request_response_rmt: {
+      properties: {
         [property]: {
           contains: search,
         },
@@ -58,7 +58,7 @@ export async function getPropertyParamsV2(
   SELECT DISTINCT
     key AS property_key,
     value AS property_param
-  FROM request_response_versioned
+  FROM request_response_rmt
   ARRAY JOIN mapKeys(properties) AS key, mapValues(properties) AS value
   WHERE (
     ${builtFilter.filter}

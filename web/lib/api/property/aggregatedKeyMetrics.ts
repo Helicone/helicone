@@ -20,7 +20,7 @@ export async function getAggregatedKeyMetrics(
     await buildFilterWithAuthClickHousePropertiesV2({
       org_id,
       filter: {
-        left: timeFilterToFilterNode(timeFilter, "request_response_versioned"),
+        left: timeFilterToFilterNode(timeFilter, "request_response_rmt"),
         right: filter,
         operator: "and",
       },
@@ -30,11 +30,11 @@ export async function getAggregatedKeyMetrics(
   SELECT 
     value AS property_value,
     count(*) AS total_requests,
-    min(request_response_versioned.request_created_at) AS active_since,
-    sum(request_response_versioned.completion_tokens) / count(*) AS avg_completion_tokens_per_request,
-    sum(request_response_versioned.latency) / count(*) AS avg_latency_per_request,
-    ${clickhousePriceCalc("request_response_versioned")} AS total_cost
-  FROM request_response_versioned
+    min(request_response_rmt.request_created_at) AS active_since,
+    sum(request_response_rmt.completion_tokens) / count(*) AS avg_completion_tokens_per_request,
+    sum(request_response_rmt.latency) / count(*) AS avg_latency_per_request,
+    ${clickhousePriceCalc("request_response_rmt")} AS total_cost
+  FROM request_response_rmt
   ARRAY JOIN mapValues(properties) AS value, mapKeys(properties) AS key
   WHERE (
     ${filterString}

@@ -1,3 +1,4 @@
+import { ENVIRONMENT } from "../..";
 import { getAllSignedURLsFromInputs } from "../../managers/inputs/InputsManager";
 import { costOfPrompt } from "../../packages/cost";
 import { dbExecute } from "../shared/db/dbExecute";
@@ -21,23 +22,31 @@ export interface RequestObj {
   provider: string;
 }
 
+export interface Score {
+  valueType: string;
+  value: number | Date | string;
+}
+
+export interface ExperimentDatasetRow {
+  rowId: string;
+  inputRecord: {
+    requestId: string;
+    requestPath: string;
+    inputs: Record<string, string>;
+    autoInputs: Record<string, string>[];
+    response: ResponseObj;
+    request: RequestObj;
+  };
+  scores: Record<string, Score>;
+}
+
 export interface Experiment {
   id: string;
   organization: string;
   dataset: {
     id: string;
     name: string;
-    rows: {
-      rowId: string;
-      inputRecord?: {
-        requestId: string;
-        requestPath: string;
-        inputs: Record<string, string>;
-        response: ResponseObj;
-        request: RequestObj;
-      };
-      scores: Record<string, number>;
-    }[];
+    rows: ExperimentDatasetRow[];
   };
   meta: any;
   createdAt: string;
@@ -58,21 +67,19 @@ export interface Experiment {
       datasetRowId: string;
       resultRequestId: string;
       response?: ResponseObj;
-      scores: Record<string, number>;
+      scores: Record<string, Score>;
       request?: RequestObj;
     }[];
   }[];
   scores: ExperimentScores | null;
 }
 
-type ScoreValue = string | number | Date;
-
 export interface ExperimentScores {
   dataset: {
-    scores: Record<string, ScoreValue>;
+    scores: Record<string, Score>;
   };
   hypothesis: {
-    scores: Record<string, ScoreValue>;
+    scores: Record<string, Score>;
   };
 }
 
@@ -144,7 +151,8 @@ function getExperimentsQuery(
                         }
                         'requestId', pir.source_request,
                         'requestPath', re.path,
-                        'inputs', pir.inputs
+                        'inputs', pir.inputs,
+                        'autoInputs', pir.auto_prompt_inputs
                       )
                       FROM prompt_input_record pir
                       left join request re on re.id = pir.source_request
@@ -155,7 +163,13 @@ function getExperimentsQuery(
                     }
                     'rowId', dsr.id,
                     'scores', (
-                      SELECT jsonb_object_agg(sa.score_key, sv.int_value)
+                      SELECT jsonb_object_agg(
+                        sa.score_key,
+                        jsonb_build_object(
+                          'value', sv.int_value,
+                          'valueType', sa.value_type
+                        )
+                      )
                       FROM score_value sv
                       JOIN score_attribute sa ON sa.id = sv.score_attribute
                       JOIN prompt_input_record pir ON pir.source_request = sv.request_id
@@ -224,7 +238,13 @@ function getExperimentsQuery(
                                   'datasetRowId', hr.dataset_row,
                                   'resultRequestId', hr.result_request_id,
                                   'scores', (
-                                    SELECT jsonb_object_agg(sa.score_key, sv.int_value)
+                                    SELECT jsonb_object_agg(
+                                      sa.score_key,
+                                      jsonb_build_object(
+                                        'value', sv.int_value,
+                                        'valueType', sa.value_type
+                                      )
+                                    )
                                     FROM score_value sv
                                     JOIN score_attribute sa ON sa.id = sv.score_attribute
                                     WHERE sv.request_id = hr.result_request_id
@@ -250,7 +270,7 @@ function getExperimentsQuery(
         left join experiment_v2_hypothesis eh on e.id = eh.experiment_v2
         left join prompts_versions pv on pv.id = eh.prompt_version
         left join prompt_v2 p_v2 on p_v2.id = pv.prompt_v2
-        LEFT JOIN experiment_dataset_v2 ds ON e.dataset = ds.id
+        LEFT JOIN helicone_dataset ds ON e.dataset = ds.id
         LEFT JOIN experiment_dataset_v2_row dsr ON dsr.dataset_id = ds.id
         ${filter ? `WHERE ${filter}` : ""}
         GROUP BY e.id, ds.id
@@ -335,6 +355,122 @@ export class ExperimentStore extends BaseStore {
     );
     return ok(experimentResults);
   }
+
+  async getExperimentById(
+    experimentId: string,
+    include: IncludeExperimentKeys
+  ): Promise<Result<Experiment, string>> {
+    return await ServerExperimentStore.getExperiment(experimentId, include);
+  }
+
+  async getDatasetRowsByIds(params: {
+    datasetRowIds: string[];
+    include?: IncludeExperimentKeys;
+  }): Promise<Result<ExperimentDatasetRow[], string>> {
+    const { datasetRowIds, include } = params;
+
+    // Helper functions for building parts of the query
+    const responseObjectString = () => `
+    jsonb_build_object(
+      'body', COALESCE(resp.body, ''),
+      'createdAt', COALESCE(resp.created_at::text, ''),
+      'completionTokens', COALESCE(resp.completion_tokens, 0),
+      'promptTokens', COALESCE(resp.prompt_tokens, 0),
+      'delayMs', COALESCE(resp.delay_ms, 0),
+      'model', COALESCE(resp.model, '')
+    )
+  `;
+
+    const requestObjectString = () => `
+    jsonb_build_object(
+      'id', req.id,
+      'provider', COALESCE(req.provider, '')
+    )
+  `;
+
+    const query = `
+    SELECT jsonb_build_object(
+      'rowId', dsr.id,
+      'inputRecord', jsonb_build_object(
+        'requestId', pir.source_request,
+        'requestPath', COALESCE(req.path, ''),
+        'inputs', COALESCE(pir.inputs::jsonb, '{}'::jsonb),
+        'autoInputs', COALESCE(pir.auto_prompt_inputs::jsonb, '[]'::jsonb)
+        ${
+          include?.responseBodies
+            ? `
+        ,'response', ${responseObjectString()}
+        ,'request', ${requestObjectString()}
+        `
+            : ""
+        }
+      )
+      ${
+        include?.score
+          ? `
+      ,'scores', COALESCE((
+        SELECT jsonb_object_agg(
+          sa.score_key,
+          jsonb_build_object(
+            'value', 
+            CASE 
+              WHEN sa.value_type = 'int' THEN sv.int_value::text
+              WHEN sa.value_type = 'float' THEN sv.float_value::text
+              WHEN sa.value_type = 'string' THEN sv.string_value
+              WHEN sa.value_type = 'boolean' THEN sv.boolean_value::text
+              WHEN sa.value_type = 'date' THEN sv.date_value::text
+            END,
+            'valueType', sa.value_type
+          )
+        )
+        FROM score_value sv
+        JOIN score_attribute sa ON sa.id = sv.score_attribute
+        WHERE sv.request_id = pir.source_request
+      ), '{}'::jsonb)
+      `
+          : ""
+      }
+    ) AS row_data
+    FROM experiment_dataset_v2_row dsr
+    LEFT JOIN prompt_input_record pir ON pir.id = dsr.input_record
+    LEFT JOIN request req ON req.id = pir.source_request
+    ${
+      include?.responseBodies
+        ? "LEFT JOIN response resp ON resp.request = pir.source_request"
+        : ""
+    }
+    WHERE dsr.id = ANY($1::uuid[])
+  `;
+
+    try {
+      const { data, error } = await dbExecute<{
+        row_data: ExperimentDatasetRow;
+      }>(query, [datasetRowIds]);
+
+      if (error) {
+        console.error("Query Error:", error);
+        return err(error);
+      }
+
+      if (!data) {
+        return err("No data returned from the query");
+      }
+
+      return ok(
+        data.map((d) => {
+          const row = d.row_data;
+          row.inputRecord.requestPath =
+            row.inputRecord.requestPath === ""
+              ? `${process.env.HELICONE_WORKER_URL}/v1/chat/completions`
+              : row.inputRecord.requestPath;
+          return row;
+        })
+      );
+    } catch (e) {
+      console.error("Exception:", e);
+      return err("An unexpected error occurred");
+    }
+  }
 }
 
 export const ServerExperimentStore: {
@@ -400,7 +536,7 @@ export const ServerExperimentStore: {
       )
       SELECT experiment_v2 as experiment_id
       FROM updated_experiment_hypothesis
-      LIMIT 1;      
+      LIMIT 1;
     `,
         []
       ),
@@ -463,17 +599,24 @@ function getExperimentHypothesisScores(
       { totalCost: 0, totalLatency: 0 }
     );
 
-    console.log("hypothesisLatency", totalLatency, validRuns.length);
-
     return ok({
       scores: {
-        dateCreated: new Date(hypothesis.createdAt),
-        model: hypothesis.model,
-        cost: validRuns.length > 0 ? totalCost / validRuns.length : 0,
-        latency: validRuns.length > 0 ? totalLatency / validRuns.length : 0,
-        ...getCustomScores(hypothesis.runs.map((run) => run.scores)),
+        dateCreated: {
+          value: new Date(hypothesis.createdAt),
+          valueType: "date",
+        },
+        model: { value: hypothesis.model, valueType: "string" },
+        cost: {
+          value: validRuns.length > 0 ? totalCost / validRuns.length : 0,
+          valueType: "number",
+        },
+        latency: {
+          value: validRuns.length > 0 ? totalLatency / validRuns.length : 0,
+          valueType: "number",
+        },
+        ...getCustomScores(hypothesis.runs?.map((run) => run.scores) ?? []),
       },
-    });
+    }) as Result<ExperimentScores["hypothesis"], string>;
   } catch (error) {
     console.error("Error calculating hypothesis cost", error);
     return err("Error calculating hypothesis cost");
@@ -524,13 +667,19 @@ function getExperimentDatasetScores(
 
     return ok({
       scores: {
-        dateCreated: new Date(latest.createdAt),
-        model: latest.model,
-        cost: validRows.length > 0 ? totalCost / validRows.length : 0,
-        latency: validRows.length > 0 ? totalLatency / validRows.length : 0,
+        dateCreated: { value: new Date(latest.createdAt), valueType: "date" },
+        model: { value: latest.model, valueType: "string" },
+        cost: {
+          value: validRows.length > 0 ? totalCost / validRows.length : 0,
+          valueType: "number",
+        },
+        latency: {
+          value: validRows.length > 0 ? totalLatency / validRows.length : 0,
+          valueType: "number",
+        },
         ...getCustomScores(validRows.map((row) => row.scores)),
       },
-    });
+    }) as Result<ExperimentScores["dataset"], string>;
   } catch (error) {
     console.error("Error calculating dataset cost", error);
     return err("Error calculating dataset cost");
@@ -538,25 +687,25 @@ function getExperimentDatasetScores(
 }
 
 function getCustomScores(
-  scores: Record<string, number>[]
-): Record<string, number> {
+  scores: Record<string, Score>[]
+): Record<string, Score> {
   const scoresValues = scores.reduce((acc, record) => {
     for (const key in record) {
-      if (record.hasOwnProperty(key)) {
+      if (record.hasOwnProperty(key) && typeof record[key].value === "number") {
         if (!acc[key]) {
-          acc[key] = { sum: 0, count: 0 };
+          acc[key] = { sum: 0, count: 0, valueType: record[key].valueType };
         }
-        acc[key].sum += record[key];
+        acc[key].sum += record[key].value as number;
         acc[key].count += 1;
       }
     }
     return acc;
-  }, {} as Record<string, { sum: number; count: number }>);
+  }, {} as Record<string, { sum: number; count: number; valueType: string }>);
 
   return Object.fromEntries(
-    Object.entries(scoresValues).map(([key, { sum, count }]) => [
+    Object.entries(scoresValues).map(([key, { sum, count, valueType }]) => [
       key,
-      sum / count,
+      { value: sum / count, valueType },
     ])
   );
 }

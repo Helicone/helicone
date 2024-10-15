@@ -43,8 +43,18 @@ export function getKafka() {
   }
 }
 
+export function generateKafkaAdmin() {
+  const kafka = getKafka();
+  return kafka?.admin();
+}
+
 export function generateKafkaConsumer(
-  groupId: "jawn-consumer-local-01" | "jawn-consumer"
+  groupId:
+    | "jawn-consumer-local-01"
+    | "jawn-consumer"
+    | "jawn-consumer-backfill"
+    | "jawn-consumer-scores"
+    | "jawn-consumer-scores-dlq"
 ) {
   const kafka = getKafka();
   const consumer = kafka?.consumer({

@@ -10,6 +10,7 @@ RUN yarn
 # Exclude yarn.lock from the copy command to avoid unnecessary rebuilds
 RUN mv /app/web/yarn.lock /app/web/yarn.lock.bak
 COPY . /app/web2
+RUN find /app/web2 -name ".env.*" -exec rm {} \;
 RUN cp -r /app/web2/* /app/web
 RUN mv /app/web/yarn.lock.bak /app/web/yarn.lock
 

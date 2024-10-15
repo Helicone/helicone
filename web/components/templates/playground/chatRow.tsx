@@ -10,7 +10,7 @@ import {
 import { useEffect, useState } from "react";
 import { clsx } from "../../shared/clsx";
 import { removeLeadingWhitespace } from "../../shared/utils/utils";
-import { Message } from "../requests/chat";
+
 import RoleButton from "./new/roleButton";
 import useNotification from "../../shared/notification/useNotification";
 import { Tooltip } from "@mui/material";
@@ -18,6 +18,7 @@ import { enforceString } from "../../../lib/helpers/typeEnforcers";
 import AddFileButton from "./new/addFileButton";
 import ThemedModal from "../../shared/themed/themedModal";
 import MarkdownEditor from "../../shared/markdownEditor";
+import { Message } from "../requests/chatComponent/types";
 
 interface ChatRowProps {
   index: number;
@@ -98,7 +99,14 @@ export const PrettyInput = ({
           </div>
 
           <div className="bg-white border-gray-300 dark:bg-black dark:border-gray-700 p-4 border rounded-lg flex flex-col space-y-4">
-            {selectedProperties?.[keyName]}
+            <MarkdownEditor
+              text={selectedProperties?.[keyName] || ""}
+              setText={(text) => {
+                console.log(text);
+              }}
+              disabled={true}
+              language="markdown"
+            />
           </div>
         </div>
       </ThemedModal>
@@ -156,7 +164,7 @@ export const RenderWithPrettyInputKeys = (props: {
   };
 
   return (
-    <div className="text-md leading-8 text-black dark:text-white">
+    <div className="text-md leading-8 text-black dark:text-white whitespace-pre-wrap">
       {replaceInputKeysWithComponents(text)}
     </div>
   );

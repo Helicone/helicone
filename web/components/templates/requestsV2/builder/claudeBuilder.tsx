@@ -13,8 +13,26 @@ class ClaudeBuilder extends AbstractRequestBuilder {
         if (this.response.response_body?.error) {
           return this.response.response_body?.error?.message || "";
         }
-        // successful response, check for choices
 
+        // Check for tool_use in the content array
+        if (Array.isArray(this.response.response_body?.content)) {
+          const toolUse = this.response.response_body.content.find(
+            (item: any) => item.type === "tool_use"
+          );
+          if (toolUse) {
+            return `${toolUse.name}(${JSON.stringify(toolUse.input)})`;
+          }
+
+          // If no tool_use, find the text content
+          const textContent = this.response.response_body.content.find(
+            (item: any) => item.type === "text"
+          );
+          if (textContent) {
+            return textContent.text || "";
+          }
+        }
+
+        // If no content array or no relevant items found, fall back to the original logic
         return this.response.response_body?.body
           ? this.response.response_body?.body?.completion ?? ""
           : this.response.response_body?.completion ?? "";
@@ -32,7 +50,7 @@ class ClaudeBuilder extends AbstractRequestBuilder {
         this.response.request_body.tooLarge
           ? "Helicone Message: Input too large"
           : this.response.request_body.prompt ||
-              this.response.request_body.messages.slice(-1)[0].content ||
+              this.response.request_body.messages?.slice(-1)?.[0]?.content ||
               ""
       ),
       responseText: getResponseText(),
@@ -44,15 +62,12 @@ class ClaudeBuilder extends AbstractRequestBuilder {
           <Completion
             request={
               this.response.request_body.prompt ||
-              this.response.request_body.messages.slice(-1)[0].content ||
+              this.response.request_body.messages?.slice(-1)?.[0]?.content ||
               ""
             }
             response={{
               title: "Response",
-              text:
-                this.response.response_body?.body?.completion ??
-                this.response.response_body?.completion ??
-                "",
+              text: getResponseText(),
             }}
             rawRequest={this.response.request_body}
             rawResponse={

@@ -27,7 +27,7 @@ export type UserFilterBranch = {
 };
 
 type UserFilterNode =
-  | FilterLeafSubset<"user_metrics">
+  | FilterLeafSubset<"user_metrics" | "request_response_rmt">
   | UserFilterBranch
   | "all";
 export interface UserMetricsQueryParams {
@@ -100,7 +100,7 @@ export class UserController extends Controller {
   > {
     const filters: FilterLeaf[] =
       requestBody.userIds?.map((userId) => ({
-        request_response_versioned: {
+        request_response_rmt: {
           user_id: {
             equals: userId,
           },
@@ -119,14 +119,14 @@ export class UserController extends Controller {
         left: filterListToTree(filters, "or"),
         right: {
           right: {
-            request_response_versioned: {
+            request_response_rmt: {
               request_created_at: {
                 gte: startTime,
               },
             },
           },
           left: {
-            request_response_versioned: {
+            request_response_rmt: {
               request_created_at: {
                 lte: endTime,
               },
@@ -151,8 +151,8 @@ export class UserController extends Controller {
       sum(prompt_tokens) as prompt_tokens, 
       sum(completion_tokens) as completion_tokens, 
       user_id,
-      ${clickhousePriceCalc("request_response_versioned")} as cost_usd
-    from request_response_versioned
+      ${clickhousePriceCalc("request_response_rmt")} as cost_usd
+      from request_response_rmt
     WHERE (
       ${filter.filter}
     )

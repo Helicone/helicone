@@ -1,6 +1,5 @@
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import useNotification from "../../components/shared/notification/useNotification";
 import { getJawnClient } from "../../lib/clients/jawn";
 import { components } from "../../lib/clients/jawnTypes/private";
 
@@ -150,7 +149,7 @@ const useGetSetting = (
 export {
   useAlertBanners,
   useCreateAlertBanner,
-  useUpdateAlertBanner,
   useGetSetting,
+  useUpdateAlertBanner,
   useUpdateSetting,
 };

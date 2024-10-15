@@ -6,6 +6,7 @@ import { FilterNode } from "../lib/filters/filterDefs";
 import { SortLeafUsers } from "../lib/sorts/users/sorts";
 import { Tier } from "../../pages/api/organization/tier";
 import { useOrg } from "../../components/layout/organizationContext";
+import { getJawnClient } from "@/lib/clients/jawn";
 
 const useGetTopUsers = (
   currentPage: number,
@@ -80,7 +81,7 @@ const useGetUnauthorized = (userId: string) => {
         body: JSON.stringify({
           filter: {
             left: {
-              request_response_versioned: {
+              request_response_rmt: {
                 request_created_at: {
                   gte: getBeginningOfMonth(),
                 },
@@ -120,4 +121,20 @@ const useGetUnauthorized = (userId: string) => {
   };
 };
 
-export { useGetTopUsers, useGetUnauthorized };
+const useGetReport = () => {
+  return useQuery({
+    queryKey: [`reports`],
+    queryFn: async (query) => {
+      const jawnClient = getJawnClient();
+      const response = await jawnClient.GET("/v1/integration/type/{type}", {
+        params: {
+          path: {
+            type: "report",
+          },
+        },
+      });
+      return response.data?.data;
+    },
+  });
+};
+export { useGetTopUsers, useGetUnauthorized, useGetReport };

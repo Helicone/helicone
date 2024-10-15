@@ -5,72 +5,103 @@ import { useState } from "react";
 import { clsx } from "../../clsx";
 import useNotification from "../../notification/useNotification";
 import ThemedModal from "../themedModal";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface ExportButtonProps<T> {
   rows: T[];
+  fetchRows?: () => Promise<T[]>;
+  format?: "CSV" | "JSONL";
+  className?: string;
 }
 
 export default function ExportButton<T>(props: ExportButtonProps<T>) {
-  const { rows } = props;
-
+  const { rows, fetchRows, format: initialFormat = "CSV", className } = props;
+  const [format, setFormat] = useState(initialFormat);
   const [open, setOpen] = useState(false);
   const [downloadingCSV, setDownloadingCSV] = useState(false);
 
   const { setNotification } = useNotification();
 
-  const csvDownload = () => {
+  const download = async () => {
     setDownloadingCSV(true);
-    // Preprocess the rows to handle nested objects
-    const processedRows = rows.map((row: any) => {
-      const newRow: Record<string, any> = {};
-      for (const key in row) {
-        if (row[key] !== null && typeof row[key] === "object") {
-          newRow[key] = JSON.stringify(row[key]);
-        } else {
-          newRow[key] = row[key];
-        }
+    try {
+      let dataToExport = rows;
+      if (fetchRows) {
+        dataToExport = await fetchRows();
       }
-      return newRow;
-    });
 
-    // Convert JSON data to CSV
-    const csv = Papa.unparse(processedRows);
-    // Create a blob with the CSV data
-    const blob = new Blob([csv], { type: "text/csv" });
-    // Create a download link and click it to start the download
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "data.csv";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+      let blob;
+      if (format === "CSV") {
+        // Preprocess the rows to handle nested objects
+        const processedRows = dataToExport.map((row: any) => {
+          const newRow: Record<string, any> = {};
+          for (const key in row) {
+            if (row[key] !== null && typeof row[key] === "object") {
+              newRow[key] = JSON.stringify(row[key]);
+            } else {
+              newRow[key] = row[key];
+            }
+          }
+          return newRow;
+        });
 
-    setDownloadingCSV(false);
-    setOpen(false);
-    setNotification("CSV downloaded successfully!", "success");
+        // Convert JSON data to CSV
+        const csv = Papa.unparse(processedRows);
+        // Create a blob with the CSV data
+        blob = new Blob([csv], { type: "text/csv" });
+      } else {
+        const jsonl = dataToExport.map((row) => JSON.stringify(row)).join("\n");
+        blob = new Blob([jsonl], { type: "application/x-ndjson" });
+      }
+
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `data.${format.toLowerCase()}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      setNotification(`${format} downloaded successfully!`, "success");
+    } catch (error) {
+      console.error(`Error exporting ${format}:`, error);
+      setNotification(`Error exporting ${format}. Please try again.`, "error");
+    } finally {
+      setDownloadingCSV(false);
+      setOpen(false);
+    }
   };
 
   return (
     <>
-      <button
+      <Button
+        variant="ghost"
         onClick={() => setOpen(true)}
-        className="border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 bg-white dark:bg-black hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2"
+        className={clsx(
+          "flex items-center gap-2 text-slate-700 dark:text-slate-400",
+          className
+        )}
+        size="xs"
       >
-        <ArrowDownTrayIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
-        <p className="text-sm font-medium text-gray-900 dark:text-gray-100 hidden sm:block">
-          Export
-        </p>
-      </button>
+        <ArrowDownTrayIcon className="h-4 w-4" />
+      </Button>
+
       <ThemedModal open={open} setOpen={setOpen}>
         <div className="flex flex-col space-y-4 sm:space-y-8 min-w-[350px] max-w-sm w-full">
           <div className="flex flex-col space-y-8">
             <div className="flex flex-col space-y-4">
               <p className="text-md sm:text-lg font-semibold text-gray-900 dark:text-gray-100">
-                Export CSV
+                Export {format}
               </p>
               <p className="text-sm sm:text-md text-gray-500">
-                Exporting by CSV is limited to 500 rows due to the huge amounts
-                of data in the requests. For larger exports, please use our{" "}
+                Exporting is limited to 500 rows due to the huge amounts of data
+                in the requests. For larger exports, please use our{" "}
                 <Link
                   href="https://docs.helicone.ai/helicone-api/getting-started"
                   target="_blank"
@@ -82,6 +113,20 @@ export default function ExportButton<T>(props: ExportButtonProps<T>) {
                 .
               </p>
             </div>
+
+            <Select
+              value={format}
+              onValueChange={(value) => setFormat(value as "CSV" | "JSONL")}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select format" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="CSV">CSV</SelectItem>
+                <SelectItem value="JSONL">JSONL</SelectItem>
+              </SelectContent>
+            </Select>
+
             <p className="text-sm sm:text-md text-gray-500">
               Export may take a lot of time. Please do not close this modal once
               export is started.
@@ -98,7 +143,7 @@ export default function ExportButton<T>(props: ExportButtonProps<T>) {
             </button>
             <button
               className="items-center rounded-md bg-black dark:bg-white px-4 py-2 text-sm flex font-semibold text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-              onClick={csvDownload}
+              onClick={download}
             >
               {downloadingCSV ? (
                 <>

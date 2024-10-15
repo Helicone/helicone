@@ -1,8 +1,8 @@
 import { createBrowserSupabaseClient } from "@supabase/auth-helpers-nextjs";
-import { SessionContextProvider, useUser } from "@supabase/auth-helpers-react";
+import { SessionContextProvider } from "@supabase/auth-helpers-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AppProps } from "next/app";
-import { ReactElement, ReactNode, useEffect, useState } from "react";
+import { ReactElement, ReactNode, useState } from "react";
 import Notification from "../components/shared/notification/Notification";
 import { NotificationProvider } from "../components/shared/notification/NotificationContext";
 import "../node_modules/react-grid-layout/css/styles.css";
@@ -15,12 +15,18 @@ import { NextPage } from "next";
 import posthog from "posthog-js";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-import {
-  OrgContextProvider,
-  useOrg,
-} from "../components/layout/organizationContext";
-import { ThemeContextProvider } from "../components/shared/theme/themeContext";
+import { OrgContextProvider } from "../components/layout/organizationContext";
+import ThemeProvider from "../components/shared/theme/themeContext";
 import Script from "next/script";
+import { PostHogProvider } from "posthog-js/react";
+import { TooltipProvider } from "@/components/ui/tooltip";
+
+declare global {
+  interface Window {
+    pylon?: any;
+    Pylon?: any;
+  }
+}
 
 if (
   typeof window !== "undefined" &&
@@ -29,7 +35,7 @@ if (
   !process.env.NEXT_PUBLIC_DISABLE_POSTHOG
 ) {
   posthog.init(process.env.NEXT_PUBLIC_POSTHOG_API_KEY, {
-    api_host: "https://us.helicone.ai/ingest",
+    api_host: `${window.location.protocol}//${window.location.host}/ingest`,
   });
 }
 
@@ -40,6 +46,9 @@ export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
 type AppPropsWithLayout = AppProps & {
   Component: NextPageWithLayout;
 };
+export function PHProvider({ children }: { children: React.ReactNode }) {
+  return <PostHogProvider client={posthog}>{children}</PostHogProvider>;
+}
 
 export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
   const queryClient = new QueryClient();
@@ -51,54 +60,43 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
 
   const trackingEnabled = process.env.NEXT_PUBLIC_TRACKING_ENABLED || false;
 
-  const user = useUser();
-  const org = useOrg();
-
-  useEffect(() => {
-    if (user) {
-      posthog.identify(user.id, {
-        email: user.email,
-        name: user.user_metadata?.name,
-      });
-    }
-
-    if (org?.currentOrg) {
-      posthog.group("organization", org.currentOrg.id, {
-        name: org.currentOrg.name,
-        tier: org.currentOrg.tier,
-        stripe_customer_id: org.currentOrg.stripe_customer_id,
-        organization_type: org.currentOrg.organization_type,
-        size: org.currentOrg.size,
-        date_joined: org.currentOrg.created_at,
-      });
-    }
-  }, [user, org]);
-
   return (
     <>
-      <SessionContextProvider
-        supabaseClient={supabaseClient}
-        initialSession={pageProps.initialSession}
-      >
-        <QueryClientProvider client={queryClient}>
-          <NotificationProvider>
-            <DndProvider backend={HTML5Backend}>
-              <OrgContextProvider>
-                <ThemeContextProvider>
-                  {getLayout(<Component {...pageProps} />)}
-                </ThemeContextProvider>
-                <Notification />
-              </OrgContextProvider>
-            </DndProvider>
-          </NotificationProvider>
-        </QueryClientProvider>
-      </SessionContextProvider>
+      <PHProvider>
+        <SessionContextProvider
+          supabaseClient={supabaseClient}
+          initialSession={pageProps.initialSession}
+        >
+          <QueryClientProvider client={queryClient}>
+            <NotificationProvider>
+              <DndProvider backend={HTML5Backend}>
+                <OrgContextProvider>
+                  <ThemeProvider attribute="class" defaultTheme="light">
+                    <TooltipProvider>
+                      {getLayout(<Component {...pageProps} />)}
+                    </TooltipProvider>
+                  </ThemeProvider>
+                  <Notification />
+                </OrgContextProvider>
+              </DndProvider>
+            </NotificationProvider>
+          </QueryClientProvider>
+        </SessionContextProvider>
+      </PHProvider>
       {trackingEnabled && <Analytics />}
       {trackingEnabled && (
         <Script
           id="koala-snippet"
           dangerouslySetInnerHTML={{
             __html: `!function(t){if(window.ko)return;window.ko=[],["identify","track","removeListeners","open","on","off","qualify","ready"].forEach(function(t){ko[t]=function(){var n=[].slice.call(arguments);return n.unshift(t),ko.push(n),ko}});var n=document.createElement("script");n.async=!0,n.setAttribute("src","https://cdn.getkoala.com/v1/pk_3d24ae9e69e18decfcb68b9d7b668c4501b5/sdk.js"),(document.body || document.head).appendChild(n)}();`,
+          }}
+        />
+      )}
+      {trackingEnabled && (
+        <Script
+          id="pylon-snippet"
+          dangerouslySetInnerHTML={{
+            __html: `(function(){var e=window;var t=document;var n=function(){n.e(arguments)};n.q=[];n.e=function(e){n.q.push(e)};e.Pylon=n;var r=function(){var e=t.createElement("script");e.setAttribute("type","text/javascript");e.setAttribute("async","true");e.setAttribute("src","https://widget.usepylon.com/widget/f766dfd3-28f8-40a8-872f-351274cbd306");var n=t.getElementsByTagName("script")[0];n.parentNode.insertBefore(e,n)};if(t.readyState==="complete"){r()}else if(e.addEventListener){e.addEventListener("load",r,false)}})();`,
           }}
         />
       )}

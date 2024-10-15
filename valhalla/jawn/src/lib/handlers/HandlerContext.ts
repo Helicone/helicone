@@ -1,3 +1,4 @@
+import { TemplateWithInputs } from "@helicone/prompts/dist/objectParser";
 import { Provider } from "../../models/models";
 import { SetOnce } from "../../utils/setOnce";
 import { AuthParams, OrgParams } from "../db/supabase";
@@ -20,11 +21,6 @@ export class HandlerContext extends SetOnce {
     this.usage = {};
     this.rawLog = {};
   }
-}
-
-export interface TemplateWithInputs {
-  template: object;
-  inputs: { [key: string]: string };
 }
 
 export type Log = {
@@ -94,12 +90,24 @@ export type HeliconeMeta = {
   posthogApiKey?: string;
   posthogHost?: string;
   lytixKey?: string;
+  lytixHost?: string;
 };
 
 export type Message = {
   authorization: string;
   heliconeMeta: HeliconeMeta;
   log: Log;
+};
+
+export type HeliconeScoresMessage = {
+  requestId: string;
+  organizationId: string;
+  scores: {
+    score_attribute_key: string;
+    score_attribute_type: string;
+    score_attribute_value: number;
+  }[];
+  createdAt: Date;
 };
 
 export type PromptRecord = {

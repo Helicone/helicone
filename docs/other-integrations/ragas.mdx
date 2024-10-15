@@ -1,0 +1,117 @@
+---
+title: "Ragas Integration"
+sidebarTitle: "Ragas"
+description: "Integrate Helicone with Ragas, an open-source framework for evaluating Retrieval-Augmented Generation (RAG) systems. Monitor and analyze the performance of your RAG pipelines."
+"twitter:title": "Ragas Integration - Helicone LLM Observability"
+---
+
+## Introduction
+
+Ragas is an open-source framework for evaluating Retrieval-Augmented Generation (RAG) systems. It provides metrics to assess various aspects of RAG performance, such as faithfulness, answer relevancy, and context precision.
+
+Integrating Helicone with Ragas allows you to monitor and analyze the performance of your RAG pipelines, providing valuable insights into their effectiveness and areas for improvement.
+
+## Integration Steps
+
+<iframe
+  width="100%"
+  height="420"
+  src="https://www.youtube.com/embed/SUOI5M5K934?autoplay=1&mute=1"
+></iframe>
+
+<Steps>
+  <Step title="Create an account + Generate an API Key">
+    Log into [Helicone](https://www.helicone.ai) or create an account. Once you have an account, you
+    can generate an [API key](https://helicone.ai/developer).
+
+    <Note>
+      Make sure to generate a [write only API key](helicone-headers/helicone-auth).
+    </Note>
+
+  </Step>
+  <Step title="Install required packages">
+    Install the necessary Python packages for the integration:
+
+    ```bash
+    pip install ragas openai
+    ```
+
+  </Step>
+  <Step title="Set up the environment">
+    Configure your environment with the Helicone API key and OpenAI API key:
+
+    ```python
+    import os
+
+    HELICONE_API_KEY = "your_helicone_api_key_here"
+    os.environ["OPENAI_API_BASE"] = f"https://oai.helicone.ai/{HELICONE_API_KEY}/v1"
+    os.environ["OPENAI_API_KEY"] = "your_openai_api_key_here"
+    ```
+
+    Replace `"your_helicone_api_key_here"` and `"your_openai_api_key_here"` with your actual API keys.
+
+  </Step>
+  <Step title="Prepare your dataset">
+    Create a dataset for evaluation using the Hugging Face `datasets` library:
+
+    ```python
+    from datasets import Dataset
+
+    data_samples = {
+        'question': ['When was the first Super Bowl?', 'Who has won the most Super Bowls?'],
+        'answer': ['The first Super Bowl was held on January 15, 1967.', 'The New England Patriots have won the most Super Bowls, with six championships.'],
+        'contexts': [
+            ['The First AFL–NFL World Championship Game, later known as Super Bowl I, was played on January 15, 1967, at the Los Angeles Memorial Coliseum in Los Angeles, California.'],
+            ['As of 2021, the New England Patriots have won the most Super Bowls with six championships, all under the leadership of quarterback Tom Brady and head coach Bill Belichick.']
+        ],
+        'ground_truth': ['The first Super Bowl was held on January 15, 1967.', 'The New England Patriots have won the most Super Bowls, with six championships as of 2021.']
+    }
+
+    dataset = Dataset.from_dict(data_samples)
+    ```
+
+  </Step>
+  <Step title="Evaluate with Ragas">
+    Use Ragas to evaluate your RAG system:
+
+    ```python
+    from ragas import evaluate
+    from ragas.metrics import faithfulness, answer_relevancy, context_precision
+
+    score = evaluate(dataset, metrics=[faithfulness, answer_relevancy, context_precision])
+    print(score.to_pandas())
+    ```
+
+  </Step>
+  <Step title="View results in Helicone">
+    The API calls made during the Ragas evaluation are automatically logged in Helicone. To view the results:
+
+    1. Go to the [Helicone dashboard](https://www.helicone.ai/dashboard)
+    2. Navigate to the 'Requests' section
+    3. You should see the API calls made during the Ragas evaluation
+
+    Analyze these logs to understand:
+    - The number of API calls made during evaluation
+    - The performance of each call (latency, tokens used, etc.)
+    - Any errors or issues that occurred during the evaluation
+
+  </Step>
+</Steps>
+
+## Advanced Usage
+
+You can customize the Ragas evaluation by using different metrics or creating your own. Refer to the [Ragas documentation](https://docs.ragas.io/) for more information on available metrics and customization options.
+
+## Troubleshooting
+
+If you encounter any issues with the integration, please check the following:
+
+1. Ensure that your Helicone and OpenAI API keys are correct and have the necessary permissions.
+2. Verify that you're using the latest versions of the Ragas and OpenAI packages.
+3. Check the Helicone dashboard for any error messages or unexpected behavior in the logged API calls.
+
+If you're still experiencing problems, please contact Helicone support for assistance.
+
+## Conclusion
+
+By integrating Helicone with Ragas, you can gain valuable insights into the performance of your RAG systems. This combination allows you to monitor and analyze your RAG pipelines effectively, helping you identify areas for improvement and optimize your system's performance.

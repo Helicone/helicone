@@ -1,0 +1,39 @@
+---
+title: "Predefined Request IDs"
+sidebarTitle: "Request ID Predefinition"
+description: "Learn how to predefine Helicone request IDs for advanced tracking and asynchronous operations in your LLM applications."
+"twitter:title": "Predefined Request IDs - Helicone OSS LLM Observability"
+---
+
+One of the significant advantages of using UUIDs as request IDs is the ability to predetermine the request ID before the actual request is dispatched to Helicone.
+
+This feature facilitates the tracking of request IDs without the necessity of receiving a response from Helicone.
+
+```python
+
+import uuid
+
+# Define request ID
+my_helicone_request_id = str(uuid.uuid4())
+
+# Request to LLM provider
+...
+    "Helicone-Request-Id": my_helicone_request_id
+...
+
+# While the above code is executing, you can perform other tasks such as providing feedback on a specific request.
+import requests
+url = 'https://api.helicone.ai/v1/feedback'
+headers = {
+    'Helicone-Auth': 'YOUR_HELICONE_AUTH_HEADER',
+    'Content-Type': 'application/json'
+}
+data = {
+    'helicone-id': my_helicone_request_id,
+    'rating': True # true for positive, false for negative
+}
+response = requests.post(url, headers=headers, json=data)
+
+```
+
+This functionality is particularly beneficial when associating different requests with different [jobs](/features/jobs/quick-start) or other features within Helicone.

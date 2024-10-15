@@ -50,7 +50,7 @@ const OpenAIAsync = (props: OpenAIAsyncProps) => {
               </p>
               <DiffHighlight
                 code={`npm install helicone`}
-                language="bash"
+                language="typescript"
                 newLines={[]}
                 oldLines={[]}
                 minHeight={false}

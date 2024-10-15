@@ -1,0 +1,30 @@
+---
+title: "Instructor Python SDK Integration"
+sidebarTitle: "Python"
+description: "Use Instructor's Python SDK to log your LLM calls in Helicone."
+"twitter:title": "Instructor Python SDK Integration - Helicone OSS LLM Observability"
+---
+
+[Instructor](https://useinstructor.com/) is a popular framework for extracting structured output from text using LLMs. Here's how you can use Helicone to track your calls while using Instructor:
+
+<Steps>
+  <Step title="Follow useinstructor.com to get setup with Instructor's JS SDK.">
+  </Step>
+  <Step title="Modify the base url and add a Helicone-Auth header">
+<CodeGroup>
+
+```python Instructor SDK
+client = instructor.from_openai(OpenAI(
+    base_url="https://oai.helicone.ai/v1",
+    api_key=OPENAI_API_KEY,
+    default_headers={
+        "Helicone-Auth": "Bearer " + HELICONE_API_KEY
+    }
+))
+```
+</CodeGroup>
+
+  </Step>
+  <Step title="Call OpenAI using Instructor and see the logs on Helicone.">
+  </Step>
+</Steps>

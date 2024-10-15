@@ -1,99 +1,96 @@
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Property } from "../../lib/api/properties/properties";
 import { ok, Result } from "../../lib/result";
-import {
-  getPropertyFiltersV2,
-  InputParam,
-  SingleFilterDef,
-} from "../lib/filters/frontendFilterDefs";
-import { getPropertiesV2 } from "../lib/propertiesV2";
+import { InputParam, SingleFilterDef } from "../lib/filters/frontendFilterDefs";
 import { getPropertyParamsV2 } from "../lib/propertyParamsV2";
 import { useDebounce } from "./debounce";
+import { getJawnClient } from "../../lib/clients/jawn";
+import { useOrg } from "../../components/layout/organizationContext";
 
-function useGetPropertiesV2<
-  T extends "properties" | "request_response_versioned"
->(
+function useGetPropertiesV2<T extends "properties" | "request_response_rmt">(
   getPropertyFilters: (
     properties: string[],
     inputParams: InputParam[]
   ) => SingleFilterDef<T>[]
 ) {
-  const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ["propertiesV2"],
-    queryFn: async () => {
-      return getPropertiesV2().then((res) => res);
-    },
-    refetchOnWindowFocus: false,
-  });
-
-  const allProperties: string[] =
-    data?.data
-      ?.map((property: Property) => {
-        return property.property;
-      })
-      ?.filter(
-        (property: string) =>
-          "helicone-sent-to-posthog" !== property.toLowerCase()
-      )
-      // sort by property alphabetically
-      .sort() ?? [];
-
-  const [propertyFilters, setPropertyFilters] = useState<SingleFilterDef<T>[]>(
-    getPropertyFilters(allProperties, [])
-  );
-
   const [propertySearch, setPropertySearch] = useState({
     property: "",
     search: "",
   });
   const debouncedPropertySearch = useDebounce(propertySearch, 300);
+  const orgId = useOrg();
+  const propertiesQuery = useQuery({
+    queryKey: ["propertiesV2", orgId?.currentOrg?.id],
+    queryFn: async (query) => {
+      const jawn = getJawnClient(query.queryKey[1]);
+      const res = await jawn.POST("/v1/property/query", {
+        body: {},
+      });
+      return res.data;
+    },
+    refetchOnWindowFocus: false,
+  });
 
-  useEffect(() => {
-    setPropertyFilters(getPropertyFilters(allProperties, []));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoading]);
+  const allProperties = useMemo((): string[] => {
+    return (
+      propertiesQuery.data?.data
+        ?.map((property: Property) => property.property)
+        ?.filter(
+          (property: string) =>
+            "helicone-sent-to-posthog" !== property.toLowerCase()
+        )
+        .sort() ?? []
+    );
+  }, [propertiesQuery.data]);
 
-  useEffect(() => {
-    const { property, search } = debouncedPropertySearch;
-    async function doSearch() {
+  const propertyFiltersQuery = useQuery({
+    queryKey: ["propertiesV2Search", debouncedPropertySearch],
+    queryFn: async ({ queryKey }) => {
+      const [, { property, search }] = queryKey as [
+        string,
+        typeof debouncedPropertySearch
+      ];
+      if (property === "") {
+        return getPropertyFilters(allProperties, []);
+      }
       const values = await getPropertyParamsV2(property, search);
       if (values.error !== null) {
         console.error(values.error);
-        return;
+        return getPropertyFilters(allProperties, []);
       }
-      const propertyFilters = getPropertyFilters(
+      return getPropertyFilters(
         allProperties,
         values.data?.map((v: any) => ({
           param: v.property_param,
           key: v.property_key,
-        }))
+        })) || []
       );
+    },
+    enabled:
+      debouncedPropertySearch.property !== "" && !propertiesQuery.isLoading,
+    keepPreviousData: true,
+  });
 
-      setPropertyFilters(propertyFilters);
-    }
+  const propertyFilters = useMemo(() => {
+    return propertyFiltersQuery.data || getPropertyFilters(allProperties, []);
+  }, [propertyFiltersQuery.data, allProperties, getPropertyFilters]);
 
-    if (property !== "") {
-      doSearch();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedPropertySearch]);
-
-  async function searchPropertyFilters(
-    property: string,
-    search: string
-  ): Promise<Result<void, string>> {
-    setPropertySearch({ property, search });
-    return ok(undefined);
-  }
+  const searchPropertyFilters = useCallback(
+    async (property: string, search: string): Promise<Result<void, string>> => {
+      setPropertySearch({ property, search });
+      return ok(undefined);
+    },
+    []
+  );
 
   return {
-    properties: allProperties || [],
-    isLoading,
-    error,
+    properties: allProperties,
+    isLoading: propertiesQuery.isLoading,
+    error: propertiesQuery.error,
     propertyFilters,
     searchPropertyFilters,
-    refetch,
+    refetch: propertiesQuery.refetch,
   };
 }
 

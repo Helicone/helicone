@@ -1,21 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { SupabaseClient } from "@supabase/supabase-js";
-import { Database, Json } from "../../../supabase/database.types";
+import { Database } from "../../../supabase/database.types";
 import { getResponse } from "../managers/FeedbackManager";
-import { deepCompare } from "../util/helpers";
+import {
+  DBQueryTimer,
+  FREQUENT_PRECENT_LOGGING,
+} from "../util/loggers/DBQueryTimer";
 import { Result, err, ok } from "../util/results";
+import { formatTimeString } from "./ClickhouseStore";
 import {
   ClickhouseClientWrapper,
   RequestResponseLog,
 } from "./ClickhouseWrapper";
 import { Valhalla } from "./valhalla";
-import { formatTimeString } from "./ClickhouseStore";
-import {
-  DBQueryTimer,
-  FREQUENT_PRECENT_LOGGING,
-} from "../util/loggers/DBQueryTimer";
-import { TemplateWithInputs } from "../../api/lib/promptHelpers";
-import { PromptStore } from "./PromptStore";
 
 export interface RequestPayload {
   request: Database["public"]["Tables"]["request"]["Insert"];
@@ -30,7 +27,6 @@ export interface ResponsePayload {
 }
 
 export class RequestResponseStore {
-  promptStore: PromptStore;
   constructor(
     private database: SupabaseClient<Database>,
     private queryTimer: DBQueryTimer,
@@ -38,9 +34,7 @@ export class RequestResponseStore {
     private clickhouseWrapper: ClickhouseClientWrapper,
     public fallBackQueue: Queue,
     public responseAndResponseQueueKV: KVNamespace
-  ) {
-    this.promptStore = new PromptStore(database, queryTimer);
-  }
+  ) {}
 
   async insertIntoRequest(
     requestPayload: RequestPayload
@@ -314,76 +308,6 @@ export class RequestResponseStore {
     return { data: null, error: null };
   }
 
-  // TODO replace this with upsertPromptV2 after prompt_v2 is fully rolled out and we are reading from it
-  async upsertPrompt(
-    heliconeTemplate: TemplateWithInputs,
-    promptId: string,
-    orgId: string
-  ): Promise<
-    Result<
-      {
-        version: number;
-        template: Json;
-      },
-      string
-    >
-  > {
-    const existingPrompt = await this.queryTimer.withTiming(
-      this.database
-        .from("prompts")
-        .select("*")
-        .eq("organization_id", orgId)
-        .eq("id", promptId)
-        .order("version", { ascending: false })
-        .limit(1),
-      {
-        queryName: "select_prompt_by_id",
-      }
-    );
-
-    if (existingPrompt.error) {
-      return { data: null, error: existingPrompt.error.message };
-    }
-
-    let version = existingPrompt.data?.[0]?.version ?? 0;
-    if (existingPrompt.data.length > 0) {
-      if (
-        !deepCompare(
-          existingPrompt.data[0].heliconeTemplate,
-          heliconeTemplate.template
-        )
-      ) {
-        version = existingPrompt.data[0].version + 1;
-      }
-    }
-    if (
-      existingPrompt.data.length === 0 ||
-      version !== existingPrompt.data[0].version
-    ) {
-      const insertResult = await this.queryTimer.withTiming(
-        this.database.from("prompts").insert([
-          {
-            id: promptId,
-            organization_id: orgId,
-            heliconeTemplate: heliconeTemplate.template as Json,
-            status: "active",
-            version,
-          },
-        ]),
-        {
-          queryName: "insert_prompt",
-        }
-      );
-      if (insertResult.error) {
-        return err(insertResult.error.message);
-      }
-    }
-    return ok({
-      version,
-      template: heliconeTemplate.template as Json,
-    });
-  }
-
   async waitForResponse(requestId: string) {
     await getResponse(this.database, this.queryTimer, requestId);
   }
@@ -454,7 +378,7 @@ export class RequestResponseStore {
 
     const query = `
         SELECT * 
-        FROM request_response_versioned
+        FROM request_response_rmt
         WHERE (
           request_id={val_0: UUID} AND
           organization_id={val_1: UUID}

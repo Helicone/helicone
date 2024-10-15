@@ -1,21 +1,34 @@
-import { PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Plus, Trash2Icon } from "lucide-react";
 import { Result } from "../../../lib/result";
 import {
   ColumnType,
   SingleFilterDef,
 } from "../../../services/lib/filters/frontendFilterDefs";
+import { OrganizationFilter } from "../../../services/lib/organization_layout/organization_layout";
+import FilterTreeEditor from "./FilterTreeEditor";
+import ThemedNumberDropdown from "./themedNumberDropdown";
 import { ThemedTextDropDown } from "./themedTextDropDown";
 import {
-  NumberInput,
-  SearchSelect,
-  SearchSelectItem,
-  Select,
-  SelectItem,
-  TextInput,
-} from "@tremor/react";
-import ThemedNumberDropdown from "./themedNumberDropdown";
-import SaveFilterButton from "../../templates/dashboard/saveFilterButton";
-import { OrganizationFilter } from "../../../services/lib/organization_layout/organization_layout";
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+
+interface UIFilterRowNode {
+  operator: "and" | "or";
+  rows: UIFilterRowTree[];
+}
+
+type UIFilterRowTree = UIFilterRowNode | UIFilterRow;
 
 export function AdvancedFilters({
   filterMap,
@@ -27,8 +40,8 @@ export function AdvancedFilters({
   layoutPage,
 }: {
   filterMap: SingleFilterDef<any>[];
-  filters: UIFilterRow[];
-  setAdvancedFilters: (filters: UIFilterRow[]) => void;
+  filters: UIFilterRowTree;
+  setAdvancedFilters: (filters: UIFilterRowTree) => void;
   searchPropertyFilters: (
     property: string,
     search: string
@@ -37,73 +50,38 @@ export function AdvancedFilters({
   savedFilters?: OrganizationFilter[];
   layoutPage: "dashboard" | "requests";
 }) {
+  const [filterTree, setFilterTree] = [filters, setAdvancedFilters];
+
   return (
-    <div className="flex flex-col bg-white dark:bg-black p-4 rounded-lg border border-gray-300 dark:border-gray-700 mt-8">
-      <div className="w-full flex flex-col sm:flex-row justify-between items-center">
-        <p className="text-sm text-gray-500 font-medium">Filters</p>
+    <div className="w-full flex flex-col bg-white p-4 dark:bg-black rounded-lg">
+      <div className="w-full flex items-center justify-between mb-3">
+        <h3 className="text-xs text-slate-900 font-semibold">Filters</h3>
         <button
           onClick={() => {
-            setAdvancedFilters([]);
+            setAdvancedFilters({ operator: "and", rows: [] });
           }}
-          className="text-xs text-gray-500 font-medium py-1 px-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-800"
+          className="text-xs text-slate-500 font-medium rounded-md"
         >
           Clear All
         </button>
       </div>
 
-      <div className="flex flex-col gap-2 bg-white dark:bg-black space-y-2 mt-4">
-        {filters.map((_filter, index) => {
-          return (
-            <div key={index}>
-              <AdvancedFilterRow
-                filterMap={filterMap}
-                filter={_filter}
-                setFilter={(filter) => {
-                  const prev = [...filters];
-                  const newFilters = [...prev];
-                  newFilters[index] = filter[0];
-                  setAdvancedFilters(newFilters);
-                }}
-                onDeleteHandler={() => {
-                  const prev = [...filters];
-                  prev.splice(index, 1);
-                  setAdvancedFilters(prev);
-                }}
-                onSearchHandler={searchPropertyFilters}
-              />
-            </div>
-          );
-        })}
-        <button
-          onClick={() => {
-            const prev = [...filters];
-            setAdvancedFilters([
-              ...prev,
-              { filterMapIdx: 0, value: "", operatorIdx: 0 },
-            ]);
-          }}
-          className="bg-white dark:bg-black ml-4 flex flex-row w-fit items-center justify-center font-normal text-sm text-black dark:text-white hover:bg-sky-100 hover:text-sky-900 dark:hover:bg-sky-900 dark:hover:text-sky-100 px-4 py-2 rounded-lg"
-        >
-          <PlusIcon
-            className="mr-1 h-3.5 flex-none text-black dark:text-white hover:bg-sky-100 hover:text-sky-900 dark:hover:bg-sky-900 dark:hover:text-sky-100"
-            aria-hidden="true"
-          />
-          Add Filter
-        </button>
-      </div>
-      <div className="flex flex-row w-full items-end justify-end">
-        {onSaveFilterCallback && (
-          <SaveFilterButton
-            filters={filters}
-            onSaveFilterCallback={onSaveFilterCallback}
-            filterMap={filterMap}
-            savedFilters={savedFilters}
-            layoutPage={layoutPage}
-          />
-        )}
-      </div>
+      <FilterTreeEditor
+        uiFilterRowTree={filterTree}
+        onUpdate={setFilterTree}
+        filterMap={filterMap}
+        onSearchHandler={searchPropertyFilters}
+        filters={filters}
+        onSaveFilterCallback={onSaveFilterCallback}
+        savedFilters={savedFilters}
+        layoutPage={layoutPage}
+      />
     </div>
   );
+}
+
+function removeUnicodeCharacters(str: string) {
+  return str.replace(/[^\x00-\x7F]/g, "");
 }
 
 function AdvancedFilterInput({
@@ -125,25 +103,24 @@ function AdvancedFilterInput({
   switch (type) {
     case "text":
       return (
-        <TextInput
-          className=""
+        <Input
           onChange={(e) => {
-            onChange(e.target.value);
+            onChange(removeUnicodeCharacters(e.target.value));
           }}
-          placeholder={"text..."}
+          className="text-xs text-slate-900 dark:text-slate-100"
+          placeholder="text..."
           value={value}
         />
       );
     case "number":
       return (
-        <NumberInput
-          className=""
+        <Input
+          type="number"
           onChange={(e) => {
             onChange(e.target.value);
           }}
-          placeholder={"number..."}
+          placeholder="number..."
           value={value}
-          enableStepper={false}
         />
       );
     case "timestamp":
@@ -161,7 +138,7 @@ function AdvancedFilterInput({
         return `${year}-${month}-${day}T${hours}:${minutes}`;
       };
 
-      const handleChange = (e: any) => {
+      const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const localDateTime = e.target.value;
 
         if (localDateTime) {
@@ -170,14 +147,14 @@ function AdvancedFilterInput({
           onChange("");
         }
       };
+
       return (
-        <input
+        <Input
           type="datetime-local"
-          name="search-field-start"
           onChange={handleChange}
           placeholder="date..."
           value={isoToLocal(value)}
-          className="block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white text-black dark:text-white dark:bg-black shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm"
+          className="text-xs h-4"
         />
       );
     case "text-with-suggestions":
@@ -199,14 +176,15 @@ function AdvancedFilterInput({
       );
     case "bool":
       return (
-        <select
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className="block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-black shadow-sm text-black dark:text-white focus:border-sky-500 focus:ring-sky-500 sm:text-sm"
-        >
-          <option value="true">Positive</option>
-          <option value="false">Negative</option>
-        </select>
+        <Select value={value} onValueChange={(newValue) => onChange(newValue)}>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Select an option" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="true">Positive</SelectItem>
+            <SelectItem value="false">Negative</SelectItem>
+          </SelectContent>
+        </Select>
       );
   }
 }
@@ -217,83 +195,88 @@ export type UIFilterRow = {
   value: string;
 };
 
-function AdvancedFilterRow({
-  filterMap,
-  filter,
-  setFilter,
-  onDeleteHandler,
+export function AdvancedFilterRow({
   onSearchHandler,
+  filter,
+  filterMap,
+  onDeleteHandler,
+  setFilter,
+  onAddFilter,
+  showAddFilter,
 }: {
   filterMap: SingleFilterDef<any>[];
   filter: UIFilterRow;
-  setFilter: (filters: UIFilterRow[]) => void;
+  setFilter: (filters: UIFilterRow) => void;
   onDeleteHandler: () => void;
   onSearchHandler: (
     property: string,
     search: string
   ) => Promise<Result<void, string>>;
+  onAddFilter: () => void;
+  showAddFilter?: boolean;
 }) {
   return (
-    <div className="w-full flex flex-col lg:flex-row gap-3 items-left lg:items-end ml-4">
-      <div className="w-full max-w-[12.5rem]">
-        <SearchSelect
+    <div className="w-full flex flex-col md:grid md:grid-cols-4 gap-3 items-left md:items-center ml-4">
+      <div className="w-full text-xs">
+        <Select
           value={filter.filterMapIdx.toString()}
           onValueChange={(value) => {
             const selected = Number(value);
             const label = filterMap[selected].label;
             if (label === "Feedback") {
-              setFilter([
-                {
-                  filterMapIdx: selected,
-                  operatorIdx: 0,
-                  value: "true",
-                },
-              ]);
+              setFilter({
+                filterMapIdx: selected,
+                operatorIdx: 0,
+                value: "true",
+              });
             } else {
-              setFilter([
-                {
-                  filterMapIdx: selected,
-                  operatorIdx: 0,
-                  value: "",
-                },
-              ]);
+              setFilter({
+                filterMapIdx: selected,
+                operatorIdx: 0,
+                value: "",
+              });
             }
           }}
-          enableClear={false}
         >
-          {filterMap.map((column, i) => (
-            <SearchSelectItem value={i.toString()} key={i}>
-              {column.label}
-            </SearchSelectItem>
-          ))}
-        </SearchSelect>
+          <SelectTrigger className="w-full max-w-[12.5rem]">
+            <SelectValue placeholder="Select a filter" />
+          </SelectTrigger>
+          <SelectContent>
+            {filterMap.map((column, i) => (
+              <SelectItem key={i} value={i.toString()}>
+                {column.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
-
       <div className="w-full max-w-[12.5rem]">
         <Select
           value={filter.operatorIdx.toString()}
           onValueChange={(value: string) => {
             const selected = Number(value);
-            setFilter([
-              {
-                filterMapIdx: filter.filterMapIdx,
-                operatorIdx: selected,
-                value: "",
-              },
-            ]);
+            setFilter({
+              filterMapIdx: filter.filterMapIdx,
+              operatorIdx: selected,
+              value: "",
+            });
           }}
-          enableClear={false}
         >
-          {filterMap[filter.filterMapIdx]?.operators.map((operator, i) => (
-            <SelectItem value={i.toString()} key={i}>
-              {operator.label}
-            </SelectItem>
-          ))}
+          <SelectTrigger className="w-full max-w-[12.5rem]">
+            <SelectValue placeholder="Select an operator" />
+          </SelectTrigger>
+          <SelectContent>
+            {filterMap[filter.filterMapIdx]?.operators.map((operator, i) => (
+              <SelectItem value={i.toString()} key={i}>
+                {operator.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
         </Select>
       </div>
-
       <div className="w-full max-w-[20rem]">
         <AdvancedFilterInput
+          key={`${filter.filterMapIdx}-${filter.operatorIdx}`}
           type={
             filterMap[filter.filterMapIdx]?.operators[filter.operatorIdx].type
           }
@@ -303,13 +286,11 @@ function AdvancedFilterRow({
               .inputParams
           }
           onChange={(value) => {
-            setFilter([
-              {
-                filterMapIdx: filter.filterMapIdx,
-                operatorIdx: filter.operatorIdx,
-                value: value ?? "",
-              },
-            ]);
+            setFilter({
+              filterMapIdx: filter.filterMapIdx,
+              operatorIdx: filter.operatorIdx,
+              value: value ?? "",
+            });
           }}
           onSearchHandler={(search: string) =>
             onSearchHandler(
@@ -319,13 +300,35 @@ function AdvancedFilterRow({
           }
         />
       </div>
-      <div className="w-full lg:w-fit mr-16 pb-1">
-        <button
-          onClick={onDeleteHandler}
-          className="bg-red-700  text-white rounded-md p-1 hover:bg-red-500"
-        >
-          <TrashIcon className="h-4" />
-        </button>
+      <div className="flex flex-row  justify-start items-center w-full pr-4 h-full">
+        {showAddFilter && showAddFilter === true && (
+          <Tooltip>
+            <TooltipTrigger>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => onAddFilter()}
+                className="text-slate-500 h-8 w-8 hover:border hover:border-slate-200 hover:text-slate-500"
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Add Filter</TooltipContent>
+          </Tooltip>
+        )}
+        <Tooltip>
+          <TooltipTrigger>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onDeleteHandler}
+              className="flex items-center text-slate-500 h-8 w-8"
+            >
+              <Trash2Icon className="h-5 w-5 text-red-700" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Delete Filter</TooltipContent>
+        </Tooltip>
       </div>
     </div>
   );

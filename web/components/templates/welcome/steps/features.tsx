@@ -23,19 +23,19 @@ const Features = (props: FeaturesProps) => {
             className="underline text-blue-500"
             href="https://docs.helicone.ai/"
             target="_blank"
-            rel="noreferrer"
+            rel="noopener noreferrer"
           >
             documentation
           </Link>
           .
         </p>
         <TabGroup>
-          <TabList className="mt-4" variant="solid">
+          <TabList className="pt-2" variant="solid">
             <Tab className="flex flex-col text-left">
               <p className="font-semibold text-md xl:text-lg">
                 Custom Properties
               </p>
-              <p className="text-xs xl:text-sm pt-1">
+              <p className="text-xs xl:text-sm ">
                 Label and segment your requests
               </p>
             </Tab>
@@ -43,13 +43,13 @@ const Features = (props: FeaturesProps) => {
               <p className="font-semibold text-md xl:text-lg">
                 Prompt Templating
               </p>
-              <p className="text-xs xl:text-sm pt-1">
+              <p className="text-xs xl:text-sm">
                 Version and visualize prompts
               </p>
             </Tab>
             <Tab className="flex flex-col text-left">
               <p className="font-semibold text-md xl:text-lg">Caching</p>
-              <p className="text-xs xl:text-sm pt-1">
+              <p className="text-xs xl:text-sm ">
                 Increase performance and save costs
               </p>
             </Tab>
@@ -70,7 +70,6 @@ const configuration = {
     "Helicone-Property-App": "mobile",
   },
 };
-
 const openai = new OpenAI(configuration);
 `}
                 language={"typescript"}
@@ -78,22 +77,28 @@ const openai = new OpenAI(configuration);
                 oldLines={[]}
                 minHeight={false}
               />
+              <p className="mt-4 text-sm text-gray-600">
+                Custom Properties allow you to add metadata to your requests,
+                enabling advanced segmentation and analysis. Tag requests with
+                session IDs, conversation context, or application data for
+                deeper insights into your AI application performance.
+              </p>
             </TabPanel>
             <TabPanel>
               <DiffHighlight
                 code={`
-import { hprompt } from "@helicone/helicone";
+import { hpf } from "@helicone/prompts";
  
 const chatCompletion = await openai.chat.completions.create(
   {
     messages: [
       {
         role: "user",
-        // Add hprompt to any string, and nest any variable in additional brackets \`{}\`
-        content: hprompt\`Write a story about \${{ scene }}\`,
+        // Add hpf to any string, and nest any variable in additional brackets \`{}\`
+        content: hpf\`Write a story about \${{ scene: "OpenAI }}\`,
       },
     ],
-    model: "gpt-3.5-turbo",
+    model: "gpt-4o",
   },
   {
     // Add Prompt Id Header
@@ -108,6 +113,13 @@ const chatCompletion = await openai.chat.completions.create(
                 oldLines={[]}
                 minHeight={false}
               />
+              <p className="mt-4 text-sm text-gray-600">
+                Prompt Templating helps you manage and version your prompts
+                effectively. This feature allows you to create reusable
+                templates, track changes, and optimize your prompts over time.
+                Maintain consistency across your AI interactions and easily
+                experiment with different prompt variations.
+              </p>
             </TabPanel>
             <TabPanel>
               <DiffHighlight
@@ -122,7 +134,6 @@ const configuration = {
     "Helicone-Cache-Enabled": "true", // add this header and set to true
   },
 };
-
 const openai = new OpenAI(configuration);
 `}
                 language={"typescript"}
@@ -130,6 +141,12 @@ const openai = new OpenAI(configuration);
                 oldLines={[]}
                 minHeight={false}
               />
+              <p className="mt-4 text-sm text-gray-600">
+                Caching saves you time and money by storing and reusing
+                responses for identical requests. This feature reduces API
+                calls, lowers costs, and improves response times, making your AI
+                application more efficient and cost-effective.
+              </p>
             </TabPanel>
           </TabPanels>
         </TabGroup>
@@ -137,11 +154,13 @@ const openai = new OpenAI(configuration);
       <Link
         href={"https://helicone.ai/community"}
         className="text-blue-500 underline text-center p-4"
+        target="_blank"
+        rel="noopener noreferrer"
       >
         Explore our many integrations 🚀
       </Link>
 
-      <div className="flex items-center justify-between p-4">
+      <div className="sticky bottom-12 p-4 flex items-center justify-between">
         <HcButton
           variant={"secondary"}
           size={"sm"}
@@ -151,7 +170,7 @@ const openai = new OpenAI(configuration);
         <HcButton
           variant={"primary"}
           size={"sm"}
-          title={"Send first event"}
+          title={"Go to dashboard"}
           onClick={() => {
             nextStep();
           }}

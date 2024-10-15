@@ -6,6 +6,7 @@ import {
   SessionNameResult,
   SessionResult,
 } from "../../managers/SessionManager";
+import { RequestFilterNode } from "./requestController";
 
 export interface SessionQueryParams {
   sessionIdContains: string;
@@ -15,12 +16,16 @@ export interface SessionQueryParams {
   };
   sessionName: string;
   timezoneDifference: number;
+  filter: RequestFilterNode;
 }
 
 export interface SessionNameQueryParams {
   nameContains: string;
   timezoneDifference: number;
+  pSize?: "p50" | "p75" | "p95" | "p99" | "p99.9";
+  useInterquartile?: boolean;
 }
+
 @Route("v1/session")
 @Tags("Session")
 @Security("api_key")
@@ -51,6 +56,23 @@ export class SessionController extends Controller {
     const sessionManager = new SessionManager(request.authParams);
 
     const result = await sessionManager.getSessionNames(requestBody);
+    if (result.error || !result.data) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
+    }
+    return result;
+  }
+
+  @Post("metrics/query")
+  public async getMetrics(
+    @Body()
+    requestBody: SessionNameQueryParams,
+    @Request() request: JawnAuthenticatedRequest
+  ) {
+    const sessionManager = new SessionManager(request.authParams);
+
+    const result = await sessionManager.getMetrics(requestBody);
     if (result.error || !result.data) {
       this.setStatus(500);
     } else {

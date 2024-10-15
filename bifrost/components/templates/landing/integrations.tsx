@@ -1,11 +1,10 @@
 "use client";
 
 import { DiffHighlight } from "@/components/shared/diffHighlight";
-import { ClipboardIcon } from "@heroicons/react/24/outline";
+import { ArrowUpRightIcon, ClipboardIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { useState } from "react";
-import { text } from "stream/consumers";
 
 interface IntegrationsProps {}
 
@@ -23,7 +22,7 @@ const Integrations = (props: IntegrationsProps) => {
         code: string;
       }
     >;
-    href?: string;
+    href: string;
   }[] = [
     {
       name: "OpenAI",
@@ -41,44 +40,31 @@ const Integrations = (props: IntegrationsProps) => {
           ></path>
         </svg>
       ),
+      href: "https://docs.helicone.ai/integrations/openai/javascript#openai-javascript-sdk-integration",
       integrations: {
         "node.js": {
           language: "tsx",
           code: `import OpenAI from "openai";
 
 const openai = new OpenAI({
-  apiKey: request.env.OPENAI_API_KEY,
-  baseURL: "https://oai.helicone.ai/HELICONE_API_KEY/v1",
-  defaultHeaders: {
-    "Helicone-Property-Environment": "production",
-    "Helicone-User-Id": "test@example.com",
-  },
+  apiKey: OPENAI_API_KEY,
+  baseURL: \`https://oai.helicone.ai/v1/\$\{HELICONE_API_KEY\}/\`
 });`,
         },
         python: {
           language: "python",
-          code: `import OpenAI    
+          code: `from openai import OpenAI    
 
 client = OpenAI(
-  api_key="your-api-key-here", 
-  base_url="https://oai.helicone.ai/HELICONE_API_KEY/v1",  
-  default_headers= {  
-    "Helicone-Property-Environment": "production",
-    "Helicone-User-Id": "test@example.com",
-  }
+  api_key=OPENAI_API_KEY, 
+  base_url=f"https://oai.helicone.ai/v1/{HELICONE_API_KEY}/"
 )`,
         },
         langchain: {
           language: "python",
           code: `llm = ChatOpenAI(
-  openai_api_base="https://oai.helicone.ai/HELICONE_API_KEY/v1"
-  openai_api_key='<>',
-  model_kwargs={
-    "extra_headers":{
-      "Helicone-Property-Environment": "production",
-      "Helicone-User-Id": "test@example.com",
-    }
-  },
+  openai_api_base=f"https://oai.helicone.ai/v1/{HELICONE_API_KEY}/"
+  openai_api_key=OPENAI_API_KEY
 )`,
         },
         langchainJS: {
@@ -86,12 +72,7 @@ client = OpenAI(
           code: `const llm = new OpenAI({
   modelName: "gpt-3.5-turbo",
   configuration: {
-    basePath: "https://oai.helicone.ai/HELICONE_API_KEY/v1",
-    defaultHeaders: {
-      "Helicone-Property-Environment": "production",
-      "Helicone-User-Id": "test@example.com",
-    },
-  },
+    basePath: "https://oai.helicone.ai/v1/HELICONE_API_KEY/"
 });`,
         },
       },
@@ -108,6 +89,7 @@ client = OpenAI(
           />
         </div>
       ),
+      href: "https://docs.helicone.ai/integrations/azure/javascript",
       integrations: {
         "node.js": {
           language: "tsx",
@@ -195,6 +177,7 @@ self.model = AzureChatOpenAI(
           />
         </div>
       ),
+      href: "https://docs.helicone.ai/integrations/anthropic/javascript",
       integrations: {
         "node.js": {
           language: "tsx",
@@ -221,7 +204,7 @@ await anthropic.messages.create({
 
 client = anthropic.Anthropic(
   api_key=os.environ.get("ANTHROPIC_API_KEY"),
-  base_url="https://anthropic.helicone.ai/v1"
+  base_url="https://anthropic.helicone.ai"
   defaultHeaders={
     "Helicone-Auth": <HELICONE_API_KEY>,
   },
@@ -298,7 +281,7 @@ client.messages.create(
       href: "https://docs.helicone.ai/getting-started/integration-method/together",
     },
     {
-      name: "Open Router",
+      name: "OpenRouter",
       logo: (
         <div className="p-3">
           <Image
@@ -332,17 +315,25 @@ client.messages.create(
 
   return (
     <div className="flex flex-col mx-auto max-w-5xl w-full">
-      <ul className="grid grid-cols-4 md:grid-cols-8 gap-8 md:gap-4 px-4 md:px-16 pt-12 pb-4">
+      <ul className="grid grid-cols-3 md:grid-cols-8 gap-8 md:gap-4 px-4 md:px-16 pb-4">
         {PROVIDERS.map((provider, index) => (
-          <li key={index}>
+          <li
+            key={index}
+            className="hover:bg-sky-100 group m-auto p-1 rounded-lg transition-colors ease-in-out duration-200"
+          >
             <button
               onClick={() => {
-                if (provider.href) {
-                  // open up a new tab
+                if (
+                  Object.keys(provider.integrations).length == 0 ||
+                  window.matchMedia("(max-width: 768px)").matches
+                ) {
                   window.open(provider.href, "_blank");
                   return;
                 }
                 setCurrentProvider(provider.name);
+                if (!provider.integrations[currentIntegration]) {
+                  setCurrentIntregration("node.js");
+                }
               }}
               className="flex flex-col items-center space-y-2"
             >
@@ -350,19 +341,26 @@ client.messages.create(
                 {provider.logo}
               </div>
               <span
-                className={`text-sm ${
+                className={`text-sm flex items-center gap-2 ${
                   currentProvider === provider.name
                     ? "font-bold text-black"
                     : "text-gray-500"
                 }`}
               >
                 {provider.name}
+                <ArrowUpRightIcon
+                  className={`h-4 w-4 hidden transition-all duration-200 ease-in-out ${
+                    Object.keys(provider.integrations).length > 0
+                      ? ""
+                      : "group-hover:flex"
+                  }`}
+                />
               </span>
             </button>
           </li>
         ))}
       </ul>
-      <div className="border rounded-2xl hidden md:flex flex-col divide-y divide-gray-700 mx-8 mt-4">
+      <div className="border rounded-2xl hidden md:flex flex-col divide-y divide-gray-700 mx-8 mt-4 hidden md:flex">
         <div className="flex items-center justify-between py-2 px-8 bg-gray-900 rounded-t-2xl">
           <ul className="flex items-center space-x-0">
             {Object.keys(selectedProvider?.integrations || {}).map(
@@ -391,6 +389,18 @@ client.messages.create(
             language={currentCodeBlock?.language || "tsx"}
           />
         </div>
+      </div>
+      <div className="flex items-center justify-center mt-4 mx-5">
+        <p className="text-gray-400 text-sm m-auto">
+          Don&apos;t see your model? Let us know by creating a Github{" "}
+          <a
+            href="https://github.com/helicone/helicone/issues"
+            target="_blank"
+            className="text-sky-500"
+          >
+            Issue.
+          </a>
+        </p>
       </div>
     </div>
   );

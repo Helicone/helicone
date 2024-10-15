@@ -1,0 +1,66 @@
+---
+title: "Upstash RAG Chat Integration"
+sidebarTitle: "RAG Chat"
+description: "Integrate Helicone with Upstash RAG Chat to enhance your retrieval-augmented generation applications with comprehensive observability and analytics."
+---
+
+## Introduction
+
+Upstash RAG Chat is a TypeScript toolkit for building powerful retrieval-augmented generation (RAG) applications. This integration with Helicone allows you to leverage advanced observability tools for your RAG Chat applications, providing deeper insights into your LLM operations.
+
+## Key Features
+
+- **Framework Compatibility**: Seamlessly integrates with Next.js, Svelte, Nuxt.js, and Solid.js.
+- **Diverse Data Ingestion**: Ingest websites by URL, text files, CSVs, PDFs, and more out of the box.
+- **Real-time Streaming**: Stream AI-generated content in real time.
+- **Built-in Vector Store**: Efficiently manage your knowledge base.
+- **Optional Redis Integration**: Store chat messages for persistent conversations.
+- **Flexible Chat Sessions**: Support for maintaining context across interactions.
+- **Customizable Prompts**: Fully customizable prompts for tailored experiences.
+- **Pure LLM Chat Mode**: Option to use without RAG for traditional LLM interactions.
+
+## Integration Steps
+
+<Steps>
+  <Step title="Create a Helicone account + Generate an API Key">
+    Log into [Helicone](https://www.helicone.ai) or create an account. Once you have an account, you
+    can generate an [API key](https://helicone.ai/developer).
+    <Note>
+      Make sure to generate a [write only API key](helicone-headers/helicone-auth).
+    </Note>
+  </Step>
+  <Step title="Install RAG Chat">
+    Install the RAG Chat package using your preferred package manager:
+    ```bash
+    npm i @upstash/rag-chat
+    # or
+    pnpm add @upstash/rag-chat
+    # or
+    yarn add @upstash/rag-chat
+    ```
+  </Step>
+  <Step title="Configure RAG Chat with Helicone">
+    Initialize RAG Chat with Helicone integration:
+    ```typescript
+    import { RAGChat, openai } from "@upstash/rag-chat";
+
+    const ragChat = new RAGChat({
+      model: openai("gpt-3.5-turbo", {
+        apiKey: process.env.OPENAI_API_KEY!,
+        analytics: { name: "helicone", token: process.env.HELICONE_API_KEY },
+      }),
+    });
+    ```
+
+  </Step>
+  <Step title="Use RAG Chat in Your Application">
+    Documented in the [Upstash RAG Chat documentation](https://upstash.com/docs/vector/sdks/rag-chat/gettingstarted).
+  </Step>
+  <Step title="View Your Logs">
+    🎉 You're all set! View your logs at [Helicone](https://www.helicone.ai).
+  </Step>
+</Steps>
+
+By integrating Upstash RAG Chat with Helicone, you can build advanced RAG applications with comprehensive observability, allowing you to optimize your LLM operations and deliver more efficient, context-aware AI interactions.
+
+For more details on RAG Chat features and usage, visit the [Upstash RAG Chat documentation](https://upstash.com/docs/vector/sdks/rag-chat/gettingstarted).

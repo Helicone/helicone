@@ -25,6 +25,7 @@ const sortMappings: { [K in keyof UserMetric]: string } = {
   average_tokens_per_request: "average_tokens_per_request",
   first_active: "first_active",
   cost: "cost",
+  rate_limited_count: "rate_limited_count",
 };
 
 export function buildUserSort(

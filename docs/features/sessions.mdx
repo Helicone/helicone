@@ -1,24 +1,20 @@
 ---
 title: "Sessions"
-description: "Effortlessly monitor sessions and traces."
+sidebarTitle: "Sessions"
+description: "Group and visualize multi-step LLM interactions. Track request flows across multiple traces and gain insights into complex AI workflows by adding only 2 simple headers."
+"twitter:title": "Sessions - Helicone OSS LLM Observability"
 ---
 
 import QuestionsSection from "/snippets/questions-section.mdx";
 
 <Info>
-  **Who can use this feature**: Anyone on any
+  **Who can use this feature**: Anyone on pro plan or above.
   [plan](https://www.helicone.ai/pricing).
 </Info>
 
-<Warning>
-  **This feature is currently in beta.** While you're welcome to try it out,
-  please know that our team is still working to refine it. Your feedback is
-  valuable to help us improve!{" "}
-</Warning>
-
 ## Introduction
 
-Helicone's Session management allows you to provide full control over any session and trace data that you send to Helicone. With Helicone, you can effortlessly monitor and manage your sessions and traces as they evolve.
+Sessions in Helicone provide a powerful way to organize and analyze complex interactions within your LLM applications. By grouping related requests together, sessions offer a holistic view of user journeys, multi-step processes, or extended AI workflows. This feature is particularly valuable for applications that involve multiple back-and-forth exchanges or those that build upon previous context.
 
 <Frame caption="Example: A Session creating an outline for a book about space">
   <img
@@ -29,10 +25,12 @@ Helicone's Session management allows you to provide full control over any sessio
 
 ### Why Sessions
 
-Requests are now matched to a `helicone-session-id`, allowing you to:
+Sessions, identified by a `helicone-session-id` header, allow you to:
 
-- Manage and track sessions and traces over time
-- Find long running traces or where in your session there are any issues
+- Reconstruct the flow of a conversation or a multi-stage task
+- Analyze performance and outcomes across entire interaction sequences
+- Identify bottlenecks or areas for improvement in your AI workflows
+- Gain deeper insights into user behavior and application patterns
 
 ## Quick Start
 
@@ -40,10 +38,11 @@ Simply add a `Helicone-Session-Id` header to your request to start tracking your
 
 To represent parent and child traces we take advantange of a simple path syntax in the `Helicone-Session-Path` header. For example, if you have a parent trace `parent` and a child trace `child`, you can represent this as `/parent/child`.
 
-Depending on your library you will need to add the following two headers to your request:
+Depending on your library you will need to add the following three headers to your request:
 
 - `Helicone-Session-Id` - The session id you want to track
 - `Helicone-Session-Path` - The path of the session
+- `Helicone-Session-Name` - The name of the session
 
 Here is an example is ts: [see other languages](/helicone-headers/header-directory)
 
@@ -72,6 +71,7 @@ openai.chat.completions.create(
     headers: {
       "Helicone-Session-Id": session,
       "Helicone-Session-Path": "/abstract",
+      "Helicone-Session-Name": "Course Plan",
     },
   }
 );

@@ -29,24 +29,55 @@ jobs:
         with:
           ref: ${{ github.ref }}
 
+
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          base: ${{ github.event.repository.default_branch }}
+          # Space delimited list usable as command-line argument list in Linux shell. If needed, it uses single or double quotes to wrap filename with unsafe characters.
+          list-files: 'shell'
+          filters: |
+            web:
+              - 'web/**/*'
+            bifrost:
+              - 'bifrost/**/*'
+            worker:
+              - 'worker/**/*'
+
       - name: Set Node.js v18
         uses: actions/setup-node@v3
         with:
           node-version: 18
 
+
+      - name: Install bifrsot dependencies
+        if: steps.filter.outputs.bifrost == 'true'
+        run: yarn install
+        working-directory: ./bifrost
+
+      - name: Bifrost lint fix
+        if: steps.filter.outputs.bifrost == 'true'
+        run: yarn lint-fix
+        working-directory: ./bifrost
+
+
       - name: Install web dependencies
+        if: steps.filter.outputs.web == 'true'
         run: yarn install
         working-directory: ./web
 
       - name: Web lint fix
-        run: yarn lint --fix
+        if: steps.filter.outputs.web == 'true'
+        run: yarn lint-fix
         working-directory: ./web
 
       - name: Install worker dependencies
+        if: steps.filter.outputs.worker == 'true'
         run: yarn install
         working-directory: ./worker
 
       - name: Worker lint fix
+        if: steps.filter.outputs.worker == 'true'
         run: yarn lint-fix
         working-directory: ./worker
 
@@ -57,7 +88,14 @@ jobs:
           skip_checkout: true
 
       - name: Web build
+        if: steps.filter.outputs.web == 'true'
         run: |
           cp ../.env.example .env
           yarn build
         working-directory: ./web
+
+      - name: Bifrost build
+        if: steps.filter.outputs.bifrost == 'true'
+        run: |
+          yarn build
+        working-directory: ./bifrost

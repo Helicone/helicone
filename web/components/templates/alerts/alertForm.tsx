@@ -1,7 +1,11 @@
-import { FormEvent, useState } from "react";
+import { FormEvent, useMemo, useState } from "react";
 import { useOrg } from "../../layout/organizationContext";
 import { useUser } from "@supabase/auth-helpers-react";
-import { useGetOrgMembers } from "../../../services/hooks/organizations";
+import {
+  useGetOrgMembers,
+  useGetOrgSlackChannels,
+  useGetOrgSlackIntegration,
+} from "../../../services/hooks/organizations";
 import useNotification from "../../shared/notification/useNotification";
 import {
   MultiSelect,
@@ -18,6 +22,8 @@ import { Tooltip } from "@mui/material";
 import { clsx } from "../../shared/clsx";
 import { alertTimeWindows } from "./alertsPage";
 import { Database } from "../../../supabase/database.types";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 
 export type AlertRequest = {
   name: string;
@@ -25,6 +31,7 @@ export type AlertRequest = {
   threshold: number;
   time_window: string;
   emails: string[];
+  slack_channels: string[];
   org_id: string;
   minimum_request_count: number | undefined;
 };
@@ -38,14 +45,32 @@ interface AlertFormProps {
 const AlertForm = (props: AlertFormProps) => {
   const { handleSubmit, onCancel, initialValues } = props;
 
+  const slackRedirectUrl = useMemo(() => {
+    if (window) {
+      return `${
+        window.location.protocol === "http:" ? "https://redirectmeto.com/" : ""
+      }${window.location.origin}/slack/redirect`;
+    }
+    return null;
+  }, []);
+
   const [selectedMetric, setSelectedMetric] = useState<string>(
     initialValues?.metric || "response.status"
   );
   const [selectedEmails, setSelectedEmails] = useState<string[]>(
     initialValues?.emails || []
   );
+  const [selectedSlackChannels, setSelectedSlackChannels] = useState<string[]>(
+    initialValues?.slack_channels || []
+  );
   const [selectedTimeWindow, setSelectedTimeWindow] = useState<string>(
     initialValues?.time_window.toString() || ""
+  );
+  const [showEmails, setShowEmails] = useState<boolean>(
+    initialValues ? initialValues.emails.length > 0 : true
+  );
+  const [showSlackChannels, setShowSlackChannels] = useState<boolean>(
+    initialValues ? initialValues.slack_channels.length > 0 : false
   );
 
   const orgContext = useOrg();
@@ -61,7 +86,18 @@ const AlertForm = (props: AlertFormProps) => {
     email: string;
     member: string;
     org_role: string;
-  }[] = [...(data?.data || [])];
+  }[] = [...(data || [])];
+
+  const { data: slackIntegration, isLoading: isLoadingSlackIntegration } =
+    useGetOrgSlackIntegration(orgContext?.currentOrg?.id || "");
+
+  const { data: slackChannelsData, isLoading: isLoadingSlackChannels } =
+    useGetOrgSlackChannels(orgContext?.currentOrg?.id || "");
+
+  const slackChannels: {
+    id: string;
+    name: string;
+  }[] = [...(slackChannelsData || [])];
 
   const handleCreateAlert = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -89,9 +125,14 @@ const AlertForm = (props: AlertFormProps) => {
         return;
       }
     }
-
-    if (selectedEmails.length < 1) {
-      setNotification("Please select at least one email", "error");
+    if (
+      (!showEmails && !showSlackChannels) ||
+      (selectedEmails.length < 1 && selectedSlackChannels.length < 1)
+    ) {
+      setNotification(
+        "Please select at least one email or slack channel",
+        "error"
+      );
       return;
     }
 
@@ -110,7 +151,8 @@ const AlertForm = (props: AlertFormProps) => {
       metric: selectedMetric,
       threshold: alertThreshold,
       time_window: selectedTimeWindow,
-      emails: selectedEmails,
+      emails: showEmails ? selectedEmails : [],
+      slack_channels: showSlackChannels ? selectedSlackChannels : [],
       org_id: orgContext?.currentOrg?.id,
       minimum_request_count: isNaN(alertMinRequests)
         ? undefined
@@ -127,7 +169,10 @@ const AlertForm = (props: AlertFormProps) => {
         {initialValues ? "Edit Alert" : "Create Alert"}
       </h1>
       <div className="col-span-4 w-full space-y-1.5 text-sm">
-        <label htmlFor="alert-name" className="text-gray-500">
+        <label
+          htmlFor="alert-name"
+          className="text-gray-500 dark:text-gray-200"
+        >
           Name
         </label>
         <input
@@ -142,7 +187,10 @@ const AlertForm = (props: AlertFormProps) => {
       </div>
 
       <div className="col-span-2 w-full space-y-1.5 text-sm">
-        <label htmlFor="alert-metric" className="text-gray-500">
+        <label
+          htmlFor="alert-metric"
+          className="text-gray-500 dark:text-gray-200"
+        >
           Metric
         </label>
         <Select
@@ -177,7 +225,7 @@ const AlertForm = (props: AlertFormProps) => {
       <div className="col-span-2 w-full space-y-1.5 text-sm ">
         <label
           htmlFor="alert-threshold"
-          className="text-gray-500 items-center flex gap-1"
+          className="text-gray-500 dark:text-gray-200 items-center flex gap-1"
         >
           Threshold
           <Tooltip
@@ -224,7 +272,7 @@ const AlertForm = (props: AlertFormProps) => {
       <div className="col-span-2 w-full space-y-1.5 text-sm">
         <label
           htmlFor="time-frame"
-          className="text-gray-500 items-center flex gap-1"
+          className="text-gray-500 dark:text-gray-200 items-center flex gap-1"
         >
           Time Frame{" "}
           <Tooltip title="Define the time frame over which the metric is evaluated. An alert will be triggered if the threshold is exceeded within this period.">
@@ -251,7 +299,7 @@ const AlertForm = (props: AlertFormProps) => {
       <div className="col-span-2 w-full space-y-1.5 text-sm">
         <label
           htmlFor="min-requests"
-          className="text-gray-500 items-center flex gap-1"
+          className="text-gray-500 dark:text-gray-200 items-center flex gap-1"
         >
           Min Requests (optional){" "}
           <Tooltip title="Define this to set a minimum number of requests for this alert to be triggered.">
@@ -270,30 +318,104 @@ const AlertForm = (props: AlertFormProps) => {
           step={1}
         />
       </div>
-      <div className="col-span-4 w-full space-y-1.5 text-sm">
-        <label htmlFor="alert-emails" className="text-gray-500">
-          Emails
-        </label>
-        <MultiSelect
-          placeholder="Select emails to send alerts to"
-          value={selectedEmails}
-          onValueChange={(values: string[]) => {
-            setSelectedEmails(values);
-          }}
-        >
-          {members.map((member, idx) => {
-            return (
-              <MultiSelectItem
-                value={member.email}
-                key={idx}
-                className="font-medium text-black"
-              >
-                {member.email}
-              </MultiSelectItem>
-            );
-          })}
-        </MultiSelect>
+
+      <div className="col-span-4 w-full p-6 bg-gray-100 dark:bg-gray-900 rounded-md space-y-1.5">
+        <h3 className="text-gray-500 font-semibold">Notify By</h3>
+        <div className="col-span-4 w-full space-y-1.5 text-sm">
+          <div className="flex items-center justify-between">
+            <label
+              htmlFor="alert-emails"
+              className="text-gray-500 dark:text-gray-200"
+            >
+              Emails
+            </label>
+            <Switch
+              size="md"
+              checked={showEmails}
+              onCheckedChange={setShowEmails}
+            />
+          </div>
+          {showEmails && (
+            <MultiSelect
+              placeholder="Select emails to send alerts to"
+              value={selectedEmails}
+              onValueChange={(values: string[]) => {
+                setSelectedEmails(values);
+              }}
+              className="!mb-8"
+            >
+              {members.map((member, idx) => {
+                return (
+                  <MultiSelectItem
+                    value={member.email}
+                    key={idx}
+                    className="font-medium text-black"
+                  >
+                    {member.email}
+                  </MultiSelectItem>
+                );
+              })}
+            </MultiSelect>
+          )}
+        </div>
+        <div className="col-span-4 w-full space-y-1.5 text-sm">
+          <div className="flex items-center justify-between">
+            <label
+              htmlFor="alert-slack-channels"
+              className="text-gray-500 dark:text-gray-200"
+            >
+              Slack Channels
+            </label>
+            <Switch
+              size="md"
+              checked={showSlackChannels}
+              onCheckedChange={setShowSlackChannels}
+            />
+          </div>
+          {showSlackChannels &&
+            (slackIntegration?.data ? (
+              <>
+                <MultiSelect
+                  placeholder="Select slack channels to send alerts to"
+                  value={selectedSlackChannels}
+                  onValueChange={(values: string[]) => {
+                    setSelectedSlackChannels(values);
+                  }}
+                >
+                  {slackChannels.map((channel, idx) => {
+                    return (
+                      <MultiSelectItem
+                        value={channel.id}
+                        key={idx}
+                        className="font-medium text-black"
+                      >
+                        {channel.name}
+                      </MultiSelectItem>
+                    );
+                  })}
+                </MultiSelect>
+                <small className="text-gray-500">
+                  If the channel is private, you will need to add the bot to the
+                  channel by mentioning <strong>@Helicone</strong> in the
+                  channel.
+                </small>
+              </>
+            ) : (
+              <Button asChild variant="outline">
+                <a
+                  href={`https://slack.com/oauth/v2/authorize?scope=channels:read,groups:read,chat:write,chat:write.public&client_id=${
+                    process.env.NEXT_PUBLIC_SLACK_CLIENT_ID ?? ""
+                  }&state=${
+                    orgContext?.currentOrg?.id || ""
+                  }&redirect_uri=${slackRedirectUrl}`}
+                >
+                  Connect Slack
+                </a>
+              </Button>
+            ))}
+        </div>
       </div>
+
       <div className="col-span-4 flex justify-end gap-2 pt-4">
         <button
           onClick={onCancel}

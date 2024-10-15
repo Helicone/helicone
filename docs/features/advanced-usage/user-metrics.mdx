@@ -1,6 +1,8 @@
 ---
 title: "User Metrics"
-description: "Get user metrics like number of requests, costs, and activities."
+sidebarTitle: "User Metrics"
+description: "Monitor individual user interactions with your LLM applications. Track per-user request volumes, costs, and usage patterns across your AI services."
+"twitter:title": "User Metrics - Helicone OSS LLM Observability"
 ---
 
 <Info>
@@ -12,16 +14,21 @@ import QuestionsSection from "/snippets/questions-section.mdx";
 
 ## Introduction
 
-Monitor and analyze how users interact with your LLMs.
+Dive deep into individual user activity within your AI applications, uncovering usage trends and optimizing resource allocation for improved performance and user satisfaction.
 
 <Frame caption="See user metrics such as the number of requests, costs, and activities.">
-  <img src="/images/user-metrics/example-user-metric.png" alt="User metrics overview: Requests, costs, and activities tracked in Helicone"/>
+  <img
+    src="/images/user-metrics/example-user-metric.png"
+    alt="User metrics overview: Requests, costs, and activities tracked in Helicone"
+  />
 </Frame>
 
 ### Why User Metrics
 
-- Get detailed insights into the number of requests, costs, and activities of selected users.
-- Optimize resources based on usage patterns.
+- Gain detailed insights into individual user activity
+- Track per-user request volumes, costs, and usage patterns
+- Optimize resource allocation based on user-specific trends
+- Improve performance and detect potential abuse
 
 ## Quick Start
 
@@ -31,10 +38,10 @@ There are two ways to specify users in your requests:
 
 <AccordionGroup>
   <Accordion title="Option 1: Using OpenAI API">
-    The OpenAI API has an optional [`user` parameter](https://platform.openai.com/docs/api-reference/chat/create#chat-create-user), where you can specify an end-user to help OpenAI to monitor and detect abuse. Learn more [here](https://platform.openai.com/docs/guides/safety-best-practices/end-user-ids). 
+    The OpenAI API has an optional [`user` parameter](https://platform.openai.com/docs/api-reference/chat/create#chat-create-user), where you can specify an end-user to help OpenAI to monitor and detect abuse. Learn more [here](https://platform.openai.com/docs/guides/safety-best-practices/end-user-ids).
   </Accordion>
   <Accordion title="Option 2: Sending the User ID via Helicone">
-    Alternatively, you can send a prompt with the header `Helicone-User-Id` to include the user ID. The value must be a _string_, for example, use an `email` or the `user ID`. 
+    Alternatively, you can send a prompt with the header `Helicone-User-Id` to include the user ID. The value must be a _string_, for example, use an `email` or the `user ID`.
       <CodeGroup>
       ```bash Curl
       curl https://oai.helicone.ai/v1/completions \
@@ -44,12 +51,17 @@ There are two ways to specify users in your requests:
       ```
 
       ```python Python
-      openai.api_base = "https://oai.helicone.ai/v1"
+      client = OpenAI(
+        base_url="https://oai.helicone.ai/v1",
+        default_headers={
+            "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
+        }
+      )
 
-      openai.Completion.create(
+      client.chat.completions.create(
           model="text-davinci-003",
           prompt="How do I log users?",
-          headers={
+          extra_headers={
               "Helicone-User-Id": "alicebob@gmail.com" # Add this header
           }
       )
@@ -77,7 +89,10 @@ There are two ways to specify users in your requests:
 Once set up correctly, you will be able to see detailed user metrics under the `Users` tab.
 
 <Frame caption="See overview, usage and detailed logs for a specific user.">
-  <img src="/images/user-metrics/example-user-metric-dashboard.png" alt="Detailed user dashboard in Helicone showing overview, usage, and logs under `Users` tab." />
+  <img
+    src="/images/user-metrics/example-user-metric-dashboard.png"
+    alt="Detailed user dashboard in Helicone showing overview, usage, and logs under `Users` tab."
+  />
 </Frame>
 
 <QuestionsSection />

@@ -21,7 +21,7 @@ const NavBarV2 = (props: NavBarV2Props) => {
   const supabaseClient = useSupabaseClient();
 
   return (
-    <header className="bg-inherit top-0 sticky z-30 border-b border-gray-200 px-4">
+    <header className="bg-inherit dark:bg-black top-0 sticky z-30 border-b border-gray-200 dark:border-gray-700 px-4">
       {!mobileMenuOpen && (
         <nav
           className="mx-auto flex max-w-6xl items-center md:gap-x-8 gap-x-16 py-3"
@@ -31,10 +31,19 @@ const NavBarV2 = (props: NavBarV2Props) => {
             <Link href="/" className="-m-1.5">
               <span className="sr-only">Helicone</span>
               <Image
+                className="dark:hidden"
                 src={"/static/logo.svg"}
                 alt="Helicone - Open-source LLM observability and monitoring platform for developers"
                 height={150}
                 width={150}
+                priority={true}
+              />
+              <Image
+                className="hidden dark:block"
+                src={"/static/logo-white.svg"}
+                alt="Helicone - Open-source LLM observability and monitoring platform for developers"
+                height={100}
+                width={100}
                 priority={true}
               />
             </Link>
@@ -44,26 +53,26 @@ const NavBarV2 = (props: NavBarV2Props) => {
 
             <Link
               href="https://docs.helicone.ai/"
-              className="flex flex-row items-center font-medium hover:text-black rounded-md px-3 py-1.5 focus:outline-none text-gray-700"
+              className="flex flex-row items-center font-medium hover:text-black dark:hover:text-white rounded-md px-3 py-1.5 focus:outline-none text-gray-700 dark:text-gray-300"
             >
               Docs
             </Link>
             <Link
-              href="/pricing"
-              className="flex flex-row items-center font-medium hover:text-black rounded-md px-3 py-1.5 focus:outline-none text-gray-700"
+              href="https://helicone.ai/pricing"
+              className="flex flex-row items-center font-medium hover:text-black dark:hover:text-white rounded-md px-3 py-1.5 focus:outline-none text-gray-700 dark:text-gray-300"
             >
               Pricing
             </Link>
             <Link
               href="/blog"
               rel="noopener noreferrer"
-              className="flex flex-row items-center font-medium hover:text-black rounded-md px-3 py-1.5 focus:outline-none text-gray-700"
+              className="flex flex-row items-center font-medium hover:text-black dark:hover:text-white rounded-md px-3 py-1.5 focus:outline-none text-gray-700 dark:text-gray-300"
             >
               Blog
             </Link>
             <Link
               href="/contact"
-              className="flex flex-row items-center font-medium hover:text-black rounded-md px-3 py-1.5 focus:outline-none text-gray-700"
+              className="flex flex-row items-center font-medium hover:text-black dark:hover:text-white rounded-md px-3 py-1.5 focus:outline-none text-gray-700 dark:text-gray-300"
             >
               Contact
             </Link>
@@ -84,7 +93,7 @@ const NavBarV2 = (props: NavBarV2Props) => {
                       router.push("/");
                     });
                   }}
-                  className="bg-white hover:bg-gray-100 ease-in-out duration-500 text-black border-[3px] border-gray-300 text-sm rounded-lg px-4 py-1.5 font-bold shadow-lg flex w-fit items-center gap-1"
+                  className="bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 ease-in-out duration-500 text-black dark:text-white border-[3px] border-gray-300 dark:border-gray-600 text-sm rounded-lg px-4 py-1.5 font-bold shadow-lg flex w-fit items-center gap-1"
                 >
                   Sign Out
                 </button>
@@ -93,7 +102,7 @@ const NavBarV2 = (props: NavBarV2Props) => {
               <>
                 <Link
                   href="/signin"
-                  className="bg-[#f8feff] hover:bg-gray-100 whitespace-nowrap rounded-md px-4 py-1.5 text-sm font-semibold text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+                  className="bg-[#f8feff] dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 whitespace-nowrap rounded-md px-4 py-1.5 text-sm font-semibold text-black dark:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
                 >
                   Sign In
                 </Link>
@@ -110,7 +119,7 @@ const NavBarV2 = (props: NavBarV2Props) => {
             {mobileMenuOpen ? (
               <button
                 type="button"
-                className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-gray-700"
+                className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-gray-700 dark:text-gray-300"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 <span className="sr-only">close main menu</span>
@@ -119,7 +128,7 @@ const NavBarV2 = (props: NavBarV2Props) => {
             ) : (
               <button
                 type="button"
-                className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-gray-700"
+                className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-gray-700 dark:text-gray-300"
                 onClick={() => setMobileMenuOpen(true)}
               >
                 <span className="sr-only">Open main menu</span>
@@ -137,7 +146,7 @@ const NavBarV2 = (props: NavBarV2Props) => {
         onClose={setMobileMenuOpen}
       >
         <div className="fixed inset-0 z-10" />
-        <Dialog.Panel className="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-gray-50 px-6 py-6 sm:ring-1 sm:ring-gray-900/10">
+        <Dialog.Panel className="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-gray-50 dark:bg-gray-900 px-6 py-6 sm:ring-1 sm:ring-gray-900/10">
           <div className="flex flex-col gap-10 h-full">
             <div>
               <div className="flex items-center gap-x-6 justify-between">
@@ -154,7 +163,7 @@ const NavBarV2 = (props: NavBarV2Props) => {
 
                 <button
                   type="button"
-                  className="-m-2.5 rounded-md p-2.5 text-gray-700"
+                  className="-m-2.5 rounded-md p-2.5 text-gray-700 dark:text-gray-300"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <span className="sr-only">Close menu</span>
@@ -165,8 +174,8 @@ const NavBarV2 = (props: NavBarV2Props) => {
                 <div className="-my-6">
                   <div className="py-6 flex flex-col space-y-8">
                     <Link
-                      href="/pricing"
-                      className="text-md font-semibold text-gray-900"
+                      href="https://helicone.ai/pricing"
+                      className="text-md font-semibold text-gray-900 dark:text-gray-300"
                     >
                       Pricing
                     </Link>
@@ -174,13 +183,13 @@ const NavBarV2 = (props: NavBarV2Props) => {
                       href="https://docs.helicone.ai/"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-md font-semibold text-gray-900"
+                      className="text-md font-semibold text-gray-900 dark:text-gray-300"
                     >
                       Documentation
                     </Link>
                     <Link
                       href="/roadmap"
-                      className="text-md font-semibold text-gray-900"
+                      className="text-md font-semibold text-gray-900 dark:text-gray-300"
                     >
                       Roadmap
                     </Link>
@@ -188,14 +197,14 @@ const NavBarV2 = (props: NavBarV2Props) => {
                       href="https://github.com/Helicone/helicone"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-md font-semibold text-gray-900"
+                      className="text-md font-semibold text-gray-900 dark:text-gray-300"
                     >
                       Github
                     </Link>
                     <Link
                       href="/blog"
                       rel="noopener noreferrer"
-                      className="text-md font-semibold text-gray-900"
+                      className="text-md font-semibold text-gray-900 dark:text-gray-300"
                     >
                       Blog
                     </Link>

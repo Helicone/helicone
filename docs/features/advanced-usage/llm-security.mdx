@@ -1,6 +1,8 @@
 ---
 title: "LLM Security"
-description: "Secure OpenAI chat completions against prompt injections."
+sidebarTitle: "LLM Security"
+description: "Enable robust security measures in your LLM applications to protect against prompt injections, detect anomalies, and prevent data exfiltration."
+"twitter:title": "LLM Security - Helicone OSS LLM Observability"
 ---
 
 import QuestionsSection from "/snippets/questions-section.mdx";
@@ -12,8 +14,8 @@ Generative AI is quickly changing the cybersecurity landscape. There are a few i
 <AccordionGroup>
 
   <Accordion title="Adversarial Instructions" icon="user-secret">
-    When attackers manipulate LLMs with carefully crafted prompts, to change their behaviors in a way that poses critical security risks. This manipulation, often referred to as "jailbreaking," tricks the LLM into executing the attacker's intentions, while ignoring its developer's design. 
-    
+    When attackers manipulate LLMs with carefully crafted prompts, to change their behaviors in a way that poses critical security risks. This manipulation, often referred to as "jailbreaking," tricks the LLM into executing the attacker's intentions, while ignoring its developer's design.
+
     A malicious actor could craft a prompt, not necessarily too sophisticated, to expose sensitive data, emit harmful or undesired output or bypass the original instruction to execute the injected one.
 
     #### Example #1
@@ -33,12 +35,14 @@ Generative AI is quickly changing the cybersecurity landscape. There are a few i
   </Accordion>
 
 {" "}
+
 <Accordion title="Anomalies" icon="triangle-exclamation">
   LLMs can exhibit behaviors outside of expected patterns that indicate a
   security risk.
 </Accordion>
 
 {" "}
+
 <Accordion title="Data Exfiltration" icon="right-from-bracket">
   An attacker can sneak an instruction into a webpage, which convinces any LLM
   application summarizing this webpage to send all other data in the context
@@ -85,10 +89,10 @@ curl https://oai.helicone.ai/v1/completions \
 ```python Python
 openai.api_base = "https://oai.helicone.ai/v1"
 
-openai.Completion.create(
+client.chat.completions.create(
     model="text-davinci-003",
     prompt="How do I enable LLM security with helicone?",
-    headers={
+    extra_headers={
       "Helicone-LLM-Security-Enabled": "true", # add this header and set to true
     }
 )

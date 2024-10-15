@@ -1,6 +1,10 @@
 ---
-title: "Javascript"
-description: "Learn how to integrate OpenAI with Helicone using Javascript."
+title: "OpenAI JavaScript SDK Integration"
+sidebarTitle: "JavaScript"
+description: "Use OpenAI's JavaScript SDK to integrate with Helicone to log your OpenAI usage."
+"twitter:title": "OpenAI JavaScript SDK Integration - Helicone OSS LLM Observability"
+icon: "js"
+iconType: "solid"
 ---
 
 ## Proxy Integration (recommended)
@@ -22,10 +26,10 @@ HELICONE_API_KEY=<your API key>
 import OpenAI from "openai";
 
 const openai = new OpenAI({
-  apiKey: request.env.OPENAI_API_KEY,
+  apiKey: process.env.OPENAI_API_KEY,
   baseURL: "https://oai.helicone.ai/v1",
   defaultHeaders: {
-    "Helicone-Auth": `Bearer ${request.env.HELICONE_API_KEY}`,
+    "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
   },
 });
 ```
@@ -52,6 +56,9 @@ const openai = new OpenAIApi(configuration);
 </Steps>
 
 ## Package Integration
+<Warning>
+`@helicone/helicone` has been deprecated and will no longer be maintained. We recommend you setup OpenAI integration with Proxy as mentioned above.
+</Warning>
 
  <Steps>
       <Step title="To get started, install the `helicone-openai` package">

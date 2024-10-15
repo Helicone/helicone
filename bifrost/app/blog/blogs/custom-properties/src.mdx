@@ -1,0 +1,135 @@
+
+In today's digital landscape, understanding your users' preferences and behaviors is crucial to delivering tailored services. Every interaction, click, and engagement offers valuable insights into what your user needs and desires, **<span style={{color: '#0ea5e9'}}>but harnessing this data effectively requires the right tools and approaches.</span>**
+
+**This is where Helicone's Custom Properties come into play.**
+
+![Custom Properties: Understanding Your Users Better and Delivering a Top-Tier Experience](/static/blog/custom-properties/cover.webp)
+
+## What are Custom Properties?
+
+Custom Properties are metadata that you can attach to your LLM requests. In Helicone, you can tag your requests with specific information to create **<span style={{color: '#0ea5e9'}}>detailed segments of your data</span>**, such as session/conversation/app IDs, the prompt chain or metadata about the user who made the request.
+
+**In this blog, we'll explore:**
+
+- the importance of custom properties, and how they enable a deeper understanding of user behavior, preferences, and patterns.
+- how you can tailor your services for your customers to **drive business growth**.
+- how companies like **<span style={{color: '#0ea5e9'}}>Journalist AI</span>** and **<span style={{color: '#0ea5e9'}}>Greptile</span>** use custom properties for user analysis.
+
+## Use Case 1: Environment Tracking
+
+Tracking environments in Helicone allows you to monitor and differentiate between various operational stages such as `development`, `staging`, and `production`.
+
+### Implementation
+
+```python
+client.chat.completions.create(
+    # ...
+    extra_headers={
+        "Helicone-Property-Environment": "development", # simply add this header to your request
+    }
+)
+```
+
+### Best for:
+
+    - **Compare performance metrics** across different stages on Helicone's dashboard. Address any issues or performance bottlenecks before moving to production.
+    - **Identify cost-saving opportunities** by tracking costs incurred at each stage, removing unnecessary expenses and optimizing resource usage.
+    - **Collect early user feedback** from staging environments and compare across stages to track improvements and refine your product.
+
+## Use Case 2: User and Feature Segmentation
+
+Understanding user behavior patterns makes it easier to find opportunities to personalize marketing campaigns, introduce new features, or expand into new markets based on trends or demand patterns.
+
+### 1. Geographic Location
+
+    Monitoring how your application perform across different geographic regions.
+
+    ```python
+        headers={
+            "Helicone-Property-User-Type": "paid",
+            "Helicone-Property-Country": "USA", # simply add this header to your request
+        }
+    ```
+
+    **Best for**:
+
+    - Optimizing resource allocation
+    - Refining pricing strategies
+    - Targeting marketing efforts towards high-value user segments
+
+### 2. Feature Segments
+
+    Monitoring feature performance or emerging trends among users.
+
+    ```python
+        headers={
+            "Helicone-Property-User-Type": "paid",
+            "Helicone-Property-Feature": "spellcheck", # simply add this header to your request
+        }
+    ```
+
+    **Best for**:
+
+    - Smartly optimizing development efforts
+    - Prioritizing features with proven demands
+    - Aligning development priorities with user needs and pain points
+
+### 3. Plan Segments
+
+    Implementing precise usage-based billing models by user types (free vs. premium).
+
+    ```python
+        headers={
+            "Helicone-Property-User-Type": "paid",
+            "Helicone-Property-Plan": "enterprise", # simply add this header to your request
+        }
+    ```
+
+    **Best for:**
+
+    - Tracking user-specific metadata such as subscription plans, usage tiers, or subscription renewal dates
+    - Identifying opportunities to upsell or cross-sell additional services
+    - Tailoring subscription offerings to better align with customer preferences
+
+## Companies Who Use Custom Properties In Production
+
+### Journalist AI
+
+<a href="https://tryjournalist.com/" target="_blank" rel="noopener noreferrer">
+  Journalist AI
+</a>
+is a platform that automates content creation for writers seeking efficient and high-quality
+content production, by generating written articles, blog posts, and other materials
+based on user input.{" "}
+
+![Journalist AI](/static/blog/custom-properties/journalist-ai-banner.webp)
+
+Journalist AI segments their users by plans using Custom Properties to:
+
+- **Compare the behavior** of subscribed vs. non-subscribed users to see which features they use more frequently.
+- **Gauge the value of that feature** in driving subscriptions if certain features are more popular among subscribed users.
+- **Track the costs** associated with providing services to subscribed vs. non-subscribed users to understand the cost-benefit ratio of subscription plans.
+- **Market certain features more aggressively** within their premium plans, if certain features are used more frequently by free users.
+
+### Greptile
+
+<a href="https://www.greptile.com/" target="_blank" rel="noopener noreferrer">
+  Greptile
+</a>
+is a platform that helps users search and analyze text data from sources including
+websites, documents, and databases, using advanced natural language processing (NLP)
+techniques.{" "}
+
+![Greptile](/static/blog/custom-properties/greptile-banner.webp)
+
+Greptile segments requests by repository (**`Helicone-Property-Repository`**) to measure:
+
+- **Number of Requests** made to each repository to gauge which repository is the most popular.
+- **Latency and Costs** associated with requests to each repository.
+- **User patterns** among different repositories.
+
+## Resources you might find helpful:
+
+→ **Doc:** [Setting up custom properties](https://docs.helicone.ai/features/advanced-usage/custom-properties).
+
+→ **Step-by-step guide:** [Using Custom Properties to Segment Data](https://docs.helicone.ai/use-cases/segmentation).

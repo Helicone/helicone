@@ -1,8 +1,19 @@
 ---
-title: "LiteLLM"
+title: "LiteLLM Integration"
+sidebarTitle: "LiteLLM"
+description: "Connect Helicone with LiteLLM, a unified interface for multiple LLM providers. Standardize logging and monitoring across various AI models with simple callback or proxy setup."
+"twitter:title": "LiteLLM Integration - Helicone OSS LLM Observability"
+icon: "cloud"
+iconType: "solid"
 ---
 
 [LiteLLM](https://github.com/BerriAI/litellm) is a model I/O library to standardize API calls to Azure, Anthropic, OpenAI, etc. Here's how you can log your LLM API calls to Helicone from LiteLLM.
+
+<Note>
+  **Note:** [Custom
+  Properties](https://docs.helicone.ai/features/advanced-usage/custom-properties)
+  are available in `metadata` starting with LiteLLM version `1.41.23`.
+</Note>
 
 <Tabs>
   <Tab title="Python">
@@ -37,10 +48,22 @@ os.environ["OPENAI_API_KEY"], os.environ["COHERE_API_KEY"] = "", ""
 litellm.success_callback=["helicone"]
 
 #openai call
-response = completion(model="gpt-3.5-turbo", messages=[{"role": "user", "content": "Hi 👋 - i'm openai"}])
+response = completion(
+  model="gpt-3.5-turbo",
+  messages=[{"role": "user", "content": "Hi 👋 - i'm openai"}],
+  metadata={
+    "Helicone-Property-Hello": "World"
+  }
+)
 
 #cohere call
-response = completion(model="command-nightly", messages=[{"role": "user", "content": "Hi 👋 - i'm cohere"}])
+response = completion(
+  model="command-r",
+  messages=[{"role": "user", "content": "Hi 👋 - i'm cohere"}],
+  metadata={
+    "Helicone-Property-Hello": "World"
+  }
+)
 
 ```
 
@@ -68,7 +91,10 @@ litellm.headers = {"Helicone-Auth": f"Bearer {os.getenv('HELICONE_API_KEY')}"}
 
 response = litellm.completion(
     model="gpt-3.5-turbo",
-    messages=[{"role": "user", "content": "how does a court case get to the Supreme Court?"}]
+    messages=[{"role": "user", "content": "how does a court case get to the Supreme Court?"}],
+    metadata={
+        "Helicone-Property-Hello": "World"
+    }
 )
 
 print(response)

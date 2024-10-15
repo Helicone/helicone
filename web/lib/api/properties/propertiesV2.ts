@@ -16,7 +16,7 @@ export async function getPropertiesV2(
   });
   const query = `
   SELECT DISTINCT arrayJoin(mapKeys(properties)) AS property
-  FROM request_response_versioned
+  FROM request_response_rmt
   WHERE (
     ${builtFilter.filter}
   )

@@ -7,7 +7,7 @@ import {
   getTimeIntervalAgo,
 } from "../../../lib/timeCalculations/time";
 import { useState } from "react";
-import ThemedTableV5 from "../../shared/themed/table/themedTableV5";
+import ThemedTable from "../../shared/themed/table/themedTable";
 import { INITIAL_COLUMNS } from "./initialColumns";
 
 import useSearchParams from "../../shared/utils/useSearchParams";
@@ -60,11 +60,12 @@ const ModelPage = (props: ModelPageProps) => {
   return (
     <>
       <AuthHeader title={"Models"} />
-      <ThemedTableV5
+      <ThemedTable
         id="modelMetrics"
         defaultData={data?.data || []}
         defaultColumns={INITIAL_COLUMNS}
-        dataLoading={isLoading}
+        skeletonLoading={isLoading}
+        dataLoading={false}
         exportData={data?.data || []}
         onRowSelect={(row) => {}}
         timeFilter={{

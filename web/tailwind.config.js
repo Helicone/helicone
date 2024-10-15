@@ -1,17 +1,57 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  darkMode: "class",
+  darkMode: ["class"],
   content: [
     "./pages/**/*.{js,ts,jsx,tsx}",
     "./components/**/*.{js,ts,jsx,tsx}",
     "./node_modules/@tremor/**/*.{js,ts,jsx,tsx}", // Tremor module
+    "./node_modules/@assistant-ui/react-playground/dist/**/*.js",
+    "./app/**/*.{ts,tsx}",
+    "./src/**/*.{ts,tsx}",
   ],
+  prefix: "",
   theme: {
+    container: {
+      center: true,
+      padding: "2rem",
+      screens: {
+        "2xl": "1400px",
+      },
+    },
     fontFamily: {},
     transparent: "transparent",
     current: "currentColor",
     extend: {
+      animation: {
+        blink: "blink 1s step-end infinite",
+        popin: "popin 1s ease-out forwards",
+        "accordion-down": "accordion-down 0.2s ease-out",
+        "accordion-up": "accordion-up 0.2s ease-out",
+      },
+      keyframes: {
+        popin: {
+          "0%": { transform: "scale(0)", opacity: "0" },
+          "100%": { transform: "scale(1)", opacity: "1" },
+        },
+        blink: {
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0" },
+        },
+        "accordion-down": {
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
+        },
+        "accordion-up": {
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
+        },
+      },
       colors: {
+        aui: {
+          primary: {
+            DEFAULT: "#0284c7",
+          },
+        },
         // light mode
         tremor: {
           brand: {
@@ -130,8 +170,11 @@ module.exports = {
     },
   ],
   plugins: [
+    require("@assistant-ui/react/tailwindcss")({
+      components: [""],
+    }),
+    require("tailwindcss-animate"),
     require("@tailwindcss/forms"),
-    require("@headlessui/tailwindcss"),
     require("@tailwindcss/typography"),
   ],
 };

@@ -11,6 +11,7 @@ import { usePrompt } from "../../../../../services/hooks/prompts/prompts";
 import ArrayDiffViewer from "../../id/arrayDiffViewer";
 import ScoresTable from "../scoresTable";
 import { SimpleTable } from "../../../../shared/table/simpleTable";
+import { formatNumber } from "../../../users/initialColumns";
 
 interface PromptIdPageProps {
   id: string;
@@ -46,6 +47,22 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
       },
     };
   });
+
+  const renderScoreValue = (score: {
+    value: string | number;
+    valueType: string;
+  }) => {
+    if (score.valueType === "boolean") {
+      return score.value === 1 ? "true" : "false";
+    }
+    if (score.valueType === "string") {
+      return score.value;
+    }
+    if (score.valueType === "number") {
+      return formatNumber(score.value as number);
+    }
+    return score.value;
+  };
 
   const renderPrettyInputs = (inputs: Record<string, string>, run: number) => {
     const TEXT_LIMIT = 80;
@@ -215,7 +232,10 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
                                       key={key}
                                       className="bg-gray-50 text-gray-700 ring-gray-200 rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset"
                                     >
-                                      {key}: {run.originResult.scores[key]}
+                                      {key}:{" "}
+                                      {renderScoreValue(
+                                        run.originResult.scores[key]
+                                      )}
                                     </span>
                                   )
                                 )}
@@ -281,7 +301,10 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
                                       key={key}
                                       className="bg-gray-50 text-gray-700 ring-gray-200 rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset"
                                     >
-                                      {key}: {run.testResult.scores[key]}
+                                      {key}:{" "}
+                                      {renderScoreValue(
+                                        run.testResult.scores[key]
+                                      )}
                                     </span>
                                   )
                                 )}

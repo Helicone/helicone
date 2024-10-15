@@ -8,3 +8,6 @@ __pycache__/
 .DS_Store
 resend-cli/
 volumes
+env/
+venv/
+test-hcone-sessions/

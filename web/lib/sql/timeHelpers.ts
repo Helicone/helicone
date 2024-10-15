@@ -23,7 +23,10 @@ export function isValidTimeFilter(filter: {
   return start <= end;
 }
 
-export const getTimeAgo = (date: Date): string => {
+export const getTimeAgo = (date?: Date): string => {
+  if (!date) {
+    return "Never";
+  }
   const now = new Date();
   const diff = now.getTime() - date.getTime();
   const seconds = Math.floor(diff / 1000);
@@ -41,3 +44,19 @@ export const getTimeAgo = (date: Date): string => {
     return `${seconds} sec ago`;
   }
 };
+
+export function formatSeconds(seconds: number): string {
+  const days = Math.floor(seconds / (24 * 60 * 60));
+  const hours = Math.floor((seconds % (24 * 60 * 60)) / (60 * 60));
+  const minutes = Math.floor((seconds % (60 * 60)) / 60);
+  const remainingSeconds = Math.round(seconds % 60);
+
+  const parts = [];
+  if (days > 0) parts.push(`${days}d`);
+  if (hours > 0) parts.push(`${hours}h`);
+  if (minutes > 0) parts.push(`${minutes}m`);
+  if (remainingSeconds > 0 || parts.length === 0)
+    parts.push(`${remainingSeconds}s`);
+
+  return parts.slice(0, 2).join(" ");
+}

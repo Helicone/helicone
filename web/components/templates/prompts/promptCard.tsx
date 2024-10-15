@@ -14,6 +14,10 @@ import { TimeFilter } from "../dashboard/dashboardPage";
 import { BackendMetricsCall } from "../../../services/hooks/useBackendFunction";
 import { getTimeMap } from "../../../lib/timeCalculations/constants";
 import Link from "next/link";
+import {
+  FilterBranch,
+  FilterLeaf,
+} from "../../../services/lib/filters/filterDefs";
 
 interface PromptCardProps {
   prompt: {
@@ -41,19 +45,23 @@ const PromptCard = (props: PromptCardProps) => {
 
   const timeIncrement = getTimeInterval(timeFilter);
 
-  const params: BackendMetricsCall<any>["params"] = {
-    timeFilter: timeFilter,
-    userFilters: [
-      {
-        request_response_versioned: {
-          properties: {
-            "Helicone-Prompt-Id": {
-              equals: prompt.user_defined_id,
-            },
-          },
+  const promptIdFilterLeaf: FilterLeaf = {
+    request_response_rmt: {
+      properties: {
+        "Helicone-Prompt-Id": {
+          equals: prompt.user_defined_id,
         },
       },
-    ],
+    },
+  };
+
+  const params: BackendMetricsCall<any>["params"] = {
+    timeFilter: timeFilter,
+    userFilters: {
+      left: promptIdFilterLeaf,
+      operator: "and",
+      right: "all",
+    } as FilterBranch,
     dbIncrement: timeIncrement,
     timeZoneDifference: new Date().getTimezoneOffset(),
   };

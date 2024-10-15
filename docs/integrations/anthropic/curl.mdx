@@ -1,0 +1,47 @@
+---
+title: "Anthropic cURL Integration"
+sidebarTitle: "cURL Integration"
+description: "Use cURL to integrate Anthropic with Helicone to log your Anthropic LLM usage."
+"twitter:title": "Anthropic cURL Integration - Helicone OSS LLM Observability"
+---
+
+<Steps>
+  <Step title="Create an account + Generate an API Key">
+    Log into [helicone](https://www.helicone.ai) or create an account. Once you have an account, you
+    can generate an [API key](https://helicone.ai/developer).
+  </Step>
+  <Step title="Modify the API base and add the `Helicone-Auth` header">
+
+    <Note>
+    Please ensure to replace API keys with your own.
+    </Note>
+
+    ```bash
+    curl --request POST \
+      --url https://anthropic.helicone.ai/v1/messages \
+      --header 'Content-Type: application/json' \
+      --header 'Helicone-Auth: Bearer <<YOUR_HELICONE_API_KEY>>' \
+      --header 'User-Agent: insomnia/8.6.1' \
+      --header 'anthropic-version: 2023-06-01' \
+      --header 'x-api-key: <<YOUR_ANTHROPIC_API_KEY>>' \
+      --data '{
+            "model": "claude-3-opus-20240229",
+            "max_tokens": 1,
+            "system": "Respond only in Spanish.",
+            "messages": [
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": "Test"
+                        }
+                    ]
+                }
+            ],
+            "stream": true
+    }'
+    ```
+
+  </Step>
+</Steps>

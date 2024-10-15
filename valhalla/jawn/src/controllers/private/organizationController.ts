@@ -23,11 +23,36 @@ import {
   UpdateOrganizationParams,
 } from "../../managers/organization/OrganizationManager";
 import { supabaseServer } from "../../lib/db/supabase";
+import { StripeManager } from "../../managers/stripe/StripeManager";
 
 @Route("v1/organization")
 @Tags("Organization")
 @Security("api_key")
 export class OrganizationController extends Controller {
+  @Post("/user/accept_terms")
+  public async acceptTerms(
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<null, string>> {
+    if (!request.authParams.userId) {
+      return err("User not found");
+    }
+
+    const result = await supabaseServer.client.auth.admin.updateUserById(
+      request.authParams.userId,
+      {
+        user_metadata: {
+          accepted_terms_date: new Date().toISOString(),
+        },
+      }
+    );
+
+    if (result.error) {
+      return err(result.error.message);
+    }
+
+    return ok(null);
+  }
+
   @Post("/create")
   public async createNewOrganization(
     @Body()
@@ -92,11 +117,44 @@ export class OrganizationController extends Controller {
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<null, string>> {
     const organizationManager = new OrganizationManager(request.authParams);
+    const org = await organizationManager.getOrg();
+    if (org.error || !org.data) {
+      return err(`Error getting organization: ${org.error}`);
+    }
+
+    if (org.data.tier === "enterprise") {
+      // Enterprise tier: Proceed to add member without additional checks
+    } else if (org.data.tier === "pro-20240913") {
+      // Pro tier: Update Stripe user count before adding member
+      const memberCount = await organizationManager.getMemberCount(true);
+      if (
+        memberCount.error ||
+        memberCount.data == null ||
+        memberCount.data < 0
+      ) {
+        return err(memberCount.error ?? "Error getting member count");
+      }
+
+      const stripeManager = new StripeManager(request.authParams);
+
+      const userCount = await stripeManager.updateProUserCount(
+        memberCount.data + 1
+      );
+
+      if (userCount.error) {
+        return err(userCount.error ?? "Error updating pro user count");
+      }
+    } else {
+      return err(
+        "Your current tier does not allow adding members. Please upgrade to Pro to add members."
+      );
+    }
 
     const result = await organizationManager.addMember(
       organizationId,
       requestBody.email
     );
+
     if (result.error || !result.data) {
       this.setStatus(500);
       return err(result.error ?? "Error adding member to organization");
@@ -262,7 +320,21 @@ export class OrganizationController extends Controller {
     @Query() memberId: string,
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<null, string>> {
+    const stripeManager = new StripeManager(request.authParams);
     const organizationManager = new OrganizationManager(request.authParams);
+
+    const memberCount = await organizationManager.getMemberCount(true);
+    if (memberCount.error || memberCount.data == null || memberCount.data < 0) {
+      return err(memberCount.error ?? "Error getting member count");
+    }
+
+    // const userCount = await stripeManager.updateProUserCount(
+    //   memberCount.data - 1
+    // );
+
+    // if (userCount.error) {
+    //   return err(userCount.error ?? "Error updating pro user count");
+    // }
 
     const result = await organizationManager.removeOrganizationMember(
       organizationId,

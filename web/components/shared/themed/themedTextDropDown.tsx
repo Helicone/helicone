@@ -1,117 +1,112 @@
-import { useEffect, useState } from "react";
-import { Result } from "../../../lib/result";
+import { Button } from "@/components/ui/button";
 import {
-  SearchSelect,
-  SearchSelectItem,
-  Tab,
-  TabGroup,
-  TabList,
-  TextInput,
-} from "@tremor/react";
-import React from "react";
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { useState } from "react";
+import { Result } from "../../../lib/result";
 
 interface ThemedTextDropDownProps {
   options: string[];
   onChange: (option: string | null) => void;
   value: string;
   onSearchHandler?: (search: string) => Promise<Result<void, string>>;
+  hideTabModes?: boolean;
 }
 
 export function ThemedTextDropDown(props: ThemedTextDropDownProps) {
-  const { options: parentOptions, onChange, value, onSearchHandler } = props;
-  const [selected, setSelected] = useState(value);
+  const {
+    options: parentOptions,
+    onChange,
+    value,
+    onSearchHandler,
+    hideTabModes = false,
+  } = props;
+
   const [query, setQuery] = useState("");
   const [tabMode, setTabMode] = useState<"smart" | "raw">("smart");
-
-  const [filteredOptions, setFilteredOptions] =
-    useState<string[]>(parentOptions);
-
-  useEffect(() => {
-    onSearchHandler?.(query);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query]);
-
-  useEffect(() => {
-    const filterOptions = query
-      ? parentOptions.filter((option) =>
-          option
-            .toLowerCase()
-            .replace(/\s+/g, "")
-            .includes(query.toLowerCase().replace(/\s+/g, ""))
-        )
-      : parentOptions;
-
-    if (query && !filterOptions.includes(query)) {
-      filterOptions.push(query);
-    }
-
-    setFilteredOptions(filterOptions);
-  }, [query, parentOptions]);
+  const [open, setOpen] = useState(false);
 
   const handleValueChange = (value: string) => {
-    setSelected(value);
+    setQuery(value);
     onChange(value);
-    if (!filteredOptions.includes(value)) {
-      setFilteredOptions((prevOptions) => [...prevOptions, value]);
-    }
+    setOpen(false);
   };
+
+  const filteredOptions = Array.from(new Set([...parentOptions, query]))
+    .filter(Boolean)
+    .sort()
+    .filter((option) => option.toLowerCase().includes(query.toLowerCase()));
 
   return (
     <div className="w-full flex flex-col gap-1">
-      <div className="flex items-center gap-1 text-xs w-full justify-end">
-        <div>
-          <TabGroup>
-            <TabList variant="solid" defaultValue="1">
-              <Tab
-                value="1"
-                className="text-xs px-2 py-0.5"
-                onClick={() => {
-                  setTabMode("smart");
-                }}
-              >
-                smart
-              </Tab>
-              <Tab
-                value="2"
-                className="text-xs px-2 py-0.5"
-                onClick={() => {
-                  setTabMode("raw");
-                }}
-              >
-                raw
-              </Tab>
-            </TabList>
-          </TabGroup>
+      {!hideTabModes && (
+        <div className="flex items-center gap-1 text-xs w-full justify-end">
+          <div>{/* Your Tab implementation goes here */}</div>
         </div>
-      </div>
+      )}
       {tabMode === "smart" ? (
-        <SearchSelect
-          searchValue={selected}
-          onSearchValueChange={(value) => {
-            setQuery(value);
-            handleValueChange(value);
-          }}
-          value={selected}
-          onValueChange={(value) => {
-            handleValueChange(value);
-          }}
-          onSelect={async () => {
-            await onSearchHandler?.(query);
-          }}
-          enableClear={true}
-        >
-          {filteredOptions.map((option, i) => (
-            <SearchSelectItem value={option} key={`${i}-${option}`}>
-              {option}
-            </SearchSelectItem>
-          ))}
-        </SearchSelect>
+        <Popover open={open} onOpenChange={setOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              role="combobox"
+              aria-expanded={open}
+              className="w-full justify-between text-xs"
+              size="md_sleek"
+            >
+              {value || "Select or enter a value"}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-full p-0">
+            <Command>
+              <CommandInput
+                placeholder="Select or enter a value"
+                value={query}
+                onValueChange={(value) => {
+                  setQuery(value);
+                  onSearchHandler?.(value);
+                }}
+                className="text-xs h-6"
+              />
+              <CommandList>
+                {filteredOptions.length === 0 && (
+                  <CommandEmpty>No results found.</CommandEmpty>
+                )}
+                <CommandGroup>
+                  {filteredOptions.map((option, i) => (
+                    <CommandItem
+                      key={`${i}-${option}`}
+                      value={option}
+                      onSelect={() => handleValueChange(option)}
+                      className="text-xs"
+                    >
+                      {option}
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </CommandList>
+            </Command>
+          </PopoverContent>
+        </Popover>
       ) : (
-        <TextInput
+        <input
+          type="text"
           value={value}
           onChange={(e) => {
             onChange(e.target.value);
           }}
+          className="border border-gray-300 rounded-md px-2 py-1 text-sm w-full"
+          placeholder="Enter a value"
         />
       )}
     </div>

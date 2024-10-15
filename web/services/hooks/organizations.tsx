@@ -6,6 +6,7 @@ import Cookies from "js-cookie";
 import { OrgContextValue } from "../../components/layout/organizationContext";
 import { ORG_ID_COOKIE_KEY } from "../../lib/constants";
 import { getJawnClient } from "../../lib/clients/jawn";
+import posthog from "posthog-js";
 
 const useGetOrgMembers = (orgId: string) => {
   const jawn = getJawnClient(orgId);
@@ -13,25 +14,77 @@ const useGetOrgMembers = (orgId: string) => {
     queryKey: ["OrganizationsMembers", orgId],
     queryFn: async (query) => {
       const organizationId = query.queryKey[1];
-      const { data: orgMembers, error } = await jawn.GET(
-        `/v1/organization/{organizationId}/members`,
-        {
-          params: {
-            path: {
-              organizationId,
+      if (!organizationId) {
+        return [];
+      }
+      try {
+        const { data: orgMembers, error } = await jawn.GET(
+          `/v1/organization/{organizationId}/members`,
+          {
+            params: {
+              path: {
+                organizationId,
+              },
             },
-          },
-        }
-      );
+          }
+        );
 
-      return orgMembers;
+        if (error) {
+          console.error("Error fetching org members:", error);
+          return [];
+        }
+
+        return orgMembers.data || [];
+      } catch (error) {
+        console.error("Error in useGetOrgMembers:", error);
+        return [];
+      }
     },
     refetchOnWindowFocus: false,
   });
   return {
-    data,
+    data: data || [],
     isLoading,
     refetch,
+  };
+};
+
+const useGetOrgSlackIntegration = (orgId: string) => {
+  const jawn = getJawnClient(orgId);
+  const { data, isLoading } = useQuery({
+    queryKey: ["OrganizationsSlackIntegration", orgId],
+    queryFn: async (query) => {
+      const { data, error } = await jawn.GET("/v1/integration/slack/settings");
+
+      if (error) {
+        console.error("Error fetching slack integration:", error);
+        return null;
+      }
+      return data;
+    },
+  });
+  return {
+    data,
+    isLoading,
+  };
+};
+
+const useGetOrgSlackChannels = (orgId: string) => {
+  const jawn = getJawnClient(orgId);
+  const { data, isLoading } = useQuery({
+    queryKey: ["OrganizationsSlackChannels", orgId],
+    queryFn: async (query) => {
+      const { data, error } = await jawn.GET("/v1/integration/slack/channels");
+      if (error) {
+        console.error("Error fetching slack channels:", error);
+        return null;
+      }
+      return data.data || [];
+    },
+  });
+  return {
+    data,
+    isLoading,
   };
 };
 
@@ -181,6 +234,49 @@ const useOrgsContextManager = () => {
   }, [orgs, user?.id, refreshCurrentOrg]);
 
   useEffect(() => {
+    if (user) {
+      posthog.identify(
+        user.id,
+        {
+          name: user.user_metadata?.name,
+        },
+        {
+          email: user.email,
+        }
+      );
+    }
+
+    if (org) {
+      posthog.group("organization", org.id, {
+        name: org.name || "",
+        tier: org.tier || "",
+        stripe_customer_id: org.stripe_customer_id || "",
+        organization_type: org.organization_type || "",
+        date_joined: org.created_at || "",
+      });
+
+      if (user && !process.env.NEXT_PUBLIC_IS_ON_PREM) {
+        window.pylon = {
+          chat_settings: {
+            app_id: "f766dfd3-28f8-40a8-872f-351274cbd306",
+            email: user.email,
+            name: user.user_metadata?.name,
+            avatar_url: user.user_metadata?.avatar_url,
+          },
+        };
+
+        if (window.Pylon) {
+          window.Pylon("setNewIssueCustomFields", {
+            organization_id: org.id,
+            organization_name: org.name,
+            organization_tier: org.tier,
+          });
+        }
+      }
+    }
+  }, [user, org?.id, org?.name, org?.tier]);
+
+  useEffect(() => {
     if (orgs && orgs.length > 0) {
       const orgIdFromCookie = Cookies.get(ORG_ID_COOKIE_KEY);
       const orgFromCookie = orgs.find((org) => org.id === orgIdFromCookie);
@@ -202,6 +298,7 @@ const useOrgsContextManager = () => {
   }, [org?.organization_type, org?.reseller_id, orgs]);
 
   let orgContextValue: OrgContextValue | null = null;
+
   orgContextValue = {
     allOrgs: orgs ?? [],
     currentOrg: org ?? undefined,
@@ -232,4 +329,6 @@ export {
   setOrgCookie,
   useGetOrg,
   useGetOrgMembersAndOwner,
+  useGetOrgSlackIntegration,
+  useGetOrgSlackChannels,
 };

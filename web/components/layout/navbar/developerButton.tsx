@@ -5,7 +5,6 @@ import {
   BookOpenIcon,
   ChatBubbleBottomCenterIcon,
   ChevronRightIcon,
-  CodeBracketIcon,
   GlobeAltIcon,
   MapIcon,
   UserGroupIcon,
@@ -50,11 +49,6 @@ const solutions = [
     name: "Webhooks",
     href: "https://docs.helicone.ai/features/webhooks",
     icon: GlobeAltIcon,
-  },
-  {
-    name: "GraphQL",
-    href: "https://docs.helicone.ai/graphql/getting-started",
-    icon: CodeBracketIcon,
   },
 ];
 

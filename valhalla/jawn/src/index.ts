@@ -2,8 +2,15 @@ require("dotenv").config({
   path: "./.env",
 });
 
+import bodyParser from "body-parser";
 import express, { NextFunction } from "express";
 import swaggerUi from "swagger-ui-express";
+import { proxyRouter } from "./controllers/public/proxyController";
+import {
+  DLQ_WORKER_COUNT,
+  NORMAL_WORKER_COUNT,
+  SCORES_WORKER_COUNT,
+} from "./lib/clients/kafkaConsumers/constant";
 import { tokenRouter } from "./lib/routers/tokenRouter";
 import { runLoopsOnce, runMainLoops } from "./mainLoops";
 import { authMiddleware } from "./middleware/auth";
@@ -14,11 +21,7 @@ import * as publicSwaggerDoc from "./tsoa-build/public/swagger.json";
 import { initLogs } from "./utils/injectLogs";
 import { initSentry } from "./utils/injectSentry";
 import { startConsumers } from "./workers/consumerInterface";
-import {
-  DLQ_WORKER_COUNT,
-  NORMAL_WORKER_COUNT,
-} from "./lib/clients/kafkaConsumers/constant";
-import { cacheMiddleware } from "./middleware/cache";
+import { DelayedOperationService } from "./lib/shared/delayedOperationService";
 
 export const ENVIRONMENT: "production" | "development" = (process.env
   .VERCEL_ENV ?? "development") as any;
@@ -34,16 +37,34 @@ const allowedOriginsEnv = {
     /^https?:\/\/(www\.)?helicone-git-valhalla-use-jawn-to-read-helicone\.vercel\.app$/,
     /^http:\/\/localhost:3000$/,
     /^http:\/\/localhost:3001$/,
+    /^http:\/\/localhost:3002$/,
     /^https?:\/\/(www\.)?eu\.helicone\.ai$/, // Added eu.helicone.ai
     /^https?:\/\/(www\.)?us\.helicone\.ai$/,
   ],
-  development: [/^http:\/\/localhost:3000$/, /^http:\/\/localhost:3001$/],
-  preview: [/^http:\/\/localhost:3000$/, /^http:\/\/localhost:3001$/],
+  development: [
+    /^http:\/\/localhost:3000$/,
+    /^http:\/\/localhost:3001$/,
+    /^http:\/\/localhost:3002$/,
+  ],
+  preview: [
+    /^http:\/\/localhost:3000$/,
+    /^http:\/\/localhost:3001$/,
+    /^http:\/\/localhost:3002$/,
+  ],
 };
 
 const allowedOrigins = allowedOriginsEnv[ENVIRONMENT];
 
 const app = express();
+
+app.use(bodyParser.json({ limit: "50mb" }));
+app.use(
+  bodyParser.urlencoded({
+    limit: "50mb",
+    extended: true,
+    parameterLimit: 50000,
+  })
+);
 
 const KAFKA_CREDS = JSON.parse(process.env.KAFKA_CREDS ?? "{}");
 const KAFKA_ENABLED = (KAFKA_CREDS?.KAFKA_ENABLED ?? "false") === "true";
@@ -52,6 +73,9 @@ if (KAFKA_ENABLED) {
   startConsumers({
     dlqCount: DLQ_WORKER_COUNT,
     normalCount: NORMAL_WORKER_COUNT,
+    scoresCount: SCORES_WORKER_COUNT,
+    scoresDlqCount: SCORES_WORKER_COUNT,
+    backFillCount: 0,
   });
 }
 
@@ -96,6 +120,10 @@ app.options("*", (req, res) => {
 
 const v1APIRouter = express.Router();
 const unAuthenticatedRouter = express.Router();
+const v1ProxyRouter = express.Router();
+
+v1ProxyRouter.use(proxyRouter);
+app.use(v1ProxyRouter);
 
 unAuthenticatedRouter.use(
   "/docs",
@@ -109,17 +137,26 @@ unAuthenticatedRouter.use("/download/swagger.json", (req, res) => {
   res.json(publicSwaggerDoc as any);
 });
 
-v1APIRouter.use(authMiddleware);
+// v1APIRouter.use(
+//   "/v1/public/dataisbeautiful",
+//   unauthorizedCacheMiddleware("/v1/public/dataisbeautiful")
+// );
 
-v1APIRouter.use("/v1/public", cacheMiddleware);
+v1APIRouter.use(authMiddleware);
 
 // Create and use the rate limiter
 if (IS_RATE_LIMIT_ENABLED) {
   v1APIRouter.use(limiter);
 }
 
-v1APIRouter.use(express.json({ limit: "50mb" }));
-v1APIRouter.use(express.urlencoded({ limit: "50mb" }));
+v1APIRouter.use(bodyParser.json({ limit: "50mb" }));
+v1APIRouter.use(
+  bodyParser.urlencoded({
+    limit: "50mb",
+    extended: true,
+    parameterLimit: 50000,
+  })
+);
 registerPublicTSOARoutes(v1APIRouter);
 registerPrivateTSOARoutes(v1APIRouter);
 
@@ -175,5 +212,30 @@ const server = app.listen(
 
 server.on("error", console.error);
 
-// Thisp
 server.setTimeout(1000 * 60 * 10); // 10 minutes
+
+// This shuts down the server and all delayed operations with delay only locally, on AWS it will be killed by the OS with no delay
+// Please wait few minutes before terminating the original task on AWS
+async function gracefulShutdown(signal: string) {
+  console.log(`Received ${signal}. Starting graceful shutdown...`);
+
+  server.close(async () => {
+    console.log("HTTP server closed.");
+
+    await DelayedOperationService.getInstance().executeShutdown();
+
+    console.log("Graceful shutdown completed.");
+    process.exit(0);
+  });
+
+  // If server hasn't closed in 30 seconds, force shutdown
+  setTimeout(() => {
+    console.error(
+      "Could not close connections in time, forcefully shutting down"
+    );
+    process.exit(1);
+  }, 30000);
+}
+
+process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
+process.on("SIGINT", () => gracefulShutdown("SIGINT"));

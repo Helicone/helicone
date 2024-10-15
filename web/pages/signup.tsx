@@ -1,7 +1,7 @@
 import { InboxArrowDownIcon } from "@heroicons/react/24/outline";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import useNotification from "../components/shared/notification/useNotification";
 import ThemedModal from "../components/shared/themed/themedModal";
 import AuthForm from "../components/templates/auth/authForm";
@@ -9,17 +9,25 @@ import { DEMO_EMAIL } from "../lib/constants";
 import PublicMetaData from "../components/layout/public/publicMetaData";
 import { GetServerSidePropsContext } from "next";
 import posthog from "posthog-js";
+import { InfoBanner } from "../components/shared/themed/themedDemoBanner";
 
 const SignUp = () => {
   const supabase = useSupabaseClient();
   const { setNotification } = useNotification();
   const [showEmailConfirmation, setShowEmailConfirmation] = useState(false);
-
   const user = useUser();
   const router = useRouter();
+  const { demo = "false" } = router.query;
+
+  useEffect(() => {
+    const { demo } = router.query;
+    if (demo === "true") {
+      localStorage.setItem("openDemo", "true");
+    }
+  }, [router.query]);
 
   if (user && user.email !== DEMO_EMAIL) {
-    router.push("/welcome");
+    router.push(`/welcome`);
   }
 
   return (
@@ -29,6 +37,8 @@ const SignUp = () => {
       }
       ogImageUrl={"https://www.helicone.ai/static/helicone-og.webp"}
     >
+      {demo === "true" && <InfoBanner />}
+
       <AuthForm
         handleEmailSubmit={async (email: string, password: string) => {
           const origin = window.location.origin;

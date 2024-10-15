@@ -1,0 +1,59 @@
+---
+title: "Firecrawl Integration"
+sidebarTitle: "Firecrawl"
+description: "Integrate Helicone with Firecrawl to enhance your web scraping and AI applications with comprehensive observability and analytics."
+---
+
+## Introduction
+
+Firecrawl is a powerful web scraping and crawling tool designed for AI applications. This integration with Helicone allows you to leverage advanced observability tools for your Firecrawl operations, providing deeper insights into your web data extraction and LLM processes.
+
+## Key Features
+
+- **Efficient Web Scraping**: Extract clean markdown or structured data from websites quickly.
+- **Comprehensive Crawling**: Navigate and retrieve data from all accessible subpages, even without a sitemap.
+- **Dynamic Content Handling**: Gather data from JavaScript-rendered content.
+- **LLM-Ready Output**: Returns clean, well-formatted markdown ready for use in LLM applications.
+- **Parallel Crawling**: Orchestrates the crawling process in parallel for faster results.
+- **Intelligent Caching**: Caches content to optimize performance and reduce unnecessary scraping.
+- **AI-Optimized**: Built by and for LLM engineers, providing clean data in the desired format.
+
+## Integration Steps
+
+<Steps>
+  <Step title="Create a Helicone account + Generate an API Key">
+    Log into [Helicone](https://www.helicone.ai) or create an account. Once you have an account, you
+    can generate an [API key](https://helicone.ai/developer).
+    <Note>
+      Make sure to generate a [write only API key](helicone-headers/helicone-auth).
+    </Note>
+  </Step>
+  <Step title="Obtain Firecrawl API Key">
+    Sign up for a Firecrawl account and obtain your API key from the [Firecrawl dashboard](https://firecrawl.dev).
+  </Step>
+  <Step title="Make API Requests with Helicone Integration">
+    Use the following cURL command as an example to make API requests to Firecrawl:
+
+    ```bash
+    curl --request POST \
+      --url https://firecrawl.helicone.ai/v0/scrape \
+      --header 'Helicone-Auth: YOUR_HELICONE_API_KEY' \
+      --header 'Authorization: Bearer YOUR_FIRECRAWL_API_KEY' \
+      --header 'Helicone-Target-Url: https://api.firecrawl.dev' \
+      --header 'Helicone-Target-Provider: Firecrawl' \
+      --header 'content-type: application/json' \
+      --data '{
+        "url": "firecrawl.dev"
+      }'
+    ```
+
+    Replace `YOUR_HELICONE_API_KEY` with your Helicone API key and `YOUR_FIRECRAWL_API_KEY` with your Firecrawl API key.
+  </Step>
+  <Step title="View Your Logs">
+    🎉 You're all set! View your logs at [Helicone](https://www.helicone.ai).
+  </Step>
+</Steps>
+
+By integrating Firecrawl with Helicone, you can build advanced web scraping and AI applications with comprehensive observability, allowing you to optimize your operations and deliver more efficient, data-driven solutions.
+
+For more details on Firecrawl features and usage, visit the [Firecrawl documentation](https://docs.firecrawl.dev/).

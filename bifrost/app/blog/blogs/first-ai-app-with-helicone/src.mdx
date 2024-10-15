@@ -1,0 +1,144 @@
+
+![Our Designer made an AI app with Helicone](/static/blog/first-ai-app/lina-first-ai-app.webp)
+
+Heya! My name is Lina, I'm a product designer at Helicone and have recently joined the team. 
+
+I've always been interested in designing for people and creating delight in digital experiences, but I was rarely on the technical implementation side. As the first non-technical member at Helicone, my main goal was to understand the product deeply. 
+
+**So I decided to make my first AI app** - in the spirit of getting a first-hand exposure to our user's pain points. 
+
+## So, what's the app?
+
+Over the course of a week, I bothered Justin (CEO of Helicone) and begged him to teach me how to create an **<span style={{color: '#0ea5e9'}}>Emoji Translator</span>** - an app that uses AI to interpret and translate text messages into emoji expressions. The app will suggest relevant emojis based on the sentiment you want to convey. Eventually, you can send emojis back and forth with your friends - this is just for fun by the way, and probably doesn't solve any actual problems.
+
+
+![Emoji translater](/static/blog/first-ai-app/emoji-converter.webp)
+
+
+
+## The First Impression
+
+I integrated it with Helicone to see what types of texts my friends are sending to the Emoji Translator, just for fun.  
+
+As a non-technical user, whenever I encounter a product that requires me to use the command line or touch the codebase, I like it a lot less. *I worried about having to install SDKs and go through lengthy onboarding to get started.*
+
+**Integration**
+
+**<span style={{color: '#0ea5e9'}}>With Helicone, the integration was pretty straightforward.</span>** I just had to change my endpoint from Open AI to the Open AI custom domain that Helicone provided: `https://oai.helicone.ai/v1` and it stored all my AI requests in an exportable table.
+
+![1-line integration](/static/blog/first-ai-app/integration.webp)
+
+**Onboarding**
+
+During onboarding, I sent my first request and Helicone made sure the request was received before moving on. I like having the confirmation of a successful integration. 
+
+
+![Helicone listening to events during onboarding to make sure everything is integrated correctly.](/static/blog/first-ai-app/listening-for-events.gif)
+
+
+
+## Feature Integration 
+
+I decided to integrate with every Helicone feature, just for fun. I'll walk through my top three, starting with *Prompts*. 
+
+### 1. Prompts 
+
+**Problem: <span style={{color: '#0ea5e9'}}>I want to tweak my prompt and test it with some sample inputs without changing my code in production. </span>**
+
+**Solution:** Helicone automatically tracked my current prompt in production. Under the "Prompts" tab, I was able to experiment with a different version of my prompt, test it with a different dataset and with a different model (<a href="https://docs.helicone.ai/features/prompts" target="_blank" rel="noopener noreferrer">doc</a>). 
+
+
+**Impact:** What was cool was being able to see how the new prompt compares to the production prompt, and see the output in almost split seconds without having to touch my code. Once I was happy with the updated prompt, that's when I updated the prompt in my codebase. 
+
+![Helicone's Experiment feature tracks prompt version automatically and allows you to test prompts without touching production code.](/static/blog/first-ai-app/compare-experiments.webp)
+
+Now, whenever I change my prompt in production, Helicone detects it automatically and keeps track of the version history for me. *The prompts and experiments feature could be really useful to do prompt regression test more easily.*
+
+
+
+### 2. Custom Properties
+
+**Problem: <span style={{color: '#0ea5e9'}}>Every time I change my prompt, I send a ton of requests to test the output. For debugging purpose, I need a way to filter only my requests. </span>**
+
+**Solution:** I added a `User` custom property and assigned my name to all the requests sent by me. As soon as the requests were received, I'm able to filter all requests by the user property on the "Requests" page. 
+
+![Helicone's Custom Properties allows you to filter and segment your data easily.](/static/blog/first-ai-app/custom-properties.webp)
+
+As a bonus, I'm able to view my detailed usage when I head to the “Users” tab which includes the `total cost`, `number of requests made` and a log of requests made by me, in this case (<a href="https://docs.helicone.ai/features/advanced-usage/custom-properties" target="_blank" rel="noopener noreferrer">doc</a>).    
+
+![Helicone's User Metrics show the detailed metrics by users.](/static/blog/first-ai-app/user-metrics.webp)
+
+**Impact:** This feature lends itself to let you do a ton of fun things like segmenting requests by user types, especially if you have user tiers like *free* v.s. *premium*, or if your app has multiple features that use the LLM, then you can use custom properties to specify which feature the requests were coming from, or even where in the world the requests are coming from - if you specific the geographical location as a custom property. 
+
+**→ This is a useful article on [how to use custom properties](https://www.helicone.ai/blog/custom-properties).**
+
+
+### 3. Caching
+
+**Problem: <span style={{color: '#0ea5e9'}}>This is just for fun, but imagine McDonald's customers have to place their orders using emojis only, then having cached responses would be super helpful for these reasons:</span>**
+
+- I don't want the requests to hit OpenAI all the time if french fries and chicken nuggets were among the most popular items people order → I want to save 💰 to actually buy my fries and nuggets.
+- If two people were to order Junior Chicken, I want the output to be the same.
+- I want the response to be fast, if not INSTANT ⚡.
+
+**Solution:** I can enable cache in Helicone by simply setting it to `true` in the header (<a href="https://docs.helicone.ai/features/advanced-usage/caching" target="_blank" rel="noopener noreferrer">doc</a>). There are other parameters I played with, such as: 
+- `cache-control` where I can limit my cache to just 2 hours. 
+- `cache-bucket-max-size` that allowed me to limit my bucket size just 10 items (20 items is the max on Helicone's free plan). 
+- `cache-seed`, which allowed me to restart my cache whenever I have an erroneous output (i.e. when the input "Chicken Nuggets" produces `🍔`). 
+
+
+**Impact:** By caching, developers can save a ton of money in the long term. A good use case is a conversational AI that answers frequently asked questions. In addition, caching also makes the user experience sooo much better without having to make the user wait or produce an inaccurate output.
+
+
+
+### Rating Helicone
+
+![Rating Helicone's Dashboard](/static/blog/first-ai-app/helicone-dashboard.webp)
+
+
+**Integration**
+
+Helicone was very easy to use, and the fact that you can access all features using Helicone header makes it appealing to commit as a long-term user. In the future, you can likely access new features in this manner.  
+
+
+**User Interface**
+
+The UI is very clean, which I love. It's also surprisingly simple and intuitive to use for a dev tool, making it accessible to non-technical users. 
+
+
+**Docs**
+
+As a visual learner, I appreciate the step-by-step breakdown and images in the docs, which makes it easy to follow. 
+
+
+**Customer Service** 
+
+The Helicone team is fast to respond to inquiries, and work hard to get to everyone's questions. The best way to reach out is by joining the <a href="https://discord.gg/hFUtEafSNr" target="_blank" rel="noopener noreferrer"><span style={{color: '#0ea5e9'}}>Discord</span></a>. 
+
+
+**Product Experience**
+
+Helicone is lightweight and capable of handling billions of requests. Using any feature feels like plug-and-play. I can access almost any feature just by adding a <a href="https://docs.helicone.ai/helicone-headers/header-directory" target="_blank" rel="noopener noreferrer"><span style={{color: '#0ea5e9'}}>header</span></a>. I love not having to read lengthy docs to figure out how things work.
+
+
+## So, who's Helicone for?
+
+As someone who's not technical, I don't like having to spend a lot of time figuring out technical problems. Having the ability to plug and play was super useful. Helicone is built to be accessible for people with all sorts of coding experience, from beginners / non-techncial users, to indie hackers and enterprises. 
+
+
+## Recommendations
+
+As a member of Helicone's team, I would recommend new Helicone users to: 
+
+- **<span style={{color: '#0ea5e9'}}>Ask the Helicone team questions!</span>** We're all very friendly.
+- **<span style={{color: '#0ea5e9'}}>Use the docs, and join <a href="https://discord.gg/hFUtEafSNr" target="_blank" rel="noopener noreferrer"><span style={{color: '#0ea5e9'}}>Discord</span></a>!</span>** But if the docs are unclear, please let us know.
+- **<span style={{color: '#0ea5e9'}}>Continue to share feedback and your use cases!</span>** 
+
+In order to become developer's favourite tools, we need your help. We will continue to listen, and dream up of a way to make monitoring your LLM a breeze. 🍃
+
+
+### Resources 
+
+Contact us about your use case: https://www.helicone.ai/contact
+
+Find out more about Helicone's use cases: https://docs.helicone.ai/use-cases/experiments

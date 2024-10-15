@@ -33,7 +33,9 @@ const PublicMetaData = (props: PublicMetaDataProps) => {
     typeof window !== "undefined" && window.location.hostname === "localhost";
 
   // Conditionally set favicon path
-  const faviconPath = isLocalhost ? "/static/logo-dev.png" : "/static/logo.png";
+  const faviconPath = isLocalhost
+    ? "/static/logo-dev.png"
+    : "/static/logo.webp";
 
   return (
     <>
@@ -63,7 +65,7 @@ const PublicMetaData = (props: PublicMetaDataProps) => {
               "@type": "Organization",
               name: "Helicone",
               url: "https://www.helicone.ai",
-              logo: "https://www.helicone.ai/static/logo.png",
+              logo: "https://www.helicone.ai/static/logo.webp",
               contactPoint: {
                 "@type": "ContactPoint",
                 contactType: "customer support",

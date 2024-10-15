@@ -8,11 +8,15 @@ import {
   dbLoggableRequestFromProxyRequest,
 } from "../dbLogger/DBLoggable";
 import {
+  CallProps,
   callPropsFromProxyRequest,
   callProvider,
   callProviderWithRetry,
 } from "../clients/ProviderClient";
-import { HeliconeProxyRequest } from "../models/HeliconeProxyRequest";
+import {
+  HeliconeProxyRequest,
+  RetryOptions,
+} from "../models/HeliconeProxyRequest";
 
 export type ProxyResult = {
   loggable: DBLoggable;
@@ -35,17 +39,33 @@ function getStatus(
     return -100;
   }
 }
+async function getProviderResponse(
+  callProps: CallProps,
+  retryOptions: RetryOptions | null,
+  responseOverride?: Response
+): Promise<Response> {
+  if (responseOverride) {
+    return responseOverride;
+  } else if (retryOptions) {
+    return callProviderWithRetry(callProps, retryOptions);
+  } else {
+    return callProvider(callProps);
+  }
+}
 
 export async function handleProxyRequest(
-  proxyRequest: HeliconeProxyRequest
+  proxyRequest: HeliconeProxyRequest,
+  responseOverride?: Response
 ): Promise<Result<ProxyResult, string>> {
   const { retryOptions } = proxyRequest;
 
   const requestStartTime = new Date();
   const callProps = callPropsFromProxyRequest(proxyRequest);
-  const response = await (retryOptions
-    ? callProviderWithRetry(callProps, retryOptions)
-    : callProvider(callProps));
+  const response = await getProviderResponse(
+    callProps,
+    retryOptions,
+    responseOverride
+  );
 
   const interceptor = response.body
     ? new ReadableInterceptor(response.body, proxyRequest.isStream)

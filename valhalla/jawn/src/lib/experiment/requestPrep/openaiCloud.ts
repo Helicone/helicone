@@ -1,6 +1,6 @@
-import { Experiment } from "../../stores/experimentStore";
-import { placeInputValues } from "../helpers";
+import { autoFillInputs } from "@helicone/prompts";
 import { PreparedRequest, PreparedRequestArgs } from "./PreparedRequest";
+import { ENVIRONMENT } from "../../..";
 
 function prepareRequestOpenAI(
   requestPath: string,
@@ -30,13 +30,15 @@ export function prepareRequestOpenAIFull({
   datasetRow,
   requestId,
 }: PreparedRequestArgs): PreparedRequest {
-  const newRequestBody = placeInputValues(
-    datasetRow.inputRecord?.inputs ?? {},
-    hypothesis.promptVersion?.template ?? {}
-  );
+  const newRequestBody = autoFillInputs({
+    template: hypothesis.promptVersion?.template ?? {},
+    inputs: datasetRow.inputRecord?.inputs ?? {},
+    autoInputs: datasetRow.inputRecord?.autoInputs ?? [],
+  });
 
   const { url: fetchUrl, headers } = prepareRequestOpenAI(
-    datasetRow.inputRecord!.requestPath,
+    datasetRow.inputRecord?.requestPath ??
+      `${process.env.HELICONE_WORKER_URL}/v1/chat/completions`,
     proxyKey,
     requestId
   );

@@ -1,39 +1,22 @@
-import { useState } from "react";
+import { UserGroupIcon } from "@heroicons/react/24/outline";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import { useState, useCallback } from "react";
 import { useDebounce } from "../../../services/hooks/debounce";
 import { useUsers } from "../../../services/hooks/users";
-import {
-  filterListToTree,
-  filterUIToFilterLeafs,
-} from "../../../services/lib/filters/filterDefs";
 import { userTableFilters } from "../../../services/lib/filters/frontendFilterDefs";
 import { SortLeafRequest } from "../../../services/lib/sorts/requests/sorts";
 import { SortDirection } from "../../../services/lib/sorts/users/sorts";
 import AuthHeader from "../../shared/authHeader";
-import useNotification from "../../shared/notification/useNotification";
-import ThemedTableV5 from "../../shared/themed/table/themedTableV5";
-import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
+import ThemedTable from "../../shared/themed/table/themedTable";
+import {
+  UIFilterRowTree,
+  filterUITreeToFilterNode,
+  getRootFilterNode,
+} from "../../../services/lib/filters/uiFilterRowTree";
 import TableFooter from "../requestsV2/tableFooter";
 import { INITIAL_COLUMNS } from "./initialColumns";
-import { useRouter } from "next/router";
-import { UserGroupIcon } from "@heroicons/react/24/outline";
-import Link from "next/link";
 
-function formatNumber(num: number) {
-  const numParts = num.toString().split(".");
-
-  if (numParts.length > 1) {
-    const decimalPlaces = numParts[1].length;
-    if (decimalPlaces < 2) {
-      return num.toFixed(2);
-    } else if (decimalPlaces > 6) {
-      return num.toFixed(6);
-    } else {
-      return num;
-    }
-  } else {
-    return num.toFixed(2);
-  }
-}
 interface UsersPageV2Props {
   currentPage: number;
   pageSize: number;
@@ -47,7 +30,9 @@ interface UsersPageV2Props {
 const UsersPageV2 = (props: UsersPageV2Props) => {
   const { currentPage, pageSize, sort } = props;
 
-  const [advancedFilters, setAdvancedFilters] = useState<UIFilterRow[]>([]);
+  const [advancedFilters, setAdvancedFilters] = useState<UIFilterRowTree>(
+    getRootFilterNode()
+  );
   const debouncedAdvancedFilters = useDebounce(advancedFilters, 500); // 0.5 seconds
 
   const router = useRouter();
@@ -65,17 +50,13 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
     currentPage,
     pageSize,
     sortLeaf,
-    filterListToTree(
-      filterUIToFilterLeafs(
-        userTableFilters.sort((a, b) => a.label.localeCompare(b.label)),
-        debouncedAdvancedFilters
-      ),
-      "and"
+    filterUITreeToFilterNode(
+      userTableFilters.sort((a, b) => a.label.localeCompare(b.label)),
+      debouncedAdvancedFilters
     )
   );
-  const { setNotification } = useNotification();
 
-  const checkIsNotUniqueUser = () => {
+  const checkIsNotUniqueUser = useCallback(() => {
     if (users.length === 0 || users.length > 1) {
       return false;
     }
@@ -84,22 +65,30 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
       const user = users[0];
       return user.user_id === "";
     }
-  };
+  }, [users]);
+
+  const onSetAdvancedFiltersHandler = useCallback(
+    (filters: UIFilterRowTree) => {
+      setAdvancedFilters(filters);
+    },
+    []
+  );
 
   return (
     <>
       <AuthHeader title={"Users"} />
       <div className="flex flex-col space-y-4">
-        <ThemedTableV5
+        <ThemedTable
           id="user-table"
           defaultData={users}
           defaultColumns={INITIAL_COLUMNS}
-          dataLoading={isLoading}
+          skeletonLoading={isLoading}
+          dataLoading={false}
           sortable={sort}
           advancedFilters={{
             filterMap: userTableFilters,
+            setAdvancedFilters: onSetAdvancedFiltersHandler,
             filters: advancedFilters,
-            setAdvancedFilters,
             searchPropertyFilters: async () => ({
               data: null,
               error: "Not implemented",

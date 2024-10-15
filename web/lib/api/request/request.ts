@@ -8,7 +8,6 @@ import {
   SortLeafRequest,
   buildRequestSort,
 } from "../../../services/lib/sorts/requests/sorts";
-import { Json } from "../../../supabase/database.types";
 import { Result, resultMap } from "../../result";
 import { dbExecute, dbQueryClickhouse } from "../db/dbExecute";
 import { LlmSchema } from "../models/requestResponseModel";
@@ -17,36 +16,27 @@ export type Provider = ProviderName | "CUSTOM";
 const MAX_TOTAL_BODY_SIZE = 3 * 1024 * 1024;
 
 export interface HeliconeRequest {
-  response_id: string;
-  response_created_at: string;
+  response_id: string | null;
+  response_created_at: string | null;
   response_body?: any;
   response_status: number;
   response_model: string | null;
   request_id: string;
-  request_model: string | null;
-  model_override: string | null;
   request_created_at: string;
   request_body: any;
   request_path: string;
   request_user_id: string | null;
-  request_properties: {
-    [key: string]: Json;
-  } | null;
-  request_feedback: {
-    [key: string]: Json;
-  } | null;
+  request_properties: Record<string, string> | null;
+  request_model: string | null;
+  model_override: string | null;
   helicone_user: string | null;
-  prompt_name: string | null;
-  prompt_regex: string | null;
-  key_name: string;
+  provider: Provider;
   delay_ms: number | null;
   time_to_first_token: number | null;
   total_tokens: number | null;
   prompt_tokens: number | null;
   completion_tokens: number | null;
-  provider: Provider;
-  node_id: string | null;
-  prompt_id: string;
+  prompt_id: string | null;
   feedback_created_at?: string | null;
   feedback_id?: string | null;
   feedback_rating?: boolean | null;
@@ -56,6 +46,10 @@ export interface HeliconeRequest {
   asset_ids: string[] | null;
   asset_urls: Record<string, string> | null;
   scores: Record<string, number> | null;
+  costUSD?: number | null;
+  properties: Record<string, string>;
+  assets: Array<string>;
+  target_url: string;
 }
 
 export async function getRequests(
@@ -180,7 +174,6 @@ export async function getRequestCountCached(
   FROM cache_hits
     left join request on cache_hits.request_id = request.id
     left join response on request.id = response.request
-    left join prompt on request.formatted_prompt_id = prompt.id
   WHERE (
     (${builtFilter.filter})
   )
@@ -209,7 +202,6 @@ export async function getRequestCount(
   SELECT count(request.id)::bigint as count
   FROM request
     left join response on request.id = response.request
-    left join prompt on request.formatted_prompt_id = prompt.id
     left join feedback on response.id = feedback.response_id
     left join job_node_request on request.id = job_node_request.request_id
   WHERE (
@@ -238,8 +230,35 @@ export async function getRequestCountClickhouse(
 
   const query = `
 SELECT
+  count(DISTINCT request_response_rmt.request_id) as count
+from request_response_rmt FINAL
+WHERE (${builtFilter.filter})
+  `;
+  const { data, error } = await dbQueryClickhouse<{ count: number }>(
+    query,
+    builtFilter.argsAcc
+  );
+  if (error !== null) {
+    return { data: null, error: error };
+  }
+
+  return { data: data[0].count, error: null };
+}
+
+export async function getRequestCachedCountClickhouse(
+  org_id: string,
+  filter: FilterNode
+): Promise<Result<number, string>> {
+  const builtFilter = await buildFilterWithAuthClickHouse({
+    org_id,
+    argsAcc: [],
+    filter,
+  });
+
+  const query = `
+SELECT
   count(DISTINCT r.request_id) as count
-from request_response_versioned r
+from cache_hits r
 WHERE (${builtFilter.filter})
   `;
   const { data, error } = await dbQueryClickhouse<{ count: number }>(

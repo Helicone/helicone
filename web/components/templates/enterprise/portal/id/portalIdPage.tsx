@@ -2,11 +2,7 @@ import {
   useGetOrg,
   useGetOrgMembers,
 } from "../../../../../services/hooks/organizations";
-import {
-  ORGANIZATION_COLORS,
-  ORGANIZATION_ICONS,
-  OrgLimits,
-} from "../../../organization/createOrgForm";
+import { OrgLimits } from "../../../organization/createOrgForm";
 import { getUSDateFromString } from "../../../../shared/utils/utils";
 import { clsx } from "../../../../shared/clsx";
 import OrgMembersPage from "../../../organization/members/orgMembersPage";
@@ -29,6 +25,10 @@ import HcBreadcrumb from "../../../../ui/hcBreadcrumb";
 import { formatISO } from "date-fns";
 import { useRequestsOverTime } from "../../../organization/plan/renderOrgPlan";
 import StyledAreaChart from "../../../dashboard/styledAreaChart";
+import {
+  ORGANIZATION_COLORS,
+  ORGANIZATION_ICONS,
+} from "@/components/templates/organization/orgConstants";
 
 interface PortalIdPageProps {
   orgId: string | null;
@@ -102,7 +102,7 @@ const PortalIdPage = (props: PortalIdPageProps) => {
   );
 
   const orgLimits = org?.limits as OrgLimits;
-  const owner = members?.data?.find((member) => member.org_role === "owner");
+  const owner = members?.find((member) => member.org_role === "owner");
 
   return (
     <div className="flex flex-col space-y-4">
@@ -221,7 +221,7 @@ const PortalIdPage = (props: PortalIdPageProps) => {
                   <div className="flex flex-col items-start space-y-1">
                     <p className="text-sm font-semibold">Members</p>
                     <p className="text-sm text-gray-500">
-                      {members?.data?.length || "n/a"}
+                      {members?.length || "n/a"}
                     </p>
                   </div>
                 </div>

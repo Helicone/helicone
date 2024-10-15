@@ -13,6 +13,7 @@ export const useHeliconeKeys = () => {
         .from("helicone_api_keys")
         .select("*")
         .eq("soft_delete", false)
+        .neq("api_key_name", "auto-generated-experiment-key")
         .eq("organization_id", org?.currentOrg?.id ?? "");
     },
     refetchOnWindowFocus: false,

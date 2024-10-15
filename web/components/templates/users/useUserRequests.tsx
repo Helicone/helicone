@@ -3,13 +3,14 @@ import {
   DASHBOARD_PAGE_TABLE_FILTERS,
   SingleFilterDef,
 } from "../../../services/lib/filters/frontendFilterDefs";
-import { filterUIToFilterLeafs } from "../../../services/lib/filters/filterDefs";
+import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import { RequestsOverTime } from "../../../lib/timeCalculations/fetchTimeData";
 import { Result, resultMap } from "../../../lib/result";
 import {
   BackendMetricsCall,
   useBackendMetricCall,
 } from "../../../services/hooks/useBackendFunction";
+import { filterUITreeToFilterNode } from "../../../services/lib/filters/uiFilterRowTree";
 
 export const useUserRequests = (
   {
@@ -22,20 +23,20 @@ export const useUserRequests = (
   userId: string
 ) => {
   const filterMap = DASHBOARD_PAGE_TABLE_FILTERS as SingleFilterDef<any>[];
-
-  const userFilters = filterUIToFilterLeafs(filterMap, uiFilters).concat([
-    {
-      request_response_versioned: {
-        user_id: {
-          equals: userId,
-        },
-      },
-    },
-  ]);
+  filterUITreeToFilterNode(filterMap, uiFilters);
+  // const userFilters = filterUIToFilterLeafs(filterMap).concat([
+  //   {
+  //     request_response_rmt: {
+  //       user_id: {
+  //         equals: userId,
+  //       },
+  //     },
+  //   },
+  // ]);
 
   const params: BackendMetricsCall<any>["params"] = {
     timeFilter,
-    userFilters,
+    userFilters: "all" as FilterNode,
     dbIncrement,
     timeZoneDifference,
   };

@@ -6,12 +6,14 @@ import * as chicky from "../../public/lottie/Polite Chicky.json";
 import * as hamster from "../../public/lottie/Aniki Hamster.json";
 import * as plane from "../../public/lottie/Paper Airplane.json";
 import * as PartyParrot from "../../public/lottie/PartyParrot.json";
+import * as Pacman from "../../public/lottie/Pacman.json";
 
 type Animation =
   | typeof chicky
   | typeof hamster
   | typeof plane
-  | typeof PartyParrot;
+  | typeof PartyParrot
+  | typeof Pacman;
 
 interface LoadingAnimationProps {
   title?: string;

@@ -1,6 +1,8 @@
 ---
 title: "Custom Properties"
-description: "Tag requests with any information you choose to segment, analyze, and visualize."
+sidebarTitle: "Custom Properties"
+description: "Add custom metadata to LLM requests for advanced segmentation and analysis. Tag requests with session IDs, conversation context, or application data to gain deeper insights into your AI application performance."
+"twitter:title": "Custom Properties - Helicone OSS LLM Observability"
 ---
 
 import QuestionsSection from "/snippets/questions-section.mdx";
@@ -9,6 +11,12 @@ import QuestionsSection from "/snippets/questions-section.mdx";
   **Who can use this feature**: Anyone on any
   [plan](https://www.helicone.ai/pricing).
 </Info>
+
+<iframe
+  width="100%"
+  height="420"
+  src="https://www.youtube.com/embed/NU0Ybp29eXQ?autoplay=1&mute=1"
+></iframe>
 
 ## Introduction
 
@@ -19,7 +27,10 @@ Custom Properties allow you to add any additional information to your requests, 
 - `Application` or `user` metadata making the request
 
 <Frame caption="Custom Properties appear as headers in the `Request` table. ">
-  <img src="/images/example-custom-properties.png" alt="Helicone Custom Properties feature for filtering and segmenting data in the Request table."/>
+  <img
+    src="/images/example-custom-properties.png"
+    alt="Helicone Custom Properties feature for filtering and segmenting data in the Request table."
+  />
 </Frame>
 
 ### Why Custom Properties
@@ -36,7 +47,7 @@ Use headers to add Custom Properties to your LLM requests.
 
 <Steps>
   <Step title="Define the Header">
-    Name your header in the format `Helicone-Property-[Name]` where `Name` is the name of your custom property. 
+    Name your header in the format `Helicone-Property-[Name]` where `Name` is the name of your custom property.
   </Step>
   <Step title="Define the Value">
     The value is a string that labels your request for this custom property. Here are some examples:
@@ -57,10 +68,10 @@ Use headers to add Custom Properties to your LLM requests.
     openai.api_base = "https://oai.helicone.ai/v1"
     openai
 
-    openai.Completion.create(
+    client.chat.completions.create(
         model="text-davinci-003",
         prompt="Say this is a test",
-        headers={
+        extra_headers={
             "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
             "Helicone-Property-Session": "24", # Example 1
             "Helicone-Property-Conversation": "support_issue_2", # Example 2
@@ -188,9 +199,9 @@ You can also update Custom Properties post-request submission by making a PUT re
   </AccordionGroup>
   </Step>
   <Step title="Make a PUT Request">
-    Here are the code snippets on how to make a PUT request: 
+    Here are the code snippets on how to make a PUT request:
     <Card title="PUT Request API" icon="link" href="https://docs.helicone.ai/rest/request/put-v1request-property">
-      Check out the detailed documentation. 
+      Check out the detailed documentation.
     </Card>
 
   </Step>

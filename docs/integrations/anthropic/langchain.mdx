@@ -1,6 +1,10 @@
 ---
-title: "Langchain"
-description: "Learn how to integrate Anthropic with Helicone using Langchain."
+title: "Anthropic LangChain Integration"
+sidebarTitle: "LangChain"
+description: "Use LangChain to integrate Anthropic with Helicone to log your Anthropic LLM usage."
+"twitter:title": "Anthropic LangChain Integration - Helicone OSS LLM Observability"
+icon: "bird"
+iconType: "solid"
 ---
 
 <Steps>
@@ -21,9 +25,9 @@ const llm = new ChatAnthropic({
   modelName: "claude-2",
   anthropicApiKey: "ANTHROPIC_API_KEY",
   clientOptions: {
-    baseURL: "https://anthropic.helicone.ai/",
+    baseURL: "https://anthropic.helicone.ai",
     defaultHeaders: {
-      "Helicone-Auth": `Bearer HELICONE_API_KEY`,
+      "Helicone-Auth": `Bearer ${HELICONE_API_KEY}`,
     },
   },
 });
@@ -33,7 +37,7 @@ const llm = new ChatAnthropic({
 anthropic = ChatAnthropic(
   temperature=0.9,
   model="claude-2",
-  anthropic_api_url="https://anthropic.helicone.ai/",
+  anthropic_api_url="https://anthropic.helicone.ai",
   anthropic_api_key="ANTHROPIC_API_KEY",
   model_kwargs={
     "extra_headers":{
@@ -47,3 +51,37 @@ anthropic = ChatAnthropic(
 
   </Step>
 </Steps>
+
+## Using AnthropicMultiModal with Helicone
+
+Enhance your integration by using **AnthropicMultiModal** with Helicone to process images and generate text descriptions. Follow the code below to add this functionality to your application.
+
+```python
+import os
+from llama_index.multi_modal_llms.anthropic import AnthropicMultiModal
+from llama_index.core.multi_modal_llms.generic_utils import load_image_urls
+
+# Initialize the AnthropicMultiModal class with your Anthropic API key
+anthropic_mm_llm = AnthropicMultiModal(
+    max_tokens=300,
+    default_headers={
+        "Helicone-Auth": f"Bearer {os.environ['HELICONE_API_KEY']}",
+    },
+    api_key="<your Anthropic API key>",
+    api_base="https://anthropic.helicone.ai",
+)
+
+# Provide image URLs
+image_urls = ["https://example.com/image1.png"]
+
+# Load image URLs into documents
+image_url_documents = load_image_urls(image_urls)
+
+# Generate a response based on the images
+response = anthropic_mm_llm.complete(
+    prompt="Describe the images as alternative text",
+    image_documents=image_url_documents,
+)
+
+print(response)
+```

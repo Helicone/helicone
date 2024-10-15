@@ -79,10 +79,16 @@ Modify the API base and add a Helicone-Auth header
 ```python
 import openai
 
-openai.api_base = "https://oai.helicone.ai/v1"
-openai.Completion.create(
+client = OpenAI(
+    base_url="https://oai.helicone.ai/v1",
+    default_headers={
+        "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
+    }
+)
+
+client.chat.completions.create(
   # ...other parameters
-  headers={
+  extra_headers={
     "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
   }
 )
@@ -92,36 +98,6 @@ openai.Completion.create(
 
   </Accordion>
 </AccordionGroup>
-
-  </Tab>
-  <Tab title="Python (w/ package)">
-    **Set HELICONE_API_KEY as an environment variable**
-    ```python
-    export HELICONE_API_KEY=<your API key>
-    ```
-
-    **Install the Helicone Package**
-    ```python
-    pip install helicone
-    ```
-
-    **Modify OpenAI import to use Helicone**
-    ```python
-    from helicone.openai_proxy import openai # replace `import openai` with this line
-    ```
-
-    Congratulations! Your OpenAI requests are now logging results to Helicone. You can use advanced Helicone features as parameters:
-    ```python
-    response = openai.Completion.create(
-        model="text-davinci-003",
-        prompt="What is Helicone?",
-        user="alice@bob.com",
-        cache=True,
-        properties={"conversation_id": 12},
-        rate_limit_policy={"quota": 100, "time_window": 60, "segment": "user"},
-        retry=True, # retry on failure
-    )
-    ```
 
   </Tab>
   <Tab title="Node.js">
@@ -148,8 +124,8 @@ const openai = new OpenAI({
 
 **OpenAI < V4**
 
-````javascript
-import { Configuration, OpenAIApi } from "openai";
+    ```javascript
+    import { Configuration, OpenAIApi } from "openai";
 
     const configuration = new Configuration({
         apiKey: process.env.OPENAI_API_KEY,
@@ -169,17 +145,20 @@ import { Configuration, OpenAIApi } from "openai";
     # Installation and Setup
     <Steps>
       <Step title="To get started, install the `helicone-openai` package">
+
       ```bash
       npm install @helicone/helicone
       ```
       </Step>
       <Step title="Set `HELICONE_API_KEY` as an environment variable">
+
        ```bash
       export HELICONE_API_KEY=sk-<your-api-key>
       ```
       <Info>You can also set the Helicone API Key in your code (See below)</Info>
       </Step>
       <Step title="Replace">
+
       ```typescript
       const { ClientOptions, OpenAI } = require("openai");
       ```
@@ -193,6 +172,7 @@ import { Configuration, OpenAIApi } from "openai";
       </Step>
       <Step title="Make a request">
       Chat, Completion, Embedding, etc usage is equivalent to OpenAI package.
+
       ```typescript
       const openai = new OpenAI({
         apiKey: process.env.OPENAI_API_KEY,
@@ -214,6 +194,7 @@ import { Configuration, OpenAIApi } from "openai";
 
     ## Send feedback
     Ensure you store the `helicone-id` header returned in the original response
+
     ```typescript
     const { data, response } = await openai.chat.completion.create({
       model: "gpt-3.5-turbo",
@@ -245,90 +226,87 @@ import { Configuration, OpenAIApi } from "openai";
   </Tab>
   <Tab title="cURL">
    **Replace the OpenAI Base URL with Helicone's**
-````
+    
+    ```bash
+    - POST https://api.openai.com/v1
 
-- POST https://api.openai.com/v1
+    - POST https://oai.helicone.ai/v1
 
-* POST https://oai.helicone.ai/v1
-
-```
+    ```
 
 **Add a Helicone-Auth header into the requests**
 
-```
-
-"Helicone-Auth": "Bearer HELICONE_API_KEY"
-
-```
+      ```bash
+      "Helicone-Auth": "Bearer HELICONE_API_KEY"
+      ```
 
 Here is an example cURL command:
 
    <Note>
    Please ensure to replace API keys with your own
    </Note>
-```
-
-    curl --request POST \
-        --url https://oai.helicone.ai/v1/chat/completions \
-        --header 'Authorization: Bearer <<YOUR_OPENAI_API_KEY>>' \
-        --header 'Content-Type: application/json' \
-        --header 'Helicone-Auth: Bearer <<YOUR_HELICONE_API_KEY>>' \
-        --data '{
-            "model": "gpt-3.5-turbo",
-            "messages": [
-                {
-                    "role": "system",
-                    "content": "Say Hello!"
-                }
-            ],
-            "temperature": 1,
-            "max_tokens": 10
-    }'
-
-```
+  ```bash
+        curl --request POST \
+            --url https://oai.helicone.ai/v1/chat/completions \
+            --header 'Authorization: Bearer <<YOUR_OPENAI_API_KEY>>' \
+            --header 'Content-Type: application/json' \
+            --header 'Helicone-Auth: Bearer <<YOUR_HELICONE_API_KEY>>' \
+            --data '{
+                "model": "gpt-3.5-turbo",
+                "messages": [
+                    {
+                        "role": "system",
+                        "content": "Say Hello!"
+                    }
+                ],
+                "temperature": 1,
+                "max_tokens": 10
+        }'
+  ```
 
 </Tab>
 <Tab title="Langchain">
  **Python**
 
- Modify the API base and add a Helicone-Auth header
- ```python
- #  Option 1
- openai.api_base = "https://oai.helicone.ai/v1"
- llm = ChatOpenAI(
-     openai_api_key='<>',
-     model_kwargs={
-       "extra_headers":{
-         "Helicone-Auth": f"Bearer {HELICONE_API_KEY}"
-       }
-     }
- )
+Modify the API base and add a Helicone-Auth header
 
- # Option 2
- llm = ChatOpenAI(
-     openai_api_key='<>',
-     model_kwargs={
-       "extra_headers":{
-         "Helicone-Auth": f"Bearer {HELICONE_API_KEY}"
-       }
-     },
-     openai_api_base="https://oai.helicone.ai/v1",
- )
- ```
+    ```python
+    #  Option 1
+    openai.api_base = "https://oai.helicone.ai/v1"
+    llm = ChatOpenAI(
+        openai_api_key='<>',
+        model_kwargs={
+          "extra_headers":{
+            "Helicone-Auth": f"Bearer {HELICONE_API_KEY}"
+          }
+        }
+    )
 
- **Typescript**
- ```typescript
- const llm = new OpenAI({
-   modelName: "gpt-3.5-turbo",
-   configuration: {
-     basePath: "https://oai.helicone.ai/v1",
-     defaultHeaders: {
-       "Helicone-Auth": `Bearer HELICONE_API_KEY`,
-       },
-     },
-   });
- ```
+    # Option 2
+    llm = ChatOpenAI(
+        openai_api_key='<>',
+        model_kwargs={
+          "extra_headers":{
+            "Helicone-Auth": f"Bearer {HELICONE_API_KEY}"
+          }
+        },
+        openai_api_base="https://oai.helicone.ai/v1",
+    )
+    ```
+
+**Typescript**
+
+    ```typescript
+    const llm = new OpenAI({
+      modelName: "gpt-3.5-turbo",
+      configuration: {
+        basePath: "https://oai.helicone.ai/v1",
+        defaultHeaders: {
+          "Helicone-Auth": `Bearer HELICONE_API_KEY`,
+        },
+      },
+    });
+    ```
 
 </Tab>
 </Tabs>
-````

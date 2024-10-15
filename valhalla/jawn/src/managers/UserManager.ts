@@ -34,25 +34,29 @@ export class UserManager extends BaseManager {
     const builtFilter = await buildFilterWithAuthClickHouse({
       org_id: organizationId,
       argsAcc: [],
-      filter: timeFilter
-        ? {
-            left: {
-              request_response_versioned: {
-                request_created_at: {
-                  gt: new Date(timeFilter.startTimeUnixSeconds * 1000),
+      filter: {
+        left: timeFilter
+          ? {
+              left: {
+                request_response_rmt: {
+                  request_created_at: {
+                    gt: new Date(timeFilter.startTimeUnixSeconds * 1000),
+                  },
                 },
               },
-            },
-            operator: "and",
-            right: {
-              request_response_versioned: {
-                request_created_at: {
-                  lt: new Date(timeFilter.endTimeUnixSeconds * 1000),
+              operator: "and",
+              right: {
+                request_response_rmt: {
+                  request_created_at: {
+                    lt: new Date(timeFilter.endTimeUnixSeconds * 1000),
+                  },
                 },
               },
-            },
-          }
-        : "all",
+            }
+          : "all",
+        operator: "and",
+        right: filter,
+      },
     });
 
     const havingFilter = buildFilterClickHouse({
@@ -63,27 +67,27 @@ export class UserManager extends BaseManager {
 
     const query = `
   SELECT
-    request_response_versioned.user_id as user_id,
-    count(DISTINCT date_trunc('day', request_response_versioned.request_created_at)) as active_for,
-    toDateTime(min(request_response_versioned.request_created_at) ${
+    request_response_rmt.user_id as user_id,
+    count(DISTINCT date_trunc('day', request_response_rmt.request_created_at)) as active_for,
+    toDateTime(min(request_response_rmt.request_created_at) ${
       timeZoneDifferenceMinutes > 0
         ? `- INTERVAL '${Math.abs(timeZoneDifferenceMinutes)} minute'`
         : `+ INTERVAL '${timeZoneDifferenceMinutes} minute'`
     }) as first_active,
-    toDateTime(max(request_response_versioned.request_created_at) ${
+    toDateTime(max(request_response_rmt.request_created_at) ${
       timeZoneDifferenceMinutes > 0
         ? `- INTERVAL '${Math.abs(timeZoneDifferenceMinutes)} minute'`
         : `+ INTERVAL '${timeZoneDifferenceMinutes} minute'`
     }) as last_active,
-    count(request_response_versioned.request_id)::Int32 as total_requests,
-    count(request_response_versioned.request_id) / count(DISTINCT date_trunc('day', request_response_versioned.request_created_at)) as average_requests_per_day_active,
-    (sum(request_response_versioned.prompt_tokens) + sum(request_response_versioned.completion_tokens)) / count(request_response_versioned.request_id) as average_tokens_per_request,
-    sum(request_response_versioned.completion_tokens) as total_completion_tokens,
-    sum(request_response_versioned.prompt_tokens) as total_prompt_tokens,
-    (${clickhousePriceCalc("request_response_versioned")}) as cost
-  from request_response_versioned
+    count(request_response_rmt.request_id)::Int32 as total_requests,
+    count(request_response_rmt.request_id) / count(DISTINCT date_trunc('day', request_response_rmt.request_created_at)) as average_requests_per_day_active,
+    (sum(request_response_rmt.prompt_tokens) + sum(request_response_rmt.completion_tokens)) / count(request_response_rmt.request_id) as average_tokens_per_request,
+    sum(request_response_rmt.completion_tokens) as total_completion_tokens,
+    sum(request_response_rmt.prompt_tokens) as total_prompt_tokens,
+    (${clickhousePriceCalc("request_response_rmt")}) as cost
+  from request_response_rmt
   WHERE (${builtFilter.filter})
-  GROUP BY request_response_versioned.user_id
+  GROUP BY request_response_rmt.user_id
   HAVING (${havingFilter.filter})
   ORDER BY last_active
   LIMIT ${limit}

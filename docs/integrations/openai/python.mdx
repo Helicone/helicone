@@ -1,6 +1,10 @@
 ---
-title: "Python"
-description: "Learn how to integrate OpenAI with Helicone using Python"
+title: "OpenAI Python SDK Integration"
+sidebarTitle: "Python"
+description: "Use OpenAI's Python SDK to integrate with Helicone to log your OpenAI usage."
+"twitter:title": "OpenAI Python SDK Integration - Helicone OSS LLM Observability"
+icon: "python"
+iconType: "solid"
 ---
 
 ## Proxy Integration (recommended)
@@ -27,19 +31,6 @@ client = OpenAI(
     "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
   }
 )
-```
-
-```Python OpenAI v1
-import openai
-
-openai.api_base = "https://oai.helicone.ai/v1"
-openai.Completion.create(
-  # ...other parameters
-  headers={
-    "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
-  }
-)
-
 ```
 
 </CodeGroup>

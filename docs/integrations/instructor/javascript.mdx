@@ -1,0 +1,31 @@
+---
+title: "Instructor JavaScript SDK Integration"
+sidebarTitle: "JavaScript"
+description: "Use Instructor's JavaScript SDK to log your LLM calls in Helicone."
+"twitter:title": "Instructor JavaScript SDK Integration - Helicone OSS LLM Observability"
+---
+
+[Instructor](https://useinstructor.com/) is a popular framework for extracting structured output from text using LLMs. Here's how you can use Helicone to track your calls while using Instructor:
+
+<Steps>
+  <Step title="Follow useinstructor.com to get setup with Instructor's JS SDK.">
+  </Step>
+  <Step title="Modify the base url and add a Helicone-Auth header">
+<CodeGroup>
+
+```javascript Instructor SDK
+const oai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+  baseURL: "https://oai.helicone.ai/v1",
+  defaultHeaders: {
+    "Helicone-Auth": "Bearer " + process.env.HELICONE_API_KEY
+  }
+})
+// ... Call OpenAI using Instructor
+```
+</CodeGroup>
+
+  </Step>
+  <Step title="Call OpenAI using Instructor and see the logs on Helicone.">
+  </Step>
+</Steps>

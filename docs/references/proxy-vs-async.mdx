@@ -1,0 +1,131 @@
+---
+title: "Proxy vs Async Integration"
+sidebarTitle: "Proxy vs Async"
+description: "Compare Helicone's Proxy and Async integration methods. Understand the features, benefits, and use cases for each approach to choose the best fit for your LLM application."
+"twitter:title": "Proxy vs Async Integration - Helicone OSS LLM Observability"
+---
+
+import QuestionsSection from "/snippets/questions-section.mdx";
+
+## Quick Compare
+
+There are two ways to interface with Helicone - Proxy and Async. We will help you decide which one is right for you, and the pros and cons with each option.
+
+|                                                                     | Proxy | Async |
+| ------------------------------------------------------------------- | ----- | ----- |
+| **Easy setup**                                                      | ✅    | ❌    |
+| [Prompts](/features/prompts/)                                       | ✅    | ✅    |
+| [Prompts Auto Formatting (easier)](/features/prompts)               | ✅    | ❌    |
+| [Custom Properties](/features/advanced-usage/custom-properties)     | ✅    | ✅    |
+| [Bucket Cache](/features/advanced-usage/caching)                    | ✅    | ❌    |
+| [User Metrics](/features/advanced-usage/user-metrics)               | ✅    | ✅    |
+| [Retries](/features/advanced-usage/retries)                         | ✅    | ❌    |
+| [Custom rate limiting](/features/advanced-usage/custom-rate-limits) | ✅    | ❌    |
+| Open-source                                                         | ✅    | ✅    |
+| Not on critical path                                                | ❌    | ✅    |
+| 0 Propagation Delay                                                 | ❌    | ✅    |
+| Negligible Logging Delay                                            | ✅    | ✅    |
+| Streaming Support                                                   | ✅    | ✅    |
+
+## Proxy
+
+The primary reason Helicone users choose to integrate with Helicone using Proxy is its **simple integration**.
+
+It's as easy as changing the base URL to point to Helicone, and we'll forward the request to the LLM and return the response to you.
+
+<Frame caption="Proxy: flow of data. ">
+  <img
+    src="/images/example-proxy.png"
+    alt="Helicone Proxy data flow illustrating simple integration by changing the base URL for instant request forwarding and response handling."
+  />
+</Frame>
+
+Since the proxy sits on the edge and is the gatekeeper of the requests, you get access to a suite of Gateway tools such as caching, rate limiting, API key management, threat detection, moderations and more.
+
+<Accordion title="Here's a simple example">
+
+    Instead of calling the OpenAI API with `api.openai.com`, you will change the URL to a Helicone dedicated domain `oai.helicone.ai`.
+
+    You can also use the general Gateway URL `gateway.helicone.ai` if Helicone doesn't have a dedicated domain for the provider yet.
+
+    <CodeGroup>
+
+    ```python Dedicated domain example
+    import openai
+
+    # Set the API base URL to Helicone's proxy
+    openai.api_base = "https://oai.helicone.ai/v1"
+
+    # Generate a chat completion request
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[{"role": "user", "content": "Say hi!"}],
+        headers={
+            "Helicone-Auth": "Bearer [HELICONE_API_KEY]"  # Your Helicone API key
+        }
+    )
+
+    print(response)
+    ```
+
+    ```python Other (Gateway example)
+    import openai
+
+    openai.api_base = "https://gateway.helicone.ai"  # Set the API base URL to Helicone Gateway
+    response = openai.ChatCompletion.create(
+        model="[DEPLOYMENT]",
+        messages=[{"role": "user", "content": "Say hi!"}],
+        headers={
+            "Helicone-Auth": "Bearer [HELICONE_API_KEY]",  # Your Helicone API key
+            "Helicone-Target-Url": "https://api.lemonfox.ai",  # The target API URL
+            "Helicone-Target-Provider": "LemonFox",  # The provider name
+        }
+    )
+    print(response)
+    ```
+    </CodeGroup>
+
+    <Note>For a detailed documentation, check out [Gateway Integration](https://docs.helicone.ai/getting-started/integration-method/gateway). </Note>
+
+</Accordion>
+
+## Async
+
+Helicone Async allows for a more flexible workflow where the actual logging of the event is **not on the critical path**. This gives some users more confidence that if we are going down or if there is a network issue that it will not affect their application.
+
+[Get started with OpenLLMetry](/getting-started/integration-method/openllmetry).
+
+<Frame caption="Async: flow of data. ">
+  <img
+    src="/images/example-async.png"
+    alt="Helicone Async workflow illustrating non-blocking event logging for improved application stability."
+  />
+</Frame>
+
+<Warning>
+  The downside is that we cannot offer the same suite of tools as we can with
+  the proxy.
+</Warning>
+
+## Summary
+
+### When to Use Proxy
+
+- When you need a quick and easy setup.
+- If you require Gateway features like custom rate limiting, caching, and retries.
+- When you want to use tools that can be instrumented directly into the proxy.
+
+### When to Use Async
+
+- If you prefer the logging of events to be off the critical path, ensuring that network issues do not affect your application.
+- When you need zero propagation delay.
+
+<Card
+  title="Integrate with Helicone"
+  href="/getting-started/quick-start#quick-start"
+  icon="flag"
+>
+  Choose your LLM provider and get started with Helicone.
+</Card>
+
+<QuestionsSection />

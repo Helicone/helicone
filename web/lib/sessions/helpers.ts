@@ -5,7 +5,6 @@ import {
   TraceNode,
   TreeNodeData,
 } from "./sessionTypes";
-import { Node, Edge } from "reactflow";
 
 export const createTraceNodes = (
   session: Session
@@ -40,44 +39,6 @@ export const findParents = (trace: Trace, allTraces: Trace[]) => {
   const parentTracePath = trace.path.split("/").slice(0, -1).join("/");
 
   return allTraces.filter((trace) => trace.path === parentTracePath);
-};
-
-export const convertToFlowElements = (
-  nodes: Record<string, TraceNode>,
-  traces: Trace[]
-) => {
-  const flowNodes: Node<Trace>[] = [];
-  const flowEdges: Edge<any>[] = [];
-
-  const pathDepthCounter: Record<number, number> = {};
-  traces.forEach((trace) => {
-    const pathDepth = trace.path.split("/").length - 1;
-
-    pathDepthCounter[pathDepth] = (pathDepthCounter?.[pathDepth] ?? 0) + 1;
-
-    flowNodes.push({
-      id: trace.request_id,
-      data: trace,
-      position: { x: pathDepth * 250, y: pathDepthCounter[pathDepth] * 100 },
-      type: "customNode",
-    });
-
-    const parents = findParents(trace, traces);
-
-    parents.forEach((parent) => {
-      flowEdges.push({
-        id: `${parent.request_id}-${trace.request_id}`,
-        source: parent.request_id,
-        target: trace.request_id,
-        type: "default",
-      });
-    });
-  });
-
-  return {
-    flowEdges,
-    flowNodes,
-  };
 };
 
 export const tracesToFolderNodes = (traces: Trace[]): FolderNode[] => {

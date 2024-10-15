@@ -1,5 +1,3 @@
-import { IS_ON_PREM } from "./lib/experiment/run";
-import { deduplicateRequestResponseVersioned } from "./loops/deduplicate";
 import { experimentsLoop } from "./loops/experiments";
 
 export interface LoopedSubscriber {
@@ -13,13 +11,6 @@ const mainLoops: LoopedSubscriber[] = [
     onLoop: experimentsLoop,
   },
 ];
-
-if (IS_ON_PREM) {
-  mainLoops.push({
-    cronInterval: 1000 * 60 * 60, // 1 hour
-    onLoop: deduplicateRequestResponseVersioned,
-  });
-}
 
 const runSingleLoop = async (loop: LoopedSubscriber) => {
   while (true) {

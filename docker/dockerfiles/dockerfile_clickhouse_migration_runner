@@ -9,6 +9,7 @@ WORKDIR /app
 # TODO Make sure the docker build and push commands are still working
 
 COPY . /app
+RUN find /app -name ".env.*" -exec rm {} \;
 
 
 CMD python3 ch_hcone.py --upgrade --host ${CLICKHOUSE_HOST} --port ${CLICKHOUSE_PORT}

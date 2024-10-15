@@ -41,6 +41,7 @@
     "@clickhouse/client-common": "^0.2.1",
     "@clickhouse/client-web": "^0.2.2",
     "@cloudflare/itty-router-openapi": "^1.0.7",
+    "@helicone/prompts": "^1.0.10",
     "@supabase/supabase-js": "^2.1.1",
     "@upstash/kafka": "^1.3.5",
     "add": "^2.0.6",

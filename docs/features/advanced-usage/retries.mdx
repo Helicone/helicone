@@ -1,6 +1,8 @@
 ---
 title: "Retries"
-description: "Intelligently retry requests to overcome rate limits and overloaded servers."
+sidebarTitle: "Retries"
+description: "Configure Helicone to automatically retry failed LLM requests, overcoming rate limits and server issues using intelligent exponential backoff."
+"twitter:title": "Retries - Helicone OSS LLM Observability"
 ---
 
 import QuestionsSection from "/snippets/questions-section.mdx";
@@ -46,12 +48,17 @@ curl https://oai.helicone.ai/v1/completions \
 ```
 
 ```python Python
-openai.api_base = "https://oai.helicone.ai/v1"
+client = OpenAI(
+    base_url="https://oai.helicone.ai/v1",
+    default_headers={
+        "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
+    }
+)
 
-openai.Completion.create(
+client.chat.completions.create(
     model="text-davinci-003",
     prompt="How do I enable retries?",
-    headers={
+    extra_headers={
       "Helicone-Retry-Enabled": "true", # Add this header and set to true
     }
 )

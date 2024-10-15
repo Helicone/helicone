@@ -26,6 +26,6 @@ tokenRouter.post("/v1/tokens/gpt3", async (req, res) => {
     res.status(400).json({ error: "content is required" });
     return;
   }
-  const tokens = await getTokenCountGPT3(content ?? "");
+  const tokens = await getTokenCountGPT3(content ?? "", "");
   res.json({ tokens });
 });

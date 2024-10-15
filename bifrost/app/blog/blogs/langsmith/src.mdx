@@ -1,0 +1,96 @@
+![Helicone vs. LangSmith, which is better?](/static/blog/langsmith-vs-helicone/cover-image.webp)
+
+## Introduction
+
+Both Helicone and LangSmith are capable, powerful DevOps platform used by enterprises and developers to develop, deploy and monitor their LLM applications and gain full visibility into their development. **But which is better?**
+
+With Helicone, the experience of observing and monitoring your LLM is intuitive and integrates well into any LLM observability tech stack. Being a Gateway, we are able to offer caching, prompt threat detection, moderation, vault, rate limiting, customer portal and other useful observability features. As a bonus, integrating with Helicone is as simple as adding two lines of code.
+
+_LangSmith is a great tool and there are some things we would recommend them over Helicone for, such as if you’re an enterprise that uses LangChain, develops AI agents, or prefers async solutions._
+
+→ <a href="https://us.helicone.ai/signup" target="_blank">Try Helicone for Free</a>
+
+---
+
+## Comparing LangSmith and Helicone at a Glance
+
+| Features               | LangSmith | Helicone |
+| :--------------------- | :-------- | :------- |
+| Gateway                | ❌        | ✔        |
+| Dashboards             | ✔         | ✔        |
+| Trace logging          | ✔         | ❌       |
+| LangChain integration  | ✔         | ✔        |
+| Caching                | ❌        | ✔        |
+| Open Source            | ❌        | ✔        |
+| Prompts                | ❌        | ✔        |
+| Experiments            | ✔         | ✔        |
+| Rate limiting          | ❌        | ✔        |
+| User tracking          | ❌        | ✔        |
+| Vector DB traces       | ✔         | ❌       |
+| Flexible pricing       | ❌        | ✔        |
+| Image support          | ❌        | ✔        |
+| No payload limitations | ❌        | ✔        |
+
+---
+
+## Acting as a Gateway
+
+The biggest difference between LangSmith and Helicone is how we log your data. Helicone is Gateway whereas LangSmith is an async solution. To integrate with Helicone, it’s as easy as changing the base URL to point to Helicone, and we’ll handle every call you make. As a cherry on top, Helicone exists to fit into any existing tech stack. A minor difference is that LangSmith tracks logs per trace, Helicone tracks logs per request and can support extremely large request bodies.
+
+![2-line code snippet to integrate with Helicone](/static/blog/langsmith-vs-helicone/code.webp)
+
+### Access to Gateway Features
+
+By using Helicone, you get access to <a href="https://docs.helicone.ai/features/advanced-usage/caching" target="_blank">caching</a>, <a href="https://docs.helicone.ai/features/advanced-usage/custom-rate-limits" target="_blank">rate limiting</a>, <a href="https://docs.helicone.ai/features/advanced-usage/vault" target="_blank">API key management</a>, <a href="https://docs.helicone.ai/features/advanced-usage/llm-security" target="_blank">threat detection</a>, <a href="https://docs.helicone.ai/features/advanced-usage/moderations" target="_blank">moderations</a> and many more. For example, Helicone customers use caching to test and save money by making fewer calls to OpenAI and other models. B2B customers also use us to rate limit their customers and stay compliant by storing OpenAI keys in Helicone vaults.
+
+### What about latency that comes with being a Gateway?
+
+We know how much latency matters to our users. We deploy on the edge using Cloudflare Workers to minimize time to response. This adds only ~50 ms from about 95% of the world’s Internet-connected population (check out <a href="https://www.cloudflare.com/network/" target="_blank">Cloudflare's stats</a>), for us to bring the additional features and convenience to you.
+
+Still not sure which one is better? Check out this update on how <a href="https://blog.cloudflare.com/2024-community-update" target="_blank"> Cloudflare selected Helicone as 1 of the 29 startups</a> for the Cloudflare Workers Launchpad this cohort.
+
+### Just Some Stats
+
+In the last 8 months, Helicone has not had any Gateway incidents with **99.9999% uptime** — that’s pretty good. Whether or not you take that into consideration, we want to give you peace of mind.
+
+---
+
+## Helicone is Open-source
+
+Helicone is fully open-source and free to start. Companies can also self-host Helicone within their infrastructure. This ensures that you have full control over the application, flexibility and customization tailored to specific business needs.
+
+---
+
+## Which is Cheaper?
+
+Helicone is also more cost-effective than LangSmith as it operates on a volumetric pricing model. This means companies only pay for what they use, which makes Helicone an easy and flexible platform for businesses to get started and scale their applications. **By the way, the first 100k requests every month are free.**
+
+→ <a href="https://www.helicone.ai/pricing" target="_blank">Find out your cost by usage on Helicone</a>
+
+---
+
+## Why are companies choosing Helicone over LangSmith?
+
+Companies that are highly responsive to market changes or opportunities often use Helicone to achieve production quality faster. Helicone simplifies the innovation process, enabling businesses to stay competitive in the fast-paced AI revolution.
+
+Moreover, Helicone can handle a large volume of requests, making it a dependable option for businesses with high traffic. Acting as a Gateway, Helicone offers a suite of both middleware and advanced features such as:
+
+- caching
+- prompt threat detection
+- moderation
+- vault
+- rate limiting
+- proxy keys
+- image support (Claude Vision, GPT-4 Vision, and DALL·E 3)
+- experiment `advanced` `coming soon`
+- fine-tune `advanced` `in beta`
+
+Finally, Helicone places a strong focus on developer experience. Its simple integration, clear pricing coupled with the above features makes Helicone a comprehensive and efficient platform for managing and monitoring your LLM applications.
+
+---
+
+## Stay Ahead with Helicone.
+
+→ <a href="https://us.helicone.ai/signup" target="_blank">Try Helicone for Free</a>
+
+→ <a href="https://www.helicone.ai/contact" target="_blank">Get in Touch With Us</a>

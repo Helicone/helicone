@@ -30,7 +30,7 @@ curl --request POST \\
 import anthropic
 client = anthropic.Client(
     api_key="<Anthropic API Key>",
-    api_url="https://anthropic.helicone.ai/v1"
+    api_url="https://anthropic.helicone.ai"
 )
 res = client._request_as_json(
     "post",

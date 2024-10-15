@@ -8,7 +8,7 @@ import {
   PromptsQueryParams,
   PromptsResult,
 } from "../../controllers/public/promptController";
-import { Result, err, promiseResultMap } from "../../lib/shared/result";
+import { Result, err, ok, promiseResultMap } from "../../lib/shared/result";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { FilterNode } from "../../lib/shared/filters/filterDefs";
 import { buildFilterPostgres } from "../../lib/shared/filters/filters";
@@ -17,6 +17,8 @@ import { User } from "../../models/user";
 import { BaseManager } from "../BaseManager";
 import { S3Client } from "../../lib/shared/db/s3Client";
 import { RequestResponseBodyStore } from "../../lib/stores/request/RequestResponseBodyStore";
+import { randomUUID } from "crypto";
+import { supabaseServer } from "../../lib/db/supabase";
 
 async function fetchImageAsBase64(url: string): Promise<string> {
   try {
@@ -86,6 +88,91 @@ export async function getAllSignedURLsFromInputs(
 }
 
 export class InputsManager extends BaseManager {
+  async createInputRecord(
+    promptVersionId: string,
+    inputs: Record<string, string>,
+    sourceRequest?: string
+  ): Promise<Result<string, string>> {
+    const inputRecordId = randomUUID();
+    const existingPrompt = await supabaseServer.client
+      .from("prompts_versions")
+      .select("*")
+      .eq("id", promptVersionId)
+      .eq("organization", this.authParams.organizationId)
+      .single();
+
+    if (existingPrompt.error || !existingPrompt.data) {
+      return err(existingPrompt.error?.message ?? "Prompt version not found");
+    }
+
+    const insertQuery = `
+      INSERT INTO prompt_input_record (id, inputs, source_request, prompt_version)
+      VALUES ($1, $2, $3, $4)
+    `;
+
+    const result = await dbExecute<PromptInputRecord>(insertQuery, [
+      inputRecordId,
+      JSON.stringify(inputs),
+      sourceRequest,
+      promptVersionId,
+    ]);
+
+    if (result.error) {
+      return err(result.error);
+    }
+
+    return ok(inputRecordId);
+  }
+
+  async getInputsFromDataset(
+    datasetId: string,
+    limit: number
+  ): Promise<Result<PromptInputRecord[], string>> {
+    const bodyStore = new RequestResponseBodyStore(
+      this.authParams.organizationId
+    );
+    const result = await dbExecute<PromptInputRecord>(
+      `
+      SELECT
+        prompt_input_record.id as id,
+        experiment_dataset_v2_row.id as dataset_row_id,
+        prompt_input_record.inputs as inputs,
+        prompt_input_record.auto_prompt_inputs as auto_prompt_inputs,
+        prompt_input_record.source_request as source_request,
+        prompt_input_record.prompt_version as prompt_version,
+        prompt_input_record.created_at as created_at
+      FROM experiment_dataset_v2_row 
+        left join helicone_dataset on experiment_dataset_v2_row.dataset_id = helicone_dataset.id
+        left join prompt_input_record on experiment_dataset_v2_row.input_record = prompt_input_record.id
+      WHERE helicone_dataset.organization = $1 AND
+      experiment_dataset_v2_row.dataset_id = $2
+      ORDER BY experiment_dataset_v2_row.created_at ASC
+      LIMIT $3
+
+      `,
+      [this.authParams.organizationId, datasetId, limit]
+    );
+    return promiseResultMap(result, async (data) => {
+      return Promise.all(
+        data.map(async (record) => {
+          const requestResponseBody = await bodyStore.getRequestResponseBody(
+            record.source_request
+          );
+          return {
+            ...record,
+            inputs: await getAllSignedURLsFromInputs(
+              record.inputs,
+              this.authParams.organizationId,
+              record.source_request
+            ),
+            response_body: requestResponseBody.data?.response,
+            request_body: requestResponseBody.data?.request,
+          };
+        })
+      );
+    });
+  }
+
   async getInputs(
     limit: number,
     promptVersion: string,
@@ -93,9 +180,10 @@ export class InputsManager extends BaseManager {
   ): Promise<Result<PromptInputRecord[], string>> {
     const result = await dbExecute<PromptInputRecord>(
       `
-      SELECT 
+      SELECT
         prompt_input_record.id as id,
         prompt_input_record.inputs as inputs,
+        prompt_input_record.auto_prompt_inputs as auto_prompt_inputs,
         prompt_input_record.source_request as source_request,
         prompt_input_record.prompt_version as prompt_version,
         prompt_input_record.created_at as created_at,
@@ -122,11 +210,13 @@ export class InputsManager extends BaseManager {
     return promiseResultMap(result, async (data) => {
       return Promise.all(
         data.map(async (record) => {
+          const requestResponseBody = await bodyStore.getRequestResponseBody(
+            record.source_request
+          );
           return {
             ...record,
-            response_body:
-              (await bodyStore.getRequestResponseBody(record.source_request))
-                .data?.response ?? {},
+            response_body: requestResponseBody.data?.response ?? {},
+            request_body: requestResponseBody.data?.request ?? {},
             inputs: await getAllSignedURLsFromInputs(
               record.inputs,
               this.authParams.organizationId,

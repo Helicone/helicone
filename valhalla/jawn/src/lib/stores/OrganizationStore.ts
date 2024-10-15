@@ -129,7 +129,7 @@ export class OrganizationStore extends BaseStore {
   }): Promise<Result<string, string>> {
     const insert = await supabaseServer.client
       .from("organization_layout")
-      .insert([insertRequest])
+      .insert([insertRequest as any])
       .select("*")
       .single();
 
@@ -185,7 +185,7 @@ export class OrganizationStore extends BaseStore {
     const updateRes = await supabaseServer.client
       .from("organization_layout")
       .update({
-        filters: filters,
+        filters: filters as any,
       })
       .eq("organization_id", organizationId)
       .eq("type", type);

@@ -7,16 +7,16 @@ import { formatISO } from "date-fns";
 import { useRequestsOverTime } from "../../organization/plan/renderOrgPlan";
 import { useOrg } from "../../../layout/organizationContext";
 import { useRouter } from "next/router";
-import {
-  ORGANIZATION_COLORS,
-  ORGANIZATION_ICONS,
-  OrgLimits,
-} from "../../organization/createOrgForm";
+import { OrgLimits } from "../../organization/createOrgForm";
 import { EllipsisHorizontalIcon } from "@heroicons/react/24/outline";
 import { Menu, Transition } from "@headlessui/react";
 import { DeleteOrgModal } from "../../organization/deleteOrgModal";
 import EditCustomerOrgModal from "./editCustomerOrgModal";
 import { Database } from "../../../../supabase/database.types";
+import {
+  ORGANIZATION_COLORS,
+  ORGANIZATION_ICONS,
+} from "../../organization/orgConstants";
 
 interface CustomerRowProps {
   org: Database["public"]["Tables"]["organization"]["Row"];
@@ -108,7 +108,7 @@ const CustomerRow = (props: CustomerRowProps) => {
           </Badge>
         </TableCell>
         <TableCell>
-          <Text>{isLoading ? "..." : members?.data?.length}</Text>
+          <Text>{isLoading ? "..." : members?.length}</Text>
         </TableCell>
         <TableCell>
           <div>

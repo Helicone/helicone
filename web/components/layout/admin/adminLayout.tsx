@@ -6,6 +6,7 @@ import {
   XMarkIcon,
   ChartBarIcon,
   TicketIcon,
+  CubeIcon,
 } from "@heroicons/react/24/outline";
 import { clsx } from "../../shared/clsx";
 import { useRouter } from "next/router";
@@ -19,7 +20,24 @@ const navigation = [
     name: "All Orgs",
     href: "/admin/stats",
     icon: ChartBarIcon,
-
+    current: false,
+  },
+  {
+    name: "Metrics",
+    href: "/admin/metrics",
+    icon: ChartBarIcon,
+    current: false,
+  },
+  {
+    name: "Feature Flags",
+    href: "/admin/feature-flags",
+    icon: ChartBarIcon,
+    current: false,
+  },
+  {
+    name: "Coles Cave",
+    href: "/admin/coles-cave",
+    icon: CubeIcon,
     current: false,
   },
 ];

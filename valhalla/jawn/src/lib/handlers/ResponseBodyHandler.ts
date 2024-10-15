@@ -1,4 +1,4 @@
-import { getTokenCount, unsupportedImage } from "../../utils/helpers";
+import { unsupportedImage } from "../../utils/helpers";
 import {
   calculateModel,
   getModelFromResponse,
@@ -24,6 +24,27 @@ import { HandlerContext } from "./HandlerContext";
 export const INTERNAL_ERRORS = {
   Cancelled: -3,
 };
+
+function isJson(responseBody: string): boolean {
+  try {
+    JSON.parse(responseBody);
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
+function isHTML(responseBody: string): boolean {
+  if (isJson(responseBody)) {
+    return false;
+  }
+
+  return (
+    responseBody.includes("<html") ||
+    responseBody.includes("<HTML") ||
+    responseBody.includes("<!DOCTYPE html>")
+  );
+}
 
 export class ResponseBodyHandler extends AbstractLogHandler {
   public async handle(context: HandlerContext): PromiseGenericResult<string> {
@@ -59,6 +80,14 @@ export class ResponseBodyHandler extends AbstractLogHandler {
         ...(context.processedLog.response.assets ?? []),
       ]);
       context.processedLog.response.body = responseBodyFinal;
+
+      const { responseModel, model } = this.determineAssistantModel(
+        responseBodyFinal,
+        context.processedLog.response.model
+      );
+
+      context.processedLog.response.model = responseModel;
+      context.processedLog.model = model;
 
       // Set usage
       const usage = processedResponseBody.data?.usage ?? {};
@@ -156,6 +185,15 @@ export class ResponseBodyHandler extends AbstractLogHandler {
     }
 
     try {
+      if (isHTML(responseBody)) {
+        return ok({
+          processedBody: {
+            error: `HTML response detected:`,
+            html_response: `${responseBody}`,
+          },
+          usage: {},
+        });
+      }
       responseBody = this.preprocess(
         isStream,
         log.response.status,
@@ -165,12 +203,6 @@ export class ResponseBodyHandler extends AbstractLogHandler {
       return await parser.parse({
         responseBody: responseBody,
         requestBody: requestBody ?? "{}",
-        tokenCounter: async (text: string) =>
-          await getTokenCount(
-            text,
-            context.processedLog.request.model,
-            provider
-          ),
         requestModel: context.processedLog.request.model,
         modelOverride: context.message.heliconeMeta.modelOverride,
       });
@@ -190,6 +222,53 @@ export class ResponseBodyHandler extends AbstractLogHandler {
     }
 
     return responseBody;
+  }
+
+  private isAssistantResponse(responseBody: any): boolean {
+    if (typeof responseBody !== "object" || responseBody === null) {
+      return false;
+    }
+    return (
+      responseBody.hasOwnProperty("assistant_id") ||
+      responseBody.hasOwnProperty("thread_id") ||
+      responseBody.data?.[0]?.hasOwnProperty("assistant_id") ||
+      responseBody.hasOwnProperty("metadata")
+    );
+  }
+
+  private isVectorDBResponse(responseBody: any): boolean {
+    return (
+      responseBody.hasOwnProperty("_type") && responseBody._type === "vector_db"
+    );
+  }
+
+  private isToolResponse(responseBody: any): boolean {
+    return (
+      responseBody.hasOwnProperty("_type") && responseBody._type === "tool"
+    );
+  }
+
+  private determineAssistantModel(
+    responseBody: any,
+    currentModel?: string
+  ): { responseModel: string; model: string } {
+    if (
+      this.isAssistantResponse(responseBody) &&
+      responseBody.hasOwnProperty("status") &&
+      ["queued", "in_progress"].includes(responseBody.status)
+    ) {
+      return { responseModel: "Assistant Polling", model: "assistant-polling" };
+    } else if (this.isAssistantResponse(responseBody) && !currentModel) {
+      return { responseModel: "Assistant Call", model: "assistant-call" };
+    } else if (this.isVectorDBResponse(responseBody)) {
+      return { responseModel: "Vector DB", model: "vector_db" };
+    } else if (this.isToolResponse(responseBody)) {
+      return {
+        responseModel: "Tool",
+        model: `tool:${responseBody.toolName}`,
+      };
+    }
+    return { responseModel: currentModel || "", model: currentModel || "" };
   }
 
   getBodyProcessor(

@@ -1,6 +1,8 @@
 ---
 title: "Scores"
-description: "Score your requests and experiments"
+sidebarTitle: "Scores"
+description: "Add custom scoring metrics to your LLM requests and experiments. Evaluate prompt performance, compare results across datasets, and quantify model outputs for continuous improvement."
+"twitter:title": "Scores - Helicone OSS LLM Observability"
 ---
 
 import QuestionsSection from "/snippets/questions-section.mdx";
@@ -10,12 +12,20 @@ import QuestionsSection from "/snippets/questions-section.mdx";
   [plan](https://www.helicone.ai/pricing).
 </Info>
 
+<Warning>
+  Scores will be ingested with a **10 minutes delay** to ensure there is enough
+  time to process the request.
+</Warning>
+
 ## Introduction
 
 Helicone's scores [API](https://docs.helicone.ai/rest/request/post-v1request-score) allows you to score your requests and experiments. You can use this feature to evaluate the performance of your prompts and compare different experiments and datasets. E.g., if you are building an image classification application, you might need a variety of scores to help you determine how accurate the outputs are compared to what you expect. For example, an image classification app might have one score that tells you how accurate the model classifies images into the correct categories, and another that measures the confidence level of the model's predictions.
 
 <Frame caption="Example: Experiment scores. ">
-  <img src="/images/scores/example-experiment-scores.png" alt="Example of experiment scores compared to the original scores displayed in Helicone."/>
+  <img
+    src="/images/scores/example-experiment-scores.png"
+    alt="Example of experiment scores compared to the original scores displayed in Helicone."
+  />
 </Frame>
 
 ### Why Scores
@@ -27,7 +37,8 @@ Scoring request allows you:
 
 <Info>
   We are currently not supporting autoscoring, but you can write your own logic
-  and submit scores via our [API](https://docs.helicone.ai/rest/request/post-v1request-score).
+  and submit scores via our
+  [API](https://docs.helicone.ai/rest/request/post-v1request-score).
 </Info>
 
 ## Quick Start
@@ -37,7 +48,10 @@ Scoring request allows you:
 You can add scores to your `requests` directly from the request page:
 
 <Frame caption="Example: Adding scores on the request page. ">
-  <img src="/images/scores/example-scores-request-page.png" alt="Example of adding scores post-request on the Requests page in Helicone."/>
+  <img
+    src="/images/scores/example-scores-request-page.png"
+    alt="Example of adding scores post-request on the Requests page in Helicone."
+  />
 </Frame>
 
 ### Option 2: Setting up your own Scoring Webhook

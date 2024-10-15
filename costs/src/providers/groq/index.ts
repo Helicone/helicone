@@ -22,18 +22,68 @@ export const costs: ModelRow[] = [
       value: "mixtral-8x7b-32768",
     },
     cost: {
-      prompt_token: 0.00000027,
-      completion_token: 0.00000027,
+      prompt_token: 0.00000024,
+      completion_token: 0.00000024,
     },
   },
   {
     model: {
       operator: "equals",
-      value: "gemma-7b-8192",
+      value: "gemma-7b-it",
     },
     cost: {
-      prompt_token: 0.0000001,
-      completion_token: 0.0000001,
+      prompt_token: 0.00000007,
+      completion_token: 0.00000007,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "gemma2-9b-it",
+    },
+    cost: {
+      prompt_token: 0.0000002,
+      completion_token: 0.0000002,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "llama3-70b-8192",
+    },
+    cost: {
+      prompt_token: 0.00000059,
+      completion_token: 0.00000079,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "llama3-8b-8192",
+    },
+    cost: {
+      prompt_token: 0.00000005,
+      completion_token: 0.00000008,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "llama3-groq-70b-8192-tool-use-preview",
+    },
+    cost: {
+      prompt_token: 0.00000089,
+      completion_token: 0.00000089,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "llama3-groq-8b-8192-tool-use-preview",
+    },
+    cost: {
+      prompt_token: 0.00000019,
+      completion_token: 0.00000019,
     },
   },
 ];

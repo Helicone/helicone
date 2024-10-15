@@ -63,12 +63,12 @@ export class CustomerController extends Controller {
       `
       SELECT
         count(*) as count,
-        ${clickhousePriceCalc("request_response_versioned")} as cost,
-        count(request_response_versioned.prompt_tokens) as prompt_tokens,
-        count(request_response_versioned.completion_tokens) as completion_tokens
-      FROM request_response_versioned
+        ${clickhousePriceCalc("request_response_rmt")} as cost,
+        count(request_response_rmt.prompt_tokens) as prompt_tokens,
+        count(request_response_rmt.completion_tokens) as completion_tokens
+      FROM request_response_rmt
       WHERE (
-        request_response_versioned.organization_id = {val_0 : String}
+        request_response_rmt.organization_id = {val_0 : String}
       )
     `,
       [customerId]

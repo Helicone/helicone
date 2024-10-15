@@ -13,8 +13,9 @@ import {
   checkLimitsSingle,
 } from "./managers/UsageLimitManager.ts";
 import { getAndStoreInCache } from "./util/cache/secureCache";
-import { parseJSXObject } from "../api/lib/promptHelpers";
+
 import { CfProperties } from "@cloudflare/workers-types";
+import { parseJSXObject } from "@helicone/prompts";
 
 export type RequestHandlerType =
   | "proxy_only"
@@ -129,8 +130,12 @@ export class RequestWrapper {
   private injectPromptProperties() {
     const promptId = this.promptSettings.promptId;
     if (promptId) {
-      this.heliconeHeaders.heliconeProperties[`Helicone-Prompt-Id`] = promptId;
+      this.injectCustomProperty(`Helicone-Prompt-Id`, promptId);
     }
+  }
+
+  injectCustomProperty(key: string, value: string): void {
+    this.heliconeHeaders.heliconeProperties[key] = value;
   }
 
   private getPromptMode(

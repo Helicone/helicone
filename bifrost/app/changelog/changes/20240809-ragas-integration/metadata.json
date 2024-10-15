@@ -1,0 +1,4 @@
+{
+  "title": "Ragas Integration for RAG System Evaluation",
+  "description": "We've added support for integrating Helicone with Ragas, an open-source framework for evaluating Retrieval-Augmented Generation (RAG) systems. This integration allows users to monitor and analyze the performance of their RAG pipelines, providing valuable insights into their effectiveness and areas for improvement."
+}

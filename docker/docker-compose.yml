@@ -343,6 +343,11 @@ services:
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ${ANON_KEY}
       CLICKHOUSE_USER: ${CLICKHOUSE_USER}
       CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
+      VALHALLA_URL: http://jawn:${JAWN_PORT}
+      S3_ENDPOINT: http://minio:9000
+      S3_ACCESS_KEY: ${MINIO_ROOT_USER}
+      S3_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
+      S3_BUCKET_NAME: "request-response-storage"
 
   worker-api:
     container_name: helicone-worker-api
@@ -379,6 +384,8 @@ services:
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ${ANON_KEY}
       CLICKHOUSE_USER: ${CLICKHOUSE_USER}
       CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
+      S3_ACCESS_KEY: ${MINIO_ROOT_USER}
+      S3_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
 
   worker-gateway:
     container_name: helicone-worker-gateway
@@ -402,6 +409,7 @@ services:
     container_name: helicone-jawn
     build:
       context: ../valhalla
+      dockerfile: ../valhalla/dockerfile
     restart: unless-stopped
     ports:
       - ${JAWN_PORT}:${JAWN_PORT}
@@ -414,4 +422,38 @@ services:
           "service_role_key": "${SERVICE_ROLE_KEY}"
         }
       SUPABASE_DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+      S3_ENDPOINT: http://minio:9000
+      S3_ACCESS_KEY: ${MINIO_ROOT_USER}
+      S3_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
+      S3_BUCKET_NAME: "request-response-storage"
+      S3_ENDPOINT_PUBLIC: http://localhost:9000
+      CLICKHOUSE_CREDS: |
+        {
+          "CLICKHOUSE_HOST": "http://${CLICKHOUSE_HOST}:${CLICKHOUSE_PORT}",
+          "CLICKHOUSE_USER": "${CLICKHOUSE_USER}",
+          "CLICKHOUSE_PASSWORD": "${CLICKHOUSE_PASSWORD}"
+        }
 
+  minio:
+    container_name: helicone-minio
+    image: minio/minio:latest
+    restart: unless-stopped
+    ports:
+      - 9000:9000
+      - 9001:9001
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    volumes:
+      - ./volumes/minio:/data:z
+    command: server /data --console-address ":9001"
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/docker-entrypoint.sh server /data --console-address ':9001' &
+      sleep 5;
+      mc alias set myminio http://localhost:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD};
+      if ! mc ls myminio/request-response-storage; then
+        mc mb myminio/request-response-storage;
+      fi;
+      tail -f /dev/null
+      "

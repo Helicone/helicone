@@ -1,21 +1,23 @@
 import { useQuery } from "@tanstack/react-query";
-import { Database } from "../../../supabase/database.types";
+
+import { getJawnClient } from "../../../lib/clients/jawn";
 
 const useAlertsPage = (orgId: string) => {
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["alerts"],
     queryFn: async () => {
-      const res = await fetch("/api/alerts", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }).then((res) => res.json());
+      const jawn = getJawnClient();
+      const res = await jawn.GET("/v1/alert/query");
 
-      const alert = res.data
-        .alert as Database["public"]["Tables"]["alert"]["Row"][];
-      const alertHistory = res.data
-        .alertHistory as Database["public"]["Tables"]["alert_history"]["Row"][];
+      if (res.error || !res.data) {
+        return {
+          alert: [],
+          alertHistory: [],
+        };
+      }
+
+      const alert = res.data.data?.alerts;
+      const alertHistory = res.data.data?.history;
 
       return {
         alert,
@@ -27,7 +29,7 @@ const useAlertsPage = (orgId: string) => {
   return {
     alerts: data?.alert || [],
     alertHistory:
-      data?.alertHistory.sort(
+      data?.alertHistory?.sort(
         (a, b) =>
           new Date(b.alert_start_time).getTime() -
           new Date(a.alert_start_time).getTime()

@@ -1,19 +1,28 @@
 ---
 title: "Key Vault"
-description: "Securely manage your provider API keys and simplify distribution using Helicone proxy keys."
+sidebarTitle: "Key Vault"
+description: "Centralize and secure provider API key management. Distribute Helicone proxy keys for simplified access control and enhanced security of your LLM applications."
+"twitter:title": "Key Vault - Helicone OSS LLM Observability"
 ---
 
-import QuestionsSection from '/snippets/questions-section.mdx';
+import QuestionsSection from "/snippets/questions-section.mdx";
 
-<Info>**Who can use this feature**: Anyone on Helicone's [Growth, Enterprise](https://www.helicone.ai/pricing) and our old Pro plan has access to Key Vault. If you are on a Free plan, upgrade to Growth or [contact us](https://www.helicone.ai/contact). </Info>
-
+<Info>
+  **Who can use this feature**: Anyone on Helicone's [Growth,
+  Enterprise](https://www.helicone.ai/pricing) and our old Pro plan has access
+  to Key Vault. If you are on a Free plan, upgrade to Growth or [contact
+  us](https://www.helicone.ai/contact).{" "}
+</Info>
 
 ## Introduction
 
-Vault is designed to securely store provider API keys (from OpenAI and future providers). It offers a seamless integration with Helicone proxy keys for enhanced management. 
+Vault is designed to securely store provider API keys (from OpenAI and future providers). It offers a seamless integration with Helicone proxy keys for enhanced management.
 
 <Frame caption="Store your provider keys, then distribute as proxy keys. ">
-  <img src="/images/vault/example-key-vault.png" alt="Example of Helicone's Key Vault for managing provider keys and distributing them safely as proxy keys. "/>
+  <img
+    src="/images/vault/example-key-vault.png"
+    alt="Example of Helicone's Key Vault for managing provider keys and distributing them safely as proxy keys. "
+  />
 </Frame>
 
 ### Why Key Vault
@@ -21,49 +30,72 @@ Vault is designed to securely store provider API keys (from OpenAI and future pr
 - **Simplified Key Management**: Send just one key to Helicone, eliminating the need to manage both a Helicone auth and an OpenAI key.
 - **Enhanced Security**: Distribute Helicone keys, ensuring users interact through our Helicone proxy.
 - **Prevent Bypass**: No need to distribute OpenAI keys directly, which could let users bypass our valuable logging and monitoring.
-
+- **Flexible Resource Allocation**:
+  - **For Hackathons:** Easily distribute AI credits to participants and implement rate limiting.
+  - **For Companies:** Allocate and control AI usage credits for employees or departments.
 
 ## Quick Start
 
-### Step 1: Store your Provider Keys 
-1. Go to the `Developer` tab > `Vault` > `Add Provider Key`. 
-2. Enter your provider key and assign a **unique** name to it for easy identification. 
-3. Click `Create Provider Key`. 
+### Step 1: Store your Provider Keys
+
+1. Go to the `Developer` tab > `Vault` > `Add Provider Key`.
+2. Enter your provider key and assign a **unique** name to it for easy identification.
+3. Click `Create Provider Key`.
 
 <Frame>
-  <img src="/images/vault/example-store-provider-key.png" alt="Storing a provider key in Helicone's Key Vault"/>
+  <img
+    src="/images/vault/example-store-provider-key.png"
+    alt="Storing a provider key in Helicone's Key Vault"
+  />
 </Frame>
 
-<Note>Currently, Helicone helps you store OpenAI Provider Key. In the future, we plan to expand to include other providers. </Note>
+<Note>
+  Currently, Helicone helps you store OpenAI Provider Key. In the future, we
+  plan to expand to include other providers.{" "}
+</Note>
 
 <Accordion title="How we encrypt your Provider Key securely?">
-  At Helicone, we use transparent column encryption with the `XChaCha20 cryptographic algorithm` and `nonce support` to securely encrypt all keys at rest, ensuring an extra layer of protection.
+  At Helicone, we use transparent column encryption with the `XChaCha20
+  cryptographic algorithm` and `nonce support` to securely encrypt all keys at
+  rest, ensuring an extra layer of protection.
 </Accordion>
 
-### Step 2: Generate Proxy Keys for Your Team  
-1. On the same `Vault` page, click on `Create Proxy Key`. 
+### Step 2: Generate Proxy Keys for Your Team
+
+1. On the same `Vault` page, click on `Create Proxy Key`.
 2. Create a name, then select your provider key from the dropdown.
-3. Click `Create Proxy Key`. 
+3. Click `Create Proxy Key`.
 
 <Frame caption="Generate a proxy key for your provider key.">
-  <img src="/images/vault/example-create-proxy-key.png" alt="Creating a proxy key for a provider key in Helicone's Key Vault. "/>
+  <img
+    src="/images/vault/example-create-proxy-key.png"
+    alt="Creating a proxy key for a provider key in Helicone's Key Vault. "
+  />
 </Frame>
 
 Helicone will then generate a unique proxy key for you. This proxy key acts as an authorization Bearer token when making requests.
 
-<Tip>**It's possible to have several proxy keys mapped to one provider key.** This flexibility can be especially useful for large teams or segmented projects.</Tip>
+<Tip>
+  **It's possible to have several proxy keys mapped to one provider key.** This
+  flexibility can be especially useful for large teams or segmented projects.
+</Tip>
 
+### Step 3: Store the Proxy Key Safely
 
-### Step 3: Store the Proxy Key Safely 
-
-Copy the key and store it somewhere safe. You can now share this key with another team member. 
+Copy the key and store it somewhere safe. You can now share this key with another team member.
 
 <Frame caption="Copy the key the store it somwhere safe. ">
-  <img src="/images/vault/example-store-key-safely.png" alt="Safely storing a proxy key generated by Helicone's Key Vault"/>
+  <img
+    src="/images/vault/example-store-key-safely.png"
+    alt="Safely storing a proxy key generated by Helicone's Key Vault"
+  />
 </Frame>
 
-<Warning>**Ensure you copy and safely store the generated proxy key right away.** It uses one-way hashing, meaning if you lose it, you'll need to generate a new one.</Warning>
-
+<Warning>
+  **Ensure you copy and safely store the generated proxy key right away.** It
+  uses one-way hashing, meaning if you lose it, you'll need to generate a new
+  one.
+</Warning>
 
 ## Important Notes
 

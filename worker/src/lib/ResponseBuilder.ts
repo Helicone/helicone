@@ -66,7 +66,8 @@ export class ResponseBuilder {
 
     return this.build({
       body: JSON.stringify({
-        message: "Rate limit reached. Please wait before making more requests.",
+        message:
+          "Helicone user was rate limit via Helicone-RateLimit-Policy header. Please wait before making more requests. See https://docs.helicone.ai/features/advanced-usage/custom-rate-limits for more details.",
       }),
       status: 429,
     });

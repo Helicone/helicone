@@ -1,6 +1,8 @@
 ---
-title: "PostHog"
-description: "We've teamed up with PostHog to bring your LLM analytics to PostHog, so you can view them all in one place."
+title: "PostHog Integration"
+sidebarTitle: "PostHog"
+description: "Combine Helicone's LLM analytics with PostHog, a comprehensive product analytics platform. View LLM insights alongside other application data for holistic performance analysis."
+"twitter:title": "PostHog Integration - Helicone OSS LLM Observability"
 ---
 
 ## How to Integrate Helicone with PostHog
@@ -10,7 +12,7 @@ description: "We've teamed up with PostHog to bring your LLM analytics to PostHo
     Create an account for PostHog [here](https://posthog.com/).
   </Step>
   <Step title="Add two new headers">
-    Similar to how you set `Helicone-Auth` [header](https://docs.helicone.ai/getting-started/integration-method/openai-proxy#openai-v1), add two new headers `Helicone-Posthog-Key` and `Helicone-Posthog-Host` with your API key and PostHog host. 
+    Similar to how you set `Helicone-Auth` [header](https://docs.helicone.ai/getting-started/integration-method/openai-proxy#openai-v1), add two new headers `Helicone-Posthog-Key` and `Helicone-Posthog-Host` with your API key and PostHog host.
     <Tip>You can find both your API key and PostHog host in your [PostHog project settings](https://us.posthog.com/settings/project). </Tip>
 
     <Tabs>
@@ -76,10 +78,10 @@ description: "We've teamed up with PostHog to bring your LLM analytics to PostHo
 
   <Step title="Create a dashboard in PostHog">
 	Create your own dashboard, or use our template to start.
-	
-	1. Go to the [dashboard tab](https://us.posthog.com/dashboard) in PostHog. 
-	2. Click the `New dashboard` button in the top right.
-	3. Select `LLM metrics – Helicone` from the list of templates, or `Blank dashboard` to start from scratch.
+
+    1. Go to the [dashboard tab](https://us.posthog.com/dashboard) in PostHog.
+    2. Click the `New dashboard` button in the top right.
+    3. Select `LLM metrics – Helicone` from the list of templates, or `Blank dashboard` to start from scratch.
 
   </Step>
 </Steps>

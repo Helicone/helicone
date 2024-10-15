@@ -1,4 +1,4 @@
-import { Chat } from "../../requests/chat";
+import { Chat } from "../../requests/chatComponent/chat";
 import AbstractRequestBuilder, {
   SpecificFields,
 } from "./abstractRequestBuilder";
@@ -76,6 +76,7 @@ class ChatBuilder extends AbstractRequestBuilder {
     const renderChat = () => {
       return (
         <Chat
+          request={this.response}
           llmSchema={this.response.llmSchema ?? undefined}
           requestBody={this.response.request_body}
           requestId={this.response.request_id}

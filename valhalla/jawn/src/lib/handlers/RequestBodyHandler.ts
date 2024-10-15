@@ -9,6 +9,15 @@ import { PromiseGenericResult, err, ok } from "../shared/result";
 import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext } from "./HandlerContext";
 
+export const MAX_ASSETS = 100;
+
+function truncMap(
+  map: Map<string, string>,
+  maxSize: number
+): Map<string, string> {
+  return new Map(Array.from(map.entries()).slice(0, maxSize));
+}
+
 export class RequestBodyHandler extends AbstractLogHandler {
   async handle(context: HandlerContext): PromiseGenericResult<string> {
     try {
@@ -25,6 +34,20 @@ export class RequestBodyHandler extends AbstractLogHandler {
       context.processedLog.request.assets = requestBodyAssets;
       context.processedLog.request.body = requestBodyFinal;
       context.processedLog.request.model = requestModel;
+
+      if (
+        this.isAssistantRequest(requestBodyFinal) &&
+        !context.processedLog.request.model
+      ) {
+        context.processedLog.request.model = "assistant-call";
+      }
+
+      if (this.isVectorDBRequest(requestBodyFinal)) {
+        context.processedLog.request.model = "vector_db";
+      } else if (this.isToolRequest(requestBodyFinal)) {
+        context.processedLog.request.model = `tool:${requestBodyFinal.toolName}`;
+      }
+
       try {
         context.processedLog.request.properties = Object.entries(
           context.message.log.request.properties
@@ -45,6 +68,29 @@ export class RequestBodyHandler extends AbstractLogHandler {
     }
   }
 
+  private isAssistantRequest(requestBody: any): boolean {
+    if (typeof requestBody !== "object" || requestBody === null) {
+      return false;
+    }
+    return (
+      (!requestBody.hasOwnProperty("messages") &&
+        requestBody.hasOwnProperty("instructions") &&
+        requestBody.hasOwnProperty("name")) ||
+      requestBody.hasOwnProperty("assistant_id") ||
+      requestBody.hasOwnProperty("metadata")
+    );
+  }
+
+  private isVectorDBRequest(requestBody: any): boolean {
+    return (
+      requestBody.hasOwnProperty("_type") && requestBody._type === "vector_db"
+    );
+  }
+
+  private isToolRequest(requestBody: any): boolean {
+    return requestBody.hasOwnProperty("_type") && requestBody._type === "tool";
+  }
+
   processRequestBody(context: HandlerContext): {
     body: any;
     model: string | undefined;
@@ -56,7 +102,11 @@ export class RequestBodyHandler extends AbstractLogHandler {
       console.log("No request body found");
       return {
         body: {},
-        model: getModelFromRequest("{}", log.request.path),
+        model: getModelFromRequest(
+          "{}",
+          log.request.path,
+          log.request.targetUrl
+        ),
       };
     }
 
@@ -64,7 +114,8 @@ export class RequestBodyHandler extends AbstractLogHandler {
 
     const requestModel = getModelFromRequest(
       parsedRequestBody,
-      log.request.path
+      log.request.path,
+      log.request.targetUrl
     );
 
     parsedRequestBody = context.message.heliconeMeta.omitRequestLog
@@ -99,6 +150,13 @@ export class RequestBodyHandler extends AbstractLogHandler {
     imageModelParsingResponse.body = unsupportedImage(
       imageModelParsingResponse.body
     );
+
+    if (imageModelParsingResponse.assets.size > MAX_ASSETS) {
+      imageModelParsingResponse.assets = truncMap(
+        imageModelParsingResponse.assets,
+        MAX_ASSETS
+      );
+    }
 
     return imageModelParsingResponse;
   }

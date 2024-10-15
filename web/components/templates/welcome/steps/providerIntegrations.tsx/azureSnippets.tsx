@@ -73,6 +73,43 @@ const model = new ChatOpenAI({
   },
 });
 `,
+  asyncLogging: (key: string) => `
+import { HeliconeAsyncLogger } from "@helicone/helicone";
+import { OpenAIClient, AzureKeyCredential } from "@azure/openai";
+
+const logger = new HeliconeAsyncLogger({
+  apiKey: process.env.HELICONE_API_KEY,
+  providers: {
+    azureOpenAI: OpenAIClient
+  }
+});
+logger.init();
+
+const client = new OpenAIClient(
+  \`https://\${process.env.AZURE_RESOURCE_NAME}.openai.azure.com/\`,
+  new AzureKeyCredential(process.env.AZURE_API_KEY!),
+);
+
+// Call OpenAI using Azure SDK
+  `,
+  manualLogging: (key: string) => `
+import { HeliconeManualLogger } from "@helicone/helicone";
+
+const logger = new HeliconeManualLogger({
+  apiKey: process.env.HELICONE_API_KEY
+});
+
+const reqBody = {
+  "model": "text-embedding-ada-002",
+  "input": "The food was delicious and the waiter was very friendly.",
+  "encoding_format": "float"
+}
+
+logger.registerRequest(reqBody);
+// Call OpenAI using Azure SDK and send the logs to Helicone
+console.log(res);
+logger.sendLog(res);
+  `,
 };
 
 type SupportedLanguages = keyof typeof CODE_CONVERTS;
@@ -84,6 +121,8 @@ const DIFF_LINES: {
   python: [4, 7],
   langchain_python: [3, 4, 14],
   langchain_typescript: [4, 9, 10],
+  asyncLogging: [],
+  manualLogging: [],
 };
 
 const NAMES: {
@@ -93,6 +132,8 @@ const NAMES: {
   python: "Python",
   langchain_python: "LangChain",
   langchain_typescript: "LangChainJS",
+  asyncLogging: "OpenLLMetry",
+  manualLogging: "Custom",
 };
 
 interface AzureSnippetsProps {
@@ -145,11 +186,29 @@ export default function AzureSnippets(props: AzureSnippetsProps) {
         >
           <h2 className="font-semibold">LangchainJS</h2>
         </button>
+        <button
+          className={clsx(
+            lang === "asyncLogging" ? "bg-sky-100" : "bg-white",
+            "flex items-center gap-2 border border-gray-300 rounded-lg py-2 px-4"
+          )}
+          onClick={() => setLang("asyncLogging")}
+        >
+          <h2 className="font-semibold">OpenLLMetry</h2>
+        </button>
+        <button
+          className={clsx(
+            lang === "manualLogging" ? "bg-sky-100" : "bg-white",
+            "flex items-center gap-2 border border-gray-300 rounded-lg py-2 px-4"
+          )}
+          onClick={() => setLang("manualLogging")}
+        >
+          <h2 className="font-semibold">Custom</h2>
+        </button>
       </div>
 
       <DiffHighlight
         code={CODE_CONVERTS[lang](apiKey)}
-        language="bash"
+        language={lang}
         newLines={DIFF_LINES[lang]}
         oldLines={[]}
         minHeight={false}

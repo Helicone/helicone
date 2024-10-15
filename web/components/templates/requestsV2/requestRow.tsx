@@ -1,31 +1,27 @@
 import {
   ArrowPathIcon,
-  HandThumbDownIcon,
-  HandThumbUpIcon,
-  InformationCircleIcon,
   MinusIcon,
   PlusIcon,
 } from "@heroicons/react/24/outline";
 import { Tooltip } from "@mui/material";
-import { useRouter } from "next/router";
+import { TextInput } from "@tremor/react";
 import { useEffect, useState } from "react";
-import { NormalizedRequest } from "./builder/abstractRequestBuilder";
-import ModelPill from "./modelPill";
-import StatusBadge from "./statusBadge";
-import { clsx } from "../../shared/clsx";
-import {
-  HandThumbUpIcon as HTUp,
-  HandThumbDownIcon as HTDown,
-} from "@heroicons/react/24/solid";
 import {
   addRequestLabel,
   addRequestScore,
-  updateRequestFeedback,
 } from "../../../services/lib/requests";
-import useNotification from "../../shared/notification/useNotification";
 import { useOrg } from "../../layout/organizationContext";
+import { clsx } from "../../shared/clsx";
+import useNotification from "../../shared/notification/useNotification";
 import HcButton from "../../ui/hcButton";
-import { TextInput } from "@tremor/react";
+import FeedbackButtons from "../feedback/thumbsUpThumbsDown";
+import { NormalizedRequest } from "./builder/abstractRequestBuilder";
+import ModelPill from "./modelPill";
+import StatusBadge from "./statusBadge";
+import ThemedModal from "../../shared/themed/themedModal";
+import NewDataset from "../datasets/NewDataset";
+import { getUSDateFromString } from "@/components/shared/utils/utils";
+import { formatNumber } from "../../shared/utils/formatNumber";
 
 function getPathName(url: string) {
   try {
@@ -34,8 +30,6 @@ function getPathName(url: string) {
     return url;
   }
 }
-
-const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH || "";
 
 const RequestRow = (props: {
   request: NormalizedRequest;
@@ -51,11 +45,6 @@ const RequestRow = (props: {
     wFull = false,
     displayPreview = true,
   } = props;
-  const [requestFeedback, setRequestFeedback] = useState<{
-    createdAt: string | null;
-    id: string | null;
-    rating: boolean | null;
-  }>(request.feedback);
 
   const org = useOrg();
 
@@ -71,7 +60,6 @@ const RequestRow = (props: {
 
   const [currentScores, setCurrentScores] = useState<Record<string, number>>();
 
-  const router = useRouter();
   const { setNotification } = useNotification();
 
   useEffect(() => {
@@ -92,26 +80,10 @@ const RequestRow = (props: {
     });
 
     setCurrentProperties(currentProperties);
-    const currentScores: Record<string, number> = request.scores || {};
+    const currentScores: Record<string, number> =
+      (request.scores as Record<string, number>) || {};
     setCurrentScores(currentScores);
   }, [properties, request.customProperties, request.scores]);
-
-  const updateFeedbackHandler = async (requestId: string, rating: boolean) => {
-    updateRequestFeedback(requestId, rating)
-      .then((res) => {
-        if (res && res.status === 200) {
-          setRequestFeedback({
-            ...requestFeedback,
-            rating: rating,
-          });
-          setNotification("Feedback submitted", "success");
-        }
-      })
-      .catch((err) => {
-        console.error(err);
-        setNotification("Error submitting feedback", "error");
-      });
-  };
 
   const onAddLabelHandler = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -166,7 +138,22 @@ const RequestRow = (props: {
 
     const formData = new FormData(e.currentTarget);
     const key = formData.get("key") as string;
-    const value = formData.get("value") as any as number;
+    let value = formData.get("value") as any;
+    let valueType = "number";
+
+    if (!isNaN(Number(value))) {
+      value = Number(value);
+    } else if (value === "true") {
+      value = true;
+      valueType = "boolean";
+    } else if (value === "false") {
+      value = false;
+      valueType = "boolean";
+    } else {
+      setNotification("Value must be a number or 'true'/'false'", "error");
+      setIsScoresAdding(false);
+      return;
+    }
 
     if (currentScores && currentScores[key]) {
       setNotification("Score already exists", "error");
@@ -174,7 +161,7 @@ const RequestRow = (props: {
       return;
     }
 
-    if (!key || !value || org?.currentOrg?.id === undefined) {
+    if (!key || org?.currentOrg?.id === undefined) {
       setNotification("Error adding score", "error");
       setIsScoresAdding(false);
       return;
@@ -195,7 +182,9 @@ const RequestRow = (props: {
                 ...currentScores,
                 [key]: value,
               }
-            : { [key]: value }
+            : {
+                [key]: value,
+              }
         );
 
         setIsScoresAdding(false);
@@ -211,8 +200,10 @@ const RequestRow = (props: {
     }
   };
 
+  const [newDatasetModalOpen, setNewDatasetModalOpen] = useState(false);
+
   return (
-    <div className="flex flex-col h-full space-y-8">
+    <div className="flex flex-col h-full space-y-8 pb-72">
       <div className="flex flex-row items-center">
         <ul
           className={clsx(
@@ -225,7 +216,7 @@ const RequestRow = (props: {
               Created At
             </p>
             <p className="text-gray-700 dark:text-gray-300 truncate">
-              {new Date(request.createdAt).toLocaleString("en-US")}
+              {getUSDateFromString(request.createdAt)}
             </p>
           </li>
           <li className="flex flex-row justify-between items-center py-2 gap-4">
@@ -239,21 +230,28 @@ const RequestRow = (props: {
           {request.status.statusType === "success" && (
             <li className="flex flex-row justify-between items-center py-2 gap-4">
               <p className="font-semibold text-gray-900 dark:text-gray-100">
-                Tokens
+                Prompt Tokens
               </p>
               <div className="flex flex-row items-center space-x-1">
                 <p className="text-gray-700 truncate dark:text-gray-300">
-                  {request.totalTokens && request.totalTokens >= 0
-                    ? request.totalTokens
+                  {request.promptTokens && request.promptTokens >= 0
+                    ? request.promptTokens
                     : "not found"}
                 </p>
-                {request.totalTokens && request.totalTokens >= 0 && (
-                  <Tooltip
-                    title={`Completion Tokens: ${request.completionTokens} - Prompt Tokens: ${request.promptTokens}`}
-                  >
-                    <InformationCircleIcon className="h-4 w-4 inline text-gray-500" />
-                  </Tooltip>
-                )}
+              </div>
+            </li>
+          )}
+          {request.status.statusType === "success" && (
+            <li className="flex flex-row justify-between items-center py-2 gap-4">
+              <p className="font-semibold text-gray-900 dark:text-gray-100">
+                Completion Tokens
+              </p>
+              <div className="flex flex-row items-center space-x-1">
+                <p className="text-gray-700 truncate dark:text-gray-300">
+                  {request.completionTokens && request.completionTokens >= 0
+                    ? request.completionTokens
+                    : "not found"}
+                </p>
               </div>
             </li>
           )}
@@ -263,6 +261,18 @@ const RequestRow = (props: {
             </p>
             <p className="text-gray-700 dark:text-gray-300 truncate">
               <span>{Number(request.latency) / 1000}s</span>
+            </p>
+          </li>
+          <li className="flex flex-row justify-between items-center py-2 gap-4">
+            <p className="font-semibold text-gray-900 dark:text-gray-100">
+              Cost
+            </p>
+            <p className="text-gray-700 dark:text-gray-300 truncate">
+              {request.cost !== null && request.cost !== undefined
+                ? `$${formatNumber(request.cost)}`
+                : request.status.statusType === "success"
+                ? "Calculating..."
+                : "N/A"}
             </p>
           </li>
           <li className="flex flex-row justify-between items-center py-2 gap-4">
@@ -325,8 +335,22 @@ const RequestRow = (props: {
             )}
         </ul>
       </div>
-
-      <div className="flex flex-col">
+      <div className="flex flex-col gap-4">
+        <div className="font-semibold text-gray-900 dark:text-gray-100 text-sm items-center flex">
+          <div className="flex flex-row items-center space-x-1">
+            <span>Add to Dataset</span>
+            <Tooltip title="Add to Dataset" placement="top">
+              <button
+                onClick={() => {
+                  setNewDatasetModalOpen(true);
+                }}
+                className="ml-1.5 p-0.5 shadow-sm bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-md h-fit"
+              >
+                <PlusIcon className="h-3 w-3 text-gray-500" />
+              </button>
+            </Tooltip>
+          </div>
+        </div>
         <div className="font-semibold text-gray-900 dark:text-gray-100 text-sm items-center flex">
           Custom Properties{" "}
           <Tooltip title="Add a new label" placement="top">
@@ -402,26 +426,26 @@ const RequestRow = (props: {
             </HcButton>
           </form>
         )}
-        <div className="flex flex-wrap gap-4 text-sm items-center pt-2">
-          {currentProperties?.map((property, i) => {
-            return (
-              <li
-                className="flex flex-col space-y-1 justify-between text-left p-2.5 shadow-sm border border-gray-300 dark:border-gray-700 rounded-lg min-w-[5rem]"
-                key={i}
-              >
-                <p className="font-semibold text-gray-900 dark:text-gray-100">
-                  {Object.keys(property)[0]}
-                </p>
-                <p className="text-gray-700 dark:text-gray-300">
-                  {property[Object.keys(property)[0]]}
-                </p>
-              </li>
-            );
-          })}
-        </div>
-      </div>
-
-      <div className="flex flex-col">
+        {currentProperties && currentProperties.length > 0 && (
+          <div className="flex flex-wrap gap-4 text-sm items-center pt-2">
+            {currentProperties.map((property, i) => {
+              const key = Object.keys(property)[0];
+              return (
+                <li
+                  className="flex flex-col space-y-1 justify-between text-left p-2.5 shadow-sm border border-gray-300 dark:border-gray-700 rounded-lg min-w-[5rem]"
+                  key={i}
+                >
+                  <p className="font-semibold text-gray-900 dark:text-gray-100">
+                    {key}
+                  </p>
+                  <p className="text-gray-700 dark:text-gray-300">
+                    {property[key]}
+                  </p>
+                </li>
+              );
+            })}
+          </div>
+        )}
         <div className="font-semibold text-gray-900 dark:text-gray-100 text-sm items-center flex">
           Scores{" "}
           <Tooltip title="Add a new score" placement="top">
@@ -474,7 +498,7 @@ const RequestRow = (props: {
               <div className="">
                 <TextInput
                   //@ts-ignore
-                  type="number"
+                  type="text"
                   name="value"
                   id="value"
                   required
@@ -500,62 +524,55 @@ const RequestRow = (props: {
           </form>
         )}
 
-        <div className="flex flex-wrap gap-4 text-sm items-center pt-2">
-          {currentScores &&
-            Object.entries(currentScores).map(([key, value]) => (
-              <li
-                className="flex flex-col space-y-1 justify-between text-left p-2.5 shadow-sm border border-gray-300 dark:border-gray-700 rounded-lg min-w-[5rem]"
-                key={key}
-              >
-                <p className="font-semibold text-gray-900 dark:text-gray-100">
-                  {key}
-                </p>
-                <p className="text-gray-700 dark:text-gray-300">{value}</p>
-              </li>
-            ))}
-        </div>
+        {currentScores && Object.keys(currentScores).length > 0 && (
+          <div className="flex flex-wrap gap-4 text-sm items-center pt-2">
+            {Object.entries(currentScores)
+              .filter(([key]) => key !== "helicone-score-feedback")
+              .map(([key, value]) => (
+                <li
+                  className="flex flex-col space-y-1 justify-between text-left p-2.5 shadow-sm border border-gray-300 dark:border-gray-700 rounded-lg min-w-[5rem]"
+                  key={key}
+                >
+                  <p className="font-semibold text-gray-900 dark:text-gray-100">
+                    {key.replace("-hcone-bool", "")}
+                  </p>
+                  <p className="text-gray-700 dark:text-gray-300">
+                    {key.endsWith("-hcone-bool")
+                      ? value === 1
+                        ? "true"
+                        : "false"
+                      : Number(value)}
+                  </p>
+                </li>
+              ))}
+          </div>
+        )}
       </div>
-
       {displayPreview && (
         <div className="flex flex-col space-y-8">
           <div className="flex w-full justify-end">
-            <div className="flex flex-row items-center space-x-4">
-              <button
-                onClick={() => {
-                  if (requestFeedback.rating === true) {
-                    return;
-                  }
-
-                  updateFeedbackHandler(request.id, true);
-                }}
-              >
-                {requestFeedback.rating === true ? (
-                  <HTUp className={clsx("h-5 w-5 text-green-500")} />
-                ) : (
-                  <HandThumbUpIcon className="h-5 w-5 text-green-500" />
-                )}
-              </button>
-              <button
-                onClick={() => {
-                  if (requestFeedback.rating === false) {
-                    return;
-                  }
-
-                  updateFeedbackHandler(request.id, false);
-                }}
-              >
-                {requestFeedback.rating === false ? (
-                  <HTDown className={clsx("h-5 w-5 text-red-500")} />
-                ) : (
-                  <HandThumbDownIcon className="h-5 w-5 text-red-500" />
-                )}
-              </button>
-            </div>
+            <FeedbackButtons
+              requestId={request.id}
+              defaultValue={
+                request.scores && request.scores["helicone-score-feedback"]
+                  ? Number(request.scores["helicone-score-feedback"]) === 1
+                    ? true
+                    : false
+                  : null
+              }
+            />
           </div>
 
           <div className="flex flex-col space-y-2">{request.render()}</div>
         </div>
       )}
+      <div className="min-h-[100px]">{/* space */}</div>
+      <ThemedModal open={newDatasetModalOpen} setOpen={setNewDatasetModalOpen}>
+        <NewDataset
+          request_ids={[request.id]}
+          onComplete={() => setNewDatasetModalOpen(false)}
+        />
+      </ThemedModal>
     </div>
   );
 };

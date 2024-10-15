@@ -1,8 +1,7 @@
-import { ToolCall } from "openai/resources/beta/threads/runs/steps";
-import { Message } from "../../components/templates/requests/chat";
+import { ChatCompletionTool } from "openai/resources";
+import { Message } from "../../components/templates/requests/chatComponent/types";
 import { NormalizedRequest } from "../../components/templates/requestsV2/builder/abstractRequestBuilder";
 import useRequestsPageV2 from "../../components/templates/requestsV2/useRequestsPageV2";
-import { ChatCompletion, ChatCompletionTool } from "openai/resources";
 
 export const getChat = (
   requests: NormalizedRequest[]
@@ -102,10 +101,13 @@ export const usePlaygroundPage = (requestId: string) => {
   const requests = useRequestsPageV2(
     1,
     1,
-    [],
     {
-      request: {
-        id: {
+      operator: "and",
+      rows: [],
+    },
+    {
+      request_response_rmt: {
+        request_id: {
           equals: requestId,
         },
       },
@@ -115,14 +117,15 @@ export const usePlaygroundPage = (requestId: string) => {
     false
   );
 
-  const { chat, isChat, tools } = getChat(requests.requests);
+  const { chat, isChat, tools } = getChat(requests.normalizedRequests);
 
   return {
     isLoading: requests.isDataLoading,
-    data: requests.requests,
+    data: requests.normalizedRequests,
     chat,
     refetch: requests.refetch,
-    hasData: requests.requests && requests.requests.length > 0,
+    hasData:
+      requests.normalizedRequests && requests.normalizedRequests.length > 0,
     isChat,
     tools,
   };

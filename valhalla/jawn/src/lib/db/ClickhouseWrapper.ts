@@ -185,15 +185,44 @@ export interface InsertRequestResponseVersioned {
   provider: Nullable<string>;
   country_code: Nullable<string>;
   target_url: Nullable<string>;
-  created_at?: string;
   sign: 1;
   version: number;
   properties: Record<string, string>;
   scores: Record<string, number>;
+  request_body: string;
+  response_body: string;
+  assets: Array<string>;
 }
+
 export type RequestResponseVersioned =
   | InsertRequestResponseVersioned
   | DeleteRequestResponseVersioned;
+
+export interface RequestResponseRMT {
+  response_id: string;
+  response_created_at: string;
+  latency: number;
+  status: number;
+  completion_tokens: number;
+  prompt_tokens: number;
+  model: string;
+  request_id: string;
+  request_created_at: string;
+  user_id: string;
+  organization_id: string;
+  proxy_key_id: string;
+  threat: boolean;
+  time_to_first_token: number;
+  provider: string;
+  country_code: string;
+  target_url: string;
+  properties: Record<string, string>;
+  scores: Record<string, number>;
+  request_body: string;
+  response_body: string;
+  assets: Array<string>;
+  updated_at?: string;
+}
 
 export interface ClickhouseDB {
   Tables: {
@@ -203,6 +232,7 @@ export interface ClickhouseDB {
     rate_limit_log: RateLimitLog;
     rate_limit_log_v2: RateLimitLogV2;
     cache_hits: CacheHits;
+    request_response_rmt: RequestResponseRMT;
   };
 }
 

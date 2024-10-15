@@ -18,7 +18,7 @@ export async function getAverageLatency(
     await buildFilterWithAuthClickHousePropertiesV2({
       org_id,
       filter: {
-        left: timeFilterToFilterNode(timeFilter, "request_response_versioned"),
+        left: timeFilterToFilterNode(timeFilter, "request_response_rmt"),
         right: filter,
         operator: "and",
       },
@@ -28,8 +28,8 @@ export async function getAverageLatency(
   WITH total_count AS (
     SELECT 
       count(*) as count,
-      sum(request_response_versioned.latency) as total_latency
-    FROM request_response_versioned
+      sum(request_response_rmt.latency) as total_latency
+    FROM request_response_rmt
     ARRAY JOIN mapKeys(properties) AS key
     WHERE (
       (${filterString})

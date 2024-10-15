@@ -1,32 +1,39 @@
-import { ArrowPathIcon, HomeIcon } from "@heroicons/react/24/outline";
-import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { ArrowPathIcon, PlusIcon } from "@heroicons/react/24/outline";
+
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { HeliconeRequest } from "../../../lib/api/request/request";
 import { useJawnClient } from "../../../lib/clients/jawnHook";
-import {
-  TimeInterval,
-  getTimeIntervalAgo,
-} from "../../../lib/timeCalculations/time";
+import { TimeInterval } from "../../../lib/timeCalculations/time";
 import { useGetUnauthorized } from "../../../services/hooks/dashboard";
 import { useDebounce } from "../../../services/hooks/debounce";
 import { useLocalStorage } from "../../../services/hooks/localStorage";
 import { useOrganizationLayout } from "../../../services/hooks/organization_layout";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import {
+  getRootFilterNode,
+  isFilterRowNode,
+  isUIFilterRow,
+  UIFilterRowNode,
+  UIFilterRowTree,
+} from "../../../services/lib/filters/uiFilterRowTree";
+import {
   OrganizationFilter,
   OrganizationLayout,
+  transformFilter,
+  transformOrganizationLayoutFilters,
 } from "../../../services/lib/organization_layout/organization_layout";
 import { placeAssetIdValues } from "../../../services/lib/requestTraverseHelper";
 import {
   SortDirection,
   SortLeafRequest,
 } from "../../../services/lib/sorts/requests/sorts";
+import { Row } from "../../layout/common";
+import GenericButton from "../../layout/common/button";
 import { useOrg } from "../../layout/organizationContext";
 import AuthHeader from "../../shared/authHeader";
 import { clsx } from "../../shared/clsx";
-import ThemedTableV5 from "../../shared/themed/table/themedTableV5";
+import ThemedTable from "../../shared/themed/table/themedTable";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
-import { ThemedSwitch } from "../../shared/themed/themedSwitch";
 import useSearchParams from "../../shared/utils/useSearchParams";
 import { TimeFilter } from "../dashboard/dashboardPage";
 import { NormalizedRequest } from "./builder/abstractRequestBuilder";
@@ -35,11 +42,20 @@ import {
   mapGeminiProJawn,
 } from "./builder/mappers/geminiMapper";
 import getNormalizedRequest from "./builder/requestBuilder";
+import DatasetButton from "./buttons/datasetButton";
 import { getInitialColumns } from "./initialColumns";
 import RequestCard from "./requestCard";
-import RequestDrawerV2 from "./requestDrawerV2";
 import TableFooter from "./tableFooter";
 import useRequestsPageV2 from "./useRequestsPageV2";
+import { useRouter } from "next/router";
+import ThemedModal from "../../shared/themed/themedModal";
+import NewDataset from "../datasets/NewDataset";
+import { useSelectMode } from "../../../services/hooks/dataset/selectMode";
+import { ProFeatureWrapper } from "@/components/shared/ProBlockerComponents/ProFeatureWrapper";
+import { Button } from "@/components/ui/button";
+import RequestDiv from "./requestDiv";
+import StreamWarning from "./StreamWarning";
+import UnauthorizedView from "./UnauthorizedView";
 
 interface RequestsPageV2Props {
   currentPage: number;
@@ -52,9 +68,40 @@ interface RequestsPageV2Props {
   isCached?: boolean;
   initialRequestId?: string;
   userId?: string;
+  evaluatorId?: string;
+  rateLimited?: boolean;
   currentFilter: OrganizationFilter | null;
   organizationLayout: OrganizationLayout | null;
   organizationLayoutAvailable: boolean;
+}
+
+function getTimeIntervalAgo(interval: TimeInterval): Date {
+  const now = new Date();
+  const utcNow = Date.UTC(
+    now.getUTCFullYear(),
+    now.getUTCMonth(),
+    now.getUTCDate(),
+    now.getUTCHours(),
+    now.getUTCMinutes(),
+    now.getUTCSeconds()
+  );
+
+  switch (interval) {
+    case "3m":
+      return new Date(utcNow - 3 * 30 * 24 * 60 * 60 * 1000);
+    case "1m":
+      return new Date(utcNow - 30 * 24 * 60 * 60 * 1000);
+    case "7d":
+      return new Date(utcNow - 7 * 24 * 60 * 60 * 1000);
+    case "24h":
+      return new Date(utcNow - 24 * 60 * 60 * 1000);
+    case "1h":
+      return new Date(utcNow - 60 * 60 * 1000);
+    case "all":
+      return new Date(0);
+    default:
+      return new Date(utcNow - 24 * 60 * 60 * 1000); // Default to 24h
+  }
 }
 
 function getSortLeaf(
@@ -88,7 +135,11 @@ function getSortLeaf(
 }
 
 function getTableName(isCached: boolean): string {
-  return isCached ? "cache_hits" : "request";
+  return isCached ? "cache_hits" : "request_response_rmt";
+}
+
+function getCreatedAtColumn(isCached: boolean): string {
+  return isCached ? "created_at" : "request_created_at";
 }
 
 const RequestsPageV2 = (props: RequestsPageV2Props) => {
@@ -99,11 +150,14 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     isCached = false,
     initialRequestId,
     userId,
+    evaluatorId,
+    rateLimited = false,
     currentFilter,
     organizationLayout,
     organizationLayoutAvailable,
   } = props;
-  const [isLive, setIsLive] = useLocalStorage("isLive", false);
+  const initialLoadRef = useRef(true);
+  const [isLive, setIsLive] = useLocalStorage("isLive-RequestPage", false);
   const jawn = useJawnClient();
   const orgContext = useOrg();
   const searchParams = useSearchParams();
@@ -119,15 +173,33 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   const [selectedData, setSelectedData] = useState<
     NormalizedRequest | undefined
   >(undefined);
-  function encodeFilter(filter: UIFilterRow): string {
-    return `${filterMap[filter.filterMapIdx].label}:${
-      filterMap[filter.filterMapIdx].operators[filter.operatorIdx].label
-    }:${filter.value}`;
-  }
+  const [modalOpen, setModalOpen] = useState(false);
+
+  const encodeFilters = (filters: UIFilterRowTree): string => {
+    const encode = (node: UIFilterRowTree): any => {
+      if (isFilterRowNode(node)) {
+        return {
+          type: "node",
+          operator: node.operator,
+          rows: node.rows.map(encode),
+        };
+      } else {
+        return {
+          type: "leaf",
+          filter: `${filterMap[node.filterMapIdx].label}:${
+            filterMap[node.filterMapIdx].operators[node.operatorIdx].label
+          }:${encodeURIComponent(node.value)}`,
+        };
+      }
+    };
+
+    return JSON.stringify(encode(filters));
+  };
 
   const getTimeFilter = () => {
     const currentTimeFilter = searchParams.get("t");
     const tableName = getTableName(isCached);
+    const createdAtColumn = getCreatedAtColumn(isCached);
 
     if (currentTimeFilter && currentTimeFilter.split("_")[0] === "custom") {
       const [_, start, end] = currentTimeFilter.split("_");
@@ -135,7 +207,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
       const filter: FilterNode = {
         left: {
           [tableName]: {
-            created_at: {
+            [createdAtColumn]: {
               gte: new Date(start).toISOString(),
             },
           },
@@ -143,7 +215,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
         operator: "and",
         right: {
           [tableName]: {
-            created_at: {
+            [createdAtColumn]: {
               lte: new Date(end).toISOString(),
             },
           },
@@ -151,12 +223,13 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
       };
       return filter;
     } else {
+      const timeIntervalDate = getTimeIntervalAgo(
+        (currentTimeFilter as TimeInterval) || "1m"
+      );
       return {
         [tableName]: {
-          created_at: {
-            gte: getTimeIntervalAgo(
-              (searchParams.get("t") as TimeInterval) || "24h"
-            ).toISOString(),
+          [createdAtColumn]: {
+            gte: new Date(timeIntervalDate).toISOString(),
           },
         },
       };
@@ -170,7 +243,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     if (currentTimeFilter && currentTimeFilter.split("_")[0] === "custom") {
       const start = currentTimeFilter.split("_")[1]
         ? new Date(currentTimeFilter.split("_")[1])
-        : getTimeIntervalAgo("24h");
+        : getTimeIntervalAgo("1m");
       const end = new Date(currentTimeFilter.split("_")[2] || new Date());
       range = {
         start,
@@ -178,7 +251,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
       };
     } else {
       range = {
-        start: getTimeIntervalAgo((currentTimeFilter as TimeInterval) || "24h"),
+        start: getTimeIntervalAgo((currentTimeFilter as TimeInterval) || "1m"),
         end: new Date(),
       };
     }
@@ -186,9 +259,11 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   };
 
   const [timeFilter, setTimeFilter] = useState<FilterNode>(getTimeFilter());
-  const [timeRange, setTimeRange] = useState<TimeFilter>(getTimeRange());
+  const timeRange = useMemo(getTimeRange, []);
 
-  const [advancedFilters, setAdvancedFilters] = useState<UIFilterRow[]>([]);
+  const [advancedFilters, setAdvancedFilters] = useState<UIFilterRowTree>(
+    getRootFilterNode()
+  );
 
   const debouncedAdvancedFilter = useDebounce(advancedFilters, 500);
 
@@ -202,14 +277,14 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   const {
     count,
     isDataLoading,
+    isBodyLoading,
     isCountLoading,
-    requests,
+    isRefetching,
+    normalizedRequests,
     properties,
     refetch,
     filterMap,
     searchPropertyFilters,
-    remove,
-    filter: builtFilter,
   } = useRequestsPageV2(
     page,
     currentPageSize,
@@ -224,15 +299,23 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     isLive
   );
 
+  const requestWithoutStream = normalizedRequests.find((r) => {
+    return (
+      (r.requestBody as any)?.stream &&
+      !(r.requestBody as any)?.stream_options?.include_usage &&
+      r.provider === "OPENAI"
+    );
+  });
+
   useEffect(() => {
     if (initialRequestId && selectedData === undefined) {
       const fetchRequest = async () => {
-        const response = await jawn.POST("/v1/request/query", {
+        const response = await jawn.POST("/v1/request/query-clickhouse", {
           body: {
             filter: {
               left: {
-                request: {
-                  id: {
+                request_response_rmt: {
+                  request_id: {
                     equals: initialRequestId,
                   },
                 },
@@ -268,13 +351,8 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
                 request.response_body = content.response;
 
                 const model =
-                  request.model_override ||
-                  request.response_model ||
                   request.request_model ||
-                  content.response?.model ||
-                  content.request?.model ||
-                  content.response?.body?.model || // anthropic
-                  getModelFromPath(request.request_path) ||
+                  getModelFromPath(request.target_url) ||
                   "";
 
                 if (
@@ -303,101 +381,184 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     }
   }, [initialRequestId]);
 
-  useEffect(() => {
-    const currentAdvancedFilters = searchParams.get("filters");
-
-    if (
-      filterMap &&
-      advancedFilters.length === 0 &&
-      currentAdvancedFilters &&
-      !isDataLoading
-    ) {
-      setAdvancedFilters(getAdvancedFilters());
-    }
-  }, [isDataLoading]);
-
   //convert this using useCallback
-  const getAdvancedFilters = useCallback(() => {
-    function decodeFilter(encoded: string): UIFilterRow | null {
-      try {
-        const parts = encoded.split(":");
-        if (parts.length !== 3) return null;
-        const filterLabel = decodeURIComponent(parts[0]);
-        const operator = decodeURIComponent(parts[1]);
-        const value = decodeURIComponent(parts[2]);
 
+  // TODO fix this to return correct UIFilterRowTree instead of UIFilterRow[]
+  const getAdvancedFilters = useCallback((): UIFilterRowTree => {
+    const decodeFilter = (encoded: any): UIFilterRowTree => {
+      if (encoded.type === "node") {
+        return {
+          operator: encoded.operator as "and" | "or",
+          rows: encoded.rows.map(decodeFilter),
+        };
+      } else {
+        const [filterLabel, operator, value] = encoded.filter.split(":");
         const filterMapIdx = filterMap.findIndex(
           (f) =>
             f.label.trim().toLowerCase() === filterLabel.trim().toLowerCase()
         );
-        const operatorIdx = filterMap[filterMapIdx].operators.findIndex(
+        const operatorIdx = filterMap[filterMapIdx]?.operators.findIndex(
           (o) => o.label.trim().toLowerCase() === operator.trim().toLowerCase()
         );
 
-        if (isNaN(filterMapIdx) || isNaN(operatorIdx)) return null;
+        if (
+          isNaN(filterMapIdx) ||
+          isNaN(operatorIdx) ||
+          filterMapIdx === -1 ||
+          operatorIdx === -1
+        ) {
+          console.log("Invalid filter map or operator index", {
+            filterLabel,
+            operator,
+          });
+          return getRootFilterNode();
+        }
 
-        return { filterMapIdx, operatorIdx, value };
-      } catch (error) {
-        console.error("Error decoding filter:", error);
-        return null;
+        return {
+          filterMapIdx,
+          operatorIdx,
+          value: value,
+        };
       }
-    }
+    };
+
     try {
       const currentAdvancedFilters = searchParams.get("filters");
 
       if (currentAdvancedFilters) {
-        const filters = decodeURIComponent(currentAdvancedFilters).slice(1, -1);
-        const decodedFilters = filters
-          .split("|")
-          .map(decodeFilter)
-          .filter((filter) => filter !== null) as UIFilterRow[];
+        const filters = decodeURIComponent(currentAdvancedFilters).replace(
+          /^"|"$/g,
+          ""
+        );
 
-        return decodedFilters;
+        const parsedFilters = JSON.parse(filters);
+        const result = decodeFilter(parsedFilters);
+        return result;
       }
     } catch (error) {
       console.error("Error decoding advanced filters:", error);
     }
-    return [];
+
+    return getRootFilterNode();
   }, [searchParams, filterMap]);
 
   useEffect(() => {
-    if (advancedFilters.length !== 0 || !userId) {
-      return;
+    if (initialLoadRef.current && filterMap.length > 0 && !isDataLoading) {
+      const loadedFilters = getAdvancedFilters();
+      setAdvancedFilters(loadedFilters);
+      initialLoadRef.current = false;
     }
+  }, [filterMap, getAdvancedFilters]);
 
-    const userFilerMapIndex = filterMap.findIndex(
-      (filter) => filter.label === "User"
-    );
+  // TODO
+  useEffect(() => {
+    if (
+      !isFilterRowNode(advancedFilters) ||
+      advancedFilters.rows.length === 0
+    ) {
+      if (userId) {
+        const userFilterMapIndex = filterMap.findIndex(
+          (filter) => filter.label === "User"
+        );
 
-    if (userFilerMapIndex !== -1) {
-      setAdvancedFilters([
-        {
-          filterMapIdx: userFilerMapIndex,
-          operatorIdx: 0,
-          value: userId,
-        },
-      ]);
+        if (userFilterMapIndex !== -1) {
+          setAdvancedFilters({
+            operator: "and",
+            rows: [
+              {
+                filterMapIdx: userFilterMapIndex,
+                operatorIdx: 0,
+                value: userId,
+              },
+            ],
+          } as UIFilterRowNode);
+        }
+      }
     }
   }, [advancedFilters, filterMap, userId]);
 
-  const onPageSizeChangeHandler = async (newPageSize: number) => {
-    setCurrentPageSize(newPageSize);
-    refetch();
-  };
+  const userFilterMapIndex = filterMap.findIndex(
+    (filter) => filter.label === "Helicone-Rate-Limit-Status"
+  );
 
-  const onPageChangeHandler = async (newPageNumber: number) => {
-    setPage(newPageNumber);
-    refetch();
-  };
+  // TODO
+  useEffect(() => {
+    if (rateLimited) {
+      if (userFilterMapIndex === -1) {
+        return;
+      }
+
+      setAdvancedFilters((prev) => {
+        const newFilter: UIFilterRow = {
+          filterMapIdx: userFilterMapIndex,
+          operatorIdx: 0,
+          value: "rate_limited",
+        };
+
+        if (isFilterRowNode(prev)) {
+          // Check if the rate limit filter already exists
+          const existingFilterIndex = prev.rows.findIndex(
+            (row) =>
+              isUIFilterRow(row) && row.filterMapIdx === userFilterMapIndex
+          );
+
+          if (existingFilterIndex !== -1) {
+            // Update existing filter
+            const updatedRows = [...prev.rows];
+            updatedRows[existingFilterIndex] = newFilter;
+            return { ...prev, rows: updatedRows };
+          } else {
+            // Add new filter
+            return { ...prev, rows: [...prev.rows, newFilter] };
+          }
+        } else {
+          // If prev is a single UIFilterRow, create a new UIFilterRowNode
+          return {
+            operator: "and",
+            rows: [prev, newFilter],
+          };
+        }
+      });
+    }
+  }, [userFilterMapIndex, rateLimited, setAdvancedFilters]);
+
+  const router = useRouter();
+
+  // Update the page state and router query when the page changes
+  const handlePageChange = useCallback(
+    (newPage: number) => {
+      router.push(
+        {
+          pathname: router.pathname,
+          query: { ...router.query, page: newPage.toString() },
+        },
+        undefined,
+        { shallow: true }
+      );
+    },
+    [router]
+  );
+
+  // Sync the page state with the router query on component mount
+  useEffect(() => {
+    const pageFromQuery = router.query.page;
+    if (pageFromQuery && !Array.isArray(pageFromQuery)) {
+      const parsedPage = parseInt(pageFromQuery, 10);
+      if (!isNaN(parsedPage) && parsedPage !== page) {
+        setPage(parsedPage);
+      }
+    }
+  }, [router.query.page, page]);
 
   const onTimeSelectHandler = (key: TimeInterval, value: string) => {
     const tableName = getTableName(isCached);
+    const createdAtColumn = getCreatedAtColumn(isCached);
     if (key === "custom") {
       const [start, end] = value.split("_");
       const filter: FilterNode = {
         left: {
           [tableName]: {
-            created_at: {
+            [createdAtColumn]: {
               gte: new Date(start).toISOString(),
             },
           },
@@ -405,33 +566,35 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
         operator: "and",
         right: {
           [tableName]: {
-            created_at: {
+            [createdAtColumn]: {
               lte: new Date(end).toISOString(),
             },
           },
         },
       };
       setTimeFilter(filter);
-      return;
-    }
-    setTimeFilter({
-      [tableName]: {
-        created_at: {
-          gte: getTimeIntervalAgo(key).toISOString(),
+    } else {
+      setTimeFilter({
+        [tableName]: {
+          [createdAtColumn]: {
+            gte: new Date(getTimeIntervalAgo(key)).toISOString(),
+          },
         },
-      },
-    });
+      });
+    }
   };
 
   const columnsWithProperties = [...getInitialColumns(isCached)].concat(
     properties.map((property) => {
       return {
-        id: `${property}`,
+        id:
+          `${property}`.toLowerCase() === "cost"
+            ? `property-${property}`
+            : `${property}`,
         accessorFn: (row) => {
           const value = row.customProperties
             ? row.customProperties[property]
             : "";
-          console.log("value", value);
           return value;
         },
         header: property,
@@ -446,12 +609,44 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     })
   );
 
+  const {
+    selectMode,
+    toggleSelectMode,
+    selectedIds,
+    toggleSelection,
+    selectAll,
+    isShiftPressed,
+  } = useSelectMode({
+    items: normalizedRequests,
+    getItemId: (request: NormalizedRequest) => request.id,
+  });
+
   const onRowSelectHandler = (row: NormalizedRequest, index: number) => {
-    setSelectedDataIndex(index);
-    setSelectedData(row);
-    setOpen(true);
-    searchParams.set("requestId", row.id);
+    if (selectMode) {
+      toggleSelection(row);
+    } else {
+      setSelectedDataIndex(index);
+      setSelectedData(row);
+      setOpen(true);
+      searchParams.set("requestId", row.id);
+    }
   };
+
+  const onSetAdvancedFiltersHandler = useCallback(
+    (filters: UIFilterRowTree, layoutFilterId?: string | null) => {
+      setAdvancedFilters(filters);
+      if (
+        layoutFilterId === null ||
+        (isFilterRowNode(filters) && filters.rows.length === 0)
+      ) {
+        searchParams.delete("filters");
+      } else {
+        const currentAdvancedFilters = encodeFilters(filters);
+        searchParams.set("filters", currentAdvancedFilters);
+      }
+    },
+    [searchParams]
+  );
 
   const {
     organizationLayout: orgLayout,
@@ -469,237 +664,276 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
       : undefined
   );
 
-  const onSetAdvancedFiltersHandler = (
-    filters: UIFilterRow[],
-    layoutFilterId?: string | null
-  ) => {
-    setAdvancedFilters(filters);
-    if (layoutFilterId === null || filters.length === 0) {
-      searchParams.delete("filters");
-    } else {
-      const currentAdvancedFilters = filters.map(encodeFilter).join("|");
-
-      searchParams.set(
-        "filters",
-        `"${encodeURIComponent(currentAdvancedFilters)}"`
-      );
+  const transformedFilters = useMemo(() => {
+    if (orgLayout?.data?.filters) {
+      return transformOrganizationLayoutFilters(orgLayout.data.filters);
     }
-  };
+    return [];
+  }, [orgLayout?.data?.filters]);
 
   const onLayoutFilterChange = (layoutFilter: OrganizationFilter | null) => {
     if (layoutFilter !== null) {
-      onSetAdvancedFiltersHandler(layoutFilter?.filter, layoutFilter.id);
-      setCurrFilter(layoutFilter?.id);
+      const transformedFilter = transformFilter(layoutFilter.filter[0]);
+      onSetAdvancedFiltersHandler(transformedFilter, layoutFilter.id);
+      setCurrFilter(layoutFilter.id);
     } else {
       setCurrFilter(null);
-      onSetAdvancedFiltersHandler([], null);
-    }
-  };
-
-  const renderUnauthorized = () => {
-    if (currentTier === "free") {
-      return (
-        <div className="flex flex-col w-full h-[80vh] justify-center items-center">
-          <div className="flex flex-col w-2/5">
-            <HomeIcon className="h-12 w-12 text-black dark:text-white border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-2 rounded-lg" />
-            <p className="text-xl text-black dark:text-white font-semibold mt-8">
-              You have reached your monthly limit.
-            </p>
-            <p className="text-sm text-gray-500 max-w-sm mt-2">
-              Upgrade your plan to view your request page. Your requests are
-              still being processed, but you will not be able to view them until
-              you upgrade.
-            </p>
-            <div className="mt-4">
-              <button
-                onClick={() => {
-                  setOpen(true);
-                }}
-                className="items-center rounded-lg bg-black dark:bg-white px-2.5 py-1.5 gap-2 text-sm flex font-medium text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-              >
-                Upgrade
-              </button>
-            </div>
-          </div>
-        </div>
-      );
-    }
-    if (currentTier === "pro") {
-      return (
-        <div className="flex flex-col w-full h-[80vh] justify-center items-center">
-          <div className="flex flex-col w-full">
-            <HomeIcon className="h-12 w-12 text-black dark:text-white border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-2 rounded-lg" />
-            <p className="text-xl text-black dark:text-white font-semibold mt-8">
-              You have reached your monthly limit on the Pro plan.
-            </p>
-            <p className="text-sm text-gray-500 max-w-sm mt-2">
-              Please get in touch with us to discuss increasing your limits.
-            </p>
-            <div className="mt-4">
-              <Link
-                href="https://cal.com/team/helicone/helicone-discovery"
-                target="_blank"
-                rel="noreferrer"
-                className="w-fit items-center rounded-lg bg-black dark:bg-white px-2.5 py-1.5 gap-2 text-sm flex font-medium text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-              >
-                Contact Us
-              </Link>
-            </div>
-          </div>
-        </div>
-      );
+      onSetAdvancedFiltersHandler({ operator: "and", rows: [] }, null);
     }
   };
 
   return (
-    <div>
-      {!isCached && userId === undefined && (
-        <AuthHeader
-          title={isCached ? "Cached Requests" : "Requests"}
-          headerActions={
-            <div className="flex flex-row gap-2">
-              <button
-                onClick={() => {
-                  remove();
-                  refetch();
-                }}
-                className="font-medium text-black dark:text-white text-sm items-center flex flex-row hover:text-sky-700 dark:hover:text-sky-300"
-              >
-                <ArrowPathIcon
-                  className={clsx(
-                    isDataLoading ? "animate-spin" : "",
-                    "h-5 w-5 inline"
-                  )}
-                />
-              </button>
-            </div>
-          }
-          actions={
-            <>
-              <ThemedSwitch
-                checked={isLive}
-                onChange={setIsLive}
-                label="Live"
-              />
-            </>
-          }
+    <>
+      <div className="h-screen flex flex-col">
+        <StreamWarning
+          requestWithStreamUsage={requestWithoutStream !== undefined}
         />
-      )}
-      {unauthorized ? (
-        <>{renderUnauthorized()}</>
-      ) : (
-        <div className="flex flex-col space-y-4">
-          <ThemedTableV5
-            id="requests-table"
-            defaultData={requests || []}
-            defaultColumns={columnsWithProperties}
-            dataLoading={isDataLoading}
-            sortable={sort}
-            advancedFilters={{
-              filterMap: filterMap,
-              filters: advancedFilters,
-              setAdvancedFilters: onSetAdvancedFiltersHandler,
-              searchPropertyFilters: searchPropertyFilters,
-              show: userId ? false : true,
-            }}
-            savedFilters={
-              organizationLayoutAvailable
-                ? {
-                    currentFilter: currFilter ?? undefined,
-                    filters: orgLayout?.data?.filters ?? undefined,
-                    onFilterChange: onLayoutFilterChange,
-                    onSaveFilterCallback: async () => {
-                      await orgLayoutRefetch();
-                    },
-                    layoutPage: "requests",
-                  }
-                : undefined
+
+        {!isCached && userId === undefined && (
+          <AuthHeader
+            title={isCached ? "Cached Requests" : "Requests"}
+            headerActions={
+              <div className="flex flex-row gap-2 items-center">
+                <button
+                  onClick={() => {
+                    refetch();
+                  }}
+                  className="font-medium text-black dark:text-white text-sm items-center flex flex-row hover:text-sky-700 dark:hover:text-sky-300"
+                >
+                  <ArrowPathIcon
+                    className={clsx(
+                      isDataLoading || isRefetching ? "animate-spin" : "",
+                      "h-4 w-4 inline duration-500 ease-in-out"
+                    )}
+                  />
+                </button>
+                <Button
+                  variant="ghost"
+                  className={clsx(
+                    "flex flex-row gap-2 items-center",
+                    isLive ? "text-green-500 animate-pulse" : "text-slate-500"
+                  )}
+                  size="sm_sleek"
+                  onClick={() => setIsLive(!isLive)}
+                >
+                  <div
+                    className={clsx(
+                      isLive ? "bg-green-500" : "bg-slate-500",
+                      "h-2 w-2 rounded-full"
+                    )}
+                  ></div>
+                  <span className="text-xs italic font-medium text-slate-900 dark:text-slate-100 whitespace-nowrap">
+                    {isLive ? "Live" : "Start Live"}
+                  </span>
+                </Button>
+              </div>
             }
-            exportData={requests.map((request) => {
-              const flattenedRequest: any = {};
-              Object.entries(request).forEach(([key, value]) => {
-                // key is properties and value is not null
-                if (
-                  key === "customProperties" &&
-                  value !== null &&
-                  value !== undefined
-                ) {
-                  Object.entries(value).forEach(([key, value]) => {
-                    if (value !== null) {
+          />
+        )}
+
+        {/* Add this wrapper */}
+        {unauthorized ? (
+          <UnauthorizedView currentTier={currentTier || ""} />
+        ) : (
+          <div className="flex flex-col h-full overflow-hidden">
+            <div
+              className={clsx(
+                isShiftPressed && "no-select",
+                "flex-grow overflow-auto"
+              )}
+            >
+              <ThemedTable
+                id="requests-table"
+                highlightedIds={
+                  selectedData && open ? [selectedData.id] : selectedIds
+                }
+                showCheckboxes={selectMode}
+                defaultData={normalizedRequests}
+                defaultColumns={columnsWithProperties}
+                skeletonLoading={isDataLoading}
+                dataLoading={isBodyLoading}
+                sortable={sort}
+                advancedFilters={{
+                  filterMap: filterMap,
+                  filters: advancedFilters,
+                  setAdvancedFilters: onSetAdvancedFiltersHandler,
+                  searchPropertyFilters: searchPropertyFilters,
+                  show: userId ? false : true,
+                }}
+                savedFilters={
+                  organizationLayoutAvailable
+                    ? {
+                        currentFilter: currFilter ?? undefined,
+                        filters:
+                          transformedFilters && orgLayout?.data?.id
+                            ? transformedFilters
+                            : undefined,
+                        onFilterChange: onLayoutFilterChange,
+                        onSaveFilterCallback: async () => {
+                          await orgLayoutRefetch();
+                        },
+                        layoutPage: "requests",
+                      }
+                    : undefined
+                }
+                exportData={normalizedRequests.map((request) => {
+                  const flattenedRequest: any = {};
+                  Object.entries(request).forEach(([key, value]) => {
+                    // key is properties and value is not null
+                    if (
+                      key === "customProperties" &&
+                      value !== null &&
+                      value !== undefined
+                    ) {
+                      Object.entries(value).forEach(([key, value]) => {
+                        if (value !== null) {
+                          flattenedRequest[key] = value;
+                        }
+                      });
+                    } else {
                       flattenedRequest[key] = value;
                     }
                   });
-                } else {
-                  flattenedRequest[key] = value;
+                  return flattenedRequest;
+                })}
+                timeFilter={{
+                  currentTimeFilter: timeRange,
+                  defaultValue: "1m",
+                  onTimeSelectHandler: onTimeSelectHandler,
+                }}
+                onRowSelect={(row, index) => {
+                  onRowSelectHandler(row, index);
+                }}
+                makeCard={
+                  userId
+                    ? undefined
+                    : (row) => {
+                        return (
+                          <RequestCard request={row} properties={properties} />
+                        );
+                      }
                 }
-              });
-              return flattenedRequest;
-            })}
-            timeFilter={{
-              currentTimeFilter: timeRange,
-              defaultValue: "24h",
-              onTimeSelectHandler: onTimeSelectHandler,
-            }}
-            onRowSelect={(row, index) => {
-              onRowSelectHandler(row, index);
-            }}
-            makeCard={
-              userId
-                ? undefined
-                : (row) => {
-                    return (
-                      <RequestCard request={row} properties={properties} />
-                    );
-                  }
-            }
-            makeRow={
-              userId
-                ? undefined
-                : {
-                    properties: properties,
-                  }
-            }
-          />
-          <TableFooter
-            currentPage={currentPage}
-            pageSize={pageSize}
-            isCountLoading={isCountLoading}
-            count={count || 0}
-            onPageChange={onPageChangeHandler}
-            onPageSizeChange={onPageSizeChangeHandler}
-            pageSizeOptions={[25, 50, 100]}
-          />
-        </div>
-      )}
-      <RequestDrawerV2
-        open={open}
-        setOpen={setOpen}
-        request={selectedData}
-        properties={properties}
-        hasPrevious={selectedDataIndex !== undefined && selectedDataIndex > 0}
-        hasNext={
-          selectedDataIndex !== undefined &&
-          selectedDataIndex < requests.length - 1
-        }
-        onPrevHandler={() => {
-          if (selectedDataIndex !== undefined && selectedDataIndex > 0) {
-            setSelectedDataIndex(selectedDataIndex - 1);
-            setSelectedData(requests[selectedDataIndex - 1]);
-            searchParams.set("requestId", requests[selectedDataIndex - 1].id);
-          }
-        }}
-        onNextHandler={() => {
-          if (
-            selectedDataIndex !== undefined &&
-            selectedDataIndex < requests.length - 1
-          ) {
-            setSelectedDataIndex(selectedDataIndex + 1);
-            setSelectedData(requests[selectedDataIndex + 1]);
-            searchParams.set("requestId", requests[selectedDataIndex + 1].id);
-          }
-        }}
-      />
-    </div>
+                makeRow={
+                  userId
+                    ? undefined
+                    : {
+                        properties: properties,
+                      }
+                }
+                customButtons={[
+                  <div key={"dataset-button"}>
+                    <DatasetButton
+                      datasetMode={selectMode}
+                      setDatasetMode={toggleSelectMode}
+                      items={[]}
+                      onAddToDataset={() => {}}
+                      renderModal={undefined}
+                    />
+                  </div>,
+                ]}
+                onSelectAll={selectAll}
+                selectedIds={selectedIds}
+                rightPanel={
+                  open ? (
+                    <RequestDiv
+                      open={open}
+                      setOpen={setOpen}
+                      request={selectedData}
+                      properties={properties}
+                      hasPrevious={
+                        selectedDataIndex !== undefined && selectedDataIndex > 0
+                      }
+                      hasNext={
+                        selectedDataIndex !== undefined &&
+                        selectedDataIndex < normalizedRequests.length - 1
+                      }
+                      onPrevHandler={() => {
+                        if (
+                          selectedDataIndex !== undefined &&
+                          selectedDataIndex > 0
+                        ) {
+                          setSelectedDataIndex(selectedDataIndex - 1);
+                          setSelectedData(
+                            normalizedRequests[selectedDataIndex - 1]
+                          );
+                          searchParams.set(
+                            "requestId",
+                            normalizedRequests[selectedDataIndex - 1].id
+                          );
+                        }
+                      }}
+                      onNextHandler={() => {
+                        if (
+                          selectedDataIndex !== undefined &&
+                          selectedDataIndex < normalizedRequests.length - 1
+                        ) {
+                          setSelectedDataIndex(selectedDataIndex + 1);
+                          setSelectedData(
+                            normalizedRequests[selectedDataIndex + 1]
+                          );
+                          searchParams.set(
+                            "requestId",
+                            normalizedRequests[selectedDataIndex + 1].id
+                          );
+                        }
+                      }}
+                    />
+                  ) : undefined
+                }
+              >
+                {selectMode && (
+                  <Row className="gap-5 items-center w-full justify-between bg-white dark:bg-black p-5 border border-slate-300 dark:border-slate-700">
+                    <div className="flex flex-row gap-2 items-center">
+                      <span className="text-sm font-medium text-slate-900 dark:text-slate-100 whitespace-nowrap">
+                        Select Mode:
+                      </span>
+                      <span className="text-sm p-2 rounded-md font-medium bg-[#F1F5F9] dark:bg-slate-900 text-[#1876D2] dark:text-slate-100 whitespace-nowrap">
+                        {selectedIds.length} selected
+                      </span>
+                    </div>
+                    {selectedIds.length > 0 && (
+                      <ProFeatureWrapper featureName="Datasets">
+                        <GenericButton
+                          onClick={() => {
+                            setModalOpen(true);
+                          }}
+                          icon={
+                            <PlusIcon className="h-5 w-5 text-slate-900 dark:text-slate-100" />
+                          }
+                          text="Add to dataset"
+                        />
+                      </ProFeatureWrapper>
+                    )}
+                  </Row>
+                )}
+              </ThemedTable>
+            </div>
+
+            <div className="bg-white dark:bg-black border-t border-slate-200 dark:border-slate-700 py-2 flex-shrink-0 w-full">
+              <TableFooter
+                currentPage={page}
+                pageSize={pageSize}
+                isCountLoading={isCountLoading}
+                count={count || 0}
+                onPageChange={(n) => handlePageChange(n)}
+                onPageSizeChange={(n) => setCurrentPageSize(n)}
+                pageSizeOptions={[25, 50, 100, 250, 500]}
+              />
+            </div>
+          </div>
+        )}
+      </div>
+
+      <ThemedModal open={modalOpen} setOpen={setModalOpen}>
+        <NewDataset
+          request_ids={selectedIds}
+          onComplete={() => {
+            setModalOpen(false);
+            toggleSelectMode(false);
+          }}
+        />
+      </ThemedModal>
+    </>
   );
 };
 

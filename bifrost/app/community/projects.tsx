@@ -28,6 +28,18 @@ const TAGS: Record<string, ProjectTag> = {
     name: "Healthcare",
     href: "",
   },
+  civictech: {
+    name: "Civic Technology",
+    href: "",
+  },
+  automotive: {
+    name: "Automotive",
+    href: "",
+  },
+  customersupport: {
+    name: "Customer Support",
+    href: "",
+  },
 };
 
 interface Project {
@@ -47,9 +59,116 @@ interface Project {
 
 const projects: Project[] = [
   {
+    title: "Chatwith",
+    description:
+      "Instantly answer questions with your custom no-code AI chatbot.",
+    usage:
+      "I love the extra insight Helicone gives me into my LLM usage. I appreciate both the big picture overview and the opportunity to drill into every request. It helps me keep my product stable & performant and optimize the costs.",
+    creators: [
+      {
+        name: "Rafal Zawadzki",
+        href: "https://x.com/rafal_makes",
+      },
+    ],
+    imageHref: "/static/community/projects/chatwith.webp", // <- change this
+    tags: [TAGS.customersupport],
+    href: "https://chatwith.tools",
+  },
+  {
+    title: "DeAP Learning",
+    description:
+      "An AI personal tutor that helps students feel excited and supported at every step on their educational journey.",
+    usage:
+      "Helicone is the perfect one-stop-shop for us to monitor all our our LLM queries. The observability & speed is unmatched for the price point.",
+    creators: [
+      {
+        name: "Anish Anne",
+        href: "https://www.linkedin.com/in/anish-anne",
+      },
+      {
+        name: "Neil Shah",
+        href: "https://www.linkedin.com/in/n-shah/",
+      },
+      {
+        name: "Harry Fazzone",
+        href: "https://www.linkedin.com/in/harry-fazzone-6ab0a0240/",
+      },
+    ],
+    imageHref: "/static/community/projects/deaplearning.webp", // <- change this
+    tags: [TAGS.education],
+    href: "https://deaplearning.com",
+  },
+  {
+    title: "elcerokm",
+    description: "Connect car dealerships with car buyers.",
+    usage:
+      "We built a chatbot to capture leads and help users find the best car in the market. Helicone helps us monitor the expenses.",
+    creators: [
+      {
+        name: "Maria Bernardez",
+        href: "https://www.linkedin.com/in/angelesbernardez/",
+      },
+    ],
+    imageHref: "/static/community/projects/elcerokm.webp", // <- change this
+    tags: [TAGS.automotive],
+    href: "https://elcerokm.com",
+  },
+  {
+    title: "Charm",
+    description:
+      "AI Sales Chatbot for B2B Growth & Marketing Teams. 1 line of code, double conversion rate.",
+    usage:
+      "Helicone has solved LLM observability for us. Integration was painless and now we can quickly see what's happening under the hood for requests & embeddings across all of our LLMs. Totally recommend.",
+    creators: [
+      {
+        name: "Izu Elechi",
+        href: "https://www.linkedin.com/in/izuchukwu/",
+      },
+      {
+        name: "Caleb Lewis",
+        href: "https://www.linkedin.com/in/developercaleb/",
+      },
+    ],
+    imageHref: "/static/community/projects/charm.webp", // <- change this
+    tags: [TAGS.tech],
+    href: "https://joincharm.com/",
+  },
+  {
+    title: "Dating Studio",
+    description:
+      "Copilot for Dating Apps. Designed to elevate your chats, not replace them.",
+    usage:
+      "Logging AI requests to unlock insights into how models are performing to optimize the experience and pick the best match for users' tasks.",
+    creators: [
+      {
+        name: "LV",
+        href: "",
+      },
+    ],
+    imageHref: "/static/community/projects/dating-studio.webp",
+    tags: [TAGS.tech],
+    href: "https://about.dating.studio/extension",
+  },
+  {
+    title: "Open Council Network",
+    description:
+      "Make the decision making process of local government accessible to citizens.",
+    usage:
+      "We use LLMs to transcribe council meetings, extract data from them, and generate summaries and email updates. Helicone has been invaluable to monitor, track and optimise those queries, and to allow us to compare performance across different LLM providers, so that we don't feel locked in to any provider and can make effective decisions to optimise costs and performance.",
+    creators: [
+      {
+        name: "Toby Abel",
+        href: "",
+      },
+    ],
+    imageHref: "/static/community/projects/open-council-network.webp", // <- change this
+    tags: [TAGS.civictech],
+    href: "https://opencouncil.network",
+  },
+  {
     title: "Haema",
     description:
-      "An AI mobile app to help people with diabetes learn how food and exercise affects their blood sugar.",
+      "Help people with diabetes learn how food and exercise affects their blood sugar.",
     usage:
       "We use Helicone to log all of the requests to our AI and we're using the logged data to directly improve our product.",
     creators: [
@@ -65,7 +184,7 @@ const projects: Project[] = [
   {
     title: "DemoFox",
     description:
-      "Instantly translates jargon and articulates business value, making inter-department communication hassle-free.",
+      "Translate jargon instantly, articulate business value, and make inter-department communication hassle-free.",
     usage:
       "We use Helicone to understand why a prompt fails to return valid data.",
     creators: [
@@ -101,7 +220,7 @@ const projects: Project[] = [
   {
     title: "Reworkd",
     description: "The simplest way to extract structured web data.",
-    usage: "API logging and cost analysis.",
+    usage: "We are using Helicone for API logging and cost analysis.",
     creators: [
       {
         name: "Asim Shrestha",
@@ -117,7 +236,8 @@ const projects: Project[] = [
     title: "Jsonify",
     description:
       "Use AI to turn websites and documents into useful structured data. ",
-    usage: "Keep track of OpenAI metrics -- cost, latency, failures, etc.",
+    usage:
+      "Helicone helps us keep track of OpenAI metrics -- cost, latency, failures, etc.",
     creators: [
       {
         name: "Paul Hunkin",
@@ -135,7 +255,7 @@ const projects: Project[] = [
   {
     title: "assistant-ui",
     description: "React components for AI chat.",
-    usage: "Get a detailed token cost breakdown per user.",
+    usage: "We use Helicone to get a detailed token cost breakdown per user.",
     creators: [
       {
         name: "Simon Farshid",
@@ -150,7 +270,7 @@ const projects: Project[] = [
   {
     title: "PitchGhost",
     description:
-      "Help companies automatically find customers on social media by scanning and scraping Twitter, Reddit, LinkedIn, etc for posts and content that would make perfect sense for your brand or business to engage with.",
+      "Find customers on social media that your brand or business should engage with.",
     usage:
       "Our platform involves tons of calls to LLMs to read and digest all of the social media posts we scan through. Helicone has been invaluable to us in checking in and monitoring these systems and especially debugging LLM calls through the playground.",
     creators: [
@@ -167,7 +287,7 @@ const projects: Project[] = [
   {
     title: "mangosqueezy",
     description:
-      "An affiliate marketing platform where businesses connect with affiliates to grow their sales or audience. It's the first crypto-based affiliate marketing platform, which facilitates cross-border payments, real-time settlement in seconds, and zero processing fees.",
+      "The first crypto-based affiliate marketing platform to connect businesses with affiliates and grow their sales or audience.",
     usage:
       "We are using Helicone to monitor our LLM usage so we know how many tokens we have used and which countries the usage is coming from. Additionally, we plan to implement a user rate limiting feature soon.",
     creators: [
@@ -189,7 +309,7 @@ const projects: Project[] = [
     title: "Greptile",
     description: "AI expert on any codebase, as an API.",
     usage:
-      "Tracing and logging LLM calls to debug, track usage, manage costs, and prepare datasets for finetuning.",
+      "We use Helicone for tracing and logging LLM calls to debug, track usage, manage costs, and prepare datasets for finetuning.",
     creators: [
       {
         name: "Daksh Gupta",
@@ -211,9 +331,9 @@ const projects: Project[] = [
   },
   {
     title: "LinkedInFy",
-    description:
-      "Automate your LinkedIn, there is no need to waste hrs on your LinkedIn to think about what to post AI will do it for you.",
-    usage: "To monitor different LLM model results and see prompts result.",
+    description: "Automate your LinkedIn posts, free up your time.",
+    usage:
+      "Helicone helps us monitor different LLM model results and see prompts result.",
     creators: [
       {
         name: "Abhishek",
@@ -287,6 +407,7 @@ export function Projects() {
                 className="flex flex-col gap-4 w-full h-full hover:bg-sky-50 rounded-lg p-4 col-span-2 md:col-span-1 mt-2"
                 href={project.href}
                 key={i}
+                target="_blank"
               >
                 {/*eslint-disable-next-line @next/next/no-img-element */}
                 <img
@@ -326,21 +447,29 @@ export function Projects() {
                     {project.title}
                   </h2>
                   <p className="text-gray-500 text-sm">{project.description}</p>
+                  <br></br>
+                  <p className="text-sky-500 text-sm font-medium">
+                    {'"'}
+                    {project.usage}
+                    {'"'}
+                  </p>
                 </div>
               </Link>
 
               {/* Creators tag */}
               <div className={clsx("flex items-center")}>
                 {project.creators.map((creator, i) => (
-                  <div
-                    key={i}
-                    className="flex items-center hover:bg-sky-50 rounded-lg px-4 py-2"
-                  >
+                  <div key={i} className="flex items-center px-4 py-1">
                     <a
-                      href={creator.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-xs font-medium text-sky-500"
+                      href={creator.href || undefined}
+                      target={creator.href ? "_blank" : undefined}
+                      rel={creator.href ? "noopener noreferrer" : undefined}
+                      className={clsx(
+                        "text-xs font-medium",
+                        creator.href
+                          ? "text-sky-500 hover:underline"
+                          : "text-gray-500"
+                      )}
                     >
                       {creator.name}
                     </a>

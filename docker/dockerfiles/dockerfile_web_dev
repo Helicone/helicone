@@ -9,6 +9,7 @@ RUN yarn
 
 
 COPY . /app/web
+RUN find /app/web -name ".env.*" -exec rm {} \;
 
 RUN rm .env.* || true
 

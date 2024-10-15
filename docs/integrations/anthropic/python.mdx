@@ -1,6 +1,10 @@
 ---
-title: "Python"
-description: "Learn how to integrate Anthropic with Helicone using Python"
+title: "Anthropic Python SDK Integration"
+sidebarTitle: "Python"
+description: "Use Anthropic's Python SDK to integrate with Helicone to log your Anthropic LLM usage."
+"twitter:title": "Anthropic Python SDK Integration - Helicone OSS LLM Observability"
+icon: "python"
+iconType: "solid"
 ---
 
 ## Proxy Integration
@@ -21,12 +25,13 @@ export HELICONE_API_KEY=<your API key>
 
 ```Python example.py
 import anthropic
+import os
 
 client = anthropic.Anthropic(
   api_key=os.environ.get("ANTHROPIC_API_KEY"),
-  base_url="https://anthropic.helicone.ai/v1"
+  base_url="https://anthropic.helicone.ai",
   default_headers={
-    "Helicone-Auth": os.environ.get("HELICONE_API_KEY"),
+    "Helicone-Auth": f"Bearer {os.environ.get("HELICONE_API_KEY")}",
   },
 )
 

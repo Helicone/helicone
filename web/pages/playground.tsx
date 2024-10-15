@@ -1,7 +1,7 @@
 import { User } from "@supabase/auth-helpers-react";
 import { GetServerSidePropsContext } from "next";
 import { useRouter } from "next/router";
-import AuthLayout from "../components/layout/authLayout";
+import AuthLayout from "../components/layout/auth/authLayout";
 import PlaygroundPage from "../components/templates/playground/playgroundPage";
 import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
 import { ReactElement } from "react";
@@ -21,7 +21,10 @@ const Playground = (props: PlaygroundProps) => {
 
   return (
     <div className="flex flex-col">
-      <PlaygroundPage request={request as string | undefined} />
+      <PlaygroundPage
+        request={request as string | undefined}
+        showNewButton={true}
+      />
     </div>
   );
 };

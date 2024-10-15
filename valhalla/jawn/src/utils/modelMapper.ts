@@ -1,8 +1,30 @@
-export function getModelFromRequest(requestBody: string, path: string) {
+export function getModelFromRequest(
+  requestBody: string,
+  path: string,
+  targetUrl: string | null = null
+) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   if (requestBody && (requestBody as any).model) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return (requestBody as any).model;
+  }
+
+  if (targetUrl && targetUrl.toLowerCase().includes("firecrawl")) {
+    try {
+      const parsedUrl = new URL(targetUrl);
+
+      const path = parsedUrl.pathname;
+
+      const trimmedPath = path.replace(/\/$/, "");
+
+      const pathParts = trimmedPath.split("/").filter(Boolean);
+
+      const model =
+        pathParts.length > 0 ? pathParts[pathParts.length - 1] : null;
+      return `firecrawl/${model}`;
+    } catch (error) {
+      console.error("Error parsing URL:", targetUrl);
+    }
   }
 
   const modelFromPath = getModelFromPath(path);
@@ -14,6 +36,7 @@ export function getModelFromRequest(requestBody: string, path: string) {
 }
 
 function getModelFromPath(path: string) {
+  console.log("path", path);
   const regex1 = /\/engines\/([^/]+)/;
   const regex2 = /models\/([^/:]+)/;
 
@@ -52,9 +75,14 @@ const requestModels = new Set<string>([
   "claude-3-opus-20240229",
   "claude-3-sonnet-20240229",
   "claude-3-haiku-20240307",
+  "gpt-4o-2024-08-06",
 ]);
 
-const responseModels = new Set<string>(["dall-e-3", "dall-e-2"]);
+const responseModels = new Set<string>([
+  "dall-e-3",
+  "dall-e-2",
+  "black-forest-labs/FLUX.1-schnell",
+]);
 
 export const isRequestImageModel = (modelName: string): boolean => {
   return requestModels.has(modelName);

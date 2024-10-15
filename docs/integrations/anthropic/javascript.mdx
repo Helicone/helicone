@@ -1,6 +1,10 @@
 ---
-title: "Javascript"
-description: "Learn how to integrate Anthropic with Helicone using Javascript."
+title: "Anthropic JavaScript SDK Integration"
+sidebarTitle: "JavaScript"
+description: "Use Anthropic's JavaScript SDK to integrate with Helicone to log your Anthropic LLM usage."
+"twitter:title": "Anthropic JavaScript SDK Integration - Helicone OSS LLM Observability"
+icon: "js"
+iconType: "solid"
 ---
 
 ## Proxy Integration
@@ -22,10 +26,10 @@ HELICONE_API_KEY=<your API key>
 import Anthropic from "@anthropic-ai/sdk";
 
 const anthropic = new Anthropic({
-  baseURL: "https://anthropic.helicone.ai/",
+  baseURL: "https://anthropic.helicone.ai",
   apiKey: process.env.ANTHROPIC_API_KEY,
   defaultHeaders: {
-    "Helicone-Auth": process.env.HELICONE_API_KEY,
+    "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
   },
 });
 

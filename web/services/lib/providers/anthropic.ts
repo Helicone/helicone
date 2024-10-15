@@ -9,6 +9,7 @@ export const fetchAnthropic = async (
   temperature: number,
   model: string,
   maxTokens: number,
+  anthropicAPIKey?: string,
   requestId?: string
 ) => {
   const completion = await fetch("/api/anthropic/chat", {
@@ -22,6 +23,7 @@ export const fetchAnthropic = async (
       temperature,
       model,
       maxTokens,
+      anthropicAPIKey,
     }),
   }).then((res) => res.json() as Promise<Result<ChatCompletion, string>>);
 

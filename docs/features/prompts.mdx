@@ -1,27 +1,32 @@
 ---
-title: "Prompts"
-description: "Effortlessly monitor prompt versions and inputs."
+title: "Prompts & Experiments"
+sidebarTitle: "Prompts & Experiments"
+description: "Automatically version prompts from your codebase via our proxy, without changing your workflow. Run experiments using historical datasets to test, evaluate, and improve prompts over time while preventing regressions in production systems."
+"twitter:title": "Prompts and Experiments - Helicone OSS LLM Observability"
 ---
 
-import QuestionsSection from '/snippets/questions-section.mdx';
+import QuestionsSection from "/snippets/questions-section.mdx";
 
 <Info>
-  **Who can use this feature**: Anyone on any
+  **Who can use this feature**: Prompts is an add-on feature for our Pro
   [plan](https://www.helicone.ai/pricing).
 </Info>
 
-<Warning>
-  **This feature is currently in beta.** While you're welcome to try it out,
-  please know that our team is still working to refine it. Your feedback is
-  valuable to help us improve!{" "}
-</Warning>
+<iframe
+  width="100%"
+  height="420"
+  src="https://www.youtube.com/embed/pJAn6hoQJDc?autoplay=1&mute=1"
+></iframe>
 
 ## Introduction
 
 Helicone's prompt management provides a seamless way for users to track the prompts used in their generative AI applications. With Helicone, you can effortlessly monitor versions and inputs as they evolve.
 
 <Frame caption="Example: A Prompt Template designed for a rap battle between two people. ">
-  <img src="/images/prompts/example-prompt-rap-battle.png" alt="Helicone example of a prompt template for monitoring and managing inputs from requests sent to your AI applications."/>
+  <img
+    src="/images/prompts/example-prompt-rap-battle.png"
+    alt="Helicone example of a prompt template for monitoring and managing inputs from requests sent to your AI applications."
+  />
 </Frame>
 
 ### Why Prompts
@@ -30,7 +35,6 @@ Requests are now matched to a `helicone-prompt-id`, allowing you to:
 
 - version and track iterations to your prompt over time, without losing any previous versions.
 - maintain a dataset of inputs and outputs for each prompt version.
-
 
 ## Quick Start
 
@@ -44,23 +48,57 @@ To use Prompts, you must set up Helicone in proxy mode. Please ensure you use on
   integration](https://docs.helicone.ai/getting-started/proxy-vs-async).
 </Note>
 
-
 ### How Prompt Templates Work
+
 As you modify your prompt in code, Helicone automatically tracks the new version and maintains a record of the old prompt. Additionally, a dataset of input/output keys is preserved for each version.
 
 <Accordion title="Get a deep dive of the feature">
 
 ### For Typescript / Javascript users:
 
-By prefixing your prompt with `hprompt` and enclosing your input variables in an additional `{}`, it allows Helicone to easily detect your prompt and inputs. We designed for minimum code change to keep it as easy as possible to use Prompts.
+By prefixing your prompt with `hpf` and enclosing your input variables in an additional `{}`, it allows Helicone to easily detect your prompt and inputs. We designed for minimum code change to keep it as easy as possible to use Prompts.
 
 ```tsx
 const location = "space";
 const character = "two brothers";
-const promptInput = hprompt`
+const promptInput = hpf`
 Compose a movie scene involving ${{ character }}, set in ${{ location }}
 `;
 ```
+
+### Static Prompts with hpstatic
+
+In addition to `hpf`, Helicone provides `hpstatic` for creating static prompts that don't change between requests. This is useful for system prompts or other constant text that you don't want to be treated as variable input.
+
+To use `hpstatic`, import it along with `hpf`:
+
+```typescript
+import { hpf, hpstatic } from "@helicone/prompts";
+```
+
+Then, you can use it like this:
+
+```typescript
+const systemPrompt = hpstatic`You are a helpful assistant.`;
+const userPrompt = hpf`Write a story about ${{ character }}`;
+
+const chatCompletion = await openai.chat.completions.create(
+  {
+    messages: [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: userPrompt },
+    ],
+    model: "gpt-3.5-turbo",
+  },
+  {
+    headers: {
+      "Helicone-Prompt-Id": "prompt_story",
+    },
+  }
+);
+```
+
+The `hpstatic` function wraps the entire text in `<helicone-prompt-static>` tags, indicating to Helicone that this part of the prompt should not be treated as variable input.
 
 ### For other users:
 
@@ -68,17 +106,17 @@ Currently, we only support packages for TypeScript and JavaScript for easy integ
 
 1. When you send over a prompt with the following syntax, we are able to extract the children text between the JSX element `helicone-prompt-input`, then place it back into the prompt to be sent to your LLM.
 
-  ```tsx
-  <helicone-prompt-input key="my_input_key">
+```tsx
+<helicone-prompt-input key="my_input_key">
+  Input to your LLM
+</helicone-prompt-input>
+```
+
+Only the following will be sent to your LLM:
+
+```tsx
     Input to your LLM
-  </helicone-prompt-input>
-  ```
-
-  Only the following will be sent to your LLM:
-
-  ```tsx
-      Input to your LLM
-  ```
+```
 
 <Note>
   It is crucial that each key has a unique identifier; otherwise, you will get
@@ -93,36 +131,45 @@ Currently, we only support packages for TypeScript and JavaScript for easy integ
 }
 ```
 
+For static prompts, you can manually wrap static parts of your prompt in `<helicone-prompt-static>` tags:
+
+```
+<helicone-prompt-static>You are a helpful assistant.</helicone-prompt-static>
+Write a story about <helicone-prompt-input key="character">a secret agent</helicone-prompt-input>
+```
+
+This tells Helicone that the first part of the prompt is static and should not be treated as variable input.
+
 </Accordion>
 
 ### Example
 
-Let's say we have an app that generates a short story, where users are able to input their own `character`. For example, the prompt is “Write a story about a secret agent”, where the `character` is “a secret agent”.
+Let's say we have an app that generates a short story, where users are able to input their own `character`. For example, the prompt is "Write a story about a secret agent", where the `character` is "a secret agent".
 
 <Tabs>
   <Tab title="Typescript / Javascript">
     <Steps>
-      <Step title="Import hprompt">
+      <Step title="Import hpf">
       ```tsx
-      import { hprompt } from "@helicone/helicone";
+      import { hpf } from "@helicone/prompts";
       ```
       </Step>
 
-      <Step title="Add `hprompt` and identify input variables">
-      Using the backtick string formatter in JavaScript, add `hprompt` in front of your backtick to automatically format your text so that Helicone can determine where your variables are.
+      <Step title="Add `hpf` and identify input variables">
+      Using the backtick string formatter in JavaScript, add `hpf` in front of your backtick to automatically format your text so that Helicone can determine where your variables are.
 
       Next, nest your inputted variable so that it is within another bracket `{}`, this is essentially
       making it so that we can determine the `input key` for Helicone.
 
       ```tsx
-      content: hprompt`Write a story about ${{ character }}`,
+      content: hpf`Write a story about ${{ character }}`,
       ```
 
         <Accordion title="Change input name">
           If you want to rename your input or have a custom input, you can change the key-value pair in the passed dictionary to the string formatter function. Like this:
 
           ```tsx
-          content: hprompt`Write a story about ${{ "my_magical_input": character  }}`,
+          content: hpf`Write a story about ${{ "my_magical_input": character  }}`,
           ```
         </Accordion>
       </Step>
@@ -145,16 +192,21 @@ Let's say we have an app that generates a short story, where users are able to i
     #### Here's what your code would look like:
 
     ``` tsx
-    // 1. Add this line
-    import { hprompt } from "@helicone/helicone";
+    // 1. Add these lines
+    import { hpf, hpstatic } from "@helicone/prompts";
 
     const chatCompletion = await openai.chat.completions.create(
       {
         messages: [
           {
+            role: "system",
+            // 2. Use hpstatic for static prompts
+            content: hpstatic`You are a creative storyteller.`,
+          },
+          {
             role: "user",
-            // 2: Add hprompt to any string, and nest any variable in additional brackets `{}`
-            content: hprompt`Write a story about ${{ character }}`,
+            // 3: Add hpf to any string, and nest any variable in additional brackets `{}`
+            content: hpf`Write a story about ${{ character }}`,
           },
         ],
         model: "gpt-3.5-turbo",
@@ -169,7 +221,7 @@ Let's say we have an app that generates a short story, where users are able to i
     ```
 
   </Tab>
-  
+
   <Tab title="Packageless (cURL)">
       Currently, we only support packages for TypeScript and JavaScript for easy integration. For other users, we recommend manually implementing input variables as follow:
     <Steps>
@@ -182,7 +234,7 @@ Let's say we have an app that generates a short story, where users are able to i
       </Step>
 
       <Step title="Add helicone-prompt-input tags">
-      Add `<helicone-prompt-input key="<INPUT_ID>">` before your input variable, and `</helicone-prompt-input>` after, where `INPUT_ID` is your key name. In this example, `key=”character”`:
+      Add `<helicone-prompt-input key="<INPUT_ID>">` before your input variable, and `</helicone-prompt-input>` after, where `INPUT_ID` is your key name. In this example, `key="character"`:
 
       ```tsx
       Write a story about <helicone-prompt-input key="character" >a secret agent</helicone-prompt-input>
@@ -228,6 +280,64 @@ Let's say we have an app that generates a short story, where users are able to i
   </Tab>
 </Tabs>
 
+## Using Prompts created on the UI
+
+If you've created a prompt on the UI, you can easily pull this prompt into your codebase by calling the following API endpoint:
+
+```javascript
+export async function getPrompt(
+  id: string,
+  variables: Record<string, any>
+): Promise<any> {
+  const getHeliconePrompt = async (id: string) => {
+    const res = await fetch(
+      `https://api.helicone.ai/v1/prompt/${id}/template`,
+      {
+        headers: {
+          Authorization: `Bearer ${YOUR_HELICONE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        method: "POST",
+        body: JSON.stringify({
+          inputs: variables,
+        }),
+      }
+    );
+
+    return (await res.json()) as Result<PromptVersionCompiled, any>;
+  };
+
+  const heliconePrompt = await getHeliconePrompt(id);
+  if (heliconePrompt.error) {
+    throw new Error(heliconePrompt.error);
+  }
+  return heliconePrompt.data?.filled_helicone_template;
+}
+
+async function pullPromptAndRunCompletion() {
+  const prompt = await getPrompt("my-prompt-id", {
+    color: "red",
+  });
+  console.log(prompt);
+
+  const openai = new OpenAI({
+    apiKey: "YOUR_OPENAI_API_KEY",
+    baseURL: `https://oai.helicone.ai/v1/${YOUR_HELICONE_API_KEY}`,
+  });
+  const response = await openai.chat.completions.create(
+    prompt satisfies OpenAI.Chat.Completions.ChatCompletionCreateParamsStreaming
+  );
+  console.log(response);
+}
+
+```
+
+## Running Experiments
+
+Once you've set up prompt management, you can leverage Helicone's experimentation features to test and improve your prompts.
+
+To learn more about running experiments with your prompts, including step-by-step guides and best practices, visit our [Experiments guide](/guides/cookbooks/experiments).
+
 ## Local Testing
 
 Many times in development, you may want to test your prompt locally before deploying it to production and you don't want Helicone to track new prompt versions.
@@ -239,4 +349,5 @@ headers: {
   "Helicone-Prompt-Mode": "testing",
 },
 ```
+
 <QuestionsSection />

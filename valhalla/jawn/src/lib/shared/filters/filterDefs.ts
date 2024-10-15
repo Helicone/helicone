@@ -167,7 +167,7 @@ interface RequestResponseLogToOperators {
   threat: SingleKey<BooleanOperators>;
 }
 
-interface RequestResponseVersionedToOperators {
+interface RequestResponseRMTToOperators {
   latency: SingleKey<NumberOperators>;
   status: SingleKey<NumberOperators>;
   request_created_at: SingleKey<TimestampOperatorsTyped>;
@@ -178,19 +178,38 @@ interface RequestResponseVersionedToOperators {
   node_id: SingleKey<TextOperators>;
   job_id: SingleKey<TextOperators>;
   threat: SingleKey<BooleanOperators>;
+  request_id: SingleKey<TextOperators>;
+  prompt_tokens: SingleKey<NumberOperators>;
+  completion_tokens: SingleKey<NumberOperators>;
+  total_tokens: SingleKey<NumberOperators>;
+  target_url: SingleKey<TextOperators>;
   properties: {
     [key: string]: SingleKey<TextOperators>;
   };
   search_properties: {
     [key: string]: SingleKey<TextOperators>;
   };
+  scores: {
+    [key: string]: SingleKey<TextOperators>;
+  };
+  scores_column: SingleKey<TextOperators>;
+  request_body: SingleKey<VectorOperators>;
+  response_body: SingleKey<VectorOperators>;
+}
+
+interface SessionsRequestResponseRMTToOperators {
+  total_cost: SingleKey<NumberOperators>;
+  total_tokens: SingleKey<NumberOperators>;
 }
 
 export type FilterLeafRequestResponseLog =
   SingleKey<RequestResponseLogToOperators>;
 
-export type FilterLeafRequestResponseVersioned =
-  SingleKey<RequestResponseVersionedToOperators>;
+export type FilterLeafRequestResponseRMT =
+  SingleKey<RequestResponseRMTToOperators>;
+
+export type FilterLeafSessionsRequestResponseRMT =
+  SingleKey<SessionsRequestResponseRMTToOperators>;
 
 type PropertiesCopyV2ToOperators = {
   key: SingleKey<TextOperators>;
@@ -321,7 +340,8 @@ export type TablesAndViews = {
 
   // CLICKHOUSE TABLES
   request_response_log: FilterLeafRequestResponseLog;
-  request_response_versioned: FilterLeafRequestResponseVersioned;
+  request_response_rmt: FilterLeafRequestResponseRMT;
+  sessions_request_response_rmt: FilterLeafSessionsRequestResponseRMT;
   users_view: FilterLeafUserView;
   properties_v3: FilterLeafPropertiesV3;
   property_with_response_v1: FilterLeafPropertyWithResponseV1;
@@ -372,17 +392,17 @@ export function timeFilterToFilterNode(
   filter: TimeFilter,
   table: keyof TablesAndViews
 ): FilterNode {
-  if (table === "request_response_versioned") {
+  if (table === "request_response_rmt") {
     return {
       left: {
-        request_response_versioned: {
+        request_response_rmt: {
           request_created_at: {
             gte: filter.start,
           },
         },
       },
       right: {
-        request_response_versioned: {
+        request_response_rmt: {
           request_created_at: {
             lte: filter.end,
           },
@@ -443,7 +463,7 @@ export function filterUIToFilterLeafs(
         filterMap[filter.filterMapIdx].isCustomProperty === true
       ) {
         return {
-          request_response_versioned: {
+          request_response_rmt: {
             properties: {
               [filterMap[filter.filterMapIdx]?.column]: {
                 [filterMap[filter.filterMapIdx]?.operators[filter.operatorIdx]

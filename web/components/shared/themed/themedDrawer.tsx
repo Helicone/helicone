@@ -1,3 +1,4 @@
+import React, { useRef, useEffect } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import {
   ArrowsPointingOutIcon,
@@ -5,9 +6,9 @@ import {
 } from "@heroicons/react/20/solid";
 import { ArrowsPointingInIcon } from "@heroicons/react/24/outline";
 import { Tooltip } from "@mui/material";
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useState } from "react";
 import { clsx } from "../clsx";
-import { useTheme } from "../theme/themeContext";
+import { useTheme } from "next-themes";
 
 interface ThemedDrawerProps {
   open: boolean;
@@ -18,19 +19,19 @@ interface ThemedDrawerProps {
   defaultWidth?: string;
 }
 
-const ThemedDrawer = (props: ThemedDrawerProps) => {
-  const {
-    open,
-    setOpen,
-    children,
-    actions,
-    defaultExpanded = false,
-    defaultWidth = "md:min-w-[60rem] w-full md:w-[60vw]",
-  } = props;
+const ThemedDrawer: React.FC<ThemedDrawerProps> = ({
+  open,
+  setOpen,
+  children,
+  actions,
+  defaultExpanded = false,
+  defaultWidth = "md:min-w-[60rem] w-full md:w-[60vw]",
+}) => {
+  const drawerRef = useRef<HTMLDivElement>(null);
 
   const [expanded, setExpanded] = useState(defaultExpanded);
 
-  const themeContext = useTheme();
+  const { theme } = useTheme();
 
   useEffect(() => {
     setExpanded(false);
@@ -40,7 +41,7 @@ const ThemedDrawer = (props: ThemedDrawerProps) => {
     <Transition.Root show={open} as={Fragment}>
       <Dialog
         as="div"
-        className={clsx(themeContext?.theme ?? "light", "relative z-40")}
+        className={clsx(theme ?? "light", "relative z-40")}
         onClose={setOpen}
       >
         <Transition.Child

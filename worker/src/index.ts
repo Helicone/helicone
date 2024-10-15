@@ -2,13 +2,15 @@
 import { createClient } from "@supabase/supabase-js";
 import { Database } from "../supabase/database.types";
 import { InMemoryRateLimiter } from "./lib/clients/InMemoryRateLimiter";
-import { RequestWrapper } from "./lib/RequestWrapper";
-import { updateLoopUsers } from "./lib/managers/LoopsManager";
-import { buildRouter } from "./routers/routerFactory";
-import { AlertManager } from "./lib/managers/AlertManager";
 import { AlertStore } from "./lib/db/AlertStore";
 import { ClickhouseClientWrapper } from "./lib/db/ClickhouseWrapper";
+import { AlertManager } from "./lib/managers/AlertManager";
+import { updateLoopUsers } from "./lib/managers/LoopsManager";
+import { RequestWrapper } from "./lib/RequestWrapper";
 import { ProviderName } from "./packages/cost/providers/mappings";
+import { buildRouter } from "./routers/routerFactory";
+import { ReportManager } from "./lib/managers/ReportManager";
+import { ReportStore } from "./lib/db/ReportStore";
 
 const FALLBACK_QUEUE = "fallback-queue";
 
@@ -162,6 +164,22 @@ function modifyEnvBasedOnPath(env: Env, request: RequestWrapper): Env {
           GATEWAY_TARGET: "https://api.together.xyz",
         };
       }
+    } else if (hostParts[0].includes("llmmapper")) {
+      if (isRootPath(url) && request.getMethod() === "GET") {
+        return {
+          ...env,
+          WORKER_DEFINED_REDIRECT_URL: "https://together.xyz",
+        };
+      } else {
+        if (url.pathname.startsWith("/oai2ant")) {
+          return {
+            ...env,
+            WORKER_TYPE: "GATEWAY_API",
+            GATEWAY_TARGET: "https://gateway.llmmapper.com",
+          };
+        }
+        throw new Error("Unknown path");
+      }
     } else if (hostParts[0].includes("openrouter")) {
       if (isRootPath(url) && request.getMethod() === "GET") {
         return {
@@ -206,6 +224,69 @@ function modifyEnvBasedOnPath(env: Env, request: RequestWrapper): Env {
         WORKER_TYPE: "GATEWAY_API",
         GATEWAY_TARGET: "https://api.hyperbolic.xyz",
       };
+    } else if (hostParts[0].includes("fireworks")) {
+      if (isRootPath(url) && request.getMethod() === "GET") {
+        return {
+          ...env,
+          WORKER_DEFINED_REDIRECT_URL: "https://fireworks.ai",
+        };
+      } else {
+        return {
+          ...env,
+          WORKER_TYPE: "GATEWAY_API",
+          GATEWAY_TARGET: "https://api.fireworks.ai",
+        };
+      }
+    } else if (hostParts[0].includes("predibase")) {
+      if (isRootPath(url) && request.getMethod() === "GET") {
+        return {
+          ...env,
+          WORKER_DEFINED_REDIRECT_URL: "https://app.predibase.com",
+        };
+      } else {
+        return {
+          ...env,
+          WORKER_TYPE: "GATEWAY_API",
+          GATEWAY_TARGET: "https://api.app.predibase.com",
+        };
+      }
+    } else if (hostParts[0].includes("qstash")) {
+      const pathname = new URL(request.url).pathname;
+      if (!pathname.startsWith("/llm")) {
+        throw new Error("QStash only accepts routes that start with /llm");
+      }
+      return {
+        ...env,
+        WORKER_TYPE: "GATEWAY_API",
+        GATEWAY_TARGET: "https://qstash.upstash.io",
+      };
+    } else if (hostParts[0].includes("firecrawl")) {
+      if (isRootPath(url) && request.getMethod() === "GET") {
+        return {
+          ...env,
+          WORKER_DEFINED_REDIRECT_URL: "https://www.firecrawl.dev/",
+        };
+      } else {
+        if (url.pathname.includes("scrape")) {
+          return {
+            ...env,
+            WORKER_TYPE: "GATEWAY_API",
+            GATEWAY_TARGET: "https://api.firecrawl.dev/v0/scrape",
+          };
+        }
+        if (url.pathname.includes("search")) {
+          return {
+            ...env,
+            WORKER_TYPE: "GATEWAY_API",
+            GATEWAY_TARGET: "https://api.firecrawl.dev/v0/search",
+          };
+        }
+        return {
+          ...env,
+          WORKER_TYPE: "GATEWAY_API",
+          GATEWAY_TARGET: "https://api.firecrawl.dev/v0/crawl",
+        };
+      }
     }
   }
 
@@ -265,26 +346,93 @@ export default {
     env: Env,
     _ctx: ExecutionContext
   ): Promise<void> {
-    const supabaseClient = createClient<Database>(
+    const supabaseClientUS = createClient<Database>(
       env.SUPABASE_URL,
       env.SUPABASE_SERVICE_ROLE_KEY
     );
+    const supabaseClientEU = createClient<Database>(
+      env.EU_SUPABASE_URL,
+      env.EU_SUPABASE_SERVICE_ROLE_KEY
+    );
     await updateLoopUsers(env);
     if (controller.cron === "0 * * * *") {
-      // Do nothing
       return;
-    } else {
-      const alertManager = new AlertManager(
-        new AlertStore(supabaseClient, new ClickhouseClientWrapper(env)),
+    }
+    if (controller.cron === "0 10 * * mon") {
+      const reportManagerUS = new ReportManager(
+        new ReportStore(
+          supabaseClientUS,
+          new ClickhouseClientWrapper({
+            CLICKHOUSE_HOST: env.CLICKHOUSE_HOST,
+            CLICKHOUSE_USER: env.CLICKHOUSE_USER,
+            CLICKHOUSE_PASSWORD: env.CLICKHOUSE_PASSWORD,
+          })
+        ),
         env
       );
 
-      const { error: checkAlertErr } = await alertManager.checkAlerts();
+      const { error: sendReportsErrUS } = await reportManagerUS.sendReports();
 
-      if (checkAlertErr) {
-        console.error(`Failed to check alerts: ${checkAlertErr}`);
+      if (sendReportsErrUS) {
+        console.error(`Failed to check reports: ${sendReportsErrUS}`);
       }
+      const reportManagerEU = new ReportManager(
+        new ReportStore(
+          supabaseClientEU,
+          new ClickhouseClientWrapper({
+            CLICKHOUSE_HOST: env.EU_CLICKHOUSE_HOST,
+            CLICKHOUSE_USER: env.EU_CLICKHOUSE_USER,
+            CLICKHOUSE_PASSWORD: env.EU_CLICKHOUSE_PASSWORD,
+          })
+        ),
+        env
+      );
+      const { error: sendReportsErrEU } = await reportManagerEU.sendReports();
+
+      if (sendReportsErrEU) {
+        console.error(`Failed to check reports: ${sendReportsErrEU}`);
+      }
+      return;
     }
+    if (controller.cron === "* * * * *") {
+      const alertManagerUS = new AlertManager(
+        new AlertStore(
+          supabaseClientUS,
+          new ClickhouseClientWrapper({
+            CLICKHOUSE_HOST: env.CLICKHOUSE_HOST,
+            CLICKHOUSE_USER: env.CLICKHOUSE_USER,
+            CLICKHOUSE_PASSWORD: env.CLICKHOUSE_PASSWORD,
+          })
+        ),
+        env
+      );
+
+      const { error: checkAlertErrUS } = await alertManagerUS.checkAlerts();
+
+      if (checkAlertErrUS) {
+        console.error(`Failed to check alerts: ${checkAlertErrUS}`);
+      }
+
+      const alertManagerEU = new AlertManager(
+        new AlertStore(
+          supabaseClientEU,
+          new ClickhouseClientWrapper({
+            CLICKHOUSE_HOST: env.EU_CLICKHOUSE_HOST,
+            CLICKHOUSE_USER: env.EU_CLICKHOUSE_USER,
+            CLICKHOUSE_PASSWORD: env.EU_CLICKHOUSE_PASSWORD,
+          })
+        ),
+        env
+      );
+
+      const { error: checkAlertErrEU } = await alertManagerEU.checkAlerts();
+
+      if (checkAlertErrEU) {
+        console.error(`Failed to check alerts: ${checkAlertErrEU}`);
+      }
+      return;
+    }
+    console.error(`Unknown cron: ${controller.cron}`);
   },
 };
 

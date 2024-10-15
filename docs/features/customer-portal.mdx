@@ -1,6 +1,8 @@
 ---
 title: "Customer Portal"
-description: "Easily manage your customers and their usage. "
+sidebarTitle: "Customer Portal"
+description: "Provide customers with a dedicated portal to view and manage their LLM usage. Oversee customer access, set rate limits, and monitor usage while allowing customers to track their own metrics."
+"twitter:title": "Customer Portal - Helicone OSS LLM Observability"
 ---
 
 import QuestionsSection from "/snippets/questions-section.mdx";
@@ -25,12 +27,15 @@ Helicone's Customer Portal is a proxy that sits between your model and your cust
 {" "}
 
 <Frame>
-  <img src="/images/customer-portal/example-customer-portal-explained.png" alt="An Explanation of Helicone's Customer Portal features" />
+  <img
+    src="/images/customer-portal/example-customer-portal-explained.png"
+    alt="An Explanation of Helicone's Customer Portal features"
+  />
 </Frame>
-- Your customer uses your provider key (that Helicone securely encrypted) to
-access your LLM application. - Helicone logs all requests and extracts the data
-in order to bring customer insights to you. - Getting access to your customer's
-usage allows you to set up billing accordingly.{" "}
+- Your customer uses your provider key (that Helicone securely encrypted) to access
+your LLM application. - Helicone logs all requests and extracts the data in order
+to bring customer insights to you. - Getting access to your customer's usage allows
+you to set up billing accordingly.{" "}
 
 </Accordion>
 
@@ -40,7 +45,10 @@ usage allows you to set up billing accordingly.{" "}
 </Note>
 
 <Frame caption="Access built-in customer usage dashboard, billing system and usage tracking by customers.">
-  <img src="/images/customer-portal/example-customer-portal.png" alt="Helicone's built-in customer usage dashboard, billing system, and usage tracking interface. "/>
+  <img
+    src="/images/customer-portal/example-customer-portal.png"
+    alt="Helicone's built-in customer usage dashboard, billing system, and usage tracking interface. "
+  />
 </Frame>
 
 ### Feature Highlight
@@ -75,7 +83,10 @@ Go to `Customer Portal` from your left nav, and click `Add Customer`. Set a rate
 </Check>
 
 <Frame>
-  <img src="/images/customer-portal/example-customer-portal-add-customers.png" alt="Adding customers in Helicone's Customer Portal interface, setting rate limits, and providing a user-specific proxy key. "/>
+  <img
+    src="/images/customer-portal/example-customer-portal-add-customers.png"
+    alt="Adding customers in Helicone's Customer Portal interface, setting rate limits, and providing a user-specific proxy key. "
+  />
 </Frame>
 
 ### Step 2: Your customer will generate proxy keys
@@ -85,7 +96,10 @@ Once your customer [creates a Helicone account](https://us.helicone.ai/signup), 
 Next, they can go to the `Developer` tab and click `Generate New Key`.
 
 <Frame>
-  <img src="/images/customer-portal/example-customer-portal-generate-proxy-key.png" alt="Generating a proxy key for Helicone Customer Portal"/>
+  <img
+    src="/images/customer-portal/example-customer-portal-generate-proxy-key.png"
+    alt="Generating a proxy key for Helicone Customer Portal"
+  />
 </Frame>
 
 ### Step 3: Your customer will use the proxy key
@@ -93,7 +107,10 @@ Next, they can go to the `Developer` tab and click `Generate New Key`.
 Your customers will paste their proxy key in the code to start logging their requests in Helicone.
 
 <Frame>
-  <img src="/images/customer-portal/example-customer-portal-use-proxy-key.png" alt="Using a proxy key from Helicone Customer Portal in the codebase."/>
+  <img
+    src="/images/customer-portal/example-customer-portal-use-proxy-key.png"
+    alt="Using a proxy key from Helicone Customer Portal in the codebase."
+  />
 </Frame>
 
 ### Step 4: View your customer's usage
@@ -101,7 +118,10 @@ Your customers will paste their proxy key in the code to start logging their req
 Once your customer starts logging their requests in Helicone, you can view their usage on your Helicone Customer Portal dashboard.
 
 <Frame>
-  <img src="/images/customer-portal/example-customer-portal-view-usage.png" alt="Viewing customer cost and usage in Helicone Customer Portal."/>
+  <img
+    src="/images/customer-portal/example-customer-portal-view-usage.png"
+    alt="Viewing customer cost and usage in Helicone Customer Portal."
+  />
 </Frame>
 
 ## Guides

@@ -32,7 +32,7 @@ type CommonFields = {
   promptId: string | null;
   temperature?: number;
   timeToFirstToken?: number | null;
-  scores?: Record<string, number> | null;
+  scores?: Record<string, { value: number; valueType: string } | number> | null;
 };
 
 export type NormalizedRequest = CommonFields & {
@@ -41,7 +41,11 @@ export type NormalizedRequest = CommonFields & {
   responseText: string;
 
   // Value to display in request drawer
-  render(): JSX.Element;
+  render(props?: {
+    hideTopBar?: boolean;
+    messageSlice?: "lastTwo";
+    className?: string;
+  }): JSX.Element;
 };
 
 export type SpecificFields = Omit<NormalizedRequest, keyof CommonFields>;

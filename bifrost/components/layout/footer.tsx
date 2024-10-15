@@ -1,6 +1,8 @@
+"use client";
 import Link from "next/link";
 import { SVGProps } from "react";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 
 interface FooterProps {}
 
@@ -46,48 +48,186 @@ const meta = {
   ],
 };
 
-const Footer = (props: FooterProps) => {
-  const {} = props;
+const Footer = () => {
+  const path = usePathname();
 
   return (
-    <footer className="bg-inherit border-t border-gray-200">
-      <div className="mx-auto max-w-5xl px-4 py-8 md:flex md:items-center md:justify-between lg:px-4">
-        <div className="flex space-x-6 md:order-2">
-          {meta.social.map((item) => (
-            <Link
-              key={item.name}
-              href={item.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-gray-400 hover:text-gray-500"
-            >
-              <span className="sr-only">{item.name}</span>
-              <item.icon className="h-6 w-6" aria-hidden="true" />
-            </Link>
-          ))}
+    <footer
+      className={`grid grid-cols-2 md:grid-cols-5 py-6 gap-y-8 pl-8 md:pl-0 md:justify-items-center items-start ${
+        path === "/"
+          ? " bg-[#2B3AC7] text-white/70 fill-white stroke-white"
+          : "bg-inherit text-black/60 fill-[#5D6673] stroke-[#5D6673]"
+      }`}
+    >
+      <div className="flex flex-col items-start font-light text-sm tracking-wide gap-1 col-span-2 md:col-span-1 justify-self-start md:justify-self-center">
+        <Image
+          src="/static/logo-text.svg"
+          alt="Bifrost"
+          width={150}
+          height={150}
+        />
+        <p className="mt-2">&copy; 2024 Helicone, Inc</p>
+        <p className="">All rights reserved.</p>
+      </div>
+
+      <div className="">
+        <p className="text-sm tracking-wide font-bold mb-2">INTEGRATIONS</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 items-start font-light text-sm tracking-wide gap-x-8 gap-y-2">
+          <a
+            className="hover:underline"
+            href="https://docs.helicone.ai/integrations/openai/javascript"
+            target="_blank"
+          >
+            OpenAI
+          </a>
+          <a
+            className="hover:underline"
+            href="https://docs.helicone.ai/integrations/anthropic/javascript"
+            target="_blank"
+          >
+            Anthropic
+          </a>
+          <a
+            className="hover:underline"
+            href="https://docs.helicone.ai/integrations/azure/javascript"
+            target="_blank"
+          >
+            Azure
+          </a>
+          <a
+            className="hover:underline"
+            href="https://docs.helicone.ai/getting-started/integration-method/litellm#litellm-integration"
+            target="_blank"
+          >
+            LiteLLM
+          </a>
+          <a
+            className="hover:underline"
+            href="https://docs.helicone.ai/getting-started/integration-method/anyscale#anyscale-integration"
+            target="_blank"
+          >
+            Anyscale
+          </a>
+          <a
+            className="hover:underline"
+            href="https://docs.helicone.ai/getting-started/integration-method/together#together-ai-integration"
+            target="_blank"
+          >
+            Together AI
+          </a>
+          <a
+            className="hover:underline"
+            href="https://docs.helicone.ai/getting-started/integration-method/openrouter#openrouter-integration"
+            target="_blank"
+          >
+            OpenRouter
+          </a>
+          <a
+            className="hover:underline"
+            href="https://docs.helicone.ai/getting-started/quick-start#other-integrations"
+            target="_blank"
+          >
+            Other
+          </a>
         </div>
-        <div className="mt-8 md:order-1 md:mt-0 space-x-4 flex flex-row">
-          <p className="text-center text-xs leading-5 text-gray-500">
-            &copy; 2024 Helicone, Inc. All rights reserved.
-          </p>
-          <Link
-            href="/privacy"
-            className="text-center text-xs leading-5 text-gray-500"
+      </div>
+
+      <div className="">
+        <p className="font-bold text-sm tracking-wide mb-2">COMPARE</p>
+        <div className="flex flex-col items-start font-light text-sm tracking-wide gap-2">
+          <a
+            className="hover:underline"
+            href="/blog/best-langsmith-alternatives"
+            target="_blank"
           >
-            Privacy Policy
-          </Link>
-          <Link
-            href="/terms"
-            className="text-center text-xs leading-5 text-gray-500"
+            Helicone vs Langsmith
+          </a>
+          <a
+            className="hover:underline"
+            href="/blog/best-datadog-alternative-for-llm"
+            target="_blank"
           >
-            Terms of Use
-          </Link>
-          <Link
-            href="/career"
-            className="text-center text-xs leading-5 text-gray-500"
+            Helicone vs Datadog
+          </a>
+          <a
+            className="hover:underline"
+            href="/blog/weights-and-biases"
+            target="_blank"
           >
-            Work with us
-          </Link>
+            Helicone vs Weights & Biases
+          </a>
+        </div>
+      </div>
+
+      <div className="">
+        <p className="font-bold text-sm tracking-wide mb-2">LEARN MORE</p>
+        <div className="flex flex-col items-start font-light text-sm tracking-wide gap-2">
+          <a
+            className="hover:underline"
+            href="https://docs.helicone.ai"
+            target="_blank"
+          >
+            Docs
+          </a>
+          <a className="hover:underline" href="/blog" target="_blank">
+            Blog
+          </a>
+          <a className="hover:underline" href="/pricing" target="_blank">
+            Pricing
+          </a>
+          <a
+            className="hover:underline"
+            href="https://us.helicone.ai/open-stats"
+            target="_blank"
+          >
+            Stats
+          </a>
+          <a className="hover:underline" href="/community" target="_blank">
+            Community
+          </a>
+          <a className="hover:underline" href="/changelog" target="_blank">
+            Changelog
+          </a>
+          <a className="hover:underline" href="/terms" target="_blank">
+            Terms
+          </a>
+          <a className="hover:underline" href="/privacy" target="_blank">
+            Privacy
+          </a>
+        </div>
+      </div>
+
+      <div className="">
+        <p className="font-bold mb-2 text-sm tracking-wide">CONNECT</p>
+        <div className="flex flex-col items-start font-light text-sm tracking-wide gap-2">
+          <a
+            className="hover:underline"
+            href="https://twitter.com/helicone_ai"
+            target="_blank"
+          >
+            Twitter
+          </a>
+          <a
+            className="hover:underline"
+            href="https://www.linkedin.com/company/helicone/"
+            target="_blank"
+          >
+            LinkedIn
+          </a>
+          <a
+            className="hover:underline"
+            href="https://discord.gg/2TkeWdXNPQ"
+            target="_blank"
+          >
+            Discord
+          </a>
+          <a
+            className="hover:underline"
+            href="mailto:contact@helicone.ai"
+            target="_blank"
+          >
+            Email
+          </a>
         </div>
       </div>
     </footer>

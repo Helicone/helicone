@@ -1,6 +1,8 @@
 import retry from "async-retry";
 import {
   S3Client as AwsS3Client,
+  CopyObjectCommand,
+  DeleteObjectCommand,
   GetObjectCommand,
   PutObjectCommand,
 } from "@aws-sdk/client-s3";
@@ -39,7 +41,7 @@ export class S3Client {
   constructor(
     accessKey: string,
     secretKey: string,
-    endpoint: string,
+    private endpoint: string,
     private bucketName: string,
     private region: "us-west-2" | "eu-west-1"
   ) {
@@ -52,6 +54,28 @@ export class S3Client {
       endpoint: endpoint ? endpoint : undefined,
       forcePathStyle: true,
     });
+  }
+
+  async copyObject(
+    sourceKey: string,
+    destinationKey: string
+  ): Promise<Result<string, string>> {
+    try {
+      const command = new CopyObjectCommand({
+        Bucket: this.bucketName,
+        Key: destinationKey,
+        CopySource: `${this.bucketName}/${sourceKey}`,
+      });
+      const response = await this.awsClient.send(command);
+      if (!response || response.$metadata.httpStatusCode !== 200) {
+        return err(
+          `Failed to copy object: ${response.$metadata.httpStatusCode}`
+        );
+      }
+      return ok(`Success`);
+    } catch (error: any) {
+      return err(`Failed to copy object: ${error.message}`);
+    }
   }
 
   async fetchContent(signedUrl: string): Promise<
@@ -222,7 +246,11 @@ export class S3Client {
     });
   }
 
-  async store(key: string, value: string): Promise<Result<string, string>> {
+  async store(
+    key: string,
+    value: string,
+    tags?: Record<string, string>
+  ): Promise<Result<string, string>> {
     return await putLimiter.schedule(async () => {
       try {
         const compressedValue = await compressData(value);
@@ -243,6 +271,7 @@ export class S3Client {
             Body: compressedValue.data,
             ContentEncoding: "gzip",
             ContentType: "application/json",
+            Metadata: tags,
           });
         }
 
@@ -262,12 +291,34 @@ export class S3Client {
     });
   }
 
+  async remove(key: string): Promise<Result<string, string>> {
+    return await putLimiter.schedule(async () => {
+      const command = new DeleteObjectCommand({
+        Bucket: this.bucketName,
+        Key: key,
+      });
+
+      const response = await this.awsClient.send(command);
+
+      if (!response || response.$metadata.httpStatusCode !== 204) {
+        return err(
+          `Failed to delete data: ${response.$metadata.httpStatusCode}`
+        );
+      }
+
+      return ok(`Success`);
+    });
+  }
   getRawRequestResponseKey = (requestId: string, orgId: string) => {
     return `organizations/${orgId}/requests/${requestId}/raw_request_response_body`;
   };
 
   getRequestResponseKey = (requestId: string, orgId: string) => {
     return `organizations/${orgId}/requests/${requestId}/request_response_body`;
+  };
+
+  getDatasetKey = (datasetId: string, requestId: string, orgId: string) => {
+    return `organizations/${orgId}/datasets/${datasetId}/requests/${requestId}/request_response_body`;
   };
 
   getRequestResponseImageKey = (
@@ -284,5 +335,9 @@ export class S3Client {
     assetId: string
   ) => {
     return `organizations/${orgId}/requests/${requestId}/assets/${assetId}`;
+  };
+
+  getRequestResponseRawUrl = (requestId: string, orgId: string) => {
+    return `organizations/${orgId}/requests/${requestId}/raw_request_response_body`;
   };
 }

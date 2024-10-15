@@ -1,11 +1,9 @@
-import { PostgrestSingleResponse } from "@supabase/postgrest-js";
 import {
   HandlerWrapperOptions,
   withAuth,
 } from "../../../lib/api/handlerWrappers";
 import { Result } from "../../../lib/result";
 import { supabaseServer } from "../../../lib/supabaseServer";
-import { Tier } from "../organization/tier";
 import { getRequestCountClickhouse } from "../../../lib/api/request/request";
 import { handleLogCostCalculation } from "../../../utlis/LogCostCalculation";
 
@@ -13,15 +11,11 @@ async function handler({
   res,
   userData: { orgId },
 }: HandlerWrapperOptions<Result<Object, string>>) {
-  const { data, error } = (await supabaseServer
+  const { data, error } = await supabaseServer
     .from("organization")
     .select("stripe_subscription_id, stripe_subscription_item_id, tier")
     .eq("id", orgId)
-    .single()) as PostgrestSingleResponse<{
-    stripe_subscription_id: string | null;
-    stripe_subscription_item_id: string | null;
-    tier: Tier;
-  }>;
+    .single();
   if (error) {
     return res.status(500).json({
       data: null,
@@ -75,14 +69,14 @@ async function handler({
   if (data.tier == "growth") {
     const requestCount = await getRequestCountClickhouse(orgId, {
       left: {
-        request_response_versioned: {
+        request_response_rmt: {
           request_created_at: {
             gte: new Date(subscriptionData.current_period_start * 1000),
           },
         },
       },
       right: {
-        request_response_versioned: {
+        request_response_rmt: {
           request_created_at: {
             lt: new Date(subscriptionData.current_period_end * 1000),
           },

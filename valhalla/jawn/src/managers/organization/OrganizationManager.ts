@@ -1,3 +1,4 @@
+import { ENVIRONMENT } from "../..";
 import { Database } from "../../lib/db/database.types";
 import { AuthParams, supabaseServer } from "../../lib/db/supabase";
 import { ok, err, Result } from "../../lib/shared/result";
@@ -26,10 +27,17 @@ export type FilterRow = {
   value: string;
 };
 
+export interface UIFilterRowNode {
+  operator: "and" | "or";
+  rows: UIFilterRowTree[];
+}
+
+export type UIFilterRowTree = UIFilterRowNode | FilterRow;
+
 export type OrganizationFilter = {
   id: string;
   name: string;
-  filter: FilterRow[];
+  filter: UIFilterRowTree[];
   createdAt?: string;
   softDelete: boolean;
 };
@@ -115,7 +123,10 @@ export class OrganizationManager extends BaseManager {
       return err("Unauthorized");
     }
 
-    if (orgMember.data.org_role !== "owner") {
+    if (
+      orgMember.data.org_role !== "owner" &&
+      orgMember.data.org_role !== "admin"
+    ) {
       return err("Only organization admins can update settings");
     }
 
@@ -284,7 +295,6 @@ export class OrganizationManager extends BaseManager {
     filters: OrganizationFilter[]
   ): Promise<Result<string, string>> {
     if (!this.authParams.userId) return err("Unauthorized");
-    if (!this.authParams.userId) return err("Unauthorized");
     const hasAccess = await this.organizationStore.checkUserBelongsToOrg(
       organizationId,
       this.authParams.userId
@@ -344,9 +354,30 @@ export class OrganizationManager extends BaseManager {
       );
 
     if (organizationLayoutError !== null) {
-      return err(organizationLayoutError);
+      return ok({ filters: [], id: "", organization_id: "", type: "" });
     }
     return ok(layout);
+  }
+
+  async getMemberCount(
+    filterHeliconeEmails: boolean = false
+  ): Promise<Result<number, string>> {
+    const { data: members, error: membersError } =
+      await this.organizationStore.getOrganizationMembers(
+        this.authParams.organizationId
+      );
+
+    if (membersError !== null) {
+      return err(membersError);
+    }
+    if (filterHeliconeEmails && ENVIRONMENT === "production") {
+      return ok(
+        members.filter((member) => !member.email.endsWith("@helicone.ai"))
+          .length
+      );
+    } else {
+      return ok(members.length);
+    }
   }
 
   async getOrganizationMembers(

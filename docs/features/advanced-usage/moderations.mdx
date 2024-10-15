@@ -1,6 +1,8 @@
 ---
 title: "Moderations"
-description: "Integrate OpenAI moderation to safeguard your chat completions."
+sidebarTitle: "Moderations"
+description: "Enable OpenAI's moderation feature in your LLM applications to automatically detect and filter harmful content in user messages."
+"twitter:title": "Moderations - Helicone OSS LLM Observability"
 ---
 
 import QuestionsSection from "/snippets/questions-section.mdx";
@@ -39,10 +41,10 @@ curl https://oai.helicone.ai/v1/completions \
 ```python Python
 openai.api_base = "https://oai.helicone.ai/v1"
 
-openai.Completion.create(
+client.chat.completions.create(
     model="text-davinci-003",
     prompt="How do I enable moderations?",
-    headers={
+    extra_headers={
       "Helicone-Moderations-Enabled": "true", # Add this header and set to true
     }
 )

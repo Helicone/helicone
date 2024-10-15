@@ -3,6 +3,7 @@ import { Result, resultMap } from "../../../../lib/result";
 import { TimeIncrement } from "../../../../lib/timeCalculations/fetchTimeData";
 import { RateLimitOverTime } from "../../../../pages/api/metrics/rateLimitsOverTime";
 import { useBackendMetricCall } from "../../../../services/hooks/useBackendFunction";
+import { FilterNode } from "../../../../services/lib/filters/filterDefs";
 
 export interface RateLimitPageData {
   timeFilter: {
@@ -20,7 +21,7 @@ const useOrgPlanPage = ({
 }: RateLimitPageData) => {
   const params = {
     timeFilter: timeFilter,
-    userFilters: [],
+    userFilters: "all" as FilterNode,
     timeZoneDifference: timeZoneDifference,
     dbIncrement,
   };

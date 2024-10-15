@@ -35,9 +35,7 @@ const CreateProviderKeyModal = (props: CreateProviderKeyModalProps) => {
     refetch,
   } = useGetOrgMembers(org?.currentOrg?.id || "");
 
-  const currentUserRole = data?.data?.find(
-    (d) => d.email === user?.email
-  )?.org_role;
+  const currentUserRole = data?.find((d) => d.email === user?.email)?.org_role;
 
   const handleSubmitHandler = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();

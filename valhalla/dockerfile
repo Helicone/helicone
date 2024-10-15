@@ -4,16 +4,19 @@
 # Use an official Node.js runtime as the base image
 FROM --platform=linux/amd64 node:20
 
-# Set the working directory inside the container
-WORKDIR /usr/src/app
+WORKDIR /usr/src/app/valhalla/jawn
 
-WORKDIR /usr/src/app/jawn
-
-COPY jawn/package.json jawn/yarn.lock ./
+COPY ./valhalla/jawn/package.json ./valhalla/jawn/yarn.lock ./
 
 RUN yarn install
 
-COPY ./jawn .
+WORKDIR /usr/src/app/shared
+COPY ./shared .
+
+WORKDIR /usr/src/app/valhalla/jawn
+COPY ./valhalla/jawn .
+
+RUN find /usr/src/app/valhalla/jawn -name ".env.*" -exec rm {} \;
 
 #yarn workspace jawn serve
 ENV PORT=8585

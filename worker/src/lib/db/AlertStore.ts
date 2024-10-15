@@ -5,7 +5,12 @@ import { Database } from "../../../supabase/database.types";
 import { clickhousePriceCalc } from "../../packages/cost";
 
 type AlertStatus = "triggered" | "resolved";
-type Alert = Database["public"]["Tables"]["alert"]["Row"];
+export type Alert = Database["public"]["Tables"]["alert"]["Row"] & {
+  organization: {
+    integrations: Database["public"]["Tables"]["integrations"]["Row"][];
+  };
+};
+
 export type AlertState = {
   totalCount: number;
   errorCount?: number;
@@ -21,14 +26,16 @@ export class AlertStore {
   public async getAlerts(): Promise<Result<Alert[], string>> {
     const { data: alerts, error: alertsErr } = await this.supabaseClient
       .from("alert")
-      .select("*")
+      .select(
+        "*, organization (integrations (id, integration_name, settings, active))"
+      )
       .eq("soft_delete", false);
 
     if (alertsErr) {
       return err(`Failed to retrieve all alerts: ${alertsErr}`);
     }
 
-    return ok(alerts);
+    return ok(alerts as Alert[]);
   }
 
   public async updateAlertStatuses(
@@ -97,9 +104,9 @@ export class AlertStore {
     timeWindowMs: number
   ): Promise<Result<AlertState, string>> {
     const query = `SELECT 
-    ${clickhousePriceCalc("request_response_versioned")} as totalCount,
+    ${clickhousePriceCalc("request_response_rmt")} as totalCount,
     COUNT() AS requestCount
-    FROM request_response_versioned
+    FROM request_response_rmt
     WHERE
     organization_id = {val_0: UUID} AND
     request_created_at >= toDateTime64(now(), 3) - INTERVAL {val_1: Int64} MILLISECOND`;
@@ -127,7 +134,7 @@ export class AlertStore {
     COUNT() AS totalCount,
     COUNTIf(status BETWEEN 400 AND 599) AS errorCount,
     COUNT() AS requestCount
-  FROM request_response_versioned
+  FROM request_response_rmt
   WHERE 
     organization_id = {val_0: UUID} AND
     request_created_at >= toDateTime64(now(), 3) - INTERVAL {val_1: Int64} MILLISECOND

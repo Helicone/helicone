@@ -1,10 +1,9 @@
 import { Env } from "../..";
-import { Database } from "../../../supabase/database.types";
 import { Result, err, ok } from "../util/results";
-import { AlertState, AlertStore } from "../db/AlertStore";
+import { Alert, AlertState, AlertStore } from "../db/AlertStore";
 
 type AlertStateUpdate = {
-  alert: Database["public"]["Tables"]["alert"]["Row"];
+  alert: Alert;
   status: "triggered" | "resolved" | "unchanged";
   timestamp: number;
   triggeredThreshold?: number;
@@ -98,6 +97,14 @@ export class AlertManager {
       if (sendEmailErr) {
         console.error(`Failed to send alert emails: ${sendEmailErr}`);
       }
+
+      const { error: sendSlackErr } = await this.sendAlertSlacks(
+        triggeredAlerts
+      );
+
+      if (sendSlackErr) {
+        console.error(`Failed to send alert slacks: ${sendSlackErr}`);
+      }
     }
 
     if (resolvedAlerts.length > 0) {
@@ -116,6 +123,14 @@ export class AlertManager {
 
       if (sendEmailErr) {
         console.error(`Failed to send resolve emails: ${sendEmailErr}`);
+      }
+
+      const { error: sendSlackErr } = await this.sendAlertSlacks(
+        resolvedAlerts
+      );
+
+      if (sendSlackErr) {
+        console.error(`Failed to send resolve slacks: ${sendSlackErr}`);
       }
     }
 
@@ -194,9 +209,7 @@ export class AlertManager {
     return ok(null);
   }
 
-  async getAlertState(
-    alert: Database["public"]["Tables"]["alert"]["Row"]
-  ): Promise<Result<AlertState, string>> {
+  async getAlertState(alert: Alert): Promise<Result<AlertState, string>> {
     if (alert.metric === "response.status") {
       return await this.alertStore.getErrorRate(
         alert.org_id,
@@ -210,7 +223,7 @@ export class AlertManager {
   }
 
   async getAlertStateUpdate(
-    alert: Database["public"]["Tables"]["alert"]["Row"],
+    alert: Alert,
     alertState: AlertState,
     timestamp: number
   ): Promise<AlertStateUpdate> {
@@ -245,7 +258,7 @@ export class AlertManager {
   }
 
   async handleRateBelowThreshold(
-    alert: Database["public"]["Tables"]["alert"]["Row"],
+    alert: Alert,
     timestamp: number
   ): Promise<AlertStateUpdate> {
     if (alert.status === "resolved") {
@@ -267,7 +280,7 @@ export class AlertManager {
   }
 
   async handleRateAboveThreshold(
-    alert: Database["public"]["Tables"]["alert"]["Row"],
+    alert: Alert,
     triggerThreshold: number,
     requestCount: number,
     timestamp: number
@@ -314,13 +327,14 @@ export class AlertManager {
     alertStatusUpdates: AlertStateUpdate[]
   ): Promise<Result<null, string>> {
     const promises = alertStatusUpdates.map(async (alertStatusUpdate) => {
-      const { error: emailResErr } = await this.sendAlertEmail(
-        alertStatusUpdate
-      );
-
-      if (emailResErr) {
-        console.error(`Error sending email: ${emailResErr}`);
-        throw new Error(emailResErr); // Throw the error to catch it outside
+      if (alertStatusUpdate.alert.emails.length > 0) {
+        const { error: emailResErr } = await this.sendAlertEmail(
+          alertStatusUpdate
+        );
+        if (emailResErr) {
+          console.error(`Error sending email: ${emailResErr}`);
+          return err(emailResErr);
+        }
       }
     });
 
@@ -361,10 +375,84 @@ export class AlertManager {
     return ok(null);
   }
 
+  private async sendAlertSlacks(
+    alertStatusUpdates: AlertStateUpdate[]
+  ): Promise<Result<null, string>> {
+    const promises = alertStatusUpdates.map(async (alertStatusUpdate) => {
+      if (alertStatusUpdate.alert.slack_channels.length > 0) {
+        const { error: slackResErr } = await this.sendAlertSlack(
+          alertStatusUpdate
+        );
+        if (slackResErr) {
+          console.error(`Error sending slack: ${slackResErr}`);
+          return err(slackResErr);
+        }
+      }
+    });
+
+    await Promise.all(promises);
+
+    return ok(null);
+  }
+
+  private async sendAlertSlack(
+    alertStatusUpdate: AlertStateUpdate
+  ): Promise<Result<null, string>> {
+    const { slack_json } = this.formatAlertNotification(alertStatusUpdate);
+
+    for (const channel of alertStatusUpdate.alert.slack_channels) {
+      const slackIntegration =
+        alertStatusUpdate.alert.organization.integrations.filter(
+          (integration) => integration.integration_name === "slack"
+        )[0];
+      if (!slackIntegration) {
+        return err(
+          `Slack integration not found for alert ${alertStatusUpdate.alert.name}`
+        );
+      }
+      const settings = slackIntegration.settings as { access_token: string };
+      if (!settings.access_token) {
+        return err(
+          `Slack access token not found for alert ${alertStatusUpdate.alert.name}`
+        );
+      }
+
+      const res = await fetch("https://slack.com/api/chat.postMessage", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${settings.access_token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          channel,
+          blocks: JSON.stringify(slack_json.blocks),
+        }),
+      });
+
+      if (!res.ok) {
+        return err(
+          `Error sending slack messages: ${res.status} ${
+            res.statusText
+          } ${await res.text()}`
+        );
+      }
+
+      const data = (await res.json()) as { ok: boolean; error?: string };
+
+      if (!data.ok) {
+        return err(`Error sending slack messages: ${data.error}`);
+      }
+    }
+
+    return ok(null);
+  }
+
   private formatAlertNotification(alertStatusUpdate: AlertStateUpdate): {
     subject: string;
     text: string;
     html: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    slack_json: Record<string, any>;
   } {
     const alert = alertStatusUpdate.alert;
     const status = alertStatusUpdate.status ?? "";
@@ -381,6 +469,10 @@ export class AlertManager {
 
     const headerClass =
       alertStatusUpdate.status === "triggered" ? "Triggered" : "Resolved";
+    const headerEmoji =
+      alertStatusUpdate.status === "triggered"
+        ? ":warning:"
+        : ":white_check_mark:";
     const subject = `Alert ${capitalizedStatus}: ${alert.name}`;
     const alertTime = new Date(alertStatusUpdate.timestamp).toUTCString();
     const actionMessage =
@@ -393,6 +485,47 @@ export class AlertManager {
     }' has been ${capitalizedStatus}.\n\nDetails:\n- ${capitalizedStatus} At: ${
       alertTime ? formatTimestamp(alertTime) : "alertTime not found"
     }\n- Threshold: ${alert.threshold}%\n\n${actionMessage}`;
+
+    const slack_json = {
+      blocks: [
+        {
+          type: "header",
+          text: {
+            type: "plain_text",
+            text: `${headerEmoji} Alert ${headerClass}: ${alert.name}`,
+          },
+        },
+        {
+          type: "section",
+          text: {
+            type: "mrkdwn",
+            text:
+              (alert.metric === "response.status"
+                ? alertStatusUpdate.status === "triggered"
+                  ? `Error rate has breached *${
+                      alert.threshold
+                    }%* in the last *${formatTimespan(alert.time_window)}*.`
+                  : `Error rate is now back within *${alert.threshold}%*.`
+                : alertStatusUpdate.status === "triggered"
+                ? `Cost has exceeded *$${
+                    alert.threshold
+                  }* in the last *${formatTimespan(alert.time_window)}*.`
+                : `Cost is now under *$${alert.threshold}*`) +
+              (alertStatusUpdate.status === "triggered"
+                ? `\nPlease take the necessary action.`
+                : `\nNo further action is required.`),
+          },
+        },
+        {
+          type: "section",
+          text: {
+            type: "mrkdwn",
+            text: `Time: ${alertTime}`,
+          },
+        },
+      ],
+    };
+
     const html = `<!DOCTYPE html>
     <html lang="en" dir="ltr" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" style="color-scheme:light dark;supported-color-schemes:light dark;">
       <head>
@@ -536,6 +669,6 @@ export class AlertManager {
       </body>
     </html>`;
 
-    return { subject, text, html };
+    return { subject, text, html, slack_json };
   }
 }

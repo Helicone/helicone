@@ -7,8 +7,8 @@ import { BaseTempKey } from "./tempKeys/baseTempKey";
 import { prepareRequestOpenAIFull } from "./requestPrep/openaiCloud";
 import { prepareRequestAzureFull as prepareRequestAzureOnPremFull } from "./requestPrep/azure";
 import { runHypothesis } from "./hypothesisRunner";
-import { generateHeliconeAPIKey } from "./tempKeys/tempProxyKey";
-import { generateProxyKey } from "./tempKeys/tempAPIKey";
+import { generateHeliconeAPIKey } from "./tempKeys/tempAPIKey";
+import { generateProxyKey } from "./tempKeys/tempProxyKey";
 import {
   PreparedRequest,
   PreparedRequestArgs,
@@ -30,8 +30,8 @@ async function prepareRequest(
     deployment: "AZURE" | "OPENAI";
   }
 ): Promise<PreparedRequest> {
-  if (IS_ON_PREM) {
-    if (onPremConfig.deployment === "AZURE") {
+  if (args.hypothesis.providerKey === null) {
+    if (IS_ON_PREM && onPremConfig.deployment === "AZURE") {
       return await prepareRequestAzureOnPremFull(args);
     } else {
       return prepareRequestOpenAIOnPremFull(args);
@@ -44,12 +44,9 @@ async function prepareRequest(
 export async function run(
   experiment: Experiment
 ): Promise<Result<string, string>> {
-  const tempKey: Result<BaseTempKey, string> = IS_ON_PREM
-    ? await generateHeliconeAPIKey(experiment.organization)
-    : await generateProxyKey(
-        experiment.hypotheses.find((x) => x.providerKey)?.providerKey ?? "",
-        "helicone-experiment" + uuid()
-      );
+  const tempKey: Result<BaseTempKey, string> = await generateHeliconeAPIKey(
+    experiment.organization
+  );
 
   if (tempKey.error || !tempKey.data) {
     return err(tempKey.error);

@@ -1,6 +1,10 @@
 ---
-title: "Header Directory"
-description: Every header you need to know to access Helicone features.
+title: "Helicone Header Directory"
+sidebarTitle: "Header Directory"
+description: "Comprehensive guide to all Helicone headers. Learn how to access and implement various Helicone features through custom request headers."
+"twitter:title": "Helicone Header Directory - Open Source LLM Observability"
+icon: "list-ul"
+iconType: "solid"
 ---
 
 <CodeGroup>
@@ -14,11 +18,16 @@ curl https://gateway.helicone.ai/v1/completions \
 ```
 
 ```python Python
-openai.api_base = "https://gateway.helicone.ai/v1"
-openai.Completion.create(
+client = OpenAI(
+    base_url="https://gateway.helicone.ai/v1",
+    default_headers={
+        "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
+    }
+)
+client.chat.completions.create(
     model="text-davinci-003",
     prompt="This is a test",
-    headers={
+    extra_headers={
         "Helicone-Auth": f"Bearer {HELICONE_API_KEY}", # required header
         "Helicone-<Header>": "<Value>", # all headers will follow this format
     }
@@ -93,22 +102,22 @@ The URL to proxy the request to when using _gateway.helicone.ai_. For example, `
   The URL to proxy the request to when using _oai.helicone.ai_. For example, `https://[YOUR_AZURE_DOMAIN].openai.azure.com`.
 </ResponseField>
 <ResponseField name="Helicone-Request-Id" type="string (uuid)">
-  The ID of the request, in the format: `123e4567-e89b-12d3-a456-426614174000` 
+  The ID of the request, in the format: `123e4567-e89b-12d3-a456-426614174000`
 </ResponseField>
 <ResponseField name="Helicone-Model-Override" type="string (model)">
-  Overrides the model used to calculate costs and mapping. Useful for when the model does not exist in URL, request or response. For example, `gpt-4-1106-preview`. 
+  Overrides the model used to calculate costs and mapping. Useful for when the model does not exist in URL, request or response. For example, `gpt-4-1106-preview`.
 </ResponseField>
 <ResponseField name="Helicone-Prompt-Id" type="string">
-  Assigning an ID allows Helicone to associate your prompt with future versions of your prompt, and automatically manage versions on your behalf. For example, both `prompt_story` and `this is the first prompt` are valid. 
+  Assigning an ID allows Helicone to associate your prompt with future versions of your prompt, and automatically manage versions on your behalf. For example, both `prompt_story` and `this is the first prompt` are valid.
 </ResponseField>
 <ResponseField name="Helicone-Property-[Name]" type="string">
-  Custom Properties allow you to add any additional information to your requests, such as session, conversation, or app IDs. Here are some examples of custom property headers and values: `Helicone-Property-Session: 121`, `Helicone-Property-App: mobile`, or `Helicone-Property-MyUser: John Doe`. There are no restrictions on the value. 
+  Custom Properties allow you to add any additional information to your requests, such as environment, conversation, or app IDs. Here are some examples of custom property headers and values: `Helicone-Property-Session: 121`, `Helicone-Property-App: mobile`, or `Helicone-Property-MyUser: John Doe`. There are no restrictions on the value.
 </ResponseField>
 <ResponseField name="Helicone-User-Id" type="string">
-  Specify the user making the request to track and analyze user metrics, such as the number of requests, costs, and activity associated with that particular user. For example, `alicebob@gmail.com` or `db513bc9-ff1b-4747-a47b-7750d0c701d3` are both valid. 
+  Specify the user making the request to track and analyze user metrics, such as the number of requests, costs, and activity associated with that particular user. For example, `alicebob@gmail.com` or `db513bc9-ff1b-4747-a47b-7750d0c701d3` are both valid.
 </ResponseField>
 <ResponseField name="Helicone-Fallbacks" type="JSON string dump">
-  Utilize any provider through a single endpoint by setting fallbacks. See how it's used in [Gateway Fallbacks](https://docs.helicone.ai/getting-started/integration-method/gateway-fallbacks). 
+  Utilize any provider through a single endpoint by setting fallbacks. See how it's used in [Gateway Fallbacks](https://docs.helicone.ai/getting-started/integration-method/gateway-fallbacks).
 </ResponseField>
 <ResponseField name="Helicone-RateLimit-Policy" type="string">
   Set up a rate limit policy. The value should follow the format: `[quota];w=[time_window];u=[unit];s=[segment]`. For example, `10;w=1000;u=cents;s=user` is a policy that allows 10 cents of requests per 1000 seconds per user.
@@ -118,6 +127,9 @@ The URL to proxy the request to when using _gateway.helicone.ai_. For example, `
 </ResponseField>
 <ResponseField name="Helicone-Session-Path" type="string">
   To represent parent and child traces we take advantage of a simple path syntax. For example, if you have a parent trace `parent` and a child trace `child`, you can represent this as `parent/child`.
+</ResponseField>
+<ResponseField name="Helicone-Session-Name" type="string">
+  The name of the session. For example, `Course Plan`.
 </ResponseField>
 
 ## 3rd Party Integrations
@@ -143,7 +155,7 @@ The URL to proxy the request to when using _gateway.helicone.ai_. For example, `
 <ResponseField name="Helicone-Cache-Enabled" type="boolean">
   Whether to cache your responses. Set to `true` or  `false`. You can customize the behavior of the cache feature by setting additional headers in your request.
   <Accordion title="Additional headers" defaultOpen>
-    | Parameter                         | Description                                       | 
+    | Parameter                         | Description                                       |
     | --------------------------------- | ------------------------------------------------- |
     | `Cache-control`                   | Specify the cache limit as a `string` in _seconds_, i.e. `max-age=3600` is 1 hour. |
     | `Helicone-Cache-Bucket-Max-Size`  | The size of cache bucket represented as a `number`.        |
@@ -169,20 +181,20 @@ The URL to proxy the request to when using _gateway.helicone.ai_. For example, `
   </Accordion>
 </ResponseField>
 <ResponseField name="Helicone-Moderations-Enabled" type="boolean">
-  Activate OpenAI moderation to safeguard your chat completions. Set to `true` or `false`. 
+  Activate OpenAI moderation to safeguard your chat completions. Set to `true` or `false`.
 </ResponseField>
 <ResponseField name="Helicone-LLM-Security-Enabled" type="boolean">
-  Secure OpenAI chat completions against prompt injections. Set to `true` or `false`. 
+  Secure OpenAI chat completions against prompt injections. Set to `true` or `false`.
 </ResponseField>
 <ResponseField name="Helicone-Stream-Force-Format" type="boolean">
-  Enforce proper stream formatting for libraries that do not inherently support it, such as Ruby. Set to `true` or `false`. 
+  Enforce proper stream formatting for libraries that do not inherently support it, such as Ruby. Set to `true` or `false`.
 </ResponseField>
 
 ## Response Headers
 
 | Headers                        | Description                                                                  |
 | ------------------------------ | ---------------------------------------------------------------------------- |
-| `Helicone-Id`                  | Indicates the ID of the request. !                                           |
+| `Helicone-Id`                  | Indicates the ID of the request.                                             |
 | `Helicone-Cache`               | Indicates whether the response was cached. Returns `HIT` or `MISS`.          |
 | `Helicone-Cache-Bucket-Idx`    | Indicates the cache bucket index used as a `number`.                         |
 | `Helicone-Fallback-Index`      | Indicates fallback idex used as a `number`.                                  |

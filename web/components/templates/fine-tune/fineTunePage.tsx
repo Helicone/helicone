@@ -25,7 +25,7 @@ import JobRow, { FineTuneJob } from "./jobRow";
 import ThemedDrawer from "../../shared/themed/themedDrawer";
 import ThemedModal from "../../shared/themed/themedModal";
 import FineTuneForm from "./fineTuneForm";
-import { useJawn } from "../../../services/hooks/useJawn";
+
 import LoadingAnimation from "../../shared/loadingAnimation";
 import { clsx } from "../../shared/clsx";
 import Link from "next/link";
@@ -43,7 +43,7 @@ interface FineTuningPageProps {}
 
 const FineTuningPage = (props: FineTuningPageProps) => {
   const {} = props;
-  const { fetchJawn } = useJawn();
+
   const [fineTuneOpen, setFineTuneOpen] = useState(false);
   const [open, setOpen] = useState(false);
   const [jobOpen, setJobOpen] = useState(false);

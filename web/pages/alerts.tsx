@@ -1,9 +1,9 @@
 import { User } from "@supabase/auth-helpers-nextjs";
-import AuthLayout from "../components/layout/authLayout";
-import AuthHeader from "../components/shared/authHeader";
+import AuthLayout from "../components/layout/auth/authLayout";
 import AlertsPage from "../components/templates/alerts/alertsPage";
 import { withAuthSSR } from "../lib/api/handlerWrappers";
 import { ReactElement } from "react";
+import { IslandContainer } from "@/components/ui/islandContainer";
 
 interface AlertProps {
   user: User;
@@ -13,10 +13,9 @@ const Alert = (props: AlertProps) => {
   const { user } = props;
 
   return (
-    <>
-      <AuthHeader title={"Alerts"} />
+    <IslandContainer className="pt-8">
       <AlertsPage user={user} />
-    </>
+    </IslandContainer>
   );
 };
 

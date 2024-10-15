@@ -7,6 +7,10 @@ import {
   BackendMetricsCall,
   useBackendMetricCall,
 } from "../../../services/hooks/useBackendFunction";
+import {
+  FilterBranch,
+  FilterLeaf,
+} from "../../../services/lib/filters/filterDefs";
 
 export interface PropertyPageData {
   timeFilter: {
@@ -19,19 +23,23 @@ export interface PropertyPageData {
 
 export const usePropertyCard = (props: PropertyPageData) => {
   const { timeFilter, property, limit = 10 } = props;
-  const params: BackendMetricsCall<any>["params"] = {
-    timeFilter,
-    userFilters: [
-      {
-        request_response_versioned: {
-          search_properties: {
-            [property]: {
-              equals: property,
-            },
-          },
+  const propertyFilterLeaf: FilterLeaf = {
+    request_response_rmt: {
+      search_properties: {
+        [property]: {
+          equals: property,
         },
       },
-    ],
+    },
+  };
+
+  const params: BackendMetricsCall<any>["params"] = {
+    timeFilter,
+    userFilters: {
+      left: propertyFilterLeaf,
+      operator: "and",
+      right: "all",
+    } as FilterBranch,
     dbIncrement: "day",
     timeZoneDifference: 0,
     limit,

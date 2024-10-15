@@ -10,6 +10,7 @@ WORKDIR /worker
 RUN yarn
 
 COPY . /worker
+RUN find /worker -name ".env.*" -exec rm {} \;
 
 RUN rm -rf ./.wrangler
 

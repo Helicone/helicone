@@ -1,265 +1,190 @@
-import { Menu, Transition } from "@headlessui/react";
-import { Fragment, useState } from "react";
-import { CheckIcon } from "@heroicons/react/24/outline";
-import { useOrg } from "./organizationContext";
-import { useUser } from "@supabase/auth-helpers-react";
+import { useTheme } from "next-themes";
+import { signOut } from "@/components/shared/utils/utils";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Switch } from "@/components/ui/switch";
+import { cn } from "@/lib/utils";
+import { Database } from "@/supabase/database.types";
+import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
+import { useRouter } from "next/router";
+import { useCallback, useMemo, useState } from "react";
 import { clsx } from "../shared/clsx";
-import CreateOrgForm, {
+import AddMemberModal from "../templates/organization/addMemberModal";
+import CreateOrgForm from "../templates/organization/createOrgForm";
+import { useOrg } from "./organizationContext";
+import {
   ORGANIZATION_COLORS,
   ORGANIZATION_ICONS,
-} from "../templates/organization/createOrgForm";
-import ThemedModal from "../shared/themed/themedModal";
-import AddMemberModal from "../templates/organization/addMemberModal";
+} from "../templates/organization/orgConstants";
+import { LogOutIcon } from "lucide-react";
+import Link from "next/link";
+import OrgMoreDropdown from "./orgMoreDropdown";
 
 interface OrgDropdownProps {}
 
-export default function OrgDropdown(props: OrgDropdownProps) {
+export default function OrgDropdown({}: OrgDropdownProps) {
   const orgContext = useOrg();
   const user = useUser();
   const [createOpen, setCreateOpen] = useState(false);
+  const [addOpen, setAddOpen] = useState(false);
+  const router = useRouter();
+  const supabaseClient = useSupabaseClient<Database>();
+  const { setTheme, theme } = useTheme();
 
   const org = useOrg();
 
-  const [addOpen, setAddOpen] = useState(false);
+  const { ownedOrgs, memberOrgs, customerOrgs } = useMemo(() => {
+    const owned =
+      orgContext?.allOrgs.filter(
+        (org) => org.owner === user?.id && org.organization_type !== "customer"
+      ) || [];
+    const member =
+      orgContext?.allOrgs.filter(
+        (org) => org.owner !== user?.id && org.organization_type !== "customer"
+      ) || [];
+    const customer =
+      orgContext?.allOrgs.filter(
+        (org) => org.organization_type === "customer"
+      ) || [];
+    return { ownedOrgs: owned, memberOrgs: member, customerOrgs: customer };
+  }, [orgContext?.allOrgs, user?.id]);
 
-  const ownedOrgs = orgContext?.allOrgs.filter(
-    (org) => org.owner === user?.id && org.organization_type !== "customer"
-  );
-  const memberOrgs = orgContext?.allOrgs.filter(
-    (org) => org.owner !== user?.id && org.organization_type !== "customer"
-  );
-  const customerOrgs = orgContext?.allOrgs.filter(
-    (org) => org.organization_type === "customer"
+  const currentIcon = useMemo(
+    () =>
+      ORGANIZATION_ICONS.find(
+        (icon) => icon.name === orgContext?.currentOrg?.icon
+      ),
+    [orgContext?.currentOrg?.icon]
   );
 
-  const currentIcon = ORGANIZATION_ICONS.find(
-    (icon) => icon.name === orgContext?.currentOrg?.icon
+  const currentColor = useMemo(
+    () =>
+      ORGANIZATION_COLORS.find(
+        (icon) => icon.name === orgContext?.currentOrg?.color
+      ),
+    [orgContext?.currentOrg?.color]
   );
 
-  const currentColor = ORGANIZATION_COLORS.find(
-    (icon) => icon.name === orgContext?.currentOrg?.color
-  );
-
-  const createNewOrgHandler = () => {
+  const createNewOrgHandler = useCallback(() => {
     setCreateOpen(true);
-  };
+  }, []);
+
+  const handleThemeChange = useCallback(() => {
+    setTheme(theme === "dark" ? "light" : "dark");
+  }, [theme, setTheme]);
+
+  const handleSignOut = useCallback(() => {
+    signOut(supabaseClient).then(() => router.push("/"));
+  }, [supabaseClient, router]);
 
   return (
     <>
-      <Menu as="div" className="relative inline-block text-left w-full">
-        <Menu.Button
-          className={clsx(
-            "text-gray-500 hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-gray-800 dark:hover:text-gray-100",
-            "group flex justify-between w-full items-center p-2 font-medium rounded-md"
-          )}
-        >
-          <div className="flex items-center">
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            className="flex items-center justify-start w-full ml-1 p-2"
+          >
             {currentIcon && (
               <currentIcon.icon
                 className={clsx(
                   `text-${currentColor?.name}-500`,
-                  "mr-3 flex-shrink-0 h-4 w-4"
+                  "mr-2 flex-shrink-0 h-4 w-4"
                 )}
                 aria-hidden="true"
               />
             )}
-            <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate w-fit max-w-[7.25rem] text-left">
+            <p className="text-xs font-semibold truncate w-fit text-left">
               {orgContext?.currentOrg?.name}
             </p>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-[15rem] ml-2 mt-2 max-h-[90vh] flex flex-col border-slate-200">
+          <DropdownMenuLabel className="flex justify-between items-center">
+            <div className="flex gap-2">
+              {currentIcon && (
+                <currentIcon.icon
+                  className={clsx(
+                    `text-${currentColor?.name}-500`,
+                    "mt-1 flex-shrink-0 h-4 w-4"
+                  )}
+                  aria-hidden="true"
+                />
+              )}
+              <div className="flex flex-col gap-1">
+                <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-50">
+                  {orgContext?.currentOrg?.name}
+                </h3>
+                <p className="text-xs text-slate-500 font-medium">
+                  {user?.email}
+                </p>
+              </div>
+            </div>
+            <div className="hidden sm:block">
+              <OrgMoreDropdown
+                ownedOrgs={ownedOrgs}
+                memberOrgs={memberOrgs}
+                customerOrgs={customerOrgs}
+                createNewOrgHandler={createNewOrgHandler}
+                currentOrgId={orgContext?.currentOrg?.id}
+                setCurrentOrg={orgContext?.setCurrentOrg}
+              />
+            </div>
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <div className="block sm:hidden">
+            <OrgMoreDropdown
+              ownedOrgs={ownedOrgs}
+              memberOrgs={memberOrgs}
+              customerOrgs={customerOrgs}
+              createNewOrgHandler={createNewOrgHandler}
+              currentOrgId={orgContext?.currentOrg?.id}
+              setCurrentOrg={orgContext?.setCurrentOrg}
+            />
+            <DropdownMenuSeparator />
           </div>
-        </Menu.Button>
-        <Transition
-          as={Fragment}
-          enter="transition ease-out duration-100"
-          enterFrom="transform opacity-0 scale-95"
-          enterTo="transform opacity-100 scale-100"
-          leave="transition ease-in duration-75"
-          leaveFrom="transform opacity-100 scale-100"
-          leaveTo="transform opacity-0 scale-95"
-        >
-          <Menu.Items className="absolute left-0 mt-1 w-[15rem] z-50 origin-top-right divide-y divide-gray-200 dark:divide-gray-800 rounded-md bg-white dark:bg-black border border-gray-300 dark:border-gray-700 shadow-2xl">
-            {ownedOrgs && ownedOrgs.length > 0 && (
-              <div className="p-1">
-                <p className="text-gray-900 dark:text-gray-100 font-semibold text-xs px-2 py-2 w-full">
-                  Your Organizations{" "}
-                  {ownedOrgs.length > 7 && (
-                    <span className="text-xs text-gray-400 dark:text-gray-600 font-normal pl-2">
-                      ({ownedOrgs.length})
-                    </span>
-                  )}
-                </p>
-                <div className="h-full max-h-60 overflow-auto">
-                  {ownedOrgs.map((org, idx) => {
-                    const icon = ORGANIZATION_ICONS.find(
-                      (icon) => icon.name === org.icon
-                    );
-                    return (
-                      <Menu.Item key={idx}>
-                        {({ active }) => (
-                          <button
-                            className={`${
-                              active
-                                ? "bg-sky-100 text-gray-700 dark:bg-sky-900 dark:text-gray-300"
-                                : "text-gray-700 dark:text-gray-300"
-                            } group flex w-full justify-between items-center rounded-md pl-4 pr-2 py-2 text-sm`}
-                            onClick={() => {
-                              orgContext?.setCurrentOrg(org.id);
-                            }}
-                          >
-                            <div className="flex flex-row space-x-2 items-center">
-                              {icon && (
-                                <icon.icon className="h-4 w-4 text-gray-500" />
-                              )}
-                              <div className="flex flex-row space-x-1">
-                                <p className="w-full max-w-[7.5rem] text-left truncate">
-                                  {org.name}
-                                </p>
-                              </div>
-                            </div>
-                            {org.id === orgContext?.currentOrg?.id && (
-                              <CheckIcon className="h-4 w-4 text-sky-500" />
-                            )}
-                          </button>
-                        )}
-                      </Menu.Item>
-                    );
-                  })}
-                </div>
+          <DropdownMenuGroup>
+            <DropdownMenuItem asChild className="cursor-pointer text-xs">
+              <Link href="/settings/members">Invite members</Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              className={cn("hover:bg-transparent cursor-default")}
+              disableHover
+              disableClickClose
+            >
+              <div className="flex items-center justify-between w-full text-xs">
+                <span>Dark mode</span>
+                <Switch
+                  checked={theme === "dark"}
+                  onCheckedChange={handleThemeChange}
+                  size="md"
+                />
               </div>
-            )}
-            {memberOrgs && memberOrgs.length > 0 && (
-              <div className="p-1">
-                <p className="text-gray-900 dark:text-gray-100 font-semibold text-xs px-2 py-2 w-full">
-                  Member Organizations
-                  {memberOrgs.length > 7 && (
-                    <span className="text-xs text-gray-400 dark:text-gray-600 font-normal pl-2">
-                      ({memberOrgs.length})
-                    </span>
-                  )}
-                </p>
-                <div className="h-full max-h-60 w-full overflow-x-auto">
-                  {memberOrgs.map((org, idx) => {
-                    const icon = ORGANIZATION_ICONS.find(
-                      (icon) => icon.name === org.icon
-                    );
-                    return (
-                      <Menu.Item key={idx}>
-                        {({ active }) => (
-                          <button
-                            className={`${
-                              active
-                                ? "bg-sky-100 text-gray-700 dark:bg-sky-900 dark:text-gray-300"
-                                : "text-gray-700 dark:text-gray-300"
-                            } group flex w-full justify-between items-center rounded-md pl-4 pr-2 py-2 text-sm`}
-                            onClick={() => {
-                              orgContext?.setCurrentOrg(org.id);
-                            }}
-                          >
-                            <div className="flex flex-row space-x-2 items-center">
-                              {icon && (
-                                <icon.icon className="h-4 w-4 text-gray-500" />
-                              )}
-                              <div className="flex flex-row space-x-1 w-full">
-                                <p
-                                  className={clsx(
-                                    "max-w-[10rem]",
-                                    "w-full text-left truncate"
-                                  )}
-                                >
-                                  {org.name}
-                                </p>
-                              </div>
-                            </div>
-                            {org.id === orgContext?.currentOrg?.id && (
-                              <CheckIcon className="h-4 w-4 text-sky-500" />
-                            )}
-                          </button>
-                        )}
-                      </Menu.Item>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-            {customerOrgs && customerOrgs.length > 0 && (
-              <div className="p-1">
-                <p className="text-gray-900 dark:text-gray-100 font-semibold text-xs px-2 py-2 w-full">
-                  Customers{" "}
-                  {customerOrgs.length > 7 && (
-                    <span className="text-xs text-gray-400 dark:text-gray-600 font-normal pl-2">
-                      ({customerOrgs.length})
-                    </span>
-                  )}
-                </p>
-                <div className="h-full max-h-60 overflow-auto">
-                  {customerOrgs.map((org, idx) => {
-                    const icon = ORGANIZATION_ICONS.find(
-                      (icon) => icon.name === org.icon
-                    );
-                    return (
-                      <Menu.Item key={idx}>
-                        {({ active }) => (
-                          <button
-                            className={`${
-                              active
-                                ? "bg-amber-100 text-gray-700 dark:bg-amber-900 dark:text-gray-300"
-                                : "text-gray-700 dark:text-gray-300"
-                            } group flex w-full justify-between items-center rounded-md pl-4 pr-2 py-2 text-sm`}
-                            onClick={() => {
-                              orgContext?.setCurrentOrg(org.id);
-                            }}
-                          >
-                            <div className="flex flex-row space-x-2 items-center">
-                              {icon && (
-                                <icon.icon className="h-4 w-4 text-gray-500" />
-                              )}
-                              <div className="flex flex-row space-x-1">
-                                <p className="w-full max-w-[10rem] text-left truncate">
-                                  {org.name}
-                                </p>
-                              </div>
-                            </div>
-                            {org.id === orgContext?.currentOrg?.id && (
-                              <CheckIcon className="h-4 w-4 text-amber-500" />
-                            )}
-                          </button>
-                        )}
-                      </Menu.Item>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-            <Menu.Item>
-              <div className="p-1">
-                <button
-                  onClick={() => {
-                    createNewOrgHandler();
-                  }}
-                  className={clsx(
-                    "flex items-center text-gray-700 hover:bg-sky-100 dark:text-gray-300 dark:hover:bg-sky-900 rounded-md text-sm pl-4 py-2 w-full truncate"
-                  )}
-                >
-                  <p>Create New Org</p>
-                </button>
-                <button
-                  onClick={() => setAddOpen(true)}
-                  className={clsx(
-                    "flex items-center space-x-2 text-gray-700 hover:bg-sky-100 dark:text-gray-300 dark:hover:bg-sky-900 rounded-md text-sm pl-4 py-2 w-full truncate"
-                  )}
-                >
-                  Invite Members
-                </button>
-              </div>
-            </Menu.Item>
-          </Menu.Items>
-        </Transition>
-      </Menu>
-      <ThemedModal open={createOpen} setOpen={setCreateOpen}>
-        <div className="w-[400px] z-50">
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
+          <DropdownMenuSeparator />
+
+          <DropdownMenuItem onSelect={handleSignOut} className="text-xs">
+            <LogOutIcon className="h-4 w-4 mr-2" />
+            Sign out
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+        <DialogContent className="sm:max-w-[425px]">
           <CreateOrgForm onCancelHandler={setCreateOpen} />
-        </div>
-      </ThemedModal>
+        </DialogContent>
+      </Dialog>
 
       <AddMemberModal
         orgId={org?.currentOrg?.id || ""}
