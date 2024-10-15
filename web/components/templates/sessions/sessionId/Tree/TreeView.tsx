@@ -47,7 +47,7 @@ const TreeView: React.FC<TreeViewProps> = ({
     <Col className="gap-5 ">
       <Col className="gap-1 items-start">
         {showSpan && (
-          <div className="bg-white rounded-lg w-full relative">
+          <div className="bg-white w-full relative dark:bg-slate-900">
             <TraceSpan
               session={session}
               selectedRequestIdDispatch={[
@@ -59,13 +59,21 @@ const TreeView: React.FC<TreeViewProps> = ({
             <Button
               variant="ghost"
               size="icon"
-              className="absolute top-3 right-3 border border-slate-200 hover:bg-slate-50 active:bg-slate-100 p-2"
+              className="absolute top-3 right-3 border border-slate-200 hover:bg-slate-50 active:bg-slate-100 p-2 dark:border-slate-700 dark:hover:bg-slate-700 dark:active:bg-slate-800"
               onClick={() => setExpandSpan(!expandSpan)}
             >
               {expandSpan ? (
-                <ShrinkIcon width={16} height={16} className="text-slate-900" />
+                <ShrinkIcon
+                  width={16}
+                  height={16}
+                  className="text-slate-900 dark:text-slate-200"
+                />
               ) : (
-                <ExpandIcon width={16} height={16} className="text-slate-900" />
+                <ExpandIcon
+                  width={16}
+                  height={16}
+                  className="text-slate-900 dark:text-slate-200"
+                />
               )}
             </Button>
           </div>
@@ -73,11 +81,11 @@ const TreeView: React.FC<TreeViewProps> = ({
       </Col>
       <Row
         className={
-          "bg-slate-50 border border-slate-200 border-collapse overflow-x-auto"
+          "bg-slate-50 dark:bg-black border border-slate-200 dark:border-slate-700 border-collapse overflow-x-auto"
         }
       >
-        <Col className="border-r border-slate-200">
-          <div className="w-full bg-slate-50 flex justify-end h-10">
+        <Col className="border-r border-slate-200 dark:border-slate-700">
+          <div className="w-full bg-slate-50 dark:bg-black flex justify-end h-10">
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>

@@ -7,6 +7,78 @@
 		"requestBodies": {},
 		"responses": {},
 		"schemas": {
+			"ResultSuccess__organization_id-string--name-string--flags-string-Array_-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"properties": {
+								"flags": {
+									"items": {
+										"type": "string"
+									},
+									"type": "array"
+								},
+								"name": {
+									"type": "string"
+								},
+								"organization_id": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"flags",
+								"name",
+								"organization_id"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultError_string_": {
+				"properties": {
+					"data": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					},
+					"error": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__organization_id-string--name-string--flags-string-Array_-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__organization_id-string--name-string--flags-string-Array_-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
 			"KafkaSettings": {
 				"properties": {
 					"miniBatchSize": {
@@ -126,26 +198,6 @@
 							null
 						],
 						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"ResultError_string_": {
-				"properties": {
-					"data": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					},
-					"error": {
-						"type": "string"
 					}
 				},
 				"required": [
@@ -6858,6 +6910,112 @@
 		"contact": {}
 	},
 	"paths": {
+		"/v1/admin/feature-flags": {
+			"post": {
+				"operationId": "UpdateFeatureFlags",
+				"responses": {
+					"204": {
+						"description": "No content"
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"orgId": {
+										"type": "string"
+									},
+									"flag": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"orgId",
+									"flag"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "DeleteFeatureFlag",
+				"responses": {
+					"204": {
+						"description": "No content"
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"orgId": {
+										"type": "string"
+									},
+									"flag": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"orgId",
+									"flag"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/admin/feature-flags/query": {
+			"post": {
+				"operationId": "GetFeatureFlags",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__organization_id-string--name-string--flags-string-Array_-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
 		"/v1/admin/orgs/top-usage": {
 			"post": {
 				"operationId": "GetTopOrgsByUsage",
