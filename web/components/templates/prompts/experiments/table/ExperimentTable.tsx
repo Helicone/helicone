@@ -54,6 +54,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../../../ui/select";
+import PromptPlayground, {
+  PromptObject,
+  Input,
+} from "../../id/promptPlayground";
 
 interface ExperimentTableProps {
   promptSubversionId?: string;
@@ -874,108 +878,145 @@ export function ExperimentTable({
       setSelectedPromptId(promptId);
     };
 
+    const [basePrompt, setBasePrompt] = useState<PromptObject>({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "system",
+          content: [{ text: "You are a helpful assistant.", type: "text" }],
+        },
+      ],
+    });
+
+    const [selectedInput, setSelectedInput] = useState<Input>({
+      id: "",
+      inputs: {},
+      source_request: "",
+      prompt_version: "",
+      created_at: "",
+      auto_prompt_inputs: [],
+      response_body: "",
+    });
     return (
       <PopoverContent className="w-[400px] p-4 bg-white shadow-lg rounded-md">
         <div className="space-y-4">
           <div className="flex flex-row space-x-2 ">
             <BeakerIcon className="h-6 w-6" />
-            <h3 className="text-md font-semibold">Welcome to Experiments</h3>
+            <h3 className="text-md font-semibold">Original Prompt</h3>
           </div>
 
-          <div className="bg-[#F9FAFB] border border-[#E2E8F0] p-4 rounded-md">
-            <h3 className="font-semibold mb-2">Start with a template</h3>
-            <p className="text-sm text-gray-500 mb-2">
-              Includes a prompt, some sample inputs, and an improved prompt
-              (aka. an experiment).
-            </p>
-            <div className="space-y-2">
-              {[
-                "Text classification",
-                "Knowledge retrieval",
-                "Step-by-step instructions",
-              ].map((template) => (
-                <Button
-                  key={template}
-                  variant="outline"
-                  className="w-full justify-start bg-slate-100 border border-[#E2E8F0] text-center flex flex-col"
-                >
-                  {template}
-                </Button>
-              ))}
-            </div>
-          </div>
-          <div>
-            <h3 className="font-semibold mb-2">Start with a prompt</h3>
-            <p className="text-sm text-gray-500 mb-2">
-              Choose an existing prompt and select the version you want to
-              experiment on.
-            </p>
-            <ScrollArea className="flex flex-col overflow-y-auto max-h-[30vh] ">
-              {prompts &&
-                prompts?.map((prompt) => (
-                  <Button
-                    key={prompt.id}
-                    variant="ghost"
-                    className="w-full justify-start mt-2"
-                    onClick={() => handlePromptSelect(prompt.id)}
-                  >
-                    <FileTextIcon className="mr-2 h-4 w-4" />
-                    {prompt.user_defined_id}
-                  </Button>
-                ))}
-            </ScrollArea>
-            {selectedPromptId &&
-              promptVersions &&
-              promptVersions.length > 0 && (
-                <div className="mt-4 flex flex-row space-x-2 items-center justify-center">
-                  <h4 className="font-semibold ">Version</h4>
-                  <Select
-                    value={selectedVersionId ?? ""}
-                    onValueChange={setSelectedVersionId}
-                  >
-                    <SelectTrigger>
-                      <SelectValue
-                        placeholder={
-                          isLoadingVersions
-                            ? "Loading versions..."
-                            : "Select the version"
-                        }
-                      />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {!isLoadingVersions &&
-                        promptVersions.map((version: any) => (
-                          <SelectItem key={version.id} value={version.id}>
-                            {version.name ||
-                              `V ${version.major_version}.${version.minor_version}`}
-                          </SelectItem>
-                        ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-
-            <div className="mt-4 flex flex-col space-y-2 items-center justify-center">
-              <Button
-                variant="default"
-                disabled={!selectedVersionId}
-                onClick={() => alert(1)}
-                className="w-full"
-              >
-                Create experiment
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => alert(1)}
-                className="w-full"
-              >
-                Start from scratch
-              </Button>
-            </div>
-          </div>
+          <PromptPlayground
+            prompt={basePrompt}
+            editMode={true}
+            selectedInput={selectedInput}
+            submitText={"Create Experiment"}
+          />
         </div>
       </PopoverContent>
     );
+
+    // return (
+    //   <PopoverContent className="w-[400px] p-4 bg-white shadow-lg rounded-md">
+    //     <div className="space-y-4">
+    //       <div className="flex flex-row space-x-2 ">
+    //         <BeakerIcon className="h-6 w-6" />
+    //         <h3 className="text-md font-semibold">Welcome to Experiments</h3>
+    //       </div>
+
+    //       <div className="bg-[#F9FAFB] border border-[#E2E8F0] p-4 rounded-md">
+    //         <h3 className="font-semibold mb-2">Start with a template</h3>
+    //         <p className="text-sm text-gray-500 mb-2">
+    //           Includes a prompt, some sample inputs, and an improved prompt
+    //           (aka. an experiment).
+    //         </p>
+    //         <div className="space-y-2">
+    //           {[
+    //             "Text classification",
+    //             "Knowledge retrieval",
+    //             "Step-by-step instructions",
+    //           ].map((template) => (
+    //             <Button
+    //               key={template}
+    //               variant="outline"
+    //               className="w-full justify-start bg-slate-100 border border-[#E2E8F0] text-center flex flex-col"
+    //             >
+    //               {template}
+    //             </Button>
+    //           ))}
+    //         </div>
+    //       </div>
+    //       <div>
+    //         <h3 className="font-semibold mb-2">Start with a prompt</h3>
+    //         <p className="text-sm text-gray-500 mb-2">
+    //           Choose an existing prompt and select the version you want to
+    //           experiment on.
+    //         </p>
+    //         <ScrollArea className="flex flex-col overflow-y-auto max-h-[30vh] ">
+    //           {prompts &&
+    //             prompts?.map((prompt) => (
+    //               <Button
+    //                 key={prompt.id}
+    //                 variant="ghost"
+    //                 className="w-full justify-start mt-2"
+    //                 onClick={() => handlePromptSelect(prompt.id)}
+    //               >
+    //                 <FileTextIcon className="mr-2 h-4 w-4" />
+    //                 {prompt.user_defined_id}
+    //               </Button>
+    //             ))}
+    //         </ScrollArea>
+    //         {selectedPromptId &&
+    //           promptVersions &&
+    //           promptVersions.length > 0 && (
+    //             <div className="mt-4 flex flex-row space-x-2 items-center justify-center">
+    //               <h4 className="font-semibold ">Version</h4>
+    //               <Select
+    //                 value={selectedVersionId ?? ""}
+    //                 onValueChange={setSelectedVersionId}
+    //               >
+    //                 <SelectTrigger>
+    //                   <SelectValue
+    //                     placeholder={
+    //                       isLoadingVersions
+    //                         ? "Loading versions..."
+    //                         : "Select the version"
+    //                     }
+    //                   />
+    //                 </SelectTrigger>
+    //                 <SelectContent>
+    //                   {!isLoadingVersions &&
+    //                     promptVersions.map((version: any) => (
+    //                       <SelectItem key={version.id} value={version.id}>
+    //                         {version.name ||
+    //                           `V ${version.major_version}.${version.minor_version}`}
+    //                       </SelectItem>
+    //                     ))}
+    //                 </SelectContent>
+    //               </Select>
+    //             </div>
+    //           )}
+
+    //         <div className="mt-4 flex flex-col space-y-2 items-center justify-center">
+    //           <Button
+    //             variant="default"
+    //             disabled={!selectedVersionId}
+    //             onClick={() => alert(1)}
+    //             className="w-full"
+    //           >
+    //             Create experiment
+    //           </Button>
+    //           <Button
+    //             variant="outline"
+    //             onClick={() => alert(1)}
+    //             className="w-full"
+    //           >
+    //             Start from scratch
+    //           </Button>
+    //         </div>
+    //       </div>
+    //     </div>
+    //   </PopoverContent>
+    // );
   };
 
   if (isDataLoading) {
