@@ -579,7 +579,10 @@ export class PromptManager extends BaseManager {
       );
     }
 
-    return ok({ id: promptId });
+    return ok({
+      id: promptId,
+      prompt_version_id: insertVersionResult.data[0].id,
+    });
   }
 
   async deletePrompt(params: {

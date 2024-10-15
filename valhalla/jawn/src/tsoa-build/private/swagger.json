@@ -429,10 +429,14 @@
 				"properties": {
 					"id": {
 						"type": "string"
+					},
+					"prompt_version_id": {
+						"type": "string"
 					}
 				},
 				"required": [
-					"id"
+					"id",
+					"prompt_version_id"
 				],
 				"type": "object",
 				"additionalProperties": false

@@ -5,13 +5,14 @@ import { ReactElement } from "react";
 import ExperimentsPage from "../../components/templates/prompts/experiments/table/experimentsPage";
 import AuthLayout from "../../components/layout/auth/authLayout";
 import { SupabaseServerWrapper } from "../../lib/wrappers/supabase";
+import ExperimentTablePageEmpty from "../../components/templates/prompts/experiments/table/experimentTablePageEmpty";
 
 interface ExperimentPage {
   user: User;
 }
 
 const Experiments = (props: ExperimentPage) => {
-  return <ExperimentsPage />;
+  return <ExperimentTablePageEmpty />;
 };
 
 export default Experiments;

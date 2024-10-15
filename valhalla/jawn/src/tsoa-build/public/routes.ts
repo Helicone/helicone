@@ -513,6 +513,7 @@ const models: TsoaRoute.Models = {
         "dataType": "refObject",
         "properties": {
             "id": {"dataType":"string","required":true},
+            "prompt_version_id": {"dataType":"string","required":true},
         },
         "additionalProperties": false,
     },

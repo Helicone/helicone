@@ -56,7 +56,7 @@ import {
 } from "../../../../ui/select";
 import PromptPlayground, {
   PromptObject,
-  Input,
+  Input as PromptInput,
 } from "../../id/promptPlayground";
 import {
   Table,
@@ -66,6 +66,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Input } from "../../../../ui/input";
+import useNotification from "../../../../shared/notification/useNotification";
+import { useRouter } from "next/router";
 
 interface ExperimentTableProps {
   promptSubversionId?: string;
@@ -871,23 +874,9 @@ export function ExperimentTable({
 
   // Add this new component
   const NewExperimentPopover = () => {
-    const [selectedPromptId, setSelectedPromptId] = useState<string | null>(
-      null
-    );
-
-    const [selectedVersionId, setSelectedVersionId] = useState<string | null>(
-      null
-    );
-
-    const { prompts: promptVersions, isLoading: isLoadingVersions } =
-      usePromptVersions(selectedPromptId ?? "");
-
-    const handlePromptSelect = (promptId: string) => {
-      setSelectedPromptId(promptId);
-    };
-
+    const notification = useNotification();
     const [basePrompt, setBasePrompt] = useState<PromptObject>({
-      model: "gpt-4o",
+      model: "gpt-4",
       messages: [
         {
           role: "system",
@@ -896,7 +885,9 @@ export function ExperimentTable({
       ],
     });
 
-    const [selectedInput, setSelectedInput] = useState<Input>({
+    const router = useRouter();
+
+    const [selectedInput, setSelectedInput] = useState<PromptInput>({
       id: "",
       inputs: {},
       source_request: "",
@@ -905,6 +896,8 @@ export function ExperimentTable({
       auto_prompt_inputs: [],
       response_body: "",
     });
+
+    const [promptName, setPromptName] = useState<string>("");
 
     const [inputs, setInputs] = useState<{ variable: string; value: string }[]>(
       [{ variable: "sectionTitle", value: "The universe" }]
@@ -924,58 +917,117 @@ export function ExperimentTable({
       setInputs([...inputs, { variable: "", value: "" }]);
     };
 
+    const handlePromptChange = (newPrompt: PromptObject) => {
+      setBasePrompt(newPrompt);
+    };
+
+    const handleCreateExperiment = async () => {
+      console.log("prompt", basePrompt);
+      console.log("Creating new experiment with prompt:", basePrompt);
+
+      const res = await jawn.POST("/v1/prompt/create", {
+        body: {
+          userDefinedId: promptName,
+          prompt: basePrompt,
+          metadata: {
+            createdFromUi: true,
+          },
+        },
+      });
+      if (res.error || !res.data) {
+        notification.setNotification("Failed to create prompt", "error");
+        return;
+      }
+
+      if (!res.data?.data?.id || !res.data?.data?.prompt_version_id) {
+        notification.setNotification("Failed to create prompt", "error");
+        return;
+      }
+
+      const dataset = await jawn.POST("/v1/helicone-dataset", {
+        body: {
+          datasetName: "Dataset for Experiment",
+          requestIds: [],
+        },
+      });
+      if (!dataset.data?.data?.datasetId) {
+        notification.setNotification("Failed to create dataset", "error");
+        return;
+      }
+
+      const experiment = await jawn.POST("/v1/experiment/new-empty", {
+        body: {
+          metadata: {
+            prompt_id: res.data?.data?.id!,
+            prompt_version: res.data?.data?.prompt_version_id!,
+          },
+          datasetId: dataset.data?.data?.datasetId,
+        },
+      });
+      if (!experiment.data?.data?.experimentId) {
+        notification.setNotification("Failed to create experiment", "error");
+        return;
+      }
+      const result = await jawn.POST(
+        "/v1/prompt/version/{promptVersionId}/subversion",
+        {
+          params: {
+            path: {
+              promptVersionId: res.data?.data?.prompt_version_id!,
+            },
+          },
+          body: {
+            newHeliconeTemplate: JSON.stringify(basePrompt),
+            isMajorVersion: false,
+            metadata: {
+              experimentAssigned: true,
+            },
+          },
+        }
+      );
+
+      if (result.error || !result.data) {
+        notification.setNotification("Failed to create subversion", "error");
+        return;
+      }
+
+      notification.setNotification("Prompt created successfully", "success");
+      router.push(
+        `/prompts/${res.data?.data?.id}/subversion/${res.data?.data?.prompt_version_id}/experiment/${experiment.data?.data?.experimentId}`
+      );
+    };
+
     return (
-      <PopoverContent className="w-[400px] p-4 bg-white shadow-lg rounded-md">
+      <PopoverContent className="w-[500px] p-4 bg-white shadow-lg rounded-md">
         <div className="space-y-4">
           <div className="flex flex-row space-x-2 ">
             <BeakerIcon className="h-6 w-6" />
             <h3 className="text-md font-semibold">Original Prompt</h3>
           </div>
 
+          <Input
+            placeholder="Prompt Name"
+            value={promptName}
+            onChange={(e) => setPromptName(e.target.value)}
+          />
+
           <PromptPlayground
             prompt={basePrompt}
             editMode={true}
             selectedInput={selectedInput}
             submitText={"Create Experiment"}
+            showSavePrompt={false}
+            onPromptChange={handlePromptChange}
           />
 
-          <div>
-            <h4 className="text-sm font-semibold mb-2">Inputs</h4>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Variable</TableHead>
-                  <TableHead>Value</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {inputs.map((input, index) => (
-                  <TableRow key={index}>
-                    <TableCell>
-                      <input
-                        type="text"
-                        value={input.variable}
-                        onChange={(e) =>
-                          handleInputChange(index, "variable", e.target.value)
-                        }
-                        className="w-full border-none focus:outline-none"
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <input
-                        type="text"
-                        value={input.value}
-                        onChange={(e) =>
-                          handleInputChange(index, "value", e.target.value)
-                        }
-                        className="w-full border-none focus:outline-none"
-                      />
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+          <Button
+            onClick={handleCreateExperiment}
+            variant="default"
+            size="sm"
+            className="w-full mt-4"
+          >
+            Create Experiment
+          </Button>
         </div>
       </PopoverContent>
     );

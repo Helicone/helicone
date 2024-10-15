@@ -39,6 +39,7 @@ export type PromptObject = {
 interface PromptPlaygroundProps {
   prompt: string | PromptObject;
   selectedInput: Input | undefined;
+  onPromptChange?: (newPrompt: PromptObject) => void;
   onSubmit?: (history: Message[], model: string) => void;
   submitText: string;
   initialModel?: string;
@@ -46,11 +47,13 @@ interface PromptPlaygroundProps {
   defaultEditMode?: boolean;
   editMode?: boolean;
   chatType?: "request" | "response" | "request-response";
+  showSavePrompt?: boolean;
 }
 
 const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
   prompt,
   selectedInput,
+  onPromptChange,
   onSubmit,
   submitText,
   initialModel,
@@ -58,6 +61,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
   defaultEditMode = false,
   editMode = true,
   chatType = "request",
+  showSavePrompt = true,
 }) => {
   // Replace template variables in the content using provided inputs
   const replaceTemplateVariables = (
@@ -317,6 +321,17 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
     }
   };
 
+  useEffect(() => {
+    const newPrompt: PromptObject = {
+      model: selectedModel || "",
+      messages: currentChat.map((message) => ({
+        role: message.role,
+        content: [{ text: message.content, type: "text" }],
+      })),
+    };
+    onPromptChange && onPromptChange(newPrompt);
+  }, [currentChat, selectedModel, onPromptChange]);
+
   return (
     <div className="flex flex-col space-y-4">
       <div className="w-full border border-gray-300 dark:border-gray-700 rounded-md divide-y divide-gray-300 dark:divide-gray-700 h-full">
@@ -334,32 +349,6 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
         </div>
 
         {/* Variable Inputs Table */}
-        {isEditMode && allVariables.length > 0 && (
-          <div className="flex flex-col space-y-4 p-4 border-t border-gray-300 dark:border-gray-700 bg-white dark:bg-black rounded-b-lg">
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              Variables
-            </label>
-            <div className="flex flex-col space-y-2">
-              {allVariables.map((key) => (
-                <div key={key} className="flex items-center space-x-2">
-                  <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                    {key}:
-                  </span>
-                  <input
-                    type="text"
-                    value={variableValues[key] || ""}
-                    onChange={(e) => handleVariableChange(key, e.target.value)}
-                    className="border rounded px-2 py-1 text-sm flex-grow"
-                  />
-                </div>
-              ))}
-            </div>
-            <p className="text-sm text-gray-500">
-              Use &#123;&#123; variable_name &#125;&#125; to insert variables
-              into your prompt.
-            </p>
-          </div>
-        )}
 
         {isEditMode && (
           <div className="flex justify-between items-center py-4 px-8 border-t border-gray-300 dark:border-gray-700 bg-white dark:bg-black">
@@ -387,20 +376,64 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
                   ))}
                 </SelectContent>
               </Select>
-              <Button
-                onClick={() =>
-                  onSubmit && onSubmit(currentChat, selectedModel || "")
-                }
-                variant="default"
-                size="sm"
-                className="px-4 font-normal"
-              >
-                Save prompt
-              </Button>
+              {showSavePrompt && (
+                <Button
+                  onClick={() =>
+                    onSubmit && onSubmit(currentChat, selectedModel || "")
+                  }
+                  variant="default"
+                  size="sm"
+                  className="px-4 font-normal"
+                >
+                  Save prompt
+                </Button>
+              )}
             </div>
           </div>
         )}
+        <p className="text-sm text-gray-500 dark:text-gray-400 p-4">
+          Use &#123;&#123; variable_name &#125;&#125; to insert variables into
+          your prompt.
+        </p>
       </div>
+      {isEditMode && allVariables.length > 0 && (
+        <div className="flex flex-col space-y-4 p-4 bg-white dark:bg-gray-950 rounded-b-lg">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+            Inputs
+          </h3>
+          <p className="text-[#94A3B8]">
+            Please provide a sample value for each input variable in your
+            prompt.{" "}
+          </p>
+          <div className="rounded-md border border-gray-200 dark:border-gray-800">
+            <div className=" dark:bg-gray-800 px-4 py-2 text-sm font-medium text-black dark:text-gray-400">
+              <div className="grid grid-cols-2 gap-4">
+                <div>Variable Name</div>
+                <div>Value</div>
+              </div>
+            </div>
+            <div className="divide-y divide-gray-200 dark:divide-gray-800">
+              {allVariables.map((key) => (
+                <div key={key} className="px-4 py-3 text-sm border-t">
+                  <div className="grid grid-cols-2 gap-4 items-center">
+                    <span className="font-medium text-gray-900 dark:text-gray-100">
+                      {key}
+                    </span>
+                    <input
+                      type="text"
+                      value={variableValues[key] || ""}
+                      onChange={(e) =>
+                        handleVariableChange(key, e.target.value)
+                      }
+                      className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-1 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600"
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
