@@ -44,8 +44,13 @@ import Link from "next/link";
 import { Row } from "../../layout/common";
 import { useQuery } from "@tanstack/react-query";
 import { IslandContainer } from "@/components/ui/islandContainer";
+import { Input } from "@/components/ui/input";
+
+import { useTheme } from "next-themes";
+import { Slider } from "@/components/ui/slider";
 
 const PlaygroundPage = (props: PlaygroundPageProps) => {
+  const { theme } = useTheme();
   const { request, showNewButton } = props;
   const [requestId, setRequestId] = useState<string | undefined>(request ?? "");
 
@@ -363,7 +368,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                   </Tooltip>
                 </label>
               </div>
-              <input
+              <Input
                 type="password"
                 value={providerAPIKey}
                 placeholder="Enter your provider API Key (optional)"
@@ -381,7 +386,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                 >
                   Temperature
                 </label>
-                <input
+                <Input
                   type="number"
                   id="temp"
                   name="temp"
@@ -404,7 +409,16 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                   className="w-14 text-sm px-2 py-1 rounded-lg border border-gray-300"
                 />
               </div>
-              <input
+              <Slider
+                value={[temperature]}
+                onValueChange={(value) => {
+                  setTemperature(value[0]);
+                }}
+                min={0}
+                max={1.99}
+                step={0.01}
+              />
+              {/* <input
                 type="range"
                 id="temp-range"
                 name="temp-range"
@@ -426,9 +440,9 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                 }}
                 className="text-black"
                 style={{
-                  accentColor: "black",
+                  accentColor: theme === "dark" ? "white" : "black",
                 }}
-              />
+              /> */}
             </div>
             <div className="flex flex-col space-y-2 w-full">
               <div className="flex flex-row w-full justify-between items-center">
@@ -438,7 +452,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                 >
                   Max Tokens
                 </label>
-                <input
+                <Input
                   type="number"
                   id="tokens"
                   name="tokens"
@@ -461,29 +475,14 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                   className="w-14 text-sm px-2 py-1 rounded-lg border border-gray-300"
                 />
               </div>
-              <input
-                type="range"
-                id="token-range"
-                name="token-range"
+              <Slider
+                value={[maxTokens]}
+                onValueChange={(value) => {
+                  setMaxTokens(value[0]);
+                }}
                 min={1}
                 max={2048}
                 step={1}
-                value={maxTokens}
-                onChange={(e) => {
-                  const value = parseFloat(e.target.value);
-                  if (value < 1) {
-                    setMaxTokens(1);
-                    return;
-                  }
-                  if (value > 2048) {
-                    setMaxTokens(2048);
-                    return;
-                  }
-                  setMaxTokens(parseFloat(e.target.value));
-                }}
-                style={{
-                  accentColor: "black",
-                }}
               />
             </div>
             <div className="flex flex-col space-y-2 w-full">
