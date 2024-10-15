@@ -220,11 +220,7 @@ const EvalsPage = () => {
     properties: { searchPropertyFilters },
   } = useUIFilterConvert(advancedFilters, timeFilter);
 
-  const {
-    evaluators: data,
-    isLoading,
-    refetch,
-  } = useQuery({
+  const { data, isLoading, refetch } = useQuery({
     queryKey: ["evals", org?.currentOrg?.id, timeFilter, userFilters],
     queryFn: async (query) => {
       const jawn = getJawnClient(org?.currentOrg?.id!);
@@ -244,7 +240,7 @@ const EvalsPage = () => {
     keepPreviousData: true,
   });
 
-  const { evaluators: scoreDistributions } = useQuery({
+  const { data: scoreDistributions } = useQuery({
     queryKey: [
       "scoreDistributions",
       org?.currentOrg?.id,
@@ -267,7 +263,7 @@ const EvalsPage = () => {
     },
   });
 
-  const { evaluators: evalScores } = useQuery({
+  const { data: evalScores } = useQuery({
     queryKey: ["evalScores", org?.currentOrg?.id],
     queryFn: async () => {
       const jawn = getJawnClient(org?.currentOrg?.id!);
@@ -407,7 +403,12 @@ const EvalsPage = () => {
           onRowSelect={(row) => {
             router.push(`/evaluators/${row.name}`);
           }}
-          customButtons={[<CreateNewEvaluator key="create-new-evaluator" />]}
+          customButtons={[
+            <CreateNewEvaluator
+              key="create-new-evaluator"
+              onSubmit={() => {}}
+            />,
+          ]}
           dataLoading={isLoading}
           skeletonLoading={isLoading}
           id="evals-table"

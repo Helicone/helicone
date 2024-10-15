@@ -1,24 +1,12 @@
 import { ChartBarIcon, PlusIcon } from "@heroicons/react/24/outline";
-import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { getJawnClient } from "../../../lib/clients/jawn";
 import {
   TimeInterval,
   getTimeIntervalAgo,
 } from "../../../lib/timeCalculations/time";
-import { useDebounce } from "../../../services/hooks/debounce";
-import { FilterNode } from "../../../services/lib/filters/filterDefs";
-import {
-  UIFilterRowTree,
-  getRootFilterNode,
-} from "../../../services/lib/filters/uiFilterRowTree";
-import { useOrg } from "../../layout/organizationContext";
 import AuthHeader from "../../shared/authHeader";
 import LoadingAnimation from "../../shared/loadingAnimation";
-import useSearchParams from "../../shared/utils/useSearchParams";
-import { TimeFilter } from "../dashboard/dashboardPage";
-import { useUIFilterConvert } from "../dashboard/useDashboardPage";
 
 // Import shadcn components
 import { Button } from "@/components/ui/button";

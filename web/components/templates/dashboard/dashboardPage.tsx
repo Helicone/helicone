@@ -303,11 +303,9 @@ const DashboardPage = (props: DashboardPageProps) => {
     {
       id: "cost-req",
       value:
-        metrics.totalCost.evaluators?.data &&
-        metrics.totalRequests?.evaluators?.data
+        metrics.totalCost.data?.data && metrics.totalRequests?.data?.data
           ? `$${formatLargeNumber(
-              metrics.totalCost.evaluators.data /
-                metrics.totalRequests?.evaluators?.data
+              metrics.totalCost.data.data / metrics.totalRequests?.data?.data
             )}`
           : "$0.00",
       label: "Avg Cost / Req",
@@ -317,10 +315,10 @@ const DashboardPage = (props: DashboardPageProps) => {
     {
       id: "prompt-tokens",
       value:
-        metrics.averageTokensPerRequest?.evaluators?.data &&
-        metrics.totalRequests?.evaluators?.data
+        metrics.averageTokensPerRequest?.data?.data &&
+        metrics.totalRequests?.data?.data
           ? formatLargeNumber(
-              metrics.averageTokensPerRequest.evaluators.data
+              metrics.averageTokensPerRequest.data.data
                 .average_prompt_tokens_per_response
             )
           : "n/a",
@@ -333,10 +331,10 @@ const DashboardPage = (props: DashboardPageProps) => {
     {
       id: "completion-tokens",
       value:
-        metrics.averageTokensPerRequest?.evaluators?.data &&
-        metrics.totalRequests?.evaluators?.data
+        metrics.averageTokensPerRequest?.data?.data &&
+        metrics.totalRequests?.data?.data
           ? formatLargeNumber(
-              metrics.averageTokensPerRequest.evaluators.data
+              metrics.averageTokensPerRequest.data.data
                 .average_completion_tokens_per_response
             )
           : "n/a",
@@ -349,10 +347,10 @@ const DashboardPage = (props: DashboardPageProps) => {
     {
       id: "total-tokens",
       value:
-        metrics.averageTokensPerRequest?.evaluators?.data &&
-        metrics.totalRequests?.evaluators?.data
+        metrics.averageTokensPerRequest?.data?.data &&
+        metrics.totalRequests?.data?.data
           ? formatLargeNumber(
-              metrics.averageTokensPerRequest.evaluators.data
+              metrics.averageTokensPerRequest.data.data
                 .average_total_tokens_per_response
             )
           : "n/a",
@@ -390,7 +388,7 @@ const DashboardPage = (props: DashboardPageProps) => {
       accStatusCounts: {},
     };
 
-    overTimeData.requestsWithStatus.evaluators?.data?.forEach((d) => {
+    overTimeData.requestsWithStatus.data?.data?.forEach((d) => {
       // data parsing for requests and errors over time graph
       const formattedTime = new Date(d.time).toUTCString();
       if (statusCounts.overTime[formattedTime] === undefined) {
@@ -419,7 +417,7 @@ const DashboardPage = (props: DashboardPageProps) => {
 
     return statusCounts;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [overTimeData.requestsWithStatus.evaluators?.data, timeIncrement]);
+  }, [overTimeData.requestsWithStatus.data?.data, timeIncrement]);
 
   // flatten the status counts over time
   const flattenedOverTime = Object.entries(
@@ -630,11 +628,9 @@ const DashboardPage = (props: DashboardPageProps) => {
                       <div className="flex flex-col space-y-0.5">
                         <p className="text-gray-500 text-sm">Requests</p>
                         <p className="text-black dark:text-white text-xl font-semibold">
-                          {metrics.totalRequests?.evaluators?.data
+                          {metrics.totalRequests?.data?.data
                             ? `${formatNumberString(
-                                metrics.totalRequests?.evaluators?.data.toFixed(
-                                  2
-                                )
+                                metrics.totalRequests?.data?.data.toFixed(2)
                               )}`
                             : "0"}
                         </p>
@@ -678,7 +674,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                         );
                         const errorPercentage =
                           (totalErrors /
-                            (metrics.totalRequests?.evaluators?.data ?? 1)) *
+                            (metrics.totalRequests?.data?.data ?? 1)) *
                             100 || 0;
                         return (
                           <div className="mb-2 text-sm">
@@ -764,11 +760,11 @@ const DashboardPage = (props: DashboardPageProps) => {
                   <StyledAreaChart
                     title={"Costs"}
                     value={
-                      metrics.totalCost.evaluators?.data
+                      metrics.totalCost.data?.data
                         ? `$${formatNumberString(
-                            metrics.totalCost.evaluators?.data < 0.02
-                              ? metrics.totalCost.evaluators?.data.toFixed(7)
-                              : metrics.totalCost.evaluators?.data.toFixed(2),
+                            metrics.totalCost.data?.data < 0.02
+                              ? metrics.totalCost.data?.data.toFixed(7)
+                              : metrics.totalCost.data?.data.toFixed(2),
                             true
                           )}`
                         : "$0.00"
@@ -778,7 +774,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                     <BarChart
                       className="h-[14rem]"
                       data={
-                        overTimeData.costs.evaluators?.data?.map((r) => ({
+                        overTimeData.costs.data?.data?.map((r) => ({
                           date: getTimeMap(timeIncrement)(r.time),
                           costs: r.cost,
                         })) ?? []
@@ -799,10 +795,8 @@ const DashboardPage = (props: DashboardPageProps) => {
                   <StyledAreaChart
                     title={"Users"}
                     value={
-                      metrics.activeUsers.evaluators?.data
-                        ? formatLargeNumber(
-                            metrics.activeUsers.evaluators?.data
-                          )
+                      metrics.activeUsers.data?.data
+                        ? formatLargeNumber(metrics.activeUsers.data?.data)
                         : "0"
                     }
                     isDataOverTimeLoading={overTimeData.users.isLoading}
@@ -810,7 +804,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                     <BarChart
                       className="h-[14rem]"
                       data={
-                        overTimeData.users.evaluators?.data?.map((r) => ({
+                        overTimeData.users.data?.data?.map((r) => ({
                           date: getTimeMap(timeIncrement)(r.time),
                           users: r.count,
                         })) ?? []
@@ -835,14 +829,14 @@ const DashboardPage = (props: DashboardPageProps) => {
                   <StyledAreaChart
                     title={"Latency"}
                     value={`${new Intl.NumberFormat("us").format(
-                      (metrics.averageLatency.evaluators?.data ?? 0) / 1000
+                      (metrics.averageLatency.data?.data ?? 0) / 1000
                     )} s / req`}
                     isDataOverTimeLoading={overTimeData.latency.isLoading}
                   >
                     <AreaChart
                       className="h-[14rem]"
                       data={
-                        overTimeData.latency.evaluators?.data?.map((r) => ({
+                        overTimeData.latency.data?.data?.map((r) => ({
                           date: getTimeMap(timeIncrement)(r.time),
                           latency: r.duration,
                         })) ?? []
@@ -874,7 +868,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                   <StyledAreaChart
                     title={"Time to First Token"}
                     value={`Average: ${new Intl.NumberFormat("us").format(
-                      metrics.averageTimeToFirstToken.evaluators?.data ?? 0
+                      metrics.averageTimeToFirstToken.data?.data ?? 0
                     )} ms`}
                     isDataOverTimeLoading={
                       overTimeData.timeToFirstToken.isLoading
@@ -883,12 +877,10 @@ const DashboardPage = (props: DashboardPageProps) => {
                     <AreaChart
                       className="h-[14rem]"
                       data={
-                        overTimeData.timeToFirstToken.evaluators?.data?.map(
-                          (r) => ({
-                            date: getTimeMap(timeIncrement)(r.time),
-                            time: r.ttft,
-                          })
-                        ) ?? []
+                        overTimeData.timeToFirstToken.data?.data?.map((r) => ({
+                          date: getTimeMap(timeIncrement)(r.time),
+                          time: r.ttft,
+                        })) ?? []
                       }
                       index="date"
                       categories={["time"]}
@@ -907,16 +899,14 @@ const DashboardPage = (props: DashboardPageProps) => {
                   <StyledAreaChart
                     title={"Threats"}
                     value={`${formatLargeNumber(
-                      Number(
-                        metrics.totalThreats.evaluators?.data?.toFixed(0) ?? 0
-                      )
+                      Number(metrics.totalThreats.data?.data?.toFixed(0) ?? 0)
                     )}`}
                     isDataOverTimeLoading={overTimeData.threats.isLoading}
                   >
                     <AreaChart
                       className="h-[14rem]"
                       data={
-                        overTimeData.threats.evaluators?.data?.map((r) => ({
+                        overTimeData.threats.data?.data?.map((r) => ({
                           date: getTimeMap(timeIncrement)(r.time),
                           threats: r.count,
                         })) ?? []
@@ -960,7 +950,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                     title={"Tokens / Minute"}
                     value={`Max: ${formatLargeNumber(
                       max(
-                        overTimeData.promptTokensOverTime.evaluators?.data
+                        overTimeData.promptTokensOverTime.data?.data
                           ?.map((d) => d.completion_tokens + d.prompt_tokens)
                           .filter((d) => d !== 0) ?? []
                       ) /
@@ -971,7 +961,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                     <AreaChart
                       className="h-[14rem]"
                       data={
-                        overTimeData.promptTokensOverTime.evaluators?.data?.map(
+                        overTimeData.promptTokensOverTime.data?.data?.map(
                           (r) => ({
                             date: getTimeMap(timeIncrement)(r.time),
                             "Prompt / min":

@@ -1,7 +1,5 @@
 import { useState } from "react";
 import { useOrg } from "../../../layout/organizationContext";
-import AuthHeader from "../../../shared/authHeader";
-import LoadingAnimation from "../../../shared/loadingAnimation";
 import useSearchParams from "../../../shared/utils/useSearchParams";
 import { TimeFilter } from "../../dashboard/dashboardPage";
 

@@ -1,6 +1,5 @@
-import { ArrowPathIcon, HomeIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { ArrowPathIcon, PlusIcon } from "@heroicons/react/24/outline";
 
-import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { HeliconeRequest } from "../../../lib/api/request/request";
 import { useJawnClient } from "../../../lib/clients/jawnHook";
