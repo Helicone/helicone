@@ -2,21 +2,21 @@ import { GetServerSidePropsContext } from "next";
 import { User } from "@supabase/auth-helpers-react";
 import { ReactElement } from "react";
 
-import ExperimentsPage from "../../components/templates/prompts/experiments/table/experimentsPage";
-import AuthLayout from "../../components/layout/auth/authLayout";
-import { SupabaseServerWrapper } from "../../lib/wrappers/supabase";
+import ExperimentTablePageEmpty from "../../../components/templates/prompts/experiments/table/experimentTablePageEmpty";
+import AuthLayout from "../../../components/layout/auth/authLayout";
+import { SupabaseServerWrapper } from "../../../lib/wrappers/supabase";
 
-interface ExperimentPage {
+interface ExperimentIdPage {
   user: User;
 }
 
-const Experiments = (props: ExperimentPage) => {
-  return <ExperimentsPage />;
+const ExperimentId = (props: ExperimentIdPage) => {
+  return <ExperimentTablePageEmpty />;
 };
 
-export default Experiments;
+export default ExperimentId;
 
-Experiments.getLayout = function getLayout(page: ReactElement) {
+ExperimentId.getLayout = function getLayout(page: ReactElement) {
   return <AuthLayout>{page}</AuthLayout>;
 };
 
