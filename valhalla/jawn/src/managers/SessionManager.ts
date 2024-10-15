@@ -389,6 +389,7 @@ WHERE ${buildWhereClause("duration")}
       .from("request")
       .select("id")
       .eq("properties->Helicone-Session-Id", `"${sessionId}"`)
+      .eq("helicone_org_id", this.authParams.organizationId)
       .order("created_at", { ascending: true })
       .limit(1);
 
