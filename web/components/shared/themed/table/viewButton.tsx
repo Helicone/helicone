@@ -27,7 +27,11 @@ export default function ViewButton({
     <div className="hidden md:block text-right">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="sm">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-slate-700 dark:text-slate-400"
+          >
             <Square3Stack3DIcon className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>

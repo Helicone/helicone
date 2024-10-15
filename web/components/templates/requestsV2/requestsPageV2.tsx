@@ -690,11 +690,11 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
       return (
         <div className="flex flex-col w-full h-[80vh] justify-center items-center">
           <div className="flex flex-col w-2/5">
-            <HomeIcon className="h-12 w-12 text-black dark:text-white border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-2 rounded-lg" />
+            <HomeIcon className="h-12 w-12 text-black dark:text-white border border-slate-300 dark:border-slate-700 bg-white dark:bg-black p-2 rounded-lg" />
             <p className="text-xl text-black dark:text-white font-semibold mt-8">
               You have reached your monthly limit.
             </p>
-            <p className="text-sm text-gray-500 max-w-sm mt-2">
+            <p className="text-sm text-slate-500 max-w-sm mt-2">
               Upgrade your plan to view your request page. Your requests are
               still being processed, but you will not be able to view them until
               you upgrade.
@@ -702,7 +702,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
             <div className="mt-4">
               <Link
                 href="/settings/billing"
-                className="w-min  whitespace-nowrap items-center rounded-lg bg-black dark:bg-white px-2.5 py-1.5 gap-2 text-sm flex font-medium text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                className="w-min  whitespace-nowrap items-center rounded-lg bg-black dark:bg-white px-2.5 py-1.5 gap-2 text-sm flex font-medium text-white dark:text-black shadow-sm hover:bg-slate-800 dark:hover:bg-slate-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
               >
                 Upgrade - Start Free Trial
               </Link>
@@ -715,11 +715,11 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
       return (
         <div className="flex flex-col w-full h-[80vh] justify-center items-center">
           <div className="flex flex-col w-full">
-            <HomeIcon className="h-12 w-12 text-black dark:text-white border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-2 rounded-lg" />
+            <HomeIcon className="h-12 w-12 text-black dark:text-white border border-slate-300 dark:border-slate-700 bg-white dark:bg-black p-2 rounded-lg" />
             <p className="text-xl text-black dark:text-white font-semibold mt-8">
               You have reached your monthly limit on the Pro plan.
             </p>
-            <p className="text-sm text-gray-500 max-w-sm mt-2">
+            <p className="text-sm text-slate-500 max-w-sm mt-2">
               Please get in touch with us to discuss increasing your limits.
             </p>
             <div className="mt-4">
@@ -727,7 +727,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
                 href="https://cal.com/team/helicone/helicone-discovery"
                 target="_blank"
                 rel="noreferrer"
-                className="w-fit items-center rounded-lg bg-black dark:bg-white px-2.5 py-1.5 gap-2 text-sm flex font-medium text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                className="w-fit items-center rounded-lg bg-black dark:bg-white px-2.5 py-1.5 gap-2 text-sm flex font-medium text-white dark:text-black shadow-sm hover:bg-slate-800 dark:hover:bg-slate-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
               >
                 Contact Us
               </Link>
@@ -757,7 +757,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
             </p>
             <button
               onClick={() => setIsWarningHidden(true)}
-              className="text-white hover:text-gray-200"
+              className="text-white hover:text-slate-200"
             >
               <span className="sr-only">Close</span>
               <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -793,18 +793,18 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
                   variant="ghost"
                   className={clsx(
                     "flex flex-row gap-2 items-center",
-                    isLive ? "text-green-500 animate-pulse" : "text-gray-500"
+                    isLive ? "text-green-500 animate-pulse" : "text-slate-500"
                   )}
                   size="sm_sleek"
                   onClick={() => setIsLive(!isLive)}
                 >
                   <div
                     className={clsx(
-                      isLive ? "bg-green-500" : "bg-gray-500",
+                      isLive ? "bg-green-500" : "bg-slate-500",
                       "h-2 w-2 rounded-full"
                     )}
                   ></div>
-                  <span className="text-xs italic font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap">
+                  <span className="text-xs italic font-medium text-slate-900 dark:text-slate-100 whitespace-nowrap">
                     {isLive ? "Live" : "Start Live"}
                   </span>
                 </Button>
@@ -964,12 +964,12 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
                 }
               >
                 {selectMode && (
-                  <Row className="gap-5 items-center w-full justify-between bg-white dark:bg-black rounded-lg p-5 border border-gray-300 dark:border-gray-700">
+                  <Row className="gap-5 items-center w-full justify-between bg-white dark:bg-black p-5 border border-slate-300 dark:border-slate-700">
                     <div className="flex flex-row gap-2 items-center">
-                      <span className="text-sm font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap">
+                      <span className="text-sm font-medium text-slate-900 dark:text-slate-100 whitespace-nowrap">
                         Select Mode:
                       </span>
-                      <span className="text-sm p-2 rounded-md font-medium bg-[#F1F5F9] text-[#1876D2] dark:text-gray-100 whitespace-nowrap">
+                      <span className="text-sm p-2 rounded-md font-medium bg-[#F1F5F9] dark:bg-slate-900 text-[#1876D2] dark:text-slate-100 whitespace-nowrap">
                         {selectedIds.length} selected
                       </span>
                     </div>
@@ -980,7 +980,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
                             setModalOpen(true);
                           }}
                           icon={
-                            <PlusIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
+                            <PlusIcon className="h-5 w-5 text-slate-900 dark:text-slate-100" />
                           }
                           text="Add to dataset"
                         />
@@ -991,7 +991,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
               </ThemedTable>
             </div>
 
-            <div className="bg-white dark:bg-black border-t border-gray-200 dark:border-gray-700 py-2 flex-shrink-0 w-full">
+            <div className="bg-white dark:bg-black border-t border-slate-200 dark:border-slate-700 py-2 flex-shrink-0 w-full">
               <TableFooter
                 currentPage={page}
                 pageSize={pageSize}
