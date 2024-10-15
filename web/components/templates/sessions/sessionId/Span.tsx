@@ -14,6 +14,7 @@ import { Col } from "../../../layout/common/col";
 import { clsx } from "../../../shared/clsx";
 import { Row } from "@/components/layout/common";
 import { Clock4Icon } from "lucide-react";
+import { useTheme } from "next-themes";
 
 interface BarChartTrace {
   name: string;
@@ -53,6 +54,8 @@ export const TraceSpan = ({
 
   const barSize = 35; // Increased from 30 to 50
 
+  const { theme } = useTheme();
+
   return (
     <div className="mx-1" id="sessions-trace-span">
       <div style={{ height: height ?? "500px", overflowY: "auto" }}>
@@ -65,7 +68,10 @@ export const TraceSpan = ({
             barSize={barSize}
             margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
           >
-            <CartesianGrid strokeDasharray="3 3" stroke="#ccc" />
+            <CartesianGrid
+              strokeDasharray="3 3"
+              stroke={theme === "dark" ? "#475569" : "#ccc"}
+            />
             <XAxis
               type="number"
               tick={{ fontSize: 12, color: "#64748b" }}
@@ -95,13 +101,15 @@ export const TraceSpan = ({
               domain={[0, spanData.length]}
             />
             <Tooltip
-              cursor={{ fill: "rgb(248, 250, 252)" }}
+              cursor={{
+                fill: theme === "dark" ? "rgb(2, 6, 23)" : "rgb(248, 250, 252)",
+              }}
               content={(props) => {
                 const { payload } = props;
 
                 const trace: BarChartTrace = payload?.[0]?.payload;
                 return (
-                  <Col className="bg-slate-50 p-2 gap-2 rounded border border-slate-200 z-50">
+                  <Col className="bg-slate-50 dark:p-2 gap-2 rounded border border-slate-200 z-50">
                     <Row className="justify-between">
                       <Row className="gap-2 items-center">
                         <h3 className="text-sm font-semibold text-slate-700">
@@ -177,7 +185,15 @@ export const TraceSpan = ({
                           ? y + height / 2
                           : y
                       }
-                      fill={isSelected ? "#0369A1" : "#334155"}
+                      fill={
+                        isSelected
+                          ? theme === "dark"
+                            ? "#0ea5e9"
+                            : "#0369A1"
+                          : theme === "dark"
+                          ? "#cbd5e1"
+                          : "#334155"
+                      }
                       opacity={isSelected ? 1 : 0.7}
                       textAnchor="start"
                       dominantBaseline="central"
@@ -201,11 +217,11 @@ export const TraceSpan = ({
                   key={`colored-cell-${index}`}
                   className={clsx(
                     entry.trace.request_id === selectedRequestId
-                      ? "fill-sky-200 hover:fill-sky-200/50 hover:cursor-pointer"
-                      : "fill-sky-100 hover:fill-sky-50 hover:cursor-pointer"
+                      ? "fill-sky-200 hover:fill-sky-200/50 dark:fill-sky-700 dark:hover:fill-sky-700/50 hover:cursor-pointer"
+                      : "fill-sky-100 hover:fill-sky-50 dark:fill-sky-800 dark:hover:fill-sky-800/50 hover:cursor-pointer"
                   )}
                   strokeWidth={1}
-                  stroke="#bae6fd"
+                  stroke={theme === "dark" ? "#0369a1" : "#bae6fd"}
                   onClick={() => setSelectedRequestId(entry.trace.request_id)}
                 />
               ))}

@@ -117,12 +117,22 @@ const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
   useEffect(() => {
     calculateAvailableSpace();
 
-    // Add event listener for window resize
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "b" && event.metaKey) {
+        setIsCollapsed(!isCollapsed);
+      }
+    };
+
+    // Add event listeners
     window.addEventListener("resize", calculateAvailableSpace);
+    window.addEventListener("keydown", handleKeyDown);
+
+    // Remove event listeners on cleanup
     return () => {
       window.removeEventListener("resize", calculateAvailableSpace);
+      window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isCollapsed, expandedItems]);
+  }, [isCollapsed, expandedItems, setIsCollapsed]);
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -185,10 +195,8 @@ const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
             : "-translate-x-full md:translate-x-0"
         )}
       >
-
-        {/* Existing sidebar content */}
-        <div className="w-full flex flex-grow flex-col overflow-y-auto border-r dark:border-slate-700 justify-between pb-4">
-          <div className="flex items-center gap-2 h-14 border-b dark:border-slate-700">
+        <div className="w-full flex flex-grow flex-col overflow-y-auto border-r dark:border-slate-800 justify-between pb-4">
+          <div className="flex items-center gap-2 h-14 border-b dark:border-slate-800">
             <div className="flex items-center gap-2 w-full">
               {!isCollapsed && <OrgDropdown />}
             </div>

@@ -22,7 +22,7 @@ const ThemedDiv: React.FC<ThemedDivProps> = ({
   return (
     <>
       <div className="px-2 py-1 sticky top-0 bg-white dark:bg-black z-10 border-b border-gray-200 dark:border-gray-800">
-        <div className="flex items-start justify-between">
+        <div className="flex items-center justify-between">
           <Button
             size={"icon"}
             variant={"ghost"}

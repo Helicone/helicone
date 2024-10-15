@@ -13,7 +13,7 @@ export function PathNode(props: {
   return (
     <div
       className={
-        "flex flex-col py-2 px-4 w-full group-hover:cursor-pointer bg-slate-50 group-hover:bg-slate-100 text-slate-700"
+        "flex flex-col py-2 px-4 w-full group-hover:cursor-pointer bg-slate-50 dark:bg-black group-hover:bg-slate-100 text-slate-700 dark:text-slate-200"
       }
       // style={{
       //   paddingLeft: (level + 1) * 16 + 8,
@@ -26,9 +26,17 @@ export function PathNode(props: {
     >
       <div className="flex items-center gap-2">
         {!closeChildren ? (
-          <MinusSquareIcon width={16} height={16} className="text-slate-700" />
+          <MinusSquareIcon
+            width={16}
+            height={16}
+            className="text-slate-700 dark:text-slate-200"
+          />
         ) : (
-          <PlusSquareIcon width={16} height={16} className="text-slate-700" />
+          <PlusSquareIcon
+            width={16}
+            height={16}
+            className="text-slate-700 dark:text-slate-200"
+          />
         )}
 
         <div className="flex w-full justify-between items-center">
