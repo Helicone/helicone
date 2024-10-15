@@ -2,6 +2,7 @@
 
 import {
   ArchiveBoxIcon,
+  BeakerIcon,
   BellIcon,
   CircleStackIcon,
   HomeIcon,
@@ -88,7 +89,7 @@ const Sidebar = ({ setOpen }: SidebarProps) => {
           {
             name: "Experiments",
             href: "/experiments",
-            icon: NotepadText,
+            icon: BeakerIcon,
             current: pathname.includes("/experiments"),
           },
           {
