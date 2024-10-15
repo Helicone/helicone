@@ -8,10 +8,10 @@ INSERT INTO auth.identities (provider_id,user_id,identity_data,provider,last_sig
 	('d9064bb5-1501-4ec9-bfee-21ab74d645b8','d9064bb5-1501-4ec9-bfee-21ab74d645b8'::uuid,'{"sub": "d9064bb5-1501-4ec9-bfee-21ab74d645b8"}','email','2022-02-12 07:40:23.615','2022-02-12 07:40:23.615','2022-02-12 07:40:23.615')
 ON CONFLICT (id) DO NOTHING;
 
-INSERT INTO public.organization (id, name, owner, has_onboarded, organization_type)
+INSERT INTO public.organization (id, name, owner, has_onboarded, organization_type, tier)
 VALUES
-    ('83635a30-5ba6-41a8-8cc6-fb7df941b24a', 'Organization for Test', 'f76629c5-a070-4bbc-9918-64beaea48848', true, 'reseller'),
-    ('a75d76e3-02e7-4d02-8a2b-c65ed27c69b2', 'Organization for Demo', 'd9064bb5-1501-4ec9-bfee-21ab74d645b8', true, 'reseller');
+    ('83635a30-5ba6-41a8-8cc6-fb7df941b24a', 'Organization for Test', 'f76629c5-a070-4bbc-9918-64beaea48848', true, 'reseller', 'enterprise'),
+    ('a75d76e3-02e7-4d02-8a2b-c65ed27c69b2', 'Organization for Demo', 'd9064bb5-1501-4ec9-bfee-21ab74d645b8', true, 'reseller', 'enterprise');
 
 
 INSERT INTO public.organization_member (member, organization, org_role) VALUES

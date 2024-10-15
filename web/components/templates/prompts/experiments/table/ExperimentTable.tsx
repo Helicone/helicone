@@ -1,41 +1,46 @@
-import React, { useRef, useEffect, useState } from "react";
 import { useOrg } from "@/components/layout/organizationContext";
 import { Button } from "@/components/ui/button";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { useJawnClient } from "@/lib/clients/jawnHook";
-import { useQuery } from "@tanstack/react-query";
+import { PlusIcon } from "@heroicons/react/24/outline";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   ColDef,
-  GridReadyEvent,
-  ColumnResizedEvent,
   ColumnMovedEvent,
+  ColumnResizedEvent,
   GridApi,
+  GridReadyEvent,
 } from "ag-grid-community";
 import "ag-grid-community/styles/ag-grid.css";
 import { AgGridReact } from "ag-grid-react";
-import { useCallback, useMemo } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import ExperimentInputSelector from "../experimentInputSelector";
 import AddColumnHeader from "./AddColumnHeader";
 import {
   HypothesisCellRenderer,
   OriginalMessagesCellRenderer,
   OriginalOutputCellRenderer,
 } from "./HypothesisCellRenderer";
-import { PlusIcon } from "@heroicons/react/24/outline";
-import ExperimentInputSelector from "../experimentInputSelector";
-import { useMutation } from "@tanstack/react-query";
 
+import { useLocalStorage } from "@/services/hooks/localStorage";
+import LoadingAnimation from "../../../../shared/loadingAnimation";
+import ExportButton from "../../../../shared/themed/table/exportButton";
+import { ColumnsDropdown } from "./components/customButtonts";
 import SettingsPanel from "./components/settingsPannel";
 import {
-  InputCellRenderer,
   CustomHeaderComponent,
-  RowNumberHeaderComponent,
-  RowNumberCellRenderer,
+  InputCellRenderer,
   InputsHeaderComponent,
+  RowNumberCellRenderer,
+  RowNumberHeaderComponent,
 } from "./components/tableElementsRenderer";
-import { ColumnsDropdown } from "./components/customButtonts";
-import ScoresTable from "./ScoresTable";
-import ExportButton from "../../../../shared/themed/table/exportButton";
-import LoadingAnimation from "../../../../shared/loadingAnimation";
+import ScoresTable from "./scores/ScoresTable";
 
 interface ExperimentTableProps {
   promptSubversionId: string;
@@ -55,7 +60,11 @@ export function ExperimentTable({
   const [columnView, setColumnView] = useState<"all" | "inputs" | "outputs">(
     "all"
   );
-  const [showScoresTable, setShowScoresTable] = useState(false);
+  const [showScoresTable, setShowScoresTable] = useLocalStorage(
+    "showScoresTable",
+    true
+  );
+
   const [isHypothesisRunning, setIsHypothesisRunning] = useState(false);
 
   // State to control ExperimentInputSelector
@@ -84,6 +93,7 @@ export function ExperimentTable({
         include: {
           responseBodies: true,
           promptVersion: true,
+          score: true,
         },
       },
     });
@@ -863,11 +873,12 @@ export function ExperimentTable({
         {showScoresTable && (
           <ScoresTable
             columnDefs={columnDefs}
-            wrapText={wrapText}
             columnWidths={columnWidths}
             columnOrder={columnOrder}
+            experimentId={experimentId}
           />
         )}
+
         <div
           className="ag-theme-alpine w-full rounded-md overflow-hidden"
           ref={experimentTableRef}

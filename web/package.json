@@ -41,6 +41,7 @@
     "@radix-ui/react-menubar": "^1.1.1",
     "@radix-ui/react-popover": "^1.1.1",
     "@radix-ui/react-progress": "^1.1.0",
+    "@radix-ui/react-radio-group": "^1.2.1",
     "@radix-ui/react-scroll-area": "^1.1.0",
     "@radix-ui/react-select": "^2.1.1",
     "@radix-ui/react-separator": "^1.1.0",
@@ -99,7 +100,8 @@
     "react-resizable-panels": "^2.1.4",
     "react-simple-code-editor": "^0.13.1",
     "stripe": "^16.11.0",
-    "tailwind-merge": "^2.5.2"
+    "tailwind-merge": "^2.5.2",
+    "vaul": "^1.0.0"
   },
   "devDependencies": {
     "@graphql-eslint/eslint-plugin": "^3.17.0",
