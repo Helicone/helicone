@@ -7,7 +7,6 @@ import { HandThumbDownIcon, HandThumbUpIcon } from "@heroicons/react/24/solid";
 import { clsx } from "../../shared/clsx";
 import CostPill from "./costPill";
 import { COUTNRY_CODE_DIRECTORY } from "./countryCodeDirectory";
-import { convertToUSDateFormat } from "../../shared/utils/dateConvertor";
 
 function formatNumber(num: number) {
   const numParts = num.toString().split(".");
@@ -35,7 +34,7 @@ export const getInitialColumns: (
     header: "Created At",
     cell: (info) => (
       <span className="text-gray-900 dark:text-gray-100 font-medium">
-        {getUSDateFromString(convertToUSDateFormat(info.getValue() as string))}
+        {getUSDateFromString(info.getValue() as string)}
       </span>
     ),
     meta: {
