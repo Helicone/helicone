@@ -418,31 +418,6 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                 max={1.99}
                 step={0.01}
               />
-              {/* <input
-                type="range"
-                id="temp-range"
-                name="temp-range"
-                min={0}
-                max={1.99}
-                step={0.01}
-                value={temperature}
-                onChange={(e) => {
-                  const value = parseFloat(e.target.value);
-                  if (value < 0.01) {
-                    setTemperature(0.01);
-                    return;
-                  }
-                  if (value > 1.99) {
-                    setTemperature(1.99);
-                    return;
-                  }
-                  setTemperature(parseFloat(e.target.value));
-                }}
-                className="text-black"
-                style={{
-                  accentColor: theme === "dark" ? "white" : "black",
-                }}
-              /> */}
             </div>
             <div className="flex flex-col space-y-2 w-full">
               <div className="flex flex-row w-full justify-between items-center">
