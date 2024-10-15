@@ -5,6 +5,7 @@ import { getCompiledServerMdx } from "@mintlify/mdx";
 import { getMetadata } from "@/components/templates/blog/getMetaData";
 
 export async function GET() {
+  const ReactDOMServer = (await import("react-dom/server")).default;
   const changelogFolder = path.join(
     process.cwd(),
     "app",
@@ -76,13 +77,15 @@ export async function GET() {
       description: mdx.description,
       url: `https://helicone.ai/changelog/${mdx.folder}`,
       date: mdx.date,
-      enclosure: {
-        url: `https://helicone.ai${mdx.imagePath}`,
-        type: "image/webp",
-      },
+      enclosure: mdx.imageExists
+        ? {
+            url: `https://helicone.ai${mdx.imagePath}`,
+            type: "image/webp",
+          }
+        : undefined,
       custom_elements: [
         {
-          "content:encoded": mdx.source,
+          "content:encoded": ReactDOMServer.renderToStaticMarkup(mdx.content),
         },
       ],
     });
