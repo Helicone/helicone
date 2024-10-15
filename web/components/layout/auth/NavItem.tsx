@@ -25,6 +25,7 @@ interface NavItemProps {
   expandedItems: string[];
   toggleExpand: (name: string) => void;
   deep?: number;
+  onClick: () => void;
 }
 
 const NavItem: React.FC<NavItemProps> = ({
@@ -34,6 +35,7 @@ const NavItem: React.FC<NavItemProps> = ({
   expandedItems,
   toggleExpand,
   deep,
+  onClick,
 }) => {
   const router = useRouter();
   const hasSubItems = link.subItems && link.subItems.length > 0;
@@ -87,7 +89,7 @@ const NavItem: React.FC<NavItemProps> = ({
     <div className={cn(isSubItem)}>
       <Link
         href={hasSubItems ? "#" : link.href}
-        onClick={hasSubItems ? () => toggleExpand(link.name) : undefined}
+        onClick={hasSubItems ? () => toggleExpand(link.name) : onClick}
         className={cn(
           hasSubItems
             ? "flex items-center gap-1 font-medium text-slate-400 text-xs mt-[10px] text-[11px]"
@@ -134,6 +136,7 @@ const NavItem: React.FC<NavItemProps> = ({
               expandedItems={expandedItems}
               toggleExpand={toggleExpand}
               deep={deep ? deep + 1 : 1}
+              onClick={onClick}
             />
           ))}
         </div>
