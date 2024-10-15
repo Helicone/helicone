@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useOrg } from "../../components/layout/organizationContext";
 import { getJawnClient } from "../../lib/clients/jawn";
+import { UIFilterRowTree } from "../lib/filters/uiFilterRowTree";
 
 const useSessions = (
   timeFilter: {
@@ -8,7 +9,8 @@ const useSessions = (
     end: Date;
   },
   sessionIdSearch: string,
-  sessionName: string
+  sessionName: string,
+  advancedFilters: UIFilterRowTree
 ) => {
   const org = useOrg();
   const { data, isLoading, refetch, isRefetching } = useQuery({
@@ -18,6 +20,7 @@ const useSessions = (
       timeFilter,
       sessionIdSearch,
       sessionName,
+      advancedFilters,
     ],
     queryFn: async (query) => {
       const orgId = query.queryKey[1] as string;
@@ -40,6 +43,7 @@ const useSessions = (
           },
           sessionName,
           timezoneDifference: 0,
+          filter: advancedFilters as any,
         },
       });
     },
