@@ -185,17 +185,6 @@ const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
             : "-translate-x-full md:translate-x-0"
         )}
       >
-        {/* Close button for mobile */}
-        {/* <div className="md:hidden absolute top-0 right-0 p-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setIsMobileMenuOpen(false)}
-            className="text-slate-500 hover:text-slate-600"
-          >
-            <XMarkIcon className="h-6 w-6" />
-          </Button>
-        </div> */}
 
         {/* Existing sidebar content */}
         <div className="w-full flex flex-grow flex-col overflow-y-auto border-r dark:border-slate-700 justify-between pb-4">
