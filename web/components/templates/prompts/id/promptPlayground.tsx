@@ -15,8 +15,8 @@ import {
 import { MODEL_LIST } from "../../playground/new/modelList";
 import PromptChatRow from "./promptChatRow";
 import { FunctionCall } from "./toolsRenderingUtils";
-
 import RoleButton from "../../playground/new/roleButton";
+import { enforceString } from "../../../../lib/helpers/typeEnforcers";
 
 export type Input = {
   id: string;
@@ -59,6 +59,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
   editMode = true,
   chatType = "request",
 }) => {
+  // Replace template variables in the content using provided inputs
   const replaceTemplateVariables = (
     content: string,
     inputs: Record<string, string>
@@ -68,6 +69,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
     });
   };
 
+  // Parse the prompt into messages
   const parsePromptToMessages = (
     promptInput: string | PromptObject,
     inputs?: Record<string, string>
@@ -113,6 +115,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
     );
   };
 
+  // State variables
   const [mode, setMode] = useState<(typeof PROMPT_MODES)[number]>("Pretty");
   const [isEditMode, setIsEditMode] = useState(defaultEditMode);
   const [currentChat, setCurrentChat] = useState<Message[]>(() =>
@@ -123,14 +126,66 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
   >({});
   const [selectedModel, setSelectedModel] = useState(initialModel);
 
-  useEffect(() => {
-    setCurrentChat(parsePromptToMessages(prompt, selectedInput?.inputs));
-  }, [prompt, selectedInput]);
+  // State to manage variable values
+  const [variableValues, setVariableValues] = useState<Record<string, string>>(
+    selectedInput?.inputs || {}
+  );
+
+  // State to store all extracted variables
+  const [allVariables, setAllVariables] = useState<string[]>([]);
 
   // Add this useEffect to update selectedModel when initialModel changes
   useEffect(() => {
     setSelectedModel(initialModel);
   }, [initialModel]);
+
+  useEffect(() => {
+    setCurrentChat(parsePromptToMessages(prompt, selectedInput?.inputs));
+  }, [prompt, selectedInput]);
+
+  // Extract variables from messages
+  const extractVariablesFromMessages = (messages: Message[]) => {
+    const variableSet = new Set<string>();
+    const regex =
+      /(?:\{\{([^}]+)\}\})|(?:<helicone-prompt-input key="([^"]+)"\s*\/>)/g;
+
+    messages.forEach((message) => {
+      const contentString = enforceString(message.content);
+      const matches = Array.from(contentString.matchAll(regex));
+      matches.forEach((match) => {
+        const key = match[1] || match[2];
+        if (key) {
+          variableSet.add(key.trim());
+        }
+      });
+    });
+
+    return Array.from(variableSet);
+  };
+
+  // Extract variables when currentChat changes
+  useEffect(() => {
+    const variables = extractVariablesFromMessages(currentChat);
+    setAllVariables(variables);
+
+    // Initialize variableValues if not already set
+    const initialValues: Record<string, string> = { ...variableValues };
+    variables.forEach((key) => {
+      if (!(key in initialValues)) {
+        initialValues[key] = "";
+      }
+    });
+    setVariableValues(initialValues);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentChat]);
+
+  // Handle changes to variable values
+  const handleVariableChange = (key: string, value: string) => {
+    setVariableValues((prevValues) => ({
+      ...prevValues,
+      [key]: value,
+    }));
+  };
 
   const handleAddMessage = () => {
     const newMessage: Message = {
@@ -178,7 +233,8 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
                     handleUpdateMessage(index, userText, role)
                   }
                   deleteRow={() => handleDeleteMessage(index)}
-                  selectedProperties={selectedInput?.inputs}
+                  // Pass variableValues to replace variables in each message
+                  selectedProperties={variableValues}
                 />
               </li>
             ))}
@@ -217,7 +273,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
             showAllMessages={true}
             expandedChildren={expandedChildren}
             setExpandedChildren={setExpandedChildren}
-            selectedProperties={selectedInput?.inputs}
+            selectedProperties={variableValues}
             isHeliconeTemplate={false}
             autoInputs={selectedInput?.auto_prompt_inputs}
             setShowAllMessages={() => {}}
@@ -276,17 +332,37 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
         <div className="flex-grow overflow-auto rounded-b-md">
           {renderMessages()}
         </div>
-        {isEditMode && (
-          <div className="flex justify-between items-center py-4 px-8 border-t border-gray-300 dark:border-gray-700 bg-white dark:bg-black rounded-b-lg">
+
+        {/* Variable Inputs Table */}
+        {isEditMode && allVariables.length > 0 && (
+          <div className="flex flex-col space-y-4 p-4 border-t border-gray-300 dark:border-gray-700 bg-white dark:bg-black rounded-b-lg">
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              Variables
+            </label>
+            <div className="flex flex-col space-y-2">
+              {allVariables.map((key) => (
+                <div key={key} className="flex items-center space-x-2">
+                  <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                    {key}:
+                  </span>
+                  <input
+                    type="text"
+                    value={variableValues[key] || ""}
+                    onChange={(e) => handleVariableChange(key, e.target.value)}
+                    className="border rounded px-2 py-1 text-sm flex-grow"
+                  />
+                </div>
+              ))}
+            </div>
             <p className="text-sm text-gray-500">
-              Use &#123;&#123; sample_variable &#125;&#125; to insert variables
+              Use &#123;&#123; variable_name &#125;&#125; to insert variables
               into your prompt.
             </p>
           </div>
         )}
 
         {isEditMode && (
-          <div className="flex justify-between items-center py-4 px-8 border-t border-gray-300 dark:border-gray-700 bg-white dark:bg-black rounded-b-lg">
+          <div className="flex justify-between items-center py-4 px-8 border-t border-gray-300 dark:border-gray-700 bg-white dark:bg-black">
             <div className="w-full flex space-x-2">
               <Button onClick={handleAddMessage} variant="outline" size="sm">
                 <PlusIcon className="h-4 w-4 mr-2" />
