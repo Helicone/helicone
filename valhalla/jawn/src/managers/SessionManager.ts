@@ -273,8 +273,13 @@ WHERE ${buildWhereClause("duration")}
   async getSessions(
     requestBody: SessionQueryParams
   ): Promise<Result<SessionResult[], string>> {
-    const { sessionIdContains, timeFilter, sessionName, timezoneDifference } =
-      requestBody;
+    const {
+      sessionIdContains,
+      timeFilter,
+      sessionName,
+      timezoneDifference,
+      filter: filterTree,
+    } = requestBody;
 
     if (!isValidTimeZoneDifference(timezoneDifference)) {
       return err("Invalid timezone difference");
@@ -295,6 +300,7 @@ WHERE ${buildWhereClause("duration")}
           },
         },
       },
+      filterTree,
     ];
 
     if (sessionName) {
@@ -327,6 +333,13 @@ WHERE ${buildWhereClause("duration")}
       argsAcc: [],
     });
 
+    const havingFilter = await buildFilterWithAuthClickHouse({
+      org_id: this.authParams.organizationId,
+      filter: filterListToTree(filters, "and"),
+      argsAcc: [],
+      having: true,
+    });
+
     // Step 1 get all the properties given this filter
     const query = `
     SELECT 
@@ -336,7 +349,8 @@ WHERE ${buildWhereClause("duration")}
       ${clickhousePriceCalc("request_response_rmt")} AS total_cost,
       count(*) AS total_requests,
       sum(request_response_rmt.prompt_tokens) AS prompt_tokens,
-      sum(request_response_rmt.completion_tokens) AS completion_tokens
+      sum(request_response_rmt.completion_tokens) AS completion_tokens,
+      sum(request_response_rmt.prompt_tokens) + sum(request_response_rmt.completion_tokens) AS total_tokens
     FROM request_response_rmt
     WHERE (
         has(properties, 'Helicone-Session-Id')
@@ -346,6 +360,7 @@ WHERE ${buildWhereClause("duration")}
         )
     )
     GROUP BY properties['Helicone-Session-Id']
+    HAVING (${havingFilter.filter})
     ORDER BY created_at DESC
     LIMIT 50
     `;
@@ -360,7 +375,7 @@ WHERE ${buildWhereClause("duration")}
         ...y,
         completion_tokens: +y.completion_tokens,
         prompt_tokens: +y.prompt_tokens,
-        total_tokens: +y.completion_tokens + +y.prompt_tokens,
+        total_tokens: +y.total_tokens,
       }))
     );
   }
