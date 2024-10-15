@@ -320,7 +320,7 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
                 }
               }}
               size="xs"
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 text-slate-700 dark:text-slate-400"
             >
               <CircleStackIcon className="h-4 w-4" />
               <span className="hidden sm:inline">Create Dataset</span>

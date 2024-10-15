@@ -468,11 +468,11 @@ const DashboardPage = (props: DashboardPageProps) => {
       return (
         <div className="flex flex-col w-full h-[80vh] justify-center items-center">
           <div className="flex flex-col w-2/5">
-            <HomeIcon className="h-12 w-12 text-black dark:text-white border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-2 rounded-lg" />
+            <HomeIcon className="h-12 w-12 text-black dark:text-white border border-slate-300 dark:border-slate-700 bg-white dark:bg-black p-2 rounded-lg" />
             <p className="text-xl text-black dark:text-white font-semibold mt-8">
               You have reached your monthly limit.
             </p>
-            <p className="text-sm text-gray-500 max-w-sm mt-2">
+            <p className="text-sm text-slate-500 max-w-sm mt-2">
               Upgrade your plan to view your dashboard. Your requests are still
               being processed, but you will not be able to view them until you
               upgrade.
@@ -482,7 +482,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                 onClick={() => {
                   setOpen(true);
                 }}
-                className="items-center rounded-lg bg-black dark:bg-white px-2.5 py-1.5 gap-2 text-sm flex font-medium text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                className="items-center rounded-lg bg-black dark:bg-white px-2.5 py-1.5 gap-2 text-sm flex font-medium text-white dark:text-black shadow-sm hover:bg-slate-800 dark:hover:bg-slate-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
               >
                 Upgrade
               </button>
@@ -495,11 +495,11 @@ const DashboardPage = (props: DashboardPageProps) => {
       return (
         <div className="flex flex-col w-full h-[80vh] justify-center items-center">
           <div className="flex flex-col w-full">
-            <HomeIcon className="h-12 w-12 text-black dark:text-white border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-2 rounded-lg" />
+            <HomeIcon className="h-12 w-12 text-black dark:text-white border border-slate-300 dark:border-slate-700 bg-white dark:bg-black p-2 rounded-lg" />
             <p className="text-xl text-black dark:text-white font-semibold mt-8">
               You have reached your monthly limit on the Pro plan.
             </p>
-            <p className="text-sm text-gray-500 max-w-sm mt-2">
+            <p className="text-sm text-slate-500 max-w-sm mt-2">
               Please get in touch with us to discuss increasing your limits.
             </p>
             <div className="mt-4">
@@ -507,7 +507,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                 href="https://cal.com/team/helicone/helicone-discovery"
                 target="_blank"
                 rel="noreferrer"
-                className="w-fit items-center rounded-lg bg-black dark:bg-white px-2.5 py-1.5 gap-2 text-sm flex font-medium text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                className="w-fit items-center rounded-lg bg-black dark:bg-white px-2.5 py-1.5 gap-2 text-sm flex font-medium text-white dark:text-black shadow-sm hover:bg-slate-800 dark:hover:bg-slate-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
               >
                 Contact Us
               </Link>
@@ -623,11 +623,11 @@ const DashboardPage = (props: DashboardPageProps) => {
                   </div>
                 ))}
                 <div key="requests">
-                  <Card>
+                  <Card className="border border-slate-200 bg-white text-slate-950 !shadow-sm dark:border-slate-800 dark:bg-black dark:text-slate-50 rounded-lg ring-0">
                     <div className="flex flex-row items-center justify-between">
                       <div className="flex flex-col space-y-0.5">
-                        <p className="text-gray-500 text-sm">Requests</p>
-                        <p className="text-black dark:text-white text-xl font-semibold">
+                        <p className="text-slate-500 text-sm">Requests</p>
+                        <p className="text-slate-950 dark:text-slate-50 text-xl font-semibold">
                           {metrics.totalRequests?.data?.data
                             ? `${formatNumberString(
                                 metrics.totalRequests?.data?.data.toFixed(2)
@@ -644,7 +644,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                       }}
                     >
                       {overTimeData.requests.isLoading ? (
-                        <div className="h-full w-full bg-gray-200 dark:bg-gray-800 rounded-md pt-4">
+                        <div className="h-full w-full bg-slate-200 dark:bg-slate-800 rounded-md pt-4">
                           <LoadingAnimation height={175} width={175} />
                         </div>
                       ) : (
@@ -664,9 +664,11 @@ const DashboardPage = (props: DashboardPageProps) => {
                   </Card>
                 </div>
                 <div key="errors">
-                  <Card className="h-full w-full flex flex-col">
+                  <Card className="h-full w-full flex flex-col border border-slate-200 bg-white text-slate-950 !shadow-sm dark:border-slate-800 dark:bg-black dark:text-slate-50 rounded-lg ring-0">
                     <div className="flex flex-col h-full">
-                      <h2 className="text-gray-500 text-sm mb-2">All Errors</h2>
+                      <h2 className="text-slate-500 text-sm mb-2">
+                        All Errors
+                      </h2>
                       {(() => {
                         const totalErrors = accumulatedStatusCounts.reduce(
                           (sum, e) => sum + e.value,
@@ -691,10 +693,10 @@ const DashboardPage = (props: DashboardPageProps) => {
                       })()}
                       <div className="flex-grow overflow-hidden flex flex-col">
                         <div className="flex flex-row justify-between items-center pb-2">
-                          <p className="text-xs font-semibold text-gray-700">
+                          <p className="text-xs font-semibold text-slate-700">
                             Error Type
                           </p>
-                          <p className="text-xs font-semibold text-gray-700">
+                          <p className="text-xs font-semibold text-slate-700">
                             Percentage
                           </p>
                         </div>
@@ -735,10 +737,10 @@ const DashboardPage = (props: DashboardPageProps) => {
                     withAnimation={true}
                   >
                     <div className="flex flex-row justify-between items-center pb-2">
-                      <p className="text-xs font-semibold text-gray-700">
+                      <p className="text-xs font-semibold text-slate-700">
                         Name
                       </p>
-                      <p className="text-xs font-semibold text-gray-700">
+                      <p className="text-xs font-semibold text-slate-700">
                         Requests
                       </p>
                     </div>
@@ -920,7 +922,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                   </StyledAreaChart>
                 </div>
                 <div key="suggest-more-graphs">
-                  <div className="space-y-2 bg-white dark:bg-black border border-gray-900 dark:border-white border-dashed w-full h-full p-2 text-black dark:text-white shadow-sm rounded-lg flex flex-col items-center justify-center">
+                  <div className="space-y-2 bg-white dark:bg-black border border-slate-200 dark:border-slate-900 border-dashed w-full h-full p-2 text-slate-950 dark:text-slate-50 shadow-sm rounded-lg flex flex-col items-center justify-center">
                     <PresentationChartLineIcon className="h-12 w-12 text-black dark:text-white" />
                     <button
                       className="p-4 text-semibold text-lg"
@@ -930,7 +932,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                     >
                       Request a new graph
                     </button>
-                    <div className="text-sm text-gray-500 text-center max-w-xs">
+                    <div className="text-sm text-slate-500 text-center max-w-xs">
                       Or use our{" "}
                       <a
                         href="https://docs.helicone.ai/getting-started/integration-method/posthog"
