@@ -9,6 +9,13 @@ interface JsonObject { [key: string]: JsonValue; }
 
 
 export interface paths {
+  "/v1/admin/feature-flags": {
+    post: operations["UpdateFeatureFlags"];
+    delete: operations["DeleteFeatureFlag"];
+  };
+  "/v1/admin/feature-flags/query": {
+    post: operations["GetFeatureFlags"];
+  };
   "/v1/admin/orgs/top-usage": {
     post: operations["GetTopOrgsByUsage"];
   };
@@ -383,6 +390,21 @@ export type webhooks = Record<string, never>;
 
 export interface components {
   schemas: {
+    "ResultSuccess__organization_id-string--name-string--flags-string-Array_-Array_": {
+      data: {
+          flags: string[];
+          name: string;
+          organization_id: string;
+        }[];
+      /** @enum {number|null} */
+      error: null;
+    };
+    ResultError_string_: {
+      /** @enum {number|null} */
+      data: null;
+      error: string;
+    };
+    "Result__organization_id-string--name-string--flags-string-Array_-Array.string_": components["schemas"]["ResultSuccess__organization_id-string--name-string--flags-string-Array_-Array_"] | components["schemas"]["ResultError_string_"];
     KafkaSettings: {
       /** Format: double */
       miniBatchSize: number;
@@ -422,11 +444,6 @@ export interface components {
       data: components["schemas"]["PromptsResult"][];
       /** @enum {number|null} */
       error: null;
-    };
-    ResultError_string_: {
-      /** @enum {number|null} */
-      data: null;
-      error: string;
     };
     "Result_PromptsResult-Array.string_": components["schemas"]["ResultSuccess_PromptsResult-Array_"] | components["schemas"]["ResultError_string_"];
     /** @description Make all properties in T optional */
@@ -2406,6 +2423,48 @@ export type external = Record<string, never>;
 
 export interface operations {
 
+  UpdateFeatureFlags: {
+    requestBody: {
+      content: {
+        "application/json": {
+          orgId: string;
+          flag: string;
+        };
+      };
+    };
+    responses: {
+      /** @description No content */
+      204: {
+        content: never;
+      };
+    };
+  };
+  DeleteFeatureFlag: {
+    requestBody: {
+      content: {
+        "application/json": {
+          orgId: string;
+          flag: string;
+        };
+      };
+    };
+    responses: {
+      /** @description No content */
+      204: {
+        content: never;
+      };
+    };
+  };
+  GetFeatureFlags: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__organization_id-string--name-string--flags-string-Array_-Array.string_"];
+        };
+      };
+    };
+  };
   GetTopOrgsByUsage: {
     requestBody: {
       content: {

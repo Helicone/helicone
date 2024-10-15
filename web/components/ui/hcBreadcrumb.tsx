@@ -17,13 +17,13 @@ export default function HcBreadcrumb(props: HcBreadcrumbProps) {
             <div className="flex items-center space-x-1">
               <Link
                 href={page.href}
-                className="text-sm font-medium text-gray-500 hover:text-gray-700 hover:underline"
+                className="text-sm font-medium text-slate-500 hover:text-slate-700 hover:underline"
               >
                 {page.name}
               </Link>
               {index === pages.length - 1 ? null : (
                 <ChevronRightIcon
-                  className="h-4 w-4 flex-shrink-0 text-gray-400"
+                  className="h-4 w-4 flex-shrink-0 text-slate-400"
                   aria-hidden="true"
                 />
               )}

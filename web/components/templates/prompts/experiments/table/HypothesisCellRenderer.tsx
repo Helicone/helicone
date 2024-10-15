@@ -7,6 +7,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import PromptPlayground from "../../id/promptPlayground";
+import { ScrollArea } from "../../../../ui/scroll-area";
 
 export const HypothesisCellRenderer: React.FC<any> = (params) => {
   const { data, colDef, context, hypothesisId } = params;
@@ -52,7 +53,7 @@ export const HypothesisCellRenderer: React.FC<any> = (params) => {
     return (
       <div className="w-full h-full whitespace-pre-wrap flex flex-row items-center space-x-2 pl-4">
         <span className="animate-ping inline-flex rounded-full bg-green-700 h-2 w-2"></span>
-        <div className="italic">Running...</div>
+        <div className="italic">Generating...</div>
       </div>
     );
   }
@@ -62,6 +63,7 @@ export const HypothesisCellRenderer: React.FC<any> = (params) => {
       <Popover
         open={showPromptPlayground}
         onOpenChange={setShowPromptPlayground}
+        modal={true}
       >
         <PopoverTrigger asChild>
           <div
@@ -72,20 +74,21 @@ export const HypothesisCellRenderer: React.FC<any> = (params) => {
           </div>
         </PopoverTrigger>
         <PopoverContent className="w-[800px] p-0" side="bottom" align="start">
-          {JSON.stringify(data)}
-          <PromptPlayground
-            prompt={formatPromptForPlayground()}
-            selectedInput={data}
-            onSubmit={(history, model) => {
-              setShowPromptPlayground(false);
-            }}
-            submitText="Save"
-            initialModel={initialModel}
-            isPromptCreatedFromUi={true}
-            defaultEditMode={false}
-            editMode={false}
-            chatType="response"
-          />
+          <ScrollArea className="flex flex-col overflow-y-auto max-h-[50vh]">
+            <PromptPlayground
+              prompt={formatPromptForPlayground()}
+              selectedInput={data}
+              onSubmit={(history, model) => {
+                setShowPromptPlayground(false);
+              }}
+              submitText="Save"
+              initialModel={initialModel}
+              isPromptCreatedFromUi={true}
+              defaultEditMode={false}
+              editMode={false}
+              chatType="response"
+            />
+          </ScrollArea>
         </PopoverContent>
       </Popover>
     );
@@ -156,19 +159,21 @@ export const OriginalMessagesCellRenderer: React.FC<any> = (params) => {
         </div>
       </PopoverTrigger>
       <PopoverContent className="w-[800px] p-0" side="bottom" align="start">
-        <PromptPlayground
-          prompt={formatPromptForPlayground() || ""}
-          selectedInput={data}
-          onSubmit={(history, model) => {
-            setShowPromptPlayground(false);
-          }}
-          submitText="Save"
-          initialModel={prompt?.model || ""}
-          isPromptCreatedFromUi={true}
-          defaultEditMode={false}
-          editMode={false}
-          chatType="request"
-        />
+        <ScrollArea className="flex flex-col overflow-y-auto max-h-[50vh]">
+          <PromptPlayground
+            prompt={formatPromptForPlayground() || ""}
+            selectedInput={data}
+            onSubmit={(history, model) => {
+              setShowPromptPlayground(false);
+            }}
+            submitText="Save"
+            initialModel={prompt?.model || ""}
+            isPromptCreatedFromUi={true}
+            defaultEditMode={false}
+            editMode={false}
+            chatType="request"
+          />
+        </ScrollArea>
       </PopoverContent>
     </Popover>
   );
@@ -227,19 +232,21 @@ export const OriginalOutputCellRenderer: React.FC<any> = (params) => {
         </div>
       </PopoverTrigger>
       <PopoverContent className="w-[800px] p-0" side="bottom" align="start">
-        <PromptPlayground
-          prompt={formatPromptForPlayground() || ""}
-          selectedInput={data}
-          onSubmit={(history, model) => {
-            setShowPromptPlayground(false);
-          }}
-          submitText="Save"
-          initialModel={prompt?.model || ""}
-          isPromptCreatedFromUi={true}
-          defaultEditMode={false}
-          editMode={false}
-          chatType="response"
-        />
+        <ScrollArea className="flex flex-col overflow-y-auto max-h-[50vh]">
+          <PromptPlayground
+            prompt={formatPromptForPlayground() || ""}
+            selectedInput={data}
+            onSubmit={(history, model) => {
+              setShowPromptPlayground(false);
+            }}
+            submitText="Save"
+            initialModel={prompt?.model || ""}
+            isPromptCreatedFromUi={true}
+            defaultEditMode={false}
+            editMode={false}
+            chatType="response"
+          />
+        </ScrollArea>
       </PopoverContent>
     </Popover>
   );

@@ -79,6 +79,13 @@ export interface paths {
   "/v1/prompt/{user_defined_id}/template": {
     post: operations["GetPromptVersionTemplates"];
   };
+  "/v1/admin/feature-flags": {
+    post: operations["UpdateFeatureFlags"];
+    delete: operations["DeleteFeatureFlag"];
+  };
+  "/v1/admin/feature-flags/query": {
+    post: operations["GetFeatureFlags"];
+  };
   "/v1/admin/orgs/top-usage": {
     post: operations["GetTopOrgsByUsage"];
   };
@@ -934,6 +941,16 @@ export interface components {
       error: null;
     };
     "Result_PromptVersionResultFilled.string_": components["schemas"]["ResultSuccess_PromptVersionResultFilled_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__organization_id-string--name-string--flags-string-Array_-Array_": {
+      data: {
+          flags: string[];
+          name: string;
+          organization_id: string;
+        }[];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__organization_id-string--name-string--flags-string-Array_-Array.string_": components["schemas"]["ResultSuccess__organization_id-string--name-string--flags-string-Array_-Array_"] | components["schemas"]["ResultError_string_"];
     KafkaSettings: {
       /** Format: double */
       miniBatchSize: number;
@@ -2812,6 +2829,48 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_PromptVersionResultFilled.string_"];
+        };
+      };
+    };
+  };
+  UpdateFeatureFlags: {
+    requestBody: {
+      content: {
+        "application/json": {
+          orgId: string;
+          flag: string;
+        };
+      };
+    };
+    responses: {
+      /** @description No content */
+      204: {
+        content: never;
+      };
+    };
+  };
+  DeleteFeatureFlag: {
+    requestBody: {
+      content: {
+        "application/json": {
+          orgId: string;
+          flag: string;
+        };
+      };
+    };
+    responses: {
+      /** @description No content */
+      204: {
+        content: never;
+      };
+    };
+  };
+  GetFeatureFlags: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__organization_id-string--name-string--flags-string-Array_-Array.string_"];
         };
       };
     };

@@ -185,7 +185,7 @@ export const AdminFeatureFlags = () => {
         </div>
 
         <div className="space-y-4">
-          {featureFlags.evaluators?.data?.map((flag) => (
+          {featureFlags.data?.data?.map((flag) => (
             <FeatureFlagCard
               key={flag.organization_id}
               flag={flag}

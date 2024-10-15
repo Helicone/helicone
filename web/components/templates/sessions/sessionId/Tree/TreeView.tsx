@@ -73,11 +73,11 @@ const TreeView: React.FC<TreeViewProps> = ({
       </Col>
       <Row
         className={
-          "bg-slate-50 border border-slate-200 rounded-lg border-collapse overflow-x-auto"
+          "bg-slate-50 border border-slate-200 border-collapse overflow-x-auto"
         }
       >
-        <Col className="border-r border-slate-200 rounded-l-lg">
-          <div className="w-full bg-slate-50 flex justify-end rounded-t-lg h-10">
+        <Col className="border-r border-slate-200">
+          <div className="w-full bg-slate-50 flex justify-end h-10">
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>

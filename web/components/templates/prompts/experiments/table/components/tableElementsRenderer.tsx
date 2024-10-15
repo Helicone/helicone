@@ -50,10 +50,19 @@ const InputCellRenderer: React.FC<any> = (props) => {
 
     const nextInputField = props.context.inputColumnFields[props.index + 1];
     if (nextInputField) {
-      props.context.setActivePopoverCell({
-        rowIndex: props.node.rowIndex,
-        colId: nextInputField,
-      });
+      const currentRowData = props.context.rowData.find(
+        (row: any) => row.id === props.node.id
+      );
+      const nextCellValue = currentRowData
+        ? currentRowData[nextInputField]
+        : undefined;
+
+      if (nextCellValue === "" || nextCellValue === undefined) {
+        props.context.setActivePopoverCell({
+          rowIndex: props.node.rowIndex,
+          colId: nextInputField,
+        });
+      }
     } else {
       // This is the last input column
       props.context.handleLastInputSubmit();
@@ -143,10 +152,10 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
     setShowPromptPlayground(true);
   };
 
-  const handleRunClick = (e: React.MouseEvent) => {
+  const handleRunClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (onRunColumn) {
-      onRunColumn(props.column.colId);
+      await onRunColumn(props.column.colId);
     }
   };
 

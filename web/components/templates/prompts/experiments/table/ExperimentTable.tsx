@@ -20,12 +20,7 @@ import {
   OriginalMessagesCellRenderer,
   OriginalOutputCellRenderer,
 } from "./HypothesisCellRenderer";
-import {
-  PlusIcon,
-  ChevronDownIcon,
-  ArrowDownTrayIcon,
-  FunnelIcon,
-} from "@heroicons/react/24/outline";
+import { PlusIcon } from "@heroicons/react/24/outline";
 import ExperimentInputSelector from "../experimentInputSelector";
 import { useMutation } from "@tanstack/react-query";
 
@@ -43,6 +38,10 @@ import {
 } from "./components/customButtonts";
 import ScoresTable from "./scores/ScoresTable";
 import { useLocalStorage } from "@/services/hooks/localStorage";
+import { ColumnsDropdown } from "./components/customButtonts";
+import ScoresTable from "./ScoresTable";
+import ExportButton from "../../../../shared/themed/table/exportButton";
+import LoadingAnimation from "../../../../shared/loadingAnimation";
 
 interface ExperimentTableProps {
   promptSubversionId: string;
@@ -56,6 +55,7 @@ export function ExperimentTable({
   const org = useOrg();
   const orgId = org?.currentOrg?.id;
   const jawn = useJawnClient();
+  const [isDataLoading, setIsDataLoading] = useState(true);
 
   const [wrapText, setWrapText] = useState(false);
   const [columnView, setColumnView] = useState<"all" | "inputs" | "outputs">(
@@ -66,6 +66,8 @@ export function ExperimentTable({
     true
   );
 
+  const [isHypothesisRunning, setIsHypothesisRunning] = useState(false);
+
   // State to control ExperimentInputSelector
   const [showExperimentInputSelector, setShowExperimentInputSelector] =
     useState(false);
@@ -74,7 +76,6 @@ export function ExperimentTable({
   const gridRef = useRef<GridApi | null>(null);
 
   const onGridReady = useCallback((params: GridReadyEvent) => {
-    params.api.sizeColumnsToFit();
     gridRef.current = params.api;
   }, []);
 
@@ -165,7 +166,6 @@ export function ExperimentTable({
 
   const fetchRandomInputRecords = useCallback(async () => {
     const jawnClient = getJawnClient(orgId);
-    console.log("promptVersionIdRandom", promptSubversionId);
     const res = await jawnClient.POST(
       "/v1/prompt/version/{promptVersionId}/inputs/query",
       {
@@ -225,6 +225,7 @@ export function ExperimentTable({
   // Function to update rowData based on fetched data
   const updateRowData = useCallback(
     (experimentData: any, inputRecordsData: any[]) => {
+      setIsDataLoading(true);
       const newInputKeys = new Set<string>();
       if (inputRecordsData && inputRecordsData.length > 0) {
         inputRecordsData.forEach((row) => {
@@ -287,6 +288,7 @@ export function ExperimentTable({
       });
 
       setRowData(newRowData);
+      setIsDataLoading(false);
     },
     [experimentData, inputRecordsData]
   );
@@ -317,6 +319,24 @@ export function ExperimentTable({
     }
   }, [inputKeys, rowData.length]);
 
+  const defaultColDef = useMemo<ColDef>(
+    () => ({
+      sortable: true,
+      filter: false,
+      resizable: true,
+      wrapText: wrapText,
+      autoHeight: wrapText,
+      cellStyle: {
+        wordBreak: "normal",
+        whiteSpace: wrapText ? "normal" : "nowrap",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+      },
+      cellClass: "border-r border-[#E2E8F0]",
+      headerClass: "border-r border-[#E2E8F0]",
+    }),
+    [wrapText]
+  );
   const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>(
     {}
   );
@@ -376,6 +396,14 @@ export function ExperimentTable({
             return row;
           })
         );
+        const anyLoading = rowData.some((row) =>
+          Object.values(row.isLoading || {}).some((loading) => loading)
+        );
+
+        if (!anyLoading) {
+          // No hypotheses are running
+          setIsHypothesisRunning(false);
+        }
       },
       onError: (error) => {
         console.error("Error running hypothesis:", error);
@@ -390,10 +418,29 @@ export function ExperimentTable({
     [runHypothesisMutation]
   );
 
-  const refetchData = () => {
-    refetchExperiments();
-    refetchInputRecords();
+  const refetchData = async () => {
+    await refetchExperiments();
+    await refetchInputRecords();
   };
+
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout | null = null;
+
+    if (isHypothesisRunning) {
+      intervalId = setInterval(() => {
+        // Refetch data and refresh the grid
+        refetchExperiments();
+        // refetchInputRecords();
+        gridRef.current?.refreshCells();
+      }, 1000);
+    }
+
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [isHypothesisRunning, refetchExperiments, refetchInputRecords]);
 
   // Determine the hypotheses to run (excluding the first one)
   const hypothesesToRun = useMemo(() => {
@@ -583,6 +630,7 @@ export function ExperimentTable({
         cellStyle: {
           display: "flex",
           alignItems: "center",
+          overflow: "hidden",
           justifyContent: "start",
           whiteSpace: wrapText ? "normal" : "nowrap",
         },
@@ -670,10 +718,12 @@ export function ExperimentTable({
             displayName: `Experiment ${experimentNumber}`,
             badgeText: "Output",
             badgeVariant: "secondary",
-            onRunColumn: (colId: string) => {
+            onRunColumn: async (colId: string) => {
               const datasetRowIds = rowData.map((row) => row.dataset_row_id);
-              datasetRowIds.map((datasetRowId) =>
-                handleRunHypothesis(colId, [datasetRowId])
+              await Promise.all(
+                datasetRowIds.map((datasetRowId) =>
+                  handleRunHypothesis(colId, [datasetRowId])
+                )
               );
             },
             hypothesis: hypothesis,
@@ -747,6 +797,42 @@ export function ExperimentTable({
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [selectedProviderKey, setSelectedProviderKey] = useState(providerKey);
 
+  const getExperimentExportData = useCallback(() => {
+    if (!rowData || rowData.length === 0) {
+      return [];
+    }
+
+    const exportedData = rowData.map((row) => {
+      const exportedRow: Record<string, any> = {};
+
+      inputColumnFields.forEach((field) => {
+        exportedRow[field] = row[field] || "";
+      });
+
+      exportedRow["messages"] = row["messages"] || "";
+
+      exportedRow["original"] = row["original"] || "";
+
+      sortedHypotheses.forEach((hypothesis, index) => {
+        const experimentLabel = `Experiment ${index + 1}`;
+        exportedRow[experimentLabel] = row[hypothesis.id] || "";
+      });
+
+      return exportedRow;
+    });
+
+    return exportedData;
+  }, [rowData, inputColumnFields, sortedHypotheses]);
+
+  if (isDataLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen flex-col">
+        <LoadingAnimation />
+        <h1 className="text-4xl font-semibold">Getting your experiments</h1>
+      </div>
+    );
+  }
+
   return (
     <div className="relative w-full">
       <div className="flex flex-col space-y-2 w-full">
@@ -764,23 +850,23 @@ export function ExperimentTable({
             columnView={columnView}
             setColumnView={setColumnView}
           />
-          <Button
+          {/* <Button
             variant="outline"
             className="py-0 px-2 border border-slate-200 h-8 flex items-center justify-center space-x-1"
           >
             <FunnelIcon className="h-4 w-4 text-slate-700" />
             <ChevronDownIcon className="h-4 w-4 text-slate-400" />
-          </Button>
-          <Button
-            variant="outline"
-            className="py-0 px-2 border border-slate-200 h-8 flex items-center justify-center space-x-1"
-          >
-            <ArrowDownTrayIcon className="h-4 w-4 text-slate-700" />
-          </Button>
-          <ProviderKeyDropdown
+          </Button> */}
+          <ExportButton
+            className="py-0 px-2 border border-slate-200 h-8 flex items-center justify-center space-x-1 bg-white"
+            key="export-button"
+            rows={getExperimentExportData()}
+          />
+
+          {/* <ProviderKeyDropdown
             providerKey={selectedProviderKey}
             setProviderKey={setSelectedProviderKey}
-          />
+          /> */}
           {/* <Button variant="outline" onClick={() => setSettingsOpen(true)}>
             Settings
           </Button> */}
@@ -883,11 +969,11 @@ export function ExperimentTable({
           datasetId: experimentData?.dataset?.id,
         }}
         requestIds={randomInputRecords}
-        onSuccess={(success) => {
+        onSuccess={async (success) => {
           if (success) {
             // Handle success: Re-fetch experiments and input records
-            refetchExperiments();
-            refetchInputRecords();
+            await refetchExperiments();
+            await refetchInputRecords();
           }
         }}
       />
