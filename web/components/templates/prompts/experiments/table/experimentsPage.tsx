@@ -1,11 +1,8 @@
-import { usePrompt } from "@/services/hooks/prompts/prompts";
-import HcBreadcrumb from "../../../../ui/hcBreadcrumb";
-import { ExperimentTable } from "./ExperimentTable";
-import { IslandContainer } from "../../../../ui/islandContainer";
 import AuthHeader from "../../../../shared/authHeader";
 import { useExperiments } from "../../../../../services/hooks/prompts/experiments";
 import ThemedTable from "../../../../shared/themed/table/themedTable";
 import { useRouter } from "next/router";
+import { PlusIcon, DocumentPlusIcon } from "@heroicons/react/24/outline";
 
 interface ExperimentsPageProps {}
 
@@ -16,9 +13,59 @@ const ExperimentsPage = (props: ExperimentsPageProps) => {
     pageSize: 25,
   });
 
+  const templateOptions = [
+    { id: "text-classification", name: "Text classification" },
+    { id: "knowledge-retrieval", name: "Knowledge retrieval" },
+    { id: "step-by-step", name: "Step-by-step instructions" },
+  ];
+
   return (
     <>
       <AuthHeader title={"Experiments"} />
+
+      <div className="mb-6 overflow-x-auto px-4">
+        <h3 className="text-md font-normal px-4 py-2 text-[#6B7280]">
+          Create a new experiment
+        </h3>
+        <div className="flex space-x-4 p-4">
+          <div>
+            <button
+              className="flex flex-col items-center justify-center w-40 h-32 bg-white rounded-lg hover:bg-transparent transition-colors border-2 border-slate-100"
+              onClick={() => router.push("/experiments/new")}
+            >
+              <PlusIcon className="w-16 h-16 text-slate-200" />
+            </button>
+            <span className="mt-2 text-sm text-[#6B7280] px-2">
+              Start from scratch
+            </span>
+          </div>
+          <div>
+            <button
+              className="flex flex-col items-center justify-center w-40 h-32 bg-white rounded-lg hover:bg-transparent transition-colors border-2 border-slate-100"
+              onClick={() => router.push("/experiments/new")}
+            >
+              <DocumentPlusIcon className="w-16 h-16 text-slate-200" />
+            </button>
+            <span className="mt-2 text-sm text-[#6B7280] px-2">
+              Start from a prompt
+            </span>
+          </div>
+          {templateOptions.map((template) => (
+            <div key={template.id}>
+              <button
+                className="flex flex-col items-center justify-center w-40 h-32 bg-white rounded-lg hover:bg-transparent  transition-colors border-2 border-slate-100"
+                onClick={() =>
+                  router.push(`/experiments/new?template=${template.id}`)
+                }
+              ></button>
+              <span className="mt-2 text-sm text-[#6B7280] px-2">
+                {template.name}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
       <ThemedTable
         defaultColumns={[
           {
@@ -33,7 +80,6 @@ const ExperimentsPage = (props: ExperimentsPageProps) => {
               return new Date(row.createdAt ?? 0).toLocaleString();
             },
           },
-
           {
             header: "Rows",
             accessorKey: "requests_count",
