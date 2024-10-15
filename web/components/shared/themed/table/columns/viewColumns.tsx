@@ -61,7 +61,7 @@ export default function ViewColumns<T>(props: ViewColumnsProps<T>) {
         <Menu.Button
           as={Button}
           variant="ghost"
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 text-slate-700 dark:text-slate-400"
           size="xs"
         >
           <AdjustmentsHorizontalIcon className="h-4 w-4" />
@@ -77,10 +77,10 @@ export default function ViewColumns<T>(props: ViewColumnsProps<T>) {
         leaveTo="transform opacity-0 scale-95"
       >
         <Menu.Items
-          className={`border border-gray-300 dark:border-gray-700 absolute z-20 right-0 sm:right-0 mt-2 mx-auto w-[calc(100vw-2rem)] sm:w-[calc(100vw-4rem)] md:w-[calc(100vw-8rem)] max-w-4xl origin-top-right rounded-lg bg-white dark:bg-black shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none h-[66vh] overflow-hidden ${
+          className={`border border-slate-300 dark:border-slate-700 absolute z-20 right-0 sm:right-0 mt-2 mx-auto w-[calc(100vw-2rem)] sm:w-[calc(100vw-4rem)] md:w-[calc(100vw-8rem)] max-w-4xl origin-top-right rounded-lg bg-white dark:bg-black shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none h-[66vh] overflow-hidden ${
             isDatasetsPage
-              ? "border border-gray-300 dark:border-gray-700 absolute z-10 right-0 sm:right-0 mt-2 mx-auto w-[calc(100vw-2rem)] sm:w-[calc(100vw-4rem)] md:w-[calc(100vw-8rem)] max-w-4xl origin-top-right rounded-lg bg-white dark:bg-black shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none h-[66vh] overflow-hidden"
-              : "border border-gray-300 dark:border-gray-700 absolute z-10 right-0 sm:right-0 mt-2 mx-auto w-[calc(100vw-2rem)] sm:w-[calc(100vw-4rem)] md:w-[calc(100vw-8rem)] max-w-4xl origin-top-right rounded-lg bg-white dark:bg-black shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none h-[66vh] overflow-hidden"
+              ? "border border-slate-300 dark:border-slate-700 absolute z-10 right-0 sm:right-0 mt-2 mx-auto w-[calc(100vw-2rem)] sm:w-[calc(100vw-4rem)] md:w-[calc(100vw-8rem)] max-w-4xl origin-top-right rounded-lg bg-white dark:bg-black shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none h-[66vh] overflow-hidden"
+              : "border border-slate-300 dark:border-slate-700 absolute z-10 right-0 sm:right-0 mt-2 mx-auto w-[calc(100vw-2rem)] sm:w-[calc(100vw-4rem)] md:w-[calc(100vw-8rem)] max-w-4xl origin-top-right rounded-lg bg-white dark:bg-black shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none h-[66vh] overflow-hidden"
           }`}
         >
           <Row className="h-full">
@@ -94,10 +94,10 @@ export default function ViewColumns<T>(props: ViewColumnsProps<T>) {
                   placement="top"
                   arrow
                 >
-                  <InformationCircleIcon className="h-5 w-5 text-gray-500 inline" />
+                  <InformationCircleIcon className="h-5 w-5 text-slate-500 inline" />
                 </BlackTooltip>
               </div>
-              <i className="text-xs text-gray-500">
+              <i className="text-xs text-slate-500">
                 Note: If something is not shown, or your columns are in an
                 unexpected state, please click{" "}
                 <span className="font-bold">Back to preset</span> on the bottom
@@ -109,7 +109,11 @@ export default function ViewColumns<T>(props: ViewColumnsProps<T>) {
               </div>
               <div className="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-white dark:from-black to-transparent pointer-events-none"></div>
             </Col>
-            <Divider orientation="vertical" flexItem />
+            <Divider
+              className="dark:border-slate-800"
+              orientation="vertical"
+              flexItem
+            />
             <Col className="flex-1 flex flex-col h-full">
               <div className="flex-grow overflow-hidden p-4">
                 <ColumnOptions
@@ -121,13 +125,13 @@ export default function ViewColumns<T>(props: ViewColumnsProps<T>) {
                   setActiveColumns={setActiveColumns}
                 />
               </div>
-              <div className="border-t border-gray-200 dark:border-gray-700 p-4">
+              <div className="border-t border-slate-200 dark:border-slate-700 p-4">
                 <Row className="flex justify-between items-center gap-2">
                   <button
                     onClick={() =>
                       setActiveColumns(columnDefsToDragColumnItems(columns))
                     }
-                    className="text-xs flex items-center justify-center gap-x-2.5 px-2 py-1 font-medium text-gray-500 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-900 rounded-lg"
+                    className="text-xs flex items-center justify-center gap-x-2.5 px-2 py-1 font-medium text-slate-500 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-lg"
                   >
                     Back to preset
                   </button>
@@ -138,7 +142,7 @@ export default function ViewColumns<T>(props: ViewColumnsProps<T>) {
                           activeColumns.map((c) => ({ ...c, shown: false }))
                         )
                       }
-                      className="text-xs flex items-center justify-center gap-x-2.5 px-2 py-1 font-medium text-gray-500 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-900 rounded-lg"
+                      className="text-xs flex items-center justify-center gap-x-2.5 px-2 py-1 font-medium text-slate-500 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-lg"
                     >
                       Deselect All
                     </button>
@@ -148,7 +152,7 @@ export default function ViewColumns<T>(props: ViewColumnsProps<T>) {
                           activeColumns.map((c) => ({ ...c, shown: true }))
                         )
                       }
-                      className="text-xs flex items-center justify-center gap-x-2.5 px-2 py-1 font-medium text-gray-500 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-900 rounded-lg"
+                      className="text-xs flex items-center justify-center gap-x-2.5 px-2 py-1 font-medium text-slate-500 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-lg"
                     >
                       Select All
                     </button>

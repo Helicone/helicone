@@ -28,7 +28,7 @@ export type RequestFilterBranch = {
   right: RequestFilterNode;
 };
 
-type RequestFilterNode =
+export type RequestFilterNode =
   | FilterLeafSubset<
       | "feedback"
       | "request"
@@ -38,6 +38,7 @@ type RequestFilterNode =
       | "request_response_search"
       | "cache_hits"
       | "request_response_rmt"
+      | "sessions_request_response_rmt"
     >
   | RequestFilterBranch
   | "all";

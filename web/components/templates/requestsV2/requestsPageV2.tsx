@@ -711,18 +711,18 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
                   variant="ghost"
                   className={clsx(
                     "flex flex-row gap-2 items-center",
-                    isLive ? "text-green-500 animate-pulse" : "text-gray-500"
+                    isLive ? "text-green-500 animate-pulse" : "text-slate-500"
                   )}
                   size="sm_sleek"
                   onClick={() => setIsLive(!isLive)}
                 >
                   <div
                     className={clsx(
-                      isLive ? "bg-green-500" : "bg-gray-500",
+                      isLive ? "bg-green-500" : "bg-slate-500",
                       "h-2 w-2 rounded-full"
                     )}
                   ></div>
-                  <span className="text-xs italic font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap">
+                  <span className="text-xs italic font-medium text-slate-900 dark:text-slate-100 whitespace-nowrap">
                     {isLive ? "Live" : "Start Live"}
                   </span>
                 </Button>
@@ -882,12 +882,12 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
                 }
               >
                 {selectMode && (
-                  <Row className="gap-5 items-center w-full justify-between bg-white dark:bg-black rounded-lg p-5 border border-gray-300 dark:border-gray-700">
+                  <Row className="gap-5 items-center w-full justify-between bg-white dark:bg-black p-5 border border-slate-300 dark:border-slate-700">
                     <div className="flex flex-row gap-2 items-center">
-                      <span className="text-sm font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap">
+                      <span className="text-sm font-medium text-slate-900 dark:text-slate-100 whitespace-nowrap">
                         Select Mode:
                       </span>
-                      <span className="text-sm p-2 rounded-md font-medium bg-[#F1F5F9] text-[#1876D2] dark:text-gray-100 whitespace-nowrap">
+                      <span className="text-sm p-2 rounded-md font-medium bg-[#F1F5F9] dark:bg-slate-900 text-[#1876D2] dark:text-slate-100 whitespace-nowrap">
                         {selectedIds.length} selected
                       </span>
                     </div>
@@ -898,7 +898,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
                             setModalOpen(true);
                           }}
                           icon={
-                            <PlusIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
+                            <PlusIcon className="h-5 w-5 text-slate-900 dark:text-slate-100" />
                           }
                           text="Add to dataset"
                         />
@@ -909,7 +909,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
               </ThemedTable>
             </div>
 
-            <div className="bg-white dark:bg-black border-t border-gray-200 dark:border-gray-700 py-2 flex-shrink-0 w-full">
+            <div className="bg-white dark:bg-black border-t border-slate-200 dark:border-slate-700 py-2 flex-shrink-0 w-full">
               <TableFooter
                 currentPage={page}
                 pageSize={pageSize}

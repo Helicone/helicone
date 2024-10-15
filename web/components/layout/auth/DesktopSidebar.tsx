@@ -13,6 +13,7 @@ import {
   ChevronRightIcon,
   Cog6ToothIcon,
   QuestionMarkCircleIcon,
+  Bars3Icon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -116,15 +117,63 @@ const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
   useEffect(() => {
     calculateAvailableSpace();
 
-    // Add event listener for window resize
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "b" && event.metaKey) {
+        setIsCollapsed(!isCollapsed);
+      }
+    };
+
+    // Add event listeners
     window.addEventListener("resize", calculateAvailableSpace);
+    window.addEventListener("keydown", handleKeyDown);
+
+    // Remove event listeners on cleanup
     return () => {
       window.removeEventListener("resize", calculateAvailableSpace);
+      window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isCollapsed, expandedItems]);
+  }, [isCollapsed, expandedItems, setIsCollapsed]);
+
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const handleCollapseToggle = () => {
+    if (window.innerWidth < 768) {
+      // Mobile breakpoint
+      setIsMobileMenuOpen(false);
+    } else {
+      setIsCollapsed(!isCollapsed);
+    }
+  };
 
   return (
     <>
+      {/* Mobile hamburger menu */}
+      <div className="sticky top-0 z-20 px-2 py-3 flex md:hidden flex-shrink-0 bg-white dark:bg-black border-b border-slate-300 dark:border-slate-70">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => {
+            setIsCollapsed(false);
+            setIsMobileMenuOpen(true);
+          }}
+          className="text-slate-500 hover:text-slate-600"
+        >
+          <Bars3Icon className="h-6 w-6" />
+        </Button>
+      </div>
+
+      {/* Mobile drawer overlay */}
+      {isMobileMenuOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+          onClick={() => {
+            setIsCollapsed(false);
+            setIsMobileMenuOpen(false);
+          }}
+        />
+      )}
+
+      {/* Sidebar container */}
       <div
         className={cn(
           "hidden md:block",
@@ -132,16 +181,22 @@ const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
           "transition-all duration-300"
         )}
       />
+
+      {/* Sidebar content */}
       <div
         ref={sidebarRef}
         className={cn(
-          "hidden md:flex md:flex-col z-30 bg-background dark:bg-gray-900 transition-all duration-300 h-screen bg-white ",
+          "flex flex-col z-50 bg-background dark:bg-slate-900 transition-all duration-300 h-screen bg-white",
           largeWith,
-          "fixed top-0 left-0"
+          "fixed top-0 left-0",
+          "md:translate-x-0", // Always visible on desktop
+          isMobileMenuOpen
+            ? "translate-x-0"
+            : "-translate-x-full md:translate-x-0"
         )}
       >
-        <div className="w-full flex flex-grow flex-col overflow-y-auto border-r  dark:border-gray-700 justify-between pb-4">
-          <div className="flex items-center gap-2 h-14 border-b dark:border-gray-700">
+        <div className="w-full flex flex-grow flex-col overflow-y-auto border-r dark:border-slate-800 justify-between pb-4">
+          <div className="flex items-center gap-2 h-14 border-b dark:border-slate-800">
             <div className="flex items-center gap-2 w-full">
               {!isCollapsed && <OrgDropdown />}
             </div>
@@ -151,8 +206,8 @@ const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => setIsCollapsed(!isCollapsed)}
-                className="w-full flex justify-center dark:hover:bg-gray-800 px-2"
+                onClick={handleCollapseToggle}
+                className="w-full flex justify-center dark:hover:bg-slate-800 px-2"
               >
                 {isCollapsed ? (
                   <ChevronRightIcon className="h-4 w-4" />
@@ -200,6 +255,10 @@ const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
                     isCollapsed={isCollapsed}
                     expandedItems={expandedItems}
                     toggleExpand={toggleExpand}
+                    onClick={() => {
+                      setIsCollapsed(false);
+                      setIsMobileMenuOpen(false);
+                    }}
                     deep={0}
                   />
                 ))}
@@ -250,7 +309,7 @@ const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="w-full dark:hover:bg-gray-800"
+                      className="w-full dark:hover:bg-slate-800"
                       asChild
                     >
                       <Link
@@ -264,7 +323,7 @@ const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
                   </TooltipTrigger>
                   <TooltipContent
                     side="right"
-                    className="dark:bg-gray-800 dark:text-gray-200"
+                    className="dark:bg-slate-800 dark:text-slate-200"
                   >
                     View Documentation
                   </TooltipContent>
@@ -274,7 +333,7 @@ const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="w-full dark:hover:bg-gray-800"
+                      className="w-full dark:hover:bg-slate-800"
                       asChild
                     >
                       <Link
@@ -288,7 +347,7 @@ const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
                   </TooltipTrigger>
                   <TooltipContent
                     side="right"
-                    className="dark:bg-gray-800 dark:text-gray-200"
+                    className="dark:bg-slate-800 dark:text-slate-200"
                   >
                     Help And Support
                   </TooltipContent>
@@ -299,7 +358,7 @@ const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="w-full justify-start dark:hover:bg-gray-800 text-[12px]"
+                  className="w-full justify-start dark:hover:bg-slate-800 text-[12px]"
                   asChild
                 >
                   <Link
@@ -316,7 +375,7 @@ const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="w-full justify-start dark:hover:bg-gray-800 text-[12px]"
+                  className="w-full justify-start dark:hover:bg-slate-800 text-[12px]"
                   asChild
                 >
                   <Link

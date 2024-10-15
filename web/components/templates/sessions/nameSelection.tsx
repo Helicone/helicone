@@ -83,8 +83,8 @@ const SessionNameSelection = ({
             className={clsx(
               "shadow-sm p-4 w-full items-start text-left rounded-none cursor-pointer border-0 border-b",
               selectedCard === seshName.name
-                ? "bg-sky-100 dark:bg-sky-950"
-                : "hover:bg-sky-50"
+                ? "bg-sky-100 dark:bg-slate-900"
+                : "hover:bg-sky-50 dark:hover:bg-slate-700/50"
             )}
             onClick={() => {
               setSelectedName(seshName.name);
@@ -139,7 +139,9 @@ const SessionNameSelection = ({
               <div
                 className={clsx(
                   "border border-slate-300 dark:border-slate-700 rounded-full h-4 w-4 flex items-center justify-center",
-                  selectedCard === seshName.name ? "bg-sky-500" : "bg-white"
+                  selectedCard === seshName.name
+                    ? "bg-sky-500 dark:bg-sky-500/80"
+                    : "bg-white dark:bg-slate-700/50"
                 )}
               ></div>
             </Row>

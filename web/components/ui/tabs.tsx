@@ -45,9 +45,9 @@ const tabsTriggerVariants = cva(
     variants: {
       variant: {
         default:
-          "data-[state=active]:bg-white data-[state=active]:text-slate-950 data-[state=active]:shadow-sm",
+          "data-[state=active]:bg-white data-[state=active]:text-slate-950 data-[state=active]:shadow-sm dark:data-[state=active]:bg-slate-900 dark:data-[state=active]:text-slate-50",
         secondary:
-          "bg-white hover:bg-slate-100 data-[state=active]:bg-slate-100 data-[state=active]:text-slate-950",
+          "bg-white hover:bg-slate-100 data-[state=active]:bg-slate-100 data-[state=active]:text-slate-950 dark:data-[state=active]:bg-slate-900 dark:data-[state=active]:text-slate-50",
       },
     },
     defaultVariants: {

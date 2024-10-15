@@ -47,7 +47,7 @@ export const QuantilesGraph = ({
   );
 
   return (
-    <Card>
+    <Card className="border border-slate-200 bg-white text-slate-950 !shadow-sm dark:border-slate-800 dark:bg-black dark:text-slate-50 rounded-lg ring-0">
       <div className="flex flex-row items-center justify-between w-full">
         <div className="flex flex-col space-y-0.5 w-full">
           <p className="text-gray-500 text-sm">Quantiles</p>
