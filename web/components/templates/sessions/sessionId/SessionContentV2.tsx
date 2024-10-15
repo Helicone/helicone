@@ -113,7 +113,29 @@ const SessionContentV2: React.FC<SessionContentV2Props> = ({
             endTime={endTime}
           />
 
-          <Row className="gap-2 items-center">
+          <Row className="gap-2 items-center mr-8">
+            {currentTopView === "tree" &&
+              (showSpan ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-[30px] text-sm font-medium flex items-center gap-1"
+                  onClick={() => setShowSpan(!showSpan)}
+                >
+                  <EyeOffIcon width={16} height={16} />
+                  Hide span
+                </Button>
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-[30px] text-sm font-medium flex items-center gap-1"
+                  onClick={() => setShowSpan(!showSpan)}
+                >
+                  <EyeIcon width={16} height={16} />
+                  Show span
+                </Button>
+              ))}
             <TabsList variant="secondary" className="h-[30px]">
               {TABS.map((tab) => (
                 <TabsTrigger
@@ -126,28 +148,6 @@ const SessionContentV2: React.FC<SessionContentV2Props> = ({
                 </TabsTrigger>
               ))}
             </TabsList>
-            {currentTopView === "tree" &&
-              (showSpan ? (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-[30px] text-sm font-medium text-slate-900 flex items-center gap-1"
-                  onClick={() => setShowSpan(!showSpan)}
-                >
-                  <EyeOffIcon width={16} height={16} />
-                  Hide span
-                </Button>
-              ) : (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-[30px] text-sm font-medium text-slate-900 flex items-center gap-1"
-                  onClick={() => setShowSpan(!showSpan)}
-                >
-                  <EyeIcon width={16} height={16} />
-                  Show span
-                </Button>
-              ))}
           </Row>
         </Row>
 

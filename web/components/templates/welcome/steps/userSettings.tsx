@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { clsx } from "../../../shared/clsx";
 import Image from "next/image";
-import { useTheme } from "../../../shared/theme/themeContext";
+import { useTheme } from "next-themes";
 
 interface UserSettingsProps {
   nextStep: () => void;
@@ -12,9 +12,7 @@ const UserSettings = (props: UserSettingsProps) => {
 
   const [loaded, setLoaded] = useState(false);
 
-  const themeContext = useTheme();
-
-  const currentTheme = themeContext?.theme;
+  const { theme, setTheme } = useTheme();
 
   useEffect(() => {
     const timer = setTimeout(() => setLoaded(true), 500); // delay of 500ms
@@ -34,9 +32,9 @@ const UserSettings = (props: UserSettingsProps) => {
       <p className="text-2xl md:text-5xl font-semibold">Select your theme</p>
       <div className="flex flex-col md:flex-row gap-4 py-8">
         <button
-          onClick={() => themeContext?.setTheme("light")}
+          onClick={() => setTheme("light")}
           className={clsx(
-            currentTheme === "light" ? "ring-2 ring-sky-500" : "",
+            theme === "light" ? "ring-2 ring-sky-500" : "",
             "rounded-lg border border-gray-300 flex flex-col items-center justify-center p-4 space-y-4 bg-white"
           )}
         >
@@ -49,9 +47,9 @@ const UserSettings = (props: UserSettingsProps) => {
           <p className="font-semibold text-black">Light</p>
         </button>
         <button
-          onClick={() => themeContext?.setTheme("dark")}
+          onClick={() => setTheme("dark")}
           className={clsx(
-            currentTheme === "dark" ? "ring-2 ring-sky-500" : "",
+            theme === "dark" ? "ring-2 ring-sky-500" : "",
             "rounded-lg border border-gray-300 flex flex-col items-center justify-center p-4 space-y-4 bg-black"
           )}
         >
