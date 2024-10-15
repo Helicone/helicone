@@ -20,11 +20,10 @@ import {
   OriginalMessagesCellRenderer,
   OriginalOutputCellRenderer,
 } from "./HypothesisCellRenderer";
-import { PlusIcon } from "@heroicons/react/24/outline";
+import { BeakerIcon, PlusIcon } from "@heroicons/react/24/outline";
 import ExperimentInputSelector from "../experimentInputSelector";
 import { useMutation } from "@tanstack/react-query";
 
-import SettingsPanel from "./components/settingsPannel";
 import {
   InputCellRenderer,
   CustomHeaderComponent,
@@ -41,14 +40,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { FileIcon } from "lucide-react";
+
+import { FileTextIcon } from "lucide-react";
 import {
   usePrompts,
   usePromptVersions,
@@ -870,6 +863,10 @@ export function ExperimentTable({
       null
     );
 
+    const [selectedVersionId, setSelectedVersionId] = useState<string | null>(
+      null
+    );
+
     const { prompts: promptVersions, isLoading: isLoadingVersions } =
       usePromptVersions(selectedPromptId ?? "");
 
@@ -880,8 +877,12 @@ export function ExperimentTable({
     return (
       <PopoverContent className="w-[400px] p-4 bg-white shadow-lg rounded-md">
         <div className="space-y-4">
-          <h2 className="text-xl font-semibold">Welcome to Experiments</h2>
-          <div>
+          <div className="flex flex-row space-x-2 ">
+            <BeakerIcon className="h-6 w-6" />
+            <h3 className="text-md font-semibold">Welcome to Experiments</h3>
+          </div>
+
+          <div className="bg-[#F9FAFB] border border-[#E2E8F0] p-4 rounded-md">
             <h3 className="font-semibold mb-2">Start with a template</h3>
             <p className="text-sm text-gray-500 mb-2">
               Includes a prompt, some sample inputs, and an improved prompt
@@ -896,7 +897,7 @@ export function ExperimentTable({
                 <Button
                   key={template}
                   variant="outline"
-                  className="w-full justify-start"
+                  className="w-full justify-start bg-slate-100 border border-[#E2E8F0] text-center flex flex-col"
                 >
                   {template}
                 </Button>
@@ -914,11 +915,11 @@ export function ExperimentTable({
                 prompts?.map((prompt) => (
                   <Button
                     key={prompt.id}
-                    variant="outline"
+                    variant="ghost"
                     className="w-full justify-start mt-2"
                     onClick={() => handlePromptSelect(prompt.id)}
                   >
-                    <FileIcon className="mr-2 h-4 w-4" />
+                    <FileTextIcon className="mr-2 h-4 w-4" />
                     {prompt.user_defined_id}
                   </Button>
                 ))}
@@ -926,9 +927,12 @@ export function ExperimentTable({
             {selectedPromptId &&
               promptVersions &&
               promptVersions.length > 0 && (
-                <div className="mt-4">
-                  <h4 className="font-semibold mb-2">Version</h4>
-                  <Select>
+                <div className="mt-4 flex flex-row space-x-2 items-center justify-center">
+                  <h4 className="font-semibold ">Version</h4>
+                  <Select
+                    value={selectedVersionId ?? ""}
+                    onValueChange={setSelectedVersionId}
+                  >
                     <SelectTrigger>
                       <SelectValue
                         placeholder={
@@ -950,6 +954,24 @@ export function ExperimentTable({
                   </Select>
                 </div>
               )}
+
+            <div className="mt-4 flex flex-col space-y-2 items-center justify-center">
+              <Button
+                variant="default"
+                disabled={!selectedVersionId}
+                onClick={() => alert(1)}
+                className="w-full"
+              >
+                Create experiment
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => alert(1)}
+                className="w-full"
+              >
+                Start from scratch
+              </Button>
+            </div>
           </div>
         </div>
       </PopoverContent>
