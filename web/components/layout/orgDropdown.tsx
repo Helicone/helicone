@@ -164,7 +164,7 @@ export default function OrgDropdown({}: OrgDropdownProps) {
               <div className="flex items-center justify-between w-full text-xs">
                 <span>Dark mode</span>
                 <Switch
-                  checked={themeContext?.theme === "dark"}
+                  checked={theme === "dark"}
                   onCheckedChange={handleThemeChange}
                   size="md"
                 />
