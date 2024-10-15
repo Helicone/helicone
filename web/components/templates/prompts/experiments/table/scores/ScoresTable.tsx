@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, useMemo } from "react";
 import { clsx } from "@/components/shared/clsx";
 import { ColDef } from "ag-grid-community";
 import { Badge } from "@/components/ui/badge";
@@ -9,78 +9,124 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import ScoresEvaluatorsConfig from "./ScoresEvaluatorsConfig";
 
 const ScoresTable = memo(
   ({
     columnDefs,
-    wrapText,
     columnWidths,
     columnOrder,
+    experimentId,
   }: {
     columnDefs: ColDef[];
-    wrapText: boolean;
     columnWidths: { [key: string]: number };
     columnOrder: string[];
+    experimentId: string;
   }) => {
-    const scoreCriterias = [
-      "Sentiment",
-      "Accuracy",
-      "Contain words",
-      "Shorter than 50 characters",
-      "Is English",
-    ];
+    // const scoreCriterias = [
+    //   "Sentiment",
+    //   "Accuracy",
+    //   "Contain words",
+    //   "Shorter than 50 characters",
+    //   "Is English",
+    // ];
 
-    // Filter output columns (excluding 'Messages' which is an input)
-    const outputColumns = columnDefs.filter(
-      (col) =>
-        col.headerComponentParams?.badgeText === "Output" &&
-        col.field !== "messages"
+    const {
+      outputColumns,
+      inputColumns,
+      addExperimentWidth,
+      scores: scoreCriterias,
+    } = columnDefs.reduce(
+      (acc, col) => {
+        if (
+          col.headerComponentParams?.badgeText === "Output" &&
+          col.field !== "messages"
+        ) {
+          acc.outputColumns.push(col);
+          const scores = col.headerComponentParams?.hypothesis.runs
+            ?.map(
+              (run: any) =>
+                Object.keys(run.scores as Record<string, any>) as string[]
+            )
+            .flat() as string[];
+          console.log("scores", scores);
+          if (scores && scores.length > 0) {
+            acc.scores = Array.from(new Set([...acc.scores, ...scores]));
+          }
+        } else if (
+          col.headerComponentParams?.badgeText === "Input" ||
+          ["rowNumber", "messages"].includes(col.field!)
+        ) {
+          acc.inputColumns.push(col);
+        } else if (col.headerName === "Add Experiment") {
+          acc.addExperimentWidth = col.width || 150;
+        }
+        return acc;
+      },
+      {
+        outputColumns: [] as ColDef[],
+        inputColumns: [] as ColDef[],
+        scores: [] as string[],
+        addExperimentWidth: 150,
+      }
     );
 
-    // Filter input columns (including 'Messages' and rowNumber)
-    const inputColumns = columnDefs.filter(
-      (col) =>
-        col.headerComponentParams?.badgeText === "Input" ||
-        col.field === "rowNumber" ||
-        col.field === "messages"
-    );
+    const {
+      rowData,
+      totalOutputWidth,
+      scoresColumnWidth,
+      sortedOutputColumns,
+    } = useMemo(() => {
+      const getColumnWidth = (col: ColDef) =>
+        columnWidths[col.field!] || (col.width as number);
+      const rowData: { score_key: string; [key: string]: number | string }[] =
+        scoreCriterias.map((score) => ({
+          score_key: score,
+          ...Object.fromEntries(
+            outputColumns.map((col) => [
+              col.field!,
+              (() => {
+                return (
+                  (col.headerComponentParams?.hypothesis.runs
+                    ?.map((run: any) => run.scores[score]?.value)
+                    ?.reduce((acc: number, curr: number) => acc + curr, 0) ??
+                    0) /
+                  (col.headerComponentParams?.hypothesis.runs?.length ?? 1)
+                );
+              })(),
+            ])
+          ),
+        }));
 
-    const rowData = scoreCriterias.map((score) => {
-      const row: any = {
-        score_key: score,
+      const totalOutputWidth = outputColumns.reduce(
+        (sum, col) => sum + getColumnWidth(col),
+        0
+      );
+      const scoresColumnWidth = inputColumns.reduce(
+        (sum, col) => sum + getColumnWidth(col),
+        0
+      );
+      const sortedOutputColumns = outputColumns.sort(
+        (a, b) => columnOrder.indexOf(a.field!) - columnOrder.indexOf(b.field!)
+      );
+
+      return {
+        rowData,
+        totalOutputWidth,
+        scoresColumnWidth,
+        sortedOutputColumns,
       };
-      outputColumns.forEach((col) => {
-        // make this random from 50 to 100
-        row[col.field!] = Math.floor(Math.random() * 50) + 50; // Placeholder value, replace with actual score calculation
-      });
-      return row;
-    });
-
-    // Calculate total width of output columns
-    const totalOutputWidth = outputColumns.reduce(
-      (sum, col) => sum + (columnWidths[col.field!] || (col.width as number)),
-      0
-    );
-
-    // Calculate the width of the Scores column as the sum of all input columns (including Messages)
-    const scoresColumnWidth = inputColumns.reduce(
-      (sum, col) => sum + (columnWidths[col.field!] || (col.width as number)),
-      0
-    );
-
-    // Find the "Add Experiment" column width
-    const addExperimentColumn = columnDefs.find(
-      (col) => col.headerName === "Add Experiment"
-    );
-    const addExperimentWidth = addExperimentColumn?.width || 150; // Default to 150 if not found
-
-    // Sort outputColumns based on columnOrder
-    const sortedOutputColumns = [...outputColumns].sort((a, b) => {
-      return columnOrder.indexOf(a.field!) - columnOrder.indexOf(b.field!);
-    });
+    }, [
+      scoreCriterias,
+      outputColumns,
+      inputColumns,
+      columnWidths,
+      columnOrder,
+    ]);
 
     return (
       <div className="overflow-auto">
+        <ScoresEvaluatorsConfig experimentId={experimentId} />
         <table
           className="w-full border-separate border-spacing-0 bg-white rounded-lg text-sm table-fixed"
           style={{
@@ -134,10 +180,8 @@ const ScoresTable = memo(
               <th
                 className={clsx("border-t border-slate-200")}
                 style={{ width: `${addExperimentWidth}px` }}
-              >
-                {/* Leave this header empty or add a title if needed */}
-              </th>
-              <th className="flex-1 border-t border-r border-slate-200 rounded-tr-lg"></th>
+              />
+              <th className="flex-1 border-t border-r border-slate-200 rounded-tr-lg" />
             </tr>
           </thead>
           <tbody>
@@ -145,19 +189,19 @@ const ScoresTable = memo(
               <tr key={row.score_key} className="text-slate-700">
                 <td
                   className={clsx(
-                    "p-2 border-b border-r border-l border-slate-200 bg-slate-50",
+                    "p-2 border-b border-r border-slate-200 bg-slate-50",
                     index === rowData.length - 1 && "rounded-bl-lg"
                   )}
                   style={{ width: `${scoresColumnWidth}px` }}
                 >
                   {row.score_key}
                 </td>
-                {sortedOutputColumns.map((col, index) => (
+                {sortedOutputColumns.map((col, colIndex) => (
                   <td
                     key={col.field}
                     className={clsx(
                       "p-2 border-b border-r border-slate-200",
-                      index === 0 && "border-l"
+                      colIndex === 0 && "border-l"
                     )}
                     style={{
                       width: `${columnWidths[col.field!] || col.width}px`,
@@ -173,15 +217,13 @@ const ScoresTable = memo(
                       : "border-b-0"
                   }
                   style={{ minWidth: `${addExperimentWidth}px` }}
-                >
-                  {/* Leave this cell empty or add content if needed */}
-                </td>
+                />
                 <td
                   className={clsx(
                     "border-r border-slate-200",
                     index === rowData.length - 1 && "border-b rounded-br-lg"
                   )}
-                ></td>
+                />
               </tr>
             ))}
           </tbody>
