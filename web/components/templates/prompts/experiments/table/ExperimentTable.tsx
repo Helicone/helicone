@@ -1063,18 +1063,10 @@ export function ExperimentTable({
             editMode={true}
             selectedInput={selectedInput}
             submitText={"Create Experiment"}
-            showSavePrompt={false}
+            playgroundMode={"experiment"}
+            handleCreateExperiment={handleCreateExperiment}
             isPromptCreatedFromUi={true}
           />
-
-          <Button
-            onClick={handleCreateExperiment}
-            variant="default"
-            size="sm"
-            className="w-full mt-4"
-          >
-            Create Experiment
-          </Button>
         </div>
       </PopoverContent>
     );

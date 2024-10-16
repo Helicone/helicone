@@ -46,7 +46,8 @@ interface PromptPlaygroundProps {
   defaultEditMode?: boolean;
   editMode?: boolean;
   chatType?: "request" | "response" | "request-response";
-  showSavePrompt?: boolean;
+  playgroundMode?: "prompt" | "experiment";
+  handleCreateExperiment?: () => void;
 }
 
 const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
@@ -59,7 +60,8 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
   defaultEditMode = false,
   editMode = true,
   chatType = "request",
-  showSavePrompt = true,
+  playgroundMode = "prompt",
+  handleCreateExperiment,
 }) => {
   const replaceTemplateVariables = (
     content: string,
@@ -318,7 +320,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
                   ))}
                 </SelectContent>
               </Select>
-              {showSavePrompt && (
+              {playgroundMode === "prompt" && (
                 <Button
                   onClick={() =>
                     onSubmit && onSubmit(currentChat, selectedModel || "")
@@ -333,45 +335,57 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
             </div>
           </div>
         )}
-        {isEditMode && promptVariables.length > 0 && (
-          <div className="flex flex-col space-y-4 p-4 bg-white dark:bg-gray-950 rounded-b-lg">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-              Inputs
-            </h3>
-            <p className="text-[#94A3B8]">
-              Please provide a sample value for each input variable in your
-              prompt.{" "}
-            </p>
-            <div className="rounded-md border border-gray-200 dark:border-gray-800">
-              <div className=" dark:bg-gray-800 px-4 py-2 text-sm font-medium text-black dark:text-gray-400">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>Variable Name</div>
-                  <div>Value</div>
+      </div>
+      {playgroundMode === "experiment" && handleCreateExperiment && (
+        <div className="flex flex-col space-y-4 pt-4 bg-white dark:bg-gray-950 rounded-b-lg">
+          {isEditMode && promptVariables.length > 0 && (
+            <div className="flex flex-col space-y-4 p-4 bg-white dark:bg-gray-950 rounded-b-lg">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                Inputs
+              </h3>
+              <p className="text-[#94A3B8]">
+                Please provide a sample value for each input variable in your
+                prompt.{" "}
+              </p>
+              <div className="rounded-md border border-gray-200 dark:border-gray-800">
+                <div className=" dark:bg-gray-800 px-4 py-2 text-sm font-medium text-black dark:text-gray-400">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>Variable Name</div>
+                    <div>Value</div>
+                  </div>
+                </div>
+                <div className="divide-y divide-gray-200 dark:divide-gray-800">
+                  {promptVariables.map((variable) => (
+                    <div
+                      key={variable.heliconeTag}
+                      className="px-4 py-3 text-sm border-t"
+                    >
+                      <div className="grid grid-cols-2 gap-4 items-center">
+                        <span className="font-medium text-gray-900 dark:text-gray-100">
+                          {variable.original}
+                        </span>
+                        <input
+                          type="text"
+                          value={""}
+                          className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-1 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600"
+                        />
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
-              <div className="divide-y divide-gray-200 dark:divide-gray-800">
-                {promptVariables.map((variable) => (
-                  <div
-                    key={variable.heliconeTag}
-                    className="px-4 py-3 text-sm border-t"
-                  >
-                    <div className="grid grid-cols-2 gap-4 items-center">
-                      <span className="font-medium text-gray-900 dark:text-gray-100">
-                        {variable.original}
-                      </span>
-                      <input
-                        type="text"
-                        value={""}
-                        className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-1 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600"
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
             </div>
-          </div>
-        )}
-      </div>
+          )}
+          <Button
+            onClick={handleCreateExperiment}
+            variant="default"
+            size="sm"
+            className="w-full mt-4"
+          >
+            Create Experiment
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
