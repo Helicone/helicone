@@ -31,6 +31,9 @@ interface PromptChatRowProps {
   editMode?: boolean;
   promptMode?: boolean;
   selectedProperties: Record<string, string> | undefined;
+  onExtractVariables?: (
+    variables: Array<{ original: string; heliconeTag: string }>
+  ) => void;
 }
 
 export const hasImage = (content: string | any[] | null) => {
@@ -49,29 +52,46 @@ export const PrettyInput = ({
   keyName: string;
   selectedProperties: Record<string, string> | undefined;
 }) => {
-  const isSelected = selectedProperties && keyName in selectedProperties;
-  const value = isSelected ? selectedProperties[keyName] : undefined;
+  const getRenderText = () => {
+    if (selectedProperties) {
+      return selectedProperties[keyName] || "{{undefined}}";
+    } else {
+      return keyName;
+    }
+  };
+  const renderText = getRenderText();
   const [open, setOpen] = useState(false);
   const TEXT_LIMIT = 120;
 
-  const renderText = isSelected ? value : `${keyName}`;
-
   return (
     <>
-      <Tooltip title={isSelected ? value : keyName} placement="top">
-        <span
-          className={clsx(
-            isSelected
-              ? "bg-sky-100 border-sky-300 dark:bg-sky-950 dark:border-sky-700"
-              : "bg-yellow-100 border-yellow-300 dark:bg-yellow-950 dark:border-yellow-700",
-            "inline-block border text-gray-900 dark:text-gray-100 rounded-lg py-1 px-3 text-sm cursor-pointer"
-          )}
-          onClick={() => setOpen(true)}
-        >
-          {renderText && renderText.length > TEXT_LIMIT
-            ? `${renderText.slice(0, TEXT_LIMIT)}...`
-            : renderText}
-        </span>
+      <Tooltip title={keyName} placement="top">
+        {renderText.length > TEXT_LIMIT ? (
+          <button
+            onClick={() => setOpen(!open)}
+            className={clsx(
+              selectedProperties
+                ? "bg-sky-100 border-sky-300 dark:bg-sky-950 dark:border-sky-700"
+                : "bg-yellow-100 border-yellow-300 dark:bg-yellow-950 dark:border-yellow-700",
+              "relative text-sm text-gray-900 dark:text-gray-100 border rounded-lg py-1 px-3 text-left"
+            )}
+            title={renderText}
+          >
+            <ArrowsPointingOutIcon className="h-4 w-4 text-sky-500 absolute right-2 top-1.5 transform" />
+            <p className="pr-8">{renderText.slice(0, TEXT_LIMIT)}...</p>
+          </button>
+        ) : (
+          <span
+            className={clsx(
+              selectedProperties
+                ? "bg-sky-100 border-sky-300 dark:bg-sky-950 dark:border-sky-700"
+                : "bg-yellow-100 border-yellow-300 dark:bg-yellow-950 dark:border-yellow-700",
+              "inline-block border text-gray-900 dark:text-gray-100 rounded-lg py-1 px-3 text-sm"
+            )}
+          >
+            {renderText}
+          </span>
+        )}
       </Tooltip>
 
       <ThemedModal open={open} setOpen={setOpen}>
@@ -85,7 +105,7 @@ export const PrettyInput = ({
 
           <div className="bg-white border-gray-300 dark:bg-black dark:border-gray-700 p-4 border rounded-lg flex flex-col space-y-4">
             <MarkdownEditor
-              text={value || ""}
+              text={selectedProperties?.[keyName] || ""}
               setText={(text) => {
                 console.log(text);
               }}
@@ -101,38 +121,47 @@ export const PrettyInput = ({
 
 const RenderWithPrettyInputKeys = (props: {
   text: string;
+
   selectedProperties: Record<string, string> | undefined;
 }) => {
   const { text, selectedProperties } = props;
 
+  // Function to replace matched patterns with JSX components
   const replaceInputKeysWithComponents = (inputText: string) => {
     if (typeof inputText !== "string") {
+      // don't throw, stringify the input and return it
       return JSON.stringify(inputText || "");
     }
 
-    const regex =
-      /(?:\{\{([^}]+)\}\})|(?:<helicone-prompt-input key="([^"]+)"[^>]*\/>)/g;
+    // Regular expression to match the pattern
+    const regex = /<helicone-prompt-input key="([^"]+)"\s*\/>/g;
     const parts = [];
     let lastIndex = 0;
 
-    inputText.replace(regex, (match, key1, key2, offset) => {
+    // Use the regular expression to find and replace all occurrences
+    inputText.replace(regex, (match: any, keyName: string, offset: number) => {
+      // Push preceding text if any
       if (offset > lastIndex) {
         parts.push(inputText.substring(lastIndex, offset));
       }
 
-      const keyName = key1 || key2;
+      // Push the PrettyInput component for the current match
       parts.push(
         <PrettyInput
-          keyName={keyName.trim()}
+          keyName={keyName}
           key={offset}
           selectedProperties={selectedProperties}
         />
       );
 
+      // Update lastIndex to the end of the current match
       lastIndex = offset + match.length;
+
+      // This return is not used but is necessary for the replace function
       return match;
     });
 
+    // Add any remaining text after the last match
     if (lastIndex < inputText.length) {
       parts.push(inputText.substring(lastIndex));
     }
@@ -147,8 +176,15 @@ const RenderWithPrettyInputKeys = (props: {
 };
 
 const PromptChatRow = (props: PromptChatRowProps) => {
-  const { index, message, callback, deleteRow, editMode, selectedProperties } =
-    props;
+  const {
+    index,
+    message,
+    callback,
+    deleteRow,
+    editMode,
+    selectedProperties,
+    onExtractVariables,
+  } = props;
 
   const [currentMessage, setCurrentMessage] = useState(message);
   const [minimize, setMinimize] = useState(false);
@@ -389,8 +425,9 @@ const PromptChatRow = (props: PromptChatRowProps) => {
     if (isEditing) {
       const newVariables = extractVariables(contentAsString || "");
       setPromptVariables(newVariables);
+      onExtractVariables?.(newVariables);
     }
-  }, [isEditing, contentAsString, extractVariables]);
+  }, [isEditing, contentAsString, extractVariables, onExtractVariables]);
 
   // Update currentMessage when the prop message changes
   useEffect(() => {
