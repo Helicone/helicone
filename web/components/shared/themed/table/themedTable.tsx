@@ -357,8 +357,7 @@ export default function ThemedTable<T extends { id?: string }>(
                               className={clsx(
                                 "py-3 border-t border-slate-300 dark:border-slate-700 px-2 text-slate-700 dark:text-slate-300",
                                 i === 0 && "pl-4",
-                                i === row.getVisibleCells().length - 1 &&
-                                  "pr-4"
+                                i === row.getVisibleCells().length - 1 && "pr-4"
                               )}
                               style={{
                                 maxWidth: cell.column.getSize(),
