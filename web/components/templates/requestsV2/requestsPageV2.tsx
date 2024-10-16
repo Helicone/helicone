@@ -729,7 +729,9 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
                         variant="ghost"
                         className={clsx(
                           "flex flex-row gap-2 items-center",
-                          isLive ? "text-green-500 animate-pulse" : "text-slate-500"
+                          isLive
+                            ? "text-green-500 animate-pulse"
+                            : "text-slate-500"
                         )}
                         size="sm_sleek"
                         onClick={() => setIsLive(!isLive)}
@@ -746,7 +748,9 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>{isLive ? "Stop live updates" : "Start live updates"}</p>
+                      <p>
+                        {isLive ? "Stop live updates" : "Start live updates"}
+                      </p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>

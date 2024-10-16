@@ -60,7 +60,7 @@ export default function ViewButton({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-40">
-          <DropdownMenuItem 
+          <DropdownMenuItem
             onClick={() => onViewChange("table")}
             title="Switch to table view"
           >
@@ -72,7 +72,7 @@ export default function ViewButton({
               <CheckIcon className="ml-auto h-5 w-5" />
             )}
           </DropdownMenuItem>
-          <DropdownMenuItem 
+          <DropdownMenuItem
             onClick={() => onViewChange("row")}
             title="Switch to row view"
           >
@@ -82,7 +82,7 @@ export default function ViewButton({
             </div>
             {currentView === "row" && <CheckIcon className="ml-auto h-5 w-5" />}
           </DropdownMenuItem>
-          <DropdownMenuItem 
+          <DropdownMenuItem
             onClick={() => onViewChange("card")}
             title="Switch to card view"
           >
