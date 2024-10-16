@@ -31,8 +31,12 @@ import { useRouter } from "next/router";
 
 // Import Shadcn UI components for dropdown
 import { CreateNewEvaluator } from "@/components/shared/CreateNewEvaluator/CreateNewEvaluator";
-import { INITIAL_COLUMNS } from "./EvaluratorColumns";
+import { EvalMetric, INITIAL_COLUMNS } from "./EvaluratorColumns";
 import { useEvaluators } from "./EvaluatorHook";
+
+// Import Sheet components
+
+import EvaluatorDetailsSheet from "./EvaluatorDetailsSheet";
 
 const EvalsPage = () => {
   const {
@@ -46,6 +50,7 @@ const EvalsPage = () => {
     advancedFilters,
     setTimeFilter,
     timeFilter,
+    deleteEvaluator,
   } = useEvaluators();
 
   const evals = useMemo(() => {
@@ -98,6 +103,10 @@ const EvalsPage = () => {
   const handleDeselectAll = () => {
     setEvalsToShow([]);
   };
+
+  const [selectedEvaluator, setSelectedEvaluator] = useState<EvalMetric | null>(
+    null
+  );
 
   const router = useRouter();
 
@@ -186,6 +195,12 @@ const EvalsPage = () => {
             </div>
           </div>
         )}
+        <EvaluatorDetailsSheet
+          selectedEvaluator={selectedEvaluator}
+          setSelectedEvaluator={setSelectedEvaluator}
+          LLMAsJudgeEvaluators={LLMAsJudgeEvaluators}
+          deleteEvaluator={deleteEvaluator}
+        />
         <ThemedTable
           advancedFilters={{
             filterMap: filterMap,
@@ -214,7 +229,7 @@ const EvalsPage = () => {
             },
           }}
           onRowSelect={(row) => {
-            router.push(`/evaluators/${row.name}`);
+            setSelectedEvaluator(row);
           }}
           customButtons={[
             <CreateNewEvaluator

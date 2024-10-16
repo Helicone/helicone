@@ -24,6 +24,23 @@ function getEvaluatorScoreName(evaluatorName: string) {
 }
 
 export class EvaluatorManager extends BaseManager {
+  async getExperiments(evaluatorId: string) {
+    const result = await dbExecute<{
+      experiment_id: string;
+      experiment_created_at: string;
+    }>(
+      `SELECT
+      experiment.id as experiment_id,
+      experiment.created_at as experiment_created_at
+      FROM evaluator_experiments
+      left join experiment_v2 as experiment on evaluator_experiments.experiment = experiment.id
+      WHERE evaluator = $1
+      AND experiment.organization = $2
+      `,
+      [evaluatorId, this.authParams.organizationId]
+    );
+    return result;
+  }
   private async runLLMEvaluator({
     scoringType,
     evaluator,
@@ -272,6 +289,19 @@ export class EvaluatorManager extends BaseManager {
   }
 
   async deleteEvaluator(evaluatorId: string): Promise<Result<null, string>> {
+    const deleteExperimentEvaluator = await dbExecute(
+      `
+      DELETE FROM evaluator_experiments
+      WHERE evaluator = $1
+      `,
+      [evaluatorId]
+    );
+    if (deleteExperimentEvaluator.error) {
+      return err(
+        `Failed to delete evaluator experiments: ${deleteExperimentEvaluator.error}`
+      );
+    }
+
     const result = await dbExecute(
       `
       DELETE FROM evaluator

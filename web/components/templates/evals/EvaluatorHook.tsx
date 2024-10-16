@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
 import { getJawnClient } from "../../../lib/clients/jawn";
 import {
@@ -122,6 +122,22 @@ export const useEvaluators = () => {
     },
   });
 
+  const deleteEvaluator = useMutation({
+    mutationFn: async (evaluatorId: string) => {
+      const jawn = getJawnClient(org?.currentOrg?.id!);
+      return jawn.DELETE("/v1/evaluator/{evaluatorId}", {
+        params: {
+          path: {
+            evaluatorId,
+          },
+        },
+      });
+    },
+    onSuccess: () => {
+      evaluators.refetch();
+    },
+  });
+
   return {
     evaluators,
     evalScores,
@@ -133,5 +149,6 @@ export const useEvaluators = () => {
     advancedFilters,
     setAdvancedFilters,
     searchPropertyFilters,
+    deleteEvaluator,
   };
 };
