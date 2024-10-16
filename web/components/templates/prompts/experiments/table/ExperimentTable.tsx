@@ -1016,8 +1016,6 @@ export function ExperimentTable({
             editMode={true}
             selectedInput={selectedInput}
             submitText={"Create Experiment"}
-            showSavePrompt={false}
-            onPromptChange={handlePromptChange}
           />
 
           <Button

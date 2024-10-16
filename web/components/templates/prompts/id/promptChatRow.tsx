@@ -425,7 +425,14 @@ const PromptChatRow = (props: PromptChatRowProps) => {
     if (isEditing) {
       const newVariables = extractVariables(contentAsString || "");
       setPromptVariables(newVariables);
-      onExtractVariables?.(newVariables);
+      onExtractVariables?.(
+        newVariables.map((item) => {
+          return {
+            original: item.original.match(/key="([^"]+)"/)?.[1] || "",
+            heliconeTag: item.heliconeTag,
+          };
+        })
+      );
     }
   }, [isEditing, contentAsString, extractVariables, onExtractVariables]);
 
