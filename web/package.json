@@ -12,8 +12,7 @@
     "lint": "next lint",
     "lint-fix": "next lint --fix",
     "postbuild": "next-sitemap",
-    "analyze": "cross-env ANALYZE=true next build",
-    "install-react-table": "yarn add react-table @types/react-table"
+    "analyze": "cross-env ANALYZE=true next build"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^0.0.33",
@@ -108,6 +107,7 @@
   },
   "devDependencies": {
     "@graphql-eslint/eslint-plugin": "^3.17.0",
+    "@types/react-table": "^7.7.14",
     "@next/bundle-analyzer": "^14.2.13",
     "@parcel/watcher": "^2.3.0",
     "@tailwindcss/forms": "^0.5.3",

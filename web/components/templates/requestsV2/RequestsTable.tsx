@@ -1,6 +1,9 @@
 import React from "react";
 import { useTable, useSortBy, usePagination, Column } from "react-table";
 
+// Add this type declaration
+declare module 'react-table' {}
+
 interface Request {
   request_id: string;
   created_at: string;
