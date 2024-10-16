@@ -18,7 +18,7 @@ ALTER TABLE "public"."evaluator" ADD CONSTRAINT "evaluator_pkey" PRIMARY KEY USI
 
 -- Add foreign key constraint
 ALTER TABLE "public"."evaluator"
-ADD CONSTRAINT "evaluator_organization_id_fkey"
+ADD CONSTRAINT "evaluator_organization_id_fkey" 
 FOREIGN KEY (organization_id) REFERENCES organization(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 -- Create index on scoring_type

@@ -229,7 +229,7 @@ WHERE ${buildWhereClause("duration")}
     });
 
     const query = `
-    SELECT
+    SELECT 
       properties['Helicone-Session-Name'] as name,
       min(request_response_rmt.request_created_at) ${
         timezoneDifference > 0
@@ -342,7 +342,7 @@ WHERE ${buildWhereClause("duration")}
 
     // Step 1 get all the properties given this filter
     const query = `
-    SELECT
+    SELECT 
       min(request_response_rmt.request_created_at) + INTERVAL ${timezoneDifference} MINUTE AS created_at,
       max(request_response_rmt.request_created_at) + INTERVAL ${timezoneDifference} MINUTE AS latest_request_created_at,
       properties['Helicone-Session-Id'] as session,

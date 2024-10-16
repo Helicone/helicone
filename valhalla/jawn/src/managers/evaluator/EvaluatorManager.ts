@@ -144,7 +144,7 @@ export class EvaluatorManager extends BaseManager {
 
     const result = await dbExecute<EvaluatorResult>(
       `
-      SELECT
+      SELECT 
         evaluator.id,
         evaluator.created_at,
         evaluator.scoring_type,
@@ -152,7 +152,7 @@ export class EvaluatorManager extends BaseManager {
         evaluator.organization_id,
         evaluator.updated_at,
         evaluator.name
-      FROM evaluator_experiments
+      FROM evaluator_experiments 
       left join evaluator on evaluator_experiments.evaluator = evaluator.id
       WHERE evaluator_experiments.experiment = $1
       `,
