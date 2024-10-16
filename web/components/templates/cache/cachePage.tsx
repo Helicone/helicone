@@ -6,7 +6,7 @@ import {
   TableCellsIcon,
 } from "@heroicons/react/24/outline";
 import { ElementType, useMemo, useState } from "react";
-import { BarChart, Divider, Badge } from "@tremor/react";
+import { BarChart, Divider } from "@tremor/react";
 import ThemedDrawer from "../../shared/themed/themedDrawer";
 import ThemedListItem from "../../shared/themed/themedListItem";
 import RequestsPageV2 from "../requestsV2/requestsPageV2";

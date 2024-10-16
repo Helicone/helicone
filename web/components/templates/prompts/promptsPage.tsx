@@ -38,7 +38,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "../../ui/dialog";
-import HcBadge from "../../ui/hcBadge";
 import HcButton from "../../ui/hcButton";
 import { Label } from "../../ui/label";
 import {
