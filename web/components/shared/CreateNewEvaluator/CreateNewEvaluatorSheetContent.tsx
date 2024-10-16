@@ -7,15 +7,26 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import React, { useState } from "react";
-import { EvaluatorConfigForm } from "./EvaluatorConfigForm";
-import { EvaluatorTypeDropdown } from "./EvaluatorTypeDropdown";
+import {
+  EvaluatorConfigForm,
+  EvaluatorConfigFormPreset,
+} from "./EvaluatorConfigForm";
+import {
+  EvaluatorTypeDropdown,
+  LLM_AS_A_JUDGE_OPTIONS,
+} from "./EvaluatorTypeDropdown";
 
 export const CreateNewEvaluatorSheetContent: React.FC<{
   onSubmit: (evaluatorId: string) => void;
   hideButton?: boolean;
 }> = ({ onSubmit, hideButton = false }) => {
-  const [selectedOption, setSelectedOption] = useState<string>("LLM");
+  const [selectedOption, setSelectedOption] = useState<string>(
+    LLM_AS_A_JUDGE_OPTIONS[0].name
+  );
 
+  const [presets, setPresets] = useState<EvaluatorConfigFormPreset>(
+    LLM_AS_A_JUDGE_OPTIONS[0].preset
+  );
   return (
     <>
       <SheetTrigger asChild>
@@ -25,21 +36,29 @@ export const CreateNewEvaluatorSheetContent: React.FC<{
           </Button>
         )}
       </SheetTrigger>
-      <SheetContent side="right" className="w-[800px] sm:max-w-[800px]">
+      <SheetContent
+        side="right"
+        className="w-[800px] sm:max-w-[800px] flex flex-col"
+      >
         <SheetHeader>
           <SheetTitle>{"Create New Evaluator"}</SheetTitle>
           <SheetDescription>
             <EvaluatorTypeDropdown
               selectedOption={selectedOption}
-              onOptionSelect={setSelectedOption}
+              onOptionSelect={(option) => {
+                setSelectedOption(option.name);
+                setPresets(option.preset);
+              }}
             />
           </SheetDescription>
         </SheetHeader>
 
-        <div className="py-4">
+        <div className="flex-grow overflow-hidden">
           <EvaluatorConfigForm
             evaluatorType={selectedOption}
             onSubmit={onSubmit}
+            configFormParams={presets}
+            setConfigFormParams={setPresets}
           />
         </div>
       </SheetContent>
