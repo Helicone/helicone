@@ -304,9 +304,7 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
                   </div>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <Card className="py-1 px-2 text-xs mb-1">
-                    {isSearchExpanded ? "Close search" : "Open search"}
-                  </Card>
+                  {isSearchExpanded ? "Close search" : "Open search"}
                 </TooltipContent>
               </Tooltip>
             )}
