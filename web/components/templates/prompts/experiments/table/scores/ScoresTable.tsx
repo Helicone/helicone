@@ -44,9 +44,8 @@ const ScoresTable = memo(
         ) {
           acc.outputColumns.push(col);
           const scores = col.headerComponentParams?.hypothesis.runs
-            ?.map(
-              (run: any) =>
-                Object.keys(run.scores as Record<string, any>) as string[]
+            ?.map((run: any) =>
+              run?.scores ? Object.keys(run.scores as Record<string, any>) : []
             )
             .flat() as string[];
           console.log("scores", scores);
@@ -79,24 +78,34 @@ const ScoresTable = memo(
     } = useMemo(() => {
       const getColumnWidth = (col: ColDef) =>
         columnWidths[col.field!] || (col.width as number);
-      const rowData: { score_key: string; [key: string]: number | string }[] =
-        scoreCriterias.map((score) => ({
-          score_key: score,
-          ...Object.fromEntries(
-            outputColumns.map((col) => [
-              col.field!,
-              (() => {
-                return (
-                  (col.headerComponentParams?.hypothesis.runs
-                    ?.map((run: any) => run.scores[score]?.value)
-                    ?.reduce((acc: number, curr: number) => acc + curr, 0) ??
-                    0) /
-                  (col.headerComponentParams?.hypothesis.runs?.length ?? 1)
-                );
-              })(),
-            ])
-          ),
-        }));
+      const rowData: {
+        score_key: string;
+        [key: string]: { percentage: number; count: number } | string;
+      }[] = scoreCriterias.map((score) => ({
+        score_key: score,
+        ...Object.fromEntries(
+          outputColumns.map((col) => [
+            col.field!,
+            (() => {
+              const values = col.headerComponentParams?.hypothesis.runs
+                ?.map((run: any) => run.scores?.[score]?.value)
+                .filter((value: any) => value !== undefined);
+              return {
+                percentage: (
+                  ((1.0 *
+                    (values?.reduce(
+                      (acc: number, curr: number) => acc + curr,
+                      0
+                    ) ?? 0)) /
+                    (col.headerComponentParams?.hypothesis.runs?.length ?? 1)) *
+                  100.0
+                ).toFixed(2),
+                count: values?.length ?? 0,
+              };
+            })(),
+          ])
+        ),
+      }));
 
       const totalOutputWidth = outputColumns.reduce(
         (sum, col) => sum + getColumnWidth(col),
@@ -196,20 +205,36 @@ const ScoresTable = memo(
                 >
                   {row.score_key}
                 </td>
-                {sortedOutputColumns.map((col, colIndex) => (
-                  <td
-                    key={col.field}
-                    className={clsx(
-                      "p-2 border-b border-r border-slate-200",
-                      colIndex === 0 && "border-l"
-                    )}
-                    style={{
-                      width: `${columnWidths[col.field!] || col.width}px`,
-                    }}
-                  >
-                    {row[col.field!]}%
-                  </td>
-                ))}
+                {sortedOutputColumns.map((col, colIndex) => {
+                  const value = row[col.field!];
+                  return (
+                    <td
+                      key={col.field}
+                      className={clsx(
+                        "p-2 border-b border-r border-slate-200",
+                        colIndex === 0 && "border-l"
+                      )}
+                      style={{
+                        width: `${columnWidths[col.field!] || col.width}px`,
+                      }}
+                    >
+                      {typeof value !== "string" && (
+                        <div className="flex justify-between">
+                          <span>{value.percentage}%</span>
+                          {value.count > 0 && (
+                            <span>
+                              {value.count}/
+                              {
+                                col.headerComponentParams?.hypothesis.runs
+                                  ?.length
+                              }
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </td>
+                  );
+                })}
                 <td
                   className={
                     index === rowData.length - 1
