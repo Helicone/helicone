@@ -93,7 +93,6 @@ const ExperimentsPage = (props: ExperimentsPageProps) => {
         onRowSelect={(row) => {
           router.push(`/experiments/${row.id}`);
         }}
-        fullWidth={true}
       />
     </>
   );

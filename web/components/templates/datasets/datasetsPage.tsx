@@ -113,7 +113,6 @@ const DatasetsPage = (props: DatasetsPageProps) => {
           onRowSelect={(row) => {
             router.push(`/datasets/${row.id}`);
           }}
-          fullWidth={true}
         />
       )}
     </>
