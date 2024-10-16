@@ -32,7 +32,6 @@ import { useLocalStorage } from "@/services/hooks/localStorage";
 import LoadingAnimation from "../../../../shared/loadingAnimation";
 import ExportButton from "../../../../shared/themed/table/exportButton";
 import { ColumnsDropdown } from "./components/customButtonts";
-import SettingsPanel from "./components/settingsPannel";
 import {
   CustomHeaderComponent,
   InputCellRenderer,
