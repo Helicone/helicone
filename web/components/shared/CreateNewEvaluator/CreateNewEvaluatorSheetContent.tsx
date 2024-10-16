@@ -53,15 +53,13 @@ export const CreateNewEvaluatorSheetContent: React.FC<{
           </SheetDescription>
         </SheetHeader>
 
-        <div className="flex-1 overflow-y-auto">
-          <div className="py-4">
-            <EvaluatorConfigForm
-              evaluatorType={selectedOption}
-              onSubmit={onSubmit}
-              configFormParams={presets}
-              setConfigFormParams={setPresets}
-            />
-          </div>
+        <div className="flex-grow overflow-hidden">
+          <EvaluatorConfigForm
+            evaluatorType={selectedOption}
+            onSubmit={onSubmit}
+            configFormParams={presets}
+            setConfigFormParams={setPresets}
+          />
         </div>
       </SheetContent>
     </>
