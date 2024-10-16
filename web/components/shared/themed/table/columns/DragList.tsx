@@ -44,7 +44,7 @@ const reorder = (list: any[], startIndex: number, endIndex: number) => {
   return result;
 };
 
-const grid = 8;
+const grid = 4;
 
 const getItemStyle = (isDragging: boolean, draggableStyle: any) => ({
   // Some basic styles to make the items look a bit nicer
@@ -102,13 +102,15 @@ export const DragList = ({
                     )}
                     className={clsx(
                       "p-2 mb-1",
-                      snapshot.isDragging ? "bg-blue-100" : "bg-white",
-                      "border border-gray-200 rounded-md",
+                      snapshot.isDragging
+                        ? "bg-blue-100 dark:bg-slate-900"
+                        : "bg-white dark:bg-black",
+                      "border border-gray-200 dark:border-gray-800 rounded-md",
                       item.shown ? "block" : "hidden"
                     )}
                   >
                     <Row className="items-center justify-between">
-                      <Row className="items-center gap-2">
+                      <Row className="items-center gap-2 text-xs">
                         <Row>
                           <EllipsisVerticalIcon className="h-3 w-3 " />
                           <EllipsisVerticalIcon className="h-3 w-3 -ml-2" />

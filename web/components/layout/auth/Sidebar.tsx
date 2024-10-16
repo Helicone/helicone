@@ -19,7 +19,6 @@ import { useMemo } from "react";
 import DesktopSidebar, { NavigationItem } from "./DesktopSidebar";
 
 import { PiGraphLight } from "react-icons/pi";
-import MobileNavigation from "./MobileNavigation";
 import { useOrg } from "../organizationContext";
 import { NotepadText, TestTube2, Webhook } from "lucide-react";
 
@@ -103,10 +102,10 @@ const Sidebar = ({ setOpen }: SidebarProps) => {
                   current: pathname.includes("/experiments"),
                 },
                 {
-                  name: "Evals",
-                  href: "/evals",
+                  name: "Evaluators",
+                  href: "/evaluators",
                   icon: SparklesIcon,
-                  current: pathname.includes("/evals"),
+                  current: pathname.includes("/evaluators"),
                 },
               ]),
           {
@@ -216,7 +215,8 @@ const Sidebar = ({ setOpen }: SidebarProps) => {
 
   return (
     <>
-      <MobileNavigation NAVIGATION={NAVIGATION} setOpen={setOpen} />
+      {/* Remove this line */}
+      {/* <MobileNavigation NAVIGATION={NAVIGATION} setOpen={setOpen} /> */}
 
       <DesktopSidebar NAVIGATION={NAVIGATION} setOpen={setOpen} />
     </>

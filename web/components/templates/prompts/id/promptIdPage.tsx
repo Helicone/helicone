@@ -79,6 +79,8 @@ import { Button } from "../../../ui/button";
 import ExperimentPanel from "./experimentPanel";
 import { useUser } from "@supabase/auth-helpers-react";
 import { IslandContainer } from "../../../ui/islandContainer";
+import { useFeatureFlags } from "@/services/hooks/featureFlags";
+import { useOrg } from "@/components/layout/organizationContext";
 
 interface PromptIdPageProps {
   id: string;
@@ -476,6 +478,13 @@ const PromptIdPage = (props: PromptIdPageProps) => {
     promptVersionId: string,
     promptData: string
   ) => {
+    if (!(experimentFlags?.hasFlag || user?.email?.includes("helicone.ai"))) {
+      notification.setNotification(
+        "Experiment feature is not enabled - sign up for the waitlist to use it",
+        "error"
+      );
+      return;
+    }
     const dataset = await jawn.POST("/v1/helicone-dataset", {
       body: {
         datasetName: "Dataset for Experiment",
@@ -622,6 +631,12 @@ const PromptIdPage = (props: PromptIdPageProps) => {
     refetchPrompt();
   };
   const user = useUser();
+  const org = useOrg();
+
+  const experimentFlags = useFeatureFlags(
+    "experiment",
+    org?.currentOrg?.id ?? ""
+  );
 
   return (
     <IslandContainer>
@@ -697,7 +712,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
           />
         </div>
 
-        <div className="flex items-center gap-2 text-sm text-gray-500">
+        <div className="flex items-center gap-2 text-sm text-slate-500">
           <p className="">
             last used{" "}
             {prompt?.last_used && getTimeAgo(new Date(prompt?.last_used))}
@@ -745,7 +760,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                         />
                       </div>
                       <div className="w-1/3 flex flex-col space-y-4">
-                        <div className="border border-gray-300 dark:border-gray-700 rounded-lg bg-[#F9FAFB]">
+                        <div className="border border-slate-300 dark:border-slate-700 rounded-lg bg-[#F9FAFB] dark:bg-black">
                           <div className="flex flex-row items-center justify-between px-4 h-12 ">
                             <h2 className="text-lg font-medium ">Versions</h2>
                           </div>
@@ -762,10 +777,10 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                                 return (
                                   <div
                                     key={promptVersion.id}
-                                    className={`px-4 py-2 cursor-pointer border-t border-gray-300 dark:border-gray-700 ${
+                                    className={`px-4 py-2 cursor-pointer border-t border-slate-300 dark:border-slate-700 ${
                                       isSelected
                                         ? "bg-sky-100 border-sky-500 dark:bg-sky-950 border-b"
-                                        : "bg-gray-50 dark:bg-gray-900"
+                                        : "bg-slate-50 dark:bg-slate-900"
                                     }`}
                                     onClick={() =>
                                       setSelectedInputAndVersion(
@@ -775,7 +790,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                                   >
                                     <div className="flex justify-between items-center">
                                       <div className="flex items-center space-x-2">
-                                        <div className="border rounded-full border-gray-500 bg-white dark:bg-black h-6 w-6 flex items-center justify-center">
+                                        <div className="border rounded-full border-slate-500 bg-white dark:bg-black h-6 w-6 flex items-center justify-center">
                                           {isSelected && (
                                             <div className="bg-sky-500 rounded-full h-4 w-4" />
                                           )}
@@ -788,7 +803,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                                           {isProduction && (
                                             <Badge
                                               variant={"default"}
-                                              className="bg-[#F1F5F9] border border-[#CBD5E1] text-black text-sm font-medium rounded-lg px-4 hover:bg-[#F1F5F9] hover:text-black"
+                                              className="bg-[#F1F5F9] dark:bg-[#1E293B] border border-[#CBD5E1] dark:border-[#475569] text-black dark:text-white text-sm font-medium rounded-lg px-4 hover:bg-[#F1F5F9] hover:text-black"
                                             >
                                               Prod
                                             </Badge>
@@ -800,8 +815,8 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                                         true ? (
                                           <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
-                                              <button className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full">
-                                                <EllipsisHorizontalIcon className="h-6 w-6 text-gray-500" />
+                                              <button className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full">
+                                                <EllipsisHorizontalIcon className="h-6 w-6 text-slate-500" />
                                               </button>
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent>
@@ -847,8 +862,8 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                                         ) : (
                                           <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
-                                              <button className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full">
-                                                <EllipsisHorizontalIcon className="h-6 w-6 text-gray-500" />
+                                              <button className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full">
+                                                <EllipsisHorizontalIcon className="h-6 w-6 text-slate-500" />
                                               </button>
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent>
@@ -869,12 +884,12 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                                       </div>
                                     </div>
                                     <div className="flex justify-between items-center mt-2">
-                                      <span className="text-xs text-gray-500">
+                                      <span className="text-xs text-slate-500">
                                         {getTimeAgo(
                                           new Date(promptVersion.created_at)
                                         )}
                                       </span>
-                                      <div className="text-xs text-gray-500 dark:text-gray-400">
+                                      <div className="text-xs text-slate-500 dark:text-slate-400">
                                         {promptVersion.model}
                                       </div>
                                     </div>
@@ -884,7 +899,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                             </div>
                           </ScrollArea>
                         </div>
-                        <div className="border border-gray-300 dark:border-gray-700 rounded-lg bg-[#F9FAFB]">
+                        <div className="border border-slate-300 dark:border-slate-700 rounded-lg bg-[#F9FAFB] dark:bg-black">
                           <div className="flex flex-row items-center justify-between mx-4 h-12">
                             <h2 className="text-lg font-medium ">Inputs</h2>
                             <div className="pl-4 w-full">
@@ -1146,7 +1161,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                         />
                       </div>
                       <div className="w-1/3 flex flex-col space-y-4">
-                        <div className="border border-gray-300 dark:border-gray-700 rounded-lg bg-[#F9FAFB]">
+                        <div className="border border-slate-300 dark:border-slate-700 rounded-lg bg-[#F9FAFB]">
                           <div className="flex flex-row items-center justify-between px-4 h-12 ">
                             <h2 className="text-lg font-medium ">Versions</h2>
                           </div>
@@ -1163,10 +1178,10 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                                 return (
                                   <div
                                     key={promptVersion.id}
-                                    className={`px-4 py-2 cursor-pointer border-t border-gray-300 dark:border-gray-700 ${
+                                    className={`px-4 py-2 cursor-pointer border-t border-slate-300 dark:border-slate-700 ${
                                       isSelected
                                         ? "bg-sky-100 border-sky-500 dark:bg-sky-950 border-b"
-                                        : "bg-gray-50 dark:bg-gray-900"
+                                        : "bg-slate-50 dark:bg-slate-900"
                                     }`}
                                     onClick={() =>
                                       setSelectedInputAndVersion(
@@ -1176,7 +1191,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                                   >
                                     <div className="flex justify-between items-center">
                                       <div className="flex items-center space-x-2">
-                                        <div className="border rounded-full border-gray-500 bg-white dark:bg-black h-6 w-6 flex items-center justify-center">
+                                        <div className="border rounded-full border-slate-500 bg-white dark:bg-black h-6 w-6 flex items-center justify-center">
                                           {isSelected && (
                                             <div className="bg-sky-500 rounded-full h-4 w-4" />
                                           )}
@@ -1201,8 +1216,8 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                                         true ? (
                                           <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
-                                              <button className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full">
-                                                <EllipsisHorizontalIcon className="h-6 w-6 text-gray-500" />
+                                              <button className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full">
+                                                <EllipsisHorizontalIcon className="h-6 w-6 text-slate-500" />
                                               </button>
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent>
@@ -1248,8 +1263,8 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                                         ) : (
                                           <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
-                                              <button className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full">
-                                                <EllipsisHorizontalIcon className="h-6 w-6 text-gray-500" />
+                                              <button className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full">
+                                                <EllipsisHorizontalIcon className="h-6 w-6 text-slate-500" />
                                               </button>
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent>
@@ -1270,12 +1285,12 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                                       </div>
                                     </div>
                                     <div className="flex justify-between items-center mt-2">
-                                      <span className="text-xs text-gray-500">
+                                      <span className="text-xs text-slate-500">
                                         {getTimeAgo(
                                           new Date(promptVersion.created_at)
                                         )}
                                       </span>
-                                      <div className="text-xs text-gray-500 dark:text-gray-400">
+                                      <div className="text-xs text-slate-500 dark:text-slate-400">
                                         {promptVersion.model}
                                       </div>
                                     </div>
@@ -1285,7 +1300,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                             </div>
                           </ScrollArea>
                         </div>
-                        <div className="border border-gray-300 dark:border-gray-700 rounded-lg bg-[#F9FAFB]">
+                        <div className="border border-slate-300 dark:border-slate-700 rounded-lg bg-[#F9FAFB]">
                           <div className="flex flex-row items-center justify-between mx-4 h-12">
                             <h2 className="text-lg font-medium ">Inputs</h2>
                             <div className="pl-4 w-full">

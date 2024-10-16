@@ -287,7 +287,7 @@ export default function ThemedTable<T extends { id?: string }>(
                       },
                     }}
                   >
-                    <thead className="text-[12px]">
+                    <thead className="text-[12px] z-[2]">
                       {table.getHeaderGroups().map((headerGroup) => (
                         <tr
                           key={headerGroup.id}
@@ -305,6 +305,7 @@ export default function ThemedTable<T extends { id?: string }>(
                                   selectedIds?.length > 0 &&
                                   selectedIds?.length < rows.length
                                 }
+                                className="text-slate-700 dark:text-slate-400"
                               />
                               <div className="absolute bottom-0 left-0 right-0 h-px bg-slate-300 dark:bg-slate-700" />
                             </th>
@@ -336,8 +337,8 @@ export default function ThemedTable<T extends { id?: string }>(
                           className={clsx(
                             " hover:cursor-pointer",
                             checkedIds?.includes(row.original?.id ?? "")
-                              ? "bg-sky-100 border-l border-sky-500 pl-2 dark:bg-sky-900 dark:border-sky-900"
-                              : "hover:bg-sky-50 dark:hover:bg-sky-950"
+                              ? "bg-sky-100 border-l border-sky-500 pl-2 dark:bg-slate-800/50 dark:border-sky-900"
+                              : "hover:bg-sky-50 dark:hover:bg-slate-700/50"
                           )}
                           onClick={
                             onRowSelect &&
@@ -351,6 +352,7 @@ export default function ThemedTable<T extends { id?: string }>(
                                   row.original?.id ?? ""
                                 )}
                                 onChange={() => {}} // Handle individual row selection
+                                className="text-slate-700 dark:text-slate-400"
                               />
                             </td>
                           )}
