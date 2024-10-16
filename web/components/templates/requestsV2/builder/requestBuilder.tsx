@@ -195,13 +195,13 @@ const getNormalizedRequest = (request: HeliconeRequest): NormalizedRequest => {
     const normalizedRequest = getRequestBuilder(request).build();
     return {
       ...normalizedRequest,
-      model: normalizedRequest.model || request.response_model || request.model_override || request.request_model || "Unknown",
+      model: normalizedRequest.model || request.response_model || request.model_override || request.request_model || "Unsupported",
     };
   } catch (error) {
     console.error("Error in getNormalizedRequest:", error);
     return {
       ...getRequestBuilder(request).build(),
-      model: request.response_model || request.model_override || request.request_model || "Unknown",
+      model: request.response_model || request.model_override || request.request_model || "Unsupported",
     };
   }
 };

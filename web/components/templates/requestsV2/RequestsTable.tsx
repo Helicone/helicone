@@ -48,7 +48,7 @@ const RequestsTable: React.FC<RequestsTableProps> = ({ requests }) => {
       {
         Header: 'Model',
         accessor: 'model',
-        Cell: ({ cell: { value } }) => value || 'Unknown',
+        Cell: ({ cell: { value } }) => value || 'Unsupported',
       },
       {
         Header: 'Request',
@@ -95,10 +95,10 @@ const RequestsTable: React.FC<RequestsTableProps> = ({ requests }) => {
     <div>
       <table {...getTableProps()}>
         <thead>
-          {headerGroups.map(headerGroup => (
-            <tr {...headerGroup.getHeaderGroupProps()}>
-              {headerGroup.headers.map(column => (
-                <th {...column.getHeaderProps(column.getSortByToggleProps())}>
+          {headerGroups.map((headerGroup, index) => (
+            <tr {...headerGroup.getHeaderGroupProps()} key={`header-group-${index}`}>
+              {headerGroup.headers.map((column, columnIndex) => (
+                <th {...column.getHeaderProps(column.getSortByToggleProps())} key={`header-${columnIndex}`}>
                   {column.render('Header')}
                   <span>
                     {column.isSorted
@@ -113,13 +113,15 @@ const RequestsTable: React.FC<RequestsTableProps> = ({ requests }) => {
           ))}
         </thead>
         <tbody {...getTableBodyProps()}>
-          {page.map(row => {
+          {page.map((row, rowIndex) => {
             prepareRow(row);
             return (
-              <tr {...row.getRowProps()}>
-                {row.cells.map(cell => {
+              <tr {...row.getRowProps()} key={`row-${rowIndex}`}>
+                {row.cells.map((cell, cellIndex) => {
                   return (
-                    <td {...cell.getCellProps()}>{cell.render('Cell')}</td>
+                    <td {...cell.getCellProps()} key={`cell-${cellIndex}`}>
+                      {cell.render('Cell')}
+                    </td>
                   );
                 })}
               </tr>
