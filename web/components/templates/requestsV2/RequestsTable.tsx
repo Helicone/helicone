@@ -1,8 +1,12 @@
 import React from "react";
-import { useTable, useSortBy, usePagination, Column } from "react-table";
-
-// Add this type declaration
-declare module "react-table" {}
+import {
+  useTable,
+  useSortBy,
+  usePagination,
+  Column,
+  UsePaginationInstanceProps,
+  UseSortByInstanceProps,
+} from "react-table";
 
 interface Request {
   request_id: string;
@@ -10,7 +14,7 @@ interface Request {
   status: string;
   user: string;
   cost: string;
-  model: string;
+  model: string | undefined;
   request_text: string;
   response_text: string;
   prompt_tokens: number;
@@ -44,7 +48,7 @@ const RequestsTable: React.FC<RequestsTableProps> = ({ requests }) => {
       {
         Header: "Model",
         accessor: "model",
-        Cell: ({ cell: { value } }) => value || "Unsupported",
+        Cell: ({ value }: { value: string | undefined }) => value || "Unsupported",
       },
       {
         Header: "Request",
@@ -62,6 +66,16 @@ const RequestsTable: React.FC<RequestsTableProps> = ({ requests }) => {
     []
   );
 
+  const tableInstance = useTable<Request>(
+    {
+      columns,
+      data,
+      initialState: { pageIndex: 0 },
+    },
+    useSortBy,
+    usePagination
+  ) as TableInstance<Request> & UsePaginationInstanceProps<Request> & UseSortByInstanceProps<Request>;
+
   const {
     getTableProps,
     getTableBodyProps,
@@ -77,15 +91,7 @@ const RequestsTable: React.FC<RequestsTableProps> = ({ requests }) => {
     previousPage,
     setPageSize,
     state: { pageIndex, pageSize },
-  } = useTable<Request>(
-    {
-      columns,
-      data,
-      initialState: { pageIndex: 0 },
-    },
-    useSortBy,
-    usePagination
-  );
+  } = tableInstance;
 
   return (
     <div>
