@@ -4,11 +4,33 @@ import ThemedTable from "../../../../shared/themed/table/themedTable";
 import { useRouter } from "next/router";
 import { PlusIcon, DocumentPlusIcon } from "@heroicons/react/24/outline";
 import useNotification from "../../../../shared/notification/useNotification";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "../../../../ui/popover";
+import { ScrollArea } from "../../../../ui/scroll-area";
+import { useState } from "react";
+import {
+  usePrompts,
+  usePromptVersions,
+} from "../../../../../services/hooks/prompts/prompts";
+import { Button } from "../../../../ui/button";
+import { FileTextIcon } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../../../ui/select";
+import { StartFromPromptPopover } from "./components/startFromPromptPopover";
 
 interface ExperimentsPageProps {}
 
 const ExperimentsPage = (props: ExperimentsPageProps) => {
   const notification = useNotification();
+  const { prompts } = usePrompts();
   const router = useRouter();
   const { experiments, isLoading } = useExperiments({
     page: 1,
@@ -41,13 +63,15 @@ const ExperimentsPage = (props: ExperimentsPageProps) => {
               Start from scratch
             </span>
           </div>
-          <div>
-            <button
-              className="flex flex-col items-center justify-center w-40 h-32 bg-white rounded-lg hover:bg-transparent transition-colors border-2 border-slate-100"
-              onClick={() => router.push("/experiments/new")}
-            >
-              <DocumentPlusIcon className="w-16 h-16 text-slate-200" />
-            </button>
+          <div className="flex flex-col items-center justify-center">
+            <Popover >
+              <PopoverTrigger>
+                <button className="flex flex-col items-center justify-center w-40 h-32 bg-white rounded-lg hover:bg-transparent transition-colors border-2 border-slate-100">
+                  <DocumentPlusIcon className="w-16 h-16 text-slate-200" />
+                </button>
+              </PopoverTrigger>
+              <StartFromPromptPopover prompts={prompts as any} />
+            </Popover>
             <span className="mt-2 text-sm text-[#6B7280] px-2">
               Start from a prompt
             </span>
