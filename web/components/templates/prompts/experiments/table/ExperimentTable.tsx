@@ -245,18 +245,17 @@ export function ExperimentTable({
   const updateRowData = useCallback(
     (experimentData: any, inputRecordsData: any[]) => {
       setIsDataLoading(true);
-      const newInputKeys = new Set<string>();
-      if (inputRecordsData && inputRecordsData.length > 0) {
-        inputRecordsData.forEach((row) => {
-          Object.keys(row.inputs).forEach((key) => newInputKeys.add(key));
-        });
-      }
-
-      if (newInputKeys.size === 0) {
-        newInputKeys.add("Input 1");
-      }
-
-      setInputKeys(newInputKeys);
+      // Remove code that updates inputKeys
+      // const newInputKeys = new Set<string>();
+      // if (inputRecordsData && inputRecordsData.length > 0) {
+      //   inputRecordsData.forEach((row) => {
+      //     Object.keys(row.inputs).forEach((key) => newInputKeys.add(key));
+      //   });
+      // }
+      // if (newInputKeys.size === 0) {
+      //   newInputKeys.add("Input 1");
+      // }
+      // setInputKeys(newInputKeys);
 
       const newRowData = inputRecordsData.map((row) => {
         const hypothesisRowData: Record<string, string> = {};
@@ -309,7 +308,7 @@ export function ExperimentTable({
       setRowData(newRowData);
       setIsDataLoading(false);
     },
-    [experimentData, inputRecordsData]
+    [experimentData, inputRecordsData, rowData]
   );
 
   // Modify the useEffect that updates rowData
@@ -654,6 +653,8 @@ export function ExperimentTable({
       const extractedVariables = extractVariables(
         promptVersionTemplate.helicone_template as any
       );
+      console.log("extractedVariables", extractedVariables);
+      console.log("helicone_template", promptVersionTemplate.helicone_template);
       if (extractedVariables.length > 0) {
         setInputKeys(new Set(extractedVariables));
       } else {
