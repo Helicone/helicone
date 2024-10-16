@@ -166,7 +166,7 @@ const getRequestBuilder = (request: HeliconeRequest) => {
     request.request_model ||
     getModelFromPath(request.target_url) ||
     "";
-  console.log('Model extracted in getRequestBuilder:', model);
+  console.log("Model extracted in getRequestBuilder:", model);
   const builderType = getBuilderType(
     model,
     request.provider,
@@ -195,13 +195,22 @@ const getNormalizedRequest = (request: HeliconeRequest): NormalizedRequest => {
     const normalizedRequest = getRequestBuilder(request).build();
     return {
       ...normalizedRequest,
-      model: normalizedRequest.model || request.response_model || request.model_override || request.request_model || "Unsupported",
+      model:
+        normalizedRequest.model ||
+        request.response_model ||
+        request.model_override ||
+        request.request_model ||
+        "Unsupported",
     };
   } catch (error) {
     console.error("Error in getNormalizedRequest:", error);
     return {
       ...getRequestBuilder(request).build(),
-      model: request.response_model || request.model_override || request.request_model || "Unsupported",
+      model:
+        request.response_model ||
+        request.model_override ||
+        request.request_model ||
+        "Unsupported",
     };
   }
 };

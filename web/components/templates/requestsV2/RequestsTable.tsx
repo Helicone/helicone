@@ -1,9 +1,5 @@
-import React from 'react';
-import {
-  useTable,
-  useSortBy,
-  usePagination,
-} from 'react-table';
+import React from "react";
+import { useTable, useSortBy, usePagination } from "react-table";
 
 interface Request {
   request_id: string;
@@ -22,45 +18,42 @@ interface RequestsTableProps {
 }
 
 const RequestsTable: React.FC<RequestsTableProps> = ({ requests }) => {
-  const data = React.useMemo(
-    () => requests,
-    [requests]
-  );
+  const data = React.useMemo(() => requests, [requests]);
 
   const columns = React.useMemo(
     () => [
       {
-        Header: 'Created At',
-        accessor: 'created_at',
+        Header: "Created At",
+        accessor: "created_at",
       },
       {
-        Header: 'Status',
-        accessor: 'status',
+        Header: "Status",
+        accessor: "status",
       },
       {
-        Header: 'User',
-        accessor: 'user',
+        Header: "User",
+        accessor: "user",
       },
       {
-        Header: 'Cost',
-        accessor: 'cost',
+        Header: "Cost",
+        accessor: "cost",
       },
       {
-        Header: 'Model',
-        accessor: 'model',
-        Cell: ({ cell: { value } }) => value || 'Unsupported',
+        Header: "Model",
+        accessor: "model",
+        Cell: ({ cell: { value } }) => value || "Unsupported",
       },
       {
-        Header: 'Request',
-        accessor: 'request_text',
+        Header: "Request",
+        accessor: "request_text",
       },
       {
-        Header: 'Response',
-        accessor: 'response_text',
+        Header: "Response",
+        accessor: "response_text",
       },
       {
-        Header: 'Prompt Tokens',
-        accessor: 'prompt_tokens',
+        Header: "Prompt Tokens",
+        accessor: "prompt_tokens",
       },
     ],
     []
@@ -96,16 +89,22 @@ const RequestsTable: React.FC<RequestsTableProps> = ({ requests }) => {
       <table {...getTableProps()}>
         <thead>
           {headerGroups.map((headerGroup, index) => (
-            <tr {...headerGroup.getHeaderGroupProps()} key={`header-group-${index}`}>
+            <tr
+              {...headerGroup.getHeaderGroupProps()}
+              key={`header-group-${index}`}
+            >
               {headerGroup.headers.map((column, columnIndex) => (
-                <th {...column.getHeaderProps(column.getSortByToggleProps())} key={`header-${columnIndex}`}>
-                  {column.render('Header')}
+                <th
+                  {...column.getHeaderProps(column.getSortByToggleProps())}
+                  key={`header-${columnIndex}`}
+                >
+                  {column.render("Header")}
                   <span>
                     {column.isSorted
                       ? column.isSortedDesc
-                        ? ' 🔽'
-                        : ' 🔼'
-                      : ''}
+                        ? " 🔽"
+                        : " 🔼"
+                      : ""}
                   </span>
                 </th>
               ))}
@@ -120,7 +119,7 @@ const RequestsTable: React.FC<RequestsTableProps> = ({ requests }) => {
                 {row.cells.map((cell, cellIndex) => {
                   return (
                     <td {...cell.getCellProps()} key={`cell-${cellIndex}`}>
-                      {cell.render('Cell')}
+                      {cell.render("Cell")}
                     </td>
                   );
                 })}
@@ -132,42 +131,42 @@ const RequestsTable: React.FC<RequestsTableProps> = ({ requests }) => {
 
       <div className="pagination">
         <button onClick={() => gotoPage(0)} disabled={!canPreviousPage}>
-          {'<<'}
-        </button>{' '}
+          {"<<"}
+        </button>{" "}
         <button onClick={() => previousPage()} disabled={!canPreviousPage}>
-          {'<'}
-        </button>{' '}
+          {"<"}
+        </button>{" "}
         <button onClick={() => nextPage()} disabled={!canNextPage}>
-          {'>'}
-        </button>{' '}
+          {">"}
+        </button>{" "}
         <button onClick={() => gotoPage(pageCount - 1)} disabled={!canNextPage}>
-          {'>>'}
-        </button>{' '}
+          {">>"}
+        </button>{" "}
         <span>
-          Page{' '}
+          Page{" "}
           <strong>
             {pageIndex + 1} of {pageOptions.length}
-          </strong>{' '}
+          </strong>{" "}
         </span>
         <span>
-          | Go to page:{' '}
+          | Go to page:{" "}
           <input
             type="number"
             defaultValue={pageIndex + 1}
-            onChange={e => {
+            onChange={(e) => {
               const page = e.target.value ? Number(e.target.value) - 1 : 0;
               gotoPage(page);
             }}
-            style={{ width: '100px' }}
+            style={{ width: "100px" }}
           />
-        </span>{' '}
+        </span>{" "}
         <select
           value={pageSize}
-          onChange={e => {
+          onChange={(e) => {
             setPageSize(Number(e.target.value));
           }}
         >
-          {[10, 20, 30, 40, 50].map(pageSize => (
+          {[10, 20, 30, 40, 50].map((pageSize) => (
             <option key={pageSize} value={pageSize}>
               Show {pageSize}
             </option>
