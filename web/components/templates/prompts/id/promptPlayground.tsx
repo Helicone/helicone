@@ -18,7 +18,7 @@ import { FunctionCall } from "./toolsRenderingUtils";
 
 import RoleButton from "../../playground/new/roleButton";
 
-type Input = {
+export type Input = {
   id: string;
   inputs: { [key: string]: string };
   source_request: string;
@@ -28,7 +28,7 @@ type Input = {
   auto_prompt_inputs: Record<string, any>[] | unknown[];
 };
 
-type PromptObject = {
+export type PromptObject = {
   model: string;
   messages: {
     role: string;

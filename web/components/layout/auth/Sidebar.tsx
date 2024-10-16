@@ -87,12 +87,6 @@ const Sidebar = ({ setOpen }: SidebarProps) => {
             current: pathname.includes("/prompts"),
           },
           {
-            name: "Experiments",
-            href: "/experiments",
-            icon: BeakerIcon,
-            current: pathname.includes("/experiments"),
-          },
-          {
             name: "Playground",
             href: "/playground",
             icon: TestTube2,
@@ -102,6 +96,12 @@ const Sidebar = ({ setOpen }: SidebarProps) => {
           ...(!user?.email?.includes("@helicone.ai")
             ? []
             : [
+                {
+                  name: "Experiments",
+                  href: "/experiments",
+                  icon: BeakerIcon,
+                  current: pathname.includes("/experiments"),
+                },
                 {
                   name: "Evals",
                   href: "/evals",

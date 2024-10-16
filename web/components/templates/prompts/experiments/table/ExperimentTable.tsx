@@ -635,6 +635,61 @@ export function ExperimentTable({
     setActivePopoverCell,
   ]);
 
+  const extractVariables = useCallback((promptTemplate: PromptObject) => {
+    const regex =
+      /(?:\{\{([^}]+)\}\})|(?:<helicone-prompt-input key="([^"]+)"[^>]*\/>)/g;
+    const variablesSet = new Set<string>();
+
+    promptTemplate?.messages?.forEach((message) => {
+      const content = Array.isArray(message.content)
+        ? message.content.map((c) => c.text).join("\n")
+        : message.content;
+
+      let match;
+      while ((match = regex.exec(content))) {
+        const key = match[1] || match[2];
+        if (key) {
+          variablesSet.add(key.trim());
+        }
+      }
+    });
+
+    return Array.from(variablesSet);
+  }, []);
+
+  useEffect(() => {
+    if (promptVersionTemplate) {
+      console.log("promptVersionTemplate", promptVersionTemplate);
+      const extractedVariables = extractVariables(
+        promptVersionTemplate.helicone_template as any
+      );
+      if (extractedVariables.length > 0) {
+        setInputKeys(new Set(extractedVariables));
+      } else {
+        setInputKeys(new Set(["Input 1"]));
+      }
+    }
+  }, [promptVersionTemplate, extractVariables]);
+
+  // Adjust useEffect to add an empty row if rowData is empty
+  useEffect(() => {
+    if (rowData.length === 0) {
+      const inputFields = Array.from(inputKeys).reduce((acc, key) => {
+        acc[key] = "";
+        return acc;
+      }, {} as Record<string, string>);
+
+      const newRow = {
+        id: `temp-${Date.now()}`,
+        dataset_row_id: null,
+        ...inputFields,
+        isLoading: {},
+      };
+
+      setRowData([newRow]);
+    }
+  }, [inputKeys, rowData.length]);
+
   const columnDefs = useMemo<ColDef[]>(() => {
     let columns: ColDef[] = [
       // Row number column (keep as is)
@@ -1062,18 +1117,20 @@ export function ExperimentTable({
             key="export-button"
             rows={getExperimentExportData()}
           />
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className="py-0 px-2 border border-slate-200 h-8 flex items-center justify-center space-x-1 flex gap-2"
-              >
-                <PlusIcon className="h-4 w-4" />
-                New Experiment
-              </Button>
-            </PopoverTrigger>
-            <NewExperimentPopover />
-          </Popover>
+          {experimentId && (
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="py-0 px-2 border border-slate-200 h-8 flex items-center justify-center space-x-1 flex gap-2"
+                >
+                  <PlusIcon className="h-4 w-4" />
+                  New Experiment
+                </Button>
+              </PopoverTrigger>
+              <NewExperimentPopover />
+            </Popover>
+          )}
         </div>
         {showScoresTable && (
           <ScoresTable
