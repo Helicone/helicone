@@ -24,7 +24,7 @@ export class ScoreManager extends BaseManager {
     this.scoreStore = new ScoreStore(authParams.organizationId);
     this.kafkaProducer = new KafkaProducer();
   }
-  private getDelayMs(): number {
+  private getDefaultDelayMs(): number {
     return process.env.NODE_ENV === "production" ? 10 * 60 * 1000 : 0; // 10 minutes in milliseconds
   }
 
@@ -44,7 +44,7 @@ export class ScoreManager extends BaseManager {
           createdAt: new Date(),
         },
       ],
-      delayMs ?? this.getDelayMs()
+      delayMs
     );
     if (res.error) {
       return err(`Error adding scores: ${res.error}`);
@@ -54,7 +54,7 @@ export class ScoreManager extends BaseManager {
 
   public async addBatchScores(
     scoresMessage: HeliconeScoresMessage[],
-    delayMs: number
+    delayMs?: number
   ): Promise<Result<null, string>> {
     if (!this.kafkaProducer.isKafkaEnabled()) {
       console.log("Kafka is not enabled. Using score manager");
@@ -70,7 +70,7 @@ export class ScoreManager extends BaseManager {
           },
           scoresMessage
         );
-      }, delayMs);
+      }, delayMs ?? this.getDefaultDelayMs());
 
       // Register the timeout and operation with ShutdownService
       DelayedOperationService.getInstance().addDelayedOperation(timeoutId, () =>
