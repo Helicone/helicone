@@ -175,6 +175,7 @@ export class RequestManager extends BaseManager {
       };
     }
   }
+
   private addScoreFilterClickhouse(
     isScored: boolean,
     filter: FilterNode

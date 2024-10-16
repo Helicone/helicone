@@ -19,10 +19,23 @@ export class ExperimentManager extends BaseManager {
     this.ExperimentStore = new ExperimentStore(authParams.organizationId);
   }
 
+  async hasAccessToExperiment(experimentId: string): Promise<boolean> {
+    const experiment = await supabaseServer.client
+      .from("experiment_v2")
+      .select("*")
+      .eq("id", experimentId)
+      .eq("organization", this.authParams.organizationId)
+      .single();
+    return !!experiment.data;
+  }
+
   async getExperimentById(
     experimentId: string,
     include: IncludeExperimentKeys
   ): Promise<Result<Experiment, string>> {
+    if (!(await this.hasAccessToExperiment(experimentId))) {
+      return err("Unauthorized");
+    }
     return this.ExperimentStore.getExperimentById(experimentId, include);
   }
 
@@ -73,9 +86,7 @@ export class ExperimentManager extends BaseManager {
         params.model,
         params.status,
         params.experimentId,
-        params.providerKeyId === "NOKEY"
-          ? null
-          : params.providerKeyId,
+        params.providerKeyId === "NOKEY" ? null : params.providerKeyId,
       ]
     );
 

@@ -1,7 +1,7 @@
 import { User } from "@supabase/auth-helpers-react";
 import { ReactElement } from "react";
 import AuthLayout from "../../components/layout/auth/authLayout";
-import EvalsPage from "../../components/templates/evals/EvalsPage";
+import EvalsPage from "../../components/templates/evals/EvaluatorsPage";
 import { withAuthSSR } from "../../lib/api/handlerWrappers";
 import { SortDirection } from "../../services/lib/sorts/requests/sorts";
 

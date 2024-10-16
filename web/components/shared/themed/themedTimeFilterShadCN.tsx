@@ -21,6 +21,7 @@ import {
 import { useProFeature } from "@/hooks/useProFeature";
 import { ProFeatureDialog } from "../ProBlockerComponents/ProFeatureDialog";
 import { useEffect, useState } from "react";
+import { Input } from "@/components/ui/input";
 
 interface ThemedTimeFilterShadCNProps
   extends React.HTMLAttributes<HTMLDivElement> {
@@ -188,7 +189,7 @@ export function ThemedTimeFilterShadCN({
           <span className="font-semibold text-sm  pt-4">Custom Range:</span>
           <div className="grid gap-2 ">
             <div className="flex items-center gap-2">
-              <input
+              <Input
                 type="number"
                 min="1"
                 value={customNumber}
@@ -269,7 +270,7 @@ export function ThemedTimeFilterShadCN({
             />
             {/* Time selection inputs */}
             <div className="grid grid-cols-2 items-center gap-2">
-              <input
+              <Input
                 type="time"
                 className="text-xs w-min ml-auto border-gray-300 rounded-md"
                 value={date?.from ? format(date.from, "HH:mm") : ""}
@@ -283,7 +284,7 @@ export function ThemedTimeFilterShadCN({
                 }}
               />
 
-              <input
+              <Input
                 type="time"
                 className="text-xs w-min ml-auto border-gray-300 rounded-md"
                 value={date?.to ? format(date.to, "HH:mm") : ""}
