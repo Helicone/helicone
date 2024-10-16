@@ -46,6 +46,7 @@ interface PromptPlaygroundProps {
   defaultEditMode?: boolean;
   editMode?: boolean;
   chatType?: "request" | "response" | "request-response";
+  showSavePrompt?: boolean;
 }
 
 const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
@@ -58,6 +59,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
   defaultEditMode = false,
   editMode = true,
   chatType = "request",
+  showSavePrompt = true,
 }) => {
   const replaceTemplateVariables = (
     content: string,
@@ -276,7 +278,6 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
           setMode={setMode}
           isEditMode={isEditMode}
           setIsEditMode={setIsEditMode}
-          editMode={editMode}
         />
 
         <div className="flex-grow overflow-auto rounded-b-md">
@@ -292,7 +293,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
         )}
 
         {isEditMode && (
-          <div className="flex justify-between items-center py-4 px-8 border-t border-gray-300 dark:border-gray-700 bg-white dark:bg-black rounded-b-lg">
+          <div className="flex justify-between items-center py-4 px-8 border-t border-gray-300 dark:border-gray-700 bg-white dark:bg-black rounded-b-lg space-x-2">
             <div className="w-full flex space-x-2">
               <Button onClick={handleAddMessage} variant="outline" size="sm">
                 <PlusIcon className="h-4 w-4 mr-2" />
@@ -317,20 +318,22 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
                   ))}
                 </SelectContent>
               </Select>
-              <Button
-                onClick={() =>
-                  onSubmit && onSubmit(currentChat, selectedModel || "")
-                }
-                variant="default"
-                size="sm"
-                className="px-4 font-normal"
-              >
-                Save prompt
-              </Button>
+              {showSavePrompt && (
+                <Button
+                  onClick={() =>
+                    onSubmit && onSubmit(currentChat, selectedModel || "")
+                  }
+                  variant="default"
+                  size="sm"
+                  className="px-4 font-normal"
+                >
+                  Save prompt
+                </Button>
+              )}
             </div>
           </div>
         )}
-        {/* {isEditMode && promptVariables.length > 0 && (
+        {isEditMode && promptVariables.length > 0 && (
           <div className="flex flex-col space-y-4 p-4 bg-white dark:bg-gray-950 rounded-b-lg">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
               Inputs
@@ -367,7 +370,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
               </div>
             </div>
           </div>
-        )} */}
+        )}
       </div>
     </div>
   );
