@@ -59,7 +59,7 @@ const useExperiments = (
       id: experiment.id,
       datasetId: experiment.dataset.id,
       datasetName: experiment.dataset.name,
-      experimentName: (experiment.meta as any).name ?? "Untitled Experiment",
+      experimentName: (experiment.meta as any).experiment_name ?? null,
       model: hypothesis?.model,
       createdAt: experiment.createdAt,
       runCount: hypothesis?.runs?.length,

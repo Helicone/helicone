@@ -1,6 +1,6 @@
 import { PlusIcon } from "@heroicons/react/24/outline";
 import { Button } from "@/components/ui/button";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { Message } from "../../requests/chatComponent/types";
 import { JsonView } from "../../requests/chatComponent/jsonView";
 import { MessageRenderer } from "../../requests/chatComponent/MessageRenderer";
@@ -48,6 +48,10 @@ interface PromptPlaygroundProps {
   chatType?: "request" | "response" | "request-response";
   playgroundMode?: "prompt" | "experiment";
   handleCreateExperiment?: () => void;
+  onExtractPromptVariables?: (
+    variables: Array<{ original: string; heliconeTag: string; value: string }>
+  ) => void;
+  onPromptChange?: (prompt: string | PromptObject) => void;
 }
 
 const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
@@ -62,6 +66,8 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
   chatType = "request",
   playgroundMode = "prompt",
   handleCreateExperiment,
+  onExtractPromptVariables,
+  onPromptChange,
 }) => {
   const replaceTemplateVariables = (
     content: string,
@@ -123,7 +129,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
     parsePromptToMessages(prompt, selectedInput?.inputs)
   );
   const [promptVariables, setPromptVariables] = useState<
-    Array<{ original: string; heliconeTag: string }>
+    Array<{ original: string; heliconeTag: string; value: string }>
   >([]);
   const [expandedChildren, setExpandedChildren] = useState<
     Record<string, boolean>
@@ -167,6 +173,54 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
     setCurrentChat(updatedChat);
   };
 
+  const onExtractVariables = useCallback(
+    (variables: Array<{ original: string; heliconeTag: string }>) => {
+      setPromptVariables((prevVariables) => {
+        const variablesMap = new Map(prevVariables.map((v) => [v.original, v]));
+
+        variables.forEach((variable) => {
+          if (!variablesMap.has(variable.original)) {
+            variablesMap.set(variable.original, {
+              ...variable,
+              value: "", // initialize value to empty string
+            });
+          }
+          // else, keep the existing variable with its value
+        });
+
+        return Array.from(variablesMap.values());
+      });
+    },
+    []
+  );
+
+  useEffect(() => {
+    if (onExtractPromptVariables) {
+      console.log("promptVariables", promptVariables);
+      onExtractPromptVariables(promptVariables);
+    }
+  }, [promptVariables]);
+
+  useEffect(() => {
+    if (onPromptChange) {
+      const promptObject: PromptObject = {
+        model: selectedModel || initialModel || "",
+        messages: currentChat.map((message) => ({
+          role: message.role as "user" | "assistant" | "system",
+          content: [
+            {
+              text: Array.isArray(message.content)
+                ? message.content.join(" ")
+                : message.content ?? "",
+              type: "text",
+            },
+          ],
+        })),
+      };
+      onPromptChange(promptObject);
+    }
+  }, [currentChat, selectedModel]);
+
   const renderMessages = () => {
     switch (mode) {
       case "Pretty":
@@ -186,9 +240,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
                   }
                   deleteRow={() => handleDeleteMessage(index)}
                   selectedProperties={selectedInput?.inputs}
-                  onExtractVariables={(variables) =>
-                    setPromptVariables(variables)
-                  }
+                  onExtractVariables={onExtractVariables}
                 />
               </li>
             ))}
@@ -338,17 +390,17 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
       </div>
       {playgroundMode === "experiment" && handleCreateExperiment && (
         <div className="flex flex-col space-y-4 pt-4 bg-white dark:bg-gray-950 rounded-b-lg">
-          {isEditMode && promptVariables.length > 0 && (
+          {/* {isEditMode && promptVariables.length > 0 && (
             <div className="flex flex-col space-y-4 p-4 bg-white dark:bg-gray-950 rounded-b-lg">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                 Inputs
               </h3>
               <p className="text-[#94A3B8]">
                 Please provide a sample value for each input variable in your
-                prompt.{" "}
+                prompt.
               </p>
               <div className="rounded-md border border-gray-200 dark:border-gray-800">
-                <div className=" dark:bg-gray-800 px-4 py-2 text-sm font-medium text-black dark:text-gray-400">
+                <div className="dark:bg-gray-800 px-4 py-2 text-sm font-medium text-black dark:text-gray-400">
                   <div className="grid grid-cols-2 gap-4">
                     <div>Variable Name</div>
                     <div>Value</div>
@@ -366,7 +418,17 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
                         </span>
                         <input
                           type="text"
-                          value={""}
+                          value={variable.value}
+                          onChange={(e) => {
+                            const newValue = e.target.value;
+                            setPromptVariables((prevVariables) =>
+                              prevVariables.map((v) =>
+                                v.original === variable.original
+                                  ? { ...v, value: newValue }
+                                  : v
+                              )
+                            );
+                          }}
                           className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-1 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600"
                         />
                       </div>
@@ -375,7 +437,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
                 </div>
               </div>
             </div>
-          )}
+          )} */}
           <Button
             onClick={handleCreateExperiment}
             variant="default"

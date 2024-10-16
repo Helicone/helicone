@@ -55,6 +55,7 @@ import PromptPlayground, {
 import { Input } from "../../../../ui/input";
 import useNotification from "../../../../shared/notification/useNotification";
 import { useRouter } from "next/router";
+import { ScrollArea } from "../../../../ui/scroll-area";
 
 interface ExperimentTableProps {
   promptSubversionId?: string;
@@ -945,6 +946,9 @@ export function ExperimentTable({
     });
 
     const [promptName, setPromptName] = useState<string>("");
+    const [promptVariables, setPromptVariables] = useState<
+      Array<{ original: string; heliconeTag: string; value: string }>
+    >([]);
 
     const [inputs, setInputs] = useState<{ variable: string; value: string }[]>(
       [{ variable: "sectionTitle", value: "The universe" }]
@@ -964,13 +968,23 @@ export function ExperimentTable({
       setInputs([...inputs, { variable: "", value: "" }]);
     };
 
-    const handlePromptChange = (newPrompt: PromptObject) => {
-      setBasePrompt(newPrompt);
+    const handlePromptChange = (newPrompt: string | PromptObject) => {
+      setBasePrompt(newPrompt as PromptObject);
     };
 
     const handleCreateExperiment = async () => {
-      console.log("prompt", basePrompt);
-      console.log("Creating new experiment with prompt:", basePrompt);
+      if (!promptName || !basePrompt) {
+        notification.setNotification(
+          "Please enter a prompt name and content",
+          "error"
+        );
+        return;
+      }
+
+      if (!basePrompt.model) {
+        notification.setNotification("Please select a model", "error");
+        return;
+      }
 
       const res = await jawn.POST("/v1/prompt/create", {
         body: {
@@ -1007,6 +1021,7 @@ export function ExperimentTable({
           metadata: {
             prompt_id: res.data?.data?.id!,
             prompt_version: res.data?.data?.prompt_version_id!,
+            experiment_name: `${promptName}_V1.0` || "",
           },
           datasetId: dataset.data?.data?.datasetId,
         },
@@ -1033,41 +1048,84 @@ export function ExperimentTable({
         }
       );
 
+      //TODO: Add this back in ?
+
+      // if (promptVariables.length > 0) {
+      //   const inputs: Record<string, string> = promptVariables.reduce(
+      //     (acc: Record<string, string>, variable: any) => {
+      //       acc[variable.original] = variable.value as string;
+      //       return acc;
+      //     },
+      //     {}
+      //   );
+      //   await jawn.POST(
+      //     "/v1/experiment/dataset/{datasetId}/version/{promptVersionId}/row/new",
+      //     {
+      //       body: {
+      //         inputs: inputs,
+      //       },
+      //       params: {
+      //         path: {
+      //           promptVersionId: res.data?.data?.prompt_version_id!,
+      //           datasetId: dataset.data?.data?.datasetId!,
+      //         },
+      //       },
+      //     }
+      //   );
+      // }
+
       if (result.error || !result.data) {
         notification.setNotification("Failed to create subversion", "error");
         return;
       }
 
       notification.setNotification("Prompt created successfully", "success");
+      setIsDataLoading(true);
       router.push(
         `/prompts/${res.data?.data?.id}/subversion/${res.data?.data?.prompt_version_id}/experiment/${experiment.data?.data?.experimentId}`
       );
     };
 
     return (
-      <PopoverContent className="w-[500px] p-4 bg-white shadow-lg rounded-md">
-        <div className="space-y-4">
-          <div className="flex flex-row space-x-2 ">
-            <BeakerIcon className="h-6 w-6" />
-            <h3 className="text-md font-semibold">Original Prompt</h3>
+      <PopoverContent
+        className="w-[600px] p-4 bg-white shadow-lg rounded-md"
+        side="bottom"
+        align="start"
+      >
+        <ScrollArea className="flex flex-col overflow-y-auto max-h-[700px] ">
+          <div className="space-y-4">
+            <div className="flex flex-row space-x-2 ">
+              <BeakerIcon className="h-6 w-6" />
+              <h3 className="text-md font-semibold">Original Prompt</h3>
+            </div>
+
+            <Input
+              placeholder="Prompt Name"
+              value={promptName}
+              onChange={(e) => setPromptName(e.target.value)}
+            />
+
+            <PromptPlayground
+              prompt={basePrompt}
+              editMode={true}
+              selectedInput={selectedInput}
+              submitText={"Create Experiment"}
+              playgroundMode={"experiment"}
+              handleCreateExperiment={handleCreateExperiment}
+              isPromptCreatedFromUi={true}
+              onExtractPromptVariables={(variables) =>
+                setPromptVariables(
+                  variables.map((variable) => ({
+                    original: variable.original,
+                    heliconeTag: variable.heliconeTag,
+                    value: variable.value,
+                  }))
+                )
+              }
+              onPromptChange={handlePromptChange}
+            />
           </div>
-
-          <Input
-            placeholder="Prompt Name"
-            value={promptName}
-            onChange={(e) => setPromptName(e.target.value)}
-          />
-
-          <PromptPlayground
-            prompt={basePrompt}
-            editMode={true}
-            selectedInput={selectedInput}
-            submitText={"Create Experiment"}
-            playgroundMode={"experiment"}
-            handleCreateExperiment={handleCreateExperiment}
-            isPromptCreatedFromUi={true}
-          />
-        </div>
+        </ScrollArea>
       </PopoverContent>
     );
   };
