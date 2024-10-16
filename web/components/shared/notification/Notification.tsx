@@ -97,6 +97,7 @@ const Notification = () => {
       leave="transition-opacity duration-150"
       leaveFrom="opacity-100"
       leaveTo="opacity-0"
+      className="pointer-events-none fixed inset-x-0 bottom-0 pb-8 pt-0 sm:pb-0 sm:top-0 sm:pt-6 z-[1000]"
     >
       <div className="pointer-events-none fixed inset-x-0 bottom-0 pb-8 pt-0 sm:pb-0 sm:top-0 sm:pt-6 z-50">
         <div className="mx-auto w-full sm:max-w-[33vw] px-2 sm:px-6 lg:px-8">
