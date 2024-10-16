@@ -56,6 +56,12 @@ import { Button } from "@/components/ui/button";
 import RequestDiv from "./requestDiv";
 import StreamWarning from "./StreamWarning";
 import UnauthorizedView from "./UnauthorizedView";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface RequestsPageV2Props {
   currentPage: number;
@@ -694,38 +700,56 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
             title={isCached ? "Cached Requests" : "Requests"}
             headerActions={
               <div className="flex flex-row gap-2 items-center">
-                <button
-                  onClick={() => {
-                    refetch();
-                  }}
-                  className="font-medium text-black dark:text-white text-sm items-center flex flex-row hover:text-sky-700 dark:hover:text-sky-300"
-                >
-                  <ArrowPathIcon
-                    className={clsx(
-                      isDataLoading || isRefetching ? "animate-spin" : "",
-                      "h-4 w-4 inline duration-500 ease-in-out"
-                    )}
-                  />
-                </button>
-                <Button
-                  variant="ghost"
-                  className={clsx(
-                    "flex flex-row gap-2 items-center",
-                    isLive ? "text-green-500 animate-pulse" : "text-slate-500"
-                  )}
-                  size="sm_sleek"
-                  onClick={() => setIsLive(!isLive)}
-                >
-                  <div
-                    className={clsx(
-                      isLive ? "bg-green-500" : "bg-slate-500",
-                      "h-2 w-2 rounded-full"
-                    )}
-                  ></div>
-                  <span className="text-xs italic font-medium text-slate-900 dark:text-slate-100 whitespace-nowrap">
-                    {isLive ? "Live" : "Start Live"}
-                  </span>
-                </Button>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={() => {
+                          refetch();
+                        }}
+                        className="font-medium text-black dark:text-white text-sm items-center flex flex-row hover:text-sky-700 dark:hover:text-sky-300"
+                      >
+                        <ArrowPathIcon
+                          className={clsx(
+                            isDataLoading || isRefetching ? "animate-spin" : "",
+                            "h-4 w-4 inline duration-500 ease-in-out"
+                          )}
+                        />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Refresh data</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        className={clsx(
+                          "flex flex-row gap-2 items-center",
+                          isLive ? "text-green-500 animate-pulse" : "text-slate-500"
+                        )}
+                        size="sm_sleek"
+                        onClick={() => setIsLive(!isLive)}
+                      >
+                        <div
+                          className={clsx(
+                            isLive ? "bg-green-500" : "bg-slate-500",
+                            "h-2 w-2 rounded-full"
+                          )}
+                        ></div>
+                        <span className="text-xs italic font-medium text-slate-900 dark:text-slate-100 whitespace-nowrap">
+                          {isLive ? "Live" : "Start Live"}
+                        </span>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{isLive ? "Stop live updates" : "Start live updates"}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </div>
             }
           />
