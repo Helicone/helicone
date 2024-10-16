@@ -6,6 +6,8 @@ import {
   Column,
   UsePaginationInstanceProps,
   UseSortByInstanceProps,
+  TableState,
+  TableInstance,
 } from "react-table";
 
 interface Request {
@@ -71,7 +73,7 @@ const RequestsTable: React.FC<RequestsTableProps> = ({ requests }) => {
     {
       columns,
       data,
-      initialState: { pageIndex: 0 },
+      initialState: { pageIndex: 0 } as Partial<TableState<Request>>,
     },
     useSortBy,
     usePagination

@@ -2,6 +2,7 @@ import {
   UseTableInstanceProps,
   UsePaginationInstanceProps,
   UseSortByInstanceProps,
+  TableState as ReactTableState,
 } from "react-table";
 
 declare module "react-table" {
@@ -9,5 +10,6 @@ declare module "react-table" {
     extends UseTableInstanceProps<D>,
       UsePaginationInstanceProps<D>,
       UseSortByInstanceProps<D> {}
+
+  export type TableState<D extends object = {}> = ReactTableState<D>;
 }
-\
