@@ -23,14 +23,6 @@ const ScoresTable = memo(
     columnOrder: string[];
     experimentId: string;
   }) => {
-    // const scoreCriterias = [
-    //   "Sentiment",
-    //   "Accuracy",
-    //   "Contain words",
-    //   "Shorter than 50 characters",
-    //   "Is English",
-    // ];
-
     const {
       outputColumns,
       inputColumns,
@@ -80,7 +72,9 @@ const ScoresTable = memo(
         columnWidths[col.field!] || (col.width as number);
       const rowData: {
         score_key: string;
-        [key: string]: { percentage: number; count: number } | string;
+        [key: string]:
+          | { percentage: number; count: number; average: number }
+          | string;
       }[] = scoreCriterias.map((score) => ({
         score_key: score,
         ...Object.fromEntries(
@@ -99,6 +93,12 @@ const ScoresTable = memo(
                     ) ?? 0)) /
                     (col.headerComponentParams?.hypothesis.runs?.length ?? 1)) *
                   100.0
+                ).toFixed(2),
+                average: (
+                  (values?.reduce(
+                    (acc: number, curr: number) => acc + curr,
+                    0
+                  ) ?? 0) / (values?.length ?? 1)
                 ).toFixed(2),
                 count: values?.length ?? 0,
               };
@@ -135,19 +135,21 @@ const ScoresTable = memo(
 
     return (
       <div className="overflow-auto">
-        <ScoresEvaluatorsConfig experimentId={experimentId} />
+        <div className="flex justify-between items-center mb-4 border bg-white  p-2">
+          <ScoresEvaluatorsConfig experimentId={experimentId} />
+        </div>
         <table
-          className="w-full border-separate border-spacing-0 bg-white rounded-lg text-sm table-fixed"
+          className="w-full border-separate border-spacing-0 bg-white text-sm table-fixed"
           style={{
             minWidth: `${
               scoresColumnWidth + totalOutputWidth + addExperimentWidth
             }px`,
           }}
         >
-          <thead className="rounded-t-lg">
-            <tr className="rounded-t-lg">
+          <thead className="">
+            <tr className="">
               <th
-                className="text-left p-2 border border-slate-200 bg-slate-50 rounded-tl-lg text-slate-900 font-semibold"
+                className="text-left p-2 border border-slate-200 bg-slate-50  text-slate-900 font-semibold"
                 style={{ width: `${scoresColumnWidth}px` }}
               >
                 <div className="flex items-center gap-2 overflow-hidden">
@@ -177,7 +179,7 @@ const ScoresTable = memo(
                     {col.headerComponentParams?.displayName}
                     {col.headerComponentParams?.displayName === "Original" && (
                       <Badge
-                        className="text-[#334155] bg-[#F8FAFC] border border-[#E2E8F0] rounded-md font-medium hover:bg-slate-100"
+                        className="text-[#334155] bg-[#F8FAFC] border border-[#E2E8F0] font-medium hover:bg-slate-100"
                         variant="outline"
                       >
                         Benchmark
@@ -190,67 +192,79 @@ const ScoresTable = memo(
                 className={clsx("border-t border-slate-200")}
                 style={{ width: `${addExperimentWidth}px` }}
               />
-              <th className="flex-1 border-t border-r border-slate-200 rounded-tr-lg" />
+              <th className="flex-1 border-t border-r border-slate-200 " />
             </tr>
           </thead>
           <tbody>
-            {rowData.map((row, index) => (
-              <tr key={row.score_key} className="text-slate-700">
-                <td
-                  className={clsx(
-                    "p-2 border-b border-r border-slate-200 bg-slate-50",
-                    index === rowData.length - 1 && "rounded-bl-lg"
-                  )}
-                  style={{ width: `${scoresColumnWidth}px` }}
-                >
-                  {row.score_key}
-                </td>
-                {sortedOutputColumns.map((col, colIndex) => {
-                  const value = row[col.field!];
-                  return (
-                    <td
-                      key={col.field}
-                      className={clsx(
-                        "p-2 border-b border-r border-slate-200",
-                        colIndex === 0 && "border-l"
-                      )}
-                      style={{
-                        width: `${columnWidths[col.field!] || col.width}px`,
-                      }}
-                    >
-                      {typeof value !== "string" && (
-                        <div className="flex justify-between">
-                          <span>{value.percentage}%</span>
-                          {value.count > 0 && (
-                            <span>
-                              {value.count}/
-                              {
-                                col.headerComponentParams?.hypothesis.runs
-                                  ?.length
-                              }
-                            </span>
-                          )}
-                        </div>
-                      )}
-                    </td>
-                  );
-                })}
-                <td
-                  className={
-                    index === rowData.length - 1
-                      ? "border-b border-slate-200"
-                      : "border-b-0"
-                  }
-                  style={{ minWidth: `${addExperimentWidth}px` }}
-                />
-                <td
-                  className={clsx(
-                    "border-r border-slate-200",
-                    index === rowData.length - 1 && "border-b rounded-br-lg"
-                  )}
-                />
-              </tr>
-            ))}
+            {rowData.map((row, index) => {
+              const isBoolean = row.score_key.endsWith("-hcone-bool");
+
+              return (
+                <tr key={row.score_key} className="text-slate-700 ">
+                  <td
+                    className={clsx(
+                      "p-2 border-b border-l border-slate-200 bg-white flex justify-between w-full",
+                      index === rowData.length - 1 && ""
+                    )}
+                    style={{ width: `${scoresColumnWidth}px` }}
+                  >
+                    {isBoolean
+                      ? row.score_key.split("-hcone-bool")[0]
+                      : row.score_key}
+                    {isBoolean && <Badge>bool</Badge>}
+                  </td>
+                  {sortedOutputColumns.map((col, colIndex) => {
+                    const value = row[col.field!];
+                    return (
+                      <td
+                        key={col.field}
+                        className={clsx(
+                          "p-2 border-b border-r border-slate-200",
+                          colIndex === 0 && "border-l"
+                        )}
+                        style={{
+                          width: `${columnWidths[col.field!] || col.width}px`,
+                        }}
+                      >
+                        {typeof value !== "string" && (
+                          <div className="flex justify-between">
+                            {isBoolean ? (
+                              <span>{value.percentage}%</span>
+                            ) : (
+                              <span>avg: {value.average}</span>
+                            )}
+
+                            {value.count > 0 && (
+                              <span>
+                                {value.count}/
+                                {
+                                  col.headerComponentParams?.hypothesis.runs
+                                    ?.length
+                                }
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      </td>
+                    );
+                  })}
+                  <td
+                    className={
+                      index === rowData.length - 1
+                        ? "border-b border-slate-200"
+                        : "border-b-0"
+                    }
+                    style={{ minWidth: `${addExperimentWidth}px` }}
+                  />
+                  <td
+                    className={clsx(
+                      "border-r border-slate-200",
+                      index === rowData.length - 1 && "border-b "
+                    )}
+                  />
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
