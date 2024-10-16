@@ -41,31 +41,12 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-import { FileTextIcon } from "lucide-react";
-import {
-  usePrompts,
-  usePromptVersions,
-} from "../../../../../services/hooks/prompts/prompts";
-import { ScrollArea } from "../../../../ui/scroll-area";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../../../../ui/select";
+import { usePrompts } from "../../../../../services/hooks/prompts/prompts";
 import PromptPlayground, {
   PromptObject,
   Input as PromptInput,
 } from "../../id/promptPlayground";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+
 import { Input } from "../../../../ui/input";
 import useNotification from "../../../../shared/notification/useNotification";
 import { useRouter } from "next/router";

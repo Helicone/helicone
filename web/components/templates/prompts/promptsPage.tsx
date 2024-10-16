@@ -23,7 +23,6 @@ import useNotification from "../../shared/notification/useNotification";
 import { SimpleTable } from "../../shared/table/simpleTable";
 import ThemedTabs from "../../shared/themed/themedTabs";
 import useSearchParams from "../../shared/utils/useSearchParams";
-import { Badge } from "../../ui/badge";
 import { Button } from "../../ui/button";
 import {
   Card,

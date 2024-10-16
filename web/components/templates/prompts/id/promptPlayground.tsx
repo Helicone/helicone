@@ -330,7 +330,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
             </div>
           </div>
         )}
-        {isEditMode && promptVariables.length > 0 && (
+        {/* {isEditMode && promptVariables.length > 0 && (
           <div className="flex flex-col space-y-4 p-4 bg-white dark:bg-gray-950 rounded-b-lg">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
               Inputs
@@ -367,7 +367,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
               </div>
             </div>
           </div>
-        )}
+        )} */}
       </div>
     </div>
   );
