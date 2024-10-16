@@ -66,7 +66,9 @@ export default function ViewButton({
                   <Square2StackIcon className="mr-2 h-5 w-5" />
                   Row
                 </div>
-                {currentView === "row" && <CheckIcon className="ml-auto h-5 w-5" />}
+                {currentView === "row" && (
+                  <CheckIcon className="ml-auto h-5 w-5" />
+                )}
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => onViewChange("card")}
