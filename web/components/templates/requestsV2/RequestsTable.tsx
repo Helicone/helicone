@@ -48,7 +48,8 @@ const RequestsTable: React.FC<RequestsTableProps> = ({ requests }) => {
       {
         Header: "Model",
         accessor: "model",
-        Cell: ({ value }: { value: string | undefined }) => value || "Unsupported",
+        Cell: ({ value }: { value: string | undefined }) =>
+          value || "Unsupported",
       },
       {
         Header: "Request",
@@ -74,7 +75,9 @@ const RequestsTable: React.FC<RequestsTableProps> = ({ requests }) => {
     },
     useSortBy,
     usePagination
-  ) as TableInstance<Request> & UsePaginationInstanceProps<Request> & UseSortByInstanceProps<Request>;
+  ) as TableInstance<Request> &
+    UsePaginationInstanceProps<Request> &
+    UseSortByInstanceProps<Request>;
 
   const {
     getTableProps,
