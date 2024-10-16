@@ -13,6 +13,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface ExportButtonProps<T> {
   rows: T[];
@@ -79,18 +85,23 @@ export default function ExportButton<T>(props: ExportButtonProps<T>) {
   };
 
   return (
-    <>
-      <Button
-        variant="ghost"
-        onClick={() => setOpen(true)}
-        className={clsx(
-          "flex items-center gap-2 text-slate-700 dark:text-slate-400",
-          className
-        )}
-        size="xs"
-      >
-        <ArrowDownTrayIcon className="h-4 w-4" />
-      </Button>
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            onClick={() => setOpen(true)}
+            className={clsx(
+              "flex items-center gap-2 text-slate-700 dark:text-slate-400",
+              className
+            )}
+            size="xs"
+          >
+            <ArrowDownTrayIcon className="h-4 w-4" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>Export data</TooltipContent>
+      </Tooltip>
 
       <ThemedModal open={open} setOpen={setOpen}>
         <div className="flex flex-col space-y-4 sm:space-y-8 min-w-[350px] max-w-sm w-full">
@@ -128,8 +139,8 @@ export default function ExportButton<T>(props: ExportButtonProps<T>) {
             </Select>
 
             <p className="text-sm sm:text-md text-gray-500">
-              Export may take a lot of time. Please do not close this modal once
-              export is started.
+              Exporting may take a while depending on the amount of data. Please
+              do not close this modal once export is started.
             </p>
           </div>
 
@@ -159,6 +170,6 @@ export default function ExportButton<T>(props: ExportButtonProps<T>) {
           </div>
         </div>
       </ThemedModal>
-    </>
+    </TooltipProvider>
   );
 }

@@ -882,10 +882,10 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
                 }
               >
                 {selectMode && (
-                  <Row className="gap-5 items-center w-full justify-between bg-white dark:bg-black p-5 border border-slate-300 dark:border-slate-700">
+                  <Row className="gap-5 items-center w-full justify-between bg-white dark:bg-black p-5">
                     <div className="flex flex-row gap-2 items-center">
                       <span className="text-sm font-medium text-slate-900 dark:text-slate-100 whitespace-nowrap">
-                        Select Mode:
+                        Dataset Selection:
                       </span>
                       <span className="text-sm p-2 rounded-md font-medium bg-[#F1F5F9] dark:bg-slate-900 text-[#1876D2] dark:text-slate-100 whitespace-nowrap">
                         {selectedIds.length} selected
