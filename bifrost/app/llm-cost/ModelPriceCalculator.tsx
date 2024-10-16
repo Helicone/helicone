@@ -59,13 +59,13 @@ const LLMPricingFAQ = () => (
       <AccordionItem value="faq-1">
         <AccordionTrigger>How does LLM API pricing work?</AccordionTrigger>
         <AccordionContent>
-          LLM API pricing typically works on a pay-per-use model, where you're
-          charged based on the number of tokens processed. Tokens are pieces of
-          text, with prices varying for input (prompts) and output
+          LLM API pricing typically works on a pay-per-use model, where
+          you&apos;re charged based on the number of tokens processed. Tokens
+          are pieces of text, with prices varying for input (prompts) and output
           (completions). Prices can differ significantly between providers and
-          models. To optimize costs, consider using Helicone's caching feature,
-          which can significantly reduce API calls and save money. Learn more
-          about caching at{" "}
+          models. To optimize costs, consider using Helicone&apos;s caching
+          feature, which can significantly reduce API calls and save money.
+          Learn more about caching at{" "}
           <a
             href="https://docs.helicone.ai/features/advanced-usage/caching"
             target="_blank"
@@ -97,7 +97,7 @@ const LLMPricingFAQ = () => (
           To reduce LLM API costs:
           <ol className="list-decimal pl-5 mt-2 space-y-2">
             <li>
-              Use Helicone's{" "}
+              Use Helicone&apos;s{" "}
               <a
                 href="https://docs.helicone.ai/features/advanced-usage/caching"
                 target="_blank"
@@ -109,7 +109,7 @@ const LLMPricingFAQ = () => (
               to avoid redundant API calls
             </li>
             <li>
-              Optimize your prompts using Helicone's{" "}
+              Optimize your prompts using Helicone&apos;s{" "}
               <a
                 href="https://docs.helicone.ai/features/prompts"
                 target="_blank"
@@ -145,7 +145,7 @@ const LLMPricingFAQ = () => (
               </a>
             </li>
             <li>
-              Use Helicone's{" "}
+              Use Helicone&apos;s{" "}
               <a
                 href="https://docs.helicone.ai/references/how-we-calculate-cost"
                 target="_blank"
@@ -161,7 +161,7 @@ const LLMPricingFAQ = () => (
       </AccordionItem>
       <AccordionItem value="faq-4">
         <AccordionTrigger>
-          What's the difference between input and output tokens in LLM API
+          What&apos;s the difference between input and output tokens in LLM API
           pricing?
         </AccordionTrigger>
         <AccordionContent>
@@ -176,7 +176,7 @@ const LLMPricingFAQ = () => (
             rel="noopener noreferrer"
             className="text-blue-600 hover:text-blue-800 underline"
           >
-            Helicone's prompt management tools
+            Helicone&apos;s prompt management tools
           </a>{" "}
           can help you optimize both input and output tokens for
           cost-efficiency.
@@ -194,7 +194,7 @@ const LLMPricingFAQ = () => (
           their spending for projects to ensure profitability. This requirement
           for accuracy in a production environment ensures that our calculator
           provides reliable estimates. For enterprise-level estimates or custom
-          pricing agreements, it's best to contact providers directly.
+          pricing agreements, it&apos;s best to contact providers directly.
         </AccordionContent>
       </AccordionItem>
     </Accordion>
@@ -242,8 +242,9 @@ const ContributingSection = () => (
       </ol>
     </div>
     <p className="text-gray-600">
-      By contributing, you're helping to maintain the largest fully open-source
-      collection of LLM API pricing data, covering over 300+ models and growing.
+      By contributing, you&apos;re helping to maintain the largest fully
+      open-source collection of LLM API pricing data, covering over 300+ models
+      and growing.
     </p>
     <div className="mt-4">
       <a
@@ -366,7 +367,7 @@ export default function ModelPriceCalculator({
     const inputCostPer1k = formatCost(selectedModelData.inputCostPer1k);
     const outputCostPer1k = formatCost(selectedModelData.outputCostPer1k);
 
-    const tweetText = `I just used Helicone's API pricing calculator for ${formatProviderName(
+    const tweetText = `I just used Helicone&apos;s API pricing calculator for ${formatProviderName(
       selectedModelData.provider
     )} ${selectedModelData.model}.
 
@@ -413,8 +414,8 @@ Optimize your AI API costs:`;
         </h2>
         <p className="text-gray-600 mb-4">
           {provider && model
-            ? `Calculate the cost of using ${model} with Helicone's free pricing tool.`
-            : "Calculate the cost of using AI models with Helicone's free pricing tool."}
+            ? `Calculate the cost of using ${model} with Helicone&apos;s free pricing tool.`
+            : "Calculate the cost of using AI models with Helicone&apos;s free pricing tool."}
         </p>
 
         <button
@@ -835,9 +836,9 @@ Optimize your AI API costs:`;
                   <div>
                     <h4 className="font-semibold">Explore Other Models</h4>
                     <p className="text-gray-600">
-                      Use the "All Models" table to compare costs across
-                      different {formatProviderName(provider)} models or even
-                      other providers.
+                      Use the &quot;All Models&quot; table to compare costs
+                      across different {formatProviderName(provider)} models or
+                      even other providers.
                     </p>
                   </div>
                 </li>
