@@ -13,12 +13,22 @@ import useNotification from "../notification/useNotification";
 export const EvaluatorConfigForm: React.FC<{
   evaluatorType: string;
   onSubmit: (evaluatorId: string) => void;
-}> = ({ evaluatorType, onSubmit }) => {
-  const [name, setName] = useState<string>("Humorous");
-  const [description, setDescription] = useState<string>("");
+  defaultParams?: {
+    name?: string;
+    description?: string;
+    expectedValueType?: "boolean" | "choice" | "range";
+    choiceScores?: Array<{ score: number; description: string }>;
+    rangeMin?: number;
+    rangeMax?: number;
+  };
+}> = ({ evaluatorType, onSubmit, defaultParams }) => {
+  const [name, setName] = useState<string>(defaultParams?.name || "Humorous");
+  const [description, setDescription] = useState<string>(
+    defaultParams?.description || ""
+  );
   const [expectedValueType, setExpectedValueType] = useState<
     "boolean" | "choice" | "range"
-  >("boolean");
+  >(defaultParams?.expectedValueType || "boolean");
 
   const [choiceScores, setChoiceScores] = useState<
     Array<{ score: number; description: string }>
@@ -29,8 +39,12 @@ export const EvaluatorConfigForm: React.FC<{
     { score: 4, description: "Very funny" },
     { score: 5, description: "Hilarious" },
   ]);
-  const [rangeMin, setRangeMin] = useState<number>(0);
-  const [rangeMax, setRangeMax] = useState<number>(100);
+  const [rangeMin, setRangeMin] = useState<number>(
+    defaultParams?.rangeMin || 0
+  );
+  const [rangeMax, setRangeMax] = useState<number>(
+    defaultParams?.rangeMax || 100
+  );
 
   const addChoiceScore = () => {
     setChoiceScores([...choiceScores, { score: 0, description: "" }]);

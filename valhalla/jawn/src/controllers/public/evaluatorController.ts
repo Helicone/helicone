@@ -125,4 +125,20 @@ export class EvaluatorController extends Controller {
     }
     return result;
   }
+
+  @Get("{evaluatorId}/experiments")
+  public async getExperimentsForEvaluator(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() evaluatorId: string
+  ) {
+    const evaluatorManager = new EvaluatorManager(request.authParams);
+    const result = await evaluatorManager.getExperiments(evaluatorId);
+
+    if (result.error || !result.data) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
+    }
+    return result;
+  }
 }
