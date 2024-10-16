@@ -65,9 +65,13 @@ export class EvaluatorManager extends BaseManager {
     const scoreName = getEvaluatorScoreName(evaluator.name);
 
     const reqManager = new ScoreManager(this.authParams);
-    const requestFeedback = await reqManager.addScores(run.resultRequestId, {
-      [scoreName]: result.score,
-    });
+    const requestFeedback = await reqManager.addScores(
+      run.resultRequestId,
+      {
+        [scoreName]: result.score,
+      },
+      0
+    );
 
     return ok(null);
   }
