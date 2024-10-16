@@ -95,11 +95,7 @@ const RateLimitPage = (props: {}) => {
   return (
     <>
       <AuthHeader
-        title={
-          <div className="flex items-center gap-2">
-            Rate limits <Badge size="sm">Beta</Badge>
-          </div>
-        }
+        title={<div className="flex items-center gap-2">Rate limits</div>}
         actions={
           <Link
             href="https://docs.helicone.ai/features/advanced-usage/custom-rate-limits"

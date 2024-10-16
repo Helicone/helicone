@@ -137,11 +137,7 @@ const CachePage = (props: CachePageProps) => {
     <IslandContainer>
       <AuthHeader
         isWithinIsland={true}
-        title={
-          <div className="flex items-center gap-2">
-            Cache <Badge size="sm">Beta</Badge>
-          </div>
-        }
+        title={<div className="flex items-center gap-2">Cache</div>}
         actions={
           <Link
             href="https://docs.helicone.ai/features/advanced-usage/caching"
@@ -306,7 +302,7 @@ openai.chat.completions.create(
                   </div>
                 </div>
                 <div
-                  className="flex flex-col w-full xl:w-1/2 
+                  className="flex flex-col w-full xl:w-1/2
 space-y-4 py-6 bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg h-[30rem]"
                 >
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 text-center">

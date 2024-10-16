@@ -29,7 +29,7 @@ const tiers: {
     mainFeatures: [
       "Up to 100k request logs",
       "Dashboards and Analytics",
-      "Beta access to prompt templates",
+      "Access to prompt templates",
       "Caching and other tooling",
     ],
   },
@@ -41,8 +41,8 @@ const tiers: {
     description: "Pay as you go. Perfect for businesses of all sizes.",
     mainFeatures: [
       "Unlimited request logs (pay as you go)",
-      "Beta access to prompt templates",
-      "Beta access to prompt experiments",
+      "Access to prompt templates",
+      "Access to prompt experiments",
       "Priority support",
       "Lower rate limits on all features",
       "Access to Helicone API",

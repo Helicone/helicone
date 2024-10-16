@@ -117,11 +117,7 @@ const SessionsPage = (props: SessionsPageProps) => {
     >
       <AuthHeader
         isWithinIsland={true}
-        title={
-          <div className="flex items-center gap-2 ml-8">
-            Sessions <Badge>Beta</Badge>
-          </div>
-        }
+        title={<div className="flex items-center gap-2 ml-8">Sessions</div>}
         actions={
           selectedName && (
             <TabsList className="grid w-full grid-cols-2 mr-8">

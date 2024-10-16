@@ -175,7 +175,7 @@ const PromptsPage = (props: PromptsPageProps) => {
           isWithinIsland={true}
           title={
             <div className="flex items-center gap-2">
-              Prompts <HcBadge title="Beta" size="sm" />
+              Prompts
               {hasLimitedAccess && (
                 <InfoBox className="ml-4">
                   <p className="text-sm font-medium flex gap-2">
