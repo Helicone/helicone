@@ -78,7 +78,16 @@ export const EvaluatorConfigForm: React.FC<{
           id="name"
           placeholder="Enter evaluator name"
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={(e) => {
+            if (!/[^a-zA-Z0-9\s]+/g.test(e.target.value)) {
+              setName(e.target.value);
+            } else {
+              notification.setNotification(
+                "Evaluator name can only contain letters and numbers.",
+                "error"
+              );
+            }
+          }}
         />
       </div>
 
