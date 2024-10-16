@@ -8,10 +8,10 @@ import { ScrollArea } from "../../../../../ui/scroll-area";
 import { SelectTrigger, SelectValue } from "../../../../../ui/select";
 import { Button } from "../../../../../ui/button";
 import { FileTextIcon } from "lucide-react";
+import { DialogContent } from "../../../../../ui/dialog";
+import { BeakerIcon } from "@heroicons/react/24/outline";
 
-export const StartFromPromptPopover = ({
-  prompts,
-}: {
+interface StartFromPromptDialogProps {
   prompts: {
     id: string;
     user_defined_id: string;
@@ -21,7 +21,12 @@ export const StartFromPromptPopover = ({
     major_version: number;
     metadata?: Record<string, any>;
   }[];
-}) => {
+  onDialogClose: (open: boolean) => void;
+}
+export const StartFromPromptDialog = ({
+  prompts,
+  onDialogClose,
+}: StartFromPromptDialogProps) => {
   const [selectedPromptId, setSelectedPromptId] = useState<string | null>(null);
 
   const [selectedVersionId, setSelectedVersionId] = useState<string | null>(
@@ -37,18 +42,18 @@ export const StartFromPromptPopover = ({
   };
 
   return (
-    <PopoverContent
-      className="w-[400px] p-4 bg-white shadow-lg rounded-md"
-      side="top"
-      align="center"
-    >
+    <DialogContent className="w-[400px] p-4 bg-white shadow-lg rounded-md">
       <div>
-        <h3 className="font-semibold mb-2">Start with a prompt</h3>
+        <div className="flex flex-row items-center space-x-2 text-center">
+          <BeakerIcon className="w-4 h-4 " />
+          <h3 className="font-medium mb-2 text-lg">Start with a prompt</h3>
+        </div>
+
         <p className="text-sm text-gray-500 mb-2">
           Choose an existing prompt and select the version you want to
           experiment on.
         </p>
-        <ScrollArea className="flex flex-col overflow-y-auto max-h-[30vh] ">
+        <ScrollArea className="flex flex-col overflow-y-auto max-h-[30vh] border border-slate-200 rounded-md p-2 pt-0">
           {prompts &&
             prompts?.map((prompt) => (
               <Button
@@ -82,7 +87,7 @@ export const StartFromPromptPopover = ({
                 }
               />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="text-md">
               {!isLoadingVersions &&
                 promptVersions?.map((version: any) => (
                   <SelectItem
@@ -102,7 +107,14 @@ export const StartFromPromptPopover = ({
           </Select>
         </div>
 
-        <div className="mt-4 flex flex-col space-y-2 items-center justify-center">
+        <div className="mt-4 flex flex-row space-x-2 items-center justify-center">
+          <Button
+            variant="outline"
+            onClick={onDialogClose}
+            className="w-full"
+          >
+            Cancel
+          </Button>
           <Button
             variant="default"
             disabled={!selectedVersionId}
@@ -113,6 +125,6 @@ export const StartFromPromptPopover = ({
           </Button>
         </div>
       </div>
-    </PopoverContent>
+    </DialogContent>
   );
 };
