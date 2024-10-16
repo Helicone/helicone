@@ -1,3 +1,4 @@
+import { providers } from "@/packages/cost/providers/mappings";
 import ModelPriceCalculator from "../../../../ModelPriceCalculator";
 
 export default async function Home({
@@ -19,4 +20,19 @@ export default async function Home({
       </div>
     </>
   );
+}
+
+export async function generateStaticParams() {
+  const paths = [];
+
+  for (const provider of providers) {
+    for (const cost of provider.costs || []) {
+      paths.push({
+        provider: encodeURIComponent(provider.provider),
+        model: encodeURIComponent(cost.model.value),
+      });
+    }
+  }
+
+  return paths;
 }
