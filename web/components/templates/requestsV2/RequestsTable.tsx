@@ -1,5 +1,5 @@
 import React from "react";
-import { useTable, useSortBy, usePagination } from "react-table";
+import { useTable, useSortBy, usePagination, Column } from "react-table";
 
 interface Request {
   request_id: string;
@@ -20,7 +20,7 @@ interface RequestsTableProps {
 const RequestsTable: React.FC<RequestsTableProps> = ({ requests }) => {
   const data = React.useMemo(() => requests, [requests]);
 
-  const columns = React.useMemo(
+  const columns: Column<Request>[] = React.useMemo(
     () => [
       {
         Header: "Created At",
@@ -74,7 +74,7 @@ const RequestsTable: React.FC<RequestsTableProps> = ({ requests }) => {
     previousPage,
     setPageSize,
     state: { pageIndex, pageSize },
-  } = useTable(
+  } = useTable<Request>(
     {
       columns,
       data,

@@ -12,7 +12,8 @@
     "lint": "next lint",
     "lint-fix": "next lint --fix",
     "postbuild": "next-sitemap",
-    "analyze": "cross-env ANALYZE=true next build"
+    "analyze": "cross-env ANALYZE=true next build",
+    "install-react-table": "yarn add react-table @types/react-table"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^0.0.33",
@@ -100,6 +101,7 @@
     "react-resizable": "^3.0.5",
     "react-resizable-panels": "^2.1.4",
     "react-simple-code-editor": "^0.13.1",
+    "react-table": "^7.8.0",
     "stripe": "^16.11.0",
     "tailwind-merge": "^2.5.2",
     "vaul": "^1.0.0"
