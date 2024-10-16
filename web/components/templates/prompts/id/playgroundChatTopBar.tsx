@@ -31,9 +31,8 @@ export const PlaygroundChatTopBar: React.FC<PlaygroundChatTopBarProps> = ({
     <div className="h-12 px-2 rounded-t-md flex flex-row items-center justify-between w-full bg-gray-50 dark:bg-black text-gray-900 dark:text-gray-100  border-gray-200 dark:border-gray-700">
       <div className="flex flex-row items-center space-x-2 py-2">
         <div className="flex rounded-md overflow-hidden ">
-          {isPromptCreatedFromUi &&
-            isPromptCreatedFromUi === true &&
-            editMode && (
+          {(isPromptCreatedFromUi && isPromptCreatedFromUi === true) ||
+            (editMode && (
               <button
                 onClick={() => setIsEditMode(true)}
                 className={`py-1 px-3 text-xs font-semibold ${
@@ -44,7 +43,7 @@ export const PlaygroundChatTopBar: React.FC<PlaygroundChatTopBarProps> = ({
               >
                 Edit
               </button>
-            )}
+            ))}
           <button
             onClick={() => setIsEditMode(false)}
             className={`py-1 px-3 text-xs font-semibold ${

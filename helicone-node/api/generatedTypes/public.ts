@@ -1059,6 +1059,7 @@ export interface components {
     };
     CreatePromptResponse: {
       id: string;
+      prompt_version_id: string;
     };
     ResultSuccess_CreatePromptResponse_: {
       data: components["schemas"]["CreatePromptResponse"];

@@ -31,6 +31,9 @@ interface PromptChatRowProps {
   editMode?: boolean;
   promptMode?: boolean;
   selectedProperties: Record<string, string> | undefined;
+  onExtractVariables?: (
+    variables: Array<{ original: string; heliconeTag: string }>
+  ) => void;
 }
 
 export const hasImage = (content: string | any[] | null) => {
@@ -173,8 +176,15 @@ const RenderWithPrettyInputKeys = (props: {
 };
 
 const PromptChatRow = (props: PromptChatRowProps) => {
-  const { index, message, callback, deleteRow, editMode, selectedProperties } =
-    props;
+  const {
+    index,
+    message,
+    callback,
+    deleteRow,
+    editMode,
+    selectedProperties,
+    onExtractVariables,
+  } = props;
 
   const [currentMessage, setCurrentMessage] = useState(message);
   const [minimize, setMinimize] = useState(false);
@@ -415,8 +425,16 @@ const PromptChatRow = (props: PromptChatRowProps) => {
     if (isEditing) {
       const newVariables = extractVariables(contentAsString || "");
       setPromptVariables(newVariables);
+      onExtractVariables?.(
+        newVariables.map((item) => {
+          return {
+            original: item.original.match(/key="([^"]+)"/)?.[1] || "",
+            heliconeTag: item.heliconeTag,
+          };
+        })
+      );
     }
-  }, [isEditing, contentAsString, extractVariables]);
+  }, [isEditing, contentAsString, extractVariables, onExtractVariables]);
 
   // Update currentMessage when the prop message changes
   useEffect(() => {

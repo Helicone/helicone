@@ -133,6 +133,7 @@ export interface PromptInputRecord {
 
 export interface CreatePromptResponse {
   id: string;
+  prompt_version_id: string;
 }
 
 @Route("v1/prompt")
