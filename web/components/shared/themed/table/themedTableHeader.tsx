@@ -36,7 +36,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Card } from "@/components/ui/card";
 
 interface ThemedTableHeaderProps<T> {
   rows?: T[];
@@ -321,9 +320,7 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
                     />
                   </span>
                 </TooltipTrigger>
-                <TooltipContent>
-                  <Card className="py-1 px-2 text-xs mb-1">Manage columns</Card>
-                </TooltipContent>
+                <TooltipContent>Manage columns</TooltipContent>
               </Tooltip>
             )}
 
@@ -334,9 +331,7 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
                     <ExportButton rows={rows} />
                   </span>
                 </TooltipTrigger>
-                <TooltipContent>
-                  <Card className="py-1 px-2 text-xs mb-1">Export data</Card>
-                </TooltipContent>
+                <TooltipContent>Export data</TooltipContent>
               </Tooltip>
             )}
 
@@ -352,9 +347,7 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
                     />
                   </span>
                 </TooltipTrigger>
-                <TooltipContent>
-                  <Card className="py-1 px-2 text-xs mb-1">Toggle view</Card>
-                </TooltipContent>
+                <TooltipContent>Toggle view</TooltipContent>
               </Tooltip>
             )}
 
