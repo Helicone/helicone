@@ -9,92 +9,65 @@ import { generateOpenAITemplate } from "@/components/shared/CreateNewEvaluator/e
 import { MinusIcon, PlusIcon } from "@heroicons/react/24/outline";
 import React, { useMemo, useState } from "react";
 import useNotification from "../notification/useNotification";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Col, Row } from "@/components/layout/common";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { InfoIcon } from "lucide-react";
+
+export type EvaluatorConfigFormPreset = {
+  name: string;
+  description: string;
+  expectedValueType: "boolean" | "choice" | "range";
+  choiceScores?: Array<{ score: number; description: string }>;
+  rangeMin?: number;
+  rangeMax?: number;
+};
 
 export const EvaluatorConfigForm: React.FC<{
   evaluatorType: string;
   onSubmit: (evaluatorId: string) => void;
-  defaultParams?: {
-    name?: string;
-    description?: string;
-    expectedValueType?: "boolean" | "choice" | "range";
-    choiceScores?: Array<{ score: number; description: string }>;
-    rangeMin?: number;
-    rangeMax?: number;
-  };
-}> = ({ evaluatorType, onSubmit, defaultParams }) => {
-  const [name, setName] = useState<string>(defaultParams?.name || "Humorous");
-  const [description, setDescription] = useState<string>(
-    defaultParams?.description || ""
-  );
-  const [expectedValueType, setExpectedValueType] = useState<
-    "boolean" | "choice" | "range"
-  >(defaultParams?.expectedValueType || "boolean");
-
-  const [choiceScores, setChoiceScores] = useState<
-    Array<{ score: number; description: string }>
-  >([
-    { score: 1, description: "Not funny" },
-    { score: 2, description: "Slightly funny" },
-    { score: 3, description: "Funny" },
-    { score: 4, description: "Very funny" },
-    { score: 5, description: "Hilarious" },
-  ]);
-  const [rangeMin, setRangeMin] = useState<number>(
-    defaultParams?.rangeMin || 0
-  );
-  const [rangeMax, setRangeMax] = useState<number>(
-    defaultParams?.rangeMax || 100
-  );
-
-  const addChoiceScore = () => {
-    setChoiceScores([...choiceScores, { score: 0, description: "" }]);
-  };
-
-  const removeChoiceScore = (index: number) => {
-    setChoiceScores(choiceScores.filter((_, i) => i !== index));
-  };
-
-  const updateChoiceScore = (
-    index: number,
-    field: "score" | "description",
-    value: string
+  configFormParams: EvaluatorConfigFormPreset;
+  setConfigFormParams: (params: EvaluatorConfigFormPreset) => void;
+}> = ({ evaluatorType, onSubmit, configFormParams, setConfigFormParams }) => {
+  const updateConfigFormParams = (
+    updates: Partial<EvaluatorConfigFormPreset>
   ) => {
-    const newScores = [...choiceScores];
-    if (field === "score") {
-      newScores[index].score = Number(value);
-    } else {
-      newScores[index].description = value;
-    }
-    setChoiceScores(newScores);
+    setConfigFormParams({ ...configFormParams, ...updates });
   };
+
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+
+  const notification = useNotification();
 
   const jawn = useJawnClient();
 
   const openAIFunction = useMemo(() => {
     return generateOpenAITemplate({
-      name,
-      description,
-      expectedValueType,
-      choiceScores,
-      rangeMin,
-      rangeMax,
+      name: configFormParams.name,
+      description: configFormParams.description,
+      expectedValueType: configFormParams.expectedValueType,
+      choiceScores: configFormParams.choiceScores,
+      rangeMin: configFormParams.rangeMin,
+      rangeMax: configFormParams.rangeMax,
       model: "gpt-4o",
     });
-  }, [name, description, expectedValueType, choiceScores, rangeMin, rangeMax]);
-
-  const notification = useNotification();
+  }, [configFormParams]);
 
   return (
-    <>
+    <Col className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="name">Name</Label>
         <Input
           id="name"
           placeholder="Enter evaluator name"
-          value={name}
+          value={configFormParams.name}
           onChange={(e) => {
             if (!/[^a-zA-Z0-9\s]+/g.test(e.target.value)) {
-              setName(e.target.value);
+              updateConfigFormParams({ name: e.target.value });
             } else {
               notification.setNotification(
                 "Evaluator name can only contain letters and numbers.",
@@ -109,35 +82,89 @@ export const EvaluatorConfigForm: React.FC<{
         <Label>Expected Value Type</Label>
         <RadioGroup
           defaultValue="boolean"
+          value={configFormParams.expectedValueType}
           onValueChange={(value) =>
-            setExpectedValueType(value as "boolean" | "choice" | "range")
+            updateConfigFormParams({
+              expectedValueType: value as "boolean" | "choice" | "range",
+            })
           }
         >
           <div className="flex items-center space-x-2">
             <RadioGroupItem value="boolean" id="boolean" />
             <Label htmlFor="boolean">Boolean</Label>
+            <Tooltip>
+              <TooltipTrigger>
+                <InfoIcon className="h-4 w-4" />
+              </TooltipTrigger>
+              <TooltipContent>
+                Boolean scorers allow you to assign a score to a response based
+                on whether it is true or false.
+              </TooltipContent>
+            </Tooltip>
           </div>
           <div className="flex items-center space-x-2">
             <RadioGroupItem value="choice" id="choice" />
             <Label htmlFor="choice">Choice Scorer</Label>
+            <Tooltip>
+              <TooltipTrigger>
+                <InfoIcon className="h-4 w-4" />
+              </TooltipTrigger>
+              <TooltipContent>
+                Choice scorers allow you to assign a score to a response based
+                on how well it matches a predefined set of choices.
+              </TooltipContent>
+            </Tooltip>
           </div>
           <div className="flex items-center space-x-2">
             <RadioGroupItem value="range" id="range" />
             <Label htmlFor="range">Range Scorer</Label>
+            <Tooltip>
+              <TooltipTrigger>
+                <InfoIcon className="h-4 w-4" />
+              </TooltipTrigger>
+              <TooltipContent>
+                Range scorers allow you to assign a score to a response based on
+                how well it matches a predefined range.
+              </TooltipContent>
+            </Tooltip>
           </div>
         </RadioGroup>
       </div>
+      {configFormParams.expectedValueType === "boolean" && (
+        <div className="space-y-2">
+          <Label>Boolean Scorer</Label>
+          <br />
+          <span className="text-xs text-gray-500">
+            Boolean scorers allow you to assign a score to a response based on
+            whether it is true or false.
+          </span>
+        </div>
+      )}
 
-      {expectedValueType === "choice" && (
+      {configFormParams.expectedValueType === "choice" && (
         <div className="space-y-2">
           <Label>Choice Scores</Label>
-          {choiceScores.map((item, index) => (
+          <br />
+          <span className="text-xs text-gray-500">
+            You can add as many choice scores as you want, and they will be used
+            to score the response based on how well it matches a predefined set
+            of choices.
+          </span>
+          {configFormParams.choiceScores?.map((item, index) => (
             <div key={index} className="flex items-center space-x-2">
               <Input
                 type="number"
                 value={item.score}
                 onChange={(e) =>
-                  updateChoiceScore(index, "score", e.target.value)
+                  updateConfigFormParams({
+                    choiceScores: [
+                      ...(configFormParams.choiceScores || []),
+                      {
+                        score: Number(e.target.value),
+                        description: item.description,
+                      },
+                    ],
+                  })
                 }
                 className="w-24"
               />
@@ -145,7 +172,14 @@ export const EvaluatorConfigForm: React.FC<{
                 type="text"
                 value={item.description}
                 onChange={(e) =>
-                  updateChoiceScore(index, "description", e.target.value)
+                  updateConfigFormParams({
+                    choiceScores: configFormParams.choiceScores?.map(
+                      (item, index) =>
+                        index === index
+                          ? { score: item.score, description: e.target.value }
+                          : item
+                    ),
+                  })
                 }
                 placeholder="Short description"
                 className="flex-grow"
@@ -155,17 +189,30 @@ export const EvaluatorConfigForm: React.FC<{
                   type="button"
                   variant="outline"
                   size="icon"
-                  onClick={() => removeChoiceScore(index)}
+                  onClick={() =>
+                    updateConfigFormParams({
+                      choiceScores: configFormParams.choiceScores?.filter(
+                        (_, i) => i !== index
+                      ),
+                    })
+                  }
                 >
                   <MinusIcon className="h-4 w-4" />
                 </Button>
               )}
-              {index === choiceScores.length - 1 && (
+              {index === (configFormParams.choiceScores?.length || 0) - 1 && (
                 <Button
                   type="button"
                   variant="outline"
                   size="icon"
-                  onClick={addChoiceScore}
+                  onClick={() =>
+                    updateConfigFormParams({
+                      choiceScores: [
+                        ...(configFormParams.choiceScores || []),
+                        { score: 0, description: "" },
+                      ],
+                    })
+                  }
                 >
                   <PlusIcon className="h-4 w-4" />
                 </Button>
@@ -175,24 +222,32 @@ export const EvaluatorConfigForm: React.FC<{
         </div>
       )}
 
-      {expectedValueType === "range" && (
+      {configFormParams.expectedValueType === "range" && (
         <div className="space-y-2">
           <Label>Range Scorer</Label>
+          <br />
+          <span className="text-xs text-gray-500">
+            You can set the minimum and maximum values for the range. The LLM
+            will return a score between these values based on how well it
+            matches the predefined range.
+          </span>
           <div className="flex items-center space-x-2">
-            <Label htmlFor="range-min">Min</Label>
             <Input
               id="range-min"
               type="number"
-              value={rangeMin}
-              onChange={(e) => setRangeMin(Number(e.target.value))}
+              value={configFormParams.rangeMin}
+              onChange={(e) =>
+                updateConfigFormParams({ rangeMin: Number(e.target.value) })
+              }
               className="w-24"
             />
-            <Label htmlFor="range-max">Max</Label>
             <Input
               id="range-max"
               type="number"
-              value={rangeMax}
-              onChange={(e) => setRangeMax(Number(e.target.value))}
+              value={configFormParams.rangeMax}
+              onChange={(e) =>
+                updateConfigFormParams({ rangeMax: Number(e.target.value) })
+              }
               className="w-24"
             />
           </div>
@@ -201,46 +256,69 @@ export const EvaluatorConfigForm: React.FC<{
 
       <div className="space-y-2">
         <Label htmlFor="description">Description</Label>
+        <br />
+        <span className="text-xs text-gray-500">
+          Desciptions are used by the LLM to understand what the evaluator does.
+        </span>
         <Textarea
           id="description"
-          placeholder="Enter evaluator description"
+          placeholder={
+            configFormParams.expectedValueType === "boolean"
+              ? "Return true if the response is funny, false otherwise... (optional)"
+              : configFormParams.expectedValueType === "choice"
+              ? "Return the score of the response based on how well it matches a predefined set of choices... (optional)"
+              : "Return a score between 0 and 100 where 0 is super boring and 100 is hilarious... (optional)"
+          }
           className="min-h-[100px]"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
+          value={configFormParams.description}
+          onChange={(e) =>
+            updateConfigFormParams({ description: e.target.value })
+          }
         />
       </div>
+      <Row className="justify-between">
+        <Button
+          onClick={() => {
+            jawn
+              .POST("/v1/evaluator", {
+                body: {
+                  llm_template: openAIFunction,
+                  scoring_type: `LLM-${configFormParams.expectedValueType.toUpperCase()}`,
+                  name: configFormParams.name,
+                },
+              })
+              .then((res) => {
+                if (res.data?.data) {
+                  notification.setNotification(
+                    "Evaluator created successfully",
+                    "success"
+                  );
+                  onSubmit(res.data.data.id);
+                } else {
+                  notification.setNotification(
+                    "Failed to create evaluator",
+                    "error"
+                  );
+                }
+              });
+          }}
+        >
+          Create Evaluator
+        </Button>
 
-      <Button
-        onClick={() => {
-          jawn
-            .POST("/v1/evaluator", {
-              body: {
-                llm_template: openAIFunction,
-                scoring_type: `LLM-${expectedValueType.toUpperCase()}`,
-                name,
-              },
-            })
-            .then((res) => {
-              if (res.data?.data) {
-                notification.setNotification(
-                  "Evaluator created successfully",
-                  "success"
-                );
-                onSubmit(res.data.data.id);
-              } else {
-                notification.setNotification(
-                  "Failed to create evaluator",
-                  "error"
-                );
-              }
-            });
-        }}
-      >
-        Create Evaluator
-      </Button>
-      <pre className="text-[8px] whitespace-pre-wrap bg-gray-100 p-4 rounded-md overflow-x-auto">
-        {openAIFunction}
-      </pre>
-    </>
+        <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
+          <DialogTrigger asChild>
+            <Button variant="outline" onClick={() => setIsPreviewOpen(true)}>
+              Preview OpenAI Function
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+            <pre className="text-xs whitespace-pre-wrap bg-gray-100 p-4 rounded-md overflow-x-auto">
+              {openAIFunction}
+            </pre>
+          </DialogContent>
+        </Dialog>
+      </Row>
+    </Col>
   );
 };
