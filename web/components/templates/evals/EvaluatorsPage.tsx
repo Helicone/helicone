@@ -35,16 +35,7 @@ import { EvalMetric, INITIAL_COLUMNS } from "./EvaluratorColumns";
 import { useEvaluators } from "./EvaluatorHook";
 
 // Import Sheet components
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Col } from "@/components/layout/common";
+
 import EvaluatorDetailsSheet from "./EvaluatorDetailsSheet";
 
 const EvalsPage = () => {
