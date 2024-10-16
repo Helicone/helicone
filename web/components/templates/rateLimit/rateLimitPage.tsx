@@ -1,5 +1,5 @@
 import { BookOpenIcon } from "@heroicons/react/24/outline";
-import { AreaChart, Badge } from "@tremor/react";
+import { AreaChart } from "@tremor/react";
 import Link from "next/link";
 import { useState } from "react";
 import { TimeFilter } from "../../../lib/api/handlerWrappers";
