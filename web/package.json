@@ -99,6 +99,7 @@
     "react-resizable": "^3.0.5",
     "react-resizable-panels": "^2.1.4",
     "react-simple-code-editor": "^0.13.1",
+    "rss-parser": "^3.13.0",
     "stripe": "^16.11.0",
     "tailwind-merge": "^2.5.2",
     "vaul": "^1.0.0"

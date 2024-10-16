@@ -21,6 +21,7 @@ import { useMemo, useEffect, useRef, useState } from "react";
 import { useOrg } from "../organizationContext";
 import OrgDropdown from "../orgDropdown";
 import NavItem from "./NavItem";
+import { ChangelogItem } from "./Sidebar";
 
 export interface NavigationItem {
   name: string;
@@ -33,11 +34,11 @@ export interface NavigationItem {
 
 interface SidebarProps {
   NAVIGATION: NavigationItem[];
-
+  changelog: ChangelogItem[];
   setOpen: (open: boolean) => void;
 }
 
-const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
+const DesktopSidebar = ({ changelog, NAVIGATION }: SidebarProps) => {
   const org = useOrg();
   const tier = org?.currentOrg?.tier;
   const router = useRouter();
@@ -269,20 +270,24 @@ const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
           {tier !== "growth" &&
             tier !== "pro" &&
             canShowInfoBox &&
-            !isCollapsed && (
-              <div className="bg-sky-500/10 rounded-lg border-l-4 border-l-sky-500 border-y border-r border-y-sky-200 border-r-sky-200 text-sky-500 flex flex-col md:flex-row md:gap-2 gap-4 justify-between md:justify-center md:items-center items-start p-2 mt-2 mx-2 mb-8">
+            !isCollapsed &&
+            changelog?.map((item) => (
+              <div
+                key={item.title}
+                className="bg-sky-500/10 rounded-lg border-l-4 border-l-sky-500 border-y border-r border-y-sky-200 border-r-sky-200 text-sky-500 flex flex-col md:flex-row md:gap-2 gap-4 justify-between md:justify-center md:items-center items-start p-2 mt-2 mx-2 mb-8"
+              >
                 <h1 className="text-xs text-start font-medium tracking-tight leading-tight">
-                  🎉 Introducing a new way to perfect your prompts.{" "}
+                  🎉 {item.title}
                   <Link
-                    href="https://helicone.ai/experiments"
+                    href={item.link}
                     target="_blank"
                     className="underline decoration-sky-400 decoration-1 underline-offset-2 font-semibold"
                   >
-                    Get early access here.
+                    {item.description}
                   </Link>{" "}
                 </h1>
               </div>
-            )}
+            ))}
           {canShowInfoBox && !isCollapsed && shouldShowInfoBox && (
             <div className="p-2">
               <InfoBox icon={() => <></>} className="flex flex-col">

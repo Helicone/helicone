@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/router";
 import { useMemo, useState } from "react";
-import { useAlertBanners } from "../../../services/hooks/admin";
+import { useAlertBanners, useChangelog } from "../../../services/hooks/admin";
 import UpgradeProModal from "../../shared/upgradeProModal";
 import { Row } from "../common";
 import { useOrg } from "../organizationContext";
@@ -38,6 +38,8 @@ const AuthLayout = (props: AuthLayoutProps) => {
     [alertBanners]
   );
 
+  const { changelog, isLoading: isChangelogLoading } = useChangelog();
+
   return (
     <MetaData
       title={`${currentPage} ${
@@ -48,7 +50,24 @@ const AuthLayout = (props: AuthLayoutProps) => {
         <DemoModal />
         <Row className="flex-col md:flex-row">
           <div className=" w-full md:w-min ">
-            <Sidebar setOpen={setOpen} />
+            <Sidebar
+              changelog={
+                changelog
+                  ? changelog.slice(0, 2).map((item) => ({
+                      title: item.title,
+                      description: item.description,
+                      link: item.link,
+                      content: item.content,
+                      "content:encoded": item["content:encoded"],
+                      "content:encodedSnippet": item["content:encodedSnippet"],
+                      contentSnippet: item.contentSnippet,
+                      isoDate: item.isoDate,
+                      pubDate: item.pubDate,
+                    }))
+                  : []
+              }
+              setOpen={setOpen}
+            />
           </div>
           <div className="flex-grow max-w-full overflow-hidden">
             <MainContent banner={banner} pathname={pathname}>
