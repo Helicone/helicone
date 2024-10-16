@@ -17,6 +17,15 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { InfoIcon } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+const modelOptions = ["gpt-4o", "gpt-4o-mini", "gpt-3.5-turbo"];
 
 export type EvaluatorConfigFormPreset = {
   name: string;
@@ -25,6 +34,7 @@ export type EvaluatorConfigFormPreset = {
   choiceScores?: Array<{ score: number; description: string }>;
   rangeMin?: number;
   rangeMax?: number;
+  model: (typeof modelOptions)[number];
 };
 
 export const EvaluatorConfigForm: React.FC<{
@@ -53,7 +63,7 @@ export const EvaluatorConfigForm: React.FC<{
       choiceScores: configFormParams.choiceScores,
       rangeMin: configFormParams.rangeMin,
       rangeMax: configFormParams.rangeMax,
-      model: "gpt-4o",
+      model: configFormParams.model,
     });
   }, [configFormParams]);
 
@@ -276,6 +286,31 @@ export const EvaluatorConfigForm: React.FC<{
           }
         />
       </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="model">Model</Label>
+        <Select
+          defaultValue="gpt-4o"
+          value={configFormParams.model}
+          onValueChange={(value) =>
+            updateConfigFormParams({
+              model: value as "gpt-4o" | "gpt-4o-mini" | "gpt-3.5-turbo",
+            })
+          }
+        >
+          <SelectTrigger className="w-[300px]">
+            <SelectValue placeholder="Select a model" />
+          </SelectTrigger>
+          <SelectContent>
+            {modelOptions.map((model) => (
+              <SelectItem key={model} value={model}>
+                {model}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
       <Row className="justify-between">
         <Button
           onClick={() => {

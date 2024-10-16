@@ -21,6 +21,7 @@ export const LLM_AS_A_JUDGE_OPTIONS: {
   {
     name: "Humor",
     preset: {
+      model: "gpt-4o-mini",
       choiceScores: [
         { score: 1, description: "Not funny" },
         { score: 2, description: "Slightly funny" },
@@ -38,6 +39,7 @@ export const LLM_AS_A_JUDGE_OPTIONS: {
   {
     name: "SQL",
     preset: {
+      model: "gpt-4o-mini",
       expectedValueType: "boolean",
       description: "Check if the response is a valid SQL query",
       name: "SQL",
@@ -48,6 +50,7 @@ export const LLM_AS_A_JUDGE_OPTIONS: {
   {
     name: "Moderation",
     preset: {
+      model: "gpt-4o-mini",
       expectedValueType: "boolean",
       description: "Check if the response is appropriate",
       name: "Moderation",
@@ -58,6 +61,7 @@ export const LLM_AS_A_JUDGE_OPTIONS: {
   {
     name: "Language - English",
     preset: {
+      model: "gpt-4o-mini",
       expectedValueType: "boolean",
       description: "Check if the response is in English",
       name: "Language - English",
