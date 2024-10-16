@@ -1113,7 +1113,7 @@ export function ExperimentTable({
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
-                  className="py-0 px-2 border border-slate-200 h-8 flex items-center justify-center space-x-1 flex gap-2"
+                  className="py-0 px-2 border border-slate-200 h-8 flex items-center justify-center space-x-1 gap-2"
                 >
                   <PlusIcon className="h-4 w-4" />
                   New Experiment
