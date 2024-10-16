@@ -135,8 +135,17 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
     selectedInput?.inputs || {}
   );
 
+  console.log("variableValues", variableValues);
+
   // State to store all extracted variables
   const [allVariables, setAllVariables] = useState<string[]>([]);
+
+  // Add this near the top of the component, with other useEffect hooks
+  useEffect(() => {
+    if (selectedInput?.inputs) {
+      setVariableValues(selectedInput.inputs);
+    }
+  }, [selectedInput]);
 
   // Add this useEffect to update selectedModel when initialModel changes
   useEffect(() => {
@@ -173,15 +182,16 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
     setAllVariables(variables);
 
     // Initialize variableValues if not already set
-    const initialValues: Record<string, string> = { ...variableValues };
-    variables.forEach((key) => {
-      if (!(key in initialValues)) {
-        initialValues[key] = "";
-      }
+    setVariableValues((prevValues) => {
+      const newValues = { ...prevValues };
+      variables.forEach((key) => {
+        if (!(key in newValues)) {
+          newValues[key] = selectedInput?.inputs?.[key] || "";
+        }
+      });
+      return newValues;
     });
-    setVariableValues(initialValues);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentChat]);
+  }, [currentChat, selectedInput]);
 
   // Handle changes to variable values
   const handleVariableChange = (key: string, value: string) => {
@@ -220,105 +230,17 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
   };
 
   const renderMessages = () => {
-    switch (mode) {
-      case "Pretty":
-        return (
-          <ul className="w-full relative h-fit">
-            {currentChat.map((message, index) => (
-              <li
-                key={message.id}
-                className="dark:border-gray-700 last:border-b-0 z-10 last:rounded-xl"
-              >
-                <PromptChatRow
-                  message={message}
-                  editMode={isEditMode}
-                  index={index}
-                  callback={(userText, role) =>
-                    handleUpdateMessage(index, userText, role)
-                  }
-                  deleteRow={() => handleDeleteMessage(index)}
-                  // Pass variableValues to replace variables in each message
-                  selectedProperties={variableValues}
-                />
-              </li>
-            ))}
-            {selectedInput?.auto_prompt_inputs &&
-              selectedInput?.auto_prompt_inputs.length > 0 && (
-                <div className="flex flex-col w-full h-full relative space-y-8 bg-white border-gray-300 dark:border-gray-700 pl-4 ">
-                  <div
-                    className={
-                      "items-start p-4 text-left flex flex-col space-y-4 text-black dark:text-white"
-                    }
-                  >
-                    <div className="flex items-center justify-center">
-                      <div className="w-20">
-                        <RoleButton
-                          role={"assistant"}
-                          onRoleChange={() => {}}
-                          disabled={!editMode}
-                          size="medium"
-                        />
-                      </div>
-                    </div>
-                    <div className="overflow-auto w-full ">
-                      <FunctionCall
-                        auto_prompt_inputs={selectedInput.auto_prompt_inputs}
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
-          </ul>
-        );
-      case "Markdown":
-        return (
-          <MessageRenderer
-            messages={currentChat}
-            showAllMessages={true}
-            expandedChildren={expandedChildren}
-            setExpandedChildren={setExpandedChildren}
-            selectedProperties={variableValues}
-            isHeliconeTemplate={false}
-            autoInputs={selectedInput?.auto_prompt_inputs}
-            setShowAllMessages={() => {}}
-            mode={mode}
-          />
-        );
-      case "JSON":
-        if (chatType === "request") {
-          return (
-            <JsonView
-              requestBody={{
-                messages: currentChat,
-                auto_prompt_inputs: selectedInput?.auto_prompt_inputs || [],
-              }}
-              responseBody={{}}
-            />
-          );
-        } else if (chatType === "response") {
-          return (
-            <JsonView
-              requestBody={{}}
-              responseBody={{
-                messages: currentChat,
-                auto_prompt_inputs: selectedInput?.auto_prompt_inputs || [],
-              }}
-            />
-          );
-        } else {
-          return (
-            <JsonView
-              requestBody={{
-                messages: currentChat,
-                auto_prompt_inputs: selectedInput?.auto_prompt_inputs || [],
-              }}
-              responseBody={{}}
-            />
-          );
-        }
-      default:
-        return null;
-    }
+    return currentChat.map((message, index) => (
+      <PromptChatRow
+        key={index}
+        message={message}
+        editMode={isEditMode}
+        index={index}
+        callback={(userText, role) => handleUpdateMessage(index, userText, role)}
+        deleteRow={() => handleDeleteMessage(index)}
+        selectedProperties={selectedInput?.inputs} // Pass selectedInput.inputs here
+      />
+    ));
   };
 
   useEffect(() => {
