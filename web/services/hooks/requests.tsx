@@ -120,29 +120,36 @@ const useGetRequestsWithBodies = (
       if (!content) return request;
 
       const model =
-        request.model_override ||
         request.response_model ||
+        request.model_override ||
         request.request_model ||
         content?.response?.model ||
         content?.request?.model ||
         content?.response?.body?.model ||
         getModelFromPath(request.target_url) ||
-        "";
+        "Unknown";
+
+      console.log('Extracted model:', model, 'for request:', request.request_id);
 
       let updatedRequest = {
         ...request,
         request_body: content.request,
         response_body: content.response,
+        model: model,
       };
 
       if (
         request.provider === "GOOGLE" &&
         model.toLowerCase().includes("gemini")
       ) {
-        updatedRequest.llmSchema = mapGeminiPro(
+        const mappedRequest = mapGeminiPro(
           updatedRequest as HeliconeRequest,
           model
         );
+        updatedRequest = {
+          ...mappedRequest,
+          model: model, // Ensure we keep our extracted model
+        };
       }
 
       return updatedRequest;

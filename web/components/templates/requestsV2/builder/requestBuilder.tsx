@@ -152,23 +152,21 @@ const builders: {
 const getModelFromPath = (path: string) => {
   const regex1 = /\/engines\/([^/]+)/;
   const regex2 = /models\/([^/:]+)/;
+  const regex3 = /\/v\d+\/([^/]+)/;
 
-  let match = path.match(regex1);
+  let match = path.match(regex1) || path.match(regex2) || path.match(regex3);
 
-  if (!match) {
-    match = path.match(regex2);
-  }
-
-  if (match && match[1]) {
-    return match[1];
-  } else {
-    return undefined;
-  }
+  return match && match[1] ? match[1] : undefined;
 };
 
 const getRequestBuilder = (request: HeliconeRequest) => {
   let model =
-    request.request_model || getModelFromPath(request.target_url) || "";
+    request.response_model ||
+    request.model_override ||
+    request.request_model ||
+    getModelFromPath(request.target_url) ||
+    "";
+  console.log('Model extracted in getRequestBuilder:', model);
   const builderType = getBuilderType(
     model,
     request.provider,
@@ -195,16 +193,16 @@ const isAssistantRequest = (request: HeliconeRequest) => {
 const getNormalizedRequest = (request: HeliconeRequest): NormalizedRequest => {
   try {
     const normalizedRequest = getRequestBuilder(request).build();
-    if (!normalizedRequest.model || normalizedRequest.model === "") {
-      normalizedRequest.model = "Unsupported";
-    }
-    return normalizedRequest;
+    return {
+      ...normalizedRequest,
+      model: normalizedRequest.model || request.response_model || request.model_override || request.request_model || "Unknown",
+    };
   } catch (error) {
-    const normalizedRequest = getRequestBuilder(request).build();
-    if (!normalizedRequest.model || normalizedRequest.model === "") {
-      normalizedRequest.model = "Unsupported";
-    }
-    return normalizedRequest;
+    console.error("Error in getNormalizedRequest:", error);
+    return {
+      ...getRequestBuilder(request).build(),
+      model: request.response_model || request.model_override || request.request_model || "Unknown",
+    };
   }
 };
 
