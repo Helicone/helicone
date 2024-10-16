@@ -1108,7 +1108,7 @@ export function ExperimentTable({
             key="export-button"
             rows={getExperimentExportData()}
           />
-          {experimentId && (
+          {!experimentId && (
             <Popover>
               <PopoverTrigger asChild>
                 <Button
