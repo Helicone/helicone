@@ -2,8 +2,6 @@ import { useOrg } from "@/components/layout/organizationContext";
 import { Button } from "@/components/ui/button";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { useJawnClient } from "@/lib/clients/jawnHook";
-import { PlusIcon } from "@heroicons/react/24/outline";
-import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   ColDef,
   ColumnMovedEvent,
@@ -20,7 +18,6 @@ import React, {
   useRef,
   useState,
 } from "react";
-import ExperimentInputSelector from "../experimentInputSelector";
 import AddColumnHeader from "./AddColumnHeader";
 import {
   HypothesisCellRenderer,
@@ -29,7 +26,7 @@ import {
 } from "./HypothesisCellRenderer";
 import { BeakerIcon, PlusIcon } from "@heroicons/react/24/outline";
 import ExperimentInputSelector from "../experimentInputSelector";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 
 import { useLocalStorage } from "@/services/hooks/localStorage";
 import LoadingAnimation from "../../../../shared/loadingAnimation";
@@ -1127,7 +1124,7 @@ export function ExperimentTable({
             </Popover>
           )}
         </div>
-        {showScoresTable && (
+        {showScoresTable && experimentId && (
           <ScoresTable
             columnDefs={columnDefs}
             columnWidths={columnWidths}
