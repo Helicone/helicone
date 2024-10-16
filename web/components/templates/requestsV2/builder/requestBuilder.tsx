@@ -194,9 +194,17 @@ const isAssistantRequest = (request: HeliconeRequest) => {
 
 const getNormalizedRequest = (request: HeliconeRequest): NormalizedRequest => {
   try {
-    return getRequestBuilder(request).build();
+    const normalizedRequest = getRequestBuilder(request).build();
+    if (!normalizedRequest.model || normalizedRequest.model === "") {
+      normalizedRequest.model = "Unsupported";
+    }
+    return normalizedRequest;
   } catch (error) {
-    return getRequestBuilder(request).build();
+    const normalizedRequest = getRequestBuilder(request).build();
+    if (!normalizedRequest.model || normalizedRequest.model === "") {
+      normalizedRequest.model = "Unsupported";
+    }
+    return normalizedRequest;
   }
 };
 

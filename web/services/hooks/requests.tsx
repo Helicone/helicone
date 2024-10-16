@@ -123,9 +123,9 @@ const useGetRequestsWithBodies = (
         request.model_override ||
         request.response_model ||
         request.request_model ||
-        content.response?.model ||
-        content.request?.model ||
-        content.response?.body?.model ||
+        content?.response?.model ||
+        content?.request?.model ||
+        content?.response?.body?.model ||
         getModelFromPath(request.target_url) ||
         "";
 
