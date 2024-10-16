@@ -84,7 +84,6 @@ interface ThemedTableV5Props<T extends { id?: string }> {
   children?: React.ReactNode;
   onSelectAll?: (checked: boolean) => void;
   selectedIds?: string[];
-  fullWidth?: boolean;
   isDatasetsPage?: boolean;
   rightPanel?: React.ReactNode;
   search?: {
@@ -122,7 +121,6 @@ export default function ThemedTable<T extends { id?: string }>(
     children,
     onSelectAll,
     selectedIds,
-    fullWidth = false,
     isDatasetsPage,
     rightPanel,
     search,
@@ -236,9 +234,8 @@ export default function ThemedTable<T extends { id?: string }>(
       </div>
 
       {children && <div className="flex-shrink-0">{children}</div>}
-      <ResizablePanelGroup direction="horizontal">
-        <ResizablePanel>
-          {" "}
+      <ResizablePanelGroup direction="horizontal" className="w-full h-full">
+        <ResizablePanel defaultSize={100} className="w-full">
           <div className="h-full overflow-x-auto bg-white dark:bg-black">
             {skeletonLoading ? (
               <LoadingAnimation title="Loading Data..." />
@@ -279,12 +276,10 @@ export default function ThemedTable<T extends { id?: string }>(
                   }}
                 >
                   <table
-                    className="h-full bg-white dark:bg-black"
-                    {...{
-                      style: {
-                        width: fullWidth ? "100%" : table.getCenterTotalSize(),
-                        overflow: "auto",
-                      },
+                    className="w-full h-full bg-white dark:bg-black"
+                    style={{
+                      width: "100%",
+                      overflow: "auto",
                     }}
                   >
                     <thead className="text-[12px] z-[2]">
@@ -361,17 +356,16 @@ export default function ThemedTable<T extends { id?: string }>(
                               key={i}
                               className={clsx(
                                 "py-3 border-t border-slate-300 dark:border-slate-700 px-2 text-slate-700 dark:text-slate-300",
-                                i === 0 && "pl-10", // Add left padding to the first column
+                                i === 0 && "pl-4",
                                 i === row.getVisibleCells().length - 1 &&
-                                  "pr-10"
+                                  "pr-4"
                               )}
-                              {...{
-                                style: {
-                                  maxWidth: cell.column.getSize(),
-                                  overflow: "hidden",
-                                  textOverflow: "ellipsis",
-                                  whiteSpace: "nowrap",
-                                },
+                              style={{
+                                maxWidth: cell.column.getSize(),
+                                width: cell.column.getSize(),
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
                               }}
                             >
                               {dataLoading &&
