@@ -159,17 +159,16 @@ export const NewExperimentDialog = () => {
     }
 
     notification.setNotification("Prompt created successfully", "success");
-
-    router.push(
+    setIsLoading(false);
+    await router.push(
       `/prompts/${res.data?.data?.id}/subversion/${res.data?.data?.prompt_version_id}/experiment/${experiment.data?.data?.experimentId}`
     );
-    setIsLoading(false);
   };
 
   return (
     <DialogContent showOverlay={false}>
       {isLoading ? (
-        <div className="flex items-center justify-center h-[600px] w-[500px]">
+        <div className="flex flex-col items-center justify-center h-[600px] w-[500px]">
           <LoadingAnimation />
           <h1 className="text-2xl font-semibold">Getting your experiments</h1>
         </div>
