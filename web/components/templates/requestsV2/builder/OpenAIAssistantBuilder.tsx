@@ -29,7 +29,7 @@ class OpenAIAssistantBuilder extends AbstractRequestBuilder {
           (msg: any) => msg.role === "assistant"
         );
         if (assistantMessage && assistantMessage.content) {
-          return assistantMessage.content[0].text.value;
+          return assistantMessage.content[0]?.text?.value || "";
         }
       }
       return JSON.stringify(responseBody, null, 2);
