@@ -166,48 +166,46 @@ export const NewExperimentDialog = () => {
   };
 
   return (
-    <DialogContent showOverlay={false}>
+    <DialogContent className="max-h-[80vh] w-full overflow-y-auto">
       {isLoading ? (
-        <div className="flex flex-col items-center justify-center h-[600px] w-[500px]">
+        <div className="flex flex-col items-center justify-center h-full w-full">
           <LoadingAnimation />
           <h1 className="text-2xl font-semibold">Getting your experiments</h1>
         </div>
       ) : (
-        <ScrollArea className="flex flex-col overflow-y-auto h-[600px] w-[500px]">
-          <div className="space-y-4 pr-8">
-            <div className="flex flex-row space-x-2 ">
-              <BeakerIcon className="h-6 w-6" />
-              <h3 className="text-md font-semibold">Original Prompt</h3>
-            </div>
-
-            <Input
-              placeholder="Prompt Name"
-              value={promptName}
-              onChange={(e) => setPromptName(e.target.value)}
-            />
-
-            <PromptPlayground
-              prompt={basePrompt}
-              editMode={true}
-              selectedInput={selectedInput}
-              defaultEditMode={true}
-              submitText={"Create Experiment"}
-              playgroundMode={"experiment"}
-              handleCreateExperiment={handleCreateExperiment}
-              isPromptCreatedFromUi={true}
-              onExtractPromptVariables={(variables: any) =>
-                setPromptVariables(
-                  variables.map((variable: any) => ({
-                    original: variable.original,
-                    heliconeTag: variable.heliconeTag,
-                    value: variable.value,
-                  }))
-                )
-              }
-              onPromptChange={handlePromptChange}
-            />
+        <div className="space-y-4 pr-8">
+          <div className="flex flex-row space-x-2 ">
+            <BeakerIcon className="h-6 w-6" />
+            <h3 className="text-md font-semibold">Original Prompt</h3>
           </div>
-        </ScrollArea>
+
+          <Input
+            placeholder="Prompt Name"
+            value={promptName}
+            onChange={(e) => setPromptName(e.target.value)}
+          />
+
+          <PromptPlayground
+            prompt={basePrompt}
+            editMode={true}
+            selectedInput={selectedInput}
+            defaultEditMode={true}
+            submitText={"Create Experiment"}
+            playgroundMode={"experiment"}
+            handleCreateExperiment={handleCreateExperiment}
+            isPromptCreatedFromUi={true}
+            onExtractPromptVariables={(variables: any) =>
+              setPromptVariables(
+                variables.map((variable: any) => ({
+                  original: variable.original,
+                  heliconeTag: variable.heliconeTag,
+                  value: variable.value,
+                }))
+              )
+            }
+            onPromptChange={handlePromptChange}
+          />
+        </div>
       )}
     </DialogContent>
   );
