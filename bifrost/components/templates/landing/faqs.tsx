@@ -59,14 +59,15 @@ const FAQS: FAQItem[] = [
           target="_blank"
           rel="noopener noreferrer"
         >
-          Read more about Helicone's latency impact
+          Read more about Helicone&apos;s latency impact
         </a>
         .
       </>
     ),
   },
   {
-    question: "I don't want to use Helicone's Proxy, can I still use Helicone?",
+    question:
+      "I don&apos;t want to use Helicone&apos;s Proxy, can I still use Helicone?",
     answer: (
       <>
         Yes, you can still use Helicone to log your requests using the{" "}
@@ -76,11 +77,11 @@ const FAQS: FAQItem[] = [
           target="_blank"
           rel="noopener noreferrer"
         >
-          Helicone SDK's Async Integration
+          Helicone SDK&apos;s Async Integration
         </a>{" "}
-        without proxying. However, it's worth noting that thousands of companies
-        use our proxy in production with high reliability. We leverage
-        Cloudflare's global network to ensure minimal latency and maximum
+        without proxying. However, it&apos;s worth noting that thousands of
+        companies use our proxy in production with high reliability. We leverage
+        Cloudflare&apos;s global network to ensure minimal latency and maximum
         uptime. If you have concerns about using our proxy in your critical
         path, we have a{" "}
         <a
