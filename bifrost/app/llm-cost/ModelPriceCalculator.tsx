@@ -18,7 +18,7 @@ import {
 import { Button } from "@/components/ui/button";
 
 // Function to format provider names
-function formatProviderName(provider: string): string {
+export function formatProviderName(provider: string): string {
   const formattingMap: { [key: string]: string } = {
     OPENAI: "OpenAI",
     ANTHROPIC: "Anthropic",
