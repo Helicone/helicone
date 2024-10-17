@@ -9,9 +9,10 @@ import {
 import PromptPlayground from "../../id/promptPlayground";
 import { ScrollArea } from "../../../../ui/scroll-area";
 import { Dialog, DialogTrigger, DialogContent } from "@/components/ui/dialog";
+import clsx from "clsx";
 
 export const HypothesisCellRenderer: React.FC<any> = (params) => {
-  const { data, colDef, context, hypothesisId } = params;
+  const { data, colDef, context, hypothesisId, wrapText } = params;
   const promptVersionTemplate = context.promptVersionTemplateRef.current;
 
   const [showPromptPlayground, setShowPromptPlayground] = useState(false);
@@ -75,7 +76,9 @@ export const HypothesisCellRenderer: React.FC<any> = (params) => {
               className="w-full h-full items-center flex justify-start cursor-pointer"
               onClick={handleCellClick}
             >
-              <div>{content}</div>
+              <div className={clsx(wrapText && "whitespace-pre-wrap")}>
+                {content}
+              </div>
             </div>
           </DialogTrigger>
           <DialogContent
@@ -113,7 +116,9 @@ export const HypothesisCellRenderer: React.FC<any> = (params) => {
               className="w-full h-full items-center flex justify-start cursor-pointer"
               onClick={handleCellClick}
             >
-              <div>{content}</div>
+              <div className={clsx(wrapText && "whitespace-pre-wrap")}>
+                {content}
+              </div>
             </div>
           </PopoverTrigger>
           <PopoverContent className="w-[800px] p-0" side="bottom" align="start">
@@ -155,7 +160,7 @@ export const HypothesisCellRenderer: React.FC<any> = (params) => {
 };
 
 export const OriginalMessagesCellRenderer: React.FC<any> = (params) => {
-  const { data, colDef, context, prompt } = params;
+  const { data, colDef, context, prompt, wrapText } = params;
   const hypothesisId = colDef.field;
 
   const [showPromptPlayground, setShowPromptPlayground] = useState(false);
@@ -183,7 +188,9 @@ export const OriginalMessagesCellRenderer: React.FC<any> = (params) => {
           onClick={handleCellClick}
         >
           {content && content !== "{}" ? (
-            <div>{content}</div>
+            <div className={clsx(wrapText && "whitespace-pre-wrap")}>
+              {content}
+            </div>
           ) : (
             <div>
               {/* <Button
@@ -223,7 +230,7 @@ export const OriginalMessagesCellRenderer: React.FC<any> = (params) => {
   );
 };
 export const OriginalOutputCellRenderer: React.FC<any> = (params) => {
-  const { data, colDef, context, prompt } = params;
+  const { data, colDef, context, prompt, wrapText } = params;
   const hypothesisId = colDef.field;
   const inputKeys = context.inputKeys;
   const [showPromptPlayground, setShowPromptPlayground] = useState(false);
@@ -265,7 +272,9 @@ export const OriginalOutputCellRenderer: React.FC<any> = (params) => {
           onClick={handleCellClick}
         >
           {content ? (
-            <div>{content}</div>
+            <div className={clsx(wrapText && "whitespace-pre-wrap")}>
+              {content}
+            </div>
           ) : (
             <div>
               <Button
