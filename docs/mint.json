@@ -7,11 +7,11 @@
   },
   "metadata": {
     "og:site_name": "Helicone OSS LLM Observability",
-    "og:image": "/favicon.ico",
+    "og:image": "/favicon.png",
     "twitter:site": "@helicone_ai",
-    "twitter:image": "/favicon.ico"
+    "twitter:image": "/favicon.png"
   },
-  "favicon": "/favicon.ico",
+  "favicon": "/favicon.png",
   "anchors": [
     {
       "name": "API Reference",
