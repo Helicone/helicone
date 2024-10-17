@@ -1185,7 +1185,7 @@ export function ExperimentTable({
         </div>
 
         {showScoresTable && experimentId && (
-          <div className="w-full bg-white border">
+          <div className="w-full bg-white border-y border-r">
             <div className="flex justify-between items-center bg-white p-2 border-b">
               <ScoresEvaluatorsConfig experimentId={experimentId} />
             </div>
