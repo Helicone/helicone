@@ -134,12 +134,9 @@ const ScoresTable = memo(
     ]);
 
     return (
-      <div className="overflow-auto">
-        <div className="flex justify-between items-center mb-4 border bg-white  p-2">
-          <ScoresEvaluatorsConfig experimentId={experimentId} />
-        </div>
+      <div className="w-full overflow-auto bg-white">
         <table
-          className="w-full border-separate border-spacing-0 bg-white text-sm table-fixed"
+          className="w-full border-spacing-0 bg-white text-sm table-fixed "
           style={{
             minWidth: `${
               scoresColumnWidth + totalOutputWidth + addExperimentWidth
@@ -149,7 +146,7 @@ const ScoresTable = memo(
           <thead className="">
             <tr className="">
               <th
-                className="text-left p-2 border-y border-slate-200 bg-slate-50 text-slate-900 font-semibold"
+                className="text-left p-2 border-r border-b border-slate-200 bg-slate-50 text-slate-900 font-semibold"
                 style={{ width: `${scoresColumnWidth}px` }}
               >
                 <div className="flex items-center gap-2 overflow-hidden">
@@ -167,10 +164,13 @@ const ScoresTable = memo(
                   </TooltipProvider>
                 </div>
               </th>
-              {sortedOutputColumns.map((col) => (
+              {sortedOutputColumns.map((col, colIndex) => (
                 <th
                   key={col.field}
-                  className="text-left p-2 border border-slate-200 text-slate-900 font-semibold overflow-hidden whitespace-nowrap"
+                  className={clsx(
+                    "text-left p-2 border-r border-b border-slate-200 text-slate-900 font-semibold overflow-hidden whitespace-nowrap"
+                    // colIndex === sortedOutputColumns.length - 1 && "border-r-0"
+                  )}
                   style={{
                     width: `${columnWidths[col.field!] || col.width}px`,
                   }}
@@ -189,10 +189,10 @@ const ScoresTable = memo(
                 </th>
               ))}
               <th
-                className={clsx("border-t border-slate-200")}
+                className={clsx("border-slate-200")}
                 style={{ width: `${addExperimentWidth}px` }}
               />
-              <th className="flex-1 border-t border-r border-slate-200 " />
+              <th className="flex-1 border-r border-slate-200 " />
             </tr>
           </thead>
           <tbody>
@@ -203,8 +203,8 @@ const ScoresTable = memo(
                 <tr key={row.score_key} className="text-slate-700 ">
                   <td
                     className={clsx(
-                      "p-2 border-b border-l border-slate-200 bg-white flex justify-between w-full",
-                      index === rowData.length - 1 && ""
+                      "p-2 border-b border-r border-slate-200 bg-white flex justify-between w-full"
+                      // index === rowData.length - 1 && "border-b-0"
                     )}
                     style={{ width: `${scoresColumnWidth}px` }}
                   >
@@ -219,8 +219,10 @@ const ScoresTable = memo(
                       <td
                         key={col.field}
                         className={clsx(
-                          "p-2 border-b border-r border-slate-200",
-                          colIndex === 0 && "border-l"
+                          "p-2 border-r border-slate-200 border-b",
+                          // colIndex === sortedOutputColumns.length - 1 &&
+                          //   "border-r-0",
+                          index === rowData.length - 1 && "border-b-0"
                         )}
                         style={{
                           width: `${columnWidths[col.field!] || col.width}px`,
@@ -248,20 +250,6 @@ const ScoresTable = memo(
                       </td>
                     );
                   })}
-                  <td
-                    className={
-                      index === rowData.length - 1
-                        ? "border-b border-slate-200"
-                        : "border-b-0"
-                    }
-                    style={{ minWidth: `${addExperimentWidth}px` }}
-                  />
-                  <td
-                    className={clsx(
-                      "border-r border-slate-200",
-                      index === rowData.length - 1 && "border-b "
-                    )}
-                  />
                 </tr>
               );
             })}
