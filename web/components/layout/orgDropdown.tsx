@@ -92,7 +92,7 @@ export default function OrgDropdown({}: OrgDropdownProps) {
         <DropdownMenuTrigger asChild>
           <Button
             variant="ghost"
-            className="flex items-center justify-start w-full ml-1 p-2"
+            className="flex items-center justify-start w-full ml-1 p-2 truncate"
           >
             {currentIcon && (
               <currentIcon.icon
@@ -103,7 +103,7 @@ export default function OrgDropdown({}: OrgDropdownProps) {
                 aria-hidden="true"
               />
             )}
-            <p className="text-xs font-semibold truncate w-fit text-left">
+            <p className="text-xs font-semibold w-fit text-left">
               {orgContext?.currentOrg?.name}
             </p>
           </Button>
