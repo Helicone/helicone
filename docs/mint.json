@@ -5,6 +5,13 @@
     "light": "/logo/light.png",
     "dark": "/logo/dark.svg"
   },
+  "metadata": {
+    "og:site_name": "Helicone OSS LLM Observability",
+    "og:image": "/favicon.svg",
+    "twitter:site": "@helicone_ai",
+    "twitter:image": "/favicon.svg"
+  },
+  "favicon": "/favicon.svg",
   "anchors": [
     {
       "name": "API Reference",
@@ -16,7 +23,6 @@
       "icon": "file-lines",
       "url": "guides"
     },
-
     {
       "name": "FAQ",
       "icon": "lightbulb",
@@ -28,13 +34,6 @@
       "publicApiKey": "pk_28dd6b0bb95629a42e92bd526a1234a9fc79"
     }
   },
-  "metadata": {
-    "og:site_name": "Helicone OSS LLM Observability",
-    "og:image": "/favicon.png",
-    "twitter:site": "@helicone_ai",
-    "twitter:image": "/favicon.png"
-  },
-  "favicon": "/favicon.png",
   "colors": {
     "primary": "#0CA5E9",
     "light": "#0CA5E9",
@@ -47,8 +46,8 @@
     "name": "Dashboard",
     "url": "https://us.helicone.ai/#:~:text=Discord-,Sign,-In"
   },
-
   "feedback": {
+    "thumbsRating": true,
     "suggestEdit": true,
     "raiseIssue": true
   },

@@ -47,13 +47,13 @@ export async function prepareRequestAzure(
 }
 
 export async function prepareRequestAzureFull({
-  hypothesis,
+  template,
   secretKey: apiKey,
   datasetRow,
   requestId,
 }: PreparedRequestArgs): Promise<PreparedRequest> {
   const newRequestBody = autoFillInputs({
-    template: hypothesis.promptVersion?.template ?? {},
+    template: template ?? {},
     inputs: datasetRow.inputRecord?.inputs ?? {},
     autoInputs: datasetRow.inputRecord?.autoInputs ?? [],
   });

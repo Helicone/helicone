@@ -4,7 +4,7 @@ import { getJawnClient } from "../../../lib/clients/jawn";
 
 const useExperiments = (
   req: { page: number; pageSize: number },
-  promptId: string
+  promptId?: string
 ) => {
   const org = useOrg();
   const { data, isLoading, refetch, isRefetching } = useQuery({
@@ -24,13 +24,15 @@ const useExperiments = (
 
       return jawn.POST("/v1/experiment/query", {
         body: {
-          filter: {
-            experiment: {
-              prompt_v2: {
-                equals: promptId,
-              },
-            },
-          },
+          filter: promptId
+            ? {
+                experiment: {
+                  prompt_v2: {
+                    equals: promptId,
+                  },
+                },
+              }
+            : {},
         },
       });
     },
@@ -57,6 +59,9 @@ const useExperiments = (
       id: experiment.id,
       datasetId: experiment.dataset.id,
       datasetName: experiment.dataset.name,
+      experimentName: (experiment.meta as any).experiment_name ?? null,
+      promptId: (experiment.meta as any).prompt_id ?? null,
+      promptVersionId: (experiment.meta as any).prompt_version ?? null,
       model: hypothesis?.model,
       createdAt: experiment.createdAt,
       runCount: hypothesis?.runs?.length,

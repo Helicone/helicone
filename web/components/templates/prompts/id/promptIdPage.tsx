@@ -412,7 +412,12 @@ const PromptIdPage = (props: PromptIdPageProps) => {
   };
 
   const handleInputSelect = (input: Input | undefined) => {
-    setSelectedInput(input);
+    setSelectedInput((prevInput) => {
+      if (prevInput?.id === input?.id) {
+        return undefined; // Deselect if the same input is clicked again
+      }
+      return input;
+    });
   };
 
   const promoteToProduction = async (promptVersionId: string) => {
@@ -490,11 +495,15 @@ const PromptIdPage = (props: PromptIdPageProps) => {
       notification.setNotification("Failed to create dataset", "error");
       return;
     }
+    const promptVersion = prompts?.find((p) => p.id === promptVersionId);
     const experiment = await jawn.POST("/v1/experiment/new-empty", {
       body: {
         metadata: {
           prompt_id: id,
           prompt_version: promptVersionId || "",
+          experiment_name:
+            `${prompt?.user_defined_id}_V${promptVersion?.major_version}.${promptVersion?.minor_version}` ||
+            "",
         },
         datasetId: dataset.data?.data?.datasetId,
       },
@@ -920,13 +929,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                                       isSelected={
                                         selectedInput?.id === input.id
                                       }
-                                      onSelect={function (): void {
-                                        if (selectedInput?.id === input.id) {
-                                          setSelectedInput(undefined);
-                                        } else {
-                                          setSelectedInput(input);
-                                        }
-                                      }}
+                                      onSelect={() => handleInputSelect(input)}
                                       requestId={input.source_request}
                                       createdAt={input.created_at}
                                       properties={input.inputs}
@@ -1327,13 +1330,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                                       isSelected={
                                         selectedInput?.id === input.id
                                       }
-                                      onSelect={function (): void {
-                                        if (selectedInput?.id === input.id) {
-                                          setSelectedInput(undefined);
-                                        } else {
-                                          setSelectedInput(input);
-                                        }
-                                      }}
+                                      onSelect={() => handleInputSelect(input)}
                                       requestId={input.source_request}
                                       createdAt={input.created_at}
                                       properties={input.inputs}

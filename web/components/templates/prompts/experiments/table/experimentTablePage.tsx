@@ -14,8 +14,8 @@ const ExperimentTablePage = (props: PromptIdPageProps) => {
   const { prompt } = usePrompt(promptId);
 
   return (
-    <IslandContainer>
-      <div className="flex flex-col w-full space-y-4 pt-4">
+    <div className="flex flex-col w-full space-y-4 pt-4">
+      <IslandContainer>
         <HcBreadcrumb
           pages={[
             {
@@ -32,12 +32,12 @@ const ExperimentTablePage = (props: PromptIdPageProps) => {
             },
           ]}
         />
-        <ExperimentTable
-          promptSubversionId={promptSubversionId}
-          experimentId={experimentId}
-        />
-      </div>
-    </IslandContainer>
+      </IslandContainer>
+      <ExperimentTable
+        promptSubversionId={promptSubversionId}
+        experimentId={experimentId}
+      />
+    </div>
   );
 };
 

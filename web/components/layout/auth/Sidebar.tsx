@@ -2,6 +2,7 @@
 
 import {
   ArchiveBoxIcon,
+  BeakerIcon,
   BellIcon,
   CircleStackIcon,
   HomeIcon,
@@ -108,6 +109,12 @@ const Sidebar = ({ changelog, setOpen }: SidebarProps) => {
           ...(!user?.email?.includes("@helicone.ai")
             ? []
             : [
+                {
+                  name: "Experiments",
+                  href: "/experiments",
+                  icon: BeakerIcon,
+                  current: pathname.includes("/experiments"),
+                },
                 {
                   name: "Evaluators",
                   href: "/evaluators",

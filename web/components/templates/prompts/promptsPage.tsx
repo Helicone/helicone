@@ -23,7 +23,6 @@ import useNotification from "../../shared/notification/useNotification";
 import { SimpleTable } from "../../shared/table/simpleTable";
 import ThemedTabs from "../../shared/themed/themedTabs";
 import useSearchParams from "../../shared/utils/useSearchParams";
-import { Badge } from "../../ui/badge";
 import { Button } from "../../ui/button";
 import {
   Card,
@@ -39,7 +38,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "../../ui/dialog";
-import HcBadge from "../../ui/hcBadge";
 import HcButton from "../../ui/hcButton";
 import { Label } from "../../ui/label";
 import {
@@ -75,6 +73,9 @@ const PromptsPage = (props: PromptsPageProps) => {
   const [newPromptModel, setNewPromptModel] = useState(MODEL_LIST[0].value);
   const [newPromptContent, setNewPromptContent] = useState("");
   const [promptVariables, setPromptVariables] = useState<string[]>([]);
+  const [variableValues, setVariableValues] = useState<Record<string, string>>(
+    {}
+  );
   const newPromptInputRef = useRef<HTMLInputElement>(null);
   const notification = useNotification();
   const filteredPrompts = prompts?.filter((prompt) =>
@@ -82,11 +83,15 @@ const PromptsPage = (props: PromptsPageProps) => {
   );
   const jawn = useJawnClient();
 
-  const extractVariables = useCallback((content: string) => {
+  const extractVariables = (content: string) => {
     const regex = /\{\{([^}]+)\}\}/g;
-    const matches = content.match(regex);
-    return matches ? matches.map((match) => match.slice(2, -2).trim()) : [];
-  }, []);
+    const variables = new Set<string>();
+    let match;
+    while ((match = regex.exec(content)) !== null) {
+      variables.add(match[1].trim());
+    }
+    return Array.from(variables);
+  };
 
   const replaceVariablesWithTags = useCallback((content: string) => {
     return content.replace(
@@ -110,6 +115,7 @@ const PromptsPage = (props: PromptsPageProps) => {
       return;
     }
 
+    // Prepare the prompt data with variable values
     const promptData = {
       model: newPromptModel,
       messages: [
@@ -168,7 +174,7 @@ const PromptsPage = (props: PromptsPageProps) => {
           isWithinIsland={true}
           title={
             <div className="flex items-center gap-2">
-              Prompts <HcBadge title="Beta" size="sm" />
+              Prompts
               {hasLimitedAccess && (
                 <InfoBox className="ml-4">
                   <p className="text-sm font-medium flex gap-2">
@@ -303,9 +309,24 @@ const PromptsPage = (props: PromptsPageProps) => {
                                     onChange={(e) => {
                                       const newContent = e.target.value;
                                       setNewPromptContent(newContent);
-                                      setPromptVariables(
-                                        extractVariables(newContent)
-                                      );
+                                      const extractedVariables =
+                                        extractVariables(newContent);
+                                      setPromptVariables(extractedVariables);
+
+                                      // Initialize or remove variable values
+                                      setVariableValues((prevValues) => {
+                                        const newValues: Record<
+                                          string,
+                                          string
+                                        > = {};
+                                        extractedVariables.forEach(
+                                          (variable) => {
+                                            newValues[variable] =
+                                              prevValues[variable] || "";
+                                          }
+                                        );
+                                        return newValues;
+                                      });
                                     }}
                                     placeholder="Type your prompt here"
                                     rows={4}
@@ -318,19 +339,34 @@ const PromptsPage = (props: PromptsPageProps) => {
                                 </div>
                                 {promptVariables.length > 0 && (
                                   <div className="flex flex-col space-y-2">
-                                    <Label className="text-lg">
-                                      Your variables
-                                    </Label>
-                                    <div className="flex flex-wrap gap-2">
+                                    <Label className="text-lg">Variables</Label>
+                                    <div className="flex flex-col space-y-2">
                                       {promptVariables.map(
                                         (variable, index) => (
-                                          <Badge
+                                          <div
                                             key={index}
-                                            variant="secondary"
-                                            className="text-sm px-4 py-2 rounded-md"
+                                            className="flex items-center space-x-2"
                                           >
-                                            {variable}
-                                          </Badge>
+                                            <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                              {variable}:
+                                            </span>
+                                            <input
+                                              type="text"
+                                              value={
+                                                variableValues[variable] || ""
+                                              }
+                                              onChange={(e) => {
+                                                const value = e.target.value;
+                                                setVariableValues(
+                                                  (prevValues) => ({
+                                                    ...prevValues,
+                                                    [variable]: value,
+                                                  })
+                                                );
+                                              }}
+                                              className="border rounded px-2 py-1 text-sm flex-grow"
+                                            />
+                                          </div>
                                         )
                                       )}
                                     </div>
