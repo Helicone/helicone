@@ -1,8 +1,5 @@
 import { usePromptVersions } from "../../../../../../services/hooks/prompts/prompts";
-
 import { useState } from "react";
-import { usePrompts } from "../../../../../../services/hooks/prompts/prompts";
-import { PopoverContent } from "../../../../../ui/popover";
 import { Select, SelectContent, SelectItem } from "../../../../../ui/select";
 import { ScrollArea } from "../../../../../ui/scroll-area";
 import { SelectTrigger, SelectValue } from "../../../../../ui/select";
@@ -10,6 +7,9 @@ import { Button } from "../../../../../ui/button";
 import { FileTextIcon } from "lucide-react";
 import { DialogContent } from "../../../../../ui/dialog";
 import { BeakerIcon } from "@heroicons/react/24/outline";
+import useNotification from "../../../../../shared/notification/useNotification";
+import { useJawnClient } from "../../../../../../lib/clients/jawnHook";
+import { useRouter } from "next/router";
 
 interface StartFromPromptDialogProps {
   prompts: {
@@ -27,11 +27,13 @@ export const StartFromPromptDialog = ({
   prompts,
   onDialogClose,
 }: StartFromPromptDialogProps) => {
+  const router = useRouter();
   const [selectedPromptId, setSelectedPromptId] = useState<string | null>(null);
-
+  const notification = useNotification();
   const [selectedVersionId, setSelectedVersionId] = useState<string | null>(
     null
   );
+  const jawn = useJawnClient();
 
   const { prompts: promptVersions, isLoading: isLoadingVersions } =
     usePromptVersions(selectedPromptId ?? "");
@@ -39,6 +41,72 @@ export const StartFromPromptDialog = ({
   const handlePromptSelect = (promptId: string) => {
     setSelectedPromptId(promptId);
     setSelectedVersionId(null);
+  };
+
+  const handleCreateExperiment = async () => {
+    if (!selectedPromptId || !selectedVersionId) {
+      notification.setNotification(
+        "Please select a prompt and version",
+        "error"
+      );
+      return;
+    }
+    const dataset = await jawn.POST("/v1/helicone-dataset", {
+      body: {
+        datasetName: "Dataset for Experiment",
+        requestIds: [],
+      },
+    });
+    if (!dataset.data?.data?.datasetId) {
+      notification.setNotification("Failed to create dataset", "error");
+      return;
+    }
+    const promptVersion = promptVersions?.find(
+      (p) => p.id === selectedVersionId
+    );
+    const prompt = prompts?.find((p) => p.id === selectedPromptId);
+    const experiment = await jawn.POST("/v1/experiment/new-empty", {
+      body: {
+        metadata: {
+          prompt_id: selectedPromptId,
+          prompt_version: selectedVersionId || "",
+          experiment_name:
+            `${prompt?.user_defined_id}_V${promptVersion?.major_version}.${promptVersion?.minor_version}` ||
+            "",
+        },
+        datasetId: dataset.data?.data?.datasetId,
+      },
+    });
+    if (!experiment.data?.data?.experimentId) {
+      notification.setNotification("Failed to create experiment", "error");
+      return;
+    }
+    const result = await jawn.POST(
+      "/v1/prompt/version/{promptVersionId}/subversion",
+      {
+        params: {
+          path: {
+            promptVersionId: selectedVersionId,
+          },
+        },
+        body: {
+          newHeliconeTemplate: JSON.stringify(promptVersion?.helicone_template),
+          isMajorVersion: false,
+          metadata: {
+            experimentAssigned: true,
+          },
+        },
+      }
+    );
+
+    if (result.error || !result.data) {
+      notification.setNotification("Failed to create subversion", "error");
+      return;
+    }
+
+    router.push(
+      `/prompts/${selectedPromptId}/subversion/${selectedVersionId}/experiment/${experiment.data?.data?.experimentId}`
+    );
   };
 
   return (
@@ -110,7 +178,7 @@ export const StartFromPromptDialog = ({
         <div className="mt-4 flex flex-row space-x-2 items-center justify-center">
           <Button
             variant="outline"
-            onClick={onDialogClose}
+            onClick={() => onDialogClose(false)}
             className="w-full"
           >
             Cancel
@@ -118,7 +186,7 @@ export const StartFromPromptDialog = ({
           <Button
             variant="default"
             disabled={!selectedVersionId}
-            onClick={() => alert(1)}
+            onClick={handleCreateExperiment}
             className="w-full"
           >
             Create experiment

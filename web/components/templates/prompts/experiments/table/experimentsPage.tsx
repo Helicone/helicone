@@ -47,7 +47,7 @@ const ExperimentsPage = (props: ExperimentsPageProps) => {
               Start from scratch
             </span>
           </div>
-          <div className="flex flex-col items-center justify-center">
+          <div className="flex flex-col items-center justify-center space-y-1">
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
               <DialogTrigger asChild>
                 <button className="flex flex-col items-center justify-center w-40 h-32 bg-white rounded-lg hover:bg-transparent transition-colors border-2 border-slate-100">
@@ -59,7 +59,7 @@ const ExperimentsPage = (props: ExperimentsPageProps) => {
                 onDialogClose={() => setDialogOpen(false)}
               />
             </Dialog>
-            <span className="mt-2 text-sm text-[#6B7280] px-2">
+            <span className="text-sm text-[#6B7280] px-2">
               Start from a prompt
             </span>
           </div>
