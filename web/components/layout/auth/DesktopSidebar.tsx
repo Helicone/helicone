@@ -196,10 +196,9 @@ const DesktopSidebar = ({ NAVIGATION }: SidebarProps) => {
         )}
       >
         <div className="w-full flex flex-grow flex-col overflow-y-auto border-r dark:border-slate-800 justify-between pb-4">
-          <div className="flex items-center gap-2 h-14 border-b dark:border-slate-800">
-            <div className="flex items-center gap-2 w-full">
-              {!isCollapsed && <OrgDropdown />}
-            </div>
+          <div className="flex items-center h-14 border-b dark:border-slate-800">
+            {!isCollapsed && <OrgDropdown />}
+
             <div
               className={cn("mx-auto", isCollapsed ? "w-full mr-4" : "mr-2")}
             >
