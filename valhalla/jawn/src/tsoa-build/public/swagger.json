@@ -7823,6 +7823,33 @@
 				}
 			}
 		},
+		"/v1/trace/log-python": {
+			"post": {
+				"operationId": "LogPythonTrace",
+				"responses": {
+					"204": {
+						"description": "No content"
+					}
+				},
+				"tags": [
+					"Trace"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {}
+						}
+					}
+				}
+			}
+		},
 		"/v1/prompt/query": {
 			"post": {
 				"operationId": "GetPrompts",

@@ -162,6 +162,9 @@ export interface paths {
   "/v1/trace/log": {
     post: operations["LogTrace"];
   };
+  "/v1/trace/log-python": {
+    post: operations["LogPythonTrace"];
+  };
   "/v1/property/query": {
     post: operations["GetProperties"];
   };
@@ -3487,6 +3490,19 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["OTELTrace"];
+      };
+    };
+    responses: {
+      /** @description No content */
+      204: {
+        content: never;
+      };
+    };
+  };
+  LogPythonTrace: {
+    requestBody: {
+      content: {
+        "application/json": unknown;
       };
     };
     responses: {
