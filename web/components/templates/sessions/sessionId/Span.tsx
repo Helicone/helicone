@@ -43,7 +43,6 @@ export const TraceSpan = ({
       (trace.end_unix_timestamp_ms - trace.start_unix_timestamp_ms) / 1000,
     trace: trace,
   }));
-  console.log(spanData, "spanData");
   const roundedRadius = 5;
 
   const domain = [
