@@ -122,7 +122,7 @@ const ScoresEvaluatorsConfig = memo(
 
     const [open, setOpen] = useState<boolean>(false);
     return (
-      <Row className="gap-2 items-center bg-white p-1 w-full">
+      <Row className="gap-2 items-center p-1 w-full">
         <Select
           value={"default"}
           onValueChange={(value) => {

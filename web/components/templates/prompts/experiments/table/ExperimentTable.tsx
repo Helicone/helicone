@@ -45,8 +45,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-
-import { usePrompts } from "../../../../../services/hooks/prompts/prompts";
 import PromptPlayground, {
   PromptObject,
   Input as PromptInput,
@@ -70,7 +68,6 @@ export function ExperimentTable({
   const orgId = org?.currentOrg?.id;
   const jawn = useJawnClient();
   const [isDataLoading, setIsDataLoading] = useState(true);
-  const { prompts, isLoading, refetch } = usePrompts();
 
   const [wrapText, setWrapText] = useState(false);
   const [columnView, setColumnView] = useState<"all" | "inputs" | "outputs">(
@@ -1145,7 +1142,7 @@ export function ExperimentTable({
         <div className="flex flex-row space-x-2 justify-end w-full">
           <Button
             variant="outline"
-            className="py-0 px-2 border border-slate-200 h-8 flex items-center justify-center space-x-1 flex gap-2"
+            className="py-0 px-2 border border-slate-200 h-8 items-center justify-center space-x-1 flex gap-2"
             onClick={() => setShowScoresTable(!showScoresTable)}
           >
             <div>{"{ }"}</div> {showScoresTable ? "Hide" : "Show"} Scores
@@ -1186,7 +1183,7 @@ export function ExperimentTable({
         )}
 
         <div
-          className="ag-theme-alpine w-full rounded-md overflow-hidden"
+          className="ag-theme-alpine w-full overflow-hidden"
           ref={experimentTableRef}
           style={
             {
@@ -1196,7 +1193,6 @@ export function ExperimentTable({
               "--ag-header-cell-hover-background-color": "#e5e7eb",
               "--ag-header-cell-moving-background-color": "#d1d5db",
               "--ag-cell-horizontal-border": "solid #E2E8F0",
-              "--ag-border-radius": "8px",
               "--ag-border-color": "#E2E8F0",
             } as React.CSSProperties
           }
