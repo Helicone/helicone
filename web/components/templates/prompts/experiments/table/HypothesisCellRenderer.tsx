@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/popover";
 import PromptPlayground from "../../id/promptPlayground";
 import { ScrollArea } from "../../../../ui/scroll-area";
+import { Dialog, DialogTrigger, DialogContent } from "@/components/ui/dialog";
 
 export const HypothesisCellRenderer: React.FC<any> = (params) => {
   const { data, colDef, context, hypothesisId } = params;
@@ -28,6 +29,9 @@ export const HypothesisCellRenderer: React.FC<any> = (params) => {
   // Extract the content to display in the cell
   const content =
     parsedResponseData?.body?.choices?.[0]?.message?.content || "";
+
+  // Check if content is longer than 100 characters
+  const isContentLong = content.length > 100;
 
   // Extract the model and messages from the promptVersionTemplate
   const initialModel = promptVersionTemplate?.model || "";
@@ -59,39 +63,79 @@ export const HypothesisCellRenderer: React.FC<any> = (params) => {
   }
 
   if (content) {
-    return (
-      <Popover
-        open={showPromptPlayground}
-        onOpenChange={setShowPromptPlayground}
-        modal={true}
-      >
-        <PopoverTrigger asChild>
-          <div
-            className={`w-full h-full items-center flex justify-start`}
-            onClick={handleCellClick}
+    if (isContentLong) {
+      // Show Dialog for content longer than 100 characters
+      return (
+        <Dialog
+          open={showPromptPlayground}
+          onOpenChange={setShowPromptPlayground}
+        >
+          <DialogTrigger asChild>
+            <div
+              className="w-full h-full items-center flex justify-start cursor-pointer"
+              onClick={handleCellClick}
+            >
+              <div>{content}</div>
+            </div>
+          </DialogTrigger>
+          <DialogContent
+            className="w-[800px] p-0 [&>button]:hidden "
+            showOverlay={false}
           >
-            <div>{content}</div>
-          </div>
-        </PopoverTrigger>
-        <PopoverContent className="w-[800px] p-0" side="bottom" align="start">
-          <ScrollArea className="flex flex-col overflow-y-auto max-h-[50vh]">
-            <PromptPlayground
-              prompt={formatPromptForPlayground()}
-              selectedInput={data}
-              onSubmit={(history, model) => {
-                setShowPromptPlayground(false);
-              }}
-              submitText="Save"
-              initialModel={initialModel}
-              isPromptCreatedFromUi={true}
-              defaultEditMode={false}
-              editMode={false}
-              chatType="response"
-            />
-          </ScrollArea>
-        </PopoverContent>
-      </Popover>
-    );
+            <ScrollArea className="flex flex-col overflow-y-auto max-h-[50vh] w-[800px]">
+              <PromptPlayground
+                prompt={formatPromptForPlayground()}
+                selectedInput={data}
+                onSubmit={(history, model) => {
+                  setShowPromptPlayground(false);
+                }}
+                submitText="Save"
+                initialModel={initialModel}
+                isPromptCreatedFromUi={false}
+                defaultEditMode={false}
+                editMode={false}
+                chatType="response"
+              />
+            </ScrollArea>
+          </DialogContent>
+        </Dialog>
+      );
+    } else {
+      // Show Popover for content with 100 characters or less
+      return (
+        <Popover
+          open={showPromptPlayground}
+          onOpenChange={setShowPromptPlayground}
+          modal={true}
+        >
+          <PopoverTrigger asChild>
+            <div
+              className="w-full h-full items-center flex justify-start cursor-pointer"
+              onClick={handleCellClick}
+            >
+              <div>{content}</div>
+            </div>
+          </PopoverTrigger>
+          <PopoverContent className="w-[800px] p-0" side="bottom" align="start">
+            <ScrollArea className="flex flex-col overflow-y-auto max-h-[50vh]">
+              <PromptPlayground
+                prompt={formatPromptForPlayground()}
+                selectedInput={data}
+                onSubmit={(history, model) => {
+                  setShowPromptPlayground(false);
+                }}
+                submitText="Save"
+                initialModel={initialModel}
+                isPromptCreatedFromUi={false}
+                defaultEditMode={false}
+                editMode={false}
+                chatType="response"
+              />
+            </ScrollArea>
+          </PopoverContent>
+        </Popover>
+      );
+    }
   } else {
     return (
       <div className="w-full h-full items-center flex justify-end">
@@ -168,7 +212,7 @@ export const OriginalMessagesCellRenderer: React.FC<any> = (params) => {
             }}
             submitText="Save"
             initialModel={prompt?.model || ""}
-            isPromptCreatedFromUi={true}
+            isPromptCreatedFromUi={false}
             defaultEditMode={false}
             editMode={false}
             chatType="request"
@@ -241,7 +285,7 @@ export const OriginalOutputCellRenderer: React.FC<any> = (params) => {
             }}
             submitText="Save"
             initialModel={prompt?.model || ""}
-            isPromptCreatedFromUi={true}
+            isPromptCreatedFromUi={false}
             defaultEditMode={false}
             editMode={false}
             chatType="response"
