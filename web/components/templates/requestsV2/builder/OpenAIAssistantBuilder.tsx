@@ -24,12 +24,12 @@ class OpenAIAssistantBuilder extends AbstractRequestBuilder {
 
     const getResponseText = () => {
       const responseBody = this.response.response_body;
-      if (responseBody.data && Array.isArray(responseBody.data)) {
+      if (responseBody?.data && Array.isArray(responseBody.data)) {
         const assistantMessage = responseBody.data.find(
           (msg: any) => msg.role === "assistant"
         );
-        if (assistantMessage && assistantMessage.content) {
-          return assistantMessage.content[0]?.text?.value || "";
+        if (assistantMessage?.content?.[0]?.text?.value) {
+          return assistantMessage.content[0].text.value;
         }
       }
       return JSON.stringify(responseBody, null, 2);
