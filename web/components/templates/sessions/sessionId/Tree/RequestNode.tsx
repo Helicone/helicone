@@ -76,7 +76,7 @@ export function RequestNode(props: {
               <TooltipTrigger asChild>
                 <div
                   ref={modelRef}
-                  className="flex-grow flex-shrink-1 max-w-[200px] min-w-[100px] bg-transparent dark:bg-black dark:border-slate-700 text-slate-700 dark:text-slate-200 px-2 py-1 text-xs font-medium rounded-md truncate"
+                  className="flex-grow flex-shrink-1 max-w-[200px] min-w-[100px] bg-transparent dark:bg-transparent dark:border-slate-700 text-slate-700 dark:text-slate-200 px-2 py-1 text-xs font-medium rounded-md truncate"
                 >
                   {node.trace?.request.model}
                 </div>

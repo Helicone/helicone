@@ -44,7 +44,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({
       className={clsx(
         level === 0 ? "p-0 m-0 h-full" : "relative flex flex-col",
         "min-h-full",
-        "bg-white"
+        "bg-white dark:bg-slate-950"
       )}
       key={`${node.name}-${node.trace?.request_id}`}
     >
@@ -54,7 +54,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({
             {new Array(level).fill(null).map((_, index) => (
               <div
                 key={index}
-                className="h-9 bg-slate-50 dark:bg-slate-950 w-[24px] relative shrink-0 group-hover:bg-slate-100 group-hover:cursor-pointer"
+                className="h-9 bg-slate-50 dark:bg-slate-950 w-[24px] relative shrink-0 group-hover:bg-slate-100 dark:group-hover:bg-slate-900 group-hover:cursor-pointer"
                 onClick={() =>
                   node.children
                     ? setCloseChildren(!closeChildren)

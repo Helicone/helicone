@@ -13,7 +13,7 @@ export function PathNode(props: {
   return (
     <div
       className={
-        "flex flex-col py-2 px-4 w-full group-hover:cursor-pointer bg-slate-50 dark:bg-black group-hover:bg-slate-100 text-slate-500 dark:text-slate-200"
+        "flex flex-col py-2 px-4 w-full group-hover:cursor-pointer bg-slate-50 dark:bg-black group-hover:bg-slate-100 dark:group-hover:bg-slate-900 text-slate-500 dark:text-slate-200"
       }
       onClick={() =>
         node.children
