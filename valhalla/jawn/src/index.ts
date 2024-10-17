@@ -57,14 +57,22 @@ const allowedOrigins = allowedOriginsEnv[ENVIRONMENT];
 
 const app = express();
 
-app.use(bodyParser.json({ limit: "50mb" }));
+var rawBodySaver = function (req: any, res: any, buf: any, encoding: any) {
+  if (buf && buf.length) {
+    req.rawBody = buf.toString(encoding || "utf8");
+  }
+};
+
+app.use(bodyParser.json({ verify: rawBodySaver, limit: "50mb" }));
 app.use(
   bodyParser.urlencoded({
-    limit: "50mb",
+    verify: rawBodySaver,
     extended: true,
+    limit: "50mb",
     parameterLimit: 50000,
   })
 );
+app.use(bodyParser.raw({ verify: rawBodySaver, type: "*/*", limit: "50mb" }));
 
 const KAFKA_CREDS = JSON.parse(process.env.KAFKA_CREDS ?? "{}");
 const KAFKA_ENABLED = (KAFKA_CREDS?.KAFKA_ENABLED ?? "false") === "true";
