@@ -7,6 +7,12 @@ import {
 import { useState } from "react";
 import { Row } from "../../../layout/common";
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface DatasetButtonProps<T> {
   datasetMode: boolean;
@@ -30,23 +36,34 @@ export default function DatasetButton<T>(props: DatasetButtonProps<T>) {
   } = props;
   const [modalOpen, setModalOpen] = useState(false);
 
+  const renderButton = () => (
+    <Button
+      variant={datasetMode ? "secondary" : "ghost"}
+      onClick={() => setDatasetMode(!datasetMode)}
+      className="flex items-center gap-2"
+      size="xs"
+    >
+      {datasetMode ? (
+        <XMarkIcon className="h-4 w-4" />
+      ) : (
+        <ListBulletIcon className="h-4 w-4" />
+      )}
+    </Button>
+  );
+
   return (
-    <>
+    <TooltipProvider>
       <Menu as="div" className="relative inline-block text-left">
         <Row className="gap-2">
           {!datasetMode || items.length === 0 ? (
-            <Button
-              variant={datasetMode ? "secondary" : "ghost"}
-              onClick={() => setDatasetMode(!datasetMode)}
-              className="flex items-center gap-2"
-              size="xs"
-            >
-              {datasetMode ? (
-                <XMarkIcon className="h-4 w-4" />
-              ) : (
-                <ListBulletIcon className="h-4 w-4" />
-              )}
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span>{renderButton()}</span>
+              </TooltipTrigger>
+              <TooltipContent align="center">
+                {datasetMode ? "Exit request selector" : "Select requests"}
+              </TooltipContent>
+            </Tooltip>
           ) : (
             <>
               {isDatasetPage ? (
@@ -73,20 +90,27 @@ export default function DatasetButton<T>(props: DatasetButtonProps<T>) {
                   )}
                 </Button>
               )}
-              <Button
-                variant="secondary"
-                onClick={() => setDatasetMode(!datasetMode)}
-                className="flex items-center gap-2"
-                size="xs"
-              >
-                <XMarkIcon className="h-4 w-4" />
-                <span>Cancel</span>
-              </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="secondary"
+                    onClick={() => setDatasetMode(!datasetMode)}
+                    className="flex items-center gap-2"
+                    size="xs"
+                  >
+                    <XMarkIcon className="h-4 w-4" />
+                    <span>Cancel</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent align="center">
+                  Exit request selector
+                </TooltipContent>
+              </Tooltip>
             </>
           )}
         </Row>
       </Menu>
       {renderModal && renderModal(modalOpen, () => setModalOpen(false))}
-    </>
+    </TooltipProvider>
   );
 }

@@ -239,7 +239,7 @@ export default function ThemedTable<T extends { id?: string }>(
       <ResizablePanelGroup direction="horizontal">
         <ResizablePanel>
           {" "}
-          <div className="h-full overflow-x-auto bg-white dark:bg-black">
+          <div className="h-full overflow-x-auto bg-slate-100 dark:bg-slate-800">
             {skeletonLoading ? (
               <LoadingAnimation title="Loading Data..." />
             ) : rows.length === 0 ? (
@@ -271,7 +271,7 @@ export default function ThemedTable<T extends { id?: string }>(
                 properties={makeRow.properties}
               />
             ) : (
-              <div className="bg-white dark:bg-black rounded-sm h-full">
+              <div className="bg-slate-50 dark:bg-black rounded-sm h-full">
                 <div
                   className=""
                   style={{
@@ -313,7 +313,11 @@ export default function ThemedTable<T extends { id?: string }>(
                           {headerGroup.headers.map((header, index) => (
                             <th
                               key={`header-${index}`}
-                              className={clsx("relative")}
+                              className={clsx(
+                                "relative",
+                                index === headerGroup.headers.length - 1 &&
+                                  "border-r border-slate-300 dark:border-slate-700"
+                              )}
                             >
                               <DraggableColumnHeader
                                 header={header}
@@ -363,15 +367,13 @@ export default function ThemedTable<T extends { id?: string }>(
                                 "py-3 border-t border-slate-300 dark:border-slate-700 px-2 text-slate-700 dark:text-slate-300",
                                 i === 0 && "pl-10", // Add left padding to the first column
                                 i === row.getVisibleCells().length - 1 &&
-                                  "pr-10"
+                                  "pr-10 border-r border-slate-300 dark:border-slate-700"
                               )}
-                              {...{
-                                style: {
-                                  maxWidth: cell.column.getSize(),
-                                  overflow: "hidden",
-                                  textOverflow: "ellipsis",
-                                  whiteSpace: "nowrap",
-                                },
+                              style={{
+                                maxWidth: cell.column.getSize(),
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
                               }}
                             >
                               {dataLoading &&
