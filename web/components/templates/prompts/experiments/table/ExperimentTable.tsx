@@ -1087,7 +1087,7 @@ export function ExperimentTable({
 
       notification.setNotification("Prompt created successfully", "success");
       setIsDataLoading(true);
-      router.push(
+      await router.push(
         `/prompts/${res.data?.data?.id}/subversion/${res.data?.data?.prompt_version_id}/experiment/${experiment.data?.data?.experimentId}`
       );
     };
