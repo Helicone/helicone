@@ -716,6 +716,7 @@ export function ExperimentTable({
         cellRenderer: InputCellRenderer,
         cellRendererParams: {
           index: index,
+          wrapText,
         },
         cellClass: "border-r border-[#E2E8F0] text-slate-700 pt-2.5",
         headerClass: "border-r border-[#E2E8F0]",
@@ -758,6 +759,7 @@ export function ExperimentTable({
         cellRenderer: OriginalMessagesCellRenderer,
         cellRendererParams: {
           prompt: promptVersionTemplate,
+          wrapText,
         },
         cellStyle: {
           verticalAlign: "middle",
@@ -789,6 +791,7 @@ export function ExperimentTable({
       cellRendererParams: {
         prompt: promptVersionTemplate,
         handleRunHypothesis,
+        wrapText,
       },
       cellStyle: {
         verticalAlign: "middle",
@@ -814,6 +817,7 @@ export function ExperimentTable({
             hypothesisId: hypothesis.id,
             handleRunHypothesis,
             loadingStates,
+            wrapText,
           },
           headerComponent: CustomHeaderComponent,
           headerComponentParams: {
@@ -861,6 +865,7 @@ export function ExperimentTable({
         experimentId,
         selectedProviderKey: providerKey,
         refetchData,
+        wrapText,
       },
     });
 
