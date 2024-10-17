@@ -160,7 +160,9 @@ const useChangelog = () => {
     queryKey: ["changelog"],
     queryFn: async () => {
       try {
-        const feed = await parser.parseURL("https://helicone.ai/changelog.xml");
+        const feed = await parser.parseURL(
+          "https://helicone.ai/rss/changelog.xml"
+        );
         return feed.items;
       } catch (err) {
         console.error("Error parsing RSS feed:", err);
