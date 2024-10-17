@@ -1104,6 +1104,7 @@ export function ExperimentTable({
               prompt={basePrompt}
               editMode={true}
               selectedInput={selectedInput}
+              defaultEditMode={true}
               submitText={"Create Experiment"}
               playgroundMode={"experiment"}
               handleCreateExperiment={handleCreateExperiment}

@@ -12,6 +12,7 @@ import { useJawnClient } from "../../../../../../lib/clients/jawnHook";
 import { useRouter } from "next/router";
 import PromptPlayground, { PromptObject } from "../../../id/promptPlayground";
 import { Input } from "../../../../../ui/input";
+import LoadingAnimation from "../../../../../shared/loadingAnimation";
 
 // Move NewExperimentDialog outside of StartFromPromptDialog
 export const NewExperimentDialog = () => {
@@ -38,6 +39,8 @@ export const NewExperimentDialog = () => {
     auto_prompt_inputs: [],
     response_body: "",
   });
+
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const [promptName, setPromptName] = useState<string>("");
   const [promptVariables, setPromptVariables] = useState<
@@ -67,16 +70,19 @@ export const NewExperimentDialog = () => {
   };
 
   const handleCreateExperiment = async () => {
+    setIsLoading(true);
     if (!promptName || !basePrompt) {
       notification.setNotification(
         "Please enter a prompt name and content",
         "error"
       );
+      setIsLoading(false);
       return;
     }
 
     if (!basePrompt.model) {
       notification.setNotification("Please select a model", "error");
+      setIsLoading(false);
       return;
     }
 
@@ -91,11 +97,13 @@ export const NewExperimentDialog = () => {
     });
     if (res.error || !res.data) {
       notification.setNotification("Failed to create prompt", "error");
+      setIsLoading(false);
       return;
     }
 
     if (!res.data?.data?.id || !res.data?.data?.prompt_version_id) {
       notification.setNotification("Failed to create prompt", "error");
+      setIsLoading(false);
       return;
     }
 
@@ -107,6 +115,7 @@ export const NewExperimentDialog = () => {
     });
     if (!dataset.data?.data?.datasetId) {
       notification.setNotification("Failed to create dataset", "error");
+      setIsLoading(false);
       return;
     }
 
@@ -122,6 +131,7 @@ export const NewExperimentDialog = () => {
     });
     if (!experiment.data?.data?.experimentId) {
       notification.setNotification("Failed to create experiment", "error");
+      setIsLoading(false);
       return;
     }
     const result = await jawn.POST(
@@ -144,6 +154,7 @@ export const NewExperimentDialog = () => {
 
     if (result.error || !result.data) {
       notification.setNotification("Failed to create subversion", "error");
+      setIsLoading(false);
       return;
     }
 
@@ -152,44 +163,53 @@ export const NewExperimentDialog = () => {
     router.push(
       `/prompts/${res.data?.data?.id}/subversion/${res.data?.data?.prompt_version_id}/experiment/${experiment.data?.data?.experimentId}`
     );
+    setIsLoading(false);
   };
 
   return (
     <DialogContent showOverlay={false}>
-      <ScrollArea className="flex flex-col overflow-y-auto h-[600px] w-[500px]">
-        <div className="space-y-4 pr-8">
-          <div className="flex flex-row space-x-2 ">
-            <BeakerIcon className="h-6 w-6" />
-            <h3 className="text-md font-semibold">Original Prompt</h3>
-          </div>
-
-          <Input
-            placeholder="Prompt Name"
-            value={promptName}
-            onChange={(e) => setPromptName(e.target.value)}
-          />
-
-          <PromptPlayground
-            prompt={basePrompt}
-            editMode={true}
-            selectedInput={selectedInput}
-            submitText={"Create Experiment"}
-            playgroundMode={"experiment"}
-            handleCreateExperiment={handleCreateExperiment}
-            isPromptCreatedFromUi={true}
-            onExtractPromptVariables={(variables: any) =>
-              setPromptVariables(
-                variables.map((variable: any) => ({
-                  original: variable.original,
-                  heliconeTag: variable.heliconeTag,
-                  value: variable.value,
-                }))
-              )
-            }
-            onPromptChange={handlePromptChange}
-          />
+      {isLoading ? (
+        <div className="flex items-center justify-center h-[600px] w-[500px]">
+          <LoadingAnimation />
+          <h1 className="text-2xl font-semibold">Getting your experiments</h1>
         </div>
-      </ScrollArea>
+      ) : (
+        <ScrollArea className="flex flex-col overflow-y-auto h-[600px] w-[500px]">
+          <div className="space-y-4 pr-8">
+            <div className="flex flex-row space-x-2 ">
+              <BeakerIcon className="h-6 w-6" />
+              <h3 className="text-md font-semibold">Original Prompt</h3>
+            </div>
+
+            <Input
+              placeholder="Prompt Name"
+              value={promptName}
+              onChange={(e) => setPromptName(e.target.value)}
+            />
+
+            <PromptPlayground
+              prompt={basePrompt}
+              editMode={true}
+              selectedInput={selectedInput}
+              defaultEditMode={true}
+              submitText={"Create Experiment"}
+              playgroundMode={"experiment"}
+              handleCreateExperiment={handleCreateExperiment}
+              isPromptCreatedFromUi={true}
+              onExtractPromptVariables={(variables: any) =>
+                setPromptVariables(
+                  variables.map((variable: any) => ({
+                    original: variable.original,
+                    heliconeTag: variable.heliconeTag,
+                    value: variable.value,
+                  }))
+                )
+              }
+              onPromptChange={handlePromptChange}
+            />
+          </div>
+        </ScrollArea>
+      )}
     </DialogContent>
   );
 };
