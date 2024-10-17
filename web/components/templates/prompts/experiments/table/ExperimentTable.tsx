@@ -738,7 +738,7 @@ export function ExperimentTable({
     });
 
     if (
-      JSON.stringify(promptVersionTemplate?.helicone_template).includes(
+      JSON.stringify(promptVersionTemplate?.helicone_template)?.includes(
         "auto-inputs"
       )
     ) {
