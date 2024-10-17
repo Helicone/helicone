@@ -50,8 +50,8 @@ export class LLMAsAJudge {
       template: this.params.llmTemplate,
       inputs: {
         inputs:
-          JSON.stringify(this.params.inputRecord.inputs) +
-          JSON.stringify(this.params.inputRecord.autoInputs),
+          JSON.stringify(this.params.inputRecord?.inputs) +
+          JSON.stringify(this.params.inputRecord?.autoInputs),
         outputs: this.params.output,
       },
       autoInputs: [],
