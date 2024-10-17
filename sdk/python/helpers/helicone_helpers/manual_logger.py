@@ -117,7 +117,6 @@ class HeliconeManualLogger:
         }
 
         try:
-            print("fetch_options", fetch_options)
             requests.post(
                 self.logging_endpoint,
                 json=fetch_options["body"],
