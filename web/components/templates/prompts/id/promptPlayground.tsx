@@ -1,6 +1,6 @@
 import { PlusIcon } from "@heroicons/react/24/outline";
 import { Button } from "@/components/ui/button";
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Message } from "../../requests/chatComponent/types";
 import { JsonView } from "../../requests/chatComponent/jsonView";
 import { MessageRenderer } from "../../requests/chatComponent/MessageRenderer";
