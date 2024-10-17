@@ -8,7 +8,7 @@ export async function getThreatsOverTime(
 ): Promise<Result<ThreatsOverTime[], string>> {
   const res = await getXOverTime<{
     threats: number;
-  }>(data, "count(request_response_rmt.threat) AS threats");
+  }>(data, "countIf(request_response_rmt.threat = true) AS threats");
   return resultMap(res, (resData) =>
     resData.map((d) => ({
       time: new Date(new Date(d.created_at_trunc).getTime()),
