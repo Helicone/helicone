@@ -203,7 +203,7 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
             props.hypothesis?.promptVersion?.model ||
             ""
           }
-          isPromptCreatedFromUi={true}
+          isPromptCreatedFromUi={false}
           defaultEditMode={false}
           editMode={false}
         />

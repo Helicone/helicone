@@ -717,8 +717,8 @@ export function ExperimentTable({
         cellRendererParams: {
           index: index,
         },
-        cellClass: "border-r border-[#E2E8F0] text-slate-700",
-        headerClass,
+        cellClass: "border-r border-[#E2E8F0] text-slate-700 pt-2.5",
+        headerClass: "border-r border-[#E2E8F0]",
         headerComponent: InputsHeaderComponent,
         headerComponentParams: {
           index: index,
@@ -726,9 +726,6 @@ export function ExperimentTable({
           badgeText: "Input",
         },
         cellStyle: {
-          display: "flex",
-          alignItems: "center",
-          overflow: "hidden",
           justifyContent: "start",
           whiteSpace: wrapText ? "normal" : "nowrap",
         },
@@ -1118,6 +1115,7 @@ export function ExperimentTable({
               prompt={basePrompt}
               editMode={true}
               selectedInput={selectedInput}
+              defaultEditMode={true}
               submitText={"Create Experiment"}
               playgroundMode={"experiment"}
               handleCreateExperiment={handleCreateExperiment}
