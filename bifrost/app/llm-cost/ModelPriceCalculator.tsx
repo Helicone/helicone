@@ -367,7 +367,7 @@ export default function ModelPriceCalculator({
     const inputCostPer1k = formatCost(selectedModelData.inputCostPer1k);
     const outputCostPer1k = formatCost(selectedModelData.outputCostPer1k);
 
-    const tweetText = `I just used Helicone&apos;s API pricing calculator for ${formatProviderName(
+    const tweetText = `I just used Helicone's API pricing calculator for ${formatProviderName(
       selectedModelData.provider
     )} ${selectedModelData.model}.
 
@@ -414,8 +414,8 @@ Optimize your AI API costs:`;
         </h2>
         <p className="text-gray-600 mb-4">
           {provider && model
-            ? `Calculate the cost of using ${model} with Helicone&apos;s free pricing tool.`
-            : "Calculate the cost of using AI models with Helicone&apos;s free pricing tool."}
+            ? `Calculate the cost of using ${model} with Helicone's free pricing tool.`
+            : "Calculate the cost of using AI models with Helicone's free pricing tool."}
         </p>
 
         <button
