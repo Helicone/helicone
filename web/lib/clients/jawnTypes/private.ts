@@ -153,6 +153,9 @@ export interface paths {
   "/v1/session/metrics/query": {
     post: operations["GetMetrics"];
   };
+  "/v1/session/{sessionId}/feedback": {
+    post: operations["UpdateSessionFeedback"];
+  };
   "/v1/user/metrics/query": {
     post: operations["GetUserMetrics"];
   };
@@ -3452,6 +3455,28 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_SessionMetrics.string_"];
+        };
+      };
+    };
+  };
+  UpdateSessionFeedback: {
+    parameters: {
+      path: {
+        sessionId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          rating: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
         };
       };
     };

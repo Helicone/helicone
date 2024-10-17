@@ -9831,6 +9831,59 @@
 				}
 			}
 		},
+		"/v1/session/{sessionId}/feedback": {
+			"post": {
+				"operationId": "UpdateSessionFeedback",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Session"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "sessionId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"rating": {
+										"type": "boolean"
+									}
+								},
+								"required": [
+									"rating"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
 		"/v1/user/metrics/query": {
 			"post": {
 				"operationId": "GetUserMetrics",
