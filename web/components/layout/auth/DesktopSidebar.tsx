@@ -210,114 +210,122 @@ const DesktopSidebar = ({ changelog, NAVIGATION }: SidebarProps) => {
             : "-translate-x-full md:translate-x-0"
         )}
       >
-        <div className="w-full flex flex-grow flex-col overflow-y-auto border-r dark:border-slate-800 pb-4 relative">
-          <div className="flex items-center gap-2 h-14 border-b dark:border-slate-800">
-            <div className="flex items-center gap-2 w-full">
-              {!isCollapsed && <OrgDropdown />}
-            </div>
-            <div
-              className={cn("mx-auto", isCollapsed ? "w-full mr-4" : "mr-2")}
-            >
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleCollapseToggle}
-                className="w-full flex justify-center dark:hover:bg-slate-800 px-2"
+        <div className="w-full flex flex-col h-full border-r dark:border-slate-800">
+          <div className="flex-grow overflow-y-auto pb-14">
+            {/* Collapsible button and OrgDropdown */}
+            <div className="flex items-center gap-2 h-14 border-b dark:border-slate-800">
+              <div className="flex items-center gap-2 w-full">
+                {!isCollapsed && <OrgDropdown />}
+              </div>
+              <div
+                className={cn("mx-auto", isCollapsed ? "w-full mr-4" : "mr-2")}
               >
-                {isCollapsed ? (
-                  <ChevronRightIcon className="h-4 w-4" />
-                ) : (
-                  <ChevronLeftIcon className="h-4 w-4" />
-                )}
-              </Button>
-            </div>
-          </div>
-          <div className="flex flex-col">
-            {((!isCollapsed &&
-              org?.currentOrg?.organization_type === "reseller") ||
-              org?.isResellerOfCurrentCustomerOrg) && (
-              <div className="flex w-full justify-center px-5 py-2">
                 <Button
-                  variant="outline"
-                  className="w-full  dark:text-slate-400"
-                  size="sm_sleek"
-                  onClick={() => {
-                    router.push("/enterprise/portal");
-                    if (
-                      org.currentOrg?.organization_type === "customer" &&
-                      org.currentOrg?.reseller_id
-                    ) {
-                      org.setCurrentOrg(org.currentOrg.reseller_id);
-                    }
-                  }}
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleCollapseToggle}
+                  className="w-full flex justify-center dark:hover:bg-slate-800 px-2"
                 >
-                  {org.currentOrg?.organization_type === "customer"
-                    ? "Back to Portal"
-                    : "Customer Portal"}
+                  {isCollapsed ? (
+                    <ChevronRightIcon className="h-4 w-4" />
+                  ) : (
+                    <ChevronLeftIcon className="h-4 w-4" />
+                  )}
                 </Button>
               </div>
-            )}
-            <div
-              ref={navItemsRef}
-              data-collapsed={isCollapsed}
-              className="group flex flex-col py-2 data-[collapsed=true]:py-2 "
-            >
-              <nav className="grid flex-grow overflow-y-auto px-2 group-[[data-collapsed=true]]:justify-center group-[[data-collapsed=true]]:px-2">
-                {NAVIGATION_ITEMS.map((link) => (
-                  <NavItem
-                    key={link.name}
-                    link={link}
-                    isCollapsed={isCollapsed}
-                    expandedItems={expandedItems}
-                    toggleExpand={toggleExpand}
-                    onClick={() => {
-                      setIsCollapsed(false);
-                      setIsMobileMenuOpen(false);
-                    }}
-                    deep={0}
-                  />
-                ))}
-              </nav>
             </div>
+
+            {/* Navigation items */}
+            <div className="flex flex-col">
+              {((!isCollapsed &&
+                org?.currentOrg?.organization_type === "reseller") ||
+                org?.isResellerOfCurrentCustomerOrg) && (
+                <div className="flex w-full justify-center px-5 py-2">
+                  <Button
+                    variant="outline"
+                    className="w-full  dark:text-slate-400"
+                    size="sm_sleek"
+                    onClick={() => {
+                      router.push("/enterprise/portal");
+                      if (
+                        org.currentOrg?.organization_type === "customer" &&
+                        org.currentOrg?.reseller_id
+                      ) {
+                        org.setCurrentOrg(org.currentOrg.reseller_id);
+                      }
+                    }}
+                  >
+                    {org.currentOrg?.organization_type === "customer"
+                      ? "Back to Portal"
+                      : "Customer Portal"}
+                  </Button>
+                </div>
+              )}
+              <div
+                ref={navItemsRef}
+                data-collapsed={isCollapsed}
+                className="group flex flex-col py-2 data-[collapsed=true]:py-2 "
+              >
+                <nav className="grid flex-grow overflow-y-auto px-2 group-[[data-collapsed=true]]:justify-center group-[[data-collapsed=true]]:px-2">
+                  {NAVIGATION_ITEMS.map((link) => (
+                    <NavItem
+                      key={link.name}
+                      link={link}
+                      isCollapsed={isCollapsed}
+                      expandedItems={expandedItems}
+                      toggleExpand={toggleExpand}
+                      onClick={() => {
+                        setIsCollapsed(false);
+                        setIsMobileMenuOpen(false);
+                      }}
+                      deep={0}
+                    />
+                  ))}
+                </nav>
+              </div>
+            </div>
+
+            {/* InfoBox */}
+            {tier !== "growth" &&
+              tier !== "pro" &&
+              canShowInfoBox &&
+              !isCollapsed && (
+                <div className="bg-sky-500/10 rounded-lg border-l-4 border-l-sky-500 border-y border-r border-y-sky-200 border-r-sky-200 text-sky-500 flex flex-col md:flex-row md:gap-2 gap-4 justify-between md:justify-center md:items-center items-start p-2 mt-2 mx-2 mb-8">
+                  <h1 className="text-xs text-start font-medium tracking-tight leading-tight">
+                    🎉 Introducing a new way to perfect your prompts.{" "}
+                    <Link
+                      href="https://helicone.ai/experiments"
+                      target="_blank"
+                      className="underline decoration-sky-400 decoration-1 underline-offset-2 font-semibold"
+                    >
+                      Get early access here.
+                    </Link>{" "}
+                  </h1>
+                </div>
+              )}
+
+            {canShowInfoBox && !isCollapsed && shouldShowInfoBox && (
+              <div className="p-2">
+                <InfoBox icon={() => <></>} className="flex flex-col">
+                  <div>
+                    <span className="text-[#1c4ed8] text-xs font-semibold leading-tight">
+                      Early Adopter Exclusive: $120 Credit for the year. <br />
+                    </span>
+                    <span className="text-[#1c4ed8] text-xs font-light leading-tight">
+                      Switch to Pro and get $10/mo credit for 1 year, as a thank
+                      you for your early support!
+                    </span>
+                  </div>
+                  <Button className="bg-blue-700 mt-[10px] text-xs" size="xs">
+                    <Link href="/settings/billing">Upgrade to Pro</Link>
+                  </Button>
+                </InfoBox>
+              </div>
+            )}
           </div>
 
-          {tier !== "growth" &&
-            tier !== "pro" &&
-            canShowInfoBox &&
-            !isCollapsed && (
-              <div className="bg-sky-500/10 rounded-lg border-l-4 border-l-sky-500 border-y border-r border-y-sky-200 border-r-sky-200 text-sky-500 flex flex-col md:flex-row md:gap-2 gap-4 justify-between md:justify-center md:items-center items-start p-2 mt-2 mx-2 mb-8">
-                <h1 className="text-xs text-start font-medium tracking-tight leading-tight">
-                  🎉 Introducing a new way to perfect your prompts.{" "}
-                  <Link
-                    href="https://helicone.ai/experiments"
-                    target="_blank"
-                    className="underline decoration-sky-400 decoration-1 underline-offset-2 font-semibold"
-                  >
-                    Get early access here.
-                  </Link>{" "}
-                </h1>
-              </div>
-            )}
-
-          {canShowInfoBox && !isCollapsed && shouldShowInfoBox && (
-            <div className="p-2">
-              <InfoBox icon={() => <></>} className="flex flex-col">
-                <div>
-                  <span className="text-[#1c4ed8] text-xs font-semibold leading-tight">
-                    Early Adopter Exclusive: $120 Credit for the year. <br />
-                  </span>
-                  <span className="text-[#1c4ed8] text-xs font-light leading-tight">
-                    Switch to Pro and get $10/mo credit for 1 year, as a thank
-                    you for your early support!
-                  </span>
-                </div>
-                <Button className="bg-blue-700 mt-[10px] text-xs" size="xs">
-                  <Link href="/settings/billing">Upgrade to Pro</Link>
-                </Button>
-              </InfoBox>
-            </div>
-          )}
-          <div className="absolute bottom-3 left-3">
+          {/* Sticky help dropdown */}
+          <div className="absolute bottom-3 left-3 z-10">
             <SidebarHelpDropdown
               changelog={changelog}
               handleChangelogClick={handleChangelogClick}
