@@ -260,6 +260,10 @@ export class ExperimentController extends Controller {
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<ExperimentRun, string>> {
     const experimentManager = new ExperimentManager(request.authParams);
+    if (requestBody.hypothesisId === "original") {
+      return experimentManager.runOriginalExperiment(requestBody);
+    }
+
     const result = await experimentManager.getExperimentById(
       requestBody.experimentId,
       {

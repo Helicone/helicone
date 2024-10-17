@@ -2,11 +2,11 @@ import { uuid } from "uuidv4";
 import { Result, err, ok } from "../shared/result";
 
 import { supabaseServer } from "../db/supabase";
-import { Experiment } from "../stores/experimentStore";
+import { Experiment, ExperimentDatasetRow } from "../stores/experimentStore";
 import { BaseTempKey } from "./tempKeys/baseTempKey";
 import { prepareRequestOpenAIFull } from "./requestPrep/openaiCloud";
 import { prepareRequestAzureFull as prepareRequestAzureOnPremFull } from "./requestPrep/azure";
-import { runHypothesis } from "./hypothesisRunner";
+import { runHypothesis, runOriginalRequest } from "./hypothesisRunner";
 import { generateHeliconeAPIKey } from "./tempKeys/tempAPIKey";
 import { generateProxyKey } from "./tempKeys/tempProxyKey";
 import {
@@ -30,7 +30,7 @@ async function prepareRequest(
     deployment: "AZURE" | "OPENAI";
   }
 ): Promise<PreparedRequest> {
-  if (args.hypothesis.providerKey === null) {
+  if (args.providerKey === null) {
     if (IS_ON_PREM && onPremConfig.deployment === "AZURE") {
       return await prepareRequestAzureOnPremFull(args);
     } else {
@@ -39,6 +39,69 @@ async function prepareRequest(
   } else {
     return prepareRequestOpenAIFull(args);
   }
+}
+
+export async function runOriginalExperiment(
+  experiment: Experiment,
+  datasetRows: ExperimentDatasetRow[]
+): Promise<Result<string, string>> {
+  const tempKey: Result<BaseTempKey, string> = await generateHeliconeAPIKey(
+    experiment.organization
+  );
+
+  if (tempKey.error || !tempKey.data) {
+    return err(tempKey.error);
+  }
+
+  return tempKey.data.with<Result<string, string>>(async (secretKey) => {
+    for (const data of datasetRows) {
+      const requestId = uuid();
+
+      if (data.inputRecord?.inputs) {
+        data.inputRecord.inputs = await getAllSignedURLsFromInputs(
+          data.inputRecord.inputs,
+          experiment.organization,
+          data.inputRecord.requestId,
+          true
+        );
+      }
+
+      const promptVersionId = experiment.meta?.["prompt_version"];
+
+      const promptVersion = await supabaseServer.client
+        .from("prompts_versions")
+        .select("*")
+        .eq("id", promptVersionId)
+        .single();
+
+      if (promptVersion.error || !promptVersion.data) {
+        return err(promptVersion.error.message);
+      }
+
+      const preparedRequest = await prepareRequest(
+        {
+          template: promptVersion.data.helicone_template,
+          providerKey: null,
+          secretKey,
+          datasetRow: data,
+          requestId,
+        },
+        {
+          deployment: experiment.meta?.deployment ?? "AZURE",
+        }
+      );
+
+      await runOriginalRequest({
+        url: preparedRequest.url,
+        headers: preparedRequest.headers,
+        body: preparedRequest.body,
+        requestId,
+        datasetRowId: data.rowId,
+        inputRecordId: data.inputRecord.id,
+      });
+    }
+    return ok("success");
+  });
 }
 
 export async function run(
@@ -68,7 +131,8 @@ export async function run(
 
         const preparedRequest = await prepareRequest(
           {
-            hypothesis,
+            template: hypothesis.promptVersion?.template ?? {},
+            providerKey: hypothesis.providerKey,
             secretKey,
             datasetRow: data,
             requestId,

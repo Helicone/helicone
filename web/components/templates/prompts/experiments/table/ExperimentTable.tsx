@@ -387,7 +387,7 @@ export function ExperimentTable({
       hypothesisId,
       datasetRowIds,
     }: {
-      hypothesisId: string;
+      hypothesisId: string | "original";
       datasetRowIds: string[];
     }) => {
       await jawn.POST("/v1/experiment/run", {
@@ -788,6 +788,7 @@ export function ExperimentTable({
       cellRenderer: OriginalOutputCellRenderer,
       cellRendererParams: {
         prompt: promptVersionTemplate,
+        handleRunHypothesis,
       },
       cellStyle: {
         verticalAlign: "middle",

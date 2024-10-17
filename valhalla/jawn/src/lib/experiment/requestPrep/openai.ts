@@ -29,13 +29,13 @@ function prepareRequestAzure(
 }
 
 export function prepareRequestOpenAIOnPremFull({
-  hypothesis,
+  template,
   secretKey: apiKey,
   datasetRow,
   requestId,
 }: PreparedRequestArgs): PreparedRequest {
   const newRequestBody = autoFillInputs({
-    template: hypothesis.promptVersion?.template ?? {},
+    template: template ?? {},
     inputs: datasetRow.inputRecord?.inputs ?? {},
     autoInputs: datasetRow.inputRecord?.autoInputs ?? [],
   });

@@ -246,6 +246,15 @@ export const OriginalOutputCellRenderer: React.FC<any> = (params) => {
     };
   };
 
+  if (data.isLoading?.[hypothesisId] && !content) {
+    return (
+      <div className="w-full h-full whitespace-pre-wrap flex flex-row items-center space-x-2 pl-4">
+        <span className="animate-ping inline-flex rounded-full bg-green-700 h-2 w-2"></span>
+        <div className="italic">Generating...</div>
+      </div>
+    );
+  }
+
   return (
     <Popover open={showPromptPlayground} onOpenChange={setShowPromptPlayground}>
       <PopoverTrigger asChild>
@@ -259,18 +268,16 @@ export const OriginalOutputCellRenderer: React.FC<any> = (params) => {
             <div>{content}</div>
           ) : (
             <div>
-              {/* <Button
+              <Button
                 variant="ghost"
                 className="w-6 h-6 p-0 border-slate-200 border rounded-md bg-slate-50 text-slate-500"
                 onClick={(e) => {
                   e.stopPropagation();
-                  params.handleRunHypothesis(hypothesisId, [
-                    data.dataset_row_id,
-                  ]);
+                  params.handleRunHypothesis("original", [data.dataset_row_id]);
                 }}
               >
                 <PlayIcon className="w-4 h-4" />
-              </Button> */}
+              </Button>
             </div>
           )}
         </div>
