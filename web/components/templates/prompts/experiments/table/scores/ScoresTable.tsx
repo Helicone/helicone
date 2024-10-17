@@ -9,7 +9,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import ScoresEvaluatorsConfig from "./ScoresEvaluatorsConfig";
 
 const ScoresTable = memo(
   ({
