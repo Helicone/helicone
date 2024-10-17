@@ -42,8 +42,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({
   return (
     <div
       className={clsx(
-        level === 0 ? "p-0 m-0 h-full" : "relative flex flex-col",
-        "min-h-full",
+        level === 0 ? "p-0 m-0" : "relative flex flex-col",
         "bg-white dark:bg-slate-950"
       )}
       key={`${node.name}-${node.trace?.request_id}`}
@@ -85,7 +84,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({
                 }
                 level={level + 1}
                 setShowDrawer={setShowDrawer}
-                isRequestSingleChild={node.children?.length === 1}
+                isRequestSingleChild={node?.children?.length === 1}
               />
             ))}
         </Col>
