@@ -54,6 +54,8 @@ import { Input } from "../../../../ui/input";
 import useNotification from "../../../../shared/notification/useNotification";
 import { useRouter } from "next/router";
 import { ScrollArea } from "../../../../ui/scroll-area";
+import clsx from "clsx";
+import ScoresEvaluatorsConfig from "./scores/ScoresEvaluatorsConfig";
 
 interface ExperimentTableProps {
   promptSubversionId?: string;
@@ -680,6 +682,9 @@ export function ExperimentTable({
       setRowData([newRow]);
     }
   }, [inputKeys, rowData.length]);
+  const headerClass = clsx(
+    "border-r border-[#E2E8F0] text-center items-center justify-center"
+  );
 
   const columnDefs = useMemo<ColDef[]>(() => {
     let columns: ColDef[] = [
@@ -692,8 +697,7 @@ export function ExperimentTable({
         pinned: "left",
         cellClass:
           "border-r border-[#E2E8F0] text-center text-slate-700 justify-center flex-1 items-center",
-        headerClass:
-          "border-r border-[#E2E8F0] text-center items-center justify-center",
+        headerClass,
         cellStyle: {
           display: "flex",
           alignItems: "center",
@@ -730,35 +734,41 @@ export function ExperimentTable({
       });
     });
 
-    // Add the "Messages" column
-    columns.push({
-      field: "messages",
-      headerName: "Messages",
-      width: 200,
-      headerComponent: CustomHeaderComponent,
-      headerComponentParams: {
-        displayName: "Messages",
-        badgeText: "Input",
-        badgeVariant: "secondary",
-        hypothesis: sortedHypotheses[0] || {},
-        promptVersionTemplate: promptVersionTemplate,
-      },
-      cellClass:
-        "border-r border-[#E2E8F0] text-slate-700 flex items-center justify-start pt-2.5",
-      headerClass: "border-r border-[#E2E8F0]",
-      cellRenderer: OriginalMessagesCellRenderer,
-      cellRendererParams: {
-        prompt: promptVersionTemplate,
-      },
-      cellStyle: {
-        verticalAlign: "middle",
-        textAlign: "left",
-        overflow: "hidden",
-        textOverflow: "ellipsis",
-        whiteSpace: wrapText ? "normal" : "nowrap",
-      },
-      autoHeight: wrapText,
-    });
+    if (
+      JSON.stringify(promptVersionTemplate?.helicone_template)?.includes(
+        "auto-inputs"
+      )
+    ) {
+      // Add the "Messages" column
+      columns.push({
+        field: "messages",
+        headerName: "Messages",
+        width: 200,
+        headerComponent: CustomHeaderComponent,
+        headerComponentParams: {
+          displayName: "Messages",
+          badgeText: "Input",
+          badgeVariant: "secondary",
+          hypothesis: sortedHypotheses[0] || {},
+          promptVersionTemplate: promptVersionTemplate,
+        },
+        cellClass:
+          "border-r border-[#E2E8F0] text-slate-700 flex items-center justify-start pt-2.5",
+        headerClass,
+        cellRenderer: OriginalMessagesCellRenderer,
+        cellRendererParams: {
+          prompt: promptVersionTemplate,
+        },
+        cellStyle: {
+          verticalAlign: "middle",
+          textAlign: "left",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: wrapText ? "normal" : "nowrap",
+        },
+        autoHeight: wrapText,
+      });
+    }
 
     // Add the "Original" column
     columns.push({
@@ -774,7 +784,7 @@ export function ExperimentTable({
         promptVersionTemplate: promptVersionTemplate,
       },
       cellClass: "border-r border-[#E2E8F0] text-slate-700 pt-2.5",
-      headerClass: "border-r border-[#E2E8F0]",
+      headerClass: headerClass,
       cellRenderer: OriginalOutputCellRenderer,
       cellRendererParams: {
         prompt: promptVersionTemplate,
@@ -820,7 +830,7 @@ export function ExperimentTable({
             hypothesis: hypothesis,
           },
           cellClass: "border-r border-[#E2E8F0] text-slate-700 pt-2.5",
-          headerClass: "border-r border-[#E2E8F0] bg-white dark:bg-gray-800",
+          headerClass: "border-r border-[#E2E8F0]",
           cellStyle: {
             verticalAlign: "middle",
             textAlign: "left",
@@ -843,6 +853,7 @@ export function ExperimentTable({
       filter: false,
       resizable: false,
       headerComponent: AddColumnHeader,
+      headerClass: "border-r border-[#E2E8F0]",
       headerComponentParams: {
         promptVersionId: promptSubversionId,
         promptVersionTemplate: promptVersionTemplate,
@@ -1137,7 +1148,7 @@ export function ExperimentTable({
 
   return (
     <div className="relative w-full">
-      <div className="flex flex-col space-y-2 w-full">
+      <div className="flex flex-col space-y-1 w-full">
         <div className="flex flex-row space-x-2 justify-end w-full pr-4">
           <Button
             variant="outline"
@@ -1172,27 +1183,34 @@ export function ExperimentTable({
             </Popover>
           )}
         </div>
+
         {showScoresTable && experimentId && (
-          <ScoresTable
-            columnDefs={columnDefs}
-            columnWidths={columnWidths}
-            columnOrder={columnOrder}
-            experimentId={experimentId}
-          />
+          <div className="w-full bg-white border">
+            <div className="flex justify-between items-center bg-white p-2 border-b">
+              <ScoresEvaluatorsConfig experimentId={experimentId} />
+            </div>
+            <ScoresTable
+              columnDefs={columnDefs}
+              columnWidths={columnWidths}
+              columnOrder={columnOrder}
+              experimentId={experimentId}
+            />
+          </div>
         )}
 
         <div
-          className="ag-theme-alpine w-full overflow-hidden"
+          className="ag-theme-alpine w-full overflow-hidden "
           ref={experimentTableRef}
           style={
             {
               "--ag-header-height": "40px",
-              "--ag-header-foreground-color": "#000",
-              "--ag-header-background-color": "#ffffff",
-              "--ag-header-cell-hover-background-color": "#e5e7eb",
-              "--ag-header-cell-moving-background-color": "#d1d5db",
+              "--ag-header-background-color": "#f3f4f6", // Light gray background
+              "--ag-header-foreground-color": "#1f2937", // Dark gray text
+              "--ag-header-cell-hover-background-color": "#e5e7eb", // Slightly darker gray on hover
+              "--ag-header-column-separator-color": "#d1d5db", // Medium gray for separators
               "--ag-cell-horizontal-border": "solid #E2E8F0",
               "--ag-border-color": "#E2E8F0",
+              "--ag-borders": "none",
             } as React.CSSProperties
           }
         >
