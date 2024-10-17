@@ -263,6 +263,9 @@ export interface paths {
   "/v1/evaluator/query": {
     post: operations["QueryEvaluators"];
   };
+  "/v1/evaluator/{evaluatorId}/experiments": {
+    get: operations["GetExperimentsForEvaluator"];
+  };
   "/v1/evals/query": {
     post: operations["QueryEvals"];
   };
@@ -2107,6 +2110,15 @@ Json: JsonObject;
       scoring_type?: string;
       llm_template?: unknown;
     };
+    "ResultSuccess__experiment_id-string--experiment_created_at-string_-Array_": {
+      data: {
+          experiment_created_at: string;
+          experiment_id: string;
+        }[];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__experiment_id-string--experiment_created_at-string_-Array.string_": components["schemas"]["ResultSuccess__experiment_id-string--experiment_created_at-string_-Array_"] | components["schemas"]["ResultError_string_"];
     Eval: {
       name: string;
       /** Format: double */
@@ -4091,6 +4103,21 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_EvaluatorResult-Array.string_"];
+        };
+      };
+    };
+  };
+  GetExperimentsForEvaluator: {
+    parameters: {
+      path: {
+        evaluatorId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__experiment_id-string--experiment_created_at-string_-Array.string_"];
         };
       };
     };

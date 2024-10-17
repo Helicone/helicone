@@ -36,7 +36,12 @@ export class ScoreStore extends BaseStore {
 
   public async putScoresIntoSupabase(requestId: string, scores: Score[]) {
     try {
-      const scoreKeys = scores.map((score) => score.score_attribute_key);
+      const scoreKeys = scores.map((score) => {
+        if (score.score_attribute_type === "boolean") {
+          return `${score.score_attribute_key}-hcone-bool`;
+        }
+        return score.score_attribute_key;
+      });
       const scoreTypes = scores.map((score) => score.score_attribute_type);
       const scoreValues = scores.map((score) => score.score_attribute_value);
 

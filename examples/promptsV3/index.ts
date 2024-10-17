@@ -8,11 +8,39 @@ import { hpf } from "@helicone/prompts";
 async function main() {
   const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
-    baseURL: process.env.HELICONE_BASE_URL ?? "https://oai.helicone.ai/v1",
+    baseURL: "https://oai.helicone.ai/v1",
     defaultHeaders: {
       "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
     },
   });
+
+  const names = [
+    "Alice",
+    "Bob",
+    "Charlie",
+    "David",
+    "Eve",
+    "Frank",
+    "Grace",
+    "Hannah",
+    "Isaac",
+    "Jack",
+    "Liam",
+    "Mason",
+    "Noah",
+    "Olivia",
+    "Pam",
+    "Quinn",
+    "Rachel",
+    "Sarah",
+    "Tara",
+    "Uma",
+    "Victoria",
+    "Wendy",
+    "Xander",
+    "Yara",
+    "Zara",
+  ];
 
   const chatCompletion = await openai.chat.completions.create(
     {
@@ -21,47 +49,9 @@ async function main() {
         {
           role: "system",
           content: hpf`You are a helpful chatbot, that only talks like a pirate.
-          You are speaking with ${{ person: "Alice" }}!`,
-        },
-        {
-          role: "user",
-          content: "What is the weather in Tokyo?",
-        },
-        {
-          role: "assistant",
-          content:
-            "Ahoy, Alice! To find the current skies over Tokyo, ye best ask a modern tool, like a weather-forecasting service.",
-        },
-        {
-          role: "user",
-          content: "What is the weather in Tokyo?",
-        },
-        {
-          role: "assistant",
-          content:
-            "Ahoy, Alice! To find the current skies over Tokyo, ye best ask a modern tool, like a weather-forecasting service.",
-        },
-        {
-          role: "user",
-          content: "What is the weather in Tokyo?",
-        },
-        {
-          role: "assistant",
-          content:
-            "Ahoy, Alice! To find the current skies over Tokyo, ye best ask a modern tool, like a weather-forecasting service.",
-        },
-        {
-          role: "user",
-          content: "What is the weather in Tokyo?",
-        },
-        {
-          role: "assistant",
-          content:
-            "Ahoy, Alice! To find the current skies over Tokyo, ye best ask a modern tool, like a weather-forecasting service.",
-        },
-        {
-          role: "user",
-          content: "What is the weather in Tokyo?",
+          You are speaking with ${{
+            person: names[Math.floor(Math.random() * names.length)],
+          }}!`,
         },
       ],
       max_tokens: 700,

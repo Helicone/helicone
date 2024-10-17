@@ -9,7 +9,7 @@ import { ScoreDistributionChart } from "./charts/ScoreDistributionChart";
 import { ScoreDistributionChartPie } from "./charts/ScoreDistributionChartPie";
 import { TracesChart } from "./charts/TracesChart";
 
-type EvalMetric = {
+export type EvalMetric = {
   name: string;
   type: string;
   valueType: string;

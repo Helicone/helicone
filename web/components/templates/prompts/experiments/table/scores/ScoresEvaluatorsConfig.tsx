@@ -1,4 +1,4 @@
-import { Row } from "@/components/layout/common";
+import { Col, Row } from "@/components/layout/common";
 import { useOrg } from "@/components/layout/organizationContext";
 import { CreateNewEvaluatorSheetContent } from "@/components/shared/CreateNewEvaluator/CreateNewEvaluatorSheetContent";
 import useNotification from "@/components/shared/notification/useNotification";
@@ -14,7 +14,7 @@ import {
 import { Sheet } from "@/components/ui/sheet";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { TrashIcon } from "lucide-react";
+import { Loader2, TrashIcon } from "lucide-react";
 import { memo, useState } from "react";
 
 const ScoresEvaluatorsConfig = memo(
@@ -107,16 +107,13 @@ const ScoresEvaluatorsConfig = memo(
     const runEvaluators = useMutation({
       mutationFn: async () => {
         const jawn = getJawnClient(org?.currentOrg?.id);
-        const evaluators = await jawn.POST(
-          `/v1/experiment/{experimentId}/evaluators/run`,
-          {
-            params: {
-              path: {
-                experimentId: experimentId,
-              },
+        return await jawn.POST(`/v1/experiment/{experimentId}/evaluators/run`, {
+          params: {
+            path: {
+              experimentId: experimentId,
             },
-          }
-        );
+          },
+        });
       },
     });
 
@@ -176,7 +173,7 @@ const ScoresEvaluatorsConfig = memo(
           />
         </Sheet>
 
-        <div className="grid grid-cols-8 gap-2 items-center text-xs mr-auto">
+        <div className="grid grid-cols-5 gap-2 items-center text-xs mr-auto">
           {evaluators.data?.data?.data?.map((evaluator, index) => {
             return (
               <Row
@@ -192,13 +189,31 @@ const ScoresEvaluatorsConfig = memo(
             );
           })}
         </div>
-        <Button
-          size="sm_sleek"
-          variant={"outline"}
-          onClick={() => runEvaluators.mutate()}
-        >
-          Run Evaluators
-        </Button>
+        <Col className="items-end">
+          <div className="flex items-center gap-2">
+            <Button
+              size="sm_sleek"
+              variant={"outline"}
+              onClick={() => runEvaluators.mutate()}
+              disabled={runEvaluators.isLoading}
+            >
+              {runEvaluators.isLoading ? "Running..." : "Run Evaluators"}
+            </Button>
+            {runEvaluators.isLoading && (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            )}
+          </div>
+          {runEvaluators.isSuccess && (
+            <span className="text-xs text-slate-500">
+              Evaluators ran successfully
+            </span>
+          )}
+          {runEvaluators.isError && (
+            <span className="text-xs text-red-500">
+              Error running evaluators
+            </span>
+          )}
+        </Col>
       </Row>
     );
   }
