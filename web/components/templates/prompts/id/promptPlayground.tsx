@@ -1,6 +1,6 @@
 import { PlusIcon } from "@heroicons/react/24/outline";
 import { Button } from "@/components/ui/button";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Message } from "../../requests/chatComponent/types";
 import { JsonView } from "../../requests/chatComponent/jsonView";
 import { MessageRenderer } from "../../requests/chatComponent/MessageRenderer";
@@ -17,6 +17,11 @@ import PromptChatRow from "./promptChatRow";
 import { FunctionCall } from "./toolsRenderingUtils";
 
 import RoleButton from "../../playground/new/roleButton";
+import {
+  getMessages,
+  getRequestMessages,
+  getResponseMessage,
+} from "../../requests/chatComponent/messageUtils";
 
 export type Input = {
   id: string;
@@ -128,6 +133,27 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
   const [currentChat, setCurrentChat] = useState<Message[]>(() =>
     parsePromptToMessages(prompt, selectedInput?.inputs)
   );
+
+  const { requestMessages, responseMessage, messages } = useMemo(() => {
+    const requestMessages = getRequestMessages(undefined, prompt);
+    const responseMessage = getResponseMessage(
+      undefined,
+      selectedInput?.response_body || {
+        id: "123",
+        choices: [
+          {
+            message: {
+              role: "assistant",
+              content: `<helicone-prompt-input key="output" />`,
+            },
+          },
+        ],
+      },
+      (prompt as PromptObject).model
+    );
+    const messages = getMessages(requestMessages, responseMessage, 200);
+    return { requestMessages, responseMessage, messages };
+  }, [prompt, selectedInput]);
   const [promptVariables, setPromptVariables] = useState<
     Array<{ original: string; heliconeTag: string; value: string }>
   >([]);
@@ -136,9 +162,9 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
   >({});
   const [selectedModel, setSelectedModel] = useState(initialModel);
 
-  useEffect(() => {
-    setCurrentChat(parsePromptToMessages(prompt, selectedInput?.inputs));
-  }, [prompt, selectedInput]);
+  // useEffect(() => {
+  //   setCurrentChat(parsePromptToMessages(prompt, selectedInput?.inputs));
+  // }, [prompt, selectedInput]);
 
   // Add this useEffect to update selectedModel when initialModel changes
   useEffect(() => {
@@ -225,7 +251,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
       case "Pretty":
         return (
           <ul className="w-full relative h-fit">
-            {currentChat.map((message, index) => (
+            {messages.map((message, index) => (
               <li
                 key={message.id}
                 className="dark:border-gray-700 last:border-b-0 z-10 last:rounded-xl"
@@ -243,80 +269,29 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
                 />
               </li>
             ))}
-            {selectedInput?.auto_prompt_inputs &&
-              selectedInput?.auto_prompt_inputs.length > 0 && (
-                <div className="flex flex-col w-full h-full relative space-y-8 bg-white border-gray-300 dark:border-gray-700 pl-4 ">
-                  <div
-                    className={
-                      "items-start p-4 text-left flex flex-col space-y-4 text-black dark:text-white"
-                    }
-                  >
-                    <div className="flex items-center justify-center">
-                      <div className="w-20">
-                        <RoleButton
-                          role={"assistant"}
-                          onRoleChange={() => {}}
-                          disabled={!editMode}
-                          size="medium"
-                        />
-                      </div>
-                    </div>
-                    <div className="overflow-auto w-full ">
-                      <FunctionCall
-                        auto_prompt_inputs={selectedInput.auto_prompt_inputs}
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
           </ul>
         );
       case "Markdown":
         return (
           <MessageRenderer
-            messages={currentChat}
+            messages={messages}
             showAllMessages={true}
             expandedChildren={expandedChildren}
             setExpandedChildren={setExpandedChildren}
             selectedProperties={selectedInput?.inputs}
-            isHeliconeTemplate={false}
+            isHeliconeTemplate={undefined}
             autoInputs={selectedInput?.auto_prompt_inputs}
             setShowAllMessages={() => {}}
             mode={mode}
           />
         );
       case "JSON":
-        if (chatType === "request") {
-          return (
-            <JsonView
-              requestBody={{
-                messages: currentChat,
-                auto_prompt_inputs: selectedInput?.auto_prompt_inputs || [],
-              }}
-              responseBody={{}}
-            />
-          );
-        } else if (chatType === "response") {
-          return (
-            <JsonView
-              requestBody={{}}
-              responseBody={{
-                messages: currentChat,
-                auto_prompt_inputs: selectedInput?.auto_prompt_inputs || [],
-              }}
-            />
-          );
-        } else {
-          return (
-            <JsonView
-              requestBody={{
-                messages: currentChat,
-                auto_prompt_inputs: selectedInput?.auto_prompt_inputs || [],
-              }}
-              responseBody={{}}
-            />
-          );
-        }
+        return (
+          <JsonView
+            requestBody={requestMessages}
+            responseBody={responseMessage}
+          />
+        );
       default:
         return null;
     }
