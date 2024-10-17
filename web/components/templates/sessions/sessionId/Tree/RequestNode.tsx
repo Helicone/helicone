@@ -3,7 +3,6 @@ import { TreeNodeData } from "../../../../../lib/sessions/sessionTypes";
 import { Row } from "../../../../layout/common/row";
 import StatusBadge from "../../../requestsV2/statusBadge";
 import { clsx } from "../../../../shared/clsx";
-import { Clock4Icon } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,

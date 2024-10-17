@@ -1,12 +1,4 @@
-import {
-  Clock2Icon,
-  Clock4Icon,
-  ClockIcon,
-  MinusIcon,
-  MinusSquareIcon,
-  PlusIcon,
-  PlusSquareIcon,
-} from "lucide-react";
+import { MinusIcon, PlusIcon } from "lucide-react";
 import { TreeNodeData } from "../../../../../lib/sessions/sessionTypes";
 
 export function PathNode(props: {

@@ -33,7 +33,6 @@ import DatasetDrawerV2 from "./datasetDrawer";
 import RemoveRequestsModal from "./RemoveRequests";
 import { useIntegration } from "@/services/hooks/useIntegrations";
 import OpenPipeFineTuneButton from "../connections/openPipe/fineTuneDatasetButton";
-import AuthHeader from "../../shared/authHeader";
 
 interface DatasetIdPageProps {
   id: string;
