@@ -121,6 +121,7 @@ export function ExperimentTable({
     fetchExperiments,
     {
       enabled: !!orgId && !!experimentId,
+      refetchInterval: 10000,
     }
   );
 
