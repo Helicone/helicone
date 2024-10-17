@@ -196,7 +196,6 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
 
   useEffect(() => {
     if (onExtractPromptVariables) {
-      console.log("promptVariables", promptVariables);
       onExtractPromptVariables(promptVariables);
     }
   }, [promptVariables]);
