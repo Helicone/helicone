@@ -54,15 +54,17 @@ const AuthLayout = (props: AuthLayoutProps) => {
               changelog={
                 changelog
                   ? changelog.slice(0, 2).map((item) => ({
-                      title: item.title,
-                      description: item.description,
-                      link: item.link,
-                      content: item.content,
-                      "content:encoded": item["content:encoded"],
-                      "content:encodedSnippet": item["content:encodedSnippet"],
-                      contentSnippet: item.contentSnippet,
-                      isoDate: item.isoDate,
-                      pubDate: item.pubDate,
+                      title: item.title || "",
+                      image: item.enclosure,
+                      description: item.description || "",
+                      link: item.link || "",
+                      content: item.content || "",
+                      "content:encoded": item["content:encoded"] || "",
+                      "content:encodedSnippet":
+                        item["content:encodedSnippet"] || "",
+                      contentSnippet: item.contentSnippet || "",
+                      isoDate: item.isoDate || "",
+                      pubDate: item.pubDate || "",
                     }))
                   : []
               }

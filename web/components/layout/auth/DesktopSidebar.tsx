@@ -1,18 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { InfoBox } from "@/components/ui/helicone/infoBox";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { useLocalStorage } from "@/services/hooks/localStorage";
 import {
-  BookOpenIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
-  Cog6ToothIcon,
-  QuestionMarkCircleIcon,
   Bars3Icon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
@@ -22,6 +14,8 @@ import { useOrg } from "../organizationContext";
 import OrgDropdown from "../orgDropdown";
 import NavItem from "./NavItem";
 import { ChangelogItem } from "./Sidebar";
+import ChangelogModal from "../ChangelogModal";
+import SidebarHelpDropdown from "../SidebarHelpDropdown";
 
 export interface NavigationItem {
   name: string;
@@ -146,6 +140,26 @@ const DesktopSidebar = ({ changelog, NAVIGATION }: SidebarProps) => {
     }
   };
 
+  const [modalOpen, setModalOpen] = useState(false);
+  const [changelogToView, setChangelogToView] = useState<ChangelogItem | null>(
+    null
+  );
+
+  const handleChangelogClick = (changelog: ChangelogItem) => {
+    setChangelogToView(changelog);
+    setModalOpen(true);
+  };
+
+  const handleModalOpen = (open: boolean) => {
+    console.log({ open });
+    if (!open) {
+      setChangelogToView(null);
+    } else {
+      setChangelogToView(changelog[0]);
+    }
+    setModalOpen(open);
+  };
+
   return (
     <>
       {/* Mobile hamburger menu */}
@@ -187,7 +201,7 @@ const DesktopSidebar = ({ changelog, NAVIGATION }: SidebarProps) => {
       <div
         ref={sidebarRef}
         className={cn(
-          "flex flex-col z-50 bg-background dark:bg-slate-900 transition-all duration-300 h-screen bg-white",
+          "flex flex-col z-50 bg-background dark:bg-neutral-950 transition-all duration-300 h-screen bg-white",
           largeWith,
           "fixed top-0 left-0",
           "md:translate-x-0", // Always visible on desktop
@@ -196,7 +210,7 @@ const DesktopSidebar = ({ changelog, NAVIGATION }: SidebarProps) => {
             : "-translate-x-full md:translate-x-0"
         )}
       >
-        <div className="w-full flex flex-grow flex-col overflow-y-auto border-r dark:border-slate-800 justify-between pb-4">
+        <div className="w-full flex flex-grow flex-col overflow-y-auto border-r dark:border-slate-800 pb-4 relative">
           <div className="flex items-center gap-2 h-14 border-b dark:border-slate-800">
             <div className="flex items-center gap-2 w-full">
               {!isCollapsed && <OrgDropdown />}
@@ -218,7 +232,7 @@ const DesktopSidebar = ({ changelog, NAVIGATION }: SidebarProps) => {
               </Button>
             </div>
           </div>
-          <div className="flex flex-grow flex-col">
+          <div className="flex flex-col">
             {((!isCollapsed &&
               org?.currentOrg?.organization_type === "reseller") ||
               org?.isResellerOfCurrentCustomerOrg) && (
@@ -267,27 +281,6 @@ const DesktopSidebar = ({ changelog, NAVIGATION }: SidebarProps) => {
             </div>
           </div>
 
-          {tier !== "growth" &&
-            tier !== "pro" &&
-            canShowInfoBox &&
-            !isCollapsed &&
-            changelog?.map((item) => (
-              <div
-                key={item.title}
-                className="bg-sky-500/10 rounded-lg border-l-4 border-l-sky-500 border-y border-r border-y-sky-200 border-r-sky-200 text-sky-500 flex flex-col md:flex-row md:gap-2 gap-4 justify-between md:justify-center md:items-center items-start p-2 mt-2 mx-2 mb-8"
-              >
-                <h1 className="text-xs text-start font-medium tracking-tight leading-tight">
-                  🎉 {item.title}
-                  <Link
-                    href={item.link}
-                    target="_blank"
-                    className="underline decoration-sky-400 decoration-1 underline-offset-2 font-semibold"
-                  >
-                    {item.description}
-                  </Link>{" "}
-                </h1>
-              </div>
-            ))}
           {canShowInfoBox && !isCollapsed && shouldShowInfoBox && (
             <div className="p-2">
               <InfoBox icon={() => <></>} className="flex flex-col">
@@ -306,97 +299,19 @@ const DesktopSidebar = ({ changelog, NAVIGATION }: SidebarProps) => {
               </InfoBox>
             </div>
           )}
-          <div className="mt-auto">
-            {isCollapsed ? (
-              <>
-                <Tooltip delayDuration={0}>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="w-full dark:hover:bg-slate-800"
-                      asChild
-                    >
-                      <Link
-                        href="https://docs.helicone.ai/introduction"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <BookOpenIcon className="h-4 w-4" />
-                      </Link>
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent
-                    side="right"
-                    className="dark:bg-slate-800 dark:text-slate-200"
-                  >
-                    View Documentation
-                  </TooltipContent>
-                </Tooltip>
-                <Tooltip delayDuration={0}>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="w-full dark:hover:bg-slate-800"
-                      asChild
-                    >
-                      <Link
-                        href="https://discord.gg/zsSTcH2qhG"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <QuestionMarkCircleIcon className="h-4 w-4" />
-                      </Link>
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent
-                    side="right"
-                    className="dark:bg-slate-800 dark:text-slate-200"
-                  >
-                    Help And Support
-                  </TooltipContent>
-                </Tooltip>
-              </>
-            ) : (
-              <>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="w-full justify-start dark:hover:bg-slate-800 text-[12px]"
-                  asChild
-                >
-                  <Link
-                    href="https://docs.helicone.ai/introduction"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-2"
-                  >
-                    <BookOpenIcon className="h-4 w-4 mr-2" />
-                    Documentation
-                  </Link>
-                </Button>
-
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="w-full justify-start dark:hover:bg-slate-800 text-[12px]"
-                  asChild
-                >
-                  <Link
-                    href="/settings"
-                    rel="noopener noreferrer"
-                    className="px-2"
-                  >
-                    <Cog6ToothIcon className="h-4 w-4 mr-2" />
-                    Settings
-                  </Link>
-                </Button>
-              </>
-            )}
+          <div className="absolute bottom-3 left-3">
+            <SidebarHelpDropdown
+              changelog={changelog}
+              handleChangelogClick={handleChangelogClick}
+            />
           </div>
         </div>
       </div>
+      <ChangelogModal
+        open={modalOpen}
+        setOpen={handleModalOpen}
+        changelog={changelogToView}
+      />
     </>
   );
 };

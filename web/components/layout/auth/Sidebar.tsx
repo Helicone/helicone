@@ -20,6 +20,7 @@ import DesktopSidebar, { NavigationItem } from "./DesktopSidebar";
 import { PiGraphLight } from "react-icons/pi";
 import { useOrg } from "../organizationContext";
 import { NotepadText, TestTube2, Webhook } from "lucide-react";
+import { Enclosure } from "rss-parser";
 
 export interface ChangelogItem {
   title: string;
@@ -31,6 +32,7 @@ export interface ChangelogItem {
   contentSnippet: string;
   isoDate: string;
   pubDate: string;
+  image?: Enclosure;
 }
 interface SidebarProps {
   setOpen: (open: boolean) => void;

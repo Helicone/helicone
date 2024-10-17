@@ -28,6 +28,7 @@ import {
 import { LogOutIcon } from "lucide-react";
 import Link from "next/link";
 import OrgMoreDropdown from "./orgMoreDropdown";
+import { Cog6ToothIcon } from "@heroicons/react/24/outline";
 
 interface OrgDropdownProps {}
 
@@ -173,6 +174,12 @@ export default function OrgDropdown({}: OrgDropdownProps) {
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
 
+          <Link href="/settings" rel="noopener noreferrer">
+            <DropdownMenuItem className="text-xs">
+              <Cog6ToothIcon className="h-4 w-4 mr-2" />
+              Settings
+            </DropdownMenuItem>
+          </Link>
           <DropdownMenuItem onSelect={handleSignOut} className="text-xs">
             <LogOutIcon className="h-4 w-4 mr-2" />
             Sign out
