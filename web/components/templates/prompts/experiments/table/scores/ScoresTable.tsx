@@ -147,7 +147,7 @@ const ScoresTable = memo(
           <thead className="rounded-t-lg">
             <tr className="rounded-t-lg">
               <th
-                className="text-left p-2 border border-slate-200 bg-slate-50 rounded-tl-lg text-slate-900 font-semibold"
+                className="text-left p-2 border-y border-slate-200 bg-slate-50 text-slate-900 font-semibold"
                 style={{ width: `${scoresColumnWidth}px` }}
               >
                 <div className="flex items-center gap-2 overflow-hidden">

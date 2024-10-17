@@ -1139,7 +1139,7 @@ export function ExperimentTable({
   return (
     <div className="relative w-full">
       <div className="flex flex-col space-y-2 w-full">
-        <div className="flex flex-row space-x-2 justify-end w-full">
+        <div className="flex flex-row space-x-2 justify-end w-full pr-4">
           <Button
             variant="outline"
             className="py-0 px-2 border border-slate-200 h-8 items-center justify-center space-x-1 flex gap-2"
