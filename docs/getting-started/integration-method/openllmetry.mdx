@@ -48,6 +48,41 @@ async function main() {
 main();
 ```
 </Tab>
+  <Tab title="Python">
+  <Steps>
+  <Step title="Install Helicone Async">
+  ```bash
+  pip install helicone-async
+  ```
+  </Step>
+  <Step title="Initialize Logger">
+  ```python
+from helicone_async import HeliconeAsyncLogger
+from openai import OpenAI
+
+logger = HeliconeAsyncLogger(
+    api_key=HELICONE_API_KEY,
+)
+
+logger.init()
+
+client = OpenAI(api_key=OPENAI_API_KEY)
+
+# Make the OpenAI call
+response = client.chat.completions.create(
+    model="gpt-3.5-turbo",
+    messages=[{"role": "system", "content": "You are a helpful assistant."},
+              {"role": "user", "content": "Who won the world series in 2020?"},
+              {"role": "assistant",
+               "content": "The Los Angeles Dodgers won the World Series in 2020."},
+              {"role": "user", "content": "Where was it played?"}]
+)
+
+print(response.choices[0])
+```
+</Step>
+</Steps>
+</Tab>
 
 </Tabs>
 
@@ -62,6 +97,4 @@ main();
 
 # Other Integrations
 
-- [Comparing Proxy vs Async Integration](../proxy-vs-async.mdx)
 - [Gateway Integration](/getting-started/integration-method/gateway)
-```
