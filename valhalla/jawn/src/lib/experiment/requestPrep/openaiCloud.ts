@@ -25,13 +25,13 @@ function prepareRequestOpenAI(
 }
 
 export function prepareRequestOpenAIFull({
-  hypothesis,
+  template,
   secretKey: proxyKey,
   datasetRow,
   requestId,
 }: PreparedRequestArgs): PreparedRequest {
   const newRequestBody = autoFillInputs({
-    template: hypothesis.promptVersion?.template ?? {},
+    template: template ?? {},
     inputs: datasetRow.inputRecord?.inputs ?? {},
     autoInputs: datasetRow.inputRecord?.autoInputs ?? [],
   });

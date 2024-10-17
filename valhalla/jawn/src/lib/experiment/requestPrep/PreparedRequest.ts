@@ -7,7 +7,8 @@ export interface PreparedRequest {
 }
 
 export interface PreparedRequestArgs {
-  hypothesis: Experiment["hypotheses"][number];
+  providerKey: string | null;
+  template: any;
   secretKey: string;
   datasetRow: Experiment["dataset"]["rows"][number];
   requestId: string;
