@@ -16,6 +16,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
+import { usePathname } from "next/navigation";
 
 // Function to format provider names
 function formatProviderName(provider: string): string {
@@ -269,8 +270,8 @@ export default function ModelPriceCalculator({
   const [selectedModelData, setSelectedModelData] = useState<CostData | null>(
     null
   );
-  const router = useRouter();
   const [showAllResults, setShowAllResults] = useState(false);
+  const pathname = usePathname();
 
   function formatCost(cost: number): string {
     if (cost === 0) return "0";
@@ -330,30 +331,24 @@ export default function ModelPriceCalculator({
     calculateCosts();
   }, [inputTokens, outputTokens]);
 
-  const handleModelSelect = (data: CostData) => {
-    setSelectedModelData(data);
-    const sanitizedProviderName = encodeURIComponent(data.provider);
-    const sanitizedModelName = encodeURIComponent(data.model);
-    router.push(
-      `/llm-cost/provider/${sanitizedProviderName}/model/${sanitizedModelName}`
-    );
-    // Add this line to scroll to the top of the page
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
   useEffect(() => {
-    // Find and set the initially selected model based on props
-    if (model && provider) {
-      const initialSelectedModel = costData.find(
+    const urlParts = pathname.split("/");
+    const urlProvider = urlParts[urlParts.indexOf("provider") + 1];
+    const urlModel = urlParts[urlParts.indexOf("model") + 1];
+
+    if (urlProvider && urlModel) {
+      const selectedModel = costData.find(
         (data) =>
-          data.model.toLowerCase() === model.toLowerCase() &&
-          data.provider.toLowerCase() === provider.toLowerCase()
+          data.model.toLowerCase() ===
+            decodeURIComponent(urlModel).toLowerCase() &&
+          data.provider.toLowerCase() ===
+            decodeURIComponent(urlProvider).toLowerCase()
       );
-      if (initialSelectedModel) {
-        setSelectedModelData(initialSelectedModel);
+      if (selectedModel) {
+        setSelectedModelData(selectedModel);
       }
     }
-  }, [costData, model, provider]);
+  }, [costData, pathname]);
 
   const visibleCostData = showAllResults ? costData : costData.slice(0, 20);
 
@@ -587,34 +582,82 @@ Optimize your AI API costs:`;
               {visibleCostData.map((data, index) => (
                 <tr
                   key={index}
-                  className={`hover:bg-sky-50 cursor-pointer transition-colors duration-150 ${
+                  className={`hover:bg-sky-50 transition-colors duration-150 ${
                     data.provider === selectedModelData?.provider &&
                     data.model === selectedModelData?.model
                       ? "bg-sky-100"
                       : ""
-                  }`}
-                  onClick={() => handleModelSelect(data)}
+                  } hover:bg-sky-50 transition-colors duration-150`}
                 >
-                  <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500 border border-gray-200">
-                    {formatProviderName(data.provider)}
+                  <td className="whitespace-nowrap text-sm text-gray-500 border border-gray-200 p-0">
+                    <a
+                      href={`/llm-cost/provider/${encodeURIComponent(
+                        data.provider
+                      )}/model/${encodeURIComponent(data.model)}`}
+                      className="block w-full h-full px-6 py-2"
+                    >
+                      {formatProviderName(data.provider)}
+                    </a>
                   </td>
-                  <td className="px-6 py-2 text-sm text-gray-900 font-medium border border-gray-200">
-                    <div className="break-words">{data.model}</div>
+                  <td className="text-sm text-gray-900 font-medium border border-gray-200 p-0">
+                    <a
+                      href={`/llm-cost/provider/${encodeURIComponent(
+                        data.provider
+                      )}/model/${encodeURIComponent(data.model)}`}
+                      className="block w-full h-full px-6 py-2"
+                    >
+                      <div className="break-words">{data.model}</div>
+                    </a>
                   </td>
-                  <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500 border border-gray-200">
-                    ${formatCost(data.inputCostPer1k)}
+                  <td className="whitespace-nowrap text-sm text-gray-500 border border-gray-200 p-0">
+                    <a
+                      href={`/llm-cost/provider/${encodeURIComponent(
+                        data.provider
+                      )}/model/${encodeURIComponent(data.model)}`}
+                      className="block w-full h-full px-6 py-2"
+                    >
+                      ${formatCost(data.inputCostPer1k)}
+                    </a>
                   </td>
-                  <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500 border border-gray-200">
-                    ${formatCost(data.outputCostPer1k)}
+                  <td className="whitespace-nowrap text-sm text-gray-500 border border-gray-200 p-0">
+                    <a
+                      href={`/llm-cost/provider/${encodeURIComponent(
+                        data.provider
+                      )}/model/${encodeURIComponent(data.model)}`}
+                      className="block w-full h-full px-6 py-2"
+                    >
+                      ${formatCost(data.outputCostPer1k)}
+                    </a>
                   </td>
-                  <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500 border border-gray-200">
-                    ${formatCost(data.inputCost)}
+                  <td className="whitespace-nowrap text-sm text-gray-500 border border-gray-200 p-0">
+                    <a
+                      href={`/llm-cost/provider/${encodeURIComponent(
+                        data.provider
+                      )}/model/${encodeURIComponent(data.model)}`}
+                      className="block w-full h-full px-6 py-2"
+                    >
+                      ${formatCost(data.inputCost)}
+                    </a>
                   </td>
-                  <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500 border border-gray-200">
-                    ${formatCost(data.outputCost)}
+                  <td className="whitespace-nowrap text-sm text-gray-500 border border-gray-200 p-0">
+                    <a
+                      href={`/llm-cost/provider/${encodeURIComponent(
+                        data.provider
+                      )}/model/${encodeURIComponent(data.model)}`}
+                      className="block w-full h-full px-6 py-2"
+                    >
+                      ${formatCost(data.outputCost)}
+                    </a>
                   </td>
-                  <td className="px-6 py-2 whitespace-nowrap text-sm font-medium text-sky-500 border border-gray-200">
-                    ${formatCost(data.totalCost)}
+                  <td className="whitespace-nowrap text-sm font-medium text-sky-500 border border-gray-200 p-0">
+                    <a
+                      href={`/llm-cost/provider/${encodeURIComponent(
+                        data.provider
+                      )}/model/${encodeURIComponent(data.model)}`}
+                      className="block w-full h-full px-6 py-2"
+                    >
+                      ${formatCost(data.totalCost)}
+                    </a>
                   </td>
                 </tr>
               ))}
