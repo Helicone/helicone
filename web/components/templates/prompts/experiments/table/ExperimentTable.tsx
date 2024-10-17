@@ -737,35 +737,41 @@ export function ExperimentTable({
       });
     });
 
-    // Add the "Messages" column
-    columns.push({
-      field: "messages",
-      headerName: "Messages",
-      width: 200,
-      headerComponent: CustomHeaderComponent,
-      headerComponentParams: {
-        displayName: "Messages",
-        badgeText: "Input",
-        badgeVariant: "secondary",
-        hypothesis: sortedHypotheses[0] || {},
-        promptVersionTemplate: promptVersionTemplate,
-      },
-      cellClass:
-        "border-r border-[#E2E8F0] text-slate-700 flex items-center justify-start pt-2.5",
-      headerClass,
-      cellRenderer: OriginalMessagesCellRenderer,
-      cellRendererParams: {
-        prompt: promptVersionTemplate,
-      },
-      cellStyle: {
-        verticalAlign: "middle",
-        textAlign: "left",
-        overflow: "hidden",
-        textOverflow: "ellipsis",
-        whiteSpace: wrapText ? "normal" : "nowrap",
-      },
-      autoHeight: wrapText,
-    });
+    if (
+      JSON.stringify(promptVersionTemplate?.helicone_template).includes(
+        "auto-inputs"
+      )
+    ) {
+      // Add the "Messages" column
+      columns.push({
+        field: "messages",
+        headerName: "Messages",
+        width: 200,
+        headerComponent: CustomHeaderComponent,
+        headerComponentParams: {
+          displayName: "Messages",
+          badgeText: "Input",
+          badgeVariant: "secondary",
+          hypothesis: sortedHypotheses[0] || {},
+          promptVersionTemplate: promptVersionTemplate,
+        },
+        cellClass:
+          "border-r border-[#E2E8F0] text-slate-700 flex items-center justify-start pt-2.5",
+        headerClass,
+        cellRenderer: OriginalMessagesCellRenderer,
+        cellRendererParams: {
+          prompt: promptVersionTemplate,
+        },
+        cellStyle: {
+          verticalAlign: "middle",
+          textAlign: "left",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: wrapText ? "normal" : "nowrap",
+        },
+        autoHeight: wrapText,
+      });
+    }
 
     // Add the "Original" column
     columns.push({
