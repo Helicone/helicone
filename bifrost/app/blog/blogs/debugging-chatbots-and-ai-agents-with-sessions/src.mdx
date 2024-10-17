@@ -1,171 +1,187 @@
-Have you ever wondered at which stage in the multi-step process does your AI model start hallucinating? Perhaps you’ve noticed consistent issues with a specific part of your AI agent workflow?
+When does your AI agent start hallucinating in the multi-step process? Have you noticed consistent issues with a specific part of your agentic workflow?
 
 ![Debugging RAG Chatbots and AI Agents with Sessions](/static/blog/sessions-ui.webp)
 
-These are common questions developers face when building **AI agents** and **Retrieval Augmented Generation (RAG)** chatbots. Getting reliable responses and minimizing errors like hallucination is incredibly challenging without visibility into how users interact with your Large Language Model (LLM). 
+**These are common questions developers face when building AI agents and Retrieval Augmented Generation (RAG) chatbots**. Getting reliable responses and minimizing errors like hallucination is incredibly challenging without visibility into how users interact with your Large Language Model. 
 
-Addressing these pitfalls is crucial in creating robust and reliable AI agents and RAG chatbots. In this blog, we will delve into how to use **<span style={{color: '#0ea5e9'}}>Helicone's Sessions</span>** feature to help you maintain context, reduce errors, and improve the overall performance of your LLM app. 
-
+In this blog, we will delve into how to use **<span style={{color: '#0ea5e9'}}>Helicone's Sessions</span>** feature to help you maintain context, reduce errors, and improve the overall performance of your LLM apps, and other tools to address these pitfalls to create more robust and reliable AI agents. 
 ### What you will learn: 
 
-- AI agents and how they work
+- What are AI agents? 
+- How do they work? 
 - Challenges of debugging AI agents
-- Introduction to Sessions
-- Using Sessions in Helicone
-- How industries use Sessions to debug AI agents
-
-Please skip ahead to **Using Sessions in Helicone** if you are familiar with AI agents.  
+- Effective debugging tools
+- How different industries debug AI agents using Sessions
 
 ---
 
-## What are AI agents? 
+## First, what are AI agents? 
 
-An AI agent is a software program that **<span style={{color: '#0ea5e9'}}>autonomously performs specific tasks using advanced decision-making abilities</span>**. It interacts with its environment by collecting data, processing it, and deciding on the best actions to achieve predefined goals. 
+An **AI agent** is a software program that autonomously performs specific tasks using advanced decision-making abilities. It interacts with its environment by collecting data, processing it, and deciding on the best actions to achieve predefined goals.
 
-For example, in a Contact Center, an AI agent can handle customer queries by asking contextually relevant questions to accurately **identify issues**, **searching internal documents** using techniques like semantic search and **deliver effective solutions** in real-time. When these AI agents encounter complex problems beyond their current capabilities, they escalate the case to a human agent smoothly to maintain high levels of customer satisfaction.
+### Types of AI Agents
+
+#### Copilots
+
+Copilots assist users by **<span style={{color: '#0ea5e9'}}>providing suggestions and recommendations</span>**. For example, when writing code, a copilot might suggest code snippets, highlight potential bugs or offer optimization tips, but the developer decides whether to implement these suggestions.
+
+#### Autonomous Agents
+
+Autonomous agents perform tasks **<span style={{color: '#0ea5e9'}}>independently without human intervention</span>**. For example, it can handle customer inquiries by identify issues, access account information, perform necessary actions (like processing refunds or updating account details), and respond to the customer. They can also escalate to a human agent if they encounter problems beyond their current capabilities. 
+
+#### Multi-Agent Systems
+
+Multi-agent systems involve **<span style={{color: '#0ea5e9'}}>interactions and collaboration between multiple autonomous agents</span>** to achieve a collective goal. These systems have advantages like dynamic reasoning, the ability to distribute tasks, and better memory for retaining information.
 
 
-## How do AI agents work?
+## What is Retrieval-Augmented Generation? 
 
-AI agents differ from traditional software programs by autonomously performing tasks based on rational decision-making principles, guided by predefined goals or instructions. They simplify and automate complex tasks by following a structured workflow:  
+**Retrieval-Augmented Generation (RAG)** is an advanced framework that allows the agent to **<span style={{color: '#0ea5e9'}}>incorporate information from external knowledge bases</span>** (e.g., databases, documents, articles) into the response. 
+
+RAG significantly improves the functionality of AI agents by accessing the most recent data based on keywords, semantic similarity, or other advanced search techniques, and use it to generate more accurate, personalized, and context-specific responses.
+
+## Four Core Components of AI Agents
+
+Unlike traditional software programs, AI agents differ by autonomously performing tasks based on rational decision-making principles. Typically, AI agents have four components:
+
+1. **Planning** 
+2. **Tool / Vector Database Calls** 
+3. **Perception** 
+4. **Memory**
 
 ![How AI Agents work](/static/blog/how-agents-work.webp)
 
-They simplify and automate complex tasks by following a structured workflow:  
 
-1. **Setting goals**: AI agents are given specific goals from the user, which they break down into smaller actionable tasks.
-2. **Acquiring data**: they collect necessary information from their environment, such as data from physical sensors for robots or software inputs like customer queries for chatbots. They often access external sources on the internet or interact with other agents or models to gather data.
-3. **Implementing the task**: With the acquired data, AI agents methodically implement the tasks, they evaluate their progress and adjust as needed based on feedback and internal logs.
+### Planning
 
+AI agents has the ability to plan and sequence actions to achieve specific goals. The integration of LLMs has significantly improved their planning capabilities, allowing them to formulate more sophisticated and effective strategies.
 
-By analyzing this data, AI agents predict the optimal outcomes aligned with the preset goals and determine what actions to take next. For example, self-driving cars use sensor data to navigate obstacles effectively. This iterative process continues until the agent achieves the designated goal. 
+### Tool / Vector Database Calls
 
+Advanced AI Agents often interact with these external tools, APIs, and services through function calls, allowing them to handle complex operations such as: 
 
+- Fetching real-time information from APIs (e.g., weather data, stock prices).
+- Utilizing translation services to convert text between languages.
+- Performing tasks like image recognition or manipulation through specialized libraries.
+- Running custom scripts to automate specific workflows or computations.
 
-## Challenges of Debugging AI agents
+### Perception
 
-**⚠️ Complex Decision Making**
+By perceiving and processing information from their environment, AI agents become more interactive and context-aware. This sensory information can include visual, auditory, and other types of data, enabling the agents to respond appropriately to different environmental cues.
 
-AI agents make decisions based on a **<span style={{color: '#0ea5e9'}}>multitude of inputs and from various data sources</span>**, including user interactions, environmental data, and internal states. Understanding how an agent processes and interprets this data requires deep insight into the algorithms and models. Agents may adapt their behavior over time through learning mechanisms, making their decision paths **<span style={{color: '#0ea5e9'}}>non-deterministic</span>** and harder to trace.
+### Memory
 
-
-**⚠️ Lack of Visibility into Internal States**
-
-Without proper tools, the internal workings of an AI agent can be a "black box," with **<span style={{color: '#0ea5e9'}}>little visibility into how inputs are transformed into outputs</span>**. In systems where agents interact with multiple services or other agents, tracing the flow of information becomes even more challenging. In addition, traditional logging methods may not capture the necessary granularity of data needed to debug complex AI behaviors effectively.
-
-**⚠️ Contextual Debugging Challenges**
-
-AI agents often operate over extended interactions or sessions, where the context accumulates over time. Tracking the agent's state throughout a session is essential for debugging since **<span style={{color: '#0ea5e9'}}>an error early in a session can have cascading effects</span>**, making it difficult to pinpoint the original source without comprehensive session data.
-
-
-While understanding the internal workings of complex AI models is inherently challenging, using tools like Helicone’s Session significantly alleviate these difficulties. 
+AI agents have the capacity to remember past interactions and behaviors, including previous tool usage and planning decisions. They store these experiences and can engage in self-reflection to inform future actions. This memory component provides continuity and allows for continuous improvement in their performance over time.
 
 
 ---
 
-## What are Sessions?
+## Challenges of Debugging AI agents
 
-**Sessions** provide a simple way to organize and group related LLM calls, making it easier for developers to trace nested agent workflows and visualize interactions between the user and the AI chatbot or agent. 
+**⚠️ Their decision making process is complicated.**
 
-Instead of looking at isolated data points, sessions allow you to: 
-- see a comprehensive view of an entire conversation or interactive flow.
-- drill down on specific LLM calls to view your agent’s flow of task execution.
-- identify issues quicker given a better understanding of the context of errors.
-- refine your chatbot's responses based on specific contexts.
+AI agents base their decisions on **<span style={{color: '#0ea5e9'}}>many inputs from diverse data sources</span>** (i.e. user interactions, environmental data, and internal states). While traditional software follow explicit instructions, AI agents learn and make decisions through patterns and correlations identified in the data. Their adaptive behavior makes their decision paths **<span style={{color: '#0ea5e9'}}>non-deterministic</span>** and harder to trace.
 
+**⚠️ No visibility into their internal states.**
 
-## Using Sessions in Helicone
+AI agents function as "black boxes” and understanding how it transforms inputs into outputs is not straightforward. When the agent interacts with external services, APIs or other agents, the behavior can be unpredictable. 
 
-1. Simply add `Helicone-Session-Id` to start tracking your sessions. 
-2. Add `Helicone-Session-Path`to specific parent and child traces. 
+**⚠️ Context builds up over time, so do errors.**
 
-Here is an example in **TypeScript**: 
+AI agents often make multiple dependent vector database calls within a single session, making it difficult to trace the data flow. They can also operate over extended sessions, where **<span style={{color: '#0ea5e9'}}>an early error can have cascading effects</span>**, making it difficult to identify their original source without proper session tracking. 
 
-```ts
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-  baseURL: "https://oai.helicone.ai/v1",
-  defaultHeaders: {
-    "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
-  },
-});
+---
 
-const session = randomUUID();
+## Tools for Debugging AI Agents
 
-openai.chat.completions.create(
-  {
-    messages: [
-      {
-        role: "user",
-        content: "Generate an abstract for a course on space.",
-      },
-    ],
-    model: "gpt-4",
-  },
-  {
-    headers: {
-      "Helicone-Session-Id": session, // defines your session
-      "Helicone-Session-Path": "/abstract", // defines the order of LLM calls
-    },
-  }
-);
-```
+While understanding the internal workings of AI models is inherently challenging, and traditional logging methods often lack the granular data to effectively debug complex behaviors, there are tools to help streamline the debugging process:
+
+### 1. Helicone `open-source`
+
+**Helicone's Sessions** is an ideal option for teams looking to intuitively group related LLM calls, trace nested agent workflows and quickly identify issues. Helicone is also catered to advanced uses such as tracking requests/response/metadata to the Vector Database, along with other observability features. 
+
+### 2. Langfuse `open-source`
+
+**Langfuse** is ideal for developers who prefer self-hosting solutions for tracing and debugging AI agent workflows. It offers similar features similar to Helicone’s and is well-suited for projects that don’t require scalability or robust, cloud-based support.
+
+### 3. AgentOps `open-source`
+
+**AgentOps** can be a good choice for teams looking for a comprehensive solution to debug AI agents. Despite a less intuitive interface, AgentOps offers comprehensive features for monitoring and managing AI agents. 
+
+### 4. LangSmith
+
+**LangSmith** is ideal for developers working extensively with the LangChain framework as its SDKs and documentation are designed to support developers within this ecosystem best.  
+
+### 5. Braintrust
+
+**Braintrust** is a good choice for those focusing on evaluating AI models. It’s an effective solutions for projects where model evaluation is a primary concern and agent tracing is a secondary need.
+
+### 6. Portkey
+
+**Portkey** is designed for developers looking for the latest tools to track and debug AI agents. It introduces new features quickly, great for teams needing the newest suite of features and willing to face the occasional reliability and stability issues.
+
+---
 
 
-## How Industries Use Sessions to Debug AI Agents 
 
-### Resolving Errors in Multi-Step Processes 
+## How Industries Debug AI Agents Using Sessions 
 
-`Travel Industry`
+### Travel: Resolving Errors in Multi-Step Processes
 
 **Challenge**
 
-In the travel industry, chatbots assist users through booking processes for flights, hotels, and car rentals. Errors can easily occur due to data parsing issues or integration problems with third-party services, leading to user frustration and incomplete bookings.
+Travel chatbots assist users through flights, hotels bookings and car rentals. Errors can easily happen due to data parsing issues or integration problems with third-party services. Users are often left frustrated or have incomplete bookings.
 
 **Solution**
+
+![Case Study: Resolving Errors in Multi-Step Processes Using Helicone's Sessions](/static/blog/debug-agents-with-sessions/example-travel.webp)
 
 Sessions provide a complete trace of the booking interaction, allowing developers to pinpoint exactly where users encounter problems. If users frequently report missing flight confirmations, session traces can reveal whether the issue stems from input parsing errors or glitches with airline APIs, enabling targeted fixes.
 
 
-### Understanding User Intent for Personalization 
-
-`Health and Fitness Industry`
+### Health & Fitness: Understanding User Intent for Personalization
 
 **Challenge**
 
-Health and fitness chatbots must accurately interpret user queries to offer personalized workout plans and dietary advice. Misinterpretation leads to generic suggestions and decreased user satisfaction.
+Health and fitness chatbots needs to accurately interpret user's asks to offer personalized workout plans and dietary advice. Misinterpretation leads to generic suggestions and unhappy users who will abandon the chatbot instantly.
 
 **Solution**
 
-By analyzing session data, developers gain insights into user preferences and can adjust chatbot responses accordingly. If session logs show users often ask about strength training over cardio, developers can tweak the chatbot to provide more relevant strength training programs, enhancing personalization.
+![Case Study: Understanding User Intent for Personalization Using Helicone's Sessions](/static/blog/debug-agents-with-sessions/example-fitness.webp)
+
+The session data reveals user preferences to help developers adjust chatbot responses. If users ask about strength training over cardio often in the session logs, developers can tweak the prompt for the chatbot to provide more relevant strength training programs.
 
 
-### Improving Context Management 
-
-`Virtual Assistants`
+### Education: Generating Content and Ensuring Quality
 
 **Challenge**
 
-Virtual assistants like Siri and Alexa handle a wide range of queries and need to maintain context during interactions, especially when users switch topics abruptly.
+AI agents that creates customized learning materials need to generate comprehensive and accurate lessons. Errors or incomplete information leads to poor learning experiences.
 
 **Solution**
 
-**Sessions** track user interactions over time, revealing how the assistant manages context shifts and where improvements are needed. If assistants struggle when users change from setting a reminder to asking about the weather, session analysis can help developers refine context management algorithms for smoother conversations.
+![Case Study: Generating Educational Content Using Helicone's Sessions](/static/blog/debug-agents-with-sessions/example-course-gen.webp)
 
-
----
-
-## Are AI agents the future?
-
-AI agents have an incredible ability to autonomously perform tasks and make decisions without needing human intervention. We're already seeing AI agents in action across various fields like customer service, healthcare, education, legal work, and even autonomous driving.
-
-However, for AI agents to truly succeed, we need to overcome some challenges. Ensuring ethical use, improving their reliability and accuracy, and addressing concerns about job displacement are all critical issues we must tackle. That's why it's more important than ever to adopt tools that monitor and enhance the visibility of AI agents and chatbot performance to make sure they are addressing user inquiries. 
+Sessions trace how the agent interprets user requests and generates course content. Data can reveal where the agent misunderstood topics or failed to cover key concepts. Developers can then fine-tune the prompts to generate more thorough content and ensure that it is well-suited for the student’s learning level.
 
 ---
 
-## You might find this helpful
+## Becoming Production-Ready 
 
-- Docs: <a href="https://docs.helicone.ai/features/sessions" target="_blank">Group LLM Requests with Sessions</a>
+We're already seeing AI agents in action across various fields like customer service, travel, health and fitness, as well as education. However, for AI agents to be truly production-ready and widely adopted, we need to continue to improve their reliability and accuracy. 
+
+This requires actively monitoring their decision making processes and gaining a deep understanding of how inputs influence outputs. The most effective way to achieve this is through robust monitoring tools that provide comprehensive insights to ensure AI agents consistently deliver optimal results.
+
+
+**Additional Resources**
+
+- Doc: <a href="https://docs.helicone.ai/features/sessions" target="_blank">How to Group LLM Requests with Helicone's Sessions</a>
+- Doc: <a href="https://docs.helicone.ai/integrations/vectordb/javascript#vector-db-javascript-sdk-integration" target="_blank">How to log Vector DB Interactions using Helicone's Javascript SDK</a>
+- Guide: <a href="https://www.helicone.ai/blog/replaying-llm-sessions" target="_blank">How to Optimize AI Agents by Replaying LLM Sessions</a>
 - Resource: <a href="https://www.helicone.ai/blog/ai-agent-builders" target="_blank">6 Open-Source Platforms and Framworks for building AI Agents</a>
-- Guide: <a href="https://www.helicone.ai/blog/replaying-llm-sessions" target="_blank">Optimizing AI Agents by Replaying LLM Sessions</a>
 
+---
+
+### Questions or feedback?
+
+Are the information out of date? Do you have additional platforms to add? Please raise an issue and we’d love to share your insights!
