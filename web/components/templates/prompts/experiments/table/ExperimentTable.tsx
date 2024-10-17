@@ -45,8 +45,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-
-import { usePrompts } from "../../../../../services/hooks/prompts/prompts";
 import PromptPlayground, {
   PromptObject,
   Input as PromptInput,
@@ -55,6 +53,7 @@ import PromptPlayground, {
 import { Input } from "../../../../ui/input";
 import useNotification from "../../../../shared/notification/useNotification";
 import { useRouter } from "next/router";
+import { ScrollArea } from "../../../../ui/scroll-area";
 
 interface ExperimentTableProps {
   promptSubversionId?: string;
@@ -69,7 +68,6 @@ export function ExperimentTable({
   const orgId = org?.currentOrg?.id;
   const jawn = useJawnClient();
   const [isDataLoading, setIsDataLoading] = useState(true);
-  const { prompts, isLoading, refetch } = usePrompts();
 
   const [wrapText, setWrapText] = useState(false);
   const [columnView, setColumnView] = useState<"all" | "inputs" | "outputs">(
@@ -945,6 +943,9 @@ export function ExperimentTable({
     });
 
     const [promptName, setPromptName] = useState<string>("");
+    const [promptVariables, setPromptVariables] = useState<
+      Array<{ original: string; heliconeTag: string; value: string }>
+    >([]);
 
     const [inputs, setInputs] = useState<{ variable: string; value: string }[]>(
       [{ variable: "sectionTitle", value: "The universe" }]
@@ -964,13 +965,23 @@ export function ExperimentTable({
       setInputs([...inputs, { variable: "", value: "" }]);
     };
 
-    const handlePromptChange = (newPrompt: PromptObject) => {
-      setBasePrompt(newPrompt);
+    const handlePromptChange = (newPrompt: string | PromptObject) => {
+      setBasePrompt(newPrompt as PromptObject);
     };
 
     const handleCreateExperiment = async () => {
-      console.log("prompt", basePrompt);
-      console.log("Creating new experiment with prompt:", basePrompt);
+      if (!promptName || !basePrompt) {
+        notification.setNotification(
+          "Please enter a prompt name and content",
+          "error"
+        );
+        return;
+      }
+
+      if (!basePrompt.model) {
+        notification.setNotification("Please select a model", "error");
+        return;
+      }
 
       const res = await jawn.POST("/v1/prompt/create", {
         body: {
@@ -1007,6 +1018,7 @@ export function ExperimentTable({
           metadata: {
             prompt_id: res.data?.data?.id!,
             prompt_version: res.data?.data?.prompt_version_id!,
+            experiment_name: `${promptName}_V1.0` || "",
           },
           datasetId: dataset.data?.data?.datasetId,
         },
@@ -1033,47 +1045,84 @@ export function ExperimentTable({
         }
       );
 
+      //TODO: Add this back in ?
+
+      // if (promptVariables.length > 0) {
+      //   const inputs: Record<string, string> = promptVariables.reduce(
+      //     (acc: Record<string, string>, variable: any) => {
+      //       acc[variable.original] = variable.value as string;
+      //       return acc;
+      //     },
+      //     {}
+      //   );
+      //   await jawn.POST(
+      //     "/v1/experiment/dataset/{datasetId}/version/{promptVersionId}/row/new",
+      //     {
+      //       body: {
+      //         inputs: inputs,
+      //       },
+      //       params: {
+      //         path: {
+      //           promptVersionId: res.data?.data?.prompt_version_id!,
+      //           datasetId: dataset.data?.data?.datasetId!,
+      //         },
+      //       },
+      //     }
+      //   );
+      // }
+
       if (result.error || !result.data) {
         notification.setNotification("Failed to create subversion", "error");
         return;
       }
 
       notification.setNotification("Prompt created successfully", "success");
+      setIsDataLoading(true);
       router.push(
         `/prompts/${res.data?.data?.id}/subversion/${res.data?.data?.prompt_version_id}/experiment/${experiment.data?.data?.experimentId}`
       );
     };
 
     return (
-      <PopoverContent className="w-[500px] p-4 bg-white shadow-lg rounded-md">
-        <div className="space-y-4">
-          <div className="flex flex-row space-x-2 ">
-            <BeakerIcon className="h-6 w-6" />
-            <h3 className="text-md font-semibold">Original Prompt</h3>
+      <PopoverContent
+        className="w-[600px] p-4 bg-white shadow-lg rounded-md"
+        side="bottom"
+        align="start"
+      >
+        <ScrollArea className="flex flex-col overflow-y-auto max-h-[700px] ">
+          <div className="space-y-4">
+            <div className="flex flex-row space-x-2 ">
+              <BeakerIcon className="h-6 w-6" />
+              <h3 className="text-md font-semibold">Original Prompt</h3>
+            </div>
+
+            <Input
+              placeholder="Prompt Name"
+              value={promptName}
+              onChange={(e) => setPromptName(e.target.value)}
+            />
+
+            <PromptPlayground
+              prompt={basePrompt}
+              editMode={true}
+              selectedInput={selectedInput}
+              submitText={"Create Experiment"}
+              playgroundMode={"experiment"}
+              handleCreateExperiment={handleCreateExperiment}
+              isPromptCreatedFromUi={true}
+              onExtractPromptVariables={(variables) =>
+                setPromptVariables(
+                  variables.map((variable) => ({
+                    original: variable.original,
+                    heliconeTag: variable.heliconeTag,
+                    value: variable.value,
+                  }))
+                )
+              }
+              onPromptChange={handlePromptChange}
+            />
           </div>
-
-          <Input
-            placeholder="Prompt Name"
-            value={promptName}
-            onChange={(e) => setPromptName(e.target.value)}
-          />
-
-          <PromptPlayground
-            prompt={basePrompt}
-            editMode={true}
-            selectedInput={selectedInput}
-            submitText={"Create Experiment"}
-          />
-
-          <Button
-            onClick={handleCreateExperiment}
-            variant="default"
-            size="sm"
-            className="w-full mt-4"
-          >
-            Create Experiment
-          </Button>
-        </div>
+        </ScrollArea>
       </PopoverContent>
     );
   };
@@ -1090,10 +1139,10 @@ export function ExperimentTable({
   return (
     <div className="relative w-full">
       <div className="flex flex-col space-y-2 w-full">
-        <div className="flex flex-row space-x-2 justify-end w-full">
+        <div className="flex flex-row space-x-2 justify-end w-full pr-4">
           <Button
             variant="outline"
-            className="py-0 px-2 border border-slate-200 h-8 flex items-center justify-center space-x-1 flex gap-2"
+            className="py-0 px-2 border border-slate-200 h-8 items-center justify-center space-x-1 flex gap-2"
             onClick={() => setShowScoresTable(!showScoresTable)}
           >
             <div>{"{ }"}</div> {showScoresTable ? "Hide" : "Show"} Scores
@@ -1134,7 +1183,7 @@ export function ExperimentTable({
         )}
 
         <div
-          className="ag-theme-alpine w-full rounded-md overflow-hidden"
+          className="ag-theme-alpine w-full overflow-hidden"
           ref={experimentTableRef}
           style={
             {
@@ -1144,7 +1193,6 @@ export function ExperimentTable({
               "--ag-header-cell-hover-background-color": "#e5e7eb",
               "--ag-header-cell-moving-background-color": "#d1d5db",
               "--ag-cell-horizontal-border": "solid #E2E8F0",
-              "--ag-border-radius": "8px",
               "--ag-border-color": "#E2E8F0",
             } as React.CSSProperties
           }
