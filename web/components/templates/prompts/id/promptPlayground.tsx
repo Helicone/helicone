@@ -159,10 +159,6 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
   >({});
   const [selectedModel, setSelectedModel] = useState(initialModel);
 
-  // useEffect(() => {
-  //   setCurrentChat(parsePromptToMessages(prompt, selectedInput?.inputs));
-  // }, [prompt, selectedInput]);
-
   // Add this useEffect to update selectedModel when initialModel changes
   useEffect(() => {
     setSelectedModel(initialModel);
