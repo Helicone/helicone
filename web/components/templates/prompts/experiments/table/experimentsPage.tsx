@@ -108,7 +108,13 @@ const ExperimentsPage = (props: ExperimentsPageProps) => {
         id="experiments"
         skeletonLoading={false}
         onRowSelect={(row) => {
-          router.push(`/experiments/${row.id}`);
+          const promptVersion = prompts?.find(
+            (p) => p.id === row.promptId || ""
+          );
+
+          router.push(
+            `/prompts/${row.promptId}/subversion/${row.promptVersionId}/experiment/${row.id}`
+          );
         }}
         fullWidth={true}
       />

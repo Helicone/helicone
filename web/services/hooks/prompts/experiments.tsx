@@ -60,6 +60,8 @@ const useExperiments = (
       datasetId: experiment.dataset.id,
       datasetName: experiment.dataset.name,
       experimentName: (experiment.meta as any).experiment_name ?? null,
+      promptId: (experiment.meta as any).prompt_id ?? null,
+      promptVersionId: (experiment.meta as any).prompt_version ?? null,
       model: hypothesis?.model,
       createdAt: experiment.createdAt,
       runCount: hypothesis?.runs?.length,
