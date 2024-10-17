@@ -1,5 +1,7 @@
 import { providers } from "@/packages/cost/providers/mappings";
-import ModelPriceCalculator from "../../../../ModelPriceCalculator";
+import ModelPriceCalculator, {
+  formatProviderName,
+} from "../../../../ModelPriceCalculator";
 
 export default async function Home({
   params,
@@ -29,7 +31,7 @@ export async function generateStaticParams() {
     for (const cost of provider.costs || []) {
       paths.push({
         provider: encodeURIComponent(provider.provider),
-        model: encodeURIComponent(cost.model.value),
+        model: formatProviderName(encodeURIComponent(cost.model.value)),
       });
     }
   }
