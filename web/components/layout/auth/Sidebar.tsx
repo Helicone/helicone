@@ -21,12 +21,26 @@ import DesktopSidebar, { NavigationItem } from "./DesktopSidebar";
 import { PiGraphLight } from "react-icons/pi";
 import { useOrg } from "../organizationContext";
 import { NotepadText, TestTube2, Webhook } from "lucide-react";
+import { Enclosure } from "rss-parser";
 
+export interface ChangelogItem {
+  title: string;
+  description: string;
+  link: string;
+  content: string;
+  "content:encoded": string;
+  "content:encodedSnippet": string;
+  contentSnippet: string;
+  isoDate: string;
+  pubDate: string;
+  image?: Enclosure;
+}
 interface SidebarProps {
   setOpen: (open: boolean) => void;
+  changelog: ChangelogItem[];
 }
 
-const Sidebar = ({ setOpen }: SidebarProps) => {
+const Sidebar = ({ changelog, setOpen }: SidebarProps) => {
   const router = useRouter();
   const { pathname } = router;
   const user = useUser();
@@ -218,7 +232,11 @@ const Sidebar = ({ setOpen }: SidebarProps) => {
       {/* Remove this line */}
       {/* <MobileNavigation NAVIGATION={NAVIGATION} setOpen={setOpen} /> */}
 
-      <DesktopSidebar NAVIGATION={NAVIGATION} setOpen={setOpen} />
+      <DesktopSidebar
+        changelog={changelog}
+        NAVIGATION={NAVIGATION}
+        setOpen={setOpen}
+      />
     </>
   );
 };
