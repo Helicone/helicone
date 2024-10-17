@@ -1,5 +1,5 @@
 import { HeliconeFeedbackRating } from "../core/HeliconeFeedback";
-import { HeliconeProxyOpenAI } from "./../proxy_logger/HeliconeProxyOpenAI";
+import { HeliconeProxyOpenAI } from "../proxy_logger/HeliconeProxyOpenAI";
 import nock from "nock";
 import {
   TEST_HELICONE_API_KEY,
