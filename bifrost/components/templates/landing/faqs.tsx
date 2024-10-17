@@ -66,7 +66,7 @@ const FAQS: FAQItem[] = [
     ),
   },
   {
-    question: "I don't want to use Helicon's Proxy, can I still use Helicone?",
+    question: "I don't want to use Helicone's Proxy, can I still use Helicone?",
     answer: (
       <>
         Yes, you can still use Helicone to log your requests using the{" "}
