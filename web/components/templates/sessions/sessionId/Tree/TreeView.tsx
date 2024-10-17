@@ -44,10 +44,10 @@ const TreeView: React.FC<TreeViewProps> = ({
   const [collapseAll, setCollapseAll] = useState(false);
   const [showDrawer, setShowDrawer] = useState(false);
   return (
-    <Col className="gap-5 ">
+    <Col>
       <Col className="gap-1 items-start">
         {showSpan && (
-          <div className="bg-white w-full relative dark:bg-slate-900">
+          <div className="bg-white w-full relative dark:bg-slate-900 border-slate-200 border-t">
             <TraceSpan
               session={session}
               selectedRequestIdDispatch={[
@@ -81,7 +81,7 @@ const TreeView: React.FC<TreeViewProps> = ({
       </Col>
       <Row
         className={
-          "bg-slate-50 dark:bg-black border border-slate-200 dark:border-slate-700 border-collapse overflow-x-auto"
+          "bg-slate-50 dark:bg-black border-t border-r border-b border-slate-200 dark:border-slate-700 border-collapse overflow-x-auto"
         }
       >
         <Col className="border-r border-slate-200 dark:border-slate-700">
@@ -118,16 +118,19 @@ const TreeView: React.FC<TreeViewProps> = ({
           />
         </Col>
         <div className="flex flex-col gap-5 w-full">
-          <div className="flex-grow">
+          <div className="flex-grow [&_.border]:border-none">
             {requestIdToShow &&
               requests.requests.requests?.find(
                 (r) => r.request_id === requestIdToShow
-              ) &&
-              getNormalizedRequest(
-                requests.requests.requests?.find(
-                  (r) => r.request_id === requestIdToShow
-                )!
-              ).render()}
+              ) && (
+                <>
+                  {getNormalizedRequest(
+                    requests.requests.requests?.find(
+                      (r) => r.request_id === requestIdToShow
+                    )!
+                  ).render()}
+                </>
+              )}
           </div>
         </div>
       </Row>
