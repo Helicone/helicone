@@ -14,9 +14,6 @@ import {
 } from "@/components/ui/select";
 import { MODEL_LIST } from "../../playground/new/modelList";
 import PromptChatRow from "./promptChatRow";
-import { FunctionCall } from "./toolsRenderingUtils";
-
-import RoleButton from "../../playground/new/roleButton";
 import {
   getMessages,
   getRequestMessages,
