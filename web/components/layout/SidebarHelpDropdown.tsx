@@ -34,7 +34,11 @@ const SidebarHelpDropdown = ({
   return (
     <DropdownMenu
       modal={false}
-      onOpenChange={() => setLatestChangelogSeen(changelog[0].title)}
+      onOpenChange={
+        changelog.length > 0
+          ? () => setLatestChangelogSeen(changelog[0].title)
+          : undefined
+      }
     >
       <DropdownMenuTrigger asChild>
         <div className="relative h-6 w-6">
