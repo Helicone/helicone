@@ -105,16 +105,15 @@ const Sidebar = ({ changelog, setOpen }: SidebarProps) => {
             icon: TestTube2,
             current: pathname.includes("/playground"),
           },
-
+          {
+            name: "Experiments",
+            href: "/experiments",
+            icon: BeakerIcon,
+            current: pathname.includes("/experiments"),
+          },
           ...(!user?.email?.includes("@helicone.ai")
             ? []
             : [
-                {
-                  name: "Experiments",
-                  href: "/experiments",
-                  icon: BeakerIcon,
-                  current: pathname.includes("/experiments"),
-                },
                 {
                   name: "Evaluators",
                   href: "/evaluators",
