@@ -1,0 +1,179 @@
+In the world of AI and language models, prompts are the backbone that guides the output of your applications. **Helicone** offers a versatile way to manage these prompts, whether you're a developer who prefers coding or someone who thrives with a UI. In this blog post, we'll explore the differences between prompt versions created from **code** and those created from the **UI**, and how you can leverage each to enhance your workflow.
+
+---
+
+## Prompt Versions Created from the UI
+
+### Collaboration at Its Best
+
+Creating prompts via the UI is perfect for teams that include non-technical members. It allows for seamless collaboration, enabling everyone to contribute to prompt development without diving into code.
+
+### Key Features:
+
+- **Editable and Deletable Versions:** Prompt versions created from the UI can be edited or deleted, giving you control over your prompt history.
+- **Manual Promotion to Production:** You can manually promote any prompt version to production. Once promoted, your codebase can automatically fetch the latest version.
+- **Quick Iteration and Testing:** Easily test different prompts directly in the UI, allowing for rapid iteration without code changes.
+
+### Benefits:
+
+- **Ease of Use:** No coding skills required to manage prompts.
+- **Team Collaboration:** Work alongside non-developers to refine prompts.
+- **Control Over Production Versions:** Decide which prompt versions go live.
+
+---
+
+### Use Prompts Created from UI in Your Codebase
+
+You can easily fetch prompts in your code by calling the **Helicone API**. All you need to do is pass your input variables to compile the prompt template with the values you require.
+
+```jsx
+export async function getPrompt(id, variables) {
+  const res = await fetch(`https://api.helicone.ai/v1/prompt/${id}/template`, {
+    headers: {
+      Authorization: `Bearer ${YOUR_HELICONE_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    method: "POST",
+    body: JSON.stringify({
+      inputs: variables,
+    }),
+  });
+  const heliconePrompt = await res.json();
+  if (heliconePrompt.error) {
+    throw new Error(heliconePrompt.error);
+  }
+  return heliconePrompt.data?.filled_helicone_template;
+}
+```
+
+## Fetch a Prompt by Name and Use it with OpenAI's Completion API
+
+When you update your prompt in the UI or promote it to Production, you will automatically fetch the latest version.
+
+```jsx
+async function pullPromptAndRunCompletion() {
+  const prompt = await getPrompt("my-prompt-id", {
+    color: "red",
+  });
+  console.log(prompt);
+
+  const openai = new OpenAI({
+    apiKey: "YOUR_OPENAI_API_KEY",
+    baseURL: `https://oai.helicone.ai/v1/${YOUR_HELICONE_API_KEY}`,
+  });
+  const response = await openai.chat.completions.create(prompt);
+  console.log(response);
+}
+```
+
+## Prompt Versions Created from Code
+
+### Flexibility and Precision
+
+For developers who prefer to keep everything within the codebase, Helicone tracks prompt versions as you code. This method offers more flexibility and integrates seamlessly with your development workflow.
+
+### Key Features
+
+- **Automatic Version Tracking**: Helicone automatically tracks new versions of your prompts as you modify them in your code.
+- **Latest Major Version in Production**: The production version is always the latest major prompt version. Any changes in your codebase update the production version.
+- **No Manual Promotion or Deletion**: You cannot manually promote or delete code prompt versions, ensuring consistency and reducing manual overhead.
+
+### Benefits
+
+- **Greater Flexibility**: Define and manage prompts with code, allowing for complex logic and integrations.
+- **Enhanced Features**: Add auto-inputs and other advanced features directly in your code.
+- **Version Control**: Maintain a history of prompt versions without manual management.
+
+## How Prompt Templates Work in Helicone
+
+As you modify your prompts in code, Helicone automatically tracks new versions and keeps a record of old ones. It also maintains a dataset of input/output keys for each version, providing a comprehensive history of your prompts.
+
+### Example: Generating a Short Story App
+
+Let's dive into an example where we build an app that generates a short story based on a user-inputted character.
+
+#### Step 1: Import `hpf`
+
+Use the `hpf` function from the `@helicone/prompts` package.
+
+```jsx
+import { hpf } from "@helicone/prompts";
+```
+
+#### Step 2: Identify Input Variables with `hpf`
+
+Use the `hpf` function alongside JavaScript's template literals. Wrap your variable in double curly braces to help Helicone identify it.
+
+```jsx
+content: hpf`Write a story about ${{ character }}`,
+```
+
+#### Step 3: Assign an ID to Your Prompt
+
+Add a `Helicone-Prompt-Id` header to your LLM request. This associates your prompt with future versions.
+
+```jsx
+headers: {
+  "Helicone-Prompt-Id": "prompt_story",
+},
+```
+
+### Full Code Example
+
+```jsx
+// 1. Import hpf and hpstatic
+import { hpf, hpstatic } from "@helicone/prompts";
+
+const chatCompletion = await openai.chat.completions.create(
+  {
+    messages: [
+      {
+        role: "system",
+        content: hpstatic`You are a creative storyteller.`,
+      },
+      {
+        role: "user",
+        content: hpf`Write a story about ${{ character }}`,
+      },
+    ],
+    model: "gpt-3.5-turbo",
+  },
+  {
+    // 3. Add Prompt ID Header
+    headers: {
+      "Helicone-Prompt-Id": "prompt_story",
+    },
+  }
+);
+```
+
+## Using Prompts Created on the UI in Your Code
+
+If you've crafted a prompt in the UI, integrating it into your codebase is straightforward. Here's how you can fetch and use it:
+
+```jsx
+// Fetch the prompt from Helicone
+const prompt = await getPrompt("your-prompt-id", {
+  variable1: "value1",
+  variable2: "value2",
+});
+
+// Use the prompt with OpenAI API
+const response = await openai.chat.completions.create({
+  model: "gpt-3.5-turbo",
+  messages: [{ role: "user", content: prompt }],
+});
+```
+
+## Conclusion
+
+Both methods of creating prompt versions in Helicone have their unique advantages:
+
+- **UI Prompts**: Ideal for collaborative environments and quick iterations, especially when working with non-technical team members.
+- **Code Prompts**: Offers greater flexibility and is suited for developers who want to manage prompts within their codebase.
+
+By understanding these differences, you can choose the approach that best fits your project's needs and streamline your prompt management process.
+
+### Questions or Feedback?
+
+If you have any questions or feedback about prompt management in Helicone, feel free to reach out or leave a comment below. We're always here to help you optimize your workflow!
