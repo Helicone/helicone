@@ -1,5 +1,5 @@
 import { GetServerSidePropsContext } from "next";
-import { User, useUser } from "@supabase/auth-helpers-react";
+import { User } from "@supabase/auth-helpers-react";
 import { ReactElement } from "react";
 import AuthLayout from "../../components/layout/auth/authLayout";
 import { SupabaseServerWrapper } from "../../lib/wrappers/supabase";
