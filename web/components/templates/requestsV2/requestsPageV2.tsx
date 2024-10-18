@@ -584,30 +584,32 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     }
   };
 
-  const columnsWithProperties = [...getInitialColumns(isCached)].concat(
-    properties.map((property) => {
-      return {
-        id:
-          `${property}`.toLowerCase() === "cost"
+  const columnsWithProperties = useMemo(() => {
+    const initialColumns = getInitialColumns(isCached);
+    return [...initialColumns].concat(
+      properties.map((property) => {
+        return {
+          id: initialColumns.find((column) => column.id === property) // on id conflict, append property- to the property
             ? `property-${property}`
             : `${property}`,
-        accessorFn: (row) => {
-          const value = row.customProperties
-            ? row.customProperties[property]
-            : "";
-          return value;
-        },
-        header: property,
-        cell: (info) => {
-          return info.getValue();
-        },
-        meta: {
-          sortKey: property,
-          category: "Custom Property",
-        },
-      };
-    })
-  );
+          accessorFn: (row) => {
+            const value = row.customProperties
+              ? row.customProperties[property]
+              : "";
+            return value;
+          },
+          header: property,
+          cell: (info) => {
+            return info.getValue();
+          },
+          meta: {
+            sortKey: property,
+            category: "Custom Property",
+          },
+        };
+      })
+    );
+  }, [properties, isCached]);
 
   const {
     selectMode,
