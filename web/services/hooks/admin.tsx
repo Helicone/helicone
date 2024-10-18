@@ -18,8 +18,6 @@ const useAlertBanners = () => {
         .select("*")
         .order("created_at", { ascending: false });
 
-      console.log("Alert banners", data);
-
       return { data, error };
     },
     refetchOnWindowFocus: false,
