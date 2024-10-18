@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { Calculator, Twitter } from "lucide-react";
 import { costOf, costOfPrompt } from "../../packages/cost"; // Ensure the path is correct
 import { providers } from "../../packages/cost/providers/mappings"; // Ensure the path is correct
-import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -17,6 +16,7 @@ import {
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { usePathname } from "next/navigation";
+import Link from "next/link";
 
 // Function to format provider names
 function formatProviderName(provider: string): string {
@@ -590,74 +590,74 @@ Optimize your AI API costs:`;
                   } hover:bg-sky-50 transition-colors duration-150`}
                 >
                   <td className="whitespace-nowrap text-sm text-gray-500 border border-gray-200 p-0">
-                    <a
+                    <Link
                       href={`/llm-cost/provider/${encodeURIComponent(
                         data.provider
                       )}/model/${encodeURIComponent(data.model)}`}
                       className="block w-full h-full px-6 py-2"
                     >
                       {formatProviderName(data.provider)}
-                    </a>
+                    </Link>
                   </td>
                   <td className="text-sm text-gray-900 font-medium border border-gray-200 p-0">
-                    <a
+                    <Link
                       href={`/llm-cost/provider/${encodeURIComponent(
                         data.provider
                       )}/model/${encodeURIComponent(data.model)}`}
                       className="block w-full h-full px-6 py-2"
                     >
                       <div className="break-words">{data.model}</div>
-                    </a>
+                    </Link>
                   </td>
                   <td className="whitespace-nowrap text-sm text-gray-500 border border-gray-200 p-0">
-                    <a
+                    <Link
                       href={`/llm-cost/provider/${encodeURIComponent(
                         data.provider
                       )}/model/${encodeURIComponent(data.model)}`}
                       className="block w-full h-full px-6 py-2"
                     >
                       ${formatCost(data.inputCostPer1k)}
-                    </a>
+                    </Link>
                   </td>
                   <td className="whitespace-nowrap text-sm text-gray-500 border border-gray-200 p-0">
-                    <a
+                    <Link
                       href={`/llm-cost/provider/${encodeURIComponent(
                         data.provider
                       )}/model/${encodeURIComponent(data.model)}`}
                       className="block w-full h-full px-6 py-2"
                     >
                       ${formatCost(data.outputCostPer1k)}
-                    </a>
+                    </Link>
                   </td>
                   <td className="whitespace-nowrap text-sm text-gray-500 border border-gray-200 p-0">
-                    <a
+                    <Link
                       href={`/llm-cost/provider/${encodeURIComponent(
                         data.provider
                       )}/model/${encodeURIComponent(data.model)}`}
                       className="block w-full h-full px-6 py-2"
                     >
                       ${formatCost(data.inputCost)}
-                    </a>
+                    </Link>
                   </td>
                   <td className="whitespace-nowrap text-sm text-gray-500 border border-gray-200 p-0">
-                    <a
+                    <Link
                       href={`/llm-cost/provider/${encodeURIComponent(
                         data.provider
                       )}/model/${encodeURIComponent(data.model)}`}
                       className="block w-full h-full px-6 py-2"
                     >
                       ${formatCost(data.outputCost)}
-                    </a>
+                    </Link>
                   </td>
                   <td className="whitespace-nowrap text-sm font-medium text-sky-500 border border-gray-200 p-0">
-                    <a
+                    <Link
                       href={`/llm-cost/provider/${encodeURIComponent(
                         data.provider
                       )}/model/${encodeURIComponent(data.model)}`}
                       className="block w-full h-full px-6 py-2"
                     >
                       ${formatCost(data.totalCost)}
-                    </a>
+                    </Link>
                   </td>
                 </tr>
               ))}
