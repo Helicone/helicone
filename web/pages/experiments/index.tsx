@@ -17,7 +17,7 @@ const Experiments = (props: ExperimentPage) => {
   const orgContext = useOrg();
 
   const { hasFlag } = useFeatureFlags(
-    "experiments",
+    "experiment",
     orgContext?.currentOrg?.id || ""
   );
 
