@@ -1,5 +1,5 @@
 import { GetServerSidePropsContext } from "next";
-import { User } from "@supabase/auth-helpers-react";
+import { User, useUser } from "@supabase/auth-helpers-react";
 import { ReactElement } from "react";
 import AuthLayout from "../../components/layout/auth/authLayout";
 import { SupabaseServerWrapper } from "../../lib/wrappers/supabase";
@@ -15,12 +15,14 @@ interface ExperimentPage {
 
 const Experiments = (props: ExperimentPage) => {
   const orgContext = useOrg();
+  const user = useUser();
 
   const { hasFlag } = useFeatureFlags(
     "experiments",
     orgContext?.currentOrg?.id || ""
   );
-  return hasFlag ? (
+
+  return hasFlag || user?.email?.includes("@helicone.ai") ? (
     <ExperimentsPage />
   ) : (
     <IslandContainer>
