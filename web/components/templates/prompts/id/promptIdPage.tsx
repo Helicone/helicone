@@ -643,90 +643,96 @@ const PromptIdPage = (props: PromptIdPageProps) => {
   );
 
   return (
-    <IslandContainer>
+    <div>
       <div className="w-full h-full flex flex-col space-y-4 pt-4">
-        <div className="flex flex-row items-center justify-between">
-          <HcBreadcrumb
-            pages={[
-              { href: "/prompts", name: "Prompts" },
-              {
-                href: `/prompts/${id}`,
-                name: prompt?.user_defined_id || "Loading...",
-              },
-            ]}
-          />
-        </div>
-
-        <div className="flex justify-between items-center">
-          <div className="flex items-center space-x-4">
-            <h1 className="font-semibold text-4xl text-black dark:text-white">
-              {prompt?.user_defined_id}
-            </h1>
-            <HcBadge title={`${sortedPrompts?.length} versions`} size={"sm"} />
-            <TooltipProvider>
-              {prompt?.metadata?.createdFromUi === true ? (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size={"sm"}
-                      className="h-6 bg-[#F1F5F9] border border-[#CBD5E1]"
-                    >
-                      <PencilIcon className="h-4 w-4 mr-2" />
-                      Editable
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent className="max-w-[15rem]" align="center">
-                    <p>
-                      This prompt was created{" "}
-                      <span className="font-semibold">in the UI</span>. You can
-                      edit / delete them, or promote to prod.
-                    </p>
-                  </TooltipContent>
-                </Tooltip>
-              ) : (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size={"sm"}
-                      className="h-6 bg-[#F1F5F9] border border-[#CBD5E1]"
-                    >
-                      <EyeIcon className="h-4 w-4 mr-2" />
-                      View only
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent className="max-w-[15rem]" align="center">
-                    <p>
-                      This prompt was created{" "}
-                      <span className="font-semibold">in code</span>. You
-                      won&apos;t be able to edit this from the UI.
-                    </p>
-                  </TooltipContent>
-                </Tooltip>
-              )}
-            </TooltipProvider>
+        <IslandContainer>
+          <div className="flex flex-row items-center justify-between">
+            <HcBreadcrumb
+              pages={[
+                { href: "/prompts", name: "Prompts" },
+                {
+                  href: `/prompts/${id}`,
+                  name: prompt?.user_defined_id || "Loading...",
+                },
+              ]}
+            />
           </div>
-          <HcButton
-            onClick={() => router.push(`/prompts/${id}/new-experiment`)}
-            variant="primary"
-            size="sm"
-            title="Start Experiment"
-            icon={BeakerIcon}
-          />
-        </div>
 
-        <div className="flex items-center gap-2 text-sm text-slate-500">
-          <p className="">
-            last used{" "}
-            {prompt?.last_used && getTimeAgo(new Date(prompt?.last_used))}
-          </p>
-          <div className="rounded-full h-1 w-1 bg-slate-400" />
-          <p className="">
-            created on{" "}
-            {prompt?.created_at && new Date(prompt?.created_at).toDateString()}
-          </p>
-        </div>
+          <div className="flex justify-between items-center">
+            <div className="flex items-center space-x-4">
+              <h1 className="font-semibold text-4xl text-black dark:text-white">
+                {prompt?.user_defined_id}
+              </h1>
+              <HcBadge
+                title={`${sortedPrompts?.length} versions`}
+                size={"sm"}
+              />
+              <TooltipProvider>
+                {prompt?.metadata?.createdFromUi === true ? (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size={"sm"}
+                        className="h-6 bg-[#F1F5F9] border border-[#CBD5E1]"
+                      >
+                        <PencilIcon className="h-4 w-4 mr-2" />
+                        Editable
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-[15rem]" align="center">
+                      <p>
+                        This prompt was created{" "}
+                        <span className="font-semibold">in the UI</span>. You
+                        can edit / delete them, or promote to prod.
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                ) : (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size={"sm"}
+                        className="h-6 bg-[#F1F5F9] border border-[#CBD5E1]"
+                      >
+                        <EyeIcon className="h-4 w-4 mr-2" />
+                        View only
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-[15rem]" align="center">
+                      <p>
+                        This prompt was created{" "}
+                        <span className="font-semibold">in code</span>. You
+                        won&apos;t be able to edit this from the UI.
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                )}
+              </TooltipProvider>
+            </div>
+            <HcButton
+              onClick={() => router.push(`/prompts/${id}/new-experiment`)}
+              variant="primary"
+              size="sm"
+              title="Start Experiment"
+              icon={BeakerIcon}
+            />
+          </div>
+
+          <div className="flex items-center gap-2 text-sm text-slate-500">
+            <p className="">
+              last used{" "}
+              {prompt?.last_used && getTimeAgo(new Date(prompt?.last_used))}
+            </p>
+            <div className="rounded-full h-1 w-1 bg-slate-400" />
+            <p className="">
+              created on{" "}
+              {prompt?.created_at &&
+                new Date(prompt?.created_at).toDateString()}
+            </p>
+          </div>
+        </IslandContainer>
         {user?.email?.includes("helicone.ai") ? (
           <TabGroup>
             <TabList variant="line" defaultValue="1">
@@ -761,6 +767,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                               | boolean
                               | undefined
                           }
+                          className="border-y"
                         />
                       </div>
                       <div className="w-1/3 flex flex-col space-y-4">
@@ -1530,7 +1537,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
           </TabGroup>
         )}
       </div>
-    </IslandContainer>
+    </div>
   );
 };
 
