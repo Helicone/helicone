@@ -214,9 +214,7 @@ const DesktopSidebar = ({ changelog, NAVIGATION }: SidebarProps) => {
           <div className="flex-grow overflow-y-auto pb-14">
             {/* Collapsible button and OrgDropdown */}
             <div className="flex items-center gap-2 h-14 border-b dark:border-slate-800">
-              <div className="flex items-center gap-2 w-full">
-                {!isCollapsed && <OrgDropdown />}
-              </div>
+              {!isCollapsed && <OrgDropdown />}
               <div
                 className={cn("mx-auto", isCollapsed ? "w-full mr-4" : "mr-2")}
               >
