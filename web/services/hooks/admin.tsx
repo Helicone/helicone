@@ -159,7 +159,7 @@ const useChangelog = () => {
     queryFn: async () => {
       try {
         const feed = await parser.parseURL(
-          "https://helicone.ai/rss/changelog.xml"
+          "https://www.helicone.ai/rss/changelog.xml"
         );
         return feed.items;
       } catch (err) {
