@@ -15,14 +15,13 @@ interface ExperimentPage {
 
 const Experiments = (props: ExperimentPage) => {
   const orgContext = useOrg();
-  const user = useUser();
 
   const { hasFlag } = useFeatureFlags(
     "experiments",
     orgContext?.currentOrg?.id || ""
   );
 
-  return hasFlag || user?.email?.includes("@helicone.ai") ? (
+  return hasFlag ? (
     <ExperimentsPage />
   ) : (
     <IslandContainer>
