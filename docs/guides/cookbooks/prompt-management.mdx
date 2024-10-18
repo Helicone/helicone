@@ -1,4 +1,4 @@
-In the world of AI and language models, prompts are the backbone that guides the output of your applications. **Helicone** offers a versatile way to manage these prompts, whether you're a developer who prefers coding or someone who thrives with a UI. In this blog post, we'll explore the differences between prompt versions created from **code** and those created from the **UI**, and how you can leverage each to enhance your workflow.
+Helicone allows you to create and manage prompts in two ways: via the UI or within your codebase. This guide explains the difference between the two methods and how to use them effectively.
 
 ---
 
@@ -7,6 +7,11 @@ In the world of AI and language models, prompts are the backbone that guides the
 ### Collaboration at Its Best
 
 Creating prompts via the UI is perfect for teams that include non-technical members. It allows for seamless collaboration, enabling everyone to contribute to prompt development without diving into code.
+
+<Frame>
+  ![View detailed logging details on Helicone's Requests
+  page.](/images/prompt-playground.png)
+</Frame>
 
 ### Key Features:
 
@@ -145,24 +150,6 @@ const chatCompletion = await openai.chat.completions.create(
     },
   }
 );
-```
-
-## Using Prompts Created on the UI in Your Code
-
-If you've crafted a prompt in the UI, integrating it into your codebase is straightforward. Here's how you can fetch and use it:
-
-```jsx
-// Fetch the prompt from Helicone
-const prompt = await getPrompt("your-prompt-id", {
-  variable1: "value1",
-  variable2: "value2",
-});
-
-// Use the prompt with OpenAI API
-const response = await openai.chat.completions.create({
-  model: "gpt-3.5-turbo",
-  messages: [{ role: "user", content: prompt }],
-});
 ```
 
 ## Conclusion
