@@ -15,6 +15,7 @@ export const costs: ModelRow[] = [
       prompt_token: 0.0000007,
       completion_token: 0.0000008,
     },
+    max_window_size: 4096,
   },
   {
     model: {
@@ -25,6 +26,7 @@ export const costs: ModelRow[] = [
       prompt_token: 0.00000024,
       completion_token: 0.00000024,
     },
+    max_window_size: 32768,
   },
   {
     model: {
@@ -35,6 +37,7 @@ export const costs: ModelRow[] = [
       prompt_token: 0.00000007,
       completion_token: 0.00000007,
     },
+    max_window_size: 32768,
   },
   {
     model: {
@@ -45,6 +48,7 @@ export const costs: ModelRow[] = [
       prompt_token: 0.0000002,
       completion_token: 0.0000002,
     },
+    max_window_size: 32768,
   },
   {
     model: {
@@ -55,6 +59,7 @@ export const costs: ModelRow[] = [
       prompt_token: 0.00000059,
       completion_token: 0.00000079,
     },
+    max_window_size: 8192,
   },
   {
     model: {
@@ -65,6 +70,7 @@ export const costs: ModelRow[] = [
       prompt_token: 0.00000005,
       completion_token: 0.00000008,
     },
+    max_window_size: 8192,
   },
   {
     model: {
@@ -75,6 +81,7 @@ export const costs: ModelRow[] = [
       prompt_token: 0.00000089,
       completion_token: 0.00000089,
     },
+    max_window_size: 8192,
   },
   {
     model: {
@@ -85,5 +92,6 @@ export const costs: ModelRow[] = [
       prompt_token: 0.00000019,
       completion_token: 0.00000019,
     },
+    max_window_size: 8192,
   },
 ];

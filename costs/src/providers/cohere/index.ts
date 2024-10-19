@@ -15,5 +15,6 @@ export const costs: ModelRow[] = [
       prompt_token: 0.0000005,
       completion_token: 0.0000015,
     },
+    max_window_size: 4096,
   },
 ];

@@ -15,6 +15,7 @@ export const costs: ModelRow[] = [
       prompt_token: 0.0000004,
       completion_token: 0.0000004,
     },
+    max_window_size: 4096,
   },
   {
     model: {
@@ -25,6 +26,7 @@ export const costs: ModelRow[] = [
       prompt_token: 0.0000004,
       completion_token: 0.0000004,
     },
+    max_window_size: 4096,
   },
   {
     model: {
@@ -35,6 +37,7 @@ export const costs: ModelRow[] = [
       prompt_token: 0.0000005,
       completion_token: 0.0000005,
     },
+    max_window_size: 4096,
   },
   {
     model: {
@@ -45,6 +48,7 @@ export const costs: ModelRow[] = [
       prompt_token: 0.000002,
       completion_token: 0.000002,
     },
+    max_window_size: 4096,
   },
   {
     model: {
@@ -55,6 +59,7 @@ export const costs: ModelRow[] = [
       prompt_token: 0.000002,
       completion_token: 0.000002,
     },
+    max_window_size: 4096,
   },
   {
     model: {
@@ -65,6 +70,7 @@ export const costs: ModelRow[] = [
       prompt_token: 0.00002,
       completion_token: 0.00002,
     },
+    max_window_size: 4096,
   },
   {
     model: {
@@ -75,6 +81,7 @@ export const costs: ModelRow[] = [
       prompt_token: 0.00002,
       completion_token: 0.00002,
     },
+    max_window_size: 4096,
   },
   {
     model: {
@@ -85,6 +92,7 @@ export const costs: ModelRow[] = [
       prompt_token: 0.00002,
       completion_token: 0.00002,
     },
+    max_window_size: 4096,
   },
   {
     model: {
@@ -95,6 +103,7 @@ export const costs: ModelRow[] = [
       prompt_token: 0.00002,
       completion_token: 0.00002,
     },
+    max_window_size: 4096,
   },
   {
     model: {
@@ -106,6 +115,7 @@ export const costs: ModelRow[] = [
       completion_token: 0.000002,
     },
     showInPlayground: true,
+    max_window_size: 4096,
   },
   {
     model: {
@@ -117,6 +127,7 @@ export const costs: ModelRow[] = [
       completion_token: 0.000002,
     },
     showInPlayground: true,
+    max_window_size: 4096,
   },
   {
     model: {
@@ -127,6 +138,7 @@ export const costs: ModelRow[] = [
       prompt_token: 0.0000015,
       completion_token: 0.000002,
     },
+    max_window_size: 4096,
   },
   {
     model: {
@@ -138,6 +150,7 @@ export const costs: ModelRow[] = [
       completion_token: 0.000002,
     },
     showInPlayground: true,
+    max_window_size: 4096,
   },
   {
     model: {
@@ -149,6 +162,7 @@ export const costs: ModelRow[] = [
       completion_token: 0.000002,
     },
     showInPlayground: true,
+    max_window_size: 4096,
   },
   {
     model: {
@@ -160,6 +174,7 @@ export const costs: ModelRow[] = [
       completion_token: 0.000002,
     },
     showInPlayground: true,
+    max_window_size: 4096,
   },
   {
     model: {
@@ -171,6 +186,7 @@ export const costs: ModelRow[] = [
       completion_token: 0.00006,
     },
     showInPlayground: true,
+    max_window_size: 8192,
   },
   {
     model: {
@@ -182,6 +198,7 @@ export const costs: ModelRow[] = [
       completion_token: 0.00006,
     },
     showInPlayground: true,
+    max_window_size: 8192,
   },
   {
     model: {
@@ -193,6 +210,7 @@ export const costs: ModelRow[] = [
       completion_token: 0.00006,
     },
     showInPlayground: true,
+    max_window_size: 8192,
   },
   {
     model: {
@@ -204,6 +222,7 @@ export const costs: ModelRow[] = [
       completion_token: 0.00012,
     },
     showInPlayground: true,
+    max_window_size: 32768,
   },
   {
     model: {
@@ -215,6 +234,7 @@ export const costs: ModelRow[] = [
       completion_token: 0.00012,
     },
     showInPlayground: true,
+    max_window_size: 32768,
   },
   {
     model: {
@@ -226,6 +246,7 @@ export const costs: ModelRow[] = [
       completion_token: 0.00012,
     },
     showInPlayground: true,
+    max_window_size: 32768,
   },
   {
     model: {
@@ -237,6 +258,7 @@ export const costs: ModelRow[] = [
       completion_token: 0.00003,
     },
     showInPlayground: true,
+    max_window_size: 128000,
   },
   {
     model: {
@@ -248,6 +270,7 @@ export const costs: ModelRow[] = [
       completion_token: 0.00003,
     },
     showInPlayground: true,
+    max_window_size: 128000,
   },
   {
     model: {
@@ -259,6 +282,7 @@ export const costs: ModelRow[] = [
       completion_token: 0.00003,
     },
     showInPlayground: true,
+    max_window_size: 128000,
   },
   {
     model: {
@@ -270,6 +294,7 @@ export const costs: ModelRow[] = [
       completion_token: 0.000015,
     },
     showInPlayground: true,
+    max_window_size: 8192,
   },
   {
     model: {
@@ -281,8 +306,8 @@ export const costs: ModelRow[] = [
       completion_token: 0.000015,
     },
     showInPlayground: true,
+    max_window_size: 8192,
   },
-
   {
     model: {
       operator: "equals",
@@ -293,6 +318,7 @@ export const costs: ModelRow[] = [
       completion_token: 0.0000006,
     },
     showInPlayground: true,
+    max_window_size: 8192,
   },
   {
     model: {
@@ -304,6 +330,7 @@ export const costs: ModelRow[] = [
       completion_token: 0.0000006,
     },
     showInPlayground: true,
+    max_window_size: 8192,
   },
   {
     model: {
@@ -315,6 +342,7 @@ export const costs: ModelRow[] = [
       completion_token: 0.000002,
     },
     showInPlayground: true,
+    max_window_size: 4096,
   },
   {
     model: {
@@ -325,6 +353,7 @@ export const costs: ModelRow[] = [
       prompt_token: 0.000003,
       completion_token: 0.000004,
     },
+    max_window_size: 16384,
   },
   {
     model: {
@@ -336,6 +365,7 @@ export const costs: ModelRow[] = [
       completion_token: 0.000004,
     },
     showInPlayground: true,
+    max_window_size: 16384,
   },
   {
     model: {
@@ -347,6 +377,7 @@ export const costs: ModelRow[] = [
       completion_token: 0.0000015,
     },
     showInPlayground: true,
+    max_window_size: 4096,
   },
   {
     model: {
@@ -358,6 +389,7 @@ export const costs: ModelRow[] = [
       completion_token: 0.00003,
     },
     showInPlayground: true,
+    max_window_size: 128000,
   },
   {
     model: {
@@ -369,6 +401,7 @@ export const costs: ModelRow[] = [
       completion_token: 0.00003,
     },
     showInPlayground: true,
+    max_window_size: 128000,
   },
   {
     model: {
@@ -380,6 +413,7 @@ export const costs: ModelRow[] = [
       completion_token: 0.00003,
     },
     showInPlayground: true,
+    max_window_size: 128000,
   },
   {
     model: {
@@ -390,6 +424,7 @@ export const costs: ModelRow[] = [
       prompt_token: 0.0000001,
       completion_token: 0.0,
     },
+    max_window_size: 8192,
   },
   {
     model: {
@@ -400,6 +435,7 @@ export const costs: ModelRow[] = [
       prompt_token: 0.0000001,
       completion_token: 0.0,
     },
+    max_window_size: 8192,
   },
   {
     model: {
@@ -410,6 +446,7 @@ export const costs: ModelRow[] = [
       prompt_token: 0.0000001,
       completion_token: 0.0,
     },
+    max_window_size: 8192,
   },
   {
     model: {
@@ -420,6 +457,7 @@ export const costs: ModelRow[] = [
       prompt_token: 0.00000002,
       completion_token: 0.0,
     },
+    max_window_size: 8192,
   },
   {
     model: {
@@ -430,6 +468,7 @@ export const costs: ModelRow[] = [
       prompt_token: 0.00000013,
       completion_token: 0.0,
     },
+    max_window_size: 8192,
   },
   {
     model: {
@@ -440,6 +479,7 @@ export const costs: ModelRow[] = [
       prompt_token: 0.00001,
       completion_token: 0.00003,
     },
+    max_window_size: 128000,
   },
   {
     model: {
@@ -451,6 +491,7 @@ export const costs: ModelRow[] = [
       prompt_token: 0.000003,
       completion_token: 0.000004,
     },
+    max_window_size: 16384,
   },
   {
     model: {
@@ -462,6 +503,7 @@ export const costs: ModelRow[] = [
       prompt_token: 0.0000025,
       completion_token: 0.00001,
     },
+    max_window_size: 8192,
   },
   {
     model: {
@@ -473,6 +515,7 @@ export const costs: ModelRow[] = [
       completion_token: 0.00006,
     },
     showInPlayground: true,
+    max_window_size: 8192,
   },
   {
     model: {
@@ -484,6 +527,7 @@ export const costs: ModelRow[] = [
       completion_token: 0.00006,
     },
     showInPlayground: true,
+    max_window_size: 8192,
   },
   {
     model: {
@@ -495,6 +539,7 @@ export const costs: ModelRow[] = [
       completion_token: 0.000012,
     },
     showInPlayground: true,
+    max_window_size: 8192,
   },
   {
     model: {
@@ -506,5 +551,6 @@ export const costs: ModelRow[] = [
       completion_token: 0.000012,
     },
     showInPlayground: true,
+    max_window_size: 8192,
   },
 ];
