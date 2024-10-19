@@ -13,7 +13,8 @@ export async function generateMetadata({
   );
 
   const title = `${decodedProvider} ${decodedModel} Pricing Calculator | API Cost Estimation`;
-  const description = `Discover the cost of AI with our ${decodedProvider} ${decodedModel} Pricing Calculator. Get accurate API pricing, token costs, and budget estimation for ${decodedModel}. Compare ${decodedProvider} models.`;
+  const description = `Explore AI costs with our comprehensive ${decodedProvider} ${decodedModel} Pricing Calculator. Compare prices for 300+ models across 10+ providers, get accurate API pricing, token costs, and budget estimations.`;
+
   const imageUrl = "/static/pricing-calc/calculator-open-graph.webp";
 
   return {
