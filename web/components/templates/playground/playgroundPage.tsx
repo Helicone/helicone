@@ -238,7 +238,9 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
         <div className="flex justify-between w-full h-full gap-8 min-h-[80vh]">
           <div className="flex w-full h-full ">
             {isLoading ? (
-              <div className="col-span-8 flex w-full border border-gray-300 rounded-lg bg-gray-200 h-96 animate-pulse" />
+              <div className="col-span-8 flex w-full border border-gray-300 dark:border-gray-700 rounded-lg bg-gray-200 dark:bg-gray-800 h-96 animate-pulse dark:text-gray-100 items-center justify-center">
+                Loading...
+              </div>
             ) : hasData && isChat && singleRequest !== null ? (
               <>
                 <ChatPlayground
