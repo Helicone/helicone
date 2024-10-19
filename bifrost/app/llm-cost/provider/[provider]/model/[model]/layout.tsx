@@ -1,3 +1,5 @@
+import { formatProviderName } from "@/app/llm-cost/CalculatorInfo";
+
 export async function generateMetadata({
   params,
 }: {
@@ -38,20 +40,4 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return <>{children}</>;
-}
-
-function formatProviderName(provider: string): string {
-  const formattingMap: { [key: string]: string } = {
-    OPENAI: "OpenAI",
-    ANTHROPIC: "Anthropic",
-    AZURE: "Azure",
-    TOGETHER: "Together AI",
-    FIREWORKS: "Fireworks",
-    OPENROUTER: "OpenRouter",
-    GROQ: "Groq",
-    QSTASH: "Qstash",
-    MISTRAL: "Mistral",
-  };
-
-  return formattingMap[provider.toUpperCase()] || provider.toUpperCase();
 }
