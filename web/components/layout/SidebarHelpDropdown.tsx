@@ -124,7 +124,7 @@ const SidebarHelpDropdown = ({
         <Link href="https://helicone.ai/changelog" target="_blank">
           <DropdownMenuItem className="cursor-pointer">
             <CalendarIcon className="h-4 w-4 mr-2 text-slate-500" />
-            View full changelog
+            Full changelog
             <ArrowUpRightIcon className="h-3.5 w-3.5 ml-2 text-slate-400 dark:text-slate-600" />
           </DropdownMenuItem>
         </Link>
