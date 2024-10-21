@@ -22,12 +22,8 @@ import Link from "next/link";
 import CalculatorInfo, { formatProviderName } from "./CalculatorInfo";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { ThemedTextDropDown } from "@/components/ui/themedTextDropDown";
 
 type ModelPriceCalculatorProps = {
   model?: string;
@@ -265,30 +261,17 @@ const FilterSection = ({
   onRemoveModel: (model: string) => void;
   onClearAll: () => void;
 }) => {
-  const [isProviderOpen, setIsProviderOpen] = useState(false);
-  const [isModelOpen, setIsModelOpen] = useState(false);
+  const availableProviders = providers
+    .filter((p) => !selectedProviders.includes(p.provider))
+    .map((p) => p.provider);
 
-  // Update this to include all models when no provider is selected
-  const availableModels =
-    selectedProviders.length === 0
-      ? providers.flatMap((p) => p.models)
-      : providers
-          .filter((p) => selectedProviders.includes(p.provider))
-          .flatMap((p) => p.models);
-
-  const availableProviders = providers.filter(
-    (p) => !selectedProviders.includes(p.provider)
-  );
-
-  const availableModelsFiltered = availableModels.filter(
-    (model) => !selectedModels.includes(model)
-  );
-
-  const getScrollAreaHeight = (itemCount: number) => {
-    const maxHeight = 288; // 72 * 4, maximum height for 4 items
-    const itemHeight = 36; // Approximate height of each item
-    return Math.min(itemCount * itemHeight, maxHeight);
-  };
+  const availableModels = providers
+    .filter(
+      (p) =>
+        selectedProviders.length === 0 || selectedProviders.includes(p.provider)
+    )
+    .flatMap((p) => p.models)
+    .filter((model) => !selectedModels.includes(model));
 
   const hasSelections =
     selectedProviders.length > 0 || selectedModels.length > 0;
@@ -296,7 +279,28 @@ const FilterSection = ({
   return (
     <div className="mb-4">
       <div className="flex justify-between items-center mb-2">
-        <h3 className="text-sm font-medium text-gray-700">Filter</h3>
+        <div className="flex gap-2">
+          <div className="w-full max-w-[10rem]">
+            <ThemedTextDropDown
+              options={availableProviders}
+              onChange={(provider) => {
+                if (provider) onAddProvider(provider);
+              }}
+              value="Filter by Provider"
+              hideTabModes={true}
+            />
+          </div>
+          <div className="w-full max-w-[10rem]">
+            <ThemedTextDropDown
+              options={availableModels}
+              onChange={(model) => {
+                if (model) onAddModel(model);
+              }}
+              value="Filter by Model"
+              hideTabModes={true}
+            />
+          </div>
+        </div>
         {hasSelections && (
           <Button
             variant="ghost"
@@ -344,66 +348,6 @@ const FilterSection = ({
           </div>
         </>
       )}
-      <div className={`flex gap-2 ${hasSelections ? "mt-2" : "mt-1"}`}>
-        <Popover open={isProviderOpen} onOpenChange={setIsProviderOpen}>
-          <PopoverTrigger asChild>
-            <Button variant="outline" size="sm" className="h-8">
-              <Plus className="w-4 h-4 mr-1" /> Add Provider
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-64 p-0">
-            <ScrollArea
-              className={`h-[${getScrollAreaHeight(
-                availableProviders.length
-              )}px]`}
-            >
-              <div className="p-4">
-                {availableProviders.map((p) => (
-                  <button
-                    key={p.provider}
-                    className="w-full text-left px-2 py-1 hover:bg-gray-100 rounded truncate"
-                    onClick={() => {
-                      onAddProvider(p.provider);
-                      setIsProviderOpen(false);
-                    }}
-                  >
-                    {formatProviderName(p.provider)}
-                  </button>
-                ))}
-              </div>
-            </ScrollArea>
-          </PopoverContent>
-        </Popover>
-        <Popover open={isModelOpen} onOpenChange={setIsModelOpen}>
-          <PopoverTrigger asChild>
-            <Button variant="outline" size="sm" className="h-8">
-              <Plus className="w-4 h-4 mr-1" /> Add Model
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-64 p-0">
-            <ScrollArea
-              className={`h-[${getScrollAreaHeight(
-                availableModelsFiltered.length
-              )}px]`}
-            >
-              <div className="p-4">
-                {availableModelsFiltered.map((model) => (
-                  <button
-                    key={model}
-                    className="w-full text-left px-2 py-1 hover:bg-gray-100 rounded truncate"
-                    onClick={() => {
-                      onAddModel(model);
-                      setIsModelOpen(false);
-                    }}
-                  >
-                    {model}
-                  </button>
-                ))}
-              </div>
-            </ScrollArea>
-          </PopoverContent>
-        </Popover>
-      </div>
     </div>
   );
 };
@@ -534,19 +478,6 @@ export default function ModelPriceCalculator({
   const uniqueProviders = useMemo(() => {
     return Array.from(new Set(costData.map((data) => data.provider))).sort();
   }, [costData]);
-
-  const uniqueModels = useMemo(() => {
-    if (selectedProviders.length === 0) {
-      return Array.from(new Set(costData.map((data) => data.model))).sort();
-    }
-    return Array.from(
-      new Set(
-        costData
-          .filter((data) => selectedProviders.includes(data.provider))
-          .map((data) => data.model)
-      )
-    ).sort();
-  }, [costData, selectedProviders]);
 
   const handleAddProvider = (provider: string) => {
     setSelectedProviders((prev) => [...prev, provider]);
