@@ -236,8 +236,8 @@ const PromptsPage = (props: PromptsPageProps) => {
                           </ProFeatureWrapper>
                         )}
                       </DialogTrigger>
-                      <DialogContent className="w-[900px] ">
-                        <DialogHeader className="flex flex-row justify-between items-center">
+                      <DialogContent className="w-full bg-white" width="900px">
+                        <DialogHeader className="flex flex-row justify-between items-center ">
                           <DialogTitle>Create a new prompt</DialogTitle>
                           <div className="flex items-center space-x-2">
                             <Switch
