@@ -22,6 +22,17 @@ import { RequestManager } from "../../managers/request/RequestManager";
 import { JawnAuthenticatedRequest } from "../../types/request";
 import { ScoreManager, ScoreRequest } from "../../managers/score/ScoreManager";
 
+export type RequestClickhouseFilterBranch = {
+  left: RequestClickhouseFilterNode;
+  operator: "or" | "and";
+  right: RequestClickhouseFilterNode;
+};
+
+export type RequestClickhouseFilterNode =
+  | FilterLeafSubset<"request_response_rmt">
+  | RequestClickhouseFilterBranch
+  | "all";
+
 export type RequestFilterBranch = {
   left: RequestFilterNode;
   operator: "or" | "and";
