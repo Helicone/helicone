@@ -1,4 +1,4 @@
-import { TimeIncrement } from "../timeCalculations/fetchTimeData";
+import { TimeIncrement } from "./getXOverTime";
 
 export function isValidTimeZoneDifference(timeZoneDifference: number): boolean {
   const minutesInDay = 24 * 60;
