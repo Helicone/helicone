@@ -13,8 +13,8 @@ Few-shot learning involves including a small number of input-output examples (us
 
 ## How to implement few-shot learning
 
-1. Provide clear examples 
-2. Separate the example from the prompt using a delimiters (For example, use lines like `---` or phrases like `Example:` to separate sections). 
+1. Provide clear examples
+2. Separate the example from the prompt using a delimiters (For example, use lines like `---` or phrases like `Example:` to separate sections).
 3. Keep examples concise
 4. Use examples that are reflective of desired outputs
 
@@ -25,7 +25,7 @@ Few-shot learning involves including a small number of input-output examples (us
   <Accordion title="Example 1: Email Response Generation.">
   The examples show the assistant how to structure the responses, the tone to use, and how to address the customer's specific concerns.
 
-  **Prompt:** 
+  **Prompt:**
 ```python
 You are an assistant helping to draft professional email responses.
 
@@ -45,18 +45,18 @@ Response:
 ```
 
   </Accordion>
-  
+
   <Accordion title="Example 2: Data Extraction.">
   The model learns to identify and extract specific pieces of information consistently across different job postings.
 
 
-  **Prompt:** 
+  **Prompt:**
   ```
 Extract key information from the following job postings.
 
 Example:
 Job Posting: "We are seeking a software engineer with 5 years of experience in Java and Python. Location: New York."
-Extracted Information: 
+Extracted Information:
 - Position: Software Engineer
 - Experience: 5 years
 - Skills: Java, Python
@@ -81,7 +81,7 @@ Extracted Information:
 The model learns to classify sentiments based on the examples provided, improving accuracy in its analysis.
 
 
-    **Prompt:** 
+    **Prompt:**
     ```
 Determine the sentiment (Positive, Negative, Neutral) of the following customer reviews.
 
