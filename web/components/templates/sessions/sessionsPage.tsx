@@ -1,7 +1,6 @@
 import { useOrg } from "@/components/layout/organizationContext";
 
-import { Badge } from "@tremor/react";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { getTimeIntervalAgo } from "../../../lib/timeCalculations/time";
 import { useDebounce } from "../../../services/hooks/debounce";
 import { useSessionNames, useSessions } from "../../../services/hooks/sessions";
@@ -17,6 +16,12 @@ import LoadingAnimation from "@/components/shared/loadingAnimation";
 import { Tabs, TabsTrigger, TabsList } from "@/components/ui/tabs";
 import { useLocalStorage } from "@/services/hooks/localStorage";
 import { ChartPieIcon, ListBulletIcon } from "@heroicons/react/24/outline";
+import { SESSIONS_TABLE_FILTERS } from "@/services/lib/filters/frontendFilterDefs";
+import {
+  filterUITreeToFilterNode,
+  getRootFilterNode,
+  UIFilterRowTree,
+} from "@/services/lib/filters/uiFilterRowTree";
 
 interface SessionsPageProps {
   currentPage: number;
@@ -63,10 +68,26 @@ const SessionsPage = (props: SessionsPageProps) => {
   const debouncedSessionIdSearch = useDebounce(sessionIdSearch, 500); // 0.5 seconds
   const [selectedName, setSelectedName] = useState<string>("");
 
+  const [advancedFilters, setAdvancedFilters] = useState<UIFilterRowTree>(
+    getRootFilterNode()
+  );
+  const debouncedAdvancedFilters = useDebounce(advancedFilters, 500); // 0.5 seconds
+
+  const onSetAdvancedFiltersHandler = useCallback(
+    (filters: UIFilterRowTree) => {
+      setAdvancedFilters(filters);
+    },
+    []
+  );
+
   const { sessions, refetch, isLoading } = useSessions(
     timeFilter,
     debouncedSessionIdSearch,
-    selectedName
+    selectedName,
+    filterUITreeToFilterNode(
+      SESSIONS_TABLE_FILTERS,
+      debouncedAdvancedFilters
+    ) as any
   );
 
   const org = useOrg();
@@ -95,11 +116,7 @@ const SessionsPage = (props: SessionsPageProps) => {
     >
       <AuthHeader
         isWithinIsland={true}
-        title={
-          <div className="flex items-center gap-2 ml-8">
-            Sessions <Badge>Beta</Badge>
-          </div>
-        }
+        title={<div className="flex items-center gap-2 ml-8">Sessions</div>}
         actions={
           selectedName && (
             <TabsList className="grid w-full grid-cols-2 mr-8">
@@ -159,6 +176,8 @@ const SessionsPage = (props: SessionsPageProps) => {
               timeFilter={timeFilter}
               setTimeFilter={setTimeFilter}
               setInterval={() => {}}
+              advancedFilters={advancedFilters}
+              onSetAdvancedFiltersHandler={onSetAdvancedFiltersHandler}
             />
           </Row>
         ) : org?.currentOrg?.tier === "free" ? (

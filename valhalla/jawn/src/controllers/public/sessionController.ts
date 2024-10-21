@@ -1,4 +1,13 @@
-import { Route, Tags, Security, Controller, Body, Post, Request } from "tsoa";
+import {
+  Route,
+  Tags,
+  Security,
+  Controller,
+  Body,
+  Post,
+  Request,
+  Path,
+} from "tsoa";
 import { Result } from "../../lib/shared/result";
 import { JawnAuthenticatedRequest } from "../../types/request";
 import {
@@ -6,6 +15,7 @@ import {
   SessionNameResult,
   SessionResult,
 } from "../../managers/SessionManager";
+import { RequestFilterNode } from "./requestController";
 
 export interface SessionQueryParams {
   sessionIdContains: string;
@@ -15,6 +25,7 @@ export interface SessionQueryParams {
   };
   sessionName: string;
   timezoneDifference: number;
+  filter: RequestFilterNode;
 }
 
 export interface SessionNameQueryParams {
@@ -72,6 +83,26 @@ export class SessionController extends Controller {
 
     const result = await sessionManager.getMetrics(requestBody);
     if (result.error || !result.data) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
+    }
+    return result;
+  }
+
+  @Post("/{sessionId}/feedback")
+  public async updateSessionFeedback(
+    @Path() sessionId: string,
+    @Body() requestBody: { rating: boolean },
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<null, string>> {
+    const sessionManager = new SessionManager(request.authParams);
+
+    const result = await sessionManager.updateSessionFeedback(
+      sessionId,
+      requestBody.rating
+    );
+    if (result.error) {
       this.setStatus(500);
     } else {
       this.setStatus(200);

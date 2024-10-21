@@ -1,5 +1,8 @@
 // src/users/usersService.ts
-import { NewExperimentParams } from "../../controllers/public/experimentController";
+import {
+  ExperimentRun,
+  NewExperimentParams,
+} from "../../controllers/public/experimentController";
 import { AuthParams, supabaseServer } from "../../lib/db/supabase";
 import { Result, err, ok } from "../../lib/shared/result";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
@@ -11,6 +14,7 @@ import {
   IncludeExperimentKeys,
 } from "../../lib/stores/experimentStore";
 import { FilterNode } from "../../lib/shared/filters/filterDefs";
+import { run, runOriginalExperiment } from "../../lib/experiment/run";
 
 export class ExperimentManager extends BaseManager {
   private ExperimentStore: ExperimentStore;
@@ -19,10 +23,49 @@ export class ExperimentManager extends BaseManager {
     this.ExperimentStore = new ExperimentStore(authParams.organizationId);
   }
 
+  async runOriginalExperiment(params: {
+    experimentId: string;
+    datasetRowIds: string[];
+  }): Promise<Result<ExperimentRun, string>> {
+    const result = await this.getExperimentById(params.experimentId, {
+      inputs: true,
+      promptVersion: true,
+    });
+
+    if (result.error || !result.data) {
+      return err(result.error);
+    }
+
+    const experiment = result.data;
+    const datasetRows = await this.getDatasetRowsByIds({
+      datasetRowIds: params.datasetRowIds,
+    });
+
+    if (datasetRows.error || !datasetRows.data) {
+      console.error(datasetRows.error);
+      return err(datasetRows.error);
+    }
+
+    return runOriginalExperiment(experiment, datasetRows.data);
+  }
+
+  async hasAccessToExperiment(experimentId: string): Promise<boolean> {
+    const experiment = await supabaseServer.client
+      .from("experiment_v2")
+      .select("*")
+      .eq("id", experimentId)
+      .eq("organization", this.authParams.organizationId)
+      .single();
+    return !!experiment.data;
+  }
+
   async getExperimentById(
     experimentId: string,
     include: IncludeExperimentKeys
   ): Promise<Result<Experiment, string>> {
+    if (!(await this.hasAccessToExperiment(experimentId))) {
+      return err("Unauthorized");
+    }
     return this.ExperimentStore.getExperimentById(experimentId, include);
   }
 
@@ -73,9 +116,7 @@ export class ExperimentManager extends BaseManager {
         params.model,
         params.status,
         params.experimentId,
-        params.providerKeyId === "NOKEY"
-          ? null
-          : params.providerKeyId,
+        params.providerKeyId === "NOKEY" ? null : params.providerKeyId,
       ]
     );
 

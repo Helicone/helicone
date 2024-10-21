@@ -50,10 +50,19 @@ const InputCellRenderer: React.FC<any> = (props) => {
 
     const nextInputField = props.context.inputColumnFields[props.index + 1];
     if (nextInputField) {
-      props.context.setActivePopoverCell({
-        rowIndex: props.node.rowIndex,
-        colId: nextInputField,
-      });
+      const currentRowData = props.context.rowData.find(
+        (row: any) => row.id === props.node.id
+      );
+      const nextCellValue = currentRowData
+        ? currentRowData[nextInputField]
+        : undefined;
+
+      if (nextCellValue === "" || nextCellValue === undefined) {
+        props.context.setActivePopoverCell({
+          rowIndex: props.node.rowIndex,
+          colId: nextInputField,
+        });
+      }
     } else {
       // This is the last input column
       props.context.handleLastInputSubmit();
@@ -98,17 +107,16 @@ const InputCellRenderer: React.FC<any> = (props) => {
         </div>
       </PopoverTrigger>
       <PopoverContent align="start" className="w-52 p-0">
-        {!isEmptyTable && (
-          <Input
-            ref={inputRef}
-            className="text-sm w-full font-semibold px-2 pt-2 border-none"
-            placeholder="Enter manually, or:"
-            value={inputValue}
-            onChange={handleInputChange}
-            onKeyDown={handleInputKeyDown}
-            onBlur={handleInputSubmit}
-          />
-        )}
+        <Input
+          ref={inputRef}
+          className="text-sm w-full font-semibold px-2 pt-2 border-none"
+          placeholder="Enter manually, or:"
+          value={inputValue}
+          onChange={handleInputChange}
+          onKeyDown={handleInputKeyDown}
+          onBlur={handleInputSubmit}
+        />
+
         <div className="flex flex-col space-y-2 p-2 items-start justify-start">
           <Button
             onClick={() => {
@@ -143,10 +151,10 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
     setShowPromptPlayground(true);
   };
 
-  const handleRunClick = (e: React.MouseEvent) => {
+  const handleRunClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (onRunColumn) {
-      onRunColumn(props.column.colId);
+      await onRunColumn(props.column.colId);
     }
   };
 
@@ -195,7 +203,7 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
             props.hypothesis?.promptVersion?.model ||
             ""
           }
-          isPromptCreatedFromUi={true}
+          isPromptCreatedFromUi={false}
           defaultEditMode={false}
           editMode={false}
         />

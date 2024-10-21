@@ -6,15 +6,29 @@ import { clsx } from "../../clsx";
 import useNotification from "../../notification/useNotification";
 import ThemedModal from "../themedModal";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface ExportButtonProps<T> {
   rows: T[];
   fetchRows?: () => Promise<T[]>;
   format?: "CSV" | "JSONL";
+  className?: string;
 }
 
 export default function ExportButton<T>(props: ExportButtonProps<T>) {
-  const { rows, fetchRows, format: initialFormat = "CSV" } = props;
+  const { rows, fetchRows, format: initialFormat = "CSV", className } = props;
   const [format, setFormat] = useState(initialFormat);
   const [open, setOpen] = useState(false);
   const [downloadingCSV, setDownloadingCSV] = useState(false);
@@ -71,15 +85,23 @@ export default function ExportButton<T>(props: ExportButtonProps<T>) {
   };
 
   return (
-    <>
-      <Button
-        variant="ghost"
-        onClick={() => setOpen(true)}
-        className="flex items-center gap-2"
-        size="xs"
-      >
-        <ArrowDownTrayIcon className="h-4 w-4" />
-      </Button>
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            onClick={() => setOpen(true)}
+            className={clsx(
+              "flex items-center gap-2 text-slate-700 dark:text-slate-400",
+              className
+            )}
+            size="xs"
+          >
+            <ArrowDownTrayIcon className="h-4 w-4" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>Export data</TooltipContent>
+      </Tooltip>
 
       <ThemedModal open={open} setOpen={setOpen}>
         <div className="flex flex-col space-y-4 sm:space-y-8 min-w-[350px] max-w-sm w-full">
@@ -102,17 +124,23 @@ export default function ExportButton<T>(props: ExportButtonProps<T>) {
                 .
               </p>
             </div>
-            <select
+
+            <Select
               value={format}
-              onChange={(e) => setFormat(e.target.value as "CSV" | "JSONL")}
-              className="mt-4 block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+              onValueChange={(value) => setFormat(value as "CSV" | "JSONL")}
             >
-              <option value="CSV">CSV</option>
-              <option value="JSONL">JSONL</option>
-            </select>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select format" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="CSV">CSV</SelectItem>
+                <SelectItem value="JSONL">JSONL</SelectItem>
+              </SelectContent>
+            </Select>
+
             <p className="text-sm sm:text-md text-gray-500">
-              Export may take a lot of time. Please do not close this modal once
-              export is started.
+              Exporting may take a while depending on the amount of data. Please
+              do not close this modal once export is started.
             </p>
           </div>
 
@@ -142,6 +170,6 @@ export default function ExportButton<T>(props: ExportButtonProps<T>) {
           </div>
         </div>
       </ThemedModal>
-    </>
+    </TooltipProvider>
   );
 }

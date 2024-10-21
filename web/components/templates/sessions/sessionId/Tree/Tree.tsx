@@ -20,6 +20,7 @@ export interface TreeNodeProps {
   level: number;
   collapseAll?: boolean;
   setShowDrawer: (x: boolean) => void;
+  isRequestSingleChild?: boolean;
 }
 
 const TreeNode: React.FC<TreeNodeProps> = ({
@@ -29,6 +30,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({
   level,
   collapseAll,
   setShowDrawer,
+  isRequestSingleChild,
 }) => {
   const [closeChildren, setCloseChildren] = useState(collapseAll ?? false);
   const [selectedRequestId, setSelectedRequestId] = selectedRequestIdDispatch;
@@ -39,7 +41,10 @@ const TreeNode: React.FC<TreeNodeProps> = ({
 
   return (
     <div
-      className={level === 0 ? "p-0 m-0" : "relative flex flex-col"}
+      className={clsx(
+        level === 0 ? "p-0 m-0" : "relative flex flex-col",
+        "bg-white dark:bg-slate-950"
+      )}
       key={`${node.name}-${node.trace?.request_id}`}
     >
       {node.children ? (
@@ -48,14 +53,14 @@ const TreeNode: React.FC<TreeNodeProps> = ({
             {new Array(level).fill(null).map((_, index) => (
               <div
                 key={index}
-                className="h-9 bg-slate-50 w-[24px] relative shrink-0 group-hover:bg-slate-100 group-hover:cursor-pointer"
+                className="h-9 bg-slate-50 dark:bg-slate-950 w-[24px] relative shrink-0 group-hover:bg-slate-100 dark:group-hover:bg-slate-900 group-hover:cursor-pointer"
                 onClick={() =>
                   node.children
                     ? setCloseChildren(!closeChildren)
                     : setSelectedRequestId(node.trace?.request_id ?? "")
                 }
               >
-                <div className="absolute top-0 right-[0px] w-[1px] h-9 bg-slate-200 z-[2]" />
+                <div className="absolute top-0 right-[0px] w-[1px] h-9 bg-slate-200 dark:bg-slate-700 z-[2]" />
               </div>
             ))}
             <PathNode
@@ -79,6 +84,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({
                 }
                 level={level + 1}
                 setShowDrawer={setShowDrawer}
+                isRequestSingleChild={node?.children?.length === 1}
               />
             ))}
         </Col>
@@ -88,8 +94,8 @@ const TreeNode: React.FC<TreeNodeProps> = ({
             className={clsx(
               "h-[42px] w-[24px]  shrink-0 group-hover:cursor-pointer sticky top-1/2 left-0 z-[2]",
               selectedRequestId === node.trace?.request_id
-                ? "bg-sky-100"
-                : "bg-white group-hover:bg-sky-50"
+                ? "bg-sky-100 dark:bg-slate-900"
+                : "bg-white dark:bg-slate-950 group-hover:bg-sky-50 dark:group-hover:bg-slate-800"
             )}
             onClick={() =>
               node.children
@@ -97,17 +103,14 @@ const TreeNode: React.FC<TreeNodeProps> = ({
                 : setSelectedRequestId(node.trace?.request_id ?? "")
             }
           >
-            <div className="absolute top-0 right-[0px] w-[1px] h-[42px] bg-slate-200 z-[2]" />
+            <div className="absolute top-0 right-[0px] w-[1px] h-[42px] bg-slate-200 dark:bg-slate-700 z-[2]" />
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger>
                   <Button
                     variant="ghost"
                     className={clsx(
-                      "p-1 m-0 flex items-center hidden group-hover:block z-[20]",
-                      selectedRequestId === node.trace?.request_id
-                        ? "bg-sky-100 hover:bg-sky-100"
-                        : "bg-sky-50 hover:bg-sky-50"
+                      "p-1 m-0 flex items-center hidden group-hover:block z-[20]"
                     )}
                     onClick={(e) => {
                       e.stopPropagation();
@@ -118,7 +121,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({
                     <SidebarCloseIcon className="w-4 h-4 text-slate-500" />
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent>
+                <TooltipContent side="right">
                   <p>View request</p>
                 </TooltipContent>
               </Tooltip>
@@ -131,8 +134,8 @@ const TreeNode: React.FC<TreeNodeProps> = ({
               className={clsx(
                 "h-[42px] w-[24px] relative shrink-0 group-hover:cursor-pointer",
                 selectedRequestId === node.trace?.request_id
-                  ? "bg-sky-100"
-                  : "bg-white group-hover:bg-sky-50"
+                  ? "bg-sky-100 dark:bg-sky-900"
+                  : "bg-white dark:bg-slate-950 group-hover:bg-sky-50 dark:group-hover:bg-slate-900"
               )}
               onClick={() =>
                 node.children
@@ -140,9 +143,10 @@ const TreeNode: React.FC<TreeNodeProps> = ({
                   : setSelectedRequestId(node.trace?.request_id ?? "")
               }
             >
-              <div className="absolute top-0 right-[0px] w-[1px] h-[42px] bg-slate-200 z-[2]" />
+              <div className="absolute top-0 right-[0px] w-[1px] h-[42px] bg-slate-200 dark:bg-slate-700 z-[2]" />
             </div>
           ))}
+
           <RequestNode
             selectedRequestId={selectedRequestId}
             node={node}
@@ -151,6 +155,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({
             setSelectedRequestId={setSelectedRequestId}
             level={level}
             setShowDrawer={setShowDrawer}
+            isRequestSingleChild={isRequestSingleChild ?? false}
           />
         </Row>
       )}
@@ -174,7 +179,7 @@ export const Tree: React.FC<TreeProps> = ({
 }) => (
   <div
     className={clsx(
-      "font-sans bg-slate-50 border-t border-slate-200",
+      "font-sans bg-slate-50 dark:bg-black border-t border-slate-200 dark:border-slate-700",
       className
     )}
   >

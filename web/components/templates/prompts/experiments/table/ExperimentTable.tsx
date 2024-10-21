@@ -1,51 +1,65 @@
-import React, { useRef, useEffect, useState } from "react";
 import { useOrg } from "@/components/layout/organizationContext";
 import { Button } from "@/components/ui/button";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { useJawnClient } from "@/lib/clients/jawnHook";
-import { useQuery } from "@tanstack/react-query";
 import {
   ColDef,
-  GridReadyEvent,
-  ColumnResizedEvent,
   ColumnMovedEvent,
+  ColumnResizedEvent,
   GridApi,
+  GridReadyEvent,
 } from "ag-grid-community";
 import "ag-grid-community/styles/ag-grid.css";
 import { AgGridReact } from "ag-grid-react";
-import { useCallback, useMemo } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import AddColumnHeader from "./AddColumnHeader";
 import {
   HypothesisCellRenderer,
   OriginalMessagesCellRenderer,
   OriginalOutputCellRenderer,
 } from "./HypothesisCellRenderer";
-import {
-  PlusIcon,
-  ChevronDownIcon,
-  ArrowDownTrayIcon,
-  FunnelIcon,
-} from "@heroicons/react/24/outline";
+import { BeakerIcon, PlusIcon } from "@heroicons/react/24/outline";
 import ExperimentInputSelector from "../experimentInputSelector";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 
-import SettingsPanel from "./components/settingsPannel";
+import { useLocalStorage } from "@/services/hooks/localStorage";
+import LoadingAnimation from "../../../../shared/loadingAnimation";
+import ExportButton from "../../../../shared/themed/table/exportButton";
+import { ColumnsDropdown } from "./components/customButtonts";
 import {
-  InputCellRenderer,
   CustomHeaderComponent,
-  RowNumberHeaderComponent,
-  RowNumberCellRenderer,
+  InputCellRenderer,
   InputsHeaderComponent,
+  RowNumberCellRenderer,
+  RowNumberHeaderComponent,
 } from "./components/tableElementsRenderer";
+import ScoresTable from "./scores/ScoresTable";
 import {
-  ColumnsDropdown,
-  ProviderKeyDropdown,
-} from "./components/customButtonts";
-import ScoresTable from "./ScoresTable";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import PromptPlayground, {
+  PromptObject,
+  Input as PromptInput,
+} from "../../id/promptPlayground";
+
+import { Input } from "../../../../ui/input";
+import useNotification from "../../../../shared/notification/useNotification";
+import { useRouter } from "next/router";
+import { ScrollArea } from "../../../../ui/scroll-area";
+import clsx from "clsx";
+import ScoresEvaluatorsConfig from "./scores/ScoresEvaluatorsConfig";
 
 interface ExperimentTableProps {
-  promptSubversionId: string;
-  experimentId: string;
+  promptSubversionId?: string;
+  experimentId?: string;
 }
 
 export function ExperimentTable({
@@ -55,12 +69,18 @@ export function ExperimentTable({
   const org = useOrg();
   const orgId = org?.currentOrg?.id;
   const jawn = useJawnClient();
+  const [isDataLoading, setIsDataLoading] = useState(true);
 
   const [wrapText, setWrapText] = useState(false);
   const [columnView, setColumnView] = useState<"all" | "inputs" | "outputs">(
     "all"
   );
-  const [showScoresTable, setShowScoresTable] = useState(false);
+  const [showScoresTable, setShowScoresTable] = useLocalStorage(
+    "showScoresTable",
+    true
+  );
+
+  const [isHypothesisRunning, setIsHypothesisRunning] = useState(false);
 
   // State to control ExperimentInputSelector
   const [showExperimentInputSelector, setShowExperimentInputSelector] =
@@ -70,25 +90,27 @@ export function ExperimentTable({
   const gridRef = useRef<GridApi | null>(null);
 
   const onGridReady = useCallback((params: GridReadyEvent) => {
-    params.api.sizeColumnsToFit();
     gridRef.current = params.api;
   }, []);
 
   const fetchExperiments = useCallback(async () => {
-    if (!orgId || !experimentId) return null;
+    if (!orgId) return null;
     const jawnClient = getJawnClient(orgId);
     const res = await jawnClient.POST("/v1/experiment/query", {
       body: {
-        filter: {
-          experiment: {
-            id: {
-              equals: experimentId,
-            },
-          },
-        },
+        filter: experimentId
+          ? {
+              experiment: {
+                id: {
+                  equals: experimentId,
+                },
+              },
+            }
+          : {},
         include: {
           responseBodies: true,
           promptVersion: true,
+          score: true,
         },
       },
     });
@@ -98,7 +120,11 @@ export function ExperimentTable({
 
   const { data: experimentData, refetch: refetchExperiments } = useQuery(
     ["experiments", orgId, experimentId],
-    fetchExperiments
+    fetchExperiments,
+    {
+      enabled: !!orgId && !!experimentId,
+      refetchInterval: 10000,
+    }
   );
 
   const providerKey = useMemo(
@@ -108,7 +134,7 @@ export function ExperimentTable({
 
   const fetchInputRecords = useCallback(async () => {
     const datasetId = experimentData?.dataset.id;
-    if (!orgId || !datasetId) return [];
+    if (!orgId || !datasetId || !promptSubversionId) return [];
     const jawnClient = getJawnClient(orgId);
     const res = await jawnClient.POST(
       "/v1/experiment/dataset/{datasetId}/inputs/query",
@@ -121,7 +147,7 @@ export function ExperimentTable({
       }
     );
     return res.data?.data;
-  }, [orgId, experimentData?.dataset?.id]);
+  }, [orgId, experimentData?.dataset?.id, promptSubversionId]);
 
   // Define fetchPromptVersionTemplate
   const fetchPromptVersionTemplate = useCallback(async () => {
@@ -129,7 +155,7 @@ export function ExperimentTable({
     const res = await jawnClient.GET("/v1/prompt/version/{promptVersionId}", {
       params: {
         path: {
-          promptVersionId: promptSubversionId,
+          promptVersionId: promptSubversionId ?? "",
         },
       },
     });
@@ -160,13 +186,12 @@ export function ExperimentTable({
 
   const fetchRandomInputRecords = useCallback(async () => {
     const jawnClient = getJawnClient(orgId);
-    console.log("promptVersionIdRandom", promptSubversionId);
     const res = await jawnClient.POST(
       "/v1/prompt/version/{promptVersionId}/inputs/query",
       {
         params: {
           path: {
-            promptVersionId: promptSubversionId,
+            promptVersionId: promptSubversionId ?? "",
           },
         },
         body: {
@@ -183,7 +208,7 @@ export function ExperimentTable({
     ["inputRecords", orgId, experimentData?.dataset?.id],
     fetchInputRecords,
     {
-      enabled: !!experimentData?.dataset?.id,
+      enabled: !!experimentData?.dataset?.id && !!promptSubversionId,
     }
   );
 
@@ -220,18 +245,18 @@ export function ExperimentTable({
   // Function to update rowData based on fetched data
   const updateRowData = useCallback(
     (experimentData: any, inputRecordsData: any[]) => {
-      const newInputKeys = new Set<string>();
-      if (inputRecordsData && inputRecordsData.length > 0) {
-        inputRecordsData.forEach((row) => {
-          Object.keys(row.inputs).forEach((key) => newInputKeys.add(key));
-        });
-      }
-
-      if (newInputKeys.size === 0) {
-        newInputKeys.add("Input 1");
-      }
-
-      setInputKeys(newInputKeys);
+      setIsDataLoading(true);
+      // Remove code that updates inputKeys
+      // const newInputKeys = new Set<string>();
+      // if (inputRecordsData && inputRecordsData.length > 0) {
+      //   inputRecordsData.forEach((row) => {
+      //     Object.keys(row.inputs).forEach((key) => newInputKeys.add(key));
+      //   });
+      // }
+      // if (newInputKeys.size === 0) {
+      //   newInputKeys.add("Input 1");
+      // }
+      // setInputKeys(newInputKeys);
 
       const newRowData = inputRecordsData.map((row) => {
         const hypothesisRowData: Record<string, string> = {};
@@ -282,16 +307,37 @@ export function ExperimentTable({
       });
 
       setRowData(newRowData);
+      setIsDataLoading(false);
     },
-    [experimentData, inputRecordsData]
+    [experimentData, inputRecordsData, rowData]
   );
 
-  // Add useEffect to update rowData when experimentData or inputRecordsData change
+  // Modify the useEffect that updates rowData
   useEffect(() => {
     if (experimentData && inputRecordsData) {
       updateRowData(experimentData, inputRecordsData);
+    } else if (!experimentId) {
+      // If there's no experimentId, set a default empty row
+      const defaultInputKey = "Input 1";
+      setInputKeys(new Set([defaultInputKey]));
+      setRowData([
+        {
+          id: `temp-${Date.now()}`,
+          dataset_row_id: null,
+          [defaultInputKey]: "",
+          isLoading: {},
+        },
+      ]);
+      setIsDataLoading(false); // Ensure we're not in a loading state
     }
-  }, [experimentData, inputRecordsData]);
+  }, [experimentData, inputRecordsData, experimentId]);
+
+  // Add a new useEffect to handle initial loading state
+  useEffect(() => {
+    if (!experimentId) {
+      setIsDataLoading(false);
+    }
+  }, [experimentId]);
 
   // Add an empty row if rowData is empty
   useEffect(() => {
@@ -341,12 +387,12 @@ export function ExperimentTable({
       hypothesisId,
       datasetRowIds,
     }: {
-      hypothesisId: string;
+      hypothesisId: string | "original";
       datasetRowIds: string[];
     }) => {
       await jawn.POST("/v1/experiment/run", {
         body: {
-          experimentId,
+          experimentId: experimentId ?? "",
           hypothesisId,
           datasetRowIds,
         },
@@ -389,6 +435,14 @@ export function ExperimentTable({
             return row;
           })
         );
+        const anyLoading = rowData.some((row) =>
+          Object.values(row.isLoading || {}).some((loading) => loading)
+        );
+
+        if (!anyLoading) {
+          // No hypotheses are running
+          setIsHypothesisRunning(false);
+        }
       },
       onError: (error) => {
         console.error("Error running hypothesis:", error);
@@ -403,10 +457,29 @@ export function ExperimentTable({
     [runHypothesisMutation]
   );
 
-  const refetchData = () => {
-    refetchExperiments();
-    refetchInputRecords();
+  const refetchData = async () => {
+    await refetchExperiments();
+    await refetchInputRecords();
   };
+
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout | null = null;
+
+    if (isHypothesisRunning) {
+      intervalId = setInterval(() => {
+        // Refetch data and refresh the grid
+        refetchExperiments();
+        // refetchInputRecords();
+        gridRef.current?.refreshCells();
+      }, 1000);
+    }
+
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [isHypothesisRunning, refetchExperiments, refetchInputRecords]);
 
   // Determine the hypotheses to run (excluding the first one)
   const hypothesesToRun = useMemo(() => {
@@ -525,7 +598,7 @@ export function ExperimentTable({
           },
           params: {
             path: {
-              promptVersionId: promptSubversionId,
+              promptVersionId: promptSubversionId ?? "",
               datasetId: experimentData?.dataset?.id ?? "",
             },
           },
@@ -553,6 +626,66 @@ export function ExperimentTable({
     setActivePopoverCell,
   ]);
 
+  const extractVariables = useCallback((promptTemplate: PromptObject) => {
+    const regex =
+      /(?:\{\{([^}]+)\}\})|(?:<helicone-prompt-input key="([^"]+)"[^>]*\/>)/g;
+    const variablesSet = new Set<string>();
+
+    promptTemplate?.messages?.forEach((message) => {
+      const content = Array.isArray(message.content)
+        ? message.content.map((c) => c.text).join("\n")
+        : message.content;
+
+      let match;
+      while ((match = regex.exec(content))) {
+        const key = match[1] || match[2];
+        if (key) {
+          variablesSet.add(key.trim());
+        }
+      }
+    });
+
+    return Array.from(variablesSet);
+  }, []);
+
+  useEffect(() => {
+    if (promptVersionTemplate) {
+      console.log("promptVersionTemplate", promptVersionTemplate);
+      const extractedVariables = extractVariables(
+        promptVersionTemplate.helicone_template as any
+      );
+      console.log("extractedVariables", extractedVariables);
+      console.log("helicone_template", promptVersionTemplate.helicone_template);
+      if (extractedVariables.length > 0) {
+        setInputKeys(new Set(extractedVariables));
+      } else {
+        setInputKeys(new Set(["Input 1"]));
+      }
+    }
+  }, [promptVersionTemplate, extractVariables]);
+
+  // Adjust useEffect to add an empty row if rowData is empty
+  useEffect(() => {
+    if (rowData.length === 0) {
+      const inputFields = Array.from(inputKeys).reduce((acc, key) => {
+        acc[key] = "";
+        return acc;
+      }, {} as Record<string, string>);
+
+      const newRow = {
+        id: `temp-${Date.now()}`,
+        dataset_row_id: null,
+        ...inputFields,
+        isLoading: {},
+      };
+
+      setRowData([newRow]);
+    }
+  }, [inputKeys, rowData.length]);
+  const headerClass = clsx(
+    "border-r border-[#E2E8F0] text-center items-center justify-center"
+  );
+
   const columnDefs = useMemo<ColDef[]>(() => {
     let columns: ColDef[] = [
       // Row number column (keep as is)
@@ -564,8 +697,7 @@ export function ExperimentTable({
         pinned: "left",
         cellClass:
           "border-r border-[#E2E8F0] text-center text-slate-700 justify-center flex-1 items-center",
-        headerClass:
-          "border-r border-[#E2E8F0] text-center items-center justify-center",
+        headerClass,
         cellStyle: {
           display: "flex",
           alignItems: "center",
@@ -584,8 +716,9 @@ export function ExperimentTable({
         cellRenderer: InputCellRenderer,
         cellRendererParams: {
           index: index,
+          wrapText,
         },
-        cellClass: "border-r border-[#E2E8F0] text-slate-700",
+        cellClass: "border-r border-[#E2E8F0] text-slate-700 pt-2.5",
         headerClass: "border-r border-[#E2E8F0]",
         headerComponent: InputsHeaderComponent,
         headerComponentParams: {
@@ -594,9 +727,6 @@ export function ExperimentTable({
           badgeText: "Input",
         },
         cellStyle: {
-          display: "flex",
-          alignItems: "center",
-          overflow: "hidden",
           justifyContent: "start",
           whiteSpace: wrapText ? "normal" : "nowrap",
         },
@@ -605,35 +735,42 @@ export function ExperimentTable({
       });
     });
 
-    // Add the "Messages" column
-    columns.push({
-      field: "messages",
-      headerName: "Messages",
-      width: 200,
-      headerComponent: CustomHeaderComponent,
-      headerComponentParams: {
-        displayName: "Messages",
-        badgeText: "Input",
-        badgeVariant: "secondary",
-        hypothesis: sortedHypotheses[0] || {},
-        promptVersionTemplate: promptVersionTemplate,
-      },
-      cellClass:
-        "border-r border-[#E2E8F0] text-slate-700 flex items-center justify-start pt-2.5",
-      headerClass: "border-r border-[#E2E8F0]",
-      cellRenderer: OriginalMessagesCellRenderer,
-      cellRendererParams: {
-        prompt: promptVersionTemplate,
-      },
-      cellStyle: {
-        verticalAlign: "middle",
-        textAlign: "left",
-        overflow: "hidden",
-        textOverflow: "ellipsis",
-        whiteSpace: wrapText ? "normal" : "nowrap",
-      },
-      autoHeight: wrapText,
-    });
+    if (
+      JSON.stringify(promptVersionTemplate?.helicone_template)?.includes(
+        "auto-inputs"
+      )
+    ) {
+      // Add the "Messages" column
+      columns.push({
+        field: "messages",
+        headerName: "Messages",
+        width: 200,
+        headerComponent: CustomHeaderComponent,
+        headerComponentParams: {
+          displayName: "Messages",
+          badgeText: "Input",
+          badgeVariant: "secondary",
+          hypothesis: sortedHypotheses[0] || {},
+          promptVersionTemplate: promptVersionTemplate,
+        },
+        cellClass:
+          "border-r border-[#E2E8F0] text-slate-700 flex items-center justify-start pt-2.5",
+        headerClass,
+        cellRenderer: OriginalMessagesCellRenderer,
+        cellRendererParams: {
+          prompt: promptVersionTemplate,
+          wrapText,
+        },
+        cellStyle: {
+          verticalAlign: "middle",
+          textAlign: "left",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: wrapText ? "normal" : "nowrap",
+        },
+        autoHeight: wrapText,
+      });
+    }
 
     // Add the "Original" column
     columns.push({
@@ -649,10 +786,12 @@ export function ExperimentTable({
         promptVersionTemplate: promptVersionTemplate,
       },
       cellClass: "border-r border-[#E2E8F0] text-slate-700 pt-2.5",
-      headerClass: "border-r border-[#E2E8F0]",
+      headerClass: headerClass,
       cellRenderer: OriginalOutputCellRenderer,
       cellRendererParams: {
         prompt: promptVersionTemplate,
+        handleRunHypothesis,
+        wrapText,
       },
       cellStyle: {
         verticalAlign: "middle",
@@ -678,22 +817,25 @@ export function ExperimentTable({
             hypothesisId: hypothesis.id,
             handleRunHypothesis,
             loadingStates,
+            wrapText,
           },
           headerComponent: CustomHeaderComponent,
           headerComponentParams: {
             displayName: `Experiment ${experimentNumber}`,
             badgeText: "Output",
             badgeVariant: "secondary",
-            onRunColumn: (colId: string) => {
+            onRunColumn: async (colId: string) => {
               const datasetRowIds = rowData.map((row) => row.dataset_row_id);
-              datasetRowIds.map((datasetRowId) =>
-                handleRunHypothesis(colId, [datasetRowId])
+              await Promise.all(
+                datasetRowIds.map((datasetRowId) =>
+                  handleRunHypothesis(colId, [datasetRowId])
+                )
               );
             },
             hypothesis: hypothesis,
           },
           cellClass: "border-r border-[#E2E8F0] text-slate-700 pt-2.5",
-          headerClass: "border-r border-[#E2E8F0] bg-white dark:bg-gray-800",
+          headerClass: "border-r border-[#E2E8F0]",
           cellStyle: {
             verticalAlign: "middle",
             textAlign: "left",
@@ -716,12 +858,14 @@ export function ExperimentTable({
       filter: false,
       resizable: false,
       headerComponent: AddColumnHeader,
+      headerClass: "border-r border-[#E2E8F0]",
       headerComponentParams: {
         promptVersionId: promptSubversionId,
         promptVersionTemplate: promptVersionTemplate,
         experimentId,
         selectedProviderKey: providerKey,
         refetchData,
+        wrapText,
       },
     });
 
@@ -761,13 +905,260 @@ export function ExperimentTable({
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [selectedProviderKey, setSelectedProviderKey] = useState(providerKey);
 
+  const getExperimentExportData = useCallback(() => {
+    if (!rowData || rowData.length === 0) {
+      return [];
+    }
+
+    const exportedData = rowData.map((row) => {
+      const exportedRow: Record<string, any> = {};
+
+      inputColumnFields.forEach((field) => {
+        exportedRow[field] = row[field] || "";
+      });
+
+      exportedRow["messages"] = row["messages"] || "";
+
+      exportedRow["original"] = row["original"] || "";
+
+      sortedHypotheses.forEach((hypothesis, index) => {
+        const experimentLabel = `Experiment ${index + 1}`;
+        exportedRow[experimentLabel] = row[hypothesis.id] || "";
+      });
+
+      return exportedRow;
+    });
+
+    return exportedData;
+  }, [rowData, inputColumnFields, sortedHypotheses]);
+
+  // Add this new component
+  const NewExperimentPopover = () => {
+    const notification = useNotification();
+    const [basePrompt, setBasePrompt] = useState<PromptObject>({
+      model: "gpt-4",
+      messages: [
+        {
+          role: "system",
+          content: [{ text: "You are a helpful assistant.", type: "text" }],
+        },
+      ],
+    });
+
+    const router = useRouter();
+
+    const [selectedInput, setSelectedInput] = useState<PromptInput>({
+      id: "",
+      inputs: {},
+      source_request: "",
+      prompt_version: "",
+      created_at: "",
+      auto_prompt_inputs: [],
+      response_body: "",
+    });
+
+    const [promptName, setPromptName] = useState<string>("");
+    const [promptVariables, setPromptVariables] = useState<
+      Array<{ original: string; heliconeTag: string; value: string }>
+    >([]);
+
+    const [inputs, setInputs] = useState<{ variable: string; value: string }[]>(
+      [{ variable: "sectionTitle", value: "The universe" }]
+    );
+
+    const handleInputChange = (
+      index: number,
+      field: "variable" | "value",
+      newValue: string
+    ) => {
+      const newInputs = [...inputs];
+      newInputs[index][field] = newValue;
+      setInputs(newInputs);
+    };
+
+    const addNewInput = () => {
+      setInputs([...inputs, { variable: "", value: "" }]);
+    };
+
+    const handlePromptChange = (newPrompt: string | PromptObject) => {
+      setBasePrompt(newPrompt as PromptObject);
+    };
+
+    const handleCreateExperiment = async () => {
+      if (!promptName || !basePrompt) {
+        notification.setNotification(
+          "Please enter a prompt name and content",
+          "error"
+        );
+        return;
+      }
+
+      if (!basePrompt.model) {
+        notification.setNotification("Please select a model", "error");
+        return;
+      }
+
+      const res = await jawn.POST("/v1/prompt/create", {
+        body: {
+          userDefinedId: promptName,
+          prompt: basePrompt,
+          metadata: {
+            createdFromUi: true,
+          },
+        },
+      });
+      if (res.error || !res.data) {
+        notification.setNotification("Failed to create prompt", "error");
+        return;
+      }
+
+      if (!res.data?.data?.id || !res.data?.data?.prompt_version_id) {
+        notification.setNotification("Failed to create prompt", "error");
+        return;
+      }
+
+      const dataset = await jawn.POST("/v1/helicone-dataset", {
+        body: {
+          datasetName: "Dataset for Experiment",
+          requestIds: [],
+        },
+      });
+      if (!dataset.data?.data?.datasetId) {
+        notification.setNotification("Failed to create dataset", "error");
+        return;
+      }
+
+      const experiment = await jawn.POST("/v1/experiment/new-empty", {
+        body: {
+          metadata: {
+            prompt_id: res.data?.data?.id!,
+            prompt_version: res.data?.data?.prompt_version_id!,
+            experiment_name: `${promptName}_V1.0` || "",
+          },
+          datasetId: dataset.data?.data?.datasetId,
+        },
+      });
+      if (!experiment.data?.data?.experimentId) {
+        notification.setNotification("Failed to create experiment", "error");
+        return;
+      }
+      const result = await jawn.POST(
+        "/v1/prompt/version/{promptVersionId}/subversion",
+        {
+          params: {
+            path: {
+              promptVersionId: res.data?.data?.prompt_version_id!,
+            },
+          },
+          body: {
+            newHeliconeTemplate: JSON.stringify(basePrompt),
+            isMajorVersion: false,
+            metadata: {
+              experimentAssigned: true,
+            },
+          },
+        }
+      );
+
+      //TODO: Add this back in ?
+
+      // if (promptVariables.length > 0) {
+      //   const inputs: Record<string, string> = promptVariables.reduce(
+      //     (acc: Record<string, string>, variable: any) => {
+      //       acc[variable.original] = variable.value as string;
+      //       return acc;
+      //     },
+      //     {}
+      //   );
+      //   await jawn.POST(
+      //     "/v1/experiment/dataset/{datasetId}/version/{promptVersionId}/row/new",
+      //     {
+      //       body: {
+      //         inputs: inputs,
+      //       },
+      //       params: {
+      //         path: {
+      //           promptVersionId: res.data?.data?.prompt_version_id!,
+      //           datasetId: dataset.data?.data?.datasetId!,
+      //         },
+      //       },
+      //     }
+      //   );
+      // }
+
+      if (result.error || !result.data) {
+        notification.setNotification("Failed to create subversion", "error");
+        return;
+      }
+
+      notification.setNotification("Prompt created successfully", "success");
+      setIsDataLoading(true);
+      await router.push(
+        `/prompts/${res.data?.data?.id}/subversion/${res.data?.data?.prompt_version_id}/experiment/${experiment.data?.data?.experimentId}`
+      );
+    };
+
+    return (
+      <PopoverContent
+        className="w-[600px] p-4 bg-white shadow-lg rounded-md"
+        side="bottom"
+        align="start"
+      >
+        <ScrollArea className="flex flex-col overflow-y-auto max-h-[700px] ">
+          <div className="space-y-4">
+            <div className="flex flex-row space-x-2 ">
+              <BeakerIcon className="h-6 w-6" />
+              <h3 className="text-md font-semibold">Original Prompt</h3>
+            </div>
+
+            <Input
+              placeholder="Prompt Name"
+              value={promptName}
+              onChange={(e) => setPromptName(e.target.value)}
+            />
+
+            <PromptPlayground
+              prompt={basePrompt}
+              editMode={true}
+              selectedInput={selectedInput}
+              defaultEditMode={true}
+              submitText={"Create Experiment"}
+              playgroundMode={"experiment"}
+              handleCreateExperiment={handleCreateExperiment}
+              isPromptCreatedFromUi={true}
+              onExtractPromptVariables={(variables) =>
+                setPromptVariables(
+                  variables.map((variable) => ({
+                    original: variable.original,
+                    heliconeTag: variable.heliconeTag,
+                    value: variable.value,
+                  }))
+                )
+              }
+              onPromptChange={handlePromptChange}
+            />
+          </div>
+        </ScrollArea>
+      </PopoverContent>
+    );
+  };
+
+  if (isDataLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen flex-col">
+        <LoadingAnimation />
+        <h1 className="text-4xl font-semibold">Getting your experiments</h1>
+      </div>
+    );
+  }
+
   return (
     <div className="relative w-full">
-      <div className="flex flex-col space-y-2 w-full">
-        <div className="flex flex-row space-x-2 justify-end w-full">
+      <div className="flex flex-col space-y-1 w-full">
+        <div className="flex flex-row space-x-2 justify-end w-full pr-4">
           <Button
             variant="outline"
-            className="py-0 px-2 border border-slate-200 h-8 flex items-center justify-center space-x-1 flex gap-2"
+            className="py-0 px-2 border border-slate-200 h-8 items-center justify-center space-x-1 flex gap-2"
             onClick={() => setShowScoresTable(!showScoresTable)}
           >
             <div>{"{ }"}</div> {showScoresTable ? "Hide" : "Show"} Scores
@@ -778,48 +1169,54 @@ export function ExperimentTable({
             columnView={columnView}
             setColumnView={setColumnView}
           />
-          <Button
-            variant="outline"
-            className="py-0 px-2 border border-slate-200 h-8 flex items-center justify-center space-x-1"
-          >
-            <FunnelIcon className="h-4 w-4 text-slate-700" />
-            <ChevronDownIcon className="h-4 w-4 text-slate-400" />
-          </Button>
-          <Button
-            variant="outline"
-            className="py-0 px-2 border border-slate-200 h-8 flex items-center justify-center space-x-1"
-          >
-            <ArrowDownTrayIcon className="h-4 w-4 text-slate-700" />
-          </Button>
-          <ProviderKeyDropdown
-            providerKey={selectedProviderKey}
-            setProviderKey={setSelectedProviderKey}
+          <ExportButton
+            className="py-0 px-2 border border-slate-200 h-8 flex items-center justify-center space-x-1 bg-white"
+            key="export-button"
+            rows={getExperimentExportData()}
           />
-          {/* <Button variant="outline" onClick={() => setSettingsOpen(true)}>
-            Settings
-          </Button> */}
+          {!experimentId && (
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="py-0 px-2 border border-slate-200 h-8 flex items-center justify-center space-x-1 gap-2"
+                >
+                  <PlusIcon className="h-4 w-4" />
+                  New Experiment
+                </Button>
+              </PopoverTrigger>
+              <NewExperimentPopover />
+            </Popover>
+          )}
         </div>
-        {showScoresTable && (
-          <ScoresTable
-            columnDefs={columnDefs}
-            wrapText={wrapText}
-            columnWidths={columnWidths}
-            columnOrder={columnOrder}
-          />
+
+        {showScoresTable && experimentId && (
+          <div className="w-full bg-white border-y border-r">
+            <div className="flex justify-between items-center bg-white p-2 border-b">
+              <ScoresEvaluatorsConfig experimentId={experimentId} />
+            </div>
+            <ScoresTable
+              columnDefs={columnDefs}
+              columnWidths={columnWidths}
+              columnOrder={columnOrder}
+              experimentId={experimentId}
+            />
+          </div>
         )}
+
         <div
-          className="ag-theme-alpine w-full rounded-md overflow-hidden"
+          className="ag-theme-alpine w-full overflow-hidden "
           ref={experimentTableRef}
           style={
             {
               "--ag-header-height": "40px",
-              "--ag-header-foreground-color": "#000",
-              "--ag-header-background-color": "#ffffff",
-              "--ag-header-cell-hover-background-color": "#e5e7eb",
-              "--ag-header-cell-moving-background-color": "#d1d5db",
+              "--ag-header-background-color": "#f3f4f6", // Light gray background
+              "--ag-header-foreground-color": "#1f2937", // Dark gray text
+              "--ag-header-cell-hover-background-color": "#e5e7eb", // Slightly darker gray on hover
+              "--ag-header-column-separator-color": "#d1d5db", // Medium gray for separators
               "--ag-cell-horizontal-border": "solid #E2E8F0",
-              "--ag-border-radius": "8px",
               "--ag-border-color": "#E2E8F0",
+              "--ag-borders": "none",
             } as React.CSSProperties
           }
         >
@@ -868,12 +1265,12 @@ export function ExperimentTable({
         </Button>
       </div>
 
-      <SettingsPanel
+      {/* <SettingsPanel
         defaultProviderKey={providerKey}
         setSelectedProviderKey={async (key) => {
           await jawn.POST("/v1/experiment/update-meta", {
             body: {
-              experimentId,
+              experimentId: experimentId ?? "",
               meta: {
                 ...(experimentData?.meta ?? {}),
                 provider_key: key ?? "",
@@ -884,7 +1281,7 @@ export function ExperimentTable({
         }}
         open={settingsOpen}
         setOpen={setSettingsOpen}
-      />
+      /> */}
 
       {/* Include the ExperimentInputSelector */}
       <ExperimentInputSelector
@@ -895,11 +1292,11 @@ export function ExperimentTable({
           datasetId: experimentData?.dataset?.id,
         }}
         requestIds={randomInputRecords}
-        onSuccess={(success) => {
+        onSuccess={async (success) => {
           if (success) {
             // Handle success: Re-fetch experiments and input records
-            refetchExperiments();
-            refetchInputRecords();
+            await refetchExperiments();
+            await refetchInputRecords();
           }
         }}
       />

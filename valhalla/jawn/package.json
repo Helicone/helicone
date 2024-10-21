@@ -2,7 +2,7 @@
   "name": "helicone-api",
   "scripts": {
     "start": "ts-node src/index.ts",
-    "build": "tsc",
+    "build": "tsc && cp src/utils/trace.proto dist/valhalla/jawn/src/utils/trace.proto",
     "serve": "node dist/valhalla/jawn/src/index.js",
     "dev": "concurrently \"nodemon\" \"nodemon -x python genTypes.py\"",
     "test:jawn": "npx jest --config packages/jawn/jest.config.js --detectOpenHandles"
@@ -37,11 +37,13 @@
     "kafkajs": "^2.2.4",
     "lodash": "^4.17.21",
     "lodash.merge": "^4.6.2",
+    "moment": "^2.30.1",
     "morgan": "^1.10.0",
     "openai": "^4.24.7",
     "pg": "^8.11.3",
     "pg-promise": "^11.6.0",
     "posthog-node": "^4.0.1",
+    "protobufjs": "^7.4.0",
     "rate-limit-redis": "^4.2.0",
     "stripe": "^16.12.0",
     "swagger-ui-express": "^5.0.0",

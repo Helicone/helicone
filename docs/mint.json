@@ -5,17 +5,28 @@
     "light": "/logo/light.png",
     "dark": "/logo/dark.svg"
   },
-
+  "metadata": {
+    "og:site_name": "Helicone OSS LLM Observability",
+    "og:image": "/favicon.svg",
+    "twitter:site": "@helicone_ai",
+    "twitter:image": "/favicon.svg"
+  },
+  "favicon": "/favicon.svg",
   "anchors": [
     {
-      "name": "API References",
+      "name": "API Reference",
       "icon": "code",
       "url": "rest"
     },
     {
-      "name": "Use Cases",
-      "icon": "list-ul",
-      "url": "use-cases"
+      "name": "Guides",
+      "icon": "file-lines",
+      "url": "guides"
+    },
+    {
+      "name": "FAQ",
+      "icon": "lightbulb",
+      "url": "faq"
     }
   ],
   "analytics": {
@@ -23,13 +34,6 @@
       "publicApiKey": "pk_28dd6b0bb95629a42e92bd526a1234a9fc79"
     }
   },
-  "metadata": {
-    "og:site_name": "Helicone OSS LLM Observability",
-    "og:image": "/favicon.png",
-    "twitter:site": "@helicone_ai",
-    "twitter:image": "/favicon.png"
-  },
-  "favicon": "/favicon.png",
   "colors": {
     "primary": "#0CA5E9",
     "light": "#0CA5E9",
@@ -39,22 +43,34 @@
     "default": "light"
   },
   "topbarCtaButton": {
-    "name": "Console",
+    "name": "Dashboard",
     "url": "https://us.helicone.ai/#:~:text=Discord-,Sign,-In"
   },
-
   "feedback": {
+    "thumbsRating": true,
     "suggestEdit": true,
     "raiseIssue": true
   },
   "openapi": ["/swagger.json"],
   "navigation": [
     {
-      "group": "Welcome",
+      "group": "Getting Started",
       "pages": [
         "getting-started/quick-start",
         "helicone-headers/header-directory",
-        "helicone-headers/helicone-auth"
+        "helicone-headers/helicone-auth",
+        {
+          "group": "Self Host",
+          "pages": [
+            "getting-started/self-host/overview",
+            "getting-started/self-host/cloud",
+            "getting-started/self-host/docker",
+            "getting-started/self-host/kubernetes",
+            "getting-started/self-host/manual"
+          ],
+          "icon": "server",
+          "iconType": "solid"
+        }
       ]
     },
     {
@@ -230,62 +246,59 @@
       ]
     },
     {
-      "group": "Resources",
+      "group": "References",
       "pages": [
-        "getting-started/proxy-vs-async",
-        "faq/how-we-calculate-cost",
-        "faq/latency-affect",
-        "faq/availability",
-        "helicone-headers/predefining-request-id",
-        "faq/secret-vs-public-key",
+        "references/api",
+        "references/proxy-vs-async",
+        "references/availability",
+        "references/latency-affect",
+        "references/data-autonomy",
+        "references/open-source",
+        "references/how-we-calculate-cost"
+      ]
+    },
+    {
+      "group": "Guides",
+      "pages": [
+        "guides/overview",
         {
-          "group": "Deployment",
+          "group": "Cookbooks",
           "pages": [
-            "getting-started/self-deploy-cloud",
-            "getting-started/self-deploy-docker",
-            "getting-started/self-deploy"
+            "guides/cookbooks/experiments",
+            "guides/cookbooks/getting-user-requests",
+            "guides/cookbooks/etl",
+            "guides/cookbooks/replay-session",
+            "guides/cookbooks/predefining-request-id",
+            "guides/cookbooks/environment-tracking",
+            "guides/cookbooks/segmentation",
+            "guides/cookbooks/github-actions",
+            "guides/cookbooks/debugging",
+            "guides/cookbooks/labeling-request-data"
           ]
         }
       ]
     },
     {
-      "group": "Observability",
-      "pages": ["use-cases/getting-user-requests", "use-cases/segmentation"]
-    },
-    {
-      "group": "Guides",
+      "group": "Applications",
       "pages": [
+        "guides/applications/overview",
         {
-          "group": "Prompt Engineering",
+          "group": "Use Cases",
           "pages": [
-            "use-cases/prompt-engineering/overview",
-            "use-cases/prompt-engineering/be-specific-and-clear",
-            "use-cases/prompt-engineering/use-structured-formats",
-            "use-cases/prompt-engineering/leverage-role-playing",
-            "use-cases/prompt-engineering/implement-few-shot-learning",
-            "use-cases/prompt-engineering/use-constrained-outputs",
-            "use-cases/prompt-engineering/use-chain-of-thought-prompting"
-          ],
-          "icon": "square-code",
-          "iconType": "solid"
-        },
-        "use-cases/experiments",
-        "use-cases/enable-stream-usage",
-        "use-cases/resell-a-model",
-        "use-cases/bill-by-usage",
-        "use-cases/replay-session"
+            "guides/applications/resell-a-model",
+            "guides/applications/bill-by-usage"
+          ]
+        }
       ]
     },
     {
-      "group": "CI/CD",
-      "pages": ["use-cases/github-actions"]
-    },
-    {
-      "group": "Developer",
+      "group": "FAQ",
       "pages": [
-        "use-cases/debugging",
-        "use-cases/etl",
-        "use-cases/data-autonomy"
+        "faq/overview",
+        {
+          "group": "Categories",
+          "pages": ["faq/tag/platform", "faq/tag/security", "faq/tag/concepts"]
+        }
       ]
     },
     {
@@ -349,5 +362,103 @@
     "linkedin": "https://www.linkedin.com/company/helicone/about/",
     "github": "https://github.com/Helicone/helicone",
     "discord": "https://discord.com/invite/zsSTcH2qhG"
-  }
+  },
+  "redirects": [
+    {
+      "source": "/getting-started/proxy-vs-async",
+      "destination": "/references/proxy-vs-async"
+    },
+    {
+      "source": "/faq/availability",
+      "destination": "/references/availability"
+    },
+    {
+      "source": "/faq/how-encryption-works",
+      "destination": "/references/how-encryption-works"
+    },
+    {
+      "source": "/faq/how-we-calculate-cost",
+      "destination": "/references/how-we-calculate-cost"
+    },
+    {
+      "source": "/faq/latency-affect",
+      "destination": "/references/latency-affect"
+    },
+    {
+      "source": "/use-cases/data-autonomy",
+      "destination": "/references/data-autonomy"
+    },
+
+    {
+      "source": "/use-cases/bill-by-usage",
+      "destination": "/guides/applications/bill-by-usage"
+    },
+    {
+      "source": "/use-cases/resell-a-model",
+      "destination": "/guides/applications/resell-a-model"
+    },
+
+    {
+      "source": "/use-cases/debugging",
+      "destination": "/guides/cookbooks/debugging"
+    },
+    {
+      "source": "/use-cases/environment-tracking",
+      "destination": "/guides/cookbooks/environment-tracking"
+    },
+    {
+      "source": "/use-cases/etl",
+      "destination": "/guides/cookbooks/etl"
+    },
+    {
+      "source": "/use-cases/experiments",
+      "destination": "/guides/cookbooks/experiments"
+    },
+    {
+      "source": "/use-cases/getting-user-requests",
+      "destination": "/guides/cookbooks/getting-user-requests"
+    },
+    {
+      "source": "/use-cases/github-actions",
+      "destination": "/guides/cookbooks/github-actions"
+    },
+    {
+      "source": "/use-cases/labeling-request-data",
+      "destination": "/guides/cookbooks/labeling-request-data"
+    },
+    {
+      "source": "/use-cases/predefining-request-id",
+      "destination": "/guides/cookbooks/predefining-request-id"
+    },
+    {
+      "source": "/use-cases/replay-session",
+      "destination": "/guides/cookbooks/replay-session"
+    },
+    {
+      "source": "/use-cases/segmentation",
+      "destination": "/guides/cookbooks/segmentation"
+    },
+
+    {
+      "source": "/use-cases/enable-stream-usage",
+      "destination": "/faq/enable-stream-usage"
+    },
+    {
+      "source": "/use-cases/secret-vs-public-key",
+      "destination": "/faq/secret-vs-public-key"
+    },
+
+    {
+      "source": "/getting-started/self-deploy-cloud",
+      "destination": "/getting-started/self-host/cloud"
+    },
+    {
+      "source": "/getting-started/self-deploy-docker",
+      "destination": "/getting-started/self-host/docker"
+    },
+    {
+      "source": "/getting-started/self-deploy",
+      "destination": "/getting-started/self-host/manual"
+    }
+  ]
 }

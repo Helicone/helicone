@@ -1,0 +1,29 @@
+import Link from "next/link";
+
+export const QuestionsSection2 = ({ questions }) => (
+  <div>
+    <hr />
+    <h3>FAQ</h3>
+    <AccordionGroup>
+      {questions.map((question, index) => (
+        <Accordion key={index} title={question.title}>
+          {typeof question.content === "string" ? (
+            <div dangerouslySetInnerHTML={{ __html: question.content }} />
+          ) : (
+            question.content
+          )}
+        </Accordion>
+      ))}
+    </AccordionGroup>
+    <Tip>
+      Additional questions or feedback? Reach out to{" "}
+      <a href="mailto:help@helicone.ai">help@helicone.ai</a> or{" "}
+      <a href="https://cal.com/team/helicone/helicone-discovery">
+        schedule a call
+      </a>{" "}
+      with us.
+    </Tip>
+  </div>
+);
+
+;

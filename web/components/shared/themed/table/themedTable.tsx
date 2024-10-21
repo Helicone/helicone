@@ -239,7 +239,7 @@ export default function ThemedTable<T extends { id?: string }>(
       <ResizablePanelGroup direction="horizontal">
         <ResizablePanel>
           {" "}
-          <div className="h-full overflow-x-auto bg-white dark:bg-black">
+          <div className="h-full overflow-x-auto bg-slate-100 dark:bg-slate-800">
             {skeletonLoading ? (
               <LoadingAnimation title="Loading Data..." />
             ) : rows.length === 0 ? (
@@ -271,7 +271,7 @@ export default function ThemedTable<T extends { id?: string }>(
                 properties={makeRow.properties}
               />
             ) : (
-              <div className="bg-white dark:bg-black rounded-sm h-full">
+              <div className="bg-slate-50 dark:bg-black rounded-sm h-full">
                 <div
                   className=""
                   style={{
@@ -287,7 +287,7 @@ export default function ThemedTable<T extends { id?: string }>(
                       },
                     }}
                   >
-                    <thead className="text-[12px]">
+                    <thead className="text-[12px] z-[2]">
                       {table.getHeaderGroups().map((headerGroup) => (
                         <tr
                           key={headerGroup.id}
@@ -305,6 +305,7 @@ export default function ThemedTable<T extends { id?: string }>(
                                   selectedIds?.length > 0 &&
                                   selectedIds?.length < rows.length
                                 }
+                                className="text-slate-700 dark:text-slate-400"
                               />
                               <div className="absolute bottom-0 left-0 right-0 h-px bg-slate-300 dark:bg-slate-700" />
                             </th>
@@ -312,7 +313,11 @@ export default function ThemedTable<T extends { id?: string }>(
                           {headerGroup.headers.map((header, index) => (
                             <th
                               key={`header-${index}`}
-                              className={clsx("relative")}
+                              className={clsx(
+                                "relative",
+                                index === headerGroup.headers.length - 1 &&
+                                  "border-r border-slate-300 dark:border-slate-700"
+                              )}
                             >
                               <DraggableColumnHeader
                                 header={header}
@@ -336,8 +341,8 @@ export default function ThemedTable<T extends { id?: string }>(
                           className={clsx(
                             " hover:cursor-pointer",
                             checkedIds?.includes(row.original?.id ?? "")
-                              ? "bg-sky-100 border-l border-sky-500 pl-2 dark:bg-sky-900 dark:border-sky-900"
-                              : "hover:bg-sky-50 dark:hover:bg-sky-950"
+                              ? "bg-sky-100 border-l border-sky-500 pl-2 dark:bg-slate-800/50 dark:border-sky-900"
+                              : "hover:bg-sky-50 dark:hover:bg-slate-700/50"
                           )}
                           onClick={
                             onRowSelect &&
@@ -351,6 +356,7 @@ export default function ThemedTable<T extends { id?: string }>(
                                   row.original?.id ?? ""
                                 )}
                                 onChange={() => {}} // Handle individual row selection
+                                className="text-slate-700 dark:text-slate-400"
                               />
                             </td>
                           )}
@@ -361,15 +367,13 @@ export default function ThemedTable<T extends { id?: string }>(
                                 "py-3 border-t border-slate-300 dark:border-slate-700 px-2 text-slate-700 dark:text-slate-300",
                                 i === 0 && "pl-10", // Add left padding to the first column
                                 i === row.getVisibleCells().length - 1 &&
-                                  "pr-10"
+                                  "pr-10 border-r border-slate-300 dark:border-slate-700"
                               )}
-                              {...{
-                                style: {
-                                  maxWidth: cell.column.getSize(),
-                                  overflow: "hidden",
-                                  textOverflow: "ellipsis",
-                                  whiteSpace: "nowrap",
-                                },
+                              style={{
+                                maxWidth: cell.column.getSize(),
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
                               }}
                             >
                               {dataLoading &&

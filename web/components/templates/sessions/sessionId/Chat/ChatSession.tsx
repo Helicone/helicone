@@ -35,7 +35,7 @@ const ChatSession: React.FC<ChatSessionProps> = ({ requests }) => {
         return (
           <Row
             key={request.request_id}
-            className="request-item rounded-lg mb-4 shadow-sm border border-gray-300 bg-gray-50"
+            className="request-item mb-4 shadow-sm border-y border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950"
           >
             <div className="flex-1">
               {normalizeRequest.render({
@@ -44,7 +44,7 @@ const ChatSession: React.FC<ChatSessionProps> = ({ requests }) => {
                 className: "",
               })}
             </div>
-            <div className="lg:min-w-[350px] p-5 rounded-lg bg-gray-100">
+            <div className="lg:min-w-[350px] p-5 rounded-lg bg-slate-100 dark:bg-black">
               <Col className="justify-between h-full">
                 <Col className="gap-y-2">
                   <Row className="justify-between mb-2 w-full">
@@ -68,31 +68,31 @@ const ChatSession: React.FC<ChatSessionProps> = ({ requests }) => {
                   </Row>
 
                   <Row className="justify-between flex-wrap">
-                    <div className="text-sm text-gray-500 font-medium w-full sm:w-auto">
+                    <div className="text-sm text-slate-500 dark:text-slate-200 font-medium w-full sm:w-auto">
                       Created at
                     </div>
-                    <i className="text-sm font-light text-gray-500 w-full sm:w-auto">
+                    <i className="text-sm font-light text-slate-500 dark:text-slate-200 w-full sm:w-auto">
                       {new Date(request.request_created_at).toLocaleString()}
                     </i>
                   </Row>
                   <Row className="justify-between flex-wrap">
-                    <div className="text-sm text-gray-500 font-medium">
+                    <div className="text-sm text-slate-500 dark:text-slate-200 font-medium">
                       Cost
                     </div>
-                    <div className="text-sm font-light text-gray-500 w-full sm:w-auto">
+                    <div className="text-sm font-light text-slate-500 dark:text-slate-200 w-full sm:w-auto">
                       $ {normalizeRequest.cost}
                     </div>
                   </Row>
                   <Row className="justify-between flex-wrap">
-                    <div className="text-sm text-gray-500 font-medium">
+                    <div className="text-sm text-slate-500 dark:text-slate-200 font-medium">
                       Latency
                     </div>
-                    <div className="text-sm font-light text-gray-500 w-full sm:w-auto">
+                    <div className="text-sm font-light text-slate-500 dark:text-slate-200 w-full sm:w-auto">
                       {normalizeRequest.latency} ms
                     </div>
                   </Row>
                   <Col className="justify-between flex-wrap">
-                    <div className="text-sm font-medium text-gray-500 w-full sm:w-auto">
+                    <div className="text-sm font-medium text-slate-500 dark:text-slate-200 w-full sm:w-auto">
                       Custom Properties
                     </div>
                     {normalizeRequest.customProperties &&
@@ -116,7 +116,7 @@ const ChatSession: React.FC<ChatSessionProps> = ({ requests }) => {
                 </Col>
                 <Row className="justify-end mt-4">
                   <button
-                    className="text-sm flex items-center text-blue-500 hover:text-blue-700"
+                    className="text-sm flex items-center text-blue-500 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
                     onClick={() => {
                       setRequestDrawerRequest(normalizeRequest);
                       setOpen(true);

@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useOrg } from "../../components/layout/organizationContext";
 import { getJawnClient } from "../../lib/clients/jawn";
+import { UIFilterRowTree } from "../lib/filters/uiFilterRowTree";
 
 const useSessions = (
   timeFilter: {
@@ -8,7 +9,8 @@ const useSessions = (
     end: Date;
   },
   sessionIdSearch: string,
-  sessionName: string
+  sessionName: string,
+  advancedFilters: UIFilterRowTree
 ) => {
   const org = useOrg();
   const { data, isLoading, refetch, isRefetching } = useQuery({
@@ -18,6 +20,7 @@ const useSessions = (
       timeFilter,
       sessionIdSearch,
       sessionName,
+      advancedFilters,
     ],
     queryFn: async (query) => {
       const orgId = query.queryKey[1] as string;
@@ -40,6 +43,7 @@ const useSessions = (
           },
           sessionName,
           timezoneDifference: 0,
+          filter: advancedFilters as any,
         },
       });
     },
@@ -142,4 +146,23 @@ const useSessionMetrics = (
   };
 };
 
-export { useSessions, useSessionNames, useSessionMetrics };
+const updateSessionFeedback = async (sessionId: string, rating: boolean) => {
+  const jawn = getJawnClient();
+  return (
+    await jawn.POST("/v1/session/{sessionId}/feedback", {
+      params: {
+        path: { sessionId },
+      },
+      body: {
+        rating,
+      },
+    })
+  ).response;
+};
+
+export {
+  useSessions,
+  useSessionNames,
+  useSessionMetrics,
+  updateSessionFeedback,
+};

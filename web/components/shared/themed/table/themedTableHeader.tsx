@@ -22,8 +22,20 @@ import FiltersButton from "./filtersButton";
 import { DragColumnItem } from "./columns/DragList";
 import { UIFilterRowTree } from "../../../../services/lib/filters/uiFilterRowTree";
 import { Button } from "@/components/ui/button";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { PinIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import clsx from "clsx";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface ThemedTableHeaderProps<T> {
   rows?: T[];
@@ -93,6 +105,11 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
+  // Add state variables to manage the popover's open state and pin status
+  const [isFiltersPopoverOpen, setIsFiltersPopoverOpen] = useState(false);
+  const [isFiltersPinned, setIsFiltersPinned] = useState(false);
+  const popoverContentRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     const displayFilters = window.sessionStorage.getItem("showFilters") || null;
     setShowFilters(displayFilters ? JSON.parse(displayFilters) : false);
@@ -119,143 +136,267 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
     }
   };
 
+  const handlePopoverInteraction = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
+
   return (
-    <div className="flex flex-col">
-      <div className="flex flex-col gap-3 lg:flex-row justify-between ">
-        <div className="flex flex-row gap-3 items-center">
-          {timeFilter !== undefined ? (
-            <ThemedTimeFilter
-              currentTimeFilter={timeFilter.currentTimeFilter}
-              timeFilterOptions={[]}
-              onSelect={function (key: string, value: string): void {
-                timeFilter.onTimeSelectHandler(key as TimeInterval, value);
-              }}
-              isFetching={false}
-              defaultValue={getDefaultValue()}
-              custom={true}
-            />
-          ) : (
-            <div />
-          )}
-          <div className="flex flex-row">
-            {advancedFilters && (
+    <TooltipProvider>
+      <div className="flex flex-col">
+        <div className="flex flex-col gap-3 lg:flex-row justify-between ">
+          <div className="flex flex-row gap-3 items-center">
+            {timeFilter !== undefined ? (
+              <ThemedTimeFilter
+                currentTimeFilter={timeFilter.currentTimeFilter}
+                timeFilterOptions={[]}
+                onSelect={function (key: string, value: string): void {
+                  timeFilter.onTimeSelectHandler(key as TimeInterval, value);
+                }}
+                isFetching={false}
+                defaultValue={getDefaultValue()}
+                custom={true}
+              />
+            ) : (
+              <div />
+            )}
+            <div className="flex flex-row">
+              {advancedFilters && (
+                <Popover
+                  open={isFiltersPopoverOpen}
+                  onOpenChange={setIsFiltersPopoverOpen}
+                >
+                  {!isFiltersPinned ? (
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="ghostLinear"
+                        className="gap-2"
+                        size="sm_sleek"
+                        onClick={() => {
+                          if (isFiltersPinned) {
+                            setShowFilters(!showFilters);
+                            setIsFiltersPopoverOpen(false);
+                          } else {
+                            setIsFiltersPopoverOpen(!isFiltersPopoverOpen);
+                            setShowFilters(false);
+                          }
+                        }}
+                      >
+                        <FunnelIcon className="h-[13px] w-[13px]" />
+                        <span className="hidden sm:inline font-normal text-[13px]">
+                          Filters
+                        </span>
+                      </Button>
+                    </PopoverTrigger>
+                  ) : (
+                    <Button
+                      variant="ghostLinear"
+                      className="gap-2"
+                      size="sm_sleek"
+                      onClick={() => {
+                        setShowFilters(!showFilters);
+                      }}
+                    >
+                      <FunnelIcon className="h-[13px] w-[13px]" />
+                      <span className="hidden sm:inline font-normal text-[13px]">
+                        {isFiltersPinned
+                          ? showFilters
+                            ? "Hide Filters"
+                            : "Show Filters"
+                          : "Filters"}
+                      </span>
+                    </Button>
+                  )}
+                  <PopoverContent
+                    className="min-w-[40rem] w-[40vw] flex items-start p-0 mx-2 rounded-lg"
+                    ref={popoverContentRef}
+                    onInteractOutside={(e) => {}}
+                    onClick={handlePopoverInteraction}
+                  >
+                    <AdvancedFilters
+                      filterMap={advancedFilters.filterMap}
+                      filters={advancedFilters.filters}
+                      setAdvancedFilters={advancedFilters.setAdvancedFilters}
+                      searchPropertyFilters={
+                        advancedFilters.searchPropertyFilters
+                      }
+                      savedFilters={savedFilters?.filters}
+                      onSaveFilterCallback={savedFilters?.onSaveFilterCallback}
+                      layoutPage={savedFilters?.layoutPage ?? "requests"}
+                    />
+                    <div className="flex justify-end ml-4">
+                      <Button
+                        variant="ghostLinear"
+                        onClick={() => {
+                          setIsFiltersPinned(!isFiltersPinned);
+                          setIsFiltersPopoverOpen(isFiltersPinned);
+                          setShowFilters(!isFiltersPinned);
+                        }}
+                        className="text-gray-500 hover:text-gray-700 p-0 mt-4 mr-4 h-auto w-auto"
+                      >
+                        {isFiltersPinned ? (
+                          <PinIcon className="h-5 w-5 text-primary" />
+                        ) : (
+                          <PinIcon className="h-5 w-5 text-muted-foreground" />
+                        )}
+                      </Button>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              )}
+
+              {savedFilters && (
+                <FiltersButton
+                  filters={savedFilters.filters}
+                  currentFilter={savedFilters.currentFilter}
+                  onFilterChange={savedFilters.onFilterChange}
+                  onDeleteCallback={() => {
+                    if (savedFilters.onSaveFilterCallback) {
+                      savedFilters.onSaveFilterCallback();
+                    }
+                  }}
+                  layoutPage={savedFilters.layoutPage}
+                />
+              )}
+            </div>
+          </div>
+
+          <div className="flex flex-wrap justify-start lg:justify-end items-center">
+            {search && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="relative flex items-center">
+                    <div
+                      className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                        isSearchExpanded ? "w-40 sm:w-64" : "w-0"
+                      }`}
+                    >
+                      <Input
+                        ref={searchInputRef}
+                        type="text"
+                        value={search.value}
+                        onChange={(e) => search.onChange(e.target.value)}
+                        placeholder={search.placeholder}
+                        className={clsx(
+                          "w-40 sm:w-64 text-sm pr-8 transition-transform duration-300 ease-in-out outline-none border-none ring-0",
+                          isSearchExpanded
+                            ? "translate-x-0"
+                            : "translate-x-full"
+                        )}
+                      />
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className={
+                        isSearchExpanded
+                          ? "absolute right-0 hover:bg-transparent"
+                          : ""
+                      }
+                      onClick={() => setIsSearchExpanded(!isSearchExpanded)}
+                    >
+                      {isSearchExpanded ? (
+                        <XMarkIcon className="h-4 w-4" />
+                      ) : (
+                        <MagnifyingGlassIcon className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {isSearchExpanded ? "Close search" : "Open search"}
+                </TooltipContent>
+              </Tooltip>
+            )}
+
+            {columns && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span>
+                    <ViewColumns
+                      columns={columns}
+                      activeColumns={activeColumns}
+                      setActiveColumns={setActiveColumns}
+                      isDatasetsPage={isDatasetsPage}
+                    />
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>Manage columns</TooltipContent>
+              </Tooltip>
+            )}
+
+            {rows && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span>
+                    <ExportButton rows={rows} />
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>Export data</TooltipContent>
+              </Tooltip>
+            )}
+
+            {viewToggle && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span>
+                    <ViewButton
+                      currentView={viewToggle.currentView}
+                      onViewChange={(value: RequestViews) => {
+                        viewToggle.onViewChange(value);
+                      }}
+                    />
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>Toggle view</TooltipContent>
+              </Tooltip>
+            )}
+
+            {advancedFilters && props.onDataSet && (
               <Button
-                onClick={showFilterHandler}
-                variant="ghostLinear"
-                className="gap-2"
-                size="sm_sleek"
+                variant="ghost"
+                onClick={() => {
+                  if (props.onDataSet) {
+                    props.onDataSet();
+                  }
+                }}
+                size="xs"
+                className="flex items-center gap-2 text-slate-700 dark:text-slate-400"
               >
-                <FunnelIcon className="h-[13px] w-[13px] " />
-                <span className="hidden sm:inline font-normal text-[13px]">
-                  {showFilters ? "Hide" : ""} Filters
-                </span>
+                <CircleStackIcon className="h-4 w-4" />
               </Button>
             )}
 
-            {savedFilters && (
-              <FiltersButton
-                filters={savedFilters.filters}
-                currentFilter={savedFilters.currentFilter}
-                onFilterChange={savedFilters.onFilterChange}
-                onDeleteCallback={() => {
-                  if (savedFilters.onSaveFilterCallback) {
-                    savedFilters.onSaveFilterCallback();
-                  }
-                }}
-                layoutPage={savedFilters.layoutPage}
-              />
-            )}
+            {customButtons && customButtons.map((button) => button)}
           </div>
         </div>
 
-        <div className="flex flex-wrap justify-start lg:justify-end items-center">
-          {search && (
-            <div className="relative flex items-center">
-              <div
-                className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                  isSearchExpanded ? "w-40 sm:w-64" : "w-0"
-                }`}
-              >
-                <Input
-                  ref={searchInputRef}
-                  type="text"
-                  value={search.value}
-                  onChange={(e) => search.onChange(e.target.value)}
-                  placeholder={search.placeholder}
-                  className={clsx(
-                    "w-40 sm:w-64 text-sm pr-8 transition-transform duration-300 ease-in-out outline-none border-none ring-0",
-                    isSearchExpanded ? "translate-x-0" : "translate-x-full"
-                  )}
-                />
-              </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                className={
-                  isSearchExpanded
-                    ? "absolute right-0 hover:bg-transparent"
-                    : ""
-                }
-                onClick={() => setIsSearchExpanded(!isSearchExpanded)}
-              >
-                {isSearchExpanded ? (
-                  <XMarkIcon className="h-4 w-4" />
-                ) : (
-                  <MagnifyingGlassIcon className="h-4 w-4" />
-                )}
-              </Button>
+        {advancedFilters && showFilters && isFiltersPinned && (
+          <div className="flex justify-start min-w-[50rem] w-full mt-1">
+            <div className="flex-1 rounded-lg">
+              <AdvancedFilters
+                filterMap={advancedFilters.filterMap}
+                filters={advancedFilters.filters}
+                setAdvancedFilters={advancedFilters.setAdvancedFilters}
+                searchPropertyFilters={advancedFilters.searchPropertyFilters}
+                savedFilters={savedFilters?.filters}
+                onSaveFilterCallback={savedFilters?.onSaveFilterCallback}
+                layoutPage={savedFilters?.layoutPage ?? "requests"}
+              />
             </div>
-          )}
-
-          {columns && (
-            <ViewColumns
-              columns={columns}
-              activeColumns={activeColumns}
-              setActiveColumns={setActiveColumns}
-              isDatasetsPage={isDatasetsPage}
-            />
-          )}
-
-          {rows && <ExportButton rows={rows} />}
-
-          {viewToggle && (
-            <ViewButton
-              currentView={viewToggle.currentView}
-              onViewChange={(value: RequestViews) => {
-                viewToggle.onViewChange(value);
-              }}
-            />
-          )}
-          {advancedFilters && props.onDataSet && (
             <Button
               variant="ghost"
               onClick={() => {
-                if (props.onDataSet) {
-                  props.onDataSet();
-                }
+                setIsFiltersPinned(false);
+                setShowFilters(false);
+                setIsFiltersPopoverOpen(true);
               }}
-              size="xs"
-              className="flex items-center gap-2"
+              className="text-gray-500 hover:text-gray-700"
             >
-              <CircleStackIcon className="h-4 w-4" />
-              <span className="hidden sm:inline">Create Dataset</span>
+              <PinIcon className="h-5 w-5 text-primary rotate-45 fill-gray-500" />
             </Button>
-          )}
-          {customButtons && customButtons.map((button) => button)}
-        </div>
+          </div>
+        )}
       </div>
-
-      {advancedFilters && showFilters && (
-        <AdvancedFilters
-          filterMap={advancedFilters.filterMap}
-          filters={advancedFilters.filters}
-          setAdvancedFilters={advancedFilters.setAdvancedFilters}
-          searchPropertyFilters={advancedFilters.searchPropertyFilters}
-          savedFilters={savedFilters?.filters}
-          onSaveFilterCallback={savedFilters?.onSaveFilterCallback}
-          layoutPage={savedFilters?.layoutPage ?? "requests"}
-        />
-      )}
-    </div>
+    </TooltipProvider>
   );
 }

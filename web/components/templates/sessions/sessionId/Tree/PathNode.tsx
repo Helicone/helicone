@@ -1,4 +1,4 @@
-import { MinusSquareIcon, PlusSquareIcon } from "lucide-react";
+import { MinusIcon, PlusIcon } from "lucide-react";
 import { TreeNodeData } from "../../../../../lib/sessions/sessionTypes";
 
 export function PathNode(props: {
@@ -13,11 +13,8 @@ export function PathNode(props: {
   return (
     <div
       className={
-        "flex flex-col py-2 px-4 w-full group-hover:cursor-pointer bg-slate-50 group-hover:bg-slate-100 text-slate-700"
+        "flex flex-col py-2 px-4 w-full group-hover:cursor-pointer bg-slate-50 dark:bg-black group-hover:bg-slate-100 dark:group-hover:bg-slate-900 text-slate-500 dark:text-slate-200"
       }
-      // style={{
-      //   paddingLeft: (level + 1) * 16 + 8,
-      // }}
       onClick={() =>
         node.children
           ? setCloseChildren(!closeChildren)
@@ -26,14 +23,28 @@ export function PathNode(props: {
     >
       <div className="flex items-center gap-2">
         {!closeChildren ? (
-          <MinusSquareIcon width={16} height={16} className="text-slate-700" />
+          <MinusIcon
+            width={14}
+            height={14}
+            className="text-slate-400 dark:text-slate-200"
+          />
         ) : (
-          <PlusSquareIcon width={16} height={16} className="text-slate-700" />
+          <PlusIcon
+            width={14}
+            height={14}
+            className="text-slate-400 dark:text-slate-200"
+          />
         )}
-
-        <div className="flex w-full justify-between items-center">
-          <div className="font-semibold text-sm">{node.name}</div>
-          <div className="font-semibold text-xs">{node.duration}</div>
+        <div className="flex w-full gap-2 items-center">
+          <div className="text-xs">{node.name}</div>
+          <div className="flex items-center gap-1">
+            {/* <Clock4Icon
+              width={14}
+              height={14}
+              className="text-slate-500 dark:text-slate-200"
+            /> */}
+            <div className="text-[11px] text-slate-400">({node.duration})</div>
+          </div>
         </div>
       </div>
     </div>

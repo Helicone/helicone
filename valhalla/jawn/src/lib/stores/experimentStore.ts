@@ -30,6 +30,7 @@ export interface Score {
 export interface ExperimentDatasetRow {
   rowId: string;
   inputRecord: {
+    id: string;
     requestId: string;
     requestPath: string;
     inputs: Record<string, string>;
@@ -137,6 +138,7 @@ function getExperimentsQuery(
                         ? `
                     'inputRecord', (
                       SELECT jsonb_build_object(
+                        'id', pir.id,
                         ${
                           include?.responseBodies
                             ? `
@@ -392,6 +394,7 @@ export class ExperimentStore extends BaseStore {
     SELECT jsonb_build_object(
       'rowId', dsr.id,
       'inputRecord', jsonb_build_object(
+        'id', pir.id,
         'requestId', pir.source_request,
         'requestPath', COALESCE(req.path, ''),
         'inputs', COALESCE(pir.inputs::jsonb, '{}'::jsonb),

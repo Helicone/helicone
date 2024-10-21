@@ -44,8 +44,13 @@ import Link from "next/link";
 import { Row } from "../../layout/common";
 import { useQuery } from "@tanstack/react-query";
 import { IslandContainer } from "@/components/ui/islandContainer";
+import { Input } from "@/components/ui/input";
+
+import { useTheme } from "next-themes";
+import { Slider } from "@/components/ui/slider";
 
 const PlaygroundPage = (props: PlaygroundPageProps) => {
+  const { theme } = useTheme();
   const { request, showNewButton } = props;
   const [requestId, setRequestId] = useState<string | undefined>(request ?? "");
 
@@ -233,7 +238,9 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
         <div className="flex justify-between w-full h-full gap-8 min-h-[80vh]">
           <div className="flex w-full h-full ">
             {isLoading ? (
-              <div className="col-span-8 flex w-full border border-gray-300 rounded-lg bg-gray-200 h-96 animate-pulse" />
+              <div className="col-span-8 flex w-full border border-gray-300 dark:border-gray-700 rounded-lg bg-gray-200 dark:bg-gray-800 h-96 animate-pulse dark:text-gray-100 items-center justify-center">
+                Loading...
+              </div>
             ) : hasData && isChat && singleRequest !== null ? (
               <>
                 <ChatPlayground
@@ -363,7 +370,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                   </Tooltip>
                 </label>
               </div>
-              <input
+              <Input
                 type="password"
                 value={providerAPIKey}
                 placeholder="Enter your provider API Key (optional)"
@@ -381,7 +388,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                 >
                   Temperature
                 </label>
-                <input
+                <Input
                   type="number"
                   id="temp"
                   name="temp"
@@ -404,30 +411,14 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                   className="w-14 text-sm px-2 py-1 rounded-lg border border-gray-300"
                 />
               </div>
-              <input
-                type="range"
-                id="temp-range"
-                name="temp-range"
+              <Slider
+                value={[temperature]}
+                onValueChange={(value) => {
+                  setTemperature(value[0]);
+                }}
                 min={0}
                 max={1.99}
                 step={0.01}
-                value={temperature}
-                onChange={(e) => {
-                  const value = parseFloat(e.target.value);
-                  if (value < 0.01) {
-                    setTemperature(0.01);
-                    return;
-                  }
-                  if (value > 1.99) {
-                    setTemperature(1.99);
-                    return;
-                  }
-                  setTemperature(parseFloat(e.target.value));
-                }}
-                className="text-black"
-                style={{
-                  accentColor: "black",
-                }}
               />
             </div>
             <div className="flex flex-col space-y-2 w-full">
@@ -438,7 +429,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                 >
                   Max Tokens
                 </label>
-                <input
+                <Input
                   type="number"
                   id="tokens"
                   name="tokens"
@@ -461,29 +452,14 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                   className="w-14 text-sm px-2 py-1 rounded-lg border border-gray-300"
                 />
               </div>
-              <input
-                type="range"
-                id="token-range"
-                name="token-range"
+              <Slider
+                value={[maxTokens]}
+                onValueChange={(value) => {
+                  setMaxTokens(value[0]);
+                }}
                 min={1}
                 max={2048}
                 step={1}
-                value={maxTokens}
-                onChange={(e) => {
-                  const value = parseFloat(e.target.value);
-                  if (value < 1) {
-                    setMaxTokens(1);
-                    return;
-                  }
-                  if (value > 2048) {
-                    setMaxTokens(2048);
-                    return;
-                  }
-                  setMaxTokens(parseFloat(e.target.value));
-                }}
-                style={{
-                  accentColor: "black",
-                }}
               />
             </div>
             <div className="flex flex-col space-y-2 w-full">

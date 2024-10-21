@@ -1,0 +1,873 @@
+"use client";
+
+import { useState, useEffect, useMemo, useRef } from "react";
+import {
+  Calculator,
+  Twitter,
+  ChevronUp,
+  ChevronDown,
+  X,
+  Plus,
+  XCircle,
+  ChevronRight,
+} from "lucide-react";
+import { costOf, costOfPrompt } from "../../packages/cost"; // Ensure the path is correct
+import { providers } from "../../packages/cost/providers/mappings"; // Ensure the path is correct
+import Image from "next/image";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { usePathname } from "next/navigation";
+import Link from "next/link";
+import CalculatorInfo, { formatProviderName } from "./CalculatorInfo";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { ThemedTextDropDown } from "@/components/ui/themedTextDropDown";
+
+type ModelPriceCalculatorProps = {
+  model?: string;
+  provider?: string;
+};
+
+type CostData = {
+  provider: string;
+  model: string;
+  inputCostPer1k: number;
+  outputCostPer1k: number;
+  inputCost: number;
+  outputCost: number;
+  totalCost: number;
+};
+
+// Custom MultiSelect component
+const MultiSelect = ({
+  label,
+  options,
+  selected,
+  onToggle,
+}: {
+  label: string;
+  options: { value: string; label: string }[];
+  selected: string[];
+  onToggle: (value: string) => void;
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center justify-between px-4 py-2 text-sm bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+      >
+        {selected.length > 0 ? `${selected.length} selected` : label}
+        <ChevronDown className="w-4 h-4 ml-2" />
+      </button>
+      {isOpen && (
+        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
+          {options.map((option) => (
+            <div
+              key={option.value}
+              className="flex items-center px-4 py-2 hover:bg-gray-100"
+            >
+              <Checkbox
+                id={`option-${option.value}`}
+                checked={selected.includes(option.value)}
+                onCheckedChange={() => onToggle(option.value)}
+              />
+              <label
+                htmlFor={`option-${option.value}`}
+                className="ml-2 text-sm text-gray-700"
+              >
+                {option.label}
+              </label>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+const ProviderPill = ({
+  provider,
+  models,
+  selectedModels,
+  onRemoveProvider,
+  onAddModel,
+  onRemoveModel,
+}: {
+  provider: string;
+  models: string[];
+  selectedModels: string[];
+  onRemoveProvider: (provider: string) => void;
+  onAddModel: (model: string) => void;
+  onRemoveModel: (model: string) => void;
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div className="mb-2">
+      <div className="relative inline-block">
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="inline-flex items-center bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full"
+        >
+          {formatProviderName(provider)}
+          <ChevronDown
+            className={`w-4 h-4 ml-2 ${isOpen ? "transform rotate-180" : ""}`}
+          />
+        </button>
+        <button
+          onClick={() => onRemoveProvider(provider)}
+          className="ml-2 text-gray-500 hover:text-gray-700 focus:outline-none"
+        >
+          <XCircle className="w-4 h-4" />
+        </button>
+        {isOpen && (
+          <div className="absolute z-10 mt-1 w-56 bg-white border border-gray-300 rounded-md shadow-lg">
+            <ScrollArea className="h-48">
+              <div className="p-2">
+                {models.map((model) => (
+                  <button
+                    key={model}
+                    onClick={() => onAddModel(model)}
+                    className="w-full text-left px-2 py-1 hover:bg-gray-100 rounded truncate"
+                  >
+                    {model}
+                  </button>
+                ))}
+              </div>
+            </ScrollArea>
+          </div>
+        )}
+      </div>
+      <div className="mt-2 ml-4">
+        {selectedModels
+          .filter((model) => models.includes(model))
+          .map((model) => (
+            <span
+              key={model}
+              className="inline-flex items-center bg-green-100 text-green-800 text-sm font-medium px-3 py-1 rounded-full mr-2 mb-2"
+            >
+              {model}
+              <button
+                onClick={() => onRemoveModel(model)}
+                className="ml-2 text-gray-500 hover:text-gray-700 focus:outline-none"
+              >
+                <XCircle className="w-3 h-3" />
+              </button>
+            </span>
+          ))}
+      </div>
+    </div>
+  );
+};
+
+const ProviderItem = ({
+  provider,
+  models,
+  onAddModel,
+}: {
+  provider: string;
+  models: string[];
+  onAddModel: (model: string) => void;
+}) => {
+  const [showModels, setShowModels] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const itemRef = useRef<HTMLDivElement>(null);
+
+  const handleMouseEnter = () => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => setShowModels(true), 200);
+  };
+
+  const handleMouseLeave = () => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => setShowModels(false), 300);
+  };
+
+  const handleClick = () => {
+    setShowModels(!showModels);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, []);
+
+  return (
+    <div
+      ref={itemRef}
+      className="relative"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      <div
+        onClick={handleClick}
+        className="flex items-center justify-between px-4 py-2 hover:bg-gray-100 cursor-pointer"
+      >
+        <span>{formatProviderName(provider)}</span>
+        <ChevronRight className="w-4 h-4" />
+      </div>
+      {showModels && (
+        <div
+          className="absolute left-full top-0 w-64 bg-white border border-gray-300 rounded-md shadow-lg ml-1"
+          onMouseEnter={() => {
+            if (timeoutRef.current) clearTimeout(timeoutRef.current);
+            setShowModels(true);
+          }}
+          onMouseLeave={handleMouseLeave}
+        >
+          <ScrollArea className="h-64">
+            <div className="p-2">
+              {models.map((model) => (
+                <button
+                  key={model}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onAddModel(model);
+                  }}
+                  className="w-full text-left px-4 py-2 hover:bg-gray-100 rounded truncate text-sm"
+                >
+                  {model}
+                </button>
+              ))}
+            </div>
+          </ScrollArea>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const FilterSection = ({
+  providers,
+  selectedProviders,
+  selectedModels,
+  onAddProvider,
+  onRemoveProvider,
+  onAddModel,
+  onRemoveModel,
+  onClearAll,
+}: {
+  providers: { provider: string; models: string[] }[];
+  selectedProviders: string[];
+  selectedModels: string[];
+  onAddProvider: (provider: string) => void;
+  onRemoveProvider: (provider: string) => void;
+  onAddModel: (model: string) => void;
+  onRemoveModel: (model: string) => void;
+  onClearAll: () => void;
+}) => {
+  const availableProviders = providers
+    .filter((p) => !selectedProviders.includes(p.provider))
+    .map((p) => p.provider);
+
+  const availableModels = providers
+    .filter(
+      (p) =>
+        selectedProviders.length === 0 || selectedProviders.includes(p.provider)
+    )
+    .flatMap((p) => p.models)
+    .filter((model) => !selectedModels.includes(model));
+
+  const hasSelections =
+    selectedProviders.length > 0 || selectedModels.length > 0;
+
+  return (
+    <div className="mb-4">
+      <div className="flex justify-between items-center mb-2">
+        <div className="flex gap-2">
+          <div className="w-full max-w-[10rem]">
+            <ThemedTextDropDown
+              options={availableProviders}
+              onChange={(provider) => {
+                if (provider) onAddProvider(provider);
+              }}
+              value="Filter by Provider"
+              hideTabModes={true}
+            />
+          </div>
+          <div className="w-full max-w-[10rem]">
+            <ThemedTextDropDown
+              options={availableModels}
+              onChange={(model) => {
+                if (model) onAddModel(model);
+              }}
+              value="Filter by Model"
+              hideTabModes={true}
+            />
+          </div>
+        </div>
+        {hasSelections && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClearAll}
+            className="text-xs text-gray-500 hover:text-gray-700"
+          >
+            Clear All
+          </Button>
+        )}
+      </div>
+      {hasSelections && (
+        <>
+          <div className="flex flex-wrap gap-2 items-center mb-2">
+            {selectedProviders.map((provider) => (
+              <span
+                key={provider}
+                className="inline-flex items-center bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full"
+              >
+                {formatProviderName(provider)}
+                <button
+                  onClick={() => onRemoveProvider(provider)}
+                  className="ml-2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                >
+                  <XCircle className="w-4 h-4" />
+                </button>
+              </span>
+            ))}
+          </div>
+          <div className="flex flex-wrap gap-2 items-center mb-2">
+            {selectedModels.map((model) => (
+              <span
+                key={model}
+                className="inline-flex items-center bg-green-100 text-green-800 text-sm font-medium px-3 py-1 rounded-full"
+              >
+                {model}
+                <button
+                  onClick={() => onRemoveModel(model)}
+                  className="ml-2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                >
+                  <XCircle className="w-4 h-4" />
+                </button>
+              </span>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+};
+
+export default function ModelPriceCalculator({
+  model,
+  provider,
+}: ModelPriceCalculatorProps) {
+  const [inputTokens, setInputTokens] = useState<string>("100");
+  const [outputTokens, setOutputTokens] = useState<string>("100");
+  const [costData, setCostData] = useState<CostData[]>([]);
+  const [selectedModelData, setSelectedModelData] = useState<CostData | null>(
+    null
+  );
+  const pathname = usePathname();
+
+  const [sortConfig, setSortConfig] = useState<{
+    key: keyof CostData;
+    direction: "asc" | "desc";
+  } | null>(null);
+
+  // Update these state declarations
+  const [selectedProviders, setSelectedProviders] = useState<string[]>([]);
+  const [selectedModels, setSelectedModels] = useState<string[]>([]);
+
+  function formatCost(cost: number): string {
+    if (cost === 0) return "0";
+    if (cost < 0.000001) {
+      return cost.toExponential(2);
+    }
+    return cost.toFixed(7).replace(/\.?0+$/, "");
+  }
+
+  useEffect(() => {
+    const calculateCosts = () => {
+      const updatedCostData: CostData[] = [];
+      const inputTokensNum = parseInt(inputTokens) || 0;
+      const outputTokensNum = parseInt(outputTokens) || 0;
+
+      providers.forEach((prov) => {
+        prov.costs?.forEach((modelCost) => {
+          const costDetails = costOf({
+            model: modelCost.model.value,
+            provider: prov.provider,
+          });
+
+          const totalCost = costOfPrompt({
+            model: modelCost.model.value,
+            provider: prov.provider,
+            promptTokens: inputTokensNum,
+            completionTokens: outputTokensNum,
+          });
+
+          if (costDetails) {
+            const inputCostPer1k = costDetails.prompt_token * 1000;
+            const outputCostPer1k = costDetails.completion_token * 1000;
+
+            const inputCost = (inputTokensNum / 1000) * inputCostPer1k;
+            const outputCost = (outputTokensNum / 1000) * outputCostPer1k;
+
+            updatedCostData.push({
+              provider: prov.provider,
+              model: modelCost.model.value,
+              inputCostPer1k,
+              outputCostPer1k,
+              inputCost,
+              outputCost,
+              totalCost: totalCost || 0,
+            });
+          } else {
+            console.warn(
+              `Cost details not found for model: ${modelCost.model.value} by provider: ${prov.provider}`
+            );
+          }
+        });
+      });
+
+      setCostData(updatedCostData);
+    };
+
+    calculateCosts();
+  }, [inputTokens, outputTokens]);
+
+  useEffect(() => {
+    const urlParts = pathname.split("/");
+    const urlProvider = urlParts[urlParts.indexOf("provider") + 1];
+    const urlModel = urlParts[urlParts.indexOf("model") + 1];
+
+    if (urlProvider && urlModel) {
+      const selectedModel = costData.find(
+        (data) =>
+          data.model.toLowerCase() ===
+            decodeURIComponent(urlModel).toLowerCase() &&
+          data.provider.toLowerCase() ===
+            decodeURIComponent(urlProvider).toLowerCase()
+      );
+      if (selectedModel) {
+        setSelectedModelData(selectedModel);
+      }
+    }
+  }, [costData, pathname]);
+
+  // Update the memoized filtered and sorted data
+  const visibleCostData = useMemo(() => {
+    let filteredData = costData.filter(
+      (data) =>
+        (selectedProviders.length === 0 ||
+          selectedProviders.includes(data.provider)) &&
+        (selectedModels.length === 0 || selectedModels.includes(data.model))
+    );
+
+    if (sortConfig !== null) {
+      filteredData.sort((a, b) => {
+        if (a[sortConfig.key] < b[sortConfig.key]) {
+          return sortConfig.direction === "asc" ? -1 : 1;
+        }
+        if (a[sortConfig.key] > b[sortConfig.key]) {
+          return sortConfig.direction === "asc" ? 1 : -1;
+        }
+        return 0;
+      });
+    }
+
+    return filteredData;
+  }, [costData, selectedProviders, selectedModels, sortConfig]);
+
+  // Update these memoized values
+  const uniqueProviders = useMemo(() => {
+    return Array.from(new Set(costData.map((data) => data.provider))).sort();
+  }, [costData]);
+
+  const handleAddProvider = (provider: string) => {
+    setSelectedProviders((prev) => [...prev, provider]);
+  };
+
+  const handleRemoveProvider = (provider: string) => {
+    setSelectedProviders((prev) => prev.filter((p) => p !== provider));
+  };
+
+  const handleAddModel = (model: string) => {
+    setSelectedModels((prev) => [...prev, model]);
+  };
+
+  const handleRemoveModel = (model: string) => {
+    setSelectedModels((prev) => prev.filter((m) => m !== model));
+  };
+
+  // Add this function to handle Twitter sharing
+  const handleTwitterShare = () => {
+    if (!selectedModelData) return;
+
+    const inputTokenCount = parseInt(inputTokens);
+    const outputTokenCount = parseInt(outputTokens);
+    const totalCost = formatCost(selectedModelData.totalCost);
+    const inputCostPer1k = formatCost(selectedModelData.inputCostPer1k);
+    const outputCostPer1k = formatCost(selectedModelData.outputCostPer1k);
+
+    const tweetText = `I just used Helicone's API pricing calculator for ${formatProviderName(
+      selectedModelData.provider
+    )} ${selectedModelData.model}.
+
+${inputTokenCount} input tokens + ${outputTokenCount} output tokens cost $${totalCost}
+
+Input: $${inputCostPer1k}/1k tokens
+Output: $${outputCostPer1k}/1k tokens
+
+Optimize your AI API costs:`;
+
+    const tweetUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
+      tweetText
+    )}&url=${encodeURIComponent(window.location.href)}`;
+    window.open(tweetUrl, "_blank");
+  };
+
+  // Function to handle sorting
+  const requestSort = (key: keyof CostData) => {
+    let direction: "asc" | "desc" = "asc";
+    if (
+      sortConfig &&
+      sortConfig.key === key &&
+      sortConfig.direction === "asc"
+    ) {
+      direction = "desc";
+    }
+    setSortConfig({ key, direction });
+  };
+
+  // Function to get sort icon
+  const getSortIcon = (key: keyof CostData) => {
+    if (!sortConfig || sortConfig.key !== key) {
+      return (
+        <ChevronDown className="inline-block ml-1 w-4 h-4 text-gray-400" />
+      );
+    }
+    return sortConfig.direction === "asc" ? (
+      <ChevronUp className="inline-block ml-1 w-4 h-4 text-gray-600" />
+    ) : (
+      <ChevronDown className="inline-block ml-1 w-4 h-4 text-gray-600" />
+    );
+  };
+
+  const providerWithModels = useMemo(() => {
+    return uniqueProviders.map((provider) => ({
+      provider,
+      models: costData
+        .filter((data) => data.provider === provider)
+        .map((data) => data.model),
+    }));
+  }, [uniqueProviders, costData]);
+
+  const handleClearAll = () => {
+    setSelectedProviders([]);
+    setSelectedModels([]);
+  };
+
+  return (
+    <div className="w-full mx-auto p-4">
+      <div className="max-w-2xl mx-auto text-center mb-8">
+        <Image
+          src="/static/pricing-calc/coins.webp"
+          alt="Pricing Calculator Icon"
+          width={99.16}
+          height={92}
+          quality={100}
+          className="mx-auto mb-4"
+          style={{
+            width: "auto",
+            height: "auto",
+            maxWidth: "100px",
+          }}
+        />
+        <h2 className="text-4xl font-semibold text-gray-800 mb-2">
+          {provider && model ? (
+            <>
+              {formatProviderName(provider)}{" "}
+              <span style={{ color: "#0CA5EA" }}>{model}</span>
+              <br />
+            </>
+          ) : (
+            "LLM API "
+          )}
+          Pricing Calculator
+        </h2>
+        <p className="text-gray-600 mb-4">
+          {provider && model
+            ? `Calculate the cost of using ${model} with Helicone's free pricing tool.`
+            : "Calculate the cost of using AI models with Helicone's free pricing tool."}
+        </p>
+
+        <button
+          className="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors duration-200"
+          onClick={handleTwitterShare}
+        >
+          <Twitter className="w-5 h-5" />
+          <span className="font-medium">Share</span>
+        </button>
+      </div>
+
+      <div className="max-w-xl mx-auto h-9 flex justify-start items-start gap-6 mb-6">
+        <div className="grow shrink basis-0 h-9 flex justify-start items-center gap-4">
+          <Label
+            htmlFor="inputTokens"
+            className="text-black text-sm font-medium leading-tight"
+          >
+            Input Tokens
+          </Label>
+          <div className="grow shrink basis-0 self-stretch relative">
+            <Input
+              id="inputTokens"
+              type="number"
+              value={inputTokens}
+              onChange={(e) => setInputTokens(e.target.value)}
+              className="pl-3 pr-3 py-2 bg-white rounded-md border border-slate-300 text-slate-900 text-sm font-normal leading-tight w-full [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+            />
+          </div>
+        </div>
+        <div className="grow shrink basis-0 h-9 flex justify-start items-center gap-4">
+          <Label
+            htmlFor="outputTokens"
+            className="text-black text-sm font-medium leading-tight"
+          >
+            Output tokens
+          </Label>
+          <div className="grow shrink basis-0 bg-[#f8feff] flex-col justify-start items-start gap-1.5 inline-flex">
+            <div className="self-stretch relative w-full">
+              <Input
+                id="outputTokens"
+                type="number"
+                value={outputTokens}
+                onChange={(e) => setOutputTokens(e.target.value)}
+                className="pl-3 pr-3 py-2 bg-slate-50 rounded-md border border-slate-300 text-slate-900 text-sm font-normal leading-tight w-full [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {selectedModelData && (
+        <Card className="max-w-xl mx-auto mb-8 p-[17px] h-[309px]">
+          <CardHeader className="p-0 mb-4">
+            <CardTitle className="text-base font-medium leading-none flex items-center gap-2">
+              <Calculator className="w-4 h-4 text-gray-500" />
+              Model Cost Calculation
+            </CardTitle>
+            <div className="flex items-center gap-2 mt-2">
+              <div className="w-3.5 h-3.5 relative opacity-10"></div>
+              <div className="text-slate-400 text-sm font-normal leading-tight">
+                {selectedModelData.provider} {selectedModelData.model}
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="p-0 space-y-[9px]">
+            <div className="flex justify-between items-center py-1.5">
+              <span className="text-slate-700 text-sm font-medium leading-tight">
+                Total Input Cost
+              </span>
+              <span className="text-sky-500 text-sm font-semibold leading-[16.80px]">
+                ${formatCost(selectedModelData.inputCost)}
+              </span>
+            </div>
+            <div className="flex justify-between items-center py-1.5">
+              <span className="text-slate-400 text-sm font-medium leading-tight">
+                Input Cost/1k tokens
+              </span>
+              <span className="text-slate-400 text-sm font-medium leading-[16.80px]">
+                ${formatCost(selectedModelData.inputCostPer1k)}/1k tokens
+              </span>
+            </div>
+            <div className="h-[0px] border-t border-slate-100"></div>
+            <div className="flex justify-between items-center py-1.5">
+              <span className="text-slate-700 text-sm font-medium leading-tight">
+                Total Output Cost
+              </span>
+              <span className="text-sky-500 text-sm font-semibold leading-[16.80px]">
+                ${formatCost(selectedModelData.outputCost)}
+              </span>
+            </div>
+            <div className="flex justify-between items-center py-1.5">
+              <span className="text-slate-400 text-sm font-medium leading-tight">
+                Output Cost/1k tokens
+              </span>
+              <span className="text-slate-400 text-sm font-medium leading-[16.80px]">
+                ${formatCost(selectedModelData.outputCostPer1k)}/1k tokens
+              </span>
+            </div>
+            <div className="h-[0px] border-t border-slate-100"></div>
+            <div className="flex justify-between items-center py-1.5">
+              <span className="text-slate-700 text-base font-semibold leading-tight">
+                Estimate Total Cost
+              </span>
+              <span className="text-sky-500 text-base font-bold leading-tight">
+                ${formatCost(selectedModelData.totalCost)}
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      <div className="mt-12 p-6">
+        <FilterSection
+          providers={providerWithModels}
+          selectedProviders={selectedProviders}
+          selectedModels={selectedModels}
+          onAddProvider={handleAddProvider}
+          onRemoveProvider={handleRemoveProvider}
+          onAddModel={handleAddModel}
+          onRemoveModel={handleRemoveModel}
+          onClearAll={handleClearAll}
+        />
+
+        <div className="w-full overflow-x-auto rounded-lg shadow-sm">
+          <div className="min-w-[1000px]">
+            <div className="max-h-[calc(200vh-600px)] overflow-y-auto">
+              <table className="w-full divide-y divide-gray-200 border-separate border-spacing-0">
+                <thead className="sticky top-0 bg-slate-100">
+                  <tr>
+                    <th
+                      scope="col"
+                      className="p-[24px] text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6 bg-slate-100 border border-gray-200 first:rounded-tl-lg cursor-pointer"
+                      onClick={() => requestSort("provider")}
+                    >
+                      Provider {getSortIcon("provider")}
+                    </th>
+                    <th
+                      scope="col"
+                      className="p-[24px] text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6 bg-slate-100 border border-gray-200 cursor-pointer"
+                      onClick={() => requestSort("model")}
+                    >
+                      Model {getSortIcon("model")}
+                    </th>
+                    <th
+                      scope="col"
+                      className="p-[24px] text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-slate-100 border border-gray-200 cursor-pointer"
+                      onClick={() => requestSort("inputCostPer1k")}
+                    >
+                      Input/1k <br />
+                      Tokens {getSortIcon("inputCostPer1k")}
+                    </th>
+                    <th
+                      scope="col"
+                      className="p-[24px] text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-slate-100 border border-gray-200 cursor-pointer"
+                      onClick={() => requestSort("outputCostPer1k")}
+                    >
+                      Output/1k <br />
+                      Tokens {getSortIcon("outputCostPer1k")}
+                    </th>
+                    <th
+                      scope="col"
+                      className="p-[24px] text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-slate-100 border border-gray-200 cursor-pointer"
+                      onClick={() => requestSort("inputCost")}
+                    >
+                      Input Cost {getSortIcon("inputCost")}
+                    </th>
+                    <th
+                      scope="col"
+                      className="p-[24px] text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-slate-100 border border-gray-200 cursor-pointer"
+                      onClick={() => requestSort("outputCost")}
+                    >
+                      Output Cost {getSortIcon("outputCost")}
+                    </th>
+                    <th
+                      scope="col"
+                      className="p-[24px] text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-slate-100 border border-gray-200 last:rounded-tr-lg cursor-pointer"
+                      onClick={() => requestSort("totalCost")}
+                    >
+                      Total Cost {getSortIcon("totalCost")}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {visibleCostData.map((data, index) => (
+                    <tr
+                      key={index}
+                      className={`hover:bg-sky-50 transition-colors duration-150 ${
+                        data.provider === selectedModelData?.provider &&
+                        data.model === selectedModelData?.model
+                          ? "bg-sky-100"
+                          : ""
+                      }`}
+                    >
+                      <td className="whitespace-nowrap text-sm text-gray-500 border border-gray-200 p-0">
+                        <Link
+                          href={`/llm-cost/provider/${encodeURIComponent(
+                            data.provider
+                          )}/model/${encodeURIComponent(data.model)}`}
+                          className="block w-full h-full px-6 py-2"
+                        >
+                          {formatProviderName(data.provider)}
+                        </Link>
+                      </td>
+                      <td className="text-sm text-gray-900 font-medium border border-gray-200 p-0">
+                        <Link
+                          href={`/llm-cost/provider/${encodeURIComponent(
+                            data.provider
+                          )}/model/${encodeURIComponent(data.model)}`}
+                          className="block w-full h-full px-6 py-2"
+                        >
+                          <div className="break-words">{data.model}</div>
+                        </Link>
+                      </td>
+                      <td className="whitespace-nowrap text-sm text-gray-500 border border-gray-200 p-0">
+                        <Link
+                          href={`/llm-cost/provider/${encodeURIComponent(
+                            data.provider
+                          )}/model/${encodeURIComponent(data.model)}`}
+                          className="block w-full h-full px-6 py-2"
+                        >
+                          ${formatCost(data.inputCostPer1k)}
+                        </Link>
+                      </td>
+                      <td className="whitespace-nowrap text-sm text-gray-500 border border-gray-200 p-0">
+                        <Link
+                          href={`/llm-cost/provider/${encodeURIComponent(
+                            data.provider
+                          )}/model/${encodeURIComponent(data.model)}`}
+                          className="block w-full h-full px-6 py-2"
+                        >
+                          ${formatCost(data.outputCostPer1k)}
+                        </Link>
+                      </td>
+                      <td className="whitespace-nowrap text-sm text-gray-500 border border-gray-200 p-0">
+                        <Link
+                          href={`/llm-cost/provider/${encodeURIComponent(
+                            data.provider
+                          )}/model/${encodeURIComponent(data.model)}`}
+                          className="block w-full h-full px-6 py-2"
+                        >
+                          ${formatCost(data.inputCost)}
+                        </Link>
+                      </td>
+                      <td className="whitespace-nowrap text-sm text-gray-500 border border-gray-200 p-0">
+                        <Link
+                          href={`/llm-cost/provider/${encodeURIComponent(
+                            data.provider
+                          )}/model/${encodeURIComponent(data.model)}`}
+                          className="block w-full h-full px-6 py-2"
+                        >
+                          ${formatCost(data.outputCost)}
+                        </Link>
+                      </td>
+                      <td className="whitespace-nowrap text-sm font-medium text-sky-500 border border-gray-200 p-0">
+                        <Link
+                          href={`/llm-cost/provider/${encodeURIComponent(
+                            data.provider
+                          )}/model/${encodeURIComponent(data.model)}`}
+                          className="block w-full h-full px-6 py-2"
+                        >
+                          ${formatCost(data.totalCost)}
+                        </Link>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <CalculatorInfo model={model} provider={provider} />
+    </div>
+  );
+}

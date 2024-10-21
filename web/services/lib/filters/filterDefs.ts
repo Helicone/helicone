@@ -171,6 +171,7 @@ interface RequestResponseVersionedToOperators {
   job_id: SingleKey<TextOperators>;
   threat: SingleKey<BooleanOperators>;
   request_id: SingleKey<TextOperators>;
+  total_tokens: SingleKey<NumberOperators>;
   prompt_tokens: SingleKey<NumberOperators>;
   completion_tokens: SingleKey<NumberOperators>;
   target_url: SingleKey<TextOperators>;
@@ -188,11 +189,19 @@ interface RequestResponseVersionedToOperators {
   "helicone-score-feedback": SingleKey<BooleanOperators>;
 }
 
+interface SessionsRequestResponseVersionedToOperators {
+  total_cost: SingleKey<NumberOperators>;
+  total_tokens: SingleKey<NumberOperators>;
+}
+
 export type FilterLeafRequestResponseLog =
   SingleKey<RequestResponseLogToOperators>;
 
 export type FilterLeafRequestResponseVersioned =
   SingleKey<RequestResponseVersionedToOperators>;
+
+export type FilterLeafSessionsRequestResponseVersioned =
+  SingleKey<SessionsRequestResponseVersionedToOperators>;
 
 type PropertiesCopyV2ToOperators = {
   key: SingleKey<TextOperators>;
@@ -280,6 +289,7 @@ export type TablesAndViews = {
   // CLICKHOUSE TABLES
   request_response_log: FilterLeafRequestResponseLog;
   request_response_rmt: FilterLeafRequestResponseVersioned;
+  sessions_request_response_rmt: FilterLeafSessionsRequestResponseVersioned;
   users_view: FilterLeafUserView;
   properties_v3: FilterLeafPropertiesCopyV2;
   property_with_response_v1: FilterLeafPropertyWithResponseV1;
