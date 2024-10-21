@@ -13,6 +13,9 @@ import {
   TrashIcon,
   EyeIcon,
   PencilIcon,
+  ChevronDownIcon,
+  MagnifyingGlassIcon,
+  XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { useRouter } from "next/router";
 import { useExperiments } from "../../../../services/hooks/prompts/experiments";
@@ -642,6 +645,10 @@ const PromptIdPage = (props: PromptIdPageProps) => {
     org?.currentOrg?.id ?? ""
   );
 
+  const [isVersionsExpanded, setIsVersionsExpanded] = useState(true);
+  const [isInputsExpanded, setIsInputsExpanded] = useState(true);
+  const [isSearchVisible, setIsSearchVisible] = useState(false);
+
   return (
     <div>
       <div className="w-full h-full flex flex-col space-y-4 pt-4">
@@ -768,203 +775,329 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                       />
                     </div>
                     <div className="w-1/3 flex flex-col">
-                      <div className="border-y border-x border-[#E8EAEC] dark:border-slate-700  bg-[#F9FAFB] dark:bg-black">
-                        <div className="flex flex-row items-center justify-between px-4 h-12 ">
-                          <h2 className="text-lg font-medium ">Versions</h2>
+                      <div className="border-y border-x border-[#E8EAEC] dark:border-slate-700 bg-[#F9FAFB] dark:bg-black">
+                        <div
+                          className="flex flex-row items-center justify-between px-4 h-12 cursor-pointer"
+                          onClick={() =>
+                            setIsVersionsExpanded(!isVersionsExpanded)
+                          }
+                        >
+                          <h2 className="text-lg font-medium">Versions</h2>
+                          <ChevronDownIcon
+                            className={`h-5 w-5 transition-transform ${
+                              isVersionsExpanded ? "rotate-180" : ""
+                            }`}
+                          />
                         </div>
 
-                        <ScrollArea className="h-[25vh] rounded-b-lg">
-                          <div>
-                            {sortedPrompts?.map((promptVersion, index) => {
-                              const isProduction =
-                                promptVersion.metadata?.isProduction === true;
-                              const isSelected =
-                                selectedVersion ===
-                                `${promptVersion.major_version}.${promptVersion.minor_version}`;
-                              const isFirst = index === 0;
-                              const isLast = index === sortedPrompts.length - 1;
+                        {isVersionsExpanded && (
+                          <ScrollArea className="h-[25vh] rounded-b-lg">
+                            <div>
+                              {sortedPrompts?.map((promptVersion, index) => {
+                                const isProduction =
+                                  promptVersion.metadata?.isProduction === true;
+                                const isSelected =
+                                  selectedVersion ===
+                                  `${promptVersion.major_version}.${promptVersion.minor_version}`;
+                                const isFirst = index === 0;
+                                const isLast =
+                                  index === sortedPrompts.length - 1;
 
-                              return (
-                                <div
-                                  key={promptVersion.id}
-                                  className={`flex flex-row w-full h-12 ${
-                                    isSelected
-                                      ? "bg-sky-100 dark:bg-sky-950"
-                                      : "bg-slate-50 dark:bg-slate-900"
-                                  } ${
-                                    isFirst
-                                      ? "border-t border-slate-300 dark:border-slate-700"
-                                      : ""
-                                  } ${
-                                    isLast
-                                      ? "border-b border-slate-300 dark:border-slate-700"
-                                      : ""
-                                  }`}
-                                >
-                                  <div className="flex items-center">
-                                    {isSelected && (
-                                      <div className="bg-sky-500 h-full w-1" />
-                                    )}
-                                  </div>
+                                return (
                                   <div
-                                    className={`flex-grow px-4 py-2 flex flex-row cursor-pointer ${
-                                      !isFirst
+                                    key={promptVersion.id}
+                                    className={`flex flex-row w-full h-12 ${
+                                      isSelected
+                                        ? "bg-sky-100 dark:bg-sky-950"
+                                        : "bg-slate-50 dark:bg-slate-900"
+                                    } ${
+                                      isFirst
                                         ? "border-t border-slate-300 dark:border-slate-700"
                                         : ""
+                                    } ${
+                                      isLast
+                                        ? "border-b border-slate-300 dark:border-slate-700"
+                                        : ""
                                     }`}
-                                    onClick={() =>
-                                      setSelectedInputAndVersion(
-                                        `${promptVersion.major_version}.${promptVersion.minor_version}`
-                                      )
-                                    }
                                   >
-                                    <div className="flex justify-between items-center w-full">
-                                      <div className="flex items-center space-x-2 flex-row justify-between w-full">
-                                        <div className="flex items-center space-x-2">
-                                          <span className="font-medium text-lg">
-                                            V{promptVersion.major_version}.
-                                            {promptVersion.minor_version}
-                                          </span>
-                                          <Badge
-                                            variant={"default"}
-                                            className="bg-[#F1F5F9] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-[#475569] text-[#334155] dark:text-white text-sm font-medium rounded-lg px-4 hover:bg-[#F1F5F9] hover:text-black"
-                                          >
-                                            {promptVersion.model}
-                                          </Badge>
-                                          <span>
-                                            {isProduction && (
-                                              <Badge
-                                                variant={"default"}
-                                                className="bg-[#BAE6FD] dark:bg-[#1E293B]  dark:border-[#475569] text-[#0369A1] dark:text-white text-sm font-medium rounded-lg px-4 hover:bg-[#F1F5F9] hover:text-black"
-                                              >
-                                                Prod
-                                              </Badge>
-                                            )}
-                                          </span>
-                                        </div>
-                                        <div className="flex items-center space-x-2">
-                                          <span className="text-base text-slate-500">
-                                            {getTimeAgo(
-                                              new Date(promptVersion.created_at)
-                                            )}
-                                          </span>
+                                    <div className="flex items-center">
+                                      {isSelected && (
+                                        <div className="bg-sky-500 h-full w-1" />
+                                      )}
+                                    </div>
+                                    <div
+                                      className={`flex-grow px-4 py-2 flex flex-row cursor-pointer ${
+                                        !isFirst
+                                          ? "border-t border-slate-300 dark:border-slate-700"
+                                          : ""
+                                      }`}
+                                      onClick={() =>
+                                        setSelectedInputAndVersion(
+                                          `${promptVersion.major_version}.${promptVersion.minor_version}`
+                                        )
+                                      }
+                                    >
+                                      <div className="flex justify-between items-center w-full">
+                                        <div className="flex items-center space-x-2 flex-row justify-between w-full">
                                           <div className="flex items-center space-x-2">
-                                            {prompt?.metadata?.createdFromUi ===
-                                            true ? (
-                                              <DropdownMenu>
-                                                <DropdownMenuTrigger asChild>
-                                                  <button className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full">
-                                                    <EllipsisHorizontalIcon className="h-6 w-6 text-slate-500" />
-                                                  </button>
-                                                </DropdownMenuTrigger>
-                                                <DropdownMenuContent align="start">
-                                                  {!isProduction && (
+                                            <span className="font-medium text-lg">
+                                              V{promptVersion.major_version}.
+                                              {promptVersion.minor_version}
+                                            </span>
+                                            <Badge
+                                              variant={"default"}
+                                              className="bg-[#F1F5F9] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-[#475569] text-[#334155] dark:text-white text-sm font-medium rounded-lg px-4 hover:bg-[#F1F5F9] hover:text-black"
+                                            >
+                                              {promptVersion.model}
+                                            </Badge>
+                                            <span>
+                                              {isProduction && (
+                                                <Badge
+                                                  variant={"default"}
+                                                  className="bg-[#BAE6FD] dark:bg-[#1E293B]  dark:border-[#475569] text-[#0369A1] dark:text-white text-sm font-medium rounded-lg px-4 hover:bg-[#F1F5F9] hover:text-black"
+                                                >
+                                                  Prod
+                                                </Badge>
+                                              )}
+                                            </span>
+                                          </div>
+                                          <div className="flex items-center space-x-2">
+                                            <span className="text-base text-slate-500">
+                                              {getTimeAgo(
+                                                new Date(
+                                                  promptVersion.created_at
+                                                )
+                                              )}
+                                            </span>
+                                            <div className="flex items-center space-x-2">
+                                              {prompt?.metadata
+                                                ?.createdFromUi === true ? (
+                                                <DropdownMenu>
+                                                  <DropdownMenuTrigger asChild>
+                                                    <button className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full">
+                                                      <EllipsisHorizontalIcon className="h-6 w-6 text-slate-500" />
+                                                    </button>
+                                                  </DropdownMenuTrigger>
+                                                  <DropdownMenuContent align="start">
+                                                    {!isProduction && (
+                                                      <DropdownMenuItem
+                                                        onClick={() =>
+                                                          promoteToProduction(
+                                                            promptVersion.id
+                                                          )
+                                                        }
+                                                      >
+                                                        <ArrowTrendingUpIcon className="h-4 w-4 mr-2" />
+                                                        Promote to prod
+                                                      </DropdownMenuItem>
+                                                    )}
                                                     <DropdownMenuItem
                                                       onClick={() =>
-                                                        promoteToProduction(
-                                                          promptVersion.id
+                                                        startExperiment(
+                                                          promptVersion.id,
+                                                          promptVersion.helicone_template
                                                         )
                                                       }
                                                     >
-                                                      <ArrowTrendingUpIcon className="h-4 w-4 mr-2" />
-                                                      Promote to prod
+                                                      <BeakerIcon className="h-4 w-4 mr-2" />
+                                                      Experiment
                                                     </DropdownMenuItem>
-                                                  )}
-                                                  <DropdownMenuItem
-                                                    onClick={() =>
-                                                      startExperiment(
-                                                        promptVersion.id,
-                                                        promptVersion.helicone_template
-                                                      )
-                                                    }
-                                                  >
-                                                    <BeakerIcon className="h-4 w-4 mr-2" />
-                                                    Experiment
-                                                  </DropdownMenuItem>
-                                                  {!isProduction && (
+                                                    {!isProduction && (
+                                                      <DropdownMenuItem
+                                                        onClick={() =>
+                                                          deletePromptVersion(
+                                                            promptVersion.id
+                                                          )
+                                                        }
+                                                      >
+                                                        <TrashIcon className="h-4 w-4 mr-2 text-red-500" />
+                                                        <p className="text-red-500">
+                                                          Delete
+                                                        </p>
+                                                      </DropdownMenuItem>
+                                                    )}
+                                                  </DropdownMenuContent>
+                                                </DropdownMenu>
+                                              ) : (
+                                                <DropdownMenu>
+                                                  <DropdownMenuTrigger asChild>
+                                                    <button className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full">
+                                                      <EllipsisHorizontalIcon className="h-6 w-6 text-slate-500" />
+                                                    </button>
+                                                  </DropdownMenuTrigger>
+                                                  <DropdownMenuContent>
                                                     <DropdownMenuItem
                                                       onClick={() =>
-                                                        deletePromptVersion(
-                                                          promptVersion.id
+                                                        startExperiment(
+                                                          promptVersion.id,
+                                                          promptVersion.helicone_template
                                                         )
                                                       }
                                                     >
-                                                      <TrashIcon className="h-4 w-4 mr-2 text-red-500" />
-                                                      <p className="text-red-500">
-                                                        Delete
-                                                      </p>
+                                                      <BeakerIcon className="h-4 w-4 mr-2" />
+                                                      Experiment
                                                     </DropdownMenuItem>
-                                                  )}
-                                                </DropdownMenuContent>
-                                              </DropdownMenu>
-                                            ) : (
-                                              <DropdownMenu>
-                                                <DropdownMenuTrigger asChild>
-                                                  <button className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full">
-                                                    <EllipsisHorizontalIcon className="h-6 w-6 text-slate-500" />
-                                                  </button>
-                                                </DropdownMenuTrigger>
-                                                <DropdownMenuContent>
-                                                  <DropdownMenuItem
-                                                    onClick={() =>
-                                                      startExperiment(
-                                                        promptVersion.id,
-                                                        promptVersion.helicone_template
-                                                      )
-                                                    }
-                                                  >
-                                                    <BeakerIcon className="h-4 w-4 mr-2" />
-                                                    Experiment
-                                                  </DropdownMenuItem>
-                                                </DropdownMenuContent>
-                                              </DropdownMenu>
-                                            )}
+                                                  </DropdownMenuContent>
+                                                </DropdownMenu>
+                                              )}
+                                            </div>
                                           </div>
                                         </div>
                                       </div>
                                     </div>
                                   </div>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </ScrollArea>
+                                );
+                              })}
+                            </div>
+                          </ScrollArea>
+                        )}
                       </div>
                       <div className="border-x border-b border-[#E8EAEC] dark:border-slate-700 bg-[#F9FAFB] dark:bg-black">
-                        <div className="flex flex-row items-center justify-between mx-4 h-12">
-                          <h2 className="text-lg font-medium ">Inputs</h2>
-                          <div className="pl-4 w-full">
-                            <TextInput
-                              placeholder="Search by request id..."
-                              value={searchRequestId}
-                              onValueChange={(value) =>
-                                setSearchRequestId(value)
-                              }
+                        <div
+                          className="flex flex-row items-center justify-between px-4 h-12 cursor-pointer"
+                          onClick={() => setIsInputsExpanded(!isInputsExpanded)}
+                        >
+                          <h2 className="text-lg font-medium">Inputs</h2>
+                          <div className="flex items-center space-x-2">
+                            {isSearchVisible ? (
+                              <div className="relative w-64">
+                                <TextInput
+                                  placeholder="Search by request id..."
+                                  value={searchRequestId}
+                                  onValueChange={(value) =>
+                                    setSearchRequestId(value)
+                                  }
+                                  className="pr-8"
+                                />
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setIsSearchVisible(false);
+                                    setSearchRequestId("");
+                                  }}
+                                  className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full"
+                                >
+                                  <XMarkIcon className="h-4 w-4 text-slate-500" />
+                                </button>
+                              </div>
+                            ) : (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setIsSearchVisible(true);
+                                }}
+                                className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full"
+                              >
+                                <MagnifyingGlassIcon className="h-5 w-5 text-slate-500" />
+                              </button>
+                            )}
+                            <ChevronDownIcon
+                              className={`h-5 w-5 transition-transform ${
+                                isInputsExpanded ? "rotate-180" : ""
+                              }`}
                             />
                           </div>
                         </div>
 
-                        <ScrollArea className="h-[30vh] rounded-b-lg">
-                          <ul className="flex flex-col ">
-                            {inputs
-                              ?.filter((input) =>
-                                input.source_request.includes(searchRequestId)
-                              )
-                              .map((input) => (
-                                <li key={input.id}>
-                                  <PromptPropertyCard
-                                    isSelected={selectedInput?.id === input.id}
-                                    onSelect={() => handleInputSelect(input)}
-                                    requestId={input.source_request}
-                                    createdAt={input.created_at}
-                                    properties={input.inputs}
-                                    autoInputs={input.auto_prompt_inputs}
-                                    view={inputView}
-                                  />
-                                </li>
-                              ))}
-                          </ul>
-                        </ScrollArea>
+                        {isInputsExpanded && (
+                          <ScrollArea className="h-[30vh] rounded-b-lg">
+                            <ul className="flex flex-col">
+                              {inputs
+                                ?.filter((input) =>
+                                  input.source_request.includes(searchRequestId)
+                                )
+                                .map((input, index, filteredInputs) => {
+                                  const isFirst = index === 0;
+                                  const isLast =
+                                    index === filteredInputs.length - 1;
+                                  const isSelected =
+                                    selectedInput?.id === input.id;
+
+                                  return (
+                                    <li
+                                      key={input.id}
+                                      className={`flex flex-row w-full ${
+                                        isSelected
+                                          ? "bg-sky-50 dark:bg-sky-900"
+                                          : "bg-white dark:bg-gray-800"
+                                      } ${
+                                        isFirst
+                                          ? "border-t border-slate-300 dark:border-slate-700"
+                                          : ""
+                                      } ${
+                                        isLast
+                                          ? "border-b border-slate-300 dark:border-slate-700"
+                                          : ""
+                                      }`}
+                                    >
+                                      <div className="flex items-center">
+                                        {isSelected && (
+                                          <div className="bg-sky-500 h-full w-1" />
+                                        )}
+                                      </div>
+                                      <div
+                                        className={`flex-grow p-4 cursor-pointer ${
+                                          !isFirst
+                                            ? "border-t border-slate-300 dark:border-slate-700"
+                                            : ""
+                                        }`}
+                                        onClick={() => handleInputSelect(input)}
+                                      >
+                                        {Object.entries(input.inputs).map(
+                                          ([key, value], index) => (
+                                            <div
+                                              key={index}
+                                              className="mb-2 last:mb-0"
+                                            >
+                                              <span className="text-blue-500 font-medium">
+                                                {key}:{" "}
+                                              </span>
+                                              <span className="text-gray-700 dark:text-gray-300">
+                                                {typeof value === "string"
+                                                  ? value.length > 100
+                                                    ? value.substring(0, 100) +
+                                                      "..."
+                                                    : value
+                                                  : JSON.stringify(value)}
+                                              </span>
+                                            </div>
+                                          )
+                                        )}
+                                        {input.auto_prompt_inputs &&
+                                          input.auto_prompt_inputs.length >
+                                            0 && (
+                                            <div className="mt-2">
+                                              <span className="text-blue-500 font-medium">
+                                                messages:{" "}
+                                              </span>
+                                              <span className="text-gray-500">
+                                                {JSON.stringify(
+                                                  input.auto_prompt_inputs
+                                                ).substring(0, 50)}
+                                                ...
+                                              </span>
+                                            </div>
+                                          )}
+                                        {input.response_body && (
+                                          <div className="mt-2">
+                                            <span className="text-blue-500 font-medium">
+                                              messages:{" "}
+                                            </span>
+                                            <span className="text-gray-700 dark:text-gray-300">
+                                              {JSON.stringify(
+                                                (input.response_body as any)
+                                                  ?.choices[0]?.message
+                                              )}
+                                            </span>
+                                          </div>
+                                        )}
+                                      </div>
+                                    </li>
+                                  );
+                                })}
+                            </ul>
+                          </ScrollArea>
+                        )}
                       </div>
                     </div>
                   </div>

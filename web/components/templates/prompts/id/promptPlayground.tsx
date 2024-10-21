@@ -247,22 +247,18 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
         return (
           <ul className="w-full relative h-fit">
             {messages.map((message, index) => (
-              <li
+              <PromptChatRow
                 key={message.id}
-                className="dark:border-gray-700 last:border-b-0 z-10 last:rounded-xl"
-              >
-                <PromptChatRow
-                  message={message}
-                  editMode={isEditMode}
-                  index={index}
-                  callback={(userText, role) =>
-                    handleUpdateMessage(index, userText, role)
-                  }
-                  deleteRow={() => handleDeleteMessage(index)}
-                  selectedProperties={selectedInput?.inputs}
-                  onExtractVariables={onExtractVariables}
-                />
-              </li>
+                message={message}
+                editMode={isEditMode}
+                index={index}
+                callback={(userText, role) =>
+                  handleUpdateMessage(index, userText, role)
+                }
+                deleteRow={() => handleDeleteMessage(index)}
+                selectedProperties={selectedInput?.inputs}
+                onExtractVariables={onExtractVariables}
+              />
             ))}
           </ul>
         );
