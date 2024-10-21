@@ -20,4 +20,6 @@ export interface ModelRow {
     start: string;
     end: string;
   };
+  max_window_size: number; // Add this line
 }
+
