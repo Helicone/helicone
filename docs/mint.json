@@ -275,6 +275,17 @@
             "guides/cookbooks/debugging",
             "guides/cookbooks/labeling-request-data"
           ]
+        },
+        {
+          "group": "Prompt Engineering",
+          "pages": [
+            "guides/prompt-engineering/be-specific-and-clear",
+            "guides/prompt-engineering/use-structured-formats",
+            "guides/prompt-engineering/leverage-role-playing",
+            "guides/prompt-engineering/implement-few-shot-learning",
+            "guides/prompt-engineering/use-constrained-outputs",
+            "guides/prompt-engineering/use-chain-of-thought-prompting"
+          ]
         }
       ]
     },
