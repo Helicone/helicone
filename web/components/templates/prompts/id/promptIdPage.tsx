@@ -775,130 +775,153 @@ const PromptIdPage = (props: PromptIdPageProps) => {
 
                         <ScrollArea className="h-[25vh] rounded-b-lg">
                           <div>
-                            {sortedPrompts?.map((promptVersion) => {
+                            {sortedPrompts?.map((promptVersion, index) => {
                               const isProduction =
                                 promptVersion.metadata?.isProduction === true;
                               const isSelected =
                                 selectedVersion ===
                                 `${promptVersion.major_version}.${promptVersion.minor_version}`;
+                              const isFirst = index === 0;
+                              const isLast = index === sortedPrompts.length - 1;
 
                               return (
                                 <div
                                   key={promptVersion.id}
-                                  className={`px-4 py-2 cursor-pointer border-t border-slate-300 dark:border-slate-700 ${
+                                  className={`flex flex-row w-full h-12 ${
                                     isSelected
-                                      ? "bg-sky-100 border-sky-500 dark:bg-sky-950 border-b"
+                                      ? "bg-sky-100 dark:bg-sky-950"
                                       : "bg-slate-50 dark:bg-slate-900"
+                                  } ${
+                                    isFirst
+                                      ? "border-t border-slate-300 dark:border-slate-700"
+                                      : ""
+                                  } ${
+                                    isLast
+                                      ? "border-b border-slate-300 dark:border-slate-700"
+                                      : ""
                                   }`}
-                                  onClick={() =>
-                                    setSelectedInputAndVersion(
-                                      `${promptVersion.major_version}.${promptVersion.minor_version}`
-                                    )
-                                  }
                                 >
-                                  <div className="flex justify-between items-center">
-                                    <div className="flex items-center space-x-2">
-                                      <div className="border rounded-full border-slate-500 bg-white dark:bg-black h-6 w-6 flex items-center justify-center">
-                                        {isSelected && (
-                                          <div className="bg-sky-500 rounded-full h-4 w-4" />
-                                        )}
-                                      </div>
-                                      <span className="font-medium text-lg">
-                                        V{promptVersion.major_version}.
-                                        {promptVersion.minor_version}
-                                      </span>
-                                      <span>
-                                        {isProduction && (
+                                  <div className="flex items-center">
+                                    {isSelected && (
+                                      <div className="bg-sky-500 h-full w-1" />
+                                    )}
+                                  </div>
+                                  <div
+                                    className={`flex-grow px-4 py-2 flex flex-row cursor-pointer ${
+                                      !isFirst
+                                        ? "border-t border-slate-300 dark:border-slate-700"
+                                        : ""
+                                    }`}
+                                    onClick={() =>
+                                      setSelectedInputAndVersion(
+                                        `${promptVersion.major_version}.${promptVersion.minor_version}`
+                                      )
+                                    }
+                                  >
+                                    <div className="flex justify-between items-center w-full">
+                                      <div className="flex items-center space-x-2 flex-row justify-between w-full">
+                                        <div className="flex items-center space-x-2">
+                                          <span className="font-medium text-lg">
+                                            V{promptVersion.major_version}.
+                                            {promptVersion.minor_version}
+                                          </span>
                                           <Badge
                                             variant={"default"}
-                                            className="bg-[#F1F5F9] dark:bg-[#1E293B] border border-[#CBD5E1] dark:border-[#475569] text-black dark:text-white text-sm font-medium rounded-lg px-4 hover:bg-[#F1F5F9] hover:text-black"
+                                            className="bg-[#F1F5F9] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-[#475569] text-[#334155] dark:text-white text-sm font-medium rounded-lg px-4 hover:bg-[#F1F5F9] hover:text-black"
                                           >
-                                            Prod
+                                            {promptVersion.model}
                                           </Badge>
-                                        )}
-                                      </span>
-                                    </div>
-                                    <div className="flex items-center space-x-2">
-                                      {prompt?.metadata?.createdFromUi ===
-                                      true ? (
-                                        <DropdownMenu>
-                                          <DropdownMenuTrigger asChild>
-                                            <button className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full">
-                                              <EllipsisHorizontalIcon className="h-6 w-6 text-slate-500" />
-                                            </button>
-                                          </DropdownMenuTrigger>
-                                          <DropdownMenuContent>
-                                            {!isProduction && (
-                                              <DropdownMenuItem
-                                                onClick={() =>
-                                                  promoteToProduction(
-                                                    promptVersion.id
-                                                  )
-                                                }
+                                          <span>
+                                            {isProduction && (
+                                              <Badge
+                                                variant={"default"}
+                                                className="bg-[#BAE6FD] dark:bg-[#1E293B]  dark:border-[#475569] text-[#0369A1] dark:text-white text-sm font-medium rounded-lg px-4 hover:bg-[#F1F5F9] hover:text-black"
                                               >
-                                                <ArrowTrendingUpIcon className="h-4 w-4 mr-2" />
-                                                Promote to prod
-                                              </DropdownMenuItem>
+                                                Prod
+                                              </Badge>
                                             )}
-                                            <DropdownMenuItem
-                                              onClick={() =>
-                                                startExperiment(
-                                                  promptVersion.id,
-                                                  promptVersion.helicone_template
-                                                )
-                                              }
-                                            >
-                                              <BeakerIcon className="h-4 w-4 mr-2" />
-                                              Experiment
-                                            </DropdownMenuItem>
-                                            {!isProduction && (
-                                              <DropdownMenuItem
-                                                onClick={() =>
-                                                  deletePromptVersion(
-                                                    promptVersion.id
-                                                  )
-                                                }
-                                              >
-                                                <TrashIcon className="h-4 w-4 mr-2 text-red-500" />
-                                                <p className="text-red-500">
-                                                  Delete
-                                                </p>
-                                              </DropdownMenuItem>
+                                          </span>
+                                        </div>
+                                        <div className="flex items-center space-x-2">
+                                          <span className="text-base text-slate-500">
+                                            {getTimeAgo(
+                                              new Date(promptVersion.created_at)
                                             )}
-                                          </DropdownMenuContent>
-                                        </DropdownMenu>
-                                      ) : (
-                                        <DropdownMenu>
-                                          <DropdownMenuTrigger asChild>
-                                            <button className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full">
-                                              <EllipsisHorizontalIcon className="h-6 w-6 text-slate-500" />
-                                            </button>
-                                          </DropdownMenuTrigger>
-                                          <DropdownMenuContent>
-                                            <DropdownMenuItem
-                                              onClick={() =>
-                                                startExperiment(
-                                                  promptVersion.id,
-                                                  promptVersion.helicone_template
-                                                )
-                                              }
-                                            >
-                                              <BeakerIcon className="h-4 w-4 mr-2" />
-                                              Experiment
-                                            </DropdownMenuItem>
-                                          </DropdownMenuContent>
-                                        </DropdownMenu>
-                                      )}
-                                    </div>
-                                  </div>
-                                  <div className="flex justify-between items-center mt-2">
-                                    <span className="text-xs text-slate-500">
-                                      {getTimeAgo(
-                                        new Date(promptVersion.created_at)
-                                      )}
-                                    </span>
-                                    <div className="text-xs text-slate-500 dark:text-slate-400">
-                                      {promptVersion.model}
+                                          </span>
+                                          <div className="flex items-center space-x-2">
+                                            {prompt?.metadata?.createdFromUi ===
+                                            true ? (
+                                              <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                  <button className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full">
+                                                    <EllipsisHorizontalIcon className="h-6 w-6 text-slate-500" />
+                                                  </button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="start">
+                                                  {!isProduction && (
+                                                    <DropdownMenuItem
+                                                      onClick={() =>
+                                                        promoteToProduction(
+                                                          promptVersion.id
+                                                        )
+                                                      }
+                                                    >
+                                                      <ArrowTrendingUpIcon className="h-4 w-4 mr-2" />
+                                                      Promote to prod
+                                                    </DropdownMenuItem>
+                                                  )}
+                                                  <DropdownMenuItem
+                                                    onClick={() =>
+                                                      startExperiment(
+                                                        promptVersion.id,
+                                                        promptVersion.helicone_template
+                                                      )
+                                                    }
+                                                  >
+                                                    <BeakerIcon className="h-4 w-4 mr-2" />
+                                                    Experiment
+                                                  </DropdownMenuItem>
+                                                  {!isProduction && (
+                                                    <DropdownMenuItem
+                                                      onClick={() =>
+                                                        deletePromptVersion(
+                                                          promptVersion.id
+                                                        )
+                                                      }
+                                                    >
+                                                      <TrashIcon className="h-4 w-4 mr-2 text-red-500" />
+                                                      <p className="text-red-500">
+                                                        Delete
+                                                      </p>
+                                                    </DropdownMenuItem>
+                                                  )}
+                                                </DropdownMenuContent>
+                                              </DropdownMenu>
+                                            ) : (
+                                              <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                  <button className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full">
+                                                    <EllipsisHorizontalIcon className="h-6 w-6 text-slate-500" />
+                                                  </button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent>
+                                                  <DropdownMenuItem
+                                                    onClick={() =>
+                                                      startExperiment(
+                                                        promptVersion.id,
+                                                        promptVersion.helicone_template
+                                                      )
+                                                    }
+                                                  >
+                                                    <BeakerIcon className="h-4 w-4 mr-2" />
+                                                    Experiment
+                                                  </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                              </DropdownMenu>
+                                            )}
+                                          </div>
+                                        </div>
+                                      </div>
                                     </div>
                                   </div>
                                 </div>
