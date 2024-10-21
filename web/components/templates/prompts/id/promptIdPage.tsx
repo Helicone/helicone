@@ -653,6 +653,49 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                   ]}
                 />
                 <Popover>
+                  {prompt?.metadata?.createdFromUi === true ? (
+                    <>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size={"sm"}
+                          className="h-6 bg-[#F1F5F9] border border-[#CBD5E1]"
+                        >
+                          <PencilIcon className="h-4 w-4 mr-2" />
+                          Editable
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="max-w-[15rem]" align="center">
+                        <p className="text-sm">
+                          This prompt was created{" "}
+                          <span className="font-semibold">in the UI</span>. You
+                          can edit / delete them, or promote to prod.
+                        </p>
+                      </PopoverContent>
+                    </>
+                  ) : (
+                    <>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size={"sm"}
+                          className="h-6 bg-[#F1F5F9] border border-[#CBD5E1]"
+                        >
+                          <EyeIcon className="h-4 w-4 mr-2" />
+                          View only
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="max-w-[15rem]" align="center">
+                        <p className="text-sm">
+                          This prompt was created{" "}
+                          <span className="font-semibold">in code</span>. You
+                          won&apos;t be able to edit this from the UI.
+                        </p>
+                      </PopoverContent>
+                    </>
+                  )}
+                </Popover>
+                <Popover>
                   <PopoverTrigger asChild>
                     <InformationCircleIcon className="h-6 w-6 text-slate-500 cursor-pointer" />
                   </PopoverTrigger>
@@ -696,52 +739,9 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                     </div>
                   </PopoverContent>
                 </Popover>
-                <Popover>
-                  {prompt?.metadata?.createdFromUi === true ? (
-                    <>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size={"sm"}
-                          className="h-6 bg-[#F1F5F9] border border-[#CBD5E1]"
-                        >
-                          <PencilIcon className="h-4 w-4 mr-2" />
-                          Editable
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="max-w-[15rem]" align="center">
-                        <p className="text-sm">
-                          This prompt was created{" "}
-                          <span className="font-semibold">in the UI</span>. You
-                          can edit / delete them, or promote to prod.
-                        </p>
-                      </PopoverContent>
-                    </>
-                  ) : (
-                    <>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size={"sm"}
-                          className="h-6 bg-[#F1F5F9] border border-[#CBD5E1]"
-                        >
-                          <EyeIcon className="h-4 w-4 mr-2" />
-                          View only
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="max-w-[15rem]" align="center">
-                        <p className="text-sm">
-                          This prompt was created{" "}
-                          <span className="font-semibold">in code</span>. You
-                          won&apos;t be able to edit this from the UI.
-                        </p>
-                      </PopoverContent>
-                    </>
-                  )}
-                </Popover>
               </div>
               <div className="flex items-center space-x-4">
-                <TabsList className="grid w-64 grid-cols-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 p-1 pb-2">
+                <TabsList className="grid w-64 h-11 grid-cols-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 ">
                   <TabsTrigger
                     value="prompt"
                     className="rounded-md transition-colors data-[state=active]:bg-slate-100 dark:data-[state=active]:bg-slate-700 data-[state=active]:text-slate-950 dark:data-[state=active]:text-slate-50"
@@ -755,13 +755,6 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                     Metrics
                   </TabsTrigger>
                 </TabsList>
-                {/* <HcButton
-                  onClick={() => router.push(`/prompts/${id}/new-experiment`)}
-                  variant="primary"
-                  size="sm"
-                  title="Start Experiment"
-                  icon={BeakerIcon}
-                /> */}
               </div>
             </div>
           </IslandContainer>
@@ -858,7 +851,12 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                                             variant={"default"}
                                             className="bg-[#F1F5F9] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-[#475569] text-[#334155] dark:text-white text-sm font-medium rounded-lg px-4 hover:bg-[#F1F5F9] hover:text-black"
                                           >
-                                            {promptVersion.model}
+                                            {promptVersion.model.length > 10
+                                              ? promptVersion.model.substring(
+                                                  0,
+                                                  10
+                                                ) + "..."
+                                              : promptVersion.model}
                                           </Badge>
                                           <span>
                                             {isProduction && (
