@@ -128,7 +128,9 @@ export class TraceManager {
         heliconeApiKeyId: authParams.heliconeApiKeyId ?? undefined,
         heliconeProxyKeyId: undefined,
         targetUrl: "",
-        provider: span.attributes.get("gen_ai.system"),
+        provider:
+          (span.attributes.get("gen_ai.system") ?? "").toUpperCase() ??
+          undefined,
         bodySize: JSON.stringify(promptMessages).length,
         path: "async-unknown-path",
         threat: false,
@@ -143,7 +145,14 @@ export class TraceManager {
         bodySize: JSON.stringify(completionChoices).length,
         timeToFirstToken: undefined,
         responseCreatedAt: new Date(parseInt(span.endTimeUnixNano) / 1000000),
-        delayMs: -1,
+        delayMs:
+          span.endTimeUnixNano && span.startTimeUnixNano
+            ? Math.trunc(
+                (parseInt(span.endTimeUnixNano) -
+                  parseInt(span.startTimeUnixNano)) /
+                  1000000
+              )
+            : -1,
       },
     };
   }
