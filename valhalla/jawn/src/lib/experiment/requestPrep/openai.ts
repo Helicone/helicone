@@ -20,7 +20,6 @@ function prepareRequestAzure(
 
   const heliconeWorkerUrl = process.env.HELICONE_WORKER_URL ?? "";
   let fetchUrl = `${heliconeWorkerUrl}/v1/chat/completions`;
-
   console.log("fetchUrl", fetchUrl);
 
   return {
