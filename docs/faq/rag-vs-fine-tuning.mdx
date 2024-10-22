@@ -1,0 +1,76 @@
+---
+title: "RAG vs Fine-tuning: Which approach should I choose?"
+sidebarTitle: "RAG vs Fine-tuning"
+icon: "scale-balanced"
+description: "Compare Retrieval Augmented Generation (RAG) and fine-tuning approaches for enhancing LLM performance"
+---
+
+Retrieval Augmented Generation (RAG) and fine-tuning are two powerful approaches to enhance Large Language Model (LLM) performance. Each method has its own strengths and use cases. Let's explore both approaches in detail:
+
+## Retrieval Augmented Generation (RAG)
+
+RAG combines the power of LLMs with external knowledge retrieval:
+
+<CardGroup cols={2}>
+  <Card title="Dynamic Knowledge" icon="bolt">
+    Augments LLM with up-to-date external information during inference
+  </Card>
+  <Card title="Flexibility" icon="puzzle-piece">
+    Easily adaptable to new information without retraining
+  </Card>
+  <Card title="Cost-Effective" icon="piggy-bank">
+    Efficient for large, frequently updated datasets
+  </Card>
+  <Card title="Quick Implementation" icon="rocket">
+    Faster to set up compared to fine-tuning
+  </Card>
+</CardGroup>
+
+### Ideal Use Cases for RAG
+
+- Question-answering systems requiring current information
+- Chatbots needing access to large, frequently updated knowledge bases
+- Applications where transparency and source attribution are crucial
+
+## Fine-tuning
+
+Fine-tuning adapts pre-trained LLMs for specific tasks:
+
+<CardGroup cols={2}>
+  <Card title="Specialized Performance" icon="bullseye">
+    Potentially higher accuracy for domain-specific tasks
+  </Card>
+  <Card title="Task-Specific Model" icon="gear">
+    Results in a model optimized for particular use cases
+  </Card>
+  <Card title="Resource Intensive" icon="server">
+    Requires more computational resources and curated datasets
+  </Card>
+  <Card title="Static Knowledge" icon="database">
+    Knowledge is embedded in model parameters
+  </Card>
+</CardGroup>
+
+### Ideal Use Cases for Fine-tuning
+
+- Specialized language tasks (e.g., legal or medical text analysis)
+- Scenarios with limited, high-quality training data
+- Applications requiring faster inference without external data retrieval
+
+## Choosing the Right Approach
+
+Consider these factors when deciding between RAG and fine-tuning:
+
+1. **Task Nature**: Is your application focused on general knowledge or a specific domain?
+2. **Data Availability**: Do you have a large, diverse dataset or a smaller, curated one?
+3. **Update Frequency**: How often does your knowledge base need to be updated?
+4. **Resource Constraints**: What computational resources are available for training and inference?
+5. **Inference Speed**: Are real-time responses critical for your application?
+6. **Explainability**: Do you need to trace the source of the model's outputs?
+
+<Tip>
+  In some cases, a hybrid approach combining RAG and fine-tuning may yield
+  optimal results, leveraging the strengths of both methods.
+</Tip>
+
+For more detailed information on fine-tuning LLMs with Helicone, check out our [comprehensive guide](/guides/cookbooks/fine-tune).

@@ -264,6 +264,7 @@
         {
           "group": "Cookbooks",
           "pages": [
+            "guides/cookbooks/fine-tune",
             "guides/cookbooks/experiments",
             "guides/cookbooks/getting-user-requests",
             "guides/cookbooks/etl",
@@ -308,7 +309,12 @@
         "faq/overview",
         {
           "group": "Categories",
-          "pages": ["faq/tag/platform", "faq/tag/security", "faq/tag/concepts"]
+          "pages": [
+            "faq/tag/platform",
+            "faq/tag/security",
+            "faq/tag/concepts",
+            "faq/tag/fine-tuning"
+          ]
         }
       ]
     },
