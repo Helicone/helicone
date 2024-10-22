@@ -3,7 +3,7 @@
   "title1": "AutoGPT x Helicone: Optimizing Evaluation Pipelines - Helicone",
   "title2": "AutoGPT x Helicone: Optimizing Evaluation Pipelines - Helicone",
   "description": "Discover how AutoGPT leverages Helicone to build the optimal evaluation pipeline for agent comparison. Learn about proxy integration, caching, and GraphQL features that save costs and enhance benchmarking processes for AI agents.AutoGPT, Helicone, AI agents, evaluation pipeline, benchmarking, proxy integration, caching, GraphQL, cost optimization, MITM proxy, custom properties, agent comparison, OpenAI, CI/CD.",
-  "images": "https://www.helicone.ai/static/blog/autogpt.webp",
+  "images": "/static/blog/autogpt.webp",
   "time": "3 minute read",
   "author": "Justin Torre",
   "date": "Mar 12, 2023"

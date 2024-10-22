@@ -1,9 +1,9 @@
 {
-  "title": "When to Fine-Tune LLMs",
-  "title1": "When to Fine-Tune LLMs",
-  "title2": "When to Fine-Tune LLMs",
-  "description": "Discover when and why you should fine-tune base language models like LLaMA to enhance performance for specialized tasks. Learn how fine-tuning transforms general models into experts tailored to your application's needs.",
-  "images": "/static/blog/when-to-finetune.webp",
+  "title": "The Case Against Fine-Tuning",
+  "title1": "The Case Against Fine-Tuning",
+  "title2": "The Case Against Fine-Tuning",
+  "description": "Discover the strategic factors for when and why to fine-tune base language models like LLaMA for specialized tasks. Understand the limited use cases where fine-tuning provides significant benefits.",
+  "images": "/static/blog/when-to-finetune/finetune-cover.webp",
   "time": "15 minute read",
   "author": "Justin Torre",
   "date": "October 8, 2024"

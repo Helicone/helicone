@@ -3,7 +3,7 @@
   "title1": "Meta Releases SAM 2 and What It Means for Developers Building Multi-Modal AI - Helicone",
   "title2": "Meta Releases SAM 2 and What It Means for Developers Building Multi-Modal AI - Helicone",
   "description": "Meta's release of SAM 2 (Segment Anything Model for videos and images) represents a significant leap in AI capabilities, revolutionizing how developers and tools like Helicone approach multi-modal observability in AI systems.",
-  "images": "https://www.helicone.ai/static/blog/sam-2-cover.webp",
+  "images": "/static/blog/sam-2-cover.webp",
   "time": "4 minute read",
   "author": "Lina Lam",
   "date": "July 30, 2024"

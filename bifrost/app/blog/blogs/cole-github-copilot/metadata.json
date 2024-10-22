@@ -3,7 +3,7 @@
   "title1": "Insider Scoop: Our Co-founder's Take on GitHub Copilot - Helicone",
   "title2": "Insider Scoop: Our Co-founder's Take on GitHub Copilot - Helicone",
   "description": "Discover how Helicone's co-founder uses GitHub Copilot in daily operations. Learn about Copilot's impact on development workflow, tips for maximizing its potential, and insights on embracing bugs in startup environments. No BS, no affiliations, just genuine opinions on AI-assisted coding and startup principles.",
-  "images": "https://www.helicone.ai/static/blog/cole-copilot.webp",
+  "images": "/static/blog/cole-copilot.webp",
   "time": "4 minute read",
   "authors": ["Cole Gottdank", "Lina Lam"],
   "date": "May 30, 2024"
