@@ -3,7 +3,7 @@
   "title1": "LLM Architecture Evolution Guide: From Basic to Advanced - Helicone",
   "title2": "LLM Architecture Evolution Guide: From Simple Chatbot to Complex System - Helicone",
   "description": "Explore the stages of LLM application development, from a basic chatbot to a sophisticated system with vector databases, gateways, tools, and agents. Learn how LLM architecture evolves to meet scaling challenges and user demands.",
-  "images": "https://www.helicone.ai/static/blog/building-an-llm-stack/cover.webp",
+  "images": "/static/blog/building-an-llm-stack/cover.webp",
   "time": "6 minute read",
   "author": "Justin Torre",
   "date": "August 5, 2024"

@@ -1,0 +1,75 @@
+---
+title: "How to Fine-Tune LLMs with Helicone and OpenPipe"
+sidebarTitle: "Fine-Tuning LLMs with Helicone and OpenPipe"
+description: "Learn how to fine-tune large language models with Helicone and OpenPipe to optimize performance for specific tasks."
+"twitter:title": "How to Fine-Tune LLMs with Helicone and OpenPipe"
+---
+
+<Steps>
+  <Step title="Add the OpenPipe Integration">
+    Navigate to `Settings` -> `Connections` in your Helicone dashboard and configure the OpenPipe integration.
+
+    ![Configure OpenPipe Integration](/images/use-cases/fine-tune/openpipe-integration.webp)
+
+    This integration allows you to manage your fine-tuning datasets and jobs seamlessly within Helicone.
+
+  </Step>
+
+  <Step title="Create a Dataset for Fine-Tuning">
+    Your dataset doesn't need to be enormous to be effective. In fact, smaller, high-quality datasets often yield better results.
+
+    - **Recommendation**: Start with 50-200 examples that are representative of the tasks you want the model to perform.
+
+    ![Create a New Dataset](/images/use-cases/fine-tune/dataset.webp)
+
+    Ensure your dataset includes clear input-output pairs to guide the model during fine-tuning.
+
+  </Step>
+
+  <Step title="Evaluate and Refine Your Dataset">
+    Within Helicone, you can evaluate your dataset to identify any issues or areas for improvement.
+
+    - **Review Samples**: Check for consistency and clarity in your examples.
+    - **Modify as Needed**: Make adjustments to ensure the dataset aligns closely with your desired outcomes.
+
+    ![Evaluate Your Dataset](/images/use-cases/fine-tune/openpipe-button.webp)
+
+    Regular evaluation helps in creating a robust fine-tuning dataset that enhances model performance.
+
+  </Step>
+
+  <Step title="Configure Your Fine-Tuning Job">
+    Set up your fine-tuning job by specifying parameters such as:
+
+    - **Model Selection**: Choose the base model you wish to fine-tune.
+    - **Training Settings**: Adjust hyperparameters like learning rate, epochs, and batch size.
+    - **Validation Metrics**: Define how you'll measure the model's performance during training.
+
+    <img
+      src="/images/use-cases/fine-tune/fine-tune-config.webp"
+      alt="Configure Fine-Tuning Job"
+      width="300"
+    />
+
+    After configuring, initiate the fine-tuning process. Helicone and OpenPipe handle the heavy lifting, providing you with progress updates.
+
+  </Step>
+
+  <Step title="Deploy and Monitor Your Fine-Tuned Model">
+    Once fine-tuning is complete:
+
+    - **Deployment**: Integrate the fine-tuned model into your application via Helicone's API endpoints.
+    - **Monitoring**: Use Helicone's observability tools to track performance, usage, and any anomalies.
+
+  </Step>
+</Steps>
+
+## Additional Fine-Tuning Resources
+
+For more information on fine-tuning, check out these resources:
+
+- [Fine-Tuning Best Practices: Training Data](https://openpipe.ai/blog/fine-tuning-best-practices-series-introduction-and-chapter-1-training-data)
+- [Fine-Tuning Best Practices: Models](https://openpipe.ai/blog/fine-tuning-best-practices-chapter-2-models)
+- [How to use OpenAI fine-tuning API](/faq/openai-fine-tuning-api)
+- [Understanding fine-tuning duration](/faq/llm-fine-tuning-time)
+- [Comparing RAG and fine-tuning approaches](/faq/rag-vs-fine-tuning)
