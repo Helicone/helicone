@@ -847,17 +847,20 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                                             V{promptVersion.major_version}.
                                             {promptVersion.minor_version}
                                           </span>
-                                          <Badge
-                                            variant={"default"}
-                                            className="bg-[#F1F5F9] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-[#475569] text-[#334155] dark:text-white text-sm font-medium rounded-lg px-4 hover:bg-[#F1F5F9] hover:text-black"
-                                          >
-                                            {promptVersion.model.length > 10
-                                              ? promptVersion.model.substring(
-                                                  0,
-                                                  10
-                                                ) + "..."
-                                              : promptVersion.model}
-                                          </Badge>
+                                          {promptVersion.model &&
+                                            promptVersion.model.length > 0 && (
+                                              <Badge
+                                                variant={"default"}
+                                                className="bg-[#F1F5F9] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-[#475569] text-[#334155] dark:text-white text-sm font-medium rounded-lg px-4 hover:bg-[#F1F5F9] hover:text-black"
+                                              >
+                                                {promptVersion.model.length >= 7
+                                                  ? promptVersion.model.substring(
+                                                      0,
+                                                      7
+                                                    ) + ".."
+                                                  : promptVersion.model}
+                                              </Badge>
+                                            )}
                                           <span>
                                             {isProduction && (
                                               <Badge
@@ -870,7 +873,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                                           </span>
                                         </div>
                                         <div className="flex items-center space-x-2">
-                                          <span className="text-base text-slate-500">
+                                          <span className="text-sm text-slate-500">
                                             {getTimeAgo(
                                               new Date(promptVersion.created_at)
                                             )}
