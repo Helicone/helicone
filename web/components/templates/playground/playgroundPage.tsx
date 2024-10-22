@@ -395,7 +395,6 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                   value={temperature}
                   onChange={(e) => {
                     const value = parseFloat(e.target.value);
-                    console.log("value", value);
                     if (value < 0.01) {
                       setTemperature(0.01);
                       return;
