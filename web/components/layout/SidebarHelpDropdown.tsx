@@ -27,9 +27,7 @@ const SidebarHelpDropdown = ({
   >("latestChangelogSeen", null);
 
   const hasNewChangelog =
-    latestChangelogSeen &&
-    changelog.length > 0 &&
-    latestChangelogSeen !== changelog[0].title;
+    changelog.length > 0 && latestChangelogSeen !== changelog[0].title;
 
   return (
     <DropdownMenu
