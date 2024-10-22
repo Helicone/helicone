@@ -5,8 +5,6 @@ description: "Learn how to fine-tune large language models with Helicone and Ope
 "twitter:title": "How to Fine-Tune LLMs with Helicone and OpenPipe"
 ---
 
-Before diving into the fine-tuning process with Helicone and OpenPipe, it's important to understand [what GPT fine-tuning is and how it works](/faq/gpt-fine-tuning). This background knowledge will help you make informed decisions throughout the process.
-
 <Steps>
   <Step title="Add the OpenPipe Integration">
     Navigate to `Settings` -> `Connections` in your Helicone dashboard and configure the OpenPipe integration.
@@ -24,7 +22,7 @@ Before diving into the fine-tuning process with Helicone and OpenPipe, it's impo
 
     ![Create a New Dataset](/images/use-cases/fine-tune/dataset.webp)
 
-    Ensure your dataset includes clear input-output pairs to guide the model during fine-tuning. For more details on preparing your dataset, refer to our guide on [using the OpenAI fine-tuning API](/faq/openai-fine-tuning-api#step-1-prepare-your-training-data).
+    Ensure your dataset includes clear input-output pairs to guide the model during fine-tuning.
 
   </Step>
 
@@ -53,7 +51,7 @@ Before diving into the fine-tuning process with Helicone and OpenPipe, it's impo
       width="300"
     />
 
-    After configuring, initiate the fine-tuning process. Helicone and OpenPipe handle the heavy lifting, providing you with progress updates. Keep in mind that [the time required for fine-tuning can vary](/faq/llm-fine-tuning-time) based on several factors.
+    After configuring, initiate the fine-tuning process. Helicone and OpenPipe handle the heavy lifting, providing you with progress updates.
 
   </Step>
 
@@ -66,10 +64,12 @@ Before diving into the fine-tuning process with Helicone and OpenPipe, it's impo
   </Step>
 </Steps>
 
-## Conclusion
+## Additional Fine-Tuning Resources
 
-In the fast-paced world of AI development, it's tempting to reach for fine-tuning as a one-size-fits-all solution. However, the smarter approach is to leverage the ever-improving capabilities of base models and reserve fine-tuning for those rare cases where it's truly necessary.
+For more information on fine-tuning, check out these resources:
 
-By carefully evaluating your application's needs and considering the rapid advancements in AI technology, you can make informed decisions that optimize both performance and resources. It's also worth considering [whether RAG (Retrieval Augmented Generation) might be a better fit for your use case](/faq/rag-vs-fine-tuning).
-
-**Remember:** Sometimes, less is more. Don't fine-tune unless you genuinely need to.
+- [Fine-Tuning Best Practices: Training Data](https://openpipe.ai/blog/fine-tuning-best-practices-series-introduction-and-chapter-1-training-data)
+- [Fine-Tuning Best Practices: Models](https://openpipe.ai/blog/fine-tuning-best-practices-chapter-2-models)
+- [How to use OpenAI fine-tuning API](/faq/openai-fine-tuning-api)
+- [Understanding fine-tuning duration](/faq/llm-fine-tuning-time)
+- [Comparing RAG and fine-tuning approaches](/faq/rag-vs-fine-tuning)
