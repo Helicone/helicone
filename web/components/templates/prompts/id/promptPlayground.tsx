@@ -41,7 +41,7 @@ export type PromptObject = {
 interface PromptPlaygroundProps {
   prompt: string | PromptObject;
   selectedInput: Input | undefined;
-  onSubmit?: (history: Message[], model: string) => void;
+  onSubmit?: (history: Message[], model: string, provider: string) => void;
   submitText: string;
   initialModel?: string;
   isPromptCreatedFromUi?: boolean;
@@ -160,10 +160,14 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
     Record<string, boolean>
   >({});
   const [selectedModel, setSelectedModel] = useState(initialModel);
+  const [selectedProvider, setSelectedProvider] = useState("OPENAI");
 
-  // Add this useEffect to update selectedModel when initialModel changes
   useEffect(() => {
     setSelectedModel(initialModel);
+    const selected = MODEL_LIST.find((model) => model.value === initialModel);
+    if (selected) {
+      setSelectedProvider(selected.provider.toUpperCase());
+    }
   }, [initialModel]);
 
   const handleAddMessage = () => {
@@ -325,7 +329,15 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
               <div className="font-normal">Model</div>
               <Select
                 value={selectedModel}
-                onValueChange={setSelectedModel}
+                onValueChange={(value) => {
+                  setSelectedModel(value);
+                  const selected = MODEL_LIST.find(
+                    (model) => model.value === value
+                  );
+                  if (selected) {
+                    setSelectedProvider(selected.provider);
+                  }
+                }}
                 defaultValue={initialModel}
               >
                 <SelectTrigger className="w-[200px]">
@@ -342,13 +354,14 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
               {playgroundMode === "prompt" && (
                 <Button
                   onClick={() =>
-                    onSubmit && onSubmit(currentChat, selectedModel || "")
+                    onSubmit &&
+                    onSubmit(currentChat, selectedModel || "", selectedProvider)
                   }
                   variant="default"
                   size="sm"
                   className="px-4 font-normal"
                 >
-                  Save prompt
+                  {submitText}
                 </Button>
               )}
             </div>

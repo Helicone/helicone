@@ -168,7 +168,7 @@ function modifyEnvBasedOnPath(env: Env, request: RequestWrapper): Env {
       if (isRootPath(url) && request.getMethod() === "GET") {
         return {
           ...env,
-          WORKER_DEFINED_REDIRECT_URL: "https://together.xyz",
+          WORKER_DEFINED_REDIRECT_URL: "THIS_DOESNT_MATTER",
         };
       } else {
         if (url.pathname.startsWith("/oai2ant")) {

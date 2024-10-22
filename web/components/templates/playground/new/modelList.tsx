@@ -58,4 +58,14 @@ export const MODEL_LIST: {
     label: "gpt-4-1106-preview",
     provider: "openai",
   },
+  {
+    value: "claude-3-5-sonnet-20240620",
+    label: "claude-3-5-sonnet-20240620",
+    provider: "anthropic",
+  },
+  {
+    value: "claude-3-opus-20240229",
+    label: "claude-3-opus-20240229",
+    provider: "anthropic",
+  },
 ];

@@ -107,7 +107,7 @@ const PromptsPage = (props: PromptsPageProps) => {
     );
   }, []);
 
-  const createPrompt = async (userDefinedId: string) => {
+  const createPrompt = async (userDefinedId: string, provider: string) => {
     if (!userDefinedId) {
       notification.setNotification("Name is required", "error");
       return;
@@ -145,6 +145,7 @@ const PromptsPage = (props: PromptsPageProps) => {
         prompt: promptData,
         metadata: {
           createdFromUi: true,
+          provider: provider || "OPENAI",
         },
       },
     });
@@ -290,8 +291,12 @@ const PromptsPage = (props: PromptsPageProps) => {
                                   onPromptChange={(prompt) =>
                                     setBasePrompt(prompt as PromptObject)
                                   }
-                                  onSubmit={async (history, model) => {
-                                    await createPrompt(newPromptName);
+                                  onSubmit={async (
+                                    history,
+                                    model,
+                                    provider
+                                  ) => {
+                                    await createPrompt(newPromptName, provider);
                                   }}
                                   className="border-none"
                                 />

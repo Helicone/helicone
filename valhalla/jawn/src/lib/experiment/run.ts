@@ -4,7 +4,7 @@ import { Result, err, ok } from "../shared/result";
 import { supabaseServer } from "../db/supabase";
 import { Experiment, ExperimentDatasetRow } from "../stores/experimentStore";
 import { BaseTempKey } from "./tempKeys/baseTempKey";
-import { prepareRequestOpenAIFull } from "./requestPrep/openaiCloud";
+import { prepareRequestAnthropicFull } from "./requestPrep/openai";
 import { prepareRequestAzureFull as prepareRequestAzureOnPremFull } from "./requestPrep/azure";
 import { runHypothesis, runOriginalRequest } from "./hypothesisRunner";
 import { generateHeliconeAPIKey } from "./tempKeys/tempAPIKey";
@@ -15,6 +15,7 @@ import {
 } from "./requestPrep/PreparedRequest";
 import { prepareRequestOpenAIOnPremFull } from "./requestPrep/openai";
 import { getAllSignedURLsFromInputs } from "../../managers/inputs/InputsManager";
+import { prepareRequestOpenAIFull } from "./requestPrep/openaiCloud";
 
 export const IS_ON_PREM =
   process.env.AZURE_BASE_URL &&
@@ -28,11 +29,16 @@ async function prepareRequest(
   args: PreparedRequestArgs,
   onPremConfig: {
     deployment: "AZURE" | "OPENAI";
-  }
+  },
+  provider: "OPENAI" | "ANTHROPIC"
 ): Promise<PreparedRequest> {
+  console.log("provider", provider);
   if (args.providerKey === null) {
     if (IS_ON_PREM && onPremConfig.deployment === "AZURE") {
       return await prepareRequestAzureOnPremFull(args);
+    } else if (provider === "ANTHROPIC") {
+      console.log("prepareRequestAnthropicFull");
+      return prepareRequestAnthropicFull(args);
     } else {
       return prepareRequestOpenAIOnPremFull(args);
     }
@@ -88,7 +94,8 @@ export async function runOriginalExperiment(
         },
         {
           deployment: experiment.meta?.deployment ?? "AZURE",
-        }
+        },
+        providerByModelName(promptVersion.data.model ?? "")
       );
 
       await runOriginalRequest({
@@ -139,7 +146,12 @@ export async function run(
           },
           {
             deployment: experiment.meta?.deployment ?? "AZURE",
-          }
+          },
+          providerByModelName(hypothesis.model)
+        );
+        console.log(
+          "preparedRequest",
+          JSON.stringify(preparedRequest, null, 2)
         );
 
         await runHypothesis({
@@ -165,3 +177,6 @@ export async function run(
     return ok("success");
   });
 }
+const providerByModelName = (modelName: string) => {
+  return modelName.includes("claude") ? "ANTHROPIC" : "OPENAI";
+};
