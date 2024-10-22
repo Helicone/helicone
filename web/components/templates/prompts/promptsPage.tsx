@@ -59,6 +59,10 @@ import PromptUsageChart from "./promptUsageChart";
 import { UpgradeToProCTA } from "../pricing/upgradeToProCTA";
 import { IslandContainer } from "@/components/ui/islandContainer";
 
+// **Import PromptPlayground and PromptObject**
+import PromptPlayground, { PromptObject } from "./id/promptPlayground";
+import { ScrollArea } from "../../ui/scroll-area";
+
 interface PromptsPageProps {
   defaultIndex: number;
 }
@@ -71,7 +75,18 @@ const PromptsPage = (props: PromptsPageProps) => {
   const [imNotTechnical, setImNotTechnical] = useState<boolean>(false);
   const [newPromptName, setNewPromptName] = useState<string>("");
   const [newPromptModel, setNewPromptModel] = useState(MODEL_LIST[0].value);
-  const [newPromptContent, setNewPromptContent] = useState("");
+
+  // **Update newPromptContent to basePrompt with type PromptObject**
+  const [basePrompt, setBasePrompt] = useState<PromptObject>({
+    model: "gpt-4",
+    messages: [
+      {
+        role: "system",
+        content: [{ text: "You are a helpful assistant.", type: "text" }],
+      },
+    ],
+  });
+
   const [promptVariables, setPromptVariables] = useState<string[]>([]);
   const [variableValues, setVariableValues] = useState<Record<string, string>>(
     {}
@@ -101,6 +116,10 @@ const PromptsPage = (props: PromptsPageProps) => {
   }, []);
 
   const createPrompt = async (userDefinedId: string) => {
+    if (!userDefinedId) {
+      notification.setNotification("Name is required", "error");
+      return;
+    }
     // Check if a prompt with this name already exists
     const existingPrompt = prompts?.find(
       (prompt) =>
@@ -115,21 +134,18 @@ const PromptsPage = (props: PromptsPageProps) => {
       return;
     }
 
-    // Prepare the prompt data with variable values
-    const promptData = {
-      model: newPromptModel,
-      messages: [
-        {
-          role: "user",
-          content: [
-            {
-              text: replaceVariablesWithTags(newPromptContent),
-              type: "text",
-            },
-          ],
-        },
-      ],
-    };
+    // Prepare the prompt data
+    const promptData = basePrompt;
+
+    if (promptData.messages.length === 0) {
+      notification.setNotification("Prompt cannot be empty", "error");
+      return;
+    }
+
+    if (!promptData.model) {
+      notification.setNotification("Model is required", "error");
+      return;
+    }
 
     const res = await jawn.POST("/v1/prompt/create", {
       body: {
@@ -250,138 +266,45 @@ const PromptsPage = (props: PromptsPageProps) => {
                             </Label>
                           </div>
                         </DialogHeader>
-                        <div className="flex flex-col space-y-4 h-[570px] justify-between">
+                        <div className="flex flex-col space-y-4 h-[600px] justify-between">
                           {imNotTechnical ? (
-                            <>
-                              <div className="flex flex-col space-y-6">
-                                <div className="flex flex-col space-y-2">
-                                  <Label
-                                    className="text-lg"
-                                    htmlFor="new-prompt-name"
-                                  >
-                                    Name
-                                  </Label>
-                                  <TextInput
-                                    id="new-prompt-name"
-                                    value={newPromptName}
-                                    onChange={(e) =>
-                                      setNewPromptName(e.target.value)
-                                    }
-                                    ref={newPromptInputRef}
-                                  />
-                                </div>
-                                <div className="flex flex-col space-y-2">
-                                  <Label
-                                    className="text-lg"
-                                    htmlFor="new-prompt-model"
-                                  >
-                                    Model
-                                  </Label>
-                                  <Select
-                                    value={newPromptModel}
-                                    onValueChange={setNewPromptModel}
-                                  >
-                                    <SelectTrigger className="w-[200px]">
-                                      <SelectValue placeholder="Select a model" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      {MODEL_LIST.map((model) => (
-                                        <SelectItem
-                                          key={model.value}
-                                          value={model.value}
-                                        >
-                                          {model.label}
-                                        </SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
-                                </div>
-                                <div className="flex flex-col space-y-2">
-                                  <Label
-                                    className="text-lg"
-                                    htmlFor="new-prompt-content"
-                                  >
-                                    Prompt
-                                  </Label>
-                                  <Textarea
-                                    id="new-prompt-content"
-                                    value={newPromptContent}
-                                    onChange={(e) => {
-                                      const newContent = e.target.value;
-                                      setNewPromptContent(newContent);
-                                      const extractedVariables =
-                                        extractVariables(newContent);
-                                      setPromptVariables(extractedVariables);
-
-                                      // Initialize or remove variable values
-                                      setVariableValues((prevValues) => {
-                                        const newValues: Record<
-                                          string,
-                                          string
-                                        > = {};
-                                        extractedVariables.forEach(
-                                          (variable) => {
-                                            newValues[variable] =
-                                              prevValues[variable] || "";
-                                          }
-                                        );
-                                        return newValues;
-                                      });
-                                    }}
-                                    placeholder="Type your prompt here"
-                                    rows={4}
-                                  />
-                                  <p className="text-sm text-gray-500">
-                                    Use &#123;&#123; sample_variable
-                                    &#125;&#125; to insert variables into your
-                                    prompt.
-                                  </p>
-                                </div>
-                                {promptVariables.length > 0 && (
-                                  <div className="flex flex-col space-y-2">
-                                    <Label className="text-lg">Variables</Label>
-                                    <div className="flex flex-col space-y-2">
-                                      {promptVariables.map(
-                                        (variable, index) => (
-                                          <div
-                                            key={index}
-                                            className="flex items-center space-x-2"
-                                          >
-                                            <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                                              {variable}:
-                                            </span>
-                                            <input
-                                              type="text"
-                                              value={
-                                                variableValues[variable] || ""
-                                              }
-                                              onChange={(e) => {
-                                                const value = e.target.value;
-                                                setVariableValues(
-                                                  (prevValues) => ({
-                                                    ...prevValues,
-                                                    [variable]: value,
-                                                  })
-                                                );
-                                              }}
-                                              className="border rounded px-2 py-1 text-sm flex-grow"
-                                            />
-                                          </div>
-                                        )
-                                      )}
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
-                              <div className="flex justify-end items-center mt-4">
-                                <Button
-                                  className="w-auto"
-                                  onClick={() => createPrompt(newPromptName)}
+                            <div className="flex flex-col space-y-6">
+                              <div className="flex flex-col space-y-2">
+                                <Label
+                                  className="text-lg"
+                                  htmlFor="new-prompt-name"
                                 >
-                                  Create prompt
-                                </Button>
+                                  Name
+                                </Label>
+                                <TextInput
+                                  id="new-prompt-name"
+                                  value={newPromptName}
+                                  onChange={(e) =>
+                                    setNewPromptName(e.target.value)
+                                  }
+                                  ref={newPromptInputRef}
+                                />
                               </div>
-                            </>
+                              <ScrollArea className="h-[500px] border rounded-md">
+                                <PromptPlayground
+                                  prompt={basePrompt}
+                                  chatType="request"
+                                  playgroundMode="prompt"
+                                  editMode={true}
+                                  defaultEditMode={true}
+                                  submitText="Create prompt"
+                                  isPromptCreatedFromUi={true}
+                                  selectedInput={undefined}
+                                  onPromptChange={(prompt) =>
+                                    setBasePrompt(prompt as PromptObject)
+                                  }
+                                  onSubmit={async (history, model) => {
+                                    await createPrompt(newPromptName);
+                                  }}
+                                  className="border-none"
+                                />
+                              </ScrollArea>
+                            </div>
                           ) : (
                             <>
                               <p className="text-gray-500 mb-2">
@@ -389,28 +312,28 @@ const PromptsPage = (props: PromptsPageProps) => {
                               </p>
                               <DiffHighlight
                                 code={`
-// 1. Add this line
-import { hprompt } from "@helicone/helicone";
-
-const chatCompletion = await openai.chat.completions.create(
-  {
-    messages: [
-      {
-        role: "user",
-        // 2: Add hprompt to any string, and nest any variable in additional brackets \`{}\`
-        content: hprompt\`Write a story about \${{ scene }}\`,
-      },
-    ],
-    model: "gpt-3.5-turbo",
-  },
-  {
-    // 4. Add Prompt Id Header
-    headers: {
-      "Helicone-Prompt-Id": "prompt_story",
+  // 1. Add this line
+  import { hprompt } from "@helicone/helicone";
+  
+  const chatCompletion = await openai.chat.completions.create(
+    {
+      messages: [
+        {
+          role: "user",
+          // 2: Add hprompt to any string, and nest any variable in additional brackets \`{}\`
+          content: hprompt\`Write a story about \${{ scene }}\`,
+        },
+      ],
+      model: "gpt-3.5-turbo",
     },
-  }
-);
-                              `}
+    {
+      // 4. Add Prompt Id Header
+      headers: {
+        "Helicone-Prompt-Id": "prompt_story",
+      },
+    }
+  );
+                                `}
                                 language="typescript"
                                 newLines={[]}
                                 oldLines={[]}
