@@ -40,15 +40,7 @@ import {
 } from "../../ui/dialog";
 import HcButton from "../../ui/hcButton";
 import { Label } from "../../ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../../ui/select";
 import { Switch } from "../../ui/switch";
-import { Textarea } from "../../ui/textarea";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../../ui/tooltip";
 import { MODEL_LIST } from "../playground/new/modelList";
 import { PricingCompare } from "../pricing/pricingCompare";
