@@ -316,6 +316,19 @@
             "faq/tag/concepts",
             "faq/tag/fine-tuning"
           ]
+        },
+        {
+          "group": "",
+          "pages": [
+            "faq/openai-fine-tuning-api",
+            "faq/llm-fine-tuning-time",
+            "faq/rag-vs-fine-tuning",
+            "faq/compliance",
+            "faq/enable-stream-usage",
+            "faq/how-encryption-works",
+            "faq/secret-vs-public-key",
+            "faq/soc2"
+          ]
         }
       ]
     },
