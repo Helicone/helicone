@@ -120,7 +120,7 @@ app.options("*", (req, res) => {
   res.setHeader("Access-Control-Allow-Methods", "*");
   res.setHeader(
     "Access-Control-Allow-Headers",
-    "Content-Type, Authorization, Helicone-Authorization"
+    "Content-Type, Authorization, Helicone-Authorization, x-vercel-set-bypass-cookie, x-vercel-protection-bypass"
   );
   res.setHeader("Access-Control-Allow-Credentials", "true");
   res.status(200).send();
@@ -184,7 +184,7 @@ app.use((req, res, next) => {
   );
   res.setHeader(
     "Access-Control-Allow-Headers",
-    "Content-Type, Authorization, Helicone-Authorization"
+    "Content-Type, Authorization, Helicone-Authorization, x-vercel-set-bypass-cookie, x-vercel-protection-bypass"
   );
   res.setHeader("Access-Control-Allow-Credentials", "true");
   next();
