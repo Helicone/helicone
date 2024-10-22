@@ -236,6 +236,7 @@
         "features/advanced-usage/user-metrics",
         "features/advanced-usage/feedback",
         "features/advanced-usage/scores",
+        "features/fine-tuning",
         "getting-started/integration-method/gateway-fallbacks",
         "features/advanced-usage/retries",
         "features/advanced-usage/custom-rate-limits",
