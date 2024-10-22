@@ -8,6 +8,7 @@ import CostPill from "./costPill";
 import { CustomProperties } from "./customProperties";
 import ModelPill from "./modelPill";
 import StatusBadge from "./statusBadge";
+import { getUSDateFromString } from "@/components/shared/utils/utils";
 
 interface RequestCardProps {
   request: NormalizedRequest;
@@ -53,7 +54,7 @@ const RequestCard = (props: RequestCardProps) => {
         <div className=" flex flex-row justify-between items-center w-full border-b border-gray-100 dark:border-gray-900 py-2">
           <div className="flex flex-row items-center gap-2">
             <p className="font-semibold text-xl">
-              {new Date(request.createdAt).toLocaleString()}
+              {getUSDateFromString(request.createdAt)}
             </p>
             <StatusBadge
               statusType={request.status.statusType}

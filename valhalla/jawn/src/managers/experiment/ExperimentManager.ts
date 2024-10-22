@@ -1,15 +1,20 @@
 // src/users/usersService.ts
-import { NewExperimentParams } from "../../controllers/public/experimentController";
+import {
+  ExperimentRun,
+  NewExperimentParams,
+} from "../../controllers/public/experimentController";
 import { AuthParams, supabaseServer } from "../../lib/db/supabase";
 import { Result, err, ok } from "../../lib/shared/result";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { BaseManager } from "../BaseManager";
 import {
   Experiment,
+  ExperimentDatasetRow,
   ExperimentStore,
   IncludeExperimentKeys,
 } from "../../lib/stores/experimentStore";
 import { FilterNode } from "../../lib/shared/filters/filterDefs";
+import { run, runOriginalExperiment } from "../../lib/experiment/run";
 
 export class ExperimentManager extends BaseManager {
   private ExperimentStore: ExperimentStore;
@@ -18,11 +23,56 @@ export class ExperimentManager extends BaseManager {
     this.ExperimentStore = new ExperimentStore(authParams.organizationId);
   }
 
+  async runOriginalExperiment(params: {
+    experimentId: string;
+    datasetRowIds: string[];
+  }): Promise<Result<ExperimentRun, string>> {
+    const result = await this.getExperimentById(params.experimentId, {
+      inputs: true,
+      promptVersion: true,
+    });
+
+    if (result.error || !result.data) {
+      return err(result.error);
+    }
+
+    const experiment = result.data;
+    const datasetRows = await this.getDatasetRowsByIds({
+      datasetRowIds: params.datasetRowIds,
+    });
+
+    if (datasetRows.error || !datasetRows.data) {
+      console.error(datasetRows.error);
+      return err(datasetRows.error);
+    }
+
+    return runOriginalExperiment(experiment, datasetRows.data);
+  }
+
+  async hasAccessToExperiment(experimentId: string): Promise<boolean> {
+    const experiment = await supabaseServer.client
+      .from("experiment_v2")
+      .select("*")
+      .eq("id", experimentId)
+      .eq("organization", this.authParams.organizationId)
+      .single();
+    return !!experiment.data;
+  }
+
   async getExperimentById(
     experimentId: string,
     include: IncludeExperimentKeys
   ): Promise<Result<Experiment, string>> {
+    if (!(await this.hasAccessToExperiment(experimentId))) {
+      return err("Unauthorized");
+    }
     return this.ExperimentStore.getExperimentById(experimentId, include);
+  }
+
+  async getDatasetRowsByIds(params: {
+    datasetRowIds: string[];
+  }): Promise<Result<ExperimentDatasetRow[], string>> {
+    return this.ExperimentStore.getDatasetRowsByIds(params);
   }
 
   async getExperiments(
@@ -38,7 +88,7 @@ export class ExperimentManager extends BaseManager {
     promptVersion: string;
     providerKeyId: string;
     status: "PENDING" | "RUNNING" | "COMPLETED" | "FAILED";
-  }): Promise<Result<null, string>> {
+  }): Promise<Result<{ hypothesisId: string }, string>> {
     const hasAccess = await supabaseServer.client
       .from("experiment_v2")
       .select("id", { count: "exact" })
@@ -49,7 +99,7 @@ export class ExperimentManager extends BaseManager {
       return err("Experiment not found");
     }
 
-    const result = await dbExecute(
+    const result = await dbExecute<{ id: string }>(
       `
       INSERT INTO experiment_v2_hypothesis (
         prompt_version,
@@ -59,6 +109,7 @@ export class ExperimentManager extends BaseManager {
         provider_key
       )
       VALUES ($1, $2, $3, $4, $5)
+      RETURNING id
       `,
       [
         params.promptVersion,
@@ -69,11 +120,11 @@ export class ExperimentManager extends BaseManager {
       ]
     );
 
-    if (result.error) {
+    if (result.error || !result.data) {
       return err(result.error);
     }
 
-    return ok(null);
+    return ok({ hypothesisId: result.data[0].id });
   }
 
   async addNewExperiment(

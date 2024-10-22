@@ -181,7 +181,8 @@ export class PromptManager extends BaseManager {
   }
 
   async getPromptVersions(
-    filter: FilterNode
+    filter: FilterNode,
+    includeExperimentVersions: boolean = false
   ): Promise<Result<PromptVersionResult[], string>> {
     const filterWithAuth = buildFilterPostgres({
       filter,
@@ -214,6 +215,14 @@ export class PromptManager extends BaseManager {
     AND prompt_v2.soft_delete = false
     AND prompts_versions.soft_delete = false
     AND (${filterWithAuth.filter})
+    ${
+      includeExperimentVersions
+        ? ""
+        : `AND (
+              prompts_versions.metadata->>'experimentAssigned' IS NULL
+              OR prompts_versions.metadata->>'experimentAssigned' != 'true'
+            )`
+    }
     `,
       filterWithAuth.argsAcc
     );
@@ -570,7 +579,10 @@ export class PromptManager extends BaseManager {
       );
     }
 
-    return ok({ id: promptId });
+    return ok({
+      id: promptId,
+      prompt_version_id: insertVersionResult.data[0].id,
+    });
   }
 
   async deletePrompt(params: {

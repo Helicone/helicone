@@ -1,5 +1,16 @@
 // src/users/usersController.ts
-import { Body, Controller, Post, Request, Route, Security, Tags } from "tsoa";
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Path,
+  Post,
+  Request,
+  Route,
+  Security,
+  Tags,
+} from "tsoa";
 import { supabaseServer } from "../../lib/db/supabase";
 import { run } from "../../lib/experiment/run";
 import { FilterLeafSubset } from "../../lib/shared/filters/filterDefs";
@@ -10,6 +21,8 @@ import {
 } from "../../lib/stores/experimentStore";
 import { ExperimentManager } from "../../managers/experiment/ExperimentManager";
 import { JawnAuthenticatedRequest } from "../../types/request";
+import { EvaluatorResult } from "./evaluatorController";
+import { EvaluatorManager } from "../../managers/evaluator/EvaluatorManager";
 
 export type ExperimentFilterBranch = {
   left: ExperimentFilterNode;
@@ -140,7 +153,7 @@ export class ExperimentController extends Controller {
       status: "PENDING" | "RUNNING" | "COMPLETED" | "FAILED";
     },
     @Request() request: JawnAuthenticatedRequest
-  ): Promise<Result<null, string>> {
+  ): Promise<Result<{ hypothesisId: string }, string>> {
     const experimentManager = new ExperimentManager(request.authParams);
 
     const result = await experimentManager.createNewExperimentHypothesis(
@@ -155,6 +168,59 @@ export class ExperimentController extends Controller {
       this.setStatus(200);
       return result;
     }
+  }
+
+  @Get("/{experimentId}/evaluators")
+  public async getExperimentEvaluators(
+    @Path() experimentId: string,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<EvaluatorResult[], string>> {
+    const evaluatorManager = new EvaluatorManager(request.authParams);
+    const result = await evaluatorManager.getEvaluatorsForExperiment(
+      experimentId
+    );
+    return result;
+  }
+
+  @Post("/{experimentId}/evaluators/run")
+  public async runExperimentEvaluators(
+    @Path() experimentId: string,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<null, string>> {
+    const evaluatorManager = new EvaluatorManager(request.authParams);
+    const result = await evaluatorManager.runExperimentEvaluators(experimentId);
+    return result;
+  }
+
+  @Post("/{experimentId}/evaluators")
+  public async createExperimentEvaluator(
+    @Path() experimentId: string,
+    @Body()
+    requestBody: {
+      evaluatorId: string;
+    },
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<null, string>> {
+    const evaluatorManager = new EvaluatorManager(request.authParams);
+    const result = await evaluatorManager.createExperimentEvaluator(
+      experimentId,
+      requestBody.evaluatorId
+    );
+    return result;
+  }
+
+  @Delete("/{experimentId}/evaluators/{evaluatorId}")
+  public async deleteExperimentEvaluator(
+    @Path() experimentId: string,
+    @Path() evaluatorId: string,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<null, string>> {
+    const evaluatorManager = new EvaluatorManager(request.authParams);
+    const result = await evaluatorManager.deleteExperimentEvaluator(
+      experimentId,
+      evaluatorId
+    );
+    return result;
   }
 
   @Post("/query")
@@ -194,6 +260,10 @@ export class ExperimentController extends Controller {
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<ExperimentRun, string>> {
     const experimentManager = new ExperimentManager(request.authParams);
+    if (requestBody.hypothesisId === "original") {
+      return experimentManager.runOriginalExperiment(requestBody);
+    }
+
     const result = await experimentManager.getExperimentById(
       requestBody.experimentId,
       {
@@ -220,24 +290,23 @@ export class ExperimentController extends Controller {
       return err("Hypothesis not found");
     }
 
-    const seen = new Set<string>();
-
-    const datasetRows = experiment.dataset.rows.filter((row) => {
-      if (!requestBody.datasetRowIds.includes(row.rowId)) {
-        return false;
-      }
-      const alreadyAdded = seen.has(row.rowId);
-      seen.add(row.rowId);
-      return !alreadyAdded;
+    const datasetRows = await experimentManager.getDatasetRowsByIds({
+      datasetRowIds: requestBody.datasetRowIds,
     });
 
-    if (datasetRows.length !== requestBody.datasetRowIds.length) {
+    if (datasetRows.error || !datasetRows.data) {
+      this.setStatus(500);
+      console.error(datasetRows.error);
+      return err(datasetRows.error);
+    }
+
+    if (datasetRows.data.length !== requestBody.datasetRowIds.length) {
       this.setStatus(404);
       console.error("Row not found");
       return err("Row not found");
     }
 
-    experiment.dataset.rows = datasetRows;
+    experiment.dataset.rows = datasetRows.data;
     experiment.hypotheses = [hypothesis];
 
     const runResult = await run(experiment);

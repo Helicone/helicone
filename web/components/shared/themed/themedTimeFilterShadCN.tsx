@@ -21,6 +21,7 @@ import {
 import { useProFeature } from "@/hooks/useProFeature";
 import { ProFeatureDialog } from "../ProBlockerComponents/ProFeatureDialog";
 import { useEffect, useState } from "react";
+import { Input } from "@/components/ui/input";
 
 interface ThemedTimeFilterShadCNProps
   extends React.HTMLAttributes<HTMLDivElement> {
@@ -81,6 +82,10 @@ export function ThemedTimeFilterShadCN({
     {
       label: "90d",
       value: () => ({ from: addDays(new Date(), -90), to: new Date() }),
+    },
+    {
+      label: "1y",
+      value: () => ({ from: addDays(new Date(), -365), to: new Date() }),
     },
   ];
 
@@ -184,7 +189,7 @@ export function ThemedTimeFilterShadCN({
           <span className="font-semibold text-sm  pt-4">Custom Range:</span>
           <div className="grid gap-2 ">
             <div className="flex items-center gap-2">
-              <input
+              <Input
                 type="number"
                 min="1"
                 value={customNumber}
@@ -229,7 +234,32 @@ export function ThemedTimeFilterShadCN({
               mode="range"
               defaultMonth={date?.from}
               selected={date}
-              onSelect={setDate}
+              onSelect={(newDate) => {
+                if (newDate?.from || newDate?.to) {
+                  const newDateRange = {
+                    from: newDate?.from
+                      ? new Date(
+                          newDate.from.getFullYear(),
+                          newDate.from.getMonth(),
+                          newDate.from.getDate(),
+                          date?.from?.getHours() ?? 0,
+                          date?.from?.getMinutes() ?? 0
+                        )
+                      : date?.from,
+                    to: newDate?.to
+                      ? new Date(
+                          newDate.to.getFullYear(),
+                          newDate.to.getMonth(),
+                          newDate.to.getDate(),
+                          date?.to?.getHours() ?? 23,
+                          date?.to?.getMinutes() ?? 59
+                        )
+                      : date?.to,
+                  };
+
+                  handleDateChange(newDateRange satisfies DateRange);
+                }
+              }}
               numberOfMonths={2}
               disabled={(date) =>
                 date > new Date() || date < new Date("1900-01-01")
@@ -240,7 +270,7 @@ export function ThemedTimeFilterShadCN({
             />
             {/* Time selection inputs */}
             <div className="grid grid-cols-2 items-center gap-2">
-              <input
+              <Input
                 type="time"
                 className="text-xs w-min ml-auto border-gray-300 rounded-md"
                 value={date?.from ? format(date.from, "HH:mm") : ""}
@@ -254,7 +284,7 @@ export function ThemedTimeFilterShadCN({
                 }}
               />
 
-              <input
+              <Input
                 type="time"
                 className="text-xs w-min ml-auto border-gray-300 rounded-md"
                 value={date?.to ? format(date.to, "HH:mm") : ""}

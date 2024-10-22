@@ -10,7 +10,6 @@ import { BaseManager } from "../BaseManager";
 import { validate as uuidValidate } from "uuid";
 
 type Scores = Record<string, number | boolean>;
-const delayMs = process.env.NODE_ENV === "production" ? 10 * 60 * 1000 : 0; // 10 minutes in milliseconds
 
 export interface ScoreRequest {
   scores: Scores;
@@ -25,21 +24,28 @@ export class ScoreManager extends BaseManager {
     this.scoreStore = new ScoreStore(authParams.organizationId);
     this.kafkaProducer = new KafkaProducer();
   }
+  private getDefaultDelayMs(): number {
+    return process.env.NODE_ENV === "production" ? 10 * 60 * 1000 : 0; // 10 minutes in milliseconds
+  }
 
   public async addScores(
     requestId: string,
-    scores: Scores
+    scores: Scores,
+    delayMs?: number
   ): Promise<Result<null, string>> {
     const mappedScores = this.mapScores(scores);
     await this.scoreStore.putScoresIntoSupabase(requestId, mappedScores);
-    const res = await this.addBatchScores([
-      {
-        requestId,
-        scores: mappedScores,
-        organizationId: this.authParams.organizationId,
-        createdAt: new Date(),
-      },
-    ]);
+    const res = await this.addBatchScores(
+      [
+        {
+          requestId,
+          scores: mappedScores,
+          organizationId: this.authParams.organizationId,
+          createdAt: new Date(),
+        },
+      ],
+      delayMs
+    );
     if (res.error) {
       return err(`Error adding scores: ${res.error}`);
     }
@@ -47,7 +53,8 @@ export class ScoreManager extends BaseManager {
   }
 
   public async addBatchScores(
-    scoresMessage: HeliconeScoresMessage[]
+    scoresMessage: HeliconeScoresMessage[],
+    delayMs?: number
   ): Promise<Result<null, string>> {
     if (!this.kafkaProducer.isKafkaEnabled()) {
       console.log("Kafka is not enabled. Using score manager");
@@ -63,7 +70,7 @@ export class ScoreManager extends BaseManager {
           },
           scoresMessage
         );
-      }, delayMs);
+      }, delayMs ?? this.getDefaultDelayMs());
 
       // Register the timeout and operation with ShutdownService
       DelayedOperationService.getInstance().addDelayedOperation(timeoutId, () =>

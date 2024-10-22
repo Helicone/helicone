@@ -116,18 +116,21 @@ export class TraceManager {
     }[],
     completionChoices: TCompletionChoices,
     heliconeProperties: Record<string, string>,
-    authParams: AuthParams
+    authParams: AuthParams,
+    userId?: string
   ): Log {
     return {
       request: {
         id: span.traceId,
-        userId: authParams.userId ?? "",
+        userId: userId ?? "",
         promptId: undefined,
         properties: heliconeProperties,
         heliconeApiKeyId: authParams.heliconeApiKeyId ?? undefined,
         heliconeProxyKeyId: undefined,
         targetUrl: "",
-        provider: span.attributes.get("gen_ai.system"),
+        provider:
+          (span.attributes.get("gen_ai.system") ?? "").toUpperCase() ??
+          undefined,
         bodySize: JSON.stringify(promptMessages).length,
         path: "async-unknown-path",
         threat: false,
@@ -142,7 +145,14 @@ export class TraceManager {
         bodySize: JSON.stringify(completionChoices).length,
         timeToFirstToken: undefined,
         responseCreatedAt: new Date(parseInt(span.endTimeUnixNano) / 1000000),
-        delayMs: -1,
+        delayMs:
+          span.endTimeUnixNano && span.startTimeUnixNano
+            ? Math.trunc(
+                (parseInt(span.endTimeUnixNano) -
+                  parseInt(span.startTimeUnixNano)) /
+                  1000000
+              )
+            : -1,
       },
     };
   }
@@ -182,15 +192,32 @@ export class TraceManager {
   ) {
     const spans = this.processOtelSpans(trace);
 
-    console.log("Processing spans");
     for (const span of spans) {
       const promptMessages = this.constructMessages(span, "gen_ai.prompt");
       const completionChoices = this.extractCompletions(span);
-      
+
+      const userId =
+        span.attributes.get(
+          "traceloop.association.properties.Helicone-User-Id"
+        ) ??
+        span.attributes.get("llm.user") ??
+        "";
+
       const heliconeProperties = Array.from(span.attributes.entries())
-        .filter(([key]) => key.startsWith("traceloop.association.properties.Helicone-Property-"))
+        .filter(
+          ([key]) =>
+            key.startsWith("traceloop.association.properties.Helicone-") &&
+            key !== "traceloop.association.properties.Helicone-User-Id"
+        )
         .reduce((acc, [key, value]) => {
-          const propertyName = key.replace("traceloop.association.properties.Helicone-Property-", "");
+          const propertyName = key.replace(
+            key.startsWith(
+              "traceloop.association.properties.Helicone-Property-"
+            )
+              ? "traceloop.association.properties.Helicone-Property-"
+              : "traceloop.association.properties.",
+            ""
+          );
           acc[propertyName] = value;
           return acc;
         }, {} as Record<string, string>);
@@ -227,7 +254,8 @@ export class TraceManager {
         promptMessages,
         completionChoices,
         heliconeProperties,
-        authParams
+        authParams,
+        userId
       );
 
       const kafkaMessage: Message = {
@@ -243,7 +271,6 @@ export class TraceManager {
         log: log,
       };
 
-      console.log("Sending to Kafka");
       await this.sendLogToKafka(kafkaMessage);
     }
   }

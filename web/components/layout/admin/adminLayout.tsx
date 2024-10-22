@@ -29,6 +29,12 @@ const navigation = [
     current: false,
   },
   {
+    name: "Feature Flags",
+    href: "/admin/feature-flags",
+    icon: ChartBarIcon,
+    current: false,
+  },
+  {
     name: "Coles Cave",
     href: "/admin/coles-cave",
     icon: CubeIcon,

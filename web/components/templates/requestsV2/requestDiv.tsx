@@ -1,5 +1,4 @@
 import { BeakerIcon, ClipboardDocumentIcon } from "@heroicons/react/24/outline";
-import { Tooltip } from "@mui/material";
 import { useRouter } from "next/router";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedDiv from "../../shared/themed/themedDiv";
@@ -7,6 +6,12 @@ import { NormalizedRequest } from "./builder/abstractRequestBuilder";
 import { ArrowDownIcon, ArrowUpIcon } from "@heroicons/react/20/solid";
 import { clsx } from "../../shared/clsx";
 import RequestRow from "./requestRow";
+import { useEffect } from "react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface RequestDivProps {
   open: boolean;
@@ -45,6 +50,26 @@ const RequestDiv = (props: RequestDivProps) => {
     }
   };
 
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setOpen(false);
+      } else if (event.key === "ArrowUp") {
+        event.preventDefault();
+        onPrevHandler?.();
+      } else if (event.key === "ArrowDown") {
+        event.preventDefault();
+        onNextHandler?.();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [onNextHandler, onPrevHandler, setOpen]);
+
   return (
     <ThemedDiv
       open={open}
@@ -52,59 +77,71 @@ const RequestDiv = (props: RequestDivProps) => {
       actions={
         <div className="w-full flex flex-row justify-between items-center">
           <div className="flex flex-row items-center space-x-2">
-            <Tooltip title="Playground">
-              <button
-                onClick={() => {
-                  if (request) {
-                    router.push("/playground?request=" + request.id);
-                  }
-                }}
-                className="hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md -m-1 p-1"
-              >
-                <BeakerIcon className="h-5 w-5" />
-              </button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => {
+                    if (request) {
+                      router.push("/playground?request=" + request.id);
+                    }
+                  }}
+                  className="hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md p-1 text-slate-700 dark:text-slate-400"
+                >
+                  <BeakerIcon className="h-4 w-4" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>Playground</TooltipContent>
             </Tooltip>
-            <Tooltip title="Copy">
-              <button
-                onClick={() => {
-                  setNotification("Copied to clipboard", "success");
-                  const copy = { ...request };
-                  delete copy.render;
-                  navigator.clipboard.writeText(
-                    JSON.stringify(copy || {}, null, 4)
-                  );
-                }}
-                className="hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md -m-1 p-1"
-              >
-                <ClipboardDocumentIcon className="h-5 w-5" />
-              </button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => {
+                    setNotification("Copied to clipboard", "success");
+                    const copy = { ...request };
+                    delete copy.render;
+                    navigator.clipboard.writeText(
+                      JSON.stringify(copy || {}, null, 4)
+                    );
+                  }}
+                  className="hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md p-1 text-slate-700 dark:text-slate-400"
+                >
+                  <ClipboardDocumentIcon className="h-4 w-4" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>Copy</TooltipContent>
             </Tooltip>
           </div>
           {(hasPrevious || hasNext) && (
             <div className="flex flex-row items-center space-x-1.5">
-              <Tooltip title="Previous">
-                <button
-                  onClick={onPrevHandler}
-                  disabled={!hasPrevious}
-                  className={clsx(
-                    !hasPrevious && "opacity-50 hover:cursor-not-allowed",
-                    "hover:bg-gray-200 dark:hover:bg-gray-800  rounded-md -m-1 p-1"
-                  )}
-                >
-                  <ArrowUpIcon className="h-5 w-5" />
-                </button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={onPrevHandler}
+                    disabled={!hasPrevious}
+                    className={clsx(
+                      !hasPrevious && "opacity-50 hover:cursor-not-allowed",
+                      "hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md p-1 text-slate-700 dark:text-slate-400"
+                    )}
+                  >
+                    <ArrowUpIcon className="h-4 w-4" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>Previous</TooltipContent>
               </Tooltip>
-              <Tooltip title="Next">
-                <button
-                  onClick={onNextHandler}
-                  disabled={!hasNext}
-                  className={clsx(
-                    !hasNext && "opacity-50 hover:cursor-not-allowed",
-                    "hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md -m-1 p-1"
-                  )}
-                >
-                  <ArrowDownIcon className="h-5 w-5" />
-                </button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={onNextHandler}
+                    disabled={!hasNext}
+                    className={clsx(
+                      !hasNext && "opacity-50 hover:cursor-not-allowed",
+                      "hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md p-1 text-slate-700 dark:text-slate-400"
+                    )}
+                  >
+                    <ArrowDownIcon className="h-4 w-4" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>Next</TooltipContent>
               </Tooltip>
             </div>
           )}

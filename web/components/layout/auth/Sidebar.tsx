@@ -2,6 +2,7 @@
 
 import {
   ArchiveBoxIcon,
+  BeakerIcon,
   BellIcon,
   CircleStackIcon,
   HomeIcon,
@@ -18,15 +19,28 @@ import { useMemo } from "react";
 import DesktopSidebar, { NavigationItem } from "./DesktopSidebar";
 
 import { PiGraphLight } from "react-icons/pi";
-import MobileNavigation from "./MobileNavigation";
 import { useOrg } from "../organizationContext";
 import { NotepadText, TestTube2, Webhook } from "lucide-react";
+import { Enclosure } from "rss-parser";
 
+export interface ChangelogItem {
+  title: string;
+  description: string;
+  link: string;
+  content: string;
+  "content:encoded": string;
+  "content:encodedSnippet": string;
+  contentSnippet: string;
+  isoDate: string;
+  pubDate: string;
+  image?: Enclosure;
+}
 interface SidebarProps {
   setOpen: (open: boolean) => void;
+  changelog: ChangelogItem[];
 }
 
-const Sidebar = ({ setOpen }: SidebarProps) => {
+const Sidebar = ({ changelog, setOpen }: SidebarProps) => {
   const router = useRouter();
   const { pathname } = router;
   const user = useUser();
@@ -91,15 +105,20 @@ const Sidebar = ({ setOpen }: SidebarProps) => {
             icon: TestTube2,
             current: pathname.includes("/playground"),
           },
-
+          {
+            name: "Experiments",
+            href: "/experiments",
+            icon: BeakerIcon,
+            current: pathname.includes("/experiments"),
+          },
           ...(!user?.email?.includes("@helicone.ai")
             ? []
             : [
                 {
-                  name: "Evals",
-                  href: "/evals",
+                  name: "Evaluators",
+                  href: "/evaluators",
                   icon: SparklesIcon,
-                  current: pathname.includes("/evals"),
+                  current: pathname.includes("/evaluators"),
                 },
               ]),
           {
@@ -209,9 +228,14 @@ const Sidebar = ({ setOpen }: SidebarProps) => {
 
   return (
     <>
-      <MobileNavigation NAVIGATION={NAVIGATION} setOpen={setOpen} />
+      {/* Remove this line */}
+      {/* <MobileNavigation NAVIGATION={NAVIGATION} setOpen={setOpen} /> */}
 
-      <DesktopSidebar NAVIGATION={NAVIGATION} setOpen={setOpen} />
+      <DesktopSidebar
+        changelog={changelog}
+        NAVIGATION={NAVIGATION}
+        setOpen={setOpen}
+      />
     </>
   );
 };

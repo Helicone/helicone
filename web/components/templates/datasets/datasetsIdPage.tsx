@@ -33,7 +33,6 @@ import DatasetDrawerV2 from "./datasetDrawer";
 import RemoveRequestsModal from "./RemoveRequests";
 import { useIntegration } from "@/services/hooks/useIntegrations";
 import OpenPipeFineTuneButton from "../connections/openPipe/fineTuneDatasetButton";
-import { IslandContainer } from "@/components/ui/islandContainer";
 
 interface DatasetIdPageProps {
   id: string;
@@ -239,24 +238,23 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
   }, [id, org?.currentOrg?.id]);
 
   return (
-    <IslandContainer className="pt-10">
+    <>
       <div className="w-full h-full flex flex-col space-y-8">
-        <div className="flex flex-row items-center justify-between">
+        <div className="flex flex-row items-center justify-between pl-8">
           <div className="flex flex-col items-start space-y-4 w-full">
-            <HcBreadcrumb
-              pages={[
-                {
-                  href: "/datasets",
-                  name: "Datasets",
-                },
-                {
-                  href: `/datasets/${id}`,
-                  name: datasets?.[0]?.name || "Loading...",
-                },
-              ]}
-            />
-            <div className="flex justify-between w-full">
-              <div className="flex gap-4 items-end">
+            <div className="w-full pt-4">
+              <HcBreadcrumb
+                pages={[
+                  { href: "/datasets", name: "Datasets" },
+                  {
+                    href: `/datasets/${id}`,
+                    name: datasets?.[0]?.name || "Loading...",
+                  },
+                ]}
+              />
+            </div>
+            <div className="flex justify-between items-center">
+              <div className="flex items-center space-x-4">
                 <h1 className="font-semibold text-4xl text-black dark:text-white">
                   {datasets?.[0]?.name}
                 </h1>
@@ -268,7 +266,7 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
         <ThemedTable
           highlightedIds={selectedIds}
           showCheckboxes={selectModeHook}
-          fullWidth={false}
+          fullWidth={true}
           defaultColumns={[
             {
               header: "Created At",
@@ -359,10 +357,10 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
           selectedIds={selectedIds}
         >
           {selectModeHook && (
-            <Row className="gap-5 items-center w-full justify-between bg-white dark:bg-black rounded-lg p-5 border border-gray-300 dark:border-gray-700">
+            <Row className="gap-5 items-center w-full justify-between bg-white dark:bg-black p-5">
               <div className="flex flex-row gap-2 items-center">
                 <span className="text-sm font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap">
-                  Select Mode:
+                  Request Selection:
                 </span>
                 <span className="text-sm p-2 rounded-md font-medium bg-[#F1F5F9] text-[#1876D2] dark:text-gray-100 whitespace-nowrap">
                   {selectedIds.length} selected
@@ -387,7 +385,7 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
                   <button
                     onClick={() => setShowRemoveModal(true)}
                     className={clsx(
-                      "relative inline-flex items-center rounded-md hover:bg-red-700 bg-red-500 px-4 py-2 text-sm font-medium text-white"
+                      "relative inline-flex items-center hover:bg-red-700 bg-red-500 px-4 py-2 text-sm font-medium text-white"
                     )}
                   >
                     <div className="flex flex-row gap-2 items-center">
@@ -450,7 +448,7 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
           setShowRemoveModal(false);
         }}
       />
-    </IslandContainer>
+    </>
   );
 };
 

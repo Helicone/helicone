@@ -25,6 +25,7 @@ interface NavItemProps {
   expandedItems: string[];
   toggleExpand: (name: string) => void;
   deep?: number;
+  onClick: () => void;
 }
 
 const NavItem: React.FC<NavItemProps> = ({
@@ -34,6 +35,7 @@ const NavItem: React.FC<NavItemProps> = ({
   expandedItems,
   toggleExpand,
   deep,
+  onClick,
 }) => {
   const router = useRouter();
   const hasSubItems = link.subItems && link.subItems.length > 0;
@@ -72,7 +74,7 @@ const NavItem: React.FC<NavItemProps> = ({
         </TooltipTrigger>
         <TooltipContent
           side="right"
-          className="flex items-center gap-4 dark:bg-gray-800 dark:text-gray-200"
+          className="flex items-center gap-4 dark:bg-slate-800 dark:text-slate-200"
         >
           {link.name}
           {link.featured && (
@@ -87,10 +89,10 @@ const NavItem: React.FC<NavItemProps> = ({
     <div className={cn(isSubItem)}>
       <Link
         href={hasSubItems ? "#" : link.href}
-        onClick={hasSubItems ? () => toggleExpand(link.name) : undefined}
+        onClick={hasSubItems ? () => toggleExpand(link.name) : onClick}
         className={cn(
           hasSubItems
-            ? "flex items-center gap-1 font-medium text-gray-400 text-xs mt-[10px] text-[11px]"
+            ? "flex items-center gap-1 font-medium text-slate-400 text-xs mt-[10px] text-[11px]"
             : cn(
                 buttonVariants({
                   variant: link.current ? "secondary" : "ghost",
@@ -117,7 +119,7 @@ const NavItem: React.FC<NavItemProps> = ({
         {hasSubItems && (
           <ChevronRightIcon
             className={cn(
-              "h-3 w-3 transition-transform fill-gray-400",
+              "h-3 w-3 transition-transform fill-slate-400",
               expandedItems.includes(link.name) && "rotate-90"
             )}
           />
@@ -134,6 +136,7 @@ const NavItem: React.FC<NavItemProps> = ({
               expandedItems={expandedItems}
               toggleExpand={toggleExpand}
               deep={deep ? deep + 1 : 1}
+              onClick={onClick}
             />
           ))}
         </div>

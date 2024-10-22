@@ -87,6 +87,11 @@ interface ThemedTableV5Props<T extends { id?: string }> {
   fullWidth?: boolean;
   isDatasetsPage?: boolean;
   rightPanel?: React.ReactNode;
+  search?: {
+    value: string;
+    onChange: (value: string) => void;
+    placeholder: string;
+  };
 }
 
 export type RequestViews = "table" | "card" | "row";
@@ -120,6 +125,7 @@ export default function ThemedTable<T extends { id?: string }>(
     fullWidth = false,
     isDatasetsPage,
     rightPanel,
+    search,
   } = props;
 
   const [view, setView] = useLocalStorage<RequestViews>("view", "table");
@@ -186,9 +192,10 @@ export default function ThemedTable<T extends { id?: string }>(
   }, [rightPanel]);
 
   return (
-    <div className="h-full flex flex-col border-b divide-y divide-gray-300 dark:divide-gray-700">
-      <div className="py-2 px-1 flex-shrink-0">
+    <div className="h-full flex flex-col border-b divide-y divide-slate-300 dark:divide-slate-700">
+      <div className="p-1 flex-shrink-0">
         <ThemedTableHeader
+          search={search}
           onDataSet={onDataSet}
           isDatasetsPage={isDatasetsPage}
           advancedFilters={
@@ -232,26 +239,26 @@ export default function ThemedTable<T extends { id?: string }>(
       <ResizablePanelGroup direction="horizontal">
         <ResizablePanel>
           {" "}
-          <div className="h-full overflow-x-auto">
+          <div className="h-full overflow-x-auto bg-slate-100 dark:bg-slate-800">
             {skeletonLoading ? (
               <LoadingAnimation title="Loading Data..." />
             ) : rows.length === 0 ? (
-              <div className="bg-white dark:bg-black h-48 w-full  border-gray-300 dark:border-gray-700 py-2 px-4 flex flex-col space-y-3 justify-center items-center">
-                <TableCellsIcon className="h-12 w-12 text-gray-900 dark:text-gray-100" />
-                <p className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+              <div className="bg-white dark:bg-black h-48 w-full  border-slate-300 dark:border-slate-700 py-2 px-4 flex flex-col space-y-3 justify-center items-center">
+                <TableCellsIcon className="h-12 w-12 text-slate-900 dark:text-slate-100" />
+                <p className="text-xl font-semibold text-slate-900 dark:text-slate-100">
                   No Data Found
                 </p>
                 {noDataCTA}
               </div>
             ) : table.getVisibleFlatColumns().length === 0 ? (
-              <div className="bg-white dark:bg-black h-48 w-full  border-gray-300 dark:border-gray-700 py-2 px-4 flex flex-col space-y-3 justify-center items-center">
-                <AdjustmentsHorizontalIcon className="h-12 w-12 text-gray-900 dark:text-gray-100" />
-                <p className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+              <div className="bg-white dark:bg-black h-48 w-full  border-slate-300 dark:border-slate-700 py-2 px-4 flex flex-col space-y-3 justify-center items-center">
+                <AdjustmentsHorizontalIcon className="h-12 w-12 text-slate-900 dark:text-slate-100" />
+                <p className="text-xl font-semibold text-slate-900 dark:text-slate-100">
                   No Columns Selected
                 </p>
               </div>
             ) : makeCard && view === "card" ? (
-              <ul className="flex flex-col space-y-8 divide-y divide-gray-300 dark:divide-gray-700 bg-white dark:bg-black rounded-lg border border-gray-300 dark:border-gray-700">
+              <ul className="flex flex-col space-y-8 divide-y divide-slate-300 dark:divide-slate-700 bg-white dark:bg-black rounded-lg border border-slate-300 dark:border-slate-700">
                 {rows.map((row, i) => (
                   <li key={"expanded-row" + i}>{makeCard(row.original)}</li>
                 ))}
@@ -264,7 +271,7 @@ export default function ThemedTable<T extends { id?: string }>(
                 properties={makeRow.properties}
               />
             ) : (
-              <div className="bg-white dark:bg-black rounded-sm h-full">
+              <div className="bg-slate-50 dark:bg-black rounded-sm h-full">
                 <div
                   className=""
                   style={{
@@ -280,7 +287,7 @@ export default function ThemedTable<T extends { id?: string }>(
                       },
                     }}
                   >
-                    <thead className="text-[12px]">
+                    <thead className="text-[12px] z-[2]">
                       {table.getHeaderGroups().map((headerGroup) => (
                         <tr
                           key={headerGroup.id}
@@ -298,14 +305,19 @@ export default function ThemedTable<T extends { id?: string }>(
                                   selectedIds?.length > 0 &&
                                   selectedIds?.length < rows.length
                                 }
+                                className="text-slate-700 dark:text-slate-400"
                               />
-                              <div className="absolute bottom-0 left-0 right-0 h-px bg-gray-300 dark:bg-gray-700" />
+                              <div className="absolute bottom-0 left-0 right-0 h-px bg-slate-300 dark:bg-slate-700" />
                             </th>
                           )}
                           {headerGroup.headers.map((header, index) => (
                             <th
                               key={`header-${index}`}
-                              className={clsx("relative")}
+                              className={clsx(
+                                "relative",
+                                index === headerGroup.headers.length - 1 &&
+                                  "border-r border-slate-300 dark:border-slate-700"
+                              )}
                             >
                               <DraggableColumnHeader
                                 header={header}
@@ -314,9 +326,9 @@ export default function ThemedTable<T extends { id?: string }>(
                                 totalColumns={headerGroup.headers.length}
                               />
                               {index < headerGroup.headers.length - 1 && (
-                                <div className="absolute top-0 right-0 h-full w-px bg-gray-300 dark:bg-gray-700" />
+                                <div className="absolute top-0 right-0 h-full w-px bg-slate-300 dark:bg-slate-700" />
                               )}
-                              <div className="absolute bottom-0 left-0 right-0 h-[0.5px] bg-gray-300 dark:bg-gray-700" />
+                              <div className="absolute bottom-0 left-0 right-0 h-[0.5px] bg-slate-300 dark:bg-slate-700" />
                             </th>
                           ))}
                         </tr>
@@ -329,8 +341,8 @@ export default function ThemedTable<T extends { id?: string }>(
                           className={clsx(
                             " hover:cursor-pointer",
                             checkedIds?.includes(row.original?.id ?? "")
-                              ? "bg-sky-100 border-l border-sky-500 pl-2 dark:bg-sky-900 dark:border-sky-900"
-                              : "hover:bg-sky-50 dark:hover:bg-sky-950"
+                              ? "bg-sky-100 border-l border-sky-500 pl-2 dark:bg-slate-800/50 dark:border-sky-900"
+                              : "hover:bg-sky-50 dark:hover:bg-slate-700/50"
                           )}
                           onClick={
                             onRowSelect &&
@@ -344,6 +356,7 @@ export default function ThemedTable<T extends { id?: string }>(
                                   row.original?.id ?? ""
                                 )}
                                 onChange={() => {}} // Handle individual row selection
+                                className="text-slate-700 dark:text-slate-400"
                               />
                             </td>
                           )}
@@ -351,18 +364,16 @@ export default function ThemedTable<T extends { id?: string }>(
                             <td
                               key={i}
                               className={clsx(
-                                "py-3 border-t border-gray-300 dark:border-gray-700 px-2 text-gray-700 dark:text-gray-300",
+                                "py-3 border-t border-slate-300 dark:border-slate-700 px-2 text-slate-700 dark:text-slate-300",
                                 i === 0 && "pl-10", // Add left padding to the first column
                                 i === row.getVisibleCells().length - 1 &&
-                                  "pr-10"
+                                  "pr-10 border-r border-slate-300 dark:border-slate-700"
                               )}
-                              {...{
-                                style: {
-                                  maxWidth: cell.column.getSize(),
-                                  overflow: "hidden",
-                                  textOverflow: "ellipsis",
-                                  whiteSpace: "nowrap",
-                                },
+                              style={{
+                                maxWidth: cell.column.getSize(),
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
                               }}
                             >
                               {dataLoading &&
@@ -374,7 +385,7 @@ export default function ThemedTable<T extends { id?: string }>(
                                     (cell.column.id == "requestText" ||
                                       cell.column.id == "responseText") &&
                                       dataLoading
-                                      ? "animate-pulse bg-gray-200 rounded-md"
+                                      ? "animate-pulse bg-slate-200 rounded-md"
                                       : "hidden"
                                   )}
                                 >
@@ -401,7 +412,7 @@ export default function ThemedTable<T extends { id?: string }>(
           <>
             <ResizableHandle withHandle />
             <ResizablePanel minSize={25} maxSize={75}>
-              <div className="h-full flex-shrink-0 transition-all duration-300 ease-in-out overflow-y-auto">
+              <div className="h-full flex-shrink-0 flex flex-col">
                 {rightPanel}
               </div>
             </ResizablePanel>

@@ -2,6 +2,8 @@ import { ChatCompletionTool } from "openai/resources";
 import { Message } from "../../components/templates/requests/chatComponent/types";
 import { NormalizedRequest } from "../../components/templates/requestsV2/builder/abstractRequestBuilder";
 import useRequestsPageV2 from "../../components/templates/requestsV2/useRequestsPageV2";
+import { getTimeIntervalAgo } from "@/lib/timeCalculations/time";
+import { useMemo } from "react";
 
 export const getChat = (
   requests: NormalizedRequest[]
@@ -98,6 +100,7 @@ export const getChat = (
 };
 
 export const usePlaygroundPage = (requestId: string) => {
+  const timeFilter = useMemo(() => getTimeIntervalAgo("3m"), []);
   const requests = useRequestsPageV2(
     1,
     1,
@@ -106,9 +109,19 @@ export const usePlaygroundPage = (requestId: string) => {
       rows: [],
     },
     {
-      request_response_rmt: {
-        request_id: {
-          equals: requestId,
+      left: {
+        request_response_rmt: {
+          request_id: {
+            equals: requestId,
+          },
+        },
+      },
+      operator: "and",
+      right: {
+        request_response_rmt: {
+          request_created_at: {
+            gte: timeFilter,
+          },
         },
       },
     },
@@ -120,7 +133,11 @@ export const usePlaygroundPage = (requestId: string) => {
   const { chat, isChat, tools } = getChat(requests.normalizedRequests);
 
   return {
-    isLoading: requests.isDataLoading,
+    isLoading:
+      requests.isDataLoading ||
+      requests.isBodyLoading ||
+      requests.isRefetching ||
+      requests.isCountLoading,
     data: requests.normalizedRequests,
     chat,
     refetch: requests.refetch,

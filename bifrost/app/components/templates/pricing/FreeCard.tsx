@@ -24,14 +24,14 @@ const FreeCard: React.FC = () => {
         <Col className="gap-[16px] ">
           <FeatureItem
             title="Generous free monthly tier"
-            description="10k free requests/month."
+            description="10k free requests per month."
           />
           <FeatureItem
-            title="Access to Dashboard"
-            description="Watch your AI app improve."
+            title="Access to Requests & Dashboard"
+            description="Trace and monitor your app's performance."
           />
           <FeatureItem
-            title="Free, truly."
+            title="Free forever"
             description="No credit card required."
           />
         </Col>

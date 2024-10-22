@@ -1,5 +1,5 @@
 import { BookOpenIcon } from "@heroicons/react/24/outline";
-import { AreaChart, Badge } from "@tremor/react";
+import { AreaChart } from "@tremor/react";
 import Link from "next/link";
 import { useState } from "react";
 import { TimeFilter } from "../../../lib/api/handlerWrappers";
@@ -95,11 +95,7 @@ const RateLimitPage = (props: {}) => {
   return (
     <>
       <AuthHeader
-        title={
-          <div className="flex items-center gap-2">
-            Rate limits <Badge size="sm">Beta</Badge>
-          </div>
-        }
+        title={<div className="flex items-center gap-2">Rate limits</div>}
         actions={
           <Link
             href="https://docs.helicone.ai/features/advanced-usage/custom-rate-limits"

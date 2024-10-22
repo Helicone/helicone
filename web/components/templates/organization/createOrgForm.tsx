@@ -149,7 +149,7 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
           <RadioGroup.Label className="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
             Choose an icon
           </RadioGroup.Label>
-          <div className="mt-4 flex items-center justify-between px-8">
+          <div className="mt-4 grid grid-cols-5 gap-4">
             {ORGANIZATION_ICONS.map((icon) => (
               <RadioGroup.Option
                 key={icon.name}
@@ -159,7 +159,7 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
                     checked
                       ? "ring-2 ring-offset-1 ring-sky-300 dark:ring-sky-700"
                       : "ring-1 ring-gray-200 dark:ring-gray-800",
-                    "bg-white dark:bg-black rounded-md p-2"
+                    "bg-white dark:bg-black rounded-md p-2 flex items-center justify-center"
                   )
                 }
               >
