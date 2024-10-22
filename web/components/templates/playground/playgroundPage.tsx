@@ -405,8 +405,8 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                     }
                     setTemperature(parseFloat(e.target.value));
                   }}
-                  min={0}
-                  max={1}
+                  min={0.01}
+                  max={1.99}
                   step={0.01}
                   className="w-14 text-sm px-2 py-1 rounded-lg border border-gray-300"
                 />
@@ -416,7 +416,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                 onValueChange={(value) => {
                   setTemperature(value[0]);
                 }}
-                min={0}
+                min={0.01}
                 max={1.99}
                 step={0.01}
               />
