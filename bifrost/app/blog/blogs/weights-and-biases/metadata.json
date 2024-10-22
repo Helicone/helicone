@@ -3,7 +3,7 @@
   "title1": "Helicone vs. Weights and Biases: LLM Observability Comparison - Helicone",
   "title2": "Helicone vs. Weights and Biases: LLM Observability Comparison - Helicone",
   "description": "Compare Helicone and Weights and Biases for LLM observability. Discover how Helicone offers essential tools for language model monitoring without the clutter, providing cost-effective, user-friendly, and easy-to-integrate solutions for modern LLMs.",
-  "images": "https://www.helicone.ai/static/blog/weights-and-biases.webp",
+  "images": "/static/blog/weights-and-biases.webp",
   "time": "5 minute read",
   "author": "Lina Lam",
   "date": "May 31, 2024"

@@ -3,7 +3,7 @@
   "title1": "The Next Evolution in OpenAI Monitoring and Optimization - Helicone",
   "title2": "The Next Evolution in OpenAI Monitoring and Optimization - Helicone",
   "description": "Discover how Helicone revolutionizes OpenAI monitoring and optimization. Learn about its advanced features like adaptive rate limiting, bucket caching, and key vault, designed to overcome traditional monitoring limitations and maximize your OpenAI usage efficiency.",
-  "images": "https://www.helicone.ai/static/blog/openai.webp",
+  "images": "/static/blog/openai.webp",
   "time": "3 minute read",
   "author": "Scott Nguyen",
   "date": "Sep 1, 2023"

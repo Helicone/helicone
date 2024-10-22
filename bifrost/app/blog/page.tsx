@@ -59,14 +59,12 @@ const RegularBlogPost: React.FC<BlogPostProps> = async ({ blog }) => {
       className="flex flex-col gap-6 w-full hover:bg-sky-50 rounded-lg p-8 col-span-2 md:col-span-1"
       href={blog.href}
     >
-      <img
+      <Image
         src={blog.imageUrl}
         alt={blog.imageAlt || blog.title}
         width={400}
         height={300}
-        style={{
-          objectFit: "cover",
-        }}
+        objectFit="cover"
         className="rounded-lg h-60 w-full border border-gray-300"
       />
 
@@ -193,6 +191,11 @@ const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
       folderName: "llm-api-providers",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "when-to-finetune",
     },
   },
   {
@@ -475,7 +478,7 @@ const blogContent: BlogStructure[] = [
     badgeText: "Product",
     date: "May 14, 2024",
     href: "/blog/switch-models-safely",
-    imageUrl: "static/blog/experiments/gpt-4o.webp",
+    imageUrl: "/static/blog/experiments/gpt-4o.webp",
     authors: [
       {
         name: "Scott Nguyen",
@@ -492,7 +495,7 @@ const blogContent: BlogStructure[] = [
     badgeText: "Compare",
     date: "Apr 29, 2024",
     href: "/blog/best-datadog-alternative-for-llm",
-    imageUrl: "static/blog/datadog/title.webp",
+    imageUrl: "/static/blog/datadog/title.webp",
     authors: [
       {
         name: "Lina Lam",
@@ -510,7 +513,7 @@ const blogContent: BlogStructure[] = [
     badgeText: "Compare",
     date: "Apr 18, 2024",
     href: "/blog/langsmith",
-    imageUrl: "static/blog/langsmith-vs-helicone/cover-image.webp",
+    imageUrl: "/static/blog/langsmith-vs-helicone/cover-image.webp",
     authors: [
       {
         name: "Lina Lam",

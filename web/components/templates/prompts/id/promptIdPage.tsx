@@ -7,17 +7,18 @@ import {
 
 import {
   BeakerIcon,
-  BookOpenIcon,
-  ChartBarIcon,
   ArrowTrendingUpIcon,
   TrashIcon,
   EyeIcon,
   PencilIcon,
+  ChevronDownIcon,
+  MagnifyingGlassIcon,
+  XMarkIcon,
+  InformationCircleIcon,
 } from "@heroicons/react/24/outline";
 import { useRouter } from "next/router";
 import { useExperiments } from "../../../../services/hooks/prompts/experiments";
 import { useInputs } from "../../../../services/hooks/prompts/inputs";
-import HcBadge from "../../../ui/hcBadge";
 import HcBreadcrumb from "../../../ui/hcBreadcrumb";
 import HcButton from "../../../ui/hcButton";
 import { useGetDataSets } from "../../../../services/hooks/prompts/datasets";
@@ -49,11 +50,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { EllipsisHorizontalIcon } from "@heroicons/react/24/solid";
 import {
-  TabGroup,
-  TabList,
-  Tab,
-  TabPanels,
-  TabPanel,
   MultiSelect,
   MultiSelectItem,
   AreaChart,
@@ -67,20 +63,14 @@ import { getUSDateFromString } from "../../../shared/utils/utils";
 import StyledAreaChart from "../../dashboard/styledAreaChart";
 import ModelPill from "../../requestsV2/modelPill";
 import StatusBadge from "../../requestsV2/statusBadge";
-import PromptPropertyCard from "./promptPropertyCard";
 import TableFooter from "../../requestsV2/tableFooter";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "../../../ui/tooltip";
 import { Button } from "../../../ui/button";
-import ExperimentPanel from "./experimentPanel";
 import { useUser } from "@supabase/auth-helpers-react";
 import { IslandContainer } from "../../../ui/islandContainer";
 import { useFeatureFlags } from "@/services/hooks/featureFlags";
 import { useOrg } from "@/components/layout/organizationContext";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Popover, PopoverContent, PopoverTrigger } from "../../../ui/popover";
 
 interface PromptIdPageProps {
   id: string;
@@ -642,149 +632,207 @@ const PromptIdPage = (props: PromptIdPageProps) => {
     org?.currentOrg?.id ?? ""
   );
 
+  const [isVersionsExpanded, setIsVersionsExpanded] = useState(true);
+  const [isInputsExpanded, setIsInputsExpanded] = useState(true);
+  const [isSearchVisible, setIsSearchVisible] = useState(false);
+
   return (
-    <IslandContainer>
+    <div>
       <div className="w-full h-full flex flex-col space-y-4 pt-4">
-        <div className="flex flex-row items-center justify-between">
-          <HcBreadcrumb
-            pages={[
-              { href: "/prompts", name: "Prompts" },
-              {
-                href: `/prompts/${id}`,
-                name: prompt?.user_defined_id || "Loading...",
-              },
-            ]}
-          />
-        </div>
+        <Tabs defaultValue="prompt">
+          <IslandContainer>
+            <div className="flex flex-row items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <HcBreadcrumb
+                  pages={[
+                    { href: "/prompts", name: "Prompts" },
+                    {
+                      href: `/prompts/${id}`,
+                      name: prompt?.user_defined_id || "Loading...",
+                    },
+                  ]}
+                />
+                <Popover>
+                  {prompt?.metadata?.createdFromUi === true ? (
+                    <>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size={"sm"}
+                          className="h-6 bg-[#F1F5F9] border border-[#CBD5E1]"
+                        >
+                          <PencilIcon className="h-4 w-4 mr-2" />
+                          Editable
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="max-w-[15rem]" align="center">
+                        <p className="text-sm">
+                          This prompt was created{" "}
+                          <span className="font-semibold">in the UI</span>. You
+                          can edit / delete them, or promote to prod.
+                        </p>
+                      </PopoverContent>
+                    </>
+                  ) : (
+                    <>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size={"sm"}
+                          className="h-6 bg-[#F1F5F9] border border-[#CBD5E1]"
+                        >
+                          <EyeIcon className="h-4 w-4 mr-2" />
+                          View only
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="max-w-[15rem]" align="center">
+                        <p className="text-sm">
+                          This prompt was created{" "}
+                          <span className="font-semibold">in code</span>. You
+                          won&apos;t be able to edit this from the UI.
+                        </p>
+                      </PopoverContent>
+                    </>
+                  )}
+                </Popover>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <InformationCircleIcon className="h-6 w-6 text-slate-500 cursor-pointer" />
+                  </PopoverTrigger>
+                  <PopoverContent className="w-64 p-4" align="start">
+                    <div className="space-y-2">
+                      <div className="border-b border-slate-200 dark:border-slate-600 py-2 p-4">
+                        <h3 className="text-sm font-semibold text-slate-700 ">
+                          Prompt Name
+                        </h3>
+                        <p className="text-xs font-medium text-slate-500">
+                          {prompt?.user_defined_id}
+                        </p>
+                      </div>
+                      <div className="border-b border-slate-200 dark:border-slate-600 py-2 px-4">
+                        <h3 className="text-sm font-semibold text-slate-700">
+                          Versions
+                        </h3>
+                        <p className="text-xs font-medium text-slate-500">
+                          {sortedPrompts?.length}
+                        </p>
+                      </div>
+                      <div className="py-2 px-4">
+                        <h3 className="text-sm font-semibold text-slate-700">
+                          Last used
+                        </h3>
+                        <p className="text-xs font-medium text-slate-500">
+                          {prompt?.last_used
+                            ? getTimeAgo(new Date(prompt?.last_used))
+                            : "Never"}
+                        </p>
+                      </div>
+                      <div className="py-2 px-4">
+                        <h3 className="text-sm font-semibold text-slate-700">
+                          Created on
+                        </h3>
+                        <p className="text-xs font-medium text-slate-500">
+                          {prompt?.created_at &&
+                            new Date(prompt?.created_at).toDateString()}
+                        </p>
+                      </div>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </div>
+              <div className="flex items-center space-x-4">
+                <TabsList className="grid w-64 h-11 grid-cols-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 ">
+                  <TabsTrigger
+                    value="prompt"
+                    className="rounded-md transition-colors data-[state=active]:bg-slate-100 dark:data-[state=active]:bg-slate-700 data-[state=active]:text-slate-950 dark:data-[state=active]:text-slate-50"
+                  >
+                    Prompt & Inputs
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="metrics"
+                    className="rounded-md transition-colors data-[state=active]:bg-slate-100 dark:data-[state=active]:bg-slate-700 data-[state=active]:text-slate-950 dark:data-[state=active]:text-slate-50"
+                  >
+                    Metrics
+                  </TabsTrigger>
+                </TabsList>
+              </div>
+            </div>
+          </IslandContainer>
 
-        <div className="flex justify-between items-center">
-          <div className="flex items-center space-x-4">
-            <h1 className="font-semibold text-4xl text-black dark:text-white">
-              {prompt?.user_defined_id}
-            </h1>
-            <HcBadge title={`${sortedPrompts?.length} versions`} size={"sm"} />
-            <TooltipProvider>
-              {prompt?.metadata?.createdFromUi === true ? (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size={"sm"}
-                      className="h-6 bg-[#F1F5F9] border border-[#CBD5E1]"
-                    >
-                      <PencilIcon className="h-4 w-4 mr-2" />
-                      Editable
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent className="max-w-[15rem]" align="center">
-                    <p>
-                      This prompt was created{" "}
-                      <span className="font-semibold">in the UI</span>. You can
-                      edit / delete them, or promote to prod.
-                    </p>
-                  </TooltipContent>
-                </Tooltip>
-              ) : (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size={"sm"}
-                      className="h-6 bg-[#F1F5F9] border border-[#CBD5E1]"
-                    >
-                      <EyeIcon className="h-4 w-4 mr-2" />
-                      View only
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent className="max-w-[15rem]" align="center">
-                    <p>
-                      This prompt was created{" "}
-                      <span className="font-semibold">in code</span>. You
-                      won&apos;t be able to edit this from the UI.
-                    </p>
-                  </TooltipContent>
-                </Tooltip>
-              )}
-            </TooltipProvider>
-          </div>
-          <HcButton
-            onClick={() => router.push(`/prompts/${id}/new-experiment`)}
-            variant="primary"
-            size="sm"
-            title="Start Experiment"
-            icon={BeakerIcon}
-          />
-        </div>
-
-        <div className="flex items-center gap-2 text-sm text-slate-500">
-          <p className="">
-            last used{" "}
-            {prompt?.last_used && getTimeAgo(new Date(prompt?.last_used))}
-          </p>
-          <div className="rounded-full h-1 w-1 bg-slate-400" />
-          <p className="">
-            created on{" "}
-            {prompt?.created_at && new Date(prompt?.created_at).toDateString()}
-          </p>
-        </div>
-        {user?.email?.includes("helicone.ai") ? (
-          <TabGroup>
-            <TabList variant="line" defaultValue="1">
-              <Tab value="1" icon={BookOpenIcon}>
-                Prompt & Inputs
-              </Tab>
-
-              <Tab value="2" icon={BeakerIcon}>
-                Experiments
-              </Tab>
-
-              <Tab value="3" icon={ChartBarIcon}>
-                Overview
-              </Tab>
-            </TabList>
-            <TabPanels>
-              <TabPanel>
-                <div className="flex items-start relative min-h-[75vh]">
-                  <div className="py-4 flex flex-col space-y-4 w-full h-full">
-                    <div className="flex space-x-4">
-                      <div className="w-2/3">
-                        <PromptPlayground
-                          prompt={selectedPrompt?.helicone_template || ""}
-                          selectedInput={selectedInput || undefined}
-                          onSubmit={async (history, model) => {
-                            await createSubversion(history, model);
-                          }}
-                          submitText="Test"
-                          initialModel={model}
-                          isPromptCreatedFromUi={
-                            prompt?.metadata?.createdFromUi as
-                              | boolean
-                              | undefined
-                          }
+          <TabsContent value="prompt">
+            <div className="flex items-start relative min-h-[75vh]">
+              <div className="py-4 flex flex-col space-y-4 w-full h-full">
+                <div className="flex">
+                  <div className="w-2/3">
+                    <PromptPlayground
+                      prompt={selectedPrompt?.helicone_template || ""}
+                      selectedInput={selectedInput || undefined}
+                      onSubmit={async (history, model) => {
+                        await createSubversion(history, model);
+                      }}
+                      submitText="Test"
+                      initialModel={model}
+                      isPromptCreatedFromUi={
+                        prompt?.metadata?.createdFromUi as boolean | undefined
+                      }
+                      className="border-y"
+                    />
+                  </div>
+                  <div className="w-1/3 flex flex-col">
+                    <div className="border-y border-x border-[#E8EAEC] dark:border-slate-700 bg-[#F9FAFB] dark:bg-black">
+                      <div
+                        className="flex flex-row items-center justify-between px-4 h-12 cursor-pointer"
+                        onClick={() =>
+                          setIsVersionsExpanded(!isVersionsExpanded)
+                        }
+                      >
+                        <h2 className="text-lg font-medium">Versions</h2>
+                        <ChevronDownIcon
+                          className={`h-5 w-5 transition-transform ${
+                            isVersionsExpanded ? "rotate-180" : ""
+                          }`}
                         />
                       </div>
-                      <div className="w-1/3 flex flex-col space-y-4">
-                        <div className="border border-slate-300 dark:border-slate-700 rounded-lg bg-[#F9FAFB] dark:bg-black">
-                          <div className="flex flex-row items-center justify-between px-4 h-12 ">
-                            <h2 className="text-lg font-medium ">Versions</h2>
-                          </div>
 
-                          <ScrollArea className="h-[25vh] rounded-b-lg">
-                            <div>
-                              {sortedPrompts?.map((promptVersion) => {
-                                const isProduction =
-                                  promptVersion.metadata?.isProduction === true;
-                                const isSelected =
-                                  selectedVersion ===
-                                  `${promptVersion.major_version}.${promptVersion.minor_version}`;
+                      {isVersionsExpanded && (
+                        <ScrollArea className="h-[25vh] rounded-b-lg">
+                          <div>
+                            {sortedPrompts?.map((promptVersion, index) => {
+                              const isProduction =
+                                promptVersion.metadata?.isProduction === true;
+                              const isSelected =
+                                selectedVersion ===
+                                `${promptVersion.major_version}.${promptVersion.minor_version}`;
+                              const isFirst = index === 0;
+                              const isLast = index === sortedPrompts.length - 1;
 
-                                return (
+                              return (
+                                <div
+                                  key={promptVersion.id}
+                                  className={`flex flex-row w-full h-12 ${
+                                    isSelected
+                                      ? "bg-sky-100 dark:bg-sky-950"
+                                      : "bg-slate-50 dark:bg-slate-900"
+                                  } ${
+                                    isFirst
+                                      ? "border-t border-slate-300 dark:border-slate-700"
+                                      : ""
+                                  } ${
+                                    isLast
+                                      ? "border-b border-slate-300 dark:border-slate-700"
+                                      : ""
+                                  }`}
+                                >
+                                  <div className="flex items-center">
+                                    {isSelected && (
+                                      <div className="bg-sky-500 h-full w-1" />
+                                    )}
+                                  </div>
                                   <div
-                                    key={promptVersion.id}
-                                    className={`px-4 py-2 cursor-pointer border-t border-slate-300 dark:border-slate-700 ${
-                                      isSelected
-                                        ? "bg-sky-100 border-sky-500 dark:bg-sky-950 border-b"
-                                        : "bg-slate-50 dark:bg-slate-900"
+                                    className={`flex-grow px-4 py-2 flex flex-row cursor-pointer ${
+                                      !isFirst
+                                        ? "border-t border-slate-300 dark:border-slate-700"
+                                        : ""
                                     }`}
                                     onClick={() =>
                                       setSelectedInputAndVersion(
@@ -792,745 +840,456 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                                       )
                                     }
                                   >
-                                    <div className="flex justify-between items-center">
-                                      <div className="flex items-center space-x-2">
-                                        <div className="border rounded-full border-slate-500 bg-white dark:bg-black h-6 w-6 flex items-center justify-center">
-                                          {isSelected && (
-                                            <div className="bg-sky-500 rounded-full h-4 w-4" />
-                                          )}
+                                    <div className="flex justify-between items-center w-full">
+                                      <div className="flex items-center space-x-2 flex-row justify-between w-full">
+                                        <div className="flex items-center space-x-2">
+                                          <span className="font-medium text-lg">
+                                            V{promptVersion.major_version}.
+                                            {promptVersion.minor_version}
+                                          </span>
+                                          {promptVersion.model &&
+                                            promptVersion.model.length > 0 && (
+                                              <Badge
+                                                variant={"default"}
+                                                className="bg-[#F1F5F9] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-[#475569] text-[#334155] dark:text-white text-sm font-medium rounded-lg px-4 hover:bg-[#F1F5F9] hover:text-black"
+                                              >
+                                                {promptVersion.model.length >= 7
+                                                  ? promptVersion.model.substring(
+                                                      0,
+                                                      7
+                                                    ) + ".."
+                                                  : promptVersion.model}
+                                              </Badge>
+                                            )}
+                                          <span>
+                                            {isProduction && (
+                                              <Badge
+                                                variant={"default"}
+                                                className="bg-[#BAE6FD] dark:bg-[#1E293B]  dark:border-[#475569] text-[#0369A1] dark:text-white text-sm font-medium rounded-lg px-4 hover:bg-[#F1F5F9] hover:text-black"
+                                              >
+                                                Prod
+                                              </Badge>
+                                            )}
+                                          </span>
                                         </div>
-                                        <span className="font-medium text-lg">
-                                          V{promptVersion.major_version}.
-                                          {promptVersion.minor_version}
-                                        </span>
-                                        <span>
-                                          {isProduction && (
-                                            <Badge
-                                              variant={"default"}
-                                              className="bg-[#F1F5F9] dark:bg-[#1E293B] border border-[#CBD5E1] dark:border-[#475569] text-black dark:text-white text-sm font-medium rounded-lg px-4 hover:bg-[#F1F5F9] hover:text-black"
-                                            >
-                                              Prod
-                                            </Badge>
-                                          )}
-                                        </span>
-                                      </div>
-                                      <div className="flex items-center space-x-2">
-                                        {prompt?.metadata?.createdFromUi ===
-                                        true ? (
-                                          <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                              <button className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full">
-                                                <EllipsisHorizontalIcon className="h-6 w-6 text-slate-500" />
-                                              </button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent>
-                                              {!isProduction && (
-                                                <DropdownMenuItem
-                                                  onClick={() =>
-                                                    promoteToProduction(
-                                                      promptVersion.id
-                                                    )
-                                                  }
-                                                >
-                                                  <ArrowTrendingUpIcon className="h-4 w-4 mr-2" />
-                                                  Promote to prod
-                                                </DropdownMenuItem>
-                                              )}
-                                              <DropdownMenuItem
-                                                onClick={() =>
-                                                  startExperiment(
-                                                    promptVersion.id,
-                                                    promptVersion.helicone_template
-                                                  )
-                                                }
-                                              >
-                                                <BeakerIcon className="h-4 w-4 mr-2" />
-                                                Experiment
-                                              </DropdownMenuItem>
-                                              {!isProduction && (
-                                                <DropdownMenuItem
-                                                  onClick={() =>
-                                                    deletePromptVersion(
-                                                      promptVersion.id
-                                                    )
-                                                  }
-                                                >
-                                                  <TrashIcon className="h-4 w-4 mr-2 text-red-500" />
-                                                  <p className="text-red-500">
-                                                    Delete
-                                                  </p>
-                                                </DropdownMenuItem>
-                                              )}
-                                            </DropdownMenuContent>
-                                          </DropdownMenu>
-                                        ) : (
-                                          <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                              <button className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full">
-                                                <EllipsisHorizontalIcon className="h-6 w-6 text-slate-500" />
-                                              </button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent>
-                                              <DropdownMenuItem
-                                                onClick={() =>
-                                                  startExperiment(
-                                                    promptVersion.id,
-                                                    promptVersion.helicone_template
-                                                  )
-                                                }
-                                              >
-                                                <BeakerIcon className="h-4 w-4 mr-2" />
-                                                Experiment
-                                              </DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                          </DropdownMenu>
-                                        )}
-                                      </div>
-                                    </div>
-                                    <div className="flex justify-between items-center mt-2">
-                                      <span className="text-xs text-slate-500">
-                                        {getTimeAgo(
-                                          new Date(promptVersion.created_at)
-                                        )}
-                                      </span>
-                                      <div className="text-xs text-slate-500 dark:text-slate-400">
-                                        {promptVersion.model}
+                                        <div className="flex items-center space-x-2">
+                                          <span className="text-sm text-slate-500">
+                                            {getTimeAgo(
+                                              new Date(promptVersion.created_at)
+                                            )}
+                                          </span>
+                                          <div className="flex items-center space-x-2">
+                                            {prompt?.metadata?.createdFromUi ===
+                                            true ? (
+                                              <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                  <button className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full">
+                                                    <EllipsisHorizontalIcon className="h-6 w-6 text-slate-500" />
+                                                  </button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="start">
+                                                  {!isProduction && (
+                                                    <DropdownMenuItem
+                                                      onClick={() =>
+                                                        promoteToProduction(
+                                                          promptVersion.id
+                                                        )
+                                                      }
+                                                    >
+                                                      <ArrowTrendingUpIcon className="h-4 w-4 mr-2" />
+                                                      Promote to prod
+                                                    </DropdownMenuItem>
+                                                  )}
+                                                  <DropdownMenuItem
+                                                    onClick={() =>
+                                                      startExperiment(
+                                                        promptVersion.id,
+                                                        promptVersion.helicone_template
+                                                      )
+                                                    }
+                                                  >
+                                                    <BeakerIcon className="h-4 w-4 mr-2" />
+                                                    Experiment
+                                                  </DropdownMenuItem>
+                                                  {!isProduction && (
+                                                    <DropdownMenuItem
+                                                      onClick={() =>
+                                                        deletePromptVersion(
+                                                          promptVersion.id
+                                                        )
+                                                      }
+                                                    >
+                                                      <TrashIcon className="h-4 w-4 mr-2 text-red-500" />
+                                                      <p className="text-red-500">
+                                                        Delete
+                                                      </p>
+                                                    </DropdownMenuItem>
+                                                  )}
+                                                </DropdownMenuContent>
+                                              </DropdownMenu>
+                                            ) : (
+                                              <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                  <button className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full">
+                                                    <EllipsisHorizontalIcon className="h-6 w-6 text-slate-500" />
+                                                  </button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent>
+                                                  <DropdownMenuItem
+                                                    onClick={() =>
+                                                      startExperiment(
+                                                        promptVersion.id,
+                                                        promptVersion.helicone_template
+                                                      )
+                                                    }
+                                                  >
+                                                    <BeakerIcon className="h-4 w-4 mr-2" />
+                                                    Experiment
+                                                  </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                              </DropdownMenu>
+                                            )}
+                                          </div>
+                                        </div>
                                       </div>
                                     </div>
                                   </div>
-                                );
-                              })}
-                            </div>
-                          </ScrollArea>
-                        </div>
-                        <div className="border border-slate-300 dark:border-slate-700 rounded-lg bg-[#F9FAFB] dark:bg-black">
-                          <div className="flex flex-row items-center justify-between mx-4 h-12">
-                            <h2 className="text-lg font-medium ">Inputs</h2>
-                            <div className="pl-4 w-full">
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </ScrollArea>
+                      )}
+                    </div>
+                    <div className="border-x border-b border-[#E8EAEC] dark:border-slate-700 bg-[#F9FAFB] dark:bg-black">
+                      <div
+                        className="flex flex-row items-center justify-between px-4 h-12 cursor-pointer"
+                        onClick={() => setIsInputsExpanded(!isInputsExpanded)}
+                      >
+                        <h2 className="text-lg font-medium">Inputs</h2>
+                        <div className="flex items-center space-x-2">
+                          {isSearchVisible ? (
+                            <div className="relative w-64">
                               <TextInput
                                 placeholder="Search by request id..."
                                 value={searchRequestId}
                                 onValueChange={(value) =>
                                   setSearchRequestId(value)
                                 }
+                                className="pr-8"
                               />
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setIsSearchVisible(false);
+                                  setSearchRequestId("");
+                                }}
+                                className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full"
+                              >
+                                <XMarkIcon className="h-4 w-4 text-slate-500" />
+                              </button>
                             </div>
-                          </div>
-
-                          <ScrollArea className="h-[30vh] rounded-b-lg">
-                            <ul className="flex flex-col ">
-                              {inputs
-                                ?.filter((input) =>
-                                  input.source_request.includes(searchRequestId)
-                                )
-                                .map((input) => (
-                                  <li key={input.id}>
-                                    <PromptPropertyCard
-                                      isSelected={
-                                        selectedInput?.id === input.id
-                                      }
-                                      onSelect={() => handleInputSelect(input)}
-                                      requestId={input.source_request}
-                                      createdAt={input.created_at}
-                                      properties={input.inputs}
-                                      autoInputs={input.auto_prompt_inputs}
-                                      view={inputView}
-                                    />
-                                  </li>
-                                ))}
-                            </ul>
-                          </ScrollArea>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </TabPanel>
-
-              <TabPanel>
-                <ExperimentPanel promptId={id} />
-              </TabPanel>
-
-              <TabPanel>
-                <div className="flex flex-col space-y-16 py-4">
-                  <div className="w-full h-full flex flex-col space-y-4">
-                    <div className="flex items-center justify-between w-full">
-                      <ThemedTimeFilter
-                        timeFilterOptions={[
-                          { key: "24h", value: "24H" },
-                          { key: "7d", value: "7D" },
-                          { key: "1m", value: "1M" },
-                          { key: "3m", value: "3M" },
-                          // { key: "all", value: "All" },
-                        ]}
-                        custom={true}
-                        onSelect={function (key: string, value: string): void {
-                          onTimeSelectHandler(key as TimeInterval, value);
-                        }}
-                        isFetching={isPromptRequestsLoading}
-                        defaultValue={interval}
-                        currentTimeFilter={timeFilter}
-                      />
-                    </div>
-
-                    <div>
-                      <StyledAreaChart
-                        title={"Total Requests"}
-                        value={total}
-                        isDataOverTimeLoading={isPromptRequestsLoading}
-                        withAnimation={true}
-                      >
-                        <AreaChart
-                          className="h-[14rem]"
-                          data={
-                            data?.data?.map((r) => ({
-                              date: getTimeMap(timeIncrement)(r.time),
-                              count: r.count,
-                            })) ?? []
-                          }
-                          index="date"
-                          categories={["count"]}
-                          colors={["cyan"]}
-                          showYAxis={false}
-                          curveType="monotone"
-                          valueFormatter={(number: number | bigint) => {
-                            return `${new Intl.NumberFormat("us").format(
-                              Number(number)
-                            )}`;
-                          }}
-                        />
-                      </StyledAreaChart>
-                    </div>
-                  </div>
-                  <div className="flex flex-col space-y-4 h-full w-full">
-                    <h2 className="text-2xl font-semibold text-black dark:text-white">
-                      Experiment Logs
-                    </h2>
-                    <div className="flex items-center justify-between w-full">
-                      <div className="flex flex-wrap items-center space-x-2 w-full">
-                        <div className="w-full max-w-[16rem]">
-                          <MultiSelect
-                            placeholder="Dataset"
-                            value={selectedDatasets}
-                            onValueChange={(value) => {
-                              setSelectedDatasets(value);
-                            }}
-                          >
-                            {datasets.map((dataset) => (
-                              <MultiSelectItem
-                                value={dataset.id}
-                                key={dataset.id}
-                              >
-                                {dataset.name}
-                              </MultiSelectItem>
-                            ))}
-                          </MultiSelect>
-                        </div>
-                        <div className="w-full max-w-[16rem]">
-                          <MultiSelect
-                            placeholder="Model"
-                            value={selectedModels}
-                            onValueChange={(value) => {
-                              setSelectedModels(value);
-                            }}
-                          >
-                            {MODEL_LIST.map((model) => (
-                              <MultiSelectItem
-                                value={model.value}
-                                key={model.value}
-                              >
-                                {model.label}
-                              </MultiSelectItem>
-                            ))}
-                          </MultiSelect>
-                        </div>
-                        <div className="pl-2">
-                          <HcButton
-                            variant={"light"}
-                            size={"sm"}
-                            title={"Clear All"}
-                            onClick={() => {
-                              setSelectedDatasets([]);
-                              setSelectedModels([]);
-                            }}
+                          ) : (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setIsSearchVisible(true);
+                              }}
+                              className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full"
+                            >
+                              <MagnifyingGlassIcon className="h-5 w-5 text-slate-500" />
+                            </button>
+                          )}
+                          <ChevronDownIcon
+                            className={`h-5 w-5 transition-transform ${
+                              isInputsExpanded ? "rotate-180" : ""
+                            }`}
                           />
                         </div>
                       </div>
-                    </div>
-                    {isExperimentsLoading ? (
-                      <div className="h-48 flex justify-center items-center">
-                        <LoadingAnimation title="Loading Experiments..." />
-                      </div>
-                    ) : (
-                      <SimpleTable
-                        data={filteredExperiments}
-                        columns={[
-                          {
-                            key: "id",
-                            header: "ID",
-                            render: (item) => (
-                              <span className="underline text-black dark:text-white">
-                                {item.id}
-                              </span>
-                            ),
-                          },
-                          {
-                            key: "status",
-                            header: "Status",
-                            render: (item) => (
-                              <StatusBadge
-                                statusType={item.status || "unknown"}
-                              />
-                            ),
-                          },
-                          {
-                            key: "createdAt",
-                            header: "Created At",
-                            render: (item) => (
-                              <span>{getUSDateFromString(item.createdAt)}</span>
-                            ),
-                          },
-                          {
-                            key: "datasetName",
-                            header: "Dataset",
-                            render: (item) => item.datasetName,
-                          },
-                          {
-                            key: "model",
-                            header: "Model",
-                            render: (item) => (
-                              <ModelPill model={item.model || "unknown"} />
-                            ),
-                          },
-                          {
-                            key: "runCount",
-                            header: "Run Count",
-                            render: (item) => item.runCount || 0,
-                          },
-                        ]}
-                        onSelect={(item) => {
-                          router.push(`/prompts/${id}/experiments/${item.id}`);
-                        }}
-                      />
-                    )}
 
-                    <TableFooter
-                      currentPage={currentPage}
-                      pageSize={100}
-                      count={experiments.length}
-                      isCountLoading={false}
-                      onPageChange={function (newPageNumber: number): void {
-                        // throw new Error("Function not implemented.");
-                      }}
-                      onPageSizeChange={function (newPageSize: number): void {
-                        // throw new Error("Function not implemented.");
-                      }}
-                      pageSizeOptions={[25, 50, 100]}
-                    />
-                  </div>
-                </div>
-              </TabPanel>
-            </TabPanels>
-          </TabGroup>
-        ) : (
-          <TabGroup>
-            <TabList variant="line" defaultValue="1">
-              <Tab value="1" icon={BookOpenIcon}>
-                Prompt & Inputs
-              </Tab>
-
-              <Tab value="2" icon={ChartBarIcon}>
-                Overview
-              </Tab>
-            </TabList>
-            <TabPanels>
-              <TabPanel>
-                <div className="flex items-start relative min-h-[75vh]">
-                  <div className="py-4 flex flex-col space-y-4 w-full h-full">
-                    <div className="flex space-x-4">
-                      <div className="w-2/3">
-                        <PromptPlayground
-                          prompt={selectedPrompt?.helicone_template || ""}
-                          selectedInput={selectedInput || undefined}
-                          onSubmit={async (history, model) => {
-                            await createSubversion(history, model);
-                          }}
-                          submitText="Test"
-                          initialModel={model}
-                          isPromptCreatedFromUi={
-                            prompt?.metadata?.createdFromUi as
-                              | boolean
-                              | undefined
-                          }
-                        />
-                      </div>
-                      <div className="w-1/3 flex flex-col space-y-4">
-                        <div className="border border-slate-300 dark:border-slate-700 rounded-lg bg-[#F9FAFB]">
-                          <div className="flex flex-row items-center justify-between px-4 h-12 ">
-                            <h2 className="text-lg font-medium ">Versions</h2>
-                          </div>
-
-                          <ScrollArea className="h-[25vh] rounded-b-lg">
-                            <div>
-                              {sortedPrompts?.map((promptVersion) => {
-                                const isProduction =
-                                  promptVersion.metadata?.isProduction === true;
+                      {isInputsExpanded && (
+                        <ScrollArea className="h-[30vh] rounded-b-lg">
+                          <ul className="flex flex-col">
+                            {inputs
+                              ?.filter((input) =>
+                                input.source_request.includes(searchRequestId)
+                              )
+                              .map((input, index, filteredInputs) => {
+                                const isFirst = index === 0;
+                                const isLast =
+                                  index === filteredInputs.length - 1;
                                 const isSelected =
-                                  selectedVersion ===
-                                  `${promptVersion.major_version}.${promptVersion.minor_version}`;
+                                  selectedInput?.id === input.id;
 
                                 return (
-                                  <div
-                                    key={promptVersion.id}
-                                    className={`px-4 py-2 cursor-pointer border-t border-slate-300 dark:border-slate-700 ${
+                                  <li
+                                    key={input.id}
+                                    className={`flex flex-row w-full ${
                                       isSelected
-                                        ? "bg-sky-100 border-sky-500 dark:bg-sky-950 border-b"
-                                        : "bg-slate-50 dark:bg-slate-900"
+                                        ? "bg-sky-50 dark:bg-sky-900"
+                                        : "bg-white dark:bg-gray-800"
+                                    } ${
+                                      isFirst
+                                        ? "border-t border-slate-300 dark:border-slate-700"
+                                        : ""
+                                    } ${
+                                      isLast
+                                        ? "border-b border-slate-300 dark:border-slate-700"
+                                        : ""
                                     }`}
-                                    onClick={() =>
-                                      setSelectedInputAndVersion(
-                                        `${promptVersion.major_version}.${promptVersion.minor_version}`
-                                      )
-                                    }
                                   >
-                                    <div className="flex justify-between items-center">
-                                      <div className="flex items-center space-x-2">
-                                        <div className="border rounded-full border-slate-500 bg-white dark:bg-black h-6 w-6 flex items-center justify-center">
-                                          {isSelected && (
-                                            <div className="bg-sky-500 rounded-full h-4 w-4" />
-                                          )}
+                                    <div className="flex items-center">
+                                      {isSelected && (
+                                        <div className="bg-sky-500 h-full w-1" />
+                                      )}
+                                    </div>
+                                    <div
+                                      className={`flex-grow p-4 cursor-pointer ${
+                                        !isFirst
+                                          ? "border-t border-slate-300 dark:border-slate-700"
+                                          : ""
+                                      }`}
+                                      onClick={() => handleInputSelect(input)}
+                                    >
+                                      {Object.entries(input.inputs).map(
+                                        ([key, value], index) => (
+                                          <div
+                                            key={index}
+                                            className="mb-2 last:mb-0"
+                                          >
+                                            <span className="text-blue-500 font-medium">
+                                              {key}:{" "}
+                                            </span>
+                                            <span className="text-gray-700 dark:text-gray-300">
+                                              {typeof value === "string"
+                                                ? value.length > 100
+                                                  ? value.substring(0, 100) +
+                                                    "..."
+                                                  : value
+                                                : JSON.stringify(value)}
+                                            </span>
+                                          </div>
+                                        )
+                                      )}
+                                      {input.auto_prompt_inputs &&
+                                        input.auto_prompt_inputs.length > 0 && (
+                                          <div className="mt-2">
+                                            <span className="text-blue-500 font-medium">
+                                              messages:{" "}
+                                            </span>
+                                            <span className="text-gray-500">
+                                              {JSON.stringify(
+                                                input.auto_prompt_inputs
+                                              ).substring(0, 50)}
+                                              ...
+                                            </span>
+                                          </div>
+                                        )}
+                                      {input.response_body && (
+                                        <div className="mt-2">
+                                          <span className="text-blue-500 font-medium">
+                                            messages:{" "}
+                                          </span>
+                                          <span className="text-gray-700 dark:text-gray-300">
+                                            {JSON.stringify(
+                                              (input.response_body as any)
+                                                ?.choices[0]?.message
+                                            )}
+                                          </span>
                                         </div>
-                                        <span className="font-medium text-lg">
-                                          V{promptVersion.major_version}.
-                                          {promptVersion.minor_version}
-                                        </span>
-                                        <span>
-                                          {isProduction && (
-                                            <Badge
-                                              variant={"default"}
-                                              className="bg-[#F1F5F9] border border-[#CBD5E1] text-black text-sm font-medium rounded-lg px-4 hover:bg-[#F1F5F9] hover:text-black"
-                                            >
-                                              Prod
-                                            </Badge>
-                                          )}
-                                        </span>
-                                      </div>
-                                      <div className="flex items-center space-x-2">
-                                        {prompt?.metadata?.createdFromUi ===
-                                        true ? (
-                                          <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                              <button className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full">
-                                                <EllipsisHorizontalIcon className="h-6 w-6 text-slate-500" />
-                                              </button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent>
-                                              {!isProduction && (
-                                                <DropdownMenuItem
-                                                  onClick={() =>
-                                                    promoteToProduction(
-                                                      promptVersion.id
-                                                    )
-                                                  }
-                                                >
-                                                  <ArrowTrendingUpIcon className="h-4 w-4 mr-2" />
-                                                  Promote to prod
-                                                </DropdownMenuItem>
-                                              )}
-                                              <DropdownMenuItem
-                                                onClick={() =>
-                                                  startExperiment(
-                                                    promptVersion.id,
-                                                    promptVersion.helicone_template
-                                                  )
-                                                }
-                                              >
-                                                <BeakerIcon className="h-4 w-4 mr-2" />
-                                                Experiment
-                                              </DropdownMenuItem>
-                                              {!isProduction && (
-                                                <DropdownMenuItem
-                                                  onClick={() =>
-                                                    deletePromptVersion(
-                                                      promptVersion.id
-                                                    )
-                                                  }
-                                                >
-                                                  <TrashIcon className="h-4 w-4 mr-2 text-red-500" />
-                                                  <p className="text-red-500">
-                                                    Delete
-                                                  </p>
-                                                </DropdownMenuItem>
-                                              )}
-                                            </DropdownMenuContent>
-                                          </DropdownMenu>
-                                        ) : (
-                                          <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                              <button className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full">
-                                                <EllipsisHorizontalIcon className="h-6 w-6 text-slate-500" />
-                                              </button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent>
-                                              <DropdownMenuItem
-                                                onClick={() =>
-                                                  startExperiment(
-                                                    promptVersion.id,
-                                                    promptVersion.helicone_template
-                                                  )
-                                                }
-                                              >
-                                                <BeakerIcon className="h-4 w-4 mr-2" />
-                                                Experiment
-                                              </DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                          </DropdownMenu>
-                                        )}
-                                      </div>
+                                      )}
                                     </div>
-                                    <div className="flex justify-between items-center mt-2">
-                                      <span className="text-xs text-slate-500">
-                                        {getTimeAgo(
-                                          new Date(promptVersion.created_at)
-                                        )}
-                                      </span>
-                                      <div className="text-xs text-slate-500 dark:text-slate-400">
-                                        {promptVersion.model}
-                                      </div>
-                                    </div>
-                                  </div>
+                                  </li>
                                 );
                               })}
-                            </div>
-                          </ScrollArea>
-                        </div>
-                        <div className="border border-slate-300 dark:border-slate-700 rounded-lg bg-[#F9FAFB]">
-                          <div className="flex flex-row items-center justify-between mx-4 h-12">
-                            <h2 className="text-lg font-medium ">Inputs</h2>
-                            <div className="pl-4 w-full">
-                              <TextInput
-                                placeholder="Search by request id..."
-                                value={searchRequestId}
-                                onValueChange={(value) =>
-                                  setSearchRequestId(value)
-                                }
-                              />
-                            </div>
-                          </div>
-
-                          <ScrollArea className="h-[30vh] rounded-b-lg">
-                            <ul className="flex flex-col ">
-                              {inputs
-                                ?.filter((input) =>
-                                  input.source_request.includes(searchRequestId)
-                                )
-                                .map((input) => (
-                                  <li key={input.id}>
-                                    <PromptPropertyCard
-                                      isSelected={
-                                        selectedInput?.id === input.id
-                                      }
-                                      onSelect={() => handleInputSelect(input)}
-                                      requestId={input.source_request}
-                                      createdAt={input.created_at}
-                                      properties={input.inputs}
-                                      autoInputs={input.auto_prompt_inputs}
-                                      view={inputView}
-                                    />
-                                  </li>
-                                ))}
-                            </ul>
-                          </ScrollArea>
-                        </div>
-                      </div>
+                          </ul>
+                        </ScrollArea>
+                      )}
                     </div>
                   </div>
                 </div>
-              </TabPanel>
-              <TabPanel>
-                <div className="flex flex-col space-y-16 py-4">
-                  <div className="w-full h-full flex flex-col space-y-4">
-                    <div className="flex items-center justify-between w-full">
-                      <ThemedTimeFilter
-                        timeFilterOptions={[
-                          { key: "24h", value: "24H" },
-                          { key: "7d", value: "7D" },
-                          { key: "1m", value: "1M" },
-                          { key: "3m", value: "3M" },
-                          // { key: "all", value: "All" },
-                        ]}
-                        custom={true}
-                        onSelect={function (key: string, value: string): void {
-                          onTimeSelectHandler(key as TimeInterval, value);
-                        }}
-                        isFetching={isPromptRequestsLoading}
-                        defaultValue={interval}
-                        currentTimeFilter={timeFilter}
-                      />
-                    </div>
+              </div>
+            </div>
+          </TabsContent>
 
-                    <div>
-                      <StyledAreaChart
-                        title={"Total Requests"}
-                        value={total}
-                        isDataOverTimeLoading={isPromptRequestsLoading}
-                        withAnimation={true}
-                      >
-                        <AreaChart
-                          className="h-[14rem]"
-                          data={
-                            data?.data?.map((r) => ({
-                              date: getTimeMap(timeIncrement)(r.time),
-                              count: r.count,
-                            })) ?? []
-                          }
-                          index="date"
-                          categories={["count"]}
-                          colors={["cyan"]}
-                          showYAxis={false}
-                          curveType="monotone"
-                          valueFormatter={(number: number | bigint) => {
-                            return `${new Intl.NumberFormat("us").format(
-                              Number(number)
-                            )}`;
-                          }}
-                        />
-                      </StyledAreaChart>
-                    </div>
-                  </div>
-                  <div className="flex flex-col space-y-4 h-full w-full">
-                    <h2 className="text-2xl font-semibold text-black dark:text-white">
-                      Experiment Logs
-                    </h2>
-                    <div className="flex items-center justify-between w-full">
-                      <div className="flex flex-wrap items-center space-x-2 w-full">
-                        <div className="w-full max-w-[16rem]">
-                          <MultiSelect
-                            placeholder="Dataset"
-                            value={selectedDatasets}
-                            onValueChange={(value) => {
-                              setSelectedDatasets(value);
-                            }}
-                          >
-                            {datasets.map((dataset) => (
-                              <MultiSelectItem
-                                value={dataset.id}
-                                key={dataset.id}
-                              >
-                                {dataset.name}
-                              </MultiSelectItem>
-                            ))}
-                          </MultiSelect>
-                        </div>
-                        <div className="w-full max-w-[16rem]">
-                          <MultiSelect
-                            placeholder="Model"
-                            value={selectedModels}
-                            onValueChange={(value) => {
-                              setSelectedModels(value);
-                            }}
-                          >
-                            {MODEL_LIST.map((model) => (
-                              <MultiSelectItem
-                                value={model.value}
-                                key={model.value}
-                              >
-                                {model.label}
-                              </MultiSelectItem>
-                            ))}
-                          </MultiSelect>
-                        </div>
-                        <div className="pl-2">
-                          <HcButton
-                            variant={"light"}
-                            size={"sm"}
-                            title={"Clear All"}
-                            onClick={() => {
-                              setSelectedDatasets([]);
-                              setSelectedModels([]);
-                            }}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                    {isExperimentsLoading ? (
-                      <div className="h-48 flex justify-center items-center">
-                        <LoadingAnimation title="Loading Experiments..." />
-                      </div>
-                    ) : (
-                      <SimpleTable
-                        data={filteredExperiments}
-                        columns={[
-                          {
-                            key: "id",
-                            header: "ID",
-                            render: (item) => (
-                              <span className="underline text-black dark:text-white">
-                                {item.id}
-                              </span>
-                            ),
-                          },
-                          {
-                            key: "status",
-                            header: "Status",
-                            render: (item) => (
-                              <StatusBadge
-                                statusType={item.status || "unknown"}
-                              />
-                            ),
-                          },
-                          {
-                            key: "createdAt",
-                            header: "Created At",
-                            render: (item) => (
-                              <span>{getUSDateFromString(item.createdAt)}</span>
-                            ),
-                          },
-                          {
-                            key: "datasetName",
-                            header: "Dataset",
-                            render: (item) => item.datasetName,
-                          },
-                          {
-                            key: "model",
-                            header: "Model",
-                            render: (item) => (
-                              <ModelPill model={item.model || "unknown"} />
-                            ),
-                          },
-                          {
-                            key: "runCount",
-                            header: "Run Count",
-                            render: (item) => item.runCount || 0,
-                          },
-                        ]}
-                        onSelect={(item) => {
-                          router.push(`/prompts/${id}/experiments/${item.id}`);
-                        }}
-                      />
-                    )}
+          <TabsContent value="metrics">
+            <div className="flex flex-col space-y-16 py-4 px-4">
+              <div className="w-full h-full flex flex-col space-y-4">
+                <div className="flex items-center justify-between w-full">
+                  <ThemedTimeFilter
+                    timeFilterOptions={[
+                      { key: "24h", value: "24H" },
+                      { key: "7d", value: "7D" },
+                      { key: "1m", value: "1M" },
+                      { key: "3m", value: "3M" },
+                      // { key: "all", value: "All" },
+                    ]}
+                    custom={true}
+                    onSelect={function (key: string, value: string): void {
+                      onTimeSelectHandler(key as TimeInterval, value);
+                    }}
+                    isFetching={isPromptRequestsLoading}
+                    defaultValue={interval}
+                    currentTimeFilter={timeFilter}
+                  />
+                </div>
 
-                    <TableFooter
-                      currentPage={currentPage}
-                      pageSize={100}
-                      count={experiments.length}
-                      isCountLoading={false}
-                      onPageChange={function (newPageNumber: number): void {
-                        // throw new Error("Function not implemented.");
+                <div>
+                  <StyledAreaChart
+                    title={"Total Requests"}
+                    value={total}
+                    isDataOverTimeLoading={isPromptRequestsLoading}
+                    withAnimation={true}
+                  >
+                    <AreaChart
+                      className="h-[14rem]"
+                      data={
+                        data?.data?.map((r) => ({
+                          date: getTimeMap(timeIncrement)(r.time),
+                          count: r.count,
+                        })) ?? []
+                      }
+                      index="date"
+                      categories={["count"]}
+                      colors={["cyan"]}
+                      showYAxis={false}
+                      curveType="monotone"
+                      valueFormatter={(number: number | bigint) => {
+                        return `${new Intl.NumberFormat("us").format(
+                          Number(number)
+                        )}`;
                       }}
-                      onPageSizeChange={function (newPageSize: number): void {
-                        // throw new Error("Function not implemented.");
-                      }}
-                      pageSizeOptions={[25, 50, 100]}
                     />
+                  </StyledAreaChart>
+                </div>
+              </div>
+              <div className="flex flex-col space-y-4 h-full w-full">
+                <h2 className="text-2xl font-semibold text-black dark:text-white">
+                  Experiment Logs
+                </h2>
+                <div className="flex items-center justify-between w-full">
+                  <div className="flex flex-wrap items-center space-x-2 w-full">
+                    <div className="w-full max-w-[16rem]">
+                      <MultiSelect
+                        placeholder="Dataset"
+                        value={selectedDatasets}
+                        onValueChange={(value) => {
+                          setSelectedDatasets(value);
+                        }}
+                      >
+                        {datasets.map((dataset) => (
+                          <MultiSelectItem value={dataset.id} key={dataset.id}>
+                            {dataset.name}
+                          </MultiSelectItem>
+                        ))}
+                      </MultiSelect>
+                    </div>
+                    <div className="w-full max-w-[16rem]">
+                      <MultiSelect
+                        placeholder="Model"
+                        value={selectedModels}
+                        onValueChange={(value) => {
+                          setSelectedModels(value);
+                        }}
+                      >
+                        {MODEL_LIST.map((model) => (
+                          <MultiSelectItem
+                            value={model.value}
+                            key={model.value}
+                          >
+                            {model.label}
+                          </MultiSelectItem>
+                        ))}
+                      </MultiSelect>
+                    </div>
+                    <div className="pl-2">
+                      <HcButton
+                        variant={"light"}
+                        size={"sm"}
+                        title={"Clear All"}
+                        onClick={() => {
+                          setSelectedDatasets([]);
+                          setSelectedModels([]);
+                        }}
+                      />
+                    </div>
                   </div>
                 </div>
-              </TabPanel>
-            </TabPanels>
-          </TabGroup>
-        )}
+                {isExperimentsLoading ? (
+                  <div className="h-48 flex justify-center items-center">
+                    <LoadingAnimation title="Loading Experiments..." />
+                  </div>
+                ) : (
+                  <SimpleTable
+                    data={filteredExperiments}
+                    columns={[
+                      {
+                        key: "id",
+                        header: "ID",
+                        render: (item) => (
+                          <span className="underline text-black dark:text-white">
+                            {item.id}
+                          </span>
+                        ),
+                      },
+                      {
+                        key: "status",
+                        header: "Status",
+                        render: (item) => (
+                          <StatusBadge statusType={item.status || "unknown"} />
+                        ),
+                      },
+                      {
+                        key: "createdAt",
+                        header: "Created At",
+                        render: (item) => (
+                          <span>{getUSDateFromString(item.createdAt)}</span>
+                        ),
+                      },
+                      {
+                        key: "datasetName",
+                        header: "Dataset",
+                        render: (item) => item.datasetName,
+                      },
+                      {
+                        key: "model",
+                        header: "Model",
+                        render: (item) => (
+                          <ModelPill model={item.model || "unknown"} />
+                        ),
+                      },
+                      {
+                        key: "runCount",
+                        header: "Run Count",
+                        render: (item) => item.runCount || 0,
+                      },
+                    ]}
+                    onSelect={(item) => {
+                      router.push(`/prompts/${id}/experiments/${item.id}`);
+                    }}
+                  />
+                )}
+
+                <TableFooter
+                  currentPage={currentPage}
+                  pageSize={100}
+                  count={experiments.length}
+                  isCountLoading={false}
+                  onPageChange={function (newPageNumber: number): void {
+                    // throw new Error("Function not implemented.");
+                  }}
+                  onPageSizeChange={function (newPageSize: number): void {
+                    // throw new Error("Function not implemented.");
+                  }}
+                  pageSizeOptions={[25, 50, 100]}
+                />
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
-    </IslandContainer>
+    </div>
   );
 };
 

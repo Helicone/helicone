@@ -1,4 +1,5 @@
 import { formatProviderName } from "@/app/llm-cost/CalculatorInfo";
+import { Metadata } from "next";
 
 export async function generateMetadata({
   params,
@@ -7,7 +8,7 @@ export async function generateMetadata({
     model: string;
     provider: string;
   };
-}) {
+}): Promise<Metadata> {
   const { model, provider } = params;
   const decodedModel = decodeURIComponent(model || "");
   const decodedProvider = formatProviderName(
@@ -22,14 +23,21 @@ export async function generateMetadata({
   return {
     title,
     description,
+    icons: "https://www.helicone.ai/static/logo.webp",
     openGraph: {
+      type: "website",
+      siteName: "Helicone.ai",
+      url: `https://www.helicone.ai/llm-cost/provider/${provider}/model/${model}`,
       title,
       description,
-      images: [{ url: imageUrl }],
+      images: imageUrl,
+      locale: "en_US",
     },
-    authors: [{ name: "Helicone Team" }],
-    other: {
-      timeToRead: "3 minutes",
+    twitter: {
+      title,
+      description,
+      card: "summary_large_image",
+      images: imageUrl,
     },
   };
 }
