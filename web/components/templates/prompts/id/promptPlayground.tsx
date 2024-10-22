@@ -54,6 +54,7 @@ interface PromptPlaygroundProps {
     variables: Array<{ original: string; heliconeTag: string; value: string }>
   ) => void;
   onPromptChange?: (prompt: string | PromptObject) => void;
+  className?: string;
 }
 
 const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
@@ -70,6 +71,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
   handleCreateExperiment,
   onExtractPromptVariables,
   onPromptChange,
+  className = "border rounded-md",
 }) => {
   const replaceTemplateVariables = (
     content: string,
@@ -245,22 +247,18 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
         return (
           <ul className="w-full relative h-fit">
             {messages.map((message, index) => (
-              <li
+              <PromptChatRow
                 key={message.id}
-                className="dark:border-gray-700 last:border-b-0 z-10 last:rounded-xl"
-              >
-                <PromptChatRow
-                  message={message}
-                  editMode={isEditMode}
-                  index={index}
-                  callback={(userText, role) =>
-                    handleUpdateMessage(index, userText, role)
-                  }
-                  deleteRow={() => handleDeleteMessage(index)}
-                  selectedProperties={selectedInput?.inputs}
-                  onExtractVariables={onExtractVariables}
-                />
-              </li>
+                message={message}
+                editMode={isEditMode}
+                index={index}
+                callback={(userText, role) =>
+                  handleUpdateMessage(index, userText, role)
+                }
+                deleteRow={() => handleDeleteMessage(index)}
+                selectedProperties={selectedInput?.inputs}
+                onExtractVariables={onExtractVariables}
+              />
             ))}
           </ul>
         );
@@ -292,7 +290,9 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
 
   return (
     <div className="flex flex-col space-y-4">
-      <div className="w-full border border-gray-300 dark:border-gray-700 rounded-md divide-y divide-gray-300 dark:divide-gray-700 h-full">
+      <div
+        className={`w-full ${className} divide-y divide-gray-300 dark:divide-gray-700 h-full`}
+      >
         <PlaygroundChatTopBar
           isPromptCreatedFromUi={isPromptCreatedFromUi}
           mode={mode}
