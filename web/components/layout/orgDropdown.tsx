@@ -125,7 +125,7 @@ export default function OrgDropdown({}: OrgDropdownProps) {
                 <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-50">
                   {orgContext?.currentOrg?.name}
                 </h3>
-                <p className="text-xs text-slate-500 font-medium">
+                <p className="text-xs text-slate-500 font-medium max-w-[10rem] truncate">
                   {user?.email}
                 </p>
               </div>
