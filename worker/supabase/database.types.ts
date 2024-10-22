@@ -286,6 +286,80 @@ export type Database = {
         }
         Relationships: []
       }
+      evaluator: {
+        Row: {
+          created_at: string
+          id: string
+          llm_template: Json | null
+          name: string
+          organization_id: string
+          scoring_type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          llm_template?: Json | null
+          name: string
+          organization_id: string
+          scoring_type: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          llm_template?: Json | null
+          name?: string
+          organization_id?: string
+          scoring_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evaluator_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      evaluator_experiments: {
+        Row: {
+          created_at: string
+          evaluator: string
+          experiment: string
+          id: number
+        }
+        Insert: {
+          created_at?: string
+          evaluator: string
+          experiment: string
+          id?: number
+        }
+        Update: {
+          created_at?: string
+          evaluator?: string
+          experiment?: string
+          id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "public_evaluator_experiments_evaluator_fkey"
+            columns: ["evaluator"]
+            isOneToOne: false
+            referencedRelation: "evaluator"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "public_evaluator_experiments_experiment_fkey"
+            columns: ["experiment"]
+            isOneToOne: false
+            referencedRelation: "experiment_v2"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       experiment_dataset_v2_row: {
         Row: {
           created_at: string
@@ -2152,41 +2226,6 @@ export type Database = {
           },
         ]
       }
-      scorer: {
-        Row: {
-          created_at: string
-          id: string
-          llm_template: Json | null
-          organization_id: string
-          scoring_type: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          llm_template?: Json | null
-          organization_id: string
-          scoring_type: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          llm_template?: Json | null
-          organization_id?: string
-          scoring_type?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "scorer_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organization"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       user_api_keys: {
         Row: {
           api_key_hash: string
@@ -2331,28 +2370,34 @@ export type Database = {
       }
       webhooks: {
         Row: {
+          config: Json | null
           created_at: string | null
           destination: string
           id: number
           is_verified: boolean
           org_id: string
           txt_record: string
+          version: string
         }
         Insert: {
+          config?: Json | null
           created_at?: string | null
           destination: string
           id?: number
           is_verified?: boolean
           org_id: string
           txt_record: string
+          version?: string
         }
         Update: {
+          config?: Json | null
           created_at?: string | null
           destination?: string
           id?: number
           is_verified?: boolean
           org_id?: string
           txt_record?: string
+          version?: string
         }
         Relationships: [
           {
