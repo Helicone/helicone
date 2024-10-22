@@ -3,7 +3,7 @@
   "title1": "A step by step guide to switch to gpt-4o safely with Helicone - Helicone",
   "title2": "A step by step guide to switch to gpt-4o safely with Helicone - Helicone",
   "description": "Learn how to use Helicone's experiments feature to safely switch to GPT-4o. This guide covers regression testing, model comparison, and seamless transition using production data without impacting users.",
-  "images": "https://www.helicone.ai/static/blog/experiments/gpt-4o.webp",
+  "images": "/static/blog/experiments/gpt-4o.webp",
   "time": "5 minute read",
   "author": "Scott Nguyen",
   "date": "May 14, 2024"

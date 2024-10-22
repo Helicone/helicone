@@ -1,11 +1,10 @@
 {
-    "title": "Optimizing Large Data Table Rendering with Asynchronous Loading in React",
-    "title1": "Optimizing Large Data Table Rendering with Asynchronous Loading in React",
-    "title2": "Optimizing Large Data Table Rendering with Asynchronous Loading in React",
-    "description": "Learn how we at Helicone optimized the rendering of large tables with asynchronous loading and optimistic updates in React.",
-    "images": "https://www.helicone.ai/static/blog/optimistic-updates/cover.webp",
-    "time": "5 minute read",
-    "author": "Yash Karthik",
-    "date": "Aug 19, 2023"
-  }
-  
+  "title": "Optimizing Large Data Table Rendering with Asynchronous Loading in React",
+  "title1": "Optimizing Large Data Table Rendering with Asynchronous Loading in React",
+  "title2": "Optimizing Large Data Table Rendering with Asynchronous Loading in React",
+  "description": "Learn how we at Helicone optimized the rendering of large tables with asynchronous loading and optimistic updates in React.",
+  "images": "/static/blog/optimistic-updates/cover.webp",
+  "time": "5 minute read",
+  "author": "Yash Karthik",
+  "date": "Aug 19, 2023"
+}

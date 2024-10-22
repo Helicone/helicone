@@ -3,7 +3,7 @@
   "title1": "I built my first AI app and integrated it with Helicone - Helicone",
   "title2": "I built my first AI app and integrated it with Helicone - Helicone",
   "description": "Follow a non-technical product designer's journey in building an Emoji Translator AI app and integrating it with Helicone. Learn about easy integration, prompt experimentation, custom properties, and caching features that make Helicone accessible for users of all technical levels.",
-  "images": "https://www.helicone.ai/static/blog/first-ai-app/lina-first-ai-app.webp",
+  "images": "/static/blog/first-ai-app/lina-first-ai-app.webp",
   "time": "6 minute read",
   "author": "Lina Lam",
   "date": "June 18, 2024"
