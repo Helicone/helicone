@@ -70,7 +70,8 @@ import { IslandContainer } from "../../../ui/islandContainer";
 import { useFeatureFlags } from "@/services/hooks/featureFlags";
 import { useOrg } from "@/components/layout/organizationContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Popover, PopoverContent, PopoverTrigger } from "../../../ui/popover";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../../../ui/tooltip";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "../../../ui/hoverCard";
 
 interface PromptIdPageProps {
   id: string;
@@ -652,54 +653,49 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                     },
                   ]}
                 />
-                <Popover>
-                  {prompt?.metadata?.createdFromUi === true ? (
-                    <>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size={"sm"}
-                          className="h-6 bg-[#F1F5F9] border border-[#CBD5E1]"
-                        >
-                          <PencilIcon className="h-4 w-4 mr-2" />
-                          Editable
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="max-w-[15rem]" align="center">
-                        <p className="text-sm">
-                          This prompt was created{" "}
-                          <span className="font-semibold">in the UI</span>. You
-                          can edit / delete them, or promote to prod.
-                        </p>
-                      </PopoverContent>
-                    </>
-                  ) : (
-                    <>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size={"sm"}
-                          className="h-6 bg-[#F1F5F9] border border-[#CBD5E1]"
-                        >
-                          <EyeIcon className="h-4 w-4 mr-2" />
-                          View only
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="max-w-[15rem]" align="center">
-                        <p className="text-sm">
-                          This prompt was created{" "}
-                          <span className="font-semibold">in code</span>. You
-                          won&apos;t be able to edit this from the UI.
-                        </p>
-                      </PopoverContent>
-                    </>
-                  )}
-                </Popover>
-                <Popover>
-                  <PopoverTrigger asChild>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size={"sm"}
+                      className="h-6 bg-[#F1F5F9] border border-[#CBD5E1]"
+                    >
+                      <PencilIcon className="h-4 w-4 mr-2" />
+                      Editable
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent align="center">
+                    <p>
+                      This prompt was created{" "}
+                      <span className="font-semibold">in the UI</span>. You can
+                      edit / delete them, or promote to prod.
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size={"sm"}
+                      className="h-6 bg-[#F1F5F9] border border-[#CBD5E1]"
+                    >
+                      <EyeIcon className="h-4 w-4 mr-2" />
+                      View only
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent align="center">
+                    <p>
+                      This prompt was created{" "}
+                      <span className="font-semibold">in code</span>. You
+                      won&apos;t be able to edit this from the UI.
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+                <HoverCard>
+                  <HoverCardTrigger asChild>
                     <InformationCircleIcon className="h-6 w-6 text-slate-500 cursor-pointer" />
-                  </PopoverTrigger>
-                  <PopoverContent className="w-64 p-4" align="start">
+                  </HoverCardTrigger>
+                  <HoverCardContent className="w-64 p-4" align="start">
                     <div className="space-y-2">
                       <div className="border-b border-slate-200 dark:border-slate-600 py-2 p-4">
                         <h3 className="text-sm font-semibold text-slate-700 ">
@@ -737,8 +733,8 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                         </p>
                       </div>
                     </div>
-                  </PopoverContent>
-                </Popover>
+                  </HoverCardContent>
+                </HoverCard>
               </div>
               <div className="flex items-center space-x-4">
                 <TabsList className="grid w-64 h-11 grid-cols-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 ">
