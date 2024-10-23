@@ -94,6 +94,17 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
+      value: "claude-3-5-sonnet-20241022",
+    },
+    cost: {
+      prompt_token: 0.000003,
+      completion_token: 0.000015,
+    },
+    showInPlayground: true,
+  },
+  {
+    model: {
+      operator: "equals",
       value: "claude-3-haiku-20240307",
     },
     cost: {
