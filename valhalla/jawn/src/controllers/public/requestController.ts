@@ -147,8 +147,6 @@ export class RequestController extends Controller {
     requestBody: RequestQueryParams,
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<HeliconeRequest[], string>> {
-    // TODO we need to traverse and make point queries faster
-    // TODO Basically we need to traverse and replace any filter RequestId: equals x, with all the PKs that are in the request_response_rmt, that we get from postgres
     const reqManager = new RequestManager(request.authParams);
     const requests = await reqManager.getRequestsClickhouse(requestBody);
     if (requests.error || !requests.data) {

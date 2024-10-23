@@ -168,6 +168,10 @@ test("cost calc snapshot test", () => {
         "provider": "ANTHROPIC"
     },
     {
+        "name": "claude-3-5-sonnet-20241022",
+        "provider": "ANTHROPIC"
+    },
+    {
         "name": "claude-3-haiku-20240307",
         "provider": "ANTHROPIC"
     },
@@ -313,6 +317,7 @@ WHEN (request_response_rmt.model ILIKE 'claude-2.0') THEN 11020 * request_respon
 WHEN (request_response_rmt.model ILIKE 'claude-3-opus-20240229') THEN 15000 * request_response_rmt.prompt_tokens + 75000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'claude-3-sonnet-20240229') THEN 3000 * request_response_rmt.prompt_tokens + 15000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'claude-3-5-sonnet-20240620') THEN 3000 * request_response_rmt.prompt_tokens + 15000 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model ILIKE 'claude-3-5-sonnet-20241022') THEN 3000 * request_response_rmt.prompt_tokens + 15000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'claude-3-haiku-20240307') THEN 250 * request_response_rmt.prompt_tokens + 1250 * request_response_rmt.completion_tokens
   ELSE 0
 END
@@ -510,6 +515,7 @@ WHEN (request_response_rmt.model ILIKE 'gemini-1.0-pro-vision-001') THEN 125 * r
 WHEN (request_response_rmt.model ILIKE 'gemini-1.0-pro') THEN 125 * request_response_rmt.prompt_tokens + 375 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE '%gemini-1.5-flash%') THEN 350 * request_response_rmt.prompt_tokens + 1050 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE '%gemini-1.5-pro%') THEN 3500 * request_response_rmt.prompt_tokens + 10500 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model ILIKE 'claude-3-5-sonnet-v2@20241022') THEN 3000 * request_response_rmt.prompt_tokens + 15000 * request_response_rmt.completion_tokens
   ELSE 0
 END
 )

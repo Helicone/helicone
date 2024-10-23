@@ -1,9 +1,6 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "../db/database.types";
 import { PromiseGenericResult, err, ok } from "../shared/result";
-import { cacheResultCustom } from "../../utils/cacheResult";
-import { KVCache } from "../cache/kvCache";
-const kvCache = new KVCache(5 * 60 * 1000); // 5 minutes
 
 export class WebhookStore {
   private supabaseClient: SupabaseClient<Database>;
@@ -14,15 +11,11 @@ export class WebhookStore {
   async getWebhooksByOrgId(
     orgId: string
   ): PromiseGenericResult<Database["public"]["Tables"]["webhooks"]["Row"][]> {
-    const webhooks = await cacheResultCustom(
-      "getWebhooksByOrgId-" + orgId,
-      async () =>
-        await this.supabaseClient
-          .from("webhooks")
-          .select("*")
-          .eq("org_id", orgId),
-      kvCache
-    );
+    const webhooks = await this.supabaseClient
+      .from("webhooks")
+      .select("*")
+      .eq("org_id", orgId)
+      .eq("is_verified", true);
 
     if (webhooks.error) {
       err(`Failed to get webhooks for org ${orgId}: ${webhooks.error.message}`);
