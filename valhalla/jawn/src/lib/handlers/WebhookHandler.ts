@@ -8,13 +8,12 @@ import { HandlerContext } from "./HandlerContext";
 
 export class WebhookHandler extends AbstractLogHandler {
   private webhookStore: WebhookStore;
-  private featureFlagStore: FeatureFlagStore;
+
   private webhookPayloads: WebhookPayload[] = [];
 
-  constructor(webhookStore: WebhookStore, featureFlagStore: FeatureFlagStore) {
+  constructor(webhookStore: WebhookStore) {
     super();
     this.webhookStore = webhookStore;
-    this.featureFlagStore = featureFlagStore;
   }
 
   async handle(context: HandlerContext): PromiseGenericResult<string> {
