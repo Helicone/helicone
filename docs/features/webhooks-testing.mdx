@@ -1,0 +1,108 @@
+---
+title: "LLM Webhooks Testing locally Helicone"
+sidebarTitle: "Local Testing Webhooks"
+description: "This is a short guide on how to test webhooks locally."
+twitter:title: "Helicone Webhooks: Real-Time LLM Integration & Automation"
+---
+
+## How to test webhooks locally
+
+The idea is that we are going to use a tool like [ngrok](https://ngrok.com/) to create a secure tunnel to your local machine so that Helicone can send events to your local server.
+
+## Create your local worker server
+
+Here is a simple python example using [FastAPI](https://fastapi.tiangolo.com/):
+
+```bash
+python3 -m pip install fastapi uvicorn
+```
+
+Create a file called `main.py` and add the following code:
+
+```python
+from fastapi import FastAPI, Request
+
+app = FastAPI()
+
+@app.post("/")
+async def webhook(request: Request):
+    return {"message": "Webhook received"}
+```
+
+Run the server using:
+
+```bash
+python3 -m uvicorn server:app --reload --port 9393
+```
+
+you should see something like this...
+
+```
+INFO:     Uvicorn running on http://127.0.0.1:9393 (Press CTRL+C to quit)
+INFO:     Started reloader process [20505] using StatReload
+INFO:     Started server process [20507]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+```
+
+## Setting up ngrok
+
+1. Install ngrok using the [official guide](https://ngrok.com/docs/getting-started/setup/install).
+2. Run `ngrok http <port>`, where `<port>` is the port that your local server is running on.
+
+```bash
+ngrok http 9393
+```
+
+You should see something like this...
+
+```
+Session Status                online
+Account                       justin@helicone.ai (Plan: Free)
+Version                       3.15.1
+Region                        United States (us)
+Latency                       63ms
+Web Interface                 http://127.0.0.1:4040
+Forwarding                    https://9742-103-249-231-120.ngrok-free.app -> http://localhost:9393
+```
+
+## Copy the ngrok URL
+
+Add the URL outputed from `ngrok` to your webhook configuration in the Helicone webhooks page.
+
+in our example it would be:
+`https://9742-103-249-231-120.ngrok-free.app`
+
+<Frame caption="Webhooks page">
+  <img src="/images/webhooks/ngrok-example.png" alt="Ngrok example" />
+</Frame>
+
+<Note>
+  For this testing example I added the property filter `environment` to equal to
+  `dev` so that it only sends events to this webhook from our development
+  environment.
+</Note>
+
+## Send a request through Helicone to receive the webhook
+
+```bash
+curl --request POST \
+  --url https://oai.helicone.ai/v1/chat/completions \
+  --header 'Authorization: Bearer $OPENAI_API_KEY' \
+  --header 'Helicone-Auth: Bearer $HELICONE_API_KEY' \
+  --header 'Helicone-Property-environment: dev' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "model": "gpt-3.5-turbo",
+    "messages": [
+        {
+            "role": "system",
+            "content": "Say Hello!"
+        }
+    ],
+    "temperature": 1,
+    "max_tokens": 10
+}'
+```
+
+After sending the request you should see the webhook hit your local server.
