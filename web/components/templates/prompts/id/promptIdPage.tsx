@@ -12,7 +12,6 @@ import {
   EyeIcon,
   PencilIcon,
   ChevronDownIcon,
-  MagnifyingGlassIcon,
   XMarkIcon,
   InformationCircleIcon,
 } from "@heroicons/react/24/outline";
@@ -634,7 +633,6 @@ const PromptIdPage = (props: PromptIdPageProps) => {
 
   const [isVersionsExpanded, setIsVersionsExpanded] = useState(true);
   const [isInputsExpanded, setIsInputsExpanded] = useState(true);
-  const [isSearchVisible, setIsSearchVisible] = useState(false);
 
   return (
     <div>
@@ -968,7 +966,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                       >
                         <h2 className="text-lg font-medium">Inputs</h2>
                         <div className="flex items-center space-x-2">
-                          {isSearchVisible ? (
+                          {isInputsExpanded && (
                             <div className="relative w-64">
                               <TextInput
                                 placeholder="Search by request id..."
@@ -981,7 +979,6 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  setIsSearchVisible(false);
                                   setSearchRequestId("");
                                 }}
                                 className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full"
@@ -989,16 +986,6 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                                 <XMarkIcon className="h-4 w-4 text-slate-500" />
                               </button>
                             </div>
-                          ) : (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setIsSearchVisible(true);
-                              }}
-                              className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full"
-                            >
-                              <MagnifyingGlassIcon className="h-5 w-5 text-slate-500" />
-                            </button>
                           )}
                           <ChevronDownIcon
                             className={`h-5 w-5 transition-transform ${
@@ -1009,103 +996,103 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                       </div>
 
                       {isInputsExpanded && (
-                        <ScrollArea className="h-[30vh] rounded-b-lg">
-                          <ul className="flex flex-col">
-                            {inputs
-                              ?.filter((input) =>
-                                input.source_request.includes(searchRequestId)
-                              )
-                              .map((input, index, filteredInputs) => {
-                                const isFirst = index === 0;
-                                const isLast =
-                                  index === filteredInputs.length - 1;
-                                const isSelected =
-                                  selectedInput?.id === input.id;
+  <ScrollArea className="h-[30vh] rounded-b-lg">
+    <ul className="flex flex-col">
+      {inputs
+        ?.filter((input) =>
+          input.source_request.includes(searchRequestId)
+        )
+        .map((input, index, filteredInputs) => {
+          const isFirst = index === 0;
+          const isLast =
+            index === filteredInputs.length - 1;
+          const isSelected =
+            selectedInput?.id === input.id;
 
-                                return (
-                                  <li
-                                    key={input.id}
-                                    className={`flex flex-row w-full ${
-                                      isSelected
-                                        ? "bg-sky-50 dark:bg-sky-900"
-                                        : "bg-white dark:bg-gray-800"
-                                    } ${
-                                      isFirst
-                                        ? "border-t border-slate-300 dark:border-slate-700"
-                                        : ""
-                                    } ${
-                                      isLast
-                                        ? "border-b border-slate-300 dark:border-slate-700"
-                                        : ""
-                                    }`}
-                                  >
-                                    <div className="flex items-center">
-                                      {isSelected && (
-                                        <div className="bg-sky-500 h-full w-1" />
-                                      )}
-                                    </div>
-                                    <div
-                                      className={`flex-grow p-4 cursor-pointer ${
-                                        !isFirst
-                                          ? "border-t border-slate-300 dark:border-slate-700"
-                                          : ""
-                                      }`}
-                                      onClick={() => handleInputSelect(input)}
-                                    >
-                                      {Object.entries(input.inputs).map(
-                                        ([key, value], index) => (
-                                          <div
-                                            key={index}
-                                            className="mb-2 last:mb-0"
-                                          >
-                                            <span className="text-blue-500 font-medium">
-                                              {key}:{" "}
-                                            </span>
-                                            <span className="text-gray-700 dark:text-gray-300">
-                                              {typeof value === "string"
-                                                ? value.length > 100
-                                                  ? value.substring(0, 100) +
-                                                    "..."
-                                                  : value
-                                                : JSON.stringify(value)}
-                                            </span>
-                                          </div>
-                                        )
-                                      )}
-                                      {input.auto_prompt_inputs &&
-                                        input.auto_prompt_inputs.length > 0 && (
-                                          <div className="mt-2">
-                                            <span className="text-blue-500 font-medium">
-                                              messages:{" "}
-                                            </span>
-                                            <span className="text-gray-500">
-                                              {JSON.stringify(
-                                                input.auto_prompt_inputs
-                                              ).substring(0, 50)}
-                                              ...
-                                            </span>
-                                          </div>
-                                        )}
-                                      {input.response_body && (
-                                        <div className="mt-2">
-                                          <span className="text-blue-500 font-medium">
-                                            messages:{" "}
-                                          </span>
-                                          <span className="text-gray-700 dark:text-gray-300">
-                                            {JSON.stringify(
-                                              (input.response_body as any)
-                                                ?.choices[0]?.message
-                                            )}
-                                          </span>
-                                        </div>
-                                      )}
-                                    </div>
-                                  </li>
-                                );
-                              })}
-                          </ul>
-                        </ScrollArea>
+          return (
+            <li
+              key={input.id}
+              className={`flex flex-row w-full ${
+                isSelected
+                  ? "bg-sky-50 dark:bg-sky-900"
+                  : "bg-white dark:bg-gray-800"
+              } ${
+                isFirst
+                  ? "border-t border-slate-300 dark:border-slate-700"
+                  : ""
+              } ${
+                isLast
+                  ? "border-b border-slate-300 dark:border-slate-700"
+                  : ""
+              }`}
+            >
+              <div className="flex items-center">
+                {isSelected && (
+                  <div className="bg-sky-500 h-full w-1" />
+                )}
+              </div>
+              <div
+                className={`flex-grow p-4 cursor-pointer ${
+                  !isFirst
+                    ? "border-t border-slate-300 dark:border-slate-700"
+                    : ""
+                }`}
+                onClick={() => handleInputSelect(input)}
+              >
+                {Object.entries(input.inputs).map(
+                  ([key, value], index) => (
+                    <div
+                      key={index}
+                      className="mb-2 last:mb-0"
+                    >
+                      <span className="text-blue-500 font-medium">
+                        {key}:{" "}
+                      </span>
+                      <span className="text-gray-700 dark:text-gray-300">
+                        {typeof value === "string"
+                          ? value.length > 100
+                            ? value.substring(0, 100) +
+                              "..."
+                            : value
+                          : JSON.stringify(value)}
+                      </span>
+                    </div>
+                  )
+                )}
+                {input.auto_prompt_inputs &&
+                  input.auto_prompt_inputs.length > 0 && (
+                    <div className="mt-2">
+                      <span className="text-blue-500 font-medium">
+                        messages:{" "}
+                      </span>
+                      <span className="text-gray-500">
+                        {JSON.stringify(
+                          input.auto_prompt_inputs
+                        ).substring(0, 50)}
+                        ...
+                      </span>
+                    </div>
+                  )}
+                {input.response_body && (
+                  <div className="mt-2">
+                    <span className="text-blue-500 font-medium">
+                      messages:{" "}
+                    </span>
+                    <span className="text-gray-700 dark:text-gray-300">
+                      {JSON.stringify(
+                        (input.response_body as any)
+                          ?.choices[0]?.message
                       )}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </li>
+          );
+        })}
+    </ul>
+  </ScrollArea>
+)}
                     </div>
                   </div>
                 </div>
