@@ -189,7 +189,15 @@
         },
         "getting-started/integration-method/deepinfra",
         "getting-started/integration-method/openrouter",
-        "getting-started/integration-method/litellm",
+        {
+          "group": "LiteLLM",
+          "pages": [
+            "getting-started/integration-method/litellm-openllmetry",
+            "getting-started/integration-method/litellm"
+          ],
+          "icon": "code",
+          "iconType": "solid"
+        },
         "getting-started/integration-method/fireworks",
         {
           "group": "Vector DB",
@@ -228,14 +236,29 @@
     {
       "group": "Features",
       "pages": [
+        {
+          "group": "Evaulation",
+          "pages": [
+            "features/advanced-usage/evaluation/overview",
+            "features/advanced-usage/feedback",
+            "features/advanced-usage/scores"
+          ],
+          "icon": "chart-line",
+          "iconType": "solid"
+        },
         "features/sessions",
         "features/prompts",
+        {
+          "group": "Webooks",
+          "pages": ["features/webhooks", "features/webhooks-testing"],
+          "icon": "webhook",
+          "iconType": "solid"
+        },
+
         "features/advanced-usage/custom-properties",
         "features/advanced-usage/caching",
         "features/advanced-usage/omit-logs",
         "features/advanced-usage/user-metrics",
-        "features/advanced-usage/feedback",
-        "features/advanced-usage/scores",
         "getting-started/integration-method/gateway-fallbacks",
         "features/advanced-usage/retries",
         "features/advanced-usage/custom-rate-limits",

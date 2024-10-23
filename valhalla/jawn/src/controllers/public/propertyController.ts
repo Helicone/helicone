@@ -10,7 +10,7 @@ export interface Property {
   property: string;
 }
 
-const kvCache = new KVCache(5 * 60 * 1000); // 5 minutes
+const kvCache = new KVCache(60 * 1000); // 5 minutes
 
 @Route("v1/property")
 @Tags("Property")
