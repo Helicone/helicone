@@ -996,103 +996,103 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                       </div>
 
                       {isInputsExpanded && (
-  <ScrollArea className="h-[30vh] rounded-b-lg">
-    <ul className="flex flex-col">
-      {inputs
-        ?.filter((input) =>
-          input.source_request.includes(searchRequestId)
-        )
-        .map((input, index, filteredInputs) => {
-          const isFirst = index === 0;
-          const isLast =
-            index === filteredInputs.length - 1;
-          const isSelected =
-            selectedInput?.id === input.id;
+                        <ScrollArea className="h-[30vh] rounded-b-lg">
+                          <ul className="flex flex-col">
+                            {inputs
+                              ?.filter((input) =>
+                                input.source_request.includes(searchRequestId)
+                              )
+                              .map((input, index, filteredInputs) => {
+                                const isFirst = index === 0;
+                                const isLast =
+                                  index === filteredInputs.length - 1;
+                                const isSelected =
+                                  selectedInput?.id === input.id;
 
-          return (
-            <li
-              key={input.id}
-              className={`flex flex-row w-full ${
-                isSelected
-                  ? "bg-sky-50 dark:bg-sky-900"
-                  : "bg-white dark:bg-gray-800"
-              } ${
-                isFirst
-                  ? "border-t border-slate-300 dark:border-slate-700"
-                  : ""
-              } ${
-                isLast
-                  ? "border-b border-slate-300 dark:border-slate-700"
-                  : ""
-              }`}
-            >
-              <div className="flex items-center">
-                {isSelected && (
-                  <div className="bg-sky-500 h-full w-1" />
-                )}
-              </div>
-              <div
-                className={`flex-grow p-4 cursor-pointer ${
-                  !isFirst
-                    ? "border-t border-slate-300 dark:border-slate-700"
-                    : ""
-                }`}
-                onClick={() => handleInputSelect(input)}
-              >
-                {Object.entries(input.inputs).map(
-                  ([key, value], index) => (
-                    <div
-                      key={index}
-                      className="mb-2 last:mb-0"
-                    >
-                      <span className="text-blue-500 font-medium">
-                        {key}:{" "}
-                      </span>
-                      <span className="text-gray-700 dark:text-gray-300">
-                        {typeof value === "string"
-                          ? value.length > 100
-                            ? value.substring(0, 100) +
-                              "..."
-                            : value
-                          : JSON.stringify(value)}
-                      </span>
-                    </div>
-                  )
-                )}
-                {input.auto_prompt_inputs &&
-                  input.auto_prompt_inputs.length > 0 && (
-                    <div className="mt-2">
-                      <span className="text-blue-500 font-medium">
-                        messages:{" "}
-                      </span>
-                      <span className="text-gray-500">
-                        {JSON.stringify(
-                          input.auto_prompt_inputs
-                        ).substring(0, 50)}
-                        ...
-                      </span>
-                    </div>
-                  )}
-                {input.response_body && (
-                  <div className="mt-2">
-                    <span className="text-blue-500 font-medium">
-                      messages:{" "}
-                    </span>
-                    <span className="text-gray-700 dark:text-gray-300">
-                      {JSON.stringify(
-                        (input.response_body as any)
-                          ?.choices[0]?.message
+                                return (
+                                  <li
+                                    key={input.id}
+                                    className={`flex flex-row w-full ${
+                                      isSelected
+                                        ? "bg-sky-50 dark:bg-sky-900"
+                                        : "bg-white dark:bg-gray-800"
+                                    } ${
+                                      isFirst
+                                        ? "border-t border-slate-300 dark:border-slate-700"
+                                        : ""
+                                    } ${
+                                      isLast
+                                        ? "border-b border-slate-300 dark:border-slate-700"
+                                        : ""
+                                    }`}
+                                  >
+                                    <div className="flex items-center">
+                                      {isSelected && (
+                                        <div className="bg-sky-500 h-full w-1" />
+                                      )}
+                                    </div>
+                                    <div
+                                      className={`flex-grow p-4 cursor-pointer ${
+                                        !isFirst
+                                          ? "border-t border-slate-300 dark:border-slate-700"
+                                          : ""
+                                      }`}
+                                      onClick={() => handleInputSelect(input)}
+                                    >
+                                      {Object.entries(input.inputs).map(
+                                        ([key, value], index) => (
+                                          <div
+                                            key={index}
+                                            className="mb-2 last:mb-0"
+                                          >
+                                            <span className="text-blue-500 font-medium">
+                                              {key}:{" "}
+                                            </span>
+                                            <span className="text-gray-700 dark:text-gray-300">
+                                              {typeof value === "string"
+                                                ? value.length > 100
+                                                  ? value.substring(0, 100) +
+                                                    "..."
+                                                  : value
+                                                : JSON.stringify(value)}
+                                            </span>
+                                          </div>
+                                        )
+                                      )}
+                                      {input.auto_prompt_inputs &&
+                                        input.auto_prompt_inputs.length > 0 && (
+                                          <div className="mt-2">
+                                            <span className="text-blue-500 font-medium">
+                                              messages:{" "}
+                                            </span>
+                                            <span className="text-gray-500">
+                                              {JSON.stringify(
+                                                input.auto_prompt_inputs
+                                              ).substring(0, 50)}
+                                              ...
+                                            </span>
+                                          </div>
+                                        )}
+                                      {input.response_body && (
+                                        <div className="mt-2">
+                                          <span className="text-blue-500 font-medium">
+                                            messages:{" "}
+                                          </span>
+                                          <span className="text-gray-700 dark:text-gray-300">
+                                            {JSON.stringify(
+                                              (input.response_body as any)
+                                                ?.choices[0]?.message
+                                            )}
+                                          </span>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </li>
+                                );
+                              })}
+                          </ul>
+                        </ScrollArea>
                       )}
-                    </span>
-                  </div>
-                )}
-              </div>
-            </li>
-          );
-        })}
-    </ul>
-  </ScrollArea>
-)}
                     </div>
                   </div>
                 </div>
