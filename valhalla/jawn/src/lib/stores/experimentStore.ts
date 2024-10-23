@@ -41,6 +41,28 @@ export interface ExperimentDatasetRow {
   scores: Record<string, Score>;
 }
 
+export interface ExperimentRequest {
+  datasetRowId: string;
+  resultRequestId: string;
+}
+
+export interface ExperimentHypothesisV2 {
+  id: string;
+  promptVersionId: string;
+  model: string;
+  status: string;
+  createdAt: string;
+  requests: ExperimentRequest[];
+}
+
+export interface ExperimentV2 {
+  id: string;
+  organization: string;
+  createdAt: string;
+  meta: any;
+  hypotheses: ExperimentHypothesisV2[];
+}
+
 export interface Experiment {
   id: string;
   organization: string;
@@ -89,6 +111,43 @@ export interface IncludeExperimentKeys {
   promptVersion?: true;
   responseBodies?: true;
   score?: true;
+}
+
+function getExperimentsV2Query(filter?: string, limit?: number) {
+  return `
+    SELECT jsonb_build_object(
+      'id', e.id,
+      'organization', e.organization,
+      'createdAt', e.created_at,
+      'meta', e.meta,
+      'hypotheses', COALESCE((
+        SELECT json_agg(
+          jsonb_build_object(
+            'id', h.id,
+            'promptVersionId', h.prompt_version,
+            'model', h.model,
+            'status', h.status,
+            'createdAt', h.created_at,
+            'requests', (
+              SELECT json_agg(
+                jsonb_build_object(
+                  'datasetRowId', hr.dataset_row,
+                  'resultRequestId', hr.result_request_id
+                )
+              )
+              FROM experiment_v2_hypothesis_run hr
+              WHERE hr.experiment_hypothesis = h.id
+            )
+          )
+        ) FROM experiment_v2_hypothesis h
+        WHERE h.experiment_v2 = e.id
+      ), '[]'::json)
+    ) as jsonb_build_object
+    FROM experiment_v2 e
+    ${filter ? `WHERE ${filter}` : ""}
+    ORDER BY e.created_at DESC
+    ${limit ? `LIMIT ${limit}` : ""}
+  `;
 }
 
 function getExperimentsQuery(
@@ -356,6 +415,27 @@ export class ExperimentStore extends BaseStore {
       experiments.data!.map((d) => enrichExperiment(d, include))
     );
     return ok(experimentResults);
+  }
+
+  async getExperimentsV2(
+    filter: FilterNode
+  ): Promise<Result<ExperimentV2[], string>> {
+    const builtFilter = buildFilterPostgres({
+      filter,
+      argsAcc: [this.organizationId],
+    });
+
+    const experimentQuery = getExperimentsV2Query(
+      `e.organization = $1 AND ${builtFilter.filter}`,
+      30
+    );
+
+    return resultMap(
+      await dbExecute<{
+        jsonb_build_object: ExperimentV2;
+      }>(experimentQuery, builtFilter.argsAcc),
+      (d) => d.map((d) => d.jsonb_build_object)
+    );
   }
 
   async getExperimentById(
