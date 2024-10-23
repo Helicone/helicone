@@ -6164,6 +6164,119 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"ExperimentRequest": {
+				"properties": {
+					"datasetRowId": {
+						"type": "string"
+					},
+					"resultRequestId": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"datasetRowId",
+					"resultRequestId"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"SimplifiedExperimentHypothesis": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"promptVersionId": {
+						"type": "string"
+					},
+					"model": {
+						"type": "string"
+					},
+					"status": {
+						"type": "string"
+					},
+					"createdAt": {
+						"type": "string"
+					},
+					"requests": {
+						"items": {
+							"$ref": "#/components/schemas/ExperimentRequest"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"id",
+					"promptVersionId",
+					"model",
+					"status",
+					"createdAt",
+					"requests"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"SimplifiedExperiment": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"organization": {
+						"type": "string"
+					},
+					"createdAt": {
+						"type": "string"
+					},
+					"meta": {},
+					"hypotheses": {
+						"items": {
+							"$ref": "#/components/schemas/SimplifiedExperimentHypothesis"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"id",
+					"organization",
+					"createdAt",
+					"meta",
+					"hypotheses"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_SimplifiedExperiment-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/SimplifiedExperiment"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_SimplifiedExperiment-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_SimplifiedExperiment-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
 			"ExperimentRun": {
 				"properties": {},
 				"type": "object",
@@ -12001,6 +12114,53 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/Result_Experiment-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Experiment"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"include": {
+										"$ref": "#/components/schemas/IncludeExperimentKeys"
+									},
+									"filter": {
+										"$ref": "#/components/schemas/ExperimentFilterNode"
+									}
+								},
+								"required": [
+									"filter"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/experiment/query/simplified": {
+			"post": {
+				"operationId": "GetSimplifiedExperiments",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_SimplifiedExperiment-Array.string_"
 								}
 							}
 						}

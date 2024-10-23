@@ -288,6 +288,9 @@ export interface paths {
   "/v1/experiment/query": {
     post: operations["GetExperiments"];
   };
+  "/v1/experiment/query/simplified": {
+    post: operations["GetSimplifiedExperiments"];
+  };
   "/v1/experiment/run": {
     post: operations["RunExperiment"];
   };
@@ -2219,6 +2222,31 @@ Json: JsonObject;
       /** @enum {boolean} */
       score?: true;
     };
+    ExperimentRequest: {
+      datasetRowId: string;
+      resultRequestId: string;
+    };
+    SimplifiedExperimentHypothesis: {
+      id: string;
+      promptVersionId: string;
+      model: string;
+      status: string;
+      createdAt: string;
+      requests: components["schemas"]["ExperimentRequest"][];
+    };
+    SimplifiedExperiment: {
+      id: string;
+      organization: string;
+      createdAt: string;
+      meta: unknown;
+      hypotheses: components["schemas"]["SimplifiedExperimentHypothesis"][];
+    };
+    "ResultSuccess_SimplifiedExperiment-Array_": {
+      data: components["schemas"]["SimplifiedExperiment"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_SimplifiedExperiment-Array.string_": components["schemas"]["ResultSuccess_SimplifiedExperiment-Array_"] | components["schemas"]["ResultError_string_"];
     ExperimentRun: Record<string, never>;
     ResultSuccess_ExperimentRun_: {
       data: components["schemas"]["ExperimentRun"];
@@ -4302,6 +4330,24 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_Experiment-Array.string_"];
+        };
+      };
+    };
+  };
+  GetSimplifiedExperiments: {
+    requestBody: {
+      content: {
+        "application/json": {
+          include?: components["schemas"]["IncludeExperimentKeys"];
+          filter: components["schemas"]["ExperimentFilterNode"];
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_SimplifiedExperiment-Array.string_"];
         };
       };
     };

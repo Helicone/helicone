@@ -83,7 +83,7 @@ export class ExperimentManager extends BaseManager {
     return this.ExperimentStore.getExperiments(filter, include);
   }
 
-  async getExperimentsV2(
+  async getSimplifiedExperiments(
     filter: FilterNode
   ): Promise<Result<SimplifiedExperiment[], string>> {
     return this.ExperimentStore.getSimplifiedExperiment(filter);

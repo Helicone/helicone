@@ -18,6 +18,7 @@ import { Result, err } from "../../lib/shared/result";
 import {
   Experiment,
   IncludeExperimentKeys,
+  SimplifiedExperiment,
 } from "../../lib/stores/experimentStore";
 import { ExperimentManager } from "../../managers/experiment/ExperimentManager";
 import { JawnAuthenticatedRequest } from "../../types/request";
@@ -237,6 +238,31 @@ export class ExperimentController extends Controller {
     const result = await experimentManager.getExperiments(
       requestBody.filter,
       requestBody.include ?? {}
+    );
+    // const result = await promptManager.getPrompts(requestBody);
+    if (result.error || !result.data) {
+      this.setStatus(500);
+      console.error(result.error);
+      return err("Not implemented");
+    } else {
+      this.setStatus(200); // set return status 201
+      return result;
+    }
+  }
+
+  @Post("/query/simplified")
+  public async getSimplifiedExperiments(
+    @Body()
+    requestBody: {
+      filter: ExperimentFilterNode;
+      include?: IncludeExperimentKeys;
+    },
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<SimplifiedExperiment[], string>> {
+    const experimentManager = new ExperimentManager(request.authParams);
+
+    const result = await experimentManager.getSimplifiedExperiments(
+      requestBody.filter
     );
     // const result = await promptManager.getPrompts(requestBody);
     if (result.error || !result.data) {
