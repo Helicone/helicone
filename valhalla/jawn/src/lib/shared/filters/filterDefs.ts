@@ -18,7 +18,8 @@ export type AllOperators =
   | "contains"
   | "not-contains"
   | "gin-contains"
-  | "vector-contains";
+  | "vector-contains"
+  | "not-empty";
 
 export type TextOperators = Record<
   "not-equals" | "equals" | "like" | "ilike" | "contains" | "not-contains",
@@ -38,12 +39,15 @@ export type TimestampOperators = Record<"gte" | "lte" | "lt" | "gt", string>;
 
 export type TimestampOperatorsTyped = Record<"gte" | "lte" | "lt" | "gt", Date>;
 
+export type ArrayOperators = Record<"not-empty", boolean>;
+
 export type AnyOperator =
   | SingleKey<TextOperators>
   | SingleKey<NumberOperators>
   | SingleKey<TimestampOperators>
   | SingleKey<TimestampOperatorsTyped>
-  | SingleKey<BooleanOperators>;
+  | SingleKey<BooleanOperators>
+  | SingleKey<ArrayOperators>;
 
 export type SingleKey<T> = Partial<T>;
 
@@ -195,6 +199,7 @@ interface RequestResponseRMTToOperators {
   scores_column: SingleKey<TextOperators>;
   request_body: SingleKey<VectorOperators>;
   response_body: SingleKey<VectorOperators>;
+  embedding: SingleKey<ArrayOperators>;
 }
 
 interface SessionsRequestResponseRMTToOperators {

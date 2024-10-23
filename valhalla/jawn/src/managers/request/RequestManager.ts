@@ -1,5 +1,8 @@
 // src/users/usersService.ts
-import { RequestQueryParams } from "../../controllers/public/requestController";
+import {
+  ClustersResponse,
+  RequestQueryParams,
+} from "../../controllers/public/requestController";
 import { FREQUENT_PRECENT_LOGGING } from "../../lib/db/DBQueryTimer";
 import { AuthParams, supabaseServer } from "../../lib/db/supabase";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
@@ -207,6 +210,20 @@ export class RequestManager extends BaseManager {
     }
   }
 
+  private addClustersFilter(filter: FilterNode): FilterNode {
+    return {
+      left: filter,
+      operator: "and",
+      right: {
+        request_response_rmt: {
+          embedding: {
+            "not-empty": true,
+          },
+        },
+      },
+    };
+  }
+
   private addPartOfExperimentFilter(
     isPartOfExperiment: boolean,
     filter: FilterNode
@@ -251,6 +268,7 @@ export class RequestManager extends BaseManager {
       isCached,
       isPartOfExperiment,
       isScored,
+      isClusters,
     } = params;
 
     let newFilter = filter;
@@ -263,6 +281,9 @@ export class RequestManager extends BaseManager {
       newFilter = this.addPartOfExperimentFilter(isPartOfExperiment, newFilter);
     }
 
+    if (isClusters !== undefined) {
+      newFilter = this.addClustersFilter(newFilter);
+    }
     const requests = isCached
       ? await getRequestsCached(
           this.authParams.organizationId,
@@ -310,12 +331,17 @@ export class RequestManager extends BaseManager {
       isCached,
       isPartOfExperiment,
       isScored,
+      isClusters,
     } = params;
 
     let newFilter = filter;
 
     if (isScored !== undefined) {
       newFilter = this.addScoreFilterClickhouse(isScored, newFilter);
+    }
+
+    if (isClusters !== undefined) {
+      newFilter = this.addClustersFilter(newFilter);
     }
 
     const requests = isCached
@@ -333,8 +359,11 @@ export class RequestManager extends BaseManager {
           newFilter,
           offset,
           limit,
-          sort
+          sort,
+          isClusters
         );
+
+    console.log({ requests });
 
     return resultMap(requests, (req) => {
       const seen = new Set();
@@ -399,5 +428,67 @@ export class RequestManager extends BaseManager {
     const uuidRegex =
       /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
     return uuidRegex.test(uuid);
+  }
+
+  async getClusters(
+    params: RequestQueryParams
+  ): Promise<Result<ClustersResponse[], string>> {
+    const requests = await this.getRequestsClickhouse({
+      ...params,
+      isClusters: true,
+      limit: 10000,
+    });
+
+    console.log(requests.data?.length);
+
+    const newRequests = requests.data?.map((r) => ({
+      request_id: r.request_id,
+      signed_body_url: r.signed_body_url,
+      embedding: r.embedding ?? [],
+    }));
+
+    try {
+      const res = await fetch("http://localhost:8000/clusters", {
+        method: "POST",
+        body: JSON.stringify(newRequests),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data = (await res.json()) as ClustersResponse[];
+
+      return ok(data);
+    } catch (e) {
+      return err(`Error getting clusters: ${e}`);
+    }
+  }
+
+  async getRequest(
+    requestId: string
+  ): Promise<Result<HeliconeRequest, string>> {
+    const requests = await this.getRequestsClickhouse({
+      filter: {
+        left: {
+          request_response_rmt: {
+            request_id: {
+              equals: requestId,
+            },
+          },
+        },
+        operator: "and",
+        right: {},
+      },
+    });
+
+    if (requests.error) {
+      return err(requests.error);
+    }
+
+    if (!requests.data?.[0]) {
+      return err("Request not found");
+    }
+
+    return ok(requests.data?.[0]);
   }
 }
