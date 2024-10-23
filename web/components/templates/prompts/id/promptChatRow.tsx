@@ -133,7 +133,8 @@ const RenderWithPrettyInputKeys = (props: {
       return JSON.stringify(inputText || "");
     }
 
-    const regex = /(?:\{\{([^}]+)\}\})|(?:<helicone-prompt-input key="([^"]+)"\s*\/>)/g;
+    const regex =
+      /(?:\{\{([^}]+)\}\})|(?:<helicone-prompt-input key="([^"]+)"\s*\/>)/g;
     const parts: (string | JSX.Element)[] = [];
     let lastIndex = 0;
 
