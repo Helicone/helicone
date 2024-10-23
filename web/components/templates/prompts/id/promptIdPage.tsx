@@ -845,7 +845,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                       </div>
 
                       {isVersionsExpanded && (
-                        <ScrollArea className="h-[25vh]">
+                        <ScrollArea className="h-[25vh] flex-shrink-0">
                           <div>
                             {sortedPrompts?.map((promptVersion, index) => {
                               const isProduction =
@@ -1013,7 +1013,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                         </ScrollArea>
                       )}
                       <div
-                        className="flex flex-row items-center justify-between px-4 h-12 cursor-pointer border-y border-slate-200 dark:border-slate-700"
+                        className="flex flex-row items-center justify-between px-4 h-12 flex-shrink-0 overflow-hidden cursor-pointer border-y border-slate-200 dark:border-slate-700"
                         onClick={() => setIsInputsExpanded(!isInputsExpanded)}
                       >
                         <h2 className="font-medium text-sm">Inputs</h2>
@@ -1028,6 +1028,9 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                                     }`}
                                   >
                                     <Input
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                      }}
                                       ref={searchInputRef}
                                       type="text"
                                       value={searchRequestId}

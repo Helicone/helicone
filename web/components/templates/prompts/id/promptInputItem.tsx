@@ -108,10 +108,10 @@ const PromptInputItem: React.FC<PromptInputItemProps> = ({
       {isOverflowed && !isExpanded && (
         <div
           className={cn(
-            "absolute top-0 left-1 w-[calc(100%-0.25rem)] h-full bg-gradient-to-b from-transparent to-white dark:to-slate-950",
+            "absolute bottom-0 h-1/2 bg-gradient-to-b from-transparent to-white dark:to-slate-950/50",
             isSelected
-              ? "to-sky-100 dark:to-sky-900"
-              : "to-white dark:to-slate-950"
+              ? "to-sky-100 dark:to-sky-900/50 left-1 w-[calc(100%-0.25rem)]"
+              : "to-white dark:to-slate-950 left-0 w-full"
           )}
           onClick={() => onSelect(input)}
         />
