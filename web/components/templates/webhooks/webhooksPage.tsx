@@ -1,6 +1,5 @@
 import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
 import { InfoBox } from "@/components/ui/helicone/infoBox";
-import { IslandContainer } from "@/components/ui/islandContainer";
 import {
   ClipboardIcon,
   EyeIcon,
