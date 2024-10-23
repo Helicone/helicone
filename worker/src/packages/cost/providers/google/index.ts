@@ -56,4 +56,15 @@ export const costs: ModelRow[] = [
       completion_token: 0.0000105,
     },
   },
+  {
+    model: {
+      operator: "equals",
+      value: "claude-3-5-sonnet-v2@20241022",
+    },
+    cost: {
+      prompt_token: 0.000003,
+      completion_token: 0.000015,
+    },
+    showInPlayground: false,
+  },
 ];
