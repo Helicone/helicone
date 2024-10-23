@@ -154,12 +154,6 @@ const Sidebar = ({ changelog, setOpen }: SidebarProps) => {
             icon: BellIcon,
             current: pathname.includes("/alerts"),
           },
-          {
-            name: "Webhooks",
-            href: "/webhooks",
-            icon: Webhook,
-            current: pathname.includes("/webhooks"),
-          },
         ],
       },
       ...(org?.currentOrg?.tier === "enterprise"
@@ -170,6 +164,12 @@ const Sidebar = ({ changelog, setOpen }: SidebarProps) => {
               current: pathname.includes("/enterprise"),
               icon: null,
               subItems: [
+                {
+                  name: "Webhooks",
+                  href: "/webhooks",
+                  icon: Webhook,
+                  current: pathname.includes("/webhooks"),
+                },
                 {
                   name: "Vault",
                   href: "/vault",
