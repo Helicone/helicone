@@ -781,12 +781,12 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                   <div className="w-1/3 flex flex-col">
                     <div className="border-y border-x border-[#E8EAEC] dark:border-slate-700 bg-[#F9FAFB] dark:bg-black">
                       <div
-                        className="flex flex-row items-center justify-between px-4 h-12 cursor-pointer"
+                        className="flex flex-row items-center justify-between px-4 py-3 cursor-pointer"
                         onClick={() =>
                           setIsVersionsExpanded(!isVersionsExpanded)
                         }
                       >
-                        <h2 className="text-lg font-medium">Versions</h2>
+                        <h2 className="font-medium text-sm">Versions</h2>
                         <ChevronDownIcon
                           className={`h-5 w-5 transition-transform ${
                             isVersionsExpanded ? "rotate-180" : ""
@@ -966,7 +966,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                         className="flex flex-row items-center justify-between px-4 h-12 cursor-pointer"
                         onClick={() => setIsInputsExpanded(!isInputsExpanded)}
                       >
-                        <h2 className="text-lg font-medium">Inputs</h2>
+                        <h2 className="font-medium text-sm">Inputs</h2>
                         <div className="flex items-center space-x-2">
                           {isSearchVisible ? (
                             <div className="relative w-64">
