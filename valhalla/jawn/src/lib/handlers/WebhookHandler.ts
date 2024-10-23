@@ -36,36 +36,37 @@ export class WebhookHandler extends AbstractLogHandler {
   }
 
   async handle(context: HandlerContext): PromiseGenericResult<string> {
-    const orgId = context.orgParams?.id;
+    return ok("DISABLED FOR NOW");
+    // const orgId = context.orgParams?.id;
 
-    if (!orgId) {
-      return err(`Org ID not found in context`);
-    }
+    // if (!orgId) {
+    //   return err(`Org ID not found in context`);
+    // }
 
-    const webhooks = await this.webhookStore.getWebhooksByOrgId(orgId);
+    // const webhooks = await this.webhookStore.getWebhooksByOrgId(orgId);
 
-    if (webhooks.error) {
-      return err(webhooks.error);
-    }
+    // if (webhooks.error) {
+    //   return err(webhooks.error);
+    // }
 
-    for (const webhook of webhooks.data ?? []) {
-      this.webhookPayloads.push({
-        payload: {
-          request: {
-            id: context.message.log.request.id,
-            body: context.processedLog.request.body,
-          },
-          response: {
-            body: context.processedLog.response.body,
-          },
-          properties: context.processedLog.request.properties ?? {},
-        },
-        webhook: webhook,
-        orgId,
-      });
-    }
+    // for (const webhook of webhooks.data ?? []) {
+    //   this.webhookPayloads.push({
+    //     payload: {
+    //       request: {
+    //         id: context.message.log.request.id,
+    //         body: context.processedLog.request.body,
+    //       },
+    //       response: {
+    //         body: context.processedLog.response.body,
+    //       },
+    //       properties: context.processedLog.request.properties ?? {},
+    //     },
+    //     webhook: webhook,
+    //     orgId,
+    //   });
+    // }
 
-    return await super.handle(context);
+    // return await super.handle(context);
   }
 
   async handleResults(): PromiseGenericResult<string> {
@@ -76,11 +77,12 @@ export class WebhookHandler extends AbstractLogHandler {
     await Promise.all(
       this.webhookPayloads.map(async (webhookPayload) => {
         try {
-          return await this.sendToWebhook(
-            webhookPayload.payload,
-            webhookPayload.webhook,
-            webhookPayload.orgId
-          );
+          console.log("Sending to webhook", webhookPayload.webhook.id);
+          // return await this.sendToWebhook(
+          //   webhookPayload.payload,
+          //   webhookPayload.webhook,
+          //   webhookPayload.orgId
+          // );
         } catch (error: any) {
           Sentry.captureException(error, {
             tags: {
