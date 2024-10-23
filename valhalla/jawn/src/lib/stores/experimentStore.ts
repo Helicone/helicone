@@ -425,7 +425,7 @@ export class ExperimentStore extends BaseStore {
       argsAcc: [this.organizationId],
     });
 
-    const experimentQuery = getExperimentsV2Query(
+    const experimentQuery = getSimplifiedExperimentsQuery(
       `e.organization = $1 AND ${builtFilter.filter}`,
       30
     );
