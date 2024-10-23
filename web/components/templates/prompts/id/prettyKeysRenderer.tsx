@@ -35,7 +35,14 @@ const RenderWithPrettyInputKeys: React.FC<RenderWithPrettyInputKeysProps> = ({
 
         // Replace variable with value or placeholder
         const value = selectedProperties?.[keyName.trim()] || `{{${keyName}}}`;
-        parts.push(value);
+        parts.push(
+          <span
+            key={offset}
+            className="text-sky-500 dark:text-sky-500 bg-sky-100 dark:bg-sky-950 border border-sky-300 dark:border-sky-700 rounded-lg py-1 px-3 text-sm inline-block"
+          >
+            {value}
+          </span>
+        );
 
         // Update lastIndex to the end of the current match
         lastIndex = offset + match.length;

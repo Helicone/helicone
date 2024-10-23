@@ -73,7 +73,7 @@ export const PrettyInput = ({
               selectedProperties
                 ? "bg-sky-100 border-sky-300 dark:bg-sky-950 dark:border-sky-700"
                 : "bg-yellow-100 border-yellow-300 dark:bg-yellow-950 dark:border-yellow-700",
-              "relative text-sm text-gray-900 dark:text-gray-100 border rounded-lg py-1 px-3 text-left"
+              "relative text-sm text-sky-500 dark:text-sky-500 border rounded-lg py-1 px-3 text-left"
             )}
             title={renderText}
           >
@@ -86,7 +86,7 @@ export const PrettyInput = ({
               selectedProperties
                 ? "bg-sky-100 border-sky-300 dark:bg-sky-950 dark:border-sky-700"
                 : "bg-yellow-100 border-yellow-300 dark:bg-yellow-950 dark:border-yellow-700",
-              "inline-block border text-gray-900 dark:text-gray-100 rounded-lg py-1 px-3 text-sm"
+              "inline-block border text-sky-500 dark:text-sky-500 rounded-lg py-1 px-3 text-sm"
             )}
           >
             {renderText}
@@ -133,35 +133,35 @@ const RenderWithPrettyInputKeys = (props: {
       return JSON.stringify(inputText || "");
     }
 
-    // Regular expression to match the pattern
-    const regex = /<helicone-prompt-input key="([^"]+)"\s*\/>/g;
-    const parts = [];
+    const regex = /(?:\{\{([^}]+)\}\})|(?:<helicone-prompt-input key="([^"]+)"\s*\/>)/g;
+    const parts: (string | JSX.Element)[] = [];
     let lastIndex = 0;
 
-    // Use the regular expression to find and replace all occurrences
-    inputText.replace(regex, (match: any, keyName: string, offset: number) => {
-      // Push preceding text if any
-      if (offset > lastIndex) {
-        parts.push(inputText.substring(lastIndex, offset));
+    inputText.replace(
+      regex,
+      (match: string, key1: string, key2: string, offset: number) => {
+        const keyName = key1 || key2;
+
+        if (offset > lastIndex) {
+          parts.push(inputText.substring(lastIndex, offset));
+        }
+
+        const value = selectedProperties?.[keyName.trim()] || `{{${keyName}}}`;
+        parts.push(
+          <span
+            key={offset}
+            className="text-sky-500 dark:text-sky-500 bg-sky-100 dark:bg-sky-950 border border-sky-300 dark:border-sky-700 rounded-lg py-1 px-3 text-sm inline-block"
+          >
+            {value}
+          </span>
+        );
+
+        lastIndex = offset + match.length;
+
+        return match;
       }
+    );
 
-      // Push the PrettyInput component for the current match
-      parts.push(
-        <PrettyInput
-          keyName={keyName}
-          key={offset}
-          selectedProperties={selectedProperties}
-        />
-      );
-
-      // Update lastIndex to the end of the current match
-      lastIndex = offset + match.length;
-
-      // This return is not used but is necessary for the replace function
-      return match;
-    });
-
-    // Add any remaining text after the last match
     if (lastIndex < inputText.length) {
       parts.push(inputText.substring(lastIndex));
     }
