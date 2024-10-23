@@ -66,6 +66,20 @@ export interface RequestQueryParams {
   includeInputs?: boolean;
   isPartOfExperiment?: boolean;
   isScored?: boolean;
+  isClusters?: boolean;
+}
+
+export interface ClustersParams {
+  filter: RequestFilterNode;
+  limit?: number;
+}
+
+export interface ClustersResponse {
+  request_id: string;
+  signed_body_url: string;
+  x: number;
+  y: number;
+  cluster: string;
 }
 
 @Route("v1/request")
@@ -268,5 +282,40 @@ export class RequestController extends Controller {
       this.setStatus(201);
       return ok(null);
     }
+  }
+
+  @Post("/clusters")
+  public async getClusters(
+    @Body()
+    requestBody: ClustersParams,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<ClustersResponse[], string>> {
+    const reqManager = new RequestManager(request.authParams);
+
+    const clusters = await reqManager.getClusters(requestBody);
+
+    if (clusters.error) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
+    }
+
+    return clusters;
+  }
+
+  @Post("/request/{requestId}")
+  public async getRequest(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() requestId: string
+  ): Promise<Result<HeliconeRequest, string>> {
+    const reqManager = new RequestManager(request.authParams);
+
+    const heliconeRequest = await reqManager.getRequest(requestId);
+    if (heliconeRequest.error) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
+    }
+    return heliconeRequest;
   }
 }
