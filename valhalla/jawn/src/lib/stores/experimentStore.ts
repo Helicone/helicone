@@ -46,7 +46,7 @@ export interface ExperimentRequest {
   resultRequestId: string;
 }
 
-export interface ExperimentHypothesisV2 {
+export interface SimplifiedExperimentHypothesis {
   id: string;
   promptVersionId: string;
   model: string;
@@ -55,12 +55,12 @@ export interface ExperimentHypothesisV2 {
   requests: ExperimentRequest[];
 }
 
-export interface ExperimentV2 {
+export interface SimplifiedExperiment {
   id: string;
   organization: string;
   createdAt: string;
   meta: any;
-  hypotheses: ExperimentHypothesisV2[];
+  hypotheses: SimplifiedExperimentHypothesis[];
 }
 
 export interface Experiment {
@@ -113,7 +113,7 @@ export interface IncludeExperimentKeys {
   score?: true;
 }
 
-function getExperimentsV2Query(filter?: string, limit?: number) {
+function getSimplifiedExperimentsQuery(filter?: string, limit?: number) {
   return `
     SELECT jsonb_build_object(
       'id', e.id,
@@ -417,9 +417,9 @@ export class ExperimentStore extends BaseStore {
     return ok(experimentResults);
   }
 
-  async getExperimentsV2(
+  async getSimplifiedExperiment(
     filter: FilterNode
-  ): Promise<Result<ExperimentV2[], string>> {
+  ): Promise<Result<SimplifiedExperiment[], string>> {
     const builtFilter = buildFilterPostgres({
       filter,
       argsAcc: [this.organizationId],
@@ -432,7 +432,7 @@ export class ExperimentStore extends BaseStore {
 
     return resultMap(
       await dbExecute<{
-        jsonb_build_object: ExperimentV2;
+        jsonb_build_object: SimplifiedExperiment;
       }>(experimentQuery, builtFilter.argsAcc),
       (d) => d.map((d) => d.jsonb_build_object)
     );
