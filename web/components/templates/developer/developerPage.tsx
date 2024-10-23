@@ -1,3 +1,4 @@
+import { IslandContainer } from "@/components/ui/islandContainer";
 import AuthHeader from "../../shared/authHeader";
 
 interface DeveloperPageProps {
@@ -8,8 +9,10 @@ interface DeveloperPageProps {
 const DeveloperPage: React.FC<DeveloperPageProps> = ({ title, children }) => {
   return (
     <>
-      <AuthHeader title={title} />
-      {children}
+      <IslandContainer>
+        <AuthHeader title={title} />
+        {children}
+      </IslandContainer>
     </>
   );
 };
