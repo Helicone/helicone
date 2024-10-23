@@ -1093,8 +1093,27 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                                           </span>
                                           <span className="text-gray-700 dark:text-gray-300">
                                             {JSON.stringify(
-                                              (input.response_body as any)
-                                                ?.choices[0]?.message
+                                              (() => {
+                                                try {
+                                                  const body =
+                                                    input.response_body as any;
+                                                  if (
+                                                    body?.choices &&
+                                                    Array.isArray(
+                                                      body.choices
+                                                    ) &&
+                                                    body.choices.length > 0
+                                                  ) {
+                                                    return (
+                                                      body.choices[0]
+                                                        ?.message || {}
+                                                    );
+                                                  }
+                                                  return {};
+                                                } catch (error) {
+                                                  return {};
+                                                }
+                                              })()
                                             )}
                                           </span>
                                         </div>
