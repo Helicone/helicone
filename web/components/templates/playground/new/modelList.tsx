@@ -39,13 +39,18 @@ export const MODEL_LIST: {
     provider: "openai",
   },
   {
-    value: "claude-3-5-sonnet-20240620",
-    label: "claude-3-5-sonnet-20240620",
+    value: "claude-3-5-sonnet-20240229",
+    label: "claude-3-5-sonnet-20240229",
     provider: "anthropic",
   },
   {
     value: "claude-3-opus-20240229",
     label: "claude-3-opus-20240229",
+    provider: "anthropic",
+  },
+  {
+    value: "claude-3-haiku-20240307",
+    label: "claude-3-haiku-20240307",
     provider: "anthropic",
   },
   {
