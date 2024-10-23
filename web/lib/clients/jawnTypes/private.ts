@@ -393,6 +393,13 @@ export interface paths {
   "/v1/dashboard/scores/query": {
     post: operations["GetScoresOverTime"];
   };
+  "/v1/webhooks": {
+    get: operations["GetWebhooks"];
+    post: operations["NewWebhook"];
+  };
+  "/v1/webhooks/{webhookId}": {
+    delete: operations["DeleteWebhook"];
+  };
   "/v1/settings/query": {
     get: operations["GetSettings"];
   };
@@ -2466,6 +2473,23 @@ Json: JsonObject;
       /** Format: double */
       timeZoneDifference: number;
     };
+    WebhookData: {
+      destination: string;
+      config: components["schemas"]["Record_string.any_"];
+    };
+    "ResultSuccess__id-string--created_at-string--destination-string--version-string--config-string--hmac_key-string_-Array_": {
+      data: {
+          hmac_key: string;
+          config: string;
+          version: string;
+          destination: string;
+          created_at: string;
+          id: string;
+        }[];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__id-string--created_at-string--destination-string--version-string--config-string--hmac_key-string_-Array.string_": components["schemas"]["ResultSuccess__id-string--created_at-string--destination-string--version-string--config-string--hmac_key-string_-Array_"] | components["schemas"]["ResultError_string_"];
   };
   responses: {
   };
@@ -4858,6 +4882,46 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result__score_key-string--score_sum-number--created_at_trunc-string_-Array.string_"];
+        };
+      };
+    };
+  };
+  GetWebhooks: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__id-string--created_at-string--destination-string--version-string--config-string--hmac_key-string_-Array.string_"];
+        };
+      };
+    };
+  };
+  NewWebhook: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["WebhookData"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ResultSuccess_unknown_"] | components["schemas"]["ResultError_unknown_"];
+        };
+      };
+    };
+  };
+  DeleteWebhook: {
+    parameters: {
+      path: {
+        webhookId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
         };
       };
     };

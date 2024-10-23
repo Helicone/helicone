@@ -1,76 +1,74 @@
 ---
-title: "Webhooks"
-description: "Webhooks allow you to build or set up integrations which subscribe to certain events on Helicone.ai. When one of those events is triggered, we'll send a HTTP POST payload to the webhook's configured URL. Webhooks can be used to update an external issue tracker, trigger CI builds, update a backup mirror, or even deploy to your production server."
+title: "Webhooks: Real-Time LLM Integration & Automation"
+sidebarTitle: "Quick start"
+description: "Leverage Helicone's powerful webhook system to automate your LLM workflows. Instantly react to events, trigger actions, and integrate with external tools for enhanced AI observability and management. Perfect for developers building robust LLM applications."
+twitter:title: "Helicone Webhooks: Real-Time LLM Integration & Automation"
 ---
 
-## Beta warning
+## Top use cases
 
-<Warning>
-  Please note that Webhooks is currently in beta. If you wish to gain access,
-  kindly contact us via Discord or email us at sales@helicone.ai
-</Warning>
+- **Scoring**: [Score requests based on custom logic](/features/advanced-usage/scores).
+- **Data ETL**: Moving data from one system to another.
+- **Automations** / Alerts: Trigger actions automatically, such as sending a Slack notification or triggering a webhook to an external tool.
 
-## NextJS Example
+## Setting up webhooks
 
-```bash
+Head over to the [webhooks page](https://us.helicone.ai/webhooks) to set up a webhook.
 
-npm install graphql-tag @apollo/client
-# Alternatively, you can use yarn add graphql-tag @apollo/client
-curl -sSL https://raw.githubusercontent.com/Helicone/helicone/main/web/lib/api/graphql/schema/types/graphql.tsx > heliconeTypes.tsx
-```
+<Frame caption="Webhooks page">
+  <img src="/images/webhooks/ngrok-example.png" alt="Ngrok example" />
+</Frame>
+
+Add the webhook URL and select the events you want to trigger on.
+
+You will want to copy the HMAC key and add it to your webhook environment to validate the signature of the webhook request.
+
+## Configure your webhook route
+
+<Note>
+  We recommend for startups to use [Cloudflare
+  workers](https://developers.cloudflare.com/workers/) or [Vercel edge
+  functions](https://vercel.com/docs/functions/edge-functions) for webhooks,
+  they are simple to setup and scale very well.
+
+We have a prebuilt [Cloudflare worker](https://deploy.workers.cloudflare.com/?url=https://github.com/Helicone/helicone/tree/main/examples/worker-helicone-scores) that you can use as a starting point.
+
+</Note>
+
+The webhook endpoint is a POST route that accepts the following JSON body:
+
+### POST /webhook
+
+The body of the request will contain the following fields:
+
+- `request_id`: The request ID of the request that triggered the webhook.
+- `request_body`: The body of the request that triggered the webhook.
+- `response_body`: The body of the response that triggered the webhook.
+
+### Example - NextJS
 
 ```tsx
-import type { NextApiRequest, NextApiResponse } from "next";
-
-import gql from "graphql-tag";
-import { ApolloClient, InMemoryCache } from "@apollo/client";
-import { HeliconeRequest } from "./heliconeTypes";
-
-const client = new ApolloClient({
-  uri: "https://www.helicone.ai/api/graphql",
-  cache: new InMemoryCache(),
-  headers: {
-    Authorization: `Bearer ${process.env.HELICONE_API_KEY}`,
-  },
-});
+import crypto from "crypto";
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<null>
+  res: NextApiResponse
 ) {
-  const { request_id: requestId } = req.body as {
-    request_id: string;
-  };
-  const GET_USERS = gql`
-    query GetHeliconeRequest($id: String!) {
-      heliconeRequest(filters: [{ requestId: { equals: $id } }]) {
-        id
-        responseBody
-        values {
-          name
-          value
-        }
-        response
-        requestBody
-        prompt
-        model
-        properties {
-          name
-          value
-        }
-        latency
-        createdAt
-        costUSD
-        cacheHits
-      }
-    }
-  `;
+  const { request_id, request_body, response_body } = req.body;
 
-  const heliconeRequest = await client.query<HeliconeRequest>({
-    query: GET_USERS,
-    variables: { id: requestId },
-  });
-  console.log(heliconeRequest.data);
-  res.status(200).json(null);
+  // STEP 1: Validate the signature of the webhook request
+  const hmac = crypto.createHmac("sha256", process.env.HELICONE_WEBHOOK_SECRET);
+  hmac.update(JSON.stringify({ request_id, request_body, response_body }));
+  const signature = hmac.digest("hex");
+  if (signature !== req.headers["helicone-signature"]) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  // STEP 2: Do something with the webhook data
+  console.log(request_id, request_body, response_body);
+  // ...
+  // EX: You can submit a score using our [Scoring API](/features/scoring)
+
+  return res.status(200).json({ message: "Webhook received" });
 }
 ```

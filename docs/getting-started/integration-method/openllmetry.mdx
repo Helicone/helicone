@@ -12,7 +12,6 @@ iconType: "solid"
 Async Integration let's you log events and calls without placing Helicone in your app's critical
 path. This ensures that an issue with Helicone will not cause an outage to your app.
 
-
 <Tabs>
   <Tab title="Node.js">
   <Steps>
@@ -27,32 +26,33 @@ import { HeliconeAsyncLogger } from "@helicone/async";
 import OpenAI from "openai";
 
 const logger = new HeliconeAsyncLogger({
-    apiKey: process.env.HELICONE_API_KEY,
-    // pass in the providers you want logged
-    providers: {
-      openAI: OpenAI,
-      //anthropic: Anthropic,
-      //cohere: Cohere
-      // ...
-    }
+apiKey: process.env.HELICONE_API_KEY,
+// pass in the providers you want logged
+providers: {
+openAI: OpenAI,
+//anthropic: Anthropic,
+//cohere: Cohere
+// ...
+}
 });
 logger.init();
 
 const openai = new OpenAI();
 
 async function main() {
-    const completion = await openai.chat.completions.create({
-      messages: [{"role": "system", "content": "You are a helpful assistant."},
-        {"role": "user", "content": "Who won the world series in 2020?"},
-        {"role": "assistant", "content": "The Los Angeles Dodgers won the World Series in 2020."},
-        {"role": "user", "content": "Where was it played?"}],
-      model: "gpt-3.5-turbo",
-    });
+const completion = await openai.chat.completions.create({
+messages: [{"role": "system", "content": "You are a helpful assistant."},
+{"role": "user", "content": "Who won the world series in 2020?"},
+{"role": "assistant", "content": "The Los Angeles Dodgers won the World Series in 2020."},
+{"role": "user", "content": "Where was it played?"}],
+model: "gpt-3.5-turbo",
+});
 
-  console.log(completion.choices[0]);
+console.log(completion.choices[0]);
 }
 
 main();
+<<<<<<< Updated upstream
 ```
 </Step>
 <Step title="Properties">
@@ -74,13 +74,18 @@ logger.withProperties({
 ```
 </Step>
 </Steps>
+=======
+
+````
+>>>>>>> Stashed changes
 </Tab>
   <Tab title="Python">
   <Steps>
   <Step title="Install Helicone Async">
   ```bash
   pip install helicone-async
-  ```
+````
+
   </Step>
   <Step title="Initialize Logger">
   ```python
@@ -88,7 +93,7 @@ from helicone_async import HeliconeAsyncLogger
 from openai import OpenAI
 
 logger = HeliconeAsyncLogger(
-    api_key=HELICONE_API_KEY,
+api_key=HELICONE_API_KEY,
 )
 
 logger.init()
@@ -96,16 +101,18 @@ logger.init()
 client = OpenAI(api_key=OPENAI_API_KEY)
 
 # Make the OpenAI call
+
 response = client.chat.completions.create(
-    model="gpt-3.5-turbo",
-    messages=[{"role": "system", "content": "You are a helpful assistant."},
-              {"role": "user", "content": "Who won the world series in 2020?"},
-              {"role": "assistant",
-               "content": "The Los Angeles Dodgers won the World Series in 2020."},
-              {"role": "user", "content": "Where was it played?"}]
+model="gpt-3.5-turbo",
+messages=[{"role": "system", "content": "You are a helpful assistant."},
+{"role": "user", "content": "Who won the world series in 2020?"},
+{"role": "assistant",
+"content": "The Los Angeles Dodgers won the World Series in 2020."},
+{"role": "user", "content": "Where was it played?"}]
 )
 
 print(response.choices[0])
+
 ```
 </Step>
 <Step title="Properties">
@@ -142,3 +149,4 @@ response = client.chat.completions.create(
 # Other Integrations
 
 - [Gateway Integration](/getting-started/integration-method/gateway)
+```

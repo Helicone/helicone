@@ -1,3 +1,4 @@
+import { ENVIRONMENT } from "../..";
 import { Database } from "../db/database.types";
 import { PromiseGenericResult, err, ok } from "../shared/result";
 import { FeatureFlagStore } from "../stores/FeatureFlagStore";
@@ -5,6 +6,8 @@ import { WebhookStore } from "../stores/WebhookStore";
 import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext } from "./HandlerContext";
 import * as Sentry from "@sentry/node";
+
+import crypto from "crypto";
 
 type WebhookPayload = {
   payload: {
@@ -15,6 +18,7 @@ type WebhookPayload = {
     response: {
       body: string;
     };
+    properties: Record<string, string>;
   };
   webhook: Database["public"]["Tables"]["webhooks"]["Row"];
   orgId: string;
@@ -32,10 +36,6 @@ export class WebhookHandler extends AbstractLogHandler {
   }
 
   async handle(context: HandlerContext): PromiseGenericResult<string> {
-    if (!context.message.heliconeMeta.webhookEnabled) {
-      return await super.handle(context);
-    }
-
     const orgId = context.orgParams?.id;
 
     if (!orgId) {
@@ -58,6 +58,7 @@ export class WebhookHandler extends AbstractLogHandler {
           response: {
             body: context.processedLog.response.body,
           },
+          properties: context.processedLog.request.properties ?? {},
         },
         webhook: webhook,
         orgId,
@@ -107,55 +108,63 @@ export class WebhookHandler extends AbstractLogHandler {
       response: {
         body: string;
       };
+      properties: Record<string, string>;
     },
     webhook: Database["public"]["Tables"]["webhooks"]["Row"],
     orgId: string
   ): PromiseGenericResult<string> {
-    // Check FF
-    const webhookFF = await this.featureFlagStore.getFeatureFlagByOrgId(
-      "webhook_beta",
-      orgId
-    );
+    try {
+      const hmacKey = webhook.hmac_key ?? "";
 
-    if (webhookFF.error || !webhookFF.data) {
-      return err(
-        `Error checking webhook ff or webhooks not enabled for user trying to use them, ${webhookFF.error}`
-      );
-    }
+      const sampleRate = (webhook.config as any)?.["sampleRate"] ?? 100;
 
-    const subscriptions =
-      await this.webhookStore.getWebhookSubscriptionByWebhookId(webhook.id);
-
-    if (subscriptions.error || !subscriptions.data) {
-      return err(`Error getting webhook subscriptions, ${subscriptions.error}`);
-    }
-
-    const shouldSend =
-      webhook.destination.includes("helicone-scoring-webhook") ||
-      subscriptions.data
-        .map((subscription) => {
-          return subscription.event === "beta";
-        })
-        .filter((x) => x).length > 0;
-
-    if (shouldSend) {
-      console.log("SENDING", webhook.destination, payload.request.id);
-      try {
-        await fetch(webhook.destination, {
-          method: "POST",
-          body: JSON.stringify({
-            request_id: payload.request.id,
-            request_body: payload.request.body,
-            response_body: payload.response.body,
-          }),
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } catch (error: any) {
-        console.error("Error sending to webhook", error.message);
+      if (Math.random() > (sampleRate * 1.0) / 100) {
+        return ok(`Skipping webhook due to sample rate`);
       }
+
+      const propertyFilters = ((webhook.config as any)?.["propertyFilters"] ??
+        []) as {
+        key: string;
+        value: string;
+      }[];
+
+      const shouldWebhookProperties = propertyFilters.every(
+        (propertyFilter) =>
+          payload.properties[propertyFilter.key] === propertyFilter.value
+      );
+
+      if (!shouldWebhookProperties) {
+        return ok(`Skipping webhook due to property filter`);
+      }
+
+      const hmac = crypto.createHmac("sha256", hmacKey);
+      const webHoookPayload = JSON.stringify({
+        request_id: payload.request.id,
+        request_body: payload.request.body,
+        response_body: payload.response.body,
+      });
+      hmac.update(webHoookPayload);
+
+      const hash = hmac.digest("hex");
+
+      if (
+        !webhook.destination.startsWith("https://") &&
+        ENVIRONMENT !== "development"
+      ) {
+        return ok(`Skipping webhook due to destination`);
+      }
+
+      fetch(webhook.destination, {
+        method: "POST",
+        body: webHoookPayload,
+        headers: {
+          "Content-Type": "application/json",
+          "Helicone-Signature": hash,
+        },
+      });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      console.error("Error sending to webhook", error.message);
     }
 
     return ok(`Successfully sent to webhook`);
