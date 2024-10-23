@@ -4,6 +4,7 @@ import type { paths as publicPaths } from "../../../../lib/clients/jawnTypes/pub
 import type { paths as privatePaths } from "../../../../lib/clients/jawnTypes/private";
 import { Button } from "@/components/ui/button";
 import { ExpandIcon, ShrinkIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 type PromptInput = NonNullable<
   (publicPaths &
@@ -105,7 +106,15 @@ const PromptInputItem: React.FC<PromptInputItemProps> = ({
         )}
       </div>
       {isOverflowed && !isExpanded && (
-        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-transparent to-white dark:to-slate-950" />
+        <div
+          className={cn(
+            "absolute top-0 left-1 w-[calc(100%-0.25rem)] h-full bg-gradient-to-b from-transparent to-white dark:to-slate-950",
+            isSelected
+              ? "to-sky-100 dark:to-sky-900"
+              : "to-white dark:to-slate-950"
+          )}
+          onClick={() => onSelect(input)}
+        />
       )}
       {isOverflowed && (
         <Button
