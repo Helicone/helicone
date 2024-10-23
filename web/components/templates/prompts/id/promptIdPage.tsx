@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import {
   usePrompt,
   usePromptRequestsOverTime,
@@ -9,12 +9,9 @@ import {
   BeakerIcon,
   ArrowTrendingUpIcon,
   TrashIcon,
-  EyeIcon,
-  PencilIcon,
   ChevronDownIcon,
   MagnifyingGlassIcon,
   XMarkIcon,
-  InformationCircleIcon,
 } from "@heroicons/react/24/outline";
 import { useRouter } from "next/router";
 import { useExperiments } from "../../../../services/hooks/prompts/experiments";
@@ -49,12 +46,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { EllipsisHorizontalIcon } from "@heroicons/react/24/solid";
-import {
-  MultiSelect,
-  MultiSelectItem,
-  AreaChart,
-  TextInput,
-} from "@tremor/react";
+import { MultiSelect, MultiSelectItem, AreaChart } from "@tremor/react";
 import { getTimeMap } from "../../../../lib/timeCalculations/constants";
 import LoadingAnimation from "../../../shared/loadingAnimation";
 import { SimpleTable } from "../../../shared/table/simpleTable";
@@ -66,11 +58,24 @@ import StatusBadge from "../../requestsV2/statusBadge";
 import TableFooter from "../../requestsV2/tableFooter";
 import { Button } from "../../../ui/button";
 import { useUser } from "@supabase/auth-helpers-react";
-import { IslandContainer } from "../../../ui/islandContainer";
 import { useFeatureFlags } from "@/services/hooks/featureFlags";
 import { useOrg } from "@/components/layout/organizationContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Popover, PopoverContent, PopoverTrigger } from "../../../ui/popover";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hoverCard";
+import { InfoIcon } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Input } from "@/components/ui/input";
+import { clsx } from "clsx";
+import PromptInputItem from "./promptInputItem";
+import { IslandContainer } from "@/components/ui/islandContainer";
 
 interface PromptIdPageProps {
   id: string;
@@ -636,134 +641,163 @@ const PromptIdPage = (props: PromptIdPageProps) => {
   const [isInputsExpanded, setIsInputsExpanded] = useState(true);
   const [isSearchVisible, setIsSearchVisible] = useState(false);
 
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (isSearchVisible && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [isSearchVisible]);
+
+  // Add this new function to handle the button click
+  const handleSearchButtonClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // This stops the event from propagating to the parent div
+    setIsSearchVisible(!isSearchVisible);
+  };
+
   return (
-    <div>
+    <IslandContainer className="mx-0">
       <div className="w-full h-full flex flex-col space-y-4 pt-4">
         <Tabs defaultValue="prompt">
-          <IslandContainer>
-            <div className="flex flex-row items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <HcBreadcrumb
-                  pages={[
-                    { href: "/prompts", name: "Prompts" },
-                    {
-                      href: `/prompts/${id}`,
-                      name: prompt?.user_defined_id || "Loading...",
-                    },
-                  ]}
-                />
-                <Popover>
-                  {prompt?.metadata?.createdFromUi === true ? (
-                    <>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size={"sm"}
-                          className="h-6 bg-[#F1F5F9] border border-[#CBD5E1]"
-                        >
-                          <PencilIcon className="h-4 w-4 mr-2" />
-                          Editable
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="max-w-[15rem]" align="center">
-                        <p className="text-sm">
-                          This prompt was created{" "}
-                          <span className="font-semibold">in the UI</span>. You
-                          can edit / delete them, or promote to prod.
-                        </p>
-                      </PopoverContent>
-                    </>
-                  ) : (
-                    <>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size={"sm"}
-                          className="h-6 bg-[#F1F5F9] border border-[#CBD5E1]"
-                        >
-                          <EyeIcon className="h-4 w-4 mr-2" />
-                          View only
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="max-w-[15rem]" align="center">
-                        <p className="text-sm">
-                          This prompt was created{" "}
-                          <span className="font-semibold">in code</span>. You
-                          won&apos;t be able to edit this from the UI.
-                        </p>
-                      </PopoverContent>
-                    </>
-                  )}
-                </Popover>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <InformationCircleIcon className="h-6 w-6 text-slate-500 cursor-pointer" />
-                  </PopoverTrigger>
-                  <PopoverContent className="w-64 p-4" align="start">
-                    <div className="space-y-2">
-                      <div className="border-b border-slate-200 dark:border-slate-600 py-2 p-4">
-                        <h3 className="text-sm font-semibold text-slate-700 ">
-                          Prompt Name
-                        </h3>
-                        <p className="text-xs font-medium text-slate-500">
+          <div className="flex flex-row items-center justify-between mx-8">
+            <div className="flex items-center space-x-4">
+              <HcBreadcrumb
+                pages={[
+                  { href: "/prompts", name: "Prompts" },
+                  {
+                    href: `/prompts/${id}`,
+                    name: prompt?.user_defined_id || "Loading...",
+                  },
+                ]}
+              />
+
+              <HoverCard>
+                <HoverCardTrigger>
+                  <InfoIcon
+                    width={16}
+                    height={16}
+                    className="text-slate-500 cursor-pointer"
+                  />
+                </HoverCardTrigger>
+                <HoverCardContent
+                  className="w-[220px] p-0 z-[1000] bg-white"
+                  align="start"
+                >
+                  <div className="p-3 gap-3 flex flex-col border-b border-slate-200">
+                    <div className="flex flex-col gap-1">
+                      <h3 className="text-base font-semibold text-slate-700">
+                        Prompt Name
+                      </h3>
+                      <div className="flex flex-row items-center gap-2">
+                        <p className="text-sm text-slate-500 truncate">
                           {prompt?.user_defined_id}
                         </p>
                       </div>
-                      <div className="border-b border-slate-200 dark:border-slate-600 py-2 px-4">
-                        <h3 className="text-sm font-semibold text-slate-700">
-                          Versions
-                        </h3>
-                        <p className="text-xs font-medium text-slate-500">
-                          {sortedPrompts?.length}
-                        </p>
-                      </div>
-                      <div className="py-2 px-4">
-                        <h3 className="text-sm font-semibold text-slate-700">
-                          Last used
-                        </h3>
-                        <p className="text-xs font-medium text-slate-500">
-                          {prompt?.last_used
-                            ? getTimeAgo(new Date(prompt?.last_used))
-                            : "Never"}
-                        </p>
-                      </div>
-                      <div className="py-2 px-4">
-                        <h3 className="text-sm font-semibold text-slate-700">
-                          Created on
-                        </h3>
-                        <p className="text-xs font-medium text-slate-500">
-                          {prompt?.created_at &&
-                            new Date(prompt?.created_at).toDateString()}
-                        </p>
-                      </div>
                     </div>
-                  </PopoverContent>
-                </Popover>
-              </div>
-              <div className="flex items-center space-x-4">
-                <TabsList className="grid w-64 h-11 grid-cols-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 ">
-                  <TabsTrigger
-                    value="prompt"
-                    className="rounded-md transition-colors data-[state=active]:bg-slate-100 dark:data-[state=active]:bg-slate-700 data-[state=active]:text-slate-950 dark:data-[state=active]:text-slate-50"
-                  >
-                    Prompt & Inputs
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="metrics"
-                    className="rounded-md transition-colors data-[state=active]:bg-slate-100 dark:data-[state=active]:bg-slate-700 data-[state=active]:text-slate-950 dark:data-[state=active]:text-slate-50"
-                  >
-                    Metrics
-                  </TabsTrigger>
-                </TabsList>
-              </div>
+                  </div>
+                  <div className="p-3 gap-3 flex flex-col border-b border-slate-200">
+                    <div className="flex flex-col gap-1">
+                      <h3 className="text-sm font-semibold text-slate-700">
+                        Versions
+                      </h3>
+                      <p className="text-sm text-slate-500 truncate">
+                        {sortedPrompts?.length}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="p-3 gap-3 flex flex-col border-b border-slate-200">
+                    <div className="flex flex-col gap-1">
+                      <h3 className="text-sm font-semibold text-slate-700">
+                        Last used
+                      </h3>
+                      <p className="text-sm text-slate-500 truncate">
+                        {prompt?.last_used
+                          ? getTimeAgo(new Date(prompt?.last_used))
+                          : "Never"}{" "}
+                      </p>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <h3 className="text-sm font-semibold text-slate-700">
+                        Created on
+                      </h3>
+                      <p className="text-sm text-slate-500 truncate">
+                        {prompt?.created_at &&
+                          new Date(prompt?.created_at).toDateString()}{" "}
+                      </p>
+                    </div>
+                  </div>
+                </HoverCardContent>
+              </HoverCard>
+              <HoverCard>
+                {prompt?.metadata?.createdFromUi === true ? (
+                  <>
+                    <HoverCardTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size={"sm"}
+                        className="h-6 bg-[#F1F5F9] border border-[#CBD5E1] text-xs font-normal"
+                      >
+                        {/* <PencilIcon className="h-4 w-4 mr-2" /> */}
+                        Editable
+                      </Button>
+                    </HoverCardTrigger>
+                    <HoverCardContent
+                      className="max-w-[15rem] bg-white "
+                      align="center"
+                    >
+                      <p className="text-sm">
+                        This prompt was created{" "}
+                        <span className="font-semibold">in the UI</span>. You
+                        can edit / delete them, or promote to prod.
+                      </p>
+                    </HoverCardContent>
+                  </>
+                ) : (
+                  <>
+                    <HoverCardTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size={"sm"}
+                        className="h-6 bg-[#F1F5F9] border border-[#CBD5E1] text-xs font-normal"
+                      >
+                        {/* <EyeIcon className="h-4 w-4 mr-2" /> */}
+                        View only
+                      </Button>
+                    </HoverCardTrigger>
+                    <HoverCardContent className="max-w-[15rem]" align="center">
+                      <p className="text-sm">
+                        This prompt was created{" "}
+                        <span className="font-semibold">in code</span>. You
+                        won&apos;t be able to edit this from the UI.
+                      </p>
+                    </HoverCardContent>
+                  </>
+                )}
+              </HoverCard>
             </div>
-          </IslandContainer>
+            <div className="flex items-center space-x-4">
+              <TabsList className="grid w-64 h-11 grid-cols-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 ">
+                <TabsTrigger
+                  value="prompt"
+                  className="rounded-md transition-colors data-[state=active]:bg-slate-100 dark:data-[state=active]:bg-slate-700 data-[state=active]:text-slate-950 dark:data-[state=active]:text-slate-50"
+                >
+                  Prompt & Inputs
+                </TabsTrigger>
+                <TabsTrigger
+                  value="metrics"
+                  className="rounded-md transition-colors data-[state=active]:bg-slate-100 dark:data-[state=active]:bg-slate-700 data-[state=active]:text-slate-950 dark:data-[state=active]:text-slate-50"
+                >
+                  Metrics
+                </TabsTrigger>
+              </TabsList>
+            </div>
+          </div>
 
           <TabsContent value="prompt">
-            <div className="flex items-start relative min-h-[75vh]">
-              <div className="py-4 flex flex-col space-y-4 w-full h-full">
-                <div className="flex">
-                  <div className="w-2/3">
+            <div className="flex items-start relative">
+              <div className="py-4 flex flex-col space-y-4 w-full h-[calc(100vh-76px)]">
+                <div className="flex h-full">
+                  <div className="w-2/3 overflow-y-auto">
                     <PromptPlayground
                       prompt={selectedPrompt?.helicone_template || ""}
                       selectedInput={selectedInput || undefined}
@@ -778,10 +812,10 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                       className="border-y"
                     />
                   </div>
-                  <div className="w-1/3 flex flex-col">
-                    <div className="border-y border-x border-[#E8EAEC] dark:border-slate-700 bg-[#F9FAFB] dark:bg-black">
+                  <div className="w-1/3 flex flex-col h-full">
+                    <div className="border-y border-x border-slate-200 dark:border-slate-700 bg-[#F9FAFB] dark:bg-black flex flex-col h-full">
                       <div
-                        className="flex flex-row items-center justify-between px-4 py-3 cursor-pointer"
+                        className="flex flex-row items-center justify-between px-4 py-3.5 cursor-pointer"
                         onClick={() =>
                           setIsVersionsExpanded(!isVersionsExpanded)
                         }
@@ -795,7 +829,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                       </div>
 
                       {isVersionsExpanded && (
-                        <ScrollArea className="h-[25vh] rounded-b-lg">
+                        <ScrollArea className="h-[25vh]">
                           <div>
                             {sortedPrompts?.map((promptVersion, index) => {
                               const isProduction =
@@ -809,21 +843,21 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                               return (
                                 <div
                                   key={promptVersion.id}
-                                  className={`flex flex-row w-full h-12 ${
+                                  className={`flex flex-row w-full h-12 relative ${
                                     isSelected
                                       ? "bg-sky-100 dark:bg-sky-950"
-                                      : "bg-slate-50 dark:bg-slate-900"
+                                      : "bg-white dark:bg-slate-950"
                                   } ${
                                     isFirst
-                                      ? "border-t border-slate-300 dark:border-slate-700"
+                                      ? "border-t border-slate-200 dark:border-slate-700"
                                       : ""
                                   } ${
                                     isLast
-                                      ? "border-b border-slate-300 dark:border-slate-700"
+                                      ? "border-b border-slate-200 dark:border-slate-700"
                                       : ""
                                   }`}
                                 >
-                                  <div className="flex items-center">
+                                  <div className="flex items-center absolute left-0 h-full">
                                     {isSelected && (
                                       <div className="bg-sky-500 h-full w-1" />
                                     )}
@@ -831,7 +865,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                                   <div
                                     className={`flex-grow px-4 py-2 flex flex-row cursor-pointer ${
                                       !isFirst
-                                        ? "border-t border-slate-300 dark:border-slate-700"
+                                        ? "border-t border-slate-200 dark:border-slate-700"
                                         : ""
                                     }`}
                                     onClick={() =>
@@ -841,38 +875,42 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                                     }
                                   >
                                     <div className="flex justify-between items-center w-full">
-                                      <div className="flex items-center space-x-2 flex-row justify-between w-full">
-                                        <div className="flex items-center space-x-2">
-                                          <span className="font-medium text-lg">
+                                      <div className="flex items-center space-x-2 w-full">
+                                        <div className="flex items-center space-x-2 min-w-0 flex-grow">
+                                          <span className="font-medium text-sm whitespace-nowrap">
                                             V{promptVersion.major_version}.
                                             {promptVersion.minor_version}
                                           </span>
                                           {promptVersion.model &&
                                             promptVersion.model.length > 0 && (
-                                              <Badge
-                                                variant={"default"}
-                                                className="bg-[#F1F5F9] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-[#475569] text-[#334155] dark:text-white text-sm font-medium rounded-lg px-4 hover:bg-[#F1F5F9] hover:text-black"
-                                              >
-                                                {promptVersion.model.length >= 7
-                                                  ? promptVersion.model.substring(
-                                                      0,
-                                                      7
-                                                    ) + ".."
-                                                  : promptVersion.model}
-                                              </Badge>
+                                              <Tooltip>
+                                                <TooltipTrigger>
+                                                  <Badge
+                                                    variant={"default"}
+                                                    className="bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-sm font-medium rounded-lg px-2 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white min-w-0 flex-shrink z-[1000]"
+                                                  >
+                                                    <span className="block truncate">
+                                                      {promptVersion.model}
+                                                    </span>
+                                                  </Badge>
+                                                </TooltipTrigger>
+                                                <TooltipContent>
+                                                  {promptVersion.model}
+                                                </TooltipContent>
+                                              </Tooltip>
                                             )}
-                                          <span>
+                                          <span className="flex-shrink-0">
                                             {isProduction && (
                                               <Badge
                                                 variant={"default"}
-                                                className="bg-[#BAE6FD] dark:bg-[#1E293B]  dark:border-[#475569] text-[#0369A1] dark:text-white text-sm font-medium rounded-lg px-4 hover:bg-[#F1F5F9] hover:text-black"
+                                                className="bg-sky-200 dark:bg-slate-800 text-sky-700 dark:text-white text-sm font-medium rounded-lg px-4 hover:bg-sky-200 dark:hover:bg-slate-800 hover:text-sky-700 dark:hover:text-white"
                                               >
                                                 Prod
                                               </Badge>
                                             )}
                                           </span>
                                         </div>
-                                        <div className="flex items-center space-x-2">
+                                        <div className="flex items-center space-x-2 flex-shrink-0">
                                           <span className="text-sm text-slate-500">
                                             {getTimeAgo(
                                               new Date(promptVersion.created_at)
@@ -960,45 +998,61 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                           </div>
                         </ScrollArea>
                       )}
-                    </div>
-                    <div className="border-x border-b border-[#E8EAEC] dark:border-slate-700 bg-[#F9FAFB] dark:bg-black">
                       <div
-                        className="flex flex-row items-center justify-between px-4 h-12 cursor-pointer"
+                        className="flex flex-row items-center justify-between px-4 h-12 cursor-pointer border-y border-slate-200 dark:border-slate-700"
                         onClick={() => setIsInputsExpanded(!isInputsExpanded)}
                       >
                         <h2 className="font-medium text-sm">Inputs</h2>
                         <div className="flex items-center space-x-2">
-                          {isSearchVisible ? (
-                            <div className="relative w-64">
-                              <TextInput
-                                placeholder="Search by request id..."
-                                value={searchRequestId}
-                                onValueChange={(value) =>
-                                  setSearchRequestId(value)
-                                }
-                                className="pr-8"
-                              />
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setIsSearchVisible(false);
-                                  setSearchRequestId("");
-                                }}
-                                className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full"
-                              >
-                                <XMarkIcon className="h-4 w-4 text-slate-500" />
-                              </button>
-                            </div>
-                          ) : (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setIsSearchVisible(true);
-                              }}
-                              className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full"
-                            >
-                              <MagnifyingGlassIcon className="h-5 w-5 text-slate-500" />
-                            </button>
+                          {isInputsExpanded && (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <div className="relative flex items-center">
+                                  <div
+                                    className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                                      isSearchVisible ? "w-40 sm:w-64" : "w-0"
+                                    }`}
+                                  >
+                                    <Input
+                                      ref={searchInputRef}
+                                      type="text"
+                                      value={searchRequestId}
+                                      onChange={(e) =>
+                                        setSearchRequestId(e.target.value)
+                                      }
+                                      placeholder="Search by request id..."
+                                      className={clsx(
+                                        "w-40 sm:w-64 text-sm pr-8 transition-transform duration-300 ease-in-out outline-none border-none ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-none",
+                                        isSearchVisible
+                                          ? "translate-x-0"
+                                          : "translate-x-full"
+                                      )}
+                                    />
+                                  </div>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className={
+                                      isSearchVisible
+                                        ? "absolute right-0 hover:bg-transparent"
+                                        : ""
+                                    }
+                                    onClick={handleSearchButtonClick} // Use the new handler here
+                                  >
+                                    {isSearchVisible ? (
+                                      <XMarkIcon className="h-4 w-4" />
+                                    ) : (
+                                      <MagnifyingGlassIcon className="h-4 w-4" />
+                                    )}
+                                  </Button>
+                                </div>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                {isSearchVisible
+                                  ? "Close search"
+                                  : "Open search"}
+                              </TooltipContent>
+                            </Tooltip>
                           )}
                           <ChevronDownIcon
                             className={`h-5 w-5 transition-transform ${
@@ -1009,102 +1063,26 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                       </div>
 
                       {isInputsExpanded && (
-                        <ScrollArea className="h-[30vh] rounded-b-lg">
-                          <ul className="flex flex-col">
-                            {inputs
-                              ?.filter((input) =>
-                                input.source_request.includes(searchRequestId)
-                              )
-                              .map((input, index, filteredInputs) => {
-                                const isFirst = index === 0;
-                                const isLast =
-                                  index === filteredInputs.length - 1;
-                                const isSelected =
-                                  selectedInput?.id === input.id;
-
-                                return (
-                                  <li
+                        <div className="flex-grow overflow-hidden">
+                          <ScrollArea className="h-full">
+                            <ul className="flex flex-col">
+                              {inputs
+                                ?.filter((input) =>
+                                  input.source_request.includes(searchRequestId)
+                                )
+                                .map((input, index, filteredInputs) => (
+                                  <PromptInputItem
                                     key={input.id}
-                                    className={`flex flex-row w-full ${
-                                      isSelected
-                                        ? "bg-sky-50 dark:bg-sky-900"
-                                        : "bg-white dark:bg-gray-800"
-                                    } ${
-                                      isFirst
-                                        ? "border-t border-slate-300 dark:border-slate-700"
-                                        : ""
-                                    } ${
-                                      isLast
-                                        ? "border-b border-slate-300 dark:border-slate-700"
-                                        : ""
-                                    }`}
-                                  >
-                                    <div className="flex items-center">
-                                      {isSelected && (
-                                        <div className="bg-sky-500 h-full w-1" />
-                                      )}
-                                    </div>
-                                    <div
-                                      className={`flex-grow p-4 cursor-pointer ${
-                                        !isFirst
-                                          ? "border-t border-slate-300 dark:border-slate-700"
-                                          : ""
-                                      }`}
-                                      onClick={() => handleInputSelect(input)}
-                                    >
-                                      {Object.entries(input.inputs).map(
-                                        ([key, value], index) => (
-                                          <div
-                                            key={index}
-                                            className="mb-2 last:mb-0"
-                                          >
-                                            <span className="text-blue-500 font-medium">
-                                              {key}:{" "}
-                                            </span>
-                                            <span className="text-gray-700 dark:text-gray-300">
-                                              {typeof value === "string"
-                                                ? value.length > 100
-                                                  ? value.substring(0, 100) +
-                                                    "..."
-                                                  : value
-                                                : JSON.stringify(value)}
-                                            </span>
-                                          </div>
-                                        )
-                                      )}
-                                      {input.auto_prompt_inputs &&
-                                        input.auto_prompt_inputs.length > 0 && (
-                                          <div className="mt-2">
-                                            <span className="text-blue-500 font-medium">
-                                              messages:{" "}
-                                            </span>
-                                            <span className="text-gray-500">
-                                              {JSON.stringify(
-                                                input.auto_prompt_inputs
-                                              ).substring(0, 50)}
-                                              ...
-                                            </span>
-                                          </div>
-                                        )}
-                                      {input.response_body && (
-                                        <div className="mt-2">
-                                          <span className="text-blue-500 font-medium">
-                                            messages:{" "}
-                                          </span>
-                                          <span className="text-gray-700 dark:text-gray-300">
-                                            {JSON.stringify(
-                                              (input.response_body as any)
-                                                ?.choices[0]?.message
-                                            )}
-                                          </span>
-                                        </div>
-                                      )}
-                                    </div>
-                                  </li>
-                                );
-                              })}
-                          </ul>
-                        </ScrollArea>
+                                    input={input}
+                                    isSelected={selectedInput?.id === input.id}
+                                    isFirst={index === 0}
+                                    isLast={index === filteredInputs.length - 1}
+                                    onSelect={handleInputSelect}
+                                  />
+                                ))}
+                            </ul>
+                          </ScrollArea>
+                        </div>
                       )}
                     </div>
                   </div>
@@ -1289,7 +1267,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
           </TabsContent>
         </Tabs>
       </div>
-    </div>
+    </IslandContainer>
   );
 };
 
