@@ -76,7 +76,6 @@ import { Input } from "@/components/ui/input";
 import { clsx } from "clsx";
 import PromptInputItem from "./promptInputItem";
 import { IslandContainer } from "@/components/ui/islandContainer";
-import { useMediaQuery } from "@mui/material";
 import { cn } from "@/lib/utils";
 
 interface PromptIdPageProps {
