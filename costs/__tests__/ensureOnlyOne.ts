@@ -743,7 +743,7 @@ WHEN (request_response_rmt.model ILIKE '%mistral%') THEN 300 * request_response_
   ELSE 0
 END
 )
-    ELSE
+    ELSE 
   CASE
   WHEN (request_response_rmt.model ILIKE 'ada') THEN 400 * request_response_rmt.prompt_tokens + 400 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'text-ada-001') THEN 400 * request_response_rmt.prompt_tokens + 400 * request_response_rmt.completion_tokens
