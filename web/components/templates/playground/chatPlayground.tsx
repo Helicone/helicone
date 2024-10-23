@@ -89,131 +89,173 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
       return;
     }
 
-    //if (!providerAPIKey) {
-    //  setNotification("Please enter your API key to access provider.", "error");
-    //  return;
-    //}
     setIsLoading(true);
 
-    const responses = await Promise.all(
-      models.map(async (model) => {
-        // Filter and map the history as before
-        const cleanMessages = (history: Message[]) => {
-          return history.filter(
+    try {
+      const processMessages = async (messages: Message[]) => {
+        return Promise.all(
+          messages.map(async (message) => {
+            if (!Array.isArray(message.content)) {
+              return message;
+            }
+
+            const processedContent = await Promise.all(
+              message.content.map(async (item: any) => {
+                if (
+                  item.type === "image_url" &&
+                  item.image_url?.url?.startsWith("http")
+                ) {
+                  try {
+                    const response = await fetch(item.image_url.url);
+                    const blob = await response.blob();
+                    const base64 = await new Promise((resolve) => {
+                      const reader = new FileReader();
+                      reader.onloadend = () => resolve(reader.result);
+                      reader.readAsDataURL(blob);
+                    });
+
+                    console.log("base64", base64);
+
+                    return {
+                      type: "image_url",
+                      image_url: {
+                        url: base64 as string,
+                      },
+                    };
+                  } catch (error) {
+                    console.error("Failed to convert image:", error);
+                    return item;
+                  }
+                }
+                return item;
+              })
+            );
+
+            return {
+              ...message,
+              content: processedContent,
+            };
+          })
+        );
+      };
+
+      // Process all messages first
+      const processedHistory = await processMessages(history);
+      // Update the current chat state with processed messages
+      setCurrentChat(processedHistory);
+
+      const responses = await Promise.all(
+        models.map(async (model) => {
+          // Filter messages for this model from the processed history
+          const filteredMessages = processedHistory.filter(
             (message) =>
               message.model === model.name || message.model === undefined
           );
+
+          const startTime = new Date().getTime();
+
+          if (model.provider === "OPENAI") {
+            const { data, error } = await fetchOpenAI({
+              messages:
+                filteredMessages as unknown as ChatCompletionCreateParams[],
+              temperature,
+              model: model.name,
+              maxTokens,
+              tools,
+              openAIApiKey: providerAPIKey,
+            });
+
+            const endTime = new Date().getTime();
+            const latency = endTime - startTime;
+
+            return { model, data, error, latency };
+          } else {
+            const { data, error } = await fetchAnthropic(
+              filteredMessages as unknown as ChatCompletionCreateParams[],
+              temperature,
+              model.name,
+              maxTokens,
+              providerAPIKey
+            );
+
+            const endTime = new Date().getTime();
+            const latency = endTime - startTime;
+
+            return { model, data, error, latency };
+          }
+        })
+      );
+
+      responses.forEach(({ model, data, error, latency }) => {
+        if (error !== null) {
+          setNotification(`${model}: ${error}`, "error");
+          return;
+        }
+
+        const getContent = (data: any) => {
+          // Check for tool calls and extract them if present
+          if (
+            data.choices &&
+            data.choices.length > 0 &&
+            data.choices[0].message?.tool_calls
+          ) {
+            const message = data.choices[0].message;
+            const tools = message.tool_calls;
+            const functionTools = tools.filter(
+              (tool: any) => tool.type === "function"
+            );
+            return JSON.stringify(functionTools, null, 4);
+          }
+          // Check for content in choices array
+          else if (
+            data.choices &&
+            data.choices.length > 0 &&
+            data.choices[0].message?.content
+          ) {
+            return data.choices[0].message.content;
+          }
+          // Check for content in the main content array
+          else if (
+            data.content &&
+            data.content.length > 0 &&
+            data.content[0].text
+          ) {
+            return data.content[0].text;
+          }
+          // Default case if no content is found
+          else {
+            return `${
+              data.model || "Model"
+            } failed to fetch response. Please try again`;
+          }
+        };
+        const getRole = (data: any) => {
+          if (data.choices && data.choices[0].message?.role) {
+            return data.choices[0].message.role;
+          } else if (data.role) {
+            return data.role;
+          } else {
+            return "assistant";
+          }
         };
 
-        const historyWithoutId = cleanMessages(history);
-
-        // Record the start time
-        const startTime = new Date().getTime();
-
-        if (model.provider === "OPENAI") {
-          // Perform the OpenAI request
-          const { data, error } = await fetchOpenAI({
-            messages:
-              historyWithoutId as unknown as ChatCompletionCreateParams[],
-            temperature,
-            model: model.name,
-            maxTokens,
-            tools,
-            openAIApiKey: providerAPIKey,
+        if (data) {
+          history.push({
+            id: crypto.randomUUID(),
+            content: getContent(data),
+            role: getRole(data),
+            model: model.name, // Include the model in the message
+            latency, // client side calculated latency
           });
-
-          // Record the end time and calculate latency
-          const endTime = new Date().getTime();
-          const latency = endTime - startTime; // Latency in milliseconds
-
-          // Return the model, data, error, and latency
-          return { model, data, error, latency };
-        } else {
-          // Perform the Anthropic request
-          const { data, error } = await fetchAnthropic(
-            historyWithoutId as unknown as ChatCompletionCreateParams[],
-            temperature,
-            model.name,
-            maxTokens,
-            providerAPIKey
-          );
-
-          // Record the end time and calculate latency
-          const endTime = new Date().getTime();
-          const latency = endTime - startTime; // Latency in milliseconds
-
-          // Return the model, data, error, and latency
-          return { model, data, error, latency };
         }
-      })
-    );
+      });
+      setCurrentChat(history);
 
-    responses.forEach(({ model, data, error, latency }) => {
-      if (error !== null) {
-        setNotification(`${model}: ${error}`, "error");
-        return;
-      }
-
-      const getContent = (data: any) => {
-        // Check for tool calls and extract them if present
-        if (
-          data.choices &&
-          data.choices.length > 0 &&
-          data.choices[0].message?.tool_calls
-        ) {
-          const message = data.choices[0].message;
-          const tools = message.tool_calls;
-          const functionTools = tools.filter(
-            (tool: any) => tool.type === "function"
-          );
-          return JSON.stringify(functionTools, null, 4);
-        }
-        // Check for content in choices array
-        else if (
-          data.choices &&
-          data.choices.length > 0 &&
-          data.choices[0].message?.content
-        ) {
-          return data.choices[0].message.content;
-        }
-        // Check for content in the main content array
-        else if (
-          data.content &&
-          data.content.length > 0 &&
-          data.content[0].text
-        ) {
-          return data.content[0].text;
-        }
-        // Default case if no content is found
-        else {
-          return `${
-            data.model || "Model"
-          } failed to fetch response. Please try again`;
-        }
-      };
-      const getRole = (data: any) => {
-        if (data.choices && data.choices[0].message?.role) {
-          return data.choices[0].message.role;
-        } else if (data.role) {
-          return data.role;
-        } else {
-          return "assistant";
-        }
-      };
-
-      if (data) {
-        history.push({
-          id: crypto.randomUUID(),
-          content: getContent(data),
-          role: getRole(data),
-          model: model.name, // Include the model in the message
-          latency, // client side calculated latency
-        });
-      }
-    });
-    setCurrentChat(history);
-
-    setIsLoading(false);
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Error processing the request:", error);
+      setNotification("Error processing the request", "error");
+    }
   };
 
   const deleteRowHandler = (rowId: string) => {
