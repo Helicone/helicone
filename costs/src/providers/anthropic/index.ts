@@ -105,17 +105,6 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
-      value: "anthropic.claude-3-5-sonnet-20241022-v2:0",
-    },
-    cost: {
-      prompt_token: 0.000003,
-      completion_token: 0.000015,
-    },
-    showInPlayground: false,
-  },
-  {
-    model: {
-      operator: "equals",
       value: "claude-3-haiku-20240307",
     },
     cost: {
