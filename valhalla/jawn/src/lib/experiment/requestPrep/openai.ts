@@ -45,8 +45,10 @@ function prepareRequestAnthropic(
     "Accept-Encoding": "",
   };
 
+  const fetchUrl = `${process.env.HELICONE_LLMMAPPER_URL}/oai2ant/v1`;
+
   return {
-    url: new URL(requestPath),
+    url: new URL(fetchUrl),
     headers,
   };
 }
@@ -88,8 +90,7 @@ export function prepareRequestAnthropicFull({
   });
 
   const { url: fetchUrl, headers } = prepareRequestAnthropic(
-    datasetRow.inputRecord?.requestPath ??
-      `${process.env.HELICONE_LLMMAPPER_URL}/oai2ant/v1`,
+    `${process.env.HELICONE_LLMMAPPER_URL}/oai2ant/v1`,
     proxyKey,
     requestId
   );
