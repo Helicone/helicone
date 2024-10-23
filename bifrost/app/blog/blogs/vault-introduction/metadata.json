@@ -3,7 +3,7 @@
   "title1": "Introducing Vault: Helicone's Key Management Solution For LLM Applications - Helicone",
   "title2": "Introducing Vault: Helicone's Key Management Solution For LLM Applications - Helicone",
   "description": "Discover Vault, Helicone's innovative solution for managing LLM API keys. Learn how it simplifies key management, enhances security, and streamlines processes for businesses using LLM applications.",
-  "images": "https://www.helicone.ai/static/blog/vault_banner.webp",
+  "images": "/static/blog/vault_banner.webp",
   "time": "3 minute read",
   "author": "Cole Gottdank",
   "date": "Sep 13, 2023"

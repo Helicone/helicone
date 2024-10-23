@@ -239,7 +239,6 @@
         {
           "group": "Evaulation",
           "pages": [
-            "features/advanced-usage/evaluation/overview",
             "features/advanced-usage/feedback",
             "features/advanced-usage/scores"
           ],
@@ -259,6 +258,7 @@
         "features/advanced-usage/caching",
         "features/advanced-usage/omit-logs",
         "features/advanced-usage/user-metrics",
+        "features/fine-tuning",
         "getting-started/integration-method/gateway-fallbacks",
         "features/advanced-usage/retries",
         "features/advanced-usage/custom-rate-limits",
@@ -287,6 +287,7 @@
         {
           "group": "Cookbooks",
           "pages": [
+            "guides/cookbooks/fine-tune",
             "guides/cookbooks/experiments",
             "guides/cookbooks/getting-user-requests",
             "guides/cookbooks/etl",
@@ -331,7 +332,25 @@
         "faq/overview",
         {
           "group": "Categories",
-          "pages": ["faq/tag/platform", "faq/tag/security", "faq/tag/concepts"]
+          "pages": [
+            "faq/tag/platform",
+            "faq/tag/security",
+            "faq/tag/concepts",
+            "faq/tag/fine-tuning"
+          ]
+        },
+        {
+          "group": "",
+          "pages": [
+            "faq/openai-fine-tuning-api",
+            "faq/llm-fine-tuning-time",
+            "faq/rag-vs-fine-tuning",
+            "faq/compliance",
+            "faq/enable-stream-usage",
+            "faq/how-encryption-works",
+            "faq/secret-vs-public-key",
+            "faq/soc2"
+          ]
         }
       ]
     },

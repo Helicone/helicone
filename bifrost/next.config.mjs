@@ -20,7 +20,12 @@ const nextConfig = {
     ];
   },
   images: {
-    domains: ["api.producthunt.com"],
+    domains: [
+      "api.producthunt.com",
+      "dailybaileyai.com",
+      "i0.wp.com",
+      "www.sequoiacap.com",
+    ],
   },
   async headers() {
     return [

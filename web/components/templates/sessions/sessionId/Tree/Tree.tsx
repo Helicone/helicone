@@ -128,24 +128,25 @@ const TreeNode: React.FC<TreeNodeProps> = ({
             </TooltipProvider>
           </div>
 
-          {new Array(level - 1).fill(null).map((_, index) => (
-            <div
-              key={index}
-              className={clsx(
-                "h-[42px] w-[24px] relative shrink-0 group-hover:cursor-pointer",
-                selectedRequestId === node.trace?.request_id
-                  ? "bg-sky-100 dark:bg-sky-900"
-                  : "bg-white dark:bg-slate-950 group-hover:bg-sky-50 dark:group-hover:bg-slate-900"
-              )}
-              onClick={() =>
-                node.children
-                  ? setCloseChildren(!closeChildren)
-                  : setSelectedRequestId(node.trace?.request_id ?? "")
-              }
-            >
-              <div className="absolute top-0 right-[0px] w-[1px] h-[42px] bg-slate-200 dark:bg-slate-700 z-[2]" />
-            </div>
-          ))}
+          {level > 0 &&
+            new Array(level - 1).fill(null).map((_, index) => (
+              <div
+                key={index}
+                className={clsx(
+                  "h-[42px] w-[24px] relative shrink-0 group-hover:cursor-pointer",
+                  selectedRequestId === node.trace?.request_id
+                    ? "bg-sky-100 dark:bg-sky-900"
+                    : "bg-white dark:bg-slate-950 group-hover:bg-sky-50 dark:group-hover:bg-slate-900"
+                )}
+                onClick={() =>
+                  node.children
+                    ? setCloseChildren(!closeChildren)
+                    : setSelectedRequestId(node.trace?.request_id ?? "")
+                }
+              >
+                <div className="absolute top-0 right-[0px] w-[1px] h-[42px] bg-slate-200 dark:bg-slate-700 z-[2]" />
+              </div>
+            ))}
 
           <RequestNode
             selectedRequestId={selectedRequestId}
