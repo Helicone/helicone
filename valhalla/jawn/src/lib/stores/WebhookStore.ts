@@ -1,9 +1,6 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "../db/database.types";
 import { PromiseGenericResult, err, ok } from "../shared/result";
-import { cacheResultCustom } from "../../utils/cacheResult";
-import { KVCache } from "../cache/kvCache";
-const kvCache = new KVCache(5 * 60 * 1000); // 5 minutes
 
 export class WebhookStore {
   private supabaseClient: SupabaseClient<Database>;
@@ -14,24 +11,17 @@ export class WebhookStore {
   async getWebhooksByOrgId(
     orgId: string
   ): PromiseGenericResult<Database["public"]["Tables"]["webhooks"]["Row"][]> {
-    return await cacheResultCustom(
-      "getWebhooksByOrgId-" + orgId,
-      async () => {
-        const webhooks = await this.supabaseClient
-          .from("webhooks")
-          .select("*")
-          .eq("org_id", orgId);
+    const webhooks = await this.supabaseClient
+      .from("webhooks")
+      .select("*")
+      .eq("org_id", orgId)
+      .eq("is_verified", true);
 
-        if (webhooks.data) {
-          return ok(webhooks.data);
-        }
+    if (webhooks.error) {
+      err(`Failed to get webhooks for org ${orgId}: ${webhooks.error.message}`);
+    }
 
-        return err(
-          `Failed to get webhooks for org ${orgId}: ${webhooks.error}`
-        );
-      },
-      kvCache
-    );
+    return ok(webhooks.data ?? []);
   }
 
   async getWebhookSubscriptionByWebhookId(

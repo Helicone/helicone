@@ -1,216 +1,98 @@
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Slider } from "@/components/ui/slider";
-import { useGetPropertiesV2 } from "@/services/hooks/propertiesV2";
-import { ChevronsUpDown, Loader2, Plus, X } from "lucide-react";
-import { useState } from "react";
-import { getPropertyFiltersV2 } from "../../../services/lib/filters/frontendFilterDefs";
+import { FormEvent, useState } from "react";
+import { Result } from "../../../lib/result";
+import { clsx } from "../../shared/clsx";
+import useNotification from "../../shared/notification/useNotification";
+import { ArrowPathIcon } from "@heroicons/react/24/outline";
 
 interface AddWebhookFormProps {
-  onSubmit: (data: {
-    destination: string;
-    config: {
-      sampleRate: number;
-      propertyFilters: { key: string; value: string }[];
-    };
-  }) => void;
-  isLoading: boolean;
+  refetchWebhooks: () => void;
+  close: () => void;
 }
 
 const AddWebhookForm = (props: AddWebhookFormProps) => {
-  const { onSubmit, isLoading } = props;
-  const [destination, setDestination] = useState("");
-  const [sampleRate, setSampleRate] = useState(100);
-  const [propertyFilters, setPropertyFilters] = useState<
-    { key: string; value: string }[]
-  >([]);
-  const properties = useGetPropertiesV2(getPropertyFiltersV2);
+  const { refetchWebhooks, close } = props;
 
-  const addPropertyFilter = () => {
-    setPropertyFilters([...propertyFilters, { key: "", value: "" }]);
-  };
+  const [isLoading, setIsLoading] = useState(false);
+  const { setNotification } = useNotification();
 
-  const removePropertyFilter = (index: number) => {
-    setPropertyFilters(propertyFilters.filter((_, i) => i !== index));
-  };
-
-  const updatePropertyFilter = (index: number, key: string, value: string) => {
-    const updatedFilters = [...propertyFilters];
-    updatedFilters[index] = { key, value };
-    setPropertyFilters(updatedFilters);
+  const handleSubmitHandler = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const webhookUrl = event.currentTarget.elements.namedItem(
+      "webhook-url"
+    ) as HTMLInputElement;
+    if (webhookUrl.value === "") {
+      setNotification("Please enter a webhook URL", "error");
+      return;
+    }
+    setIsLoading(true);
+    await fetch("/api/webhooks/add", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        destination: webhookUrl.value,
+      }),
+    })
+      .then((res) => res.json() as Promise<Result<boolean, string>>)
+      .then((res) => {
+        if (res.error) {
+          setNotification(res.error, "error");
+        } else {
+          setNotification("Webhook created!", "success");
+          refetchWebhooks();
+          close();
+        }
+        setIsLoading(false);
+      });
   };
 
   return (
-    <Card className="w-full border-none">
-      <CardHeader>
-        <CardTitle>Listen to events</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          <div className="space-y-2 max-w-xl">
-            <Label htmlFor="webhook-url">Endpoint URL</Label>
-            <Input
-              type="text"
-              id="webhook-url"
-              value={destination}
-              onChange={(e) => setDestination(e.target.value)}
-              placeholder="https://"
-            />
-          </div>
-          <div className="space-y-4 max-w-lg">
-            <Label htmlFor="sample-rate" className="flex items-center gap-2">
-              Sample Rate:{" "}
-              <Input
-                type="number"
-                value={sampleRate}
-                onChange={(e) => {
-                  const value = Number(e.target.value);
-                  if (value >= 0 && value <= 100) {
-                    setSampleRate(value);
-                  }
-                }}
-                className="w-16"
-              />
-              %
-            </Label>
-            <Slider
-              id="sample-rate"
-              min={0.1}
-              max={100}
-              step={0.1}
-              value={[sampleRate]}
-              variant="secondary"
-              onValueChange={(value) => setSampleRate(value[0])}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>Properties Filters</Label>
-            <br />
-            <i className="text-xs">
-              This uses{" "}
-              <a
-                href="https://docs.helicone.ai/features/advanced-usage/custom-properties#custom-properties"
-                target="_blank"
-                className="underline"
-                rel="noreferrer"
-              >
-                custom properties
-              </a>{" "}
-              to filter which events are sent to the webhook.
-            </i>
-            <br />
-
-            {propertyFilters.map((filter, index) => (
-              <div
-                key={index}
-                className="grid grid-cols-3 items-center space-x-2"
-              >
-                <div className="col-span-1">
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        className="w-full justify-between"
-                      >
-                        {filter.key || "Select property"}
-                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-[200px] p-0">
-                      <Command className="rounded-lg border shadow-md md:min-w-[450px]">
-                        <CommandInput
-                          placeholder="Type in anything..."
-                          onValueChange={(value) => {
-                            console.log(value);
-                            updatePropertyFilter(index, value, filter.value);
-                          }}
-                        />
-                        <CommandList>
-                          <CommandEmpty>No results found.</CommandEmpty>
-                          <CommandGroup heading="Suggestions">
-                            {properties.properties?.map((property) => (
-                              <CommandItem
-                                key={property}
-                                onSelect={() =>
-                                  updatePropertyFilter(
-                                    index,
-                                    property,
-                                    filter.value
-                                  )
-                                }
-                                value={property}
-                              >
-                                {property}
-                              </CommandItem>
-                            ))}
-                          </CommandGroup>
-                        </CommandList>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-                </div>
-                <div className="flex items-center space-x-2 col-span-2">
-                  <Input
-                    placeholder="Value"
-                    value={filter.value}
-                    onChange={(e) =>
-                      updatePropertyFilter(index, filter.key, e.target.value)
-                    }
-                  />
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => removePropertyFilter(index)}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            ))}
-            <Button variant="outline" onClick={addPropertyFilter}>
-              <Plus className="mr-2 h-4 w-4" /> Add Property
-            </Button>
-          </div>
-        </div>
-      </CardContent>
-      <CardFooter className="flex justify-end space-x-2">
-        <Button variant="outline" onClick={close}>
-          Cancel
-        </Button>
-        <Button
-          onClick={() =>
-            onSubmit({ destination, config: { sampleRate, propertyFilters } })
-          }
-          disabled={isLoading}
+    <form
+      action="#"
+      method="POST"
+      onSubmit={handleSubmitHandler}
+      className="flex flex-col gap-4 w-full space-y-4 min-w-[30rem]"
+    >
+      <p className="font-semibold text-lg text-gray-900 dark:text-gray-100">
+        Listen to events
+      </p>
+      <div className="space-y-1.5 text-sm">
+        <label
+          htmlFor="webhook-url"
+          className="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100"
         >
-          {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          Endpoint URL
+        </label>
+        <input
+          type="text"
+          name="webhook-url"
+          id="webhook-url"
+          className={clsx(
+            "block w-full rounded-md border border-gray-300 dark:border-gray-700 shadow-sm p-2 text-sm"
+          )}
+          placeholder={"https://"}
+        />
+      </div>
+      <div className="flex justify-end gap-2 pt-4">
+        <button
+          type="button"
+          onClick={close}
+          className="flex flex-row items-center rounded-md bg-white dark:bg-black px-4 py-2 text-sm font-semibold border border-gray-300 hover:bg-gray-50 text-gray-900 dark:border-gray-700 dark:hover:bg-gray-900 dark:text-gray-100 shadow-sm hover:text-gray-700 dark:hover:text-gray-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          className="items-center rounded-md bg-black dark:bg-white px-4 py-2 text-sm flex font-semibold text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+        >
+          {isLoading && (
+            <ArrowPathIcon className="w-4 h-4 mr-1.5 animate-spin" />
+          )}
           Add Webhook
-        </Button>
-      </CardFooter>
-    </Card>
+        </button>
+      </div>
+    </form>
   );
 };
 
