@@ -7206,6 +7206,83 @@
 				],
 				"type": "object",
 				"additionalProperties": false
+			},
+			"WebhookData": {
+				"properties": {
+					"destination": {
+						"type": "string"
+					},
+					"config": {
+						"$ref": "#/components/schemas/Record_string.any_"
+					}
+				},
+				"required": [
+					"destination",
+					"config"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess__id-string--created_at-string--destination-string--version-string--config-string--hmac_key-string_-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"properties": {
+								"hmac_key": {
+									"type": "string"
+								},
+								"config": {
+									"type": "string"
+								},
+								"version": {
+									"type": "string"
+								},
+								"destination": {
+									"type": "string"
+								},
+								"created_at": {
+									"type": "string"
+								},
+								"id": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"hmac_key",
+								"config",
+								"version",
+								"destination",
+								"created_at",
+								"id"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__id-string--created_at-string--destination-string--version-string--config-string--hmac_key-string_-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__id-string--created_at-string--destination-string--version-string--config-string--hmac_key-string_-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
 			}
 		},
 		"securitySchemes": {
@@ -13449,6 +13526,108 @@
 						}
 					}
 				}
+			}
+		},
+		"/v1/webhooks": {
+			"post": {
+				"operationId": "NewWebhook",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/ResultSuccess_unknown_"
+										},
+										{
+											"$ref": "#/components/schemas/ResultError_unknown_"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Webhooks"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/WebhookData"
+							}
+						}
+					}
+				}
+			},
+			"get": {
+				"operationId": "GetWebhooks",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__id-string--created_at-string--destination-string--version-string--config-string--hmac_key-string_-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Webhooks"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/webhooks/{webhookId}": {
+			"delete": {
+				"operationId": "DeleteWebhook",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Webhooks"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "webhookId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
 			}
 		},
 		"/v1/settings/query": {
