@@ -71,7 +71,11 @@ import { useFeatureFlags } from "@/services/hooks/featureFlags";
 import { useOrg } from "@/components/layout/organizationContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../../../ui/tooltip";
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "../../../ui/hoverCard";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "../../../ui/hoverCard";
 
 interface PromptIdPageProps {
   id: string;
