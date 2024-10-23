@@ -821,6 +821,1714 @@
 					}
 				]
 			},
+			"Record_string.string_": {
+				"properties": {},
+				"additionalProperties": {
+					"type": "string"
+				},
+				"type": "object",
+				"description": "Construct a type with a set of properties K of type T"
+			},
+			"ProviderName": {
+				"type": "string",
+				"enum": [
+					"OPENAI",
+					"ANTHROPIC",
+					"AZURE",
+					"LOCAL",
+					"HELICONE",
+					"AMDBARTEK",
+					"ANYSCALE",
+					"CLOUDFLARE",
+					"2YFV",
+					"TOGETHER",
+					"LEMONFOX",
+					"FIREWORKS",
+					"PERPLEXITY",
+					"GOOGLE",
+					"OPENROUTER",
+					"WISDOMINANUTSHELL",
+					"GROQ",
+					"COHERE",
+					"MISTRAL",
+					"DEEPINFRA",
+					"QSTASH",
+					"FIRECRAWL"
+				]
+			},
+			"Provider": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ProviderName"
+					},
+					{
+						"type": "string"
+					},
+					{
+						"type": "string",
+						"enum": [
+							"CUSTOM"
+						]
+					}
+				]
+			},
+			"LlmType": {
+				"type": "string",
+				"enum": [
+					"chat",
+					"completion"
+				]
+			},
+			"FunctionCall": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"arguments": {
+						"additionalProperties": false,
+						"type": "object"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ChatMessage": {
+				"properties": {
+					"role": {
+						"type": "string"
+					},
+					"content": {
+						"type": "string"
+					},
+					"function_call": {
+						"$ref": "#/components/schemas/FunctionCall"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Request": {
+				"properties": {
+					"llm_type": {
+						"$ref": "#/components/schemas/LlmType"
+					},
+					"model": {
+						"type": "string"
+					},
+					"provider": {
+						"type": "string"
+					},
+					"prompt": {
+						"type": "string",
+						"nullable": true
+					},
+					"max_tokens": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"temperature": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"top_p": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"n": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"stream": {
+						"type": "boolean",
+						"nullable": true
+					},
+					"stop": {
+						"type": "string",
+						"nullable": true
+					},
+					"presence_penalty": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"frequency_penalty": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"logprobs": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"best_of": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"logit_bias": {
+						"additionalProperties": false,
+						"type": "object",
+						"nullable": true
+					},
+					"user": {
+						"type": "string",
+						"nullable": true
+					},
+					"messages": {
+						"items": {
+							"$ref": "#/components/schemas/ChatMessage"
+						},
+						"type": "array",
+						"nullable": true
+					},
+					"tooLarge": {
+						"type": "boolean"
+					},
+					"heliconeMessage": {
+						"type": "string"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Record_number.string_": {
+				"properties": {},
+				"additionalProperties": {
+					"type": "string"
+				},
+				"type": "object",
+				"description": "Construct a type with a set of properties K of type T"
+			},
+			"ErrorInfo": {
+				"properties": {
+					"code": {
+						"type": "string",
+						"nullable": true
+					},
+					"message": {
+						"type": "string",
+						"nullable": true
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Response": {
+				"properties": {
+					"completions": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/Record_number.string_"
+							}
+						],
+						"nullable": true
+					},
+					"message": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/ChatMessage"
+							}
+						],
+						"nullable": true
+					},
+					"error": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/ErrorInfo"
+							}
+						],
+						"nullable": true
+					},
+					"model": {
+						"type": "string",
+						"nullable": true
+					},
+					"tooLarge": {
+						"type": "boolean"
+					},
+					"heliconeMessage": {
+						"type": "string"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"LlmSchema": {
+				"properties": {
+					"request": {
+						"$ref": "#/components/schemas/Request"
+					},
+					"response": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/Response"
+							}
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"request"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Record_string.number_": {
+				"properties": {},
+				"additionalProperties": {
+					"type": "number",
+					"format": "double"
+				},
+				"type": "object",
+				"description": "Construct a type with a set of properties K of type T"
+			},
+			"HeliconeRequest": {
+				"properties": {
+					"response_id": {
+						"type": "string",
+						"nullable": true,
+						"example": "Happy"
+					},
+					"response_created_at": {
+						"type": "string",
+						"nullable": true
+					},
+					"response_body": {},
+					"response_status": {
+						"type": "number",
+						"format": "double"
+					},
+					"response_model": {
+						"type": "string",
+						"nullable": true
+					},
+					"request_id": {
+						"type": "string"
+					},
+					"request_created_at": {
+						"type": "string"
+					},
+					"request_body": {},
+					"request_path": {
+						"type": "string"
+					},
+					"request_user_id": {
+						"type": "string",
+						"nullable": true
+					},
+					"request_properties": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/Record_string.string_"
+							}
+						],
+						"nullable": true
+					},
+					"request_model": {
+						"type": "string",
+						"nullable": true
+					},
+					"model_override": {
+						"type": "string",
+						"nullable": true
+					},
+					"helicone_user": {
+						"type": "string",
+						"nullable": true
+					},
+					"provider": {
+						"$ref": "#/components/schemas/Provider"
+					},
+					"delay_ms": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"time_to_first_token": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"total_tokens": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"prompt_tokens": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"completion_tokens": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"prompt_id": {
+						"type": "string",
+						"nullable": true
+					},
+					"feedback_created_at": {
+						"type": "string",
+						"nullable": true
+					},
+					"feedback_id": {
+						"type": "string",
+						"nullable": true
+					},
+					"feedback_rating": {
+						"type": "boolean",
+						"nullable": true
+					},
+					"signed_body_url": {
+						"type": "string",
+						"nullable": true
+					},
+					"llmSchema": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/LlmSchema"
+							}
+						],
+						"nullable": true
+					},
+					"country_code": {
+						"type": "string",
+						"nullable": true
+					},
+					"asset_ids": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array",
+						"nullable": true
+					},
+					"asset_urls": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/Record_string.string_"
+							}
+						],
+						"nullable": true
+					},
+					"scores": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/Record_string.number_"
+							}
+						],
+						"nullable": true
+					},
+					"costUSD": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"properties": {
+						"$ref": "#/components/schemas/Record_string.string_"
+					},
+					"assets": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"target_url": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"response_id",
+					"response_created_at",
+					"response_status",
+					"response_model",
+					"request_id",
+					"request_created_at",
+					"request_body",
+					"request_path",
+					"request_user_id",
+					"request_properties",
+					"request_model",
+					"model_override",
+					"helicone_user",
+					"provider",
+					"delay_ms",
+					"time_to_first_token",
+					"total_tokens",
+					"prompt_tokens",
+					"completion_tokens",
+					"prompt_id",
+					"llmSchema",
+					"country_code",
+					"asset_ids",
+					"asset_urls",
+					"scores",
+					"properties",
+					"assets",
+					"target_url"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_HeliconeRequest-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/HeliconeRequest"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_HeliconeRequest-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_HeliconeRequest-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"Partial_ResponseTableToOperators_": {
+				"properties": {
+					"body_tokens": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"body_model": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"body_completion": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"status": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"model": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					}
+				},
+				"type": "object",
+				"description": "Make all properties in T optional"
+			},
+			"Partial_TimestampOperators_": {
+				"properties": {
+					"gte": {
+						"type": "string"
+					},
+					"lte": {
+						"type": "string"
+					},
+					"lt": {
+						"type": "string"
+					},
+					"gt": {
+						"type": "string"
+					}
+				},
+				"type": "object",
+				"description": "Make all properties in T optional"
+			},
+			"Partial_RequestTableToOperators_": {
+				"properties": {
+					"prompt": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"created_at": {
+						"$ref": "#/components/schemas/Partial_TimestampOperators_"
+					},
+					"user_id": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"auth_hash": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"org_id": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"id": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"node_id": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"model": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"modelOverride": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"path": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"prompt_id": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					}
+				},
+				"type": "object",
+				"description": "Make all properties in T optional"
+			},
+			"Partial_FeedbackTableToOperators_": {
+				"properties": {
+					"id": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"created_at": {
+						"$ref": "#/components/schemas/Partial_TimestampOperators_"
+					},
+					"rating": {
+						"$ref": "#/components/schemas/Partial_BooleanOperators_"
+					},
+					"response_id": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					}
+				},
+				"type": "object",
+				"description": "Make all properties in T optional"
+			},
+			"Partial_RequestResponseSearchToOperators_": {
+				"properties": {
+					"request_body_vector": {
+						"$ref": "#/components/schemas/Partial_VectorOperators_"
+					},
+					"response_body_vector": {
+						"$ref": "#/components/schemas/Partial_VectorOperators_"
+					}
+				},
+				"type": "object",
+				"description": "Make all properties in T optional"
+			},
+			"Partial_SessionsRequestResponseRMTToOperators_": {
+				"properties": {
+					"total_cost": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"total_tokens": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					}
+				},
+				"type": "object",
+				"description": "Make all properties in T optional"
+			},
+			"Partial_CacheHitsTableToOperators_": {
+				"properties": {
+					"organization_id": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"request_id": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"latency": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"completion_tokens": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"prompt_tokens": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"created_at": {
+						"$ref": "#/components/schemas/Partial_TimestampOperatorsTyped_"
+					}
+				},
+				"type": "object",
+				"description": "Make all properties in T optional"
+			},
+			"Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_": {
+				"properties": {
+					"request_response_rmt": {
+						"$ref": "#/components/schemas/Partial_RequestResponseRMTToOperators_"
+					},
+					"response": {
+						"$ref": "#/components/schemas/Partial_ResponseTableToOperators_"
+					},
+					"request": {
+						"$ref": "#/components/schemas/Partial_RequestTableToOperators_"
+					},
+					"feedback": {
+						"$ref": "#/components/schemas/Partial_FeedbackTableToOperators_"
+					},
+					"request_response_search": {
+						"$ref": "#/components/schemas/Partial_RequestResponseSearchToOperators_"
+					},
+					"sessions_request_response_rmt": {
+						"$ref": "#/components/schemas/Partial_SessionsRequestResponseRMTToOperators_"
+					},
+					"cache_hits": {
+						"$ref": "#/components/schemas/Partial_CacheHitsTableToOperators_"
+					},
+					"properties": {
+						"properties": {},
+						"additionalProperties": {
+							"$ref": "#/components/schemas/Partial_TextOperators_"
+						},
+						"type": "object"
+					},
+					"values": {
+						"properties": {},
+						"additionalProperties": {
+							"$ref": "#/components/schemas/Partial_TextOperators_"
+						},
+						"type": "object"
+					}
+				},
+				"type": "object",
+				"description": "From T, pick a set of properties whose keys are in the union K"
+			},
+			"FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_": {
+				"$ref": "#/components/schemas/Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_"
+			},
+			"RequestFilterNode": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_"
+					},
+					{
+						"$ref": "#/components/schemas/RequestFilterBranch"
+					},
+					{
+						"type": "string",
+						"enum": [
+							"all"
+						]
+					}
+				]
+			},
+			"RequestFilterBranch": {
+				"properties": {
+					"right": {
+						"$ref": "#/components/schemas/RequestFilterNode"
+					},
+					"operator": {
+						"type": "string",
+						"enum": [
+							"or",
+							"and"
+						]
+					},
+					"left": {
+						"$ref": "#/components/schemas/RequestFilterNode"
+					}
+				},
+				"required": [
+					"right",
+					"operator",
+					"left"
+				],
+				"type": "object"
+			},
+			"SortDirection": {
+				"type": "string",
+				"enum": [
+					"asc",
+					"desc"
+				]
+			},
+			"SortLeafRequest": {
+				"properties": {
+					"random": {
+						"type": "boolean",
+						"enum": [
+							true
+						],
+						"nullable": false
+					},
+					"created_at": {
+						"$ref": "#/components/schemas/SortDirection"
+					},
+					"cache_created_at": {
+						"$ref": "#/components/schemas/SortDirection"
+					},
+					"latency": {
+						"$ref": "#/components/schemas/SortDirection"
+					},
+					"last_active": {
+						"$ref": "#/components/schemas/SortDirection"
+					},
+					"total_tokens": {
+						"$ref": "#/components/schemas/SortDirection"
+					},
+					"completion_tokens": {
+						"$ref": "#/components/schemas/SortDirection"
+					},
+					"prompt_tokens": {
+						"$ref": "#/components/schemas/SortDirection"
+					},
+					"user_id": {
+						"$ref": "#/components/schemas/SortDirection"
+					},
+					"body_model": {
+						"$ref": "#/components/schemas/SortDirection"
+					},
+					"is_cached": {
+						"$ref": "#/components/schemas/SortDirection"
+					},
+					"request_prompt": {
+						"$ref": "#/components/schemas/SortDirection"
+					},
+					"response_text": {
+						"$ref": "#/components/schemas/SortDirection"
+					},
+					"properties": {
+						"properties": {},
+						"additionalProperties": {
+							"$ref": "#/components/schemas/SortDirection"
+						},
+						"type": "object"
+					},
+					"values": {
+						"properties": {},
+						"additionalProperties": {
+							"$ref": "#/components/schemas/SortDirection"
+						},
+						"type": "object"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"RequestQueryParams": {
+				"properties": {
+					"filter": {
+						"$ref": "#/components/schemas/RequestFilterNode"
+					},
+					"offset": {
+						"type": "number",
+						"format": "double"
+					},
+					"limit": {
+						"type": "number",
+						"format": "double"
+					},
+					"sort": {
+						"$ref": "#/components/schemas/SortLeafRequest"
+					},
+					"isCached": {
+						"type": "boolean"
+					},
+					"includeInputs": {
+						"type": "boolean"
+					},
+					"isPartOfExperiment": {
+						"type": "boolean"
+					},
+					"isScored": {
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"filter"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"HeliconeRequestAsset": {
+				"properties": {
+					"assetUrl": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"assetUrl"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_HeliconeRequestAsset_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/HeliconeRequestAsset"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_HeliconeRequestAsset.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_HeliconeRequestAsset_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"Record_string.number-or-boolean_": {
+				"properties": {},
+				"additionalProperties": {
+					"anyOf": [
+						{
+							"type": "number",
+							"format": "double"
+						},
+						{
+							"type": "boolean"
+						}
+					]
+				},
+				"type": "object",
+				"description": "Construct a type with a set of properties K of type T"
+			},
+			"Scores": {
+				"$ref": "#/components/schemas/Record_string.number-or-boolean_"
+			},
+			"ScoreRequest": {
+				"properties": {
+					"scores": {
+						"$ref": "#/components/schemas/Scores"
+					}
+				},
+				"required": [
+					"scores"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"SessionResult": {
+				"properties": {
+					"created_at": {
+						"type": "string"
+					},
+					"latest_request_created_at": {
+						"type": "string"
+					},
+					"session": {
+						"type": "string"
+					},
+					"total_cost": {
+						"type": "number",
+						"format": "double"
+					},
+					"total_requests": {
+						"type": "number",
+						"format": "double"
+					},
+					"prompt_tokens": {
+						"type": "number",
+						"format": "double"
+					},
+					"completion_tokens": {
+						"type": "number",
+						"format": "double"
+					},
+					"total_tokens": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"created_at",
+					"latest_request_created_at",
+					"session",
+					"total_cost",
+					"total_requests",
+					"prompt_tokens",
+					"completion_tokens",
+					"total_tokens"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_SessionResult-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/SessionResult"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_SessionResult-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_SessionResult-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"SessionQueryParams": {
+				"properties": {
+					"sessionIdContains": {
+						"type": "string"
+					},
+					"timeFilter": {
+						"properties": {
+							"endTimeUnixMs": {
+								"type": "number",
+								"format": "double"
+							},
+							"startTimeUnixMs": {
+								"type": "number",
+								"format": "double"
+							}
+						},
+						"required": [
+							"endTimeUnixMs",
+							"startTimeUnixMs"
+						],
+						"type": "object"
+					},
+					"sessionName": {
+						"type": "string"
+					},
+					"timezoneDifference": {
+						"type": "number",
+						"format": "double"
+					},
+					"filter": {
+						"$ref": "#/components/schemas/RequestFilterNode"
+					}
+				},
+				"required": [
+					"sessionIdContains",
+					"timeFilter",
+					"sessionName",
+					"timezoneDifference",
+					"filter"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"SessionNameResult": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"created_at": {
+						"type": "string"
+					},
+					"total_cost": {
+						"type": "number",
+						"format": "double"
+					},
+					"last_used": {
+						"type": "string"
+					},
+					"first_used": {
+						"type": "string"
+					},
+					"session_count": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"name",
+					"created_at",
+					"total_cost",
+					"last_used",
+					"first_used",
+					"session_count"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_SessionNameResult-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/SessionNameResult"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_SessionNameResult-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_SessionNameResult-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"SessionNameQueryParams": {
+				"properties": {
+					"nameContains": {
+						"type": "string"
+					},
+					"timezoneDifference": {
+						"type": "number",
+						"format": "double"
+					},
+					"pSize": {
+						"type": "string",
+						"enum": [
+							"p50",
+							"p75",
+							"p95",
+							"p99",
+							"p99.9"
+						]
+					},
+					"useInterquartile": {
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"nameContains",
+					"timezoneDifference"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"HistogramRow": {
+				"properties": {
+					"range_start": {
+						"type": "string"
+					},
+					"range_end": {
+						"type": "string"
+					},
+					"value": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"range_start",
+					"range_end",
+					"value"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"SessionMetrics": {
+				"properties": {
+					"session_count": {
+						"items": {
+							"$ref": "#/components/schemas/HistogramRow"
+						},
+						"type": "array"
+					},
+					"session_duration": {
+						"items": {
+							"$ref": "#/components/schemas/HistogramRow"
+						},
+						"type": "array"
+					},
+					"session_cost": {
+						"items": {
+							"$ref": "#/components/schemas/HistogramRow"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"session_count",
+					"session_duration",
+					"session_cost"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_SessionMetrics_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/SessionMetrics"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_SessionMetrics.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_SessionMetrics_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"UserMetricsResult": {
+				"properties": {
+					"user_id": {
+						"type": "string"
+					},
+					"active_for": {
+						"type": "number",
+						"format": "double"
+					},
+					"first_active": {
+						"type": "string"
+					},
+					"last_active": {
+						"type": "string"
+					},
+					"total_requests": {
+						"type": "number",
+						"format": "double"
+					},
+					"average_requests_per_day_active": {
+						"type": "number",
+						"format": "double"
+					},
+					"average_tokens_per_request": {
+						"type": "number",
+						"format": "double"
+					},
+					"total_completion_tokens": {
+						"type": "number",
+						"format": "double"
+					},
+					"total_prompt_tokens": {
+						"type": "number",
+						"format": "double"
+					},
+					"cost": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"user_id",
+					"active_for",
+					"first_active",
+					"last_active",
+					"total_requests",
+					"average_requests_per_day_active",
+					"average_tokens_per_request",
+					"total_completion_tokens",
+					"total_prompt_tokens",
+					"cost"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_UserMetricsResult-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/UserMetricsResult"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_UserMetricsResult-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_UserMetricsResult-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"Partial_UserMetricsToOperators_": {
+				"properties": {
+					"user_id": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"last_active": {
+						"$ref": "#/components/schemas/Partial_TimestampOperators_"
+					},
+					"total_requests": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"active_for": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"average_requests_per_day_active": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"average_tokens_per_request": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"total_completion_tokens": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"total_prompt_tokens": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"cost": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					}
+				},
+				"type": "object",
+				"description": "Make all properties in T optional"
+			},
+			"Pick_FilterLeaf.user_metrics-or-request_response_rmt_": {
+				"properties": {
+					"request_response_rmt": {
+						"$ref": "#/components/schemas/Partial_RequestResponseRMTToOperators_"
+					},
+					"user_metrics": {
+						"$ref": "#/components/schemas/Partial_UserMetricsToOperators_"
+					}
+				},
+				"type": "object",
+				"description": "From T, pick a set of properties whose keys are in the union K"
+			},
+			"FilterLeafSubset_user_metrics-or-request_response_rmt_": {
+				"$ref": "#/components/schemas/Pick_FilterLeaf.user_metrics-or-request_response_rmt_"
+			},
+			"UserFilterNode": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/FilterLeafSubset_user_metrics-or-request_response_rmt_"
+					},
+					{
+						"$ref": "#/components/schemas/UserFilterBranch"
+					},
+					{
+						"type": "string",
+						"enum": [
+							"all"
+						]
+					}
+				]
+			},
+			"UserFilterBranch": {
+				"properties": {
+					"right": {
+						"$ref": "#/components/schemas/UserFilterNode"
+					},
+					"operator": {
+						"type": "string",
+						"enum": [
+							"or",
+							"and"
+						]
+					},
+					"left": {
+						"$ref": "#/components/schemas/UserFilterNode"
+					}
+				},
+				"required": [
+					"right",
+					"operator",
+					"left"
+				],
+				"type": "object"
+			},
+			"UserMetricsQueryParams": {
+				"properties": {
+					"filter": {
+						"$ref": "#/components/schemas/UserFilterNode"
+					},
+					"offset": {
+						"type": "number",
+						"format": "double"
+					},
+					"limit": {
+						"type": "number",
+						"format": "double"
+					},
+					"timeFilter": {
+						"properties": {
+							"endTimeUnixSeconds": {
+								"type": "number",
+								"format": "double"
+							},
+							"startTimeUnixSeconds": {
+								"type": "number",
+								"format": "double"
+							}
+						},
+						"required": [
+							"endTimeUnixSeconds",
+							"startTimeUnixSeconds"
+						],
+						"type": "object"
+					},
+					"timeZoneDifferenceMinutes": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"filter",
+					"offset",
+					"limit"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"properties": {
+								"cost_usd": {
+									"type": "number",
+									"format": "double"
+								},
+								"user_id": {
+									"type": "string"
+								},
+								"completion_tokens": {
+									"type": "number",
+									"format": "double"
+								},
+								"prompt_tokens": {
+									"type": "number",
+									"format": "double"
+								},
+								"count": {
+									"type": "number",
+									"format": "double"
+								}
+							},
+							"required": [
+								"cost_usd",
+								"user_id",
+								"completion_tokens",
+								"prompt_tokens",
+								"count"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"UserQueryParams": {
+				"properties": {
+					"userIds": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"timeFilter": {
+						"properties": {
+							"endTimeUnixSeconds": {
+								"type": "number",
+								"format": "double"
+							},
+							"startTimeUnixSeconds": {
+								"type": "number",
+								"format": "double"
+							}
+						},
+						"required": [
+							"endTimeUnixSeconds",
+							"startTimeUnixSeconds"
+						],
+						"type": "object"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"OTELTrace": {
+				"properties": {
+					"resourceSpans": {
+						"items": {
+							"properties": {
+								"scopeSpans": {
+									"items": {
+										"properties": {
+											"spans": {
+												"items": {
+													"properties": {
+														"droppedLinksCount": {
+															"type": "number",
+															"format": "double"
+														},
+														"links": {
+															"items": {},
+															"type": "array"
+														},
+														"status": {
+															"properties": {
+																"code": {
+																	"type": "number",
+																	"format": "double"
+																}
+															},
+															"required": [
+																"code"
+															],
+															"type": "object"
+														},
+														"droppedEventsCount": {
+															"type": "number",
+															"format": "double"
+														},
+														"events": {
+															"items": {},
+															"type": "array"
+														},
+														"droppedAttributesCount": {
+															"type": "number",
+															"format": "double"
+														},
+														"attributes": {
+															"items": {
+																"properties": {
+																	"value": {
+																		"properties": {
+																			"intValue": {
+																				"type": "number",
+																				"format": "double"
+																			},
+																			"stringValue": {
+																				"type": "string"
+																			}
+																		},
+																		"type": "object"
+																	},
+																	"key": {
+																		"type": "string"
+																	}
+																},
+																"required": [
+																	"value",
+																	"key"
+																],
+																"type": "object"
+															},
+															"type": "array"
+														},
+														"endTimeUnixNano": {
+															"type": "string"
+														},
+														"startTimeUnixNano": {
+															"type": "string"
+														},
+														"kind": {
+															"type": "number",
+															"format": "double"
+														},
+														"name": {
+															"type": "string"
+														},
+														"spanId": {
+															"type": "string"
+														},
+														"traceId": {
+															"type": "string"
+														}
+													},
+													"required": [
+														"droppedLinksCount",
+														"links",
+														"status",
+														"droppedEventsCount",
+														"events",
+														"droppedAttributesCount",
+														"attributes",
+														"endTimeUnixNano",
+														"startTimeUnixNano",
+														"kind",
+														"name",
+														"spanId",
+														"traceId"
+													],
+													"type": "object"
+												},
+												"type": "array"
+											},
+											"scope": {
+												"properties": {
+													"version": {
+														"type": "string"
+													},
+													"name": {
+														"type": "string"
+													}
+												},
+												"required": [
+													"version",
+													"name"
+												],
+												"type": "object"
+											}
+										},
+										"required": [
+											"spans",
+											"scope"
+										],
+										"type": "object"
+									},
+									"type": "array"
+								},
+								"resource": {
+									"properties": {
+										"droppedAttributesCount": {
+											"type": "number",
+											"format": "double"
+										},
+										"attributes": {
+											"items": {
+												"properties": {
+													"value": {
+														"properties": {
+															"arrayValue": {
+																"properties": {
+																	"values": {
+																		"items": {
+																			"properties": {
+																				"stringValue": {
+																					"type": "string"
+																				}
+																			},
+																			"required": [
+																				"stringValue"
+																			],
+																			"type": "object"
+																		},
+																		"type": "array"
+																	}
+																},
+																"required": [
+																	"values"
+																],
+																"type": "object"
+															},
+															"intValue": {
+																"type": "number",
+																"format": "double"
+															},
+															"stringValue": {
+																"type": "string"
+															}
+														},
+														"type": "object"
+													},
+													"key": {
+														"type": "string"
+													}
+												},
+												"required": [
+													"value",
+													"key"
+												],
+												"type": "object"
+											},
+											"type": "array"
+										}
+									},
+									"required": [
+										"droppedAttributesCount",
+										"attributes"
+									],
+									"type": "object"
+								}
+							},
+							"required": [
+								"scopeSpans",
+								"resource"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"resourceSpans"
+				],
+				"type": "object"
+			},
 			"PromptsResult": {
 				"properties": {
 					"id": {
@@ -1207,14 +2915,6 @@
 				],
 				"type": "object",
 				"additionalProperties": false
-			},
-			"Record_string.string_": {
-				"properties": {},
-				"additionalProperties": {
-					"type": "string"
-				},
-				"type": "object",
-				"description": "Construct a type with a set of properties K of type T"
 			},
 			"PromptInputRecord": {
 				"properties": {
@@ -1753,49 +3453,6 @@
 					"omitRequestLog"
 				],
 				"type": "object"
-			},
-			"ProviderName": {
-				"type": "string",
-				"enum": [
-					"OPENAI",
-					"ANTHROPIC",
-					"AZURE",
-					"LOCAL",
-					"HELICONE",
-					"AMDBARTEK",
-					"ANYSCALE",
-					"CLOUDFLARE",
-					"2YFV",
-					"TOGETHER",
-					"LEMONFOX",
-					"FIREWORKS",
-					"PERPLEXITY",
-					"GOOGLE",
-					"OPENROUTER",
-					"WISDOMINANUTSHELL",
-					"GROQ",
-					"COHERE",
-					"MISTRAL",
-					"DEEPINFRA",
-					"QSTASH",
-					"FIRECRAWL"
-				]
-			},
-			"Provider": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ProviderName"
-					},
-					{
-						"type": "string"
-					},
-					{
-						"type": "string",
-						"enum": [
-							"CUSTOM"
-						]
-					}
-				]
 			},
 			"TemplateWithInputs": {
 				"description": "Parses a string containing custom JSX-like tags and extracts information to produce two outputs:\n1. A version of the string with all JSX tags removed, leaving only the text content.\n2. An object representing a template with self-closing JSX tags and a separate mapping of keys to their\n   corresponding text content.\n\nThe function specifically targets `<helicone-prompt-input>` tags, which include a `key` attribute and enclosed text content.\nThese tags are transformed or removed based on the desired output structure. The process involves regular expressions\nto match and manipulate the input string to produce the outputs.\n\nParameters:\n- input: A string containing the text and JSX-like tags to be parsed.\n\nReturns:\nAn object with two properties:\n1. stringWithoutJSXTags: A string where all `<helicone-prompt-input>` tags are removed, and only their text content remains.\n2. templateWithInputs: An object containing:\n   - template: A version of the input string where `<helicone-prompt-input>` tags are replaced with self-closing versions,\n     preserving the `key` attributes but removing the text content.\n   - inputs: An object mapping the `key` attributes to their corresponding text content, effectively extracting\n     the data from the original tags.\n\nExample Usage:\n```ts\nconst input = `\nThe scene is <helicone-prompt-input key=\"scene\" >Harry Potter</helicone-prompt-input>.\n<helicone-prompt-input key=\"name\" >justin</helicone-prompt-input>  test`;\n\nconst expectedOutput = parseJSXString(input);\nconsole.log(expectedOutput);\n```\nThe function is useful for preprocessing strings with embedded custom JSX-like tags, extracting useful data,\nand preparing templates for further processing or rendering. It demonstrates a practical application of regular\nexpressions for text manipulation in TypeScript, specifically tailored to a custom JSX-like syntax.",
@@ -3022,216 +4679,6 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"OTELTrace": {
-				"properties": {
-					"resourceSpans": {
-						"items": {
-							"properties": {
-								"scopeSpans": {
-									"items": {
-										"properties": {
-											"spans": {
-												"items": {
-													"properties": {
-														"droppedLinksCount": {
-															"type": "number",
-															"format": "double"
-														},
-														"links": {
-															"items": {},
-															"type": "array"
-														},
-														"status": {
-															"properties": {
-																"code": {
-																	"type": "number",
-																	"format": "double"
-																}
-															},
-															"required": [
-																"code"
-															],
-															"type": "object"
-														},
-														"droppedEventsCount": {
-															"type": "number",
-															"format": "double"
-														},
-														"events": {
-															"items": {},
-															"type": "array"
-														},
-														"droppedAttributesCount": {
-															"type": "number",
-															"format": "double"
-														},
-														"attributes": {
-															"items": {
-																"properties": {
-																	"value": {
-																		"properties": {
-																			"intValue": {
-																				"type": "number",
-																				"format": "double"
-																			},
-																			"stringValue": {
-																				"type": "string"
-																			}
-																		},
-																		"type": "object"
-																	},
-																	"key": {
-																		"type": "string"
-																	}
-																},
-																"required": [
-																	"value",
-																	"key"
-																],
-																"type": "object"
-															},
-															"type": "array"
-														},
-														"endTimeUnixNano": {
-															"type": "string"
-														},
-														"startTimeUnixNano": {
-															"type": "string"
-														},
-														"kind": {
-															"type": "number",
-															"format": "double"
-														},
-														"name": {
-															"type": "string"
-														},
-														"spanId": {
-															"type": "string"
-														},
-														"traceId": {
-															"type": "string"
-														}
-													},
-													"required": [
-														"droppedLinksCount",
-														"links",
-														"status",
-														"droppedEventsCount",
-														"events",
-														"droppedAttributesCount",
-														"attributes",
-														"endTimeUnixNano",
-														"startTimeUnixNano",
-														"kind",
-														"name",
-														"spanId",
-														"traceId"
-													],
-													"type": "object"
-												},
-												"type": "array"
-											},
-											"scope": {
-												"properties": {
-													"version": {
-														"type": "string"
-													},
-													"name": {
-														"type": "string"
-													}
-												},
-												"required": [
-													"version",
-													"name"
-												],
-												"type": "object"
-											}
-										},
-										"required": [
-											"spans",
-											"scope"
-										],
-										"type": "object"
-									},
-									"type": "array"
-								},
-								"resource": {
-									"properties": {
-										"droppedAttributesCount": {
-											"type": "number",
-											"format": "double"
-										},
-										"attributes": {
-											"items": {
-												"properties": {
-													"value": {
-														"properties": {
-															"arrayValue": {
-																"properties": {
-																	"values": {
-																		"items": {
-																			"properties": {
-																				"stringValue": {
-																					"type": "string"
-																				}
-																			},
-																			"required": [
-																				"stringValue"
-																			],
-																			"type": "object"
-																		},
-																		"type": "array"
-																	}
-																},
-																"required": [
-																	"values"
-																],
-																"type": "object"
-															},
-															"intValue": {
-																"type": "number",
-																"format": "double"
-															},
-															"stringValue": {
-																"type": "string"
-															}
-														},
-														"type": "object"
-													},
-													"key": {
-														"type": "string"
-													}
-												},
-												"required": [
-													"value",
-													"key"
-												],
-												"type": "object"
-											},
-											"type": "array"
-										}
-									},
-									"required": [
-										"droppedAttributesCount",
-										"attributes"
-									],
-									"type": "object"
-								}
-							},
-							"required": [
-								"scopeSpans",
-								"resource"
-							],
-							"type": "object"
-						},
-						"type": "array"
-					}
-				},
-				"required": [
-					"resourceSpans"
-				],
-				"type": "object"
-			},
 			"Property": {
 				"properties": {
 					"property": {
@@ -3549,63 +4996,6 @@
 				],
 				"type": "object",
 				"additionalProperties": false
-			},
-			"Partial_TimestampOperators_": {
-				"properties": {
-					"gte": {
-						"type": "string"
-					},
-					"lte": {
-						"type": "string"
-					},
-					"lt": {
-						"type": "string"
-					},
-					"gt": {
-						"type": "string"
-					}
-				},
-				"type": "object",
-				"description": "Make all properties in T optional"
-			},
-			"Partial_RequestTableToOperators_": {
-				"properties": {
-					"prompt": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					},
-					"created_at": {
-						"$ref": "#/components/schemas/Partial_TimestampOperators_"
-					},
-					"user_id": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					},
-					"auth_hash": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					},
-					"org_id": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					},
-					"id": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					},
-					"node_id": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					},
-					"model": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					},
-					"modelOverride": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					},
-					"path": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					},
-					"prompt_id": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					}
-				},
-				"type": "object",
-				"description": "Make all properties in T optional"
 			},
 			"Pick_FilterLeaf.request-or-prompts_versions_": {
 				"properties": {
@@ -4021,6 +5411,176 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"EvaluatorResult": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"created_at": {
+						"type": "string"
+					},
+					"scoring_type": {
+						"type": "string"
+					},
+					"llm_template": {},
+					"organization_id": {
+						"type": "string"
+					},
+					"updated_at": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"id",
+					"created_at",
+					"scoring_type",
+					"llm_template",
+					"organization_id",
+					"updated_at",
+					"name"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_EvaluatorResult_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/EvaluatorResult"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_EvaluatorResult.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_EvaluatorResult_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"CreateEvaluatorParams": {
+				"properties": {
+					"scoring_type": {
+						"type": "string"
+					},
+					"llm_template": {},
+					"name": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"scoring_type",
+					"llm_template",
+					"name"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_EvaluatorResult-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/EvaluatorResult"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_EvaluatorResult-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_EvaluatorResult-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"UpdateEvaluatorParams": {
+				"properties": {
+					"scoring_type": {
+						"type": "string"
+					},
+					"llm_template": {}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess__experiment_id-string--experiment_created_at-string_-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"properties": {
+								"experiment_created_at": {
+									"type": "string"
+								},
+								"experiment_id": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"experiment_created_at",
+								"experiment_id"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__experiment_id-string--experiment_created_at-string_-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__experiment_id-string--experiment_created_at-string_-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
 			"ResultSuccess__experimentId-string__": {
 				"properties": {
 					"data": {
@@ -4160,73 +5720,6 @@
 				"anyOf": [
 					{
 						"$ref": "#/components/schemas/ResultSuccess__hypothesisId-string__"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
-			"EvaluatorResult": {
-				"properties": {
-					"id": {
-						"type": "string"
-					},
-					"created_at": {
-						"type": "string"
-					},
-					"scoring_type": {
-						"type": "string"
-					},
-					"llm_template": {},
-					"organization_id": {
-						"type": "string"
-					},
-					"updated_at": {
-						"type": "string"
-					},
-					"name": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"id",
-					"created_at",
-					"scoring_type",
-					"llm_template",
-					"organization_id",
-					"updated_at",
-					"name"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"ResultSuccess_EvaluatorResult-Array_": {
-				"properties": {
-					"data": {
-						"items": {
-							"$ref": "#/components/schemas/EvaluatorResult"
-						},
-						"type": "array"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result_EvaluatorResult-Array.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess_EvaluatorResult-Array_"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
@@ -4700,109 +6193,6 @@
 				"anyOf": [
 					{
 						"$ref": "#/components/schemas/ResultSuccess_ExperimentRun_"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
-			"ResultSuccess_EvaluatorResult_": {
-				"properties": {
-					"data": {
-						"$ref": "#/components/schemas/EvaluatorResult"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result_EvaluatorResult.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess_EvaluatorResult_"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
-			"CreateEvaluatorParams": {
-				"properties": {
-					"scoring_type": {
-						"type": "string"
-					},
-					"llm_template": {},
-					"name": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"scoring_type",
-					"llm_template",
-					"name"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"UpdateEvaluatorParams": {
-				"properties": {
-					"scoring_type": {
-						"type": "string"
-					},
-					"llm_template": {}
-				},
-				"type": "object",
-				"additionalProperties": false
-			},
-			"ResultSuccess__experiment_id-string--experiment_created_at-string_-Array_": {
-				"properties": {
-					"data": {
-						"items": {
-							"properties": {
-								"experiment_created_at": {
-									"type": "string"
-								},
-								"experiment_id": {
-									"type": "string"
-								}
-							},
-							"required": [
-								"experiment_created_at",
-								"experiment_id"
-							],
-							"type": "object"
-						},
-						"type": "array"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result__experiment_id-string--experiment_created_at-string_-Array.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess__experiment_id-string--experiment_created_at-string_-Array_"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
@@ -5351,23 +6741,6 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"UpgradeToProRequest": {
-				"properties": {
-					"addons": {
-						"properties": {
-							"prompts": {
-								"type": "boolean"
-							},
-							"alerts": {
-								"type": "boolean"
-							}
-						},
-						"type": "object"
-					}
-				},
-				"type": "object",
-				"additionalProperties": false
-			},
 			"NewOrganizationParams": {
 				"properties": {
 					"tier": {
@@ -5894,1390 +7267,17 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"LlmType": {
-				"type": "string",
-				"enum": [
-					"chat",
-					"completion"
-				]
-			},
-			"FunctionCall": {
+			"UpgradeToProRequest": {
 				"properties": {
-					"name": {
-						"type": "string"
-					},
-					"arguments": {
-						"additionalProperties": false,
-						"type": "object"
-					}
-				},
-				"type": "object",
-				"additionalProperties": false
-			},
-			"ChatMessage": {
-				"properties": {
-					"role": {
-						"type": "string"
-					},
-					"content": {
-						"type": "string"
-					},
-					"function_call": {
-						"$ref": "#/components/schemas/FunctionCall"
-					}
-				},
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Request": {
-				"properties": {
-					"llm_type": {
-						"$ref": "#/components/schemas/LlmType"
-					},
-					"model": {
-						"type": "string"
-					},
-					"provider": {
-						"type": "string"
-					},
-					"prompt": {
-						"type": "string",
-						"nullable": true
-					},
-					"max_tokens": {
-						"type": "number",
-						"format": "double",
-						"nullable": true
-					},
-					"temperature": {
-						"type": "number",
-						"format": "double",
-						"nullable": true
-					},
-					"top_p": {
-						"type": "number",
-						"format": "double",
-						"nullable": true
-					},
-					"n": {
-						"type": "number",
-						"format": "double",
-						"nullable": true
-					},
-					"stream": {
-						"type": "boolean",
-						"nullable": true
-					},
-					"stop": {
-						"type": "string",
-						"nullable": true
-					},
-					"presence_penalty": {
-						"type": "number",
-						"format": "double",
-						"nullable": true
-					},
-					"frequency_penalty": {
-						"type": "number",
-						"format": "double",
-						"nullable": true
-					},
-					"logprobs": {
-						"type": "number",
-						"format": "double",
-						"nullable": true
-					},
-					"best_of": {
-						"type": "number",
-						"format": "double",
-						"nullable": true
-					},
-					"logit_bias": {
-						"additionalProperties": false,
-						"type": "object",
-						"nullable": true
-					},
-					"user": {
-						"type": "string",
-						"nullable": true
-					},
-					"messages": {
-						"items": {
-							"$ref": "#/components/schemas/ChatMessage"
-						},
-						"type": "array",
-						"nullable": true
-					},
-					"tooLarge": {
-						"type": "boolean"
-					},
-					"heliconeMessage": {
-						"type": "string"
-					}
-				},
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Record_number.string_": {
-				"properties": {},
-				"additionalProperties": {
-					"type": "string"
-				},
-				"type": "object",
-				"description": "Construct a type with a set of properties K of type T"
-			},
-			"ErrorInfo": {
-				"properties": {
-					"code": {
-						"type": "string",
-						"nullable": true
-					},
-					"message": {
-						"type": "string",
-						"nullable": true
-					}
-				},
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Response": {
-				"properties": {
-					"completions": {
-						"allOf": [
-							{
-								"$ref": "#/components/schemas/Record_number.string_"
-							}
-						],
-						"nullable": true
-					},
-					"message": {
-						"allOf": [
-							{
-								"$ref": "#/components/schemas/ChatMessage"
-							}
-						],
-						"nullable": true
-					},
-					"error": {
-						"allOf": [
-							{
-								"$ref": "#/components/schemas/ErrorInfo"
-							}
-						],
-						"nullable": true
-					},
-					"model": {
-						"type": "string",
-						"nullable": true
-					},
-					"tooLarge": {
-						"type": "boolean"
-					},
-					"heliconeMessage": {
-						"type": "string"
-					}
-				},
-				"type": "object",
-				"additionalProperties": false
-			},
-			"LlmSchema": {
-				"properties": {
-					"request": {
-						"$ref": "#/components/schemas/Request"
-					},
-					"response": {
-						"allOf": [
-							{
-								"$ref": "#/components/schemas/Response"
-							}
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"request"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Record_string.number_": {
-				"properties": {},
-				"additionalProperties": {
-					"type": "number",
-					"format": "double"
-				},
-				"type": "object",
-				"description": "Construct a type with a set of properties K of type T"
-			},
-			"HeliconeRequest": {
-				"properties": {
-					"response_id": {
-						"type": "string",
-						"nullable": true,
-						"example": "Happy"
-					},
-					"response_created_at": {
-						"type": "string",
-						"nullable": true
-					},
-					"response_body": {},
-					"response_status": {
-						"type": "number",
-						"format": "double"
-					},
-					"response_model": {
-						"type": "string",
-						"nullable": true
-					},
-					"request_id": {
-						"type": "string"
-					},
-					"request_created_at": {
-						"type": "string"
-					},
-					"request_body": {},
-					"request_path": {
-						"type": "string"
-					},
-					"request_user_id": {
-						"type": "string",
-						"nullable": true
-					},
-					"request_properties": {
-						"allOf": [
-							{
-								"$ref": "#/components/schemas/Record_string.string_"
-							}
-						],
-						"nullable": true
-					},
-					"request_model": {
-						"type": "string",
-						"nullable": true
-					},
-					"model_override": {
-						"type": "string",
-						"nullable": true
-					},
-					"helicone_user": {
-						"type": "string",
-						"nullable": true
-					},
-					"provider": {
-						"$ref": "#/components/schemas/Provider"
-					},
-					"delay_ms": {
-						"type": "number",
-						"format": "double",
-						"nullable": true
-					},
-					"time_to_first_token": {
-						"type": "number",
-						"format": "double",
-						"nullable": true
-					},
-					"total_tokens": {
-						"type": "number",
-						"format": "double",
-						"nullable": true
-					},
-					"prompt_tokens": {
-						"type": "number",
-						"format": "double",
-						"nullable": true
-					},
-					"completion_tokens": {
-						"type": "number",
-						"format": "double",
-						"nullable": true
-					},
-					"prompt_id": {
-						"type": "string",
-						"nullable": true
-					},
-					"feedback_created_at": {
-						"type": "string",
-						"nullable": true
-					},
-					"feedback_id": {
-						"type": "string",
-						"nullable": true
-					},
-					"feedback_rating": {
-						"type": "boolean",
-						"nullable": true
-					},
-					"signed_body_url": {
-						"type": "string",
-						"nullable": true
-					},
-					"llmSchema": {
-						"allOf": [
-							{
-								"$ref": "#/components/schemas/LlmSchema"
-							}
-						],
-						"nullable": true
-					},
-					"country_code": {
-						"type": "string",
-						"nullable": true
-					},
-					"asset_ids": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array",
-						"nullable": true
-					},
-					"asset_urls": {
-						"allOf": [
-							{
-								"$ref": "#/components/schemas/Record_string.string_"
-							}
-						],
-						"nullable": true
-					},
-					"scores": {
-						"allOf": [
-							{
-								"$ref": "#/components/schemas/Record_string.number_"
-							}
-						],
-						"nullable": true
-					},
-					"costUSD": {
-						"type": "number",
-						"format": "double",
-						"nullable": true
-					},
-					"properties": {
-						"$ref": "#/components/schemas/Record_string.string_"
-					},
-					"assets": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
-					},
-					"target_url": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"response_id",
-					"response_created_at",
-					"response_status",
-					"response_model",
-					"request_id",
-					"request_created_at",
-					"request_body",
-					"request_path",
-					"request_user_id",
-					"request_properties",
-					"request_model",
-					"model_override",
-					"helicone_user",
-					"provider",
-					"delay_ms",
-					"time_to_first_token",
-					"total_tokens",
-					"prompt_tokens",
-					"completion_tokens",
-					"prompt_id",
-					"llmSchema",
-					"country_code",
-					"asset_ids",
-					"asset_urls",
-					"scores",
-					"properties",
-					"assets",
-					"target_url"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"ResultSuccess_HeliconeRequest-Array_": {
-				"properties": {
-					"data": {
-						"items": {
-							"$ref": "#/components/schemas/HeliconeRequest"
-						},
-						"type": "array"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result_HeliconeRequest-Array.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess_HeliconeRequest-Array_"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
-			"Partial_ResponseTableToOperators_": {
-				"properties": {
-					"body_tokens": {
-						"$ref": "#/components/schemas/Partial_NumberOperators_"
-					},
-					"body_model": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					},
-					"body_completion": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					},
-					"status": {
-						"$ref": "#/components/schemas/Partial_NumberOperators_"
-					},
-					"model": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					}
-				},
-				"type": "object",
-				"description": "Make all properties in T optional"
-			},
-			"Partial_FeedbackTableToOperators_": {
-				"properties": {
-					"id": {
-						"$ref": "#/components/schemas/Partial_NumberOperators_"
-					},
-					"created_at": {
-						"$ref": "#/components/schemas/Partial_TimestampOperators_"
-					},
-					"rating": {
-						"$ref": "#/components/schemas/Partial_BooleanOperators_"
-					},
-					"response_id": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					}
-				},
-				"type": "object",
-				"description": "Make all properties in T optional"
-			},
-			"Partial_RequestResponseSearchToOperators_": {
-				"properties": {
-					"request_body_vector": {
-						"$ref": "#/components/schemas/Partial_VectorOperators_"
-					},
-					"response_body_vector": {
-						"$ref": "#/components/schemas/Partial_VectorOperators_"
-					}
-				},
-				"type": "object",
-				"description": "Make all properties in T optional"
-			},
-			"Partial_SessionsRequestResponseRMTToOperators_": {
-				"properties": {
-					"total_cost": {
-						"$ref": "#/components/schemas/Partial_NumberOperators_"
-					},
-					"total_tokens": {
-						"$ref": "#/components/schemas/Partial_NumberOperators_"
-					}
-				},
-				"type": "object",
-				"description": "Make all properties in T optional"
-			},
-			"Partial_CacheHitsTableToOperators_": {
-				"properties": {
-					"organization_id": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					},
-					"request_id": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					},
-					"latency": {
-						"$ref": "#/components/schemas/Partial_NumberOperators_"
-					},
-					"completion_tokens": {
-						"$ref": "#/components/schemas/Partial_NumberOperators_"
-					},
-					"prompt_tokens": {
-						"$ref": "#/components/schemas/Partial_NumberOperators_"
-					},
-					"created_at": {
-						"$ref": "#/components/schemas/Partial_TimestampOperatorsTyped_"
-					}
-				},
-				"type": "object",
-				"description": "Make all properties in T optional"
-			},
-			"Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_": {
-				"properties": {
-					"request_response_rmt": {
-						"$ref": "#/components/schemas/Partial_RequestResponseRMTToOperators_"
-					},
-					"response": {
-						"$ref": "#/components/schemas/Partial_ResponseTableToOperators_"
-					},
-					"request": {
-						"$ref": "#/components/schemas/Partial_RequestTableToOperators_"
-					},
-					"feedback": {
-						"$ref": "#/components/schemas/Partial_FeedbackTableToOperators_"
-					},
-					"request_response_search": {
-						"$ref": "#/components/schemas/Partial_RequestResponseSearchToOperators_"
-					},
-					"sessions_request_response_rmt": {
-						"$ref": "#/components/schemas/Partial_SessionsRequestResponseRMTToOperators_"
-					},
-					"cache_hits": {
-						"$ref": "#/components/schemas/Partial_CacheHitsTableToOperators_"
-					},
-					"properties": {
-						"properties": {},
-						"additionalProperties": {
-							"$ref": "#/components/schemas/Partial_TextOperators_"
-						},
-						"type": "object"
-					},
-					"values": {
-						"properties": {},
-						"additionalProperties": {
-							"$ref": "#/components/schemas/Partial_TextOperators_"
-						},
-						"type": "object"
-					}
-				},
-				"type": "object",
-				"description": "From T, pick a set of properties whose keys are in the union K"
-			},
-			"FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_": {
-				"$ref": "#/components/schemas/Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_"
-			},
-			"RequestFilterNode": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_"
-					},
-					{
-						"$ref": "#/components/schemas/RequestFilterBranch"
-					},
-					{
-						"type": "string",
-						"enum": [
-							"all"
-						]
-					}
-				]
-			},
-			"RequestFilterBranch": {
-				"properties": {
-					"right": {
-						"$ref": "#/components/schemas/RequestFilterNode"
-					},
-					"operator": {
-						"type": "string",
-						"enum": [
-							"or",
-							"and"
-						]
-					},
-					"left": {
-						"$ref": "#/components/schemas/RequestFilterNode"
-					}
-				},
-				"required": [
-					"right",
-					"operator",
-					"left"
-				],
-				"type": "object"
-			},
-			"SortDirection": {
-				"type": "string",
-				"enum": [
-					"asc",
-					"desc"
-				]
-			},
-			"SortLeafRequest": {
-				"properties": {
-					"random": {
-						"type": "boolean",
-						"enum": [
-							true
-						],
-						"nullable": false
-					},
-					"created_at": {
-						"$ref": "#/components/schemas/SortDirection"
-					},
-					"cache_created_at": {
-						"$ref": "#/components/schemas/SortDirection"
-					},
-					"latency": {
-						"$ref": "#/components/schemas/SortDirection"
-					},
-					"last_active": {
-						"$ref": "#/components/schemas/SortDirection"
-					},
-					"total_tokens": {
-						"$ref": "#/components/schemas/SortDirection"
-					},
-					"completion_tokens": {
-						"$ref": "#/components/schemas/SortDirection"
-					},
-					"prompt_tokens": {
-						"$ref": "#/components/schemas/SortDirection"
-					},
-					"user_id": {
-						"$ref": "#/components/schemas/SortDirection"
-					},
-					"body_model": {
-						"$ref": "#/components/schemas/SortDirection"
-					},
-					"is_cached": {
-						"$ref": "#/components/schemas/SortDirection"
-					},
-					"request_prompt": {
-						"$ref": "#/components/schemas/SortDirection"
-					},
-					"response_text": {
-						"$ref": "#/components/schemas/SortDirection"
-					},
-					"properties": {
-						"properties": {},
-						"additionalProperties": {
-							"$ref": "#/components/schemas/SortDirection"
-						},
-						"type": "object"
-					},
-					"values": {
-						"properties": {},
-						"additionalProperties": {
-							"$ref": "#/components/schemas/SortDirection"
-						},
-						"type": "object"
-					}
-				},
-				"type": "object",
-				"additionalProperties": false
-			},
-			"RequestQueryParams": {
-				"properties": {
-					"filter": {
-						"$ref": "#/components/schemas/RequestFilterNode"
-					},
-					"offset": {
-						"type": "number",
-						"format": "double"
-					},
-					"limit": {
-						"type": "number",
-						"format": "double"
-					},
-					"sort": {
-						"$ref": "#/components/schemas/SortLeafRequest"
-					},
-					"isCached": {
-						"type": "boolean"
-					},
-					"includeInputs": {
-						"type": "boolean"
-					},
-					"isPartOfExperiment": {
-						"type": "boolean"
-					},
-					"isScored": {
-						"type": "boolean"
-					}
-				},
-				"required": [
-					"filter"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"HeliconeRequestAsset": {
-				"properties": {
-					"assetUrl": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"assetUrl"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"ResultSuccess_HeliconeRequestAsset_": {
-				"properties": {
-					"data": {
-						"$ref": "#/components/schemas/HeliconeRequestAsset"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result_HeliconeRequestAsset.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess_HeliconeRequestAsset_"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
-			"Record_string.number-or-boolean_": {
-				"properties": {},
-				"additionalProperties": {
-					"anyOf": [
-						{
-							"type": "number",
-							"format": "double"
-						},
-						{
-							"type": "boolean"
-						}
-					]
-				},
-				"type": "object",
-				"description": "Construct a type with a set of properties K of type T"
-			},
-			"Scores": {
-				"$ref": "#/components/schemas/Record_string.number-or-boolean_"
-			},
-			"ScoreRequest": {
-				"properties": {
-					"scores": {
-						"$ref": "#/components/schemas/Scores"
-					}
-				},
-				"required": [
-					"scores"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"SessionResult": {
-				"properties": {
-					"created_at": {
-						"type": "string"
-					},
-					"latest_request_created_at": {
-						"type": "string"
-					},
-					"session": {
-						"type": "string"
-					},
-					"total_cost": {
-						"type": "number",
-						"format": "double"
-					},
-					"total_requests": {
-						"type": "number",
-						"format": "double"
-					},
-					"prompt_tokens": {
-						"type": "number",
-						"format": "double"
-					},
-					"completion_tokens": {
-						"type": "number",
-						"format": "double"
-					},
-					"total_tokens": {
-						"type": "number",
-						"format": "double"
-					}
-				},
-				"required": [
-					"created_at",
-					"latest_request_created_at",
-					"session",
-					"total_cost",
-					"total_requests",
-					"prompt_tokens",
-					"completion_tokens",
-					"total_tokens"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"ResultSuccess_SessionResult-Array_": {
-				"properties": {
-					"data": {
-						"items": {
-							"$ref": "#/components/schemas/SessionResult"
-						},
-						"type": "array"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result_SessionResult-Array.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess_SessionResult-Array_"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
-			"SessionQueryParams": {
-				"properties": {
-					"sessionIdContains": {
-						"type": "string"
-					},
-					"timeFilter": {
+					"addons": {
 						"properties": {
-							"endTimeUnixMs": {
-								"type": "number",
-								"format": "double"
+							"prompts": {
+								"type": "boolean"
 							},
-							"startTimeUnixMs": {
-								"type": "number",
-								"format": "double"
+							"alerts": {
+								"type": "boolean"
 							}
 						},
-						"required": [
-							"endTimeUnixMs",
-							"startTimeUnixMs"
-						],
-						"type": "object"
-					},
-					"sessionName": {
-						"type": "string"
-					},
-					"timezoneDifference": {
-						"type": "number",
-						"format": "double"
-					},
-					"filter": {
-						"$ref": "#/components/schemas/RequestFilterNode"
-					}
-				},
-				"required": [
-					"sessionIdContains",
-					"timeFilter",
-					"sessionName",
-					"timezoneDifference",
-					"filter"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"SessionNameResult": {
-				"properties": {
-					"name": {
-						"type": "string"
-					},
-					"created_at": {
-						"type": "string"
-					},
-					"total_cost": {
-						"type": "number",
-						"format": "double"
-					},
-					"last_used": {
-						"type": "string"
-					},
-					"first_used": {
-						"type": "string"
-					},
-					"session_count": {
-						"type": "number",
-						"format": "double"
-					}
-				},
-				"required": [
-					"name",
-					"created_at",
-					"total_cost",
-					"last_used",
-					"first_used",
-					"session_count"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"ResultSuccess_SessionNameResult-Array_": {
-				"properties": {
-					"data": {
-						"items": {
-							"$ref": "#/components/schemas/SessionNameResult"
-						},
-						"type": "array"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result_SessionNameResult-Array.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess_SessionNameResult-Array_"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
-			"SessionNameQueryParams": {
-				"properties": {
-					"nameContains": {
-						"type": "string"
-					},
-					"timezoneDifference": {
-						"type": "number",
-						"format": "double"
-					},
-					"pSize": {
-						"type": "string",
-						"enum": [
-							"p50",
-							"p75",
-							"p95",
-							"p99",
-							"p99.9"
-						]
-					},
-					"useInterquartile": {
-						"type": "boolean"
-					}
-				},
-				"required": [
-					"nameContains",
-					"timezoneDifference"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"HistogramRow": {
-				"properties": {
-					"range_start": {
-						"type": "string"
-					},
-					"range_end": {
-						"type": "string"
-					},
-					"value": {
-						"type": "number",
-						"format": "double"
-					}
-				},
-				"required": [
-					"range_start",
-					"range_end",
-					"value"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"SessionMetrics": {
-				"properties": {
-					"session_count": {
-						"items": {
-							"$ref": "#/components/schemas/HistogramRow"
-						},
-						"type": "array"
-					},
-					"session_duration": {
-						"items": {
-							"$ref": "#/components/schemas/HistogramRow"
-						},
-						"type": "array"
-					},
-					"session_cost": {
-						"items": {
-							"$ref": "#/components/schemas/HistogramRow"
-						},
-						"type": "array"
-					}
-				},
-				"required": [
-					"session_count",
-					"session_duration",
-					"session_cost"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"ResultSuccess_SessionMetrics_": {
-				"properties": {
-					"data": {
-						"$ref": "#/components/schemas/SessionMetrics"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result_SessionMetrics.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess_SessionMetrics_"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
-			"UserMetricsResult": {
-				"properties": {
-					"user_id": {
-						"type": "string"
-					},
-					"active_for": {
-						"type": "number",
-						"format": "double"
-					},
-					"first_active": {
-						"type": "string"
-					},
-					"last_active": {
-						"type": "string"
-					},
-					"total_requests": {
-						"type": "number",
-						"format": "double"
-					},
-					"average_requests_per_day_active": {
-						"type": "number",
-						"format": "double"
-					},
-					"average_tokens_per_request": {
-						"type": "number",
-						"format": "double"
-					},
-					"total_completion_tokens": {
-						"type": "number",
-						"format": "double"
-					},
-					"total_prompt_tokens": {
-						"type": "number",
-						"format": "double"
-					},
-					"cost": {
-						"type": "number",
-						"format": "double"
-					}
-				},
-				"required": [
-					"user_id",
-					"active_for",
-					"first_active",
-					"last_active",
-					"total_requests",
-					"average_requests_per_day_active",
-					"average_tokens_per_request",
-					"total_completion_tokens",
-					"total_prompt_tokens",
-					"cost"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"ResultSuccess_UserMetricsResult-Array_": {
-				"properties": {
-					"data": {
-						"items": {
-							"$ref": "#/components/schemas/UserMetricsResult"
-						},
-						"type": "array"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result_UserMetricsResult-Array.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess_UserMetricsResult-Array_"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
-			"Partial_UserMetricsToOperators_": {
-				"properties": {
-					"user_id": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					},
-					"last_active": {
-						"$ref": "#/components/schemas/Partial_TimestampOperators_"
-					},
-					"total_requests": {
-						"$ref": "#/components/schemas/Partial_NumberOperators_"
-					},
-					"active_for": {
-						"$ref": "#/components/schemas/Partial_NumberOperators_"
-					},
-					"average_requests_per_day_active": {
-						"$ref": "#/components/schemas/Partial_NumberOperators_"
-					},
-					"average_tokens_per_request": {
-						"$ref": "#/components/schemas/Partial_NumberOperators_"
-					},
-					"total_completion_tokens": {
-						"$ref": "#/components/schemas/Partial_NumberOperators_"
-					},
-					"total_prompt_tokens": {
-						"$ref": "#/components/schemas/Partial_NumberOperators_"
-					},
-					"cost": {
-						"$ref": "#/components/schemas/Partial_NumberOperators_"
-					}
-				},
-				"type": "object",
-				"description": "Make all properties in T optional"
-			},
-			"Pick_FilterLeaf.user_metrics-or-request_response_rmt_": {
-				"properties": {
-					"request_response_rmt": {
-						"$ref": "#/components/schemas/Partial_RequestResponseRMTToOperators_"
-					},
-					"user_metrics": {
-						"$ref": "#/components/schemas/Partial_UserMetricsToOperators_"
-					}
-				},
-				"type": "object",
-				"description": "From T, pick a set of properties whose keys are in the union K"
-			},
-			"FilterLeafSubset_user_metrics-or-request_response_rmt_": {
-				"$ref": "#/components/schemas/Pick_FilterLeaf.user_metrics-or-request_response_rmt_"
-			},
-			"UserFilterNode": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/FilterLeafSubset_user_metrics-or-request_response_rmt_"
-					},
-					{
-						"$ref": "#/components/schemas/UserFilterBranch"
-					},
-					{
-						"type": "string",
-						"enum": [
-							"all"
-						]
-					}
-				]
-			},
-			"UserFilterBranch": {
-				"properties": {
-					"right": {
-						"$ref": "#/components/schemas/UserFilterNode"
-					},
-					"operator": {
-						"type": "string",
-						"enum": [
-							"or",
-							"and"
-						]
-					},
-					"left": {
-						"$ref": "#/components/schemas/UserFilterNode"
-					}
-				},
-				"required": [
-					"right",
-					"operator",
-					"left"
-				],
-				"type": "object"
-			},
-			"UserMetricsQueryParams": {
-				"properties": {
-					"filter": {
-						"$ref": "#/components/schemas/UserFilterNode"
-					},
-					"offset": {
-						"type": "number",
-						"format": "double"
-					},
-					"limit": {
-						"type": "number",
-						"format": "double"
-					},
-					"timeFilter": {
-						"properties": {
-							"endTimeUnixSeconds": {
-								"type": "number",
-								"format": "double"
-							},
-							"startTimeUnixSeconds": {
-								"type": "number",
-								"format": "double"
-							}
-						},
-						"required": [
-							"endTimeUnixSeconds",
-							"startTimeUnixSeconds"
-						],
-						"type": "object"
-					},
-					"timeZoneDifferenceMinutes": {
-						"type": "number",
-						"format": "double"
-					}
-				},
-				"required": [
-					"filter",
-					"offset",
-					"limit"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"ResultSuccess__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array_": {
-				"properties": {
-					"data": {
-						"items": {
-							"properties": {
-								"cost_usd": {
-									"type": "number",
-									"format": "double"
-								},
-								"user_id": {
-									"type": "string"
-								},
-								"completion_tokens": {
-									"type": "number",
-									"format": "double"
-								},
-								"prompt_tokens": {
-									"type": "number",
-									"format": "double"
-								},
-								"count": {
-									"type": "number",
-									"format": "double"
-								}
-							},
-							"required": [
-								"cost_usd",
-								"user_id",
-								"completion_tokens",
-								"prompt_tokens",
-								"count"
-							],
-							"type": "object"
-						},
-						"type": "array"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array_"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
-			"UserQueryParams": {
-				"properties": {
-					"userIds": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
-					},
-					"timeFilter": {
-						"properties": {
-							"endTimeUnixSeconds": {
-								"type": "number",
-								"format": "double"
-							},
-							"startTimeUnixSeconds": {
-								"type": "number",
-								"format": "double"
-							}
-						},
-						"required": [
-							"endTimeUnixSeconds",
-							"startTimeUnixSeconds"
-						],
 						"type": "object"
 					}
 				},
@@ -7755,6 +7755,621 @@
 								},
 								"type": "object"
 							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/request/query": {
+			"post": {
+				"operationId": "GetRequests",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_HeliconeRequest-Array.string_"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"filter": "all",
+											"isCached": false,
+											"limit": 10,
+											"offset": 0,
+											"sort": {
+												"created_at": "desc"
+											},
+											"isScored": false,
+											"isPartOfExperiment": false
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Request"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"description": "Request query filters",
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/RequestQueryParams",
+								"description": "Request query filters"
+							},
+							"example": {
+								"filter": "all",
+								"isCached": false,
+								"limit": 10,
+								"offset": 0,
+								"sort": {
+									"created_at": "desc"
+								},
+								"isScored": false,
+								"isPartOfExperiment": false
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/request/query-clickhouse": {
+			"post": {
+				"operationId": "GetRequestsClickhouse",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_HeliconeRequest-Array.string_"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"filter": "all",
+											"isCached": false,
+											"limit": 10,
+											"offset": 0,
+											"sort": {
+												"created_at": "desc"
+											},
+											"isScored": false,
+											"isPartOfExperiment": false
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Request"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"description": "Request query filters",
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/RequestQueryParams",
+								"description": "Request query filters"
+							},
+							"example": {
+								"filter": "all",
+								"isCached": false,
+								"limit": 10,
+								"offset": 0,
+								"sort": {
+									"created_at": "desc"
+								},
+								"isScored": false,
+								"isPartOfExperiment": false
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/request/{requestId}/feedback": {
+			"post": {
+				"operationId": "FeedbackRequest",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Request"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "requestId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"rating": {
+										"type": "boolean"
+									}
+								},
+								"required": [
+									"rating"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/request/{requestId}/property": {
+			"put": {
+				"operationId": "PutProperty",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Request"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "requestId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"value": {
+										"type": "string"
+									},
+									"key": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"value",
+									"key"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/request/{requestId}/assets/{assetId}": {
+			"post": {
+				"operationId": "GetRequestAssetById",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_HeliconeRequestAsset.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Request"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "requestId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "path",
+						"name": "assetId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/request/{requestId}/score": {
+			"post": {
+				"operationId": "AddScores",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Request"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "requestId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ScoreRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/session/query": {
+			"post": {
+				"operationId": "GetSessions",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_SessionResult-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Session"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/SessionQueryParams"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/session/name/query": {
+			"post": {
+				"operationId": "GetNames",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_SessionNameResult-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Session"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/SessionNameQueryParams"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/session/metrics/query": {
+			"post": {
+				"operationId": "GetMetrics",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_SessionMetrics.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Session"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/SessionNameQueryParams"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/session/{sessionId}/feedback": {
+			"post": {
+				"operationId": "UpdateSessionFeedback",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Session"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "sessionId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"rating": {
+										"type": "boolean"
+									}
+								},
+								"required": [
+									"rating"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/user/metrics/query": {
+			"post": {
+				"operationId": "GetUserMetrics",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_UserMetricsResult-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"User"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UserMetricsQueryParams"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/user/query": {
+			"post": {
+				"operationId": "GetUsers",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"User"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UserQueryParams"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/trace/log": {
+			"post": {
+				"operationId": "LogTrace",
+				"responses": {
+					"204": {
+						"description": "No content"
+					}
+				},
+				"tags": [
+					"Trace"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/OTELTrace"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/trace/log-python": {
+			"post": {
+				"operationId": "LogPythonTrace",
+				"responses": {
+					"204": {
+						"description": "No content"
+					}
+				},
+				"tags": [
+					"Trace"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {}
 						}
 					}
 				}
@@ -9916,62 +10531,6 @@
 				]
 			}
 		},
-		"/v1/trace/log": {
-			"post": {
-				"operationId": "LogTrace",
-				"responses": {
-					"204": {
-						"description": "No content"
-					}
-				},
-				"tags": [
-					"Trace"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/OTELTrace"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/v1/trace/log-python": {
-			"post": {
-				"operationId": "LogPythonTrace",
-				"responses": {
-					"204": {
-						"description": "No content"
-					}
-				},
-				"tags": [
-					"Trace"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {}
-						}
-					}
-				}
-			}
-		},
 		"/v1/property/query": {
 			"post": {
 				"operationId": "GetProperties",
@@ -10844,6 +11403,225 @@
 				}
 			}
 		},
+		"/v1/evaluator": {
+			"post": {
+				"operationId": "CreateEvaluator",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_EvaluatorResult.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Evaluator"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CreateEvaluatorParams"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/evaluator/{evaluatorId}": {
+			"get": {
+				"operationId": "GetEvaluator",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_EvaluatorResult.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Evaluator"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "evaluatorId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"put": {
+				"operationId": "UpdateEvaluator",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_EvaluatorResult.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Evaluator"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "evaluatorId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UpdateEvaluatorParams"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "DeleteEvaluator",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Evaluator"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "evaluatorId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/evaluator/query": {
+			"post": {
+				"operationId": "QueryEvaluators",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_EvaluatorResult-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Evaluator"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {},
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/evaluator/{evaluatorId}/experiments": {
+			"get": {
+				"operationId": "GetExperimentsForEvaluator",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__experiment_id-string--experiment_created_at-string_-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Evaluator"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "evaluatorId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
 		"/v1/experiment/new-empty": {
 			"post": {
 				"operationId": "CreateNewEmptyExperiment",
@@ -11315,225 +12093,6 @@
 				}
 			}
 		},
-		"/v1/evaluator": {
-			"post": {
-				"operationId": "CreateEvaluator",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_EvaluatorResult.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Evaluator"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/CreateEvaluatorParams"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/v1/evaluator/{evaluatorId}": {
-			"get": {
-				"operationId": "GetEvaluator",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_EvaluatorResult.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Evaluator"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "evaluatorId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				]
-			},
-			"put": {
-				"operationId": "UpdateEvaluator",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_EvaluatorResult.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Evaluator"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "evaluatorId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/UpdateEvaluatorParams"
-							}
-						}
-					}
-				}
-			},
-			"delete": {
-				"operationId": "DeleteEvaluator",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_null.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Evaluator"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "evaluatorId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				]
-			}
-		},
-		"/v1/evaluator/query": {
-			"post": {
-				"operationId": "QueryEvaluators",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_EvaluatorResult-Array.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Evaluator"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"properties": {},
-								"type": "object"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/v1/evaluator/{evaluatorId}/experiments": {
-			"get": {
-				"operationId": "GetExperimentsForEvaluator",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result__experiment_id-string--experiment_created_at-string_-Array.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Evaluator"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "evaluatorId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				]
-			}
-		},
 		"/v1/public/dataisbeautiful/total-values": {
 			"post": {
 				"operationId": "GetTotalValues",
@@ -11914,545 +12473,6 @@
 								"properties": {},
 								"type": "object"
 							}
-						}
-					}
-				}
-			}
-		},
-		"/v1/stripe/subscription/free/usage": {
-			"get": {
-				"operationId": "GetFreeUsage",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "number",
-									"format": "double"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Stripe"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": []
-			}
-		},
-		"/v1/stripe/subscription/new-customer/upgrade-to-pro": {
-			"post": {
-				"operationId": "UpgradeToPro",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "string"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Stripe"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/UpgradeToProRequest"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/v1/stripe/subscription/existing-customer/upgrade-to-pro": {
-			"post": {
-				"operationId": "UpgradeExistingCustomer",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "string"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Stripe"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/UpgradeToProRequest"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/v1/stripe/subscription/manage-subscription": {
-			"post": {
-				"operationId": "ManageSubscription",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "string"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Stripe"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": []
-			}
-		},
-		"/v1/stripe/subscription/undo-cancel-subscription": {
-			"post": {
-				"operationId": "UndoCancelSubscription",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "number",
-									"enum": [
-										null
-									],
-									"nullable": true
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Stripe"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": []
-			}
-		},
-		"/v1/stripe/subscription/add-ons/{productType}": {
-			"post": {
-				"operationId": "AddOns",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "number",
-									"enum": [
-										null
-									],
-									"nullable": true
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Stripe"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "productType",
-						"required": true,
-						"schema": {
-							"type": "string",
-							"enum": [
-								"alerts",
-								"prompts"
-							]
-						}
-					}
-				]
-			},
-			"delete": {
-				"operationId": "DeleteAddOns",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "number",
-									"enum": [
-										null
-									],
-									"nullable": true
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Stripe"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "productType",
-						"required": true,
-						"schema": {
-							"type": "string",
-							"enum": [
-								"alerts",
-								"prompts"
-							]
-						}
-					}
-				]
-			}
-		},
-		"/v1/stripe/subscription/preview-invoice": {
-			"get": {
-				"operationId": "PreviewInvoice",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"properties": {
-										"total": {
-											"type": "number",
-											"format": "double"
-										},
-										"tax": {
-											"type": "number",
-											"format": "double",
-											"nullable": true
-										},
-										"subtotal": {
-											"type": "number",
-											"format": "double"
-										},
-										"discount": {
-											"properties": {
-												"coupon": {
-													"properties": {
-														"amount_off": {
-															"type": "number",
-															"format": "double",
-															"nullable": true
-														},
-														"percent_off": {
-															"type": "number",
-															"format": "double",
-															"nullable": true
-														},
-														"name": {
-															"type": "string",
-															"nullable": true
-														}
-													},
-													"required": [
-														"amount_off",
-														"percent_off",
-														"name"
-													],
-													"type": "object"
-												}
-											},
-											"required": [
-												"coupon"
-											],
-											"type": "object",
-											"nullable": true
-										},
-										"lines": {
-											"properties": {
-												"data": {
-													"items": {
-														"properties": {
-															"description": {
-																"type": "string",
-																"nullable": true
-															},
-															"amount": {
-																"type": "number",
-																"format": "double",
-																"nullable": true
-															},
-															"id": {
-																"type": "string",
-																"nullable": true
-															}
-														},
-														"required": [
-															"description",
-															"amount",
-															"id"
-														],
-														"type": "object"
-													},
-													"type": "array"
-												}
-											},
-											"required": [
-												"data"
-											],
-											"type": "object",
-											"nullable": true
-										},
-										"next_payment_attempt": {
-											"type": "number",
-											"format": "double",
-											"nullable": true
-										},
-										"currency": {
-											"type": "string",
-											"nullable": true
-										}
-									},
-									"required": [
-										"total",
-										"tax",
-										"subtotal",
-										"discount",
-										"lines",
-										"next_payment_attempt",
-										"currency"
-									],
-									"type": "object",
-									"nullable": true
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Stripe"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": []
-			}
-		},
-		"/v1/stripe/subscription/cancel-subscription": {
-			"post": {
-				"operationId": "CancelSubscription",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "number",
-									"enum": [
-										null
-									],
-									"nullable": true
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Stripe"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": []
-			}
-		},
-		"/v1/stripe/subscription/migrate-to-pro": {
-			"post": {
-				"operationId": "MigrateToPro",
-				"responses": {
-					"204": {
-						"description": "No content"
-					}
-				},
-				"tags": [
-					"Stripe"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": []
-			}
-		},
-		"/v1/stripe/subscription": {
-			"get": {
-				"operationId": "GetSubscription",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"properties": {
-										"items": {
-											"items": {
-												"properties": {
-													"price": {
-														"properties": {
-															"product": {
-																"properties": {
-																	"name": {
-																		"type": "string",
-																		"nullable": true
-																	}
-																},
-																"required": [
-																	"name"
-																],
-																"type": "object",
-																"nullable": true
-															}
-														},
-														"required": [
-															"product"
-														],
-														"type": "object"
-													},
-													"quantity": {
-														"type": "number",
-														"format": "double"
-													}
-												},
-												"required": [
-													"price"
-												],
-												"type": "object"
-											},
-											"type": "array"
-										},
-										"trial_end": {
-											"type": "number",
-											"format": "double",
-											"nullable": true
-										},
-										"id": {
-											"type": "string"
-										},
-										"current_period_start": {
-											"type": "number",
-											"format": "double"
-										},
-										"current_period_end": {
-											"type": "number",
-											"format": "double"
-										},
-										"cancel_at_period_end": {
-											"type": "boolean"
-										},
-										"status": {
-											"type": "string"
-										}
-									},
-									"required": [
-										"items",
-										"trial_end",
-										"id",
-										"current_period_start",
-										"current_period_end",
-										"cancel_at_period_end",
-										"status"
-									],
-									"type": "object",
-									"nullable": true
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Stripe"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": []
-			}
-		},
-		"/v1/stripe/webhook": {
-			"post": {
-				"operationId": "HandleStripeWebhook",
-				"responses": {
-					"204": {
-						"description": "No content"
-					}
-				},
-				"tags": [
-					"Stripe"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {}
 						}
 					}
 				}
@@ -13105,38 +13125,50 @@
 				"parameters": []
 			}
 		},
-		"/v1/request/query": {
-			"post": {
-				"operationId": "GetRequests",
+		"/v1/stripe/subscription/free/usage": {
+			"get": {
+				"operationId": "GetFreeUsage",
 				"responses": {
 					"200": {
 						"description": "Ok",
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Result_HeliconeRequest-Array.string_"
-								},
-								"examples": {
-									"Example 1": {
-										"value": {
-											"filter": "all",
-											"isCached": false,
-											"limit": 10,
-											"offset": 0,
-											"sort": {
-												"created_at": "desc"
-											},
-											"isScored": false,
-											"isPartOfExperiment": false
-										}
-									}
+									"type": "number",
+									"format": "double"
 								}
 							}
 						}
 					}
 				},
 				"tags": [
-					"Request"
+					"Stripe"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/stripe/subscription/new-customer/upgrade-to-pro": {
+			"post": {
+				"operationId": "UpgradeToPro",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Stripe"
 				],
 				"security": [
 					{
@@ -13145,62 +13177,34 @@
 				],
 				"parameters": [],
 				"requestBody": {
-					"description": "Request query filters",
 					"required": true,
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/RequestQueryParams",
-								"description": "Request query filters"
-							},
-							"example": {
-								"filter": "all",
-								"isCached": false,
-								"limit": 10,
-								"offset": 0,
-								"sort": {
-									"created_at": "desc"
-								},
-								"isScored": false,
-								"isPartOfExperiment": false
+								"$ref": "#/components/schemas/UpgradeToProRequest"
 							}
 						}
 					}
 				}
 			}
 		},
-		"/v1/request/query-clickhouse": {
+		"/v1/stripe/subscription/existing-customer/upgrade-to-pro": {
 			"post": {
-				"operationId": "GetRequestsClickhouse",
+				"operationId": "UpgradeExistingCustomer",
 				"responses": {
 					"200": {
 						"description": "Ok",
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Result_HeliconeRequest-Array.string_"
-								},
-								"examples": {
-									"Example 1": {
-										"value": {
-											"filter": "all",
-											"isCached": false,
-											"limit": 10,
-											"offset": 0,
-											"sort": {
-												"created_at": "desc"
-											},
-											"isScored": false,
-											"isPartOfExperiment": false
-										}
-									}
+									"type": "string"
 								}
 							}
 						}
 					}
 				},
 				"tags": [
-					"Request"
+					"Stripe"
 				],
 				"security": [
 					{
@@ -13209,157 +13213,94 @@
 				],
 				"parameters": [],
 				"requestBody": {
-					"description": "Request query filters",
 					"required": true,
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/RequestQueryParams",
-								"description": "Request query filters"
-							},
-							"example": {
-								"filter": "all",
-								"isCached": false,
-								"limit": 10,
-								"offset": 0,
-								"sort": {
-									"created_at": "desc"
-								},
-								"isScored": false,
-								"isPartOfExperiment": false
+								"$ref": "#/components/schemas/UpgradeToProRequest"
 							}
 						}
 					}
 				}
 			}
 		},
-		"/v1/request/{requestId}/feedback": {
+		"/v1/stripe/subscription/manage-subscription": {
 			"post": {
-				"operationId": "FeedbackRequest",
+				"operationId": "ManageSubscription",
 				"responses": {
 					"200": {
 						"description": "Ok",
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Result_null.string_"
+									"type": "string"
 								}
 							}
 						}
 					}
 				},
 				"tags": [
-					"Request"
+					"Stripe"
 				],
 				"security": [
 					{
 						"api_key": []
 					}
 				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "requestId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"properties": {
-									"rating": {
-										"type": "boolean"
-									}
-								},
-								"required": [
-									"rating"
-								],
-								"type": "object"
-							}
-						}
-					}
-				}
+				"parameters": []
 			}
 		},
-		"/v1/request/{requestId}/property": {
-			"put": {
-				"operationId": "PutProperty",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_null.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Request"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "requestId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"properties": {
-									"value": {
-										"type": "string"
-									},
-									"key": {
-										"type": "string"
-									}
-								},
-								"required": [
-									"value",
-									"key"
-								],
-								"type": "object"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/v1/request/{requestId}/assets/{assetId}": {
+		"/v1/stripe/subscription/undo-cancel-subscription": {
 			"post": {
-				"operationId": "GetRequestAssetById",
+				"operationId": "UndoCancelSubscription",
 				"responses": {
 					"200": {
 						"description": "Ok",
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Result_HeliconeRequestAsset.string_"
+									"type": "number",
+									"enum": [
+										null
+									],
+									"nullable": true
 								}
 							}
 						}
 					}
 				},
 				"tags": [
-					"Request"
+					"Stripe"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/stripe/subscription/add-ons/{productType}": {
+			"post": {
+				"operationId": "AddOns",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "number",
+									"enum": [
+										null
+									],
+									"nullable": true
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Stripe"
 				],
 				"security": [
 					{
@@ -13369,85 +13310,343 @@
 				"parameters": [
 					{
 						"in": "path",
-						"name": "requestId",
+						"name": "productType",
 						"required": true,
 						"schema": {
-							"type": "string"
+							"type": "string",
+							"enum": [
+								"alerts",
+								"prompts"
+							]
 						}
-					},
+					}
+				]
+			},
+			"delete": {
+				"operationId": "DeleteAddOns",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "number",
+									"enum": [
+										null
+									],
+									"nullable": true
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Stripe"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
 					{
 						"in": "path",
-						"name": "assetId",
+						"name": "productType",
 						"required": true,
 						"schema": {
-							"type": "string"
+							"type": "string",
+							"enum": [
+								"alerts",
+								"prompts"
+							]
 						}
 					}
 				]
 			}
 		},
-		"/v1/request/{requestId}/score": {
-			"post": {
-				"operationId": "AddScores",
+		"/v1/stripe/subscription/preview-invoice": {
+			"get": {
+				"operationId": "PreviewInvoice",
 				"responses": {
 					"200": {
 						"description": "Ok",
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Result_null.string_"
+									"properties": {
+										"total": {
+											"type": "number",
+											"format": "double"
+										},
+										"tax": {
+											"type": "number",
+											"format": "double",
+											"nullable": true
+										},
+										"subtotal": {
+											"type": "number",
+											"format": "double"
+										},
+										"discount": {
+											"properties": {
+												"coupon": {
+													"properties": {
+														"amount_off": {
+															"type": "number",
+															"format": "double",
+															"nullable": true
+														},
+														"percent_off": {
+															"type": "number",
+															"format": "double",
+															"nullable": true
+														},
+														"name": {
+															"type": "string",
+															"nullable": true
+														}
+													},
+													"required": [
+														"amount_off",
+														"percent_off",
+														"name"
+													],
+													"type": "object"
+												}
+											},
+											"required": [
+												"coupon"
+											],
+											"type": "object",
+											"nullable": true
+										},
+										"lines": {
+											"properties": {
+												"data": {
+													"items": {
+														"properties": {
+															"description": {
+																"type": "string",
+																"nullable": true
+															},
+															"amount": {
+																"type": "number",
+																"format": "double",
+																"nullable": true
+															},
+															"id": {
+																"type": "string",
+																"nullable": true
+															}
+														},
+														"required": [
+															"description",
+															"amount",
+															"id"
+														],
+														"type": "object"
+													},
+													"type": "array"
+												}
+											},
+											"required": [
+												"data"
+											],
+											"type": "object",
+											"nullable": true
+										},
+										"next_payment_attempt": {
+											"type": "number",
+											"format": "double",
+											"nullable": true
+										},
+										"currency": {
+											"type": "string",
+											"nullable": true
+										}
+									},
+									"required": [
+										"total",
+										"tax",
+										"subtotal",
+										"discount",
+										"lines",
+										"next_payment_attempt",
+										"currency"
+									],
+									"type": "object",
+									"nullable": true
 								}
 							}
 						}
 					}
 				},
 				"tags": [
-					"Request"
+					"Stripe"
 				],
 				"security": [
 					{
 						"api_key": []
 					}
 				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "requestId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/ScoreRequest"
-							}
-						}
-					}
-				}
+				"parameters": []
 			}
 		},
-		"/v1/session/query": {
+		"/v1/stripe/subscription/cancel-subscription": {
 			"post": {
-				"operationId": "GetSessions",
+				"operationId": "CancelSubscription",
 				"responses": {
 					"200": {
 						"description": "Ok",
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Result_SessionResult-Array.string_"
+									"type": "number",
+									"enum": [
+										null
+									],
+									"nullable": true
 								}
 							}
 						}
 					}
 				},
 				"tags": [
-					"Session"
+					"Stripe"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/stripe/subscription/migrate-to-pro": {
+			"post": {
+				"operationId": "MigrateToPro",
+				"responses": {
+					"204": {
+						"description": "No content"
+					}
+				},
+				"tags": [
+					"Stripe"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/stripe/subscription": {
+			"get": {
+				"operationId": "GetSubscription",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"items": {
+											"items": {
+												"properties": {
+													"price": {
+														"properties": {
+															"product": {
+																"properties": {
+																	"name": {
+																		"type": "string",
+																		"nullable": true
+																	}
+																},
+																"required": [
+																	"name"
+																],
+																"type": "object",
+																"nullable": true
+															}
+														},
+														"required": [
+															"product"
+														],
+														"type": "object"
+													},
+													"quantity": {
+														"type": "number",
+														"format": "double"
+													}
+												},
+												"required": [
+													"price"
+												],
+												"type": "object"
+											},
+											"type": "array"
+										},
+										"trial_end": {
+											"type": "number",
+											"format": "double",
+											"nullable": true
+										},
+										"id": {
+											"type": "string"
+										},
+										"current_period_start": {
+											"type": "number",
+											"format": "double"
+										},
+										"current_period_end": {
+											"type": "number",
+											"format": "double"
+										},
+										"cancel_at_period_end": {
+											"type": "boolean"
+										},
+										"status": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"items",
+										"trial_end",
+										"id",
+										"current_period_start",
+										"current_period_end",
+										"cancel_at_period_end",
+										"status"
+									],
+									"type": "object",
+									"nullable": true
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Stripe"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/stripe/webhook": {
+			"post": {
+				"operationId": "HandleStripeWebhook",
+				"responses": {
+					"204": {
+						"description": "No content"
+					}
+				},
+				"tags": [
+					"Stripe"
 				],
 				"security": [
 					{
@@ -13459,206 +13658,7 @@
 					"required": true,
 					"content": {
 						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/SessionQueryParams"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/v1/session/name/query": {
-			"post": {
-				"operationId": "GetNames",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_SessionNameResult-Array.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Session"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/SessionNameQueryParams"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/v1/session/metrics/query": {
-			"post": {
-				"operationId": "GetMetrics",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_SessionMetrics.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Session"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/SessionNameQueryParams"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/v1/session/{sessionId}/feedback": {
-			"post": {
-				"operationId": "UpdateSessionFeedback",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_null.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Session"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "sessionId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"properties": {
-									"rating": {
-										"type": "boolean"
-									}
-								},
-								"required": [
-									"rating"
-								],
-								"type": "object"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/v1/user/metrics/query": {
-			"post": {
-				"operationId": "GetUserMetrics",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_UserMetricsResult-Array.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"User"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/UserMetricsQueryParams"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/v1/user/query": {
-			"post": {
-				"operationId": "GetUsers",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"User"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/UserQueryParams"
-							}
+							"schema": {}
 						}
 					}
 				}

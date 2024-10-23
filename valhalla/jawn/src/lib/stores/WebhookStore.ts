@@ -27,6 +27,18 @@ export class WebhookStore {
     // return await cacheResultCustom(
     //   "getWebhooksByOrgId-" + orgId,
     //   async () => {
+    //     const webhooks = await this.supabaseClient
+    //       .from("webhooks")
+    //       .select("*")
+    //       .eq("org_id", orgId);
+
+    //     if (webhooks.data) {
+    //       return ok(webhooks.data);
+    //     }
+
+    //     return err(
+    //       `Failed to get webhooks for org ${orgId}: ${webhooks.error}`
+    //     );
     //   },
     //   kvCache
     // );
