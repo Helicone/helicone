@@ -14,24 +14,34 @@ export class WebhookStore {
   async getWebhooksByOrgId(
     orgId: string
   ): PromiseGenericResult<Database["public"]["Tables"]["webhooks"]["Row"][]> {
-    return await cacheResultCustom(
-      "getWebhooksByOrgId-" + orgId,
-      async () => {
-        const webhooks = await this.supabaseClient
-          .from("webhooks")
-          .select("*")
-          .eq("org_id", orgId);
+    const webhooks = await this.supabaseClient
+      .from("webhooks")
+      .select("*")
+      .eq("org_id", orgId);
 
-        if (webhooks.data) {
-          return ok(webhooks.data);
-        }
+    if (webhooks.data) {
+      return ok(webhooks.data);
+    }
 
-        return err(
-          `Failed to get webhooks for org ${orgId}: ${webhooks.error}`
-        );
-      },
-      kvCache
-    );
+    return err(`Failed to get webhooks for org ${orgId}: ${webhooks.error}`);
+    // return await cacheResultCustom(
+    //   "getWebhooksByOrgId-" + orgId,
+    //   async () => {
+    //     const webhooks = await this.supabaseClient
+    //       .from("webhooks")
+    //       .select("*")
+    //       .eq("org_id", orgId);
+
+    //     if (webhooks.data) {
+    //       return ok(webhooks.data);
+    //     }
+
+    //     return err(
+    //       `Failed to get webhooks for org ${orgId}: ${webhooks.error}`
+    //     );
+    //   },
+    //   kvCache
+    // );
   }
 
   async getWebhookSubscriptionByWebhookId(

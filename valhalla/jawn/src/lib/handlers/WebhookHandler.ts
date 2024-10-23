@@ -1,26 +1,10 @@
-import { ENVIRONMENT } from "../..";
-import { Database } from "../db/database.types";
-import { PromiseGenericResult, err, ok } from "../shared/result";
+import * as Sentry from "@sentry/node";
+import { sendToWebhook, WebhookPayload } from "../clients/webhookSender";
+import { err, ok, PromiseGenericResult } from "../shared/result";
 import { FeatureFlagStore } from "../stores/FeatureFlagStore";
 import { WebhookStore } from "../stores/WebhookStore";
 import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext } from "./HandlerContext";
-import * as Sentry from "@sentry/node";
-import crypto from "crypto";
-
-type WebhookPayload = {
-  payload: {
-    request: {
-      id: string;
-      body: string;
-    };
-    response: {
-      body: string;
-    };
-  };
-  webhook: Database["public"]["Tables"]["webhooks"]["Row"];
-  orgId: string;
-};
 
 export class WebhookHandler extends AbstractLogHandler {
   private webhookStore: WebhookStore;
@@ -34,28 +18,66 @@ export class WebhookHandler extends AbstractLogHandler {
   }
 
   async handle(context: HandlerContext): PromiseGenericResult<string> {
-    return ok("DISABLED FOR NOW");
+    const orgId = context.orgParams?.id;
+
+    if (!orgId) {
+      return err(`Org ID not found in context`);
+    }
+
+    const webhooks = await this.webhookStore.getWebhooksByOrgId(orgId);
+
+    if (webhooks.error) {
+      return err(webhooks.error);
+    }
+
+    for (const webhook of webhooks.data ?? []) {
+      this.webhookPayloads.push({
+        payload: {
+          request: {
+            id: context.message.log.request.id,
+            body: context.processedLog.request.body,
+          },
+          response: {
+            body: context.processedLog.response.body,
+          },
+          properties: context.processedLog.request.properties ?? {},
+        },
+        webhook: webhook,
+        orgId,
+      });
+    }
+
+    return await super.handle(context);
   }
 
   async handleResults(): PromiseGenericResult<string> {
-    return ok("DISABLED FOR NOW");
-  }
+    if (this.webhookPayloads.length === 0) {
+      return ok("No webhooks to send");
+    }
+    console.log("Sending to webhooks: ", this.webhookPayloads.length);
 
-  async sendToWebhook(
-    payload: {
-      request: {
-        id: string;
-        body: string;
-      };
-      response: {
-        body: string;
-      };
-      properties: Record<string, string>;
-    },
-    webhook: Database["public"]["Tables"]["webhooks"]["Row"],
-    orgId: string
-  ): PromiseGenericResult<string> {
-    console.log(crypto.randomUUID());
-    return ok(`NO IMPLEMENTATION`);
+    await Promise.all(
+      this.webhookPayloads.map(async (webhookPayload) => {
+        try {
+          return await sendToWebhook(
+            webhookPayload.payload,
+            webhookPayload.webhook
+          );
+        } catch (error: any) {
+          Sentry.captureException(error, {
+            tags: {
+              type: "WebhookError",
+              topic: "request-response-logs-prod",
+            },
+            extra: {
+              orgId: webhookPayload.orgId,
+              webhook: webhookPayload.webhook,
+            },
+          });
+        }
+      })
+    );
+
+    return ok(`Successfully sent to webhooks`);
   }
 }
