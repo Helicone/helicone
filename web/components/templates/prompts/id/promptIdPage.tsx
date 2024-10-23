@@ -12,7 +12,6 @@ import {
   EyeIcon,
   PencilIcon,
   ChevronDownIcon,
-  MagnifyingGlassIcon,
   XMarkIcon,
   InformationCircleIcon,
 } from "@heroicons/react/24/outline";
@@ -634,7 +633,6 @@ const PromptIdPage = (props: PromptIdPageProps) => {
 
   const [isVersionsExpanded, setIsVersionsExpanded] = useState(true);
   const [isInputsExpanded, setIsInputsExpanded] = useState(true);
-  const [isSearchVisible, setIsSearchVisible] = useState(false);
 
   return (
     <div>
@@ -968,7 +966,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                       >
                         <h2 className="text-lg font-medium">Inputs</h2>
                         <div className="flex items-center space-x-2">
-                          {isSearchVisible ? (
+                          {isInputsExpanded && (
                             <div className="relative w-64">
                               <TextInput
                                 placeholder="Search by request id..."
@@ -981,7 +979,6 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  setIsSearchVisible(false);
                                   setSearchRequestId("");
                                 }}
                                 className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full"
@@ -989,16 +986,6 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                                 <XMarkIcon className="h-4 w-4 text-slate-500" />
                               </button>
                             </div>
-                          ) : (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setIsSearchVisible(true);
-                              }}
-                              className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full"
-                            >
-                              <MagnifyingGlassIcon className="h-5 w-5 text-slate-500" />
-                            </button>
                           )}
                           <ChevronDownIcon
                             className={`h-5 w-5 transition-transform ${
