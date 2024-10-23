@@ -63,8 +63,7 @@ export class LogManager {
     const lytixHandler = new LytixHandler();
 
     const webhookHandler = new WebhookHandler(
-      new WebhookStore(supabaseServer.client),
-      new FeatureFlagStore(supabaseServer.client)
+      new WebhookStore(supabaseServer.client)
     );
 
     authHandler
