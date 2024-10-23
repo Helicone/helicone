@@ -14,21 +14,24 @@ export class WebhookStore {
   async getWebhooksByOrgId(
     orgId: string
   ): PromiseGenericResult<Database["public"]["Tables"]["webhooks"]["Row"][]> {
-    const webhooks = await cacheResultCustom(
+    return await cacheResultCustom(
       "getWebhooksByOrgId-" + orgId,
-      async () =>
-        await this.supabaseClient
+      async () => {
+        const webhooks = await this.supabaseClient
           .from("webhooks")
           .select("*")
-          .eq("org_id", orgId),
+          .eq("org_id", orgId);
+
+        if (webhooks.data) {
+          return ok(webhooks.data);
+        }
+
+        return err(
+          `Failed to get webhooks for org ${orgId}: ${webhooks.error}`
+        );
+      },
       kvCache
     );
-
-    if (webhooks.error) {
-      err(`Failed to get webhooks for org ${orgId}: ${webhooks.error.message}`);
-    }
-
-    return ok(webhooks.data ?? []);
   }
 
   async getWebhookSubscriptionByWebhookId(
