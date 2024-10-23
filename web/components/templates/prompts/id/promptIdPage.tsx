@@ -642,6 +642,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
   const [isVersionsExpanded, setIsVersionsExpanded] = useState(true);
   const [isInputsExpanded, setIsInputsExpanded] = useState(true);
   const [isSearchVisible, setIsSearchVisible] = useState(false);
+  const [isOverMaxWidth, setIsOverMaxWidth] = useState(false);
 
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -651,13 +652,30 @@ const PromptIdPage = (props: PromptIdPageProps) => {
     }
   }, [isSearchVisible]);
 
+  useEffect(() => {
+    const handleResize = () => {
+      if (window && window.innerWidth > 1808) {
+        setIsOverMaxWidth(true);
+      } else {
+        setIsOverMaxWidth(false);
+      }
+    };
+
+    handleResize();
+
+    // also check on resize
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
   // Add this new function to handle the button click
   const handleSearchButtonClick = (e: React.MouseEvent) => {
     e.stopPropagation(); // This stops the event from propagating to the parent div
     setIsSearchVisible(!isSearchVisible);
   };
-
-  const isOverMaxWidth = useMediaQuery("(max-width: 1200px)");
 
   return (
     <IslandContainer className="mx-0">
