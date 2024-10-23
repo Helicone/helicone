@@ -27,7 +27,7 @@
     "dateformat": "^5.0.3",
     "dotenv": "^16.3.1",
     "express": "4.19.2",
-    "express-openapi-validator": "^5.1.1",
+    "express-openapi-validator": "^5.3.7",
     "express-rate-limit": "^7.2.0",
     "fs": "^0.0.1-security",
     "generate-api-key": "^1.0.2",
