@@ -57,7 +57,7 @@
     "@supabase/supabase-js": "^2.1.1",
     "@tanstack/react-query": "^4.24.10",
     "@tanstack/react-table": "^8.15.0",
-    "@tremor/react": "^3.17.4",
+    "@tremor/react": "^3.18.3",
     "@vercel/analytics": "^0.1.5",
     "ag-grid-community": "^32.1.0",
     "ag-grid-react": "^32.1.0",
