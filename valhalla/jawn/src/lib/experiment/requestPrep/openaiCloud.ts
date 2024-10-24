@@ -16,6 +16,7 @@ function prepareRequestOpenAI(
     Authorization: `Bearer ${proxyKey}`,
     Accept: "application/json",
     "Accept-Encoding": "",
+    "Helicone-Experiment-Secret-Key": process.env.EXPERIMENTS_SECRET_KEY ?? "",
   };
   let fetchUrl = requestPath;
   return {

@@ -23,6 +23,7 @@ export async function prepareRequestAzure(
     "api-key": azureAPIKey,
     Accept: "application/json",
     "Accept-Encoding": "",
+    "Helicone-Experiment-Secret-Key": process.env.EXPERIMENTS_SECRET_KEY ?? "",
   };
 
   if (apiKey) {

@@ -75,6 +75,7 @@ export interface BASE_Env {
   UPSTASH_KAFKA_USERNAME: string;
   UPSTASH_KAFKA_API_KEY: string;
   UPSTASH_KAFKA_PASSWORD: string;
+  EXPERIMENTS_SECRET_KEY: string;
   ORG_IDS?: string;
   PERCENT_LOG_KAFKA?: string;
   WORKER_DEFINED_REDIRECT_URL?: string;
@@ -313,6 +314,7 @@ export default {
     ctx: ExecutionContext
   ): Promise<Response> {
     try {
+      console.log({ env });
       const requestWrapper = await RequestWrapper.create(request, env);
       if (requestWrapper.error || !requestWrapper.data) {
         return handleError(requestWrapper.error);
