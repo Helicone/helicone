@@ -43,12 +43,11 @@ export const ExperimentRandomInputSelector = (
 
   return (
     <ThemedDrawer open={open} setOpen={setOpen}>
-      {open ? "open" : "closed"}
       <div className="h-full flex flex-col space-y-4 justify-between w-full">
         <div className="flex flex-col w-full">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-semibold text-xl">
-              Select Inputs ({requestIds?.length})
+              Randomized Inputs ({requestIds?.length})
             </h2>
           </div>
           <p className="text-gray-500 text-sm pb-4">
