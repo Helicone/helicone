@@ -12,7 +12,7 @@ const IslandContainer = React.forwardRef<
   <div
     ref={ref}
     role="alert"
-    className={cn(className, ISLAND_MARGIN)}
+    className={cn(ISLAND_MARGIN, className)}
     {...props}
   />
 ));
