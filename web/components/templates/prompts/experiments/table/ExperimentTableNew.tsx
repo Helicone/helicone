@@ -127,7 +127,7 @@ export function ExperimentTableNew({
     [experimentData]
   );
 
-  const fetchRequest = useCallback(
+  const fetchRequestById = useCallback(
     async (requestId: string) => {
       const jawnClient = getJawnClient(orgId);
       const res = await jawnClient.POST("/v1/request/query-clickhouse", {
@@ -153,6 +153,29 @@ export function ExperimentTableNew({
     [orgId]
   );
 
+  const fetchAllHypothesisResponses = useCallback(async () => {
+    if (!experimentData || !experimentData.hypotheses) return [];
+
+    const allResponses = await Promise.all(
+      experimentData.hypotheses.map(async (hypothesis) => {
+        const responses = await Promise.all(
+          hypothesis.requests.map(async (request) => {
+            const response = await fetchRequestById(request.resultRequestId);
+            return {
+              datasetRowId: request.datasetRowId,
+              hypothesisId: hypothesis.id,
+              response,
+            };
+          })
+        );
+        return responses;
+      })
+    );
+
+    // Flatten the array
+    return allResponses.flat();
+  }, [experimentData, fetchRequestById]);
+
   const fetchInputRecords = useCallback(async () => {
     const datasetId = experimentData?.dataset.id;
     if (!orgId || !datasetId || !promptSubversionId) return [];
@@ -169,7 +192,7 @@ export function ExperimentTableNew({
     );
     return res.data?.data;
   }, [orgId, experimentData?.dataset?.id, promptSubversionId]);
-  s
+  s;
 
   // Define fetchPromptVersionTemplate
   const fetchPromptVersionTemplate = useCallback(async () => {

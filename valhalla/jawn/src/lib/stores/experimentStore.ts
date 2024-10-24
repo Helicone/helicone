@@ -60,6 +60,10 @@ export interface SimplifiedExperiment {
   organization: string;
   createdAt: string;
   meta: any;
+  dataset: {
+    id: string;
+    rowIds: string[];
+  };
   hypotheses: SimplifiedExperimentHypothesis[];
 }
 
@@ -120,31 +124,45 @@ function getSimplifiedExperimentsQuery(filter?: string, limit?: number) {
       'organization', e.organization,
       'createdAt', e.created_at,
       'meta', e.meta,
-      'hypotheses', COALESCE((
-        SELECT json_agg(
+      'dataset', jsonb_build_object(
+        'id', ds.id,
+        'rowIds', COALESCE(
+          (
+            SELECT jsonb_agg(dsr.id)
+            FROM experiment_dataset_v2_row dsr
+            WHERE dsr.dataset_id = ds.id
+          ), '[]'::jsonb
+        )
+      ),
+      'hypotheses', COALESCE(
+        jsonb_agg(
           jsonb_build_object(
             'id', h.id,
             'promptVersionId', h.prompt_version,
             'model', h.model,
             'status', h.status,
             'createdAt', h.created_at,
-            'requests', (
-              SELECT json_agg(
-                jsonb_build_object(
-                  'datasetRowId', hr.dataset_row,
-                  'resultRequestId', hr.result_request_id
+            'requests', COALESCE(
+              (
+                SELECT jsonb_agg(
+                  jsonb_build_object(
+                    'datasetRowId', hr.dataset_row,
+                    'resultRequestId', hr.result_request_id
+                  )
                 )
-              )
-              FROM experiment_v2_hypothesis_run hr
-              WHERE hr.experiment_hypothesis = h.id
+                FROM experiment_v2_hypothesis_run hr
+                WHERE hr.experiment_hypothesis = h.id
+              ), '[]'::jsonb
             )
           )
-        ) FROM experiment_v2_hypothesis h
-        WHERE h.experiment_v2 = e.id
-      ), '[]'::json)
+        ) FILTER (WHERE h.id IS NOT NULL), '[]'::jsonb
+      )
     ) as jsonb_build_object
     FROM experiment_v2 e
+    LEFT JOIN helicone_dataset ds ON e.dataset = ds.id
+    LEFT JOIN experiment_v2_hypothesis h ON h.experiment_v2 = e.id
     ${filter ? `WHERE ${filter}` : ""}
+    GROUP BY e.id, ds.id
     ORDER BY e.created_at DESC
     ${limit ? `LIMIT ${limit}` : ""}
   `;
