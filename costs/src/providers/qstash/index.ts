@@ -15,6 +15,7 @@ export const costs: ModelRow[] = [
       prompt_token: 3e-7,
       completion_token: 3e-7,
     },
+    max_window_size: 4096,
   },
   {
     model: {
@@ -25,5 +26,6 @@ export const costs: ModelRow[] = [
       prompt_token: 3e-7,
       completion_token: 3e-7,
     },
+    max_window_size: 32768,
   },
 ];
