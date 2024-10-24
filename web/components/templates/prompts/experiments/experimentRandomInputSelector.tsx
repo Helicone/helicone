@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import ThemedDrawer from "../../../shared/themed/themedDrawer";
 import HcButton from "../../../ui/hcButton";
 import { useJawnClient } from "../../../../lib/clients/jawnHook";
