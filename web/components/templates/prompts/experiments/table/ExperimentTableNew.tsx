@@ -367,7 +367,9 @@ export function ExperimentTableNew({
   // Modify the useEffect that updates rowData
   useEffect(() => {
     if (experimentData && inputRecordsData) {
-      updateRowData(experimentData, inputRecordsData);
+      updateRowData(experimentData, inputRecordsData).then(() => {
+        setIsInitialLoading(false);
+      });
     } else if (!experimentId) {
       // If there's no experimentId, set a default empty row
       const defaultInputKey = "Input 1";
@@ -380,7 +382,7 @@ export function ExperimentTableNew({
           isLoading: {},
         },
       ]);
-      setIsDataLoading(false); // Ensure we're not in a loading state
+      setIsInitialLoading(false);
     }
   }, [experimentData, inputRecordsData, experimentId]);
 
@@ -1192,14 +1194,18 @@ export function ExperimentTableNew({
     );
   };
 
-  // if (isDataLoading) {
-  //   return (
-  //     <div className="flex items-center justify-center h-screen flex-col">
-  //       <LoadingAnimation />
-  //       <h1 className="text-4xl font-semibold">Getting your experiments</h1>
-  //     </div>
-  //   );
-  // }
+  // Add a new state for initial loading
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+
+  // Add the loading check back before the return statement
+  if (isInitialLoading && experimentId) {
+    return (
+      <div className="flex items-center justify-center h-screen flex-col">
+        <LoadingAnimation />
+        <h1 className="text-4xl font-semibold">Getting your experiments</h1>
+      </div>
+    );
+  }
 
   return (
     <div className="relative w-full">
