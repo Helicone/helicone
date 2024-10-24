@@ -8,6 +8,7 @@ import PromptPropertyCard from "../id/promptPropertyCard";
 interface ExperimentInputSelectorProps {
   open: boolean;
   setOpen: (open: boolean) => void;
+  setShowRandomInputSelector: (open: boolean) => void;
   requestIds?: {
     id: string;
     inputs: {

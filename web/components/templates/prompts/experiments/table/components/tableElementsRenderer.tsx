@@ -14,6 +14,7 @@ import { useState, useEffect, useRef } from "react";
 import { Badge } from "../../../../../ui/badge";
 import PromptPlayground from "../../../id/promptPlayground";
 import { Input } from "../../../../../ui/input";
+import { Dices } from "lucide-react";
 
 const InputCellRenderer: React.FC<any> = (props) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
@@ -128,6 +129,17 @@ const InputCellRenderer: React.FC<any> = (props) => {
           >
             <TableCellsIcon className="inline h-4 w-4 mr-2" />
             Select an input set
+          </Button>
+          <Button
+            onClick={() => {
+              setPopoverOpen(false);
+              props.context.setShowRandomInputSelector(true);
+            }}
+            className="h-8 w-full flex items-center justify-start"
+            variant="ghost"
+          >
+            <Dices className="inline h-4 w-4 mr-2" />
+            Random prod
           </Button>
           <Button
             className="w-full h-8 flex items-center justify-start"

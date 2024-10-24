@@ -56,6 +56,7 @@ import { useRouter } from "next/router";
 import { ScrollArea } from "../../../../ui/scroll-area";
 import clsx from "clsx";
 import ScoresEvaluatorsConfig from "./scores/ScoresEvaluatorsConfig";
+import { ExperimentRandomInputSelector } from "../experimentRandomInputSelector";
 
 interface ExperimentTableProps {
   promptSubversionId?: string;
@@ -217,6 +218,7 @@ export function ExperimentTable({
     fetchRandomInputRecords,
     {
       enabled: true,
+      refetchInterval: 10000,
     }
   );
 
@@ -918,6 +920,7 @@ export function ExperimentTable({
 
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [selectedProviderKey, setSelectedProviderKey] = useState(providerKey);
+  const [showRandomInputSelector, setShowRandomInputSelector] = useState(false);
 
   const getExperimentExportData = useCallback(() => {
     if (!rowData || rowData.length === 0) {
@@ -1248,6 +1251,7 @@ export function ExperimentTable({
             getRowId={getRowId}
             context={{
               setShowExperimentInputSelector,
+              setShowRandomInputSelector,
               handleRunHypothesis,
               hypothesesToRun,
               inputKeys: Array.from(inputKeys),
@@ -1297,10 +1301,28 @@ export function ExperimentTable({
         setOpen={setSettingsOpen}
       /> */}
 
+      <ExperimentRandomInputSelector
+        open={showRandomInputSelector}
+        setOpen={setShowRandomInputSelector}
+        meta={{
+          promptVersionId: promptSubversionId,
+          datasetId: experimentData?.dataset?.id,
+        }}
+        requestIds={randomInputRecords}
+        onSuccess={async (success) => {
+          if (success) {
+            await refetchExperiments();
+            await refetchInputRecords();
+            setShowRandomInputSelector(false);
+          }
+        }}
+      />
+
       {/* Include the ExperimentInputSelector */}
       <ExperimentInputSelector
         open={showExperimentInputSelector}
         setOpen={setShowExperimentInputSelector}
+        setShowRandomInputSelector={setShowRandomInputSelector}
         meta={{
           promptVersionId: promptSubversionId,
           datasetId: experimentData?.dataset?.id,
