@@ -5,7 +5,7 @@ import { withAuthSSR } from "../../lib/api/handlerWrappers";
 import { useGetRequests } from "../../services/hooks/requests";
 
 import { sessionFromHeliconeRequests } from "../../lib/sessions/sessionsFromHeliconeTequests";
-import SessionContentV2 from "../../components/templates/sessions/sessionId/SessionContentV2";
+import { SessionContent } from "../../components/templates/sessions/sessionId/SessionContent";
 
 const SessionDetail = ({ session_id }: { session_id: string }) => {
   const requests = useGetRequests(
@@ -30,7 +30,7 @@ const SessionDetail = ({ session_id }: { session_id: string }) => {
   const session = sessionFromHeliconeRequests(requests.requests.requests ?? []);
 
   return (
-    <SessionContentV2
+    <SessionContent
       session={session}
       session_id={session_id as string}
       requests={requests}
