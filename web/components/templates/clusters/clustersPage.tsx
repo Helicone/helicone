@@ -38,6 +38,14 @@ const ClustersPage = () => {
     []
   );
 
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen w-full">
+        Gathering clusters from your data... This may take a few minutes.
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-4">
       <h1>Clusters</h1>
