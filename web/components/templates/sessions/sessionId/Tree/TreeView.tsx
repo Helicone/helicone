@@ -21,11 +21,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import RequestDrawerV2 from "@/components/templates/requestsV2/requestDrawerV2";
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from "@/components/ui/resizable";
+
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface TreeViewProps {
