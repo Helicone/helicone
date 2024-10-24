@@ -19,6 +19,12 @@ import {
   getRequestMessages,
   getResponseMessage,
 } from "../../requests/chatComponent/messageUtils";
+import { Ellipsis } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export type Input = {
   id: string;
@@ -231,7 +237,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
     }
   }, [currentChat, selectedModel]);
 
-  const renderMessages = () => {
+  const renderMessages = (messages: Message[]) => {
     switch (mode) {
       case "Pretty":
         return (
@@ -278,6 +284,8 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
     }
   };
 
+  const [isAccordionOpen, setIsAccordionOpen] = useState(false);
+
   return (
     <div className="flex flex-col space-y-4">
       <div
@@ -291,8 +299,40 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
           setIsEditMode={setIsEditMode}
         />
 
+        {!isAccordionOpen &&
+          chatType === "response" &&
+          playgroundMode === "experiment" && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div
+                  className="flex justify-center w-full cursor-pointer bg-slate-50 dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800"
+                  onClick={() => setIsAccordionOpen(!isAccordionOpen)}
+                >
+                  <Button
+                    variant="secondary"
+                    size="icon"
+                    className="w-auto h-auto px-2 rounded-full my-2 hover:bg-slate-200 dark:hover:bg-slate-800"
+                    // onClick={(e) => e.stopPropagation()}
+                  >
+                    <Ellipsis className="h-4 w-4" />
+                  </Button>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>View Inputs</TooltipContent>
+            </Tooltip>
+          )}
+
+        {chatType === "response" &&
+          playgroundMode === "experiment" &&
+          isAccordionOpen &&
+          renderMessages(messages.slice(0, messages.length - 1))}
+
         <div className="flex-grow overflow-auto rounded-b-md">
-          {renderMessages()}
+          {chatType === "response" &&
+          playgroundMode === "experiment" &&
+          isEditMode === false
+            ? renderMessages([messages[messages.length - 1]])
+            : renderMessages(messages)}
         </div>
         {isEditMode && (
           <div className="flex justify-between items-center py-4 px-8 border-t border-slate-300 dark:border-slate-700 bg-white dark:bg-black rounded-b-lg">
@@ -302,7 +342,6 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
             </p>
           </div>
         )}
-
         {isEditMode && (
           <div className="flex justify-between items-center py-4 px-8 border-t border-slate-300 dark:border-slate-700 bg-white dark:bg-black rounded-b-lg space-x-2">
             <div className="w-full flex space-x-2">
