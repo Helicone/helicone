@@ -119,7 +119,7 @@ export function ExperimentTableNew({
     fetchExperiments,
     {
       enabled: !!orgId && !!experimentId,
-      refetchInterval: 10000,
+      refetchInterval: 6000,
     }
   );
 
@@ -470,8 +470,8 @@ export function ExperimentTableNew({
       },
       onSettled: async (_, __, { hypothesisId, datasetRowIds }) => {
         // Refetch data
-        await refetchExperiments();
-        await refetchInputRecords();
+        // await refetchExperiments();
+        // await refetchInputRecords();
 
         // Reset loading state in rowData
         setRowData((prevData) =>
@@ -519,6 +519,7 @@ export function ExperimentTableNew({
 
     if (isHypothesisRunning) {
       intervalId = setInterval(() => {
+        console.log("refetching data");
         // Refetch data and refresh the grid
         refetchExperiments();
         // refetchInputRecords();
@@ -1191,14 +1192,14 @@ export function ExperimentTableNew({
     );
   };
 
-  if (isDataLoading) {
-    return (
-      <div className="flex items-center justify-center h-screen flex-col">
-        <LoadingAnimation />
-        <h1 className="text-4xl font-semibold">Getting your experiments</h1>
-      </div>
-    );
-  }
+  // if (isDataLoading) {
+  //   return (
+  //     <div className="flex items-center justify-center h-screen flex-col">
+  //       <LoadingAnimation />
+  //       <h1 className="text-4xl font-semibold">Getting your experiments</h1>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="relative w-full">
