@@ -5309,7 +5309,7 @@ export function RegisterRoutes(app: Router) {
 
             async function ExperimentController_getSimplifiedExperiments(request: ExRequest, response: ExResponse, next: any) {
             const args: Record<string, TsoaRoute.ParameterSchema> = {
-                    requestBody: {"in":"body","name":"requestBody","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"include":{"ref":"IncludeExperimentKeys"},"filter":{"ref":"ExperimentFilterNode","required":true}}},
+                    requestBody: {"in":"body","name":"requestBody","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"filter":{"ref":"ExperimentFilterNode","required":true}}},
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
             };
 

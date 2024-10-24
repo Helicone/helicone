@@ -255,7 +255,6 @@ export class ExperimentController extends Controller {
     @Body()
     requestBody: {
       filter: ExperimentFilterNode;
-      include?: IncludeExperimentKeys;
     },
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<SimplifiedExperiment[], string>> {
@@ -264,6 +263,7 @@ export class ExperimentController extends Controller {
     const result = await experimentManager.getSimplifiedExperiments(
       requestBody.filter
     );
+    console.log(result);
     // const result = await promptManager.getPrompts(requestBody);
     if (result.error || !result.data) {
       this.setStatus(500);

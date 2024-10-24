@@ -11657,9 +11657,6 @@
 						"application/json": {
 							"schema": {
 								"properties": {
-									"include": {
-										"$ref": "#/components/schemas/IncludeExperimentKeys"
-									},
 									"filter": {
 										"$ref": "#/components/schemas/ExperimentFilterNode"
 									}
