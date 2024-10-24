@@ -22,8 +22,14 @@ import {
 import { RequestManager } from "../../managers/request/RequestManager";
 import { JawnAuthenticatedRequest } from "../../types/request";
 import { ScoreManager, ScoreRequest } from "../../managers/score/ScoreManager";
+<<<<<<< HEAD
 import { cacheResultCustom } from "../../utils/cacheResult";
 import { KVCache } from "../../lib/cache/kvCache";
+||||||| parent of 5ba5fb2a (create embeddings on the fly + cache clusters)
+=======
+import { KVRedisCache } from "../../lib/cache/kvRedisCache";
+import { cacheResultRedis } from "../../utils/cacheResult";
+>>>>>>> 5ba5fb2a (create embeddings on the fly + cache clusters)
 
 export type RequestClickhouseFilterBranch = {
   left: RequestClickhouseFilterNode;
@@ -291,8 +297,16 @@ export class RequestController extends Controller {
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<ClustersResponse[], string>> {
     const reqManager = new RequestManager(request.authParams);
+    // const clusters = await reqManager.getClusters(requestBody);
 
-    const clusters = await reqManager.getClusters(requestBody);
+    const clusters = await cacheResultRedis(
+      "/v1/request/clusters" + request.authParams.organizationId,
+      () => reqManager.getClusters(requestBody),
+      new KVRedisCache(1000 * 60 * 60 * 24), // 1 day
+      requestBody.filter
+    );
+
+    console.log("length of clusters", clusters.data?.length);
 
     if (clusters.error) {
       this.setStatus(500);
