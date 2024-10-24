@@ -1242,7 +1242,6 @@ export function ExperimentTable({
             onColumnResized={onColumnResized}
             onColumnMoved={onColumnMoved}
             enableCellTextSelection={true}
-            colResizeDefault="shift"
             suppressRowTransform={true}
             domLayout="autoHeight"
             getRowId={getRowId}
