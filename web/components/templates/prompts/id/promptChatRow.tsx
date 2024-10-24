@@ -73,7 +73,7 @@ export const PrettyInput = ({
               selectedProperties
                 ? "bg-sky-100 border-sky-300 dark:bg-sky-950 dark:border-sky-700"
                 : "bg-yellow-100 border-yellow-300 dark:bg-yellow-950 dark:border-yellow-700",
-              "relative text-sm text-gray-900 dark:text-gray-100 border rounded-lg py-1 px-3 text-left"
+              "relative text-sm text-slate-900 dark:text-slate-100 border rounded-lg py-0.5 px-1 text-left"
             )}
             title={renderText}
           >
@@ -86,7 +86,7 @@ export const PrettyInput = ({
               selectedProperties
                 ? "bg-sky-100 border-sky-300 dark:bg-sky-950 dark:border-sky-700"
                 : "bg-yellow-100 border-yellow-300 dark:bg-yellow-950 dark:border-yellow-700",
-              "inline-block border text-gray-900 dark:text-gray-100 rounded-lg py-1 px-3 text-sm"
+              "inline-block border text-slate-900 dark:text-slate-100 rounded-lg py-0.5 px-1 text-sm"
             )}
           >
             {renderText}
@@ -99,11 +99,11 @@ export const PrettyInput = ({
           <div className="flex items-center w-full justify-center">
             <h3 className="text-2xl font-semibold">{keyName}</h3>
             <button onClick={() => setOpen(false)} className="ml-auto">
-              <XMarkIcon className="h-6 w-6 text-gray-500" />
+              <XMarkIcon className="h-6 w-6 text-slate-500" />
             </button>
           </div>
 
-          <div className="bg-white border-gray-300 dark:bg-black dark:border-gray-700 p-4 border rounded-lg flex flex-col space-y-4">
+          <div className="bg-white border-slate-300 dark:bg-black dark:border-slate-700 p-4 border rounded-lg flex flex-col space-y-4">
             <MarkdownEditor
               text={selectedProperties?.[keyName] || ""}
               setText={(text) => {
@@ -169,7 +169,7 @@ const RenderWithPrettyInputKeys = (props: {
   };
 
   return (
-    <div className="text-md leading-8 text-black dark:text-white whitespace-pre-wrap">
+    <div className="text-sm leading-7 text-slate-900 dark:text-slate-100 whitespace-pre-wrap">
       {replaceInputKeysWithComponents(text)}
     </div>
   );
@@ -291,7 +291,7 @@ const PromptChatRow = (props: PromptChatRowProps) => {
           />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           {hasImage(content) && (
-            <div className="flex flex-wrap items-center pt-4 border-t border-gray-300 dark:border-gray-700">
+            <div className="flex flex-wrap items-center pt-4 border-t border-slate-300 dark:border-slate-700">
               {content.map((item, index) =>
                 item.type === "image_url" || item.type === "image" ? (
                   <div key={index} className="relative">
@@ -316,7 +316,7 @@ const PromptChatRow = (props: PromptChatRowProps) => {
                         height={256}
                       />
                     ) : (
-                      <div className="h-[150px] w-[200px] bg-white border border-gray-300 text-center items-center flex justify-center text-xs italic text-gray-500">
+                      <div className="h-[150px] w-[200px] bg-white border border-slate-300 text-center items-center flex justify-center text-xs italic text-slate-500">
                         Unsupported Image Type
                       </div>
                     )}
@@ -447,13 +447,14 @@ const PromptChatRow = (props: PromptChatRowProps) => {
       className={clsx(
         index === 0 ? "" : "border-t",
         "bg-white dark:bg-black",
-        "flex flex-row justify-between gap-8 border-gray-300 dark:border-gray-700"
+        "flex flex-row justify-between gap-8 border-slate-300 dark:border-slate-700"
       )}
     >
       <div className="flex flex-col gap-4 w-full">
-        <div className="flex flex-col w-full h-full relative space-y-4">
-          <div className="flex w-full justify-between px-8 pt-4 rounded-t-lg">
+        <div className="flex flex-col w-full h-full relative space-y-2">
+          <div className="flex w-full justify-between px-4 pt-3 rounded-t-lg">
             <RoleButton
+              size="small"
               role={role}
               onRoleChange={(newRole) => {
                 setRole(newRole);
@@ -474,12 +475,12 @@ const PromptChatRow = (props: PromptChatRowProps) => {
                     onClick={() => {
                       setMinimize(!minimize);
                     }}
-                    className="text-gray-500 font-semibold"
+                    className="text-slate-700 font-semibold"
                   >
                     {minimize ? (
-                      <EyeIcon className="h-5 w-5" />
+                      <EyeIcon className="h-4 w-4" />
                     ) : (
-                      <EyeSlashIcon className="h-5 w-5" />
+                      <EyeSlashIcon className="h-4 w-4" />
                     )}
                   </button>
                 </Tooltip>
@@ -491,9 +492,9 @@ const PromptChatRow = (props: PromptChatRowProps) => {
                       navigator.clipboard.writeText(contentAsString || "");
                       setNotification("Copied to clipboard", "success");
                     }}
-                    className="text-gray-500 font-semibold"
+                    className="text-slate-700 font-semibold"
                   >
-                    <ClipboardIcon className="h-5 w-5" />
+                    <ClipboardIcon className="h-4 w-4" />
                   </button>
                 </Tooltip>
               )}
@@ -513,7 +514,7 @@ const PromptChatRow = (props: PromptChatRowProps) => {
                       }}
                       className="text-red-500 font-semibold"
                     >
-                      <TrashIcon className="h-5 w-5" />
+                      <TrashIcon className="h-4 w-4" />
                     </button>
                   </Tooltip>
                 </div>
@@ -521,7 +522,7 @@ const PromptChatRow = (props: PromptChatRowProps) => {
             </div>
           </div>
           <div>
-            <div className="w-full px-8 pb-4">
+            <div className="w-full px-4 pb-3">
               {isEditing ? (
                 <div className="space-y-4">
                   <MarkdownEditor
@@ -553,7 +554,7 @@ const PromptChatRow = (props: PromptChatRowProps) => {
                   />
                   {promptVariables.length > 0 && (
                     <div className="flex flex-col space-y-2">
-                      <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
                         Variables
                       </label>
                       <div className="flex flex-wrap gap-2">
