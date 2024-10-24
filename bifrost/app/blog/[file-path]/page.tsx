@@ -1,22 +1,12 @@
-import { getCompiledServerMdx } from "@mintlify/mdx";
-import path from "path";
-import fs from "fs";
-import Link from "next/link";
-import { ChevronLeftIcon } from "@heroicons/react/20/solid";
-import { notFound } from "next/navigation";
-
-import "@mintlify/mdx/dist/styles.css";
 import { getMetadata } from "@/components/templates/blog/getMetaData";
-
-function getContent(filePath: string) {
-  try {
-    const source = fs.readFileSync(filePath, "utf8");
-    return getCompiledServerMdx({ source });
-  } catch (error) {
-    console.error(error);
-    return null;
-  }
-}
+import { ChevronLeftIcon } from "@heroicons/react/20/solid";
+import { promises as fs } from "fs";
+import { serialize } from "next-mdx-remote/serialize";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import path from "path";
+import { RemoteMdxPage } from "./mdxRenderer";
+import remarkGfm from "remark-gfm";
 
 export default async function Home({
   params,
@@ -33,14 +23,16 @@ export default async function Home({
     params["file-path"],
     "src.mdx"
   );
-  const contentResult = await getContent(changelogFolder);
-  if (!contentResult) {
-    notFound();
-  }
+
+  const source = await fs.readFile(changelogFolder, "utf8");
+
+  const mdxSource = await serialize(source, {
+    mdxOptions: {
+      remarkPlugins: [remarkGfm],
+    },
+  });
 
   const metadata = await getMetadata(params["file-path"]);
-
-  const { content } = contentResult;
 
   if (!metadata) {
     notFound();
@@ -76,7 +68,7 @@ export default async function Home({
           <h1 className="text-bold text-sky-500 mt-16 md:mt-0">
             {String(metadata.title)}
           </h1>
-          {content}
+          <RemoteMdxPage mdxSource={mdxSource} />
         </article>
       </div>
     </div>
