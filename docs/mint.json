@@ -245,24 +245,15 @@
           "icon": "chart-line",
           "iconType": "solid"
         },
+        "features/sessions",
+        "features/prompts",
         {
           "group": "Webooks",
           "pages": ["features/webhooks", "features/webhooks-testing"],
           "icon": "webhook",
           "iconType": "solid"
         },
-        {
-          "group": "Sessions",
-          "pages": ["features/sessions", "features/sessions-feedback"],
-          "icon": "chart-line",
-          "iconType": "solid"
-        },
-        {
-          "group": "Prompts",
-          "pages": ["features/prompts", "feature/prompts/experiments"],
-          "icon": "chart-line",
-          "iconType": "solid"
-        },
+
         "features/advanced-usage/custom-properties",
         "features/advanced-usage/caching",
         "features/advanced-usage/omit-logs",
