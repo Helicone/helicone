@@ -4,10 +4,11 @@ require("dotenv").config({
 import { OpenAI } from "openai";
 // import { hprompt, HeliconeAPIClient } from "@helicone/helicone";
 import { v4 as uuid } from "uuid";
+import { hpf } from "@helicone/prompts";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
-  baseURL: "http://localhost:8787/v1", //"https://oai.helicone.ai/v1",
+  baseURL: "https://oai.helicone.ai/v1",
   defaultHeaders: {
     "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
   },
@@ -18,13 +19,15 @@ async function main() {
     //sleep for 1 second
     await new Promise((resolve) => setTimeout(resolve, 1000));
     const requestId = uuid();
-
+    const names = ["John", "Jane", "Jim", "Jill"];
     const chatCompletion = await openai.chat.completions.create(
       {
         messages: [
           {
             role: "user",
-            content: `Respond only hello world`,
+            content: hpf`Respond Say hellow to ${{
+              name: names[Math.floor(Math.random() * names.length)],
+            }}`,
           },
         ],
         model: "gpt-3.5-turbo",
@@ -34,6 +37,7 @@ async function main() {
           "Helicone-Request-Id": requestId,
           // "Helicone-Property-testing": "true",
           "Helicone-Property-Environment": "development",
+          "Helicone-Prompt-Id": "say-hello-to",
         },
       }
     );
