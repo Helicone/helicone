@@ -259,4 +259,8 @@ const useGetRequestCountClickhouse = (
   };
 };
 
-export { useGetRequestCountClickhouse, useGetRequests };
+export {
+  useGetRequestCountClickhouse,
+  useGetRequests,
+  useGetRequestsWithBodies,
+};

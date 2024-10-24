@@ -29,7 +29,7 @@ export const HypothesisCellRenderer: React.FC<any> = (params) => {
 
   // Extract the content to display in the cell
   const content =
-    parsedResponseData?.body?.choices?.[0]?.message?.content || "";
+    parsedResponseData?.response?.choices?.[0]?.message?.content || "";
 
   // Check if content is longer than 100 characters
   const isContentLong = content.length > 100;

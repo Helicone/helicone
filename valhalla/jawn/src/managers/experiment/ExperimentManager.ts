@@ -11,6 +11,7 @@ import {
   Experiment,
   ExperimentDatasetRow,
   ExperimentStore,
+  SimplifiedExperiment,
   IncludeExperimentKeys,
 } from "../../lib/stores/experimentStore";
 import { FilterNode } from "../../lib/shared/filters/filterDefs";
@@ -80,6 +81,12 @@ export class ExperimentManager extends BaseManager {
     include: IncludeExperimentKeys
   ): Promise<Result<Experiment[], string>> {
     return this.ExperimentStore.getExperiments(filter, include);
+  }
+
+  async getSimplifiedExperiments(
+    filter: FilterNode
+  ): Promise<Result<SimplifiedExperiment[], string>> {
+    return this.ExperimentStore.getSimplifiedExperiment(filter);
   }
 
   async createNewExperimentHypothesis(params: {

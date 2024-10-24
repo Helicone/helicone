@@ -1,7 +1,8 @@
 /* tslint:disable */
 /* eslint-disable */
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-import { TsoaRoute, fetchMiddlewares, ExpressTemplateService } from '@tsoa/runtime';
+import type { TsoaRoute } from '@tsoa/runtime';
+import {  fetchMiddlewares, ExpressTemplateService } from '@tsoa/runtime';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { AdminController } from './../../controllers/private/adminController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -1965,6 +1966,55 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ExperimentRequest": {
+        "dataType": "refObject",
+        "properties": {
+            "datasetRowId": {"dataType":"string","required":true},
+            "resultRequestId": {"dataType":"string","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "SimplifiedExperimentHypothesis": {
+        "dataType": "refObject",
+        "properties": {
+            "id": {"dataType":"string","required":true},
+            "promptVersionId": {"dataType":"string","required":true},
+            "model": {"dataType":"string","required":true},
+            "status": {"dataType":"string","required":true},
+            "createdAt": {"dataType":"string","required":true},
+            "runs": {"dataType":"array","array":{"dataType":"refObject","ref":"ExperimentRequest"},"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "SimplifiedExperiment": {
+        "dataType": "refObject",
+        "properties": {
+            "id": {"dataType":"string","required":true},
+            "organization": {"dataType":"string","required":true},
+            "createdAt": {"dataType":"string","required":true},
+            "meta": {"dataType":"any","required":true},
+            "dataset": {"dataType":"nestedObjectLiteral","nestedProperties":{"rowIds":{"dataType":"array","array":{"dataType":"string"},"required":true},"id":{"dataType":"string","required":true}},"required":true},
+            "hypotheses": {"dataType":"array","array":{"dataType":"refObject","ref":"SimplifiedExperimentHypothesis"},"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ResultSuccess_SimplifiedExperiment-Array_": {
+        "dataType": "refObject",
+        "properties": {
+            "data": {"dataType":"array","array":{"dataType":"refObject","ref":"SimplifiedExperiment"},"required":true},
+            "error": {"dataType":"enum","enums":[null],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Result_SimplifiedExperiment-Array.string_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_SimplifiedExperiment-Array_"},{"ref":"ResultError_string_"}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ExperimentRun": {
         "dataType": "refObject",
         "properties": {
@@ -2504,11 +2554,18 @@ const templateService = new ExpressTemplateService(models, {"noImplicitAdditiona
 
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 
+
+
+
 export function RegisterRoutes(app: Router) {
+
     // ###########################################################################################################
     //  NOTE: If you do not see routes for all of your controllers in this file, then you might not have informed tsoa of where to look
     //      Please look into the "controllerPathGlobs" config option described in the readme: https://github.com/lukeautry/tsoa
     // ###########################################################################################################
+
+
+    
         app.post('/v1/admin/feature-flags',
             authenticateMiddleware([{"api_key":[]}]),
             ...(fetchMiddlewares<RequestHandler>(AdminController)),
@@ -5235,6 +5292,38 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'getExperiments',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.post('/v1/experiment/query/simplified',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(ExperimentController)),
+            ...(fetchMiddlewares<RequestHandler>(ExperimentController.prototype.getSimplifiedExperiments)),
+
+            async function ExperimentController_getSimplifiedExperiments(request: ExRequest, response: ExResponse, next: any) {
+            const args: Record<string, TsoaRoute.ParameterSchema> = {
+                    requestBody: {"in":"body","name":"requestBody","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"filter":{"ref":"ExperimentFilterNode","required":true}}},
+                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args, request, response });
+
+                const controller = new ExperimentController();
+
+              await templateService.apiHandler({
+                methodName: 'getSimplifiedExperiments',
                 controller,
                 response,
                 next,

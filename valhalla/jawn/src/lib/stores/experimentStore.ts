@@ -41,6 +41,40 @@ export interface ExperimentDatasetRow {
   scores: Record<string, Score>;
 }
 
+export interface ExperimentRequest {
+  datasetRowId: string;
+  resultRequestId: string;
+}
+
+export interface SimplifiedExperimentHypothesis {
+  id: string;
+  promptVersionId: string;
+  model: string;
+  status: string;
+  createdAt: string;
+  runs: ExperimentRequest[];
+}
+
+export interface DatasetRow {
+  rowId: string;
+  inputRecord: {
+    id: string;
+    requestId: string;
+  };
+}
+
+export interface SimplifiedExperiment {
+  id: string;
+  organization: string;
+  createdAt: string;
+  meta: any;
+  dataset: {
+    id: string;
+    rowIds: string[];
+  };
+  hypotheses: SimplifiedExperimentHypothesis[];
+}
+
 export interface Experiment {
   id: string;
   organization: string;
@@ -89,6 +123,57 @@ export interface IncludeExperimentKeys {
   promptVersion?: true;
   responseBodies?: true;
   score?: true;
+}
+
+function getSimplifiedExperimentsQuery(filter?: string, limit?: number) {
+  return `
+    SELECT jsonb_build_object(
+      'id', e.id,
+      'organization', e.organization,
+      'createdAt', e.created_at,
+      'meta', e.meta,
+      'dataset', jsonb_build_object(
+        'id', ds.id,
+        'rowIds', COALESCE(
+          (
+            SELECT jsonb_agg(dsr.id)
+            FROM experiment_dataset_v2_row dsr
+            WHERE dsr.dataset_id = ds.id
+          ), '[]'::jsonb
+        )
+      ),
+      'hypotheses', COALESCE(
+        jsonb_agg(
+          jsonb_build_object(
+            'id', h.id,
+            'promptVersionId', h.prompt_version,
+            'model', h.model,
+            'status', h.status,
+            'createdAt', h.created_at,
+            'runs', COALESCE(
+              (
+                SELECT jsonb_agg(
+                  jsonb_build_object(
+                    'datasetRowId', hr.dataset_row,
+                    'resultRequestId', hr.result_request_id
+                  )
+                )
+                FROM experiment_v2_hypothesis_run hr
+                WHERE hr.experiment_hypothesis = h.id
+              ), '[]'::jsonb
+            )
+          )
+        ) FILTER (WHERE h.id IS NOT NULL), '[]'::jsonb
+      )
+    ) as jsonb_build_object
+    FROM experiment_v2 e
+    LEFT JOIN helicone_dataset ds ON e.dataset = ds.id
+    LEFT JOIN experiment_v2_hypothesis h ON h.experiment_v2 = e.id
+    ${filter ? `WHERE ${filter}` : ""}
+    GROUP BY e.id, ds.id
+    ORDER BY e.created_at DESC
+    ${limit ? `LIMIT ${limit}` : ""}
+  `;
 }
 
 function getExperimentsQuery(
@@ -356,6 +441,27 @@ export class ExperimentStore extends BaseStore {
       experiments.data!.map((d) => enrichExperiment(d, include))
     );
     return ok(experimentResults);
+  }
+
+  async getSimplifiedExperiment(
+    filter: FilterNode
+  ): Promise<Result<SimplifiedExperiment[], string>> {
+    const builtFilter = buildFilterPostgres({
+      filter,
+      argsAcc: [this.organizationId],
+    });
+
+    const experimentQuery = getSimplifiedExperimentsQuery(
+      `e.organization = $1 AND ${builtFilter.filter}`,
+      30
+    );
+
+    return resultMap(
+      await dbExecute<{
+        jsonb_build_object: SimplifiedExperiment;
+      }>(experimentQuery, builtFilter.argsAcc),
+      (d) => d.map((d) => d.jsonb_build_object)
+    );
   }
 
   async getExperimentById(
