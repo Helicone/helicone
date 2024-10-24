@@ -41,6 +41,7 @@ export type Log = {
     requestCreatedAt: Date;
     isStream: boolean;
     heliconeTemplate?: TemplateWithInputs;
+    embedding?: number[];
   };
   response: {
     id: string;
