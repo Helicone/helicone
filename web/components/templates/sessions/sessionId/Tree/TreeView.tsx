@@ -44,96 +44,98 @@ const TreeView: React.FC<TreeViewProps> = ({
   const [collapseAll, setCollapseAll] = useState(false);
   const [showDrawer, setShowDrawer] = useState(false);
   return (
-    <Col>
-      <Col className="gap-1 items-start">
-        {showSpan && (
-          <div className="bg-white w-full relative dark:bg-slate-900 border-slate-200 border-t">
-            <TraceSpan
-              session={session}
+    <>
+      <Col className="h-full">
+        <Col className="gap-1 items-start sticky top-0 z-[100]">
+          {showSpan && (
+            <div className="bg-white w-full relative dark:bg-slate-900 border-slate-200 border-t">
+              <TraceSpan
+                session={session}
+                selectedRequestIdDispatch={[
+                  selectedRequestId,
+                  setSelectedRequestId,
+                ]}
+                height={expandSpan ? "100%" : "200px"}
+              />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute top-3 right-3 border border-slate-200 hover:bg-slate-50 active:bg-slate-100 p-2 dark:border-slate-700 dark:hover:bg-slate-700 dark:active:bg-slate-800"
+                onClick={() => setExpandSpan(!expandSpan)}
+              >
+                {expandSpan ? (
+                  <ShrinkIcon
+                    width={16}
+                    height={16}
+                    className="text-slate-900 dark:text-slate-200"
+                  />
+                ) : (
+                  <ExpandIcon
+                    width={16}
+                    height={16}
+                    className="text-slate-900 dark:text-slate-200"
+                  />
+                )}
+              </Button>
+            </div>
+          )}
+        </Col>
+        <Row
+          className={
+            "bg-slate-50 dark:bg-black border-t border-r border-b border-slate-200 dark:border-slate-700 border-collapse overflow-x-auto"
+          }
+        >
+          <Col className="border-r border-slate-200 dark:border-slate-700 ">
+            <div className="w-full bg-slate-50 dark:bg-black flex justify-end h-10">
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      className="rounded-none"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setCollapseAll(!collapseAll)}
+                    >
+                      {collapseAll ? (
+                        <ChevronsUpDownIcon width={16} height={16} />
+                      ) : (
+                        <ChevronsDownUpIcon width={16} height={16} />
+                      )}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Collapse All</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+            <Tree
+              data={tracesToTreeNodeData(session.traces)}
+              className="min-h-[1000px] w-[30em] min-w-[30em] max-h-screen"
               selectedRequestIdDispatch={[
                 selectedRequestId,
                 setSelectedRequestId,
               ]}
-              height={expandSpan ? "100%" : "200px"}
+              collapseAll={collapseAll}
+              setShowDrawer={setShowDrawer}
             />
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute top-3 right-3 border border-slate-200 hover:bg-slate-50 active:bg-slate-100 p-2 dark:border-slate-700 dark:hover:bg-slate-700 dark:active:bg-slate-800"
-              onClick={() => setExpandSpan(!expandSpan)}
-            >
-              {expandSpan ? (
-                <ShrinkIcon
-                  width={16}
-                  height={16}
-                  className="text-slate-900 dark:text-slate-200"
-                />
-              ) : (
-                <ExpandIcon
-                  width={16}
-                  height={16}
-                  className="text-slate-900 dark:text-slate-200"
-                />
-              )}
-            </Button>
+          </Col>
+          <div className="flex flex-col gap-5 w-full">
+            <div className="flex-grow [&_.border]:border-none">
+              {requestIdToShow &&
+                requests.requests.requests?.find(
+                  (r) => r.request_id === requestIdToShow
+                ) && (
+                  <>
+                    {getNormalizedRequest(
+                      requests.requests.requests?.find(
+                        (r) => r.request_id === requestIdToShow
+                      )!
+                    ).render()}
+                  </>
+                )}
+            </div>
           </div>
-        )}
+        </Row>
       </Col>
-      <Row
-        className={
-          "bg-slate-50 dark:bg-black border-t border-r border-b border-slate-200 dark:border-slate-700 border-collapse overflow-x-auto"
-        }
-      >
-        <Col className="border-r border-slate-200 dark:border-slate-700 ">
-          <div className="w-full bg-slate-50 dark:bg-black flex justify-end h-10">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    className="rounded-none"
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setCollapseAll(!collapseAll)}
-                  >
-                    {collapseAll ? (
-                      <ChevronsUpDownIcon width={16} height={16} />
-                    ) : (
-                      <ChevronsDownUpIcon width={16} height={16} />
-                    )}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Collapse All</TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-          <Tree
-            data={tracesToTreeNodeData(session.traces)}
-            className="min-h-[1000px] w-[30em] min-w-[30em] max-h-screen"
-            selectedRequestIdDispatch={[
-              selectedRequestId,
-              setSelectedRequestId,
-            ]}
-            collapseAll={collapseAll}
-            setShowDrawer={setShowDrawer}
-          />
-        </Col>
-        <div className="flex flex-col gap-5 w-full">
-          <div className="flex-grow [&_.border]:border-none">
-            {requestIdToShow &&
-              requests.requests.requests?.find(
-                (r) => r.request_id === requestIdToShow
-              ) && (
-                <>
-                  {getNormalizedRequest(
-                    requests.requests.requests?.find(
-                      (r) => r.request_id === requestIdToShow
-                    )!
-                  ).render()}
-                </>
-              )}
-          </div>
-        </div>
-      </Row>
       {showDrawer && requestIdToShow && (
         <RequestDrawerV2
           open={showDrawer}
@@ -146,7 +148,7 @@ const TreeView: React.FC<TreeViewProps> = ({
           properties={[]}
         />
       )}
-    </Col>
+    </>
   );
 };
 

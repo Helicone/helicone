@@ -87,99 +87,105 @@ export const SessionContent: React.FC<SessionContentProps> = ({
   const [showSpan, setShowSpan] = useLocalStorage("showSpan-TreeView", true);
 
   return (
-    <Col className="gap-[12px]">
+    <Col className="h-screen">
       <Tabs
         value={currentTopView}
         onValueChange={(tab) =>
           setCurrentTopView(tab as (typeof TABS)[number]["id"])
         }
+        className="flex flex-col h-full"
       >
-        <Row className="items-center justify-between">
-          <BreadCrumb
-            className="mx-8 pt-10"
-            // @ts-ignore
-            users={session.traces
-              .map((trace) => trace.request.user)
-              .filter((user) => user !== "" && user != null)}
-            models={session.traces.map((trace) => trace.request.model ?? "")}
-            promptTokens={session.traces.reduce(
-              (acc, trace) =>
-                acc + (parseInt(`${trace?.request?.promptTokens}`) || 0),
-              0
-            )}
-            completionTokens={session.traces.reduce(
-              (acc, trace) =>
-                acc + (parseInt(`${trace?.request?.completionTokens}`) || 0),
-              0
-            )}
-            sessionId={session_id as string}
-            numTraces={session.traces.length}
-            sessionCost={session.session_cost_usd}
-            startTime={startTime}
-            endTime={endTime}
-            sessionFeedback={
-              requestWithFeedback?.properties["Helicone-Session-Feedback"] ===
-              "1"
-                ? true
-                : requestWithFeedback?.properties[
-                    "Helicone-Session-Feedback"
-                  ] === "0"
-                ? false
-                : null
-            }
-          />
+        <div className="sticky top-0 bg-white z-10">
+          <Row className="items-center justify-between">
+            <BreadCrumb
+              className="mx-8 pt-10"
+              // @ts-ignore
+              users={session.traces
+                .map((trace) => trace.request.user)
+                .filter((user) => user !== "" && user != null)}
+              models={session.traces.map((trace) => trace.request.model ?? "")}
+              promptTokens={session.traces.reduce(
+                (acc, trace) =>
+                  acc + (parseInt(`${trace?.request?.promptTokens}`) || 0),
+                0
+              )}
+              completionTokens={session.traces.reduce(
+                (acc, trace) =>
+                  acc + (parseInt(`${trace?.request?.completionTokens}`) || 0),
+                0
+              )}
+              sessionId={session_id as string}
+              numTraces={session.traces.length}
+              sessionCost={session.session_cost_usd}
+              startTime={startTime}
+              endTime={endTime}
+              sessionFeedback={
+                requestWithFeedback?.properties["Helicone-Session-Feedback"] ===
+                "1"
+                  ? true
+                  : requestWithFeedback?.properties[
+                      "Helicone-Session-Feedback"
+                    ] === "0"
+                  ? false
+                  : null
+              }
+            />
 
-          <Row className="gap-2 items-center mr-8">
-            {currentTopView === "tree" &&
-              (showSpan ? (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-[30px] text-sm font-medium flex items-center gap-1"
-                  onClick={() => setShowSpan(!showSpan)}
-                >
-                  <EyeOffIcon width={16} height={16} />
-                  Hide span
-                </Button>
-              ) : (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-[30px] text-sm font-medium flex items-center gap-1"
-                  onClick={() => setShowSpan(!showSpan)}
-                >
-                  <EyeIcon width={16} height={16} />
-                  Show span
-                </Button>
-              ))}
-            <TabsList variant="secondary" className="h-[30px]">
-              {TABS.map((tab) => (
-                <TabsTrigger
-                  className="h-[22px] text-slate-900 text-xs"
-                  variant="secondary"
-                  key={tab.id}
-                  value={tab.id}
-                >
-                  {tab.label}
-                </TabsTrigger>
-              ))}
-            </TabsList>
+            <Row className="gap-2 items-center mr-8">
+              {currentTopView === "tree" &&
+                (showSpan ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-[30px] text-sm font-medium flex items-center gap-1"
+                    onClick={() => setShowSpan(!showSpan)}
+                  >
+                    <EyeOffIcon width={16} height={16} />
+                    Hide span
+                  </Button>
+                ) : (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-[30px] text-sm font-medium flex items-center gap-1"
+                    onClick={() => setShowSpan(!showSpan)}
+                  >
+                    <EyeIcon width={16} height={16} />
+                    Show span
+                  </Button>
+                ))}
+              <TabsList variant="secondary" className="h-[30px]">
+                {TABS.map((tab) => (
+                  <TabsTrigger
+                    className="h-[22px] text-slate-900 text-xs"
+                    variant="secondary"
+                    key={tab.id}
+                    value={tab.id}
+                  >
+                    {tab.label}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </Row>
           </Row>
-        </Row>
+        </div>
 
-        <TabsContent value="tree">
-          <TreeView
-            session={session}
-            selectedRequestId={selectedRequestId}
-            setSelectedRequestId={handleRequestIdChange}
-            requests={requests}
-            showSpan={showSpan}
-          />
-        </TabsContent>
+        <div className="flex-grow overflow-auto">
+          <TabsContent value="tree" className="h-full">
+            <TreeView
+              session={session}
+              selectedRequestId={selectedRequestId}
+              setSelectedRequestId={handleRequestIdChange}
+              requests={requests}
+              showSpan={showSpan}
+            />
+          </TabsContent>
 
-        <TabsContent value="chat">
-          <ChatSession requests={requests} />
-        </TabsContent>
+          <TabsContent value="chat" className="h-full">
+            <ChatSession requests={requests} />
+          </TabsContent>
+        </div>
+
         <RequestDrawerV2
           request={
             requests.requests.requests?.find(
