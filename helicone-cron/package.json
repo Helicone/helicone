@@ -4,7 +4,7 @@
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20230115.0",
     "@types/dateformat": "^5.0.2",
-    "@types/jest": "^29.5.12",
+    "@types/jest": "^29.5.14",
     "@types/pg": "^8.11.5",
     "typescript": "^4.9.5",
     "wrangler": "^3.48.0"
