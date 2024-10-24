@@ -21,8 +21,6 @@ export const HypothesisCellRenderer: React.FC<any> = (params) => {
   const responseString = data[hypothesisId];
   let parsedResponseData: any = {};
 
-  console.log("responseString", responseString);
-
   try {
     parsedResponseData = JSON.parse(responseString);
   } catch (error) {
@@ -32,8 +30,6 @@ export const HypothesisCellRenderer: React.FC<any> = (params) => {
   // Extract the content to display in the cell
   const content =
     parsedResponseData?.response?.choices?.[0]?.message?.content || "";
-
-  console.log("content", content);
 
   // Check if content is longer than 100 characters
   const isContentLong = content.length > 100;
@@ -153,9 +149,6 @@ export const HypothesisCellRenderer: React.FC<any> = (params) => {
           className="w-6 h-6 p-0 border-slate-200 border rounded-md bg-slate-50 text-slate-500"
           onClick={(e) => {
             e.stopPropagation();
-            console.log("hypothesisId", hypothesisId);
-
-            console.log("data.dataset_row_id", data.dataset_row_id);
             params.handleRunHypothesis(hypothesisId, [data.dataset_row_id]);
           }}
         >

@@ -119,7 +119,7 @@ export function ExperimentTableNew({
     fetchExperiments,
     {
       enabled: !!orgId && !!experimentId,
-      refetchInterval: 6000,
+      refetchInterval: 3000,
     }
   );
 
@@ -259,21 +259,47 @@ export function ExperimentTableNew({
   // After defining inputKeys
   const inputColumnFields = Array.from(inputKeys);
 
-  // Function to update rowData based on fetched data
+  // Add a cache ref at the component level
+  const responseBodyCache = useRef<Record<string, any>>({});
+
+  // Modify updateRowData to use the cache
   const updateRowData = useCallback(
     async (experimentData: any, inputRecordsData: any[]) => {
       setIsDataLoading(true);
-      // Remove code that updates inputKeys
-      // const newInputKeys = new Set<string>();
-      // if (inputRecordsData && inputRecordsData.length > 0) {
-      //   inputRecordsData.forEach((row) => {
-      //     Object.keys(row.inputs).forEach((key) => newInputKeys.add(key));
-      //   });
-      // }
-      // if (newInputKeys.size === 0) {
-      //   newInputKeys.add("Input 1");
-      // }
-      // setInputKeys(newInputKeys);
+
+      const fetchRequestResponseBody = async (request_response: any) => {
+        // Check cache first
+        if (
+          request_response.request_id &&
+          responseBodyCache.current[request_response.request_id]
+        ) {
+          return responseBodyCache.current[request_response.request_id];
+        }
+
+        if (!request_response.signed_body_url) return null;
+
+        try {
+          const contentResponse = await fetch(request_response.signed_body_url);
+          if (contentResponse.ok) {
+            const text = await contentResponse.text();
+            let content = JSON.parse(text);
+            if (request_response.asset_urls) {
+              content = placeAssetIdValues(
+                request_response.asset_urls,
+                content
+              );
+            }
+            // Store in cache
+            if (request_response.request_id) {
+              responseBodyCache.current[request_response.request_id] = content;
+            }
+            return content;
+          }
+        } catch (error) {
+          console.error("Error fetching response body:", error);
+        }
+        return null;
+      };
 
       const newRowData = await Promise.all(
         inputRecordsData.map(async (row) => {
@@ -281,39 +307,27 @@ export function ExperimentTableNew({
 
           // Always populate "Messages" and "Original" columns
           hypothesisRowData["messages"] = JSON.stringify(
-            //@ts-ignore
             row?.request_body?.messages || {},
             null,
             2
           );
-          let content =
-            row?.response_body?.choices?.[0]?.message?.content || "";
 
-          // Parse the content if it's a JSON string
-          try {
-            hypothesisRowData["original"] = JSON.parse(content);
-          } catch (error) {
-            hypothesisRowData["original"] = content; // Use original content if parsing fails
-          }
-
-          const fetchRequestResponseBody = async (request_response: any) => {
-            if (!request_response.signed_body_url) return null;
-            const contentResponse = await fetch(
-              request_response.signed_body_url
-            );
-            if (contentResponse.ok) {
-              const text = await contentResponse.text();
-              let content = JSON.parse(text);
-              if (request_response.asset_urls) {
-                content = placeAssetIdValues(
-                  request_response.asset_urls,
-                  content
-                );
-              }
-              return content;
+          // Check cache for original content
+          const originalCacheKey = `original_${row.dataset_row_id}`;
+          if (responseBodyCache.current[originalCacheKey]) {
+            hypothesisRowData["original"] =
+              responseBodyCache.current[originalCacheKey];
+          } else {
+            let content =
+              row?.response_body?.choices?.[0]?.message?.content || "";
+            try {
+              hypothesisRowData["original"] = JSON.parse(content);
+            } catch (error) {
+              hypothesisRowData["original"] = content;
             }
-            return null;
-          };
+            responseBodyCache.current[originalCacheKey] =
+              hypothesisRowData["original"];
+          }
 
           // Add data for other hypotheses if they exist
           await Promise.all(
@@ -321,22 +335,34 @@ export function ExperimentTableNew({
               const hypothesisRun = hypothesis.runs?.find(
                 (r: any) => r.datasetRowId === row.dataset_row_id
               );
-              console.log("hypothesisRun", hypothesisRun);
+
               if (hypothesisRun) {
-                const request_response = await fetchRequestById(
-                  hypothesisRun.resultRequestId
-                );
-                console.log("request_response", request_response);
-                if (request_response) {
-                  const requestResponseBody = await fetchRequestResponseBody(
-                    request_response
-                  );
-                  console.log("requestResponseBody", requestResponseBody);
+                // Check cache for hypothesis result
+                const cacheKey = hypothesisRun.resultRequestId;
+
+                if (responseBodyCache.current[cacheKey]) {
                   hypothesisRowData[hypothesis.id] = JSON.stringify(
-                    requestResponseBody,
+                    responseBodyCache.current[cacheKey],
                     null,
                     2
                   );
+                } else {
+                  const request_response = await fetchRequestById(
+                    hypothesisRun.resultRequestId
+                  );
+
+                  if (request_response) {
+                    const requestResponseBody = await fetchRequestResponseBody(
+                      request_response
+                    );
+                    if (requestResponseBody) {
+                      hypothesisRowData[hypothesis.id] = JSON.stringify(
+                        requestResponseBody,
+                        null,
+                        2
+                      );
+                    }
+                  }
                 }
               }
             })
@@ -350,10 +376,9 @@ export function ExperimentTableNew({
           return {
             id: row.dataset_row_id,
             dataset_row_id: row.dataset_row_id,
-            // Spread inputs to individual fields
             ...row.inputs,
             ...hypothesisRowData,
-            isLoading: existingRow?.isLoading || {}, // Preserve isLoading state
+            isLoading: existingRow?.isLoading || {},
           };
         })
       );
@@ -361,81 +386,15 @@ export function ExperimentTableNew({
       setRowData(newRowData);
       setIsDataLoading(false);
     },
-    [experimentData, inputRecordsData, rowData]
+    [fetchRequestById, rowData]
   );
 
-  // Modify the useEffect that updates rowData
-  useEffect(() => {
-    if (experimentData && inputRecordsData) {
-      updateRowData(experimentData, inputRecordsData).then(() => {
-        setIsInitialLoading(false);
-      });
-    } else if (!experimentId) {
-      // If there's no experimentId, set a default empty row
-      const defaultInputKey = "Input 1";
-      setInputKeys(new Set([defaultInputKey]));
-      setRowData([
-        {
-          id: `temp-${Date.now()}`,
-          dataset_row_id: null,
-          [defaultInputKey]: "",
-          isLoading: {},
-        },
-      ]);
-      setIsInitialLoading(false);
-    }
-  }, [experimentData, inputRecordsData, experimentId]);
+  // Add a function to clear the cache when needed (e.g., when running new hypotheses)
+  const clearResponseCache = useCallback(() => {
+    responseBodyCache.current = {};
+  }, []);
 
-  // Add a new useEffect to handle initial loading state
-  useEffect(() => {
-    if (!experimentId) {
-      setIsDataLoading(false);
-    }
-  }, [experimentId]);
-
-  // Add an empty row if rowData is empty
-  useEffect(() => {
-    if (rowData.length === 0) {
-      const inputFields = Array.from(inputKeys).reduce((acc, key) => {
-        acc[key] = "";
-        return acc as Record<string, string>;
-      }, {} as Record<string, string>);
-
-      const newRow = {
-        id: `temp-${Date.now()}`,
-        dataset_row_id: null,
-        ...inputFields,
-        isLoading: {},
-      };
-
-      setRowData([newRow]);
-    }
-  }, [inputKeys, rowData.length]);
-
-  const defaultColDef = useMemo<ColDef>(
-    () => ({
-      sortable: true,
-      filter: false,
-      resizable: true,
-      wrapText: wrapText,
-      autoHeight: wrapText,
-      cellStyle: {
-        wordBreak: "normal",
-        whiteSpace: wrapText ? "normal" : "nowrap",
-        overflow: "hidden",
-        textOverflow: "ellipsis",
-      },
-      cellClass: "border-r border-[#E2E8F0]",
-      headerClass: "border-r border-[#E2E8F0]",
-    }),
-    [wrapText]
-  );
-  const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>(
-    {}
-  );
-
-  const getRowId = useCallback((params: any) => params.data.id, []);
-
+  // Modify runHypothesisMutation to clear cache for the affected rows
   const runHypothesisMutation = useMutation(
     async ({
       hypothesisId,
@@ -444,6 +403,15 @@ export function ExperimentTableNew({
       hypothesisId: string | "original";
       datasetRowIds: string[];
     }) => {
+      // Clear cache for the affected rows
+      datasetRowIds.forEach((rowId) => {
+        Object.keys(responseBodyCache.current).forEach((key) => {
+          if (key.includes(rowId)) {
+            delete responseBodyCache.current[key];
+          }
+        });
+      });
+
       await jawn.POST("/v1/experiment/run", {
         body: {
           experimentId: experimentId ?? "",
@@ -871,7 +839,6 @@ export function ExperimentTableNew({
           cellRendererParams: {
             hypothesisId: hypothesis.id,
             handleRunHypothesis,
-            loadingStates,
             wrapText,
           },
           headerComponent: CustomHeaderComponent,
@@ -946,7 +913,6 @@ export function ExperimentTableNew({
     sortedHypotheses,
     columnView,
     handleRunHypothesis,
-    loadingStates,
     rowData,
     wrapText,
     inputKeys,
@@ -1197,6 +1163,33 @@ export function ExperimentTableNew({
   // Add a new state for initial loading
   const [isInitialLoading, setIsInitialLoading] = useState(true);
 
+  // Add effect to handle initial data loading
+  useEffect(() => {
+    const loadInitialData = async () => {
+      if (experimentData && inputRecordsData) {
+        await updateRowData(experimentData, inputRecordsData);
+        setIsInitialLoading(false);
+        setIsDataLoading(false);
+      } else if (!experimentId) {
+        // If there's no experimentId, set default empty state
+        const defaultInputKey = "Input 1";
+        setInputKeys(new Set([defaultInputKey]));
+        setRowData([
+          {
+            id: `temp-${Date.now()}`,
+            dataset_row_id: null,
+            [defaultInputKey]: "",
+            isLoading: {},
+          },
+        ]);
+        setIsInitialLoading(false);
+        setIsDataLoading(false);
+      }
+    };
+
+    loadInitialData();
+  }, [experimentData, inputRecordsData, experimentId]);
+
   // Add the loading check back before the return statement
   if (isInitialLoading && experimentId) {
     return (
@@ -1286,7 +1279,6 @@ export function ExperimentTableNew({
             colResizeDefault="shift"
             suppressRowTransform={true}
             domLayout="autoHeight"
-            getRowId={getRowId}
             context={{
               setShowExperimentInputSelector,
               handleRunHypothesis,
