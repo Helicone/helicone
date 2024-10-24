@@ -84,7 +84,7 @@ const TreeView: React.FC<TreeViewProps> = ({
           "bg-slate-50 dark:bg-black border-t border-r border-b border-slate-200 dark:border-slate-700 border-collapse overflow-x-auto"
         }
       >
-        <Col className="border-r border-slate-200 dark:border-slate-700">
+        <Col className="border-r border-slate-200 dark:border-slate-700 ">
           <div className="w-full bg-slate-50 dark:bg-black flex justify-end h-10">
             <TooltipProvider>
               <Tooltip>
