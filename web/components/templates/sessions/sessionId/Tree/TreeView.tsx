@@ -21,6 +21,12 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import RequestDrawerV2 from "@/components/templates/requestsV2/requestDrawerV2";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface TreeViewProps {
   session: Session;
@@ -85,55 +91,61 @@ const TreeView: React.FC<TreeViewProps> = ({
             "bg-slate-50 dark:bg-black border-t border-r border-b border-slate-200 dark:border-slate-700 border-collapse overflow-x-auto"
           }
         >
-          <Col className="border-r border-slate-200 dark:border-slate-700 ">
-            <div className="w-full bg-slate-50 dark:bg-black flex justify-end h-10">
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      className="rounded-none"
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => setCollapseAll(!collapseAll)}
-                    >
-                      {collapseAll ? (
-                        <ChevronsUpDownIcon width={16} height={16} />
-                      ) : (
-                        <ChevronsDownUpIcon width={16} height={16} />
-                      )}
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Collapse All</TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </div>
-            <Tree
-              data={tracesToTreeNodeData(session.traces)}
-              className="min-h-[1000px] w-[30em] min-w-[30em] max-h-screen"
-              selectedRequestIdDispatch={[
-                selectedRequestId,
-                setSelectedRequestId,
-              ]}
-              collapseAll={collapseAll}
-              setShowDrawer={setShowDrawer}
-            />
-          </Col>
-          <div className="flex flex-col gap-5 w-full">
-            <div className="flex-grow [&_.border]:border-none">
-              {requestIdToShow &&
-                requests.requests.requests?.find(
-                  (r) => r.request_id === requestIdToShow
-                ) && (
-                  <>
-                    {getNormalizedRequest(
-                      requests.requests.requests?.find(
-                        (r) => r.request_id === requestIdToShow
-                      )!
-                    ).render()}
-                  </>
-                )}
-            </div>
+          <div className="flex-shrink-0 w-[30em]">
+            <ScrollArea className="h-full">
+              <Col className="border-r border-slate-200 dark:border-slate-700 pb-10">
+                <div className="w-full bg-slate-50 dark:bg-black flex justify-end h-10">
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          className="rounded-none"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => setCollapseAll(!collapseAll)}
+                        >
+                          {collapseAll ? (
+                            <ChevronsUpDownIcon width={16} height={16} />
+                          ) : (
+                            <ChevronsDownUpIcon width={16} height={16} />
+                          )}
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Collapse All</TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
+                <Tree
+                  data={tracesToTreeNodeData(session.traces)}
+                  className="min-h-[1000px] max-h-screen"
+                  selectedRequestIdDispatch={[
+                    selectedRequestId,
+                    setSelectedRequestId,
+                  ]}
+                  collapseAll={collapseAll}
+                  setShowDrawer={setShowDrawer}
+                />
+              </Col>
+            </ScrollArea>
           </div>
+          <ScrollArea className="h-full w-fit bg-white">
+            <div className="flex flex-col gap-5 w-full">
+              <div className="flex-grow [&_.border]:border-none">
+                {requestIdToShow &&
+                  requests.requests.requests?.find(
+                    (r) => r.request_id === requestIdToShow
+                  ) && (
+                    <>
+                      {getNormalizedRequest(
+                        requests.requests.requests?.find(
+                          (r) => r.request_id === requestIdToShow
+                        )!
+                      ).render()}
+                    </>
+                  )}
+              </div>
+            </div>
+          </ScrollArea>
         </Row>
       </Col>
       {showDrawer && requestIdToShow && (
