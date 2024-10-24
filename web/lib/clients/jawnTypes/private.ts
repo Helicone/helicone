@@ -2137,7 +2137,7 @@ Json: JsonObject;
       model: string;
       status: string;
       createdAt: string;
-      requests: components["schemas"]["ExperimentRequest"][];
+      runs: components["schemas"]["ExperimentRequest"][];
     };
     SimplifiedExperiment: {
       id: string;

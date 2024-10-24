@@ -21,6 +21,8 @@ export const HypothesisCellRenderer: React.FC<any> = (params) => {
   const responseString = data[hypothesisId];
   let parsedResponseData: any = {};
 
+  console.log("responseString", responseString);
+
   try {
     parsedResponseData = JSON.parse(responseString);
   } catch (error) {
@@ -29,7 +31,9 @@ export const HypothesisCellRenderer: React.FC<any> = (params) => {
 
   // Extract the content to display in the cell
   const content =
-    parsedResponseData?.body?.choices?.[0]?.message?.content || "";
+    parsedResponseData?.response?.choices?.[0]?.message?.content || "";
+
+  console.log("content", content);
 
   // Check if content is longer than 100 characters
   const isContentLong = content.length > 100;

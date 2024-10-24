@@ -2,6 +2,7 @@ import { usePrompt } from "@/services/hooks/prompts/prompts";
 import HcBreadcrumb from "../../../../ui/hcBreadcrumb";
 import { ExperimentTable } from "./ExperimentTable";
 import { IslandContainer } from "../../../../ui/islandContainer";
+import { ExperimentTableNew } from "./ExperimentTableNew";
 
 interface PromptIdPageProps {
   promptId: string;
@@ -33,7 +34,7 @@ const ExperimentTablePage = (props: PromptIdPageProps) => {
           ]}
         />
       </IslandContainer>
-      <ExperimentTable
+      <ExperimentTableNew
         promptSubversionId={promptSubversionId}
         experimentId={experimentId}
       />

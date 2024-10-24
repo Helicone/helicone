@@ -2111,7 +2111,7 @@ const models: TsoaRoute.Models = {
             "model": {"dataType":"string","required":true},
             "status": {"dataType":"string","required":true},
             "createdAt": {"dataType":"string","required":true},
-            "requests": {"dataType":"array","array":{"dataType":"refObject","ref":"ExperimentRequest"},"required":true},
+            "runs": {"dataType":"array","array":{"dataType":"refObject","ref":"ExperimentRequest"},"required":true},
         },
         "additionalProperties": false,
     },

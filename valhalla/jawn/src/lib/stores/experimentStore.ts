@@ -52,7 +52,15 @@ export interface SimplifiedExperimentHypothesis {
   model: string;
   status: string;
   createdAt: string;
-  requests: ExperimentRequest[];
+  runs: ExperimentRequest[];
+}
+
+export interface DatasetRow {
+  rowId: string;
+  inputRecord: {
+    id: string;
+    requestId: string;
+  };
 }
 
 export interface SimplifiedExperiment {
@@ -142,7 +150,7 @@ function getSimplifiedExperimentsQuery(filter?: string, limit?: number) {
             'model', h.model,
             'status', h.status,
             'createdAt', h.created_at,
-            'requests', COALESCE(
+            'runs', COALESCE(
               (
                 SELECT jsonb_agg(
                   jsonb_build_object(

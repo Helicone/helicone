@@ -6094,7 +6094,7 @@
 					"createdAt": {
 						"type": "string"
 					},
-					"requests": {
+					"runs": {
 						"items": {
 							"$ref": "#/components/schemas/ExperimentRequest"
 						},
@@ -6107,7 +6107,7 @@
 					"model",
 					"status",
 					"createdAt",
-					"requests"
+					"runs"
 				],
 				"type": "object",
 				"additionalProperties": false

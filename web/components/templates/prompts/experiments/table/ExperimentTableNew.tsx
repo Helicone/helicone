@@ -56,6 +56,7 @@ import { useRouter } from "next/router";
 import { ScrollArea } from "../../../../ui/scroll-area";
 import clsx from "clsx";
 import ScoresEvaluatorsConfig from "./scores/ScoresEvaluatorsConfig";
+import { placeAssetIdValues } from "../../../../../services/lib/requestTraverseHelper";
 
 interface ExperimentTableProps {
   promptSubversionId?: string;
@@ -122,11 +123,6 @@ export function ExperimentTableNew({
     }
   );
 
-  const providerKey = useMemo(
-    () => (experimentData?.meta as any)?.provider_key,
-    [experimentData]
-  );
-
   const fetchRequestById = useCallback(
     async (requestId: string) => {
       const jawnClient = getJawnClient(orgId);
@@ -153,29 +149,6 @@ export function ExperimentTableNew({
     [orgId]
   );
 
-  const fetchAllHypothesisResponses = useCallback(async () => {
-    if (!experimentData || !experimentData.hypotheses) return [];
-
-    const allResponses = await Promise.all(
-      experimentData.hypotheses.map(async (hypothesis) => {
-        const responses = await Promise.all(
-          hypothesis.requests.map(async (request) => {
-            const response = await fetchRequestById(request.resultRequestId);
-            return {
-              datasetRowId: request.datasetRowId,
-              hypothesisId: hypothesis.id,
-              response,
-            };
-          })
-        );
-        return responses;
-      })
-    );
-
-    // Flatten the array
-    return allResponses.flat();
-  }, [experimentData, fetchRequestById]);
-
   const fetchInputRecords = useCallback(async () => {
     const datasetId = experimentData?.dataset.id;
     if (!orgId || !datasetId || !promptSubversionId) return [];
@@ -192,7 +165,6 @@ export function ExperimentTableNew({
     );
     return res.data?.data;
   }, [orgId, experimentData?.dataset?.id, promptSubversionId]);
-  s;
 
   // Define fetchPromptVersionTemplate
   const fetchPromptVersionTemplate = useCallback(async () => {
@@ -289,7 +261,7 @@ export function ExperimentTableNew({
 
   // Function to update rowData based on fetched data
   const updateRowData = useCallback(
-    (experimentData: any, inputRecordsData: any[]) => {
+    async (experimentData: any, inputRecordsData: any[]) => {
       setIsDataLoading(true);
       // Remove code that updates inputKeys
       // const newInputKeys = new Set<string>();
@@ -303,53 +275,88 @@ export function ExperimentTableNew({
       // }
       // setInputKeys(newInputKeys);
 
-      const newRowData = inputRecordsData.map((row) => {
-        const hypothesisRowData: Record<string, string> = {};
+      const newRowData = await Promise.all(
+        inputRecordsData.map(async (row) => {
+          const hypothesisRowData: Record<string, string> = {};
 
-        // Always populate "Messages" and "Original" columns
-        hypothesisRowData["messages"] = JSON.stringify(
-          //@ts-ignore
-          row?.request_body?.messages || {},
-          null,
-          2
-        );
-        let content = row?.response_body?.choices?.[0]?.message?.content || "";
-
-        // Parse the content if it's a JSON string
-        try {
-          hypothesisRowData["original"] = JSON.parse(content);
-        } catch (error) {
-          hypothesisRowData["original"] = content; // Use original content if parsing fails
-        }
-
-        // Add data for other hypotheses if they exist
-        experimentData.hypotheses.forEach((hypothesis: any) => {
-          const hypothesisRun = hypothesis.runs?.find(
-            (r: any) => r.datasetRowId === row.dataset_row_id
+          // Always populate "Messages" and "Original" columns
+          hypothesisRowData["messages"] = JSON.stringify(
+            //@ts-ignore
+            row?.request_body?.messages || {},
+            null,
+            2
           );
-          if (hypothesisRun) {
-            hypothesisRowData[hypothesis.id] = JSON.stringify(
-              hypothesisRun.response,
-              null,
-              2
-            );
+          let content =
+            row?.response_body?.choices?.[0]?.message?.content || "";
+
+          // Parse the content if it's a JSON string
+          try {
+            hypothesisRowData["original"] = JSON.parse(content);
+          } catch (error) {
+            hypothesisRowData["original"] = content; // Use original content if parsing fails
           }
-        });
 
-        // Find existing row to preserve isLoading state
-        const existingRow = rowData.find(
-          (existingRow) => existingRow.dataset_row_id === row.dataset_row_id
-        );
+          const fetchRequestResponseBody = async (request_response: any) => {
+            if (!request_response.signed_body_url) return null;
+            const contentResponse = await fetch(
+              request_response.signed_body_url
+            );
+            if (contentResponse.ok) {
+              const text = await contentResponse.text();
+              let content = JSON.parse(text);
+              if (request_response.asset_urls) {
+                content = placeAssetIdValues(
+                  request_response.asset_urls,
+                  content
+                );
+              }
+              return content;
+            }
+            return null;
+          };
 
-        return {
-          id: row.dataset_row_id,
-          dataset_row_id: row.dataset_row_id,
-          // Spread inputs to individual fields
-          ...row.inputs,
-          ...hypothesisRowData,
-          isLoading: existingRow?.isLoading || {}, // Preserve isLoading state
-        };
-      });
+          // Add data for other hypotheses if they exist
+          await Promise.all(
+            experimentData.hypotheses.map(async (hypothesis: any) => {
+              const hypothesisRun = hypothesis.runs?.find(
+                (r: any) => r.datasetRowId === row.dataset_row_id
+              );
+              console.log("hypothesisRun", hypothesisRun);
+              if (hypothesisRun) {
+                const request_response = await fetchRequestById(
+                  hypothesisRun.resultRequestId
+                );
+                console.log("request_response", request_response);
+                if (request_response) {
+                  const requestResponseBody = await fetchRequestResponseBody(
+                    request_response
+                  );
+                  console.log("requestResponseBody", requestResponseBody);
+                  hypothesisRowData[hypothesis.id] = JSON.stringify(
+                    requestResponseBody,
+                    null,
+                    2
+                  );
+                }
+              }
+            })
+          );
+
+          // Find existing row to preserve isLoading state
+          const existingRow = rowData.find(
+            (existingRow) => existingRow.dataset_row_id === row.dataset_row_id
+          );
+
+          return {
+            id: row.dataset_row_id,
+            dataset_row_id: row.dataset_row_id,
+            // Spread inputs to individual fields
+            ...row.inputs,
+            ...hypothesisRowData,
+            isLoading: existingRow?.isLoading || {}, // Preserve isLoading state
+          };
+        })
+      );
 
       setRowData(newRowData);
       setIsDataLoading(false);
@@ -908,7 +915,6 @@ export function ExperimentTableNew({
         promptVersionId: promptSubversionId,
         promptVersionTemplate: promptVersionTemplate,
         experimentId,
-        selectedProviderKey: providerKey,
         refetchData,
         wrapText,
       },
@@ -946,9 +952,6 @@ export function ExperimentTableNew({
     activePopoverCell,
     handleLastInputSubmit,
   ]);
-
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const [selectedProviderKey, setSelectedProviderKey] = useState(providerKey);
 
   const getExperimentExportData = useCallback(() => {
     if (!rowData || rowData.length === 0) {
