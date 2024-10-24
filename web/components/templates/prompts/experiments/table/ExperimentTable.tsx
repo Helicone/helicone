@@ -268,14 +268,28 @@ export function ExperimentTable({
           null,
           2
         );
-        let content = row?.response_body?.choices?.[0]?.message?.content || "";
+        let content = row?.response_body?.choices?.[0]?.message?.content;
 
-        // Parse the content if it's a JSON string
-        try {
-          hypothesisRowData["original"] = JSON.parse(content);
-        } catch (error) {
-          hypothesisRowData["original"] = content; // Use original content if parsing fails
+        if (!content) {
+          const toolCalls =
+            row?.response_body?.choices?.[0]?.message?.tool_calls;
+          if (toolCalls && toolCalls.length > 0) {
+            const firstToolCall = toolCalls[0];
+            const argumentsString = firstToolCall?.function?.arguments || "";
+
+            try {
+              const argumentsObj = JSON.parse(argumentsString);
+              content = argumentsObj.content || "";
+            } catch (error) {
+              console.error("Failed to parse tool call arguments:", error);
+              content = argumentsString;
+            }
+          } else {
+            content = "";
+          }
         }
+
+        hypothesisRowData["original"] = content;
 
         // Add data for other hypotheses if they exist
         experimentData.hypotheses.forEach((hypothesis: any) => {
