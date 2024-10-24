@@ -227,20 +227,6 @@ export interface paths {
   "/v1/helicone-dataset/{datasetId}/request/{requestId}": {
     post: operations["UpdateHeliconeDatasetRequest"];
   };
-  "/v1/evaluator": {
-    post: operations["CreateEvaluator"];
-  };
-  "/v1/evaluator/{evaluatorId}": {
-    get: operations["GetEvaluator"];
-    put: operations["UpdateEvaluator"];
-    delete: operations["DeleteEvaluator"];
-  };
-  "/v1/evaluator/query": {
-    post: operations["QueryEvaluators"];
-  };
-  "/v1/evaluator/{evaluatorId}/experiments": {
-    get: operations["GetExperimentsForEvaluator"];
-  };
   "/v1/experiment/new-empty": {
     post: operations["CreateNewEmptyExperiment"];
   };
@@ -271,6 +257,20 @@ export interface paths {
   };
   "/v1/experiment/run": {
     post: operations["RunExperiment"];
+  };
+  "/v1/evaluator": {
+    post: operations["CreateEvaluator"];
+  };
+  "/v1/evaluator/{evaluatorId}": {
+    get: operations["GetEvaluator"];
+    put: operations["UpdateEvaluator"];
+    delete: operations["DeleteEvaluator"];
+  };
+  "/v1/evaluator/query": {
+    post: operations["QueryEvaluators"];
+  };
+  "/v1/evaluator/{evaluatorId}/experiments": {
+    get: operations["GetExperimentsForEvaluator"];
   };
   "/v1/evals/query": {
     post: operations["QueryEvals"];
@@ -1934,45 +1934,6 @@ Json: JsonObject;
       data: null;
       error: unknown;
     };
-    EvaluatorResult: {
-      id: string;
-      created_at: string;
-      scoring_type: string;
-      llm_template: unknown;
-      organization_id: string;
-      updated_at: string;
-      name: string;
-    };
-    ResultSuccess_EvaluatorResult_: {
-      data: components["schemas"]["EvaluatorResult"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_EvaluatorResult.string_": components["schemas"]["ResultSuccess_EvaluatorResult_"] | components["schemas"]["ResultError_string_"];
-    CreateEvaluatorParams: {
-      scoring_type: string;
-      llm_template: unknown;
-      name: string;
-    };
-    "ResultSuccess_EvaluatorResult-Array_": {
-      data: components["schemas"]["EvaluatorResult"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_EvaluatorResult-Array.string_": components["schemas"]["ResultSuccess_EvaluatorResult-Array_"] | components["schemas"]["ResultError_string_"];
-    UpdateEvaluatorParams: {
-      scoring_type?: string;
-      llm_template?: unknown;
-    };
-    "ResultSuccess__experiment_id-string--experiment_created_at-string_-Array_": {
-      data: {
-          experiment_created_at: string;
-          experiment_id: string;
-        }[];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__experiment_id-string--experiment_created_at-string_-Array.string_": components["schemas"]["ResultSuccess__experiment_id-string--experiment_created_at-string_-Array_"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess__experimentId-string__": {
       data: {
         experimentId: string;
@@ -2017,6 +1978,21 @@ Json: JsonObject;
       error: null;
     };
     "Result__hypothesisId-string_.string_": components["schemas"]["ResultSuccess__hypothesisId-string__"] | components["schemas"]["ResultError_string_"];
+    EvaluatorResult: {
+      id: string;
+      created_at: string;
+      scoring_type: string;
+      llm_template: unknown;
+      organization_id: string;
+      updated_at: string;
+      name: string;
+    };
+    "ResultSuccess_EvaluatorResult-Array_": {
+      data: components["schemas"]["EvaluatorResult"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_EvaluatorResult-Array.string_": components["schemas"]["ResultSuccess_EvaluatorResult-Array_"] | components["schemas"]["ResultError_string_"];
     ResponseObj: {
       body: unknown;
       createdAt: string;
@@ -2163,6 +2139,30 @@ Json: JsonObject;
       error: null;
     };
     "Result_ExperimentRun.string_": components["schemas"]["ResultSuccess_ExperimentRun_"] | components["schemas"]["ResultError_string_"];
+    ResultSuccess_EvaluatorResult_: {
+      data: components["schemas"]["EvaluatorResult"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_EvaluatorResult.string_": components["schemas"]["ResultSuccess_EvaluatorResult_"] | components["schemas"]["ResultError_string_"];
+    CreateEvaluatorParams: {
+      scoring_type: string;
+      llm_template: unknown;
+      name: string;
+    };
+    UpdateEvaluatorParams: {
+      scoring_type?: string;
+      llm_template?: unknown;
+    };
+    "ResultSuccess__experiment_id-string--experiment_created_at-string_-Array_": {
+      data: {
+          experiment_created_at: string;
+          experiment_id: string;
+        }[];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__experiment_id-string--experiment_created_at-string_-Array.string_": components["schemas"]["ResultSuccess__experiment_id-string--experiment_created_at-string_-Array_"] | components["schemas"]["ResultError_string_"];
     Eval: {
       name: string;
       /** Format: double */
@@ -3978,101 +3978,6 @@ export interface operations {
       };
     };
   };
-  CreateEvaluator: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CreateEvaluatorParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_EvaluatorResult.string_"];
-        };
-      };
-    };
-  };
-  GetEvaluator: {
-    parameters: {
-      path: {
-        evaluatorId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_EvaluatorResult.string_"];
-        };
-      };
-    };
-  };
-  UpdateEvaluator: {
-    parameters: {
-      path: {
-        evaluatorId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UpdateEvaluatorParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_EvaluatorResult.string_"];
-        };
-      };
-    };
-  };
-  DeleteEvaluator: {
-    parameters: {
-      path: {
-        evaluatorId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  QueryEvaluators: {
-    requestBody: {
-      content: {
-        "application/json": Record<string, never>;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_EvaluatorResult-Array.string_"];
-        };
-      };
-    };
-  };
-  GetExperimentsForEvaluator: {
-    parameters: {
-      path: {
-        evaluatorId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__experiment_id-string--experiment_created_at-string_-Array.string_"];
-        };
-      };
-    };
-  };
   CreateNewEmptyExperiment: {
     requestBody: {
       content: {
@@ -4264,6 +4169,101 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_ExperimentRun.string_"];
+        };
+      };
+    };
+  };
+  CreateEvaluator: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateEvaluatorParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_EvaluatorResult.string_"];
+        };
+      };
+    };
+  };
+  GetEvaluator: {
+    parameters: {
+      path: {
+        evaluatorId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_EvaluatorResult.string_"];
+        };
+      };
+    };
+  };
+  UpdateEvaluator: {
+    parameters: {
+      path: {
+        evaluatorId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateEvaluatorParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_EvaluatorResult.string_"];
+        };
+      };
+    };
+  };
+  DeleteEvaluator: {
+    parameters: {
+      path: {
+        evaluatorId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  QueryEvaluators: {
+    requestBody: {
+      content: {
+        "application/json": Record<string, never>;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_EvaluatorResult-Array.string_"];
+        };
+      };
+    };
+  };
+  GetExperimentsForEvaluator: {
+    parameters: {
+      path: {
+        evaluatorId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__experiment_id-string--experiment_created_at-string_-Array.string_"];
         };
       };
     };
