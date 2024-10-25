@@ -218,7 +218,16 @@ export class ExperimentManager extends BaseManager {
     const experimentTableColumnsResult =
       await this.ExperimentStore.createExperimentTableColumns(
         experimentTableResult.data.experimentTableId,
-        heliconeInputKeys.map((key) => ({ name: key, type: "input" }))
+        [
+          ...heliconeInputKeys.map((key) => ({
+            name: key,
+            type: "input",
+          })),
+          {
+            name: "original",
+            type: "output",
+          },
+        ] as { name: string; type: "input" | "output" }[]
       );
 
     return ok({

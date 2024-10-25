@@ -399,7 +399,7 @@ export class ExperimentStore extends BaseStore {
   async createExperimentTableColumn(
     experimentTableId: string,
     columnName: string,
-    columnType: "input" | "messages" | "original" | "experiment"
+    columnType: "input" | "output" | "experiment"
   ): Promise<Result<{ id: string }, string>> {
     const result = await supabaseServer.client
       .from("experiment_column")
@@ -422,7 +422,7 @@ export class ExperimentStore extends BaseStore {
     experimentTableId: string,
     columns: {
       name: string;
-      type: "input" | "messages" | "original" | "experiment";
+      type: "input" | "output" | "experiment";
     }[]
   ): Promise<Result<{ ids: string[] }, string>> {
     const results = await Promise.all(
