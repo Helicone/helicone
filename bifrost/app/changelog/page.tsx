@@ -2,9 +2,34 @@ import { getMetadata } from "@/components/templates/blog/getMetaData";
 import { getCompiledServerMdx } from "@mintlify/mdx";
 import "@mintlify/mdx/dist/styles.css";
 import fs from "fs";
+import { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import path from "path";
+
+export const metadata: Metadata = {
+  title: "Helicone Changelog | Latest Updates & New Features",
+  description:
+    "Stay up to date with Helicone's latest features, improvements, and product updates. Track our journey in building the future of LLM observability and AI infrastructure.",
+  icons: "https://www.helicone.ai/static/logo.webp",
+  openGraph: {
+    type: "website",
+    siteName: "Helicone.ai",
+    url: "https://www.helicone.ai/changelog",
+    title: "Helicone Changelog | Latest Updates & New Features",
+    description:
+      "Stay up to date with Helicone's latest features, improvements, and product updates. Track our journey in building the future of LLM observability and AI infrastructure.",
+    images: "/static/changelog/changelog-open-graph.webp",
+    locale: "en_US",
+  },
+  twitter: {
+    title: "Helicone Changelog | Latest Updates & New Features",
+    description:
+      "Stay up to date with Helicone's latest features, improvements, and product updates. Track our journey in building the future of LLM observability and AI infrastructure.",
+    card: "summary_large_image",
+    images: "/static/changelog/changelog-open-graph.webp",
+  },
+};
 
 const getChangeMdxs = async () => {
   const changelogFolder = path.join(

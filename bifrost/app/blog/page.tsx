@@ -2,6 +2,31 @@ import { clsx } from "@/components/shared/utils";
 import Image from "next/image";
 import Link from "next/link";
 import { getMetadata } from "@/components/templates/blog/getMetaData";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Helicone Blog | AI Development Insights & Best Practices",
+  description:
+    "Stay updated with the latest insights on AI development, LLM observability, and industry best practices from the team building the future of AI infrastructure.",
+  icons: "https://www.helicone.ai/static/logo.webp",
+  openGraph: {
+    type: "website",
+    siteName: "Helicone.ai",
+    url: "https://www.helicone.ai/blog",
+    title: "Helicone Blog | AI Development Insights & Best Practices",
+    description:
+      "Stay updated with the latest insights on AI development, LLM observability, and industry best practices from the team building the future of AI infrastructure.",
+    images: "/static/blog/blog-open-graph.webp",
+    locale: "en_US",
+  },
+  twitter: {
+    title: "Helicone Blog | AI Development Insights & Best Practices",
+    description:
+      "Stay updated with the latest insights on AI development, LLM observability, and industry best practices from the team building the future of AI infrastructure.",
+    card: "summary_large_image",
+    images: "/static/blog/blog-open-graph.webp",
+  },
+};
 
 type BlogPostProps = {
   blog: BlogStructure;
