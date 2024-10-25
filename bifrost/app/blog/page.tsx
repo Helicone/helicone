@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   title: "Helicone Blog | AI Development Insights & Best Practices",
   description:
     "Stay updated with the latest insights on AI development, LLM observability, and industry best practices from the team building the future of AI infrastructure.",
-  icons: "https://www.helicone.ai/static/logo.webp",
+  icons: "/static/logo.webp",
   openGraph: {
     type: "website",
     siteName: "Helicone.ai",
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     title: "Helicone Blog | AI Development Insights & Best Practices",
     description:
       "Stay updated with the latest insights on AI development, LLM observability, and industry best practices from the team building the future of AI infrastructure.",
-    images: "/static/blog/blog-open-graph.webp",
+    images: "/static/dashboard-preview.png",
     locale: "en_US",
   },
   twitter: {
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     description:
       "Stay updated with the latest insights on AI development, LLM observability, and industry best practices from the team building the future of AI infrastructure.",
     card: "summary_large_image",
-    images: "/static/blog/blog-open-graph.webp",
+    images: "/static/dashboard-preview.png",
   },
 };
 

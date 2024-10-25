@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     title: "Helicone Changelog | Latest Updates & New Features",
     description:
       "Stay up to date with Helicone's latest features, improvements, and product updates. Track our journey in building the future of LLM observability and AI infrastructure.",
-    images: "/static/changelog/changelog-open-graph.webp",
+    images: "/static/dashboard-preview.png",
     locale: "en_US",
   },
   twitter: {
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     description:
       "Stay up to date with Helicone's latest features, improvements, and product updates. Track our journey in building the future of LLM observability and AI infrastructure.",
     card: "summary_large_image",
-    images: "/static/changelog/changelog-open-graph.webp",
+    images: "/static/dashboard-preview.png",
   },
 };
 
