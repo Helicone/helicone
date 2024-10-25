@@ -1045,33 +1045,53 @@ export function ExperimentTable({
         return;
       }
 
-      const experiment = await jawn.POST("/v1/experiment/new-empty", {
-        body: {
-          metadata: {
-            prompt_id: res.data?.data?.id!,
-            prompt_version: res.data?.data?.prompt_version_id!,
-            experiment_name: `${promptName}_V1.0` || "",
-          },
-          datasetId: dataset.data?.data?.datasetId,
-        },
-      });
-      if (!experiment.data?.data?.experimentId) {
-        notification.setNotification("Failed to create experiment", "error");
-        return;
-      }
-      const result = await jawn.POST(
-        "/v1/prompt/version/{promptVersionId}/subversion",
+      // const experiment = await jawn.POST("/v1/experiment/new-empty", {
+      //   body: {
+      //     metadata: {
+      //       prompt_id: res.data?.data?.id!,
+      //       prompt_version: res.data?.data?.prompt_version_id!,
+      //       experiment_name: `${promptName}_V1.0` || "",
+      //     },
+      //     datasetId: dataset.data?.data?.datasetId,
+      //   },
+      // });
+      // if (!experiment.data?.data?.experimentId) {
+      //   notification.setNotification("Failed to create experiment", "error");
+      //   return;
+      // }
+      // const result = await jawn.POST(
+      //   "/v1/prompt/version/{promptVersionId}/subversion",
+      //   {
+      //     params: {
+      //       path: {
+      //         promptVersionId: res.data?.data?.prompt_version_id!,
+      //       },
+      //     },
+      //     body: {
+      //       newHeliconeTemplate: JSON.stringify(basePrompt),
+      //       isMajorVersion: false,
+      //       metadata: {
+      //         experimentAssigned: true,
+      //       },
+      //     },
+      //   }
+      // );
+
+      const experimentTableResult = await jawn.POST(
+        "/v1/experiment/new-experiment-table",
         {
-          params: {
-            path: {
-              promptVersionId: res.data?.data?.prompt_version_id!,
-            },
-          },
           body: {
+            datasetId: dataset.data?.data?.datasetId!,
+            promptVersionId: res.data?.data?.prompt_version_id!,
             newHeliconeTemplate: JSON.stringify(basePrompt),
             isMajorVersion: false,
-            metadata: {
+            promptSubversionMetadata: {
               experimentAssigned: true,
+            },
+            experimentMetadata: {
+              prompt_id: res.data?.data?.id!,
+              prompt_version: res.data?.data?.prompt_version_id!,
+              experiment_name: `${promptName}_V1.0` || "",
             },
           },
         }
@@ -1103,16 +1123,16 @@ export function ExperimentTable({
       //   );
       // }
 
-      if (result.error || !result.data) {
-        notification.setNotification("Failed to create subversion", "error");
-        return;
-      }
+      // if (result.error || !result.data) {
+      //   notification.setNotification("Failed to create subversion", "error");
+      //   return;
+      // }
 
-      notification.setNotification("Prompt created successfully", "success");
-      setIsDataLoading(true);
-      await router.push(
-        `/prompts/${res.data?.data?.id}/subversion/${res.data?.data?.prompt_version_id}/experiment/${experiment.data?.data?.experimentId}`
-      );
+      // notification.setNotification("Prompt created successfully", "success");
+      // setIsDataLoading(true);
+      // await router.push(
+      //   `/prompts/${res.data?.data?.id}/subversion/${res.data?.data?.prompt_version_id}/experiment/${experiment.data?.data?.experimentId}`
+      // );
     };
 
     return (

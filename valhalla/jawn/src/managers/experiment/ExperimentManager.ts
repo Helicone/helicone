@@ -19,11 +19,11 @@ import { PromptManager } from "../prompt/PromptManager";
 
 export interface CreateExperimentTableParams {
   datasetId: string;
-  experimentMetadata: Record<string, string>;
+  experimentMetadata: Record<string, any>;
   promptVersionId: string;
   newHeliconeTemplate: string;
   isMajorVersion: boolean;
-  promptSubversionMetadata: Record<string, string>;
+  promptSubversionMetadata: Record<string, any>;
 }
 
 export class ExperimentManager extends BaseManager {
@@ -186,6 +186,7 @@ export class ExperimentManager extends BaseManager {
   async createNewExperimentTable(
     params: CreateExperimentTableParams
   ): Promise<Result<{ tableId: string; experimentId: string }, string>> {
+    console.log("params", params);
     const experimentTableResult =
       await this.ExperimentStore.createNewExperimentTable(
         params.datasetId,
@@ -210,10 +211,19 @@ export class ExperimentManager extends BaseManager {
       return err(newPromptVersionResult.error);
     }
 
-    const heliconeTempalteKeys = promptManager.getHeliconeTemplateKeys(
+    const heliconeInputKeys = promptManager.getHeliconeTemplateKeys(
       newPromptVersionResult.data.helicone_template
     );
 
-    return ok({ tableId: experimentTableResult.data.experimentTableId });
+    const experimentTableColumnsResult =
+      await this.ExperimentStore.createExperimentTableColumns(
+        experimentTableResult.data.experimentTableId,
+        heliconeInputKeys.map((key) => ({ name: key, type: "input" }))
+      );
+
+    return ok({
+      tableId: experimentTableResult.data.experimentTableId,
+      experimentId: experimentTableResult.data.experimentId,
+    });
   }
 }

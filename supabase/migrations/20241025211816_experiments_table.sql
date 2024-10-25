@@ -34,7 +34,6 @@ ENABLE ROW LEVEL SECURITY;
 
 -- Create all indexes first
 CREATE UNIQUE INDEX experiment_table_pkey ON public.experiment_table USING btree (id);
-CREATE UNIQUE INDEX experiment_table_name_key ON public.experiment_table USING btree (name);
 CREATE UNIQUE INDEX experiment_column_pkey ON public.experiment_column USING btree (id);
 CREATE UNIQUE INDEX experiment_cell_value_pkey ON public.experiment_cell_value USING btree (id);
 CREATE UNIQUE INDEX experiment_cell_value_column_row_key ON public.experiment_cell_value USING btree (column_id, row_index);

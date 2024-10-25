@@ -399,15 +399,45 @@ export class ExperimentStore extends BaseStore {
   async createExperimentTableColumn(
     experimentTableId: string,
     columnName: string,
-    columnType: "string" | "number" | "boolean" | "date"
-  ): Promise<Result<void, string>> {
+    columnType: "input" | "messages" | "original" | "experiment"
+  ): Promise<Result<{ id: string }, string>> {
     const result = await supabaseServer.client
-      .from("")
+      .from("experiment_column")
       .insert({
-        : experimentTableId,
-        name: columnName,
-        type: columnType,
-      });
+        table_id: experimentTableId,
+        column_name: columnName,
+        column_type: columnType,
+      })
+      .select("*")
+      .single();
+    if (result.error || !result.data) {
+      return err(
+        result.error?.message ?? "Failed to create experiment table column"
+      );
+    }
+    return ok({ id: result.data.id });
+  }
+
+  async createExperimentTableColumns(
+    experimentTableId: string,
+    columns: {
+      name: string;
+      type: "input" | "messages" | "original" | "experiment";
+    }[]
+  ): Promise<Result<{ ids: string[] }, string>> {
+    const results = await Promise.all(
+      columns.map((column) =>
+        this.createExperimentTableColumn(
+          experimentTableId,
+          column.name,
+          column.type
+        )
+      )
+    );
+    if (results.some((result) => result.error)) {
+      return err("Failed to create experiment table columns");
+    }
+    return ok({ ids: results.map((result) => result.data!.id) });
   }
 
   async getExperimentById(

@@ -19,7 +19,10 @@ import {
   Experiment,
   IncludeExperimentKeys,
 } from "../../lib/stores/experimentStore";
-import { ExperimentManager } from "../../managers/experiment/ExperimentManager";
+import {
+  CreateExperimentTableParams,
+  ExperimentManager,
+} from "../../managers/experiment/ExperimentManager";
 import { JawnAuthenticatedRequest } from "../../types/request";
 import { EvaluatorResult } from "./evaluatorController";
 import { EvaluatorManager } from "../../managers/evaluator/EvaluatorManager";
@@ -92,6 +95,27 @@ export class ExperimentController extends Controller {
         error: null,
       };
     }
+  }
+
+  @Post("/new-experiment-table")
+  public async createNewExperimentTable(
+    @Body()
+    requestBody: CreateExperimentTableParams,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<
+    Result<
+      {
+        tableId: string;
+        experimentId: string;
+      },
+      string
+    >
+  > {
+    const experimentManager = new ExperimentManager(request.authParams);
+    const result = await experimentManager.createNewExperimentTable(
+      requestBody
+    );
+    return result;
   }
 
   @Post("/update-meta")
