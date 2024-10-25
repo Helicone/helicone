@@ -606,4 +606,14 @@ export class PromptManager extends BaseManager {
 
     return ok(null);
   }
+
+  public getHeliconeTemplateKeys(template: string): string[] {
+    const regex = /<helicone-prompt-input key="([^"]+)"\s*\/>/g;
+    const matches = template.match(regex);
+    return matches
+      ? matches.map((match) =>
+          match.replace(/<helicone-prompt-input key="|"\s*\/>/g, "")
+        )
+      : [];
+  }
 }

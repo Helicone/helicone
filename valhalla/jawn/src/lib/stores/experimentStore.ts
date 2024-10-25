@@ -1,6 +1,7 @@
 import { ENVIRONMENT } from "../..";
 import { getAllSignedURLsFromInputs } from "../../managers/inputs/InputsManager";
 import { costOfPrompt } from "../../packages/cost";
+import { supabaseServer } from "../db/supabase";
 import { dbExecute } from "../shared/db/dbExecute";
 import { FilterNode } from "../shared/filters/filterDefs";
 import { buildFilterPostgres } from "../shared/filters/filters";
@@ -356,6 +357,57 @@ export class ExperimentStore extends BaseStore {
       experiments.data!.map((d) => enrichExperiment(d, include))
     );
     return ok(experimentResults);
+  }
+
+  async createNewExperimentTable(
+    datasetId: string,
+    experimentMetadata: Record<string, string>
+  ): Promise<
+    Result<{ experimentTableId: string; experimentId: string }, string>
+  > {
+    const result = await supabaseServer.client
+      .from("experiment_v2")
+      .insert({
+        dataset: datasetId,
+        organization: this.organizationId,
+        meta: experimentMetadata,
+      })
+      .select("*")
+      .single();
+    if (result.error || !result.data) {
+      return err(result.error?.message ?? "Failed to create experiment table");
+    }
+    const experimentTable = await supabaseServer.client
+      .from("experiment_table")
+      .insert({
+        experiment_id: result.data.id,
+        name: "Experiment Table",
+      })
+      .select("*")
+      .single();
+    if (experimentTable.error || !experimentTable.data) {
+      return err(
+        experimentTable.error?.message ?? "Failed to create experiment table"
+      );
+    }
+    return ok({
+      experimentTableId: experimentTable.data.id,
+      experimentId: result.data.id,
+    });
+  }
+
+  async createExperimentTableColumn(
+    experimentTableId: string,
+    columnName: string,
+    columnType: "string" | "number" | "boolean" | "date"
+  ): Promise<Result<void, string>> {
+    const result = await supabaseServer.client
+      .from("")
+      .insert({
+        : experimentTableId,
+        name: columnName,
+        type: columnType,
+      });
   }
 
   async getExperimentById(

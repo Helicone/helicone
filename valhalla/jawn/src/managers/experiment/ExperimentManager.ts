@@ -15,6 +15,16 @@ import {
 } from "../../lib/stores/experimentStore";
 import { FilterNode } from "../../lib/shared/filters/filterDefs";
 import { run, runOriginalExperiment } from "../../lib/experiment/run";
+import { PromptManager } from "../prompt/PromptManager";
+
+export interface CreateExperimentTableParams {
+  datasetId: string;
+  experimentMetadata: Record<string, string>;
+  promptVersionId: string;
+  newHeliconeTemplate: string;
+  isMajorVersion: boolean;
+  promptSubversionMetadata: Record<string, string>;
+}
 
 export class ExperimentManager extends BaseManager {
   private ExperimentStore: ExperimentStore;
@@ -171,5 +181,39 @@ export class ExperimentManager extends BaseManager {
     }
 
     return ok({ experimentId: experiment.data.id });
+  }
+
+  async createNewExperimentTable(
+    params: CreateExperimentTableParams
+  ): Promise<Result<{ tableId: string; experimentId: string }, string>> {
+    const experimentTableResult =
+      await this.ExperimentStore.createNewExperimentTable(
+        params.datasetId,
+        params.experimentMetadata
+      );
+
+    if (experimentTableResult.error || !experimentTableResult.data) {
+      return err(experimentTableResult.error);
+    }
+
+    const promptManager = new PromptManager(this.authParams);
+    const newPromptVersionResult = await promptManager.createNewPromptVersion(
+      params.promptVersionId,
+      {
+        newHeliconeTemplate: params.newHeliconeTemplate,
+        isMajorVersion: params.isMajorVersion,
+        metadata: params.promptSubversionMetadata,
+      }
+    );
+
+    if (newPromptVersionResult.error || !newPromptVersionResult.data) {
+      return err(newPromptVersionResult.error);
+    }
+
+    const heliconeTempalteKeys = promptManager.getHeliconeTemplateKeys(
+      newPromptVersionResult.data.helicone_template
+    );
+
+    return ok({ tableId: experimentTableResult.data.experimentTableId });
   }
 }

@@ -80,6 +80,10 @@ export class ExperimentController extends Controller {
       console.error(result.error);
       return err(result.error.message);
     } else {
+      await supabaseServer.client.from("experiment_table").insert({
+        experiment_id: result.data.id,
+        name: "Experiment Table",
+      });
       this.setStatus(200); // set return status 201
       return {
         data: {
