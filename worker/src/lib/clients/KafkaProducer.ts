@@ -41,7 +41,7 @@ export type HeliconeMeta = {
   posthogHost?: string;
   lytixKey?: string;
   lytixHost?: string;
-  experimentSecretKey?: string;
+  heliconeManualAccessKey?: string;
 };
 
 export type KafkaMessage = {
@@ -54,11 +54,11 @@ export type KafkaMessage = {
 export class KafkaProducer {
   private kafka: Kafka | null = null;
   private VALHALLA_URL: string | undefined = undefined;
-  private EXPERIMENTS_SECRET_KEY: string | undefined = undefined;
+  private HELICONE_MANUAL_ACCESS_KEY: string | undefined = undefined;
 
   constructor(env: Env) {
     this.VALHALLA_URL = env.VALHALLA_URL;
-    this.EXPERIMENTS_SECRET_KEY = env.EXPERIMENTS_SECRET_KEY;
+    this.HELICONE_MANUAL_ACCESS_KEY = env.HELICONE_MANUAL_ACCESS_KEY;
 
     if (
       !env.UPSTASH_KAFKA_URL ||
@@ -78,9 +78,12 @@ export class KafkaProducer {
   }
 
   async sendMessage(msg: KafkaMessage) {
+    console.log("their's", msg.heliconeMeta.heliconeManualAccessKey);
+    console.log("mine", this.HELICONE_MANUAL_ACCESS_KEY);
     if (
       !this.kafka ||
-      msg.heliconeMeta.experimentSecretKey === this.EXPERIMENTS_SECRET_KEY
+      msg.heliconeMeta.heliconeManualAccessKey ===
+        this.HELICONE_MANUAL_ACCESS_KEY
     ) {
       await this.sendMessageHttp(msg);
       return;
@@ -131,10 +134,7 @@ export class KafkaProducer {
         body: JSON.stringify({
           log: msg.log,
           authorization: msg.authorization,
-          heliconeMeta: {
-            ...msg.heliconeMeta,
-            experimentSecretKey: undefined,
-          },
+          heliconeMeta: msg.heliconeMeta,
         }),
       });
 

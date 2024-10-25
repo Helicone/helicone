@@ -91,6 +91,7 @@ export type HeliconeMeta = {
   posthogHost?: string;
   lytixKey?: string;
   lytixHost?: string;
+  heliconeManualAccessKey?: string;
 };
 
 export type Message = {
