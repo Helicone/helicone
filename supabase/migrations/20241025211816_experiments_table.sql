@@ -1,9 +1,10 @@
+
+-- Then create the tables
 CREATE TABLE "public"."experiment_table" (
     "id" uuid not null default gen_random_uuid(),
     "name" text not null,
     "experiment_id" uuid not null,
-    "created_at" timestamp with time zone not null default now(),
-    CONSTRAINT "experiment_table_pkey" PRIMARY KEY ("id")
+    "created_at" timestamp with time zone not null default now()
 );
 
 ALTER TABLE "public"."experiment_table"
@@ -14,8 +15,7 @@ CREATE TABLE "public"."experiment_columns" (
     "table_id" uuid not null,
     "column_name" text not null,
     "column_type" text not null,
-    "created_at" timestamp with time zone not null default now(),
-    CONSTRAINT "experiment_columns_pkey" PRIMARY KEY ("id")
+    "created_at" timestamp with time zone not null default now()
 );
 
 ALTER TABLE "public"."experiment_columns"
@@ -26,8 +26,7 @@ CREATE TABLE "public"."experiment_cell_values" (
     "column_id" uuid not null,
     "row_index" integer not null,
     "value" text,
-    "created_at" timestamp with time zone not null default now(),
-    CONSTRAINT "experiment_cell_values_pkey" PRIMARY KEY ("id")
+    "created_at" timestamp with time zone not null default now()
 );
 
 ALTER TABLE "public"."experiment_cell_values"
@@ -57,7 +56,7 @@ ADD CONSTRAINT "experiment_table_name_key" UNIQUE USING INDEX "experiment_table_
 -- Add foreign key constraints with not valid first
 ALTER TABLE "public"."experiment_table"
 ADD CONSTRAINT "experiment_table_experiment_id_fkey"
-FOREIGN KEY (experiment_id) REFERENCES experiments(id) ON UPDATE CASCADE ON DELETE CASCADE NOT VALID;
+FOREIGN KEY (experiment_id) REFERENCES experiment_v2(id) ON UPDATE CASCADE ON DELETE CASCADE NOT VALID;
 
 ALTER TABLE "public"."experiment_columns"
 ADD CONSTRAINT "experiment_columns_table_id_fkey"
