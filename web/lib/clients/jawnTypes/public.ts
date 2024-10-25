@@ -1372,6 +1372,7 @@ export interface components {
      */
     "url.URL": string;
     HeliconeMeta: {
+      heliconeManualAccessKey?: string;
       lytixHost?: string;
       lytixKey?: string;
       posthogHost?: string;

@@ -62,7 +62,7 @@ export interface IHeliconeHeaders {
   webhookEnabled: boolean;
   experimentColumnId: Nullable<string>;
   experimentRowIndex: Nullable<string>;
-  experimentSecretKey: Nullable<string>;
+  heliconeManualAccessKey: Nullable<string>;
 }
 
 export class HeliconeHeaders implements IHeliconeHeaders {
@@ -111,7 +111,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
   experimentRowIndex: Nullable<string>;
   lytixKey: Nullable<string>;
   lytixHost: Nullable<string>;
-  experimentSecretKey: Nullable<string>;
+  heliconeManualAccessKey: Nullable<string>;
 
   constructor(private headers: Headers) {
     const heliconeHeaders = this.getHeliconeHeaders();
@@ -147,7 +147,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
     this.webhookEnabled = heliconeHeaders.webhookEnabled;
     this.experimentColumnId = heliconeHeaders.experimentColumnId;
     this.experimentRowIndex = heliconeHeaders.experimentRowIndex;
-    this.experimentSecretKey = heliconeHeaders.experimentSecretKey;
+    this.heliconeManualAccessKey = heliconeHeaders.heliconeManualAccessKey;
   }
 
   private getFallBacks(): Nullable<HeliconeFallback[]> {
@@ -284,8 +284,8 @@ export class HeliconeHeaders implements IHeliconeHeaders {
         this.headers.get("Helicone-Experiment-Column-Id") ?? null,
       experimentRowIndex:
         this.headers.get("Helicone-Experiment-Row-Index") ?? null,
-      experimentSecretKey:
-        this.headers.get("Helicone-Experiment-Secret-Key") ?? null,
+      heliconeManualAccessKey:
+        this.headers.get("Helicone-Manual-Access-Key") ?? null,
     };
   }
 
