@@ -49,7 +49,7 @@ export class EmbeddingsHandler extends AbstractLogHandler {
 
     try {
       const embedding = await openai.embeddings.create({
-        input: JSON.stringify(request.properties), // TODO: is this the right thing to do?
+        input: JSON.stringify(requestBody), // TODO: is this the right thing to do?
         model: "text-embedding-3-small",
       });
 

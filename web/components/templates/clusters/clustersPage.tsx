@@ -50,20 +50,19 @@ const ClustersPage = () => {
     <div className="flex flex-col gap-4">
       <h1>Clusters</h1>
       <Plot
-        data={[
-          {
-            x: clusters.map((c) => c?.x ?? 0),
-            y: clusters.map((c) => c?.y ?? 0),
-            type: "scatter",
-            mode: "markers",
-            text: clusters.map((c) => c?.cluster ?? ""),
-            marker: {
-              size: 10,
-              color: clusters.map((c) => c?.cluster ?? 0),
-            },
-            hovertext: clusters.map((c) => c?.request_id ?? ""),
-          },
-        ]}
+        data={uniqueClusters.map((cluster) => ({
+          x: clusters
+            .filter((c) => c?.cluster === cluster)
+            .map((c) => c?.x ?? 0),
+          y: clusters
+            .filter((c) => c?.cluster === cluster)
+            .map((c) => c?.y ?? 0),
+          type: "scattergl",
+          mode: "markers",
+          hovertext: clusters
+            .filter((c) => c?.cluster === cluster)
+            .map((c) => c?.request_id ?? ""),
+        }))}
         onClick={(data) => {
           console.log(data);
           // @ts-ignore
@@ -75,6 +74,8 @@ const ClustersPage = () => {
         }}
         layout={{
           title: "Clusters",
+          plot_bgcolor: "transparent",
+          paper_bgcolor: "transparent",
         }}
       />
 

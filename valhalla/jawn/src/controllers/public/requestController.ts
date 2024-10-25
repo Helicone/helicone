@@ -306,8 +306,6 @@ export class RequestController extends Controller {
       requestBody.filter
     );
 
-    console.log("length of clusters", clusters.data?.length);
-
     if (clusters.error) {
       this.setStatus(500);
     } else {
