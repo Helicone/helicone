@@ -78,7 +78,7 @@ export function ExperimentTable({
   );
   const [showScoresTable, setShowScoresTable] = useLocalStorage(
     "showScoresTable",
-    true
+    false
   );
 
   const [isHypothesisRunning, setIsHypothesisRunning] = useState(false);
