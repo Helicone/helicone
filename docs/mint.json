@@ -32,6 +32,9 @@
   "analytics": {
     "koala": {
       "publicApiKey": "pk_28dd6b0bb95629a42e92bd526a1234a9fc79"
+    },
+    "posthog": {
+      "apiKey": "phc_jeluwNoJNpc7zEzkQrPbjyMOqdnJQjFAVr849LaEaPG"
     }
   },
   "colors": {
