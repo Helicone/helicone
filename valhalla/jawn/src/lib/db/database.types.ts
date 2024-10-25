@@ -360,7 +360,7 @@ export type Database = {
           },
         ]
       }
-      experiment_cell_values: {
+      experiment_cell_value: {
         Row: {
           column_id: string
           created_at: string
@@ -384,15 +384,15 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "experiment_cell_values_column_id_fkey"
+            foreignKeyName: "experiment_cell_value_column_id_fkey"
             columns: ["column_id"]
             isOneToOne: false
-            referencedRelation: "experiment_columns"
+            referencedRelation: "experiment_column"
             referencedColumns: ["id"]
           },
         ]
       }
-      experiment_columns: {
+      experiment_column: {
         Row: {
           column_name: string
           column_type: string
@@ -416,7 +416,7 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "experiment_columns_table_id_fkey"
+            foreignKeyName: "experiment_column_table_id_fkey"
             columns: ["table_id"]
             isOneToOne: false
             referencedRelation: "experiment_table"
