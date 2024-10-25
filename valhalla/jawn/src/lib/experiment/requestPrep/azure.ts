@@ -23,6 +23,7 @@ export async function prepareRequestAzure(
     "api-key": azureAPIKey,
     Accept: "application/json",
     "Accept-Encoding": "",
+    "Helicone-Manual-Access-Key": process.env.HELICONE_MANUAL_ACCESS_KEY ?? "",
   };
 
   if (apiKey) {

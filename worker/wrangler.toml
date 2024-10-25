@@ -36,6 +36,7 @@ S3_ENDPOINT = "http://localhost:9000"
 S3_ACCESS_KEY = "minioadmin"
 S3_SECRET_KEY = "minioadmin"
 S3_BUCKET_NAME = "request-response-storage"
+HELICONE_MANUAL_ACCESS_KEY="Q2xH5Cwid/gAmuLv8QWhgcpNXA4DG1Dxe0ypQTJ8oEA="
 
 [triggers]
 crons = ["* * * * *", "0 * * * *", "0 10 * * mon"]

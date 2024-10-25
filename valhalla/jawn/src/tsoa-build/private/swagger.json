@@ -1022,6 +1022,9 @@
 			},
 			"HeliconeMeta": {
 				"properties": {
+					"heliconeManualAccessKey": {
+						"type": "string"
+					},
 					"lytixHost": {
 						"type": "string"
 					},

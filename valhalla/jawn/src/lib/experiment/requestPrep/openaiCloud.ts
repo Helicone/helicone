@@ -16,6 +16,7 @@ function prepareRequestOpenAI(
     Authorization: `Bearer ${proxyKey}`,
     Accept: "application/json",
     "Accept-Encoding": "",
+    "Helicone-Manual-Access-Key": process.env.HELICONE_MANUAL_ACCESS_KEY ?? "",
   };
   let fetchUrl = requestPath;
   return {
