@@ -10,11 +10,13 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "../../../../../ui/popover";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { Badge } from "../../../../../ui/badge";
 import PromptPlayground from "../../../id/promptPlayground";
 import { Input } from "../../../../../ui/input";
 import { Dices } from "lucide-react";
+import ArrayDiffViewer from "../../../id/arrayDiffViewer";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const InputCellRenderer: React.FC<any> = (props) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
@@ -155,8 +157,14 @@ const InputCellRenderer: React.FC<any> = (props) => {
 };
 
 const CustomHeaderComponent: React.FC<any> = (props) => {
-  const { displayName, badgeText, badgeVariant, onRunColumn, onHeaderClick } =
-    props;
+  const {
+    displayName,
+    badgeText,
+    badgeVariant,
+    onRunColumn,
+    onHeaderClick,
+    orginalPromptTemplate,
+  } = props;
   const [showPromptPlayground, setShowPromptPlayground] = useState(false);
 
   const handleHeaderClick = (e: React.MouseEvent) => {
@@ -170,6 +178,17 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
     }
   };
 
+  const hasDiff = useMemo(() => {
+    return (
+      props.context?.promptVersionTemplateRef?.current?.helicone_template
+        ?.messages && props.hypothesis?.promptVersion?.template?.messages
+    );
+  }, [
+    props.context?.promptVersionTemplateRef,
+    props.hypothesis?.promptVersion?.template?.messages,
+  ]);
+
+  const [showDiff, setShowDiff] = useState(false);
   return (
     <Popover open={showPromptPlayground} onOpenChange={setShowPromptPlayground}>
       <PopoverTrigger asChild>
@@ -200,25 +219,69 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
         </div>
       </PopoverTrigger>
       <PopoverContent className="w-[800px] p-0" side="bottom">
-        <PromptPlayground
-          prompt={
-            props.promptVersionTemplate?.helicone_template ??
-            (props.hypothesis?.promptVersion?.template || "")
-          }
-          selectedInput={undefined}
-          onSubmit={(history, model) => {
-            setShowPromptPlayground(false);
-          }}
-          submitText="Save"
-          initialModel={
-            props.promptVersionTemplate?.model ||
-            props.hypothesis?.promptVersion?.model ||
-            ""
-          }
-          isPromptCreatedFromUi={false}
-          defaultEditMode={false}
-          editMode={false}
-        />
+        {hasDiff ? (
+          <Tabs defaultValue="diff" className="w-full">
+            <TabsList
+              className="w-full flex justify-end rounded-none"
+              variant={"secondary"}
+            >
+              <TabsTrigger value="diff">Diff</TabsTrigger>
+              <TabsTrigger value="preview">Preview</TabsTrigger>
+            </TabsList>
+            <TabsContent value="diff">
+              <ArrayDiffViewer
+                origin={
+                  props.context?.promptVersionTemplateRef?.current
+                    ?.helicone_template?.messages ?? []
+                }
+                target={
+                  props.hypothesis?.promptVersion?.template?.messages ?? []
+                }
+              />
+            </TabsContent>
+            <TabsContent value="preview">
+              <PromptPlayground
+                prompt={
+                  props.promptVersionTemplate?.helicone_template ??
+                  (props.hypothesis?.promptVersion?.template || "")
+                }
+                selectedInput={undefined}
+                onSubmit={(history, model) => {
+                  setShowPromptPlayground(false);
+                }}
+                submitText="Save"
+                initialModel={
+                  props.promptVersionTemplate?.model ||
+                  props.hypothesis?.promptVersion?.model ||
+                  ""
+                }
+                isPromptCreatedFromUi={false}
+                defaultEditMode={false}
+                editMode={false}
+              />
+            </TabsContent>
+          </Tabs>
+        ) : (
+          <PromptPlayground
+            prompt={
+              props.promptVersionTemplate?.helicone_template ??
+              (props.hypothesis?.promptVersion?.template || "")
+            }
+            selectedInput={undefined}
+            onSubmit={(history, model) => {
+              setShowPromptPlayground(false);
+            }}
+            submitText="Save"
+            initialModel={
+              props.promptVersionTemplate?.model ||
+              props.hypothesis?.promptVersion?.model ||
+              ""
+            }
+            isPromptCreatedFromUi={false}
+            defaultEditMode={false}
+            editMode={false}
+          />
+        )}
       </PopoverContent>
     </Popover>
   );
