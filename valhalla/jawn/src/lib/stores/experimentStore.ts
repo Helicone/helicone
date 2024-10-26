@@ -581,7 +581,14 @@ export class ExperimentStore extends BaseStore {
                 FROM generate_series(0, (SELECT max_index FROM max_row_index)) row_number
               )
             )
-            ORDER BY ec.created_at DESC
+            ORDER BY 
+              CASE 
+                WHEN ec.column_type = 'input' THEN 1
+                WHEN ec.column_type = 'output' THEN 2
+                WHEN ec.column_type = 'experiment' THEN 3
+                ELSE 4
+              END,
+              ec.created_at ASC
           ),
           '[]'
         ) as columns
