@@ -92,6 +92,23 @@ export interface IncludeExperimentKeys {
   score?: true;
 }
 
+export interface ExperimentTableColumn {
+  id: string;
+  columnName: string;
+  columnType: string;
+  cells: {
+    rowIndex: number;
+    value: string | null;
+  }[];
+}
+
+export interface ExperimentTable {
+  id: string;
+  name: string;
+  experimentId: string;
+  columns: ExperimentTableColumn[];
+}
+
 function getExperimentsQuery(
   filter?: string,
   limit?: number,
@@ -438,6 +455,132 @@ export class ExperimentStore extends BaseStore {
       return err("Failed to create experiment table columns");
     }
     return ok({ ids: results.map((result) => result.data!.id) });
+  }
+
+  async createExperimentCell(
+    columnId: string,
+    rowIndex: number,
+    value: string | null
+  ): Promise<Result<{ id: string }, string>> {
+    const result = await supabaseServer.client
+      .from("experiment_cell_value")
+      .insert({
+        column_id: columnId,
+        row_index: rowIndex,
+        value: value,
+      })
+      .select("*")
+      .single();
+
+    if (result.error || !result.data) {
+      return err(result.error?.message ?? "Failed to create experiment cell");
+    }
+    return ok({ id: result.data.id });
+  }
+
+  async createExperimentCells(
+    cells: {
+      columnId: string;
+      rowIndex: number;
+      value: string | null;
+    }[]
+  ): Promise<Result<{ ids: string[] }, string>> {
+    const results = await Promise.all(
+      cells.map((cell) =>
+        this.createExperimentCell(cell.columnId, cell.rowIndex, cell.value)
+      )
+    );
+    if (results.some((result) => result.error)) {
+      return err("Failed to create experiment cells");
+    }
+    return ok({ ids: results.map((result) => result.data!.id) });
+  }
+
+  async getExperimentTableById(
+    experimentId: string
+  ): Promise<Result<ExperimentTable, string>> {
+    const query = `
+      WITH table_data AS (
+        SELECT 
+          et.id,
+          et.name,
+          et.experiment_id,
+          ec.id as column_id,
+          ec.column_name,
+          ec.column_type,
+          ec.created_at as ec_created_at,
+          ecv.row_index,
+          ecv.value
+        FROM experiment_table et
+        LEFT JOIN experiment_column ec ON ec.table_id = et.id
+        LEFT JOIN experiment_cell_value ecv ON ecv.column_id = ec.id
+        WHERE et.experiment_id = $1
+        ORDER BY ec.created_at DESC, ecv.row_index
+      )
+      SELECT 
+        id,
+        name,
+        experiment_id as "experimentId",
+        COALESCE(
+          jsonb_agg(
+            CASE WHEN column_id IS NOT NULL THEN
+              jsonb_build_object(
+                'id', column_id,
+                'columnName', column_name,
+                'columnType', column_type,
+                'cells', (
+                  SELECT jsonb_agg(
+                    jsonb_build_object(
+                      'rowIndex', cell.row_index,
+                      'value', cell.value
+                    )
+                    ORDER BY cell.row_index
+                  )
+                  FROM table_data cell
+                  WHERE cell.column_id = td.column_id
+                  AND cell.row_index IS NOT NULL
+                )
+              )
+            END
+            ORDER BY td.ec_created_at DESC
+          ) FILTER (WHERE column_id IS NOT NULL),
+          '[]'
+        ) as columns
+      FROM table_data td
+      GROUP BY id, name, experiment_id;
+    `;
+
+    try {
+      const { data, error } = await dbExecute<{
+        id: string;
+        name: string;
+        experimentId: string;
+        columns: ExperimentTableColumn[];
+      }>(query, [experimentId]);
+
+      if (error) {
+        console.error("Query Error:", error);
+        return err(error);
+      }
+
+      if (!data || data.length === 0) {
+        return err("Experiment table not found");
+      }
+
+      // Clean up null cells arrays
+      const result = {
+        ...data[0],
+        columns: data[0].columns.map((col) => ({
+          ...col,
+          cells: col.cells || [],
+        })),
+      };
+
+      return ok(result);
+    } catch (e) {
+      console.error("Exception:", e);
+      return err("An unexpected error occurred");
+    }
   }
 
   async getExperimentById(

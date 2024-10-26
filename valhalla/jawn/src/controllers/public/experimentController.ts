@@ -14,9 +14,10 @@ import {
 import { supabaseServer } from "../../lib/db/supabase";
 import { run } from "../../lib/experiment/run";
 import { FilterLeafSubset } from "../../lib/shared/filters/filterDefs";
-import { Result, err } from "../../lib/shared/result";
+import { Result, err, ok } from "../../lib/shared/result";
 import {
   Experiment,
+  ExperimentTable,
   IncludeExperimentKeys,
 } from "../../lib/stores/experimentStore";
 import {
@@ -116,6 +117,57 @@ export class ExperimentController extends Controller {
       requestBody
     );
     return result;
+  }
+
+  @Post("/table/{experimentId}")
+  public async getExperimentTableById(
+    @Path() experimentId: string,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<ExperimentTable, string>> {
+    const experimentManager = new ExperimentManager(request.authParams);
+    return experimentManager.getExperimentTableById(experimentId);
+  }
+
+  @Post("/table/{experimentTableId}/cell")
+  public async createExperimentCell(
+    @Path() experimentTableId: string,
+    @Body()
+    requestBody: {
+      columnId: string;
+      rowIndex: number;
+      value: string | null;
+    },
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<null, string>> {
+    const experimentManager = new ExperimentManager(request.authParams);
+    const result = await experimentManager.createExperimentCells({
+      cells: [requestBody],
+    });
+    if (result.error) {
+      this.setStatus(500);
+      console.error(result.error);
+      return err(result.error);
+    }
+    return ok(null);
+  }
+
+  @Post("/table/{experimentTableId}/column")
+  public async createExperimentColumn(
+    @Path() experimentTableId: string,
+    @Body()
+    requestBody: {
+      columnName: string;
+      columnType: string;
+    },
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<null, string>> {
+    const experimentManager = new ExperimentManager(request.authParams);
+    const result = await experimentManager.createExperimentColumn({
+      experimentTableId,
+      columnName: requestBody.columnName,
+      columnType: requestBody.columnType,
+    });
+    return ok(null);
   }
 
   @Post("/update-meta")

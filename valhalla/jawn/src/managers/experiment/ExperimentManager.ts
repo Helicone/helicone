@@ -11,6 +11,7 @@ import {
   Experiment,
   ExperimentDatasetRow,
   ExperimentStore,
+  ExperimentTable,
   IncludeExperimentKeys,
 } from "../../lib/stores/experimentStore";
 import { FilterNode } from "../../lib/shared/filters/filterDefs";
@@ -234,5 +235,40 @@ export class ExperimentManager extends BaseManager {
       tableId: experimentTableResult.data.experimentTableId,
       experimentId: experimentTableResult.data.experimentId,
     });
+  }
+
+  async createExperimentCells(params: {
+    cells: {
+      columnId: string;
+      rowIndex: number;
+      value: string | null;
+    }[];
+  }): Promise<Result<{ ids: string[] }, string>> {
+    return this.ExperimentStore.createExperimentCells(params.cells);
+  }
+
+  async getExperimentTableById(
+    experimentId: string
+  ): Promise<Result<ExperimentTable, string>> {
+    return this.ExperimentStore.getExperimentTableById(experimentId);
+  }
+
+  async createExperimentColumn(params: {
+    experimentTableId: string;
+    columnName: string;
+    columnType: string;
+  }): Promise<
+    Result<
+      {
+        id: string;
+      },
+      string
+    >
+  > {
+    return this.ExperimentStore.createExperimentTableColumn(
+      params.experimentTableId,
+      params.columnName,
+      params.columnType as "experiment" | "input" | "output"
+    );
   }
 }

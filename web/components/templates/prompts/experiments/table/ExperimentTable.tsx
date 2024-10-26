@@ -128,6 +128,56 @@ export function ExperimentTable({
     }
   );
 
+  const fetchExperimentTable = useCallback(async () => {
+    if (!orgId || !experimentId) return null;
+
+    const jawnClient = getJawnClient(orgId);
+    const res = await jawnClient.POST("/v1/experiment/table/{experimentId}", {
+      params: {
+        path: {
+          experimentId: experimentId,
+        },
+      },
+    });
+
+    // if (res.error) {
+    //   console.error("Error fetching experiment table:", res.error);
+    //   return null;
+    // }
+
+    return res.data?.data; // Assuming the data is in res.data.data
+  }, [orgId, experimentId]);
+
+  const { data: experimentTableData, refetch: refetchExperimentTable } =
+    useQuery(["experimentTable", orgId, experimentId], fetchExperimentTable, {
+      enabled: !!orgId && !!experimentId,
+    });
+
+  const handleAddColumn = useCallback(
+    async (columnName: string, columnType: string) => {
+      const res = await jawn.POST(
+        "/v1/experiment/table/{experimentTableId}/column",
+        {
+          params: {
+            path: { experimentTableId: experimentId || "" },
+          },
+          body: {
+            columnName,
+            columnType, // e.g., "input", "output", or "experiment"
+          },
+        }
+      );
+
+      if (res.error) {
+        console.error("Error adding column:", res);
+      } else {
+        // Refetch the experiment table or update state
+        await refetchExperimentTable();
+      }
+    },
+    [experimentId, jawn, refetchExperimentTable]
+  );
+
   const providerKey = useMemo(
     () => (experimentData?.meta as any)?.provider_key,
     [experimentData]
@@ -723,33 +773,92 @@ export function ExperimentTable({
       },
     ];
 
-    // Add columns for each input key
-    Array.from(inputKeys).forEach((key, index) => {
-      columns.push({
-        field: key,
-        headerName: key,
-        width: 150,
-        cellRenderer: InputCellRenderer,
-        cellRendererParams: {
-          index: index,
-          wrapText,
-        },
-        cellClass: "border-r border-[#E2E8F0] text-slate-700 pt-2.5",
-        headerClass: "border-r border-[#E2E8F0]",
-        headerComponent: InputsHeaderComponent,
-        headerComponentParams: {
-          index: index,
-          displayName: key,
-          badgeText: "Input",
-        },
-        cellStyle: {
-          justifyContent: "start",
-          whiteSpace: wrapText ? "normal" : "nowrap",
-        },
-        autoHeight: wrapText,
-        editable: false, // Set this to false to prevent default editing
-      });
+    Array.from(experimentTableData?.columns || []).forEach((column, index) => {
+      if (column.columnType === "input") {
+        columns.push({
+          field: column.id,
+          headerName: column.columnName,
+          width: 150,
+          cellRenderer: InputCellRenderer,
+          cellRendererParams: {
+            index: index,
+            wrapText,
+          },
+          cellClass: "border-r border-[#E2E8F0] text-slate-700 pt-2.5",
+          headerClass: "border-r border-[#E2E8F0]",
+          headerComponent: InputsHeaderComponent,
+          headerComponentParams: {
+            index: index,
+            displayName: column.columnName,
+            badgeText: "Input",
+          },
+          cellStyle: {
+            justifyContent: "start",
+            whiteSpace: wrapText ? "normal" : "nowrap",
+          },
+          autoHeight: wrapText,
+          editable: false, // Set this to false to prevent default editing
+        });
+      } else if (column.columnType === "output") {
+        columns.push({
+          field: "original",
+          headerName: "Original",
+          width: 200,
+          headerComponent: CustomHeaderComponent,
+          headerComponentParams: {
+            displayName: "Original",
+            badgeText: "Output",
+            badgeVariant: "secondary",
+            hypothesis: sortedHypotheses[1] || {},
+            promptVersionTemplate: promptVersionTemplate,
+          },
+          cellClass: "border-r border-[#E2E8F0] text-slate-700 pt-2.5",
+          headerClass: headerClass,
+          cellRenderer: OriginalOutputCellRenderer,
+          cellRendererParams: {
+            prompt: promptVersionTemplate,
+            handleRunHypothesis,
+            wrapText,
+          },
+          cellStyle: {
+            verticalAlign: "middle",
+            textAlign: "left",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: wrapText ? "normal" : "nowrap",
+          },
+          autoHeight: wrapText,
+        });
+      }
     });
+
+    // Add columns for each input key
+    // Array.from(inputKeys).forEach((key, index) => {
+    //   columns.push({
+    //     field: key,
+    //     headerName: key,
+    //     width: 150,
+    //     cellRenderer: InputCellRenderer,
+    //     cellRendererParams: {
+    //       index: index,
+    //       wrapText,
+    //     },
+    //     cellClass: "border-r border-[#E2E8F0] text-slate-700 pt-2.5",
+    //     headerClass: "border-r border-[#E2E8F0]",
+    //     headerComponent: InputsHeaderComponent,
+    //     headerComponentParams: {
+    //       index: index,
+    //       displayName: key,
+    //       badgeText: "Input",
+    //     },
+    //     cellStyle: {
+    //       justifyContent: "start",
+    //       whiteSpace: wrapText ? "normal" : "nowrap",
+    //     },
+    //     autoHeight: wrapText,
+    //     editable: false, // Set this to false to prevent default editing
+    //   });
+    // });
 
     if (
       JSON.stringify(promptVersionTemplate?.helicone_template)?.includes(
@@ -789,35 +898,35 @@ export function ExperimentTable({
     }
 
     // Add the "Original" column
-    columns.push({
-      field: "original",
-      headerName: "Original",
-      width: 200,
-      headerComponent: CustomHeaderComponent,
-      headerComponentParams: {
-        displayName: "Original",
-        badgeText: "Output",
-        badgeVariant: "secondary",
-        hypothesis: sortedHypotheses[1] || {},
-        promptVersionTemplate: promptVersionTemplate,
-      },
-      cellClass: "border-r border-[#E2E8F0] text-slate-700 pt-2.5",
-      headerClass: headerClass,
-      cellRenderer: OriginalOutputCellRenderer,
-      cellRendererParams: {
-        prompt: promptVersionTemplate,
-        handleRunHypothesis,
-        wrapText,
-      },
-      cellStyle: {
-        verticalAlign: "middle",
-        textAlign: "left",
-        overflow: "hidden",
-        textOverflow: "ellipsis",
-        whiteSpace: wrapText ? "normal" : "nowrap",
-      },
-      autoHeight: wrapText,
-    });
+    // columns.push({
+    //   field: "original",
+    //   headerName: "Original",
+    //   width: 200,
+    //   headerComponent: CustomHeaderComponent,
+    //   headerComponentParams: {
+    //     displayName: "Original",
+    //     badgeText: "Output",
+    //     badgeVariant: "secondary",
+    //     hypothesis: sortedHypotheses[1] || {},
+    //     promptVersionTemplate: promptVersionTemplate,
+    //   },
+    //   cellClass: "border-r border-[#E2E8F0] text-slate-700 pt-2.5",
+    //   headerClass: headerClass,
+    //   cellRenderer: OriginalOutputCellRenderer,
+    //   cellRendererParams: {
+    //     prompt: promptVersionTemplate,
+    //     handleRunHypothesis,
+    //     wrapText,
+    //   },
+    //   cellStyle: {
+    //     verticalAlign: "middle",
+    //     textAlign: "left",
+    //     overflow: "hidden",
+    //     textOverflow: "ellipsis",
+    //     whiteSpace: wrapText ? "normal" : "nowrap",
+    //   },
+    //   autoHeight: wrapText,
+    // });
 
     // Add columns for additional experiments
     if (columnView === "all" || columnView === "outputs") {
