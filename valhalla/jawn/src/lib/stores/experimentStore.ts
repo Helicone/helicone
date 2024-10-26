@@ -39,6 +39,8 @@ export interface ExperimentDatasetRow {
     response: ResponseObj;
     request: RequestObj;
   };
+  rowIndex: number;
+  columnId: string;
   scores: Record<string, Score>;
 }
 
@@ -96,8 +98,10 @@ export interface ExperimentTableColumn {
   id: string;
   columnName: string;
   columnType: string;
+  hypothesisId?: string;
   cells: {
     rowIndex: number;
+    requestId?: string;
     value: string | null;
   }[];
 }
@@ -399,6 +403,7 @@ export class ExperimentStore extends BaseStore {
       .insert({
         experiment_id: result.data.id,
         name: "Experiment Table",
+        organization_id: this.organizationId,
       })
       .select("*")
       .single();
@@ -416,7 +421,8 @@ export class ExperimentStore extends BaseStore {
   async createExperimentTableColumn(
     experimentTableId: string,
     columnName: string,
-    columnType: "input" | "output" | "experiment"
+    columnType: "input" | "output" | "experiment",
+    hypothesisId?: string
   ): Promise<Result<{ id: string }, string>> {
     const result = await supabaseServer.client
       .from("experiment_column")
@@ -424,6 +430,8 @@ export class ExperimentStore extends BaseStore {
         table_id: experimentTableId,
         column_name: columnName,
         column_type: columnType,
+        hypothesis_id: hypothesisId,
+        metadata: hypothesisId ? { hypothesisId: hypothesisId } : null,
       })
       .select("*")
       .single();
@@ -440,6 +448,7 @@ export class ExperimentStore extends BaseStore {
     columns: {
       name: string;
       type: "input" | "output" | "experiment";
+      hypothesisId?: string;
     }[]
   ): Promise<Result<{ ids: string[] }, string>> {
     const results = await Promise.all(
@@ -447,7 +456,8 @@ export class ExperimentStore extends BaseStore {
         this.createExperimentTableColumn(
           experimentTableId,
           column.name,
-          column.type
+          column.type,
+          column.hypothesisId
         )
       )
     );
@@ -478,6 +488,42 @@ export class ExperimentStore extends BaseStore {
     return ok({ id: result.data.id });
   }
 
+  async createExperimentTableRow(params: {
+    experimentTableId: string;
+    rowIndex: number;
+  }): Promise<Result<{ ids: string[] }, string>> {
+    // First, get all columns for this experiment table
+    const columnsResult = await supabaseServer.client
+      .from("experiment_column")
+      .select("*")
+      .eq("table_id", params.experimentTableId);
+
+    if (columnsResult.error) {
+      return err(columnsResult.error.message);
+    }
+
+    // Create empty cells for each column
+    const cellPromises = columnsResult.data.map((column) =>
+      this.createExperimentCell(column.id, params.rowIndex, null)
+    );
+
+    try {
+      const results = await Promise.all(cellPromises);
+
+      // Check if any cell creation failed
+      const failedResults = results.filter((result) => result.error);
+      if (failedResults.length > 0) {
+        return err(`Failed to create cells: ${failedResults[0].error}`);
+      }
+
+      // Return the first cell's ID as the row identifier
+      // Since all cells are created for the same row, any cell ID can serve as the row ID
+      return ok({ ids: results.map((result) => result.data!.id) });
+    } catch (error) {
+      return err(`Failed to create experiment row: ${error}`);
+    }
+  }
+
   async createExperimentCells(
     cells: {
       columnId: string;
@@ -500,54 +546,49 @@ export class ExperimentStore extends BaseStore {
     experimentId: string
   ): Promise<Result<ExperimentTable, string>> {
     const query = `
-      WITH table_data AS (
-        SELECT 
-          et.id,
-          et.name,
-          et.experiment_id,
-          ec.id as column_id,
-          ec.column_name,
-          ec.column_type,
-          ec.created_at as ec_created_at,
-          ecv.row_index,
-          ecv.value
-        FROM experiment_table et
-        LEFT JOIN experiment_column ec ON ec.table_id = et.id
-        LEFT JOIN experiment_cell_value ecv ON ecv.column_id = ec.id
+      WITH max_row_index AS (
+        SELECT COALESCE(MAX(row_index), -1) as max_index
+        FROM experiment_cell_value ecv
+        JOIN experiment_column ec ON ec.id = ecv.column_id
+        JOIN experiment_table et ON et.id = ec.table_id
         WHERE et.experiment_id = $1
-        ORDER BY ec.created_at DESC, ecv.row_index
       )
       SELECT 
-        id,
-        name,
-        experiment_id as "experimentId",
+        et.id,
+        et.name,
+        et.experiment_id as "experimentId",
         COALESCE(
           jsonb_agg(
-            CASE WHEN column_id IS NOT NULL THEN
-              jsonb_build_object(
-                'id', column_id,
-                'columnName', column_name,
-                'columnType', column_type,
-                'cells', (
-                  SELECT jsonb_agg(
-                    jsonb_build_object(
-                      'rowIndex', cell.row_index,
-                      'value', cell.value
-                    )
-                    ORDER BY cell.row_index
+            jsonb_build_object(
+              'id', ec.id,
+              'columnName', ec.column_name,
+              'columnType', ec.column_type,
+              'hypothesisId', ec.hypothesis_id,
+              'cells', (
+                SELECT jsonb_agg(
+                  jsonb_build_object(
+                    'rowIndex', row_number,
+                    'requestId', (
+                      SELECT ecv.request_id
+                      FROM experiment_cell_value ecv
+                      WHERE ecv.column_id = ec.id
+                      AND ecv.row_index = row_number
+                    ),
+                    'value', NULL
                   )
-                  FROM table_data cell
-                  WHERE cell.column_id = td.column_id
-                  AND cell.row_index IS NOT NULL
+                  ORDER BY row_number
                 )
+                FROM generate_series(0, (SELECT max_index FROM max_row_index)) row_number
               )
-            END
-            ORDER BY td.ec_created_at DESC
-          ) FILTER (WHERE column_id IS NOT NULL),
+            )
+            ORDER BY ec.created_at DESC
+          ),
           '[]'
         ) as columns
-      FROM table_data td
-      GROUP BY id, name, experiment_id;
+      FROM experiment_table et
+      LEFT JOIN experiment_column ec ON ec.table_id = et.id
+      WHERE et.experiment_id = $1
+      GROUP BY et.id, et.name, et.experiment_id;
     `;
 
     try {

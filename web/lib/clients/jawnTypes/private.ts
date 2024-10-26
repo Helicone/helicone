@@ -188,45 +188,6 @@ export interface paths {
   "/v1/integration/slack/channels": {
     get: operations["GetSlackChannels"];
   };
-  "/v1/experiment/dataset": {
-    post: operations["AddDataset"];
-  };
-  "/v1/experiment/dataset/random": {
-    post: operations["AddRandomDataset"];
-  };
-  "/v1/experiment/dataset/query": {
-    post: operations["GetDatasets"];
-  };
-  "/v1/experiment/dataset/{datasetId}/row/insert": {
-    post: operations["InsertDatasetRow"];
-  };
-  "/v1/experiment/dataset/{datasetId}/version/{promptVersionId}/row/new": {
-    post: operations["CreateDatasetRow"];
-  };
-  "/v1/experiment/dataset/{datasetId}/inputs/query": {
-    post: operations["GetDataset"];
-  };
-  "/v1/experiment/dataset/{datasetId}/mutate": {
-    post: operations["MutateDataset"];
-  };
-  "/v1/helicone-dataset": {
-    post: operations["AddHeliconeDataset"];
-  };
-  "/v1/helicone-dataset/{datasetId}/mutate": {
-    post: operations["MutateHeliconeDataset"];
-  };
-  "/v1/helicone-dataset/{datasetId}/query": {
-    post: operations["QueryHeliconeDatasetRows"];
-  };
-  "/v1/helicone-dataset/{datasetId}/count": {
-    post: operations["CountHeliconeDatasetRows"];
-  };
-  "/v1/helicone-dataset/query": {
-    post: operations["QueryHeliconeDataset"];
-  };
-  "/v1/helicone-dataset/{datasetId}/request/{requestId}": {
-    post: operations["UpdateHeliconeDatasetRequest"];
-  };
   "/v1/experiment/new-empty": {
     post: operations["CreateNewEmptyExperiment"];
   };
@@ -280,6 +241,45 @@ export interface paths {
   };
   "/v1/evaluator/{evaluatorId}/experiments": {
     get: operations["GetExperimentsForEvaluator"];
+  };
+  "/v1/experiment/dataset": {
+    post: operations["AddDataset"];
+  };
+  "/v1/experiment/dataset/random": {
+    post: operations["AddRandomDataset"];
+  };
+  "/v1/experiment/dataset/query": {
+    post: operations["GetDatasets"];
+  };
+  "/v1/experiment/dataset/{datasetId}/row/insert": {
+    post: operations["InsertDatasetRow"];
+  };
+  "/v1/experiment/dataset/{datasetId}/version/{promptVersionId}/row/new": {
+    post: operations["CreateDatasetRow"];
+  };
+  "/v1/experiment/dataset/{datasetId}/inputs/query": {
+    post: operations["GetDataset"];
+  };
+  "/v1/experiment/dataset/{datasetId}/mutate": {
+    post: operations["MutateDataset"];
+  };
+  "/v1/helicone-dataset": {
+    post: operations["AddHeliconeDataset"];
+  };
+  "/v1/helicone-dataset/{datasetId}/mutate": {
+    post: operations["MutateHeliconeDataset"];
+  };
+  "/v1/helicone-dataset/{datasetId}/query": {
+    post: operations["QueryHeliconeDatasetRows"];
+  };
+  "/v1/helicone-dataset/{datasetId}/count": {
+    post: operations["CountHeliconeDatasetRows"];
+  };
+  "/v1/helicone-dataset/query": {
+    post: operations["QueryHeliconeDataset"];
+  };
+  "/v1/helicone-dataset/{datasetId}/request/{requestId}": {
+    post: operations["UpdateHeliconeDatasetRequest"];
   };
   "/v1/evals/query": {
     post: operations["QueryEvals"];
@@ -757,6 +757,8 @@ export interface components {
         id: string;
       };
       request: {
+        experimentRowIndex?: string;
+        experimentColumnId?: string;
         heliconeTemplate?: components["schemas"]["TemplateWithInputs"];
         isStream: boolean;
         /** Format: date-time */
@@ -1826,6 +1828,249 @@ Json: JsonObject;
       error: null;
     };
     "Result_Array__id-string--name-string__.string_": components["schemas"]["ResultSuccess_Array__id-string--name-string___"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__experimentId-string__": {
+      data: {
+        experimentId: string;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__experimentId-string_.string_": components["schemas"]["ResultSuccess__experimentId-string__"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__tableId-string--experimentId-string__": {
+      data: {
+        experimentId: string;
+        tableId: string;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__tableId-string--experimentId-string_.string_": components["schemas"]["ResultSuccess__tableId-string--experimentId-string__"] | components["schemas"]["ResultError_string_"];
+    CreateExperimentTableParams: {
+      datasetId: string;
+      experimentMetadata: components["schemas"]["Record_string.any_"];
+      promptVersionId: string;
+      newHeliconeTemplate: string;
+      isMajorVersion: boolean;
+      promptSubversionMetadata: components["schemas"]["Record_string.any_"];
+    };
+    ExperimentTableColumn: {
+      id: string;
+      columnName: string;
+      columnType: string;
+      hypothesisId?: string;
+      cells: ({
+          value: string | null;
+          /** Format: double */
+          rowIndex: number;
+        })[];
+    };
+    ExperimentTable: {
+      id: string;
+      name: string;
+      experimentId: string;
+      columns: components["schemas"]["ExperimentTableColumn"][];
+    };
+    ResultSuccess_ExperimentTable_: {
+      data: components["schemas"]["ExperimentTable"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ExperimentTable.string_": components["schemas"]["ResultSuccess_ExperimentTable_"] | components["schemas"]["ResultError_string_"];
+    ResultSuccess_unknown_: {
+      data: unknown;
+      /** @enum {number|null} */
+      error: null;
+    };
+    /**
+     * @description Error format
+     *
+     * {@link https://postgrest.org/en/stable/api.html?highlight=options#errors-and-http-status-codes}
+     */
+    PostgrestError: {
+      code: string;
+      hint: string;
+      details: string;
+      message: string;
+    };
+    ResultError_PostgrestError_: {
+      /** @enum {number|null} */
+      data: null;
+      error: components["schemas"]["PostgrestError"];
+    };
+    NewExperimentParams: {
+      datasetId: string;
+      promptVersion: string;
+      model: string;
+      providerKeyId: string;
+      meta?: unknown;
+    };
+    "ResultSuccess__hypothesisId-string__": {
+      data: {
+        hypothesisId: string;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__hypothesisId-string_.string_": components["schemas"]["ResultSuccess__hypothesisId-string__"] | components["schemas"]["ResultError_string_"];
+    EvaluatorResult: {
+      id: string;
+      created_at: string;
+      scoring_type: string;
+      llm_template: unknown;
+      organization_id: string;
+      updated_at: string;
+      name: string;
+    };
+    "ResultSuccess_EvaluatorResult-Array_": {
+      data: components["schemas"]["EvaluatorResult"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_EvaluatorResult-Array.string_": components["schemas"]["ResultSuccess_EvaluatorResult-Array_"] | components["schemas"]["ResultError_string_"];
+    ResponseObj: {
+      body: unknown;
+      createdAt: string;
+      /** Format: double */
+      completionTokens: number;
+      /** Format: double */
+      promptTokens: number;
+      /** Format: double */
+      delayMs: number;
+      model: string;
+    };
+    RequestObj: {
+      id: string;
+      provider: string;
+    };
+    Score: {
+      valueType: string;
+      value: number | string;
+    };
+    /** @description Construct a type with a set of properties K of type T */
+    "Record_string.Score_": {
+      [key: string]: components["schemas"]["Score"];
+    };
+    ExperimentDatasetRow: {
+      rowId: string;
+      inputRecord: {
+        request: components["schemas"]["RequestObj"];
+        response: components["schemas"]["ResponseObj"];
+        autoInputs: components["schemas"]["Record_string.string_"][];
+        inputs: components["schemas"]["Record_string.string_"];
+        requestPath: string;
+        requestId: string;
+        id: string;
+      };
+      /** Format: double */
+      rowIndex: number;
+      columnId: string;
+      scores: components["schemas"]["Record_string.Score_"];
+    };
+    ExperimentScores: {
+      dataset: {
+        scores: components["schemas"]["Record_string.Score_"];
+      };
+      hypothesis: {
+        scores: components["schemas"]["Record_string.Score_"];
+      };
+    };
+    Experiment: {
+      id: string;
+      organization: string;
+      dataset: {
+        rows: components["schemas"]["ExperimentDatasetRow"][];
+        name: string;
+        id: string;
+      };
+      meta: unknown;
+      createdAt: string;
+      hypotheses: {
+          runs: {
+              request?: components["schemas"]["RequestObj"];
+              scores: components["schemas"]["Record_string.Score_"];
+              response?: components["schemas"]["ResponseObj"];
+              resultRequestId: string;
+              datasetRowId: string;
+            }[];
+          providerKey: string;
+          createdAt: string;
+          status: string;
+          model: string;
+          parentPromptVersion?: {
+            template: unknown;
+          };
+          promptVersion?: {
+            template: unknown;
+          };
+          promptVersionId: string;
+          id: string;
+        }[];
+      scores: components["schemas"]["ExperimentScores"] | null;
+    };
+    "ResultSuccess_Experiment-Array_": {
+      data: components["schemas"]["Experiment"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Experiment-Array.string_": components["schemas"]["ResultSuccess_Experiment-Array_"] | components["schemas"]["ResultError_string_"];
+    /** @description Make all properties in T optional */
+    Partial_ExperimentToOperators_: {
+      id?: components["schemas"]["Partial_TextOperators_"];
+      prompt_v2?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description From T, pick a set of properties whose keys are in the union K */
+    "Pick_FilterLeaf.experiment_": {
+      experiment?: components["schemas"]["Partial_ExperimentToOperators_"];
+    };
+    FilterLeafSubset_experiment_: components["schemas"]["Pick_FilterLeaf.experiment_"];
+    ExperimentFilterNode: components["schemas"]["FilterLeafSubset_experiment_"] | components["schemas"]["ExperimentFilterBranch"] | "all";
+    ExperimentFilterBranch: {
+      right: components["schemas"]["ExperimentFilterNode"];
+      /** @enum {string} */
+      operator: "or" | "and";
+      left: components["schemas"]["ExperimentFilterNode"];
+    };
+    IncludeExperimentKeys: {
+      /** @enum {boolean} */
+      inputs?: true;
+      /** @enum {boolean} */
+      promptVersion?: true;
+      /** @enum {boolean} */
+      responseBodies?: true;
+      /** @enum {boolean} */
+      score?: true;
+    };
+    ExperimentRun: Record<string, never>;
+    ResultSuccess_ExperimentRun_: {
+      data: components["schemas"]["ExperimentRun"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ExperimentRun.string_": components["schemas"]["ResultSuccess_ExperimentRun_"] | components["schemas"]["ResultError_string_"];
+    ResultSuccess_EvaluatorResult_: {
+      data: components["schemas"]["EvaluatorResult"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_EvaluatorResult.string_": components["schemas"]["ResultSuccess_EvaluatorResult_"] | components["schemas"]["ResultError_string_"];
+    CreateEvaluatorParams: {
+      scoring_type: string;
+      llm_template: unknown;
+      name: string;
+    };
+    UpdateEvaluatorParams: {
+      scoring_type?: string;
+      llm_template?: unknown;
+    };
+    "ResultSuccess__experiment_id-string--experiment_created_at-string_-Array_": {
+      data: {
+          experiment_created_at: string;
+          experiment_id: string;
+        }[];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__experiment_id-string--experiment_created_at-string_-Array.string_": components["schemas"]["ResultSuccess__experiment_id-string--experiment_created_at-string_-Array_"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess__datasetId-string__": {
       data: {
         datasetId: string;
@@ -1943,245 +2188,6 @@ Json: JsonObject;
       data: null;
       error: unknown;
     };
-    "ResultSuccess__experimentId-string__": {
-      data: {
-        experimentId: string;
-      };
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__experimentId-string_.string_": components["schemas"]["ResultSuccess__experimentId-string__"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess__tableId-string--experimentId-string__": {
-      data: {
-        experimentId: string;
-        tableId: string;
-      };
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__tableId-string--experimentId-string_.string_": components["schemas"]["ResultSuccess__tableId-string--experimentId-string__"] | components["schemas"]["ResultError_string_"];
-    CreateExperimentTableParams: {
-      datasetId: string;
-      experimentMetadata: components["schemas"]["Record_string.any_"];
-      promptVersionId: string;
-      newHeliconeTemplate: string;
-      isMajorVersion: boolean;
-      promptSubversionMetadata: components["schemas"]["Record_string.any_"];
-    };
-    ExperimentTableColumn: {
-      id: string;
-      columnName: string;
-      columnType: string;
-      cells: ({
-          value: string | null;
-          /** Format: double */
-          rowIndex: number;
-        })[];
-    };
-    ExperimentTable: {
-      id: string;
-      name: string;
-      experimentId: string;
-      columns: components["schemas"]["ExperimentTableColumn"][];
-    };
-    ResultSuccess_ExperimentTable_: {
-      data: components["schemas"]["ExperimentTable"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_ExperimentTable.string_": components["schemas"]["ResultSuccess_ExperimentTable_"] | components["schemas"]["ResultError_string_"];
-    ResultSuccess_unknown_: {
-      data: unknown;
-      /** @enum {number|null} */
-      error: null;
-    };
-    /**
-     * @description Error format
-     *
-     * {@link https://postgrest.org/en/stable/api.html?highlight=options#errors-and-http-status-codes}
-     */
-    PostgrestError: {
-      code: string;
-      hint: string;
-      details: string;
-      message: string;
-    };
-    ResultError_PostgrestError_: {
-      /** @enum {number|null} */
-      data: null;
-      error: components["schemas"]["PostgrestError"];
-    };
-    NewExperimentParams: {
-      datasetId: string;
-      promptVersion: string;
-      model: string;
-      providerKeyId: string;
-      meta?: unknown;
-    };
-    "ResultSuccess__hypothesisId-string__": {
-      data: {
-        hypothesisId: string;
-      };
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__hypothesisId-string_.string_": components["schemas"]["ResultSuccess__hypothesisId-string__"] | components["schemas"]["ResultError_string_"];
-    EvaluatorResult: {
-      id: string;
-      created_at: string;
-      scoring_type: string;
-      llm_template: unknown;
-      organization_id: string;
-      updated_at: string;
-      name: string;
-    };
-    "ResultSuccess_EvaluatorResult-Array_": {
-      data: components["schemas"]["EvaluatorResult"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_EvaluatorResult-Array.string_": components["schemas"]["ResultSuccess_EvaluatorResult-Array_"] | components["schemas"]["ResultError_string_"];
-    ResponseObj: {
-      body: unknown;
-      createdAt: string;
-      /** Format: double */
-      completionTokens: number;
-      /** Format: double */
-      promptTokens: number;
-      /** Format: double */
-      delayMs: number;
-      model: string;
-    };
-    RequestObj: {
-      id: string;
-      provider: string;
-    };
-    Score: {
-      valueType: string;
-      value: number | string;
-    };
-    /** @description Construct a type with a set of properties K of type T */
-    "Record_string.Score_": {
-      [key: string]: components["schemas"]["Score"];
-    };
-    ExperimentDatasetRow: {
-      rowId: string;
-      inputRecord: {
-        request: components["schemas"]["RequestObj"];
-        response: components["schemas"]["ResponseObj"];
-        autoInputs: components["schemas"]["Record_string.string_"][];
-        inputs: components["schemas"]["Record_string.string_"];
-        requestPath: string;
-        requestId: string;
-        id: string;
-      };
-      scores: components["schemas"]["Record_string.Score_"];
-    };
-    ExperimentScores: {
-      dataset: {
-        scores: components["schemas"]["Record_string.Score_"];
-      };
-      hypothesis: {
-        scores: components["schemas"]["Record_string.Score_"];
-      };
-    };
-    Experiment: {
-      id: string;
-      organization: string;
-      dataset: {
-        rows: components["schemas"]["ExperimentDatasetRow"][];
-        name: string;
-        id: string;
-      };
-      meta: unknown;
-      createdAt: string;
-      hypotheses: {
-          runs: {
-              request?: components["schemas"]["RequestObj"];
-              scores: components["schemas"]["Record_string.Score_"];
-              response?: components["schemas"]["ResponseObj"];
-              resultRequestId: string;
-              datasetRowId: string;
-            }[];
-          providerKey: string;
-          createdAt: string;
-          status: string;
-          model: string;
-          parentPromptVersion?: {
-            template: unknown;
-          };
-          promptVersion?: {
-            template: unknown;
-          };
-          promptVersionId: string;
-          id: string;
-        }[];
-      scores: components["schemas"]["ExperimentScores"] | null;
-    };
-    "ResultSuccess_Experiment-Array_": {
-      data: components["schemas"]["Experiment"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_Experiment-Array.string_": components["schemas"]["ResultSuccess_Experiment-Array_"] | components["schemas"]["ResultError_string_"];
-    /** @description Make all properties in T optional */
-    Partial_ExperimentToOperators_: {
-      id?: components["schemas"]["Partial_TextOperators_"];
-      prompt_v2?: components["schemas"]["Partial_TextOperators_"];
-    };
-    /** @description From T, pick a set of properties whose keys are in the union K */
-    "Pick_FilterLeaf.experiment_": {
-      experiment?: components["schemas"]["Partial_ExperimentToOperators_"];
-    };
-    FilterLeafSubset_experiment_: components["schemas"]["Pick_FilterLeaf.experiment_"];
-    ExperimentFilterNode: components["schemas"]["FilterLeafSubset_experiment_"] | components["schemas"]["ExperimentFilterBranch"] | "all";
-    ExperimentFilterBranch: {
-      right: components["schemas"]["ExperimentFilterNode"];
-      /** @enum {string} */
-      operator: "or" | "and";
-      left: components["schemas"]["ExperimentFilterNode"];
-    };
-    IncludeExperimentKeys: {
-      /** @enum {boolean} */
-      inputs?: true;
-      /** @enum {boolean} */
-      promptVersion?: true;
-      /** @enum {boolean} */
-      responseBodies?: true;
-      /** @enum {boolean} */
-      score?: true;
-    };
-    ExperimentRun: Record<string, never>;
-    ResultSuccess_ExperimentRun_: {
-      data: components["schemas"]["ExperimentRun"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_ExperimentRun.string_": components["schemas"]["ResultSuccess_ExperimentRun_"] | components["schemas"]["ResultError_string_"];
-    ResultSuccess_EvaluatorResult_: {
-      data: components["schemas"]["EvaluatorResult"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_EvaluatorResult.string_": components["schemas"]["ResultSuccess_EvaluatorResult_"] | components["schemas"]["ResultError_string_"];
-    CreateEvaluatorParams: {
-      scoring_type: string;
-      llm_template: unknown;
-      name: string;
-    };
-    UpdateEvaluatorParams: {
-      scoring_type?: string;
-      llm_template?: unknown;
-    };
-    "ResultSuccess__experiment_id-string--experiment_created_at-string_-Array_": {
-      data: {
-          experiment_created_at: string;
-          experiment_id: string;
-        }[];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__experiment_id-string--experiment_created_at-string_-Array.string_": components["schemas"]["ResultSuccess__experiment_id-string--experiment_created_at-string_-Array_"] | components["schemas"]["ResultError_string_"];
     Eval: {
       name: string;
       /** Format: double */
@@ -3755,248 +3761,6 @@ export interface operations {
       };
     };
   };
-  AddDataset: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["NewDatasetParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__datasetId-string_.string_"];
-        };
-      };
-    };
-  };
-  AddRandomDataset: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["RandomDatasetParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__datasetId-string_.string_"];
-        };
-      };
-    };
-  };
-  GetDatasets: {
-    requestBody: {
-      content: {
-        "application/json": {
-          promptVersionId?: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_DatasetResult-Array.string_"];
-        };
-      };
-    };
-  };
-  InsertDatasetRow: {
-    parameters: {
-      path: {
-        datasetId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          inputRecordId: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_string.string_"];
-        };
-      };
-    };
-  };
-  CreateDatasetRow: {
-    parameters: {
-      path: {
-        datasetId: string;
-        promptVersionId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          sourceRequest?: string;
-          inputs: components["schemas"]["Record_string.string_"];
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_string.string_"];
-        };
-      };
-    };
-  };
-  GetDataset: {
-    parameters: {
-      path: {
-        datasetId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_PromptInputRecord-Array.string_"];
-        };
-      };
-    };
-  };
-  MutateDataset: {
-    requestBody: {
-      content: {
-        "application/json": {
-          removeRequests: string[];
-          addRequests: string[];
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result___-Array.string_"];
-        };
-      };
-    };
-  };
-  AddHeliconeDataset: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["NewHeliconeDatasetParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__datasetId-string_.string_"];
-        };
-      };
-    };
-  };
-  MutateHeliconeDataset: {
-    parameters: {
-      path: {
-        datasetId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["MutateParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  QueryHeliconeDatasetRows: {
-    parameters: {
-      path: {
-        datasetId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          /** Format: double */
-          limit: number;
-          /** Format: double */
-          offset: number;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_HeliconeDatasetRow-Array.string_"];
-        };
-      };
-    };
-  };
-  CountHeliconeDatasetRows: {
-    parameters: {
-      path: {
-        datasetId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_number.string_"];
-        };
-      };
-    };
-  };
-  QueryHeliconeDataset: {
-    requestBody: {
-      content: {
-        "application/json": {
-          datasetIds?: string[];
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_HeliconeDataset-Array.string_"];
-        };
-      };
-    };
-  };
-  UpdateHeliconeDatasetRequest: {
-    parameters: {
-      path: {
-        datasetId: string;
-        requestId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          responseBody: components["schemas"]["Json"];
-          requestBody: components["schemas"]["Json"];
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["ResultSuccess_any_"] | components["schemas"]["ResultError_unknown_"];
-        };
-      };
-    };
-  };
   CreateNewEmptyExperiment: {
     requestBody: {
       content: {
@@ -4079,6 +3843,7 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": {
+          hypothesisId?: string;
           columnType: string;
           columnName: string;
         };
@@ -4238,7 +4003,12 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": {
-          datasetRowIds: string[];
+          cells: {
+              columnId: string;
+              datasetRowId: string;
+              /** Format: double */
+              rowIndex: number;
+            }[];
           hypothesisId: string;
           experimentId: string;
         };
@@ -4344,6 +4114,251 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result__experiment_id-string--experiment_created_at-string_-Array.string_"];
+        };
+      };
+    };
+  };
+  AddDataset: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["NewDatasetParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__datasetId-string_.string_"];
+        };
+      };
+    };
+  };
+  AddRandomDataset: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RandomDatasetParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__datasetId-string_.string_"];
+        };
+      };
+    };
+  };
+  GetDatasets: {
+    requestBody: {
+      content: {
+        "application/json": {
+          promptVersionId?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_DatasetResult-Array.string_"];
+        };
+      };
+    };
+  };
+  InsertDatasetRow: {
+    parameters: {
+      path: {
+        datasetId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          inputRecordId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_string.string_"];
+        };
+      };
+    };
+  };
+  CreateDatasetRow: {
+    parameters: {
+      path: {
+        datasetId: string;
+        promptVersionId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          sourceRequest?: string;
+          experimentTableId: string;
+          /** Format: double */
+          rowIndex: number;
+          inputs: components["schemas"]["Record_string.string_"];
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_string.string_"];
+        };
+      };
+    };
+  };
+  GetDataset: {
+    parameters: {
+      path: {
+        datasetId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_PromptInputRecord-Array.string_"];
+        };
+      };
+    };
+  };
+  MutateDataset: {
+    requestBody: {
+      content: {
+        "application/json": {
+          removeRequests: string[];
+          addRequests: string[];
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result___-Array.string_"];
+        };
+      };
+    };
+  };
+  AddHeliconeDataset: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["NewHeliconeDatasetParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__datasetId-string_.string_"];
+        };
+      };
+    };
+  };
+  MutateHeliconeDataset: {
+    parameters: {
+      path: {
+        datasetId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["MutateParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  QueryHeliconeDatasetRows: {
+    parameters: {
+      path: {
+        datasetId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          /** Format: double */
+          limit: number;
+          /** Format: double */
+          offset: number;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_HeliconeDatasetRow-Array.string_"];
+        };
+      };
+    };
+  };
+  CountHeliconeDatasetRows: {
+    parameters: {
+      path: {
+        datasetId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_number.string_"];
+        };
+      };
+    };
+  };
+  QueryHeliconeDataset: {
+    requestBody: {
+      content: {
+        "application/json": {
+          datasetIds?: string[];
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_HeliconeDataset-Array.string_"];
+        };
+      };
+    };
+  };
+  UpdateHeliconeDatasetRequest: {
+    parameters: {
+      path: {
+        datasetId: string;
+        requestId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          responseBody: components["schemas"]["Json"];
+          requestBody: components["schemas"]["Json"];
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ResultSuccess_any_"] | components["schemas"]["ResultError_unknown_"];
         };
       };
     };

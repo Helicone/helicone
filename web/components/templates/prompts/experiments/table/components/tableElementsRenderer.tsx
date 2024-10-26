@@ -23,9 +23,9 @@ const InputCellRenderer: React.FC<any> = (props) => {
   const [inputValue, setInputValue] = useState(props.value || "");
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const isEmptyTable =
-    props.context.rowData?.length === 0 ||
-    !props.context.rowData?.some((row: any) => row.dataset_row_id);
+  const inputColumns = props.context.experimentTableData?.columns.filter(
+    (column: any) => column.columnType === "input"
+  );
 
   // Determine the display value
   const displayValue = inputValue || "Click to add input";
@@ -51,24 +51,20 @@ const InputCellRenderer: React.FC<any> = (props) => {
 
     setPopoverOpen(false);
 
-    const nextInputField = props.context.inputColumnFields[props.index + 1];
-    if (nextInputField) {
-      const currentRowData = props.context.rowData.find(
-        (row: any) => row.id === props.node.id
-      );
-      const nextCellValue = currentRowData
-        ? currentRowData[nextInputField]
-        : undefined;
+    // Find current column index in input columns
+    const currentColumnIndex = inputColumns.findIndex(
+      (col: any) => col.id === props.column.colId
+    );
+    const nextInputColumn = inputColumns[currentColumnIndex + 1];
 
-      if (nextCellValue === "" || nextCellValue === undefined) {
-        props.context.setActivePopoverCell({
-          rowIndex: props.node.rowIndex,
-          colId: nextInputField,
-        });
-      }
+    if (nextInputColumn) {
+      props.context.setActivePopoverCell({
+        rowIndex: props.node.rowIndex,
+        colId: nextInputColumn.id,
+      });
     } else {
       // This is the last input column
-      props.context.handleLastInputSubmit();
+      props.context.handleLastInputSubmit(props.node.rowIndex);
     }
   };
 

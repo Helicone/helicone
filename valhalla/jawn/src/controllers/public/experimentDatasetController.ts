@@ -18,6 +18,7 @@ import { DatasetManager } from "../../managers/dataset/DatasetManager";
 import { JawnAuthenticatedRequest } from "../../types/request";
 import { randomUUID } from "crypto";
 import { InputsManager } from "../../managers/inputs/InputsManager";
+import { ExperimentManager } from "../../managers/experiment/ExperimentManager";
 
 export type DatasetFilterBranch = {
   left: DatasetFilterNode;
@@ -162,6 +163,8 @@ export class ExperimentDatasetController extends Controller {
     @Body()
     requestBody: {
       inputs: Record<string, string>;
+      rowIndex: number;
+      experimentTableId: string;
       sourceRequest?: string;
     },
     @Request() request: JawnAuthenticatedRequest,
@@ -186,6 +189,18 @@ export class ExperimentDatasetController extends Controller {
       datasetId,
       inputRecordResult.data
     );
+
+    const experimentManager = new ExperimentManager(request.authParams);
+    // const experimentTableCell =
+    //   await experimentManager.createExperimentTableRows({
+    //     experimentTableId: requestBody.experimentTableId,
+    //     rowIndex: requestBody.rowIndex,
+    //   });
+
+    // if (experimentTableCell.error || !experimentTableCell.data) {
+    //   console.error(experimentTableCell.error);
+    //   this.setStatus(500);
+    // }
 
     if (datasetRowResult.error || !datasetRowResult.data) {
       console.error(datasetRowResult.error);

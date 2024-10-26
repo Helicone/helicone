@@ -41,6 +41,8 @@ export interface DBLoggableProps {
     flaggedForModeration: boolean | null;
     request_ip: string | null;
     country_code: string | null;
+    experimentColumnId: string | null;
+    experimentRowIndex: string | null;
   };
   timing: {
     startTime: Date;
@@ -75,6 +77,8 @@ export function dbLoggableRequestFromProxyRequest(
     flaggedForModeration: proxyRequest.flaggedForModeration ?? null,
     request_ip: null,
     country_code: null,
+    experimentColumnId: proxyRequest.experimentColumnId ?? null,
+    experimentRowIndex: proxyRequest.experimentRowIndex ?? null,
   };
 }
 
@@ -154,6 +158,8 @@ export class DBLoggable {
           requestCreatedAt: this.request.startTime ?? new Date(),
           isStream: this.request.isStream,
           heliconeTemplate: this.request.heliconeTemplate ?? undefined,
+          experimentColumnId: this.request.experimentColumnId ?? undefined,
+          experimentRowIndex: this.request.experimentRowIndex ?? undefined,
         },
         response: {
           id: this.response.responseId,

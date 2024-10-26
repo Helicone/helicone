@@ -89,6 +89,8 @@ export async function runOriginalExperiment(
           secretKey,
           datasetRow: data,
           requestId,
+          columnId: data.columnId,
+          rowIndex: data.rowIndex,
         },
         {
           deployment: experiment.meta?.deployment ?? "AZURE",
@@ -141,6 +143,8 @@ export async function run(
             secretKey,
             datasetRow: data,
             requestId,
+            columnId: data.columnId,
+            rowIndex: data.rowIndex,
           },
           {
             deployment: experiment.meta?.deployment ?? "AZURE",

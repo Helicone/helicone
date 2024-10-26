@@ -154,7 +154,7 @@ export function ExperimentTable({
     });
 
   const handleAddColumn = useCallback(
-    async (columnName: string, columnType: string) => {
+    async (columnName: string, columnType: string, hypothesisId?: string) => {
       const res = await jawn.POST(
         "/v1/experiment/table/{experimentTableId}/column",
         {
@@ -163,7 +163,8 @@ export function ExperimentTable({
           },
           body: {
             columnName,
-            columnType, // e.g., "input", "output", or "experiment"
+            columnType,
+            hypothesisId,
           },
         }
       );
@@ -385,7 +386,7 @@ export function ExperimentTable({
     } else if (!experimentId) {
       // If there's no experimentId, set a default empty row
       const defaultInputKey = "Input 1";
-      setInputKeys(new Set([defaultInputKey]));
+      //setInputKeys(new Set([defaultInputKey]));
       setRowData([
         {
           id: `temp-${Date.now()}`,
@@ -451,25 +452,31 @@ export function ExperimentTable({
   const runHypothesisMutation = useMutation(
     async ({
       hypothesisId,
-      datasetRowIds,
+      cells,
     }: {
-      hypothesisId: string | "original";
-      datasetRowIds: string[];
+      hypothesisId: string;
+      cells: Array<{
+        rowIndex: number;
+        datasetRowId: string;
+        columnId: string;
+      }>;
     }) => {
       await jawn.POST("/v1/experiment/run", {
         body: {
           experimentId: experimentId ?? "",
           hypothesisId,
-          datasetRowIds,
+          cells,
         },
       });
     },
     {
-      onMutate: ({ hypothesisId, datasetRowIds }) => {
+      onMutate: ({ hypothesisId, cells }) => {
         // Update loading state in rowData
         setRowData((prevData) =>
           prevData.map((row) => {
-            if (datasetRowIds.includes(row.dataset_row_id)) {
+            if (
+              cells.some((cell) => cell.datasetRowId === row.dataset_row_id)
+            ) {
               return {
                 ...row,
                 isLoading: {
@@ -482,15 +489,16 @@ export function ExperimentTable({
           })
         );
       },
-      onSettled: async (_, __, { hypothesisId, datasetRowIds }) => {
-        // Refetch data
+      onSettled: async (_, __, { hypothesisId, cells }) => {
         await refetchExperiments();
         await refetchInputRecords();
 
-        // Reset loading state in rowData
+        // Reset loading state
         setRowData((prevData) =>
           prevData.map((row) => {
-            if (datasetRowIds.includes(row.dataset_row_id)) {
+            if (
+              cells.some((cell) => cell.datasetRowId === row.dataset_row_id)
+            ) {
               const newIsLoading = { ...(row.isLoading || {}) };
               delete newIsLoading[hypothesisId];
               return {
@@ -501,24 +509,28 @@ export function ExperimentTable({
             return row;
           })
         );
+
         const anyLoading = rowData.some((row) =>
           Object.values(row.isLoading || {}).some((loading) => loading)
         );
 
         if (!anyLoading) {
-          // No hypotheses are running
           setIsHypothesisRunning(false);
         }
-      },
-      onError: (error) => {
-        console.error("Error running hypothesis:", error);
       },
     }
   );
 
   const handleRunHypothesis = useCallback(
-    (hypothesisId: string, datasetRowIds: string[]) => {
-      runHypothesisMutation.mutate({ hypothesisId, datasetRowIds });
+    (
+      hypothesisId: string,
+      cells: Array<{
+        rowIndex: number;
+        datasetRowId: string;
+        columnId: string;
+      }>
+    ) => {
+      runHypothesisMutation.mutate({ hypothesisId, cells });
     },
     [runHypothesisMutation]
   );
@@ -642,55 +654,75 @@ export function ExperimentTable({
     setCurrentRowInputs((prev) => ({ ...prev, [key]: value.trim() }));
   }, []);
 
-  const handleLastInputSubmit = useCallback(async () => {
-    // Check if all inputs are filled
-    const allInputsFilled = Array.from(inputKeys).every(
-      (key) => currentRowInputs[key] && currentRowInputs[key].trim() !== ""
+  // First, create a helper function to get input columns
+  const getInputColumns = useCallback(() => {
+    return (
+      experimentTableData?.columns?.filter(
+        (column) => column.columnType === "input"
+      ) || []
     );
+  }, [experimentTableData?.columns]);
 
-    if (!allInputsFilled) {
-      console.log(
-        "Not all inputs are filled. Please fill all inputs before submitting."
+  // Modify handleLastInputSubmit to use input columns
+  const handleLastInputSubmit = useCallback(
+    async (rowIndex: number) => {
+      const inputColumns = getInputColumns();
+      console.log("last input submit", inputColumns);
+
+      // Check if all inputs are filled using input columns
+      const allInputsFilled = inputColumns.every(
+        (column) =>
+          currentRowInputs[column.id] &&
+          currentRowInputs[column.id].trim() !== ""
       );
-      return;
-    }
 
-    try {
-      await jawn.POST(
-        "/v1/experiment/dataset/{datasetId}/version/{promptVersionId}/row/new",
-        {
-          body: {
-            inputs: currentRowInputs,
-          },
-          params: {
-            path: {
-              promptVersionId: promptSubversionId ?? "",
-              datasetId: experimentData?.dataset?.id ?? "",
+      if (!allInputsFilled) {
+        console.log(
+          "Not all inputs are filled. Please fill all inputs before submitting."
+        );
+        return;
+      }
+
+      try {
+        await jawn.POST(
+          "/v1/experiment/dataset/{datasetId}/version/{promptVersionId}/row/new",
+          {
+            body: {
+              inputs: currentRowInputs,
+              rowIndex: rowIndex,
+              experimentTableId: experimentTableData?.id ?? "",
             },
-          },
-        }
-      );
+            params: {
+              path: {
+                promptVersionId: promptSubversionId ?? "",
+                datasetId: experimentData?.dataset?.id ?? "",
+              },
+            },
+          }
+        );
 
-      // Clear the current row inputs after successful submission
-      setCurrentRowInputs({});
+        // Clear the current row inputs after successful submission
+        setCurrentRowInputs({});
 
-      // Reset the activePopoverCell to prevent the popover from showing up
-      setActivePopoverCell(null);
+        // Reset the activePopoverCell to prevent the popover from showing up
+        setActivePopoverCell(null);
 
-      // Refetch input records to update the table
-      refetchInputRecords();
-    } catch (error) {
-      console.error("Error submitting row:", error);
-    }
-  }, [
-    currentRowInputs,
-    jawn,
-    promptSubversionId,
-    experimentData?.dataset?.id,
-    inputKeys,
-    refetchInputRecords,
-    setActivePopoverCell,
-  ]);
+        // Refetch input records to update the table
+        refetchInputRecords();
+      } catch (error) {
+        console.error("Error submitting row:", error);
+      }
+    },
+    [
+      currentRowInputs,
+      jawn,
+      promptSubversionId,
+      experimentData?.dataset?.id,
+      inputKeys,
+      refetchInputRecords,
+      getInputColumns,
+    ]
+  );
 
   const extractVariables = useCallback((promptTemplate: PromptObject) => {
     const regex =
@@ -723,9 +755,9 @@ export function ExperimentTable({
       console.log("extractedVariables", extractedVariables);
       console.log("helicone_template", promptVersionTemplate.helicone_template);
       if (extractedVariables.length > 0) {
-        setInputKeys(new Set(extractedVariables));
+        //setInputKeys(new Set(extractedVariables));
       } else {
-        setInputKeys(new Set(["Input 1"]));
+        //setInputKeys(new Set(["Input 1"]));
       }
     }
   }, [promptVersionTemplate, extractVariables]);
@@ -772,6 +804,8 @@ export function ExperimentTable({
         autoHeight: wrapText,
       },
     ];
+
+    const inputColumns: Set<string> = new Set();
 
     Array.from(experimentTableData?.columns || []).forEach((column, index) => {
       if (column.columnType === "input") {
@@ -838,7 +872,7 @@ export function ExperimentTable({
             suppressSizeToFit: true,
             cellRenderer: HypothesisCellRenderer,
             cellRendererParams: {
-              hypothesisId: column.id,
+              hypothesisId: column.hypothesisId,
               handleRunHypothesis,
               loadingStates,
               wrapText,
@@ -849,14 +883,13 @@ export function ExperimentTable({
               badgeText: "Output",
               badgeVariant: "secondary",
               onRunColumn: async (colId: string) => {
-                const datasetRowIds = rowData.map((row) => row.dataset_row_id);
-                await Promise.all(
-                  datasetRowIds.map((datasetRowId) =>
-                    handleRunHypothesis(colId, [datasetRowId])
-                  )
-                );
+                const cells = rowData.map((row, index) => ({
+                  rowIndex: index,
+                  datasetRowId: row.dataset_row_id,
+                  columnId: colId,
+                }));
+                await handleRunHypothesis(colId, cells);
               },
-              hypothesis: column,
             },
             cellClass: "border-r border-[#E2E8F0] text-slate-700 pt-2.5",
             headerClass: "border-r border-[#E2E8F0]",
@@ -872,6 +905,8 @@ export function ExperimentTable({
         }
       }
     });
+
+    console.log("inputColumns", inputColumns);
 
     // Add columns for each input key
     // Array.from(inputKeys).forEach((key, index) => {
@@ -1426,6 +1461,7 @@ export function ExperimentTable({
               handleRunHypothesis,
               hypothesesToRun,
               inputKeys: Array.from(inputKeys),
+              experimentTableData,
               inputColumnFields,
               hypotheses: sortedHypotheses,
               refetchExperiments,

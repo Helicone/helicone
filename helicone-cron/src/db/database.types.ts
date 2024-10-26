@@ -365,6 +365,7 @@ export type Database = {
           column_id: string
           created_at: string
           id: string
+          request_id: string | null
           row_index: number
           value: string | null
         }
@@ -372,6 +373,7 @@ export type Database = {
           column_id: string
           created_at?: string
           id?: string
+          request_id?: string | null
           row_index: number
           value?: string | null
         }
@@ -379,6 +381,7 @@ export type Database = {
           column_id?: string
           created_at?: string
           id?: string
+          request_id?: string | null
           row_index?: number
           value?: string | null
         }
@@ -397,21 +400,27 @@ export type Database = {
           column_name: string
           column_type: string
           created_at: string
+          hypothesis_id: string | null
           id: string
+          metadata: Json | null
           table_id: string
         }
         Insert: {
           column_name: string
           column_type: string
           created_at?: string
+          hypothesis_id?: string | null
           id?: string
+          metadata?: Json | null
           table_id: string
         }
         Update: {
           column_name?: string
           column_type?: string
           created_at?: string
+          hypothesis_id?: string | null
           id?: string
+          metadata?: Json | null
           table_id?: string
         }
         Relationships: [
@@ -466,18 +475,21 @@ export type Database = {
           experiment_id: string
           id: string
           name: string
+          organization_id: string
         }
         Insert: {
           created_at?: string
           experiment_id: string
           id?: string
           name: string
+          organization_id: string
         }
         Update: {
           created_at?: string
           experiment_id?: string
           id?: string
           name?: string
+          organization_id?: string
         }
         Relationships: [
           {
@@ -485,6 +497,13 @@ export type Database = {
             columns: ["experiment_id"]
             isOneToOne: false
             referencedRelation: "experiment_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "experiment_table_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization"
             referencedColumns: ["id"]
           },
         ]

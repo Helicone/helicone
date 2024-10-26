@@ -21,6 +21,8 @@ export type Log = {
     requestCreatedAt: Date;
     isStream: boolean;
     heliconeTemplate?: TemplateWithInputs;
+    experimentColumnId?: string;
+    experimentRowIndex?: string;
   };
   response: {
     id: string;

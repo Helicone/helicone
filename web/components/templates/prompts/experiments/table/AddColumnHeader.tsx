@@ -32,7 +32,8 @@ interface AddColumnHeaderProps {
   refetchData: () => Promise<void>; // Add this line
   handleAddColumn: (
     columnName: string,
-    columnType: "experiment" | "input" | "output"
+    columnType: "experiment" | "input" | "output",
+    hypothesisId?: string
   ) => Promise<void>;
 }
 
@@ -242,17 +243,28 @@ const AddColumnHeader: React.FC<AddColumnHeaderProps> = ({
                       return;
                     }
 
-                    await jawn.POST("/v1/experiment/hypothesis", {
-                      body: {
-                        experimentId: experimentId,
-                        model: model,
-                        promptVersion: result.data.data?.id ?? "",
-                        providerKeyId: selectedProviderKey ?? "NOKEY",
-                        status: "RUNNING",
-                      },
-                    });
+                    const hypothesisResult = await jawn.POST(
+                      "/v1/experiment/hypothesis",
+                      {
+                        body: {
+                          experimentId: experimentId,
+                          model: model,
+                          promptVersion: result.data.data?.id ?? "",
+                          providerKeyId: selectedProviderKey ?? "NOKEY",
+                          status: "RUNNING",
+                        },
+                      }
+                    );
+                    if (hypothesisResult.error || !hypothesisResult.data) {
+                      console.error(hypothesisResult);
+                      return;
+                    }
 
-                    await handleAddColumn("Experiment", "experiment");
+                    await handleAddColumn(
+                      "Experiment",
+                      "experiment",
+                      hypothesisResult.data.data?.hypothesisId
+                    );
 
                     setOpen(false); // Close the drawer after adding the column
 

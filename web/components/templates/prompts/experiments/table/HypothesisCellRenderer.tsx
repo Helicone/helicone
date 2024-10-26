@@ -149,7 +149,15 @@ export const HypothesisCellRenderer: React.FC<any> = (params) => {
           className="w-6 h-6 p-0 border-slate-200 border rounded-md bg-slate-50 text-slate-500"
           onClick={(e) => {
             e.stopPropagation();
-            params.handleRunHypothesis(hypothesisId, [data.dataset_row_id]);
+            console.log("params", hypothesisId);
+            // Pass row index and column id along with dataset row id
+            params.handleRunHypothesis(hypothesisId, [
+              {
+                rowIndex: params.node.rowIndex,
+                datasetRowId: data.dataset_row_id,
+                columnId: colDef.field,
+              },
+            ]);
           }}
         >
           <PlayIcon className="w-4 h-4" />

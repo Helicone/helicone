@@ -158,6 +158,7 @@ export class ExperimentController extends Controller {
     requestBody: {
       columnName: string;
       columnType: string;
+      hypothesisId?: string;
     },
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<null, string>> {
@@ -167,6 +168,7 @@ export class ExperimentController extends Controller {
       experimentTableId,
       columnName: requestBody.columnName,
       columnType: requestBody.columnType,
+      hypothesisId: requestBody.hypothesisId,
     });
     return ok(null);
   }
@@ -336,13 +338,20 @@ export class ExperimentController extends Controller {
     requestBody: {
       experimentId: string;
       hypothesisId: string;
-      datasetRowIds: string[];
+      cells: Array<{
+        rowIndex: number;
+        datasetRowId: string;
+        columnId: string;
+      }>;
     },
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<ExperimentRun, string>> {
     const experimentManager = new ExperimentManager(request.authParams);
     if (requestBody.hypothesisId === "original") {
-      return experimentManager.runOriginalExperiment(requestBody);
+      return experimentManager.runOriginalExperiment({
+        experimentId: requestBody.experimentId,
+        datasetRowIds: requestBody.cells.map((cell) => cell.datasetRowId),
+      });
     }
 
     const result = await experimentManager.getExperimentById(
@@ -372,7 +381,7 @@ export class ExperimentController extends Controller {
     }
 
     const datasetRows = await experimentManager.getDatasetRowsByIds({
-      datasetRowIds: requestBody.datasetRowIds,
+      datasetRowIds: requestBody.cells.map((cell) => cell.datasetRowId),
     });
 
     if (datasetRows.error || !datasetRows.data) {
@@ -381,13 +390,24 @@ export class ExperimentController extends Controller {
       return err(datasetRows.error);
     }
 
-    if (datasetRows.data.length !== requestBody.datasetRowIds.length) {
+    if (datasetRows.data.length !== requestBody.cells.length) {
       this.setStatus(404);
       console.error("Row not found");
       return err("Row not found");
     }
 
-    experiment.dataset.rows = datasetRows.data;
+    const newDatasetRows = datasetRows.data.map((row, index) => {
+      const cellData = requestBody.cells.find(
+        (x) => x.datasetRowId === row.rowId
+      );
+      return {
+        ...row,
+        rowIndex: cellData?.rowIndex ?? 0,
+        columnId: cellData?.columnId ?? "",
+      };
+    });
+
+    experiment.dataset.rows = newDatasetRows;
     experiment.hypotheses = [hypothesis];
 
     const runResult = await run(experiment);

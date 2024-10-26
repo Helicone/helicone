@@ -15,7 +15,7 @@ import {
   IncludeExperimentKeys,
 } from "../../lib/stores/experimentStore";
 import { FilterNode } from "../../lib/shared/filters/filterDefs";
-import { run, runOriginalExperiment } from "../../lib/experiment/run";
+import { runOriginalExperiment } from "../../lib/experiment/run";
 import { PromptManager } from "../prompt/PromptManager";
 
 export interface CreateExperimentTableParams {
@@ -247,6 +247,13 @@ export class ExperimentManager extends BaseManager {
     return this.ExperimentStore.createExperimentCells(params.cells);
   }
 
+  async createExperimentTableRows(params: {
+    experimentTableId: string;
+    rowIndex: number;
+  }): Promise<Result<{ ids: string[] }, string>> {
+    return this.ExperimentStore.createExperimentTableRow(params);
+  }
+
   async getExperimentTableById(
     experimentId: string
   ): Promise<Result<ExperimentTable, string>> {
@@ -257,6 +264,7 @@ export class ExperimentManager extends BaseManager {
     experimentTableId: string;
     columnName: string;
     columnType: string;
+    hypothesisId?: string;
   }): Promise<
     Result<
       {
@@ -268,7 +276,8 @@ export class ExperimentManager extends BaseManager {
     return this.ExperimentStore.createExperimentTableColumn(
       params.experimentTableId,
       params.columnName,
-      params.columnType as "experiment" | "input" | "output"
+      params.columnType as "experiment" | "input" | "output",
+      params.hypothesisId
     );
   }
 }

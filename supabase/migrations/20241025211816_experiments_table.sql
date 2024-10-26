@@ -3,6 +3,7 @@ CREATE TABLE "public"."experiment_table" (
     "id" uuid not null default gen_random_uuid(),
     "name" text not null,
     "experiment_id" uuid not null,
+    "organization_id" uuid not null,
     "created_at" timestamp with time zone not null default now()
 );
 
@@ -12,8 +13,9 @@ ENABLE ROW LEVEL SECURITY;
 CREATE TABLE "public"."experiment_column" (
     "id" uuid not null default gen_random_uuid(),
     "table_id" uuid not null,
-    "column_name" text not null,
+    "column_name" text nexperiment_cell_valuet null,
     "column_type" text not null,
+    "hypothesis_id" uuid,
     "metadata" JSONB,
     "created_at" timestamp with time zone not null default now()
 );
@@ -24,6 +26,7 @@ ENABLE ROW LEVEL SECURITY;
 CREATE TABLE "public"."experiment_cell_value" (
     "id" uuid not null default gen_random_uuid(),
     "column_id" uuid not null,
+    "request_id" uuid,
     "row_index" integer not null,
     "value" text,
     "created_at" timestamp with time zone not null default now()
@@ -55,6 +58,10 @@ ADD CONSTRAINT "experiment_cell_value_pkey" PRIMARY KEY USING INDEX "experiment_
 ALTER TABLE "public"."experiment_table"
 ADD CONSTRAINT "experiment_table_experiment_id_fkey"
 FOREIGN KEY (experiment_id) REFERENCES experiment_v2(id) ON UPDATE CASCADE ON DELETE CASCADE NOT VALID;
+
+ALTER TABLE "public"."experiment_table"
+ADD CONSTRAINT "experiment_table_organization_id_fkey"
+FOREIGN KEY (organization_id) REFERENCES organization(id) ON UPDATE CASCADE ON DELETE CASCADE NOT VALID;
 
 ALTER TABLE "public"."experiment_column"
 ADD CONSTRAINT "experiment_column_table_id_fkey"
