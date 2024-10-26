@@ -882,13 +882,14 @@ export function ExperimentTable({
               displayName: column.columnName,
               badgeText: "Output",
               badgeVariant: "secondary",
+              hypothesisId: column.hypothesisId,
               onRunColumn: async (colId: string) => {
                 const cells = rowData.map((row, index) => ({
                   rowIndex: index,
                   datasetRowId: row.dataset_row_id,
                   columnId: colId,
                 }));
-                await handleRunHypothesis(colId, cells);
+                await handleRunHypothesis(column.hypothesisId ?? "", cells);
               },
             },
             cellClass: "border-r border-[#E2E8F0] text-slate-700 pt-2.5",

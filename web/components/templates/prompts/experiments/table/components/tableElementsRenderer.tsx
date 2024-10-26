@@ -170,6 +170,10 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
   const handleRunClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (onRunColumn) {
+      console.log(
+        "running column",
+        props.column.colDef.headerComponentParams.hypothesisId
+      );
       await onRunColumn(props.column.colId);
     }
   };

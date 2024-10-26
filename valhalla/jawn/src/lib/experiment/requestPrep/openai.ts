@@ -23,7 +23,7 @@ function prepareRequestAzure(
   if (columnId) {
     headers["Helicone-Experiment-Column-Id"] = columnId;
   }
-  if (rowIndex) {
+  if (rowIndex !== undefined) {
     headers["Helicone-Experiment-Row-Index"] = rowIndex.toString();
   }
 
