@@ -30,6 +30,10 @@ interface AddColumnHeaderProps {
   promptVersionTemplate: any;
   selectedProviderKey: string | null;
   refetchData: () => Promise<void>; // Add this line
+  handleAddColumn: (
+    columnName: string,
+    columnType: "experiment" | "input" | "output"
+  ) => Promise<void>;
 }
 
 const SCORES = [
@@ -46,6 +50,7 @@ const AddColumnHeader: React.FC<AddColumnHeaderProps> = ({
   experimentId,
   selectedProviderKey,
   refetchData, // Add this line
+  handleAddColumn,
 }) => {
   const [open, setOpen] = useState(false);
   const jawn = useJawnClient();
@@ -246,6 +251,8 @@ const AddColumnHeader: React.FC<AddColumnHeaderProps> = ({
                         status: "RUNNING",
                       },
                     });
+
+                    await handleAddColumn("Experiment", "experiment");
 
                     setOpen(false); // Close the drawer after adding the column
 

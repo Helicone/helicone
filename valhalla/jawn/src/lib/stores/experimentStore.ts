@@ -567,13 +567,21 @@ export class ExperimentStore extends BaseStore {
         return err("Experiment table not found");
       }
 
-      // Clean up null cells arrays
+      // Sort columns by columnType: input, output, experiment
       const result = {
         ...data[0],
-        columns: data[0].columns.map((col) => ({
-          ...col,
-          cells: col.cells || [],
-        })),
+        columns: data[0].columns
+          .sort((a, b) => {
+            const order = { input: 0, output: 1, experiment: 2 };
+            return (
+              order[a.columnType as keyof typeof order] -
+              order[b.columnType as keyof typeof order]
+            );
+          })
+          .map((col) => ({
+            ...col,
+            cells: col.cells || [],
+          })),
       };
 
       return ok(result);

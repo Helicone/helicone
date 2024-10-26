@@ -159,7 +159,7 @@ export function ExperimentTable({
         "/v1/experiment/table/{experimentTableId}/column",
         {
           params: {
-            path: { experimentTableId: experimentId || "" },
+            path: { experimentTableId: experimentTableData?.id || "" },
           },
           body: {
             columnName,
@@ -990,6 +990,7 @@ export function ExperimentTable({
         experimentId,
         selectedProviderKey: providerKey,
         refetchData,
+        handleAddColumn,
         wrapText,
       },
     });
