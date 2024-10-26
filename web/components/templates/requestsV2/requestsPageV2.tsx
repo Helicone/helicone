@@ -716,7 +716,14 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
                     isLive ? "text-green-500 animate-pulse" : "text-slate-500"
                   )}
                   size="sm_sleek"
-                  onClick={() => setIsLive(!isLive)}
+                  onClick={() => {
+                    if (!isLive) {
+                      searchParams.delete("t");
+                      setIsLive(true);
+                    } else {
+                      setIsLive(false);
+                    }
+                  }}
                 >
                   <div
                     className={clsx(

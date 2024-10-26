@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 
 import { useRouter } from "next/router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAlertBanners, useChangelog } from "../../../services/hooks/admin";
 import UpgradeProModal from "../../shared/upgradeProModal";
 import { Row } from "../common";
@@ -12,6 +12,7 @@ import DemoModal from "./DemoModal";
 import MainContent from "./MainContent";
 import Sidebar from "./Sidebar";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
+import { useUser } from "@supabase/auth-helpers-react";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -22,9 +23,9 @@ const AuthLayout = (props: AuthLayoutProps) => {
   const router = useRouter();
   const { pathname } = router;
   const org = useOrg();
+  const user = useUser();
 
   const [open, setOpen] = useState(false);
-  const [showTermsModal, setShowTermsModal] = useState(false);
 
   const currentPage = useMemo(() => {
     const path = pathname.split("/")[1];
@@ -39,6 +40,16 @@ const AuthLayout = (props: AuthLayoutProps) => {
   );
 
   const { changelog, isLoading: isChangelogLoading } = useChangelog();
+
+  useEffect(() => {
+    if (!user) {
+      router.push("/signin?unauthorized=true");
+    }
+  }, [router, user]);
+
+  if (!user) {
+    return null;
+  }
 
   return (
     <MetaData
