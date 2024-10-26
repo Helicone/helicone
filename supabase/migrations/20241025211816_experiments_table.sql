@@ -15,6 +15,7 @@ CREATE TABLE "public"."experiment_column" (
     "table_id" uuid not null,
     "column_name" text not null,
     "column_type" text not null,
+    "metadata" JSONB,
     "created_at" timestamp with time zone not null default now()
 );
 
@@ -37,6 +38,9 @@ CREATE UNIQUE INDEX experiment_table_pkey ON public.experiment_table USING btree
 CREATE UNIQUE INDEX experiment_column_pkey ON public.experiment_column USING btree (id);
 CREATE UNIQUE INDEX experiment_cell_value_pkey ON public.experiment_cell_value USING btree (id);
 CREATE UNIQUE INDEX experiment_cell_value_column_row_key ON public.experiment_cell_value USING btree (column_id, row_index);
+
+-- Create an index on the metadata column for better query performance
+CREATE INDEX idx_experiment_column_metadata ON experiment_column USING GIN (metadata);
 
 -- Then add primary key constraints using the indexes
 ALTER TABLE "public"."experiment_table"

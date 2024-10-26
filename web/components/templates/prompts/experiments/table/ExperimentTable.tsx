@@ -829,6 +829,47 @@ export function ExperimentTable({
           },
           autoHeight: wrapText,
         });
+      } else if (column.columnType === "experiment") {
+        if (columnView === "all" || columnView === "outputs") {
+          columns.push({
+            field: column.id,
+            headerName: column.columnName,
+            width: 230,
+            suppressSizeToFit: true,
+            cellRenderer: HypothesisCellRenderer,
+            cellRendererParams: {
+              hypothesisId: column.id,
+              handleRunHypothesis,
+              loadingStates,
+              wrapText,
+            },
+            headerComponent: CustomHeaderComponent,
+            headerComponentParams: {
+              displayName: column.columnName,
+              badgeText: "Output",
+              badgeVariant: "secondary",
+              onRunColumn: async (colId: string) => {
+                const datasetRowIds = rowData.map((row) => row.dataset_row_id);
+                await Promise.all(
+                  datasetRowIds.map((datasetRowId) =>
+                    handleRunHypothesis(colId, [datasetRowId])
+                  )
+                );
+              },
+              hypothesis: column,
+            },
+            cellClass: "border-r border-[#E2E8F0] text-slate-700 pt-2.5",
+            headerClass: "border-r border-[#E2E8F0]",
+            cellStyle: {
+              verticalAlign: "middle",
+              textAlign: "left",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: wrapText ? "normal" : "nowrap",
+            },
+            autoHeight: wrapText,
+          });
+        }
       }
     });
 
@@ -929,49 +970,49 @@ export function ExperimentTable({
     // });
 
     // Add columns for additional experiments
-    if (columnView === "all" || columnView === "outputs") {
-      sortedHypotheses.forEach((hypothesis, index) => {
-        const experimentNumber = index + 1;
-        columns.push({
-          field: hypothesis.id,
-          headerName: hypothesis.id,
-          width: 230,
-          suppressSizeToFit: true,
-          cellRenderer: HypothesisCellRenderer,
-          cellRendererParams: {
-            hypothesisId: hypothesis.id,
-            handleRunHypothesis,
-            loadingStates,
-            wrapText,
-          },
-          headerComponent: CustomHeaderComponent,
-          headerComponentParams: {
-            displayName: `Experiment ${experimentNumber}`,
-            badgeText: "Output",
-            badgeVariant: "secondary",
-            onRunColumn: async (colId: string) => {
-              const datasetRowIds = rowData.map((row) => row.dataset_row_id);
-              await Promise.all(
-                datasetRowIds.map((datasetRowId) =>
-                  handleRunHypothesis(colId, [datasetRowId])
-                )
-              );
-            },
-            hypothesis: hypothesis,
-          },
-          cellClass: "border-r border-[#E2E8F0] text-slate-700 pt-2.5",
-          headerClass: "border-r border-[#E2E8F0]",
-          cellStyle: {
-            verticalAlign: "middle",
-            textAlign: "left",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: wrapText ? "normal" : "nowrap",
-          },
-          autoHeight: wrapText,
-        });
-      });
-    }
+    // if (columnView === "all" || columnView === "outputs") {
+    //   sortedHypotheses.forEach((hypothesis, index) => {
+    //     const experimentNumber = index + 1;
+    //     columns.push({
+    //       field: hypothesis.id,
+    //       headerName: hypothesis.id,
+    //       width: 230,
+    //       suppressSizeToFit: true,
+    //       cellRenderer: HypothesisCellRenderer,
+    //       cellRendererParams: {
+    //         hypothesisId: hypothesis.id,
+    //         handleRunHypothesis,
+    //         loadingStates,
+    //         wrapText,
+    //       },
+    //       headerComponent: CustomHeaderComponent,
+    //       headerComponentParams: {
+    //         displayName: `Experiment ${experimentNumber}`,
+    //         badgeText: "Output",
+    //         badgeVariant: "secondary",
+    //         onRunColumn: async (colId: string) => {
+    //           const datasetRowIds = rowData.map((row) => row.dataset_row_id);
+    //           await Promise.all(
+    //             datasetRowIds.map((datasetRowId) =>
+    //               handleRunHypothesis(colId, [datasetRowId])
+    //             )
+    //           );
+    //         },
+    //         hypothesis: hypothesis,
+    //       },
+    //       cellClass: "border-r border-[#E2E8F0] text-slate-700 pt-2.5",
+    //       headerClass: "border-r border-[#E2E8F0]",
+    //       cellStyle: {
+    //         verticalAlign: "middle",
+    //         textAlign: "left",
+    //         overflow: "hidden",
+    //         textOverflow: "ellipsis",
+    //         whiteSpace: wrapText ? "normal" : "nowrap",
+    //       },
+    //       autoHeight: wrapText,
+    //     });
+    //   });
+    // }
 
     // Add the "Add Experiment" column
     columns.push({
