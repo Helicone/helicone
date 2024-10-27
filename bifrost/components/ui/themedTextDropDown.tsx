@@ -48,9 +48,9 @@ export function ThemedTextDropDown(props: ThemedTextDropDownProps) {
     .filter((option) => option.toLowerCase().includes(query.toLowerCase()));
 
   return (
-    <div className="w-full flex flex-col gap-1">
+    <div className="w-full flex flex-col gap-2">
       {!hideTabModes && (
-        <div className="flex items-center gap-1 text-xs w-full justify-end">
+        <div className="flex items-center gap-2 text-xs w-full justify-end">
           <div>{/* Your Tab implementation goes here */}</div>
         </div>
       )}
@@ -76,7 +76,7 @@ export function ThemedTextDropDown(props: ThemedTextDropDownProps) {
                   setQuery(value);
                   onSearchHandler?.(value);
                 }}
-                className="text-xs h-6"
+                className="text-xs h-6 py-4" // Added padding to top and bottom
               />
               <CommandList>
                 {filteredOptions.length === 0 && (

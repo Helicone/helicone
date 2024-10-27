@@ -280,6 +280,13 @@ const FilterSection = ({
     <div className="mb-4">
       <div className="flex justify-between items-center mb-2">
         <div className="flex gap-2">
+          {/* <button
+            className="inline-flex items-center gap-2 px-3 py-2 bg-white text-slate-700 border border-slate-300 rounded-md hover:bg-slate-50 transition-colors duration-100 h-full"
+            onClick={handleTwitterShare}
+          >
+            <Twitter className="w-4 h-4" />
+            <span className="font-medium text-sm hidden md:block">Share</span>
+          </button> */}
           <div className="w-full max-w-[10rem]">
             <ThemedTextDropDown
               options={availableProviders}
@@ -596,23 +603,15 @@ Optimize your AI API costs:`;
             ? `Calculate the cost of using ${model} with Helicone's free pricing tool.`
             : "Calculate the cost of using AI models with Helicone's free pricing tool."}
         </p>
-
-        <button
-          className="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors duration-200"
-          onClick={handleTwitterShare}
-        >
-          <Twitter className="w-5 h-5" />
-          <span className="font-medium">Share</span>
-        </button>
       </div>
 
-      <div className="max-w-xl mx-auto h-9 flex justify-start items-start gap-6 mb-6">
+      <div className="max-w-xl mx-auto h-9 flex justify-start items-start gap-4 mb-6">
         <div className="grow shrink basis-0 h-9 flex justify-start items-center gap-4">
           <Label
             htmlFor="inputTokens"
             className="text-black text-sm font-medium leading-tight"
           >
-            Input Tokens
+            Input tokens
           </Label>
           <div className="grow shrink basis-0 self-stretch relative">
             <Input
@@ -624,7 +623,7 @@ Optimize your AI API costs:`;
             />
           </div>
         </div>
-        <div className="grow shrink basis-0 h-9 flex justify-start items-center gap-4">
+        <div className="grow shrink basis-0 h-9 flex justify-start items-center gap-2">
           <Label
             htmlFor="outputTokens"
             className="text-black text-sm font-medium leading-tight"
@@ -638,11 +637,18 @@ Optimize your AI API costs:`;
                 type="number"
                 value={outputTokens}
                 onChange={(e) => setOutputTokens(e.target.value)}
-                className="pl-3 pr-3 py-2 bg-slate-50 rounded-md border border-slate-300 text-slate-900 text-sm font-normal leading-tight w-full [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                className="pl-3 pr-3 py-2 bg-white rounded-md border border-slate-300 text-slate-900 text-sm font-normal leading-tight w-full [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               />
             </div>
           </div>
         </div>
+        <button
+          className="inline-flex items-center gap-2 px-3 py-2 bg-white text-slate-700 border border-slate-300 rounded-md hover:bg-slate-50 transition-colors duration-100 h-full"
+          onClick={handleTwitterShare}
+        >
+          <Twitter className="w-4 h-4" />
+          <span className="font-medium text-sm hidden md:block">Share</span>
+        </button>
       </div>
 
       {selectedModelData && (
