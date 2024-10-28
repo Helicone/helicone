@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import ThemedDrawer from "../../../shared/themed/themedDrawer";
-import HcButton from "../../../ui/hcButton";
 import PromptPropertyCard from "./promptPropertyCard";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import { useJawnClient } from "../../../../lib/clients/jawnHook";
 import useNotification from "../../../shared/notification/useNotification";
+import { Button } from "@/components/ui/button";
 
 interface SelectRandomDatasetProps {
   open: boolean;
@@ -111,17 +111,17 @@ const SelectRandomDataset = (props: SelectRandomDatasetProps) => {
         </div>
 
         <div className="flex justify-end space-x-4 sticky bottom-0 py-4 bg-white">
-          <HcButton
+          <Button
             variant={"secondary"}
             size={"sm"}
             title={"Cancel"}
             onClick={() => setOpen(false)}
-          />
+          >
+            Cancel
+          </Button>
 
-          <HcButton
-            variant={"primary"}
+          <Button
             size={"sm"}
-            title={"Confirm"}
             onClick={async () => {
               const dataset = await jawn.POST("/v1/experiment/dataset", {
                 body: {
@@ -147,7 +147,9 @@ const SelectRandomDataset = (props: SelectRandomDatasetProps) => {
                 setOpen(false);
               }
             }}
-          />
+          >
+            Confirm
+          </Button>
         </div>
       </div>
     </ThemedDrawer>

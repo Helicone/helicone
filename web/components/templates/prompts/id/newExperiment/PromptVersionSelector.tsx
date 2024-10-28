@@ -6,7 +6,7 @@ import MarkdownEditor from "../../../../shared/markdownEditor";
 import { ArrowsPointingOutIcon } from "@heroicons/react/24/outline";
 import ThemedModal from "../../../../shared/themed/themedModal";
 import { Tooltip } from "@mui/material";
-import HcButton from "../../../../ui/hcButton";
+import { Button } from "../../../../ui/button";
 import { Prompt } from "./types";
 import useNotification from "../../../../shared/notification/useNotification";
 
@@ -171,10 +171,8 @@ const PromptVersionSelector: React.FC<PromptVersionSelectorProps> = ({
         id="step-inc"
         className="w-full flex justify-end sticky bottom-0 bg-gray-100 py-4 border-t border-gray-300 dark:border-gray-700 dark:bg-transparent"
       >
-        <HcButton
-          variant={"primary"}
-          size={"sm"}
-          title={"Continue"}
+        <Button
+          size="sm"
           onClick={() => {
             if (!selectedPrompt) {
               setNotification(
@@ -186,7 +184,9 @@ const PromptVersionSelector: React.FC<PromptVersionSelectorProps> = ({
               onContinue();
             }
           }}
-        />
+        >
+          Continue
+        </Button>
       </div>
       <ThemedModal open={open} setOpen={setOpen}>
         <div className="flex flex-col w-[80vw]">

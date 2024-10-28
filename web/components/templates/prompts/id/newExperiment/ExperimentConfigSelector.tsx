@@ -1,13 +1,12 @@
 import React from "react";
 import { Select, SelectItem } from "@tremor/react";
-import HcButton from "../../../../ui/hcButton";
-import { PlusIcon } from "@heroicons/react/20/solid";
 import ProviderKeyList from "../../../enterprise/portal/id/providerKeyList";
 import SelectRandomDataset from "../selectRandomDataset";
 import { Prompt } from "./types";
 import { useJawnClient } from "../../../../../lib/clients/jawnHook";
 import useNotification from "../../../../shared/notification/useNotification";
 import { PlaygroundModel } from "../../../playground/playgroundPage";
+import { Button } from "@/components/ui/button";
 
 interface Dataset {
   id: string;
@@ -81,11 +80,9 @@ const ExperimentConfigSelector: React.FC<ExperimentConfigSelectorProps> = ({
                       </SelectItem>
                     ))}
                   </Select>
-                  <HcButton
+                  <Button
                     variant={"secondary"}
                     size={"xs"}
-                    title={"Generate random dataset"}
-                    icon={PlusIcon}
                     onClick={async () => {
                       const response = await jawn.POST(
                         "/v1/prompt/version/{promptVersionId}/inputs/query",
@@ -105,7 +102,9 @@ const ExperimentConfigSelector: React.FC<ExperimentConfigSelectorProps> = ({
                       setRequestIds(response.data?.data || undefined);
                       setOpenConfirmModal(true);
                     }}
-                  />
+                  >
+                    Generate random dataset
+                  </Button>
                 </div>
               </li>
               <li className="flex items-start space-x-2">
@@ -169,16 +168,17 @@ const ExperimentConfigSelector: React.FC<ExperimentConfigSelectorProps> = ({
         id="step-inc"
         className="w-full flex justify-between sticky bottom-0 bg-gray-100 py-4 border-t border-gray-300 dark:border-gray-700 dark:bg-transparent"
       >
-        <HcButton
+        <Button
           variant={"secondary"}
           size={"sm"}
-          title={"Back"}
           onClick={() => {
             setCurrentStep(1);
           }}
-        />
-        <HcButton
-          variant={"primary"}
+        >
+          Back
+        </Button>
+        <Button
+          variant={"default"}
           size={"sm"}
           title={"Continue"}
           onClick={() => {

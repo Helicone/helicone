@@ -1,9 +1,9 @@
 import { useMemo, useState } from "react";
 import ThemedDrawer from "../../../shared/themed/themedDrawer";
-import HcButton from "../../../ui/hcButton";
 import { useJawnClient } from "../../../../lib/clients/jawnHook";
 import useNotification from "../../../shared/notification/useNotification";
 import PromptPropertyCard from "../id/promptPropertyCard";
+import { Button } from "@/components/ui/button";
 
 interface ExperimentInputSelectorProps {
   open: boolean;
@@ -95,17 +95,17 @@ export const ExperimentRandomInputSelector = (
         </div>
 
         <div className="flex justify-end space-x-4 sticky bottom-0 py-4 bg-white pb-20">
-          <HcButton
+          <Button
             variant={"secondary"}
             size={"sm"}
-            title={"Cancel"}
             onClick={() => setOpen(false)}
-          />
+          >
+            Cancel
+          </Button>
 
-          <HcButton
-            variant={"primary"}
+          <Button
+            variant={"default"}
             size={"sm"}
-            title={"Confirm"}
             onClick={async () => {
               await Promise.all(
                 shuffledRequests.map((request) => {
@@ -132,7 +132,9 @@ export const ExperimentRandomInputSelector = (
                 setOpen(false);
               }
             }}
-          />
+          >
+            Confirm
+          </Button>
         </div>
       </div>
     </ThemedDrawer>

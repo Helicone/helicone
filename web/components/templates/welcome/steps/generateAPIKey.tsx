@@ -5,13 +5,13 @@ import { useState } from "react";
 import { generateAPIKeyHelper } from "../../../../utlis/generateAPIKeyHelper";
 import { useOrg } from "../../../layout/organizationContext";
 import useNotification from "../../../shared/notification/useNotification";
-import HcButton from "../../../ui/hcButton";
 import Image from "next/image";
 import { clsx } from "../../../shared/clsx";
 import CodeSnippet from "./providerIntegrations.tsx/openAISnippets";
 import AzureSnippets from "./providerIntegrations.tsx/azureSnippets";
 import AnthropicSnippets from "./providerIntegrations.tsx/anthropicSnippets";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 interface GenerateAPIKeyProps {
   apiKey: string;
@@ -93,14 +93,15 @@ const GenerateAPIKey = (props: GenerateAPIKeyProps) => {
                 value={name}
                 onValueChange={(value) => setName(value)}
               />
-              <HcButton
+              <Button
                 variant={"secondary"}
                 size={"sm"}
-                title={"Generate API Key"}
                 onClick={() => {
                   onGenerateKeyHandler();
                 }}
-              />
+              >
+                Generate API Key
+              </Button>
             </div>
           </div>
 
@@ -212,22 +213,19 @@ const GenerateAPIKey = (props: GenerateAPIKeyProps) => {
         </div>
       </div>
       <div className="sticky bottom-0 p-4 flex items-center justify-between">
-        <HcButton
-          variant={"secondary"}
+        <Button variant={"secondary"} size={"sm"} onClick={previousStep}>
+          Back
+        </Button>
+        <Button
           size={"sm"}
-          title={"Back"}
-          onClick={() => previousStep()}
-        />
-        <HcButton
-          variant={"primary"}
-          size={"sm"}
-          title={"Next"}
           onClick={() => {
             navigator.clipboard.writeText(apiKey);
             setNotification("Copied API key to clipboard", "success");
             nextStep();
           }}
-        />
+        >
+          Next
+        </Button>
       </div>
     </div>
   );

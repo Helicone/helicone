@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import ThemedDrawer from "../../../shared/themed/themedDrawer";
-import HcButton from "../../../ui/hcButton";
 import { useJawnClient } from "../../../../lib/clients/jawnHook";
 import useNotification from "../../../shared/notification/useNotification";
 import PromptPropertyCard from "../id/promptPropertyCard";
+import { Button } from "@/components/ui/button";
 
 interface ExperimentInputSelectorProps {
   open: boolean;
@@ -103,12 +103,14 @@ const ExperimentInputSelector = (props: ExperimentInputSelectorProps) => {
             <h2 className="font-semibold text-xl">
               Select Inputs ({requestIds?.length})
             </h2>
-            <HcButton
+            <Button
               variant="secondary"
               size="sm"
               title={isAllSelected ? "Deselect All" : "Select All"}
               onClick={handleSelectAll}
-            />
+            >
+              {isAllSelected ? "Deselect All" : "Select All"}
+            </Button>
           </div>
           <p className="text-gray-500 text-sm pb-4">
             Select the inputs you want to include in the dataset.
@@ -140,17 +142,16 @@ const ExperimentInputSelector = (props: ExperimentInputSelectorProps) => {
         </div>
 
         <div className="flex justify-end space-x-4 sticky bottom-0 py-4 bg-white">
-          <HcButton
+          <Button
             variant={"secondary"}
             size={"sm"}
-            title={"Cancel"}
             onClick={() => setOpen(false)}
-          />
+          >
+            Cancel
+          </Button>
 
-          <HcButton
-            variant={"primary"}
+          <Button
             size={"sm"}
-            title={"Confirm"}
             onClick={async () => {
               if (selectedRequests.length === 0) {
                 setNotification("Please select at least one input.", "error");
@@ -182,7 +183,9 @@ const ExperimentInputSelector = (props: ExperimentInputSelectorProps) => {
                 setOpen(false);
               }
             }}
-          />
+          >
+            Confirm
+          </Button>
         </div>
       </div>
     </ThemedDrawer>

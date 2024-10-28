@@ -5,8 +5,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { CustomerPortalContent } from "../../../pages/signin";
 import { useRouter } from "next/router";
-import HcButton from "../../ui/hcButton";
 import { Select, SelectItem, TextInput } from "@tremor/react";
+import { Button } from "@/components/ui/button";
 
 interface AuthFormProps {
   handleEmailSubmit: (email: string, password: string) => void;
@@ -224,22 +224,20 @@ const AuthForm = (props: AuthFormProps) => {
                   </div>
 
                   <div className="pt-2 w-full flex">
-                    <HcButton
-                      variant={"primary"}
+                    <Button
                       size={"sm"}
-                      loading={isLoading}
-                      title={
-                        authFormType === "signin"
-                          ? "Sign in with email"
-                          : authFormType === "signup"
-                          ? "Sign up with email"
-                          : authFormType === "reset"
-                          ? "Reset password"
-                          : "Update password"
-                      }
+                      disabled={isLoading}
                       type="submit"
                       className="w-full flex"
-                    />
+                    >
+                      {authFormType === "signin"
+                        ? "Sign in with email"
+                        : authFormType === "signup"
+                        ? "Sign up with email"
+                        : authFormType === "reset"
+                        ? "Reset password"
+                        : "Update password"}
+                    </Button>
                   </div>
                 </form>
               </div>

@@ -6,12 +6,12 @@ import { useTranslation } from "react-i18next";
 import { getJawnClient } from "../../../../lib/clients/jawn";
 import { useOrg } from "../../../layout/organizationContext";
 import useNotification from "../../../shared/notification/useNotification";
-import HcButton from "../../../ui/hcButton";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useJawnClient } from "@/lib/clients/jawnHook";
+import { Button } from "@/components/ui/button";
 
 export const COMPANY_SIZES = ["Just me", "2-5", "5-25", "25-100", "100+"];
 
@@ -278,14 +278,16 @@ const CreateOrg = (props: CreateOrgProps) => {
           </div>
         </div>
         <div className="sticky bottom-0 p-4 flex items-center justify-between">
-          <HcButton variant={"secondary"} size={"sm"} title={"Back"} />
-          <HcButton
-            variant={"primary"}
+          <Button variant={"secondary"} size={"sm"}>
+            Back
+          </Button>
+          <Button
             size={"sm"}
-            title={"Accept terms and next"}
             onClick={handleOrgCreate}
             disabled={isLoading || !termsAccepted}
-          />
+          >
+            Accept terms and next
+          </Button>
         </div>
       </div>
     </>

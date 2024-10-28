@@ -1,11 +1,11 @@
 import React from "react";
+import { Button } from "../../../../ui/button";
 
 import { useJawnClient } from "../../../../../lib/clients/jawnHook";
 import useNotification from "../../../../shared/notification/useNotification";
 import { useRouter } from "next/router";
 import ArrayDiffViewer from "../arrayDiffViewer";
 import ModelPill from "../../../requestsV2/modelPill";
-import HcButton from "../../../../ui/hcButton";
 
 interface ExperimentConfirmationProps {
   template: any[]; // Replace with the correct type
@@ -173,21 +173,22 @@ const ExperimentConfirmation: React.FC<ExperimentConfirmationProps> = ({
         id="step-inc"
         className="w-full flex justify-between sticky bottom-0 bg-gray-100 py-4 border-t border-gray-300 dark:border-gray-700 dark:bg-transparent"
       >
-        <HcButton
-          variant={"secondary"}
-          size={"sm"}
-          title={"Back"}
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={() => {
             setCurrentStep(2);
           }}
-        />
-        <HcButton
-          loading={isLoading}
-          variant={"primary"}
-          size={"sm"}
-          title={"Confirm and run experiment"}
+        >
+          Back
+        </Button>
+        <Button
+          disabled={isLoading}
+          size="sm"
           onClick={handleConfirmExperiment}
-        />
+        >
+          Confirm and run experiment
+        </Button>
       </div>
     </>
   );

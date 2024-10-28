@@ -1,7 +1,7 @@
 import { TabGroup, TabList, Tab, TabPanels, TabPanel } from "@tremor/react";
-import HcButton from "../../../ui/hcButton";
 import { DiffHighlight } from "../diffHighlight";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 interface FeaturesProps {
   apiKey?: string;
@@ -161,20 +161,17 @@ const openai = new OpenAI(configuration);
       </Link>
 
       <div className="sticky bottom-12 p-4 flex items-center justify-between">
-        <HcButton
-          variant={"secondary"}
+        <Button variant={"secondary"} size={"sm"} onClick={previousStep}>
+          Back
+        </Button>
+        <Button
           size={"sm"}
-          title={"Back"}
-          onClick={previousStep}
-        />
-        <HcButton
-          variant={"primary"}
-          size={"sm"}
-          title={"Go to dashboard"}
           onClick={() => {
             nextStep();
           }}
-        />
+        >
+          Go to dashboard
+        </Button>
       </div>
     </div>
   );

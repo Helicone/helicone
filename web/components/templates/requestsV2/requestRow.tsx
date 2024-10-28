@@ -13,7 +13,6 @@ import {
 import { useOrg } from "../../layout/organizationContext";
 import { clsx } from "../../shared/clsx";
 import useNotification from "../../shared/notification/useNotification";
-import HcButton from "../../ui/hcButton";
 import FeedbackButtons from "../feedback/thumbsUpThumbsDown";
 import { NormalizedRequest } from "./builder/abstractRequestBuilder";
 import ModelPill from "./modelPill";
@@ -449,17 +448,15 @@ const RequestRow = (props: {
                 />
               </div>
             </div>
-            <HcButton
+            <Button
               size="sm"
-              title="Add"
-              variant="primary"
               className="h-fit flex flex-row rounded-md bg-black dark:bg-white px-4 text-xs font-semibold border border-black dark:border-white hover:bg-gray-900 dark:hover:bg-gray-100 text-gray-50 dark:text-gray-900 shadow-sm hover:text-gray-300 dark:hover:text-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
             >
               {isAdding && (
                 <ArrowPathIcon className="w-4 h-4 mr-1.5 animate-spin" />
               )}
               Add
-            </HcButton>
+            </Button>
           </form>
         )}
         {currentProperties && currentProperties.length > 0 && (
@@ -551,10 +548,8 @@ const RequestRow = (props: {
                 />
               </div>
             </div>
-            <HcButton
+            <Button
               size="sm"
-              title="Add"
-              variant="primary"
               type="submit"
               className="h-fit flex flex-row rounded-md bg-black dark:bg-white px-4 text-xs font-semibold border border-black dark:border-white hover:bg-gray-900 dark:hover:bg-gray-100 text-gray-50 dark:text-gray-900 shadow-sm hover:text-gray-300 dark:hover:text-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
             >
@@ -562,7 +557,7 @@ const RequestRow = (props: {
                 <ArrowPathIcon className="w-4 h-4 mr-1.5 animate-spin" />
               )}
               Add
-            </HcButton>
+            </Button>
           </form>
         )}
 

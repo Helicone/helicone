@@ -1,5 +1,5 @@
 import { RadioGroup } from "@headlessui/react";
-import { CheckCircleIcon, PlusIcon } from "@heroicons/react/20/solid";
+import { CheckCircleIcon } from "@heroicons/react/20/solid";
 import { KeyIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { Tooltip } from "@mui/material";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
@@ -8,7 +8,6 @@ import { DecryptedProviderKey } from "../../../../../services/lib/keys";
 import { clsx } from "../../../../shared/clsx";
 import useNotification from "../../../../shared/notification/useNotification";
 import { SecretInput } from "../../../../shared/themed/themedTable";
-import HcButton from "../../../../ui/hcButton";
 import { useVaultPage } from "../../../vault/useVaultPage";
 import { Button } from "../../../../ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
@@ -231,18 +230,18 @@ const ProviderKeySelector = (props: ProviderKeySelectorProps) => {
               </div>
             </RadioGroup>
           )}
-          <HcButton
+          <Button
             variant={"secondary"}
             size={"sm"}
-            title={"Add new key"}
             onClick={(e) => {
               e.stopPropagation();
               e.preventDefault();
               setIsProviderOpen(true);
             }}
-            icon={PlusIcon}
             className="w-full"
-          />
+          >
+            Add new key
+          </Button>
 
           <div className="flex justify-between mt-4">
             <Button

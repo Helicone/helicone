@@ -1,10 +1,8 @@
 import { useOrg } from "@/components/layout/organizationContext";
 import { ProFeatureWrapper } from "@/components/shared/ProBlockerComponents/ProFeatureWrapper";
 import { InfoBox } from "@/components/ui/helicone/infoBox";
-import { MagnifyingGlassIcon } from "@heroicons/react/20/solid";
 import {
   ChevronDownIcon,
-  DocumentPlusIcon,
   DocumentTextIcon,
   EyeIcon,
   PencilIcon,
@@ -38,7 +36,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "../../ui/dialog";
-import HcButton from "../../ui/hcButton";
 import { Label } from "../../ui/label";
 import { Switch } from "../../ui/switch";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../../ui/tooltip";
@@ -49,11 +46,14 @@ import PromptCard from "./promptCard";
 import PromptDelete from "./promptDelete";
 import PromptUsageChart from "./promptUsageChart";
 import { UpgradeToProCTA } from "../pricing/upgradeToProCTA";
-import { IslandContainer } from "@/components/ui/islandContainer";
 
 // **Import PromptPlayground and PromptObject**
 import PromptPlayground, { PromptObject } from "./id/promptPlayground";
 import { ScrollArea } from "../../ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { ISLAND_MARGIN } from "@/components/ui/islandContainer";
+import { cn } from "@/lib/utils";
 
 interface PromptsPageProps {
   defaultIndex: number;
@@ -176,10 +176,10 @@ const PromptsPage = (props: PromptsPageProps) => {
   const [showPricingCompare, setShowPricingCompare] = useState(false);
 
   return (
-    <IslandContainer>
+    <div>
       <div className="flex flex-col space-y-4 w-full">
         <AuthHeader
-          isWithinIsland={true}
+          isWithinIsland={false}
           title={
             <div className="flex items-center gap-2">
               Prompts
@@ -209,38 +209,35 @@ const PromptsPage = (props: PromptsPageProps) => {
               {(hasAccess || hasLimitedAccess) && (
                 <div
                   id="util"
-                  className="flex flex-row justify-between items-center"
+                  className={cn(
+                    "flex flex-row justify-between items-center",
+                    ISLAND_MARGIN
+                  )}
                 >
                   <div className="flex flex-row items-center space-x-2 w-full">
                     <div className="max-w-xs w-full">
-                      <TextInput
-                        icon={MagnifyingGlassIcon}
+                      <Input
                         value={searchName}
-                        onValueChange={(value) => setSearchName(value)}
+                        onChange={(e) => setSearchName(e.target.value)}
                         placeholder="Search prompts..."
+                        className="h-full"
                       />
                     </div>
 
                     <Dialog>
                       <DialogTrigger asChild className="w-min">
                         {hasAccess ? (
-                          <HcButton
-                            variant={"primary"}
-                            size={"sm"}
-                            title={"Create new prompt"}
-                            icon={DocumentPlusIcon}
-                          />
+                          <Button variant="default" size="sm">
+                            Create Experiment
+                          </Button>
                         ) : (
                           <ProFeatureWrapper
                             featureName="Prompts"
                             enabled={false}
                           >
-                            <HcButton
-                              variant={"primary"}
-                              size={"sm"}
-                              title={"Create new prompt"}
-                              icon={DocumentPlusIcon}
-                            />
+                            <Button variant="default" size="sm">
+                              Create Experiment
+                            </Button>
                           </ProFeatureWrapper>
                         )}
                       </DialogTrigger>
@@ -413,14 +410,14 @@ const PromptsPage = (props: PromptsPageProps) => {
                         key: undefined,
                         header: "Permission",
                         render: (prompt) => (
-                          <div className="text-gray-500">
+                          <div>
                             {prompt.metadata?.createdFromUi === true ? (
                               <Tooltip>
                                 <TooltipTrigger asChild>
-                                  <div className="flex items-center justify-center text-center bg-[#F1F5F9] dark:bg-[#1E293B] rounded-md p-2 border border-[#CBD5E1] dark:border-[#475569] text-black dark:text-white max-w-28">
+                                  <Badge className="bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-xs font-medium rounded-lg px-2 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white">
                                     <PencilIcon className="h-4 w-4 mr-1" />
                                     <p>Editable</p>
-                                  </div>
+                                  </Badge>
                                 </TooltipTrigger>
                                 <TooltipContent align="center">
                                   <p>
@@ -436,10 +433,10 @@ const PromptsPage = (props: PromptsPageProps) => {
                             ) : (
                               <Tooltip>
                                 <TooltipTrigger asChild>
-                                  <div className="flex items-center justify-center bg-[#F1F5F9] rounded-md p-2 border border-[#CBD5E1] text-black max-w-28">
+                                  <Badge className="bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-xs font-medium rounded-lg px-2 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white">
                                     <EyeIcon className="h-4 w-4 mr-1" />
                                     <p>View only</p>
-                                  </div>
+                                  </Badge>
                                 </TooltipTrigger>
                                 <TooltipContent align="center">
                                   <p>
@@ -718,7 +715,7 @@ const chatCompletion = await openai.chat.completions.create(
           )}
         </div>
       </div>
-    </IslandContainer>
+    </div>
   );
 };
 

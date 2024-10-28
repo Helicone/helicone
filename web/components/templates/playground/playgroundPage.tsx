@@ -13,9 +13,10 @@ import {
   ArrowLeftIcon,
   ArrowRightIcon,
 } from "@heroicons/react/24/outline";
-import { Button, MultiSelect, MultiSelectItem, TextInput } from "@tremor/react";
+import { MultiSelect, MultiSelectItem, TextInput } from "@tremor/react";
 import ThemedModal from "../../shared/themed/themedModal";
 import Image from "next/image";
+import { Button } from "@/components/ui/button";
 
 import {
   ProviderName,
@@ -23,8 +24,6 @@ import {
   playgroundModels,
 } from "../../../packages/cost/providers/mappings";
 import FunctionButton from "./functionButton";
-import HcButton from "../../ui/hcButton";
-import { PlusIcon } from "@heroicons/react/20/solid";
 import { ChatCompletionTool } from "openai/resources";
 import { Tooltip } from "@mui/material";
 
@@ -467,11 +466,9 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                 <p className="font-medium text-sm text-gray-900 dark:text-gray-100">
                   Tools
                 </p>
-                <HcButton
-                  variant={"light"}
+                <Button
+                  variant={"ghost"}
                   size={"xs"}
-                  title={""}
-                  icon={PlusIcon}
                   onClick={() => {
                     const defaultTool = {
                       type: "function",
