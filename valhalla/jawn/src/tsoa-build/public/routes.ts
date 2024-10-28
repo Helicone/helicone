@@ -2109,6 +2109,11 @@ const models: TsoaRoute.Models = {
         "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_DatasetResult-Array_"},{"ref":"ResultError_string_"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Record_string._value-string--columnId-string--rowIndex-number__": {
+        "dataType": "refAlias",
+        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{},"additionalProperties":{"dataType":"nestedObjectLiteral","nestedProperties":{"rowIndex":{"dataType":"double","required":true},"columnId":{"dataType":"string","required":true},"value":{"dataType":"string","required":true}}},"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ResultSuccess___-Array_": {
         "dataType": "refObject",
         "properties": {
@@ -5642,7 +5647,7 @@ export function RegisterRoutes(app: Router) {
 
             async function ExperimentDatasetController_createDatasetRow(request: ExRequest, response: ExResponse, next: any) {
             const args: Record<string, TsoaRoute.ParameterSchema> = {
-                    requestBody: {"in":"body","name":"requestBody","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"sourceRequest":{"dataType":"string"},"experimentTableId":{"dataType":"string","required":true},"rowIndex":{"dataType":"double","required":true},"inputs":{"ref":"Record_string.string_","required":true}}},
+                    requestBody: {"in":"body","name":"requestBody","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"sourceRequest":{"dataType":"string"},"experimentTableId":{"dataType":"string","required":true},"rowIndex":{"dataType":"double","required":true},"inputs":{"ref":"Record_string._value-string--columnId-string--rowIndex-number__","required":true}}},
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
                     datasetId: {"in":"path","name":"datasetId","required":true,"dataType":"string"},
                     promptVersionId: {"in":"path","name":"promptVersionId","required":true,"dataType":"string"},

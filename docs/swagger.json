@@ -6112,6 +6112,31 @@
 					}
 				]
 			},
+			"Record_string._value-string--columnId-string--rowIndex-number__": {
+				"properties": {},
+				"additionalProperties": {
+					"properties": {
+						"rowIndex": {
+							"type": "number",
+							"format": "double"
+						},
+						"columnId": {
+							"type": "string"
+						},
+						"value": {
+							"type": "string"
+						}
+					},
+					"required": [
+						"rowIndex",
+						"columnId",
+						"value"
+					],
+					"type": "object"
+				},
+				"type": "object",
+				"description": "Construct a type with a set of properties K of type T"
+			},
 			"ResultSuccess___-Array_": {
 				"properties": {
 					"data": {
@@ -12111,7 +12136,7 @@
 										"format": "double"
 									},
 									"inputs": {
-										"$ref": "#/components/schemas/Record_string.string_"
+										"$ref": "#/components/schemas/Record_string._value-string--columnId-string--rowIndex-number__"
 									}
 								},
 								"required": [

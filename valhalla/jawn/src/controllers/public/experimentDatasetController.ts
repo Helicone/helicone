@@ -162,7 +162,10 @@ export class ExperimentDatasetController extends Controller {
   public async createDatasetRow(
     @Body()
     requestBody: {
-      inputs: Record<string, string>;
+      inputs: Record<
+        string,
+        { value: string; columnId: string; rowIndex: number }
+      >;
       rowIndex: number;
       experimentTableId: string;
       sourceRequest?: string;
@@ -172,9 +175,12 @@ export class ExperimentDatasetController extends Controller {
     @Path() promptVersionId: string
   ): Promise<Result<string, string>> {
     const inputManager = new InputsManager(request.authParams);
+    const inputs = Object.fromEntries(
+      Object.entries(requestBody.inputs).map(([k, { value }]) => [k, value])
+    );
     const inputRecordResult = await inputManager.createInputRecord(
       promptVersionId,
-      requestBody.inputs,
+      inputs,
       requestBody.sourceRequest
     );
 
@@ -191,16 +197,20 @@ export class ExperimentDatasetController extends Controller {
     );
 
     const experimentManager = new ExperimentManager(request.authParams);
-    // const experimentTableCell =
-    //   await experimentManager.createExperimentTableRows({
-    //     experimentTableId: requestBody.experimentTableId,
-    //     rowIndex: requestBody.rowIndex,
-    //   });
+    const experimentTableCell = await experimentManager.createExperimentCells({
+      cells: Object.entries(requestBody.inputs).map(
+        ([k, { value, columnId, rowIndex }]) => ({
+          columnId,
+          rowIndex,
+          value,
+        })
+      ),
+    });
 
-    // if (experimentTableCell.error || !experimentTableCell.data) {
-    //   console.error(experimentTableCell.error);
-    //   this.setStatus(500);
-    // }
+    if (experimentTableCell.error || !experimentTableCell.data) {
+      console.error(experimentTableCell.error);
+      this.setStatus(500);
+    }
 
     if (datasetRowResult.error || !datasetRowResult.data) {
       console.error(datasetRowResult.error);

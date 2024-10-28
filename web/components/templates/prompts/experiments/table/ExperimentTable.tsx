@@ -647,12 +647,18 @@ export function ExperimentTable({
   } | null>(null);
 
   const [currentRowInputs, setCurrentRowInputs] = useState<
-    Record<string, string>
+    Record<string, { columnId: string; value: string; rowIndex: number }>
   >({});
 
-  const handleInputChange = useCallback((key: string, value: string) => {
-    setCurrentRowInputs((prev) => ({ ...prev, [key]: value.trim() }));
-  }, []);
+  const handleInputChange = useCallback(
+    (key: string, value: string, columnId: string, rowIndex: number) => {
+      setCurrentRowInputs((prev) => ({
+        ...prev,
+        [key]: { columnId, value: value.trim(), rowIndex },
+      }));
+    },
+    []
+  );
 
   // First, create a helper function to get input columns
   const getInputColumns = useCallback(() => {
@@ -666,19 +672,20 @@ export function ExperimentTable({
   // Modify handleLastInputSubmit to use input columns
   const handleLastInputSubmit = useCallback(
     async (rowIndex: number) => {
-      const inputColumns = getInputColumns();
-      console.log("last input submit", inputColumns);
+      console.log("currentRowInputs", currentRowInputs);
 
-      // Check if all inputs are filled using input columns
-      const allInputsFilled = inputColumns.every(
-        (column) =>
-          currentRowInputs[column.id] &&
-          currentRowInputs[column.id].trim() !== ""
-      );
+      // Check if all current row values are filled
+      const currentRowValues = Object.values(currentRowInputs)
+        .filter((value) => value !== undefined && value !== null)
+        .map((value) => String(value).trim());
 
-      if (!allInputsFilled) {
+      const allValuesFilled =
+        currentRowValues.length > 0 &&
+        !currentRowValues.some((value) => value === "");
+
+      if (!allValuesFilled) {
         console.log(
-          "Not all inputs are filled. Please fill all inputs before submitting."
+          "Not all values are filled. Please fill all values before submitting."
         );
         return;
       }
@@ -825,6 +832,8 @@ export function ExperimentTable({
             index: index,
             displayName: column.columnName,
             badgeText: "Input",
+            columnName: column.columnName,
+            type: column.columnType,
           },
           cellStyle: {
             justifyContent: "start",

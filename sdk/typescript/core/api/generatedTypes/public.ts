@@ -2224,6 +2224,15 @@ Json: JsonObject;
       error: null;
     };
     "Result_DatasetResult-Array.string_": components["schemas"]["ResultSuccess_DatasetResult-Array_"] | components["schemas"]["ResultError_string_"];
+    /** @description Construct a type with a set of properties K of type T */
+    "Record_string._value-string--columnId-string--rowIndex-number__": {
+      [key: string]: {
+        /** Format: double */
+        rowIndex: number;
+        columnId: string;
+        value: string;
+      };
+    };
     "ResultSuccess___-Array_": {
       data: Record<string, never>[];
       /** @enum {number|null} */
@@ -4308,7 +4317,7 @@ export interface operations {
           experimentTableId: string;
           /** Format: double */
           rowIndex: number;
-          inputs: components["schemas"]["Record_string.string_"];
+          inputs: components["schemas"]["Record_string._value-string--columnId-string--rowIndex-number__"];
         };
       };
     };
