@@ -46,9 +46,64 @@ function isHTML(responseBody: string): boolean {
   );
 }
 
+interface PredibaseHeaderUsage {
+  promptTokens?: number;
+  completionTokens?: number;
+  totalTokens?: number; 
+  totalTime?: number;
+  timePerToken?: number;
+  queueTime?: number;
+}
+
 export class ResponseBodyHandler extends AbstractLogHandler {
+  private getModelFromPredibaseHeaders(headers: Headers): string | undefined {
+    return headers.get("x-model-id") || undefined;
+  }
+
+  private getUsageFromPredibaseHeaders(headers: Headers): PredibaseHeaderUsage {
+    const usage: PredibaseHeaderUsage = {};
+    
+    try {
+      const promptTokens = headers.get("x-prompt-tokens");
+      const generatedTokens = headers.get("x-generated-tokens");
+      const totalTokens = headers.get("x-total-tokens");
+      const totalTime = headers.get("x-total-time");
+      const timePerToken = headers.get("x-time-per-token");
+      const queueTime = headers.get("x-queue-time");
+  
+      if (promptTokens) usage.promptTokens = parseInt(promptTokens);
+      if (generatedTokens) usage.completionTokens = parseInt(generatedTokens);
+      if (totalTokens) usage.totalTokens = parseInt(totalTokens);
+      if (totalTime) usage.totalTime = parseInt(totalTime);
+      if (timePerToken) usage.timePerToken = parseFloat(timePerToken);
+      if (queueTime) usage.queueTime = parseInt(queueTime);
+    } catch (e) {
+      console.warn("Error parsing Predibase header usage values:", e);
+    }
+  
+    return usage;
+  }
+
   public async handle(context: HandlerContext): PromiseGenericResult<string> {
     try {
+      // Check headers first for Predibase specific values
+      const headers = context.message.log.response.headers;
+      if (headers) {
+        const headerModel = this.getModelFromPredibaseHeaders(headers);
+        if (headerModel) {
+          context.processedLog.response.model = headerModel;
+          context.processedLog.model = headerModel;
+        }
+        
+        const headerUsage = this.getUsageFromPredibaseHeaders(headers);
+        if (Object.keys(headerUsage).length > 0) {
+          context.usage = {
+            ...context.usage,
+            ...headerUsage
+          };
+        }
+      }
+
       const processedResponseBody = await this.processBody(context);
       context.processedLog.response.model = getModelFromResponse(
         processedResponseBody.data?.processedBody

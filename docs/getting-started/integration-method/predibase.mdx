@@ -1,0 +1,56 @@
+---
+title: "Predibase Integration"
+sidebarTitle: "Predibase" 
+description: "Connect Helicone with Predibase's LLM serving platform. Simple setup process using a custom base_url for seamless integration with your Predibase-based AI applications."
+"twitter:title": "Predibase Integration - Helicone OSS LLM Observability"
+icon: "cloud"
+iconType: "solid"
+---
+
+# Gateway Integration
+
+<Steps>
+  <Step title="Create a Helicone account">
+    Log into [helicone](https://www.helicone.ai) or create an account. Once you have an account, you
+    can generate an [API key](https://helicone.ai/developer).
+  </Step>
+  <Step title="Create a Predibase account"> 
+    Log into app.predibase.com or create an account. Once you have an account, you
+    can generate an API key.
+  </Step>
+  <Step title="Set HELICONE_API_KEY and PREDIBASE_API_KEY as environment variables">
+```javascript
+HELICONE_API_KEY=<your API key>
+PREDIBASE_API_KEY=<your API key>
+```
+  </Step>
+  <Step title="Modify the base URL and add Auth headers">
+
+Replace the following Predibase URL with the Helicone Gateway URL:
+
+`https://serving.app.predibase.com` -> `https://predibase.helicone.ai`
+
+Add these authentication headers to your requests:
+
+```
+Helicone-Auth: Bearer ${HELICONE_API_KEY}
+Authorization: Bearer ${PREDIBASE_API_KEY}
+```
+
+Example request:
+
+```bash
+curl -X POST https://predibase.helicone.ai/v1/completions \
+  -H "Content-Type: application/json" \
+  -H "Helicone-Auth: Bearer ${HELICONE_API_KEY}" \
+  -H "Authorization: Bearer ${PREDIBASE_API_KEY}" \
+  -d '{
+    "model": "predibase/Meta-Llama-3.1-8B-Instruct-dequantized",
+    "prompt": "Say this is a test"
+  }'
+```
+
+  </Step>
+</Steps>
+
+For more information on how to use headers, see [Helicone Headers](https://docs.helicone.ai/helicone-headers/header-directory#utilizing-headers) docs.
