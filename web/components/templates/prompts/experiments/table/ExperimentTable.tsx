@@ -308,14 +308,6 @@ export function ExperimentTable({
     [orgId]
   );
 
-  const { data: requestData } = useQuery(
-    ["requestData", orgId],
-    getRequestDataByIds,
-    {
-      enabled: !!orgId,
-    }
-  );
-
   const fetchRequestResponseBody = async (request_response: any) => {
     // Check cache first
     if (
@@ -431,9 +423,11 @@ export function ExperimentTable({
               experimentTableData.columns.some(
                 (col) => col.id === columnId && col.columnType === "experiment"
               ) &&
-              cellData?.requestId
+              (cellData as any)?.requestId
             ) {
-              const requestData = requestDataMap.get(cellData.requestId);
+              const requestData = requestDataMap.get(
+                (cellData as any).requestId
+              );
               if (requestData) {
                 // Fetch the response body
                 const responseBody = await fetchRequestResponseBody(
