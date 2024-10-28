@@ -1,7 +1,18 @@
-import { useState } from "react";
+import useNotification from "@/components/shared/notification/useNotification";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hoverCard";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { cn } from "@/lib/utils";
+import { CopyIcon, InfoIcon } from "lucide-react";
 import { getTimeAgo } from "../../../../lib/sql/timeHelpers";
-import HcBreadcrumb from "../../../ui/hcBreadcrumb";
 import { formatLargeNumber } from "../../../shared/utils/numberFormat";
+import HcBreadcrumb from "../../../ui/hcBreadcrumb";
+import SessionFeedback from "../../feedback/sessionFeedback";
 
 function timeDiff(startTime: Date, endTime: Date): string {
   const diff = endTime.getTime() - startTime.getTime();
@@ -31,6 +42,8 @@ export const BreadCrumb = ({
   completionTokens,
   models,
   users,
+  className,
+  sessionFeedback,
 }: {
   sessionId: string;
   startTime?: Date;
@@ -41,128 +54,150 @@ export const BreadCrumb = ({
   promptTokens: number;
   completionTokens: number;
   users: string[];
+  className?: string;
+  sessionFeedback: boolean | null;
 }) => {
-  const [expanded, setExpanded] = useState(false);
+  const { setNotification } = useNotification();
 
   return (
-    <div className="w-full h-full flex flex-col space-y-8">
-      <div className="flex flex-row items-center justify-between">
-        <div className="flex flex-col items-start space-y-4 w-full">
-          <HcBreadcrumb
-            pages={[
-              {
-                href: "/sessions",
-                name: "Sessions",
-              },
-              {
-                href: `/sessions/${sessionId}`,
-                name: sessionId,
-              },
-            ]}
-          />
-          <div className="flex justify-between w-full">
-            <div className="flex gap-4 items-end">
-              <h1 className="font-semibold text-4xl text-black dark:text-white">
-                {sessionId}
-              </h1>
-            </div>
-          </div>
-          <ul className="list-disc flex items-center gap-7 text-sm text-gray-500">
-            <p>
-              Last used{" "}
-              <span className="text-sky-500 font-semibold">
-                {getTimeAgo(endTime)}
-              </span>
-            </p>
-            <li className={expanded ? "" : "hidden"}>
-              Created on:{" "}
-              <span className="font-semibold">
-                {startTime ? startTime.toLocaleDateString() : ""}
-              </span>
-            </li>
+    <div className={cn("flex flex-row items-center space-x-2", className)}>
+      <HcBreadcrumb
+        pages={[
+          {
+            href: "/sessions",
+            name: "Sessions",
+          },
+          {
+            href: `/sessions/${sessionId}`,
+            name: sessionId,
+          },
+        ]}
+      />
 
-            <li>
-              {" "}
-              <span className="font-semibold">{numTraces}</span> trace
-              {numTraces == 1 ? "" : "s"}
-            </li>
-            <li>
-              Total Cost:{" "}
-              <span className="font-semibold">
-                ${formatLargeNumber(sessionCost)}
-              </span>
-            </li>
-            <li>
-              Total Latency:{" "}
-              <span className="font-semibold">
-                {startTime && endTime ? timeDiff(startTime, endTime) : ""}
-              </span>
-            </li>
-
-            <li
-              onClick={() => setExpanded(true)}
-              className={expanded ? "hidden" : "hover:cursor-pointer"}
-            >
-              More...
-            </li>
-
-            <ul
-              className={
-                expanded
-                  ? "list-disc flex items-center gap-6 text-sm text-gray-500"
-                  : "hidden"
-              }
-            >
-              <li className={users.length > 0 ? "" : "hidden"}>
-                User{users.length == 1 ? "" : "s"}:{" "}
-                {users.map((user, idx) => (
-                  <a
-                    href="/users"
-                    target="_blank"
-                    key={idx}
-                    className="font-semibold text-xs border-2 border-solid border-gray-500 rounded-md gap-2 px-2 mx-1"
+      <div className="flex items-center space-x-4">
+        <HoverCard>
+          <HoverCardTrigger>
+            <InfoIcon
+              width={16}
+              height={16}
+              className="text-slate-500 cursor-pointer"
+            />
+          </HoverCardTrigger>
+          <HoverCardContent
+            align="start"
+            className="w-[220px] p-0 z-[1000] bg-white"
+          >
+            <div className="p-3 gap-3 flex flex-col border-b border-slate-200">
+              <div className="flex flex-col gap-1">
+                <h3 className="text-base font-semibold text-slate-700">
+                  Session ID
+                </h3>
+                <div className="flex flex-row items-center gap-2">
+                  <p className="text-sm text-slate-500 truncate">{sessionId}</p>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="p-0 w-[14px] h-[14px] text-slate-500"
+                    onClick={() => {
+                      navigator.clipboard.writeText(sessionId);
+                      setNotification("Copied to clipboard", "success");
+                    }}
                   >
-                    {user}
-                  </a>
-                ))}
-              </li>
+                    <CopyIcon />
+                  </Button>
+                </div>
+              </div>
+            </div>
+            <div className="p-3 gap-3 flex flex-col border-b border-slate-200">
+              <div className="flex flex-col gap-1">
+                <h3 className="text-sm font-semibold text-slate-700">Traces</h3>
+                <p className="text-sm text-slate-500 truncate">{numTraces}</p>
+              </div>
+              <div className="flex flex-col gap-1">
+                <h3 className="text-sm font-semibold text-slate-700">
+                  Total cost
+                </h3>
+                <p className="text-sm text-slate-500 truncate">
+                  ${formatLargeNumber(sessionCost)}
+                </p>
+              </div>
+              <div className="flex flex-col gap-1">
+                <h3 className="text-sm font-semibold text-slate-700">
+                  Total latency
+                </h3>
+                <p className="text-sm text-slate-500 truncate">
+                  {startTime && endTime ? timeDiff(startTime, endTime) : ""}
+                </p>
+              </div>
+              <div className="flex flex-col gap-1">
+                <h3 className="text-sm font-semibold text-slate-700">
+                  Models used
+                </h3>
+                <ScrollArea className="w-[194px]">
+                  <div className="flex gap-2">
+                    {Array.from(new Set(models)).map((model, idx) => (
+                      <Badge
+                        key={idx}
+                        className="font-normal text-sm text-slate-500 bg-slate-50 border-slate-200 text-nowrap rounded-md"
+                        variant="secondary"
+                      >
+                        {model}
+                      </Badge>
+                    ))}
+                  </div>
+                  <ScrollBar orientation="horizontal" />
+                </ScrollArea>
+              </div>
+            </div>
 
-              <li>
-                Model{models.length == 1 ? "" : "s"}:{" "}
-                {models.map((model, index) => (
-                  <span key={index} className="font-semibold">
-                    {model +
-                      (models.length != 1 && index != models.length - 1
-                        ? ", "
-                        : "")}
-                  </span>
-                ))}
-              </li>
-
-              <li>
-                Total Tokens:{" "}
-                <span className="font-semibold">
+            <div className="p-3 gap-3 flex flex-col border-b border-slate-200">
+              <div className="flex flex-col gap-1">
+                <h3 className="text-sm font-semibold text-slate-700">
+                  Total tokens
+                </h3>
+                <p className="text-sm text-slate-500 truncate">
                   {promptTokens + completionTokens}
-                </span>
-              </li>
-              <li>
-                Prompt Tokens:{" "}
-                <span className="font-semibold">{promptTokens}</span>
-              </li>
-              <li>
-                Completion Tokens:{" "}
-                <span className="font-semibold">{completionTokens}</span>
-              </li>
+                </p>
+              </div>
+              <div className="flex flex-col gap-1">
+                <h3 className="text-sm font-semibold text-slate-700">
+                  Prompt tokens
+                </h3>
+                <p className="text-sm text-slate-500 truncate">
+                  {promptTokens}
+                </p>
+              </div>
+              <div className="flex flex-col gap-1">
+                <h3 className="text-sm font-semibold text-slate-700">
+                  Completion tokens
+                </h3>
+                <p className="text-sm text-slate-500 truncate">
+                  {completionTokens}
+                </p>
+              </div>
+            </div>
+            <div className="p-3 gap-3 flex flex-col border-b border-slate-200">
+              <div className="flex flex-col gap-1">
+                <h3 className="text-sm font-semibold text-slate-700">
+                  Last used
+                </h3>
+                <p className="text-sm text-slate-500 truncate">
+                  {getTimeAgo(endTime)}
+                </p>
+              </div>
+              <div className="flex flex-col gap-1">
+                <h3 className="text-sm font-semibold text-slate-700">
+                  Created on
+                </h3>
+                <p className="text-sm text-slate-500 truncate">
+                  {startTime ? startTime.toLocaleDateString() : ""}
+                </p>
+              </div>
+            </div>
+          </HoverCardContent>
+        </HoverCard>
 
-              <li
-                onClick={() => setExpanded(false)}
-                className={expanded ? "hover:cursor-pointer" : "hidden"}
-              >
-                Less...
-              </li>
-            </ul>
-          </ul>
-        </div>
+        <SessionFeedback sessionId={sessionId} defaultValue={sessionFeedback} />
       </div>
     </div>
   );

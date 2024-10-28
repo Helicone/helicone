@@ -128,7 +128,6 @@ const SessionDetails = ({
             }}
           />
         </TabsContent>
-
         <TabsContent value="metrics">
           <SessionMetrics selectedSession={selectedSession} />
         </TabsContent>
