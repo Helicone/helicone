@@ -430,7 +430,6 @@ export class ExperimentStore extends BaseStore {
         table_id: experimentTableId,
         column_name: columnName,
         column_type: columnType,
-        hypothesis_id: hypothesisId,
         metadata: hypothesisId ? { hypothesisId: hypothesisId } : null,
       })
       .select("*")
@@ -563,7 +562,6 @@ export class ExperimentStore extends BaseStore {
               'id', ec.id,
               'columnName', ec.column_name,
               'columnType', ec.column_type,
-              'hypothesisId', ec.hypothesis_id,
               'cells', (
                 SELECT jsonb_agg(
                   jsonb_build_object(
