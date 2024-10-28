@@ -295,8 +295,27 @@ export function ExperimentTable({
   // After defining inputKeys
   const inputColumnFields = Array.from(inputKeys);
 
-  // Function to update rowData based on fetched data
-  const updateRowData = useCallback(() => {
+  const getRequestDataByIds = useCallback(
+    async (requestIds: string[]) => {
+      const jawnClient = getJawnClient(orgId);
+      const res = await jawnClient.POST("/v1/request/query-ids", {
+        body: { requestIds },
+      });
+      return res.data?.data;
+    },
+    [orgId]
+  );
+
+  const { data: requestData } = useQuery(
+    ["requestData", orgId],
+    getRequestDataByIds,
+    {
+      enabled: !!orgId,
+    }
+  );
+
+  // Modify updateRowData to be async
+  const updateRowData = useCallback(async () => {
     setIsDataLoading(true);
 
     if (!experimentTableData) {
@@ -308,33 +327,86 @@ export function ExperimentTable({
     // Build a mapping of rowIndex to row object
     const rowIndexToRow = new Map<number, any>();
 
+    // Collect requestIds for experiment columns
+    const requestIdsToFetch = new Set<string>();
+
     // For each column
     experimentTableData.columns.forEach((column) => {
       const columnId = column.id;
 
-      column.cells.forEach((cell) => {
-        const rowIndex = cell.rowIndex;
-        let row = rowIndexToRow.get(rowIndex);
-        if (!row) {
-          row = { id: `row-${rowIndex}`, rowIndex };
-          rowIndexToRow.set(rowIndex, row);
-        }
+      if (column.columnType === "experiment") {
+        // Process experiment columns
+        column.cells.forEach((cell) => {
+          const rowIndex = cell.rowIndex;
+          let row = rowIndexToRow.get(rowIndex);
+          if (!row) {
+            row = { id: `row-${rowIndex}`, rowIndex };
+            rowIndexToRow.set(rowIndex, row);
+          }
 
-        // Set the value for the column in the row
-        row[columnId] = cell.value;
+          // Collect requestIds
+          if (cell.requestId) {
+            // Temporarily store requestId in the cell data
+            row[columnId] = { requestId: cell.requestId };
+            requestIdsToFetch.add(cell.requestId);
+          }
+        });
+      } else {
+        // Non-experiment columns
+        column.cells.forEach((cell) => {
+          const rowIndex = cell.rowIndex;
+          let row = rowIndexToRow.get(rowIndex);
+          if (!row) {
+            row = { id: `row-${rowIndex}`, rowIndex };
+            rowIndexToRow.set(rowIndex, row);
+          }
 
-        // Store requestId if needed
-        if (cell.requestId) {
-          row.requestId = cell.requestId;
-        }
-        if (cell.metadata && cell.metadata.datasetRowId) {
-          row.dataset_row_id = cell.metadata.datasetRowId;
-        }
-      });
+          // Set the value for the column in the row
+          row[columnId] = cell.value;
+
+          // Store requestId if needed
+          if (cell.requestId) {
+            row.requestId = cell.requestId;
+          }
+          if (cell.metadata && cell.metadata.datasetRowId) {
+            row.dataset_row_id = cell.metadata.datasetRowId;
+          }
+        });
+      }
     });
+
+    // Fetch request data for experiment columns
+    let requestDataMap = new Map<string, any>();
+    if (requestIdsToFetch.size > 0) {
+      const requestIdsArray = Array.from(requestIdsToFetch);
+      console.log("requestIdsArray", requestIdsArray);
+      const requestDataArray = await getRequestDataByIds(requestIdsArray);
+      // Build a map from requestId to requestData
+      requestDataArray?.forEach((requestDataItem) => {
+        requestDataMap.set(requestDataItem.request_id, requestDataItem);
+      });
+    }
 
     // Now construct the rowData array
     const newRowData = Array.from(rowIndexToRow.values()).map((row) => {
+      // Process experiment column data
+      Object.entries(row).forEach(([columnId, cellData]) => {
+        if (
+          experimentTableData.columns.some(
+            (col) => col.id === columnId && col.columnType === "experiment"
+          ) &&
+          cellData?.requestId
+        ) {
+          const requestData = requestDataMap.get(cellData.requestId);
+          if (requestData) {
+            // Set the value in the row based on requestData
+            row[columnId] = requestData.response_body; // Adjust according to your data structure
+          } else {
+            row[columnId] = null; // Or any default value
+          }
+        }
+      });
+
       // Find existing row to preserve isLoading state
       const existingRow = rowData.find(
         (existingRow) => existingRow.id === row.id
@@ -351,7 +423,7 @@ export function ExperimentTable({
 
     setRowData(newRowData);
     setIsDataLoading(false);
-  }, [experimentTableData, rowData]);
+  }, [experimentTableData, rowData, getRequestDataByIds]);
 
   // Modify the useEffect that updates rowData
   useEffect(() => {
