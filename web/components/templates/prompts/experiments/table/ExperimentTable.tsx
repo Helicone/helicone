@@ -57,6 +57,7 @@ import { ScrollArea } from "../../../../ui/scroll-area";
 import clsx from "clsx";
 import ScoresEvaluatorsConfig from "./scores/ScoresEvaluatorsConfig";
 import { ExperimentRandomInputSelector } from "../experimentRandomInputSelector";
+import { placeAssetIdValues } from '../../../../../services/lib/requestTraverseHelper';
 
 interface ExperimentTableProps {
   promptSubversionId?: string;
@@ -291,6 +292,7 @@ export function ExperimentTable({
   // Keep track of all input keys
   const [inputKeys, setInputKeys] = useState<Set<string>>(new Set(["Input 1"]));
   const [tempRowId, setTempRowId] = useState(0);
+  const responseBodyCache = useRef<Record<string, any>>({});
 
   // After defining inputKeys
   const inputColumnFields = Array.from(inputKeys);
@@ -313,6 +315,37 @@ export function ExperimentTable({
       enabled: !!orgId,
     }
   );
+
+  const fetchRequestResponseBody = async (request_response: any) => {
+    // Check cache first
+    if (
+      request_response.request_id &&
+      responseBodyCache.current[request_response.request_id]
+    ) {
+      return responseBodyCache.current[request_response.request_id];
+    }
+
+    if (!request_response.signed_body_url) return null;
+
+    try {
+      const contentResponse = await fetch(request_response.signed_body_url);
+      if (contentResponse.ok) {
+        const text = await contentResponse.text();
+        let content = JSON.parse(text);
+        if (request_response.asset_urls) {
+          content = placeAssetIdValues(request_response.asset_urls, content);
+        }
+        // Store in cache
+        if (request_response.request_id) {
+          responseBodyCache.current[request_response.request_id] = content;
+        }
+        return content;
+      }
+    } catch (error) {
+      console.error("Error fetching response body:", error);
+    }
+    return null;
+  };
 
   // Modify updateRowData to be async
   const updateRowData = useCallback(async () => {
@@ -389,6 +422,7 @@ export function ExperimentTable({
 
     // Now construct the rowData array
     const newRowData = Array.from(rowIndexToRow.values()).map((row) => {
+      console.log("row", row);
       // Process experiment column data
       Object.entries(row).forEach(([columnId, cellData]) => {
         if (
