@@ -199,7 +199,6 @@ export const SessionContent: React.FC<SessionContentProps> = ({
           }
           open={selectedRequestId !== "" && openDrawer}
           setOpen={(open) => handleRequestIdChange("")}
-          properties={[]}
         />
       </Tabs>
     </Col>
