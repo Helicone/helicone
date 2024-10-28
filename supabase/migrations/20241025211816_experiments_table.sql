@@ -1,3 +1,5 @@
+-- revoke all 
+
 -- Then create the tables
 CREATE TABLE "public"."experiment_table" (
     "id" uuid not null default gen_random_uuid(),
@@ -9,6 +11,8 @@ CREATE TABLE "public"."experiment_table" (
 
 ALTER TABLE "public"."experiment_table"
 ENABLE ROW LEVEL SECURITY;
+
+revoke all on table "public"."experiment_table" from anon, authenticated;
 
 CREATE TABLE "public"."experiment_column" (
     "id" uuid not null default gen_random_uuid(),
@@ -23,6 +27,8 @@ CREATE TABLE "public"."experiment_column" (
 ALTER TABLE "public"."experiment_column"
 ENABLE ROW LEVEL SECURITY;
 
+revoke all on table "public"."experiment_column" from anon, authenticated;
+
 CREATE TABLE "public"."experiment_cell_value" (
     "id" uuid not null default gen_random_uuid(),
     "column_id" uuid not null,
@@ -34,6 +40,8 @@ CREATE TABLE "public"."experiment_cell_value" (
 
 ALTER TABLE "public"."experiment_cell_value"
 ENABLE ROW LEVEL SECURITY;
+
+revoke all on table "public"."experiment_cell_value" from anon, authenticated;
 
 -- Create all indexes first
 CREATE UNIQUE INDEX experiment_table_pkey ON public.experiment_table USING btree (id);

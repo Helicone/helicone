@@ -87,6 +87,7 @@ export class ExperimentController extends Controller {
       await supabaseServer.client.from("experiment_table").insert({
         experiment_id: result.data.id,
         name: "Experiment Table",
+        organization_id: request.authParams.organizationId,
       });
       this.setStatus(200); // set return status 201
       return {

@@ -83,7 +83,7 @@ export function prepareRequestOpenAIOnPremFull({
     columnId,
     rowIndex
   );
-  console.log("fetchUrl", fetchUrl);
+
   return {
     url: fetchUrl,
     headers,
