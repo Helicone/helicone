@@ -41,7 +41,7 @@ const ThemedDrawer: React.FC<ThemedDrawerProps> = ({
     <Transition.Root show={open} as={Fragment}>
       <Dialog
         as="div"
-        className={clsx(theme ?? "light", "relative z-40")}
+        className={clsx(theme ?? "light", "relative z-[200]")}
         onClose={setOpen}
       >
         <Transition.Child
