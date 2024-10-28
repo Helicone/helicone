@@ -5,7 +5,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { Tooltip } from "@mui/material";
 import { TextInput } from "@tremor/react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   addRequestLabel,
   addRequestScore,
@@ -22,6 +22,11 @@ import ThemedModal from "../../shared/themed/themedModal";
 import NewDataset from "../datasets/NewDataset";
 import { getUSDateFromString } from "@/components/shared/utils/utils";
 import { formatNumber } from "../../shared/utils/formatNumber";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { useQuery } from "@tanstack/react-query";
+import { getJawnClient } from "@/lib/clients/jawn";
 
 function getPathName(url: string) {
   try {
@@ -61,6 +66,38 @@ const RequestRow = (props: {
   const [currentScores, setCurrentScores] = useState<Record<string, number>>();
 
   const { setNotification } = useNotification();
+
+  const promptId = useMemo(() => {
+    return request.customProperties?.["Helicone-Prompt-Id"] as
+      | string
+      | undefined;
+  }, [request.customProperties]);
+
+  const sessionData = useMemo(() => {
+    const sessionId = request.customProperties?.["Helicone-Session-Id"] as
+      | string
+      | undefined;
+    return { sessionId };
+  }, [request.customProperties]);
+
+  const promptData = useQuery({
+    queryKey: ["prompt", promptId, org?.currentOrg?.id],
+    queryFn: async (query) => {
+      const jawn = getJawnClient(query.queryKey[2]);
+      const prompt = await jawn.POST("/v1/prompt/query", {
+        body: {
+          filter: {
+            prompt_v2: {
+              user_defined_id: {
+                equals: query.queryKey[1],
+              },
+            },
+          },
+        },
+      });
+      return prompt.data?.data?.[0];
+    },
+  });
 
   useEffect(() => {
     // find all the key values of properties and set them to currentProperties
@@ -428,22 +465,28 @@ const RequestRow = (props: {
         )}
         {currentProperties && currentProperties.length > 0 && (
           <div className="flex flex-wrap gap-4 text-sm items-center pt-2">
-            {currentProperties.map((property, i) => {
-              const key = Object.keys(property)[0];
-              return (
-                <li
-                  className="flex flex-col space-y-1 justify-between text-left p-2.5 shadow-sm border border-gray-300 dark:border-gray-700 rounded-lg min-w-[5rem]"
-                  key={i}
-                >
-                  <p className="font-semibold text-gray-900 dark:text-gray-100">
-                    {key}
-                  </p>
-                  <p className="text-gray-700 dark:text-gray-300">
-                    {property[key]}
-                  </p>
-                </li>
-              );
-            })}
+            {currentProperties
+              .filter(
+                (property) =>
+                  !["Helicone-Prompt-Id", "Helicone-Session-Id"].includes(
+                    Object.keys(property)[0]
+                  )
+              )
+              .map((property, i) => {
+                const key = Object.keys(property)[0];
+                return (
+                  <li className="flex flex-row items-center space-x-2" key={i}>
+                    {/* TODO: Add Property link */}
+                    <Button
+                      variant="outline"
+                      size="sm_sleek"
+                      className="flex flex-row items-center space-x-2 truncate cursor-default "
+                    >
+                      <span>{key}:</span> <span>{property[key]}</span>
+                    </Button>
+                  </li>
+                );
+              })}
           </div>
         )}
         <div className="font-semibold text-gray-900 dark:text-gray-100 text-sm items-center flex">
@@ -548,24 +591,59 @@ const RequestRow = (props: {
           </div>
         )}
       </div>
+      <div className="font-semibold text-gray-900 dark:text-gray-100 text-sm items-center flex">
+        Helicone Settings{" "}
+      </div>
+      <div className="flex w-full justify-between gap-8">
+        <div className="flex flex-col gap-2">
+          {promptId && (
+            <div className="flex flex-row items-center space-x-2">
+              <Button
+                variant="outline"
+                size="sm_sleek"
+                className="flex flex-row items-center space-x-2 truncate"
+                asChild
+              >
+                <Link href={`/prompts/${promptData.data?.id}`}>
+                  <span>Prompt:</span> <span>{promptId}</span>
+                </Link>
+              </Button>
+            </div>
+          )}
+          {sessionData && (
+            <>
+              <div className="flex flex-row items-center space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm_sleek"
+                  className="flex flex-row items-center space-x-2 truncate"
+                  asChild
+                >
+                  <Link href={`/sessions/${sessionData.sessionId}`}>
+                    <span>Session:</span> <span>{sessionData.sessionId}</span>
+                  </Link>
+                </Button>
+              </div>
+            </>
+          )}
+        </div>
+        <FeedbackButtons
+          requestId={request.id}
+          defaultValue={
+            request.scores && request.scores["helicone-score-feedback"]
+              ? Number(request.scores["helicone-score-feedback"]) === 1
+                ? true
+                : false
+              : null
+          }
+        />
+      </div>
       {displayPreview && (
         <div className="flex flex-col space-y-8">
-          <div className="flex w-full justify-end">
-            <FeedbackButtons
-              requestId={request.id}
-              defaultValue={
-                request.scores && request.scores["helicone-score-feedback"]
-                  ? Number(request.scores["helicone-score-feedback"]) === 1
-                    ? true
-                    : false
-                  : null
-              }
-            />
-          </div>
-
           <div className="flex flex-col space-y-2">{request.render()}</div>
         </div>
       )}
+
       <div className="min-h-[100px]">{/* space */}</div>
       <ThemedModal open={newDatasetModalOpen} setOpen={setNewDatasetModalOpen}>
         <NewDataset
