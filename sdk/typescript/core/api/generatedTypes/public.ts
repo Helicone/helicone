@@ -49,6 +49,12 @@ export interface paths {
   "/v1/request/query-clickhouse": {
     post: operations["GetRequestsClickhouse"];
   };
+  "/v1/request/{requestId}": {
+    get: operations["GetRequestById"];
+  };
+  "/v1/request/query-ids": {
+    post: operations["GetRequestsByIds"];
+  };
   "/v1/request/{requestId}/feedback": {
     post: operations["FeedbackRequest"];
   };
@@ -883,6 +889,12 @@ export interface components {
       isPartOfExperiment?: boolean;
       isScored?: boolean;
     };
+    ResultSuccess_HeliconeRequest_: {
+      data: components["schemas"]["HeliconeRequest"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_HeliconeRequest.string_": components["schemas"]["ResultSuccess_HeliconeRequest_"] | components["schemas"]["ResultError_string_"];
     HeliconeRequestAsset: {
       assetUrl: string;
     };
@@ -2794,6 +2806,38 @@ export interface operations {
          * }
          */
         "application/json": components["schemas"]["RequestQueryParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_HeliconeRequest-Array.string_"];
+        };
+      };
+    };
+  };
+  GetRequestById: {
+    parameters: {
+      path: {
+        requestId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_HeliconeRequest.string_"];
+        };
+      };
+    };
+  };
+  GetRequestsByIds: {
+    requestBody: {
+      content: {
+        "application/json": {
+          requestIds: string[];
+        };
       };
     };
     responses: {
