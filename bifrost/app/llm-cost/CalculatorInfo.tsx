@@ -25,8 +25,15 @@ export function formatProviderName(provider: string): string {
   return formattingMap[provider.toUpperCase()] || provider.toUpperCase();
 }
 
+
 // Reusable FAQ component
 const LLMPricingFAQ = () => {
+  const [faq1Open, setFaq1Open] = React.useState(false);
+  const [faq2Open, setFaq2Open] = React.useState(false);
+  const [faq3Open, setFaq3Open] = React.useState(false);
+  const [faq4Open, setFaq4Open] = React.useState(false);
+  const [faq5Open, setFaq5Open] = React.useState(false);
+
   return (
     <section>
       <h3 className="text-2xl font-semibold mb-8 mt-12">
@@ -34,10 +41,10 @@ const LLMPricingFAQ = () => {
       </h3>
       <Accordion type="single" collapsible className="w-full">
         <AccordionItem value="faq-1" className="mb-4 mt-4">
-          <AccordionTrigger className="font-medium text-slate-700 mb-2 flex items-start justify-between w-full text-left">
+          <AccordionTrigger className="font-medium text-slate-700 mb-2 flex items-start justify-between w-full text-left" onClick={() => setFaq1Open(!faq1Open)}>
             How does LLM API pricing work?
             <svg
-              className="w-5 h-5 text-slate-500 ml-auto"
+              className={`w-5 h-5 text-slate-500 ml-auto ${faq1Open ? 'transform rotate-180' : ''}`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -72,10 +79,10 @@ const LLMPricingFAQ = () => {
         </AccordionItem>
         <div className="border-t border-slate-200"></div>
         <AccordionItem value="faq-2" className="mb-4 mt-4">
-          <AccordionTrigger className="font-medium text-slate-700 mb-2 flex items-start justify-between w-full text-left">
+          <AccordionTrigger className="font-medium text-slate-700 mb-2 flex items-start justify-between w-full text-left" onClick={() => setFaq2Open(!faq2Open)}>
             What are the most cost-effective LLM APIs for startups? 
             <svg
-              className="w-5 h-5 text-slate-500 ml-auto"
+              className={`w-5 h-5 text-slate-500 ml-auto ${faq2Open ? 'transform rotate-180' : ''}`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -101,10 +108,10 @@ const LLMPricingFAQ = () => {
         </AccordionItem>
         <div className="border-t border-slate-200"></div>
         <AccordionItem value="faq-3" className="mb-4 mt-4">
-          <AccordionTrigger className="font-medium text-slate-700 mb-2 flex items-start justify-between w-full text-left">
+          <AccordionTrigger className="font-medium text-slate-700 mb-2 flex items-start justify-between w-full text-left" onClick={() => setFaq3Open(!faq3Open)}>
             How can I reduce my LLM API costs?
             <svg
-              className="w-5 h-5 text-slate-500 ml-auto"
+              className={`w-5 h-5 text-slate-500 ml-auto ${faq3Open ? 'transform rotate-180' : ''}`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -186,10 +193,10 @@ const LLMPricingFAQ = () => {
         </AccordionItem>
         <div className="border-t border-slate-200"></div>
         <AccordionItem value="faq-4" className="mb-4 mt-4">
-          <AccordionTrigger className="font-medium text-slate-700 mb-2 flex items-start justify-between w-full text-left">
+          <AccordionTrigger className="font-medium text-slate-700 mb-2 flex items-start justify-between w-full text-left" onClick={() => setFaq4Open(!faq4Open)}>
             What&apos;s the difference between input and output tokens in LLM API pricing?
             <svg
-              className="w-5 h-5 text-slate-500 ml-auto"
+              className={`w-5 h-5 text-slate-500 ml-auto ${faq4Open ? 'transform rotate-180' : ''}`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -223,10 +230,10 @@ const LLMPricingFAQ = () => {
         </AccordionItem>
         <div className="border-t border-slate-200"></div>
         <AccordionItem value="faq-5" className="mb-4 mt-4">
-          <AccordionTrigger className="font-medium text-slate-700 mb-2 flex items-start justify-between w-full text-left">
+          <AccordionTrigger className="font-medium text-slate-700 mb-2 flex items-start justify-between w-full text-left" onClick={() => setFaq5Open(!faq5Open)}>
             How accurate is this LLM API pricing calculator?
             <svg
-              className="w-5 h-5 text-slate-500 ml-auto"
+              className={`w-5 h-5 text-slate-500 ml-auto ${faq5Open ? 'transform rotate-180' : ''}`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
