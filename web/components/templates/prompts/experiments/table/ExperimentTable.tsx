@@ -95,40 +95,6 @@ export function ExperimentTable({
     gridRef.current = params.api;
   }, []);
 
-  const fetchExperiments = useCallback(async () => {
-    if (!orgId) return null;
-    const jawnClient = getJawnClient(orgId);
-    const res = await jawnClient.POST("/v1/experiment/query", {
-      body: {
-        filter: experimentId
-          ? {
-              experiment: {
-                id: {
-                  equals: experimentId,
-                },
-              },
-            }
-          : {},
-        include: {
-          responseBodies: true,
-          promptVersion: true,
-          score: true,
-        },
-      },
-    });
-
-    return res.data?.data?.[0];
-  }, [orgId, experimentId]);
-
-  const { data: experimentData, refetch: refetchExperiments } = useQuery(
-    ["experiments", orgId, experimentId],
-    fetchExperiments,
-    {
-      enabled: !!orgId && !!experimentId,
-      refetchInterval: 10000,
-    }
-  );
-
   const fetchExperimentTable = useCallback(async () => {
     if (!orgId || !experimentId) return null;
 
@@ -180,13 +146,8 @@ export function ExperimentTable({
     [experimentId, jawn, refetchExperimentTable]
   );
 
-  const providerKey = useMemo(
-    () => (experimentData?.meta as any)?.provider_key,
-    [experimentData]
-  );
-
   const fetchInputRecords = useCallback(async () => {
-    const datasetId = experimentData?.dataset.id;
+    const datasetId = experimentTableData?.metadata?.datasetId as string;
     if (!orgId || !datasetId || !promptSubversionId) return [];
     const jawnClient = getJawnClient(orgId);
     const res = await jawnClient.POST(
@@ -194,13 +155,13 @@ export function ExperimentTable({
       {
         params: {
           path: {
-            datasetId,
+            datasetId: datasetId,
           },
         },
       }
     );
     return res.data?.data;
-  }, [orgId, experimentData?.dataset?.id, promptSubversionId]);
+  }, [orgId, experimentTableData?.metadata?.datasetId, promptSubversionId]);
 
   // Define fetchPromptVersionTemplate
   const fetchPromptVersionTemplate = useCallback(async () => {
@@ -258,10 +219,11 @@ export function ExperimentTable({
   }, [orgId, promptSubversionId]);
 
   const { data: inputRecordsData, refetch: refetchInputRecords } = useQuery(
-    ["inputRecords", orgId, experimentData?.dataset?.id],
+    ["inputRecords", orgId, experimentTableData?.metadata?.datasetId],
     fetchInputRecords,
     {
-      enabled: !!experimentData?.dataset?.id && !!promptSubversionId,
+      enabled:
+        !!experimentTableData?.metadata?.datasetId && !!promptSubversionId,
     }
   );
 
@@ -562,7 +524,7 @@ export function ExperimentTable({
         );
       },
       onSettled: async (_, __, { hypothesisId, cells }) => {
-        await refetchExperiments();
+        await refetchExperimentTable();
         await refetchInputRecords();
 
         // Reset loading state
@@ -608,7 +570,7 @@ export function ExperimentTable({
   );
 
   const refetchData = async () => {
-    await refetchExperiments();
+    await refetchExperimentTable();
     await refetchInputRecords();
   };
 
@@ -618,7 +580,7 @@ export function ExperimentTable({
     if (isHypothesisRunning) {
       intervalId = setInterval(() => {
         // Refetch data and refresh the grid
-        refetchExperiments();
+        refetchExperimentTable();
         // refetchInputRecords();
         gridRef.current?.refreshCells();
       }, 1000);
@@ -629,23 +591,7 @@ export function ExperimentTable({
         clearInterval(intervalId);
       }
     };
-  }, [isHypothesisRunning, refetchExperiments, refetchInputRecords]);
-
-  // Determine the hypotheses to run (excluding the first one)
-  const hypothesesToRun = useMemo(() => {
-    return experimentData?.hypotheses.map((h: any) => h.id) || [];
-  }, [experimentData?.hypotheses]);
-
-  // Define sortedHypotheses
-  const sortedHypotheses = useMemo(() => {
-    return experimentData?.hypotheses
-      ? [...experimentData.hypotheses].sort((a, b) => {
-          return (
-            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-          );
-        })
-      : [];
-  }, [experimentData?.hypotheses]);
+  }, [isHypothesisRunning, refetchExperimentTable, refetchInputRecords]);
 
   const [columnWidths, setColumnWidths] = useState<{ [key: string]: number }>(
     {}
@@ -774,7 +720,8 @@ export function ExperimentTable({
             params: {
               path: {
                 promptVersionId: promptSubversionId ?? "",
-                datasetId: experimentData?.dataset?.id ?? "",
+                datasetId:
+                  (experimentTableData?.metadata?.datasetId as string) ?? "",
               },
             },
           }
@@ -796,7 +743,7 @@ export function ExperimentTable({
       currentRowInputs,
       jawn,
       promptSubversionId,
-      experimentData?.dataset?.id,
+      experimentTableData?.metadata?.datasetId,
       inputKeys,
       refetchInputRecords,
       getInputColumns,
@@ -924,7 +871,6 @@ export function ExperimentTable({
             displayName: "Original",
             badgeText: "Output",
             badgeVariant: "secondary",
-            hypothesis: sortedHypotheses[1] || {},
             promptVersionTemplate: promptVersionTemplate,
           },
           cellClass: "border-r border-[#E2E8F0] text-slate-700 pt-2.5",
@@ -1036,7 +982,6 @@ export function ExperimentTable({
           displayName: "Messages",
           badgeText: "Input",
           badgeVariant: "secondary",
-          hypothesis: sortedHypotheses[0] || {},
           promptVersionTemplate: promptVersionTemplate,
         },
         cellClass:
@@ -1149,7 +1094,7 @@ export function ExperimentTable({
         promptVersionId: promptSubversionId,
         promptVersionTemplate: promptVersionTemplate,
         experimentId,
-        selectedProviderKey: providerKey,
+        selectedProviderKey: "",
         refetchData,
         handleAddColumn,
         wrapText,
@@ -1176,7 +1121,6 @@ export function ExperimentTable({
 
     return columns;
   }, [
-    sortedHypotheses,
     columnView,
     handleRunHypothesis,
     loadingStates,
@@ -1190,7 +1134,6 @@ export function ExperimentTable({
   ]);
 
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [selectedProviderKey, setSelectedProviderKey] = useState(providerKey);
   const [showRandomInputSelector, setShowRandomInputSelector] = useState(false);
 
   const getExperimentExportData = useCallback(() => {
@@ -1209,16 +1152,16 @@ export function ExperimentTable({
 
       exportedRow["original"] = row["original"] || "";
 
-      sortedHypotheses.forEach((hypothesis, index) => {
-        const experimentLabel = `Experiment ${index + 1}`;
-        exportedRow[experimentLabel] = row[hypothesis.id] || "";
-      });
+      // sortedHypotheses.forEach((hypothesis, index) => {
+      //   const experimentLabel = `Experiment ${index + 1}`;
+      //   exportedRow[experimentLabel] = row[hypothesis.id] || "";
+      // });
 
       return exportedRow;
     });
 
     return exportedData;
-  }, [rowData, inputColumnFields, sortedHypotheses]);
+  }, [rowData, inputColumnFields]);
 
   // Add this new component
   const NewExperimentPopover = () => {
@@ -1363,6 +1306,9 @@ export function ExperimentTable({
               prompt_id: res.data?.data?.id!,
               prompt_version: res.data?.data?.prompt_version_id!,
               experiment_name: `${promptName}_V1.0` || "",
+            },
+            experimentTableMetadata: {
+              datasetId: dataset.data?.data?.datasetId!,
             },
           },
         }
@@ -1544,12 +1490,11 @@ export function ExperimentTable({
               setShowExperimentInputSelector,
               setShowRandomInputSelector,
               handleRunHypothesis,
-              hypothesesToRun,
+              hypothesesToRun: [],
               inputKeys: Array.from(inputKeys),
               experimentTableData,
               inputColumnFields,
-              hypotheses: sortedHypotheses,
-              refetchExperiments,
+              hypotheses: [],
               experimentId,
               orgId,
               promptVersionTemplateRef,
@@ -1598,12 +1543,12 @@ export function ExperimentTable({
         setOpen={setShowRandomInputSelector}
         meta={{
           promptVersionId: promptSubversionId,
-          datasetId: experimentData?.dataset?.id,
+          datasetId: (experimentTableData?.metadata?.datasetId as string) ?? "",
         }}
         requestIds={randomInputRecords}
         onSuccess={async (success) => {
           if (success) {
-            await refetchExperiments();
+            await refetchExperimentTable();
             await refetchInputRecords();
             setShowRandomInputSelector(false);
           }
@@ -1617,13 +1562,13 @@ export function ExperimentTable({
         setShowRandomInputSelector={setShowRandomInputSelector}
         meta={{
           promptVersionId: promptSubversionId,
-          datasetId: experimentData?.dataset?.id,
+          datasetId: (experimentTableData?.metadata?.datasetId as string) ?? "",
         }}
         requestIds={randomInputRecords}
         onSuccess={async (success) => {
           if (success) {
             // Handle success: Re-fetch experiments and input records
-            await refetchExperiments();
+            await refetchExperimentTable();
             await refetchInputRecords();
           }
         }}

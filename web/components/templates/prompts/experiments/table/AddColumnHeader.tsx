@@ -250,7 +250,7 @@ const AddColumnHeader: React.FC<AddColumnHeaderProps> = ({
                           experimentId: experimentId,
                           model: model,
                           promptVersion: result.data.data?.id ?? "",
-                          providerKeyId: selectedProviderKey ?? "NOKEY",
+                          providerKeyId: "NOKEY",
                           status: "RUNNING",
                         },
                       }

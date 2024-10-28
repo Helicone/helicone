@@ -88,6 +88,9 @@ export class ExperimentController extends Controller {
         experiment_id: result.data.id,
         name: "Experiment Table",
         organization_id: request.authParams.organizationId,
+        metadata: {
+          datasetId: requestBody.datasetId,
+        },
       });
       this.setStatus(200); // set return status 201
       return {

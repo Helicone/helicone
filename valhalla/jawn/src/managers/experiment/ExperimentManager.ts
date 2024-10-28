@@ -25,6 +25,7 @@ export interface CreateExperimentTableParams {
   newHeliconeTemplate: string;
   isMajorVersion: boolean;
   promptSubversionMetadata: Record<string, any>;
+  experimentTableMetadata?: Record<string, any>;
 }
 
 export class ExperimentManager extends BaseManager {
@@ -191,7 +192,8 @@ export class ExperimentManager extends BaseManager {
     const experimentTableResult =
       await this.ExperimentStore.createNewExperimentTable(
         params.datasetId,
-        params.experimentMetadata
+        params.experimentMetadata,
+        params.experimentTableMetadata
       );
 
     if (experimentTableResult.error || !experimentTableResult.data) {

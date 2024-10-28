@@ -113,6 +113,7 @@ export interface ExperimentTable {
   name: string;
   experimentId: string;
   columns: ExperimentTableColumn[];
+  metadata?: Record<string, any>;
 }
 
 function getExperimentsQuery(
@@ -384,7 +385,8 @@ export class ExperimentStore extends BaseStore {
 
   async createNewExperimentTable(
     datasetId: string,
-    experimentMetadata: Record<string, string>
+    experimentMetadata: Record<string, string>,
+    experimentTableMetadata?: Record<string, any>
   ): Promise<
     Result<{ experimentTableId: string; experimentId: string }, string>
   > {
@@ -406,6 +408,7 @@ export class ExperimentStore extends BaseStore {
         experiment_id: result.data.id,
         name: "Experiment Table",
         organization_id: this.organizationId,
+        metadata: experimentTableMetadata ?? null,
       })
       .select("*")
       .single();
@@ -566,6 +569,7 @@ export class ExperimentStore extends BaseStore {
         et.id,
         et.name,
         et.experiment_id as "experimentId",
+        et.metadata,
         COALESCE(
           jsonb_agg(
             jsonb_build_object(
@@ -627,7 +631,7 @@ export class ExperimentStore extends BaseStore {
       FROM experiment_table et
       LEFT JOIN experiment_column ec ON ec.table_id = et.id
       WHERE et.experiment_id = $1
-      GROUP BY et.id, et.name, et.experiment_id;
+      GROUP BY et.id, et.name, et.experiment_id, et.metadata;
     `;
 
     try {
