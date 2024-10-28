@@ -327,6 +327,9 @@ export function ExperimentTable({
         if (cell.requestId) {
           row.requestId = cell.requestId;
         }
+        if (cell.metadata && cell.metadata.datasetRowId) {
+          row.dataset_row_id = cell.metadata.datasetRowId;
+        }
       });
     });
 
@@ -842,6 +845,7 @@ export function ExperimentTable({
           autoHeight: wrapText,
         });
       } else if (column.columnType === "experiment") {
+        console.log("column", column);
         if (columnView === "all" || columnView === "outputs") {
           columns.push({
             field: column.id,
@@ -850,7 +854,7 @@ export function ExperimentTable({
             suppressSizeToFit: true,
             cellRenderer: HypothesisCellRenderer,
             cellRendererParams: {
-              hypothesisId: column.hypothesisId,
+              hypothesisId: column.metadata?.hypothesisId,
               handleRunHypothesis,
               loadingStates,
               wrapText,
@@ -862,6 +866,7 @@ export function ExperimentTable({
               badgeVariant: "secondary",
               hypothesisId: column.hypothesisId,
               onRunColumn: async (colId: string) => {
+                console.log("rowData", rowData);
                 const cells = rowData.map((row, index) => ({
                   rowIndex: index,
                   datasetRowId: row.dataset_row_id,

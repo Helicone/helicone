@@ -203,6 +203,9 @@ export class ExperimentDatasetController extends Controller {
           columnId,
           rowIndex,
           value,
+          metadata: {
+            datasetRowId: datasetRowResult.data,
+          },
         })
       ),
     });

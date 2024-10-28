@@ -5049,6 +5049,9 @@
 					"cells": {
 						"items": {
 							"properties": {
+								"metadata": {
+									"$ref": "#/components/schemas/Record_string.any_"
+								},
 								"value": {
 									"type": "string",
 									"nullable": true
@@ -5068,6 +5071,9 @@
 							"type": "object"
 						},
 						"type": "array"
+					},
+					"metadata": {
+						"$ref": "#/components/schemas/Record_string.any_"
 					}
 				},
 				"required": [

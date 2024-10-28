@@ -242,6 +242,7 @@ export class ExperimentManager extends BaseManager {
       columnId: string;
       rowIndex: number;
       value: string | null;
+      metadata?: Record<string, any>;
     }[];
   }): Promise<Result<{ ids: string[] }, string>> {
     return this.ExperimentStore.createExperimentCells(params.cells);

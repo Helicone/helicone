@@ -1898,11 +1898,13 @@ Json: JsonObject;
       columnType: string;
       hypothesisId?: string;
       cells: ({
+          metadata?: components["schemas"]["Record_string.any_"];
           value: string | null;
           requestId?: string;
           /** Format: double */
           rowIndex: number;
         })[];
+      metadata?: components["schemas"]["Record_string.any_"];
     };
     ExperimentTable: {
       id: string;

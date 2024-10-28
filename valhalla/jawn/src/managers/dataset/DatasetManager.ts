@@ -109,19 +109,20 @@ export class DatasetManager extends BaseManager {
     if (existingDataset.error || !existingDataset.data) {
       return err(existingDataset.error?.message ?? "Dataset not found");
     }
-    const datasetRowId = randomUUID();
     const dataset = await supabaseServer.client
       .from("experiment_dataset_v2_row")
       .insert({
         dataset_id: datasetId,
         input_record: inputRecordId,
-      });
+      })
+      .select("*")
+      .single();
 
-    if (dataset.error) {
-      return err(dataset.error.message);
+    if (dataset.error || !dataset.data) {
+      return err(dataset.error?.message ?? "Failed to add dataset row");
     }
 
-    return ok(datasetRowId);
+    return ok(dataset.data.id);
   }
 
   async addRandomDataset(params: RandomDatasetParams): Promise<

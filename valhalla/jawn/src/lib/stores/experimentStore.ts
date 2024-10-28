@@ -103,7 +103,9 @@ export interface ExperimentTableColumn {
     rowIndex: number;
     requestId?: string;
     value: string | null;
+    metadata?: Record<string, any>;
   }[];
+  metadata?: Record<string, any>;
 }
 
 export interface ExperimentTable {
@@ -469,7 +471,8 @@ export class ExperimentStore extends BaseStore {
   async createExperimentCell(
     columnId: string,
     rowIndex: number,
-    value: string | null
+    value: string | null,
+    metadata?: Record<string, any>
   ): Promise<Result<{ id: string }, string>> {
     const result = await supabaseServer.client
       .from("experiment_cell")
@@ -477,6 +480,7 @@ export class ExperimentStore extends BaseStore {
         column_id: columnId,
         row_index: rowIndex,
         value: value,
+        metadata: metadata ?? null,
       })
       .select("*")
       .single();
@@ -503,7 +507,7 @@ export class ExperimentStore extends BaseStore {
 
     // Create empty cells for each column
     const cellPromises = columnsResult.data.map((column) =>
-      this.createExperimentCell(column.id, params.rowIndex, null)
+      this.createExperimentCell(column.id, params.rowIndex, null, {})
     );
 
     try {
@@ -528,11 +532,17 @@ export class ExperimentStore extends BaseStore {
       columnId: string;
       rowIndex: number;
       value: string | null;
+      metadata?: Record<string, any>;
     }[]
   ): Promise<Result<{ ids: string[] }, string>> {
     const results = await Promise.all(
       cells.map((cell) =>
-        this.createExperimentCell(cell.columnId, cell.rowIndex, cell.value)
+        this.createExperimentCell(
+          cell.columnId,
+          cell.rowIndex,
+          cell.value,
+          cell.metadata
+        )
       )
     );
     if (results.some((result) => result.error)) {
@@ -562,6 +572,7 @@ export class ExperimentStore extends BaseStore {
               'id', ec.id,
               'columnName', ec.column_name,
               'columnType', ec.column_type,
+              'metadata', ec.metadata,
               'cells', (
                 SELECT jsonb_agg(
                   jsonb_build_object(
@@ -583,7 +594,13 @@ export class ExperimentStore extends BaseStore {
                       FROM experiment_cell ecv
                       WHERE ecv.column_id = ec.id
                       AND ecv.row_index = row_number
-                    ) -> 'value'
+                    ) -> 'value',
+                    'metadata', (
+                      SELECT ecv.metadata
+                      FROM experiment_cell ecv
+                      WHERE ecv.column_id = ec.id
+                      AND ecv.row_index = row_number
+                    )
                   )
                   ORDER BY row_number
                 )
