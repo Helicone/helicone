@@ -1,4 +1,6 @@
-import { Badge, TableCell, TableRow, Text, AreaChart } from "@tremor/react";
+import { TableCell, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { AreaChart } from "@tremor/react";
 import { getUSDateFromString } from "../../../shared/utils/utils";
 import { Fragment, useState } from "react";
 import { clsx } from "../../../shared/clsx";
@@ -100,15 +102,22 @@ const CustomerRow = (props: CustomerRowProps) => {
           {org.name}
         </TableCell>
         <TableCell>
-          <Text>{getUSDateFromString(org.created_at || "")}</Text>
+          <span className="text-sm text-gray-500 dark:text-gray-400">
+            {getUSDateFromString(org.created_at || "")}
+          </span>
         </TableCell>
         <TableCell>
-          <Badge color="emerald" size="xs" className="text-xs">
-            <span className="text-xs">active</span>
+          <Badge
+            variant="outline"
+            className="bg-emerald-50 text-emerald-700 hover:bg-emerald-50 border-emerald-200"
+          >
+            active
           </Badge>
         </TableCell>
         <TableCell>
-          <Text>{isLoading ? "..." : members?.length}</Text>
+          <span className="text-sm text-gray-500 dark:text-gray-400">
+            {isLoading ? "..." : members?.length}
+          </span>
         </TableCell>
         <TableCell>
           <div>

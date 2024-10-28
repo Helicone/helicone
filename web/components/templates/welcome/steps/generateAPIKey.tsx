@@ -1,5 +1,5 @@
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
-import { TextInput } from "@tremor/react";
+import { Input } from "@/components/ui/input";
 import generateApiKey from "generate-api-key";
 import { useState } from "react";
 import { generateAPIKeyHelper } from "../../../../utlis/generateAPIKeyHelper";
@@ -85,13 +85,13 @@ const GenerateAPIKey = (props: GenerateAPIKeyProps) => {
               API Key Name
             </label>
             <div className="flex items-center gap-4">
-              <TextInput
+              <Input
                 name="key-name"
                 id="key-name"
                 required
                 placeholder="Your Shiny API Key Name"
                 value={name}
-                onValueChange={(value) => setName(value)}
+                onChange={(e) => setName(e.target.value)}
               />
               <Button
                 variant={"secondary"}

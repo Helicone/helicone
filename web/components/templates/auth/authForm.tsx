@@ -5,8 +5,15 @@ import Link from "next/link";
 import Image from "next/image";
 import { CustomerPortalContent } from "../../../pages/signin";
 import { useRouter } from "next/router";
-import { Select, SelectItem, TextInput } from "@tremor/react";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 
 interface AuthFormProps {
   handleEmailSubmit: (email: string, password: string) => void;
@@ -144,23 +151,19 @@ const AuthForm = (props: AuthFormProps) => {
                       </span>
                     </label>
 
-                    <Select defaultValue={checkPath()}>
-                      <SelectItem
-                        value="us"
-                        onClick={() => {
-                          handleRouting("us");
-                        }}
-                      >
-                        🇺🇸 United States
-                      </SelectItem>
-                      <SelectItem
-                        value="eu"
-                        onClick={() => {
-                          handleRouting("eu");
-                        }}
-                      >
-                        🇪🇺 European Union
-                      </SelectItem>
+                    <Select
+                      defaultValue={checkPath()}
+                      onValueChange={(value) =>
+                        handleRouting(value as "us" | "eu")
+                      }
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select a region" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="us">🇺🇸 United States</SelectItem>
+                        <SelectItem value="eu">🇪🇺 European Union</SelectItem>
+                      </SelectContent>
                     </Select>
                   </div>
 
@@ -173,15 +176,15 @@ const AuthForm = (props: AuthFormProps) => {
                         Email
                       </label>
                       <div className="mt-1">
-                        <TextInput
+                        <Input
                           id="email"
                           name="email"
                           type="email"
                           autoComplete="email"
                           required
-                          placeholder={"jane@acme.com"}
+                          placeholder="jane@acme.com"
                           value={email}
-                          onValueChange={setEmail}
+                          onChange={(e) => setEmail(e.target.value)}
                         />
                       </div>
                     </div>
@@ -196,7 +199,7 @@ const AuthForm = (props: AuthFormProps) => {
                           Password
                         </label>
                         <div className="mt-1">
-                          <TextInput
+                          <Input
                             id="password"
                             name="password"
                             type="password"
@@ -204,7 +207,7 @@ const AuthForm = (props: AuthFormProps) => {
                             placeholder="***********"
                             required
                             value={password}
-                            onValueChange={setPassword}
+                            onChange={(e) => setPassword(e.target.value)}
                           />
                         </div>
                       </div>

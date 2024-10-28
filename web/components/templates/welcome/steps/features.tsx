@@ -1,4 +1,4 @@
-import { TabGroup, TabList, Tab, TabPanels, TabPanel } from "@tremor/react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DiffHighlight } from "../diffHighlight";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -29,35 +29,34 @@ const Features = (props: FeaturesProps) => {
           </Link>
           .
         </p>
-        <TabGroup>
-          <TabList className="pt-2" variant="solid">
-            <Tab className="flex flex-col text-left">
+        <Tabs defaultValue="properties">
+          <TabsList className="grid w-full grid-cols-3 h-auto">
+            <TabsTrigger value="properties" className="flex flex-col text-left">
               <p className="font-semibold text-md xl:text-lg">
                 Custom Properties
               </p>
-              <p className="text-xs xl:text-sm ">
+              <p className="text-xs xl:text-sm">
                 Label and segment your requests
               </p>
-            </Tab>
-            <Tab className="flex flex-col text-left">
+            </TabsTrigger>
+            <TabsTrigger value="templating" className="flex flex-col text-left">
               <p className="font-semibold text-md xl:text-lg">
                 Prompt Templating
               </p>
               <p className="text-xs xl:text-sm">
                 Version and visualize prompts
               </p>
-            </Tab>
-            <Tab className="flex flex-col text-left">
+            </TabsTrigger>
+            <TabsTrigger value="caching" className="flex flex-col text-left">
               <p className="font-semibold text-md xl:text-lg">Caching</p>
-              <p className="text-xs xl:text-sm ">
+              <p className="text-xs xl:text-sm">
                 Increase performance and save costs
               </p>
-            </Tab>
-          </TabList>
-          <TabPanels>
-            <TabPanel>
-              <DiffHighlight
-                code={`
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="properties">
+            <DiffHighlight
+              code={`
 import { OpenAI } from "openai";
 
 const configuration = {
@@ -72,21 +71,21 @@ const configuration = {
 };
 const openai = new OpenAI(configuration);
 `}
-                language={"typescript"}
-                newLines={[7, 8, 9]}
-                oldLines={[]}
-                minHeight={false}
-              />
-              <p className="mt-4 text-sm text-gray-600">
-                Custom Properties allow you to add metadata to your requests,
-                enabling advanced segmentation and analysis. Tag requests with
-                session IDs, conversation context, or application data for
-                deeper insights into your AI application performance.
-              </p>
-            </TabPanel>
-            <TabPanel>
-              <DiffHighlight
-                code={`
+              language={"typescript"}
+              newLines={[7, 8, 9]}
+              oldLines={[]}
+              minHeight={false}
+            />
+            <p className="mt-4 text-sm text-gray-600">
+              Custom Properties allow you to add metadata to your requests,
+              enabling advanced segmentation and analysis. Tag requests with
+              session IDs, conversation context, or application data for deeper
+              insights into your AI application performance.
+            </p>
+          </TabsContent>
+          <TabsContent value="templating">
+            <DiffHighlight
+              code={`
 import { hpf } from "@helicone/prompts";
  
 const chatCompletion = await openai.chat.completions.create(
@@ -108,22 +107,22 @@ const chatCompletion = await openai.chat.completions.create(
   }
 );
  `}
-                language={"typescript"}
-                newLines={[]}
-                oldLines={[]}
-                minHeight={false}
-              />
-              <p className="mt-4 text-sm text-gray-600">
-                Prompt Templating helps you manage and version your prompts
-                effectively. This feature allows you to create reusable
-                templates, track changes, and optimize your prompts over time.
-                Maintain consistency across your AI interactions and easily
-                experiment with different prompt variations.
-              </p>
-            </TabPanel>
-            <TabPanel>
-              <DiffHighlight
-                code={`
+              language={"typescript"}
+              newLines={[]}
+              oldLines={[]}
+              minHeight={false}
+            />
+            <p className="mt-4 text-sm text-gray-600">
+              Prompt Templating helps you manage and version your prompts
+              effectively. This feature allows you to create reusable templates,
+              track changes, and optimize your prompts over time. Maintain
+              consistency across your AI interactions and easily experiment with
+              different prompt variations.
+            </p>
+          </TabsContent>
+          <TabsContent value="caching">
+            <DiffHighlight
+              code={`
 import { OpenAI } from "openai";
 
 const configuration = {
@@ -136,20 +135,19 @@ const configuration = {
 };
 const openai = new OpenAI(configuration);
 `}
-                language={"typescript"}
-                newLines={[7]}
-                oldLines={[]}
-                minHeight={false}
-              />
-              <p className="mt-4 text-sm text-gray-600">
-                Caching saves you time and money by storing and reusing
-                responses for identical requests. This feature reduces API
-                calls, lowers costs, and improves response times, making your AI
-                application more efficient and cost-effective.
-              </p>
-            </TabPanel>
-          </TabPanels>
-        </TabGroup>
+              language={"typescript"}
+              newLines={[7]}
+              oldLines={[]}
+              minHeight={false}
+            />
+            <p className="mt-4 text-sm text-gray-600">
+              Caching saves you time and money by storing and reusing responses
+              for identical requests. This feature reduces API calls, lowers
+              costs, and improves response times, making your AI application
+              more efficient and cost-effective.
+            </p>
+          </TabsContent>
+        </Tabs>
       </div>
       <Link
         href={"https://helicone.ai/community"}

@@ -19,9 +19,16 @@ import {
   InformationCircleIcon,
 } from "@heroicons/react/24/outline";
 import { useOrg } from "../../../../layout/organizationContext";
-import { Select, SelectItem, TextInput } from "@tremor/react";
+import { Input } from "@/components/ui/input";
 import { useGetOrgMembers } from "../../../../../services/hooks/organizations";
 import { useUser } from "@supabase/auth-helpers-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface ProviderKeySelectorProps {
   variant?: "portal" | "basic";
@@ -276,10 +283,15 @@ const ProviderKeySelector = (props: ProviderKeySelectorProps) => {
           <div className="flex flex-col space-y-8 w-full text-gray-900 dark:text-gray-100">
             <div className="w-full space-y-1.5 text-sm">
               <label htmlFor="api-key">Provider</label>
-              <Select defaultValue="openai" disabled enableClear={false}>
-                <SelectItem value="openai">
-                  {variant === "portal" ? "Custom" : "OpenAI"}
-                </SelectItem>
+              <Select defaultValue="openai" disabled>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select provider" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="openai">
+                    {variant === "portal" ? "Custom" : "OpenAI"}
+                  </SelectItem>
+                </SelectContent>
               </Select>
             </div>
 
@@ -301,7 +313,7 @@ const ProviderKeySelector = (props: ProviderKeySelectorProps) => {
                 <code className="not-italic">authorization</code> header with
                 the <code className="not-italic">Bearer</code> prefix.
               </div>
-              <TextInput
+              <Input
                 type="password"
                 name="provider-key"
                 id="provider-key"
@@ -311,7 +323,7 @@ const ProviderKeySelector = (props: ProviderKeySelectorProps) => {
             </div>
             <div className="w-full space-y-1.5 text-sm">
               <label htmlFor="key-name">Key Name</label>
-              <TextInput
+              <Input
                 name="key-name"
                 id="key-name"
                 required

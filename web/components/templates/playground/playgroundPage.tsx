@@ -13,7 +13,8 @@ import {
   ArrowLeftIcon,
   ArrowRightIcon,
 } from "@heroicons/react/24/outline";
-import { MultiSelect, MultiSelectItem, TextInput } from "@tremor/react";
+import { MultiSelect, MultiSelectItem } from "@tremor/react";
+import { Input } from "@/components/ui/input";
 import ThemedModal from "../../shared/themed/themedModal";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -43,7 +44,6 @@ import Link from "next/link";
 import { Row } from "../../layout/common";
 import { useQuery } from "@tanstack/react-query";
 import { IslandContainer } from "@/components/ui/islandContainer";
-import { Input } from "@/components/ui/input";
 
 import { useTheme } from "next-themes";
 import { Slider } from "@/components/ui/slider";
@@ -148,10 +148,10 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
         actions={
           <div id="toolbar" className="flex flex-row items-center gap-2 w-full">
             <div className="max-w-sm w-[22rem]">
-              <TextInput
+              <Input
                 id="request-id"
                 name="request-id"
-                onValueChange={(e) => setRequestId(e)}
+                onChange={(e) => setRequestId(e.target.value)}
                 value={requestId}
                 placeholder="Enter in a Request ID"
                 className="w-full"
@@ -184,7 +184,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
         {showNewButton && (
           <Button
             onClick={() => setNewPlaygroundOpen(!newPlaygroundOpen)}
-            className="transition-all duration-300 hover:bg-sky-500 dark:hover:bg-sky-900"
+            className="transition-all duration-300"
           >
             {newPlaygroundOpen ? (
               <Row>

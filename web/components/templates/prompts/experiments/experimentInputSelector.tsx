@@ -116,12 +116,12 @@ const ExperimentInputSelector = (props: ExperimentInputSelectorProps) => {
             Select the inputs you want to include in the dataset.
           </p>
 
-          <ul className="flex flex-col items-center space-y-4 w-full pt-4  overflow-y-auto">
+          <ul className="flex flex-col items-center space-y-4 w-full pt-4 px-1 overflow-y-auto">
             {requestIds?.map((request) => (
               <li key={request.id} className="w-full flex items-start">
                 <input
                   type="checkbox"
-                  className="mt-2 mr-2"
+                  className="mt-2 mr-2 rounded border-slate-300 dark:border-slate-700"
                   checked={selectedRequests.some(
                     (req) => req.id === request.id
                   )}

@@ -1,6 +1,11 @@
 import React from "react";
-import { Select, SelectItem } from "@tremor/react";
-import HcBadge from "../../../../ui/hcBadge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../../../ui/select";
 import { clsx } from "../../../../shared/clsx";
 import MarkdownEditor from "../../../../shared/markdownEditor";
 import { ArrowsPointingOutIcon } from "@heroicons/react/24/outline";
@@ -9,6 +14,7 @@ import { Tooltip } from "@mui/material";
 import { Button } from "../../../../ui/button";
 import { Prompt } from "./types";
 import useNotification from "../../../../shared/notification/useNotification";
+import { Badge } from "@/components/ui/badge";
 
 interface PromptVersionSelectorProps {
   prompts: Prompt[];
@@ -68,16 +74,20 @@ const PromptVersionSelector: React.FC<PromptVersionSelectorProps> = ({
               <Select
                 value={searchVersion}
                 onValueChange={(value) => setSearchVersion(value)}
-                enableClear={true}
               >
-                {prompts?.map((prompt) => (
-                  <SelectItem
-                    key={prompt.id}
-                    value={`${prompt.major_version}.${prompt.minor_version}`}
-                  >
-                    {prompt.major_version}.{prompt.minor_version}
-                  </SelectItem>
-                ))}
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Select version" />
+                </SelectTrigger>
+                <SelectContent>
+                  {prompts?.map((prompt) => (
+                    <SelectItem
+                      key={prompt.id}
+                      value={`${prompt.major_version}.${prompt.minor_version}`}
+                    >
+                      {prompt.major_version}.{prompt.minor_version}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
               </Select>
             </div>
           </div>
@@ -130,7 +140,7 @@ const PromptVersionSelector: React.FC<PromptVersionSelectorProps> = ({
                           V{prompt.major_version}.{prompt.minor_version}
                         </span>
                         {isProduction && (
-                          <HcBadge title={"Production"} size={"sm"} />
+                          <Badge variant="secondary">Production</Badge>
                         )}
                       </div>
                     </div>

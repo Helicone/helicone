@@ -1,5 +1,11 @@
 import React from "react";
-import { Select, SelectItem } from "@tremor/react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import ProviderKeyList from "../../../enterprise/portal/id/providerKeyList";
 import SelectRandomDataset from "../selectRandomDataset";
 import { Prompt } from "./types";
@@ -74,11 +80,16 @@ const ExperimentConfigSelector: React.FC<ExperimentConfigSelectorProps> = ({
                     value={selectedDatasetId}
                     onValueChange={(value) => setSelectedDatasetId(value)}
                   >
-                    {datasets.map((dataset) => (
-                      <SelectItem key={dataset.id} value={dataset.id}>
-                        {dataset.name}
-                      </SelectItem>
-                    ))}
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select a dataset" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {datasets.map((dataset) => (
+                        <SelectItem key={dataset.id} value={dataset.id}>
+                          {dataset.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
                   </Select>
                   <Button
                     variant={"secondary"}
@@ -113,15 +124,19 @@ const ExperimentConfigSelector: React.FC<ExperimentConfigSelectorProps> = ({
                 </label>
                 <div className="flex w-full max-w-xs">
                   <Select
-                    placeholder="Select a model"
                     value={selectedModel}
                     onValueChange={(value) => setSelectedModel(value)}
                   >
-                    {PLAYGROUND_MODELS.map((model) => (
-                      <SelectItem key={model.name} value={model.name}>
-                        {model.name}
-                      </SelectItem>
-                    ))}
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select a model" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {PLAYGROUND_MODELS.map((model) => (
+                        <SelectItem key={model.name} value={model.name}>
+                          {model.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
                   </Select>
                 </div>
               </li>
@@ -132,15 +147,19 @@ const ExperimentConfigSelector: React.FC<ExperimentConfigSelectorProps> = ({
                   </label>
                   <div className="flex w-full max-w-36">
                     <Select
-                      placeholder="Select cloud"
                       value={selectedDeployment}
                       onValueChange={(value) => {
                         if (value === "AZURE" || value === "OPENAI")
                           setSelectedDeployment(value);
                       }}
                     >
-                      <SelectItem value={"OPENAI"}>Open AI</SelectItem>
-                      <SelectItem value={"AZURE"}>Azure</SelectItem>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select cloud" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="OPENAI">Open AI</SelectItem>
+                        <SelectItem value="AZURE">Azure</SelectItem>
+                      </SelectContent>
                     </Select>
                   </div>
                 </li>

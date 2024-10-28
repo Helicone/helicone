@@ -3,8 +3,13 @@ import {
   MinusIcon,
   PlusIcon,
 } from "@heroicons/react/24/outline";
-import { Tooltip } from "@mui/material";
-import { TextInput } from "@tremor/react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Input } from "@/components/ui/input";
 import { useEffect, useMemo, useState } from "react";
 import {
   addRequestLabel,
@@ -374,34 +379,44 @@ const RequestRow = (props: {
         <div className="font-semibold text-gray-900 dark:text-gray-100 text-sm items-center flex">
           <div className="flex flex-row items-center space-x-1">
             <span>Add to Dataset</span>
-            <Tooltip title="Add to Dataset" placement="top">
-              <button
-                onClick={() => {
-                  setNewDatasetModalOpen(true);
-                }}
-                className="ml-1.5 p-0.5 shadow-sm bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-md h-fit"
-              >
-                <PlusIcon className="h-3 w-3 text-gray-500" />
-              </button>
-            </Tooltip>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => {
+                      setNewDatasetModalOpen(true);
+                    }}
+                    className="ml-1.5 p-0.5 shadow-sm bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-md h-fit"
+                  >
+                    <PlusIcon className="h-3 w-3 text-gray-500" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>Add to Dataset</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
         </div>
         <div className="font-semibold text-gray-900 dark:text-gray-100 text-sm items-center flex">
           Custom Properties{" "}
-          <Tooltip title="Add a new label" placement="top">
-            <button
-              onClick={() => {
-                setIsAddingLabel(!isAddingLabel);
-              }}
-              className="ml-1.5 p-0.5 shadow-sm bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-md h-fit"
-            >
-              {isAddingLabel ? (
-                <MinusIcon className="h-3 w-3 text-gray-500" />
-              ) : (
-                <PlusIcon className="h-3 w-3 text-gray-500" />
-              )}
-            </button>
-          </Tooltip>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => {
+                    setIsAddingLabel(!isAddingLabel);
+                  }}
+                  className="ml-1.5 p-0.5 shadow-sm bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-md h-fit"
+                >
+                  {isAddingLabel ? (
+                    <MinusIcon className="h-3 w-3 text-gray-500" />
+                  ) : (
+                    <PlusIcon className="h-3 w-3 text-gray-500" />
+                  )}
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>Add a new label</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
         {isAddingLabel && (
           <form
@@ -416,13 +431,13 @@ const RequestRow = (props: {
                 Key
               </label>
               <div className="">
-                <TextInput
+                <Input
                   type="text"
                   name="key"
                   id="key"
                   required
                   className={clsx(
-                    "bg-white dark:bg-black block w-full rounded-md px-2 text-sm text-gray-900 dark:text-gray-100 shadow-sm placeholder:text-gray-400 border border-gray-300 dark:border-gray-700 sm:leading-6"
+                    "bg-white dark:bg-black block w-full rounded-md px-2 text-sm text-gray-900 dark:text-gray-100 shadow-sm placeholder:text-gray-400 border border-gray-300 dark:border-gray-700 sm:leading-6 h-full"
                   )}
                   placeholder={"Key"}
                 />
@@ -436,22 +451,19 @@ const RequestRow = (props: {
                 Value
               </label>
               <div className="">
-                <TextInput
+                <Input
                   type="text"
                   name="value"
                   id="value"
                   required
                   className={clsx(
-                    "bg-white dark:bg-black block w-full rounded-md px-2 text-sm text-gray-900 dark:text-gray-100 shadow-sm placeholder:text-gray-400 border border-gray-300 dark:border-gray-700 sm:leading-6"
+                    "bg-white dark:bg-black block w-full rounded-md px-2 text-sm text-gray-900 dark:text-gray-100 shadow-sm placeholder:text-gray-400 border border-gray-300 dark:border-gray-700 sm:leading-6 h-full"
                   )}
                   placeholder={"Value"}
                 />
               </div>
             </div>
-            <Button
-              size="sm"
-              className="h-fit flex flex-row rounded-md bg-black dark:bg-white px-4 text-xs font-semibold border border-black dark:border-white hover:bg-gray-900 dark:hover:bg-gray-100 text-gray-50 dark:text-gray-900 shadow-sm hover:text-gray-300 dark:hover:text-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
-            >
+            <Button size="sm">
               {isAdding && (
                 <ArrowPathIcon className="w-4 h-4 mr-1.5 animate-spin" />
               )}
@@ -487,20 +499,25 @@ const RequestRow = (props: {
         )}
         <div className="font-semibold text-gray-900 dark:text-gray-100 text-sm items-center flex">
           Scores{" "}
-          <Tooltip title="Add a new score" placement="top">
-            <button
-              onClick={() => {
-                setIsScoresAddingLabel(!isScoresAddingLabel);
-              }}
-              className="ml-1.5 p-0.5 shadow-sm bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-md h-fit"
-            >
-              {isScoresAddingLabel ? (
-                <MinusIcon className="h-3 w-3 text-gray-500" />
-              ) : (
-                <PlusIcon className="h-3 w-3 text-gray-500" />
-              )}
-            </button>
-          </Tooltip>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => {
+                    setIsScoresAddingLabel(!isScoresAddingLabel);
+                  }}
+                  className="ml-1.5 p-0.5 shadow-sm bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-md h-fit"
+                >
+                  {isScoresAddingLabel ? (
+                    <MinusIcon className="h-3 w-3 text-gray-500" />
+                  ) : (
+                    <PlusIcon className="h-3 w-3 text-gray-500" />
+                  )}
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>Add a new score</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
         {isScoresAddingLabel && (
           <form
@@ -515,13 +532,13 @@ const RequestRow = (props: {
                 Key
               </label>
               <div className="">
-                <TextInput
+                <Input
                   type="text"
                   name="key"
                   id="key"
                   required
                   className={clsx(
-                    "bg-white dark:bg-black block w-full rounded-md px-2  text-sm text-gray-900 dark:text-gray-100 shadow-sm placeholder:text-gray-400 border border-gray-300 dark:border-gray-700 sm:leading-6"
+                    "bg-white dark:bg-black block w-full rounded-md px-2  text-sm text-gray-900 dark:text-gray-100 shadow-sm placeholder:text-gray-400 border border-gray-300 dark:border-gray-700 sm:leading-6 h-full"
                   )}
                   placeholder={"Key"}
                 />
@@ -535,24 +552,20 @@ const RequestRow = (props: {
                 Value
               </label>
               <div className="">
-                <TextInput
+                <Input
                   //@ts-ignore
                   type="text"
                   name="value"
                   id="value"
                   required
                   className={clsx(
-                    "bg-white dark:bg-black block w-full rounded-md px-2  text-sm text-gray-900 dark:text-gray-100 shadow-sm placeholder:text-gray-400 border border-gray-300 dark:border-gray-700 sm:leading-6"
+                    "bg-white dark:bg-black block w-full rounded-md px-2  text-sm text-gray-900 dark:text-gray-100 shadow-sm placeholder:text-gray-400 border border-gray-300 dark:border-gray-700 sm:leading-6 h-full"
                   )}
                   placeholder={"Value"}
                 />
               </div>
             </div>
-            <Button
-              size="sm"
-              type="submit"
-              className="h-fit flex flex-row rounded-md bg-black dark:bg-white px-4 text-xs font-semibold border border-black dark:border-white hover:bg-gray-900 dark:hover:bg-gray-100 text-gray-50 dark:text-gray-900 shadow-sm hover:text-gray-300 dark:hover:text-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
-            >
+            <Button size="sm" type="submit">
               {isAdding && (
                 <ArrowPathIcon className="w-4 h-4 mr-1.5 animate-spin" />
               )}

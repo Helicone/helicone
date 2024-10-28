@@ -17,7 +17,7 @@ import {
 import { ScrollArea } from "../../ui/scroll-area";
 import { Checkbox } from "../../ui/checkbox";
 import { Button } from "@/components/ui/button";
-import { TextInput } from "@tremor/react";
+import { Input } from "@/components/ui/input";
 import { Label } from "../../ui/label";
 
 interface NewDatasetProps {
@@ -179,7 +179,7 @@ export default function NewDataset({
         {selectedOption === "new" && (
           <div className="pl-7">
             <Label htmlFor="new-dataset-name">Dataset name</Label>
-            <TextInput
+            <Input
               id="new-dataset-name"
               value={newDatasetName}
               onChange={(e) => setNewDatasetName(e.target.value)}

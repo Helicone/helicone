@@ -9,7 +9,6 @@ import {
   Square2StackIcon,
   TableCellsIcon,
 } from "@heroicons/react/24/outline";
-import { TextInput } from "@tremor/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useCallback, useMemo, useRef, useState } from "react";
@@ -265,7 +264,7 @@ const PromptsPage = (props: PromptsPageProps) => {
                                 >
                                   Name
                                 </Label>
-                                <TextInput
+                                <Input
                                   id="new-prompt-name"
                                   value={newPromptName}
                                   onChange={(e) =>
