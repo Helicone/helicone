@@ -57,7 +57,7 @@ import { ScrollArea } from "../../../../ui/scroll-area";
 import clsx from "clsx";
 import ScoresEvaluatorsConfig from "./scores/ScoresEvaluatorsConfig";
 import { ExperimentRandomInputSelector } from "../experimentRandomInputSelector";
-import { placeAssetIdValues } from '../../../../../services/lib/requestTraverseHelper';
+import { placeAssetIdValues } from "../../../../../services/lib/requestTraverseHelper";
 
 interface ExperimentTableProps {
   promptSubversionId?: string;
@@ -421,36 +421,36 @@ export function ExperimentTable({
     }
 
     // Now construct the rowData array
-    const newRowData = Array.from(rowIndexToRow.values()).map((row) => {
-      console.log("row", row);
-      // Process experiment column data
-      Object.entries(row).forEach(([columnId, cellData]) => {
-        if (
-          experimentTableData.columns.some(
-            (col) => col.id === columnId && col.columnType === "experiment"
-          ) &&
-          cellData?.requestId
-        ) {
-          const requestData = requestDataMap.get(cellData.requestId);
-          if (requestData) {
-            // Set the value in the row based on requestData
-            row[columnId] = requestData.response_body; // Adjust according to your data structure
-          } else {
-            row[columnId] = null; // Or any default value
-          }
-        }
-      });
-
-      // Find existing row to preserve isLoading state
-      const existingRow = rowData.find(
-        (existingRow) => existingRow.id === row.id
-      );
-
-      return {
-        ...row,
-        isLoading: existingRow?.isLoading || {},
-      };
-    });
+    const newRowData = await Promise.all(
+      Array.from(rowIndexToRow.values()).map(async (row) => {
+        console.log("row", row);
+        // Process experiment column data
+        await Promise.all(
+          Object.entries(row).map(async ([columnId, cellData]) => {
+            if (
+              experimentTableData.columns.some(
+                (col) => col.id === columnId && col.columnType === "experiment"
+              ) &&
+              cellData?.requestId
+            ) {
+              const requestData = requestDataMap.get(cellData.requestId);
+              if (requestData) {
+                // Fetch the response body
+                const responseBody = await fetchRequestResponseBody(
+                  requestData
+                );
+                console.log("responseBody", responseBody);
+                // Set the value in the row based on the fetched response body
+                row[columnId] = responseBody; // Adjust according to your data structure
+              } else {
+                row[columnId] = null; // Or any default value
+              }
+            }
+          })
+        );
+        return row;
+      })
+    );
 
     // Sort rows by rowIndex
     newRowData.sort((a, b) => a.rowIndex - b.rowIndex);
@@ -964,6 +964,7 @@ export function ExperimentTable({
               handleRunHypothesis,
               loadingStates,
               wrapText,
+              columnId: column.id,
             },
             headerComponent: CustomHeaderComponent,
             headerComponentParams: {

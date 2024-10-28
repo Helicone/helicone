@@ -18,18 +18,11 @@ export const HypothesisCellRenderer: React.FC<any> = (params) => {
   const [showPromptPlayground, setShowPromptPlayground] = useState(false);
 
   // Parse the response data
-  const responseString = data[hypothesisId];
-  let parsedResponseData: any = {};
+  console.log("hypothesisId", colDef);
+  const parsedResponseData = data[colDef.cellRendererParams.columnId];
 
-  try {
-    parsedResponseData = JSON.parse(responseString);
-  } catch (error) {
-    console.error("Failed to parse response data:", error);
-  }
-
-  // Extract the content to display in the cell
   const content =
-    parsedResponseData?.body?.choices?.[0]?.message?.content || "";
+    parsedResponseData?.response?.choices?.[0]?.message?.content || "";
 
   // Check if content is longer than 100 characters
   const isContentLong = content.length > 100;
