@@ -296,108 +296,77 @@ export function ExperimentTable({
   const inputColumnFields = Array.from(inputKeys);
 
   // Function to update rowData based on fetched data
-  const updateRowData = useCallback(
-    (experimentData: any, inputRecordsData: any[]) => {
-      setIsDataLoading(true);
-      // Remove code that updates inputKeys
-      // const newInputKeys = new Set<string>();
-      // if (inputRecordsData && inputRecordsData.length > 0) {
-      //   inputRecordsData.forEach((row) => {
-      //     Object.keys(row.inputs).forEach((key) => newInputKeys.add(key));
-      //   });
-      // }
-      // if (newInputKeys.size === 0) {
-      //   newInputKeys.add("Input 1");
-      // }
-      // setInputKeys(newInputKeys);
+  const updateRowData = useCallback(() => {
+    setIsDataLoading(true);
 
-      const newRowData = inputRecordsData.map((row) => {
-        const hypothesisRowData: Record<string, string> = {};
+    if (!experimentTableData) {
+      setRowData([]);
+      setIsDataLoading(false);
+      return;
+    }
 
-        // Always populate "Messages" and "Original" columns
-        hypothesisRowData["messages"] = JSON.stringify(
-          //@ts-ignore
-          row?.request_body?.messages || {},
-          null,
-          2
-        );
-        let content = row?.response_body?.choices?.[0]?.message?.content;
+    // Build a mapping of rowIndex to row object
+    const rowIndexToRow = new Map<number, any>();
 
-        if (!content) {
-          const toolCalls =
-            row?.response_body?.choices?.[0]?.message?.tool_calls;
-          if (toolCalls && toolCalls.length > 0) {
-            const firstToolCall = toolCalls[0];
-            const argumentsString = firstToolCall?.function?.arguments || "";
+    // For each column
+    experimentTableData.columns.forEach((column) => {
+      const columnId = column.id;
 
-            try {
-              const argumentsObj = JSON.parse(argumentsString);
-              content = argumentsObj.content || "";
-            } catch (error) {
-              console.error("Failed to parse tool call arguments:", error);
-              content = argumentsString;
-            }
-          } else {
-            content = "";
-          }
+      column.cells.forEach((cell) => {
+        const rowIndex = cell.rowIndex;
+        let row = rowIndexToRow.get(rowIndex);
+        if (!row) {
+          row = { id: `row-${rowIndex}`, rowIndex };
+          rowIndexToRow.set(rowIndex, row);
         }
 
-        hypothesisRowData["original"] = content;
+        // Set the value for the column in the row
+        row[columnId] = cell.value;
 
-        // Add data for other hypotheses if they exist
-        experimentData.hypotheses.forEach((hypothesis: any) => {
-          const hypothesisRun = hypothesis.runs?.find(
-            (r: any) => r.datasetRowId === row.dataset_row_id
-          );
-          if (hypothesisRun) {
-            hypothesisRowData[hypothesis.id] = JSON.stringify(
-              hypothesisRun.response,
-              null,
-              2
-            );
-          }
-        });
-
-        // Find existing row to preserve isLoading state
-        const existingRow = rowData.find(
-          (existingRow) => existingRow.dataset_row_id === row.dataset_row_id
-        );
-
-        return {
-          id: row.dataset_row_id,
-          dataset_row_id: row.dataset_row_id,
-          // Spread inputs to individual fields
-          ...row.inputs,
-          ...hypothesisRowData,
-          isLoading: existingRow?.isLoading || {}, // Preserve isLoading state
-        };
+        // Store requestId if needed
+        if (cell.requestId) {
+          row.requestId = cell.requestId;
+        }
       });
+    });
 
-      setRowData(newRowData);
-      setIsDataLoading(false);
-    },
-    [experimentData, inputRecordsData, rowData]
-  );
+    // Now construct the rowData array
+    const newRowData = Array.from(rowIndexToRow.values()).map((row) => {
+      // Find existing row to preserve isLoading state
+      const existingRow = rowData.find(
+        (existingRow) => existingRow.id === row.id
+      );
+
+      return {
+        ...row,
+        isLoading: existingRow?.isLoading || {},
+      };
+    });
+
+    // Sort rows by rowIndex
+    newRowData.sort((a, b) => a.rowIndex - b.rowIndex);
+
+    setRowData(newRowData);
+    setIsDataLoading(false);
+  }, [experimentTableData, rowData]);
 
   // Modify the useEffect that updates rowData
   useEffect(() => {
-    if (experimentData && inputRecordsData) {
-      updateRowData(experimentData, inputRecordsData);
+    if (experimentTableData) {
+      updateRowData();
     } else if (!experimentId) {
       // If there's no experimentId, set a default empty row
       const defaultInputKey = "Input 1";
-      //setInputKeys(new Set([defaultInputKey]));
       setRowData([
         {
           id: `temp-${Date.now()}`,
-          dataset_row_id: null,
           [defaultInputKey]: "",
           isLoading: {},
         },
       ]);
       setIsDataLoading(false); // Ensure we're not in a loading state
     }
-  }, [experimentData, inputRecordsData, experimentId]);
+  }, [experimentTableData, experimentId]);
 
   // Add a new useEffect to handle initial loading state
   useEffect(() => {

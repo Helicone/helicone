@@ -360,11 +360,12 @@ export type Database = {
           },
         ]
       }
-      experiment_cell_value: {
+      experiment_cell: {
         Row: {
           column_id: string
           created_at: string
           id: string
+          metadata: Json | null
           request_id: string | null
           row_index: number
           value: string | null
@@ -373,6 +374,7 @@ export type Database = {
           column_id: string
           created_at?: string
           id?: string
+          metadata?: Json | null
           request_id?: string | null
           row_index: number
           value?: string | null
@@ -381,13 +383,14 @@ export type Database = {
           column_id?: string
           created_at?: string
           id?: string
+          metadata?: Json | null
           request_id?: string | null
           row_index?: number
           value?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "experiment_cell_value_column_id_fkey"
+            foreignKeyName: "experiment_cell_column_id_fkey"
             columns: ["column_id"]
             isOneToOne: false
             referencedRelation: "experiment_column"
@@ -400,7 +403,6 @@ export type Database = {
           column_name: string
           column_type: string
           created_at: string
-          hypothesis_id: string | null
           id: string
           metadata: Json | null
           table_id: string
@@ -409,7 +411,6 @@ export type Database = {
           column_name: string
           column_type: string
           created_at?: string
-          hypothesis_id?: string | null
           id?: string
           metadata?: Json | null
           table_id: string
@@ -418,7 +419,6 @@ export type Database = {
           column_name?: string
           column_type?: string
           created_at?: string
-          hypothesis_id?: string | null
           id?: string
           metadata?: Json | null
           table_id?: string
@@ -474,6 +474,7 @@ export type Database = {
           created_at: string
           experiment_id: string
           id: string
+          metadata: Json | null
           name: string
           organization_id: string
         }
@@ -481,6 +482,7 @@ export type Database = {
           created_at?: string
           experiment_id: string
           id?: string
+          metadata?: Json | null
           name: string
           organization_id: string
         }
@@ -488,6 +490,7 @@ export type Database = {
           created_at?: string
           experiment_id?: string
           id?: string
+          metadata?: Json | null
           name?: string
           organization_id?: string
         }

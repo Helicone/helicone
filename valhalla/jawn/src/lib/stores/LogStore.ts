@@ -100,7 +100,7 @@ response_body_vector = EXCLUDED.response_body_vector`;
 
 const experimentCellValueColumns = new pgp.helpers.ColumnSet(
   ["column_id", "request_id", "row_index", "value"],
-  { table: "experiment_cell_value" }
+  { table: "experiment_cell" }
 );
 
 const onConflictExperimentCellValue =

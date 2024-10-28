@@ -473,7 +473,7 @@ export class ExperimentStore extends BaseStore {
     value: string | null
   ): Promise<Result<{ id: string }, string>> {
     const result = await supabaseServer.client
-      .from("experiment_cell_value")
+      .from("experiment_cell")
       .insert({
         column_id: columnId,
         row_index: rowIndex,
@@ -548,7 +548,7 @@ export class ExperimentStore extends BaseStore {
     const query = `
       WITH max_row_index AS (
         SELECT COALESCE(MAX(row_index), -1) as max_index
-        FROM experiment_cell_value ecv
+        FROM experiment_cell ecv
         JOIN experiment_column ec ON ec.id = ecv.column_id
         JOIN experiment_table et ON et.id = ec.table_id
         WHERE et.experiment_id = $1
@@ -569,16 +569,33 @@ export class ExperimentStore extends BaseStore {
                   jsonb_build_object(
                     'rowIndex', row_number,
                     'requestId', (
-                      SELECT ecv.request_id
-                      FROM experiment_cell_value ecv
+                      SELECT jsonb_build_object(
+                        'requestId', ecv.request_id,
+                        'value', ecv.value
+                      )
+                      FROM experiment_cell ecv
                       WHERE ecv.column_id = ec.id
                       AND ecv.row_index = row_number
-                    ),
-                    'value', NULL
+                    ) -> 'requestId',
+                    'value', (
+                      SELECT jsonb_build_object(
+                        'requestId', ecv.request_id,
+                        'value', ecv.value
+                      )
+                      FROM experiment_cell ecv
+                      WHERE ecv.column_id = ec.id
+                      AND ecv.row_index = row_number
+                    ) -> 'value'
                   )
                   ORDER BY row_number
                 )
                 FROM generate_series(0, (SELECT max_index FROM max_row_index)) row_number
+                LEFT JOIN LATERAL (
+                  SELECT ecv.request_id, ecv.value
+                  FROM experiment_cell ecv
+                  WHERE ecv.column_id = ec.id
+                  AND ecv.row_index = row_number
+                ) cell_data ON true
               )
             )
             ORDER BY 
