@@ -22,7 +22,6 @@ import ThemedModal from "../../shared/themed/themedModal";
 import NewDataset from "../datasets/NewDataset";
 import { getUSDateFromString } from "@/components/shared/utils/utils";
 import { formatNumber } from "../../shared/utils/formatNumber";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
