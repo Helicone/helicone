@@ -233,7 +233,7 @@ async function processExample(example: (typeof examples)[0]) {
 
 async function main() {
   await Promise.all(
-    examples.map(async (example) => {
+    examples.slice(0, 3).map(async (example) => {
       processExample(example);
     })
   );
