@@ -283,7 +283,13 @@ export const OriginalOutputCellRenderer: React.FC<any> = (params) => {
                 className="w-6 h-6 p-0 border-slate-200 border rounded-md bg-slate-50 text-slate-500"
                 onClick={(e) => {
                   e.stopPropagation();
-                  params.handleRunHypothesis("original", [data.dataset_row_id]);
+                  params.handleRunHypothesis("original", [
+                    {
+                      rowIndex: params.node.rowIndex,
+                      datasetRowId: data.dataset_row_id,
+                      columnId: colDef.field,
+                    },
+                  ]);
                 }}
               >
                 <PlayIcon className="w-4 h-4" />

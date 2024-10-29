@@ -318,7 +318,10 @@ export function ExperimentTable({
     experimentTableData.columns.forEach((column) => {
       const columnId = column.id;
 
-      if (column.columnType === "experiment") {
+      if (
+        column.columnType === "experiment" ||
+        column.columnType === "original"
+      ) {
         // Process experiment columns
         column.cells.forEach((cell) => {
           const rowIndex = cell.rowIndex;
@@ -872,7 +875,7 @@ export function ExperimentTable({
         });
       } else if (column.columnType === "output") {
         columns.push({
-          field: "original",
+          field: column.id,
           headerName: "Original",
           width: 200,
           headerComponent: CustomHeaderComponent,
@@ -887,8 +890,11 @@ export function ExperimentTable({
           cellRenderer: OriginalOutputCellRenderer,
           cellRendererParams: {
             prompt: promptVersionTemplate,
+            hypothesisId: column.metadata?.hypothesisId,
             handleRunHypothesis,
+            loadingStates,
             wrapText,
+            columnId: column.id,
           },
           cellStyle: {
             verticalAlign: "middle",
