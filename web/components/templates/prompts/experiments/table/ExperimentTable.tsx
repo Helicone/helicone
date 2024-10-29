@@ -320,7 +320,7 @@ export function ExperimentTable({
 
       if (
         column.columnType === "experiment" ||
-        column.columnType === "original"
+        column.columnType === "output"
       ) {
         // Process experiment columns
         column.cells.forEach((cell) => {
@@ -386,7 +386,10 @@ export function ExperimentTable({
           Object.entries(row).map(async ([columnId, cellData]) => {
             if (
               experimentTableData.columns.some(
-                (col) => col.id === columnId && col.columnType === "experiment"
+                (col) =>
+                  col.id === columnId &&
+                  (col.columnType === "experiment" ||
+                    col.columnType === "output")
               ) &&
               (cellData as any)?.requestId
             ) {

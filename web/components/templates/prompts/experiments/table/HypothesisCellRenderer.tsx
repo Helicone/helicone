@@ -239,7 +239,7 @@ export const OriginalOutputCellRenderer: React.FC<any> = (params) => {
 
   const content =
     parsedResponseData?.response?.choices?.[0]?.message?.content || "";
-  console.log("content", content);
+  console.log("content", data);
   const parsedData = data.messages;
   const handleCellClick = (e: React.MouseEvent) => {
     e.stopPropagation();
