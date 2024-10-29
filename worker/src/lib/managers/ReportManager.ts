@@ -175,7 +175,6 @@ export class ReportManager {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     slack_json: Record<string, any>;
   }> {
-    const text = `This is a test report`;
     const subject = `Report`;
 
     const ONE_WEEK_MS = 1000 * 60 * 60 * 24 * 7;
@@ -238,7 +237,7 @@ export class ReportManager {
                     },
                     {
                       type: "text",
-                      text: `$${cost.data?.value} (`,
+                      text: `$${cost.data?.value.toFixed(2)} (`,
                     },
                     {
                       type: "emoji",
@@ -271,7 +270,7 @@ export class ReportManager {
                     },
                     {
                       type: "text",
-                      text: `${numberOfRequests.data?.value} (`,
+                      text: `${numberOfRequests.data?.value.toFixed(2)} (`,
                     },
                     {
                       type: "emoji",
@@ -304,7 +303,7 @@ export class ReportManager {
                     },
                     {
                       type: "text",
-                      text: `${errorRate.data?.value} (`,
+                      text: `${errorRate.data?.value.toFixed(2)} (`,
                     },
                     {
                       type: "emoji",
@@ -338,7 +337,7 @@ export class ReportManager {
                     },
                     {
                       type: "text",
-                      text: `${numberOfUsers.data?.value} (`,
+                      text: `${numberOfUsers.data?.value.toFixed(2)} (`,
                     },
                     {
                       type: "emoji",
@@ -371,7 +370,7 @@ export class ReportManager {
                     },
                     {
                       type: "text",
-                      text: `${numberOfThreats.data?.value} (`,
+                      text: `${numberOfThreats.data?.value.toFixed(2)} (`,
                     },
                     {
                       type: "emoji",
@@ -404,7 +403,7 @@ export class ReportManager {
                     },
                     {
                       type: "text",
-                      text: `${numberOfSessions.data?.value} (`,
+                      text: `${numberOfSessions.data?.value.toFixed(2)} (`,
                     },
                     {
                       type: "emoji",
@@ -437,7 +436,7 @@ export class ReportManager {
                     },
                     {
                       type: "text",
-                      text: `$${avgCostOfSessions.data?.value} (`,
+                      text: `$${avgCostOfSessions.data?.value.toFixed(2)} (`,
                     },
                     {
                       type: "emoji",
@@ -548,14 +547,16 @@ export class ReportManager {
                               <tr style="vertical-align:middle;" valign="middle">
                                 <td class="content">
                                   <ul>
-                                    <li>Cost: $${cost.data?.value} (${
+                                    <li>Cost: $${cost.data?.value.toFixed(
+                                      2
+                                    )} (${
       this.formatChangeData(cost.data?.value || 0, cost.data?.previous || 0)[1]
     } by ${
       this.formatChangeData(cost.data?.value || 0, cost.data?.previous || 0)[0]
     })</li>
-                                    <li>Requests: ${
-                                      numberOfRequests.data?.value
-                                    } (${
+                                    <li>Requests: ${numberOfRequests.data?.value.toFixed(
+                                      2
+                                    )} (${
       this.formatChangeData(
         numberOfRequests.data?.value || 0,
         numberOfRequests.data?.previous || 0
@@ -566,7 +567,9 @@ export class ReportManager {
         numberOfRequests.data?.previous || 0
       )[0]
     })</li>
-                                    <li>Error Rate: ${errorRate.data?.value} (${
+                                    <li>Error Rate: ${errorRate.data?.value.toFixed(
+                                      2
+                                    )} (${
       this.formatChangeData(
         errorRate.data?.value || 0,
         errorRate.data?.previous || 0,
@@ -578,7 +581,9 @@ export class ReportManager {
         errorRate.data?.previous || 0
       )[0]
     })</li>
-                                    <li>Users: ${numberOfUsers.data?.value} (${
+                                    <li>Users: ${numberOfUsers.data?.value.toFixed(
+                                      2
+                                    )} (${
       this.formatChangeData(
         numberOfUsers.data?.value || 0,
         numberOfUsers.data?.previous || 0
@@ -589,9 +594,9 @@ export class ReportManager {
         numberOfUsers.data?.previous || 0
       )[0]
     })</li>
-                                    <li>Threats: ${
-                                      numberOfThreats.data?.value
-                                    } (${
+                                    <li>Threats: ${numberOfThreats.data?.value.toFixed(
+                                      2
+                                    )} (${
       this.formatChangeData(
         numberOfThreats.data?.value || 0,
         numberOfThreats.data?.previous || 0
@@ -602,7 +607,7 @@ export class ReportManager {
         numberOfThreats.data?.previous || 0
       )[0]
     })</li>
-    <li>Sessions: ${numberOfSessions.data?.value} (${
+    <li>Sessions: ${numberOfSessions.data?.value.toFixed(2)} (${
       this.formatChangeData(
         numberOfSessions.data?.value || 0,
         numberOfSessions.data?.previous || 0
@@ -613,7 +618,7 @@ export class ReportManager {
         numberOfSessions.data?.previous || 0
       )[0]
     })</li>
-    <li>Avg Cost of Sessions: $${avgCostOfSessions.data?.value} (${
+    <li>Avg Cost of Sessions: $${avgCostOfSessions.data?.value.toFixed(2)} (${
       this.formatChangeData(
         avgCostOfSessions.data?.value || 0,
         avgCostOfSessions.data?.previous || 0
@@ -676,6 +681,80 @@ export class ReportManager {
         </div>
       </body>
     </html>`;
+
+    const text = `Here's a summary of your usage this week
+      - Cost: $${cost.data?.value.toFixed(2)} (${
+      this.formatChangeData(cost.data?.value || 0, cost.data?.previous || 0)[1]
+    } by ${
+      this.formatChangeData(cost.data?.value || 0, cost.data?.previous || 0)[0]
+    })</li>
+    - Requests: ${numberOfRequests.data?.value.toFixed(2)} (${
+      this.formatChangeData(
+        numberOfRequests.data?.value || 0,
+        numberOfRequests.data?.previous || 0
+      )[1]
+    } by ${
+      this.formatChangeData(
+        numberOfRequests.data?.value || 0,
+        numberOfRequests.data?.previous || 0
+      )[0]
+    })</li>
+    - Error Rate: ${errorRate.data?.value.toFixed(2)} (${
+      this.formatChangeData(
+        errorRate.data?.value || 0,
+        errorRate.data?.previous || 0,
+        true
+      )[1]
+    } by ${
+      this.formatChangeData(
+        errorRate.data?.value || 0,
+        errorRate.data?.previous || 0
+      )[0]
+    })</li>
+    - Users: ${numberOfUsers.data?.value.toFixed(2)} (${
+      this.formatChangeData(
+        numberOfUsers.data?.value || 0,
+        numberOfUsers.data?.previous || 0
+      )[1]
+    } by ${
+      this.formatChangeData(
+        numberOfUsers.data?.value || 0,
+        numberOfUsers.data?.previous || 0
+      )[0]
+    })
+    - Threats: ${numberOfThreats.data?.value.toFixed(2)} (${
+      this.formatChangeData(
+        numberOfThreats.data?.value || 0,
+        numberOfThreats.data?.previous || 0
+      )[1]
+    } by ${
+      this.formatChangeData(
+        numberOfThreats.data?.value || 0,
+        numberOfThreats.data?.previous || 0
+      )[0]
+    })
+    - Sessions: ${numberOfSessions.data?.value.toFixed(2)} (${
+      this.formatChangeData(
+        numberOfSessions.data?.value || 0,
+        numberOfSessions.data?.previous || 0
+      )[1]
+    } by ${
+      this.formatChangeData(
+        numberOfSessions.data?.value || 0,
+        numberOfSessions.data?.previous || 0
+      )[0]
+    })
+    - Avg Cost of Sessions: $${avgCostOfSessions.data?.value.toFixed(2)} (${
+      this.formatChangeData(
+        avgCostOfSessions.data?.value || 0,
+        avgCostOfSessions.data?.previous || 0
+      )[1]
+    } by ${
+      this.formatChangeData(
+        avgCostOfSessions.data?.value || 0,
+        avgCostOfSessions.data?.previous || 0
+      )[0]
+    })`;
 
     return { subject, text, html, slack_json };
   }
