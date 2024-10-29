@@ -169,6 +169,7 @@ export class ExperimentDatasetController extends Controller {
       rowIndex: number;
       experimentTableId: string;
       sourceRequest?: string;
+      originalColumnId?: string;
     },
     @Request() request: JawnAuthenticatedRequest,
     @Path() datasetId: string,
@@ -197,17 +198,31 @@ export class ExperimentDatasetController extends Controller {
     );
 
     const experimentManager = new ExperimentManager(request.authParams);
+    const newCells: {
+      columnId: string;
+      rowIndex: number;
+      value: string | null;
+      metadata?: Record<string, any>;
+    }[] = Object.entries(requestBody.inputs).map(
+      ([k, { value, columnId, rowIndex }]) => ({
+        columnId,
+        rowIndex,
+        value,
+        metadata: {
+          datasetRowId: datasetRowResult.data,
+        },
+      })
+    );
+    newCells.push({
+      columnId: requestBody.originalColumnId ?? "",
+      rowIndex: requestBody.rowIndex,
+      value: null,
+      metadata: {
+        datasetRowId: datasetRowResult.data,
+      },
+    });
     const experimentTableCell = await experimentManager.createExperimentCells({
-      cells: Object.entries(requestBody.inputs).map(
-        ([k, { value, columnId, rowIndex }]) => ({
-          columnId,
-          rowIndex,
-          value,
-          metadata: {
-            datasetRowId: datasetRowResult.data,
-          },
-        })
-      ),
+      cells: newCells,
     });
 
     if (experimentTableCell.error || !experimentTableCell.data) {

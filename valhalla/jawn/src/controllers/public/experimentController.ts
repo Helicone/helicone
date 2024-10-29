@@ -12,7 +12,7 @@ import {
   Tags,
 } from "tsoa";
 import { supabaseServer } from "../../lib/db/supabase";
-import { run } from "../../lib/experiment/run";
+import { run, runOriginalExperiment } from "../../lib/experiment/run";
 import { FilterLeafSubset } from "../../lib/shared/filters/filterDefs";
 import { Result, err, ok } from "../../lib/shared/result";
 import {
@@ -351,12 +351,6 @@ export class ExperimentController extends Controller {
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<ExperimentRun, string>> {
     const experimentManager = new ExperimentManager(request.authParams);
-    if (requestBody.hypothesisId === "original") {
-      return experimentManager.runOriginalExperiment({
-        experimentId: requestBody.experimentId,
-        datasetRowIds: requestBody.cells.map((cell) => cell.datasetRowId),
-      });
-    }
 
     const result = await experimentManager.getExperimentById(
       requestBody.experimentId,
@@ -373,16 +367,6 @@ export class ExperimentController extends Controller {
     }
 
     const experiment = result.data;
-
-    const hypothesis = experiment.hypotheses.find(
-      (hypothesis) => hypothesis.id === requestBody.hypothesisId
-    );
-
-    if (!hypothesis) {
-      this.setStatus(404);
-      console.error("Hypothesis not found");
-      return err("Hypothesis not found");
-    }
 
     const datasetRows = await experimentManager.getDatasetRowsByIds({
       datasetRowIds: requestBody.cells.map((cell) => cell.datasetRowId),
@@ -412,6 +396,21 @@ export class ExperimentController extends Controller {
     });
 
     experiment.dataset.rows = newDatasetRows;
+
+    if (requestBody.hypothesisId === "original") {
+      return runOriginalExperiment(experiment, newDatasetRows);
+    }
+
+    const hypothesis = experiment.hypotheses.find(
+      (hypothesis) => hypothesis.id === requestBody.hypothesisId
+    );
+
+    if (!hypothesis) {
+      this.setStatus(404);
+      console.error("Hypothesis not found");
+      return err("Hypothesis not found");
+    }
+
     experiment.hypotheses = [hypothesis];
 
     const runResult = await run(experiment);

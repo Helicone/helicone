@@ -235,7 +235,11 @@ export const OriginalOutputCellRenderer: React.FC<any> = (params) => {
   const hypothesisId = colDef.field;
   const inputKeys = context.inputKeys;
   const [showPromptPlayground, setShowPromptPlayground] = useState(false);
-  const content = data[hypothesisId];
+  const parsedResponseData = data[colDef.cellRendererParams.columnId];
+
+  const content =
+    parsedResponseData?.response?.choices?.[0]?.message?.content || "";
+  console.log("content", content);
   const parsedData = data.messages;
   const handleCellClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -254,7 +258,7 @@ export const OriginalOutputCellRenderer: React.FC<any> = (params) => {
     };
   };
 
-  if (data.isLoading?.[hypothesisId] && !content) {
+  if (data.isLoading?.[hypothesisId]) {
     return (
       <div className="w-full h-full whitespace-pre-wrap flex flex-row items-center space-x-2 pl-4">
         <span className="animate-ping inline-flex rounded-full bg-green-700 h-2 w-2"></span>

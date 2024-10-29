@@ -728,6 +728,10 @@ export function ExperimentTable({
               inputs: currentRowInputs,
               rowIndex: rowIndex,
               experimentTableId: experimentTableData?.id ?? "",
+              originalColumnId:
+                experimentTableData?.columns.find(
+                  (column) => column.columnType === "output"
+                )?.id ?? undefined,
             },
             params: {
               path: {
