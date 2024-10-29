@@ -48,7 +48,7 @@ const TreeView: React.FC<TreeViewProps> = ({
   return (
     <>
       <Col className="h-full">
-        <Col className="gap-1 items-start sticky top-0 z-[100]">
+        <Col className="gap-1 items-start sticky top-0 z-[1]">
           {showSpan && (
             <div className="bg-white w-full relative dark:bg-slate-900 border-slate-200 border-t">
               <TraceSpan
