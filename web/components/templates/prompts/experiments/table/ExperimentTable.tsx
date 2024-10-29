@@ -71,7 +71,7 @@ export function ExperimentTable({
   const org = useOrg();
   const orgId = org?.currentOrg?.id;
   const jawn = useJawnClient();
-  const [isDataLoading, setIsDataLoading] = useState(false);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
 
   const [wrapText, setWrapText] = useState(false);
   const [columnView, setColumnView] = useState<"all" | "inputs" | "outputs">(
@@ -305,7 +305,6 @@ export function ExperimentTable({
   const updateRowData = useCallback(async () => {
     if (!experimentTableData) {
       setRowData([]);
-      setIsDataLoading(false);
       return;
     }
 
@@ -421,13 +420,14 @@ export function ExperimentTable({
     newRowData.sort((a, b) => a.rowIndex - b.rowIndex);
 
     setRowData(newRowData);
-    setIsDataLoading(false);
   }, [experimentTableData, getRequestDataByIds]);
 
   // Modify the useEffect that updates rowData
   useEffect(() => {
     if (experimentTableData) {
-      updateRowData();
+      updateRowData().then(() => {
+        setIsInitialLoading(false);
+      });
     } else if (!experimentId) {
       // If there's no experimentId, set a default empty row
       const defaultInputKey = "Input 1";
@@ -438,14 +438,14 @@ export function ExperimentTable({
           isLoading: {},
         },
       ]);
-      setIsDataLoading(false); // Ensure we're not in a loading state
+      setIsInitialLoading(false); // Ensure we're not in a loading state
     }
   }, [experimentTableData, experimentId]);
 
   // Add a new useEffect to handle initial loading state
   useEffect(() => {
     if (!experimentId) {
-      setIsDataLoading(false);
+      setIsInitialLoading(false);
     }
   }, [experimentId]);
 
@@ -1414,7 +1414,7 @@ export function ExperimentTable({
     );
   };
 
-  if (isDataLoading) {
+  if (isInitialLoading) {
     return (
       <div className="flex items-center justify-center h-screen flex-col">
         <LoadingAnimation />
