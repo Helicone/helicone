@@ -6,7 +6,6 @@ import { useGetRequests } from "../../services/hooks/requests";
 
 import { sessionFromHeliconeRequests } from "../../lib/sessions/sessionsFromHeliconeTequests";
 import { SessionContent } from "../../components/templates/sessions/sessionId/SessionContent";
-import { useSessions } from "@/services/hooks/sessions";
 
 const SessionDetail = ({ session_id }: { session_id: string }) => {
   const ThreeMonthsAgo = useMemo(() => {
