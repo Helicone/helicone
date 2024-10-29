@@ -71,7 +71,7 @@ export function ExperimentTable({
   const org = useOrg();
   const orgId = org?.currentOrg?.id;
   const jawn = useJawnClient();
-  const [isDataLoading, setIsDataLoading] = useState(true);
+  const [isDataLoading, setIsDataLoading] = useState(false);
 
   const [wrapText, setWrapText] = useState(false);
   const [columnView, setColumnView] = useState<"all" | "inputs" | "outputs">(
@@ -303,7 +303,7 @@ export function ExperimentTable({
 
   // Modify updateRowData to be async
   const updateRowData = useCallback(async () => {
-    setIsDataLoading(true);
+    //setIsDataLoading(true);
 
     if (!experimentTableData) {
       setRowData([]);
@@ -911,7 +911,7 @@ export function ExperimentTable({
               displayName: column.columnName,
               badgeText: "Output",
               badgeVariant: "secondary",
-              hypothesisId: column.hypothesisId,
+              hypothesisId: column.metadata?.hypothesisId ?? "",
               onRunColumn: async (colId: string) => {
                 console.log("rowData", rowData);
                 const cells = rowData.map((row, index) => ({
@@ -919,7 +919,10 @@ export function ExperimentTable({
                   datasetRowId: row.dataset_row_id,
                   columnId: colId,
                 }));
-                await handleRunHypothesis(column.hypothesisId ?? "", cells);
+                await handleRunHypothesis(
+                  (column.metadata?.hypothesisId as string) ?? "",
+                  cells
+                );
               },
             },
             cellClass: "border-r border-[#E2E8F0] text-slate-700 pt-2.5",
