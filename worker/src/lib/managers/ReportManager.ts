@@ -766,7 +766,7 @@ export class ReportManager {
   ): [string, "up" | "down"] {
     const change =
       previous === 0 || inPercentage
-        ? `${current - previous}`
+        ? `${(current - previous).toFixed(2)}`
         : `${Math.abs(((current - previous) / previous) * 100).toFixed(2)}%`;
 
     return [change, current > previous ? "up" : "down"];
