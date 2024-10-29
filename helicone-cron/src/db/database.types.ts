@@ -2373,6 +2373,7 @@ export type Database = {
           config: Json | null
           created_at: string | null
           destination: string
+          hmac_key: string | null
           id: number
           is_verified: boolean
           org_id: string
@@ -2383,6 +2384,7 @@ export type Database = {
           config?: Json | null
           created_at?: string | null
           destination: string
+          hmac_key?: string | null
           id?: number
           is_verified?: boolean
           org_id: string
@@ -2393,6 +2395,7 @@ export type Database = {
           config?: Json | null
           created_at?: string | null
           destination?: string
+          hmac_key?: string | null
           id?: number
           is_verified?: boolean
           org_id?: string

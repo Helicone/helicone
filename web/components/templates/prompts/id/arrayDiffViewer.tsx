@@ -51,7 +51,7 @@ const ArrayDiffViewer = (props: ArrayDiffViewerProps) => {
         const originContent = getContent(origin[index]);
         const targetContent = getContent(target[index]);
         return (
-          <Accordion key={index} className="relative">
+          <Accordion key={index} className="relative" defaultOpen={true}>
             <AccordionHeader className="text-sm font-medium text-tremor-content-strong dark:text-dark-tremor-content-strong">
               <div className="flex items-center space-x-4">
                 {!isSameRole && (
@@ -78,7 +78,7 @@ const ArrayDiffViewer = (props: ArrayDiffViewerProps) => {
                 {originContent !== targetContent && (
                   <div
                     className={
-                      "text-xs border border-yellow-500 text-yellow-900 dark:text-yellow-300 font-semibold rounded-md bg-yellow-100 dark:bg-yellow-900  px-2 py-1 w-fit flex items-center"
+                      "text-xs border border-yellow-500 text-yellow-900 dark:text-yellow-300 font-semibold bg-yellow-100 dark:bg-yellow-900  px-2 py-1 w-fit flex items-center"
                     }
                   >
                     <EyeIcon className="h-4 w-4 mr-1" />
