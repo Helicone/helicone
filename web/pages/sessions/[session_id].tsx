@@ -1,4 +1,4 @@
-import { ReactElement } from "react";
+import { ReactElement, useMemo } from "react";
 import AuthLayout from "../../components/layout/auth/authLayout";
 import { withAuthSSR } from "../../lib/api/handlerWrappers";
 
@@ -6,16 +6,31 @@ import { useGetRequests } from "../../services/hooks/requests";
 
 import { sessionFromHeliconeRequests } from "../../lib/sessions/sessionsFromHeliconeTequests";
 import { SessionContent } from "../../components/templates/sessions/sessionId/SessionContent";
+import { useSessions } from "@/services/hooks/sessions";
 
 const SessionDetail = ({ session_id }: { session_id: string }) => {
+  const ThreeMonthsAgo = useMemo(() => {
+    return new Date(Date.now() - 30 * 24 * 60 * 60 * 1000 * 3);
+  }, []);
+
   const requests = useGetRequests(
     1,
     100,
     {
-      request_response_rmt: {
-        properties: {
-          "Helicone-Session-Id": {
-            equals: session_id as string,
+      left: {
+        request_response_rmt: {
+          properties: {
+            "Helicone-Session-Id": {
+              equals: session_id as string,
+            },
+          },
+        },
+      },
+      operator: "and",
+      right: {
+        request_response_rmt: {
+          request_created_at: {
+            gt: ThreeMonthsAgo,
           },
         },
       },
