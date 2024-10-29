@@ -13,6 +13,7 @@ import { Row } from "@/components/layout/common";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
+import LoadingAnimation from "@/components/shared/loadingAnimation";
 
 interface SessionContentProps {
   session: Session;
@@ -85,6 +86,14 @@ export const SessionContent: React.FC<SessionContentProps> = ({
   }, [requests.requests.requests]);
 
   const [showSpan, setShowSpan] = useLocalStorage("showSpan-TreeView", true);
+
+  if (requests.requests.isLoading) {
+    return (
+      <div className="h-screen w-full flex justify-center items-center">
+        <LoadingAnimation />
+      </div>
+    );
+  }
 
   return (
     <Col className="h-screen">
