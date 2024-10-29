@@ -40,3 +40,5 @@ logger.log_request(
   }
 )
 ```
+
+You can also use the `HeliconeManualLogger` for [VectorDB Logging](https://docs.helicone.ai/integrations/vectordb/python) and [Tools Logging](https://docs.helicone.ai/integrations/tools/python).
