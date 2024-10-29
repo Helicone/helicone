@@ -171,7 +171,7 @@ module.exports = {
   ],
   plugins: [
     require("@assistant-ui/react/tailwindcss")({
-      components: [""],
+      components: ["default-theme"],
     }),
     require("tailwindcss-animate"),
     require("@tailwindcss/forms"),
