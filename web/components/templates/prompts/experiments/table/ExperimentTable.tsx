@@ -425,7 +425,16 @@ export function ExperimentTable({
     // Sort rows by rowIndex
     newRowData.sort((a, b) => a.rowIndex - b.rowIndex);
 
-    setRowData(newRowData);
+    // Before setting the new rowData, merge isLoading from previous state
+    const updatedRowData = newRowData.map((newRow) => {
+      const existingRow = rowDataRef.current.find((row) => row.id === newRow.id);
+      if (existingRow && existingRow.isLoading) {
+        newRow.isLoading = existingRow.isLoading;
+      }
+      return newRow;
+    });
+
+    setRowData(updatedRowData);
   }, [experimentTableData, getRequestDataByIds]);
 
   // Modify the useEffect that updates rowData
@@ -526,7 +535,6 @@ export function ExperimentTable({
             const matchingCell = cells.find(
               (cell) => cell.datasetRowId === row.dataset_row_id
             );
-            console.log("matchingCell", matchingCell);
             if (matchingCell) {
               const newIsLoading = {
                 ...(row.isLoading || {}),
@@ -1427,6 +1435,14 @@ export function ExperimentTable({
       </PopoverContent>
     );
   };
+
+  // At the top of your component, create a ref to store rowData
+  const rowDataRef = useRef(rowData);
+
+  // Update the ref whenever rowData changes
+  useEffect(() => {
+    rowDataRef.current = rowData;
+  }, [rowData]);
 
   if (isInitialLoading) {
     return (
