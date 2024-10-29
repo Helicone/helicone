@@ -526,6 +526,7 @@ export function ExperimentTable({
             const matchingCell = cells.find(
               (cell) => cell.datasetRowId === row.dataset_row_id
             );
+            console.log("matchingCell", matchingCell);
             if (matchingCell) {
               const newIsLoading = {
                 ...(row.isLoading || {}),
@@ -897,7 +898,7 @@ export function ExperimentTable({
           cellRenderer: OriginalOutputCellRenderer,
           cellRendererParams: {
             prompt: promptVersionTemplate,
-            hypothesisId: column.metadata?.hypothesisId,
+            hypothesisId: "original",
             handleRunHypothesis,
             loadingStates,
             wrapText,

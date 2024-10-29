@@ -232,7 +232,7 @@ export const OriginalMessagesCellRenderer: React.FC<any> = (params) => {
 };
 export const OriginalOutputCellRenderer: React.FC<any> = (params) => {
   const { data, colDef, context, prompt, wrapText } = params;
-  const hypothesisId = colDef.field;
+  const hypothesisId = params.hypothesisId;
   const inputKeys = context.inputKeys;
   const [showPromptPlayground, setShowPromptPlayground] = useState(false);
   const parsedResponseData = data[colDef.cellRendererParams.columnId];
