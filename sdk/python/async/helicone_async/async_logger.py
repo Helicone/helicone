@@ -1,4 +1,5 @@
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+from opentelemetry.context import attach, set_value
 
 from traceloop.sdk import Traceloop
 
@@ -33,12 +34,22 @@ class HeliconeAsyncLogger:
             headers={"Authorization": f"Bearer {self.api_key}"},
         )
 
+        os.environ["TRACELOOP_TRACE_CONTENT"] = "false"
+
+        attach(set_value("override_enable_content_tracing", True))
+
         Traceloop.init(
             exporter=exporter,
             disable_batch=True,
             should_enrich_metrics=False,
             instruments=SUPPORTED_INSTRUMENTS,
         )
+
+    def disable_content_tracing(self) -> None:
+        attach(set_value("override_enable_content_tracing", False))
+
+    def enable_content_tracing(self) -> None:
+        attach(set_value("override_enable_content_tracing", True))
 
     def set_properties(self, properties: dict) -> None:
         Traceloop.set_association_properties(properties)
