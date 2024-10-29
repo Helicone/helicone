@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "helicone_async"
-version = "1.0.0"
+version = "1.0.1"
 description = "A Python wrapper for logging llm traces directly to Helicone, by passing the proxy, with OpenLLMetry."
 license = "Apache-2.0"
 authors = ["Helicone, Inc. <help@helicone.ai>"]
