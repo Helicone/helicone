@@ -370,7 +370,7 @@ export function ExperimentTable({
       const requestDataArray = await getRequestDataByIds(requestIdsArray);
       // Build a map from requestId to requestData
       requestDataArray?.forEach((requestDataItem) => {
-        requestDataMap.set(requestDataItem.request_id, requestDataItem);
+        requestDataMap.set(requestDataItem?.request_id, requestDataItem);
       });
     }
 
