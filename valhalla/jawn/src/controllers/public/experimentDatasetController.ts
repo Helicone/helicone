@@ -140,6 +140,11 @@ export class ExperimentDatasetController extends Controller {
     @Body()
     requestBody: {
       inputRecordId: string;
+      inputs: Record<
+        string,
+        { value: string; columnId: string; rowIndex: number }
+      >;
+      originalColumnId?: string;
     },
     @Request() request: JawnAuthenticatedRequest,
     @Path() datasetId: string
@@ -153,6 +158,29 @@ export class ExperimentDatasetController extends Controller {
       console.error(datasetRowResult.error);
       this.setStatus(500);
       return datasetRowResult;
+    }
+    const inputRecordResult = await datasetManager.getDatasetRowInputRecord(
+      requestBody.inputRecordId
+    );
+    const newCells = [
+      ...Object.values(requestBody.inputs).map(
+        ({ value, columnId, rowIndex }) => ({
+          columnId,
+          rowIndex,
+          value,
+          requestId: inputRecordResult.data?.source_request ?? undefined,
+          metadata: { datasetRowId: datasetRowResult.data },
+        })
+      ),
+    ];
+    const experimentManager = new ExperimentManager(request.authParams);
+    const experimentTableCell = await experimentManager.createExperimentCells({
+      cells: newCells,
+    });
+
+    if (experimentTableCell.error || !experimentTableCell.data) {
+      console.error(experimentTableCell.error);
+      this.setStatus(500);
     }
     this.setStatus(200);
     return ok(requestBody.inputRecordId);
@@ -198,29 +226,22 @@ export class ExperimentDatasetController extends Controller {
     );
 
     const experimentManager = new ExperimentManager(request.authParams);
-    const newCells: {
-      columnId: string;
-      rowIndex: number;
-      value: string | null;
-      metadata?: Record<string, any>;
-    }[] = Object.entries(requestBody.inputs).map(
-      ([k, { value, columnId, rowIndex }]) => ({
-        columnId,
-        rowIndex,
-        value,
-        metadata: {
-          datasetRowId: datasetRowResult.data,
-        },
-      })
-    );
-    newCells.push({
-      columnId: requestBody.originalColumnId ?? "",
-      rowIndex: requestBody.rowIndex,
-      value: null,
-      metadata: {
-        datasetRowId: datasetRowResult.data,
+    const newCells = [
+      ...Object.values(requestBody.inputs).map(
+        ({ value, columnId, rowIndex }) => ({
+          columnId,
+          rowIndex,
+          value,
+          metadata: { datasetRowId: datasetRowResult.data },
+        })
+      ),
+      {
+        columnId: requestBody.originalColumnId ?? "",
+        rowIndex: requestBody.rowIndex,
+        value: null,
+        metadata: { datasetRowId: datasetRowResult.data },
       },
-    });
+    ];
     const experimentTableCell = await experimentManager.createExperimentCells({
       cells: newCells,
     });

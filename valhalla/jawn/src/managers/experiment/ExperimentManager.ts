@@ -245,6 +245,7 @@ export class ExperimentManager extends BaseManager {
       rowIndex: number;
       value: string | null;
       metadata?: Record<string, any>;
+      requestId?: string;
     }[];
   }): Promise<Result<{ ids: string[] }, string>> {
     return this.ExperimentStore.createExperimentCells(params.cells);

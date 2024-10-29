@@ -120,6 +120,22 @@ export function ExperimentTable({
       enabled: !!orgId && !!experimentId,
     });
 
+  const inputColumns = useMemo(() => {
+    return (
+      experimentTableData?.columns.filter(
+        (column) => column.columnType === "input"
+      ) ?? []
+    );
+  }, [experimentTableData]);
+
+  const inputColumnNameToId = useMemo(() => {
+    const map: Record<string, string> = {};
+    inputColumns.forEach((column) => {
+      map[column.columnName] = column.id;
+    });
+    return map;
+  }, [inputColumns]);
+
   const handleAddColumn = useCallback(
     async (columnName: string, columnType: string, hypothesisId?: string) => {
       const res = await jawn.POST(
@@ -227,6 +243,43 @@ export function ExperimentTable({
     }
   );
 
+  const mapInputRecordsToExistingColumns = useCallback(
+    (inputRecords: Record<string, string>) => {
+      return Object.entries(inputRecords).map(([columnId, value]) => {
+        return {
+          columnId,
+          value,
+        };
+      });
+    },
+    []
+  );
+
+  const mapInputRecordsToColumnsWithRowId = useCallback(
+    (inputRecords: Record<string, string>, rowId: string, rowIndex: number) => {
+      const result: Record<
+        string,
+        { columnId: string; value: string; rowIndex: number }
+      > = {};
+
+      Object.entries(inputRecords).forEach(([inputKey, value]) => {
+        const columnId = inputColumnNameToId[inputKey];
+        if (columnId) {
+          result[inputKey] = {
+            columnId,
+            value,
+            rowIndex,
+          };
+        } else {
+          console.warn(`Column ID for input key "${inputKey}" not found.`);
+        }
+      });
+
+      return result;
+    },
+    [inputColumnNameToId]
+  );
+
   const { data: randomInputRecordsData } = useQuery(
     ["randomInputRecords", orgId, promptSubversionId],
     fetchRandomInputRecords,
@@ -238,9 +291,9 @@ export function ExperimentTable({
 
   const randomInputRecords = useMemo(() => {
     return (
-      randomInputRecordsData?.map((row) => ({
+      randomInputRecordsData?.map((row, index) => ({
         id: row.id,
-        inputs: row.inputs,
+        inputs: mapInputRecordsToColumnsWithRowId(row.inputs, row.id, index),
         source_request: row.source_request,
         prompt_version: row.prompt_version,
         created_at: row.created_at,
@@ -248,6 +301,8 @@ export function ExperimentTable({
       })) ?? []
     );
   }, [randomInputRecordsData]);
+
+  console.log("randomInputRecords", randomInputRecords);
 
   // Use useState to manage rowData
   const [rowData, setRowData] = useState<any[]>([]);
@@ -425,13 +480,25 @@ export function ExperimentTable({
     // Sort rows by rowIndex
     newRowData.sort((a, b) => a.rowIndex - b.rowIndex);
 
-    // Before setting the new rowData, merge isLoading from previous state
+    // Preserve isLoading state from previous rowData
     const updatedRowData = newRowData.map((newRow) => {
-      const existingRow = rowDataRef.current.find((row) => row.id === newRow.id);
+      // Find the matching row in the previous rowData
+      const existingRow = rowDataRef.current.find(
+        (row) => row.id === newRow.id
+      );
+
+      // If an existing row is found, preserve its isLoading state
       if (existingRow && existingRow.isLoading) {
-        newRow.isLoading = existingRow.isLoading;
+        return {
+          ...newRow,
+          isLoading: existingRow.isLoading,
+        };
       }
-      return newRow;
+      // Otherwise, initialize isLoading as an empty object
+      return {
+        ...newRow,
+        isLoading: {},
+      };
     });
 
     setRowData(updatedRowData);
@@ -598,24 +665,24 @@ export function ExperimentTable({
     await refetchInputRecords();
   };
 
-  useEffect(() => {
-    let intervalId: NodeJS.Timeout | null = null;
+  // useEffect(() => {
+  //   let intervalId: NodeJS.Timeout | null = null;
 
-    if (isHypothesisRunning) {
-      intervalId = setInterval(() => {
-        // Refetch data and refresh the grid
-        refetchExperimentTable();
-        // refetchInputRecords();
-        gridRef.current?.refreshCells();
-      }, 1000);
-    }
+  //   if (isHypothesisRunning) {
+  //     intervalId = setInterval(() => {
+  //       // Refetch data and refresh the grid
+  //       refetchExperimentTable();
+  //       // refetchInputRecords();
+  //       gridRef.current?.refreshCells();
+  //     }, 1000);
+  //   }
 
-    return () => {
-      if (intervalId) {
-        clearInterval(intervalId);
-      }
-    };
-  }, [isHypothesisRunning, refetchExperimentTable, refetchInputRecords]);
+  //   return () => {
+  //     if (intervalId) {
+  //       clearInterval(intervalId);
+  //     }
+  //   };
+  // }, [isHypothesisRunning, refetchExperimentTable, refetchInputRecords]);
 
   const [columnWidths, setColumnWidths] = useState<{ [key: string]: number }>(
     {}
@@ -702,15 +769,6 @@ export function ExperimentTable({
     []
   );
 
-  // First, create a helper function to get input columns
-  const getInputColumns = useCallback(() => {
-    return (
-      experimentTableData?.columns?.filter(
-        (column) => column.columnType === "input"
-      ) || []
-    );
-  }, [experimentTableData?.columns]);
-
   // Modify handleLastInputSubmit to use input columns
   const handleLastInputSubmit = useCallback(
     async (rowIndex: number) => {
@@ -774,7 +832,7 @@ export function ExperimentTable({
       experimentTableData?.metadata?.datasetId,
       inputKeys,
       refetchInputRecords,
-      getInputColumns,
+      inputColumns,
     ]
   );
 
@@ -1531,6 +1589,8 @@ export function ExperimentTable({
             enableCellTextSelection={true}
             colResizeDefault="shift"
             suppressRowTransform={true}
+            suppressColumnVirtualisation={true}
+            suppressColumnMoveAnimation={true}
             domLayout="autoHeight"
             getRowId={getRowId}
             context={{
@@ -1588,9 +1648,14 @@ export function ExperimentTable({
       <ExperimentRandomInputSelector
         open={showRandomInputSelector}
         setOpen={setShowRandomInputSelector}
+        numberOfRows={rowData.length}
         meta={{
           promptVersionId: promptSubversionId,
           datasetId: (experimentTableData?.metadata?.datasetId as string) ?? "",
+          originalColumnId:
+            experimentTableData?.columns?.find(
+              (column) => column.id === "output"
+            )?.id ?? "",
         }}
         requestIds={randomInputRecords}
         onSuccess={async (success) => {
@@ -1610,7 +1675,12 @@ export function ExperimentTable({
         meta={{
           promptVersionId: promptSubversionId,
           datasetId: (experimentTableData?.metadata?.datasetId as string) ?? "",
+          originalColumnId:
+            experimentTableData?.columns?.find(
+              (column) => column.id === "output"
+            )?.id ?? "",
         }}
+        numberOfRows={rowData.length}
         requestIds={randomInputRecords}
         onSuccess={async (success) => {
           if (success) {

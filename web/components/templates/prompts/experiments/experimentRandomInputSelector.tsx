@@ -5,23 +5,24 @@ import { useJawnClient } from "../../../../lib/clients/jawnHook";
 import useNotification from "../../../shared/notification/useNotification";
 import PromptPropertyCard from "../id/promptPropertyCard";
 
+type DatasetRequest = {
+  id: string;
+  inputs: Record<string, { columnId: string; value: string; rowIndex: number }>;
+  source_request: string;
+  prompt_version: string;
+  created_at: string;
+};
+
 interface ExperimentInputSelectorProps {
   open: boolean;
   setOpen: (open: boolean) => void;
-
-  requestIds?: {
-    id: string;
-    inputs: {
-      [key: string]: string;
-    };
-    source_request: string;
-    prompt_version: string;
-    created_at: string;
-  }[];
+  requestIds?: DatasetRequest[];
   onSuccess?: (success: boolean) => void;
+  numberOfRows: number;
   meta?: {
     promptVersionId?: string;
     datasetId?: string;
+    originalColumnId?: string;
   };
 }
 
@@ -87,7 +88,9 @@ export const ExperimentRandomInputSelector = (
                   isSelected={true}
                   requestId={request.source_request}
                   createdAt={request.created_at}
-                  properties={request.inputs}
+                  properties={Object.fromEntries(
+                    Object.entries(request.inputs).map(([k, v]) => [k, v.value])
+                  )}
                 />
               </li>
             ))}
@@ -108,12 +111,24 @@ export const ExperimentRandomInputSelector = (
             title={"Confirm"}
             onClick={async () => {
               await Promise.all(
-                shuffledRequests.map((request) => {
-                  return jawn.POST(
+                shuffledRequests.map(async (request, index) => {
+                  const rowIndex = props.numberOfRows - 1 + index;
+                  await jawn.POST(
                     "/v1/experiment/dataset/{datasetId}/row/insert",
                     {
                       body: {
                         inputRecordId: request.id,
+                        inputs: Object.fromEntries(
+                          Object.entries(request.inputs).map(([k, v]) => [
+                            k,
+                            {
+                              value: v.value,
+                              columnId: v.columnId,
+                              rowIndex: rowIndex,
+                            },
+                          ])
+                        ),
+                        originalColumnId: props.meta?.originalColumnId ?? "",
                       },
                       params: {
                         path: {

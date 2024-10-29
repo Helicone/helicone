@@ -475,7 +475,8 @@ export class ExperimentStore extends BaseStore {
     columnId: string,
     rowIndex: number,
     value: string | null,
-    metadata?: Record<string, any>
+    metadata?: Record<string, any>,
+    requestId?: string
   ): Promise<Result<{ id: string }, string>> {
     const result = await supabaseServer.client
       .from("experiment_cell")
@@ -483,6 +484,7 @@ export class ExperimentStore extends BaseStore {
         column_id: columnId,
         row_index: rowIndex,
         value: value,
+        request_id: requestId ?? null,
         metadata: metadata ?? null,
       })
       .select("*")
@@ -536,6 +538,7 @@ export class ExperimentStore extends BaseStore {
       rowIndex: number;
       value: string | null;
       metadata?: Record<string, any>;
+      requestId?: string;
     }[]
   ): Promise<Result<{ ids: string[] }, string>> {
     const results = await Promise.all(
@@ -544,7 +547,8 @@ export class ExperimentStore extends BaseStore {
           cell.columnId,
           cell.rowIndex,
           cell.value,
-          cell.metadata
+          cell.metadata,
+          cell.requestId
         )
       )
     );

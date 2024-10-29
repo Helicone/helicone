@@ -5,35 +5,26 @@ import { useJawnClient } from "../../../../lib/clients/jawnHook";
 import useNotification from "../../../shared/notification/useNotification";
 import PromptPropertyCard from "../id/promptPropertyCard";
 
-interface ExperimentInputSelectorProps {
-  open: boolean;
-  setOpen: (open: boolean) => void;
-  setShowRandomInputSelector: (open: boolean) => void;
-  requestIds?: {
-    id: string;
-    inputs: {
-      [key: string]: string;
-    };
-    source_request: string;
-    prompt_version: string;
-    created_at: string;
-  }[];
-  onSuccess?: (success: boolean) => void;
-  meta?: {
-    promptVersionId?: string;
-    datasetId?: string;
-  };
-}
-
 type DatasetRequest = {
   id: string;
-  inputs: {
-    [key: string]: string;
-  };
+  inputs: Record<string, { columnId: string; value: string; rowIndex: number }>;
   source_request: string;
   prompt_version: string;
   created_at: string;
 };
+interface ExperimentInputSelectorProps {
+  open: boolean;
+  setOpen: (open: boolean) => void;
+  setShowRandomInputSelector: (open: boolean) => void;
+  requestIds?: DatasetRequest[];
+  onSuccess?: (success: boolean) => void;
+  numberOfRows: number;
+  meta?: {
+    promptVersionId?: string;
+    datasetId?: string;
+    originalColumnId?: string;
+  };
+}
 
 const ExperimentInputSelector = (props: ExperimentInputSelectorProps) => {
   const { open, setOpen, requestIds, onSuccess } = props;
@@ -132,7 +123,9 @@ const ExperimentInputSelector = (props: ExperimentInputSelectorProps) => {
                   )}
                   requestId={request.source_request}
                   createdAt={request.created_at}
-                  properties={request.inputs}
+                  properties={Object.fromEntries(
+                    Object.entries(request.inputs).map(([k, v]) => [k, v.value])
+                  )}
                 />
               </li>
             ))}
@@ -158,12 +151,25 @@ const ExperimentInputSelector = (props: ExperimentInputSelectorProps) => {
               }
 
               await Promise.all(
-                selectedRequests.map((request) => {
-                  return jawn.POST(
+                selectedRequests.map(async (request, index) => {
+                  const rowIndex = props.numberOfRows - 1 + index;
+
+                  await jawn.POST(
                     "/v1/experiment/dataset/{datasetId}/row/insert",
                     {
                       body: {
                         inputRecordId: request.id,
+                        inputs: Object.fromEntries(
+                          Object.entries(request.inputs).map(([k, v]) => [
+                            k,
+                            {
+                              value: v.value,
+                              columnId: v.columnId,
+                              rowIndex: rowIndex,
+                            },
+                          ])
+                        ),
+                        originalColumnId: props.meta?.originalColumnId ?? "",
                       },
                       params: {
                         path: {

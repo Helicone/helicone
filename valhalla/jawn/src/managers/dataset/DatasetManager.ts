@@ -20,7 +20,7 @@ import { buildFilterPostgres } from "../../lib/shared/filters/filters";
 import { resultMap } from "../../lib/shared/result";
 import { User } from "../../models/user";
 import { BaseManager } from "../BaseManager";
-import { Json } from "../../lib/db/database.types";
+import { Database, Json } from "../../lib/db/database.types";
 import { HeliconeDatasetManager } from "./HeliconeDatasetManager";
 import { randomUUID } from "crypto";
 
@@ -123,6 +123,26 @@ export class DatasetManager extends BaseManager {
     }
 
     return ok(dataset.data.id);
+  }
+
+  async getDatasetRowInputRecord(
+    datasetRowId: string
+  ): Promise<
+    Result<Database["public"]["Tables"]["prompt_input_record"]["Row"], string>
+  > {
+    const inputRecord = await supabaseServer.client
+      .from("prompt_input_record")
+      .select("*")
+      .eq("id", datasetRowId)
+      .single();
+
+    if (inputRecord.error || !inputRecord.data) {
+      return err(
+        inputRecord.error?.message ?? "Failed to get dataset row input record"
+      );
+    }
+
+    return ok(inputRecord.data);
   }
 
   async addRandomDataset(params: RandomDatasetParams): Promise<
