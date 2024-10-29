@@ -11,6 +11,7 @@ import { Result } from "../../lib/result";
 import { FilterNode } from "../lib/filters/filterDefs";
 import { placeAssetIdValues } from "../lib/requestTraverseHelper";
 import { SortLeafRequest } from "../lib/sorts/requests/sorts";
+import { getNormalizedRequests } from "@/components/templates/requestsV2/useRequestsPageV2";
 
 function formatDateForClickHouse(date: Date): string {
   return date.toISOString().slice(0, 19).replace("T", " ");
@@ -161,6 +162,109 @@ const useGetRequestsWithBodies = (
   };
 };
 
+const useGetRequestsByIdsWithBodies = (requestIds: string[]) => {
+  const org = useOrg();
+
+  const { data, isLoading, refetch, isRefetching } = useQuery({
+    queryKey: ["requestsData", requestIds, org?.currentOrg?.id],
+    queryFn: async (query) => {
+      const requestIds = query.queryKey[1] as string[];
+      const orgId = query.queryKey[3] as string;
+      const jawn = getJawnClient(orgId);
+      console.log({ requestIds });
+
+      const response = await jawn.POST("/v1/request/query-ids", {
+        body: {
+          requestIds: requestIds,
+        },
+      });
+
+      console.log({ response });
+
+      return response.data as Result<HeliconeRequest[], string>;
+    },
+    refetchOnWindowFocus: false,
+    keepPreviousData: true,
+  });
+
+  const requestsWithSignedUrls = useMemo(() => data?.data ?? [], [data]);
+
+  const urlQueries = useQueries({
+    queries: requestsWithSignedUrls.map((request) => ({
+      queryKey: ["request-content", request.signed_body_url],
+      queryFn: async () => {
+        if (requestBodyCache.has(request.request_id)) {
+          return requestBodyCache.get(request.request_id);
+        }
+        if (!request.signed_body_url) return null;
+        const contentResponse = await fetch(request.signed_body_url);
+        if (contentResponse.ok) {
+          const text = await contentResponse.text();
+          let content = JSON.parse(text);
+          if (request.asset_urls) {
+            content = placeAssetIdValues(request.asset_urls, content);
+          }
+          requestBodyCache.set(request.request_id, content);
+          if (requestBodyCache.size > 1000) {
+            requestBodyCache.clear();
+          }
+          return content;
+        }
+        return null;
+      },
+      keepPreviousData: true,
+      enabled: !!request.signed_body_url,
+    })),
+  });
+
+  const requests = useMemo(() => {
+    return requestsWithSignedUrls.map((request, index) => {
+      const content = urlQueries[index].data;
+      if (!content) return request;
+
+      const model =
+        request.model_override ||
+        request.response_model ||
+        request.request_model ||
+        content.response?.model ||
+        content.request?.model ||
+        content.response?.body?.model ||
+        getModelFromPath(request.target_url) ||
+        "";
+
+      let updatedRequest = {
+        ...request,
+        request_body: content.request,
+        response_body: content.response,
+      };
+
+      if (
+        request.provider === "GOOGLE" &&
+        model.toLowerCase().includes("gemini")
+      ) {
+        updatedRequest.llmSchema = mapGeminiPro(
+          updatedRequest as HeliconeRequest,
+          model
+        );
+      }
+
+      return updatedRequest;
+    });
+  }, [requestsWithSignedUrls, urlQueries]);
+
+  const isUrlsFetching = urlQueries.some((query) => query.isFetching);
+
+  return {
+    isLoading: isLoading,
+    refetch,
+    isRefetching: isRefetching || isUrlsFetching,
+    requests: requests,
+    normalizedRequests: getNormalizedRequests(requests),
+    completedQueries: urlQueries.filter((query) => query.isSuccess).length,
+    totalQueries: requestsWithSignedUrls.length,
+  };
+};
+
 const useGetRequests = (
   currentPage: number,
   currentPageSize: number,
@@ -259,4 +363,8 @@ const useGetRequestCountClickhouse = (
   };
 };
 
-export { useGetRequestCountClickhouse, useGetRequests };
+export {
+  useGetRequestCountClickhouse,
+  useGetRequests,
+  useGetRequestsByIdsWithBodies,
+};

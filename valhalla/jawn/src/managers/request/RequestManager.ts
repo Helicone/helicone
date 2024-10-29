@@ -27,7 +27,7 @@ import { cacheResultCustom } from "../../utils/cacheResult";
 import { KVCache } from "../../lib/cache/kvCache";
 
 const deltaTime = (date: Date, minutes: number) => {
-  return new Date(date.getTime() - minutes * 60000);
+  return new Date(date.getTime() + minutes * 60000);
 };
 
 function toISOStringClickhousePatch(date: string): string {
@@ -71,6 +71,7 @@ export class RequestManager extends BaseManager {
   async getRequestByIds(
     requestIds: string[]
   ): Promise<Result<HeliconeRequest[], string>> {
+    console.log({ requestIds });
     const requests = await Promise.all(
       requestIds.map((requestId) => this.getRequestById(requestId))
     );
@@ -96,6 +97,53 @@ export class RequestManager extends BaseManager {
     }
 
     const requestFromPostgres = requestPostgres.data?.[0];
+    console.log(
+      JSON.stringify({
+        filter: {
+          left: {
+            left: {
+              request_response_rmt: {
+                request_id: {
+                  equals: requestId,
+                },
+              },
+            },
+            operator: "and",
+            right: {
+              request_response_rmt: {
+                model: {
+                  equals: requestFromPostgres?.request_model ?? "",
+                },
+              },
+            },
+          },
+          right: {
+            right: {
+              request_response_rmt: {
+                request_created_at: {
+                  gt: deltaTime(
+                    new Date(requestFromPostgres?.request_created_at!),
+                    -10
+                  ),
+                },
+              },
+            },
+            left: {
+              request_response_rmt: {
+                request_created_at: {
+                  lt: deltaTime(
+                    new Date(requestFromPostgres?.request_created_at!),
+                    10
+                  ),
+                },
+              },
+            },
+            operator: "and",
+          },
+          operator: "and",
+        },
+      })
+    );
     const requestClickhouse = await this.getRequestsClickhouse({
       filter: {
         left: {
@@ -141,6 +189,8 @@ export class RequestManager extends BaseManager {
         operator: "and",
       },
     });
+
+    console.log({ requestClickhouse });
 
     return resultMap(requestClickhouse, (data) => {
       return data?.[0];

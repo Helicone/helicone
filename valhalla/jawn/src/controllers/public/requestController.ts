@@ -22,14 +22,8 @@ import {
 import { RequestManager } from "../../managers/request/RequestManager";
 import { JawnAuthenticatedRequest } from "../../types/request";
 import { ScoreManager, ScoreRequest } from "../../managers/score/ScoreManager";
-<<<<<<< HEAD
-import { cacheResultCustom } from "../../utils/cacheResult";
-import { KVCache } from "../../lib/cache/kvCache";
-||||||| parent of 5ba5fb2a (create embeddings on the fly + cache clusters)
-=======
 import { KVRedisCache } from "../../lib/cache/kvRedisCache";
 import { cacheResultRedis } from "../../utils/cacheResult";
->>>>>>> 5ba5fb2a (create embeddings on the fly + cache clusters)
 
 export type RequestClickhouseFilterBranch = {
   left: RequestClickhouseFilterNode;
