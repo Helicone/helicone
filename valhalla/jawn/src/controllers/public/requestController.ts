@@ -3,6 +3,7 @@ import {
   Body,
   Controller,
   Example,
+  Get,
   Path,
   Post,
   Put,
@@ -21,6 +22,8 @@ import {
 import { RequestManager } from "../../managers/request/RequestManager";
 import { JawnAuthenticatedRequest } from "../../types/request";
 import { ScoreManager, ScoreRequest } from "../../managers/score/ScoreManager";
+import { cacheResultCustom } from "../../utils/cacheResult";
+import { KVCache } from "../../lib/cache/kvCache";
 
 export type RequestClickhouseFilterBranch = {
   left: RequestClickhouseFilterNode;
@@ -104,7 +107,7 @@ export class RequestController extends Controller {
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<HeliconeRequest[], string>> {
     const reqManager = new RequestManager(request.authParams);
-    const requests = await reqManager.getRequests(requestBody);
+    const requests = await reqManager.getRequestsPostgres(requestBody);
     if (requests.error || !requests.data) {
       this.setStatus(500);
     } else {
@@ -157,6 +160,30 @@ export class RequestController extends Controller {
       this.setStatus(200); // set return status 201
     }
     return requests;
+  }
+
+  @Get("/{requestId}")
+  public async getRequestById(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() requestId: string
+  ): Promise<Result<HeliconeRequest, string>> {
+    const reqManager = new RequestManager(request.authParams);
+    const requestID = await reqManager.getRequestById(requestId);
+    if (requestID.error) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
+    }
+    return requestID;
+  }
+
+  @Post("/query-ids")
+  public async getRequestsByIds(
+    @Body() requestBody: { requestIds: string[] },
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<HeliconeRequest[], string>> {
+    const reqManager = new RequestManager(request.authParams);
+    return reqManager.getRequestByIds(requestBody.requestIds);
   }
 
   @Post("/{requestId}/feedback")

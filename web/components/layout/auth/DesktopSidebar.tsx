@@ -47,7 +47,7 @@ const DesktopSidebar = ({ changelog, NAVIGATION }: SidebarProps) => {
 
   const [expandedItems, setExpandedItems] = useLocalStorage<string[]>(
     "expandedItems",
-    []
+    ["Developer", "Segments", "Improve"]
   );
 
   const toggleExpand = (name: string) => {
@@ -216,7 +216,10 @@ const DesktopSidebar = ({ changelog, NAVIGATION }: SidebarProps) => {
             <div className="flex items-center gap-2 h-14 border-b dark:border-slate-800">
               {!isCollapsed && <OrgDropdown />}
               <div
-                className={cn("mx-auto", isCollapsed ? "w-full mr-4" : "mr-2")}
+                className={cn(
+                  "flex justify-center items-center",
+                  isCollapsed ? "w-full m-4" : "mr-2"
+                )}
               >
                 <Button
                   variant="ghost"

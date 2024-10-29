@@ -1,41 +1,22 @@
-import { Database } from "../db/database.types";
-import { PromiseGenericResult, err, ok } from "../shared/result";
+import * as Sentry from "@sentry/node";
+import { sendToWebhook, WebhookPayload } from "../clients/webhookSender";
+import { err, ok, PromiseGenericResult } from "../shared/result";
 import { FeatureFlagStore } from "../stores/FeatureFlagStore";
 import { WebhookStore } from "../stores/WebhookStore";
 import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext } from "./HandlerContext";
-import * as Sentry from "@sentry/node";
-
-type WebhookPayload = {
-  payload: {
-    request: {
-      id: string;
-      body: string;
-    };
-    response: {
-      body: string;
-    };
-  };
-  webhook: Database["public"]["Tables"]["webhooks"]["Row"];
-  orgId: string;
-};
 
 export class WebhookHandler extends AbstractLogHandler {
   private webhookStore: WebhookStore;
-  private featureFlagStore: FeatureFlagStore;
+
   private webhookPayloads: WebhookPayload[] = [];
 
-  constructor(webhookStore: WebhookStore, featureFlagStore: FeatureFlagStore) {
+  constructor(webhookStore: WebhookStore) {
     super();
     this.webhookStore = webhookStore;
-    this.featureFlagStore = featureFlagStore;
   }
 
   async handle(context: HandlerContext): PromiseGenericResult<string> {
-    if (!context.message.heliconeMeta.webhookEnabled) {
-      return await super.handle(context);
-    }
-
     const orgId = context.orgParams?.id;
 
     if (!orgId) {
@@ -58,6 +39,7 @@ export class WebhookHandler extends AbstractLogHandler {
           response: {
             body: context.processedLog.response.body,
           },
+          properties: context.processedLog.request.properties ?? {},
         },
         webhook: webhook,
         orgId,
@@ -71,14 +53,14 @@ export class WebhookHandler extends AbstractLogHandler {
     if (this.webhookPayloads.length === 0) {
       return ok("No webhooks to send");
     }
+    console.log("Sending to webhooks: ", this.webhookPayloads.length);
 
     await Promise.all(
       this.webhookPayloads.map(async (webhookPayload) => {
         try {
-          return await this.sendToWebhook(
+          return await sendToWebhook(
             webhookPayload.payload,
-            webhookPayload.webhook,
-            webhookPayload.orgId
+            webhookPayload.webhook
           );
         } catch (error: any) {
           Sentry.captureException(error, {
@@ -96,68 +78,5 @@ export class WebhookHandler extends AbstractLogHandler {
     );
 
     return ok(`Successfully sent to webhooks`);
-  }
-
-  async sendToWebhook(
-    payload: {
-      request: {
-        id: string;
-        body: string;
-      };
-      response: {
-        body: string;
-      };
-    },
-    webhook: Database["public"]["Tables"]["webhooks"]["Row"],
-    orgId: string
-  ): PromiseGenericResult<string> {
-    // Check FF
-    const webhookFF = await this.featureFlagStore.getFeatureFlagByOrgId(
-      "webhook_beta",
-      orgId
-    );
-
-    if (webhookFF.error || !webhookFF.data) {
-      return err(
-        `Error checking webhook ff or webhooks not enabled for user trying to use them, ${webhookFF.error}`
-      );
-    }
-
-    const subscriptions =
-      await this.webhookStore.getWebhookSubscriptionByWebhookId(webhook.id);
-
-    if (subscriptions.error || !subscriptions.data) {
-      return err(`Error getting webhook subscriptions, ${subscriptions.error}`);
-    }
-
-    const shouldSend =
-      webhook.destination.includes("helicone-scoring-webhook") ||
-      subscriptions.data
-        .map((subscription) => {
-          return subscription.event === "beta";
-        })
-        .filter((x) => x).length > 0;
-
-    if (shouldSend) {
-      console.log("SENDING", webhook.destination, payload.request.id);
-      try {
-        await fetch(webhook.destination, {
-          method: "POST",
-          body: JSON.stringify({
-            request_id: payload.request.id,
-            request_body: payload.request.body,
-            response_body: payload.response.body,
-          }),
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } catch (error: any) {
-        console.error("Error sending to webhook", error.message);
-      }
-    }
-
-    return ok(`Successfully sent to webhook`);
   }
 }

@@ -56,6 +56,7 @@ import { useRouter } from "next/router";
 import { ScrollArea } from "../../../../ui/scroll-area";
 import clsx from "clsx";
 import ScoresEvaluatorsConfig from "./scores/ScoresEvaluatorsConfig";
+import { ExperimentRandomInputSelector } from "../experimentRandomInputSelector";
 
 interface ExperimentTableProps {
   promptSubversionId?: string;
@@ -77,7 +78,7 @@ export function ExperimentTable({
   );
   const [showScoresTable, setShowScoresTable] = useLocalStorage(
     "showScoresTable",
-    true
+    false
   );
 
   const [isHypothesisRunning, setIsHypothesisRunning] = useState(false);
@@ -217,6 +218,7 @@ export function ExperimentTable({
     fetchRandomInputRecords,
     {
       enabled: true,
+      refetchInterval: 10000,
     }
   );
 
@@ -268,14 +270,28 @@ export function ExperimentTable({
           null,
           2
         );
-        let content = row?.response_body?.choices?.[0]?.message?.content || "";
+        let content = row?.response_body?.choices?.[0]?.message?.content;
 
-        // Parse the content if it's a JSON string
-        try {
-          hypothesisRowData["original"] = JSON.parse(content);
-        } catch (error) {
-          hypothesisRowData["original"] = content; // Use original content if parsing fails
+        if (!content) {
+          const toolCalls =
+            row?.response_body?.choices?.[0]?.message?.tool_calls;
+          if (toolCalls && toolCalls.length > 0) {
+            const firstToolCall = toolCalls[0];
+            const argumentsString = firstToolCall?.function?.arguments || "";
+
+            try {
+              const argumentsObj = JSON.parse(argumentsString);
+              content = argumentsObj.content || "";
+            } catch (error) {
+              console.error("Failed to parse tool call arguments:", error);
+              content = argumentsString;
+            }
+          } else {
+            content = "";
+          }
         }
+
+        hypothesisRowData["original"] = content;
 
         // Add data for other hypotheses if they exist
         experimentData.hypotheses.forEach((hypothesis: any) => {
@@ -299,6 +315,7 @@ export function ExperimentTable({
         return {
           id: row.dataset_row_id,
           dataset_row_id: row.dataset_row_id,
+          inputs: row.inputs,
           // Spread inputs to individual fields
           ...row.inputs,
           ...hypothesisRowData,
@@ -851,7 +868,7 @@ export function ExperimentTable({
     // Add the "Add Experiment" column
     columns.push({
       headerName: "Add Experiment",
-      width: 150,
+      width: 170,
       suppressSizeToFit: true,
       suppressMenu: true,
       sortable: false,
@@ -904,6 +921,7 @@ export function ExperimentTable({
 
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [selectedProviderKey, setSelectedProviderKey] = useState(providerKey);
+  const [showRandomInputSelector, setShowRandomInputSelector] = useState(false);
 
   const getExperimentExportData = useCallback(() => {
     if (!rowData || rowData.length === 0) {
@@ -1110,13 +1128,11 @@ export function ExperimentTable({
               <BeakerIcon className="h-6 w-6" />
               <h3 className="text-md font-semibold">Original Prompt</h3>
             </div>
-
             <Input
               placeholder="Prompt Name"
               value={promptName}
               onChange={(e) => setPromptName(e.target.value)}
             />
-
             <PromptPlayground
               prompt={basePrompt}
               editMode={true}
@@ -1228,12 +1244,12 @@ export function ExperimentTable({
             onColumnResized={onColumnResized}
             onColumnMoved={onColumnMoved}
             enableCellTextSelection={true}
-            colResizeDefault="shift"
             suppressRowTransform={true}
             domLayout="autoHeight"
             getRowId={getRowId}
             context={{
               setShowExperimentInputSelector,
+              setShowRandomInputSelector,
               handleRunHypothesis,
               hypothesesToRun,
               inputKeys: Array.from(inputKeys),
@@ -1257,10 +1273,11 @@ export function ExperimentTable({
         </div>
         <Button
           variant="ghost"
+          size="sm"
           onClick={handleAddRow}
-          className="max-w-32 flex flex-row space-x-2 text-md text-[#334155]"
+          className="self-start flex flex-row space-x-2 text-slate-700 mt-0"
         >
-          <PlusIcon className="h-6 w-6" />
+          <PlusIcon className="h-4 w-4" />
           Add row
         </Button>
       </div>
@@ -1283,10 +1300,28 @@ export function ExperimentTable({
         setOpen={setSettingsOpen}
       /> */}
 
+      <ExperimentRandomInputSelector
+        open={showRandomInputSelector}
+        setOpen={setShowRandomInputSelector}
+        meta={{
+          promptVersionId: promptSubversionId,
+          datasetId: experimentData?.dataset?.id,
+        }}
+        requestIds={randomInputRecords}
+        onSuccess={async (success) => {
+          if (success) {
+            await refetchExperiments();
+            await refetchInputRecords();
+            setShowRandomInputSelector(false);
+          }
+        }}
+      />
+
       {/* Include the ExperimentInputSelector */}
       <ExperimentInputSelector
         open={showExperimentInputSelector}
         setOpen={setShowExperimentInputSelector}
+        setShowRandomInputSelector={setShowRandomInputSelector}
         meta={{
           promptVersionId: promptSubversionId,
           datasetId: experimentData?.dataset?.id,
