@@ -427,6 +427,7 @@ export class LoggingHandler extends AbstractLogHandler {
       response_body:
         this.extractResponseBodyMessage(context.processedLog.response.body) ??
         "",
+      embedding: context.message.log.request.embedding ?? [],
     };
 
     return requestResponseLog;

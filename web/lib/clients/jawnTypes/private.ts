@@ -150,6 +150,12 @@ export interface paths {
   "/v1/request/{requestId}/score": {
     post: operations["AddScores"];
   };
+  "/v1/request/clusters": {
+    post: operations["GetClusters"];
+  };
+  "/v1/request/request/{requestId}": {
+    post: operations["GetRequest"];
+  };
   "/v1/session/query": {
     post: operations["GetSessions"];
   };
@@ -751,6 +757,7 @@ export interface components {
         id: string;
       };
       request: {
+        embedding?: number[];
         heliconeTemplate?: components["schemas"]["TemplateWithInputs"];
         isStream: boolean;
         /** Format: date-time */
@@ -1364,6 +1371,7 @@ export interface components {
       properties: components["schemas"]["Record_string.string_"];
       assets: string[];
       target_url: string;
+      embedding: number[] | null;
     };
     "ResultSuccess_HeliconeRequest-Array_": {
       data: components["schemas"]["HeliconeRequest"][];
@@ -1432,6 +1440,10 @@ export interface components {
       gt?: string;
     };
     /** @description Make all properties in T optional */
+    Partial_ArrayOperators_: {
+      "not-empty"?: boolean;
+    };
+    /** @description Make all properties in T optional */
     Partial_RequestResponseRMTToOperators_: {
       latency?: components["schemas"]["Partial_NumberOperators_"];
       status?: components["schemas"]["Partial_NumberOperators_"];
@@ -1460,6 +1472,7 @@ export interface components {
       scores_column?: components["schemas"]["Partial_TextOperators_"];
       request_body?: components["schemas"]["Partial_VectorOperators_"];
       response_body?: components["schemas"]["Partial_VectorOperators_"];
+      embedding?: components["schemas"]["Partial_ArrayOperators_"];
     };
     /** @description Make all properties in T optional */
     Partial_SessionsRequestResponseRMTToOperators_: {
@@ -1534,6 +1547,7 @@ export interface components {
       includeInputs?: boolean;
       isPartOfExperiment?: boolean;
       isScored?: boolean;
+      isClusters?: boolean;
     };
     ResultSuccess_HeliconeRequest_: {
       data: components["schemas"]["HeliconeRequest"];
@@ -1557,6 +1571,26 @@ export interface components {
     Scores: components["schemas"]["Record_string.number-or-boolean_"];
     ScoreRequest: {
       scores: components["schemas"]["Scores"];
+    };
+    ClustersResponse: {
+      request_id: string;
+      signed_body_url: string;
+      /** Format: double */
+      x: number;
+      /** Format: double */
+      y: number;
+      cluster: string;
+    };
+    "ResultSuccess_ClustersResponse-Array_": {
+      data: components["schemas"]["ClustersResponse"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ClustersResponse-Array.string_": components["schemas"]["ResultSuccess_ClustersResponse-Array_"] | components["schemas"]["ResultError_string_"];
+    ClustersParams: {
+      filter: components["schemas"]["RequestFilterNode"];
+      /** Format: double */
+      limit?: number;
     };
     SessionResult: {
       created_at: string;
@@ -3511,6 +3545,36 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  GetClusters: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ClustersParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ClustersResponse-Array.string_"];
+        };
+      };
+    };
+  };
+  GetRequest: {
+    parameters: {
+      path: {
+        requestId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_HeliconeRequest.string_"];
         };
       };
     };

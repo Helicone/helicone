@@ -1,4 +1,5 @@
 import { KVCache } from "../lib/cache/kvCache";
+import { KVRedisCache } from "../lib/cache/kvRedisCache";
 import { Result } from "../lib/shared/result";
 import { stringToNumberHash } from "../utils/helpers";
 
@@ -33,6 +34,30 @@ export async function cacheResultCustom<T, K>(
   const result = await fn();
   if (result.data) {
     kvCache.set(cacheKey, result).catch((err) => {
+      console.error("Failed to set cache:", err);
+    });
+  }
+
+  return result;
+}
+
+export async function cacheResultRedis<T, K>(
+  cacheKeyMiddle: string,
+  fn: () => Promise<Result<T, K>>,
+  kvRedisCache: KVRedisCache,
+  ...args: any[]
+): Promise<Result<T, K>> {
+  const cacheKey = getCacheKey(JSON.stringify(args) + cacheKeyMiddle);
+
+  const cachedValue = await kvRedisCache.get(cacheKey);
+  if (cachedValue) {
+    console.log("Cache hit for", cacheKey);
+    return cachedValue as Result<T, K>;
+  }
+
+  const result = await fn();
+  if (result.data) {
+    kvRedisCache.set(cacheKey, result).catch((err) => {
       console.error("Failed to set cache:", err);
     });
   }

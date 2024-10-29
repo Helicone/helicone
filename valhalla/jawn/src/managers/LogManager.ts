@@ -3,6 +3,7 @@ import { RateLimitHandler } from "../lib/handlers/RateLimitHandler";
 import { AuthenticationHandler } from "../lib/handlers/AuthenticationHandler";
 import { RequestBodyHandler } from "../lib/handlers/RequestBodyHandler";
 import { LoggingHandler } from "../lib/handlers/LoggingHandler";
+import { EmbeddingsHandler } from "../lib/handlers/EmbeddingsHandler";
 import { ResponseBodyHandler } from "../lib/handlers/ResponseBodyHandler";
 import { HandlerContext, Message } from "../lib/handlers/HandlerContext";
 import { LogStore } from "../lib/stores/LogStore";
@@ -53,6 +54,7 @@ export class LogManager {
     const requestHandler = new RequestBodyHandler();
     const responseBodyHandler = new ResponseBodyHandler();
     const promptHandler = new PromptHandler();
+    const embeddingsHandler = new EmbeddingsHandler();
     const loggingHandler = new LoggingHandler(
       new LogStore(),
       new VersionedRequestStore(""),
@@ -72,6 +74,7 @@ export class LogManager {
       .setNext(requestHandler)
       .setNext(responseBodyHandler)
       .setNext(promptHandler)
+      .setNext(embeddingsHandler)
       .setNext(loggingHandler)
       .setNext(posthogHandler)
       .setNext(lytixHandler)

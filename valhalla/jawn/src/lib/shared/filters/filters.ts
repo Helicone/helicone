@@ -221,6 +221,13 @@ const whereKeyMappings: KeyMappings = {
         value: `${placeValueSafely(value)}`,
       };
     }
+    if ("embedding" in filter && filter.embedding) {
+      return {
+        column: "request_response_rmt.embedding",
+        operator: "not-empty",
+        value: "",
+      };
+    }
     return easyKeyMappings<"request_response_rmt">({
       latency: "request_response_rmt.latency",
       status: "request_response_rmt.status",
@@ -239,6 +246,7 @@ const whereKeyMappings: KeyMappings = {
       request_body: "request_response_rmt.request_body",
       response_body: "request_response_rmt.response_body",
       scores_column: "request_response_rmt.scores",
+      embedding: "request_response_rmt.embedding",
     })(filter, placeValueSafely);
   },
   request_response_search: (filter, placeValueSafely) => {
@@ -373,6 +381,8 @@ function operatorToSql(operator: AllOperators): string {
       return "@>";
     case "vector-contains":
       return "@@";
+    case "not-empty":
+      return "";
   }
 }
 
@@ -413,6 +423,8 @@ export function buildFilterLeaf(
       filters.push(`${column} is not null`);
     } else if (operatorKey === "equals" && value === "null") {
       filters.push(`${column} is null`);
+    } else if (operatorKey === "not-empty") {
+      filters.push(`notEmpty(${column})`);
     } else {
       if (operatorKey === "contains" || operatorKey === "not-contains") {
         filters.push(`${column} ${sqlOperator} '%' || ${value}::text || '%'`);

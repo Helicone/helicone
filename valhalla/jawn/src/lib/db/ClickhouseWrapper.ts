@@ -222,6 +222,7 @@ export interface RequestResponseRMT {
   response_body: string;
   assets: Array<string>;
   updated_at?: string;
+  embedding?: number[];
 }
 
 export interface ClickhouseDB {

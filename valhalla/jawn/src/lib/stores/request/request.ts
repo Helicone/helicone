@@ -70,6 +70,7 @@ export interface HeliconeRequest {
   properties: Record<string, string>;
   assets: Array<string>;
   target_url: string;
+  embedding: number[] | null;
 }
 
 function addJoinQueries(joinQuery: string, filter: FilterNode): string {
@@ -122,6 +123,7 @@ export async function getRequests(
     argsAcc: [],
   });
   const sortSQL = buildRequestSort(sort);
+  console.log(builtFilter.filter);
 
   const query = `
   SELECT response.id AS response_id,
@@ -199,7 +201,8 @@ export async function getRequestsClickhouse(
   filter: FilterNode,
   offset: number,
   limit: number,
-  sort: SortLeafRequest
+  sort: SortLeafRequest,
+  isClusters?: boolean
 ): Promise<Result<HeliconeRequest[], string>> {
   if (isNaN(offset) || isNaN(limit)) {
     return { data: null, error: "Invalid offset or limit" };
@@ -207,7 +210,7 @@ export async function getRequestsClickhouse(
 
   const sortSQL = buildRequestSortClickhouse(sort);
 
-  if (limit < 0 || limit > 1_000) {
+  if ((limit < 0 || limit > 1_000) && !isClusters) {
     return err("invalid limit");
   }
   const builtFilter = await buildFilterWithAuthClickHouse({
@@ -238,6 +241,7 @@ export async function getRequestsClickhouse(
       properties,
       assets as asset_ids,
       target_url,
+      ${isClusters ? "embedding" : ""}
     FROM request_response_rmt FINAL
     WHERE (
       (${builtFilter.filter})

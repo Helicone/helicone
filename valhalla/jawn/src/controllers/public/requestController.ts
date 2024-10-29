@@ -22,8 +22,14 @@ import {
 import { RequestManager } from "../../managers/request/RequestManager";
 import { JawnAuthenticatedRequest } from "../../types/request";
 import { ScoreManager, ScoreRequest } from "../../managers/score/ScoreManager";
+<<<<<<< HEAD
 import { cacheResultCustom } from "../../utils/cacheResult";
 import { KVCache } from "../../lib/cache/kvCache";
+||||||| parent of 5ba5fb2a (create embeddings on the fly + cache clusters)
+=======
+import { KVRedisCache } from "../../lib/cache/kvRedisCache";
+import { cacheResultRedis } from "../../utils/cacheResult";
+>>>>>>> 5ba5fb2a (create embeddings on the fly + cache clusters)
 
 export type RequestClickhouseFilterBranch = {
   left: RequestClickhouseFilterNode;
@@ -66,6 +72,20 @@ export interface RequestQueryParams {
   includeInputs?: boolean;
   isPartOfExperiment?: boolean;
   isScored?: boolean;
+  isClusters?: boolean;
+}
+
+export interface ClustersParams {
+  filter: RequestFilterNode;
+  limit?: number;
+}
+
+export interface ClustersResponse {
+  request_id: string;
+  signed_body_url: string;
+  x: number;
+  y: number;
+  cluster: string;
 }
 
 @Route("v1/request")
@@ -268,5 +288,46 @@ export class RequestController extends Controller {
       this.setStatus(201);
       return ok(null);
     }
+  }
+
+  @Post("/clusters")
+  public async getClusters(
+    @Body()
+    requestBody: ClustersParams,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<ClustersResponse[], string>> {
+    const reqManager = new RequestManager(request.authParams);
+    // const clusters = await reqManager.getClusters(requestBody);
+
+    const clusters = await cacheResultRedis(
+      "/v1/request/clusters" + request.authParams.organizationId,
+      () => reqManager.getClusters(requestBody),
+      new KVRedisCache(1000 * 60 * 60 * 24), // 1 day
+      requestBody.filter
+    );
+
+    if (clusters.error) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
+    }
+
+    return clusters;
+  }
+
+  @Post("/request/{requestId}")
+  public async getRequest(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() requestId: string
+  ): Promise<Result<HeliconeRequest, string>> {
+    const reqManager = new RequestManager(request.authParams);
+
+    const heliconeRequest = await reqManager.getRequest(requestId);
+    if (heliconeRequest.error) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
+    }
+    return heliconeRequest;
   }
 }
