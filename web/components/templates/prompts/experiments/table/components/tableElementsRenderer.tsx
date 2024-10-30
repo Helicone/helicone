@@ -250,7 +250,7 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
       </PopoverTrigger>
       <PopoverContent className="w-[800px] p-0" side="bottom">
         {hasDiff ? (
-          <Tabs defaultValue="diff" className="w-full">
+          <Tabs defaultValue="preview" className="w-full">
             <TabsList
               className="w-full flex justify-end rounded-none"
               variant={"secondary"}
