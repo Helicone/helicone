@@ -1435,43 +1435,14 @@ export function ExperimentTable({
           },
         }
       );
+      if (!experimentTableResult.data?.data?.experimentId) {
+        notification.setNotification("Failed to create experiment", "error");
+        return;
+      }
 
-      //TODO: Add this back in ?
-
-      // if (promptVariables.length > 0) {
-      //   const inputs: Record<string, string> = promptVariables.reduce(
-      //     (acc: Record<string, string>, variable: any) => {
-      //       acc[variable.original] = variable.value as string;
-      //       return acc;
-      //     },
-      //     {}
-      //   );
-      //   await jawn.POST(
-      //     "/v1/experiment/dataset/{datasetId}/version/{promptVersionId}/row/new",
-      //     {
-      //       body: {
-      //         inputs: inputs,
-      //       },
-      //       params: {
-      //         path: {
-      //           promptVersionId: res.data?.data?.prompt_version_id!,
-      //           datasetId: dataset.data?.data?.datasetId!,
-      //         },
-      //       },
-      //     }
-      //   );
-      // }
-
-      // if (result.error || !result.data) {
-      //   notification.setNotification("Failed to create subversion", "error");
-      //   return;
-      // }
-
-      // notification.setNotification("Prompt created successfully", "success");
-      // setIsDataLoading(true);
-      // await router.push(
-      //   `/prompts/${res.data?.data?.id}/subversion/${res.data?.data?.prompt_version_id}/experiment/${experiment.data?.data?.experimentId}`
-      // );
+      await router.push(
+        `/prompts/${res.data?.data?.id}/subversion/${res.data?.data?.prompt_version_id}/experiment/${experimentTableResult.data?.data?.experimentId}`
+      );
     };
 
     return (

@@ -492,113 +492,43 @@ const PromptIdPage = (props: PromptIdPageProps) => {
       return;
     }
     const promptVersion = prompts?.find((p) => p.id === promptVersionId);
-    const experiment = await jawn.POST("/v1/experiment/new-empty", {
-      body: {
-        metadata: {
-          prompt_id: id,
-          prompt_version: promptVersionId || "",
-          experiment_name:
-            `${prompt?.user_defined_id}_V${promptVersion?.major_version}.${promptVersion?.minor_version}` ||
-            "",
-        },
-        datasetId: dataset.data?.data?.datasetId,
-      },
-    });
-    if (!experiment.data?.data?.experimentId) {
-      notification.setNotification("Failed to create experiment", "error");
-      return;
-    }
-    const result = await jawn.POST(
-      "/v1/prompt/version/{promptVersionId}/subversion",
+
+    const experimentTableResult = await jawn.POST(
+      "/v1/experiment/new-experiment-table",
       {
-        params: {
-          path: {
-            promptVersionId: promptVersionId,
-          },
-        },
         body: {
+          datasetId: dataset.data?.data?.datasetId!,
+          promptVersionId: promptVersionId,
           newHeliconeTemplate: JSON.stringify(promptData),
           isMajorVersion: false,
-          metadata: {
+          promptSubversionMetadata: {
             experimentAssigned: true,
+          },
+          experimentMetadata: {
+            prompt_id: id,
+            prompt_version: promptVersionId,
+            experiment_name:
+              `${prompt?.user_defined_id}_V${promptVersion?.major_version}.${promptVersion?.minor_version}` ||
+              "",
+          },
+          experimentTableMetadata: {
+            datasetId: dataset.data?.data?.datasetId!,
           },
         },
       }
     );
-
-    if (result.error || !result.data) {
-      notification.setNotification("Failed to create subversion", "error");
+    if (!experimentTableResult.data?.data?.experimentId) {
+      notification.setNotification("Failed to create experiment", "error");
       return;
     }
 
-    // const randomInputData = await jawn.POST(
-    //   "/v1/prompt/version/{promptVersionId}/inputs/query",
-    //   {
-    //     params: {
-    //       path: {
-    //         promptVersionId: promptVersionId,
-    //       },
-    //     },
-    //     body: {
-    //       limit: 10,
-    //       random: true,
-    //     },
-    //   }
-    // );
-
-    // if (
-    //   randomInputData.error ||
-    //   !randomInputData.data ||
-    //   !randomInputData.data.data
-    // ) {
-    //   notification.setNotification("Failed to get random inputs", "error");
-    //   return;
-    // }
-
-    // await Promise.all(
-    //   randomInputData?.data?.data?.map((request) => {
-    //     return jawn.POST(
-    //       "/v1/experiment/dataset/{datasetId}/version/{promptVersionId}/row",
-    //       {
-    //         body: {
-    //           inputs: request.inputs,
-    //           sourceRequest: request.source_request,
-    //         },
-    //         params: {
-    //           path: {
-    //             promptVersionId: promptVersionId,
-    //             datasetId: dataset.data?.data?.datasetId ?? "",
-    //           },
-    //         },
-    //       }
-    //     );
-    //   })
-    // );
-
-    // const hypothesis = await jawn.POST("/v1/experiment/hypothesis", {
-    //   body: {
-    //     experimentId: experiment.data?.data?.experimentId,
-    //     model: model,
-    //     promptVersion: promptVersionId,
-    //     providerKeyId: "NOKEY",
-    //     status: "RUNNING",
-    //   },
-    // });
-
-    // const runResult = await jawn.POST("/v1/experiment/run", {
-    //   body: {
-    //     experimentId: experiment.data?.data?.experimentId,
-    //     hypothesisId: hypothesis.data?.data?.hypothesisId || "",
-    //     datasetRowIds: [],
-    //   },
-    // });
-    // if (runResult.error || !runResult.data) {
-    //   notification.setNotification("Failed to run experiment", "error");
-    //   return;
-    // }
+    console.log(
+      "route",
+      `/prompts/${id}/subversion/${promptVersionId}/experiment/${experimentTableResult.data?.data?.experimentId}`
+    );
 
     router.push(
-      `/prompts/${id}/subversion/${promptVersionId}/experiment/${experiment.data?.data?.experimentId}`
+      `/prompts/${id}/subversion/${promptVersionId}/experiment/${experimentTableResult.data?.data?.experimentId}`
     );
   };
 
