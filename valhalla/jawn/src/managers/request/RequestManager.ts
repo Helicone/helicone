@@ -97,53 +97,6 @@ export class RequestManager extends BaseManager {
     }
 
     const requestFromPostgres = requestPostgres.data?.[0];
-    console.log(
-      JSON.stringify({
-        filter: {
-          left: {
-            left: {
-              request_response_rmt: {
-                request_id: {
-                  equals: requestId,
-                },
-              },
-            },
-            operator: "and",
-            right: {
-              request_response_rmt: {
-                model: {
-                  equals: requestFromPostgres?.request_model ?? "",
-                },
-              },
-            },
-          },
-          right: {
-            right: {
-              request_response_rmt: {
-                request_created_at: {
-                  gt: deltaTime(
-                    new Date(requestFromPostgres?.request_created_at!),
-                    -10
-                  ),
-                },
-              },
-            },
-            left: {
-              request_response_rmt: {
-                request_created_at: {
-                  lt: deltaTime(
-                    new Date(requestFromPostgres?.request_created_at!),
-                    10
-                  ),
-                },
-              },
-            },
-            operator: "and",
-          },
-          operator: "and",
-        },
-      })
-    );
     const requestClickhouse = await this.getRequestsClickhouse({
       filter: {
         left: {
@@ -158,7 +111,7 @@ export class RequestManager extends BaseManager {
           right: {
             request_response_rmt: {
               model: {
-                equals: requestFromPostgres?.request_model ?? "",
+                equals: requestFromPostgres?.response_model ?? "",
               },
             },
           },

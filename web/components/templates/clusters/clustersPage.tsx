@@ -125,6 +125,10 @@ const ClustersPage = () => {
         defaultData={requestsByCluster}
         skeletonLoading={false}
         dataLoading={isRequestsLoading}
+        onRowSelect={(row) => {
+          setOpen(true);
+          setSelectedRequestId(row.id);
+        }}
         // skeletonLoading={}
         // dataLoading={isRequestsLoading}
       />
