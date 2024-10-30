@@ -83,7 +83,6 @@ export function ExperimentTable({
 
   const [isHypothesisRunning, setIsHypothesisRunning] = useState(false);
 
-  // State to control ExperimentInputSelector
   const [showExperimentInputSelector, setShowExperimentInputSelector] =
     useState(false);
 
