@@ -21,7 +21,7 @@ const StreamWarning: React.FC<StreamWarningProps> = ({
   }
 
   return (
-    <Alert variant="default" className="max-w-[800px] mx-10">
+    <Alert variant="warning" className="w-full">
       <div className="flex justify-between items-center">
         <AlertDescription className="text-muted-foreground">
           We are unable to calculate your cost accurately because the
