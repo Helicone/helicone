@@ -1,9 +1,9 @@
 import { useState } from "react";
 import ThemedModal from "../../shared/themed/themedModal";
 import MarkdownEditor from "../../shared/markdownEditor";
-import HcButton from "../../ui/hcButton";
 import { TrashIcon } from "@heroicons/react/24/outline";
 import { ChatCompletionTool } from "openai/resources";
+import { Button } from "@/components/ui/button";
 
 interface FunctionButtonProps {
   tool: ChatCompletionTool;
@@ -64,16 +64,16 @@ const FunctionButton = (props: FunctionButtonProps) => {
             {!isValidJson(functionText) && (
               <p className="text-red-500 text-sm">Invalid JSON</p>
             )}
-            <HcButton
-              variant={"primary"}
+            <Button
               size={"sm"}
-              title={"Save"}
               disabled={!isValidJson(functionText)}
               onClick={() => {
                 onSave(functionText);
                 setFunctionText(functionText);
               }}
-            />
+            >
+              Save
+            </Button>
           </div>
         </div>
       </ThemedModal>
