@@ -1,5 +1,4 @@
 import { ProFeatureWrapper } from "@/components/shared/ProBlockerComponents/ProFeatureWrapper";
-import { DocumentPlusIcon } from "@heroicons/react/24/outline";
 import React, { useCallback, useRef, useState } from "react";
 import {
   Dialog,
@@ -8,11 +7,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "../../ui/dialog";
-import HcButton from "../../ui/hcButton";
 import { Label } from "../../ui/label";
 import { Switch } from "../../ui/switch";
 import { MODEL_LIST } from "../playground/new/modelList";
 import { DiffHighlight } from "../welcome/diffHighlight";
+import { Button } from "@/components/ui/button";
 
 interface CreatePromptDialogProps {
   hasAccess: boolean;
@@ -40,12 +39,9 @@ const CreatePromptDialog: React.FC<CreatePromptDialogProps> = ({
     <Dialog>
       <DialogTrigger asChild className="w-min">
         <ProFeatureWrapper featureName="Prompts" enabled={hasAccess}>
-          <HcButton
-            variant={"primary"}
-            size={"sm"}
-            title={"Create new prompt"}
-            icon={DocumentPlusIcon}
-          />
+          <Button variant={"default"} size={"sm"}>
+            Create new prompt
+          </Button>
         </ProFeatureWrapper>
       </DialogTrigger>
       <DialogContent className="w-[900px] ">

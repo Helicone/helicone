@@ -1,13 +1,25 @@
-import { Tooltip } from "@mui/material";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { clsx } from "../../../shared/clsx";
 import useNotification from "../../../shared/notification/useNotification";
 import { getUSDateFromString } from "../../../shared/utils/utils";
-import { ArrowsPointingOutIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { TrashIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
-import ThemedModal from "../../../shared/themed/themedModal";
-import { Badge } from "@tremor/react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
 import { useRouter } from "next/router";
 import { Col } from "../../../layout/common";
+import { Card, CardContent } from "@/components/ui/card";
+import { ExpandIcon, ShrinkIcon } from "lucide-react";
 
 interface PromptPropertyCardProps {
   isSelected: boolean;
@@ -42,161 +54,144 @@ const PromptPropertyCard = (props: PromptPropertyCardProps) => {
 
   return (
     <>
-      <div
+      <Card
         className={clsx(
           isSelected
             ? "bg-sky-100 border-sky-500 dark:bg-sky-950"
-            : "bg-white border-gray-300 dark:bg-black dark:border-gray-700",
+            : "bg-white border-slate-300 dark:bg-black dark:border-slate-700",
           "w-full border-t px-4 py-2 "
         )}
       >
-        <div className={clsx("flex flex-col w-full")}>
-          <div className="flex flex-col space-y-1 items-start w-full">
-            <div className="flex items-center w-full justify-between text-left">
-              {onSelect ? (
-                <button onClick={onSelect}>
-                  <div className="border rounded-full border-gray-500 bg-white dark:bg-black h-6 w-6 flex items-center justify-center">
-                    {isSelected && index === undefined && (
-                      <div className="bg-sky-500 rounded-full h-4 w-4" />
-                    )}
-                    {index && (
-                      <p className="text-xs font-bold text-gray-500 dark:text-gray-400">
-                        {index}
-                      </p>
-                    )}
-                  </div>
-                </button>
-              ) : (
-                <div />
-              )}
-              <div className="flex items-center space-x-2">
-                <button
-                  className="p-1 hover:bg-gray-100 rounded-lg"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setExpanded(true);
-                  }}
-                >
-                  <ArrowsPointingOutIcon className="h-4 w-4 text-gray-500" />
-                </button>
-                {onRemove && (
+        <CardContent className="p-0 relative">
+          <div className={clsx("flex flex-col w-full")}>
+            <div className="flex flex-col space-y-1 items-start w-full">
+              <div className="flex items-center w-full justify-between text-left">
+                {onSelect ? (
+                  <button onClick={onSelect}>
+                    <div className="border rounded-full border-slate-500 bg-white dark:bg-black h-6 w-6 flex items-center justify-center">
+                      {isSelected && index === undefined && (
+                        <div className="bg-sky-500 rounded-full h-4 w-4" />
+                      )}
+                      {index && (
+                        <p className="text-xs font-bold text-slate-500 dark:text-slate-400">
+                          {index}
+                        </p>
+                      )}
+                    </div>
+                  </button>
+                ) : (
+                  <div />
+                )}
+                <div className="flex items-center space-x-2 absolute right-1 top-1">
                   <button
-                    className="p-1 hover:bg-gray-100 rounded-lg"
+                    className="p-1 hover:bg-slate-100 rounded-lg"
                     onClick={(e) => {
                       e.stopPropagation();
-                      onRemove();
+                      setExpanded(true);
                     }}
                   >
-                    <TrashIcon className="h-4 w-4 text-red-500" />
+                    {expanded ? (
+                      <ShrinkIcon className="h-4 w-4 text-slate-500" />
+                    ) : (
+                      <ExpandIcon className="h-4 w-4 text-slate-500" />
+                    )}
                   </button>
-                )}
+                  {onRemove && (
+                    <button
+                      className="p-1 hover:bg-slate-100 rounded-lg"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onRemove();
+                      }}
+                    >
+                      <TrashIcon className="h-4 w-4 text-red-500" />
+                    </button>
+                  )}
+                </div>
               </div>
+              <div className="flex items-center w-full justify-between text-left">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigator.clipboard.writeText(requestId);
+                        setNotification("Copied to clipboard", "success");
+                      }}
+                      className={clsx(
+                        size === "large" ? "text-md" : "text-sm",
+                        "underline font-semibold text-slate-900 dark:text-slate-100 truncate"
+                      )}
+                    >
+                      {requestId}
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent className="text-xs z-[1001]">
+                    <p>Copy</p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+              <p className={"text-xs text-slate-500"}>
+                {getUSDateFromString(createdAt)}
+              </p>
             </div>
-            <div className="flex items-center w-full justify-between text-left">
-              <Tooltip title="Copy">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigator.clipboard.writeText(requestId);
-                    setNotification("Copied to clipboard", "success");
-                  }}
-                  className={clsx(
-                    size === "large" ? "text-lg" : "text-sm",
-                    "underline font-semibold text-black dark:text-white truncate"
-                  )}
-                >
-                  {requestId}
-                </button>
-              </Tooltip>
-            </div>
-            <p
-              className={clsx(
-                size === "large" ? "text-sm" : "text-xs",
-                "text-gray-500"
-              )}
-            >
-              {getUSDateFromString(createdAt)}
-            </p>
           </div>
-        </div>
-        <Col>
-          <label className="text-sm text-gray-500 mt-4">User Inputs</label>
-          <ul className="divide-y divide-gray-300 dark:divide-gray-700 flex flex-col w-full">
-            {Object.entries(properties).map(([key, value]) => (
-              <li
-                key={key}
-                className="flex items-center py-2 justify-between gap-8"
-              >
-                <p
-                  className={clsx(
-                    size === "large" ? "text-sm" : "text-xs",
-                    "font-semibold text-black dark:text-white"
-                  )}
+          <Col>
+            <label className="text-xs text-slate-500 mt-2">User Inputs</label>
+            <ul className="divide-y divide-slate-300 dark:divide-slate-700 flex flex-col w-full">
+              {Object.entries(properties).map(([key, value]) => (
+                <li
+                  key={key}
+                  className="flex items-center py-2 justify-between gap-8"
                 >
-                  {key}
-                </p>
-                <p
-                  className={clsx(
-                    size === "large" ? "text-sm" : "text-xs",
-                    "text-sm text-gray-700 dark:text-gray-300 max-w-[22.5vw] truncate"
-                  )}
-                >
-                  {value}
-                </p>
-              </li>
-            ))}
-          </ul>
-          {/* {autoInputs && Object.keys(autoInputs).length > 0 && (
-            <>
-              <label className="text-sm text-gray-500 mt-4">Auto Inputs</label>
-              <ul className="flex flex-col w-full divide-y divide-gray-300 dark:divide-gray-700 mt-2">
-                {Object.entries(autoInputs).map(([key, value], idx) => (
-                  <li key={key} className="py-2">
-                    <Tooltip title="Click to copy">
-                      <span
-                        className="cursor-pointer hover:opacity-75 transition-opacity duration-300"
-                        onClick={() => {
-                          navigator.clipboard.writeText(JSON.stringify(value));
-                          setNotification("Copied to clipboard", "success");
-                        }}
-                      >
-                        {idx}: {JSON.stringify(value).substring(0, 25)}...
-                      </span>
-                    </Tooltip>
-                  </li>
-                ))}
-              </ul>
-            </>
-          )} */}
-        </Col>
-      </div>
-      <ThemedModal open={expanded} setOpen={setExpanded}>
-        <div className="w-[80vw] h-full flex flex-col items-start relative">
-          <div className="flex flex-col h-full items-start sticky -top-6 bg-white -mt-4 py-4 border-b border-gray-300 dark:border-gray-700 w-full">
-            <Tooltip title="Copy">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  navigator.clipboard.writeText(requestId);
-                  setNotification("Copied to clipboard", "success");
-                }}
-                className={clsx(
-                  size === "large" ? "text-lg" : "text-sm",
-                  "underline font-semibold text-black dark:text-white truncate"
-                )}
-              >
-                {requestId}
-              </button>
-            </Tooltip>
+                  <p className="font-semibold text-slate-900 dark:text-slate-100 text-xs">
+                    {key}
+                  </p>
+                  <p className="text-xs text-slate-700 dark:text-slate-300 max-w-[22.5vw] truncate">
+                    {value}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </Col>
+        </CardContent>
+      </Card>
+      <Dialog open={expanded} onOpenChange={setExpanded}>
+        <DialogContent className="max-w-[80vw] max-h-[85vh] overflow-y-auto z-[1000]">
+          <DialogHeader className="sticky -top-6 bg-white -mt-4 py-4 border-b">
+            <DialogTitle>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigator.clipboard.writeText(requestId);
+                        setNotification("Copied to clipboard", "success");
+                      }}
+                      className={clsx(
+                        size === "large" ? "text-lg" : "text-sm",
+                        "underline font-semibold text-slate-950 dark:text-slate-50 truncate"
+                      )}
+                    >
+                      {requestId}
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="text-xs z-[1001]">
+                    <p>Copy</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </DialogTitle>
             <p
               className={clsx(
                 size === "large" ? "text-sm" : "text-xs",
-                "text-gray-500"
+                "text-slate-500"
               )}
             >
               {getUSDateFromString(createdAt)}
             </p>
-            <ul className="flex flex-wrap gap-2 pt-4">
+            <ul className="flex flex-wrap gap-2 pt-2">
               {Object.entries(properties).map(([key, value]) => (
                 <li key={key}>
                   <button
@@ -205,37 +200,27 @@ const PromptPropertyCard = (props: PromptPropertyCardProps) => {
                     }}
                     className="hover:cursor-pointer"
                   >
-                    <Badge size="md">{key}</Badge>
+                    <Badge variant="secondary">{key}</Badge>
                   </button>
                 </li>
               ))}
             </ul>
-          </div>
+          </DialogHeader>
 
-          <ul className="divide-y divide-gray-300 dark:divide-gray-700 flex flex-col w-full">
+          <ul className="divide-y divide-slate-300 dark:divide-slate-700 flex flex-col w-full">
             {Object.entries(properties).map(([key, value]) => (
               <li key={key} className="flex flex-col py-4 space-y-2">
-                <p
-                  className={clsx(
-                    size === "large" ? "text-xl" : "text-md",
-                    "font-semibold text-black dark:text-white"
-                  )}
-                >
+                <p className={"font-medium text-black dark:text-white"}>
                   {key}
                 </p>
-                <p
-                  className={clsx(
-                    size === "large" ? "text-md" : "text-sm",
-                    "text-gray-700 dark:text-gray-300 whitespace-pre-wrap"
-                  )}
-                >
+                <p className="text-slate-700 dark:text-slate-300 whitespace-pre-wrap text-sm">
                   {value}
                 </p>
               </li>
             ))}
           </ul>
-        </div>
-      </ThemedModal>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };

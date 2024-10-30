@@ -7,15 +7,6 @@ import {
   TableCellsIcon,
   TagIcon,
 } from "@heroicons/react/24/outline";
-import {
-  Card,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeaderCell,
-  TableRow,
-} from "@tremor/react";
 import { useRouter } from "next/router";
 import { usePropertyCard } from "./useProperty";
 
@@ -36,6 +27,7 @@ import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import ThemedTableHeader from "../../shared/themed/themedHeader";
 import useSearchParams from "../../shared/utils/useSearchParams";
 import { formatNumber } from "../users/initialColumns";
+import { SimpleTable } from "../../shared/table/simpleTable";
 
 interface PropertyPanelProps {
   property: string;
@@ -210,130 +202,114 @@ const PropertyPanel = (props: PropertyPanelProps) => {
             </li>
           </ul>
 
-          <Card className="py-1 px-2">
-            {isAnyLoading ? (
-              <div className="py-8">
-                <LoadingAnimation title="Loading Data..." />
-              </div>
-            ) : (
-              <Table className="overflow-auto">
-                <TableHead className="border-b border-gray-300 dark:border-gray-700">
-                  <TableRow>
-                    <TableHeaderCell className="text-black dark:text-white w-[200px]">
-                      {/* the fine-tune job id  */}
-                      Value
-                    </TableHeaderCell>
-                    <TableHeaderCell className="text-black dark:text-white">
-                      Requests
-                    </TableHeaderCell>
-                    <TableHeaderCell className="text-black dark:text-white">
-                      Cost
-                    </TableHeaderCell>
-                    <TableHeaderCell className="text-black dark:text-white">
-                      Avg Comp Tokens
-                    </TableHeaderCell>
-                    <TableHeaderCell className="text-black dark:text-white">
-                      Avg Latency
-                    </TableHeaderCell>
-                    <TableHeaderCell className="text-black dark:text-white">
-                      Avg Cost
-                    </TableHeaderCell>
-                    <TableHeaderCell />
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {cleanedValueData.map((propertyValue, i) => (
-                    <TableRow
-                      key={i}
-                      className="text-black dark:text-white border-b border-gray-300 dark:border-gray-700"
-                    >
-                      <>
-                        <TableCell
-                          className="flex flex-row items-start font-semibold max-w-[200px] 2xl:max-w-[400px] truncate underline hover:cursor-pointer"
-                          onClick={() => {
-                            const value = propertyValue.property_value;
-
-                            const filterMapIndex = filterMap.findIndex(
-                              (f) => f.label === property
-                            );
-
-                            const currentAdvancedFilters = encodeURIComponent(
-                              JSON.stringify(
-                                [
-                                  {
-                                    filterMapIdx: filterMapIndex,
-                                    operatorIdx: 0,
-                                    value,
-                                  },
-                                ]
-                                  .map(encodeFilter)
-                                  .join("|")
-                              )
-                            );
-
-                            router.push({
-                              pathname: "/requests",
-                              query: {
-                                t: "3m",
-                                filters: currentAdvancedFilters,
+          {isAnyLoading ? (
+            <div className="py-8">
+              <LoadingAnimation title="Loading Data..." />
+            </div>
+          ) : (
+            <SimpleTable
+              className="w-full border rounded"
+              data={cleanedValueData}
+              columns={[
+                {
+                  key: "property_value" as keyof (typeof cleanedValueData)[0],
+                  header: "Value",
+                  render: (propertyValue) => (
+                    <div
+                      className="flex flex-row items-start font-semibold max-w-[200px] 2xl:max-w-[400px] truncate underline hover:cursor-pointer"
+                      onClick={() => {
+                        const value = propertyValue.property_value;
+                        const filterMapIndex = filterMap.findIndex(
+                          (f) => f.label === property
+                        );
+                        const currentAdvancedFilters = encodeURIComponent(
+                          JSON.stringify(
+                            [
+                              {
+                                filterMapIdx: filterMapIndex,
+                                operatorIdx: 0,
+                                value,
                               },
-                            });
-                          }}
-                        >
-                          {propertyValue.property_value}
-                          <ArrowTopRightOnSquareIcon className="h-4 w-4 inline ml-1 text-gray-700 dark:text-gray-300" />
-                        </TableCell>
-                        <TableCell>{propertyValue.total_requests}</TableCell>
-                        <TableCell>
-                          ${formatNumber(propertyValue.total_cost, 6)}
-                        </TableCell>
-                        <TableCell>
-                          {formatNumber(
-                            propertyValue.avg_completion_tokens_per_request,
-                            6
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          {formatNumber(
-                            propertyValue.avg_latency_per_request,
-                            6
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          $
-                          {formatNumber(
-                            propertyValue.average_cost_per_request,
-                            6
-                          )}
-                        </TableCell>
-                      </>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
+                            ]
+                              .map(encodeFilter)
+                              .join("|")
+                          )
+                        );
 
-            {!showMore && propertyValueData.length > 10 && (
-              <div className="w-full items-center flex justify-center p-2">
-                <button
-                  onClick={() => {
-                    setShowMore(true);
-                    refetch();
-                  }}
-                  className="text-black dark:text-white border p-2 border-gray-300 bg-white hover:bg-gray-100 dark:border-gray-700 dark:bg-black dark:hover:bg-gray-900 rounded-lg font-semibold flex flex-row gap-2 items-center text-sm"
-                >
-                  {isRefetching ? (
-                    <div className="animate-spin h-4 w-4">
-                      <ArrowPathIcon />
+                        router.push({
+                          pathname: "/requests",
+                          query: {
+                            t: "3m",
+                            filters: currentAdvancedFilters,
+                          },
+                        });
+                      }}
+                    >
+                      {propertyValue.property_value}
+                      <ArrowTopRightOnSquareIcon className="h-4 w-4 inline ml-1 text-gray-700 dark:text-gray-300" />
                     </div>
-                  ) : (
-                    <ArrowsPointingOutIcon className="h-4 w-4" />
-                  )}
-                  Show More
-                </button>
-              </div>
-            )}
-          </Card>
+                  ),
+                },
+                {
+                  key: "total_requests" as keyof (typeof cleanedValueData)[0],
+                  header: "Requests",
+                  render: (propertyValue) => propertyValue.total_requests,
+                },
+                {
+                  key: "total_cost" as keyof (typeof cleanedValueData)[0],
+                  header: "Cost",
+                  render: (propertyValue) =>
+                    `$${formatNumber(propertyValue.total_cost, 6)}`,
+                },
+                {
+                  key: "avg_completion_tokens_per_request" as keyof (typeof cleanedValueData)[0],
+                  header: "Avg Comp Tokens",
+                  render: (propertyValue) =>
+                    formatNumber(
+                      propertyValue.avg_completion_tokens_per_request,
+                      6
+                    ),
+                },
+                {
+                  key: "avg_latency_per_request" as keyof (typeof cleanedValueData)[0],
+                  header: "Avg Latency",
+                  render: (propertyValue) =>
+                    formatNumber(propertyValue.avg_latency_per_request, 6),
+                },
+                {
+                  key: "average_cost_per_request" as keyof (typeof cleanedValueData)[0],
+                  header: "Avg Cost",
+                  render: (propertyValue) =>
+                    `$${formatNumber(
+                      propertyValue.average_cost_per_request,
+                      6
+                    )}`,
+                },
+              ]}
+              emptyMessage="No property data available"
+            />
+          )}
+
+          {!showMore && propertyValueData.length > 10 && (
+            <div className="w-full items-center flex justify-center p-2">
+              <button
+                onClick={() => {
+                  setShowMore(true);
+                  refetch();
+                }}
+                className="text-black dark:text-white border p-2 border-gray-300 bg-white hover:bg-gray-100 dark:border-gray-700 dark:bg-black dark:hover:bg-gray-900 rounded-lg font-semibold flex flex-row gap-2 items-center text-sm"
+              >
+                {isRefetching ? (
+                  <div className="animate-spin h-4 w-4">
+                    <ArrowPathIcon />
+                  </div>
+                ) : (
+                  <ArrowsPointingOutIcon className="h-4 w-4" />
+                )}
+                Show More
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>

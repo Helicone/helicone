@@ -1,13 +1,18 @@
 import React from "react";
-import { Select, SelectItem } from "@tremor/react";
-import HcButton from "../../../../ui/hcButton";
-import { PlusIcon } from "@heroicons/react/20/solid";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import ProviderKeyList from "../../../enterprise/portal/id/providerKeyList";
 import SelectRandomDataset from "../selectRandomDataset";
 import { Prompt } from "./types";
 import { useJawnClient } from "../../../../../lib/clients/jawnHook";
 import useNotification from "../../../../shared/notification/useNotification";
 import { PlaygroundModel } from "../../../playground/playgroundPage";
+import { Button } from "@/components/ui/button";
 
 interface Dataset {
   id: string;
@@ -75,17 +80,20 @@ const ExperimentConfigSelector: React.FC<ExperimentConfigSelectorProps> = ({
                     value={selectedDatasetId}
                     onValueChange={(value) => setSelectedDatasetId(value)}
                   >
-                    {datasets.map((dataset) => (
-                      <SelectItem key={dataset.id} value={dataset.id}>
-                        {dataset.name}
-                      </SelectItem>
-                    ))}
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select a dataset" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {datasets.map((dataset) => (
+                        <SelectItem key={dataset.id} value={dataset.id}>
+                          {dataset.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
                   </Select>
-                  <HcButton
+                  <Button
                     variant={"secondary"}
                     size={"xs"}
-                    title={"Generate random dataset"}
-                    icon={PlusIcon}
                     onClick={async () => {
                       const response = await jawn.POST(
                         "/v1/prompt/version/{promptVersionId}/inputs/query",
@@ -105,7 +113,9 @@ const ExperimentConfigSelector: React.FC<ExperimentConfigSelectorProps> = ({
                       setRequestIds(response.data?.data || undefined);
                       setOpenConfirmModal(true);
                     }}
-                  />
+                  >
+                    Generate random dataset
+                  </Button>
                 </div>
               </li>
               <li className="flex items-start space-x-2">
@@ -114,15 +124,19 @@ const ExperimentConfigSelector: React.FC<ExperimentConfigSelectorProps> = ({
                 </label>
                 <div className="flex w-full max-w-xs">
                   <Select
-                    placeholder="Select a model"
                     value={selectedModel}
                     onValueChange={(value) => setSelectedModel(value)}
                   >
-                    {PLAYGROUND_MODELS.map((model) => (
-                      <SelectItem key={model.name} value={model.name}>
-                        {model.name}
-                      </SelectItem>
-                    ))}
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select a model" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {PLAYGROUND_MODELS.map((model) => (
+                        <SelectItem key={model.name} value={model.name}>
+                          {model.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
                   </Select>
                 </div>
               </li>
@@ -133,15 +147,19 @@ const ExperimentConfigSelector: React.FC<ExperimentConfigSelectorProps> = ({
                   </label>
                   <div className="flex w-full max-w-36">
                     <Select
-                      placeholder="Select cloud"
                       value={selectedDeployment}
                       onValueChange={(value) => {
                         if (value === "AZURE" || value === "OPENAI")
                           setSelectedDeployment(value);
                       }}
                     >
-                      <SelectItem value={"OPENAI"}>Open AI</SelectItem>
-                      <SelectItem value={"AZURE"}>Azure</SelectItem>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select cloud" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="OPENAI">Open AI</SelectItem>
+                        <SelectItem value="AZURE">Azure</SelectItem>
+                      </SelectContent>
                     </Select>
                   </div>
                 </li>
@@ -169,16 +187,17 @@ const ExperimentConfigSelector: React.FC<ExperimentConfigSelectorProps> = ({
         id="step-inc"
         className="w-full flex justify-between sticky bottom-0 bg-gray-100 py-4 border-t border-gray-300 dark:border-gray-700 dark:bg-transparent"
       >
-        <HcButton
+        <Button
           variant={"secondary"}
           size={"sm"}
-          title={"Back"}
           onClick={() => {
             setCurrentStep(1);
           }}
-        />
-        <HcButton
-          variant={"primary"}
+        >
+          Back
+        </Button>
+        <Button
+          variant={"default"}
           size={"sm"}
           title={"Continue"}
           onClick={() => {

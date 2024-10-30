@@ -1,5 +1,5 @@
 import React from "react";
-import HcButton from "../../ui/hcButton";
+import { Button } from "@/components/ui/button";
 
 interface ChatPlaygroundFooterProps {
   onBack: () => void;
@@ -15,18 +15,12 @@ const ChatPlaygroundFooter: React.FC<ChatPlaygroundFooterProps> = ({
       id="step-inc"
       className="w-full flex justify-between sticky bottom-0 bg-gray-100 py-4 border-t border-gray-300 dark:border-gray-700 dark:bg-[#17191d]"
     >
-      <HcButton
-        variant={"secondary"}
-        size={"sm"}
-        title={"Back"}
-        onClick={onBack}
-      />
-      <HcButton
-        variant={"primary"}
-        size={"sm"}
-        title={"Continue"}
-        onClick={onContinue}
-      />
+      <Button variant={"secondary"} size={"sm"} onClick={onBack}>
+        Back
+      </Button>
+      <Button size={"sm"} onClick={onContinue}>
+        Continue
+      </Button>
     </div>
   );
 };

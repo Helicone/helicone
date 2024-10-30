@@ -5,7 +5,6 @@ import {
   useGetHeliconeDatasets,
 } from "../../../services/hooks/dataset/heliconeDataset";
 import ThemedTable from "../../shared/themed/table/themedTable";
-import HcBadge from "../../ui/hcBadge";
 import HcBreadcrumb from "../../ui/hcBreadcrumb";
 import {
   getGenericRequestText,
@@ -33,6 +32,7 @@ import DatasetDrawerV2 from "./datasetDrawer";
 import RemoveRequestsModal from "./RemoveRequests";
 import { useIntegration } from "@/services/hooks/useIntegrations";
 import OpenPipeFineTuneButton from "../connections/openPipe/fineTuneDatasetButton";
+import { Badge } from "@/components/ui/badge";
 
 interface DatasetIdPageProps {
   id: string;
@@ -258,7 +258,7 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
                 <h1 className="font-semibold text-4xl text-black dark:text-white">
                   {datasets?.[0]?.name}
                 </h1>
-                <HcBadge title={`${count || 0} rows`} size={"sm"} />
+                <Badge variant="secondary">{`${count || 0} rows`}</Badge>
               </div>
             </div>
           </div>

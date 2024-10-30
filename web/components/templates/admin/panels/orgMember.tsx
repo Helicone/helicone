@@ -1,5 +1,4 @@
 import { TextInput } from "@tremor/react";
-import HcButton from "../../../ui/hcButton";
 import { useState } from "react";
 
 import useNotification from "../../../shared/notification/useNotification";
@@ -7,6 +6,7 @@ import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { getJawnClient } from "../../../../lib/clients/jawn";
 import { ClipboardIcon } from "@heroicons/react/24/outline";
+import { Button } from "@/components/ui/button";
 
 interface OrgMemberProps {}
 
@@ -88,8 +88,7 @@ const OrgMember = (props: OrgMemberProps) => {
             />
           </div>
           <div className="col-span-1">
-            <HcButton
-              variant={"primary"}
+            <Button
               size={"xs"}
               onClick={async () => {
                 if (!orgName) {
@@ -98,9 +97,10 @@ const OrgMember = (props: OrgMemberProps) => {
                 }
                 findOrgs(orgName);
               }}
-              loading={isFindingOrgs}
-              title={"Search for Org Id"}
-            />
+              disabled={isFindingOrgs}
+            >
+              Search for Org Id
+            </Button>
           </div>
         </div>
         <ul>
@@ -160,8 +160,7 @@ const OrgMember = (props: OrgMemberProps) => {
         </ul>
 
         <div className="">
-          <HcButton
-            variant={"primary"}
+          <Button
             size={"xs"}
             onClick={async () => {
               if (!orgId) {
@@ -174,8 +173,9 @@ const OrgMember = (props: OrgMemberProps) => {
               }
               addAdminToOrg({ orgId, adminIds });
             }}
-            title={"Add Admin(s) to Org"}
-          />
+          >
+            Add Admin(s) to Org
+          </Button>
         </div>
       </div>
     </>

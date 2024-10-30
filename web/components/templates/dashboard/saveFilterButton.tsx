@@ -2,7 +2,6 @@ import { useState } from "react";
 import { clsx } from "../../shared/clsx";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedModal from "../../shared/themed/themedModal";
-import { TextInput } from "@tremor/react";
 import { v4 as uuidv4 } from "uuid";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import { SingleFilterDef } from "../../../services/lib/filters/frontendFilterDefs";
@@ -17,6 +16,7 @@ import {
 } from "../../../services/lib/filters/uiFilterRowTree";
 import { Button } from "@/components/ui/button";
 import { SaveIcon } from "lucide-react";
+import { Input } from "@/components/ui/input";
 
 interface SaveFilterButtonProps {
   filters: UIFilterRowTree;
@@ -186,7 +186,7 @@ const SaveFilterButton = (props: SaveFilterButtonProps) => {
             >
               Filter Name
             </label>
-            <TextInput
+            <Input
               placeholder="My new filter"
               value={filterName}
               onChange={(e) => {

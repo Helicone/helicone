@@ -1,11 +1,11 @@
 import { useState } from "react";
-import HcButton from "../../../ui/hcButton";
 import Image from "next/image";
 import { clsx } from "../../../shared/clsx";
 import CodeSnippet from "./providerIntegrations.tsx/openAISnippets";
 import AzureSnippets from "./providerIntegrations.tsx/azureSnippets";
 import AnthropicSnippets from "./providerIntegrations.tsx/anthropicSnippets";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 interface IntegrationsProps {
   apiKey: string;
@@ -135,20 +135,18 @@ const Integrations = (props: IntegrationsProps) => {
         <div className="mt-8">{renderProviderObject[selectedProvider]}</div>
       </div>
       <div className="flex items-center justify-between p-4 sticky bottom-0 bg-gray-50 z-10">
-        <HcButton
-          variant={"secondary"}
+        <Button variant={"secondary"} size={"sm"} onClick={previousStep}>
+          Back
+        </Button>
+        <Button
+          variant={"default"}
           size={"sm"}
-          title={"Back"}
-          onClick={previousStep}
-        />
-        <HcButton
-          variant={"primary"}
-          size={"sm"}
-          title={"Learn more about features and tooling"}
           onClick={() => {
             nextStep();
           }}
-        />
+        >
+          Learn more about features and tooling
+        </Button>
       </div>
     </div>
   );
