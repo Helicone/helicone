@@ -58,6 +58,7 @@ import clsx from "clsx";
 import ScoresEvaluatorsConfig from "./scores/ScoresEvaluatorsConfig";
 import { ExperimentRandomInputSelector } from "../experimentRandomInputSelector";
 import { placeAssetIdValues } from "../../../../../services/lib/requestTraverseHelper";
+import ScoresTableContainer from "./scores/ScoresTableContainer";
 
 interface ExperimentTableProps {
   promptSubversionId?: string;
@@ -840,20 +841,18 @@ export function ExperimentTable({
   const fetchExperimentHypothesisScores = useCallback(
     async (hypothesisId: string) => {
       const result = await jawn.POST(
-        // @ts-ignore
-        `/v1/experiment/${experimentId}/hypothesis/${hypothesisId}/scores`,
+        "/v1/experiment/hypothesis/{hypothesisId}/scores",
         {
           params: {
             path: {
-              experimentId: experimentId ?? "",
               hypothesisId,
             },
           },
         }
       );
-      return result.data;
+      return result.data ?? {};
     },
-    [experimentId, jawn]
+    [jawn]
   );
 
   const columnDefs = useMemo<ColDef[]>(() => {
@@ -898,7 +897,6 @@ export function ExperimentTable({
             badgeText: "Input",
             columnName: column.columnName,
             type: column.columnType,
-            fetchExperimentHypothesisScores,
           },
           cellStyle: {
             justifyContent: "start",
@@ -961,6 +959,7 @@ export function ExperimentTable({
               hypothesisId: column.metadata?.hypothesisId ?? "",
               promptVersionId: column.metadata?.promptVersionId ?? "",
               originalPromptTemplate: promptVersionTemplateRef.current,
+              runs: column.cells.filter((cell) => cell.requestId),
               onRunColumn: async (colId: string) => {
                 rowData.map(async (row, index) => {
                   const cells = [
@@ -1436,11 +1435,12 @@ export function ExperimentTable({
             <div className="flex justify-between items-center bg-white p-2 border-b">
               <ScoresEvaluatorsConfig experimentId={experimentId} />
             </div>
-            <ScoresTable
+            <ScoresTableContainer
               columnDefs={columnDefs}
               columnWidths={columnWidths}
               columnOrder={columnOrder}
               experimentId={experimentId}
+              fetchExperimentHypothesisScores={fetchExperimentHypothesisScores}
             />
           </div>
         )}

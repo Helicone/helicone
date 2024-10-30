@@ -570,10 +570,9 @@ export class ExperimentStore extends BaseStore {
   }
 
   async getExperimentHypothesisScores(params: {
-    experimentId: string;
     hypothesisId: string;
   }): Promise<Result<ExperimentScores["hypothesis"], string>> {
-    const { experimentId, hypothesisId } = params;
+    const { hypothesisId } = params;
 
     const query = `
       SELECT 

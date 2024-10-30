@@ -19,6 +19,7 @@ import {
   Experiment,
   ExperimentTable,
   IncludeExperimentKeys,
+  Score,
 } from "../../lib/stores/experimentStore";
 import {
   CreateExperimentTableParams,
@@ -258,15 +259,13 @@ export class ExperimentController extends Controller {
     }
   }
 
-  @Post("/{experimentId}/hypothesis/{hypothesisId}/scores")
+  @Post("/hypothesis/{hypothesisId}/scores")
   public async getExperimentHypothesisScores(
-    @Path() experimentId: string,
     @Path() hypothesisId: string,
     @Request() request: JawnAuthenticatedRequest
-  ): Promise<Result<null, string>> {
+  ): Promise<Result<{ scores: Record<string, Score> }, string>> {
     const experimentManager = new ExperimentManager(request.authParams);
     const result = await experimentManager.getExperimentHypothesisScores({
-      experimentId,
       hypothesisId,
     });
     return result;
