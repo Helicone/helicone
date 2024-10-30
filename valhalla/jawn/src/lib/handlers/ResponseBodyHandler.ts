@@ -39,11 +39,18 @@ function isHTML(responseBody: string): boolean {
     return false;
   }
 
-  return (
-    responseBody.includes("<html") ||
-    responseBody.includes("<HTML") ||
-    responseBody.includes("<!DOCTYPE html>")
-  );
+  const htmlIndicators = [
+    "<html",
+    "<HTML",
+    "<!DOCTYPE html>",
+    "<!DOCTYPE HTML>",
+    "<body",
+    "<BODY",
+    "<head",
+    "<HEAD",
+    "<?xml",
+  ];
+  return htmlIndicators.some((indicator) => responseBody.startsWith(indicator));
 }
 
 export class ResponseBodyHandler extends AbstractLogHandler {
