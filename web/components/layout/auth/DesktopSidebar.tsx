@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { InfoBox } from "@/components/ui/helicone/infoBox";
 import { cn } from "@/lib/utils";
 import { useLocalStorage } from "@/services/hooks/localStorage";
 import {
