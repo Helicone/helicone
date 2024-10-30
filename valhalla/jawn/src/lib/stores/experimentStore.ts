@@ -569,6 +569,108 @@ export class ExperimentStore extends BaseStore {
     return ok({ ids: results.map((result) => result.data!.id) });
   }
 
+  async getExperimentHypothesisScores(params: {
+    experimentId: string;
+    hypothesisId: string;
+  }): Promise<Result<ExperimentScores["hypothesis"], string>> {
+    const { experimentId, hypothesisId } = params;
+
+    const query = `
+      SELECT 
+        hr.result_request_id,
+        r.provider,
+        r.model,
+        r.created_at,
+        resp.completion_tokens, 
+        resp.prompt_tokens, 
+        resp.delay_ms,
+        COALESCE(
+          (
+            SELECT jsonb_object_agg(
+            sa.score_key,
+            jsonb_build_object(
+              'value', sv.int_value,
+              'valueType', sa.value_type
+            )
+          )
+        FROM score_value sv
+        JOIN score_attribute sa ON sa.id = sv.score_attribute
+            WHERE sv.request_id = r.id and sa.organization = $2
+          ),
+          '{}'::jsonb
+        ) as scores
+      FROM experiment_v2_hypothesis_run hr
+      JOIN request r ON r.id = hr.result_request_id
+      JOIN response resp ON resp.request = r.id
+      WHERE hr.experiment_hypothesis = $1
+    `;
+
+    const result = await dbExecute<{
+      result_request_id: string;
+      provider: string;
+      model: string;
+      created_at: string;
+      completion_tokens: number;
+      prompt_tokens: number;
+      delay_ms: number;
+      scores: Record<string, Score>;
+    }>(query, [hypothesisId, this.organizationId]);
+
+    if (result.error) {
+      return err(result.error);
+    }
+
+    const runs = result.data;
+
+    if (!runs || runs.length === 0) {
+      return err("No runs found");
+    }
+
+    try {
+      const totalCost = runs.reduce((sum, run) => {
+        const cost =
+          modelCost({
+            model: run.model,
+            provider: run.provider,
+            sum_prompt_tokens: run.prompt_tokens,
+            sum_completion_tokens: run.completion_tokens,
+          }) ?? 0;
+        return sum + cost;
+      }, 0);
+
+      const totalLatency = runs.reduce((sum, run) => sum + run.delay_ms, 0);
+
+      // Collect the custom scores from each run
+      const customScoresArray = runs.map((run) => run.scores);
+
+      const customScores = getCustomScores(customScoresArray);
+
+      const scores: ExperimentScores["hypothesis"] = {
+        scores: {
+          dateCreated: {
+            value: new Date(runs[0].created_at),
+            valueType: "date",
+          },
+          model: { value: runs[0].model, valueType: "string" },
+          cost: {
+            value: totalCost / runs.length,
+            valueType: "number",
+          },
+          latency: {
+            value: totalLatency / runs.length,
+            valueType: "number",
+          },
+          ...customScores,
+        },
+      };
+
+      return ok(scores);
+    } catch (error) {
+      console.error("Error calculating hypothesis scores", error);
+      return err("Error calculating hypothesis scores");
+    }
+  }
+
   async getExperimentTableById(
     experimentId: string
   ): Promise<Result<ExperimentTable, string>> {

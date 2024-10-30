@@ -837,6 +837,25 @@ export function ExperimentTable({
     "border-r border-[#E2E8F0] text-center items-center justify-center"
   );
 
+  const fetchExperimentHypothesisScores = useCallback(
+    async (hypothesisId: string) => {
+      const result = await jawn.POST(
+        // @ts-ignore
+        `/v1/experiment/${experimentId}/hypothesis/${hypothesisId}/scores`,
+        {
+          params: {
+            path: {
+              experimentId: experimentId ?? "",
+              hypothesisId,
+            },
+          },
+        }
+      );
+      return result.data;
+    },
+    [experimentId, jawn]
+  );
+
   const columnDefs = useMemo<ColDef[]>(() => {
     let columns: ColDef[] = [
       // Row number column (keep as is)
@@ -879,6 +898,7 @@ export function ExperimentTable({
             badgeText: "Input",
             columnName: column.columnName,
             type: column.columnType,
+            fetchExperimentHypothesisScores,
           },
           cellStyle: {
             justifyContent: "start",

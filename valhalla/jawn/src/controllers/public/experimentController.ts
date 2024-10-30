@@ -258,6 +258,20 @@ export class ExperimentController extends Controller {
     }
   }
 
+  @Post("/{experimentId}/hypothesis/{hypothesisId}/scores")
+  public async getExperimentHypothesisScores(
+    @Path() experimentId: string,
+    @Path() hypothesisId: string,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<null, string>> {
+    const experimentManager = new ExperimentManager(request.authParams);
+    const result = await experimentManager.getExperimentHypothesisScores({
+      experimentId,
+      hypothesisId,
+    });
+    return result;
+  }
+
   @Get("/{experimentId}/evaluators")
   public async getExperimentEvaluators(
     @Path() experimentId: string,

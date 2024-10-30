@@ -13,6 +13,7 @@ import {
   ExperimentStore,
   ExperimentTable,
   IncludeExperimentKeys,
+  Score,
 } from "../../lib/stores/experimentStore";
 import { FilterNode } from "../../lib/shared/filters/filterDefs";
 import { runOriginalExperiment } from "../../lib/experiment/run";
@@ -285,5 +286,12 @@ export class ExperimentManager extends BaseManager {
       params.hypothesisId,
       params.promptVersionId
     );
+  }
+
+  async getExperimentHypothesisScores(params: {
+    experimentId: string;
+    hypothesisId: string;
+  }): Promise<Result<{ scores: Record<string, Score> }, string>> {
+    return this.ExperimentStore.getExperimentHypothesisScores(params);
   }
 }

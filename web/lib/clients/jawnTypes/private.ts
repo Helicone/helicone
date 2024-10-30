@@ -232,6 +232,9 @@ export interface paths {
   "/v1/experiment/hypothesis": {
     post: operations["CreateNewExperimentHypothesis"];
   };
+  "/v1/experiment/{experimentId}/hypothesis/{hypothesisId}/scores": {
+    post: operations["GetExperimentHypothesisScores"];
+  };
   "/v1/experiment/{experimentId}/evaluators": {
     get: operations["GetExperimentEvaluators"];
     post: operations["CreateExperimentEvaluator"];
@@ -4064,6 +4067,22 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result__hypothesisId-string_.string_"];
+        };
+      };
+    };
+  };
+  GetExperimentHypothesisScores: {
+    parameters: {
+      path: {
+        experimentId: string;
+        hypothesisId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
         };
       };
     };
