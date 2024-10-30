@@ -17,6 +17,8 @@ import { Input } from "../../../../../ui/input";
 import { Dices } from "lucide-react";
 import ArrayDiffViewer from "../../../id/arrayDiffViewer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useQuery } from "@tanstack/react-query";
+import { useJawnClient } from "../../../../../../lib/clients/jawnHook";
 
 const InputCellRenderer: React.FC<any> = (props) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
@@ -168,8 +170,34 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
     onRunColumn,
     onHeaderClick,
     orginalPromptTemplate,
+    promptVersionId,
   } = props;
+
   const [showPromptPlayground, setShowPromptPlayground] = useState(false);
+  const jawnClient = useJawnClient();
+
+  // Use React Query to fetch and cache the prompt template
+  const { data: promptTemplate } = useQuery(
+    ["promptTemplate", promptVersionId],
+    async () => {
+      if (!props.context.orgId || !promptVersionId) return null;
+
+      const res = await jawnClient.GET("/v1/prompt/version/{promptVersionId}", {
+        params: {
+          path: {
+            promptVersionId: promptVersionId,
+          },
+        },
+      });
+      return res.data?.data;
+    },
+    {
+      enabled:
+        !!props.context.orgId && !!promptVersionId && showPromptPlayground,
+      staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
+      cacheTime: 30 * 60 * 1000, // Keep in cache for 30 minutes
+    }
+  );
 
   const handleHeaderClick = (e: React.MouseEvent) => {
     setShowPromptPlayground(true);
@@ -178,22 +206,17 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
   const handleRunClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (onRunColumn) {
-      console.log("running column", props.column.colDef);
       await onRunColumn(props.column.colId);
     }
   };
 
   const hasDiff = useMemo(() => {
     return (
-      props.context?.promptVersionTemplateRef?.current?.helicone_template
-        ?.messages && props.hypothesis?.promptVersion?.template?.messages
+      promptTemplate?.helicone_template?.messages &&
+      props.hypothesis?.promptVersion?.template?.messages
     );
-  }, [
-    props.context?.promptVersionTemplateRef,
-    props.hypothesis?.promptVersion?.template?.messages,
-  ]);
+  }, [promptTemplate, props.hypothesis?.promptVersion?.template?.messages]);
 
-  const [showDiff, setShowDiff] = useState(false);
   return (
     <Popover open={showPromptPlayground} onOpenChange={setShowPromptPlayground}>
       <PopoverTrigger asChild>
@@ -235,10 +258,7 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
             </TabsList>
             <TabsContent value="diff">
               <ArrayDiffViewer
-                origin={
-                  props.context?.promptVersionTemplateRef?.current
-                    ?.helicone_template?.messages ?? []
-                }
+                origin={promptTemplate?.helicone_template?.messages ?? []}
                 target={
                   props.hypothesis?.promptVersion?.template?.messages ?? []
                 }
@@ -247,7 +267,7 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
             <TabsContent value="preview">
               <PromptPlayground
                 prompt={
-                  props.promptVersionTemplate?.helicone_template ??
+                  promptTemplate?.helicone_template ??
                   (props.hypothesis?.promptVersion?.template || "")
                 }
                 selectedInput={undefined}
@@ -256,7 +276,7 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
                 }}
                 submitText="Save"
                 initialModel={
-                  props.promptVersionTemplate?.model ||
+                  promptTemplate?.model ||
                   props.hypothesis?.promptVersion?.model ||
                   ""
                 }
@@ -269,7 +289,7 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
         ) : (
           <PromptPlayground
             prompt={
-              props.promptVersionTemplate?.helicone_template ??
+              promptTemplate?.helicone_template ??
               (props.hypothesis?.promptVersion?.template || "")
             }
             selectedInput={undefined}
@@ -278,7 +298,7 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
             }}
             submitText="Save"
             initialModel={
-              props.promptVersionTemplate?.model ||
+              promptTemplate?.model ||
               props.hypothesis?.promptVersion?.model ||
               ""
             }

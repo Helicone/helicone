@@ -999,6 +999,7 @@ export function ExperimentTable({
             displayName: "Original",
             badgeText: "Output",
             badgeVariant: "secondary",
+            promptVersionId: column.metadata?.promptVersionId ?? "",
             promptVersionTemplate: promptVersionTemplate,
           },
           cellClass: "border-r border-[#E2E8F0] text-slate-700 pt-2.5",
@@ -1648,7 +1649,7 @@ export function ExperimentTable({
               setActivePopoverCell,
               handleLastInputSubmit,
               handleInputChange,
-              rowData, 
+              rowData, // Add this line
             }}
             rowClass="border-b border-gray-200 hover:bg-gray-50"
             headerHeight={40}
