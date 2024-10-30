@@ -987,7 +987,7 @@ export function ExperimentTable({
             displayName: "Original",
             badgeText: "Output",
             badgeVariant: "secondary",
-            promptVersionId: column.metadata?.promptVersionId ?? "",
+            promptVersionId: promptVersionTemplate?.id ?? "",
             promptVersionTemplate: promptVersionTemplate,
           },
           cellClass: "border-r border-[#E2E8F0] text-slate-700 pt-2.5",

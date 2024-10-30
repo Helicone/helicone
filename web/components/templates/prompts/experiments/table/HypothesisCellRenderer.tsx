@@ -244,8 +244,9 @@ export const OriginalOutputCellRenderer: React.FC<any> = (params) => {
   const parsedResponseData = data[colDef.cellRendererParams.columnId];
 
   const content =
-    parsedResponseData?.response?.choices?.[0]?.message?.content || "";
-  const parsedData = data.messages;
+    parsedResponseData?.responseBody?.response?.choices?.[0]?.message
+      ?.content || "";
+
   const handleCellClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     setShowPromptPlayground(true);
@@ -262,8 +263,11 @@ export const OriginalOutputCellRenderer: React.FC<any> = (params) => {
       ],
     };
   };
+  const cellId = `${colDef.cellRendererParams.columnId}_${params.node.rowIndex}`;
 
-  if (data.isLoading?.[hypothesisId]) {
+  const isLoading = data.isLoading?.[cellId];
+
+  if (isLoading) {
     return (
       <div className="w-full h-full whitespace-pre-wrap flex flex-row items-center space-x-2 pl-4">
         <span className="animate-ping inline-flex rounded-full bg-green-700 h-2 w-2"></span>
@@ -297,6 +301,7 @@ export const OriginalOutputCellRenderer: React.FC<any> = (params) => {
                       rowIndex: params.node.rowIndex,
                       datasetRowId: data.dataset_row_id,
                       columnId: colDef.field,
+                      cellId: cellId,
                     },
                   ]);
                 }}
