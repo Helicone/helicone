@@ -55,7 +55,9 @@ export function AdvancedFilters({
   return (
     <div className="w-full flex flex-col bg-white p-4 dark:bg-black rounded-lg">
       <div className="w-full flex items-center justify-between mb-3">
-        <h3 className="text-xs text-slate-900 font-semibold">Filters</h3>
+        <h3 className="text-xs text-slate-900 dark:text-slate-100 font-semibold">
+          Filters
+        </h3>
         <button
           onClick={() => {
             setAdvancedFilters({ operator: "and", rows: [] });

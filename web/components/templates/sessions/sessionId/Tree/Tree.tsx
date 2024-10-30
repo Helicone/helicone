@@ -135,7 +135,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({
                 className={clsx(
                   "h-[42px] w-[24px] relative shrink-0 group-hover:cursor-pointer",
                   selectedRequestId === node.trace?.request_id
-                    ? "bg-sky-100 dark:bg-sky-900"
+                    ? "bg-sky-100 dark:bg-slate-900"
                     : "bg-white dark:bg-slate-950 group-hover:bg-sky-50 dark:group-hover:bg-slate-900"
                 )}
                 onClick={() =>
