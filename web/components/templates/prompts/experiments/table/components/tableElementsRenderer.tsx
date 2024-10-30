@@ -168,6 +168,7 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
     onHeaderClick,
     orginalPromptTemplate,
     promptVersionId,
+    originalPromptTemplate,
   } = props;
 
   const [showPromptPlayground, setShowPromptPlayground] = useState(false);
@@ -191,8 +192,10 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
     {
       enabled:
         !!props.context.orgId && !!promptVersionId && showPromptPlayground,
-      staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
-      cacheTime: 30 * 60 * 1000, // Keep in cache for 30 minutes
+      staleTime: Infinity,
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+      refetchOnReconnect: false,
     }
   );
 
@@ -211,11 +214,10 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
 
   const hasDiff = useMemo(() => {
     return (
-      //@ts-ignore
-      promptTemplate?.helicone_template?.messages &&
-      props.hypothesis?.promptVersion?.template?.messages
+      (promptTemplate?.helicone_template as any)?.messages &&
+      (originalPromptTemplate?.helicone_template as any)?.messages
     );
-  }, [promptTemplate, props.hypothesis?.promptVersion?.template?.messages]);
+  }, [promptTemplate, originalPromptTemplate]);
 
   return (
     <Popover open={showPromptPlayground} onOpenChange={setShowPromptPlayground}>
@@ -258,9 +260,11 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
             </TabsList>
             <TabsContent value="diff">
               <ArrayDiffViewer
-                origin={promptTemplate?.helicone_template?.messages ?? []}
+                origin={
+                  originalPromptTemplate?.helicone_template?.messages ?? []
+                }
                 target={
-                  props.hypothesis?.promptVersion?.template?.messages ?? []
+                  (promptTemplate?.helicone_template as any)?.messages ?? []
                 }
               />
             </TabsContent>

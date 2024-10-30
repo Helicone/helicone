@@ -33,7 +33,8 @@ interface AddColumnHeaderProps {
   handleAddColumn: (
     columnName: string,
     columnType: "experiment" | "input" | "output",
-    hypothesisId?: string
+    hypothesisId?: string,
+    promptVersionId?: string
   ) => Promise<void>;
 }
 

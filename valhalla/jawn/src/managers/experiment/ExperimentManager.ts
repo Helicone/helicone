@@ -228,6 +228,7 @@ export class ExperimentManager extends BaseManager {
           {
             name: "original",
             type: "output",
+            promptVersionId: params.promptVersionId,
           },
         ] as { name: string; type: "input" | "output" }[]
       );

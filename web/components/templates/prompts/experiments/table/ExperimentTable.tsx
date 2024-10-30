@@ -155,12 +155,9 @@ export function ExperimentTable({
 
       if (res.error) {
         console.error("Error adding column:", res);
-      } else {
-        // Refetch the experiment table or update state
-        await refetchExperimentTable();
       }
     },
-    [experimentId, jawn, refetchExperimentTable]
+    [jawn, refetchExperimentTable, experimentTableData?.id]
   );
 
   const fetchInputRecords = useCallback(async () => {
@@ -200,7 +197,10 @@ export function ExperimentTable({
     {
       staleTime: Infinity, // Data will never be considered stale
       cacheTime: Infinity, // Keep the data in cache indefinitely
-      enabled: !!orgId && !!promptSubversionId, // Enable query only if values are available
+      enabled: !!orgId && !!promptSubversionId,
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+      refetchOnReconnect: false,
     }
   );
 
@@ -214,6 +214,7 @@ export function ExperimentTable({
   useEffect(() => {
     promptVersionTemplateRef.current = promptVersionTemplate;
   }, [promptVersionTemplate]);
+
 
   const fetchRandomInputRecords = useCallback(async () => {
     const jawnClient = getJawnClient(orgId);
@@ -897,14 +898,14 @@ export function ExperimentTable({
             displayName: "Original",
             badgeText: "Output",
             badgeVariant: "secondary",
-            promptVersionId: promptVersionTemplate?.id ?? "",
-            promptVersionTemplate: promptVersionTemplate,
+            promptVersionId: promptVersionTemplateRef?.current?.id ?? "",
+            promptVersionTemplate: promptVersionTemplateRef.current,
           },
           cellClass: "border-r border-[#E2E8F0] text-slate-700 pt-2.5",
           headerClass: headerClass,
           cellRenderer: OriginalOutputCellRenderer,
           cellRendererParams: {
-            prompt: promptVersionTemplate,
+            prompt: promptVersionTemplateRef.current,
             hypothesisId: "original",
             handleRunHypothesis,
             wrapText,
@@ -940,6 +941,7 @@ export function ExperimentTable({
               badgeVariant: "secondary",
               hypothesisId: column.metadata?.hypothesisId ?? "",
               promptVersionId: column.metadata?.promptVersionId ?? "",
+              originalPromptTemplate: promptVersionTemplateRef.current,
               onRunColumn: async (colId: string) => {
                 rowData.map(async (row, index) => {
                   const cells = [
