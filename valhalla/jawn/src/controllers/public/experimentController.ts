@@ -124,7 +124,7 @@ export class ExperimentController extends Controller {
     return result;
   }
 
-  @Post("/table/{experimentId}")
+  @Post("/table/{experimentId}/query")
   public async getExperimentTableById(
     @Path() experimentId: string,
     @Request() request: JawnAuthenticatedRequest
@@ -259,7 +259,7 @@ export class ExperimentController extends Controller {
     }
   }
 
-  @Post("/hypothesis/{hypothesisId}/scores")
+  @Post("/hypothesis/{hypothesisId}/scores/query")
   public async getExperimentHypothesisScores(
     @Path() hypothesisId: string,
     @Request() request: JawnAuthenticatedRequest

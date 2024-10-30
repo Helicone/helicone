@@ -100,13 +100,16 @@ export function ExperimentTable({
     if (!orgId || !experimentId) return null;
 
     const jawnClient = getJawnClient(orgId);
-    const res = await jawnClient.POST("/v1/experiment/table/{experimentId}", {
-      params: {
-        path: {
-          experimentId: experimentId,
+    const res = await jawnClient.POST(
+      "/v1/experiment/table/{experimentId}/query",
+      {
+        params: {
+          path: {
+            experimentId: experimentId,
+          },
         },
-      },
-    });
+      }
+    );
 
     return res.data?.data;
   }, [orgId, experimentId]);
@@ -841,7 +844,7 @@ export function ExperimentTable({
   const fetchExperimentHypothesisScores = useCallback(
     async (hypothesisId: string) => {
       const result = await jawn.POST(
-        "/v1/experiment/hypothesis/{hypothesisId}/scores",
+        "/v1/experiment/hypothesis/{hypothesisId}/scores/query",
         {
           params: {
             path: {
