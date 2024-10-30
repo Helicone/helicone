@@ -1030,7 +1030,7 @@ export function ExperimentTable({
 
     columns.push({
       headerName: "Add Experiment",
-      width: 150,
+      width: 170,
       suppressSizeToFit: true,
       suppressMenu: true,
       sortable: false,
@@ -1244,13 +1244,11 @@ export function ExperimentTable({
               <BeakerIcon className="h-6 w-6" />
               <h3 className="text-md font-semibold">Original Prompt</h3>
             </div>
-
             <Input
               placeholder="Prompt Name"
               value={promptName}
               onChange={(e) => setPromptName(e.target.value)}
             />
-
             <PromptPlayground
               prompt={basePrompt}
               editMode={true}
@@ -1469,7 +1467,6 @@ export function ExperimentTable({
             onColumnResized={onColumnResized}
             onColumnMoved={onColumnMoved}
             enableCellTextSelection={true}
-            colResizeDefault="shift"
             suppressRowTransform={true}
             suppressColumnVirtualisation={true}
             suppressColumnMoveAnimation={true}
@@ -1507,10 +1504,11 @@ export function ExperimentTable({
         </div>
         <Button
           variant="ghost"
+          size="sm"
           onClick={handleAddRow}
-          className="max-w-32 flex flex-row space-x-2 text-md text-[#334155]"
+          className="self-start flex flex-row space-x-2 text-slate-700 mt-0"
         >
-          <PlusIcon className="h-6 w-6" />
+          <PlusIcon className="h-4 w-4" />
           Add row
         </Button>
       </div>

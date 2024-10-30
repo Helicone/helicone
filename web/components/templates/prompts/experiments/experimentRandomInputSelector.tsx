@@ -1,9 +1,10 @@
 import { useMemo, useState } from "react";
 import ThemedDrawer from "../../../shared/themed/themedDrawer";
-import HcButton from "../../../ui/hcButton";
 import { useJawnClient } from "../../../../lib/clients/jawnHook";
 import useNotification from "../../../shared/notification/useNotification";
 import PromptPropertyCard from "../id/promptPropertyCard";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 type DatasetRequest = {
   id: string;
@@ -56,28 +57,34 @@ export const ExperimentRandomInputSelector = (
           </p>
 
           <div className="flex items-center mb-4">
-            <button
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => setNumberInput((prev) => Math.max(prev - 1, 0))}
               className="border p-2 mr-2"
             >
               -
-            </button>
-            <input
+            </Button>
+            <Input
               type="number"
               value={numberInput}
               onChange={(e) => {
                 const value = e.target.value.replace(/^0+/, ""); // Remove leading zeros
                 setNumberInput(Number(value));
               }}
-              className="border p-2 mr-2 w-10"
+              className="border p-2 mr-2 w-10 h-full"
             />
-            <button
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => setNumberInput((prev) => prev + 1)}
               className="border p-2 mr-2"
             >
               +
-            </button>
-            <span>Random Inputs</span>
+            </Button>
+            <span className="text-sm text-slate-700 dark:text-slate-300">
+              Random Inputs
+            </span>
           </div>
 
           <ul className="flex flex-col items-center space-y-4 w-full pt-4 overflow-y-auto">
@@ -98,17 +105,17 @@ export const ExperimentRandomInputSelector = (
         </div>
 
         <div className="flex justify-end space-x-4 sticky bottom-0 py-4 bg-white pb-20">
-          <HcButton
+          <Button
             variant={"secondary"}
             size={"sm"}
-            title={"Cancel"}
             onClick={() => setOpen(false)}
-          />
+          >
+            Cancel
+          </Button>
 
-          <HcButton
-            variant={"primary"}
+          <Button
+            variant={"default"}
             size={"sm"}
-            title={"Confirm"}
             onClick={async () => {
               await Promise.all(
                 shuffledRequests.map(async (request, index) => {
@@ -147,7 +154,9 @@ export const ExperimentRandomInputSelector = (
                 setOpen(false);
               }
             }}
-          />
+          >
+            Confirm
+          </Button>
         </div>
       </div>
     </ThemedDrawer>

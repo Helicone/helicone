@@ -17,7 +17,6 @@ import { useRouter } from "next/router";
 import { useExperiments } from "../../../../services/hooks/prompts/experiments";
 import { useInputs } from "../../../../services/hooks/prompts/inputs";
 import HcBreadcrumb from "../../../ui/hcBreadcrumb";
-import HcButton from "../../../ui/hcButton";
 import { useGetDataSets } from "../../../../services/hooks/prompts/datasets";
 import { MODEL_LIST } from "../../playground/new/modelList";
 import { BackendMetricsCall } from "../../../../services/hooks/useBackendFunction";
@@ -1124,15 +1123,16 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                       </MultiSelect>
                     </div>
                     <div className="pl-2">
-                      <HcButton
-                        variant={"light"}
+                      <Button
+                        variant={"ghost"}
                         size={"sm"}
-                        title={"Clear All"}
                         onClick={() => {
                           setSelectedDatasets([]);
                           setSelectedModels([]);
                         }}
-                      />
+                      >
+                        Clear All
+                      </Button>
                     </div>
                   </div>
                 </div>

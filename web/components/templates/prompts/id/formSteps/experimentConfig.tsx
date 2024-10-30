@@ -1,4 +1,11 @@
-import { Select, SelectItem, TextInput } from "@tremor/react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import ProviderKeyList from "../../../enterprise/portal/id/providerKeyList";
 import PromptPropertyCard from "../promptPropertyCard";
 import { useState } from "react";
@@ -64,7 +71,7 @@ const ExperimentConfig = (props: ExperimentConfigProps) => {
         >
           Name
         </label>
-        <TextInput
+        <Input
           value={experimentName}
           onChange={(e) => setExperimentName(e.target.value)}
         />
@@ -79,23 +86,25 @@ const ExperimentConfig = (props: ExperimentConfigProps) => {
           </label>
           <Select
             value={selectedVersion}
-            placeholder={selectedVersion}
             onValueChange={(e) => {
               setSelectedVersion(e);
             }}
-            enableClear={false}
-            className="w-full"
           >
-            {Array.from(
-              { length: currentPrompt.latest_version + 1 },
-              (_, i) => i
-            )
-              .reverse()
-              .map((version: any, i: number) => (
-                <SelectItem value={version} key={i}>
-                  {version}
-                </SelectItem>
-              ))}
+            <SelectTrigger>
+              <SelectValue placeholder={selectedVersion} />
+            </SelectTrigger>
+            <SelectContent>
+              {Array.from(
+                { length: currentPrompt.latest_version + 1 },
+                (_, i) => i
+              )
+                .reverse()
+                .map((version: any, i: number) => (
+                  <SelectItem key={i} value={version.toString()}>
+                    {version}
+                  </SelectItem>
+                ))}
+            </SelectContent>
           </Select>
         </div>
         <div className="flex flex-col space-y-1 w-1/4">
@@ -107,17 +116,21 @@ const ExperimentConfig = (props: ExperimentConfigProps) => {
           </label>
           <Select
             value={experimentModel}
-            enableClear={false}
             onValueChange={(e) => {
               setExperimentModel(e);
             }}
           >
-            <SelectItem value="gpt-3.5-turbo-1106">
-              gpt-3.5-turbo-1106
-            </SelectItem>
-            <SelectItem value="gpt-4-vision-preview">
-              gpt-4-vision-preview
-            </SelectItem>
+            <SelectTrigger>
+              <SelectValue placeholder="Select model" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="gpt-3.5-turbo-1106">
+                gpt-3.5-turbo-1106
+              </SelectItem>
+              <SelectItem value="gpt-4-vision-preview">
+                gpt-4-vision-preview
+              </SelectItem>
+            </SelectContent>
           </Select>
         </div>
       </div>

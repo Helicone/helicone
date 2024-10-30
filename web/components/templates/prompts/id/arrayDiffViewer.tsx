@@ -1,9 +1,9 @@
 import {
   Accordion,
-  AccordionBody,
-  AccordionHeader,
-  AccordionList,
-} from "@tremor/react";
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import ReactDiffViewer from "react-diff-viewer";
 import RoleButton from "../../playground/new/roleButton";
 import { ArrowRightIcon, EyeIcon } from "@heroicons/react/20/solid";
@@ -17,7 +17,7 @@ const ArrayDiffViewer = (props: ArrayDiffViewerProps) => {
   const { origin, target } = props;
 
   if (!origin || !Array.isArray(origin) || !target || !Array.isArray(target)) {
-    return <p className="text-xs text-gray-500">Failed to find diff</p>;
+    return <p className="text-xs text-muted-foreground">Failed to find diff</p>;
   }
 
   // map the array that is longer with tie-breaker being origin
@@ -25,7 +25,11 @@ const ArrayDiffViewer = (props: ArrayDiffViewerProps) => {
   const mappedArray = isOriginLonger ? origin : target;
 
   return (
-    <AccordionList>
+    <Accordion
+      type="multiple"
+      className="w-full"
+      defaultValue={mappedArray.map((_, i) => i.toString())}
+    >
       {mappedArray.map((_, index) => {
         const originItem = origin[index];
         const targetItem = target[index];
@@ -51,8 +55,12 @@ const ArrayDiffViewer = (props: ArrayDiffViewerProps) => {
         const originContent = getContent(origin[index]);
         const targetContent = getContent(target[index]);
         return (
-          <Accordion key={index} className="relative" defaultOpen={true}>
-            <AccordionHeader className="text-sm font-medium text-tremor-content-strong dark:text-dark-tremor-content-strong">
+          <AccordionItem
+            key={index}
+            value={index.toString()}
+            className="relative"
+          >
+            <AccordionTrigger className="hover:no-underline py-3 px-4 border-t border-slate-200 dark:border-slate-800">
               <div className="flex items-center space-x-4">
                 {!isSameRole && (
                   <>
@@ -64,7 +72,7 @@ const ArrayDiffViewer = (props: ArrayDiffViewerProps) => {
                       disabled={true}
                     />
                     <div>
-                      <ArrowRightIcon className="h-4 w-4 text-black dark:text-white" />
+                      <ArrowRightIcon className="h-4 w-4 text-foreground" />
                     </div>
                   </>
                 )}
@@ -78,7 +86,7 @@ const ArrayDiffViewer = (props: ArrayDiffViewerProps) => {
                 {originContent !== targetContent && (
                   <div
                     className={
-                      "text-xs border border-yellow-500 text-yellow-900 dark:text-yellow-300 font-semibold bg-yellow-100 dark:bg-yellow-900  px-2 py-1 w-fit flex items-center"
+                      "text-xs border border-yellow-500 text-yellow-900 dark:text-yellow-300 font-semibold bg-yellow-100 dark:bg-yellow-900 px-2 py-1 w-fit flex items-center"
                     }
                   >
                     <EyeIcon className="h-4 w-4 mr-1" />
@@ -86,10 +94,10 @@ const ArrayDiffViewer = (props: ArrayDiffViewerProps) => {
                   </div>
                 )}
               </div>
-            </AccordionHeader>
-            <AccordionBody className="leading-6">
+            </AccordionTrigger>
+            <AccordionContent className="p-4">
               {originContent === targetContent ? (
-                <p className="text-xs text-gray-500">No changes</p>
+                <p className="text-xs text-slate-500">No changes</p>
               ) : (
                 <div className="flex flex-col mt-4 space-y-2 w-full">
                   <ReactDiffViewer
@@ -101,11 +109,11 @@ const ArrayDiffViewer = (props: ArrayDiffViewerProps) => {
                   />
                 </div>
               )}
-            </AccordionBody>
-          </Accordion>
+            </AccordionContent>
+          </AccordionItem>
         );
       })}
-    </AccordionList>
+    </Accordion>
   );
 };
 

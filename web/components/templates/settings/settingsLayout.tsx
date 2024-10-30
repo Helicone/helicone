@@ -8,7 +8,7 @@ import {
   NoSymbolIcon,
   UserGroupIcon,
 } from "@heroicons/react/24/outline";
-import { Divider } from "@tremor/react";
+import { Separator } from "@/components/ui/separator";
 import { KeyIcon, LinkIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -97,7 +97,7 @@ const SettingsLayout = ({ children }: SettingsLayoutProps) => {
               ))}
             </TabsList>
           </Tabs>
-          <Divider />
+          <Separator />
         </div>
 
         <div className="flex-1 w-full">{children}</div>

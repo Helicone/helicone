@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import ThemedDrawer from "../../../shared/themed/themedDrawer";
-import HcButton from "../../../ui/hcButton";
 import { useJawnClient } from "../../../../lib/clients/jawnHook";
 import useNotification from "../../../shared/notification/useNotification";
 import PromptPropertyCard from "../id/promptPropertyCard";
+import { Button } from "@/components/ui/button";
 
 type DatasetRequest = {
   id: string;
@@ -94,23 +94,25 @@ const ExperimentInputSelector = (props: ExperimentInputSelectorProps) => {
             <h2 className="font-semibold text-xl">
               Select Inputs ({requestIds?.length})
             </h2>
-            <HcButton
+            <Button
               variant="secondary"
               size="sm"
               title={isAllSelected ? "Deselect All" : "Select All"}
               onClick={handleSelectAll}
-            />
+            >
+              {isAllSelected ? "Deselect All" : "Select All"}
+            </Button>
           </div>
           <p className="text-gray-500 text-sm pb-4">
             Select the inputs you want to include in the dataset.
           </p>
 
-          <ul className="flex flex-col items-center space-y-4 w-full pt-4  overflow-y-auto">
+          <ul className="flex flex-col items-center space-y-4 w-full pt-4 px-1 overflow-y-auto">
             {requestIds?.map((request) => (
               <li key={request.id} className="w-full flex items-start">
                 <input
                   type="checkbox"
-                  className="mt-2 mr-2"
+                  className="mt-2 mr-2 rounded border-slate-300 dark:border-slate-700"
                   checked={selectedRequests.some(
                     (req) => req.id === request.id
                   )}
@@ -133,17 +135,16 @@ const ExperimentInputSelector = (props: ExperimentInputSelectorProps) => {
         </div>
 
         <div className="flex justify-end space-x-4 sticky bottom-0 py-4 bg-white">
-          <HcButton
+          <Button
             variant={"secondary"}
             size={"sm"}
-            title={"Cancel"}
             onClick={() => setOpen(false)}
-          />
+          >
+            Cancel
+          </Button>
 
-          <HcButton
-            variant={"primary"}
+          <Button
             size={"sm"}
-            title={"Confirm"}
             onClick={async () => {
               if (selectedRequests.length === 0) {
                 setNotification("Please select at least one input.", "error");
@@ -188,7 +189,9 @@ const ExperimentInputSelector = (props: ExperimentInputSelectorProps) => {
                 setOpen(false);
               }
             }}
-          />
+          >
+            Confirm
+          </Button>
         </div>
       </div>
     </ThemedDrawer>

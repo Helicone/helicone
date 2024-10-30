@@ -2,7 +2,6 @@ import { TextInput } from "@tremor/react";
 import { SimpleTable } from "../../../shared/table/simpleTable";
 import { ThemedSwitch } from "../../../shared/themed/themedSwitch";
 import { getUSDate } from "../../../shared/utils/utils";
-import HcButton from "../../../ui/hcButton";
 import { useState } from "react";
 import {
   useAlertBanners,
@@ -10,6 +9,7 @@ import {
   useUpdateAlertBanner,
 } from "../../../../services/hooks/admin";
 import useNotification from "../../../shared/notification/useNotification";
+import { Button } from "@/components/ui/button";
 
 interface AlertBannersProps {}
 
@@ -55,8 +55,7 @@ const AlertBanners = (props: AlertBannersProps) => {
           />
         </div>
         <div className="col-span-1">
-          <HcButton
-            variant={"primary"}
+          <Button
             size={"xs"}
             onClick={async () => {
               if (!title || !message) {
@@ -65,9 +64,10 @@ const AlertBanners = (props: AlertBannersProps) => {
               }
               createBanner({ title, message });
             }}
-            loading={isCreatingBanner}
-            title={"Create new alert"}
-          />
+            disabled={isCreatingBanner}
+          >
+            Create new alert
+          </Button>
         </div>
       </div>
       <div className="text-black flex flex-col space-y-2">

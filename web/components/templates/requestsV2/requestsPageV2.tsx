@@ -687,9 +687,11 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   return (
     <>
       <div className="h-screen flex flex-col">
-        <StreamWarning
-          requestWithStreamUsage={requestWithoutStream !== undefined}
-        />
+        <div className="mx-10">
+          <StreamWarning
+            requestWithStreamUsage={requestWithoutStream !== undefined}
+          />
+        </div>
 
         {!isCached && userId === undefined && (
           <AuthHeader

@@ -50,6 +50,7 @@ export const HypothesisCellRenderer: React.FC<any> = (params) => {
     return {
       model: initialModel,
       messages: [
+        ...promptVersionTemplate.helicone_template.messages,
         {
           role: "assistant",
           content: content,
@@ -95,6 +96,7 @@ export const HypothesisCellRenderer: React.FC<any> = (params) => {
                 isPromptCreatedFromUi={false}
                 defaultEditMode={false}
                 editMode={false}
+                playgroundMode="experiment"
                 chatType="response"
               />
             </ScrollArea>
@@ -132,6 +134,7 @@ export const HypothesisCellRenderer: React.FC<any> = (params) => {
                 isPromptCreatedFromUi={false}
                 defaultEditMode={false}
                 editMode={false}
+                playgroundMode="experiment"
                 chatType="response"
               />
             </ScrollArea>
@@ -229,6 +232,7 @@ export const OriginalMessagesCellRenderer: React.FC<any> = (params) => {
             isPromptCreatedFromUi={false}
             defaultEditMode={false}
             editMode={false}
+            playgroundMode="experiment"
             chatType="request"
           />
         </ScrollArea>
@@ -256,6 +260,7 @@ export const OriginalOutputCellRenderer: React.FC<any> = (params) => {
     return {
       model: prompt?.model || "",
       messages: [
+        ...(prompt?.helicone_template?.messages || []),
         {
           role: "assistant",
           content: content,
@@ -325,6 +330,7 @@ export const OriginalOutputCellRenderer: React.FC<any> = (params) => {
             isPromptCreatedFromUi={false}
             defaultEditMode={false}
             editMode={false}
+            playgroundMode="experiment"
             chatType="response"
           />
         </ScrollArea>
