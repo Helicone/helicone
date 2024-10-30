@@ -271,7 +271,11 @@ const ScoresTable = memo(
                             {isBoolean ? (
                               <span>{value.percentage}%</span>
                             ) : (
-                              <span>avg: {value.average}</span>
+                              <span>
+                                {typeof value.average !== "string"
+                                  ? `avg: ${value.average}`
+                                  : value.average}
+                              </span>
                             )}
 
                             {value.count > 0 && (
