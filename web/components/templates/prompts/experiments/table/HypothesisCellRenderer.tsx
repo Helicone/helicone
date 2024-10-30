@@ -14,14 +14,12 @@ import clsx from "clsx";
 export const HypothesisCellRenderer: React.FC<any> = (params) => {
   const { data, colDef, context, wrapText, hypothesisId } = params;
   const promptVersionTemplate = context.promptVersionTemplateRef.current;
-  // Use the cellId from the data
-  console.log("data", data);
+
 
   const [showPromptPlayground, setShowPromptPlayground] = useState(false);
 
   // Parse the response data
   const parsedResponseData = data[colDef.cellRendererParams.columnId] || null;
-  console.log("parsedResponseData", colDef.cellRendererParams);
 
   const content =
     parsedResponseData?.responseBody?.response?.choices?.[0]?.message
@@ -30,11 +28,8 @@ export const HypothesisCellRenderer: React.FC<any> = (params) => {
   // Construct cellId using columnId and rowIndex
   const cellId = `${colDef.cellRendererParams.columnId}_${params.node.rowIndex}`;
 
-  // Check if this specific cell is loading
-  console.log("cellIdfff", params);
+
   const isLoading = data.isLoading?.[cellId];
-  console.log("isLoading", isLoading);
-  console.log("loadingData", data);
 
   if (isLoading) {
     return (
@@ -64,8 +59,6 @@ export const HypothesisCellRenderer: React.FC<any> = (params) => {
       ],
     };
   };
-  console.log("data123", data);
-  console.log("cellId123", cellId);
 
   // Check if content is longer than 100 characters
   const isContentLong = content.length > 100;
@@ -157,9 +150,7 @@ export const HypothesisCellRenderer: React.FC<any> = (params) => {
           onClick={(e) => {
             e.stopPropagation();
             const cellId = parsedResponseData?.cellId;
-            console.log("cellIdSend", cellId);
-            console.log("some", colDef.cellRendererParams, data);
-            // Pass row index, column id, dataset row id, and cellId
+           
             params.handleRunHypothesis(hypothesisId, [
               {
                 rowIndex: params.node.rowIndex,
@@ -256,7 +247,6 @@ export const OriginalOutputCellRenderer: React.FC<any> = (params) => {
 
   const content =
     parsedResponseData?.response?.choices?.[0]?.message?.content || "";
-  console.log("content", data);
   const parsedData = data.messages;
   const handleCellClick = (e: React.MouseEvent) => {
     e.stopPropagation();

@@ -324,10 +324,15 @@ export function ExperimentTable({
   const getRequestDataByIds = useCallback(
     async (requestIds: string[]) => {
       const jawnClient = getJawnClient(orgId);
-      const res = await jawnClient.POST("/v1/request/query-ids", {
-        body: { requestIds },
-      });
-      return res.data?.data;
+      try {
+        const res = await jawnClient.POST("/v1/request/query-ids", {
+          body: { requestIds },
+        });
+        return res.data?.data;
+      } catch (error) {
+        console.error("Error fetching request data:", error);
+        return [];
+      }
     },
     [orgId]
   );
@@ -658,31 +663,13 @@ export function ExperimentTable({
           });
           return newData;
         });
+        // Set isHypothesisRunning to true when the mutation starts
+        setIsHypothesisRunning(true);
       },
       onError: (error, variables, context) => {
         // Handle error if needed
-      },
-      onSettled: async (_, __, { cells }) => {
-        await refetchExperimentTable();
-
-        setRowData((prevData) => {
-          const newData = prevData.map((row) => {
-            const matchingCell = cells.find(
-              (cell) => cell.rowIndex === row.rowIndex
-            );
-            if (matchingCell) {
-              const cellId = `${matchingCell.columnId}_${matchingCell.rowIndex}`;
-              const newIsLoading = { ...(row.isLoading || {}) };
-              delete newIsLoading[cellId]; // Remove loading state for specific cell
-              return {
-                ...row,
-                isLoading: newIsLoading,
-              };
-            }
-            return row;
-          });
-          return newData;
-        });
+        // Set isHypothesisRunning to false if there's an error
+        setIsHypothesisRunning(false);
       },
     }
   );
@@ -1023,7 +1010,6 @@ export function ExperimentTable({
           autoHeight: wrapText,
         });
       } else if (column.columnType === "experiment") {
-        console.log("column", column);
         if (columnView === "all" || columnView === "outputs") {
           columns.push({
             field: column.id,
@@ -1075,8 +1061,6 @@ export function ExperimentTable({
         }
       }
     });
-
-    console.log("inputColumns", inputColumns);
 
     // Add columns for each input key
     // Array.from(inputKeys).forEach((key, index) => {
@@ -1542,6 +1526,58 @@ export function ExperimentTable({
   useEffect(() => {
     rowDataRef.current = rowData;
   }, [rowData]);
+
+  // Modify the onSettled to only handle errors
+
+  // Add polling effect to handle updates
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout | null = null;
+
+    if (isHypothesisRunning) {
+      intervalId = setInterval(async () => {
+        await refetchExperimentTable();
+        await updateRowData();
+
+        const latestRowData = rowDataRef.current;
+
+        let anyLoadingCells = false; // Assume no cells are loading
+
+        const newData = latestRowData.map((row) => {
+          const newIsLoading = { ...(row.isLoading || {}) };
+
+          Object.keys(newIsLoading).forEach((cellId) => {
+            const [columnId, rowIndexStr] = cellId.split("_");
+            const cellData = row[columnId]; // Use columnId
+
+            if (cellData && cellData.responseBody) {
+              delete newIsLoading[cellId];
+            } else {
+              anyLoadingCells = true; // Set to true if any cell is still loading
+            }
+          });
+
+          return {
+            ...row,
+            isLoading: newIsLoading,
+          };
+        });
+
+        setRowData(newData);
+
+        if (!anyLoadingCells) {
+          setIsHypothesisRunning(false);
+        }
+
+        gridRef.current?.refreshCells();
+      }, 3000);
+    }
+
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [isHypothesisRunning, refetchExperimentTable, updateRowData]);
 
   if (isInitialLoading) {
     return (
