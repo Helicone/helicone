@@ -512,6 +512,9 @@ const PromptIdPage = (props: PromptIdPageProps) => {
           },
           experimentTableMetadata: {
             datasetId: dataset.data?.data?.datasetId!,
+            model: promptVersion?.model,
+            prompt_id: id,
+            prompt_version: promptVersionId,
           },
         },
       }

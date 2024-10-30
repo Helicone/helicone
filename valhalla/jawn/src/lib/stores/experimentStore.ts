@@ -1,6 +1,7 @@
 import { ENVIRONMENT } from "../..";
 import { getAllSignedURLsFromInputs } from "../../managers/inputs/InputsManager";
 import { costOfPrompt } from "../../packages/cost";
+import { Database } from "../db/database.types";
 import { supabaseServer } from "../db/supabase";
 import { dbExecute } from "../shared/db/dbExecute";
 import { FilterNode } from "../shared/filters/filterDefs";
@@ -115,6 +116,14 @@ export interface ExperimentTable {
   experimentId: string;
   columns: ExperimentTableColumn[];
   metadata?: Record<string, any>;
+}
+
+export interface ExperimentTableSimplified {
+  id: string;
+  name: string;
+  experimentId: string;
+  createdAt: string;
+  metadata?: any;
 }
 
 function getExperimentsQuery(
@@ -386,6 +395,7 @@ export class ExperimentStore extends BaseStore {
 
   async createNewExperimentTable(
     datasetId: string,
+    name: string,
     experimentMetadata: Record<string, string>,
     experimentTableMetadata?: Record<string, any>
   ): Promise<
@@ -407,7 +417,7 @@ export class ExperimentStore extends BaseStore {
       .from("experiment_table")
       .insert({
         experiment_id: result.data.id,
-        name: "Experiment Table",
+        name: name,
         organization_id: this.organizationId,
         metadata: experimentTableMetadata ?? null,
       })
@@ -795,6 +805,30 @@ export class ExperimentStore extends BaseStore {
       console.error("Exception:", e);
       return err("An unexpected error occurred");
     }
+  }
+
+  async getExperimentTables(): Promise<
+    Result<ExperimentTableSimplified[], string>
+  > {
+    const { data, error } = await supabaseServer.client
+      .from("experiment_table")
+      .select("*")
+      .eq("organization_id", this.organizationId)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      return err(error.message);
+    }
+
+    return ok(
+      data.map((table) => ({
+        id: table.id,
+        name: table.name,
+        experimentId: table.experiment_id,
+        metadata: table.metadata,
+        createdAt: table.created_at,
+      }))
+    );
   }
 
   async getExperimentById(

@@ -12,12 +12,14 @@ import {
   ExperimentDatasetRow,
   ExperimentStore,
   ExperimentTable,
+  ExperimentTableSimplified,
   IncludeExperimentKeys,
   Score,
 } from "../../lib/stores/experimentStore";
 import { FilterNode } from "../../lib/shared/filters/filterDefs";
 import { runOriginalExperiment } from "../../lib/experiment/run";
 import { PromptManager } from "../prompt/PromptManager";
+import { Database } from "../../lib/db/database.types";
 
 export interface CreateExperimentTableParams {
   datasetId: string;
@@ -192,6 +194,7 @@ export class ExperimentManager extends BaseManager {
     const experimentTableResult =
       await this.ExperimentStore.createNewExperimentTable(
         params.datasetId,
+        params.experimentMetadata.experiment_name || "Experiment",
         params.experimentMetadata,
         params.experimentTableMetadata
       );
@@ -263,6 +266,12 @@ export class ExperimentManager extends BaseManager {
     experimentId: string
   ): Promise<Result<ExperimentTable, string>> {
     return this.ExperimentStore.getExperimentTableById(experimentId);
+  }
+
+  async getExperimentTables(): Promise<
+    Result<ExperimentTableSimplified[], string>
+  > {
+    return this.ExperimentStore.getExperimentTables();
   }
 
   async createExperimentColumn(params: {

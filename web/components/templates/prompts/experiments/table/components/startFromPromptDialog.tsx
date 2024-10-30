@@ -287,6 +287,9 @@ export const StartFromPromptDialog = ({
           },
           experimentTableMetadata: {
             datasetId: dataset.data?.data?.datasetId!,
+            model: promptVersion?.model,
+            prompt_id: selectedPromptId!,
+            prompt_version: selectedVersionId!,
           },
         },
       }

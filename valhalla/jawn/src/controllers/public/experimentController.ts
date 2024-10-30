@@ -18,6 +18,7 @@ import { Result, err, ok } from "../../lib/shared/result";
 import {
   Experiment,
   ExperimentTable,
+  ExperimentTableSimplified,
   IncludeExperimentKeys,
   Score,
 } from "../../lib/stores/experimentStore";
@@ -131,6 +132,13 @@ export class ExperimentController extends Controller {
   ): Promise<Result<ExperimentTable, string>> {
     const experimentManager = new ExperimentManager(request.authParams);
     return experimentManager.getExperimentTableById(experimentId);
+  }
+  @Post("/tables/query")
+  public async getExperimentTables(
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<ExperimentTableSimplified[], string>> {
+    const experimentManager = new ExperimentManager(request.authParams);
+    return experimentManager.getExperimentTables();
   }
 
   @Post("/table/{experimentTableId}/cell")

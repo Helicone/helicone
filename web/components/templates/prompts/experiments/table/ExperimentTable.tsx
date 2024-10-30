@@ -19,11 +19,10 @@ import React, {
   useState,
 } from "react";
 import AddColumnHeader from "./AddColumnHeader";
-import {
-  HypothesisCellRenderer,
-  OriginalMessagesCellRenderer,
-  OriginalOutputCellRenderer,
-} from "./HypothesisCellRenderer";
+import { HypothesisCellRenderer } from "./cells/HypothesisCellRenderer";
+import { OriginalMessagesCellRenderer } from "./cells/OriginalMessagesCellRenderer";
+import { OriginalOutputCellRenderer } from "./cells/OriginalOutputCellRenderer";
+
 import { BeakerIcon, PlusIcon } from "@heroicons/react/24/outline";
 import ExperimentInputSelector from "../experimentInputSelector";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -39,7 +38,6 @@ import {
   RowNumberCellRenderer,
   RowNumberHeaderComponent,
 } from "./components/tableElementsRenderer";
-import ScoresTable from "./scores/ScoresTable";
 import {
   Popover,
   PopoverContent,
@@ -1221,6 +1219,9 @@ export function ExperimentTable({
             },
             experimentTableMetadata: {
               datasetId: dataset.data?.data?.datasetId!,
+              model: basePrompt.model,
+              prompt_id: res.data?.data?.id!,
+              prompt_version: res.data?.data?.prompt_version_id!,
             },
           },
         }
