@@ -72,8 +72,6 @@ export function ExperimentTable({
   const orgId = org?.currentOrg?.id;
   const jawn = useJawnClient();
   const [isInitialLoading, setIsInitialLoading] = useState(true);
-  const loadingCellIds = useRef<string[]>([]);
-
   const [wrapText, setWrapText] = useState(false);
   const [columnView, setColumnView] = useState<"all" | "inputs" | "outputs">(
     "all"
@@ -108,12 +106,7 @@ export function ExperimentTable({
       },
     });
 
-    // if (res.error) {
-    //   console.error("Error fetching experiment table:", res.error);
-    //   return null;
-    // }
-
-    return res.data?.data; // Assuming the data is in res.data.data
+    return res.data?.data;
   }, [orgId, experimentId]);
 
   const { data: experimentTableData, refetch: refetchExperimentTable } =
@@ -250,18 +243,6 @@ export function ExperimentTable({
     }
   );
 
-  const mapInputRecordsToExistingColumns = useCallback(
-    (inputRecords: Record<string, string>) => {
-      return Object.entries(inputRecords).map(([columnId, value]) => {
-        return {
-          columnId,
-          value,
-        };
-      });
-    },
-    []
-  );
-
   const mapInputRecordsToColumnsWithRowId = useCallback(
     (inputRecords: Record<string, string>, rowId: string, rowIndex: number) => {
       const result: Record<
@@ -308,8 +289,6 @@ export function ExperimentTable({
       })) ?? []
     );
   }, [randomInputRecordsData]);
-
-  console.log("randomInputRecords", randomInputRecords);
 
   // Use useState to manage rowData
   const [rowData, setRowData] = useState<any[]>([]);
@@ -458,8 +437,6 @@ export function ExperimentTable({
       );
     }
 
-    console.log("rowIndexToRow", rowIndexToRow);
-
     // Now construct the rowData array
     const newRowData = await Promise.all(
       Array.from(rowIndexToRow.values()).map(async (row) => {
@@ -520,7 +497,6 @@ export function ExperimentTable({
 
     // Preserve isLoading state from previous rowData
     const updatedRowData = newRowData.map((newRow) => {
-      console.log("updatedRowData");
       // Find the matching row in the previous rowData
       const existingRow = rowDataRef.current.find(
         (row) => row.id === newRow.id
@@ -637,19 +613,14 @@ export function ExperimentTable({
     },
     {
       onMutate: ({ cells, hypothesisId }) => {
-        console.log("hypothesisId2", hypothesisId);
         // Manually update isLoading in rowData for the specific cells
         setRowData((prevData) => {
           const newData = prevData.map((row) => {
-            console.log("hypothesisId1", hypothesisId);
-            console.log("row", row);
-            console.log("cells", cells);
             const matchingCell = cells.find(
               (cell) => cell.rowIndex === row.rowIndex
             );
             if (matchingCell) {
               const cellId = `${matchingCell.columnId}_${matchingCell.rowIndex}`;
-              console.log("cellIdGot", cellId);
               const newIsLoading = {
                 ...(row.isLoading || {}),
                 [cellId]: true, // Use combined cellId
@@ -693,25 +664,6 @@ export function ExperimentTable({
     await refetchExperimentTable();
     await refetchInputRecords();
   };
-
-  // useEffect(() => {
-  //   let intervalId: NodeJS.Timeout | null = null;
-
-  //   if (isHypothesisRunning) {
-  //     intervalId = setInterval(() => {
-  //       // Refetch data and refresh the grid
-  //       refetchExperimentTable();
-  //       // refetchInputRecords();
-  //       gridRef.current?.refreshCells();
-  //     }, 1000);
-  //   }
-
-  //   return () => {
-  //     if (intervalId) {
-  //       clearInterval(intervalId);
-  //     }
-  //   };
-  // }, [isHypothesisRunning, refetchExperimentTable, refetchInputRecords]);
 
   const [columnWidths, setColumnWidths] = useState<{ [key: string]: number }>(
     {}
@@ -768,7 +720,6 @@ export function ExperimentTable({
           )
         );
 
-        // If this is the last input column, add a new row
         if (
           event.colDef.field === inputColumnFields[inputColumnFields.length - 1]
         ) {
@@ -801,9 +752,6 @@ export function ExperimentTable({
   // Modify handleLastInputSubmit to use input columns
   const handleLastInputSubmit = useCallback(
     async (rowIndex: number) => {
-      console.log("currentRowInputs", currentRowInputs);
-
-      // Check if all current row values are filled
       const currentRowValues = Object.values(currentRowInputs)
         .filter((value) => value !== undefined && value !== null)
         .map((value) => String(value).trim());
@@ -866,44 +814,6 @@ export function ExperimentTable({
     ]
   );
 
-  const extractVariables = useCallback((promptTemplate: PromptObject) => {
-    const regex =
-      /(?:\{\{([^}]+)\}\})|(?:<helicone-prompt-input key="([^"]+)"[^>]*\/>)/g;
-    const variablesSet = new Set<string>();
-
-    promptTemplate?.messages?.forEach((message) => {
-      const content = Array.isArray(message.content)
-        ? message.content.map((c) => c.text).join("\n")
-        : message.content;
-
-      let match;
-      while ((match = regex.exec(content))) {
-        const key = match[1] || match[2];
-        if (key) {
-          variablesSet.add(key.trim());
-        }
-      }
-    });
-
-    return Array.from(variablesSet);
-  }, []);
-
-  useEffect(() => {
-    if (promptVersionTemplate) {
-      console.log("promptVersionTemplate", promptVersionTemplate);
-      const extractedVariables = extractVariables(
-        promptVersionTemplate.helicone_template as any
-      );
-      console.log("extractedVariables", extractedVariables);
-      console.log("helicone_template", promptVersionTemplate.helicone_template);
-      if (extractedVariables.length > 0) {
-        //setInputKeys(new Set(extractedVariables));
-      } else {
-        //setInputKeys(new Set(["Input 1"]));
-      }
-    }
-  }, [promptVersionTemplate, extractVariables]);
-
   // Adjust useEffect to add an empty row if rowData is empty
   useEffect(() => {
     if (rowData.length === 0) {
@@ -946,8 +856,6 @@ export function ExperimentTable({
         autoHeight: wrapText,
       },
     ];
-
-    const inputColumns: Set<string> = new Set();
 
     Array.from(experimentTableData?.columns || []).forEach((column, index) => {
       if (column.columnType === "input") {
@@ -1062,34 +970,6 @@ export function ExperimentTable({
       }
     });
 
-    // Add columns for each input key
-    // Array.from(inputKeys).forEach((key, index) => {
-    //   columns.push({
-    //     field: key,
-    //     headerName: key,
-    //     width: 150,
-    //     cellRenderer: InputCellRenderer,
-    //     cellRendererParams: {
-    //       index: index,
-    //       wrapText,
-    //     },
-    //     cellClass: "border-r border-[#E2E8F0] text-slate-700 pt-2.5",
-    //     headerClass: "border-r border-[#E2E8F0]",
-    //     headerComponent: InputsHeaderComponent,
-    //     headerComponentParams: {
-    //       index: index,
-    //       displayName: key,
-    //       badgeText: "Input",
-    //     },
-    //     cellStyle: {
-    //       justifyContent: "start",
-    //       whiteSpace: wrapText ? "normal" : "nowrap",
-    //     },
-    //     autoHeight: wrapText,
-    //     editable: false, // Set this to false to prevent default editing
-    //   });
-    // });
-
     if (
       JSON.stringify(promptVersionTemplate?.helicone_template)?.includes(
         "auto-inputs"
@@ -1126,83 +1006,6 @@ export function ExperimentTable({
       });
     }
 
-    // Add the "Original" column
-    // columns.push({
-    //   field: "original",
-    //   headerName: "Original",
-    //   width: 200,
-    //   headerComponent: CustomHeaderComponent,
-    //   headerComponentParams: {
-    //     displayName: "Original",
-    //     badgeText: "Output",
-    //     badgeVariant: "secondary",
-    //     hypothesis: sortedHypotheses[1] || {},
-    //     promptVersionTemplate: promptVersionTemplate,
-    //   },
-    //   cellClass: "border-r border-[#E2E8F0] text-slate-700 pt-2.5",
-    //   headerClass: headerClass,
-    //   cellRenderer: OriginalOutputCellRenderer,
-    //   cellRendererParams: {
-    //     prompt: promptVersionTemplate,
-    //     handleRunHypothesis,
-    //     wrapText,
-    //   },
-    //   cellStyle: {
-    //     verticalAlign: "middle",
-    //     textAlign: "left",
-    //     overflow: "hidden",
-    //     textOverflow: "ellipsis",
-    //     whiteSpace: wrapText ? "normal" : "nowrap",
-    //   },
-    //   autoHeight: wrapText,
-    // });
-
-    // Add columns for additional experiments
-    // if (columnView === "all" || columnView === "outputs") {
-    //   sortedHypotheses.forEach((hypothesis, index) => {
-    //     const experimentNumber = index + 1;
-    //     columns.push({
-    //       field: hypothesis.id,
-    //       headerName: hypothesis.id,
-    //       width: 230,
-    //       suppressSizeToFit: true,
-    //       cellRenderer: HypothesisCellRenderer,
-    //       cellRendererParams: {
-    //         hypothesisId: hypothesis.id,
-    //         handleRunHypothesis,
-    //         loadingStates,
-    //         wrapText,
-    //       },
-    //       headerComponent: CustomHeaderComponent,
-    //       headerComponentParams: {
-    //         displayName: `Experiment ${experimentNumber}`,
-    //         badgeText: "Output",
-    //         badgeVariant: "secondary",
-    //         onRunColumn: async (colId: string) => {
-    //           const datasetRowIds = rowData.map((row) => row.dataset_row_id);
-    //           await Promise.all(
-    //             datasetRowIds.map((datasetRowId) =>
-    //               handleRunHypothesis(colId, [datasetRowId])
-    //             )
-    //           );
-    //         },
-    //         hypothesis: hypothesis,
-    //       },
-    //       cellClass: "border-r border-[#E2E8F0] text-slate-700 pt-2.5",
-    //       headerClass: "border-r border-[#E2E8F0]",
-    //       cellStyle: {
-    //         verticalAlign: "middle",
-    //         textAlign: "left",
-    //         overflow: "hidden",
-    //         textOverflow: "ellipsis",
-    //         whiteSpace: wrapText ? "normal" : "nowrap",
-    //       },
-    //       autoHeight: wrapText,
-    //     });
-    //   });
-    // }
-
-    // Add the "Add Experiment" column
     columns.push({
       headerName: "Add Experiment",
       width: 150,
@@ -1273,11 +1076,6 @@ export function ExperimentTable({
       exportedRow["messages"] = row["messages"] || "";
 
       exportedRow["original"] = row["original"] || "";
-
-      // sortedHypotheses.forEach((hypothesis, index) => {
-      //   const experimentLabel = `Experiment ${index + 1}`;
-      //   exportedRow[experimentLabel] = row[hypothesis.id] || "";
-      // });
 
       return exportedRow;
     });
@@ -1381,38 +1179,6 @@ export function ExperimentTable({
         return;
       }
 
-      // const experiment = await jawn.POST("/v1/experiment/new-empty", {
-      //   body: {
-      //     metadata: {
-      //       prompt_id: res.data?.data?.id!,
-      //       prompt_version: res.data?.data?.prompt_version_id!,
-      //       experiment_name: `${promptName}_V1.0` || "",
-      //     },
-      //     datasetId: dataset.data?.data?.datasetId,
-      //   },
-      // });
-      // if (!experiment.data?.data?.experimentId) {
-      //   notification.setNotification("Failed to create experiment", "error");
-      //   return;
-      // }
-      // const result = await jawn.POST(
-      //   "/v1/prompt/version/{promptVersionId}/subversion",
-      //   {
-      //     params: {
-      //       path: {
-      //         promptVersionId: res.data?.data?.prompt_version_id!,
-      //       },
-      //     },
-      //     body: {
-      //       newHeliconeTemplate: JSON.stringify(basePrompt),
-      //       isMajorVersion: false,
-      //       metadata: {
-      //         experimentAssigned: true,
-      //       },
-      //     },
-      //   }
-      // );
-
       const experimentTableResult = await jawn.POST(
         "/v1/experiment/new-experiment-table",
         {
@@ -1498,9 +1264,6 @@ export function ExperimentTable({
     rowDataRef.current = rowData;
   }, [rowData]);
 
-  // Modify the onSettled to only handle errors
-
-  // Add polling effect to handle updates
   useEffect(() => {
     let intervalId: NodeJS.Timeout | null = null;
 
@@ -1729,24 +1492,6 @@ export function ExperimentTable({
           Add row
         </Button>
       </div>
-
-      {/* <SettingsPanel
-        defaultProviderKey={providerKey}
-        setSelectedProviderKey={async (key) => {
-          await jawn.POST("/v1/experiment/update-meta", {
-            body: {
-              experimentId: experimentId ?? "",
-              meta: {
-                ...(experimentData?.meta ?? {}),
-                provider_key: key ?? "",
-              },
-            },
-          });
-          refetchExperiments();
-        }}
-        open={settingsOpen}
-        setOpen={setSettingsOpen}
-      /> */}
 
       <ExperimentRandomInputSelector
         open={showRandomInputSelector}
