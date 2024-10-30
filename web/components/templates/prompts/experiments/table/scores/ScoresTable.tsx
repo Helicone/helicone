@@ -234,7 +234,6 @@ const ScoresTable = memo(
           <tbody>
             {rowData.map((row, index) => {
               const isBoolean = row.score_key.endsWith("-hcone-bool");
-              console.log("row", row);
 
               return (
                 <tr key={row.score_key} className="text-slate-700 ">
@@ -252,7 +251,6 @@ const ScoresTable = memo(
                   </td>
                   {sortedOutputColumns.map((col, colIndex) => {
                     const value = row[col.field!];
-                    console.log("value", value);
                     return (
                       <td
                         key={col.field}

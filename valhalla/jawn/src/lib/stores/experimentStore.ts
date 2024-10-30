@@ -557,7 +557,7 @@ export class ExperimentStore extends BaseStore {
         this.createExperimentCell(
           cell.columnId,
           cell.rowIndex,
-          cell.value,
+          cell.value === null || cell.value === "" ? null : cell.value,
           cell.metadata,
           cell.requestId
         )
