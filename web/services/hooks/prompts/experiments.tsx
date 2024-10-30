@@ -88,7 +88,6 @@ const useExperimentTables = () => {
       return jawn.POST("/v1/experiment/tables/query", {});
     },
     refetchOnWindowFocus: false,
-    // refetch every 5 seconds
     refetchInterval: 5_000,
   });
 
