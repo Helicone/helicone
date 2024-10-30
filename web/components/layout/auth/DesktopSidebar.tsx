@@ -15,6 +15,7 @@ import NavItem from "./NavItem";
 import { ChangelogItem } from "./Sidebar";
 import ChangelogModal from "../ChangelogModal";
 import SidebarHelpDropdown from "../SidebarHelpDropdown";
+import { useTheme } from "next-themes";
 
 export interface NavigationItem {
   name: string;
@@ -108,12 +109,17 @@ const DesktopSidebar = ({ changelog, NAVIGATION }: SidebarProps) => {
     }
   };
 
+  const { theme, setTheme } = useTheme();
+
   useEffect(() => {
     calculateAvailableSpace();
 
     const handleKeyDown = (event: KeyboardEvent) => {
+      event.preventDefault();
       if (event.key === "b" && event.metaKey) {
         setIsCollapsed(!isCollapsed);
+      } else if (event.metaKey && event.shiftKey && event.key === "l") {
+        setTheme(theme === "dark" ? "light" : "dark");
       }
     };
 
@@ -126,7 +132,8 @@ const DesktopSidebar = ({ changelog, NAVIGATION }: SidebarProps) => {
       window.removeEventListener("resize", calculateAvailableSpace);
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isCollapsed, expandedItems, setIsCollapsed]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isCollapsed, expandedItems, setIsCollapsed, theme]);
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
