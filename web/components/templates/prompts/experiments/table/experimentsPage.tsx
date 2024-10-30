@@ -109,7 +109,7 @@ const ExperimentsPage = (props: ExperimentsPageProps) => {
           const promptVersion = (row.metadata as any)?.prompt_version;
           if (promptId && promptVersion) {
             router.push(
-              `/prompts/${promptId}/subversion/${promptVersion}/experiment/${row.id}`
+              `/prompts/${promptId}/subversion/${promptVersion}/experiment/${row.experimentId}`
             );
           }
         }}
