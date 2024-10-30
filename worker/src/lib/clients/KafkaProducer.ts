@@ -41,6 +41,7 @@ export type HeliconeMeta = {
   posthogHost?: string;
   lytixKey?: string;
   lytixHost?: string;
+  sessionId?: string;
 };
 
 export type KafkaMessage = {
