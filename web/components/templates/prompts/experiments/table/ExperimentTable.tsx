@@ -863,6 +863,7 @@ export function ExperimentTable({
 
         // Refetch input records to update the table
         refetchInputRecords();
+        refetchExperimentTable();
       } catch (error) {
         console.error("Error submitting row:", error);
       }

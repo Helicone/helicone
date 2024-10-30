@@ -210,8 +210,11 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
     }
   };
 
+  //TODO: FIX!!!
+
   const hasDiff = useMemo(() => {
     return (
+      //@ts-ignore
       promptTemplate?.helicone_template?.messages &&
       props.hypothesis?.promptVersion?.template?.messages
     );
