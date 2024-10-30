@@ -167,7 +167,6 @@ export function ExperimentTable({
     return res.data?.data;
   }, [orgId, experimentTableData?.metadata?.datasetId, promptSubversionId]);
 
-  // Define fetchPromptVersionTemplate
   const fetchPromptVersionTemplate = useCallback(async () => {
     const jawnClient = getJawnClient(orgId);
     const res = await jawnClient.GET("/v1/prompt/version/{promptVersionId}", {
@@ -180,7 +179,6 @@ export function ExperimentTable({
     return res.data?.data;
   }, [orgId, promptSubversionId]);
 
-  // Use useQuery to fetch promptVersionTemplateData
   const { data: promptVersionTemplateData } = useQuery(
     ["promptVersionTemplate", promptSubversionId],
     fetchPromptVersionTemplate,
@@ -194,10 +192,8 @@ export function ExperimentTable({
     }
   );
 
-  // Memoize promptVersionTemplate
   const promptVersionTemplate = promptVersionTemplateData;
 
-  // Store promptVersionTemplate in a ref
   const promptVersionTemplateRef = useRef(promptVersionTemplate);
 
   // Update the ref when promptVersionTemplate changes
@@ -307,7 +303,6 @@ export function ExperimentTable({
     [orgId]
   );
 
-  // Modify updateRowData to be async
   const updateRowData = useCallback(async () => {
     if (!experimentTableData) {
       setRowData([]);
@@ -341,7 +336,6 @@ export function ExperimentTable({
             rowIndexToRow.set(rowIndex, row);
           }
 
-          // Collect requestIds
           if (cell.requestId) {
             // Temporarily store requestId in the cell data
             row[columnId] = {

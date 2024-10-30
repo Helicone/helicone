@@ -57,7 +57,17 @@ const ScoresTableContainer = ({
       columnWidths={columnWidths}
       columnOrder={columnOrder}
       experimentId={experimentId}
-      scores={scores}
+      scores={
+        scores as Record<
+          string,
+          {
+            data: {
+              scores: Record<string, { value: any; valueType: string }>;
+            } | null;
+            error: string | null;
+          }
+        >
+      }
     />
   );
 };

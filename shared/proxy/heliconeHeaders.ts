@@ -280,7 +280,8 @@ export class HeliconeHeaders<T extends IInternalHeaders>
       posthogHost: this.headers.get("Helicone-Posthog-Host") ?? null,
       webhookEnabled:
         this.headers.get("Helicone-Webhook-Enabled") == "true" ? true : false,
-      experimentColumnId: "1",
+      experimentColumnId:
+        this.headers.get("Helicone-Experiment-Column-Id") ?? null,
       experimentRowIndex:
         this.headers.get("Helicone-Experiment-Row-Index") ?? null,
     };
