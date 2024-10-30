@@ -115,10 +115,11 @@ const DesktopSidebar = ({ changelog, NAVIGATION }: SidebarProps) => {
     calculateAvailableSpace();
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      event.preventDefault();
       if (event.key === "b" && event.metaKey) {
+        event.preventDefault();
         setIsCollapsed(!isCollapsed);
       } else if (event.metaKey && event.shiftKey && event.key === "l") {
+        event.preventDefault();
         setTheme(theme === "dark" ? "light" : "dark");
       }
     };
@@ -133,7 +134,7 @@ const DesktopSidebar = ({ changelog, NAVIGATION }: SidebarProps) => {
       window.removeEventListener("keydown", handleKeyDown);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isCollapsed, expandedItems, setIsCollapsed, theme]);
+  }, [isCollapsed, expandedItems, setIsCollapsed, setTheme, theme]);
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
