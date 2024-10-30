@@ -359,17 +359,8 @@ const RowNumberCellRenderer: React.FC<any> = (props) => {
       : "N/A";
 
   const handleRunClick = () => {
-    const hypothesesToRun = props.context.hypothesesToRun; // Get the hypotheses IDs to run
-    const datasetRowId = props.data.dataset_row_id; // Get the dataset row ID
-
-    if (!datasetRowId || !hypothesesToRun || hypothesesToRun.length === 0) {
-      return;
-    }
-
-    // Run each hypothesis for this dataset row
-    hypothesesToRun.forEach((hypothesisId: string) => {
-      props.context.handleRunHypothesis(hypothesisId, [datasetRowId]);
-    });
+    const rowIndex = props.node.rowIndex;
+    props.context.handleRunRow(rowIndex);
   };
 
   return (

@@ -1579,6 +1579,55 @@ export function ExperimentTable({
     };
   }, [isHypothesisRunning, refetchExperimentTable, updateRowData]);
 
+  const handleRunRow = useCallback(
+    (rowIndex: number) => {
+      const rowDataItem = rowDataRef.current.find(
+        (row) => row.rowIndex === rowIndex
+      );
+      if (!rowDataItem) {
+        console.error(`Row with index ${rowIndex} not found.`);
+        return;
+      }
+
+      const datasetRowId = rowDataItem.dataset_row_id;
+      if (!datasetRowId) {
+        console.error(`Dataset row ID not found for row index ${rowIndex}.`);
+        return;
+      }
+
+      const hypothesesToRun =
+        experimentTableData?.columns
+          .filter(
+            (column) =>
+              column.metadata?.hypothesisId &&
+              column.columnType === "experiment"
+          )
+          .map((column) => ({
+            hypothesisId: column.metadata?.hypothesisId as string,
+            columnId: column.id,
+          })) || [];
+
+      // Prepare cells to run
+      const cells = hypothesesToRun.map((hypothesis) => {
+        const cellId = `${hypothesis.columnId}_${rowIndex}`;
+        return {
+          hypothesisId: hypothesis.hypothesisId,
+          cell: {
+            rowIndex,
+            datasetRowId,
+            columnId: hypothesis.columnId,
+            cellId,
+          },
+        };
+      });
+
+      cells.forEach((cell) => {
+        handleRunHypothesis(cell.hypothesisId, [cell.cell]);
+      });
+    },
+    [rowDataRef, experimentTableData, handleRunHypothesis]
+  );
+
   if (isInitialLoading) {
     return (
       <div className="flex items-center justify-center h-screen flex-col">
@@ -1671,10 +1720,16 @@ export function ExperimentTable({
             domLayout="autoHeight"
             getRowId={getRowId}
             context={{
+              handleRunHypothesis,
+              handleRunRow,
+              hypothesesToRun:
+                (experimentTableData?.columns
+                  .filter((column) => column.metadata?.hypothesisId)
+                  .map(
+                    (column) => column.metadata?.hypothesisId
+                  ) as string[]) || [],
               setShowExperimentInputSelector,
               setShowRandomInputSelector,
-              handleRunHypothesis,
-              hypothesesToRun: [],
               inputKeys: Array.from(inputKeys),
               experimentTableData,
               inputColumnFields,

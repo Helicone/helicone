@@ -15,7 +15,6 @@ export const HypothesisCellRenderer: React.FC<any> = (params) => {
   const { data, colDef, context, wrapText, hypothesisId } = params;
   const promptVersionTemplate = context.promptVersionTemplateRef.current;
 
-
   const [showPromptPlayground, setShowPromptPlayground] = useState(false);
 
   // Parse the response data
@@ -27,7 +26,6 @@ export const HypothesisCellRenderer: React.FC<any> = (params) => {
 
   // Construct cellId using columnId and rowIndex
   const cellId = `${colDef.cellRendererParams.columnId}_${params.node.rowIndex}`;
-
 
   const isLoading = data.isLoading?.[cellId];
 
@@ -150,7 +148,7 @@ export const HypothesisCellRenderer: React.FC<any> = (params) => {
           onClick={(e) => {
             e.stopPropagation();
             const cellId = parsedResponseData?.cellId;
-           
+
             params.handleRunHypothesis(hypothesisId, [
               {
                 rowIndex: params.node.rowIndex,
