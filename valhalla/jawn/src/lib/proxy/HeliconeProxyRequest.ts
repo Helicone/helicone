@@ -94,8 +94,6 @@ export class HeliconeProxyRequestMapper {
       isStream = isStream || queryParams.get("alt") === "sse";
     }
 
-    console.log(this.request.heliconeHeaders);
-
     return {
       data: {
         heliconePromptTemplate: await this.getHeliconeTemplate(),

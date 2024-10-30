@@ -522,11 +522,6 @@ const PromptIdPage = (props: PromptIdPageProps) => {
       return;
     }
 
-    console.log(
-      "route",
-      `/prompts/${id}/subversion/${promptVersionId}/experiment/${experimentTableResult.data?.data?.experimentId}`
-    );
-
     router.push(
       `/prompts/${id}/subversion/${promptVersionId}/experiment/${experimentTableResult.data?.data?.experimentId}`
     );

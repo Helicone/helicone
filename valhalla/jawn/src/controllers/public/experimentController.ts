@@ -168,7 +168,6 @@ export class ExperimentController extends Controller {
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<null, string>> {
     const experimentManager = new ExperimentManager(request.authParams);
-    console.log(requestBody);
     const result = await experimentManager.createExperimentColumn({
       experimentTableId,
       columnName: requestBody.columnName,

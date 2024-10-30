@@ -188,7 +188,6 @@ export class ExperimentManager extends BaseManager {
   async createNewExperimentTable(
     params: CreateExperimentTableParams
   ): Promise<Result<{ tableId: string; experimentId: string }, string>> {
-    console.log("params", params);
     const experimentTableResult =
       await this.ExperimentStore.createNewExperimentTable(
         params.datasetId,

@@ -35,8 +35,6 @@ const InputCellRenderer: React.FC<any> = (props) => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     setInputValue(newValue);
-    console.log(props.column.colDef.headerComponentParams.columnName);
-    console.log(newValue);
     props.context.handleInputChange(
       props.column.colDef.headerComponentParams.columnName,
       newValue,
@@ -65,7 +63,6 @@ const InputCellRenderer: React.FC<any> = (props) => {
       (col: any) => col.id === props.column.colId
     );
     const nextInputColumn = inputColumns[currentColumnIndex + 1];
-    console.log("nextInputColumn", nextInputColumn);
 
     if (nextInputColumn) {
       props.context.setActivePopoverCell({
