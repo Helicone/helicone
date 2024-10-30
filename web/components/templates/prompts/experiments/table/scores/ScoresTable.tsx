@@ -119,7 +119,16 @@ const ScoresTable = memo(
               } else if (valueType === "number") {
                 return {
                   percentage: (value * 100).toFixed(2),
-                  average: value.toFixed(2),
+                  average:
+                    value.toString().length > 3
+                      ? value.toFixed(5)
+                      : value.toFixed(2),
+                  count: 1,
+                };
+              } else if (valueType === "string") {
+                return {
+                  percentage: 0,
+                  average: value,
                   count: 1,
                 };
               }
@@ -225,6 +234,7 @@ const ScoresTable = memo(
           <tbody>
             {rowData.map((row, index) => {
               const isBoolean = row.score_key.endsWith("-hcone-bool");
+              console.log("row", row);
 
               return (
                 <tr key={row.score_key} className="text-slate-700 ">
@@ -242,6 +252,7 @@ const ScoresTable = memo(
                   </td>
                   {sortedOutputColumns.map((col, colIndex) => {
                     const value = row[col.field!];
+                    console.log("value", value);
                     return (
                       <td
                         key={col.field}
@@ -271,6 +282,7 @@ const ScoresTable = memo(
                             )}
                           </div>
                         )}
+                        {typeof value === "string" && <span>{value}</span>}
                       </td>
                     );
                   })}
