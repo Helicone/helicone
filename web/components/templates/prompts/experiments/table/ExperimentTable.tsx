@@ -64,6 +64,8 @@ interface ExperimentTableProps {
   experimentId?: string;
 }
 
+const REFRESH_INTERVAL = 3000;
+
 export function ExperimentTable({
   promptSubversionId,
   experimentId,
@@ -520,7 +522,7 @@ export function ExperimentTable({
 
   // Modify the useEffect that updates rowData
   useEffect(() => {
-    if (experimentTableData) {
+    if (experimentTableData && experimentTableData.columns.length > 0) {
       updateRowData().then(() => {
         setIsInitialLoading(false);
       });
@@ -855,6 +857,7 @@ export function ExperimentTable({
         autoHeight: wrapText,
       },
     ];
+    let experimentColumnId = 1;
 
     Array.from(experimentTableData?.columns || []).forEach((column, index) => {
       if (column.columnType === "input") {
@@ -932,7 +935,7 @@ export function ExperimentTable({
             },
             headerComponent: CustomHeaderComponent,
             headerComponentParams: {
-              displayName: column.columnName,
+              displayName: `Experiment ${experimentColumnId++}`,
               badgeText: "Output",
               badgeVariant: "secondary",
               hypothesisId: column.metadata?.hypothesisId ?? "",
@@ -1057,7 +1060,6 @@ export function ExperimentTable({
     handleLastInputSubmit,
   ]);
 
-  const [settingsOpen, setSettingsOpen] = useState(false);
   const [showRandomInputSelector, setShowRandomInputSelector] = useState(false);
 
   const getExperimentExportData = useCallback(() => {
@@ -1279,7 +1281,7 @@ export function ExperimentTable({
           const newIsLoading = { ...(row.isLoading || {}) };
 
           Object.keys(newIsLoading).forEach((cellId) => {
-            const [columnId, rowIndexStr] = cellId.split("_");
+            const [columnId, _] = cellId.split("_");
             const cellData = row[columnId]; // Use columnId
 
             if (cellData && cellData.responseBody) {
@@ -1302,7 +1304,7 @@ export function ExperimentTable({
         }
 
         gridRef.current?.refreshCells();
-      }, 3000);
+      }, REFRESH_INTERVAL);
     }
 
     return () => {
