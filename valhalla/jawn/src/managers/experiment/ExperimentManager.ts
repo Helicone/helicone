@@ -269,6 +269,7 @@ export class ExperimentManager extends BaseManager {
     columnName: string;
     columnType: string;
     hypothesisId?: string;
+    promptVersionId?: string;
   }): Promise<
     Result<
       {
@@ -281,7 +282,8 @@ export class ExperimentManager extends BaseManager {
       params.experimentTableId,
       params.columnName,
       params.columnType as "experiment" | "input" | "output",
-      params.hypothesisId
+      params.hypothesisId,
+      params.promptVersionId
     );
   }
 }

@@ -263,7 +263,8 @@ const AddColumnHeader: React.FC<AddColumnHeaderProps> = ({
                     await handleAddColumn(
                       "Experiment",
                       "experiment",
-                      hypothesisResult.data.data?.hypothesisId
+                      hypothesisResult.data.data?.hypothesisId,
+                      result.data.data?.id
                     );
 
                     setOpen(false); // Close the drawer after adding the column

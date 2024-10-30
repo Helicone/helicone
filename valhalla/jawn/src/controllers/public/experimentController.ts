@@ -163,6 +163,7 @@ export class ExperimentController extends Controller {
       columnName: string;
       columnType: string;
       hypothesisId?: string;
+      promptVersionId?: string;
     },
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<null, string>> {
@@ -173,6 +174,7 @@ export class ExperimentController extends Controller {
       columnName: requestBody.columnName,
       columnType: requestBody.columnType,
       hypothesisId: requestBody.hypothesisId,
+      promptVersionId: requestBody.promptVersionId,
     });
     return ok(null);
   }

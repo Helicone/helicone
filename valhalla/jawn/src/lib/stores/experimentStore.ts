@@ -100,6 +100,7 @@ export interface ExperimentTableColumn {
   columnType: string;
   hypothesisId?: string;
   cells: {
+    id: string;
     rowIndex: number;
     requestId?: string;
     value: string | null;
@@ -427,15 +428,23 @@ export class ExperimentStore extends BaseStore {
     experimentTableId: string,
     columnName: string,
     columnType: "input" | "output" | "experiment",
-    hypothesisId?: string
+    hypothesisId?: string,
+    promptVersionId?: string
   ): Promise<Result<{ id: string }, string>> {
+    const metadata: Record<string, any> = {};
+    if (hypothesisId) {
+      metadata.hypothesisId = hypothesisId;
+    }
+    if (promptVersionId) {
+      metadata.promptVersionId = promptVersionId;
+    }
     const result = await supabaseServer.client
       .from("experiment_column")
       .insert({
         table_id: experimentTableId,
         column_name: columnName,
         column_type: columnType,
-        metadata: hypothesisId ? { hypothesisId: hypothesisId } : null,
+        metadata: metadata,
       })
       .select("*")
       .single();
@@ -453,6 +462,7 @@ export class ExperimentStore extends BaseStore {
       name: string;
       type: "input" | "output" | "experiment";
       hypothesisId?: string;
+      promptVersionId?: string;
     }[]
   ): Promise<Result<{ ids: string[] }, string>> {
     const results = await Promise.all(
@@ -461,7 +471,8 @@ export class ExperimentStore extends BaseStore {
           experimentTableId,
           column.name,
           column.type,
-          column.hypothesisId
+          column.hypothesisId,
+          column.promptVersionId
         )
       )
     );
@@ -584,6 +595,12 @@ export class ExperimentStore extends BaseStore {
               'cells', (
                 SELECT jsonb_agg(
                   jsonb_build_object(
+                    'id', (
+                      SELECT ecv.id
+                      FROM experiment_cell ecv
+                      WHERE ecv.column_id = ec.id
+                      AND ecv.row_index = row_number
+                    ),
                     'rowIndex', row_number,
                     'requestId', (
                       SELECT jsonb_build_object(

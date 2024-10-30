@@ -72,6 +72,7 @@ export function ExperimentTable({
   const orgId = org?.currentOrg?.id;
   const jawn = useJawnClient();
   const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const loadingCellIds = useRef<string[]>([]);
 
   const [wrapText, setWrapText] = useState(false);
   const [columnView, setColumnView] = useState<"all" | "inputs" | "outputs">(
@@ -137,7 +138,12 @@ export function ExperimentTable({
   }, [inputColumns]);
 
   const handleAddColumn = useCallback(
-    async (columnName: string, columnType: string, hypothesisId?: string) => {
+    async (
+      columnName: string,
+      columnType: string,
+      hypothesisId?: string,
+      promptVersionId?: string
+    ) => {
       const res = await jawn.POST(
         "/v1/experiment/table/{experimentTableId}/column",
         {
@@ -148,6 +154,7 @@ export function ExperimentTable({
             columnName,
             columnType,
             hypothesisId,
+            promptVersionId,
           },
         }
       );
@@ -382,15 +389,28 @@ export function ExperimentTable({
           const rowIndex = cell.rowIndex;
           let row = rowIndexToRow.get(rowIndex);
           if (!row) {
-            row = { id: `row-${rowIndex}`, rowIndex, isLoading: {} };
+            row = {
+              id: `row-${rowIndex}`,
+              rowIndex,
+              isLoading: {},
+              cellId: `${columnId}_${rowIndex}`,
+            };
             rowIndexToRow.set(rowIndex, row);
           }
 
           // Collect requestIds
           if (cell.requestId) {
             // Temporarily store requestId in the cell data
-            row[columnId] = { requestId: cell.requestId };
+            row[columnId] = {
+              requestId: cell.requestId,
+              cellId: `${columnId}_${rowIndex}`,
+            };
             requestIdsToFetch.add(cell.requestId);
+          } else {
+            row[columnId] = {
+              requestId: null,
+              cellId: `${columnId}_${rowIndex}`,
+            };
           }
         });
       } else {
@@ -433,40 +453,53 @@ export function ExperimentTable({
       );
     }
 
+    console.log("rowIndexToRow", rowIndexToRow);
+
     // Now construct the rowData array
     const newRowData = await Promise.all(
       Array.from(rowIndexToRow.values()).map(async (row) => {
         // Process experiment column data
         await Promise.all(
-          Object.entries(row).map(async ([columnId, cellData]) => {
+          experimentTableData.columns.map(async (column) => {
+            const columnId = column.id;
+
+            // If it's an experiment or output column
             if (
-              experimentTableData.columns.some(
-                (col) =>
-                  col.id === columnId &&
-                  (col.columnType === "experiment" ||
-                    col.columnType === "output")
-              ) &&
-              (cellData as any)?.requestId
+              column.columnType === "experiment" ||
+              column.columnType === "output"
             ) {
-              const requestData = requestDataMap.get(
-                (cellData as any).requestId
-              );
-              if (requestData) {
-                // Fetch the response body
-                const responseBody = await fetchRequestResponseBody(
-                  requestData
-                );
-                // Set the value in the row based on the fetched response body
-                row[columnId] = responseBody;
-                // After updating the row data, refresh the specific cell
-                if (gridRef.current) {
-                  const rowNode = gridRef.current.getRowNode(row.id);
-                  if (rowNode) {
-                    gridRef.current.refreshCells({
-                      rowNodes: [rowNode],
-                      columns: [columnId],
-                      force: true,
-                    });
+              const cellData = row[columnId] as any;
+
+              // Always initialize the column with the cellId from cellData
+              if (!row[columnId] && cellData?.cellId) {
+                row[columnId] = {
+                  responseBody: null,
+                  cellId: cellData.cellId, // Use the original cellId
+                };
+              }
+
+              // If we have request data, process it
+              if (cellData?.requestId) {
+                const requestData = requestDataMap.get(cellData.requestId);
+                if (requestData) {
+                  const responseBody = await fetchRequestResponseBody(
+                    requestData
+                  );
+                  row[columnId] = {
+                    responseBody,
+                    cellId: cellData.cellId, // Always use the original cellId
+                  };
+
+                  // Refresh the cell if needed
+                  if (gridRef.current) {
+                    const rowNode = gridRef.current.getRowNode(row.id);
+                    if (rowNode) {
+                      gridRef.current.refreshCells({
+                        rowNodes: [rowNode],
+                        columns: [columnId],
+                        force: true,
+                      });
+                    }
                   }
                 }
               }
@@ -482,6 +515,7 @@ export function ExperimentTable({
 
     // Preserve isLoading state from previous rowData
     const updatedRowData = newRowData.map((newRow) => {
+      console.log("updatedRowData");
       // Find the matching row in the previous rowData
       const existingRow = rowDataRef.current.find(
         (row) => row.id === newRow.id
@@ -568,9 +602,6 @@ export function ExperimentTable({
     }),
     [wrapText]
   );
-  const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>(
-    {}
-  );
 
   const getRowId = useCallback((params: any) => params.data.id, []);
 
@@ -584,28 +615,39 @@ export function ExperimentTable({
         rowIndex: number;
         datasetRowId: string;
         columnId: string;
+        cellId: string;
       }>;
     }) => {
       await jawn.POST("/v1/experiment/run", {
         body: {
           experimentId: experimentId ?? "",
           hypothesisId,
-          cells,
+          cells: cells.map((cell) => ({
+            rowIndex: cell.rowIndex,
+            datasetRowId: cell.datasetRowId,
+            columnId: cell.columnId,
+          })),
         },
       });
     },
     {
-      onMutate: ({ hypothesisId, cells }) => {
+      onMutate: ({ cells, hypothesisId }) => {
+        console.log("hypothesisId2", hypothesisId);
         // Manually update isLoading in rowData for the specific cells
         setRowData((prevData) => {
           const newData = prevData.map((row) => {
+            console.log("hypothesisId1", hypothesisId);
+            console.log("row", row);
+            console.log("cells", cells);
             const matchingCell = cells.find(
-              (cell) => cell.datasetRowId === row.dataset_row_id
+              (cell) => cell.rowIndex === row.rowIndex
             );
             if (matchingCell) {
+              const cellId = `${matchingCell.columnId}_${matchingCell.rowIndex}`;
+              console.log("cellIdGot", cellId);
               const newIsLoading = {
                 ...(row.isLoading || {}),
-                [hypothesisId]: true,
+                [cellId]: true, // Use combined cellId
               };
               return {
                 ...row,
@@ -620,19 +662,18 @@ export function ExperimentTable({
       onError: (error, variables, context) => {
         // Handle error if needed
       },
-      onSettled: async (_, __, { hypothesisId, cells }) => {
-        // Refetch the experiment table data
+      onSettled: async (_, __, { cells }) => {
         await refetchExperimentTable();
 
-        // After data is refetched, reset isLoading
         setRowData((prevData) => {
           const newData = prevData.map((row) => {
             const matchingCell = cells.find(
-              (cell) => cell.datasetRowId === row.dataset_row_id
+              (cell) => cell.rowIndex === row.rowIndex
             );
             if (matchingCell) {
+              const cellId = `${matchingCell.columnId}_${matchingCell.rowIndex}`;
               const newIsLoading = { ...(row.isLoading || {}) };
-              delete newIsLoading[hypothesisId];
+              delete newIsLoading[cellId]; // Remove loading state for specific cell
               return {
                 ...row,
                 isLoading: newIsLoading,
@@ -653,6 +694,7 @@ export function ExperimentTable({
         rowIndex: number;
         datasetRowId: string;
         columnId: string;
+        cellId: string;
       }>
     ) => {
       runHypothesisMutation.mutate({ hypothesisId, cells });
@@ -966,7 +1008,6 @@ export function ExperimentTable({
             prompt: promptVersionTemplate,
             hypothesisId: "original",
             handleRunHypothesis,
-            loadingStates,
             wrapText,
             columnId: column.id,
           },
@@ -991,7 +1032,6 @@ export function ExperimentTable({
             cellRendererParams: {
               hypothesisId: column.metadata?.hypothesisId,
               handleRunHypothesis,
-              loadingStates,
               wrapText,
               columnId: column.id,
             },
@@ -1001,22 +1041,22 @@ export function ExperimentTable({
               badgeText: "Output",
               badgeVariant: "secondary",
               hypothesisId: column.metadata?.hypothesisId ?? "",
+              promptVersionId: column.metadata?.promptVersionId ?? "",
               onRunColumn: async (colId: string) => {
-                await Promise.all(
-                  rowData.map(async (row, index) => {
-                    const cells = [
-                      {
-                        rowIndex: index,
-                        datasetRowId: row.dataset_row_id,
-                        columnId: colId,
-                      },
-                    ];
-                    await handleRunHypothesis(
-                      (column.metadata?.hypothesisId as string) ?? "",
-                      cells
-                    );
-                  })
-                );
+                rowData.map(async (row, index) => {
+                  const cells = [
+                    {
+                      rowIndex: index,
+                      datasetRowId: row.dataset_row_id,
+                      columnId: colId,
+                      cellId: `${colId}_${index}`,
+                    },
+                  ];
+                  handleRunHypothesis(
+                    (column.metadata?.hypothesisId as string) ?? "",
+                    cells
+                  );
+                });
               },
             },
             cellClass: "border-r border-[#E2E8F0] text-slate-700 pt-2.5",
@@ -1220,7 +1260,6 @@ export function ExperimentTable({
   }, [
     columnView,
     handleRunHypothesis,
-    loadingStates,
     rowData,
     wrapText,
     inputKeys,
@@ -1609,7 +1648,7 @@ export function ExperimentTable({
               setActivePopoverCell,
               handleLastInputSubmit,
               handleInputChange,
-              rowData, // Add this line
+              rowData, 
             }}
             rowClass="border-b border-gray-200 hover:bg-gray-50"
             headerHeight={40}

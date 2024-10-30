@@ -12,20 +12,38 @@ import { Dialog, DialogTrigger, DialogContent } from "@/components/ui/dialog";
 import clsx from "clsx";
 
 export const HypothesisCellRenderer: React.FC<any> = (params) => {
-  const { data, colDef, context, hypothesisId, wrapText } = params;
+  const { data, colDef, context, wrapText, hypothesisId } = params;
   const promptVersionTemplate = context.promptVersionTemplateRef.current;
+  // Use the cellId from the data
+  console.log("data", data);
 
   const [showPromptPlayground, setShowPromptPlayground] = useState(false);
 
   // Parse the response data
-  console.log("hypothesisId", colDef);
-  const parsedResponseData = data[colDef.cellRendererParams.columnId];
+  const parsedResponseData = data[colDef.cellRendererParams.columnId] || null;
+  console.log("parsedResponseData", colDef.cellRendererParams);
 
   const content =
-    parsedResponseData?.response?.choices?.[0]?.message?.content || "";
+    parsedResponseData?.responseBody?.response?.choices?.[0]?.message
+      ?.content || "";
 
-  // Check if content is longer than 100 characters
-  const isContentLong = content.length > 100;
+  // Construct cellId using columnId and rowIndex
+  const cellId = `${colDef.cellRendererParams.columnId}_${params.node.rowIndex}`;
+
+  // Check if this specific cell is loading
+  console.log("cellIdfff", params);
+  const isLoading = data.isLoading?.[cellId];
+  console.log("isLoading", isLoading);
+  console.log("loadingData", data);
+
+  if (isLoading) {
+    return (
+      <div className="w-full h-full whitespace-pre-wrap flex flex-row items-center space-x-2 pl-4">
+        <span className="animate-ping inline-flex rounded-full bg-green-700 h-2 w-2"></span>
+        <div className="italic">Generating...</div>
+      </div>
+    );
+  }
 
   // Extract the model and messages from the promptVersionTemplate
   const initialModel = promptVersionTemplate?.model || "";
@@ -46,15 +64,11 @@ export const HypothesisCellRenderer: React.FC<any> = (params) => {
       ],
     };
   };
+  console.log("data123", data);
+  console.log("cellId123", cellId);
 
-  if (data.isLoading?.[hypothesisId]) {
-    return (
-      <div className="w-full h-full whitespace-pre-wrap flex flex-row items-center space-x-2 pl-4">
-        <span className="animate-ping inline-flex rounded-full bg-green-700 h-2 w-2"></span>
-        <div className="italic">Generating...</div>
-      </div>
-    );
-  }
+  // Check if content is longer than 100 characters
+  const isContentLong = content.length > 100;
 
   if (content) {
     if (isContentLong) {
@@ -142,13 +156,16 @@ export const HypothesisCellRenderer: React.FC<any> = (params) => {
           className="w-6 h-6 p-0 border-slate-200 border rounded-md bg-slate-50 text-slate-500"
           onClick={(e) => {
             e.stopPropagation();
-            console.log("params", hypothesisId);
-            // Pass row index and column id along with dataset row id
+            const cellId = parsedResponseData?.cellId;
+            console.log("cellIdSend", cellId);
+            console.log("some", colDef.cellRendererParams, data);
+            // Pass row index, column id, dataset row id, and cellId
             params.handleRunHypothesis(hypothesisId, [
               {
                 rowIndex: params.node.rowIndex,
                 datasetRowId: data.dataset_row_id,
-                columnId: colDef.field,
+                columnId: colDef.cellRendererParams.columnId,
+                cellId: cellId,
               },
             ]);
           }}

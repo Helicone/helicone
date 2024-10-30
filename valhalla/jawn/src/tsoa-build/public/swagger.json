@@ -5265,11 +5265,15 @@
 								"rowIndex": {
 									"type": "number",
 									"format": "double"
+								},
+								"id": {
+									"type": "string"
 								}
 							},
 							"required": [
 								"value",
-								"rowIndex"
+								"rowIndex",
+								"id"
 							],
 							"type": "object"
 						},
@@ -11575,6 +11579,9 @@
 						"application/json": {
 							"schema": {
 								"properties": {
+									"promptVersionId": {
+										"type": "string"
+									},
 									"hypothesisId": {
 										"type": "string"
 									},

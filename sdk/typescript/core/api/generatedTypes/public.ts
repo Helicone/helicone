@@ -2021,6 +2021,7 @@ Json: JsonObject;
           requestId?: string;
           /** Format: double */
           rowIndex: number;
+          id: string;
         })[];
       metadata?: components["schemas"]["Record_string.any_"];
     };
@@ -4102,6 +4103,7 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": {
+          promptVersionId?: string;
           hypothesisId?: string;
           columnType: string;
           columnName: string;

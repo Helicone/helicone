@@ -1822,7 +1822,7 @@ const models: TsoaRoute.Models = {
             "columnName": {"dataType":"string","required":true},
             "columnType": {"dataType":"string","required":true},
             "hypothesisId": {"dataType":"string"},
-            "cells": {"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"metadata":{"ref":"Record_string.any_"},"value":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},"requestId":{"dataType":"string"},"rowIndex":{"dataType":"double","required":true}}},"required":true},
+            "cells": {"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"metadata":{"ref":"Record_string.any_"},"value":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},"requestId":{"dataType":"string"},"rowIndex":{"dataType":"double","required":true},"id":{"dataType":"string","required":true}}},"required":true},
             "metadata": {"ref":"Record_string.any_"},
         },
         "additionalProperties": false,
@@ -5277,7 +5277,7 @@ export function RegisterRoutes(app: Router) {
             async function ExperimentController_createExperimentColumn(request: ExRequest, response: ExResponse, next: any) {
             const args: Record<string, TsoaRoute.ParameterSchema> = {
                     experimentTableId: {"in":"path","name":"experimentTableId","required":true,"dataType":"string"},
-                    requestBody: {"in":"body","name":"requestBody","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"hypothesisId":{"dataType":"string"},"columnType":{"dataType":"string","required":true},"columnName":{"dataType":"string","required":true}}},
+                    requestBody: {"in":"body","name":"requestBody","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"promptVersionId":{"dataType":"string"},"hypothesisId":{"dataType":"string"},"columnType":{"dataType":"string","required":true},"columnName":{"dataType":"string","required":true}}},
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
             };
 

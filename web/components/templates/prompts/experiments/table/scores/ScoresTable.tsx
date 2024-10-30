@@ -34,15 +34,15 @@ const ScoresTable = memo(
           col.field !== "messages"
         ) {
           acc.outputColumns.push(col);
-          const scores = col.headerComponentParams?.hypothesis.runs
-            ?.map((run: any) =>
-              run?.scores ? Object.keys(run.scores as Record<string, any>) : []
-            )
-            .flat() as string[];
-          console.log("scores", scores);
-          if (scores && scores.length > 0) {
-            acc.scores = Array.from(new Set([...acc.scores, ...scores]));
-          }
+          // const scores = col.headerComponentParams?.hypothesis.runs
+          //   ?.map((run: any) =>
+          //     run?.scores ? Object.keys(run.scores as Record<string, any>) : []
+          //   )
+          //   .flat() as string[];
+          // console.log("scores", scores);
+          // if (scores && scores.length > 0) {
+          //   acc.scores = Array.from(new Set([...acc.scores, ...scores]));
+          // }
         } else if (
           col.headerComponentParams?.badgeText === "Input" ||
           ["rowNumber", "messages"].includes(col.field!)
