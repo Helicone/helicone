@@ -104,7 +104,7 @@ export const SessionContent: React.FC<SessionContentProps> = ({
         }
         className="flex flex-col h-full"
       >
-        <div className="sticky top-0 bg-white z-10">
+        <div className="sticky top-0 bg-white dark:bg-slate-950 z-10">
           <Row className="items-center justify-between">
             <BreadCrumb
               className="mx-8 pt-10"
