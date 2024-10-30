@@ -215,7 +215,6 @@ export function ExperimentTable({
     promptVersionTemplateRef.current = promptVersionTemplate;
   }, [promptVersionTemplate]);
 
-
   const fetchRandomInputRecords = useCallback(async () => {
     const jawnClient = getJawnClient(orgId);
     const res = await jawnClient.POST(
