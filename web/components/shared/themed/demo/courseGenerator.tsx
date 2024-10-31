@@ -269,7 +269,7 @@ export const CourseGenerator: React.FC = () => {
         },
       },
     ];
-
+    // hi
     try {
       const response = await jawn.POST("/v1/demo/completion", {
         body: {
