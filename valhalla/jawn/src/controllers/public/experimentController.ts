@@ -126,13 +126,15 @@ export class ExperimentController extends Controller {
     return result;
   }
 
-  @Post("/table/{experimentId}/query")
+  @Post("/table/{experimentTableId}/query")
   public async getExperimentTableById(
-    @Path() experimentId: string,
+    @Path() experimentTableId: string,
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<ExperimentTable, string>> {
     const experimentManager = new ExperimentManager(request.authParams);
-    return experimentManager.getExperimentTableByExperimentId(experimentId);
+    return experimentManager.getExperimentTableByExperimentId(
+      experimentTableId
+    );
   }
   @Post("/tables/query")
   public async getExperimentTables(
@@ -162,20 +164,33 @@ export class ExperimentController extends Controller {
       console.error(result.error);
       return err(result.error);
     }
+    this.setStatus(204);
     return ok(null);
   }
 
   @Patch("/table/{experimentTableId}/cell")
-  public async updateExperimentCellStatus(
+  public async updateExperimentCell(
     @Path() experimentTableId: string,
-    @Body() requestBody: { cells: { cellId: string; status: string }[] },
+    @Body() requestBody: { cellId: string; status?: string; value?: string },
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<null, string>> {
     const experimentManager = new ExperimentManager(request.authParams);
-    const result = await experimentManager.updateExperimentCellStatuses({
-      cells: requestBody.cells,
+    const result = await experimentManager.updateExperimentCells({
+      cells: [
+        {
+          cellId: requestBody.cellId,
+          status: requestBody.status ?? null,
+          value: requestBody.value ?? null,
+        },
+      ],
     });
-    return result;
+    if (result.error) {
+      this.setStatus(500);
+      console.error(result.error);
+      return err(result.error);
+    }
+    this.setStatus(204);
+    return ok(null);
   }
 
   @Post("/table/{experimentTableId}/column")
@@ -198,6 +213,34 @@ export class ExperimentController extends Controller {
       hypothesisId: requestBody.hypothesisId,
       promptVersionId: requestBody.promptVersionId,
     });
+    if (result.error) {
+      this.setStatus(500);
+      console.error(result.error);
+      return err(result.error);
+    }
+    this.setStatus(204);
+    return ok(null);
+  }
+
+  @Post("/table/{experimentTableId}/row")
+  public async createExperimentTableRow(
+    @Path() experimentTableId: string,
+    @Body()
+    requestBody: {
+      rowIndex: number;
+    },
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<null, string>> {
+    const experimentManager = new ExperimentManager(request.authParams);
+    const result = await experimentManager.createExperimentTableRow({
+      experimentTableId,
+      rowIndex: requestBody.rowIndex,
+    });
+    if (result.error || !result.data) {
+      this.setStatus(500);
+      console.error(result.error);
+      return err(result.error);
+    }
     return ok(null);
   }
 
@@ -459,10 +502,9 @@ export class ExperimentController extends Controller {
       };
     });
 
-    const statusUpdateResult =
-      await experimentManager.updateExperimentCellStatuses({
-        cells: cellsToUpdate,
-      });
+    const statusUpdateResult = await experimentManager.updateExperimentCells({
+      cells: cellsToUpdate,
+    });
 
     if (statusUpdateResult.error) {
       this.setStatus(500);

@@ -87,11 +87,11 @@ export function ExperimentTable({
 
     const jawnClient = getJawnClient(orgId);
     const res = await jawnClient.POST(
-      "/v1/experiment/table/{experimentId}/query",
+      "/v1/experiment/table/{experimentTableId}/query",
       {
         params: {
           path: {
-            experimentId: experimentId,
+            experimentTableId: experimentId,
           },
         },
       }

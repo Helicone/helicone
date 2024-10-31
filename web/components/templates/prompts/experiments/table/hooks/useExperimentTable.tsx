@@ -1,6 +1,6 @@
-import { useRef } from "react";
 import { getJawnClient } from "../../../../../../lib/clients/jawn";
 import { placeAssetIdValues } from "../../../../../../services/lib/requestTraverseHelper";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export type ExperimentTable = {
   id: string;
@@ -27,7 +27,7 @@ export type Cell = {
 };
 
 type ColumnType = "input" | "output" | "experiment";
-type CellStatus = "initialized" | "success";
+type CellStatus = "initialized" | "success" | "running";
 
 export const getRequestDataByIds = async (
   orgId: string,
@@ -216,4 +216,121 @@ export async function updateTableData({
   return updatedRowData;
 }
 
+export async function useExperimentTable(
+  orgId: string,
+  experimentTableId: string
+) {
+  const queryClient = useQueryClient();
+  const experimentTableQuery = useQuery(
+    ["experimentTable", orgId, experimentTableId],
+    async () => {
+      if (!orgId || !experimentTableId) return null;
+      const jawnClient = getJawnClient(orgId);
+      const res = await jawnClient.POST(
+        "/v1/experiment/table/{experimentTableId}/query",
+        {
+          params: {
+            path: {
+              experimentTableId: experimentTableId,
+            },
+          },
+        }
+      );
+      const rowData = await updateTableData({
+        experimentTableData: res.data?.data as ExperimentTable,
+        getRequestDataByIds: (requestIds) =>
+          getRequestDataByIds(orgId, requestIds),
+        responseBodyCache: {},
+      });
+      return rowData;
+    },
+    {
+      enabled: !!orgId && !!experimentTableId,
+    }
+  );
 
+  const addExperimentTableColumn = useMutation({
+    mutationFn: async ({
+      columnName,
+      columnType,
+      hypothesisId,
+      promptVersionId,
+    }: {
+      columnName: string;
+      columnType: string;
+      hypothesisId?: string;
+      promptVersionId?: string;
+    }) => {
+      const jawnClient = getJawnClient(orgId);
+      const res = await jawnClient.POST(
+        "/v1/experiment/table/{experimentTableId}/column",
+        {
+          params: {
+            path: { experimentTableId: experimentTableId || "" },
+          },
+          body: {
+            columnName,
+            columnType,
+            hypothesisId,
+            promptVersionId,
+          },
+        }
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["experimentTable", orgId, experimentTableId],
+      });
+    },
+  });
+
+  const addExperimentTableRow = useMutation({
+    mutationFn: async ({ rowIndex }: { rowIndex: number }) => {
+      const jawnClient = getJawnClient(orgId);
+      const res = await jawnClient.POST(
+        "/v1/experiment/table/{experimentTableId}/row",
+        {
+          params: { path: { experimentTableId: experimentTableId } },
+          body: { rowIndex },
+        }
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["experimentTable", orgId, experimentTableId],
+      });
+    },
+  });
+
+  const updateExperimentCell = useMutation({
+    mutationFn: async ({
+      cellId,
+      status,
+      value,
+    }: {
+      cellId: string;
+      status: string;
+      value: string;
+    }) => {
+      const jawnClient = getJawnClient(orgId);
+      const res = await jawnClient.PATCH(
+        "/v1/experiment/table/{experimentTableId}/cell",
+        {
+          params: { path: { experimentTableId: experimentTableId } },
+          body: { cellId, status, value },
+        }
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["experimentTable", orgId, experimentTableId],
+      });
+    },
+  });
+
+  return {
+    addExperimentTableColumn,
+    addExperimentTableRow,
+    updateExperimentCell,
+  };
+}

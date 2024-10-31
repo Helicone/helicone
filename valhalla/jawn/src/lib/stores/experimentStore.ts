@@ -441,7 +441,7 @@ export class ExperimentStore extends BaseStore {
       SELECT COALESCE(MAX(ecv.row_index), -1) as max_row_index
       FROM experiment_cell ecv
       JOIN experiment_column ec ON ec.id = ecv.column_id
-      WHERE ec.table_id = $1
+      WHERE ec.id = $1
     `;
 
     const result = await dbExecute<{ max_row_index: number }>(query, [
@@ -497,12 +497,11 @@ export class ExperimentStore extends BaseStore {
     // If there are existing rows, create empty cells
     if (maxRowIndex >= 0) {
       const cellsQuery = `
-        INSERT INTO experiment_cell (column_id, row_index, value, metadata)
+        INSERT INTO experiment_cell (column_id, row_index, value)
         SELECT 
           $1 as column_id,
           generate_series(0, $2) as row_index,
-          NULL as value,
-          '{"status": "initialized"}'::jsonb as metadata
+          NULL as value
       `;
 
       const cellsResult = await dbExecute(cellsQuery, [
@@ -568,13 +567,14 @@ export class ExperimentStore extends BaseStore {
     return ok({ id: result.data.id });
   }
 
-  async updateExperimentCellStatus(params: {
+  async updateExperimentCell(params: {
     cellId: string;
-    status: string;
+    status: string | null;
+    value: string | null;
   }): Promise<Result<{ id: string }, string>> {
     const result = await supabaseServer.client
       .from("experiment_cell")
-      .update({ status: params.status })
+      .update({ status: params.status ?? null, value: params.value ?? null })
       .eq("id", params.cellId)
       .select("*")
       .single();
@@ -584,11 +584,11 @@ export class ExperimentStore extends BaseStore {
     return ok({ id: result.data.id });
   }
 
-  async updateExperimentCellStatuses(params: {
-    cells: { cellId: string; status: string }[];
+  async updateExperimentCells(params: {
+    cells: { cellId: string; status: string | null; value: string | null }[];
   }): Promise<Result<{ ids: string[] }, string>> {
     const results = await Promise.all(
-      params.cells.map((cell) => this.updateExperimentCellStatus(cell))
+      params.cells.map((cell) => this.updateExperimentCell(cell))
     );
     if (results.some((result) => result.error)) {
       return err("Failed to update experiment cell statuses");
@@ -604,7 +604,7 @@ export class ExperimentStore extends BaseStore {
     const columnsResult = await supabaseServer.client
       .from("experiment_column")
       .select("*")
-      .eq("table_id", params.experimentTableId);
+      .eq("experimentTableId", params.experimentTableId);
 
     if (columnsResult.error) {
       return err(columnsResult.error.message);
@@ -757,8 +757,8 @@ export class ExperimentStore extends BaseStore {
     }
   }
 
-  async getExperimentTableByExperimentIdId(
-    experimentId: string
+  async getExperimentTable(
+    experimentTableId: string
   ): Promise<Result<ExperimentTable, string>> {
     const query = `
       SELECT 
@@ -804,7 +804,7 @@ export class ExperimentStore extends BaseStore {
         ) as columns
       FROM experiment_table et
       LEFT JOIN experiment_column ec ON ec.table_id = et.id
-      WHERE et.experiment_id = $1
+      WHERE et.id = $1
       GROUP BY et.id, et.name, et.experiment_id, et.metadata;
     `;
 
@@ -814,7 +814,7 @@ export class ExperimentStore extends BaseStore {
         name: string;
         experimentId: string;
         columns: ExperimentTableColumn[];
-      }>(query, [experimentId]);
+      }>(query, [experimentTableId]);
 
       if (error) {
         console.error("Query Error:", error);
@@ -868,12 +868,10 @@ export class ExperimentStore extends BaseStore {
   }
 
   async updateExperimentTableMetadata(params: {
-    experimentId: string;
+    experimentTableId: string;
     metadata: Record<string, any>;
   }): Promise<Result<null, string>> {
-    const existingMetadata = await this.getExperimentTableByExperimentIdId(
-      params.experimentId
-    );
+    const existingMetadata = await this.getExperimentTable(params.experimentId);
     const result = await supabaseServer.client
       .from("experiment_table")
       .update({
@@ -882,7 +880,7 @@ export class ExperimentStore extends BaseStore {
           ...params.metadata,
         },
       })
-      .eq("experiment_id", params.experimentId);
+      .eq("id", params.experimentTableId);
     if (result.error) {
       return err(result.error.message);
     }

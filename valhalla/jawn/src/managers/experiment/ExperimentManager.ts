@@ -254,13 +254,17 @@ export class ExperimentManager extends BaseManager {
     return this.ExperimentStore.createExperimentCells(params.cells);
   }
 
-  async updateExperimentCellStatuses(params: {
-    cells: { cellId: string; status: string }[];
+  async updateExperimentCells(params: {
+    cells: {
+      cellId: string;
+      status: string | null;
+      value: string | null;
+    }[];
   }): Promise<Result<{ ids: string[] }, string>> {
-    return this.ExperimentStore.updateExperimentCellStatuses(params);
+    return this.ExperimentStore.updateExperimentCells(params);
   }
 
-  async createExperimentTableRows(params: {
+  async createExperimentTableRow(params: {
     experimentTableId: string;
     rowIndex: number;
   }): Promise<Result<{ ids: string[] }, string>> {
@@ -268,11 +272,9 @@ export class ExperimentManager extends BaseManager {
   }
 
   async getExperimentTableByExperimentId(
-    experimentId: string
+    experimentTableId: string
   ): Promise<Result<ExperimentTable, string>> {
-    return this.ExperimentStore.getExperimentTableByExperimentIdId(
-      experimentId
-    );
+    return this.ExperimentStore.getExperimentTable(experimentTableId);
   }
 
   async getExperimentTableById(
@@ -290,7 +292,7 @@ export class ExperimentManager extends BaseManager {
   }
 
   async updateExperimentTableMetadata(params: {
-    experimentId: string;
+    experimentTableId: string;
     metadata: Record<string, any>;
   }): Promise<Result<null, string>> {
     return this.ExperimentStore.updateExperimentTableMetadata(params);
