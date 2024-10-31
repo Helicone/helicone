@@ -11136,6 +11136,72 @@
 						}
 					}
 				}
+			},
+			"patch": {
+				"operationId": "UpdateExperimentCellStatus",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Experiment"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "experimentTableId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"cells": {
+										"items": {
+											"properties": {
+												"status": {
+													"type": "string"
+												},
+												"cellId": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"status",
+												"cellId"
+											],
+											"type": "object"
+										},
+										"type": "array"
+									}
+								},
+								"required": [
+									"cells"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/v1/experiment/table/{experimentTableId}/column": {

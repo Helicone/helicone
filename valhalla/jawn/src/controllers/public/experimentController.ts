@@ -4,6 +4,7 @@ import {
   Controller,
   Delete,
   Get,
+  Patch,
   Path,
   Post,
   Request,
@@ -162,6 +163,19 @@ export class ExperimentController extends Controller {
       return err(result.error);
     }
     return ok(null);
+  }
+
+  @Patch("/table/{experimentTableId}/cell")
+  public async updateExperimentCellStatus(
+    @Path() experimentTableId: string,
+    @Body() requestBody: { cells: { cellId: string; status: string }[] },
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<null, string>> {
+    const experimentManager = new ExperimentManager(request.authParams);
+    const result = await experimentManager.updateExperimentCellStatuses({
+      cells: requestBody.cells,
+    });
+    return result;
   }
 
   @Post("/table/{experimentTableId}/column")

@@ -208,6 +208,7 @@ export interface paths {
   };
   "/v1/experiment/table/{experimentTableId}/cell": {
     post: operations["CreateExperimentCell"];
+    patch: operations["UpdateExperimentCellStatus"];
   };
   "/v1/experiment/table/{experimentTableId}/column": {
     post: operations["CreateExperimentColumn"];
@@ -3918,6 +3919,31 @@ export interface operations {
           /** Format: double */
           rowIndex: number;
           columnId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  UpdateExperimentCellStatus: {
+    parameters: {
+      path: {
+        experimentTableId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          cells: {
+              status: string;
+              cellId: string;
+            }[];
         };
       };
     };
