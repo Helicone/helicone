@@ -368,6 +368,7 @@ export class ExperimentController extends Controller {
         rowIndex: number;
         datasetRowId: string;
         columnId: string;
+        cellId: string;
       }>;
     },
     @Request() request: JawnAuthenticatedRequest
@@ -436,6 +437,24 @@ export class ExperimentController extends Controller {
     experiment.hypotheses = [hypothesis];
 
     const runResult = await run(experiment);
+
+    const cellsToUpdate = requestBody.cells.map((cell) => {
+      return {
+        cellId: cell.cellId,
+        status: "running",
+      };
+    });
+
+    const statusUpdateResult =
+      await experimentManager.updateExperimentCellStatuses({
+        cells: cellsToUpdate,
+      });
+
+    if (statusUpdateResult.error) {
+      this.setStatus(500);
+      console.error(statusUpdateResult.error);
+      return err(statusUpdateResult.error);
+    }
 
     return runResult;
   }

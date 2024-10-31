@@ -249,10 +249,15 @@ export class ExperimentManager extends BaseManager {
       rowIndex: number;
       value: string | null;
       metadata?: Record<string, any>;
-      requestId?: string;
     }[];
   }): Promise<Result<{ ids: string[] }, string>> {
     return this.ExperimentStore.createExperimentCells(params.cells);
+  }
+
+  async updateExperimentCellStatuses(params: {
+    cells: { cellId: string; status: string }[];
+  }): Promise<Result<{ ids: string[] }, string>> {
+    return this.ExperimentStore.updateExperimentCellStatuses(params);
   }
 
   async createExperimentTableRows(params: {

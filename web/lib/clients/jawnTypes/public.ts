@@ -4317,6 +4317,7 @@ export interface operations {
       content: {
         "application/json": {
           cells: {
+              cellId: string;
               columnId: string;
               datasetRowId: string;
               /** Format: double */

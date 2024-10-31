@@ -5223,7 +5223,7 @@ export function RegisterRoutes(app: Router) {
 
             async function ExperimentController_runExperiment(request: ExRequest, response: ExResponse, next: any) {
             const args: Record<string, TsoaRoute.ParameterSchema> = {
-                    requestBody: {"in":"body","name":"requestBody","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"cells":{"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"columnId":{"dataType":"string","required":true},"datasetRowId":{"dataType":"string","required":true},"rowIndex":{"dataType":"double","required":true}}},"required":true},"hypothesisId":{"dataType":"string","required":true},"experimentId":{"dataType":"string","required":true}}},
+                    requestBody: {"in":"body","name":"requestBody","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"cells":{"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"cellId":{"dataType":"string","required":true},"columnId":{"dataType":"string","required":true},"datasetRowId":{"dataType":"string","required":true},"rowIndex":{"dataType":"double","required":true}}},"required":true},"hypothesisId":{"dataType":"string","required":true},"experimentId":{"dataType":"string","required":true}}},
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
             };
 

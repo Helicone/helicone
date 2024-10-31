@@ -124,7 +124,6 @@ export type PromptRecord = {
 
 export type ExperimentCellValue = {
   columnId: string;
-  requestId: string;
   rowIndex: number;
   value: string;
 };

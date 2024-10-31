@@ -331,22 +331,22 @@ export function ExperimentTable({
               id: `row-${rowIndex}`,
               rowIndex,
               isLoading: {},
-              cellId: `${columnId}_${rowIndex}`,
+              cellId: cell.id,
             };
             rowIndexToRow.set(rowIndex, row);
           }
 
-          if (cell.requestId) {
-            // Temporarily store requestId in the cell data
+          if (cell.value) {
+            // Temporarily store value in the cell data
             row[columnId] = {
-              requestId: cell.requestId,
-              cellId: `${columnId}_${rowIndex}`,
+              value: cell.value,
+              cellId: cell.id,
             };
-            requestIdsToFetch.add(cell.requestId);
+            requestIdsToFetch.add(cell.value);
           } else {
             row[columnId] = {
-              requestId: null,
-              cellId: `${columnId}_${rowIndex}`,
+              value: null,
+              cellId: cell.id,
             };
           }
         });
@@ -363,9 +363,9 @@ export function ExperimentTable({
           // Set the value for the column in the row
           row[columnId] = cell.value;
 
-          // Store requestId if needed
-          if (cell.requestId) {
-            row.requestId = cell.requestId;
+          // Store value if needed
+          if (cell.value) {
+            row.value = cell.value;
           }
           if (cell.metadata && cell.metadata.datasetRowId) {
             row.dataset_row_id = cell.metadata.datasetRowId;
@@ -379,12 +379,12 @@ export function ExperimentTable({
     if (requestIdsToFetch.size > 0) {
       const requestIdsArray = Array.from(requestIdsToFetch);
 
-      // Fetch data for each requestId individually
+      // Fetch data for each value individually
       await Promise.all(
-        requestIdsArray.map(async (requestId) => {
-          const requestDataArray = await getRequestDataByIds([requestId]);
+        requestIdsArray.map(async (value) => {
+          const requestDataArray = await getRequestDataByIds([value]);
           if (requestDataArray && requestDataArray.length > 0) {
-            requestDataMap.set(requestId, requestDataArray[0]);
+            requestDataMap.set(value, requestDataArray[0]);
           }
         })
       );
@@ -414,8 +414,8 @@ export function ExperimentTable({
               }
 
               // If we have request data, process it
-              if (cellData?.requestId) {
-                const requestData = requestDataMap.get(cellData.requestId);
+              if (cellData?.value) {
+                const requestData = requestDataMap.get(cellData.value);
                 if (requestData) {
                   const responseBody = await fetchRequestResponseBody(
                     requestData,
@@ -561,6 +561,7 @@ export function ExperimentTable({
             rowIndex: cell.rowIndex,
             datasetRowId: cell.datasetRowId,
             columnId: cell.columnId,
+            cellId: cell.cellId,
           })),
         },
       });
@@ -912,7 +913,7 @@ export function ExperimentTable({
               hypothesisId: column.metadata?.hypothesisId ?? "",
               promptVersionId: column.metadata?.promptVersionId ?? "",
               originalPromptTemplate: promptVersionTemplateRef.current,
-              runs: column.cells.filter((cell) => cell.requestId),
+              runs: column.cells.filter((cell) => cell.value),
               onRunColumn: async (colId: string) => {
                 rowData.map(async (row, index) => {
                   const cells = [

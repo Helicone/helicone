@@ -385,9 +385,8 @@ export class LoggingHandler extends AbstractLogHandler {
 
     return {
       columnId: experimentColumnId,
-      requestId: request.id,
       rowIndex: parseInt(experimentRowIndex),
-      value: "",
+      value: request.id,
     };
   }
 

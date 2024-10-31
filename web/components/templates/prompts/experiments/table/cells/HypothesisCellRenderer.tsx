@@ -19,6 +19,7 @@ export const HypothesisCellRenderer: React.FC<any> = (params) => {
 
   // Parse the response data
   const parsedResponseData = data[colDef.cellRendererParams.columnId] || null;
+  console.log("data", data);
 
   const content =
     parsedResponseData?.responseBody?.response?.choices?.[0]?.message
@@ -26,6 +27,8 @@ export const HypothesisCellRenderer: React.FC<any> = (params) => {
 
   // Construct cellId using columnId and rowIndex
   const cellId = `${colDef.cellRendererParams.columnId}_${params.node.rowIndex}`;
+
+  const columnId = colDef.cellRendererParams.columnId;
 
   const isLoading = data.isLoading?.[cellId];
 
@@ -150,14 +153,16 @@ export const HypothesisCellRenderer: React.FC<any> = (params) => {
           className="w-6 h-6 p-0 border-slate-200 border rounded-md bg-slate-50 text-slate-500"
           onClick={(e) => {
             e.stopPropagation();
-            const cellId = parsedResponseData?.cellId;
+            const cell = parsedResponseData;
+            console.log("columnId", columnId);
+            console.log("cellId", cell.cellId);
 
             params.handleRunHypothesis(hypothesisId, [
               {
                 rowIndex: params.node.rowIndex,
                 datasetRowId: data.dataset_row_id,
                 columnId: colDef.cellRendererParams.columnId,
-                cellId: cellId,
+                cellId: cell.cellId,
               },
             ]);
           }}

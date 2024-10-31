@@ -99,14 +99,14 @@ request_body_vector = EXCLUDED.request_body_vector,
 response_body_vector = EXCLUDED.response_body_vector`;
 
 const experimentCellValueColumns = new pgp.helpers.ColumnSet(
-  ["column_id", "request_id", "row_index", "value"],
+  ["column_id", "row_index", "value", "status"],
   { table: "experiment_cell" }
 );
 
 const onConflictExperimentCellValue =
   " ON CONFLICT (column_id, row_index) DO UPDATE SET " +
   "value = EXCLUDED.value, " +
-  "request_id = EXCLUDED.request_id";
+  "status = EXCLUDED.status";
 
 export class LogStore {
   constructor() {}
@@ -210,9 +210,9 @@ export class LogStore {
             // Map the incoming camelCase to required snake_case
             const cellValues = payload.experimentCellValues.map((cell) => ({
               column_id: cell.columnId,
-              request_id: cell.requestId,
               row_index: cell.rowIndex,
               value: cell.value,
+              status: "success",
             }));
 
             const insertExperimentCellValues =

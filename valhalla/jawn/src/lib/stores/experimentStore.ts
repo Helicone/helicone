@@ -434,6 +434,27 @@ export class ExperimentStore extends BaseStore {
     });
   }
 
+  async getMaxRowIndex(
+    experimentTableId: string
+  ): Promise<Result<number, string>> {
+    const query = `
+      SELECT COALESCE(MAX(ecv.row_index), -1) as max_row_index
+      FROM experiment_cell ecv
+      JOIN experiment_column ec ON ec.id = ecv.column_id
+      WHERE ec.table_id = $1
+    `;
+
+    const result = await dbExecute<{ max_row_index: number }>(query, [
+      experimentTableId,
+    ]);
+
+    if (result.error || !result.data || result.data.length === 0) {
+      return err(result.error ?? "Failed to get max row index");
+    }
+
+    return ok(result.data[0].max_row_index);
+  }
+
   async createExperimentTableColumn(
     experimentTableId: string,
     columnName: string,
@@ -448,7 +469,9 @@ export class ExperimentStore extends BaseStore {
     if (promptVersionId) {
       metadata.promptVersionId = promptVersionId;
     }
-    const result = await supabaseServer.client
+
+    // Create the column using Supabase
+    const columnResult = await supabaseServer.client
       .from("experiment_column")
       .insert({
         table_id: experimentTableId,
@@ -458,12 +481,41 @@ export class ExperimentStore extends BaseStore {
       })
       .select("*")
       .single();
-    if (result.error || !result.data) {
-      return err(
-        result.error?.message ?? "Failed to create experiment table column"
-      );
+
+    if (columnResult.error || !columnResult.data) {
+      return err(columnResult.error?.message ?? "Failed to create column");
     }
-    return ok({ id: result.data.id });
+
+    // Get max row index
+    const maxRowResult = await this.getMaxRowIndex(experimentTableId);
+    if (maxRowResult.error || !maxRowResult.data) {
+      return err(maxRowResult.error ?? "Failed to get max row index");
+    }
+
+    const maxRowIndex = maxRowResult.data;
+
+    // If there are existing rows, create empty cells
+    if (maxRowIndex >= 0) {
+      const cellsQuery = `
+        INSERT INTO experiment_cell (column_id, row_index, value, metadata)
+        SELECT 
+          $1 as column_id,
+          generate_series(0, $2) as row_index,
+          NULL as value,
+          '{"status": "initialized"}'::jsonb as metadata
+      `;
+
+      const cellsResult = await dbExecute(cellsQuery, [
+        columnResult.data.id,
+        maxRowIndex,
+      ]);
+
+      if (cellsResult.error) {
+        return err(cellsResult.error);
+      }
+    }
+
+    return ok({ id: columnResult.data.id });
   }
 
   async createExperimentTableColumns(
@@ -496,19 +548,16 @@ export class ExperimentStore extends BaseStore {
     columnId: string,
     rowIndex: number,
     value: string | null,
-    metadata?: Record<string, any>,
-    requestId?: string
+    metadata?: Record<string, any>
   ): Promise<Result<{ id: string }, string>> {
     const result = await supabaseServer.client
       .from("experiment_cell")
       .insert({
         column_id: columnId,
         row_index: rowIndex,
-        value: value,
-        request_id: requestId ?? null,
-        metadata: metadata
-          ? { ...metadata, status: "initialized" }
-          : { status: "initialized" },
+        value: value ?? null,
+        status: "initialized",
+        metadata: metadata ?? null,
       })
       .select("*")
       .single();
@@ -517,6 +566,34 @@ export class ExperimentStore extends BaseStore {
       return err(result.error?.message ?? "Failed to create experiment cell");
     }
     return ok({ id: result.data.id });
+  }
+
+  async updateExperimentCellStatus(params: {
+    cellId: string;
+    status: string;
+  }): Promise<Result<{ id: string }, string>> {
+    const result = await supabaseServer.client
+      .from("experiment_cell")
+      .update({ status: params.status })
+      .eq("id", params.cellId)
+      .select("*")
+      .single();
+    if (result.error || !result.data) {
+      return err(result.error?.message ?? "Failed to update experiment cell");
+    }
+    return ok({ id: result.data.id });
+  }
+
+  async updateExperimentCellStatuses(params: {
+    cells: { cellId: string; status: string }[];
+  }): Promise<Result<{ ids: string[] }, string>> {
+    const results = await Promise.all(
+      params.cells.map((cell) => this.updateExperimentCellStatus(cell))
+    );
+    if (results.some((result) => result.error)) {
+      return err("Failed to update experiment cell statuses");
+    }
+    return ok({ ids: results.map((result) => result.data!.id) });
   }
 
   async createExperimentTableRow(params: {
@@ -561,7 +638,6 @@ export class ExperimentStore extends BaseStore {
       rowIndex: number;
       value: string | null;
       metadata?: Record<string, any>;
-      requestId?: string;
     }[]
   ): Promise<Result<{ ids: string[] }, string>> {
     const results = await Promise.all(
@@ -570,8 +646,7 @@ export class ExperimentStore extends BaseStore {
           cell.columnId,
           cell.rowIndex,
           cell.value === null || cell.value === "" ? null : cell.value,
-          cell.metadata,
-          cell.requestId
+          cell.metadata
         )
       )
     );
@@ -686,13 +761,6 @@ export class ExperimentStore extends BaseStore {
     experimentId: string
   ): Promise<Result<ExperimentTable, string>> {
     const query = `
-      WITH max_row_index AS (
-        SELECT COALESCE(MAX(row_index), -1) as max_index
-        FROM experiment_cell ecv
-        JOIN experiment_column ec ON ec.id = ecv.column_id
-        JOIN experiment_table et ON et.id = ec.table_id
-        WHERE et.experiment_id = $1
-      )
       SELECT 
         et.id,
         et.name,
@@ -708,47 +776,19 @@ export class ExperimentStore extends BaseStore {
               'cells', (
                 SELECT jsonb_agg(
                   jsonb_build_object(
-                    'id', (
-                      SELECT ecv.id
-                      FROM experiment_cell ecv
-                      WHERE ecv.column_id = ec.id
-                      AND ecv.row_index = row_number
-                    ),
-                    'rowIndex', row_number,
-                    'requestId', (
-                      SELECT jsonb_build_object(
-                        'requestId', ecv.request_id,
-                        'value', ecv.value
-                      )
-                      FROM experiment_cell ecv
-                      WHERE ecv.column_id = ec.id
-                      AND ecv.row_index = row_number
-                    ) -> 'requestId',
-                    'value', (
-                      SELECT jsonb_build_object(
-                        'requestId', ecv.request_id,
-                        'value', ecv.value
-                      )
-                      FROM experiment_cell ecv
-                      WHERE ecv.column_id = ec.id
-                      AND ecv.row_index = row_number
-                    ) -> 'value',
-                    'metadata', (
-                      SELECT ecv.metadata
-                      FROM experiment_cell ecv
-                      WHERE ecv.column_id = ec.id
-                      AND ecv.row_index = row_number
-                    )
+                    'id', ecv.id,
+                    'rowIndex', ecv.row_index,
+                    'value', ecv.value,
+                    'status', ecv.status,
+                    'metadata', CASE 
+                      WHEN ecv.metadata IS NULL THEN NULL 
+                      ELSE ecv.metadata::jsonb 
+                    END
                   )
-                  ORDER BY row_number
+                  ORDER BY ecv.row_index
                 )
-                FROM generate_series(0, (SELECT max_index FROM max_row_index)) row_number
-                LEFT JOIN LATERAL (
-                  SELECT ecv.request_id, ecv.value
-                  FROM experiment_cell ecv
-                  WHERE ecv.column_id = ec.id
-                  AND ecv.row_index = row_number
-                ) cell_data ON true
+                FROM experiment_cell ecv
+                WHERE ecv.column_id = ec.id
               )
             )
             ORDER BY 

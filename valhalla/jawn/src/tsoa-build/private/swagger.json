@@ -11637,6 +11637,9 @@
 									"cells": {
 										"items": {
 											"properties": {
+												"cellId": {
+													"type": "string"
+												},
 												"columnId": {
 													"type": "string"
 												},
@@ -11649,6 +11652,7 @@
 												}
 											},
 											"required": [
+												"cellId",
 												"columnId",
 												"datasetRowId",
 												"rowIndex"

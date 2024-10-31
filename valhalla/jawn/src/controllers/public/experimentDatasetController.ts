@@ -167,8 +167,7 @@ export class ExperimentDatasetController extends Controller {
         ({ value, columnId, rowIndex }) => ({
           columnId,
           rowIndex,
-          value,
-          requestId: inputRecordResult.data?.source_request ?? undefined,
+          value: inputRecordResult.data?.source_request ?? null,
           metadata: { datasetRowId: datasetRowResult.data },
         })
       ),
