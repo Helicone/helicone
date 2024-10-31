@@ -506,7 +506,9 @@ export class ExperimentStore extends BaseStore {
         row_index: rowIndex,
         value: value,
         request_id: requestId ?? null,
-        metadata: metadata ?? null,
+        metadata: metadata
+          ? { ...metadata, status: "initialized" }
+          : { status: "initialized" },
       })
       .select("*")
       .single();
