@@ -196,6 +196,7 @@ export class ExperimentDatasetController extends Controller {
       >;
       rowIndex: number;
       experimentTableId: string;
+      experimentId: string;
       sourceRequest?: string;
       originalColumnId?: string;
     },
@@ -244,6 +245,17 @@ export class ExperimentDatasetController extends Controller {
     ];
     const experimentTableCell = await experimentManager.createExperimentCells({
       cells: newCells,
+    });
+
+    const latestRowIndex = newCells.reduce((max, row) => {
+      return Math.max(max, row.rowIndex);
+    }, 0);
+
+    await experimentManager.updateExperimentTableMetadata({
+      experimentId: requestBody.experimentId,
+      metadata: {
+        rows: latestRowIndex,
+      },
     });
 
     if (experimentTableCell.error || !experimentTableCell.data) {

@@ -729,6 +729,7 @@ export function ExperimentTable({
               inputs: currentRowInputs,
               rowIndex: rowIndex,
               experimentTableId: experimentTableData?.id ?? "",
+              experimentId: experimentTableData?.experimentId ?? "",
               originalColumnId:
                 experimentTableData?.columns.find(
                   (column) => column.columnType === "output"

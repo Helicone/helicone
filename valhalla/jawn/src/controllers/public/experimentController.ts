@@ -131,7 +131,7 @@ export class ExperimentController extends Controller {
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<ExperimentTable, string>> {
     const experimentManager = new ExperimentManager(request.authParams);
-    return experimentManager.getExperimentTableById(experimentId);
+    return experimentManager.getExperimentTableByExperimentId(experimentId);
   }
   @Post("/tables/query")
   public async getExperimentTables(

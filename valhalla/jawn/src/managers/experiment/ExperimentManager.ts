@@ -262,16 +262,33 @@ export class ExperimentManager extends BaseManager {
     return this.ExperimentStore.createExperimentTableRow(params);
   }
 
-  async getExperimentTableById(
+  async getExperimentTableByExperimentId(
     experimentId: string
   ): Promise<Result<ExperimentTable, string>> {
-    return this.ExperimentStore.getExperimentTableById(experimentId);
+    return this.ExperimentStore.getExperimentTableByExperimentIdId(
+      experimentId
+    );
+  }
+
+  async getExperimentTableById(
+    experimentTableId: string
+  ): Promise<
+    Result<Database["public"]["Tables"]["experiment_table"]["Row"], string>
+  > {
+    return this.ExperimentStore.getExperimentTableById(experimentTableId);
   }
 
   async getExperimentTables(): Promise<
     Result<ExperimentTableSimplified[], string>
   > {
     return this.ExperimentStore.getExperimentTables();
+  }
+
+  async updateExperimentTableMetadata(params: {
+    experimentId: string;
+    metadata: Record<string, any>;
+  }): Promise<Result<null, string>> {
+    return this.ExperimentStore.updateExperimentTableMetadata(params);
   }
 
   async createExperimentColumn(params: {
@@ -288,13 +305,37 @@ export class ExperimentManager extends BaseManager {
       string
     >
   > {
-    return this.ExperimentStore.createExperimentTableColumn(
-      params.experimentTableId,
-      params.columnName,
-      params.columnType as "experiment" | "input" | "output",
-      params.hypothesisId,
-      params.promptVersionId
+    const experimentTableResult = await this.getExperimentTableById(
+      params.experimentTableId
     );
+    if (experimentTableResult.error || !experimentTableResult.data) {
+      return err(experimentTableResult.error);
+    }
+    const experimentColumnResult =
+      await this.ExperimentStore.createExperimentTableColumn(
+        params.experimentTableId,
+        params.columnName,
+        params.columnType as "experiment" | "input" | "output",
+        params.hypothesisId,
+        params.promptVersionId
+      );
+
+    if (experimentColumnResult.error || !experimentColumnResult.data) {
+      return err(experimentColumnResult.error);
+    }
+
+    await this.createExperimentCells({
+      cells: Array.from(
+        { length: (experimentTableResult.data.metadata as any)?.rows + 1 },
+        (_, index) => ({
+          columnId: experimentColumnResult.data.id,
+          rowIndex: index,
+          value: null,
+        })
+      ),
+    });
+
+    return ok({ id: experimentColumnResult.data.id });
   }
 
   async getExperimentHypothesisScores(params: {

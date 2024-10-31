@@ -680,7 +680,7 @@ export class ExperimentStore extends BaseStore {
     }
   }
 
-  async getExperimentTableById(
+  async getExperimentTableByExperimentIdId(
     experimentId: string
   ): Promise<Result<ExperimentTable, string>> {
     const query = `
@@ -805,6 +805,46 @@ export class ExperimentStore extends BaseStore {
       console.error("Exception:", e);
       return err("An unexpected error occurred");
     }
+  }
+
+  async getExperimentTableById(
+    experimentTableId: string
+  ): Promise<
+    Result<Database["public"]["Tables"]["experiment_table"]["Row"], string>
+  > {
+    const result = await supabaseServer.client
+      .from("experiment_table")
+      .select("*")
+      .eq("id", experimentTableId)
+      .single();
+
+    if (result.error) {
+      return err(result.error.message);
+    }
+
+    return ok(result.data);
+  }
+
+  async updateExperimentTableMetadata(params: {
+    experimentId: string;
+    metadata: Record<string, any>;
+  }): Promise<Result<null, string>> {
+    const existingMetadata = await this.getExperimentTableByExperimentIdId(
+      params.experimentId
+    );
+    const result = await supabaseServer.client
+      .from("experiment_table")
+      .update({
+        metadata: {
+          ...existingMetadata.data?.metadata,
+          ...params.metadata,
+        },
+      })
+      .eq("experiment_id", params.experimentId);
+    if (result.error) {
+      return err(result.error.message);
+    }
+    return ok(null);
   }
 
   async getExperimentTables(): Promise<
