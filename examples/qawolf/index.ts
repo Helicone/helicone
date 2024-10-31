@@ -10,7 +10,7 @@ import { examples } from "./examples";
 const sessionId = uuid();
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
-  baseURL: "https://oai.helicone.ai/v1",
+  baseURL: "http://localhost:8787/v1",
   defaultHeaders: {
     "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
   },
@@ -233,7 +233,7 @@ async function processExample(example: (typeof examples)[0]) {
 
 async function main() {
   await Promise.all(
-    examples.slice(0, 3).map(async (example) => {
+    examples.map(async (example) => {
       processExample(example);
     })
   );
