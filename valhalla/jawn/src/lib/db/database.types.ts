@@ -366,8 +366,8 @@ export type Database = {
           created_at: string
           id: string
           metadata: Json | null
-          request_id: string | null
           row_index: number
+          status: string | null
           value: string | null
         }
         Insert: {
@@ -375,8 +375,8 @@ export type Database = {
           created_at?: string
           id?: string
           metadata?: Json | null
-          request_id?: string | null
           row_index: number
+          status?: string | null
           value?: string | null
         }
         Update: {
@@ -384,8 +384,8 @@ export type Database = {
           created_at?: string
           id?: string
           metadata?: Json | null
-          request_id?: string | null
           row_index?: number
+          status?: string | null
           value?: string | null
         }
         Relationships: [
