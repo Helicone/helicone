@@ -299,8 +299,12 @@ export class ExperimentManager extends BaseManager {
     const maxRowIndex = await this.ExperimentStore.getMaxRowIndex(
       params.experimentTableId
     );
-    if (maxRowIndex.error || !maxRowIndex.data) {
-      return err(maxRowIndex.error);
+    if (
+      maxRowIndex.error ||
+      maxRowIndex.data === null ||
+      maxRowIndex.data === -1
+    ) {
+      return err(maxRowIndex.error ?? "Failed to get max row index");
     }
 
     return this.ExperimentStore.createExperimentTableRow({
