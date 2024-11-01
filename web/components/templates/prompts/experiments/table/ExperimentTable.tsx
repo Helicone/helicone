@@ -505,6 +505,37 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
 
   const [showRandomInputSelector, setShowRandomInputSelector] = useState(false);
 
+  const handleRunRow = useCallback(
+    (rowIndex: number) => {
+      const row = experimentTableQuery?.rows[rowIndex];
+      if (!row) return;
+
+      const experimentColumns = experimentTableQuery?.columns?.filter(
+        (column) => column.columnType === "experiment"
+      );
+
+      if (!experimentColumns) return;
+
+      experimentColumns.forEach((column) => {
+        const hypothesisId = (column.metadata?.hypothesisId as string) ?? "";
+        if (!hypothesisId) return;
+
+        const cells = [
+          {
+            cellId: row.cells[column.id].cellId,
+          },
+        ];
+
+        handleRunHypothesis(hypothesisId, cells);
+      });
+    },
+    [
+      experimentTableQuery?.rows,
+      experimentTableQuery?.columns,
+      handleRunHypothesis,
+    ]
+  );
+
   if (isExperimentTableLoading) {
     return (
       <div className="flex items-center justify-center h-screen flex-col">
@@ -607,10 +638,10 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
               experimentId: experimentTableQuery?.metadata?.experimentId,
               orgId,
               promptVersionTemplateRef: promptVersionTemplateData ?? {},
-              activePopoverCell,
               handleInputChange,
-              rowData: experimentTableQuery?.rows, // Add this line
+              rowData: experimentTableQuery?.rows,
               handleUpdateExperimentCell,
+              handleRunRow,
             }}
             rowClass="border-b border-gray-200 hover:bg-gray-50"
             headerHeight={40}
