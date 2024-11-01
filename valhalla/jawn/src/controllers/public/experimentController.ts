@@ -253,6 +253,7 @@ export class ExperimentController extends Controller {
     requestBody: {
       promptVersionId: string;
       sourceRequest?: string;
+      inputs?: Record<string, string>;
     },
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<null, string>> {
@@ -297,6 +298,7 @@ export class ExperimentController extends Controller {
         datasetRowId: datasetRowResult.data,
         inputId: inputRecordResult.data,
       },
+      inputs: requestBody.inputs,
     });
 
     if (result.error || !result.data) {
@@ -592,5 +594,35 @@ export class ExperimentController extends Controller {
     const runResult = await run(experiment);
 
     return runResult;
+  }
+
+  @Post("/table/{experimentTableId}/row-with-cells")
+  public async createExperimentTableRowWithCells(
+    @Path() experimentTableId: string,
+    @Body()
+    requestBody: {
+      metadata?: Record<string, any>;
+      cells: {
+        columnId: string;
+        value: string | null;
+        metadata?: Record<string, any>;
+      }[];
+    },
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<null, string>> {
+    const experimentManager = new ExperimentManager(request.authParams);
+
+    const result = await experimentManager.createExperimentTableRowWithCells({
+      experimentTableId,
+      metadata: requestBody.metadata,
+      cells: requestBody.cells,
+    });
+
+    if (result.error || !result.data) {
+      this.setStatus(500);
+      console.error(result.error);
+      return err(result.error);
+    }
+    return ok(null);
   }
 }

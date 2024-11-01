@@ -10,16 +10,17 @@ import PromptPlayground from "../../../id/promptPlayground";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 import clsx from "clsx";
+import { CellData } from "./types";
 
 export const OriginalOutputCellRenderer: React.FC<any> = (params) => {
   const { data, colDef, context, prompt, wrapText } = params;
   const hypothesisId = params.hypothesisId;
   const inputKeys = context.inputKeys;
   const [showPromptPlayground, setShowPromptPlayground] = useState(false);
-  const parsedResponseData = data.cells[colDef.cellRendererParams.columnId];
+  const cellData = data.cells[colDef.cellRendererParams.columnId] as CellData;
 
   const content =
-    parsedResponseData?.value?.response?.choices?.[0]?.message?.content || "";
+    cellData?.value?.response?.choices?.[0]?.message?.content || "";
 
   const handleCellClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -38,11 +39,8 @@ export const OriginalOutputCellRenderer: React.FC<any> = (params) => {
       ],
     };
   };
-  const cellId = `${colDef.cellRendererParams.columnId}_${params.node.rowIndex}`;
 
-  const isLoading = data.isLoading?.[cellId];
-
-  if (isLoading) {
+  if (cellData?.status === "running") {
     return (
       <div className="w-full h-full whitespace-pre-wrap flex flex-row items-center space-x-2 pl-4">
         <span className="animate-ping inline-flex rounded-full bg-green-700 h-2 w-2"></span>
@@ -73,7 +71,7 @@ export const OriginalOutputCellRenderer: React.FC<any> = (params) => {
                   e.stopPropagation();
                   params.handleRunHypothesis("original", [
                     {
-                      cellId: cellId,
+                      cellId: cellData.cellId,
                     },
                   ]);
                 }}

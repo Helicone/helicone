@@ -20,7 +20,7 @@ export const HypothesisCellRenderer: React.FC<any> = (params) => {
 
   // Parse the response data
   const cellData = data.cells[colDef.cellRendererParams.columnId] as CellData;
-  console.log("cell", cellData);
+  console.log("cell123", cellData);
 
   const content =
     cellData?.value?.response?.choices?.[0]?.message?.content || "";

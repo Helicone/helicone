@@ -20,7 +20,7 @@ interface ExperimentInputSelectorProps {
   requestIds?: DatasetRequest[];
   onSuccess?: (success: boolean) => void;
   numberOfRows: number;
-  handleAddRow: () => void;
+  handleAddRow: (inputs: Record<string, string>) => void;
   meta?: {
     promptVersionId?: string;
     datasetId?: string;
@@ -134,7 +134,7 @@ export const ExperimentRandomInputSelector = (
                       },
                     }
                   );
-                  await props.handleAddRow();
+                  await props.handleAddRow(request.inputs);
                 })
               );
 

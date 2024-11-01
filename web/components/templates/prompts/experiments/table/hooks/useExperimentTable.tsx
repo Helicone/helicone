@@ -242,13 +242,45 @@ export function useExperimentTable(orgId: string, experimentTableId: string) {
   });
 
   const addExperimentTableRow = useMutation({
-    mutationFn: async ({ promptVersionId }: { promptVersionId: string }) => {
+    mutationFn: async ({
+      promptVersionId,
+      inputs,
+    }: {
+      promptVersionId: string;
+      inputs?: Record<string, string>;
+    }) => {
       const jawnClient = getJawnClient(orgId);
       const res = await jawnClient.POST(
         "/v1/experiment/table/{experimentTableId}/row",
         {
           params: { path: { experimentTableId: experimentTableId } },
-          body: { promptVersionId: promptVersionId },
+          body: { promptVersionId, inputs },
+        }
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["experimentTable", orgId, experimentTableId],
+      });
+    },
+  });
+
+  const addExperimentTableRowWithCells = useMutation({
+    mutationFn: async ({
+      cells,
+    }: {
+      cells: {
+        columnId: string;
+        value: string | null;
+        metadata?: Record<string, any>;
+      }[];
+    }) => {
+      const jawnClient = getJawnClient(orgId);
+      const res = await jawnClient.POST(
+        "/v1/experiment/table/{experimentTableId}/row-with-cells",
+        {
+          params: { path: { experimentTableId: experimentTableId } },
+          body: { cells },
         }
       );
     },
@@ -341,5 +373,6 @@ export function useExperimentTable(orgId: string, experimentTableId: string) {
     addExperimentTableRow,
     updateExperimentCell,
     runHypothesisMutation,
+    addExperimentTableRowWithCells,
   };
 }

@@ -108,9 +108,7 @@ const ExperimentsPage = (props: ExperimentsPageProps) => {
           const promptId = (row.metadata as any)?.prompt_id;
           const promptVersion = (row.metadata as any)?.prompt_version;
           if (promptId && promptVersion) {
-            router.push(
-              `/prompts/${promptId}/subversion/${promptVersion}/experiment/${row.experimentId}`
-            );
+            router.push(`/experiments/${row.id}`);
           }
         }}
         fullWidth={true}

@@ -438,7 +438,7 @@ export class ExperimentStore extends BaseStore {
     experimentTableId: string
   ): Promise<Result<number, string>> {
     const query = `
-      SELECT COALESCE(MAX(ecv.row_index), -1) as max_row_index
+      SELECT COALESCE(MAX(ecv.row_index), 0) as max_row_index
       FROM experiment_cell ecv
       JOIN experiment_column ec ON ec.id = ecv.column_id
       JOIN experiment_table et ON et.id = ec.table_id
@@ -449,7 +449,9 @@ export class ExperimentStore extends BaseStore {
       experimentTableId,
     ]);
 
-    if (result.error || !result.data || result.data.length === 0) {
+    console.log("result", result);
+
+    if (result.error || result.data === null || result.data.length === 0) {
       return err(result.error ?? "Failed to get max row index");
     }
 
@@ -738,6 +740,7 @@ export class ExperimentStore extends BaseStore {
     experimentTableId: string;
     rowIndex: number;
     metadata?: Record<string, any>;
+    inputs?: Record<string, string>;
   }): Promise<Result<{ ids: string[] }, string>> {
     // First, get all columns for this experiment table
     const columnsResult = await supabaseServer.client
@@ -750,14 +753,27 @@ export class ExperimentStore extends BaseStore {
     }
 
     // Create empty cells for each column
-    const cellPromises = columnsResult.data.map((column) =>
-      this.createExperimentCell(
-        column.id,
-        params.rowIndex,
-        null,
-        params.metadata
-      )
-    );
+    let cellPromises: Promise<Result<{ id: string }, string>>[] = [];
+
+    if (params.inputs && Object.keys(params.inputs).length > 0) {
+      cellPromises = columnsResult.data.map((column) =>
+        this.createExperimentCell(
+          column.id,
+          params.rowIndex,
+          params?.inputs?.[column.column_name] ?? null,
+          params.metadata
+        )
+      );
+    } else {
+      columnsResult.data.map((column) =>
+        this.createExperimentCell(
+          column.id,
+          params.rowIndex,
+          null,
+          params.metadata
+        )
+      );
+    }
 
     try {
       const results = await Promise.all(cellPromises);
@@ -1171,6 +1187,71 @@ export class ExperimentStore extends BaseStore {
     } catch (e) {
       console.error("Exception:", e);
       return err("An unexpected error occurred");
+    }
+  }
+
+  async createExperimentTableRowWithCells(params: {
+    experimentTableId: string;
+    rowIndex: number;
+    metadata?: Record<string, any>;
+    cells: {
+      columnId: string;
+      value: string | null;
+      metadata?: Record<string, any>;
+    }[];
+  }): Promise<Result<{ ids: string[] }, string>> {
+    // Fetch all columns for the experiment table
+    const columnsResult = await supabaseServer.client
+      .from("experiment_column")
+      .select("id")
+      .eq("table_id", params.experimentTableId);
+
+    if (columnsResult.error) {
+      return err(columnsResult.error.message);
+    }
+
+    const allColumnIds = columnsResult.data.map((col) => col.id);
+
+    // Create cells for specified columns
+    const cellPromises = params.cells.map((cell) =>
+      this.createExperimentCell(
+        cell.columnId,
+        params.rowIndex,
+        cell.value,
+        cell.metadata ?? params.metadata
+      )
+    );
+
+    // Create empty cells for other columns
+    const specifiedColumnIds = params.cells.map((cell) => cell.columnId);
+    const otherColumnIds = allColumnIds.filter(
+      (id) => !specifiedColumnIds.includes(id)
+    );
+
+    for (const columnId of otherColumnIds) {
+      cellPromises.push(
+        this.createExperimentCell(
+          columnId,
+          params.rowIndex,
+          null,
+          params.metadata
+        )
+      );
+    }
+
+    try {
+      const results = await Promise.all(cellPromises);
+
+      // Check if any cell creation failed
+      const failedResults = results.filter((result) => result.error);
+      if (failedResults.length > 0) {
+        return err(`Failed to create cells: ${failedResults[0].error}`);
+      }
+
+      // Return the IDs of the created cells
+      return ok({ ids: results.map((result) => result.data!.id) });
+    } catch (error) {
+      return err(`Failed to create experiment row: ${error}`);
     }
   }
 }

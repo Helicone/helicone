@@ -295,6 +295,7 @@ export class ExperimentManager extends BaseManager {
   async createExperimentTableRow(params: {
     experimentTableId: string;
     metadata?: Record<string, any>;
+    inputs?: Record<string, string>;
   }): Promise<Result<{ ids: string[] }, string>> {
     const maxRowIndex = await this.ExperimentStore.getMaxRowIndex(
       params.experimentTableId
@@ -311,6 +312,7 @@ export class ExperimentManager extends BaseManager {
       experimentTableId: params.experimentTableId,
       rowIndex: maxRowIndex.data + 1,
       metadata: params.metadata,
+      inputs: params.inputs,
     });
   }
 
@@ -392,5 +394,33 @@ export class ExperimentManager extends BaseManager {
     hypothesisId: string;
   }): Promise<Result<{ scores: Record<string, Score> }, string>> {
     return this.ExperimentStore.getExperimentHypothesisScores(params);
+  }
+
+  async createExperimentTableRowWithCells(params: {
+    experimentTableId: string;
+    metadata?: Record<string, any>;
+    cells: {
+      columnId: string;
+      value: string | null;
+      metadata?: Record<string, any>;
+    }[];
+  }): Promise<Result<{ ids: string[] }, string>> {
+    const maxRowIndex = await this.ExperimentStore.getMaxRowIndex(
+      params.experimentTableId
+    );
+    if (
+      maxRowIndex.error ||
+      maxRowIndex.data === null ||
+      maxRowIndex.data === -1
+    ) {
+      return err(maxRowIndex.error ?? "Failed to get max row index");
+    }
+
+    return this.ExperimentStore.createExperimentTableRowWithCells({
+      experimentTableId: params.experimentTableId,
+      rowIndex: maxRowIndex.data + 1,
+      metadata: params.metadata,
+      cells: params.cells,
+    });
   }
 }

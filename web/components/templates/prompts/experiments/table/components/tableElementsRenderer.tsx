@@ -23,7 +23,7 @@ import { useJawnClient } from "../../../../../../lib/clients/jawnHook";
 const InputCellRenderer: React.FC<any> = (props) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [inputValue, setInputValue] = useState(
-    props.data.cells[props.colDef.cellRendererParams.columnId].value || ""
+    props.data.cells[props.colDef.cellRendererParams.columnId]?.value || ""
   );
   const inputRef = useRef<HTMLInputElement>(null);
 

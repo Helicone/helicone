@@ -64,6 +64,7 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
     addExperimentTableRow,
     updateExperimentCell,
     runHypothesisMutation,
+    addExperimentTableRowWithCells,
   } = useExperimentTable(orgId || "", experimentTableId);
   const promptSubversionId = experimentTableQuery?.promptSubversionId;
 
@@ -309,12 +310,34 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
   //   addExperimentTableRow(newRow);
   // }, [inputKeys, tempRowId]);
 
-  const handleAddRow = useCallback(() => {
-    addExperimentTableRow.mutate({
-      promptVersionId:
-        (experimentTableQuery?.promptSubversionId as string) ?? "",
-    });
-  }, [addExperimentTableRow]);
+  const handleAddRow = useCallback(
+    (inputs?: Record<string, string>) => {
+      addExperimentTableRow.mutate({
+        promptVersionId:
+          (experimentTableQuery?.promptSubversionId as string) ?? "",
+        inputs,
+      });
+    },
+    [addExperimentTableRow]
+  );
+
+  const handleAddRowWithCells = useCallback(
+    (inputs?: Record<string, string>) => {
+      const columns = experimentTableQuery?.columns?.filter(
+        (column) => column.columnType === "input"
+      );
+
+      const cells = Object.entries(inputs ?? {}).map(([key, value]) => ({
+        columnId:
+          columns?.find((column) => column.columnName === key)?.id ?? "",
+        value,
+      }));
+      console.log("cells333", cells);
+      if (!cells) return;
+      addExperimentTableRowWithCells.mutate({ cells });
+    },
+    [addExperimentTableRowWithCells]
+  );
 
   const handleCellValueChanged = useCallback(
     (event: any) => {
@@ -570,6 +593,7 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
                       cellId: row.cells[colId].cellId,
                     },
                   ];
+
                   handleRunHypothesis(
                     (column.metadata?.hypothesisId as string) ?? "",
                     cells
@@ -946,7 +970,7 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
         <Button
           variant="ghost"
           size="sm"
-          onClick={handleAddRow}
+          onClick={() => handleAddRow({})}
           className="self-start flex flex-row space-x-2 text-slate-700 mt-0"
         >
           <PlusIcon className="h-4 w-4" />
@@ -966,7 +990,7 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
               (column) => column.id === "output"
             )?.id ?? "",
         }}
-        handleAddRow={handleAddRow}
+        handleAddRow={handleAddRowWithCells}
         requestIds={randomInputRecords}
         onSuccess={async (success) => {}}
       />

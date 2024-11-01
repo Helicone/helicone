@@ -287,6 +287,9 @@ export interface paths {
   "/v1/experiment/run": {
     post: operations["RunExperiment"];
   };
+  "/v1/experiment/table/{experimentTableId}/row-with-cells": {
+    post: operations["CreateExperimentTableRowWithCells"];
+  };
   "/v1/evaluator": {
     post: operations["CreateEvaluator"];
   };
@@ -4219,6 +4222,7 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": {
+          inputs?: components["schemas"]["Record_string.string_"];
           sourceRequest?: string;
           promptVersionId: string;
         };
@@ -4406,6 +4410,33 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_ExperimentRun.string_"];
+        };
+      };
+    };
+  };
+  CreateExperimentTableRowWithCells: {
+    parameters: {
+      path: {
+        experimentTableId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          cells: ({
+              metadata?: components["schemas"]["Record_string.any_"];
+              value: string | null;
+              columnId: string;
+            })[];
+          metadata?: components["schemas"]["Record_string.any_"];
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
         };
       };
     };
