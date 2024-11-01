@@ -21,7 +21,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useJawnClient } from "../../../../../../lib/clients/jawnHook";
 
 const InputCellRenderer: React.FC<any> = (props) => {
-  const [popoverOpen, setPopoverOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const [inputValue, setInputValue] = useState(
     props.data.cells[props.colDef.cellRendererParams.columnId]?.value || ""
   );
@@ -45,33 +45,19 @@ const InputCellRenderer: React.FC<any> = (props) => {
     );
   };
 
-  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      handleInputSubmit();
-    }
-  };
-
   const handleInputSubmit = () => {
-    if (inputValue.trim() === "") {
-      // Don't submit if the value is empty
-      return;
-    }
+    if (inputValue.trim() === "") return;
 
-    console.log("props.data", props.data);
-    console.log("props.column.colId", props.column.colId);
     const cell = props.data.cells[props.column.colId];
 
-    console.log("cellId", cell.cellId);
-    // Update the cell in the experiment table
     props.context.handleUpdateExperimentCell({
       cellId: cell.cellId,
       value: inputValue.trim(),
     });
 
-    setPopoverOpen(false);
+    setIsEditing(false);
 
-    // Move to the next input or handle last input submission
+    // Move to the next input
     const currentColumnIndex = inputColumns.findIndex(
       (col: any) => col.id === props.column.colId
     );
@@ -82,94 +68,51 @@ const InputCellRenderer: React.FC<any> = (props) => {
         rowIndex: props.node.rowIndex,
         colId: nextInputColumn.id,
       });
-    } else {
-      // // This is the last input column
-      // console.log("handleLastInputSubmit");
-      // props.context.handleLastInputSubmitCallback(props.node.rowIndex);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleInputSubmit();
+    } else if (e.key === "Escape") {
+      setIsEditing(false);
     }
   };
 
   useEffect(() => {
-    if (popoverOpen && inputRef.current) {
+    if (isEditing && inputRef.current) {
       inputRef.current.focus();
     }
-  }, [popoverOpen]);
+  }, [isEditing]);
 
-  useEffect(() => {
-    const isActiveCell =
-      props.context.activePopoverCell?.rowIndex === props.node.rowIndex &&
-      props.context.activePopoverCell?.colId === props.column.colId;
-    if (isActiveCell) {
-      setPopoverOpen(true);
-    } else {
-      setPopoverOpen(false);
-    }
-  }, [
-    props.context.activePopoverCell,
-    props.node.rowIndex,
-    props.column.colId,
-  ]);
+  if (isEditing) {
+    return (
+      <Input
+        ref={inputRef}
+        className="h-full w-full text-sm border-none focus:ring-0"
+        value={inputValue}
+        onChange={handleInputChange}
+        onKeyDown={handleKeyDown}
+        onBlur={handleInputSubmit}
+        autoFocus
+      />
+    );
+  }
 
   return (
-    <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
-      <PopoverTrigger asChild>
-        <div
-          className="cursor-pointer"
-          style={{
-            whiteSpace: "inherit",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            color: inputValue ? "inherit" : "#6B7280",
-            minHeight: "20px",
-          }}
-        >
-          {displayValue}
-        </div>
-      </PopoverTrigger>
-      <PopoverContent align="start" className="w-52 p-0">
-        <Input
-          ref={inputRef}
-          className="text-sm w-full font-semibold px-2 pt-2 border-none"
-          placeholder="Enter manually, or:"
-          value={inputValue}
-          onChange={handleInputChange}
-          onKeyDown={handleInputKeyDown}
-          onBlur={handleInputSubmit}
-        />
-
-        <div className="flex flex-col space-y-2 p-2 items-start justify-start">
-          <Button
-            onClick={() => {
-              setPopoverOpen(false);
-              props.context.setShowExperimentInputSelector(true);
-            }}
-            className="h-8 w-full flex items-center justify-start"
-            variant="ghost"
-          >
-            <TableCellsIcon className="inline h-4 w-4 mr-2" />
-            Select an input set
-          </Button>
-          <Button
-            onClick={() => {
-              setPopoverOpen(false);
-              props.context.setShowRandomInputSelector(true);
-            }}
-            className="h-8 w-full flex items-center justify-start"
-            variant="ghost"
-          >
-            <Dices className="inline h-4 w-4 mr-2" />
-            Random prod
-          </Button>
-          <Button
-            className="w-full h-8 flex items-center justify-start"
-            variant="ghost"
-          >
-            <FolderIcon className="inline h-4 w-4 mr-2" />
-            Select a dataset
-          </Button>
-        </div>
-      </PopoverContent>
-    </Popover>
+    <div
+      className="cursor-pointer h-full w-full px-2 flex items-center"
+      onClick={() => setIsEditing(true)}
+      style={{
+        whiteSpace: "inherit",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        color: inputValue ? "inherit" : "#6B7280",
+      }}
+    >
+      {displayValue}
+    </div>
   );
 };
 

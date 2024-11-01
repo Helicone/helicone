@@ -20,7 +20,13 @@ interface ExperimentInputSelectorProps {
   requestIds?: DatasetRequest[];
   onSuccess?: (success: boolean) => void;
   numberOfRows: number;
-  handleAddRow: (inputs: Record<string, string>) => void;
+  handleAddRows: (
+    rows: {
+      inputRecordId: string;
+      datasetId: string;
+      inputs: Record<string, string>;
+    }[]
+  ) => void;
   meta?: {
     promptVersionId?: string;
     datasetId?: string;
@@ -116,26 +122,12 @@ export const ExperimentRandomInputSelector = (
             variant={"default"}
             size={"sm"}
             onClick={async () => {
-              await Promise.all(
-                shuffledRequests.map(async (request, index) => {
-                  console.log("request", request);
-                  await jawn.POST(
-                    "/v1/experiment/dataset/{datasetId}/row/insert",
-                    {
-                      body: {
-                        inputRecordId: request.id,
-                        inputs: request.inputs,
-                        originalColumnId: props.meta?.originalColumnId ?? "",
-                      },
-                      params: {
-                        path: {
-                          datasetId: props.meta?.datasetId ?? "",
-                        },
-                      },
-                    }
-                  );
-                  await props.handleAddRow(request.inputs);
-                })
+              await props.handleAddRows(
+                shuffledRequests.map((request) => ({
+                  inputRecordId: request.id,
+                  datasetId: props.meta?.datasetId ?? "",
+                  inputs: request.inputs,
+                }))
               );
 
               if (onSuccess) {

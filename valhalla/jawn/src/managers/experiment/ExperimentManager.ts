@@ -402,7 +402,6 @@ export class ExperimentManager extends BaseManager {
     cells: {
       columnId: string;
       value: string | null;
-      metadata?: Record<string, any>;
     }[];
   }): Promise<Result<{ ids: string[] }, string>> {
     const maxRowIndex = await this.ExperimentStore.getMaxRowIndex(
@@ -422,5 +421,18 @@ export class ExperimentManager extends BaseManager {
       metadata: params.metadata,
       cells: params.cells,
     });
+  }
+
+  async createExperimentTableRowWithCellsBatch(params: {
+    experimentTableId: string;
+    rows: {
+      metadata?: Record<string, any>;
+      cells: {
+        columnId: string;
+        value: string | null;
+      }[];
+    }[];
+  }): Promise<Result<{ ids: string[] }, string>> {
+    return this.ExperimentStore.createExperimentTableRowsWithCells(params);
   }
 }

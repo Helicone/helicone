@@ -249,7 +249,7 @@ export interface paths {
   "/v1/experiment/table/{experimentTableId}/column": {
     post: operations["CreateExperimentColumn"];
   };
-  "/v1/experiment/table/{experimentTableId}/row": {
+  "/v1/experiment/table/{experimentTableId}/row/new": {
     post: operations["CreateExperimentTableRow"];
   };
   "/v1/experiment/update-meta": {
@@ -280,8 +280,11 @@ export interface paths {
   "/v1/experiment/run": {
     post: operations["RunExperiment"];
   };
-  "/v1/experiment/table/{experimentTableId}/row-with-cells": {
+  "/v1/experiment/table/{experimentTableId}/row/insert": {
     post: operations["CreateExperimentTableRowWithCells"];
+  };
+  "/v1/experiment/table/{experimentTableId}/row/insert/batch": {
+    post: operations["CreateExperimentTableRowWithCellsBatch"];
   };
   "/v1/experiment/dataset": {
     post: operations["AddDataset"];
@@ -4391,11 +4394,42 @@ export interface operations {
       content: {
         "application/json": {
           cells: ({
-              metadata?: components["schemas"]["Record_string.any_"];
               value: string | null;
               columnId: string;
             })[];
-          metadata?: components["schemas"]["Record_string.any_"];
+          datasetId: string;
+          inputs: components["schemas"]["Record_string.string_"];
+          inputRecordId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  CreateExperimentTableRowWithCellsBatch: {
+    parameters: {
+      path: {
+        experimentTableId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          rows: ({
+              cells: ({
+                  value: string | null;
+                  columnId: string;
+                })[];
+              datasetId: string;
+              inputs: components["schemas"]["Record_string.string_"];
+              inputRecordId: string;
+            })[];
         };
       };
     };

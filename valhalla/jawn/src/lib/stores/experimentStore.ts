@@ -1254,6 +1254,91 @@ export class ExperimentStore extends BaseStore {
       return err(`Failed to create experiment row: ${error}`);
     }
   }
+
+  async createExperimentTableRowsWithCells(params: {
+    experimentTableId: string;
+    rows: {
+      metadata?: Record<string, any>;
+      cells: {
+        columnId: string;
+        value: string | null;
+        metadata?: Record<string, any>;
+      }[];
+    }[];
+  }): Promise<Result<{ ids: string[] }, string>> {
+    // Fetch all columns for the experiment table
+    const columnsResult = await supabaseServer.client
+      .from("experiment_column")
+      .select("id")
+      .eq("table_id", params.experimentTableId);
+
+    if (columnsResult.error) {
+      return err(columnsResult.error.message);
+    }
+
+    const allColumnIds = columnsResult.data.map((col) => col.id);
+
+    // Get the current max row index
+    const maxRowIndexResult = await this.getMaxRowIndex(params.experimentTableId);
+    if (maxRowIndexResult.error || maxRowIndexResult.data === null) {
+      return err(maxRowIndexResult.error ?? "Failed to get max row index");
+    }
+
+    let currentRowIndex = maxRowIndexResult.data + 1;
+
+    // Collect all cells to create
+    const cellsToCreate: {
+      columnId: string;
+      rowIndex: number;
+      value: string | null;
+      metadata?: Record<string, any>;
+    }[] = [];
+
+    for (const row of params.rows) {
+      // Create cells for specified columns
+      const specifiedColumnIds = row.cells.map((cell) => cell.columnId);
+      const otherColumnIds = allColumnIds.filter(
+        (id) => !specifiedColumnIds.includes(id)
+      );
+
+      // Cells for specified columns
+      for (const cell of row.cells) {
+        cellsToCreate.push({
+          columnId: cell.columnId,
+          rowIndex: currentRowIndex,
+          value: cell.value,
+          metadata: cell.metadata ?? row.metadata,
+        });
+      }
+
+      // Cells for other columns (empty)
+      for (const columnId of otherColumnIds) {
+        cellsToCreate.push({
+          columnId: columnId,
+          rowIndex: currentRowIndex,
+          value: null,
+          metadata: row.metadata,
+        });
+      }
+
+      // Increment rowIndex for next row
+      currentRowIndex++;
+    }
+
+    // Now, bulk insert all cells
+    try {
+      const results = await this.createExperimentCells(cellsToCreate);
+
+      if (results.error) {
+        return err(results.error);
+      }
+
+      // Return the IDs of the created cells
+      return ok({ ids: results.data.ids });
+    } catch (error) {
+      return err(`Failed to create experiment rows: ${error}`);
+    }
+  }
 }
 
 export const ServerExperimentStore: {

@@ -156,28 +156,7 @@ export class ExperimentDatasetController extends Controller {
       this.setStatus(500);
       return datasetRowResult;
     }
-    const inputRecordResult = await datasetManager.getDatasetRowInputRecord(
-      requestBody.inputRecordId
-    );
-    // const newCells = [
-    //   ...Object.values(requestBody.inputs).map(
-    //     ({ value, columnId, rowIndex }) => ({
-    //       columnId,
-    //       rowIndex,
-    //       value: inputRecordResult.data?.source_request ?? null,
-    //       metadata: { datasetRowId: datasetRowResult.data },
-    //     })
-    //   ),
-    // ];
-    // const experimentManager = new ExperimentManager(request.authParams);
-    // const experimentTableCell = await experimentManager.createExperimentCells({
-    //   cells: newCells,
-    // });
 
-    // if (experimentTableCell.error || !experimentTableCell.data) {
-    //   console.error(experimentTableCell.error);
-    //   this.setStatus(500);
-    // }
     this.setStatus(200);
     return ok(requestBody.inputRecordId);
   }

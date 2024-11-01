@@ -246,7 +246,7 @@ export class ExperimentController extends Controller {
     return ok(null);
   }
 
-  @Post("/table/{experimentTableId}/row")
+  @Post("/table/{experimentTableId}/row/new")
   public async createExperimentTableRow(
     @Path() experimentTableId: string,
     @Body()
@@ -596,27 +596,102 @@ export class ExperimentController extends Controller {
     return runResult;
   }
 
-  @Post("/table/{experimentTableId}/row-with-cells")
+  @Post("/table/{experimentTableId}/row/insert")
   public async createExperimentTableRowWithCells(
     @Path() experimentTableId: string,
     @Body()
     requestBody: {
-      metadata?: Record<string, any>;
+      inputRecordId: string;
+      inputs: Record<string, string>;
+      datasetId: string;
       cells: {
         columnId: string;
         value: string | null;
-        metadata?: Record<string, any>;
       }[];
     },
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<null, string>> {
     const experimentManager = new ExperimentManager(request.authParams);
 
+    const datasetManager = new DatasetManager(request.authParams);
+    const datasetRowResult = await datasetManager.addDatasetRow(
+      requestBody.datasetId,
+      requestBody.inputRecordId
+    );
+    if (datasetRowResult.error || !datasetRowResult.data) {
+      console.error(datasetRowResult.error);
+      this.setStatus(500);
+      return err(datasetRowResult.error);
+    }
+
     const result = await experimentManager.createExperimentTableRowWithCells({
       experimentTableId,
-      metadata: requestBody.metadata,
+      metadata: {
+        datasetRowId: datasetRowResult.data,
+        inputId: requestBody.inputRecordId,
+      },
       cells: requestBody.cells,
     });
+
+    if (result.error || !result.data) {
+      this.setStatus(500);
+      console.error(result.error);
+      return err(result.error);
+    }
+    return ok(null);
+  }
+  @Post("/table/{experimentTableId}/row/insert/batch")
+  public async createExperimentTableRowWithCellsBatch(
+    @Path() experimentTableId: string,
+    @Body()
+    requestBody: {
+      rows: {
+        inputRecordId: string;
+        inputs: Record<string, string>;
+        datasetId: string;
+        cells: {
+          columnId: string;
+          value: string | null;
+        }[];
+      }[];
+    },
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<null, string>> {
+    const experimentManager = new ExperimentManager(request.authParams);
+    const datasetManager = new DatasetManager(request.authParams);
+
+    // Process dataset rows in parallel
+    const datasetRowPromises = requestBody.rows.map((row) =>
+      datasetManager.addDatasetRow(row.datasetId, row.inputRecordId)
+    );
+
+    const datasetRowResults = await Promise.all(datasetRowPromises);
+
+    // Check for errors
+    for (let i = 0; i < datasetRowResults.length; i++) {
+      const result = datasetRowResults[i];
+      if (result.error || !result.data) {
+        console.error(result.error);
+        this.setStatus(500);
+        return err(result.error);
+      }
+    }
+
+    // Prepare the rows with metadata
+    const rowsWithMetadata = requestBody.rows.map((row, index) => ({
+      metadata: {
+        datasetRowId: datasetRowResults[index].data,
+        inputId: row.inputRecordId,
+      },
+      cells: row.cells,
+    }));
+
+    // Now call the bulk insertion function
+    const result =
+      await experimentManager.createExperimentTableRowWithCellsBatch({
+        experimentTableId,
+        rows: rowsWithMetadata,
+      });
 
     if (result.error || !result.data) {
       this.setStatus(500);

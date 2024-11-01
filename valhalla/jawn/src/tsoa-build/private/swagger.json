@@ -11870,7 +11870,7 @@
 				}
 			}
 		},
-		"/v1/experiment/table/{experimentTableId}/row": {
+		"/v1/experiment/table/{experimentTableId}/row/new": {
 			"post": {
 				"operationId": "CreateExperimentTableRow",
 				"responses": {
@@ -12395,7 +12395,7 @@
 				}
 			}
 		},
-		"/v1/experiment/table/{experimentTableId}/row-with-cells": {
+		"/v1/experiment/table/{experimentTableId}/row/insert": {
 			"post": {
 				"operationId": "CreateExperimentTableRowWithCells",
 				"responses": {
@@ -12437,9 +12437,6 @@
 									"cells": {
 										"items": {
 											"properties": {
-												"metadata": {
-													"$ref": "#/components/schemas/Record_string.any_"
-												},
 												"value": {
 													"type": "string",
 													"nullable": true
@@ -12456,12 +12453,113 @@
 										},
 										"type": "array"
 									},
-									"metadata": {
-										"$ref": "#/components/schemas/Record_string.any_"
+									"datasetId": {
+										"type": "string"
+									},
+									"inputs": {
+										"$ref": "#/components/schemas/Record_string.string_"
+									},
+									"inputRecordId": {
+										"type": "string"
 									}
 								},
 								"required": [
-									"cells"
+									"cells",
+									"datasetId",
+									"inputs",
+									"inputRecordId"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/experiment/table/{experimentTableId}/row/insert/batch": {
+			"post": {
+				"operationId": "CreateExperimentTableRowWithCellsBatch",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Experiment"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "experimentTableId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"rows": {
+										"items": {
+											"properties": {
+												"cells": {
+													"items": {
+														"properties": {
+															"value": {
+																"type": "string",
+																"nullable": true
+															},
+															"columnId": {
+																"type": "string"
+															}
+														},
+														"required": [
+															"value",
+															"columnId"
+														],
+														"type": "object"
+													},
+													"type": "array"
+												},
+												"datasetId": {
+													"type": "string"
+												},
+												"inputs": {
+													"$ref": "#/components/schemas/Record_string.string_"
+												},
+												"inputRecordId": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"cells",
+												"datasetId",
+												"inputs",
+												"inputRecordId"
+											],
+											"type": "object"
+										},
+										"type": "array"
+									}
+								},
+								"required": [
+									"rows"
 								],
 								"type": "object"
 							}

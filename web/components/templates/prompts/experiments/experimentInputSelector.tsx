@@ -7,11 +7,12 @@ import { Button } from "@/components/ui/button";
 
 type DatasetRequest = {
   id: string;
-  inputs: Record<string, { columnId: string; value: string; rowIndex: number }>;
+  inputs: { [key: string]: string };
   source_request: string;
   prompt_version: string;
   created_at: string;
 };
+
 interface ExperimentInputSelectorProps {
   open: boolean;
   setOpen: (open: boolean) => void;
@@ -19,6 +20,13 @@ interface ExperimentInputSelectorProps {
   requestIds?: DatasetRequest[];
   onSuccess?: (success: boolean) => void;
   numberOfRows: number;
+  handleAddRows: (
+    rows: {
+      inputRecordId: string;
+      datasetId: string;
+      inputs: Record<string, string>;
+    }[]
+  ) => void;
   meta?: {
     promptVersionId?: string;
     datasetId?: string;
@@ -27,7 +35,7 @@ interface ExperimentInputSelectorProps {
 }
 
 const ExperimentInputSelector = (props: ExperimentInputSelectorProps) => {
-  const { open, setOpen, requestIds, onSuccess } = props;
+  const { open, setOpen, requestIds, onSuccess, handleAddRows } = props;
   const jawn = useJawnClient();
   const { setNotification } = useNotification();
 
@@ -125,9 +133,7 @@ const ExperimentInputSelector = (props: ExperimentInputSelectorProps) => {
                   )}
                   requestId={request.source_request}
                   createdAt={request.created_at}
-                  properties={Object.fromEntries(
-                    Object.entries(request.inputs).map(([k, v]) => [k, v.value])
-                  )}
+                  properties={request.inputs}
                 />
               </li>
             ))}
@@ -151,41 +157,18 @@ const ExperimentInputSelector = (props: ExperimentInputSelectorProps) => {
                 return;
               }
 
-              await Promise.all(
-                selectedRequests.map(async (request, index) => {
-                  const rowIndex = props.numberOfRows - 1 + index;
-
-                  await jawn.POST(
-                    "/v1/experiment/dataset/{datasetId}/row/insert",
-                    {
-                      body: {
-                        inputRecordId: request.id,
-                        inputs: Object.fromEntries(
-                          Object.entries(request.inputs).map(([k, v]) => [
-                            k,
-                            {
-                              value: v.value,
-                              columnId: v.columnId,
-                              rowIndex: rowIndex,
-                            },
-                          ])
-                        ),
-                        originalColumnId: props.meta?.originalColumnId ?? "",
-                      },
-                      params: {
-                        path: {
-                          datasetId: props.meta?.datasetId ?? "",
-                        },
-                      },
-                    }
-                  );
-                })
+              await props.handleAddRows(
+                selectedRequests.map((request) => ({
+                  inputRecordId: request.id,
+                  datasetId: props.meta?.datasetId ?? "",
+                  inputs: request.inputs,
+                }))
               );
 
               if (onSuccess) {
                 onSuccess(true);
 
-                setNotification("Dataset created successfully", "success");
+                setNotification("Requests added to dataset", "success");
                 setOpen(false);
               }
             }}

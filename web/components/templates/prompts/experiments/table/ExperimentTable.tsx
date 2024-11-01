@@ -38,7 +38,11 @@ import {
   RowNumberCellRenderer,
   RowNumberHeaderComponent,
 } from "./components/tableElementsRenderer";
-import { Popover, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import clsx from "clsx";
 import ScoresEvaluatorsConfig from "./scores/ScoresEvaluatorsConfig";
 import { ExperimentRandomInputSelector } from "../experimentRandomInputSelector";
@@ -46,6 +50,7 @@ import ScoresTableContainer from "./scores/ScoresTableContainer";
 import { NewExperimentPopover } from "./components/newExperimentPopover";
 import { fetchRequestResponseBody } from "./utils/requestDataFetch";
 import { useExperimentTable } from "./hooks/useExperimentTable";
+import { AddRowPopover } from "./components/addRowPopover";
 
 interface ExperimentTableProps {
   experimentTableId: string;
@@ -64,7 +69,7 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
     addExperimentTableRow,
     updateExperimentCell,
     runHypothesisMutation,
-    addExperimentTableRowWithCells,
+    addExperimentTableRowInsertBatch,
   } = useExperimentTable(orgId || "", experimentTableId);
   const promptSubversionId = experimentTableQuery?.promptSubversionId;
 
@@ -106,6 +111,7 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
   );
 
   const [isHypothesisRunning, setIsHypothesisRunning] = useState(false);
+  const [popoverOpen, setPopoverOpen] = useState(false);
 
   const [showExperimentInputSelector, setShowExperimentInputSelector] =
     useState(false);
@@ -321,22 +327,43 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
     [addExperimentTableRow]
   );
 
-  const handleAddRowWithCells = useCallback(
-    (inputs?: Record<string, string>) => {
+  const handleAddRowInsertBatch = useCallback(
+    (
+      rows: {
+        inputRecordId: string;
+        datasetId: string;
+        inputs: Record<string, string>;
+      }[]
+    ) => {
       const columns = experimentTableQuery?.columns?.filter(
         (column) => column.columnType === "input"
       );
 
-      const cells = Object.entries(inputs ?? {}).map(([key, value]) => ({
-        columnId:
-          columns?.find((column) => column.columnName === key)?.id ?? "",
-        value,
-      }));
-      console.log("cells333", cells);
-      if (!cells) return;
-      addExperimentTableRowWithCells.mutate({ cells });
+      if (!columns) return;
+
+      const newRows = rows.map((row) => {
+        const cells = Object.entries(row.inputs ?? {}).map(([key, value]) => ({
+          columnId:
+            columns.find((column) => column.columnName === key)?.id ?? "",
+          value,
+        }));
+
+        return {
+          inputRecordId: row.inputRecordId,
+          datasetId: row.datasetId,
+          inputs: row.inputs,
+          cells,
+        };
+      });
+
+      console.log("newRows", newRows);
+      if (!newRows) return;
+
+      addExperimentTableRowInsertBatch.mutate({
+        rows: newRows,
+      });
     },
-    [addExperimentTableRowWithCells]
+    [addExperimentTableRowInsertBatch, experimentTableQuery]
   );
 
   const handleCellValueChanged = useCallback(
@@ -967,15 +994,26 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
             onCellValueChanged={handleCellValueChanged}
           />
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => handleAddRow({})}
-          className="self-start flex flex-row space-x-2 text-slate-700 mt-0"
-        >
-          <PlusIcon className="h-4 w-4" />
-          Add row
-        </Button>
+        <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="self-start flex flex-row space-x-2 text-slate-700 mt-0"
+            >
+              <PlusIcon className="h-4 w-4" />
+              Add row
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent>
+            <AddRowPopover
+              setPopoverOpen={setPopoverOpen}
+              setShowExperimentInputSelector={setShowExperimentInputSelector}
+              setShowRandomInputSelector={setShowRandomInputSelector}
+              handleAddRow={handleAddRow}
+            />
+          </PopoverContent>
+        </Popover>
       </div>
 
       <ExperimentRandomInputSelector
@@ -990,12 +1028,12 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
               (column) => column.id === "output"
             )?.id ?? "",
         }}
-        handleAddRow={handleAddRowWithCells}
+        handleAddRows={handleAddRowInsertBatch}
         requestIds={randomInputRecords}
         onSuccess={async (success) => {}}
       />
 
-      {/* <ExperimentInputSelector
+      <ExperimentInputSelector
         open={showExperimentInputSelector}
         setOpen={setShowExperimentInputSelector}
         setShowRandomInputSelector={setShowRandomInputSelector}
@@ -1009,13 +1047,9 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
         }}
         numberOfRows={rowData.length}
         requestIds={randomInputRecords}
-        onSuccess={async (success) => {
-          if (success) {
-            await refetchExperimentTable();
-            await refetchInputRecords();
-          }
-        }}
-      /> */}
+        handleAddRows={handleAddRowInsertBatch}
+        onSuccess={async (success) => {}}
+      />
     </div>
   );
 }
