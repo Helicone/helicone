@@ -297,7 +297,7 @@ export const StartFromPromptDialog = ({
       return;
     }
 
-    router.push(`/experiments/${experimentTableResult.data?.data?.id}`);
+    router.push(`/experiments/${experimentTableResult.data?.data?.tableId}`);
   };
 
   return (

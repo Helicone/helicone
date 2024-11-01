@@ -167,6 +167,14 @@ export class ExperimentController extends Controller {
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<null, string>> {
     const experimentManager = new ExperimentManager(request.authParams);
+    const experimentTable = await experimentManager.getExperimentTableById(
+      experimentTableId
+    );
+    if (experimentTable.error || !experimentTable.data) {
+      this.setStatus(500);
+      console.error(experimentTable.error);
+      return err(experimentTable.error);
+    }
     const result = await experimentManager.createExperimentCells({
       cells: [requestBody],
     });
@@ -193,6 +201,14 @@ export class ExperimentController extends Controller {
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<null, string>> {
     const experimentManager = new ExperimentManager(request.authParams);
+    const experimentTable = await experimentManager.getExperimentTableById(
+      experimentTableId
+    );
+    if (experimentTable.error || !experimentTable.data) {
+      this.setStatus(500);
+      console.error(experimentTable.error);
+      return err(experimentTable.error);
+    }
     const result = await experimentManager.updateExperimentCells({
       cells: [
         {
@@ -239,6 +255,14 @@ export class ExperimentController extends Controller {
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<null, string>> {
     const experimentManager = new ExperimentManager(request.authParams);
+    const experimentTable = await experimentManager.getExperimentTableById(
+      experimentTableId
+    );
+    if (experimentTable.error || !experimentTable.data) {
+      this.setStatus(500);
+      console.error(experimentTable.error);
+      return err(experimentTable.error);
+    }
     const result = await experimentManager.createExperimentColumn({
       experimentTableId,
       columnName: requestBody.columnName,

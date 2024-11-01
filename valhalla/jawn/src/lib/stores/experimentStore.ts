@@ -964,7 +964,7 @@ export class ExperimentStore extends BaseStore {
         ) as columns
       FROM experiment_table et
       LEFT JOIN experiment_column ec ON ec.table_id = et.id
-      WHERE et.id = $1
+      WHERE et.id = $1 AND et.organization_id = $2
       GROUP BY et.id, et.name, et.experiment_id, et.metadata;
     `;
 
@@ -974,7 +974,7 @@ export class ExperimentStore extends BaseStore {
         name: string;
         experimentId: string;
         columns: ExperimentTableColumn[];
-      }>(query, [experimentTableId]);
+      }>(query, [experimentTableId, this.organizationId]);
 
       if (error) {
         console.error("Query Error:", error);
@@ -1016,6 +1016,7 @@ export class ExperimentStore extends BaseStore {
       .from("experiment_table")
       .select("*")
       .eq("id", experimentTableId)
+      .eq("organization_id", this.organizationId)
       .single();
 
     if (result.error || !result.data) {
@@ -1027,6 +1028,7 @@ export class ExperimentStore extends BaseStore {
       name: result.data.name,
       experimentId: result.data.experiment_id,
       metadata: result.data.metadata,
+      createdAt: result.data.created_at,
     });
   }
 

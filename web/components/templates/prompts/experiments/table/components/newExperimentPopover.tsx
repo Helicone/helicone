@@ -134,7 +134,9 @@ export const NewExperimentPopover = () => {
       return;
     }
 
-    await router.push(`/experiments/${experimentTableResult.data?.data?.id}`);
+    await router.push(
+      `/experiments/${experimentTableResult.data?.data?.tableId}`
+    );
   };
 
   return (
