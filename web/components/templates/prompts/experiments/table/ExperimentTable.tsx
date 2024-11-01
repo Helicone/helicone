@@ -11,13 +11,7 @@ import {
 } from "ag-grid-community";
 import "ag-grid-community/styles/ag-grid.css";
 import { AgGridReact } from "ag-grid-react";
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import AddColumnHeader from "./AddColumnHeader";
 import { HypothesisCellRenderer } from "./cells/HypothesisCellRenderer";
 import { OriginalMessagesCellRenderer } from "./cells/OriginalMessagesCellRenderer";
@@ -25,7 +19,6 @@ import { OriginalOutputCellRenderer } from "./cells/OriginalOutputCellRenderer";
 
 import { PlusIcon } from "@heroicons/react/24/outline";
 import ExperimentInputSelector from "../experimentInputSelector";
-import { useMutation, useQuery } from "@tanstack/react-query";
 
 import { useLocalStorage } from "@/services/hooks/localStorage";
 import LoadingAnimation from "../../../../shared/loadingAnimation";
@@ -48,9 +41,9 @@ import ScoresEvaluatorsConfig from "./scores/ScoresEvaluatorsConfig";
 import { ExperimentRandomInputSelector } from "../experimentRandomInputSelector";
 import ScoresTableContainer from "./scores/ScoresTableContainer";
 import { NewExperimentPopover } from "./components/newExperimentPopover";
-import { fetchRequestResponseBody } from "./utils/requestDataFetch";
 import { useExperimentTable } from "./hooks/useExperimentTable";
 import { AddRowPopover } from "./components/addRowPopover";
+import { useQuery } from "@tanstack/react-query";
 
 interface ExperimentTableProps {
   experimentTableId: string;
@@ -61,10 +54,11 @@ const REFRESH_INTERVAL = 3000;
 export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
   const org = useOrg();
   const orgId = org?.currentOrg?.id;
-  console.log("experimentTableId", experimentTableId);
-  // Use the hook to get data and functions
+
   const {
     experimentTableQuery,
+    isExperimentTableLoading,
+    refetchExperimentTable,
     addExperimentTableColumn,
     addExperimentTableRow,
     updateExperimentCell,
@@ -73,7 +67,6 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
   } = useExperimentTable(orgId || "", experimentTableId);
   const promptSubversionId = experimentTableQuery?.promptSubversionId;
 
-  // Fetch promptVersionTemplate data only after promptSubversionId is available
   const {
     data: promptVersionTemplateData,
     isLoading: isPromptVersionTemplateLoading,
@@ -99,7 +92,6 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
     }
   );
 
-  const rowData = experimentTableQuery?.rows || [];
   const [wrapText, setWrapText] = useState(false);
   const [columnView, setColumnView] = useState<"all" | "inputs" | "outputs">(
     "all"
@@ -109,7 +101,6 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
     false
   );
 
-  const [isHypothesisRunning, setIsHypothesisRunning] = useState(false);
   const [popoverOpen, setPopoverOpen] = useState(false);
 
   const [showExperimentInputSelector, setShowExperimentInputSelector] =
@@ -122,48 +113,16 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
     gridRef.current = params.api;
   }, []);
 
-  const fetchInputRecords = useCallback(async () => {
-    const datasetId = experimentTableQuery?.metadata?.datasetId as string;
-    if (!orgId || !datasetId || !experimentTableQuery?.promptSubversionId)
-      return [];
-    const jawnClient = getJawnClient(orgId);
-    const res = await jawnClient.POST(
-      "/v1/experiment/dataset/{datasetId}/inputs/query",
-      {
-        params: {
-          path: {
-            datasetId: datasetId,
-          },
-        },
-      }
-    );
-    return res.data?.data;
-  }, [orgId, experimentTableQuery?.metadata?.datasetId]);
-
-  // const mapInputRecordsToColumnsWithRowId = useCallback(
-  //   (inputRecords: Record<string, string>, rowId: string, rowIndex: number) => {
-  //     const result: Record<
-  //       string,
-  //       { columnId: string; value: string; rowIndex: number }
-  //     > = {};
-
-  //     Object.entries(inputRecords).forEach(([inputKey, value]) => {
-  //       const columnId = inputColumnNameToId[inputKey];
-  //       if (columnId) {
-  //         result[inputKey] = {
-  //           columnId,
-  //           value,
-  //           rowIndex,
-  //         };
-  //       } else {
-  //         console.warn(`Column ID for input key "${inputKey}" not found.`);
-  //       }
-  //     });
-
-  //     return result;
-  //   },
-  //   [inputColumnNameToId]
-  // );
+  const handleUpdateExperimentCell = useCallback(
+    ({ cellId, value }: { cellId: string; value: string; status?: string }) => {
+      updateExperimentCell.mutate({
+        cellId,
+        value,
+        status: status ?? "initialized",
+      });
+    },
+    [updateExperimentCell]
+  );
 
   const handleRunHypothesis = useCallback(
     (
@@ -220,7 +179,6 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
     setColumnOrder(newOrder);
   }, []);
 
-  // const handleAddRow = useCallback(() => {
   //   const newRowId = `temp-${tempRowId}`;
   //   setTempRowId((prevId) => prevId + 1);
 
@@ -289,21 +247,12 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
     [addExperimentTableRowInsertBatch, experimentTableQuery]
   );
 
-  const [activePopoverCell, setActivePopoverCell] = useState<{
-    rowIndex: number;
-    colId: string;
-  } | null>(null);
-
   const [currentRowInputs, setCurrentRowInputs] = useState<
     Record<string, { columnId: string; value: string; rowIndex: number }>
   >({});
 
   const handleInputChange = useCallback(
     (key: string, value: string, columnId: string, rowIndex: number) => {
-      console.log("key", key);
-      console.log("value", value);
-      console.log("columnId", columnId);
-      console.log("rowIndex", rowIndex);
       setCurrentRowInputs((prev) => ({
         ...prev,
         [key]: { columnId, value: value.trim(), rowIndex },
@@ -311,73 +260,6 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
     },
     []
   );
-
-  // Modify handleLastInputSubmit to use input columns
-  // const handleLastInputSubmit = useCallback(
-  //   async (rowIndex: number) => {
-  //     const currentRowValues = Object.values(currentRowInputs)
-  //       .filter((value) => value !== undefined && value !== null)
-  //       .map((value) => String(value).trim());
-
-  //     const allValuesFilled =
-  //       currentRowValues.length > 0 &&
-  //       !currentRowValues.some((value) => value === "");
-
-  //     if (!allValuesFilled) {
-  //       console.log(
-  //         "Not all values are filled. Please fill all values before submitting."
-  //       );
-  //       return;
-  //     }
-
-  //     try {
-  //       await jawn.POST(
-  //         "/v1/experiment/dataset/{datasetId}/version/{promptVersionId}/row/new",
-  //         {
-  //           body: {
-  //             inputs: currentRowInputs,
-  //             rowIndex: rowIndex,
-  //             experimentTableId: experimentTableData?.id ?? "",
-  //             experimentId: experimentTableData?.experimentId ?? "",
-  //             originalColumnId:
-  //               experimentTableData?.columns.find(
-  //                 (column) => column.columnType === "output"
-  //               )?.id ?? undefined,
-  //           },
-  //           params: {
-  //             path: {
-  //               promptVersionId: promptSubversionId ?? "",
-  //               datasetId:
-  //                 (experimentTableData?.metadata?.datasetId as string) ?? "",
-  //             },
-  //           },
-  //         }
-  //       );
-
-  //       // Clear the current row inputs after successful submission
-  //       setCurrentRowInputs({});
-
-  //       // Reset the activePopoverCell to prevent the popover from showing up
-  //       setActivePopoverCell(null);
-
-  //       // Refetch input records to update the table
-  //       refetchInputRecords();
-  //       refetchExperimentTable();
-  //     } catch (error) {
-  //       console.error("Error submitting row:", error);
-  //     }
-  //   },
-  //   [
-  //     currentRowInputs,
-  //     promptSubversionId,
-  //     experimentTableQuery?.metadata?.datasetId,
-  //     inputKeys,
-  //     refetchInputRecords,
-  //   ]
-  // );
-
-  // Adjust useEffect to add an empty row if rowData is empty
-
   const headerClass = clsx(
     "border-r border-[#E2E8F0] text-center items-center justify-center"
   );
@@ -615,162 +497,22 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
   }, [
     columnView,
     handleRunHypothesis,
-    experimentTableQuery?.rows,
+    experimentTableQuery?.columns,
     wrapText,
     columnWidths,
     columnOrder,
-    activePopoverCell,
   ]);
 
   const [showRandomInputSelector, setShowRandomInputSelector] = useState(false);
 
-  // const getExperimentExportData = useCallback(() => {
-  //   if (!rowData || rowData.length === 0) {
-  //     return [];
-  //   }
-
-  //   const exportedData = rowData.map((row) => {
-  //     const exportedRow: Record<string, any> = {};
-
-  //     inputColumnFields.forEach((field) => {
-  //       exportedRow[field] = row[field] || "";
-  //     });
-
-  //     exportedRow["messages"] = row["messages"] || "";
-
-  //     exportedRow["original"] = row["original"] || "";
-
-  //     return exportedRow;
-  //   });
-
-  //   return exportedData;
-  // }, [rowData, inputColumnFields]);
-
-  // At the top of your component, create a ref to store rowData
-  // const rowDataRef = useRef(rowData);
-
-  // // Update the ref whenever rowData changes
-  // useEffect(() => {
-  //   rowDataRef.current = rowData;
-  // }, [rowData]);
-
-  // useEffect(() => {
-  //   let intervalId: NodeJS.Timeout | null = null;
-
-  //   if (isHypothesisRunning) {
-  //     intervalId = setInterval(async () => {
-  //       await refetchExperimentTable();
-  //       await updateRowData();
-
-  //       const latestRowData = rowDataRef.current;
-
-  //       let anyLoadingCells = false; // Assume no cells are loading
-
-  //       const newData = latestRowData.map((row) => {
-  //         const newIsLoading = { ...(row.isLoading || {}) };
-
-  //         Object.keys(newIsLoading).forEach((cellId) => {
-  //           const [columnId, _] = cellId.split("_");
-  //           const cellData = row[columnId]; // Use columnId
-
-  //           if (cellData && cellData.responseBody) {
-  //             delete newIsLoading[cellId];
-  //           } else {
-  //             anyLoadingCells = true; // Set to true if any cell is still loading
-  //           }
-  //         });
-
-  //         return {
-  //           ...row,
-  //           isLoading: newIsLoading,
-  //         };
-  //       });
-
-  //       setRowData(newData);
-
-  //       if (!anyLoadingCells) {
-  //         setIsHypothesisRunning(false);
-  //       }
-
-  //       gridRef.current?.refreshCells();
-  //     }, REFRESH_INTERVAL);
-  //   }
-
-  //   return () => {
-  //     if (intervalId) {
-  //       clearInterval(intervalId);
-  //     }
-  //   };
-  // }, [isHypothesisRunning, refetchExperimentTable, updateRowData]);
-
-  // const handleRunRow = useCallback(
-  //   (rowIndex: number) => {
-  //     const rowDataItem = experimentTableQuery?.rows.find(
-  //       (row) => row.rowIndex === rowIndex
-  //     );
-  //     if (!rowDataItem) {
-  //       console.error(`Row with index ${rowIndex} not found.`);
-  //       return;
-  //     }
-
-  //     const datasetRowId = rowDataItem.datasetRowId;
-  //     if (!datasetRowId) {
-  //       console.error(`Dataset row ID not found for row index ${rowIndex}.`);
-  //       return;
-  //     }
-
-  //     const hypothesesToRun =
-  //       experimentTableQuery?.columns
-  //         ?.filter(
-  //           (column) =>
-  //             column.metadata?.hypothesisId &&
-  //             column.columnType === "experiment"
-  //         )
-  //         .map((column) => ({
-  //           hypothesisId: column.metadata?.hypothesisId as string,
-  //           columnId: column.id,
-  //         })) || [];
-
-  //     // Prepare cells to run
-  //     const cells = hypothesesToRun.map((hypothesis) => {
-  //       const cellId = `${hypothesis.columnId}_${rowIndex}`;
-  //       return {
-  //         hypothesisId: hypothesis.hypothesisId,
-  //         cell: {
-  //           rowIndex,
-  //           datasetRowId,
-  //           columnId: hypothesis.columnId,
-  //           cellId,
-  //         },
-  //       };
-  //     });
-
-  //     cells.forEach((cell) => {
-  //       handleRunHypothesis(cell.hypothesisId, [cell.cell]);
-  //     });
-  //   },
-  //   [experimentTableQuery?.columns, handleRunHypothesis]
-  // );
-
-  // if (isExperimentTableLoading) {
-  //   return (
-  //     <div className="flex items-center justify-center h-screen flex-col">
-  //       <LoadingAnimation />
-  //       <h1 className="text-4xl font-semibold">Getting your experiments</h1>
-  //     </div>
-  //   );
-  // }
-
-  const handleUpdateExperimentCell = useCallback(
-    ({ cellId, value }: { cellId: string; value: string; status?: string }) => {
-      updateExperimentCell.mutate({
-        cellId,
-        value,
-        status: status ?? "initialized",
-      });
-    },
-    [updateExperimentCell]
-  );
+  if (isExperimentTableLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen flex-col">
+        <LoadingAnimation />
+        <h1 className="text-4xl font-semibold">Getting your experiments</h1>
+      </div>
+    );
+  }
 
   return (
     <div className="relative w-full">
@@ -789,11 +531,11 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
             columnView={columnView}
             setColumnView={setColumnView}
           />
-          {/* <ExportButton
+          <ExportButton
             className="py-0 px-2 border border-slate-200 h-8 flex items-center justify-center space-x-1 bg-white"
             key="export-button"
-            rows={getExperimentExportData()}
-          /> */}
+            rows={experimentTableQuery?.rows ?? []}
+          />
           {!experimentTableQuery?.metadata?.experimentId && (
             <Popover>
               <PopoverTrigger asChild>
@@ -866,7 +608,6 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
               orgId,
               promptVersionTemplateRef: promptVersionTemplateData ?? {},
               activePopoverCell,
-              setActivePopoverCell,
               handleInputChange,
               rowData: experimentTableQuery?.rows, // Add this line
               handleUpdateExperimentCell,
@@ -887,7 +628,7 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
               Add row
             </Button>
           </PopoverTrigger>
-          <PopoverContent>
+          <PopoverContent className="w-full px-2 py-2">
             <AddRowPopover
               setPopoverOpen={setPopoverOpen}
               setShowExperimentInputSelector={setShowExperimentInputSelector}

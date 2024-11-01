@@ -174,37 +174,40 @@ export async function getTableData({
 
 export function useExperimentTable(orgId: string, experimentTableId: string) {
   const queryClient = useQueryClient();
-  const { data: experimentTableQuery, refetch: refetchExperimentTable } =
-    useQuery(["experimentTable", orgId, experimentTableId], async () => {
-      if (!orgId || !experimentTableId) return null;
-      const jawnClient = getJawnClient(orgId);
-      const res = await jawnClient.POST(
-        "/v1/experiment/table/{experimentTableId}/query",
-        {
-          params: {
-            path: {
-              experimentTableId: experimentTableId,
-            },
+  const {
+    data: experimentTableQuery,
+    refetch: refetchExperimentTable,
+    isLoading: isExperimentTableLoading,
+  } = useQuery(["experimentTable", orgId, experimentTableId], async () => {
+    if (!orgId || !experimentTableId) return null;
+    const jawnClient = getJawnClient(orgId);
+    const res = await jawnClient.POST(
+      "/v1/experiment/table/{experimentTableId}/query",
+      {
+        params: {
+          path: {
+            experimentTableId: experimentTableId,
           },
-        }
-      );
-      const rowData = await getTableData({
-        experimentTableData: res.data?.data as ExperimentTable,
-        getRequestDataByIds: (requestIds) =>
-          getRequestDataByIds(orgId, requestIds),
-        responseBodyCache: {},
-      });
-      return {
-        id: res.data?.data?.id,
-        name: res.data?.data?.name,
-        experimentId: res.data?.data?.experimentId,
-        promptSubversionId: res.data?.data?.metadata?.prompt_version as string,
-        datasetId: res.data?.data?.metadata?.datasetId as string,
-        metadata: res.data?.data?.metadata,
-        columns: res.data?.data?.columns,
-        rows: rowData,
-      };
+        },
+      }
+    );
+    const rowData = await getTableData({
+      experimentTableData: res.data?.data as ExperimentTable,
+      getRequestDataByIds: (requestIds) =>
+        getRequestDataByIds(orgId, requestIds),
+      responseBodyCache: {},
     });
+    return {
+      id: res.data?.data?.id,
+      name: res.data?.data?.name,
+      experimentId: res.data?.data?.experimentId,
+      promptSubversionId: res.data?.data?.metadata?.prompt_version as string,
+      datasetId: res.data?.data?.metadata?.datasetId as string,
+      metadata: res.data?.data?.metadata,
+      columns: res.data?.data?.columns,
+      rows: rowData,
+    };
+  });
 
   const addExperimentTableColumn = useMutation({
     mutationFn: async ({
@@ -352,6 +355,8 @@ export function useExperimentTable(orgId: string, experimentTableId: string) {
 
   return {
     experimentTableQuery,
+    isExperimentTableLoading,
+    refetchExperimentTable,
     addExperimentTableColumn,
     addExperimentTableRow,
     updateExperimentCell,

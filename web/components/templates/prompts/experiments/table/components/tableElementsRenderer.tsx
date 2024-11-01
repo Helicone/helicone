@@ -1,9 +1,4 @@
-import {
-  FolderIcon,
-  ListBulletIcon,
-  PlayIcon,
-  TableCellsIcon,
-} from "@heroicons/react/24/outline";
+import { ListBulletIcon, PlayIcon } from "@heroicons/react/24/outline";
 import { Button } from "../../../../../ui/button";
 import {
   Popover,
@@ -56,19 +51,6 @@ const InputCellRenderer: React.FC<any> = (props) => {
     });
 
     setIsEditing(false);
-
-    // Move to the next input
-    const currentColumnIndex = inputColumns.findIndex(
-      (col: any) => col.id === props.column.colId
-    );
-    const nextInputColumn = inputColumns[currentColumnIndex + 1];
-
-    if (nextInputColumn) {
-      props.context.setActivePopoverCell({
-        rowIndex: props.node.rowIndex,
-        colId: nextInputColumn.id,
-      });
-    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
