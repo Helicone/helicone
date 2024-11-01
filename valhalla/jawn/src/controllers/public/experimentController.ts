@@ -614,7 +614,7 @@ export class ExperimentController extends Controller {
       return err(statusUpdateResult.error);
     }
     const result = await experimentManager.getExperimentById(
-      experimentTable.data.experiment_id,
+      experimentTable.data.experimentId,
       {
         inputs: true,
         promptVersion: true,

@@ -48,8 +48,6 @@ interface ExperimentTableProps {
   experimentTableId: string;
 }
 
-const REFRESH_INTERVAL = 3000;
-
 export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
   const org = useOrg();
   const orgId = org?.currentOrg?.id;
@@ -117,7 +115,7 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
       updateExperimentCell.mutate({
         cellId,
         value,
-        status: status ?? "initialized",
+        status: "initialized",
       });
     },
     [updateExperimentCell]
@@ -130,7 +128,6 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
         cellId: string;
       }>
     ) => {
-      // Update cells to running status before mutation
       cells.forEach((cell) => {
         updateExperimentCell.mutate({
           cellId: cell.cellId,
@@ -139,7 +136,6 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
         });
       });
 
-      // Then run the hypothesis
       runHypothesisMutation.mutate({ hypothesisId, cells });
     },
     [runHypothesisMutation, updateExperimentCell]
