@@ -14,7 +14,6 @@ import PromptPlayground, { PromptObject } from "../../../id/promptPlayground";
 import { Input } from "../../../../../ui/input";
 import LoadingAnimation from "../../../../../shared/loadingAnimation";
 
-// Move NewExperimentDialog outside of StartFromPromptDialog
 export const NewExperimentDialog = () => {
   const notification = useNotification();
   const [basePrompt, setBasePrompt] = useState<PromptObject>({

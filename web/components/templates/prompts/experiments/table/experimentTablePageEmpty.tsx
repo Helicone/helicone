@@ -9,7 +9,7 @@ const ExperimentTablePageEmpty = (props: ExperimentTablePageEmptyProps) => {
 
   return (
     <div className="flex flex-col w-full space-y-4 pt-4">
-      <ExperimentTable experimentTableId={experimentTableId} />
+      <ExperimentTable experimentTableId={experimentTableId ?? ""} />
     </div>
   );
 };

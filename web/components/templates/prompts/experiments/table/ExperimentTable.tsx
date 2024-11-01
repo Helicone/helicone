@@ -1,7 +1,6 @@
 import { useOrg } from "@/components/layout/organizationContext";
 import { Button } from "@/components/ui/button";
 import { getJawnClient } from "@/lib/clients/jawn";
-import { useJawnClient } from "@/lib/clients/jawnHook";
 import {
   ColDef,
   ColumnMovedEvent,

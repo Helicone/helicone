@@ -9,7 +9,6 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { Badge } from "../../../../../ui/badge";
 import PromptPlayground from "../../../id/promptPlayground";
 import { Input } from "../../../../../ui/input";
-import { Dices } from "lucide-react";
 import ArrayDiffViewer from "../../../id/arrayDiffViewer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
