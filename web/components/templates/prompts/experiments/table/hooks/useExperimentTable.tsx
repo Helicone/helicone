@@ -1,6 +1,11 @@
 import { getJawnClient } from "../../../../../../lib/clients/jawn";
 import { placeAssetIdValues } from "../../../../../../services/lib/requestTraverseHelper";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  QueryClient,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 
 export type ExperimentTable = {
   id: string;
@@ -78,32 +83,29 @@ export const fetchRequestResponseBody = async (request_response: any) => {
   return null;
 };
 
+// Add a new query key constant
+const CELL_RESPONSE_CACHE_KEY = "cellResponseCache";
+
 export async function getTableData({
   experimentTableData,
   responseBodyCache,
   getRequestDataByIds,
+  queryClient,
 }: {
   experimentTableData: ExperimentTable | null;
   responseBodyCache: Record<string, any>;
   getRequestDataByIds: (requestIds: string[]) => Promise<any[]>;
+  queryClient: QueryClient;
 }): Promise<TableRow[]> {
   if (!experimentTableData) {
     return [];
   }
 
-  // Build a mapping of rowIndex to row object
   const rowIndexToRow = new Map<number, TableRow>();
-
-  // Collect requestIds for experiment columns
-  const requestIdsToFetch = new Set<string>();
 
   await Promise.all(
     experimentTableData.columns.map(async (column) => {
       const columnId = column.id;
-      console.log("columnId", columnId);
-      console.log("column.cells", column.cells);
-
-      // Process all columns
       await Promise.all(
         column.cells.map(async (cell) => {
           const rowIndex = cell.rowIndex;
@@ -116,35 +118,37 @@ export async function getTableData({
               cells: {},
             };
             rowIndexToRow.set(rowIndex, newRow);
-            row = newRow; // Ensure 'row' is defined
+            row = newRow;
           }
 
-          // Now process the cell data
           if (cell.value !== undefined && cell.value !== null) {
             if (
               isUUID(cell.value) &&
               (cell.status === "initialized" || cell.status === "success")
             ) {
-              const requestDataArray = await getRequestDataByIds([cell.value]);
-              if (requestDataArray && requestDataArray.length > 0) {
-                const responseBody = await fetchRequestResponseBody(
-                  requestDataArray[0]
-                );
-                row.cells[columnId] = {
-                  cellId: cell.id,
-                  value: responseBody,
-                  status: cell.status,
-                };
-              } else {
-                // Handle case where request data is not found
-                row.cells[columnId] = {
-                  cellId: cell.id,
-                  value: null,
-                  status: cell.status,
-                };
+              // Check cache first
+              const cacheKey = [CELL_RESPONSE_CACHE_KEY, cell.value];
+              let responseBody = queryClient.getQueryData(cacheKey);
+
+              if (!responseBody) {
+                const requestDataArray = await getRequestDataByIds([
+                  cell.value,
+                ]);
+                if (requestDataArray && requestDataArray.length > 0) {
+                  responseBody = await fetchRequestResponseBody(
+                    requestDataArray[0]
+                  );
+                  // Cache the response
+                  queryClient.setQueryData(cacheKey, responseBody);
+                }
               }
+
+              row.cells[columnId] = {
+                cellId: cell.id,
+                value: responseBody,
+                status: cell.status,
+              };
             } else {
-              // Assign the actual cell.value for non-UUID values
               row.cells[columnId] = {
                 cellId: cell.id,
                 value: cell.value,
@@ -152,7 +156,6 @@ export async function getTableData({
               };
             }
           } else {
-            // Handle cells with no value
             row.cells[columnId] = {
               cellId: cell.id,
               value: null,
@@ -164,12 +167,9 @@ export async function getTableData({
     })
   );
 
-  // Convert the map to an array and sort by rowIndex
-  const rows = Array.from(rowIndexToRow.values()).sort(
+  return Array.from(rowIndexToRow.values()).sort(
     (a, b) => a.rowIndex - b.rowIndex
   );
-  console.log("rows", rows);
-  return rows;
 }
 
 export function useExperimentTable(orgId: string, experimentTableId: string) {
@@ -196,6 +196,7 @@ export function useExperimentTable(orgId: string, experimentTableId: string) {
       getRequestDataByIds: (requestIds) =>
         getRequestDataByIds(orgId, requestIds),
       responseBodyCache: {},
+      queryClient,
     });
     return {
       id: res.data?.data?.id,
@@ -319,11 +320,17 @@ export function useExperimentTable(orgId: string, experimentTableId: string) {
         }
       );
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
+      // Invalidate the specific cell cache if it's a UUID
+      if (isUUID(variables.value)) {
+        queryClient.invalidateQueries([
+          CELL_RESPONSE_CACHE_KEY,
+          variables.value,
+        ]);
+      }
       queryClient.invalidateQueries({
         queryKey: ["experimentTable", orgId, experimentTableId],
       });
-      console.log("updateExperimentCell success");
     },
   });
 
