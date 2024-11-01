@@ -1,25 +1,17 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import ThemedDrawer from "../../../shared/themed/themedDrawer";
 import { useJawnClient } from "../../../../lib/clients/jawnHook";
 import useNotification from "../../../shared/notification/useNotification";
 import PromptPropertyCard from "../id/promptPropertyCard";
 import { Button } from "@/components/ui/button";
-
-type DatasetRequest = {
-  id: string;
-  inputs: { [key: string]: string };
-  source_request: string;
-  prompt_version: string;
-  created_at: string;
-};
+import { useQuery } from "@tanstack/react-query";
 
 interface ExperimentInputSelectorProps {
   open: boolean;
   setOpen: (open: boolean) => void;
-  setShowRandomInputSelector: (open: boolean) => void;
-  requestIds?: DatasetRequest[];
+  promptVersionId: string | undefined;
+  datasetId: string;
   onSuccess?: (success: boolean) => void;
-  numberOfRows: number;
   handleAddRows: (
     rows: {
       inputRecordId: string;
@@ -27,34 +19,77 @@ interface ExperimentInputSelectorProps {
       inputs: Record<string, string>;
     }[]
   ) => void;
-  meta?: {
-    promptVersionId?: string;
-    datasetId?: string;
-    originalColumnId?: string;
-  };
 }
 
 const ExperimentInputSelector = (props: ExperimentInputSelectorProps) => {
-  const { open, setOpen, requestIds, onSuccess, handleAddRows } = props;
+  const {
+    open,
+    setOpen,
+    promptVersionId,
+    datasetId,
+    onSuccess,
+    handleAddRows,
+  } = props;
   const jawn = useJawnClient();
   const { setNotification } = useNotification();
 
-  const [selectedRequests, setSelectedRequests] = useState<DatasetRequest[]>(
-    []
-  );
+  // State to track selected inputs
+  const [selectedRequests, setSelectedRequests] = useState<any[]>([]);
 
-  // New state to track if all items are selected
+  // State to track if all items are selected
   const [isAllSelected, setIsAllSelected] = useState(false);
 
+  // Fetch input records using useQuery
+  const {
+    data: inputRecordsData,
+    isLoading,
+    isError,
+  } = useQuery(
+    ["inputRecords", promptVersionId],
+    async () => {
+      const res = await jawn.POST(
+        "/v1/prompt/version/{promptVersionId}/inputs/query",
+        {
+          params: {
+            path: {
+              promptVersionId: promptVersionId ?? "",
+            },
+          },
+          body: {
+            limit: 1000, // Adjust limit as needed
+          },
+        }
+      );
+      return res.data?.data ?? [];
+    },
+    {
+      enabled: open && promptVersionId !== undefined, // Fetch only when the drawer is open
+    }
+  );
+
+  // Process input records
+  const inputRecords = useMemo(() => {
+    if (!inputRecordsData) return [];
+    return inputRecordsData.map((record) => ({
+      id: record.id,
+      inputs: record.inputs,
+      source_request: record.source_request,
+      prompt_version: record.prompt_version,
+      created_at: record.created_at,
+      response: record.response_body,
+    }));
+  }, [inputRecordsData]);
+
+  // Update selected requests when inputRecords change
   useEffect(() => {
-    if (requestIds) {
+    if (inputRecords.length > 0) {
       setSelectedRequests([]); // Initialize with no requests selected
       setIsAllSelected(false); // Reset the select all state
     }
-  }, [requestIds]);
+  }, [inputRecords]);
 
   const handleToggleRequest = (id: string) => {
-    const request = requestIds?.find((r) => r.id === id);
+    const request = inputRecords.find((r) => r.id === id);
     if (!request) return;
 
     setSelectedRequests((prevSelected) => {
@@ -63,7 +98,7 @@ const ExperimentInputSelector = (props: ExperimentInputSelectorProps) => {
         // Remove the request from selectedRequests
         const newSelected = prevSelected.filter((req) => req.id !== id);
         // Update isAllSelected if not all items are selected
-        if (newSelected.length !== requestIds?.length) {
+        if (newSelected.length !== inputRecords.length) {
           setIsAllSelected(false);
         }
         return newSelected;
@@ -71,7 +106,7 @@ const ExperimentInputSelector = (props: ExperimentInputSelectorProps) => {
         // Add the request to selectedRequests
         const newSelected = [...prevSelected, request];
         // Update isAllSelected if all items are selected
-        if (newSelected.length === requestIds?.length) {
+        if (newSelected.length === inputRecords.length) {
           setIsAllSelected(true);
         }
         return newSelected;
@@ -87,8 +122,8 @@ const ExperimentInputSelector = (props: ExperimentInputSelectorProps) => {
       setIsAllSelected(false);
     } else {
       // Select all
-      if (requestIds) {
-        setSelectedRequests(requestIds);
+      if (inputRecords) {
+        setSelectedRequests(inputRecords);
         setIsAllSelected(true);
       }
     }
@@ -100,7 +135,7 @@ const ExperimentInputSelector = (props: ExperimentInputSelectorProps) => {
         <div className="flex flex-col w-full">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-semibold text-xl">
-              Select Inputs ({requestIds?.length})
+              Select Inputs ({inputRecords.length})
             </h2>
             <Button
               variant="secondary"
@@ -116,27 +151,31 @@ const ExperimentInputSelector = (props: ExperimentInputSelectorProps) => {
           </p>
 
           <ul className="flex flex-col items-center space-y-4 w-full pt-4 px-1 overflow-y-auto">
-            {requestIds?.map((request) => (
-              <li key={request.id} className="w-full flex items-start">
-                <input
-                  type="checkbox"
-                  className="mt-2 mr-2 rounded border-slate-300 dark:border-slate-700"
-                  checked={selectedRequests.some(
-                    (req) => req.id === request.id
-                  )}
-                  onChange={() => handleToggleRequest(request.id)}
-                />
-                <PromptPropertyCard
-                  autoInputs={request.inputs}
-                  isSelected={selectedRequests.some(
-                    (req) => req.id === request.id
-                  )}
-                  requestId={request.source_request}
-                  createdAt={request.created_at}
-                  properties={request.inputs}
-                />
-              </li>
-            ))}
+            {isLoading && <div>Loading inputs...</div>}
+            {isError && <div>Error loading inputs.</div>}
+            {!isLoading &&
+              !isError &&
+              inputRecords.map((request) => (
+                <li key={request.id} className="w-full flex items-start">
+                  <input
+                    type="checkbox"
+                    className="mt-2 mr-2 rounded border-slate-300 dark:border-slate-700"
+                    checked={selectedRequests.some(
+                      (req) => req.id === request.id
+                    )}
+                    onChange={() => handleToggleRequest(request.id)}
+                  />
+                  <PromptPropertyCard
+                    autoInputs={request.inputs}
+                    isSelected={selectedRequests.some(
+                      (req) => req.id === request.id
+                    )}
+                    requestId={request.source_request}
+                    createdAt={request.created_at}
+                    properties={request.inputs}
+                  />
+                </li>
+              ))}
           </ul>
         </div>
 
@@ -157,10 +196,10 @@ const ExperimentInputSelector = (props: ExperimentInputSelectorProps) => {
                 return;
               }
 
-              await props.handleAddRows(
+              await handleAddRows(
                 selectedRequests.map((request) => ({
                   inputRecordId: request.id,
-                  datasetId: props.meta?.datasetId ?? "",
+                  datasetId: datasetId ?? "",
                   inputs: request.inputs,
                 }))
               );
@@ -168,7 +207,7 @@ const ExperimentInputSelector = (props: ExperimentInputSelectorProps) => {
               if (onSuccess) {
                 onSuccess(true);
 
-                setNotification("Requests added to dataset", "success");
+                setNotification("Added inputs to dataset", "success");
                 setOpen(false);
               }
             }}

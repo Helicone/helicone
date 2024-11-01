@@ -1019,34 +1019,17 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
       <ExperimentRandomInputSelector
         open={showRandomInputSelector}
         setOpen={setShowRandomInputSelector}
-        numberOfRows={rowData.length}
-        meta={{
-          promptVersionId: promptSubversionId,
-          datasetId: experimentTableQuery?.datasetId ?? "",
-          originalColumnId:
-            experimentTableQuery?.columns?.find(
-              (column) => column.id === "output"
-            )?.id ?? "",
-        }}
         handleAddRows={handleAddRowInsertBatch}
-        requestIds={randomInputRecords}
+        promptVersionId={promptSubversionId}
+        datasetId={experimentTableQuery?.datasetId ?? ""}
         onSuccess={async (success) => {}}
       />
 
       <ExperimentInputSelector
         open={showExperimentInputSelector}
         setOpen={setShowExperimentInputSelector}
-        setShowRandomInputSelector={setShowRandomInputSelector}
-        meta={{
-          promptVersionId: promptSubversionId,
-          datasetId: experimentTableQuery?.datasetId ?? "",
-          originalColumnId:
-            experimentTableQuery?.columns?.find(
-              (column) => column.id === "output"
-            )?.id ?? "",
-        }}
-        numberOfRows={rowData.length}
-        requestIds={randomInputRecords}
+        promptVersionId={promptSubversionId}
+        datasetId={experimentTableQuery?.datasetId ?? ""}
         handleAddRows={handleAddRowInsertBatch}
         onSuccess={async (success) => {}}
       />
