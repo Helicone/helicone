@@ -1,7 +1,7 @@
-import { usePrompt } from "@/services/hooks/prompts/prompts";
-import HcBreadcrumb from "../../../../ui/hcBreadcrumb";
 import { ExperimentTable } from "./ExperimentTable";
 import { IslandContainer } from "../../../../ui/islandContainer";
+import HcBreadcrumb from "../../../../ui/hcBreadcrumb";
+import { useExperimentTableMetadata } from "../../../../../services/hooks/prompts/experiments";
 
 interface ExperimentTablePageProps {
   experimentTableId: string;
@@ -9,27 +9,23 @@ interface ExperimentTablePageProps {
 
 const ExperimentTablePage = (props: ExperimentTablePageProps) => {
   const { experimentTableId } = props;
-  // const { prompt } = usePrompt(promptId);
+  const { experiment } = useExperimentTableMetadata({ id: experimentTableId });
 
   return (
     <div className="flex flex-col w-full space-y-4 pt-4">
       <IslandContainer>
-        {/* <HcBreadcrumb
+        <HcBreadcrumb
           pages={[
             {
-              href: "/prompts",
-              name: "Prompts",
+              href: "/experiments",
+              name: "Experiments",
             },
             {
-              href: `/prompts/${promptId}`,
-              name: prompt?.user_defined_id || "Loading...",
-            },
-            {
-              href: `/prompts/${promptId}/subversion/${promptSubversionId}/experiment/${experimentId}`,
-              name: "Experiment",
+              href: `/experiments/${experimentTableId}`,
+              name: experiment?.name ?? "Experiment",
             },
           ]}
-        /> */}
+        />
       </IslandContainer>
       <ExperimentTable experimentTableId={experimentTableId} />
     </div>

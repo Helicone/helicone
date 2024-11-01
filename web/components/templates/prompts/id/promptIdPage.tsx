@@ -492,33 +492,30 @@ const PromptIdPage = (props: PromptIdPageProps) => {
     }
     const promptVersion = prompts?.find((p) => p.id === promptVersionId);
 
-    const experimentTableResult = await jawn.POST(
-      "/v1/experiment/new-experiment-table",
-      {
-        body: {
-          datasetId: dataset.data?.data?.datasetId!,
-          promptVersionId: promptVersionId,
-          newHeliconeTemplate: JSON.stringify(promptData),
-          isMajorVersion: false,
-          promptSubversionMetadata: {
-            experimentAssigned: true,
-          },
-          experimentMetadata: {
-            prompt_id: id,
-            prompt_version: promptVersionId,
-            experiment_name:
-              `${prompt?.user_defined_id}_V${promptVersion?.major_version}.${promptVersion?.minor_version}` ||
-              "",
-          },
-          experimentTableMetadata: {
-            datasetId: dataset.data?.data?.datasetId!,
-            model: promptVersion?.model,
-            prompt_id: id,
-            prompt_version: promptVersionId,
-          },
+    const experimentTableResult = await jawn.POST("/v1/experiment/table/new", {
+      body: {
+        datasetId: dataset.data?.data?.datasetId!,
+        promptVersionId: promptVersionId,
+        newHeliconeTemplate: JSON.stringify(promptData),
+        isMajorVersion: false,
+        promptSubversionMetadata: {
+          experimentAssigned: true,
         },
-      }
-    );
+        experimentMetadata: {
+          prompt_id: id,
+          prompt_version: promptVersionId,
+          experiment_name:
+            `${prompt?.user_defined_id}_V${promptVersion?.major_version}.${promptVersion?.minor_version}` ||
+            "",
+        },
+        experimentTableMetadata: {
+          datasetId: dataset.data?.data?.datasetId!,
+          model: promptVersion?.model,
+          prompt_id: id,
+          prompt_version: promptVersionId,
+        },
+      },
+    });
     if (!experimentTableResult.data?.data?.experimentId) {
       notification.setNotification("Failed to create experiment", "error");
       return;

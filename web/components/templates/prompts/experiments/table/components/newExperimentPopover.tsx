@@ -107,39 +107,34 @@ export const NewExperimentPopover = () => {
       return;
     }
 
-    const experimentTableResult = await jawn.POST(
-      "/v1/experiment/new-experiment-table",
-      {
-        body: {
-          datasetId: dataset.data?.data?.datasetId!,
-          promptVersionId: res.data?.data?.prompt_version_id!,
-          newHeliconeTemplate: JSON.stringify(basePrompt),
-          isMajorVersion: false,
-          promptSubversionMetadata: {
-            experimentAssigned: true,
-          },
-          experimentMetadata: {
-            prompt_id: res.data?.data?.id!,
-            prompt_version: res.data?.data?.prompt_version_id!,
-            experiment_name: `${promptName}_V1.0` || "",
-          },
-          experimentTableMetadata: {
-            datasetId: dataset.data?.data?.datasetId!,
-            model: basePrompt.model,
-            prompt_id: res.data?.data?.id!,
-            prompt_version: res.data?.data?.prompt_version_id!,
-          },
+    const experimentTableResult = await jawn.POST("/v1/experiment/table/new", {
+      body: {
+        datasetId: dataset.data?.data?.datasetId!,
+        promptVersionId: res.data?.data?.prompt_version_id!,
+        newHeliconeTemplate: JSON.stringify(basePrompt),
+        isMajorVersion: false,
+        promptSubversionMetadata: {
+          experimentAssigned: true,
         },
-      }
-    );
+        experimentMetadata: {
+          prompt_id: res.data?.data?.id!,
+          prompt_version: res.data?.data?.prompt_version_id!,
+          experiment_name: `${promptName}_V1.0` || "",
+        },
+        experimentTableMetadata: {
+          datasetId: dataset.data?.data?.datasetId!,
+          model: basePrompt.model,
+          prompt_id: res.data?.data?.id!,
+          prompt_version: res.data?.data?.prompt_version_id!,
+        },
+      },
+    });
     if (!experimentTableResult.data?.data?.experimentId) {
       notification.setNotification("Failed to create experiment", "error");
       return;
     }
 
-    await router.push(
-      `/prompts/${res.data?.data?.id}/subversion/${res.data?.data?.prompt_version_id}/experiment/${experimentTableResult.data?.data?.experimentId}`
-    );
+    await router.push(`/experiments/${experimentTableResult.data?.data?.id}`);
   };
 
   return (

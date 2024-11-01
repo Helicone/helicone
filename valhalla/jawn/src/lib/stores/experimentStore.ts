@@ -1011,20 +1011,23 @@ export class ExperimentStore extends BaseStore {
 
   async getExperimentTableById(
     experimentTableId: string
-  ): Promise<
-    Result<Database["public"]["Tables"]["experiment_table"]["Row"], string>
-  > {
+  ): Promise<Result<ExperimentTableSimplified, string>> {
     const result = await supabaseServer.client
       .from("experiment_table")
       .select("*")
       .eq("id", experimentTableId)
       .single();
 
-    if (result.error) {
-      return err(result.error.message);
+    if (result.error || !result.data) {
+      return err(result.error?.message ?? "Experiment table not found");
     }
 
-    return ok(result.data);
+    return ok({
+      id: result.data.id,
+      name: result.data.name,
+      experimentId: result.data.experiment_id,
+      metadata: result.data.metadata,
+    });
   }
 
   async updateExperimentTableMetadata(params: {

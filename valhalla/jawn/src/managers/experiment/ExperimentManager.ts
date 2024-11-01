@@ -237,6 +237,15 @@ export class ExperimentManager extends BaseManager {
         ] as { name: string; type: "input" | "output" }[]
       );
 
+    if (
+      experimentTableColumnsResult.error ||
+      !experimentTableColumnsResult.data
+    ) {
+      return err(
+        "Failed to create experiment table columns. Make sure the prompt has any inputs."
+      );
+    }
+
     return ok({
       tableId: experimentTableResult.data.experimentTableId,
       experimentId: experimentTableResult.data.experimentId,
@@ -324,9 +333,7 @@ export class ExperimentManager extends BaseManager {
 
   async getExperimentTableById(
     experimentTableId: string
-  ): Promise<
-    Result<Database["public"]["Tables"]["experiment_table"]["Row"], string>
-  > {
+  ): Promise<Result<ExperimentTableSimplified, string>> {
     return this.ExperimentStore.getExperimentTableById(experimentTableId);
   }
 

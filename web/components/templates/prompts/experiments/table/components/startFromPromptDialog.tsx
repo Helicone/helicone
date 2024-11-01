@@ -267,42 +267,37 @@ export const StartFromPromptDialog = ({
     );
     const prompt = prompts?.find((p) => p.id === selectedPromptId);
 
-    const experimentTableResult = await jawn.POST(
-      "/v1/experiment/new-experiment-table",
-      {
-        body: {
-          datasetId: dataset.data?.data?.datasetId!,
-          promptVersionId: selectedVersionId!,
-          newHeliconeTemplate: JSON.stringify(promptVersion?.helicone_template),
-          isMajorVersion: false,
-          promptSubversionMetadata: {
-            experimentAssigned: true,
-          },
-          experimentMetadata: {
-            prompt_id: selectedPromptId!,
-            prompt_version: selectedVersionId!,
-            experiment_name:
-              `${prompt?.user_defined_id}_V${promptVersion?.major_version}.${promptVersion?.minor_version}` ||
-              "",
-          },
-          experimentTableMetadata: {
-            datasetId: dataset.data?.data?.datasetId!,
-            model: promptVersion?.model,
-            prompt_id: selectedPromptId!,
-            prompt_version: selectedVersionId!,
-          },
+    const experimentTableResult = await jawn.POST("/v1/experiment/table/new", {
+      body: {
+        datasetId: dataset.data?.data?.datasetId!,
+        promptVersionId: selectedVersionId!,
+        newHeliconeTemplate: JSON.stringify(promptVersion?.helicone_template),
+        isMajorVersion: false,
+        promptSubversionMetadata: {
+          experimentAssigned: true,
         },
-      }
-    );
+        experimentMetadata: {
+          prompt_id: selectedPromptId!,
+          prompt_version: selectedVersionId!,
+          experiment_name:
+            `${prompt?.user_defined_id}_V${promptVersion?.major_version}.${promptVersion?.minor_version}` ||
+            "",
+        },
+        experimentTableMetadata: {
+          datasetId: dataset.data?.data?.datasetId!,
+          model: promptVersion?.model,
+          prompt_id: selectedPromptId!,
+          prompt_version: selectedVersionId!,
+        },
+      },
+    });
 
     if (experimentTableResult.error || !experimentTableResult.data) {
       notification.setNotification("Failed to create subversion", "error");
       return;
     }
 
-    router.push(
-      `/prompts/${selectedPromptId}/subversion/${selectedVersionId}/experiment/${experimentTableResult.data?.data?.experimentId}`
-    );
+    router.push(`/experiments/${experimentTableResult.data?.data?.id}`);
   };
 
   return (

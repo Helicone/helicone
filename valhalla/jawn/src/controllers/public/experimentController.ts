@@ -32,6 +32,7 @@ import { EvaluatorResult } from "./evaluatorController";
 import { EvaluatorManager } from "../../managers/evaluator/EvaluatorManager";
 import { InputsManager } from "../../managers/inputs/InputsManager";
 import { DatasetManager } from "../../managers/dataset/DatasetManager";
+import { Database } from "../../lib/db/database.types";
 
 export type ExperimentFilterBranch = {
   left: ExperimentFilterNode;
@@ -107,7 +108,7 @@ export class ExperimentController extends Controller {
     }
   }
 
-  @Post("/new-experiment-table")
+  @Post("/table/new")
   public async createNewExperimentTable(
     @Body()
     requestBody: CreateExperimentTableParams,
@@ -137,6 +138,14 @@ export class ExperimentController extends Controller {
     return experimentManager.getExperimentTableByExperimentId(
       experimentTableId
     );
+  }
+  @Post("/table/{experimentTableId}/metadata/query")
+  public async getExperimentTableMetadata(
+    @Path() experimentTableId: string,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<ExperimentTableSimplified, string>> {
+    const experimentManager = new ExperimentManager(request.authParams);
+    return experimentManager.getExperimentTableById(experimentTableId);
   }
   @Post("/tables/query")
   public async getExperimentTables(
