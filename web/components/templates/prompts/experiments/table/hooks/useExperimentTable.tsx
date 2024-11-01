@@ -324,27 +324,6 @@ export function useExperimentTable(orgId: string, experimentTableId: string) {
     },
   });
 
-  // const fetchPromptVersionTemplate = useQuery(
-  //   ["promptVersionTemplate", experimentTableQuery?.promptSubversionId],
-  //   async () => {
-  //     const jawnClient = getJawnClient(orgId);
-  //     const res = await jawnClient.GET("/v1/prompt/version/{promptVersionId}", {
-  //       params: {
-  //         path: {
-  //           promptVersionId:
-  //             (experimentTableQuery?.promptSubversionId as string) ?? "",
-  //         },
-  //       },
-  //     });
-
-  //     return res.data?.data;
-  //   },
-  //   {
-  //     cacheTime: Infinity,
-  //     enabled: !!orgId && !!experimentTableQuery?.promptSubversionId,
-  //   }
-  // );
-
   const runHypothesisMutation = useMutation({
     mutationFn: async ({
       hypothesisId,
@@ -364,7 +343,7 @@ export function useExperimentTable(orgId: string, experimentTableId: string) {
         },
       });
     },
-    onSuccess: () => {
+    onMutate: () => {
       queryClient.invalidateQueries({
         queryKey: ["experimentTable", orgId, experimentTableId],
       });

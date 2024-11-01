@@ -92,8 +92,7 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
           },
         },
       });
-      console.log("res123123", res);
-      return res.data?.data ?? {};
+      return res.data?.data;
     },
     {
       enabled: !!promptSubversionId,
@@ -141,37 +140,6 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
     return res.data?.data;
   }, [orgId, experimentTableQuery?.metadata?.datasetId]);
 
-  console.log("promptVersionTemplateData", promptVersionTemplateData);
-
-  const fetchRandomInputRecords = useCallback(async () => {
-    const jawnClient = getJawnClient(orgId);
-    const res = await jawnClient.POST(
-      "/v1/prompt/version/{promptVersionId}/inputs/query",
-      {
-        params: {
-          path: {
-            promptVersionId:
-              (experimentTableQuery?.promptSubversionId as string) ?? "",
-          },
-        },
-        body: {
-          limit: 100,
-          random: true,
-        },
-      }
-    );
-
-    return res.data?.data;
-  }, [orgId, experimentTableQuery?.promptSubversionId]);
-
-  const { data: inputRecordsData, refetch: refetchInputRecords } = useQuery(
-    ["inputRecords", orgId, experimentTableQuery?.metadata?.datasetId],
-    fetchInputRecords,
-    {
-      enabled: !!experimentTableQuery?.metadata?.datasetId,
-    }
-  );
-
   // const mapInputRecordsToColumnsWithRowId = useCallback(
   //   (inputRecords: Record<string, string>, rowId: string, rowIndex: number) => {
   //     const result: Record<
@@ -196,51 +164,6 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
   //   },
   //   [inputColumnNameToId]
   // );
-
-  const { data: randomInputRecordsData } = useQuery(
-    ["randomInputRecords", orgId, experimentTableQuery?.promptSubversionId],
-    fetchRandomInputRecords,
-    {
-      enabled: true,
-      refetchInterval: 10000,
-    }
-  );
-
-  const randomInputRecords = useMemo(() => {
-    return (
-      randomInputRecordsData?.map((row, index) => ({
-        id: row.id,
-        inputs: row.inputs,
-        source_request: row.source_request,
-        prompt_version: row.prompt_version,
-        created_at: row.created_at,
-        response: row.response_body,
-      })) ?? []
-    );
-  }, [randomInputRecordsData]);
-
-  // Keep track of all input keys
-  const [inputKeys, setInputKeys] = useState<Set<string>>(new Set(["Input 1"]));
-  const [tempRowId, setTempRowId] = useState(0);
-
-  // After defining inputKeys
-  const inputColumnFields = Array.from(inputKeys);
-
-  const getRequestDataByIds = useCallback(
-    async (requestIds: string[]) => {
-      const jawnClient = getJawnClient(orgId);
-      try {
-        const res = await jawnClient.POST("/v1/request/query-ids", {
-          body: { requestIds },
-        });
-        return res.data?.data;
-      } catch (error) {
-        console.error("Error fetching request data:", error);
-        return [];
-      }
-    },
-    [orgId]
-  );
 
   const handleRunHypothesis = useCallback(
     (
@@ -324,7 +247,7 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
         inputs,
       });
     },
-    [addExperimentTableRow]
+    [addExperimentTableRow, experimentTableQuery?.promptSubversionId]
   );
 
   const handleAddRowInsertBatch = useCallback(
@@ -366,23 +289,6 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
     [addExperimentTableRowInsertBatch, experimentTableQuery]
   );
 
-  const handleCellValueChanged = useCallback(
-    (event: any) => {
-      console.log("event", event);
-      if (inputColumnFields.includes(event.colDef.field)) {
-        const updatedRow = { ...event.data };
-        console.log("updatedRow", updatedRow);
-        // updateExperimentCell.mutate(updatedRow);
-
-        // if (
-        //   event.colDef.field === inputColumnFields[inputColumnFields.length - 1]
-        // ) {
-        //   handleAddRow();
-        // }
-      }
-    },
-    [inputColumnFields, handleAddRow]
-  );
   const [activePopoverCell, setActivePopoverCell] = useState<{
     rowIndex: number;
     colId: string;
@@ -471,41 +377,28 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
   // );
 
   // Adjust useEffect to add an empty row if rowData is empty
-  useEffect(() => {
-    // if (rowData.length === 0) {
-    //   const inputFields = Array.from(inputKeys).reduce((acc, key) => {
-    //     acc[key] = "";
-    //     return acc;
-    //   }, {} as Record<string, string>);
-    //   const newRow = {
-    //     id: `temp-${Date.now()}`,
-    //     dataset_row_id: null,
-    //     ...inputFields,
-    //     isLoading: {},
-    //   };
-    //   addExperimentTableRow(newRow);
-    // }
-  }, [inputKeys, experimentTableQuery?.rows.length]);
+
   const headerClass = clsx(
     "border-r border-[#E2E8F0] text-center items-center justify-center"
   );
 
-  // const fetchExperimentHypothesisScores = useCallback(
-  //   async (hypothesisId: string) => {
-  //     const result = await jawn.POST(
-  //       "/v1/experiment/hypothesis/{hypothesisId}/scores/query",
-  //       {
-  //         params: {
-  //           path: {
-  //             hypothesisId,
-  //           },
-  //         },
-  //       }
-  //     );
-  //     return result.data ?? {};
-  //   },
-  //   [jawn]
-  // );
+  const fetchExperimentHypothesisScores = useCallback(
+    async (hypothesisId: string) => {
+      const jawnClient = getJawnClient(orgId);
+      const result = await jawnClient.POST(
+        "/v1/experiment/hypothesis/{hypothesisId}/scores/query",
+        {
+          params: {
+            path: {
+              hypothesisId,
+            },
+          },
+        }
+      );
+      return result.data ?? {};
+    },
+    [orgId]
+  );
 
   const columnDefs = useMemo<ColDef[]>(() => {
     let columns: ColDef[] = [
@@ -724,7 +617,6 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
     handleRunHypothesis,
     experimentTableQuery?.rows,
     wrapText,
-    inputKeys,
     columnWidths,
     columnOrder,
     activePopoverCell,
@@ -917,23 +809,23 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
             </Popover>
           )}
         </div>
-        {/* 
-        {showScoresTable && experimentTableQuery?.metadata?.experimentId && (
+
+        {showScoresTable && experimentTableQuery?.experimentId && (
           <div className="w-full bg-white border-y border-r">
             <div className="flex justify-between items-center bg-white p-2 border-b">
               <ScoresEvaluatorsConfig
-                experimentId={experimentTableQuery?.metadata?.experimentId}
+                experimentId={experimentTableQuery?.experimentId ?? ""}
               />
             </div>
             <ScoresTableContainer
               columnDefs={columnDefs}
               columnWidths={columnWidths}
               columnOrder={columnOrder}
-              experimentId={experimentId}
+              experimentId={experimentTableQuery?.experimentId ?? ""}
               fetchExperimentHypothesisScores={fetchExperimentHypothesisScores}
             />
           </div>
-        )} */}
+        )}
 
         <div
           className="ag-theme-alpine w-full overflow-hidden "
@@ -966,18 +858,9 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
             // getRowId={getRowId}
             context={{
               handleRunHypothesis,
-              // handleRunRow,
-              hypothesesToRun:
-                (experimentTableQuery?.data?.columns
-                  .filter((column) => column.metadata?.hypothesisId)
-                  .map(
-                    (column) => column.metadata?.hypothesisId
-                  ) as string[]) || [],
               setShowExperimentInputSelector,
               setShowRandomInputSelector,
-              inputKeys: Array.from(inputKeys),
               experimentTableData: experimentTableQuery,
-              inputColumnFields,
               hypotheses: [],
               experimentId: experimentTableQuery?.metadata?.experimentId,
               orgId,
@@ -991,7 +874,6 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
             rowClass="border-b border-gray-200 hover:bg-gray-50"
             headerHeight={40}
             rowHeight={50}
-            onCellValueChanged={handleCellValueChanged}
           />
         </div>
         <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
