@@ -207,7 +207,6 @@ export class LogStore {
             payload.experimentCellValues &&
             payload.experimentCellValues.length > 0
           ) {
-            // Map the incoming camelCase to required snake_case
             const cellValues = payload.experimentCellValues.map((cell) => ({
               column_id: cell.columnId,
               row_index: cell.rowIndex,
@@ -222,6 +221,18 @@ export class LogStore {
             await t.none(insertExperimentCellValues);
           }
         } catch (error: any) {
+          const cellValues = payload.experimentCellValues.map((cell) => ({
+            column_id: cell.columnId,
+            row_index: cell.rowIndex,
+            value: cell.value,
+            status: "failed",
+          }));
+
+          const insertExperimentCellValues =
+            pgp.helpers.insert(cellValues, experimentCellValueColumns) +
+            onConflictExperimentCellValue;
+
+          await t.none(insertExperimentCellValues);
           console.error("Error inserting experiment cell values", error);
           throw error;
         }

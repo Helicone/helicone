@@ -1,4 +1,8 @@
-import { FolderIcon, TableCellsIcon } from "@heroicons/react/24/outline";
+import {
+  FolderIcon,
+  PencilIcon,
+  TableCellsIcon,
+} from "@heroicons/react/24/outline";
 import { Button } from "../../../../../ui/button";
 import { Dices } from "lucide-react";
 
@@ -25,7 +29,7 @@ export const AddRowPopover: React.FC<AddRowPopoverProps> = ({
         className="h-8 w-full flex items-center justify-start"
         variant="ghost"
       >
-        <TableCellsIcon className="inline h-4 w-4 mr-2" />
+        <PencilIcon className="inline h-4 w-4 mr-2" />
         Manual input
       </Button>
       <Button
