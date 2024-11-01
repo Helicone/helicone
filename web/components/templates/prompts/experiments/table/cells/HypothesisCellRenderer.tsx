@@ -15,22 +15,13 @@ import { CellData } from "./types";
 export const HypothesisCellRenderer: React.FC<any> = (params) => {
   const { data, colDef, context, wrapText, hypothesisId } = params;
   const promptVersionTemplate = context.promptVersionTemplateRef ?? {};
-  console.log("promptVersionTemplate", context.promptVersionTemplateRef);
   const [showPromptPlayground, setShowPromptPlayground] = useState(false);
 
   // Parse the response data
   const cellData = data.cells[colDef.cellRendererParams.columnId] as CellData;
-  console.log("cell123", cellData);
 
   const content =
     cellData?.value?.response?.choices?.[0]?.message?.content || "";
-
-  // // Construct cellId using columnId and rowIndex
-  // const cellId = `${colDef.cellRendererParams.columnId}_${params.node.rowIndex}`;
-
-  // const columnId = colDef.cellRendererParams.columnId;
-
-  // const isLoading = data.isLoading?.[cellId];
 
   if (cellData?.status === "running") {
     return (
