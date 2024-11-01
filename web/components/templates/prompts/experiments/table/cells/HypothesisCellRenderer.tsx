@@ -10,29 +10,29 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Dialog, DialogTrigger, DialogContent } from "@/components/ui/dialog";
 import clsx from "clsx";
 import PromptPlayground from "../../../id/promptPlayground";
+import { CellData } from "./types";
 
 export const HypothesisCellRenderer: React.FC<any> = (params) => {
   const { data, colDef, context, wrapText, hypothesisId } = params;
-  const promptVersionTemplate = context.promptVersionTemplateRef.current;
-
+  const promptVersionTemplate = context.promptVersionTemplateRef ?? {};
+  console.log("promptVersionTemplate", context.promptVersionTemplateRef);
   const [showPromptPlayground, setShowPromptPlayground] = useState(false);
 
   // Parse the response data
-  const parsedResponseData = data[colDef.cellRendererParams.columnId] || null;
-  console.log("data", data);
+  const cellData = data.cells[colDef.cellRendererParams.columnId] as CellData;
+  console.log("cell", cellData);
 
   const content =
-    parsedResponseData?.responseBody?.response?.choices?.[0]?.message
-      ?.content || "";
+    cellData?.value?.response?.choices?.[0]?.message?.content || "";
 
-  // Construct cellId using columnId and rowIndex
-  const cellId = `${colDef.cellRendererParams.columnId}_${params.node.rowIndex}`;
+  // // Construct cellId using columnId and rowIndex
+  // const cellId = `${colDef.cellRendererParams.columnId}_${params.node.rowIndex}`;
 
-  const columnId = colDef.cellRendererParams.columnId;
+  // const columnId = colDef.cellRendererParams.columnId;
 
-  const isLoading = data.isLoading?.[cellId];
+  // const isLoading = data.isLoading?.[cellId];
 
-  if (isLoading) {
+  if (cellData?.status === "running") {
     return (
       <div className="w-full h-full whitespace-pre-wrap flex flex-row items-center space-x-2 pl-4">
         <span className="animate-ping inline-flex rounded-full bg-green-700 h-2 w-2"></span>
@@ -53,7 +53,7 @@ export const HypothesisCellRenderer: React.FC<any> = (params) => {
     return {
       model: initialModel,
       messages: [
-        ...promptVersionTemplate.helicone_template.messages,
+        ...(promptVersionTemplate.helicone_template?.messages ?? []),
         {
           role: "assistant",
           content: content,
@@ -153,16 +153,14 @@ export const HypothesisCellRenderer: React.FC<any> = (params) => {
           className="w-6 h-6 p-0 border-slate-200 border rounded-md bg-slate-50 text-slate-500"
           onClick={(e) => {
             e.stopPropagation();
-            const cell = parsedResponseData;
-            console.log("columnId", columnId);
-            console.log("cellId", cell.cellId);
-
+            params.context.handleUpdateExperimentCell({
+              cellId: cellData.cellId,
+              value: null,
+              status: "running",
+            });
             params.handleRunHypothesis(hypothesisId, [
               {
-                rowIndex: params.node.rowIndex,
-                datasetRowId: data.dataset_row_id,
-                columnId: colDef.cellRendererParams.columnId,
-                cellId: cell.cellId,
+                cellId: cellData.cellId,
               },
             ]);
           }}

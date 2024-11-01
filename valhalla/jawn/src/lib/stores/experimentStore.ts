@@ -441,7 +441,8 @@ export class ExperimentStore extends BaseStore {
       SELECT COALESCE(MAX(ecv.row_index), -1) as max_row_index
       FROM experiment_cell ecv
       JOIN experiment_column ec ON ec.id = ecv.column_id
-      WHERE ec.id = $1
+      JOIN experiment_table et ON et.id = ec.table_id
+      WHERE et.id = $1
     `;
 
     const result = await dbExecute<{ max_row_index: number }>(query, [
@@ -486,32 +487,44 @@ export class ExperimentStore extends BaseStore {
       return err(columnResult.error?.message ?? "Failed to create column");
     }
 
-    // Get max row index
-    const maxRowResult = await this.getMaxRowIndex(experimentTableId);
-    if (maxRowResult.error || !maxRowResult.data) {
-      return err(maxRowResult.error ?? "Failed to get max row index");
+    // Fetch existing columns for the experiment table
+    const existingColumnsResult = await supabaseServer.client
+      .from("experiment_column")
+      .select("id")
+      .eq("table_id", experimentTableId);
+
+    if (
+      existingColumnsResult.error ||
+      !existingColumnsResult.data ||
+      existingColumnsResult.data.length === 0
+    ) {
+      return err("No existing columns found in the experiment table.");
     }
 
-    const maxRowIndex = maxRowResult.data;
+    // Use the first existing column to copy metadata from
+    const existingColumnId = existingColumnsResult.data[0].id;
 
-    // If there are existing rows, create empty cells
-    if (maxRowIndex >= 0) {
-      const cellsQuery = `
-        INSERT INTO experiment_cell (column_id, row_index, value)
-        SELECT 
-          $1 as column_id,
-          generate_series(0, $2) as row_index,
-          NULL as value
-      `;
+    // If there are existing rows, create cells with copied metadata
+    const cellsQuery = `
+      INSERT INTO experiment_cell (column_id, row_index, status, value, metadata)
+      SELECT 
+        $1 AS column_id,
+        ecv.row_index,
+        'initialized' AS status,
+        NULL AS value,
+        ecv.metadata
+      FROM experiment_cell ecv
+      WHERE ecv.column_id = $2
+      ORDER BY ecv.row_index
+    `;
 
-      const cellsResult = await dbExecute(cellsQuery, [
-        columnResult.data.id,
-        maxRowIndex,
-      ]);
+    const cellsResult = await dbExecute(cellsQuery, [
+      columnResult.data.id, // $1: the new column ID
+      existingColumnId, // $2: the existing column ID to copy metadata from
+    ]);
 
-      if (cellsResult.error) {
-        return err(cellsResult.error);
-      }
+    if (cellsResult.error) {
+      return err(cellsResult.error);
     }
 
     return ok({ id: columnResult.data.id });
@@ -567,44 +580,170 @@ export class ExperimentStore extends BaseStore {
     return ok({ id: result.data.id });
   }
 
+  async getExperimentCellsByIds(cellIds: string[]): Promise<
+    Result<
+      {
+        cellId: string;
+        status: string | null;
+        value: string | null;
+        metadata: Record<string, any> | null;
+        rowIndex: number;
+        columnId: string;
+      }[],
+      string
+    >
+  > {
+    const query = `
+    SELECT
+      ec.id,
+      ec.status,
+      ec.value,
+      ec.metadata,
+      ec.row_index,
+      ec.column_id
+    FROM experiment_cell ec
+    WHERE ec.id = ANY($1::uuid[])
+  `;
+    const result = await dbExecute<{
+      id: string;
+      status: string | null;
+      value: string | null;
+      metadata: Record<string, any> | null;
+      row_index: number;
+      column_id: string;
+    }>(query, [cellIds]);
+
+    if (result.error || !result.data) {
+      return err(result.error ?? "Failed to get experiment cells");
+    }
+    return ok(
+      result.data.map((cell) => ({
+        cellId: cell.id,
+        status: cell.status,
+        value: cell.value,
+        metadata: cell.metadata,
+        rowIndex: cell.row_index,
+        columnId: cell.column_id,
+      }))
+    );
+  }
+
   async updateExperimentCell(params: {
     cellId: string;
     status: string | null;
-    value: string | null;
-  }): Promise<Result<{ id: string }, string>> {
-    const result = await supabaseServer.client
-      .from("experiment_cell")
-      .update({ status: params.status ?? null, value: params.value ?? null })
-      .eq("id", params.cellId)
-      .select("*")
-      .single();
-    if (result.error || !result.data) {
-      return err(result.error?.message ?? "Failed to update experiment cell");
+    value?: string | null;
+    metadata?: Record<string, any> | null;
+  }): Promise<
+    Result<
+      {
+        cellId: string;
+        status: string | null;
+        value: string | null;
+        metadata: Record<string, any> | null;
+        columnName: string;
+      },
+      string
+    >
+  > {
+    const { cellId, status, value, metadata } = params;
+
+    // Build the updates dynamically
+    const updates: string[] = [];
+    const values: any[] = [];
+    let index = 1;
+
+    if (status !== null && status !== undefined && status !== "") {
+      updates.push(`status = $${index++}`);
+      values.push(status);
     }
-    return ok({ id: result.data.id });
+
+    if (value !== null && value !== undefined && value !== "") {
+      updates.push(`value = $${index++}`);
+      values.push(value);
+    }
+
+    if (metadata) {
+      // Use jsonb concatenation operator to merge existing and new metadata
+      updates.push(
+        `metadata = COALESCE(metadata, '{}'::jsonb) || $${index++}::jsonb`
+      );
+      values.push(JSON.stringify(metadata));
+    }
+
+    if (updates.length === 0) {
+      return err("No fields to update");
+    }
+
+    const query = `
+      UPDATE experiment_cell ec
+      SET ${updates.join(", ")}
+      FROM experiment_column col
+      WHERE ec.id = $${index}
+        AND ec.column_id = col.id
+      RETURNING ec.id, ec.status, ec.value, ec.metadata, col.column_name;
+    `;
+
+    values.push(cellId);
+
+    const result = await dbExecute<{
+      id: string;
+      status: string | null;
+      value: string | null;
+      metadata: Record<string, any> | null;
+      column_name: string;
+    }>(query, values);
+
+    if (result.error || !result.data || result.data.length === 0) {
+      return err(result.error ?? "Failed to update experiment cell");
+    }
+
+    return ok({
+      cellId: result.data[0].id,
+      status: result.data[0].status,
+      value: result.data[0].value,
+      metadata: result.data[0].metadata,
+      columnName: result.data[0].column_name,
+    });
   }
 
   async updateExperimentCells(params: {
-    cells: { cellId: string; status: string | null; value: string | null }[];
-  }): Promise<Result<{ ids: string[] }, string>> {
+    cells: {
+      cellId: string;
+      status: string | null;
+      value?: string | null;
+      metadata?: Record<string, any> | null;
+    }[];
+  }): Promise<
+    Result<
+      {
+        cellId: string;
+        status: string | null;
+        value?: string | null;
+        metadata?: Record<string, any> | null;
+        columnName: string;
+      }[],
+      string
+    >
+  > {
     const results = await Promise.all(
       params.cells.map((cell) => this.updateExperimentCell(cell))
     );
     if (results.some((result) => result.error)) {
       return err("Failed to update experiment cell statuses");
     }
-    return ok({ ids: results.map((result) => result.data!.id) });
+    return ok(results.map((result) => result.data!));
   }
 
   async createExperimentTableRow(params: {
     experimentTableId: string;
     rowIndex: number;
+    metadata?: Record<string, any>;
   }): Promise<Result<{ ids: string[] }, string>> {
     // First, get all columns for this experiment table
     const columnsResult = await supabaseServer.client
       .from("experiment_column")
       .select("*")
-      .eq("experimentTableId", params.experimentTableId);
+      .eq("table_id", params.experimentTableId);
 
     if (columnsResult.error) {
       return err(columnsResult.error.message);
@@ -612,7 +751,12 @@ export class ExperimentStore extends BaseStore {
 
     // Create empty cells for each column
     const cellPromises = columnsResult.data.map((column) =>
-      this.createExperimentCell(column.id, params.rowIndex, null, {})
+      this.createExperimentCell(
+        column.id,
+        params.rowIndex,
+        null,
+        params.metadata
+      )
     );
 
     try {
@@ -871,7 +1015,9 @@ export class ExperimentStore extends BaseStore {
     experimentTableId: string;
     metadata: Record<string, any>;
   }): Promise<Result<null, string>> {
-    const existingMetadata = await this.getExperimentTable(params.experimentId);
+    const existingMetadata = await this.getExperimentTable(
+      params.experimentTableId
+    );
     const result = await supabaseServer.client
       .from("experiment_table")
       .update({

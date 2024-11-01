@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 
 type DatasetRequest = {
   id: string;
-  inputs: Record<string, { columnId: string; value: string; rowIndex: number }>;
+  inputs: { [key: string]: string };
   source_request: string;
   prompt_version: string;
   created_at: string;
@@ -20,6 +20,7 @@ interface ExperimentInputSelectorProps {
   requestIds?: DatasetRequest[];
   onSuccess?: (success: boolean) => void;
   numberOfRows: number;
+  handleAddRow: () => void;
   meta?: {
     promptVersionId?: string;
     datasetId?: string;
@@ -95,9 +96,7 @@ export const ExperimentRandomInputSelector = (
                   isSelected={true}
                   requestId={request.source_request}
                   createdAt={request.created_at}
-                  properties={Object.fromEntries(
-                    Object.entries(request.inputs).map(([k, v]) => [k, v.value])
-                  )}
+                  properties={request.inputs}
                 />
               </li>
             ))}
@@ -119,22 +118,13 @@ export const ExperimentRandomInputSelector = (
             onClick={async () => {
               await Promise.all(
                 shuffledRequests.map(async (request, index) => {
-                  const rowIndex = props.numberOfRows - 1 + index;
+                  console.log("request", request);
                   await jawn.POST(
                     "/v1/experiment/dataset/{datasetId}/row/insert",
                     {
                       body: {
                         inputRecordId: request.id,
-                        inputs: Object.fromEntries(
-                          Object.entries(request.inputs).map(([k, v]) => [
-                            k,
-                            {
-                              value: v.value,
-                              columnId: v.columnId,
-                              rowIndex: rowIndex,
-                            },
-                          ])
-                        ),
+                        inputs: request.inputs,
                         originalColumnId: props.meta?.originalColumnId ?? "",
                       },
                       params: {
@@ -144,6 +134,7 @@ export const ExperimentRandomInputSelector = (
                       },
                     }
                   );
+                  await props.handleAddRow();
                 })
               );
 

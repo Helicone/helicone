@@ -140,10 +140,7 @@ export class ExperimentDatasetController extends Controller {
     @Body()
     requestBody: {
       inputRecordId: string;
-      inputs: Record<
-        string,
-        { value: string; columnId: string; rowIndex: number }
-      >;
+      inputs: Record<string, string>;
       originalColumnId?: string;
     },
     @Request() request: JawnAuthenticatedRequest,
@@ -162,25 +159,25 @@ export class ExperimentDatasetController extends Controller {
     const inputRecordResult = await datasetManager.getDatasetRowInputRecord(
       requestBody.inputRecordId
     );
-    const newCells = [
-      ...Object.values(requestBody.inputs).map(
-        ({ value, columnId, rowIndex }) => ({
-          columnId,
-          rowIndex,
-          value: inputRecordResult.data?.source_request ?? null,
-          metadata: { datasetRowId: datasetRowResult.data },
-        })
-      ),
-    ];
-    const experimentManager = new ExperimentManager(request.authParams);
-    const experimentTableCell = await experimentManager.createExperimentCells({
-      cells: newCells,
-    });
+    // const newCells = [
+    //   ...Object.values(requestBody.inputs).map(
+    //     ({ value, columnId, rowIndex }) => ({
+    //       columnId,
+    //       rowIndex,
+    //       value: inputRecordResult.data?.source_request ?? null,
+    //       metadata: { datasetRowId: datasetRowResult.data },
+    //     })
+    //   ),
+    // ];
+    // const experimentManager = new ExperimentManager(request.authParams);
+    // const experimentTableCell = await experimentManager.createExperimentCells({
+    //   cells: newCells,
+    // });
 
-    if (experimentTableCell.error || !experimentTableCell.data) {
-      console.error(experimentTableCell.error);
-      this.setStatus(500);
-    }
+    // if (experimentTableCell.error || !experimentTableCell.data) {
+    //   console.error(experimentTableCell.error);
+    //   this.setStatus(500);
+    // }
     this.setStatus(200);
     return ok(requestBody.inputRecordId);
   }
@@ -189,27 +186,18 @@ export class ExperimentDatasetController extends Controller {
   public async createDatasetRow(
     @Body()
     requestBody: {
-      inputs: Record<
-        string,
-        { value: string; columnId: string; rowIndex: number }
-      >;
-      rowIndex: number;
-      experimentTableId: string;
-      experimentId: string;
+      inputs: Record<string, string>;
       sourceRequest?: string;
-      originalColumnId?: string;
     },
     @Request() request: JawnAuthenticatedRequest,
     @Path() datasetId: string,
     @Path() promptVersionId: string
   ): Promise<Result<string, string>> {
     const inputManager = new InputsManager(request.authParams);
-    const inputs = Object.fromEntries(
-      Object.entries(requestBody.inputs).map(([k, { value }]) => [k, value])
-    );
+
     const inputRecordResult = await inputManager.createInputRecord(
       promptVersionId,
-      inputs,
+      requestBody.inputs,
       requestBody.sourceRequest
     );
 
@@ -224,43 +212,6 @@ export class ExperimentDatasetController extends Controller {
       datasetId,
       inputRecordResult.data
     );
-
-    const experimentManager = new ExperimentManager(request.authParams);
-    const newCells = [
-      ...Object.values(requestBody.inputs).map(
-        ({ value, columnId, rowIndex }) => ({
-          columnId,
-          rowIndex,
-          value,
-          metadata: { datasetRowId: datasetRowResult.data },
-        })
-      ),
-      {
-        columnId: requestBody.originalColumnId ?? "",
-        rowIndex: requestBody.rowIndex,
-        value: null,
-        metadata: { datasetRowId: datasetRowResult.data },
-      },
-    ];
-    const experimentTableCell = await experimentManager.createExperimentCells({
-      cells: newCells,
-    });
-
-    const latestRowIndex = newCells.reduce((max, row) => {
-      return Math.max(max, row.rowIndex);
-    }, 0);
-
-    await experimentManager.updateExperimentTableMetadata({
-      experimentId: requestBody.experimentId,
-      metadata: {
-        rows: latestRowIndex,
-      },
-    });
-
-    if (experimentTableCell.error || !experimentTableCell.data) {
-      console.error(experimentTableCell.error);
-      this.setStatus(500);
-    }
 
     if (datasetRowResult.error || !datasetRowResult.data) {
       console.error(datasetRowResult.error);

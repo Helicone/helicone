@@ -26,8 +26,28 @@ export type Cell = {
   rowIndex: number;
 };
 
+export type TableCell = {
+  value: string | null;
+  cellId: string;
+  status: CellStatus;
+};
+
+export type TableRow = {
+  id: string;
+  rowIndex: number;
+  isLoading: Record<string, boolean>;
+  cells: Record<string, TableCell>; // columnId -> TableCell
+};
+
 type ColumnType = "input" | "output" | "experiment";
 type CellStatus = "initialized" | "success" | "running";
+
+//TODO: Move to metadata and remove this
+export function isUUID(value: string): boolean {
+  const uuidRegex =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(value);
+}
 
 export const getRequestDataByIds = async (
   orgId: string,
@@ -58,7 +78,7 @@ export const fetchRequestResponseBody = async (request_response: any) => {
   return null;
 };
 
-export async function updateTableData({
+export async function getTableData({
   experimentTableData,
   responseBodyCache,
   getRequestDataByIds,
@@ -66,164 +86,96 @@ export async function updateTableData({
   experimentTableData: ExperimentTable | null;
   responseBodyCache: Record<string, any>;
   getRequestDataByIds: (requestIds: string[]) => Promise<any[]>;
-}): Promise<any[]> {
+}): Promise<TableRow[]> {
   if (!experimentTableData) {
     return [];
   }
+
   // Build a mapping of rowIndex to row object
-  const rowIndexToRow = new Map<number, any>();
+  const rowIndexToRow = new Map<number, TableRow>();
 
   // Collect requestIds for experiment columns
   const requestIdsToFetch = new Set<string>();
 
-  experimentTableData.columns.forEach((column) => {
-    const columnId = column.id;
+  await Promise.all(
+    experimentTableData.columns.map(async (column) => {
+      const columnId = column.id;
+      console.log("columnId", columnId);
+      console.log("column.cells", column.cells);
 
-    if (column.columnType === "experiment" || column.columnType === "output") {
-      // Process experiment columns
-      column.cells.forEach((cell) => {
-        const rowIndex = cell.rowIndex;
-        let row = rowIndexToRow.get(rowIndex);
-        if (!row) {
-          row = {
-            id: `row-${rowIndex}`,
-            rowIndex,
-            isLoading: {},
-            cellId: cell.id,
-          };
-          rowIndexToRow.set(rowIndex, row);
-        }
-
-        if (cell.value) {
-          // Temporarily store value in the cell data
-          row[columnId] = {
-            value: cell.value,
-            cellId: cell.id,
-          };
-          requestIdsToFetch.add(cell.value);
-        } else {
-          row[columnId] = {
-            value: null,
-            cellId: cell.id,
-          };
-        }
-      });
-    } else {
-      // Non-experiment columns
-      column.cells.forEach((cell) => {
-        const rowIndex = cell.rowIndex;
-        let row = rowIndexToRow.get(rowIndex);
-        if (!row) {
-          row = { id: `row-${rowIndex}`, rowIndex, isLoading: {} };
-          rowIndexToRow.set(rowIndex, row);
-        }
-
-        // Set the value for the column in the row
-        row[columnId] = cell.value;
-
-        // Store value if needed
-        if (cell.value) {
-          row.value = cell.value;
-        }
-        if (cell.metadata && cell.metadata.datasetRowId) {
-          row.dataset_row_id = cell.metadata.datasetRowId;
-        }
-      });
-    }
-  });
-
-  const requestDataMap = new Map<string, any>();
-  if (requestIdsToFetch.size > 0) {
-    const requestIdsArray = Array.from(requestIdsToFetch);
-
-    // Fetch data for each value individually
-    await Promise.all(
-      requestIdsArray.map(async (value) => {
-        const requestDataArray = await getRequestDataByIds([value]);
-        if (requestDataArray && requestDataArray.length > 0) {
-          requestDataMap.set(value, requestDataArray[0]);
-        }
-      })
-    );
-  }
-
-  // Now construct the rowData array
-  const newRowData = await Promise.all(
-    Array.from(rowIndexToRow.values()).map(async (row) => {
-      // Process experiment column data
+      // Process all columns
       await Promise.all(
-        experimentTableData.columns.map(async (column) => {
-          const columnId = column.id;
+        column.cells.map(async (cell) => {
+          const rowIndex = cell.rowIndex;
+          let row = rowIndexToRow.get(rowIndex);
+          if (!row) {
+            const newRow: TableRow = {
+              id: `row-${rowIndex}`,
+              rowIndex,
+              isLoading: {},
+              cells: {},
+            };
+            rowIndexToRow.set(rowIndex, newRow);
+            row = newRow; // Ensure 'row' is defined
+          }
 
-          // If it's an experiment or output column
-          if (
-            column.columnType === "experiment" ||
-            column.columnType === "output"
-          ) {
-            const cellData = row[columnId] as any;
-
-            // Always initialize the column with the cellId from cellData
-            if (!row[columnId] && cellData?.cellId) {
-              row[columnId] = {
-                responseBody: null,
-                cellId: cellData.cellId, // Use the original cellId
+          // Now process the cell data
+          if (cell.value !== undefined && cell.value !== null) {
+            if (
+              isUUID(cell.value) &&
+              (cell.status === "initialized" || cell.status === "success")
+            ) {
+              const requestDataArray = await getRequestDataByIds([cell.value]);
+              if (requestDataArray && requestDataArray.length > 0) {
+                const responseBody = await fetchRequestResponseBody(
+                  requestDataArray[0]
+                );
+                row.cells[columnId] = {
+                  cellId: cell.id,
+                  value: responseBody,
+                  status: cell.status,
+                };
+              } else {
+                // Handle case where request data is not found
+                row.cells[columnId] = {
+                  cellId: cell.id,
+                  value: null,
+                  status: cell.status,
+                };
+              }
+            } else {
+              // Assign the actual cell.value for non-UUID values
+              row.cells[columnId] = {
+                cellId: cell.id,
+                value: cell.value,
+                status: cell.status,
               };
             }
-
-            // If we have request data, process it
-            if (cellData?.value) {
-              const requestData = requestDataMap.get(cellData.value);
-              if (requestData) {
-                const responseBody = await fetchRequestResponseBody(
-                  requestData
-                );
-                row[columnId] = {
-                  responseBody,
-                  cellId: cellData.cellId, // Always use the original cellId
-                };
-
-                // Refresh the cell if needed
-              }
-            }
+          } else {
+            // Handle cells with no value
+            row.cells[columnId] = {
+              cellId: cell.id,
+              value: null,
+              status: cell.status,
+            };
           }
         })
       );
-      return row;
     })
   );
 
-  // Sort rows by rowIndex
-  newRowData.sort((a, b) => a.rowIndex - b.rowIndex);
-
-  // Preserve isLoading state from previous rowData
-  const updatedRowData = newRowData.map((newRow) => {
-    // Find the matching row in the previous rowData
-    const existingRow = rowIndexToRow.get(newRow.rowIndex);
-
-    // If an existing row is found, preserve its isLoading state
-    if (existingRow && existingRow.isLoading) {
-      return {
-        ...newRow,
-        isLoading: existingRow.isLoading,
-      };
-    }
-    // Otherwise, initialize isLoading as an empty object
-    return {
-      ...newRow,
-      isLoading: {},
-    };
-  });
-  return updatedRowData;
+  // Convert the map to an array and sort by rowIndex
+  const rows = Array.from(rowIndexToRow.values()).sort(
+    (a, b) => a.rowIndex - b.rowIndex
+  );
+  console.log("rows", rows);
+  return rows;
 }
 
-export async function useExperimentTable(
-  orgId: string,
-  experimentTableId: string
-) {
+export function useExperimentTable(orgId: string, experimentTableId: string) {
   const queryClient = useQueryClient();
-  const experimentTableQuery = useQuery(
-    ["experimentTable", orgId, experimentTableId],
-    async () => {
+  const { data: experimentTableQuery, refetch: refetchExperimentTable } =
+    useQuery(["experimentTable", orgId, experimentTableId], async () => {
       if (!orgId || !experimentTableId) return null;
       const jawnClient = getJawnClient(orgId);
       const res = await jawnClient.POST(
@@ -236,18 +188,23 @@ export async function useExperimentTable(
           },
         }
       );
-      const rowData = await updateTableData({
+      const rowData = await getTableData({
         experimentTableData: res.data?.data as ExperimentTable,
         getRequestDataByIds: (requestIds) =>
           getRequestDataByIds(orgId, requestIds),
         responseBodyCache: {},
       });
-      return rowData;
-    },
-    {
-      enabled: !!orgId && !!experimentTableId,
-    }
-  );
+      return {
+        id: res.data?.data?.id,
+        name: res.data?.data?.name,
+        experimentId: res.data?.data?.experimentId,
+        promptSubversionId: res.data?.data?.metadata?.prompt_version as string,
+        datasetId: res.data?.data?.metadata?.datasetId as string,
+        metadata: res.data?.data?.metadata,
+        columns: res.data?.data?.columns,
+        rows: rowData,
+      };
+    });
 
   const addExperimentTableColumn = useMutation({
     mutationFn: async ({
@@ -285,13 +242,13 @@ export async function useExperimentTable(
   });
 
   const addExperimentTableRow = useMutation({
-    mutationFn: async ({ rowIndex }: { rowIndex: number }) => {
+    mutationFn: async ({ promptVersionId }: { promptVersionId: string }) => {
       const jawnClient = getJawnClient(orgId);
       const res = await jawnClient.POST(
         "/v1/experiment/table/{experimentTableId}/row",
         {
           params: { path: { experimentTableId: experimentTableId } },
-          body: { rowIndex },
+          body: { promptVersionId: promptVersionId },
         }
       );
     },
@@ -307,19 +264,69 @@ export async function useExperimentTable(
       cellId,
       status,
       value,
+      metadata,
     }: {
       cellId: string;
       status: string;
       value: string;
+      metadata?: Record<string, any>;
     }) => {
       const jawnClient = getJawnClient(orgId);
       const res = await jawnClient.PATCH(
         "/v1/experiment/table/{experimentTableId}/cell",
         {
           params: { path: { experimentTableId: experimentTableId } },
-          body: { cellId, status, value },
+          body: { cellId, status, value, metadata, updateInputs: true },
         }
       );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["experimentTable", orgId, experimentTableId],
+      });
+      console.log("updateExperimentCell success");
+    },
+  });
+
+  // const fetchPromptVersionTemplate = useQuery(
+  //   ["promptVersionTemplate", experimentTableQuery?.promptSubversionId],
+  //   async () => {
+  //     const jawnClient = getJawnClient(orgId);
+  //     const res = await jawnClient.GET("/v1/prompt/version/{promptVersionId}", {
+  //       params: {
+  //         path: {
+  //           promptVersionId:
+  //             (experimentTableQuery?.promptSubversionId as string) ?? "",
+  //         },
+  //       },
+  //     });
+
+  //     return res.data?.data;
+  //   },
+  //   {
+  //     cacheTime: Infinity,
+  //     enabled: !!orgId && !!experimentTableQuery?.promptSubversionId,
+  //   }
+  // );
+
+  const runHypothesisMutation = useMutation({
+    mutationFn: async ({
+      hypothesisId,
+      cells,
+    }: {
+      hypothesisId: string;
+      cells: Array<{
+        cellId: string;
+      }>;
+    }) => {
+      const jawnClient = getJawnClient(orgId || "");
+      await jawnClient.POST("/v1/experiment/run", {
+        body: {
+          experimentTableId,
+          hypothesisId,
+          cells,
+        },
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -329,8 +336,10 @@ export async function useExperimentTable(
   });
 
   return {
+    experimentTableQuery,
     addExperimentTableColumn,
     addExperimentTableRow,
     updateExperimentCell,
+    runHypothesisMutation,
   };
 }

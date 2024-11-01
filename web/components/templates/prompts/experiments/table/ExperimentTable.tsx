@@ -45,22 +45,56 @@ import { ExperimentRandomInputSelector } from "../experimentRandomInputSelector"
 import ScoresTableContainer from "./scores/ScoresTableContainer";
 import { NewExperimentPopover } from "./components/newExperimentPopover";
 import { fetchRequestResponseBody } from "./utils/requestDataFetch";
+import { useExperimentTable } from "./hooks/useExperimentTable";
 
 interface ExperimentTableProps {
-  promptSubversionId?: string;
-  experimentId?: string;
+  experimentTableId: string;
 }
 
 const REFRESH_INTERVAL = 3000;
 
-export function ExperimentTable({
-  promptSubversionId,
-  experimentId,
-}: ExperimentTableProps) {
+export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
   const org = useOrg();
   const orgId = org?.currentOrg?.id;
-  const jawn = useJawnClient();
-  const [isInitialLoading, setIsInitialLoading] = useState(true);
+  console.log("experimentTableId", experimentTableId);
+  // Use the hook to get data and functions
+  const {
+    experimentTableQuery,
+    addExperimentTableColumn,
+    addExperimentTableRow,
+    updateExperimentCell,
+    runHypothesisMutation,
+  } = useExperimentTable(orgId || "", experimentTableId);
+  const promptSubversionId = experimentTableQuery?.promptSubversionId;
+
+  // Fetch promptVersionTemplate data only after promptSubversionId is available
+  const {
+    data: promptVersionTemplateData,
+    isLoading: isPromptVersionTemplateLoading,
+    error: promptVersionTemplateError,
+  } = useQuery(
+    ["promptVersionTemplate", promptSubversionId],
+    async () => {
+      if (!orgId || !promptSubversionId) {
+        return null;
+      }
+      const jawnClient = getJawnClient(orgId);
+      const res = await jawnClient.GET("/v1/prompt/version/{promptVersionId}", {
+        params: {
+          path: {
+            promptVersionId: promptSubversionId,
+          },
+        },
+      });
+      console.log("res123123", res);
+      return res.data?.data ?? {};
+    },
+    {
+      enabled: !!promptSubversionId,
+    }
+  );
+
+  const rowData = experimentTableQuery?.rows || [];
   const [wrapText, setWrapText] = useState(false);
   const [columnView, setColumnView] = useState<"all" | "inputs" | "outputs">(
     "all"
@@ -82,77 +116,10 @@ export function ExperimentTable({
     gridRef.current = params.api;
   }, []);
 
-  const fetchExperimentTable = useCallback(async () => {
-    if (!orgId || !experimentId) return null;
-
-    const jawnClient = getJawnClient(orgId);
-    const res = await jawnClient.POST(
-      "/v1/experiment/table/{experimentTableId}/query",
-      {
-        params: {
-          path: {
-            experimentTableId: experimentId,
-          },
-        },
-      }
-    );
-
-    return res.data?.data;
-  }, [orgId, experimentId]);
-
-  const { data: experimentTableData, refetch: refetchExperimentTable } =
-    useQuery(["experimentTable", orgId, experimentId], fetchExperimentTable, {
-      enabled: !!orgId && !!experimentId,
-    });
-
-  const inputColumns = useMemo(() => {
-    return (
-      experimentTableData?.columns.filter(
-        (column) => column.columnType === "input"
-      ) ?? []
-    );
-  }, [experimentTableData]);
-
-  const inputColumnNameToId = useMemo(() => {
-    const map: Record<string, string> = {};
-    inputColumns.forEach((column) => {
-      map[column.columnName] = column.id;
-    });
-    return map;
-  }, [inputColumns]);
-
-  const handleAddColumn = useCallback(
-    async (
-      columnName: string,
-      columnType: string,
-      hypothesisId?: string,
-      promptVersionId?: string
-    ) => {
-      const res = await jawn.POST(
-        "/v1/experiment/table/{experimentTableId}/column",
-        {
-          params: {
-            path: { experimentTableId: experimentTableData?.id || "" },
-          },
-          body: {
-            columnName,
-            columnType,
-            hypothesisId,
-            promptVersionId,
-          },
-        }
-      );
-
-      if (res.error) {
-        console.error("Error adding column:", res);
-      }
-    },
-    [jawn, refetchExperimentTable, experimentTableData?.id]
-  );
-
   const fetchInputRecords = useCallback(async () => {
-    const datasetId = experimentTableData?.metadata?.datasetId as string;
-    if (!orgId || !datasetId || !promptSubversionId) return [];
+    const datasetId = experimentTableQuery?.metadata?.datasetId as string;
+    if (!orgId || !datasetId || !experimentTableQuery?.promptSubversionId)
+      return [];
     const jawnClient = getJawnClient(orgId);
     const res = await jawnClient.POST(
       "/v1/experiment/dataset/{datasetId}/inputs/query",
@@ -165,41 +132,9 @@ export function ExperimentTable({
       }
     );
     return res.data?.data;
-  }, [orgId, experimentTableData?.metadata?.datasetId, promptSubversionId]);
+  }, [orgId, experimentTableQuery?.metadata?.datasetId]);
 
-  const fetchPromptVersionTemplate = useCallback(async () => {
-    const jawnClient = getJawnClient(orgId);
-    const res = await jawnClient.GET("/v1/prompt/version/{promptVersionId}", {
-      params: {
-        path: {
-          promptVersionId: promptSubversionId ?? "",
-        },
-      },
-    });
-    return res.data?.data;
-  }, [orgId, promptSubversionId]);
-
-  const { data: promptVersionTemplateData } = useQuery(
-    ["promptVersionTemplate", promptSubversionId],
-    fetchPromptVersionTemplate,
-    {
-      staleTime: Infinity, // Data will never be considered stale
-      cacheTime: Infinity, // Keep the data in cache indefinitely
-      enabled: !!orgId && !!promptSubversionId,
-      refetchOnWindowFocus: false,
-      refetchOnMount: false,
-      refetchOnReconnect: false,
-    }
-  );
-
-  const promptVersionTemplate = promptVersionTemplateData;
-
-  const promptVersionTemplateRef = useRef(promptVersionTemplate);
-
-  // Update the ref when promptVersionTemplate changes
-  useEffect(() => {
-    promptVersionTemplateRef.current = promptVersionTemplate;
-  }, [promptVersionTemplate]);
+  console.log("promptVersionTemplateData", promptVersionTemplateData);
 
   const fetchRandomInputRecords = useCallback(async () => {
     const jawnClient = getJawnClient(orgId);
@@ -208,7 +143,8 @@ export function ExperimentTable({
       {
         params: {
           path: {
-            promptVersionId: promptSubversionId ?? "",
+            promptVersionId:
+              (experimentTableQuery?.promptSubversionId as string) ?? "",
           },
         },
         body: {
@@ -219,44 +155,43 @@ export function ExperimentTable({
     );
 
     return res.data?.data;
-  }, [orgId, promptSubversionId]);
+  }, [orgId, experimentTableQuery?.promptSubversionId]);
 
   const { data: inputRecordsData, refetch: refetchInputRecords } = useQuery(
-    ["inputRecords", orgId, experimentTableData?.metadata?.datasetId],
+    ["inputRecords", orgId, experimentTableQuery?.metadata?.datasetId],
     fetchInputRecords,
     {
-      enabled:
-        !!experimentTableData?.metadata?.datasetId && !!promptSubversionId,
+      enabled: !!experimentTableQuery?.metadata?.datasetId,
     }
   );
 
-  const mapInputRecordsToColumnsWithRowId = useCallback(
-    (inputRecords: Record<string, string>, rowId: string, rowIndex: number) => {
-      const result: Record<
-        string,
-        { columnId: string; value: string; rowIndex: number }
-      > = {};
+  // const mapInputRecordsToColumnsWithRowId = useCallback(
+  //   (inputRecords: Record<string, string>, rowId: string, rowIndex: number) => {
+  //     const result: Record<
+  //       string,
+  //       { columnId: string; value: string; rowIndex: number }
+  //     > = {};
 
-      Object.entries(inputRecords).forEach(([inputKey, value]) => {
-        const columnId = inputColumnNameToId[inputKey];
-        if (columnId) {
-          result[inputKey] = {
-            columnId,
-            value,
-            rowIndex,
-          };
-        } else {
-          console.warn(`Column ID for input key "${inputKey}" not found.`);
-        }
-      });
+  //     Object.entries(inputRecords).forEach(([inputKey, value]) => {
+  //       const columnId = inputColumnNameToId[inputKey];
+  //       if (columnId) {
+  //         result[inputKey] = {
+  //           columnId,
+  //           value,
+  //           rowIndex,
+  //         };
+  //       } else {
+  //         console.warn(`Column ID for input key "${inputKey}" not found.`);
+  //       }
+  //     });
 
-      return result;
-    },
-    [inputColumnNameToId]
-  );
+  //     return result;
+  //   },
+  //   [inputColumnNameToId]
+  // );
 
   const { data: randomInputRecordsData } = useQuery(
-    ["randomInputRecords", orgId, promptSubversionId],
+    ["randomInputRecords", orgId, experimentTableQuery?.promptSubversionId],
     fetchRandomInputRecords,
     {
       enabled: true,
@@ -268,7 +203,7 @@ export function ExperimentTable({
     return (
       randomInputRecordsData?.map((row, index) => ({
         id: row.id,
-        inputs: mapInputRecordsToColumnsWithRowId(row.inputs, row.id, index),
+        inputs: row.inputs,
         source_request: row.source_request,
         prompt_version: row.prompt_version,
         created_at: row.created_at,
@@ -277,12 +212,9 @@ export function ExperimentTable({
     );
   }, [randomInputRecordsData]);
 
-  // Use useState to manage rowData
-  const [rowData, setRowData] = useState<any[]>([]);
   // Keep track of all input keys
   const [inputKeys, setInputKeys] = useState<Set<string>>(new Set(["Input 1"]));
   const [tempRowId, setTempRowId] = useState(0);
-  const responseBodyCache = useRef<Record<string, any>>({});
 
   // After defining inputKeys
   const inputColumnFields = Array.from(inputKeys);
@@ -303,310 +235,10 @@ export function ExperimentTable({
     [orgId]
   );
 
-  const updateRowData = useCallback(async () => {
-    if (!experimentTableData) {
-      setRowData([]);
-      return;
-    }
-
-    // Build a mapping of rowIndex to row object
-    const rowIndexToRow = new Map<number, any>();
-
-    // Collect requestIds for experiment columns
-    const requestIdsToFetch = new Set<string>();
-
-    experimentTableData.columns.forEach((column) => {
-      const columnId = column.id;
-
-      if (
-        column.columnType === "experiment" ||
-        column.columnType === "output"
-      ) {
-        // Process experiment columns
-        column.cells.forEach((cell) => {
-          const rowIndex = cell.rowIndex;
-          let row = rowIndexToRow.get(rowIndex);
-          if (!row) {
-            row = {
-              id: `row-${rowIndex}`,
-              rowIndex,
-              isLoading: {},
-              cellId: cell.id,
-            };
-            rowIndexToRow.set(rowIndex, row);
-          }
-
-          if (cell.value) {
-            // Temporarily store value in the cell data
-            row[columnId] = {
-              value: cell.value,
-              cellId: cell.id,
-            };
-            requestIdsToFetch.add(cell.value);
-          } else {
-            row[columnId] = {
-              value: null,
-              cellId: cell.id,
-            };
-          }
-        });
-      } else {
-        // Non-experiment columns
-        column.cells.forEach((cell) => {
-          const rowIndex = cell.rowIndex;
-          let row = rowIndexToRow.get(rowIndex);
-          if (!row) {
-            row = { id: `row-${rowIndex}`, rowIndex, isLoading: {} };
-            rowIndexToRow.set(rowIndex, row);
-          }
-
-          // Set the value for the column in the row
-          row[columnId] = cell.value;
-
-          // Store value if needed
-          if (cell.value) {
-            row.value = cell.value;
-          }
-          if (cell.metadata && cell.metadata.datasetRowId) {
-            row.dataset_row_id = cell.metadata.datasetRowId;
-          }
-        });
-      }
-    });
-
-    // Fetch request data for experiment columns
-    const requestDataMap = new Map<string, any>();
-    if (requestIdsToFetch.size > 0) {
-      const requestIdsArray = Array.from(requestIdsToFetch);
-
-      // Fetch data for each value individually
-      await Promise.all(
-        requestIdsArray.map(async (value) => {
-          const requestDataArray = await getRequestDataByIds([value]);
-          if (requestDataArray && requestDataArray.length > 0) {
-            requestDataMap.set(value, requestDataArray[0]);
-          }
-        })
-      );
-    }
-
-    // Now construct the rowData array
-    const newRowData = await Promise.all(
-      Array.from(rowIndexToRow.values()).map(async (row) => {
-        // Process experiment column data
-        await Promise.all(
-          experimentTableData.columns.map(async (column) => {
-            const columnId = column.id;
-
-            // If it's an experiment or output column
-            if (
-              column.columnType === "experiment" ||
-              column.columnType === "output"
-            ) {
-              const cellData = row[columnId] as any;
-
-              // Always initialize the column with the cellId from cellData
-              if (!row[columnId] && cellData?.cellId) {
-                row[columnId] = {
-                  responseBody: null,
-                  cellId: cellData.cellId, // Use the original cellId
-                };
-              }
-
-              // If we have request data, process it
-              if (cellData?.value) {
-                const requestData = requestDataMap.get(cellData.value);
-                if (requestData) {
-                  const responseBody = await fetchRequestResponseBody(
-                    requestData,
-                    responseBodyCache
-                  );
-                  row[columnId] = {
-                    responseBody,
-                    cellId: cellData.cellId, // Always use the original cellId
-                  };
-
-                  // Refresh the cell if needed
-                  if (gridRef.current) {
-                    const rowNode = gridRef.current.getRowNode(row.id);
-                    if (rowNode) {
-                      gridRef.current.refreshCells({
-                        rowNodes: [rowNode],
-                        columns: [columnId],
-                        force: true,
-                      });
-                    }
-                  }
-                }
-              }
-            }
-          })
-        );
-        return row;
-      })
-    );
-
-    // Sort rows by rowIndex
-    newRowData.sort((a, b) => a.rowIndex - b.rowIndex);
-
-    // Preserve isLoading state from previous rowData
-    const updatedRowData = newRowData.map((newRow) => {
-      // Find the matching row in the previous rowData
-      const existingRow = rowDataRef.current.find(
-        (row) => row.id === newRow.id
-      );
-
-      // If an existing row is found, preserve its isLoading state
-      if (existingRow && existingRow.isLoading) {
-        return {
-          ...newRow,
-          isLoading: existingRow.isLoading,
-        };
-      }
-      // Otherwise, initialize isLoading as an empty object
-      return {
-        ...newRow,
-        isLoading: {},
-      };
-    });
-
-    setRowData(updatedRowData);
-  }, [experimentTableData, getRequestDataByIds]);
-
-  // Modify the useEffect that updates rowData
-  useEffect(() => {
-    if (experimentTableData && experimentTableData.columns.length > 0) {
-      updateRowData().then(() => {
-        setIsInitialLoading(false);
-      });
-    } else if (!experimentId) {
-      // If there's no experimentId, set a default empty row
-      const defaultInputKey = "Input 1";
-      setRowData([
-        {
-          id: `temp-${Date.now()}`,
-          [defaultInputKey]: "",
-          isLoading: {},
-        },
-      ]);
-      setIsInitialLoading(false); // Ensure we're not in a loading state
-    }
-  }, [experimentTableData, experimentId]);
-
-  // Add a new useEffect to handle initial loading state
-  useEffect(() => {
-    if (!experimentId) {
-      setIsInitialLoading(false);
-    }
-  }, [experimentId]);
-
-  // Add an empty row if rowData is empty
-  useEffect(() => {
-    if (rowData.length === 0) {
-      const inputFields = Array.from(inputKeys).reduce((acc, key) => {
-        acc[key] = "";
-        return acc as Record<string, string>;
-      }, {} as Record<string, string>);
-
-      const newRow = {
-        id: `temp-${Date.now()}`,
-        dataset_row_id: null,
-        ...inputFields,
-        isLoading: {},
-      };
-
-      setRowData([newRow]);
-    }
-  }, [inputKeys, rowData.length]);
-
-  const defaultColDef = useMemo<ColDef>(
-    () => ({
-      sortable: true,
-      filter: false,
-      resizable: true,
-      wrapText: wrapText,
-      autoHeight: wrapText,
-      cellStyle: {
-        wordBreak: "normal",
-        whiteSpace: wrapText ? "normal" : "nowrap",
-        overflow: "hidden",
-        textOverflow: "ellipsis",
-      },
-      cellClass: "border-r border-[#E2E8F0]",
-      headerClass: "border-r border-[#E2E8F0]",
-    }),
-    [wrapText]
-  );
-
-  const getRowId = useCallback((params: any) => params.data.id, []);
-
-  const runHypothesisMutation = useMutation(
-    async ({
-      hypothesisId,
-      cells,
-    }: {
-      hypothesisId: string;
-      cells: Array<{
-        rowIndex: number;
-        datasetRowId: string;
-        columnId: string;
-        cellId: string;
-      }>;
-    }) => {
-      await jawn.POST("/v1/experiment/run", {
-        body: {
-          experimentId: experimentId ?? "",
-          hypothesisId,
-          cells: cells.map((cell) => ({
-            rowIndex: cell.rowIndex,
-            datasetRowId: cell.datasetRowId,
-            columnId: cell.columnId,
-            cellId: cell.cellId,
-          })),
-        },
-      });
-    },
-    {
-      onMutate: ({ cells, hypothesisId }) => {
-        // Manually update isLoading in rowData for the specific cells
-        setRowData((prevData) => {
-          const newData = prevData.map((row) => {
-            const matchingCell = cells.find(
-              (cell) => cell.rowIndex === row.rowIndex
-            );
-            if (matchingCell) {
-              const cellId = `${matchingCell.columnId}_${matchingCell.rowIndex}`;
-              const newIsLoading = {
-                ...(row.isLoading || {}),
-                [cellId]: true, // Use combined cellId
-              };
-              return {
-                ...row,
-                isLoading: newIsLoading,
-              };
-            }
-            return row;
-          });
-          return newData;
-        });
-        // Set isHypothesisRunning to true when the mutation starts
-        setIsHypothesisRunning(true);
-      },
-      onError: (error, variables, context) => {
-        // Handle error if needed
-        // Set isHypothesisRunning to false if there's an error
-        setIsHypothesisRunning(false);
-      },
-    }
-  );
-
   const handleRunHypothesis = useCallback(
     (
       hypothesisId: string,
       cells: Array<{
-        rowIndex: number;
-        datasetRowId: string;
-        columnId: string;
         cellId: string;
       }>
     ) => {
@@ -615,10 +247,22 @@ export function ExperimentTable({
     [runHypothesisMutation]
   );
 
-  const refetchData = async () => {
-    await refetchExperimentTable();
-    await refetchInputRecords();
-  };
+  const handleAddColumn = useCallback(
+    (
+      columnName: string,
+      columnType: string,
+      hypothesisId?: string,
+      promptVersionId?: string
+    ) => {
+      addExperimentTableColumn.mutate({
+        columnName,
+        columnType,
+        hypothesisId,
+        promptVersionId,
+      });
+    },
+    [addExperimentTableColumn]
+  );
 
   const [columnWidths, setColumnWidths] = useState<{ [key: string]: number }>(
     {}
@@ -646,45 +290,49 @@ export function ExperimentTable({
     setColumnOrder(newOrder);
   }, []);
 
+  // const handleAddRow = useCallback(() => {
+  //   const newRowId = `temp-${tempRowId}`;
+  //   setTempRowId((prevId) => prevId + 1);
+
+  //   const inputFields = Array.from(inputKeys).reduce((acc, key) => {
+  //     acc[key] = "";
+  //     return acc as Record<string, string>;
+  //   }, {} as Record<string, string>);
+
+  //   const newRow = {
+  //     id: newRowId,
+  //     dataset_row_id: null,
+  //     ...inputFields,
+  //     isLoading: {},
+  //   };
+
+  //   addExperimentTableRow(newRow);
+  // }, [inputKeys, tempRowId]);
+
   const handleAddRow = useCallback(() => {
-    const newRowId = `temp-${tempRowId}`;
-    setTempRowId((prevId) => prevId + 1);
-
-    const inputFields = Array.from(inputKeys).reduce((acc, key) => {
-      acc[key] = "";
-      return acc as Record<string, string>;
-    }, {} as Record<string, string>);
-
-    const newRow = {
-      id: newRowId,
-      dataset_row_id: null,
-      ...inputFields,
-      isLoading: {},
-    };
-
-    setRowData((prevData) => [...prevData, newRow]);
-  }, [inputKeys, tempRowId]);
+    addExperimentTableRow.mutate({
+      promptVersionId:
+        (experimentTableQuery?.promptSubversionId as string) ?? "",
+    });
+  }, [addExperimentTableRow]);
 
   const handleCellValueChanged = useCallback(
     (event: any) => {
+      console.log("event", event);
       if (inputColumnFields.includes(event.colDef.field)) {
         const updatedRow = { ...event.data };
-        setRowData((prevData) =>
-          prevData.map((row) =>
-            row.dataset_row_id === updatedRow.dataset_row_id ? updatedRow : row
-          )
-        );
+        console.log("updatedRow", updatedRow);
+        // updateExperimentCell.mutate(updatedRow);
 
-        if (
-          event.colDef.field === inputColumnFields[inputColumnFields.length - 1]
-        ) {
-          handleAddRow();
-        }
+        // if (
+        //   event.colDef.field === inputColumnFields[inputColumnFields.length - 1]
+        // ) {
+        //   handleAddRow();
+        // }
       }
     },
     [inputColumnFields, handleAddRow]
   );
-
   const [activePopoverCell, setActivePopoverCell] = useState<{
     rowIndex: number;
     colId: string;
@@ -696,6 +344,10 @@ export function ExperimentTable({
 
   const handleInputChange = useCallback(
     (key: string, value: string, columnId: string, rowIndex: number) => {
+      console.log("key", key);
+      console.log("value", value);
+      console.log("columnId", columnId);
+      console.log("rowIndex", rowIndex);
       setCurrentRowInputs((prev) => ({
         ...prev,
         [key]: { columnId, value: value.trim(), rowIndex },
@@ -705,109 +357,105 @@ export function ExperimentTable({
   );
 
   // Modify handleLastInputSubmit to use input columns
-  const handleLastInputSubmit = useCallback(
-    async (rowIndex: number) => {
-      const currentRowValues = Object.values(currentRowInputs)
-        .filter((value) => value !== undefined && value !== null)
-        .map((value) => String(value).trim());
+  // const handleLastInputSubmit = useCallback(
+  //   async (rowIndex: number) => {
+  //     const currentRowValues = Object.values(currentRowInputs)
+  //       .filter((value) => value !== undefined && value !== null)
+  //       .map((value) => String(value).trim());
 
-      const allValuesFilled =
-        currentRowValues.length > 0 &&
-        !currentRowValues.some((value) => value === "");
+  //     const allValuesFilled =
+  //       currentRowValues.length > 0 &&
+  //       !currentRowValues.some((value) => value === "");
 
-      if (!allValuesFilled) {
-        console.log(
-          "Not all values are filled. Please fill all values before submitting."
-        );
-        return;
-      }
+  //     if (!allValuesFilled) {
+  //       console.log(
+  //         "Not all values are filled. Please fill all values before submitting."
+  //       );
+  //       return;
+  //     }
 
-      try {
-        await jawn.POST(
-          "/v1/experiment/dataset/{datasetId}/version/{promptVersionId}/row/new",
-          {
-            body: {
-              inputs: currentRowInputs,
-              rowIndex: rowIndex,
-              experimentTableId: experimentTableData?.id ?? "",
-              experimentId: experimentTableData?.experimentId ?? "",
-              originalColumnId:
-                experimentTableData?.columns.find(
-                  (column) => column.columnType === "output"
-                )?.id ?? undefined,
-            },
-            params: {
-              path: {
-                promptVersionId: promptSubversionId ?? "",
-                datasetId:
-                  (experimentTableData?.metadata?.datasetId as string) ?? "",
-              },
-            },
-          }
-        );
+  //     try {
+  //       await jawn.POST(
+  //         "/v1/experiment/dataset/{datasetId}/version/{promptVersionId}/row/new",
+  //         {
+  //           body: {
+  //             inputs: currentRowInputs,
+  //             rowIndex: rowIndex,
+  //             experimentTableId: experimentTableData?.id ?? "",
+  //             experimentId: experimentTableData?.experimentId ?? "",
+  //             originalColumnId:
+  //               experimentTableData?.columns.find(
+  //                 (column) => column.columnType === "output"
+  //               )?.id ?? undefined,
+  //           },
+  //           params: {
+  //             path: {
+  //               promptVersionId: promptSubversionId ?? "",
+  //               datasetId:
+  //                 (experimentTableData?.metadata?.datasetId as string) ?? "",
+  //             },
+  //           },
+  //         }
+  //       );
 
-        // Clear the current row inputs after successful submission
-        setCurrentRowInputs({});
+  //       // Clear the current row inputs after successful submission
+  //       setCurrentRowInputs({});
 
-        // Reset the activePopoverCell to prevent the popover from showing up
-        setActivePopoverCell(null);
+  //       // Reset the activePopoverCell to prevent the popover from showing up
+  //       setActivePopoverCell(null);
 
-        // Refetch input records to update the table
-        refetchInputRecords();
-        refetchExperimentTable();
-      } catch (error) {
-        console.error("Error submitting row:", error);
-      }
-    },
-    [
-      currentRowInputs,
-      jawn,
-      promptSubversionId,
-      experimentTableData?.metadata?.datasetId,
-      inputKeys,
-      refetchInputRecords,
-      inputColumns,
-    ]
-  );
+  //       // Refetch input records to update the table
+  //       refetchInputRecords();
+  //       refetchExperimentTable();
+  //     } catch (error) {
+  //       console.error("Error submitting row:", error);
+  //     }
+  //   },
+  //   [
+  //     currentRowInputs,
+  //     promptSubversionId,
+  //     experimentTableQuery?.metadata?.datasetId,
+  //     inputKeys,
+  //     refetchInputRecords,
+  //   ]
+  // );
 
   // Adjust useEffect to add an empty row if rowData is empty
   useEffect(() => {
-    if (rowData.length === 0) {
-      const inputFields = Array.from(inputKeys).reduce((acc, key) => {
-        acc[key] = "";
-        return acc;
-      }, {} as Record<string, string>);
-
-      const newRow = {
-        id: `temp-${Date.now()}`,
-        dataset_row_id: null,
-        ...inputFields,
-        isLoading: {},
-      };
-
-      setRowData([newRow]);
-    }
-  }, [inputKeys, rowData.length]);
+    // if (rowData.length === 0) {
+    //   const inputFields = Array.from(inputKeys).reduce((acc, key) => {
+    //     acc[key] = "";
+    //     return acc;
+    //   }, {} as Record<string, string>);
+    //   const newRow = {
+    //     id: `temp-${Date.now()}`,
+    //     dataset_row_id: null,
+    //     ...inputFields,
+    //     isLoading: {},
+    //   };
+    //   addExperimentTableRow(newRow);
+    // }
+  }, [inputKeys, experimentTableQuery?.rows.length]);
   const headerClass = clsx(
     "border-r border-[#E2E8F0] text-center items-center justify-center"
   );
 
-  const fetchExperimentHypothesisScores = useCallback(
-    async (hypothesisId: string) => {
-      const result = await jawn.POST(
-        "/v1/experiment/hypothesis/{hypothesisId}/scores/query",
-        {
-          params: {
-            path: {
-              hypothesisId,
-            },
-          },
-        }
-      );
-      return result.data ?? {};
-    },
-    [jawn]
-  );
+  // const fetchExperimentHypothesisScores = useCallback(
+  //   async (hypothesisId: string) => {
+  //     const result = await jawn.POST(
+  //       "/v1/experiment/hypothesis/{hypothesisId}/scores/query",
+  //       {
+  //         params: {
+  //           path: {
+  //             hypothesisId,
+  //           },
+  //         },
+  //       }
+  //     );
+  //     return result.data ?? {};
+  //   },
+  //   [jawn]
+  // );
 
   const columnDefs = useMemo<ColDef[]>(() => {
     let columns: ColDef[] = [
@@ -831,7 +479,7 @@ export function ExperimentTable({
     ];
     let experimentColumnId = 1;
 
-    Array.from(experimentTableData?.columns || []).forEach((column, index) => {
+    Array.from(experimentTableQuery?.columns || []).forEach((column, index) => {
       if (column.columnType === "input") {
         columns.push({
           field: column.id,
@@ -841,6 +489,7 @@ export function ExperimentTable({
           cellRendererParams: {
             index: index,
             wrapText,
+            columnId: column.id,
           },
           cellClass: "border-r border-[#E2E8F0] text-slate-700 pt-2.5",
           headerClass: "border-r border-[#E2E8F0]",
@@ -869,14 +518,14 @@ export function ExperimentTable({
             displayName: "Original",
             badgeText: "Output",
             badgeVariant: "secondary",
-            promptVersionId: promptVersionTemplateRef?.current?.id ?? "",
-            promptVersionTemplate: promptVersionTemplateRef.current,
+            promptVersionId: promptVersionTemplateData?.id ?? "",
+            promptVersionTemplate: promptVersionTemplateData || {},
           },
           cellClass: "border-r border-[#E2E8F0] text-slate-700 pt-2.5",
           headerClass: headerClass,
           cellRenderer: OriginalOutputCellRenderer,
           cellRendererParams: {
-            prompt: promptVersionTemplateRef.current,
+            prompt: promptVersionTemplateData,
             hypothesisId: "original",
             handleRunHypothesis,
             wrapText,
@@ -912,16 +561,13 @@ export function ExperimentTable({
               badgeVariant: "secondary",
               hypothesisId: column.metadata?.hypothesisId ?? "",
               promptVersionId: column.metadata?.promptVersionId ?? "",
-              originalPromptTemplate: promptVersionTemplateRef.current,
+              originalPromptTemplate: promptVersionTemplateData,
               runs: column.cells.filter((cell) => cell.value),
               onRunColumn: async (colId: string) => {
-                rowData.map(async (row, index) => {
+                experimentTableQuery?.rows.map(async (row, index) => {
                   const cells = [
                     {
-                      rowIndex: index,
-                      datasetRowId: row.dataset_row_id,
-                      columnId: colId,
-                      cellId: `${colId}_${index}`,
+                      cellId: row.cells[colId].cellId,
                     },
                   ];
                   handleRunHypothesis(
@@ -947,7 +593,7 @@ export function ExperimentTable({
     });
 
     if (
-      JSON.stringify(promptVersionTemplate?.helicone_template)?.includes(
+      JSON.stringify(promptVersionTemplateData?.helicone_template)?.includes(
         "auto-inputs"
       )
     ) {
@@ -961,14 +607,14 @@ export function ExperimentTable({
           displayName: "Messages",
           badgeText: "Input",
           badgeVariant: "secondary",
-          promptVersionTemplate: promptVersionTemplate,
+          promptVersionTemplate: promptVersionTemplateData,
         },
         cellClass:
           "border-r border-[#E2E8F0] text-slate-700 flex items-center justify-start pt-2.5",
         headerClass,
         cellRenderer: OriginalMessagesCellRenderer,
         cellRendererParams: {
-          prompt: promptVersionTemplate,
+          prompt: promptVersionTemplateData,
           wrapText,
         },
         cellStyle: {
@@ -993,11 +639,11 @@ export function ExperimentTable({
       headerComponent: AddColumnHeader,
       headerClass: "border-r border-[#E2E8F0]",
       headerComponentParams: {
-        promptVersionId: promptSubversionId,
-        promptVersionTemplate: promptVersionTemplate,
-        experimentId,
+        promptVersionId:
+          (experimentTableQuery?.promptSubversionId as string) ?? "",
+        promptVersionTemplate: promptVersionTemplateData,
+        experimentId: experimentTableQuery?.experimentId,
         selectedProviderKey: "",
-        refetchData,
         handleAddColumn,
         wrapText,
       },
@@ -1025,155 +671,163 @@ export function ExperimentTable({
   }, [
     columnView,
     handleRunHypothesis,
-    rowData,
+    experimentTableQuery?.rows,
     wrapText,
     inputKeys,
     columnWidths,
     columnOrder,
     activePopoverCell,
-    handleLastInputSubmit,
   ]);
 
   const [showRandomInputSelector, setShowRandomInputSelector] = useState(false);
 
-  const getExperimentExportData = useCallback(() => {
-    if (!rowData || rowData.length === 0) {
-      return [];
-    }
+  // const getExperimentExportData = useCallback(() => {
+  //   if (!rowData || rowData.length === 0) {
+  //     return [];
+  //   }
 
-    const exportedData = rowData.map((row) => {
-      const exportedRow: Record<string, any> = {};
+  //   const exportedData = rowData.map((row) => {
+  //     const exportedRow: Record<string, any> = {};
 
-      inputColumnFields.forEach((field) => {
-        exportedRow[field] = row[field] || "";
-      });
+  //     inputColumnFields.forEach((field) => {
+  //       exportedRow[field] = row[field] || "";
+  //     });
 
-      exportedRow["messages"] = row["messages"] || "";
+  //     exportedRow["messages"] = row["messages"] || "";
 
-      exportedRow["original"] = row["original"] || "";
+  //     exportedRow["original"] = row["original"] || "";
 
-      return exportedRow;
-    });
+  //     return exportedRow;
+  //   });
 
-    return exportedData;
-  }, [rowData, inputColumnFields]);
-
-  // Add this new component
+  //   return exportedData;
+  // }, [rowData, inputColumnFields]);
 
   // At the top of your component, create a ref to store rowData
-  const rowDataRef = useRef(rowData);
+  // const rowDataRef = useRef(rowData);
 
-  // Update the ref whenever rowData changes
-  useEffect(() => {
-    rowDataRef.current = rowData;
-  }, [rowData]);
+  // // Update the ref whenever rowData changes
+  // useEffect(() => {
+  //   rowDataRef.current = rowData;
+  // }, [rowData]);
 
-  useEffect(() => {
-    let intervalId: NodeJS.Timeout | null = null;
+  // useEffect(() => {
+  //   let intervalId: NodeJS.Timeout | null = null;
 
-    if (isHypothesisRunning) {
-      intervalId = setInterval(async () => {
-        await refetchExperimentTable();
-        await updateRowData();
+  //   if (isHypothesisRunning) {
+  //     intervalId = setInterval(async () => {
+  //       await refetchExperimentTable();
+  //       await updateRowData();
 
-        const latestRowData = rowDataRef.current;
+  //       const latestRowData = rowDataRef.current;
 
-        let anyLoadingCells = false; // Assume no cells are loading
+  //       let anyLoadingCells = false; // Assume no cells are loading
 
-        const newData = latestRowData.map((row) => {
-          const newIsLoading = { ...(row.isLoading || {}) };
+  //       const newData = latestRowData.map((row) => {
+  //         const newIsLoading = { ...(row.isLoading || {}) };
 
-          Object.keys(newIsLoading).forEach((cellId) => {
-            const [columnId, _] = cellId.split("_");
-            const cellData = row[columnId]; // Use columnId
+  //         Object.keys(newIsLoading).forEach((cellId) => {
+  //           const [columnId, _] = cellId.split("_");
+  //           const cellData = row[columnId]; // Use columnId
 
-            if (cellData && cellData.responseBody) {
-              delete newIsLoading[cellId];
-            } else {
-              anyLoadingCells = true; // Set to true if any cell is still loading
-            }
-          });
+  //           if (cellData && cellData.responseBody) {
+  //             delete newIsLoading[cellId];
+  //           } else {
+  //             anyLoadingCells = true; // Set to true if any cell is still loading
+  //           }
+  //         });
 
-          return {
-            ...row,
-            isLoading: newIsLoading,
-          };
-        });
+  //         return {
+  //           ...row,
+  //           isLoading: newIsLoading,
+  //         };
+  //       });
 
-        setRowData(newData);
+  //       setRowData(newData);
 
-        if (!anyLoadingCells) {
-          setIsHypothesisRunning(false);
-        }
+  //       if (!anyLoadingCells) {
+  //         setIsHypothesisRunning(false);
+  //       }
 
-        gridRef.current?.refreshCells();
-      }, REFRESH_INTERVAL);
-    }
+  //       gridRef.current?.refreshCells();
+  //     }, REFRESH_INTERVAL);
+  //   }
 
-    return () => {
-      if (intervalId) {
-        clearInterval(intervalId);
-      }
-    };
-  }, [isHypothesisRunning, refetchExperimentTable, updateRowData]);
+  //   return () => {
+  //     if (intervalId) {
+  //       clearInterval(intervalId);
+  //     }
+  //   };
+  // }, [isHypothesisRunning, refetchExperimentTable, updateRowData]);
 
-  const handleRunRow = useCallback(
-    (rowIndex: number) => {
-      const rowDataItem = rowDataRef.current.find(
-        (row) => row.rowIndex === rowIndex
-      );
-      if (!rowDataItem) {
-        console.error(`Row with index ${rowIndex} not found.`);
-        return;
-      }
+  // const handleRunRow = useCallback(
+  //   (rowIndex: number) => {
+  //     const rowDataItem = experimentTableQuery?.rows.find(
+  //       (row) => row.rowIndex === rowIndex
+  //     );
+  //     if (!rowDataItem) {
+  //       console.error(`Row with index ${rowIndex} not found.`);
+  //       return;
+  //     }
 
-      const datasetRowId = rowDataItem.dataset_row_id;
-      if (!datasetRowId) {
-        console.error(`Dataset row ID not found for row index ${rowIndex}.`);
-        return;
-      }
+  //     const datasetRowId = rowDataItem.datasetRowId;
+  //     if (!datasetRowId) {
+  //       console.error(`Dataset row ID not found for row index ${rowIndex}.`);
+  //       return;
+  //     }
 
-      const hypothesesToRun =
-        experimentTableData?.columns
-          .filter(
-            (column) =>
-              column.metadata?.hypothesisId &&
-              column.columnType === "experiment"
-          )
-          .map((column) => ({
-            hypothesisId: column.metadata?.hypothesisId as string,
-            columnId: column.id,
-          })) || [];
+  //     const hypothesesToRun =
+  //       experimentTableQuery?.columns
+  //         ?.filter(
+  //           (column) =>
+  //             column.metadata?.hypothesisId &&
+  //             column.columnType === "experiment"
+  //         )
+  //         .map((column) => ({
+  //           hypothesisId: column.metadata?.hypothesisId as string,
+  //           columnId: column.id,
+  //         })) || [];
 
-      // Prepare cells to run
-      const cells = hypothesesToRun.map((hypothesis) => {
-        const cellId = `${hypothesis.columnId}_${rowIndex}`;
-        return {
-          hypothesisId: hypothesis.hypothesisId,
-          cell: {
-            rowIndex,
-            datasetRowId,
-            columnId: hypothesis.columnId,
-            cellId,
-          },
-        };
-      });
+  //     // Prepare cells to run
+  //     const cells = hypothesesToRun.map((hypothesis) => {
+  //       const cellId = `${hypothesis.columnId}_${rowIndex}`;
+  //       return {
+  //         hypothesisId: hypothesis.hypothesisId,
+  //         cell: {
+  //           rowIndex,
+  //           datasetRowId,
+  //           columnId: hypothesis.columnId,
+  //           cellId,
+  //         },
+  //       };
+  //     });
 
-      cells.forEach((cell) => {
-        handleRunHypothesis(cell.hypothesisId, [cell.cell]);
+  //     cells.forEach((cell) => {
+  //       handleRunHypothesis(cell.hypothesisId, [cell.cell]);
+  //     });
+  //   },
+  //   [experimentTableQuery?.columns, handleRunHypothesis]
+  // );
+
+  // if (isExperimentTableLoading) {
+  //   return (
+  //     <div className="flex items-center justify-center h-screen flex-col">
+  //       <LoadingAnimation />
+  //       <h1 className="text-4xl font-semibold">Getting your experiments</h1>
+  //     </div>
+  //   );
+  // }
+
+  const handleUpdateExperimentCell = useCallback(
+    ({ cellId, value }: { cellId: string; value: string; status?: string }) => {
+      updateExperimentCell.mutate({
+        cellId,
+        value,
+        status: status ?? "initialized",
       });
     },
-    [rowDataRef, experimentTableData, handleRunHypothesis]
+    [updateExperimentCell]
   );
-
-  if (isInitialLoading) {
-    return (
-      <div className="flex items-center justify-center h-screen flex-col">
-        <LoadingAnimation />
-        <h1 className="text-4xl font-semibold">Getting your experiments</h1>
-      </div>
-    );
-  }
 
   return (
     <div className="relative w-full">
@@ -1192,12 +846,12 @@ export function ExperimentTable({
             columnView={columnView}
             setColumnView={setColumnView}
           />
-          <ExportButton
+          {/* <ExportButton
             className="py-0 px-2 border border-slate-200 h-8 flex items-center justify-center space-x-1 bg-white"
             key="export-button"
             rows={getExperimentExportData()}
-          />
-          {!experimentId && (
+          /> */}
+          {!experimentTableQuery?.metadata?.experimentId && (
             <Popover>
               <PopoverTrigger asChild>
                 <Button
@@ -1212,11 +866,13 @@ export function ExperimentTable({
             </Popover>
           )}
         </div>
-
-        {showScoresTable && experimentId && (
+        {/* 
+        {showScoresTable && experimentTableQuery?.metadata?.experimentId && (
           <div className="w-full bg-white border-y border-r">
             <div className="flex justify-between items-center bg-white p-2 border-b">
-              <ScoresEvaluatorsConfig experimentId={experimentId} />
+              <ScoresEvaluatorsConfig
+                experimentId={experimentTableQuery?.metadata?.experimentId}
+              />
             </div>
             <ScoresTableContainer
               columnDefs={columnDefs}
@@ -1226,7 +882,7 @@ export function ExperimentTable({
               fetchExperimentHypothesisScores={fetchExperimentHypothesisScores}
             />
           </div>
-        )}
+        )} */}
 
         <div
           className="ag-theme-alpine w-full overflow-hidden "
@@ -1246,7 +902,7 @@ export function ExperimentTable({
         >
           <AgGridReact
             ref={gridRef as any}
-            rowData={rowData}
+            rowData={experimentTableQuery?.rows}
             columnDefs={columnDefs}
             onGridReady={onGridReady}
             onColumnResized={onColumnResized}
@@ -1256,12 +912,12 @@ export function ExperimentTable({
             suppressColumnVirtualisation={true}
             suppressColumnMoveAnimation={true}
             domLayout="autoHeight"
-            getRowId={getRowId}
+            // getRowId={getRowId}
             context={{
               handleRunHypothesis,
-              handleRunRow,
+              // handleRunRow,
               hypothesesToRun:
-                (experimentTableData?.columns
+                (experimentTableQuery?.data?.columns
                   .filter((column) => column.metadata?.hypothesisId)
                   .map(
                     (column) => column.metadata?.hypothesisId
@@ -1269,17 +925,17 @@ export function ExperimentTable({
               setShowExperimentInputSelector,
               setShowRandomInputSelector,
               inputKeys: Array.from(inputKeys),
-              experimentTableData,
+              experimentTableData: experimentTableQuery,
               inputColumnFields,
               hypotheses: [],
-              experimentId,
+              experimentId: experimentTableQuery?.metadata?.experimentId,
               orgId,
-              promptVersionTemplateRef,
+              promptVersionTemplateRef: promptVersionTemplateData ?? {},
               activePopoverCell,
               setActivePopoverCell,
-              handleLastInputSubmit,
               handleInputChange,
-              rowData, // Add this line
+              rowData: experimentTableQuery?.rows, // Add this line
+              handleUpdateExperimentCell,
             }}
             rowClass="border-b border-gray-200 hover:bg-gray-50"
             headerHeight={40}
@@ -1304,31 +960,26 @@ export function ExperimentTable({
         numberOfRows={rowData.length}
         meta={{
           promptVersionId: promptSubversionId,
-          datasetId: (experimentTableData?.metadata?.datasetId as string) ?? "",
+          datasetId: experimentTableQuery?.datasetId ?? "",
           originalColumnId:
-            experimentTableData?.columns?.find(
+            experimentTableQuery?.columns?.find(
               (column) => column.id === "output"
             )?.id ?? "",
         }}
+        handleAddRow={handleAddRow}
         requestIds={randomInputRecords}
-        onSuccess={async (success) => {
-          if (success) {
-            await refetchExperimentTable();
-            await refetchInputRecords();
-            setShowRandomInputSelector(false);
-          }
-        }}
+        onSuccess={async (success) => {}}
       />
 
-      <ExperimentInputSelector
+      {/* <ExperimentInputSelector
         open={showExperimentInputSelector}
         setOpen={setShowExperimentInputSelector}
         setShowRandomInputSelector={setShowRandomInputSelector}
         meta={{
           promptVersionId: promptSubversionId,
-          datasetId: (experimentTableData?.metadata?.datasetId as string) ?? "",
+          datasetId: experimentTableQuery?.datasetId ?? "",
           originalColumnId:
-            experimentTableData?.columns?.find(
+            experimentTableQuery?.columns?.find(
               (column) => column.id === "output"
             )?.id ?? "",
         }}
@@ -1340,7 +991,7 @@ export function ExperimentTable({
             await refetchInputRecords();
           }
         }}
-      />
+      /> */}
     </div>
   );
 }

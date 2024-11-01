@@ -258,17 +258,56 @@ export class ExperimentManager extends BaseManager {
     cells: {
       cellId: string;
       status: string | null;
-      value: string | null;
+      value?: string | null;
+      metadata?: Record<string, any> | null;
     }[];
-  }): Promise<Result<{ ids: string[] }, string>> {
+  }): Promise<
+    Result<
+      {
+        cellId: string;
+        status: string | null;
+        value?: string | null;
+        metadata?: Record<string, any> | null;
+        columnName: string;
+      }[],
+      string
+    >
+  > {
     return this.ExperimentStore.updateExperimentCells(params);
+  }
+
+  async getExperimentCellsByIds(cellIds: string[]): Promise<
+    Result<
+      {
+        cellId: string;
+        status: string | null;
+        value: string | null;
+        metadata: Record<string, any> | null;
+        rowIndex: number;
+        columnId: string;
+      }[],
+      string
+    >
+  > {
+    return this.ExperimentStore.getExperimentCellsByIds(cellIds);
   }
 
   async createExperimentTableRow(params: {
     experimentTableId: string;
-    rowIndex: number;
+    metadata?: Record<string, any>;
   }): Promise<Result<{ ids: string[] }, string>> {
-    return this.ExperimentStore.createExperimentTableRow(params);
+    const maxRowIndex = await this.ExperimentStore.getMaxRowIndex(
+      params.experimentTableId
+    );
+    if (maxRowIndex.error || !maxRowIndex.data) {
+      return err(maxRowIndex.error);
+    }
+
+    return this.ExperimentStore.createExperimentTableRow({
+      experimentTableId: params.experimentTableId,
+      rowIndex: maxRowIndex.data + 1,
+      metadata: params.metadata,
+    });
   }
 
   async getExperimentTableByExperimentId(

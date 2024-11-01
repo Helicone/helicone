@@ -16,11 +16,10 @@ export const OriginalOutputCellRenderer: React.FC<any> = (params) => {
   const hypothesisId = params.hypothesisId;
   const inputKeys = context.inputKeys;
   const [showPromptPlayground, setShowPromptPlayground] = useState(false);
-  const parsedResponseData = data[colDef.cellRendererParams.columnId];
+  const parsedResponseData = data.cells[colDef.cellRendererParams.columnId];
 
   const content =
-    parsedResponseData?.responseBody?.response?.choices?.[0]?.message
-      ?.content || "";
+    parsedResponseData?.value?.response?.choices?.[0]?.message?.content || "";
 
   const handleCellClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -74,9 +73,6 @@ export const OriginalOutputCellRenderer: React.FC<any> = (params) => {
                   e.stopPropagation();
                   params.handleRunHypothesis("original", [
                     {
-                      rowIndex: params.node.rowIndex,
-                      datasetRowId: data.dataset_row_id,
-                      columnId: colDef.field,
                       cellId: cellId,
                     },
                   ]);

@@ -290,7 +290,9 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     currentPageSize,
     debouncedAdvancedFilter,
     {
-      left: timeFilter,
+      left: time
+      
+      Filter,
       operator: "and",
       right: "all",
     },

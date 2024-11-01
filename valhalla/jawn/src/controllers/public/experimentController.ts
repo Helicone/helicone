@@ -30,6 +30,8 @@ import {
 import { JawnAuthenticatedRequest } from "../../types/request";
 import { EvaluatorResult } from "./evaluatorController";
 import { EvaluatorManager } from "../../managers/evaluator/EvaluatorManager";
+import { InputsManager } from "../../managers/inputs/InputsManager";
+import { DatasetManager } from "../../managers/dataset/DatasetManager";
 
 export type ExperimentFilterBranch = {
   left: ExperimentFilterNode;
@@ -171,7 +173,14 @@ export class ExperimentController extends Controller {
   @Patch("/table/{experimentTableId}/cell")
   public async updateExperimentCell(
     @Path() experimentTableId: string,
-    @Body() requestBody: { cellId: string; status?: string; value?: string },
+    @Body()
+    requestBody: {
+      cellId: string;
+      status?: string;
+      value?: string;
+      metadata?: Record<string, string>;
+      updateInputs?: boolean;
+    },
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<null, string>> {
     const experimentManager = new ExperimentManager(request.authParams);
@@ -181,14 +190,29 @@ export class ExperimentController extends Controller {
           cellId: requestBody.cellId,
           status: requestBody.status ?? null,
           value: requestBody.value ?? null,
+          metadata: requestBody.metadata ?? null,
         },
       ],
     });
-    if (result.error) {
+    if (result.error || !result.data) {
       this.setStatus(500);
       console.error(result.error);
       return err(result.error);
     }
+
+    if (requestBody.updateInputs) {
+      const inputManager = new InputsManager(request.authParams);
+      await Promise.all(
+        result.data.map((cell) => {
+          if (cell.metadata?.inputId) {
+            return inputManager.updateInputRecord(cell.metadata.inputId, {
+              [cell.columnName]: cell.value ?? "",
+            });
+          }
+        })
+      );
+    }
+
     this.setStatus(204);
     return ok(null);
   }
@@ -227,15 +251,54 @@ export class ExperimentController extends Controller {
     @Path() experimentTableId: string,
     @Body()
     requestBody: {
-      rowIndex: number;
+      promptVersionId: string;
+      sourceRequest?: string;
     },
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<null, string>> {
     const experimentManager = new ExperimentManager(request.authParams);
+    const inputManager = new InputsManager(request.authParams);
+    const inputRecordResult = await inputManager.createInputRecord(
+      requestBody.promptVersionId,
+      {},
+      requestBody.sourceRequest
+    );
+    if (inputRecordResult.error || !inputRecordResult.data) {
+      this.setStatus(500);
+      console.error(inputRecordResult.error);
+      return err(inputRecordResult.error);
+    }
+
+    const experimentTable = await experimentManager.getExperimentTableById(
+      experimentTableId
+    );
+
+    if (experimentTable.error || !experimentTable.data) {
+      this.setStatus(500);
+      console.error(experimentTable.error);
+      return err(experimentTable.error);
+    }
+
+    const datasetManager = new DatasetManager(request.authParams);
+    const datasetRowResult = await datasetManager.addDatasetRow(
+      (experimentTable.data?.metadata as any)?.datasetId,
+      inputRecordResult.data
+    );
+
+    if (datasetRowResult.error || !datasetRowResult.data) {
+      console.error(datasetRowResult.error);
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
+    }
     const result = await experimentManager.createExperimentTableRow({
       experimentTableId,
-      rowIndex: requestBody.rowIndex,
+      metadata: {
+        datasetRowId: datasetRowResult.data,
+        inputId: inputRecordResult.data,
+      },
     });
+
     if (result.error || !result.data) {
       this.setStatus(500);
       console.error(result.error);
@@ -419,21 +482,42 @@ export class ExperimentController extends Controller {
   public async runExperiment(
     @Body()
     requestBody: {
-      experimentId: string;
+      experimentTableId: string;
       hypothesisId: string;
-      cells: Array<{
-        rowIndex: number;
-        datasetRowId: string;
-        columnId: string;
+      cells: {
         cellId: string;
-      }>;
+      }[];
     },
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<ExperimentRun, string>> {
     const experimentManager = new ExperimentManager(request.authParams);
 
+    const experimentTable = await experimentManager.getExperimentTableById(
+      requestBody.experimentTableId
+    );
+    if (experimentTable.error || !experimentTable.data) {
+      this.setStatus(500);
+      console.error(experimentTable.error);
+      return err(experimentTable.error);
+    }
+    const cellsToUpdate = requestBody.cells.map((cell) => {
+      return {
+        cellId: cell.cellId,
+        status: "running",
+      };
+    });
+
+    const statusUpdateResult = await experimentManager.updateExperimentCells({
+      cells: cellsToUpdate,
+    });
+
+    if (statusUpdateResult.error) {
+      this.setStatus(500);
+      console.error(statusUpdateResult.error);
+      return err(statusUpdateResult.error);
+    }
     const result = await experimentManager.getExperimentById(
-      requestBody.experimentId,
+      experimentTable.data.experiment_id,
       {
         inputs: true,
         promptVersion: true,
@@ -448,8 +532,20 @@ export class ExperimentController extends Controller {
 
     const experiment = result.data;
 
+    const experimentCells = await experimentManager.getExperimentCellsByIds(
+      requestBody.cells.map((cell) => cell.cellId)
+    );
+
+    if (experimentCells.error || !experimentCells.data) {
+      this.setStatus(500);
+      console.error(experimentCells.error);
+      return err(experimentCells.error);
+    }
+
     const datasetRows = await experimentManager.getDatasetRowsByIds({
-      datasetRowIds: requestBody.cells.map((cell) => cell.datasetRowId),
+      datasetRowIds: experimentCells.data.map(
+        (cell) => cell.metadata?.datasetRowId
+      ),
     });
 
     if (datasetRows.error || !datasetRows.data) {
@@ -465,8 +561,8 @@ export class ExperimentController extends Controller {
     }
 
     const newDatasetRows = datasetRows.data.map((row, index) => {
-      const cellData = requestBody.cells.find(
-        (x) => x.datasetRowId === row.rowId
+      const cellData = experimentCells.data.find(
+        (x) => x.metadata?.datasetRowId === row.rowId
       );
       return {
         ...row,
@@ -494,23 +590,6 @@ export class ExperimentController extends Controller {
     experiment.hypotheses = [hypothesis];
 
     const runResult = await run(experiment);
-
-    const cellsToUpdate = requestBody.cells.map((cell) => {
-      return {
-        cellId: cell.cellId,
-        status: "running",
-      };
-    });
-
-    const statusUpdateResult = await experimentManager.updateExperimentCells({
-      cells: cellsToUpdate,
-    });
-
-    if (statusUpdateResult.error) {
-      this.setStatus(500);
-      console.error(statusUpdateResult.error);
-      return err(statusUpdateResult.error);
-    }
 
     return runResult;
   }

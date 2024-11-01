@@ -524,9 +524,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
       return;
     }
 
-    router.push(
-      `/prompts/${id}/subversion/${promptVersionId}/experiment/${experimentTableResult.data?.data?.experimentId}`
-    );
+    router.push(`/experiments/${experimentTableResult.data?.data?.tableId}`);
   };
 
   const deletePromptVersion = async (promptVersionId: string) => {

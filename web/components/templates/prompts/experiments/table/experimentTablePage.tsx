@@ -3,20 +3,18 @@ import HcBreadcrumb from "../../../../ui/hcBreadcrumb";
 import { ExperimentTable } from "./ExperimentTable";
 import { IslandContainer } from "../../../../ui/islandContainer";
 
-interface PromptIdPageProps {
-  promptId: string;
-  promptSubversionId: string;
-  experimentId: string;
+interface ExperimentTablePageProps {
+  experimentTableId: string;
 }
 
-const ExperimentTablePage = (props: PromptIdPageProps) => {
-  const { promptId, promptSubversionId, experimentId } = props;
-  const { prompt } = usePrompt(promptId);
+const ExperimentTablePage = (props: ExperimentTablePageProps) => {
+  const { experimentTableId } = props;
+  // const { prompt } = usePrompt(promptId);
 
   return (
     <div className="flex flex-col w-full space-y-4 pt-4">
       <IslandContainer>
-        <HcBreadcrumb
+        {/* <HcBreadcrumb
           pages={[
             {
               href: "/prompts",
@@ -31,12 +29,9 @@ const ExperimentTablePage = (props: PromptIdPageProps) => {
               name: "Experiment",
             },
           ]}
-        />
+        /> */}
       </IslandContainer>
-      <ExperimentTable
-        promptSubversionId={promptSubversionId}
-        experimentId={experimentId}
-      />
+      <ExperimentTable experimentTableId={experimentTableId} />
     </div>
   );
 };

@@ -269,8 +269,6 @@ const AddColumnHeader: React.FC<AddColumnHeaderProps> = ({
                     );
 
                     setOpen(false); // Close the drawer after adding the column
-
-                    await refetchData(); // Refetch the table data
                   }}
                   submitText="Test"
                   initialModel={"gpt-4o"}

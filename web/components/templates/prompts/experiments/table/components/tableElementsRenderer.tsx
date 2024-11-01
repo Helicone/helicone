@@ -22,7 +22,9 @@ import { useJawnClient } from "../../../../../../lib/clients/jawnHook";
 
 const InputCellRenderer: React.FC<any> = (props) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
-  const [inputValue, setInputValue] = useState(props.value || "");
+  const [inputValue, setInputValue] = useState(
+    props.data.cells[props.colDef.cellRendererParams.columnId].value || ""
+  );
   const inputRef = useRef<HTMLInputElement>(null);
 
   const inputColumns = props.context.experimentTableData?.columns.filter(
@@ -56,9 +58,20 @@ const InputCellRenderer: React.FC<any> = (props) => {
       return;
     }
 
+    console.log("props.data", props.data);
+    console.log("props.column.colId", props.column.colId);
+    const cell = props.data.cells[props.column.colId];
+
+    console.log("cellId", cell.cellId);
+    // Update the cell in the experiment table
+    props.context.handleUpdateExperimentCell({
+      cellId: cell.cellId,
+      value: inputValue.trim(),
+    });
+
     setPopoverOpen(false);
 
-    // Find current column index in input columns
+    // Move to the next input or handle last input submission
     const currentColumnIndex = inputColumns.findIndex(
       (col: any) => col.id === props.column.colId
     );
@@ -70,8 +83,9 @@ const InputCellRenderer: React.FC<any> = (props) => {
         colId: nextInputColumn.id,
       });
     } else {
-      // This is the last input column
-      props.context.handleLastInputSubmit(props.node.rowIndex);
+      // // This is the last input column
+      // console.log("handleLastInputSubmit");
+      // props.context.handleLastInputSubmitCallback(props.node.rowIndex);
     }
   };
 

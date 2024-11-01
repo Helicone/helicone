@@ -17,13 +17,7 @@ interface ExperimentPage {
 const Experiments = (props: ExperimentPage) => {
   const { user, experimentId, promptSubversionId, promptId } = props;
 
-  return (
-    <ExperimentTablePage
-      experimentId={experimentId}
-      promptSubversionId={promptSubversionId}
-      promptId={promptId}
-    />
-  );
+  return <></>;
 };
 
 export default Experiments;
