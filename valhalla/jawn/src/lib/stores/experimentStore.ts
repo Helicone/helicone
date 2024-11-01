@@ -449,8 +449,6 @@ export class ExperimentStore extends BaseStore {
       experimentTableId,
     ]);
 
-    console.log("result", result);
-
     if (result.error || result.data === null || result.data.length === 0) {
       return err(result.error ?? "Failed to get max row index");
     }
@@ -506,7 +504,7 @@ export class ExperimentStore extends BaseStore {
     // Use the first existing column to copy metadata from
     const existingColumnId = existingColumnsResult.data[0].id;
 
-    // If there are existing rows, create cells with copied metadata
+    // If there are existing rows, create cells with updated metadata
     const cellsQuery = `
       INSERT INTO experiment_cell (column_id, row_index, status, value, metadata)
       SELECT 
@@ -514,7 +512,7 @@ export class ExperimentStore extends BaseStore {
         ecv.row_index,
         'initialized' AS status,
         NULL AS value,
-        ecv.metadata
+        ecv.metadata || jsonb_build_object('cellType', $3::text) AS metadata
       FROM experiment_cell ecv
       WHERE ecv.column_id = $2
       ORDER BY ecv.row_index
@@ -523,6 +521,7 @@ export class ExperimentStore extends BaseStore {
     const cellsResult = await dbExecute(cellsQuery, [
       columnResult.data.id, // $1: the new column ID
       existingColumnId, // $2: the existing column ID to copy metadata from
+      columnType, // $3: the columnType to be used as cellType
     ]);
 
     if (cellsResult.error) {
@@ -761,17 +760,18 @@ export class ExperimentStore extends BaseStore {
           column.id,
           params.rowIndex,
           params?.inputs?.[column.column_name] ?? null,
-          params.metadata
+          {
+            ...params.metadata,
+            cellType: column.column_type,
+          }
         )
       );
     } else {
       columnsResult.data.map((column) =>
-        this.createExperimentCell(
-          column.id,
-          params.rowIndex,
-          null,
-          params.metadata
-        )
+        this.createExperimentCell(column.id, params.rowIndex, null, {
+          ...params.metadata,
+          cellType: column.column_type,
+        })
       );
     }
 
@@ -1276,10 +1276,12 @@ export class ExperimentStore extends BaseStore {
       return err(columnsResult.error.message);
     }
 
-    const allColumnIds = columnsResult.data.map((col) => col.id);
+    const allColumns = columnsResult.data.map((col) => col);
 
     // Get the current max row index
-    const maxRowIndexResult = await this.getMaxRowIndex(params.experimentTableId);
+    const maxRowIndexResult = await this.getMaxRowIndex(
+      params.experimentTableId
+    );
     if (maxRowIndexResult.error || maxRowIndexResult.data === null) {
       return err(maxRowIndexResult.error ?? "Failed to get max row index");
     }
@@ -1297,8 +1299,8 @@ export class ExperimentStore extends BaseStore {
     for (const row of params.rows) {
       // Create cells for specified columns
       const specifiedColumnIds = row.cells.map((cell) => cell.columnId);
-      const otherColumnIds = allColumnIds.filter(
-        (id) => !specifiedColumnIds.includes(id)
+      const otherColumnIds = allColumns.filter(
+        (col) => !specifiedColumnIds.includes(col.id)
       );
 
       // Cells for specified columns
@@ -1314,12 +1316,16 @@ export class ExperimentStore extends BaseStore {
       // Cells for other columns (empty)
       for (const columnId of otherColumnIds) {
         cellsToCreate.push({
-          columnId: columnId,
+          columnId: columnId.id,
           rowIndex: currentRowIndex,
           value: null,
-          metadata: row.metadata,
+          metadata: {
+            ...row.metadata,
+            cellType: "output",
+          },
         });
       }
+      console.log("cellsToCreate", cellsToCreate);
 
       // Increment rowIndex for next row
       currentRowIndex++;
@@ -1334,7 +1340,7 @@ export class ExperimentStore extends BaseStore {
       }
 
       // Return the IDs of the created cells
-      return ok({ ids: results.data.ids });
+      return ok({ ids: results.data?.ids ?? [] });
     } catch (error) {
       return err(`Failed to create experiment rows: ${error}`);
     }

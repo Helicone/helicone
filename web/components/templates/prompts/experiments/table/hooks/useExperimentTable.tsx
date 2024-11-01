@@ -32,7 +32,7 @@ export type Cell = {
 };
 
 export type TableCell = {
-  value: string | null;
+  value: string | any | null;
   cellId: string;
   status: CellStatus;
 };
@@ -123,7 +123,8 @@ export async function getTableData({
 
           if (cell.value !== undefined && cell.value !== null) {
             if (
-              isUUID(cell.value) &&
+              (cell.metadata?.cellType === "output" ||
+                cell.metadata?.cellType === "experiment") &&
               (cell.status === "initialized" || cell.status === "success")
             ) {
               // Check cache first
@@ -178,37 +179,54 @@ export function useExperimentTable(orgId: string, experimentTableId: string) {
     data: experimentTableQuery,
     refetch: refetchExperimentTable,
     isLoading: isExperimentTableLoading,
-  } = useQuery(["experimentTable", orgId, experimentTableId], async () => {
-    if (!orgId || !experimentTableId) return null;
-    const jawnClient = getJawnClient(orgId);
-    const res = await jawnClient.POST(
-      "/v1/experiment/table/{experimentTableId}/query",
-      {
-        params: {
-          path: {
-            experimentTableId: experimentTableId,
+  } = useQuery(
+    ["experimentTable", orgId, experimentTableId],
+    async () => {
+      if (!orgId || !experimentTableId) return null;
+      const jawnClient = getJawnClient(orgId);
+      const res = await jawnClient.POST(
+        "/v1/experiment/table/{experimentTableId}/query",
+        {
+          params: {
+            path: {
+              experimentTableId: experimentTableId,
+            },
           },
-        },
-      }
-    );
-    const rowData = await getTableData({
-      experimentTableData: res.data?.data as ExperimentTable,
-      getRequestDataByIds: (requestIds) =>
-        getRequestDataByIds(orgId, requestIds),
-      responseBodyCache: {},
-      queryClient,
-    });
-    return {
-      id: res.data?.data?.id,
-      name: res.data?.data?.name,
-      experimentId: res.data?.data?.experimentId,
-      promptSubversionId: res.data?.data?.metadata?.prompt_version as string,
-      datasetId: res.data?.data?.metadata?.datasetId as string,
-      metadata: res.data?.data?.metadata,
-      columns: res.data?.data?.columns,
-      rows: rowData,
-    };
-  });
+        }
+      );
+      const rowData = await getTableData({
+        experimentTableData: res.data?.data as ExperimentTable,
+        getRequestDataByIds: (requestIds) =>
+          getRequestDataByIds(orgId, requestIds),
+        responseBodyCache: {},
+        queryClient,
+      });
+      return {
+        id: res.data?.data?.id,
+        name: res.data?.data?.name,
+        experimentId: res.data?.data?.experimentId,
+        promptSubversionId: res.data?.data?.metadata?.prompt_version as string,
+        datasetId: res.data?.data?.metadata?.datasetId as string,
+        metadata: res.data?.data?.metadata,
+        columns: res.data?.data?.columns,
+        rows: rowData,
+      };
+    },
+    {
+      // Add polling configuration
+      refetchInterval: (data) => {
+        // Check if any cells are in "running" status
+        const hasRunningCells = data?.rows?.some((row) =>
+          Object.values(row.cells).some((cell) => cell.status === "running")
+        );
+
+        // Refetch every 3 seconds if there are running cells, otherwise stop polling
+        return hasRunningCells ? 3000 : false;
+      },
+      // Continue polling even when the window loses focus
+      refetchIntervalInBackground: true,
+    }
+  );
 
   const addExperimentTableColumn = useMutation({
     mutationFn: async ({
@@ -223,20 +241,17 @@ export function useExperimentTable(orgId: string, experimentTableId: string) {
       promptVersionId?: string;
     }) => {
       const jawnClient = getJawnClient(orgId);
-      const res = await jawnClient.POST(
-        "/v1/experiment/table/{experimentTableId}/column",
-        {
-          params: {
-            path: { experimentTableId: experimentTableId || "" },
-          },
-          body: {
-            columnName,
-            columnType,
-            hypothesisId,
-            promptVersionId,
-          },
-        }
-      );
+      await jawnClient.POST("/v1/experiment/table/{experimentTableId}/column", {
+        params: {
+          path: { experimentTableId: experimentTableId || "" },
+        },
+        body: {
+          columnName,
+          columnType,
+          hypothesisId,
+          promptVersionId,
+        },
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -254,7 +269,7 @@ export function useExperimentTable(orgId: string, experimentTableId: string) {
       inputs?: Record<string, string>;
     }) => {
       const jawnClient = getJawnClient(orgId);
-      const res = await jawnClient.POST(
+      await jawnClient.POST(
         "/v1/experiment/table/{experimentTableId}/row/new",
         {
           params: { path: { experimentTableId: experimentTableId } },
@@ -284,7 +299,7 @@ export function useExperimentTable(orgId: string, experimentTableId: string) {
       }[];
     }) => {
       const jawnClient = getJawnClient(orgId);
-      const res = await jawnClient.POST(
+      await jawnClient.POST(
         "/v1/experiment/table/{experimentTableId}/row/insert/batch",
         {
           params: { path: { experimentTableId: experimentTableId } },
@@ -312,17 +327,17 @@ export function useExperimentTable(orgId: string, experimentTableId: string) {
       metadata?: Record<string, any>;
     }) => {
       const jawnClient = getJawnClient(orgId);
-      const res = await jawnClient.PATCH(
-        "/v1/experiment/table/{experimentTableId}/cell",
-        {
-          params: { path: { experimentTableId: experimentTableId } },
-          body: { cellId, status, value, metadata, updateInputs: true },
-        }
-      );
+      await jawnClient.PATCH("/v1/experiment/table/{experimentTableId}/cell", {
+        params: { path: { experimentTableId: experimentTableId } },
+        body: { cellId, status, value, metadata, updateInputs: true },
+      });
     },
     onSuccess: (_, variables) => {
       // Invalidate the specific cell cache if it's a UUID
-      if (isUUID(variables.value)) {
+      if (
+        variables.metadata?.cellType === "output" ||
+        variables.metadata?.cellType === "experiment"
+      ) {
         queryClient.invalidateQueries([
           CELL_RESPONSE_CACHE_KEY,
           variables.value,
@@ -353,7 +368,9 @@ export function useExperimentTable(orgId: string, experimentTableId: string) {
         },
       });
     },
-    onMutate: () => {
+
+    onSettled: () => {
+      // Always refetch after error or success
       queryClient.invalidateQueries({
         queryKey: ["experimentTable", orgId, experimentTableId],
       });

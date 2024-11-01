@@ -131,9 +131,19 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
         cellId: string;
       }>
     ) => {
+      // Update cells to running status before mutation
+      cells.forEach((cell) => {
+        updateExperimentCell.mutate({
+          cellId: cell.cellId,
+          status: "running",
+          value: "",
+        });
+      });
+
+      // Then run the hypothesis
       runHypothesisMutation.mutate({ hypothesisId, cells });
     },
-    [runHypothesisMutation]
+    [runHypothesisMutation, updateExperimentCell]
   );
 
   const handleAddColumn = useCallback(
