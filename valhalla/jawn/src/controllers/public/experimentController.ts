@@ -135,9 +135,7 @@ export class ExperimentController extends Controller {
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<ExperimentTable, string>> {
     const experimentManager = new ExperimentManager(request.authParams);
-    return experimentManager.getExperimentTableByExperimentId(
-      experimentTableId
-    );
+    return experimentManager.getExperimentTableById(experimentTableId);
   }
   @Post("/table/{experimentTableId}/metadata/query")
   public async getExperimentTableMetadata(
@@ -145,7 +143,9 @@ export class ExperimentController extends Controller {
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<ExperimentTableSimplified, string>> {
     const experimentManager = new ExperimentManager(request.authParams);
-    return experimentManager.getExperimentTableById(experimentTableId);
+    return experimentManager.getExperimentTableSimplifiedById(
+      experimentTableId
+    );
   }
   @Post("/tables/query")
   public async getExperimentTables(
@@ -167,9 +167,10 @@ export class ExperimentController extends Controller {
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<null, string>> {
     const experimentManager = new ExperimentManager(request.authParams);
-    const experimentTable = await experimentManager.getExperimentTableById(
-      experimentTableId
-    );
+    const experimentTable =
+      await experimentManager.getExperimentTableSimplifiedById(
+        experimentTableId
+      );
     if (experimentTable.error || !experimentTable.data) {
       this.setStatus(500);
       console.error(experimentTable.error);
@@ -201,9 +202,10 @@ export class ExperimentController extends Controller {
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<null, string>> {
     const experimentManager = new ExperimentManager(request.authParams);
-    const experimentTable = await experimentManager.getExperimentTableById(
-      experimentTableId
-    );
+    const experimentTable =
+      await experimentManager.getExperimentTableSimplifiedById(
+        experimentTableId
+      );
     if (experimentTable.error || !experimentTable.data) {
       this.setStatus(500);
       console.error(experimentTable.error);
@@ -255,9 +257,10 @@ export class ExperimentController extends Controller {
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<null, string>> {
     const experimentManager = new ExperimentManager(request.authParams);
-    const experimentTable = await experimentManager.getExperimentTableById(
-      experimentTableId
-    );
+    const experimentTable =
+      await experimentManager.getExperimentTableSimplifiedById(
+        experimentTableId
+      );
     if (experimentTable.error || !experimentTable.data) {
       this.setStatus(500);
       console.error(experimentTable.error);
@@ -303,9 +306,10 @@ export class ExperimentController extends Controller {
       return err(inputRecordResult.error);
     }
 
-    const experimentTable = await experimentManager.getExperimentTableById(
-      experimentTableId
-    );
+    const experimentTable =
+      await experimentManager.getExperimentTableSimplifiedById(
+        experimentTableId
+      );
 
     if (experimentTable.error || !experimentTable.data) {
       this.setStatus(500);
@@ -589,9 +593,10 @@ export class ExperimentController extends Controller {
   ): Promise<Result<ExperimentRun, string>> {
     const experimentManager = new ExperimentManager(request.authParams);
 
-    const experimentTable = await experimentManager.getExperimentTableById(
-      requestBody.experimentTableId
-    );
+    const experimentTable =
+      await experimentManager.getExperimentTableSimplifiedById(
+        requestBody.experimentTableId
+      );
     if (experimentTable.error || !experimentTable.data) {
       this.setStatus(500);
       console.error(experimentTable.error);

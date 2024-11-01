@@ -325,13 +325,13 @@ export class ExperimentManager extends BaseManager {
     });
   }
 
-  async getExperimentTableByExperimentId(
+  async getExperimentTableById(
     experimentTableId: string
   ): Promise<Result<ExperimentTable, string>> {
     return this.ExperimentStore.getExperimentTable(experimentTableId);
   }
 
-  async getExperimentTableById(
+  async getExperimentTableSimplifiedById(
     experimentTableId: string
   ): Promise<Result<ExperimentTableSimplified, string>> {
     return this.ExperimentStore.getExperimentTableById(experimentTableId);
@@ -364,7 +364,7 @@ export class ExperimentManager extends BaseManager {
       string
     >
   > {
-    const experimentTableResult = await this.getExperimentTableById(
+    const experimentTableResult = await this.getExperimentTableSimplifiedById(
       params.experimentTableId
     );
     if (experimentTableResult.error || !experimentTableResult.data) {
