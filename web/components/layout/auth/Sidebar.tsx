@@ -111,7 +111,8 @@ const Sidebar = ({ changelog, setOpen }: SidebarProps) => {
             icon: BeakerIcon,
             current: pathname.includes("/experiments"),
           },
-          ...(!user?.email?.includes("@helicone.ai")
+          ...(!user?.email?.includes("@helicone.ai") ||
+          !!user?.email?.includes("@greptile")
             ? []
             : [
                 {
