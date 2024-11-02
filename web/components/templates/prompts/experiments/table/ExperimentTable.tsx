@@ -19,10 +19,19 @@ import { OriginalOutputCellRenderer } from "./cells/OriginalOutputCellRenderer";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import ExperimentInputSelector from "../experimentInputSelector";
 
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { useLocalStorage } from "@/services/hooks/localStorage";
+import clsx from "clsx";
 import LoadingAnimation from "../../../../shared/loadingAnimation";
 import ExportButton from "../../../../shared/themed/table/exportButton";
+import { ExperimentRandomInputSelector } from "../experimentRandomInputSelector";
+import { AddRowPopover } from "./components/addRowPopover";
 import { ColumnsDropdown } from "./components/customButtonts";
+import { NewExperimentPopover } from "./components/newExperimentPopover";
 import {
   CustomHeaderComponent,
   InputCellRenderer,
@@ -30,19 +39,9 @@ import {
   RowNumberCellRenderer,
   RowNumberHeaderComponent,
 } from "./components/tableElementsRenderer";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import clsx from "clsx";
-import ScoresEvaluatorsConfig from "./scores/ScoresEvaluatorsConfig";
-import { ExperimentRandomInputSelector } from "../experimentRandomInputSelector";
-import ScoresTableContainer from "./scores/ScoresTableContainer";
-import { NewExperimentPopover } from "./components/newExperimentPopover";
 import { useExperimentTable } from "./hooks/useExperimentTable";
-import { AddRowPopover } from "./components/addRowPopover";
-import { useQuery } from "@tanstack/react-query";
+import ScoresEvaluatorsConfig from "./scores/ScoresEvaluatorsConfig";
+import ScoresTableContainer from "./scores/ScoresTableContainer";
 
 interface ExperimentTableProps {
   experimentTableId: string;
@@ -55,39 +54,14 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
   const {
     experimentTableQuery,
     isExperimentTableLoading,
-    refetchExperimentTable,
     addExperimentTableColumn,
     addExperimentTableRow,
     updateExperimentCell,
     runHypothesisMutation,
     addExperimentTableRowInsertBatch,
+    promptVersionTemplateData,
   } = useExperimentTable(orgId || "", experimentTableId);
   const promptSubversionId = experimentTableQuery?.promptSubversionId;
-
-  const {
-    data: promptVersionTemplateData,
-    isLoading: isPromptVersionTemplateLoading,
-    error: promptVersionTemplateError,
-  } = useQuery(
-    ["promptVersionTemplate", promptSubversionId],
-    async () => {
-      if (!orgId || !promptSubversionId) {
-        return null;
-      }
-      const jawnClient = getJawnClient(orgId);
-      const res = await jawnClient.GET("/v1/prompt/version/{promptVersionId}", {
-        params: {
-          path: {
-            promptVersionId: promptSubversionId,
-          },
-        },
-      });
-      return res.data?.data;
-    },
-    {
-      enabled: !!promptSubversionId,
-    }
-  );
 
   const [wrapText, setWrapText] = useState(false);
   const [columnView, setColumnView] = useState<"all" | "inputs" | "outputs">(
@@ -110,17 +84,6 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
     gridRef.current = params.api;
   }, []);
 
-  const handleUpdateExperimentCell = useCallback(
-    ({ cellId, value }: { cellId: string; value: string; status?: string }) => {
-      updateExperimentCell.mutate({
-        cellId,
-        value,
-        status: "initialized",
-      });
-    },
-    [updateExperimentCell]
-  );
-
   const handleRunHypothesis = useCallback(
     (
       hypothesisId: string,
@@ -139,23 +102,6 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
       runHypothesisMutation.mutate({ hypothesisId, cells });
     },
     [runHypothesisMutation, updateExperimentCell]
-  );
-
-  const handleAddColumn = useCallback(
-    (
-      columnName: string,
-      columnType: string,
-      hypothesisId?: string,
-      promptVersionId?: string
-    ) => {
-      addExperimentTableColumn.mutate({
-        columnName,
-        columnType,
-        hypothesisId,
-        promptVersionId,
-      });
-    },
-    [addExperimentTableColumn]
   );
 
   const [columnWidths, setColumnWidths] = useState<{ [key: string]: number }>(
@@ -183,24 +129,6 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
     const newOrder = event.api.getAllGridColumns().map((col) => col.getColId());
     setColumnOrder(newOrder);
   }, []);
-
-  //   const newRowId = `temp-${tempRowId}`;
-  //   setTempRowId((prevId) => prevId + 1);
-
-  //   const inputFields = Array.from(inputKeys).reduce((acc, key) => {
-  //     acc[key] = "";
-  //     return acc as Record<string, string>;
-  //   }, {} as Record<string, string>);
-
-  //   const newRow = {
-  //     id: newRowId,
-  //     dataset_row_id: null,
-  //     ...inputFields,
-  //     isLoading: {},
-  //   };
-
-  //   addExperimentTableRow(newRow);
-  // }, [inputKeys, tempRowId]);
 
   const handleAddRow = useCallback(
     (inputs?: Record<string, string>) => {
@@ -252,19 +180,6 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
     [addExperimentTableRowInsertBatch, experimentTableQuery]
   );
 
-  const [currentRowInputs, setCurrentRowInputs] = useState<
-    Record<string, { columnId: string; value: string; rowIndex: number }>
-  >({});
-
-  const handleInputChange = useCallback(
-    (key: string, value: string, columnId: string, rowIndex: number) => {
-      setCurrentRowInputs((prev) => ({
-        ...prev,
-        [key]: { columnId, value: value.trim(), rowIndex },
-      }));
-    },
-    []
-  );
   const headerClass = clsx(
     "border-r border-[#E2E8F0] text-center items-center justify-center"
   );
@@ -475,7 +390,7 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
         promptVersionTemplate: promptVersionTemplateData,
         experimentId: experimentTableQuery?.experimentId,
         selectedProviderKey: "",
-        handleAddColumn,
+        handleAddColumn: addExperimentTableColumn.mutate,
         wrapText,
       },
     });
@@ -500,12 +415,18 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
 
     return columns;
   }, [
-    columnView,
-    handleRunHypothesis,
-    experimentTableQuery?.columns,
+    headerClass,
     wrapText,
-    columnWidths,
+    experimentTableQuery?.columns,
+    experimentTableQuery?.promptSubversionId,
+    experimentTableQuery?.experimentId,
+    experimentTableQuery?.rows,
+    promptVersionTemplateData,
+    addExperimentTableColumn.mutate,
     columnOrder,
+    handleRunHypothesis,
+    columnView,
+    columnWidths,
   ]);
 
   const [showRandomInputSelector, setShowRandomInputSelector] = useState(false);
@@ -643,9 +564,9 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
               experimentId: experimentTableQuery?.metadata?.experimentId,
               orgId,
               promptVersionTemplateRef: promptVersionTemplateData ?? {},
-              handleInputChange,
+
               rowData: experimentTableQuery?.rows,
-              handleUpdateExperimentCell,
+              handleUpdateExperimentCell: updateExperimentCell.mutate,
               handleRunRow,
             }}
             rowClass="border-b border-gray-200 hover:bg-gray-50"

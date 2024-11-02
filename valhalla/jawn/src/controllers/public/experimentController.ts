@@ -294,6 +294,17 @@ export class ExperimentController extends Controller {
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<null, string>> {
     const experimentManager = new ExperimentManager(request.authParams);
+    const experimentTable =
+      await experimentManager.getExperimentTableSimplifiedById(
+        experimentTableId
+      );
+
+    if (experimentTable.error || !experimentTable.data) {
+      this.setStatus(500);
+      console.error(experimentTable.error);
+      return err(experimentTable.error);
+    }
+
     const inputManager = new InputsManager(request.authParams);
     const inputRecordResult = await inputManager.createInputRecord(
       requestBody.promptVersionId,
@@ -304,17 +315,6 @@ export class ExperimentController extends Controller {
       this.setStatus(500);
       console.error(inputRecordResult.error);
       return err(inputRecordResult.error);
-    }
-
-    const experimentTable =
-      await experimentManager.getExperimentTableSimplifiedById(
-        experimentTableId
-      );
-
-    if (experimentTable.error || !experimentTable.data) {
-      this.setStatus(500);
-      console.error(experimentTable.error);
-      return err(experimentTable.error);
     }
 
     const datasetManager = new DatasetManager(request.authParams);
@@ -364,6 +364,17 @@ export class ExperimentController extends Controller {
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<null, string>> {
     const experimentManager = new ExperimentManager(request.authParams);
+    const experimentTable =
+      await experimentManager.getExperimentTableSimplifiedById(
+        experimentTableId
+      );
+
+    if (experimentTable.error || !experimentTable.data) {
+      this.setStatus(500);
+      console.error(experimentTable.error);
+      return err(experimentTable.error);
+    }
+
     const datasetManager = new DatasetManager(request.authParams);
 
     // Process dataset rows in parallel

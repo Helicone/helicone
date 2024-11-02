@@ -21,22 +21,12 @@ const InputCellRenderer: React.FC<any> = (props) => {
   );
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const inputColumns = props.context.experimentTableData?.columns.filter(
-    (column: any) => column.columnType === "input"
-  );
-
   // Determine the display value
   const displayValue = inputValue || "Click to add input";
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     setInputValue(newValue);
-    props.context.handleInputChange(
-      props.column.colDef.headerComponentParams.columnName,
-      newValue,
-      props.column.colId,
-      props.node.rowIndex
-    );
   };
 
   const handleInputSubmit = () => {

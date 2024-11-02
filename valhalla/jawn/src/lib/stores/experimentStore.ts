@@ -1047,7 +1047,9 @@ export class ExperimentStore extends BaseStore {
           ...params.metadata,
         },
       })
-      .eq("id", params.experimentTableId);
+      .eq("id", params.experimentTableId)
+      .eq("organization_id", this.organizationId);
+
     if (result.error) {
       return err(result.error.message);
     }

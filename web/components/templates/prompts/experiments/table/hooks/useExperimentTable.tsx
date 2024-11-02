@@ -170,7 +170,7 @@ export function useExperimentTable(orgId: string, experimentTableId: string) {
   const queryClient = useQueryClient();
   const {
     data: experimentTableQuery,
-    refetch: refetchExperimentTable,
+
     isLoading: isExperimentTableLoading,
   } = useQuery(
     ["experimentTable", orgId, experimentTableId],
@@ -310,12 +310,12 @@ export function useExperimentTable(orgId: string, experimentTableId: string) {
   const updateExperimentCell = useMutation({
     mutationFn: async ({
       cellId,
-      status,
+      status = "initialized",
       value,
       metadata,
     }: {
       cellId: string;
-      status: string;
+      status?: string;
       value: string;
       metadata?: Record<string, any>;
     }) => {
@@ -370,10 +370,33 @@ export function useExperimentTable(orgId: string, experimentTableId: string) {
     },
   });
 
+  const promptSubversionId = experimentTableQuery?.promptSubversionId;
+
+  const { data: promptVersionTemplateData } = useQuery(
+    ["promptVersionTemplate", promptSubversionId],
+    async () => {
+      if (!orgId || !promptSubversionId) {
+        return null;
+      }
+      const jawnClient = getJawnClient(orgId);
+      const res = await jawnClient.GET("/v1/prompt/version/{promptVersionId}", {
+        params: {
+          path: {
+            promptVersionId: promptSubversionId,
+          },
+        },
+      });
+      return res.data?.data;
+    },
+    {
+      enabled: !!promptSubversionId,
+    }
+  );
+
   return {
     experimentTableQuery,
     isExperimentTableLoading,
-    refetchExperimentTable,
+    promptVersionTemplateData,
     addExperimentTableColumn,
     addExperimentTableRow,
     updateExperimentCell,
