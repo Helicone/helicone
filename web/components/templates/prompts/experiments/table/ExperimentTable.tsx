@@ -142,6 +142,17 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
     [addExperimentTableRow, experimentTableQuery?.promptSubversionId]
   );
 
+  const handleAddColumn = useCallback(
+    (columnName: string, columnType: "experiment" | "input" | "output") => {
+      addExperimentTableColumn.mutate({
+        promptVersionId: promptSubversionId ?? "",
+        columnName,
+        columnType,
+      });
+    },
+    [addExperimentTableColumn, promptSubversionId]
+  );
+
   const handleAddRowInsertBatch = useCallback(
     (
       rows: {
@@ -392,7 +403,7 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
         promptVersionTemplate: promptVersionTemplateData,
         experimentId: experimentTableQuery?.experimentId,
         selectedProviderKey: "",
-        handleAddColumn: addExperimentTableColumn.mutate,
+        handleAddColumn,
         wrapText,
       },
     });

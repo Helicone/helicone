@@ -106,7 +106,6 @@ export async function getTableData({
             const newRow: TableRow = {
               id: `row-${rowIndex}`,
               rowIndex,
-              isLoading: {},
               cells: {},
             };
             rowIndexToRow.set(rowIndex, newRow);
@@ -325,7 +324,6 @@ export function useExperimentTable(orgId: string, experimentTableId: string) {
       });
     },
     onSuccess: (_, variables) => {
-      // Invalidate the specific cell cache if it's a UUID
       if (
         variables.metadata?.cellType === "output" ||
         variables.metadata?.cellType === "experiment"
