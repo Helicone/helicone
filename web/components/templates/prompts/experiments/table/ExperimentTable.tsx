@@ -89,6 +89,7 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
       hypothesisId: string,
       cells: Array<{
         cellId: string;
+        columnId: string;
       }>
     ) => {
       cells.forEach((cell) => {
@@ -313,6 +314,7 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
                   const cells = [
                     {
                       cellId: row.cells[colId].cellId,
+                      columnId: colId,
                     },
                   ];
 
@@ -449,6 +451,7 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
         const cells = [
           {
             cellId: row.cells[column.id].cellId,
+            columnId: column.id,
           },
         ];
 

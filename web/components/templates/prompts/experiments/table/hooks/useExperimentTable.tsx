@@ -40,7 +40,6 @@ export type TableCell = {
 export type TableRow = {
   id: string;
   rowIndex: number;
-  isLoading: Record<string, boolean>;
   cells: Record<string, TableCell>; // columnId -> TableCell
 };
 
@@ -350,14 +349,42 @@ export function useExperimentTable(orgId: string, experimentTableId: string) {
       hypothesisId: string;
       cells: Array<{
         cellId: string;
+        columnId: string;
       }>;
     }) => {
+      queryClient.setQueryData(
+        ["experimentTable", orgId, experimentTableId],
+        (data: { rows: TableRow[] } | undefined) => {
+          return {
+            ...data,
+            rows:
+              data?.rows.map((row) => {
+                const newRow: TableRow = JSON.parse(JSON.stringify(row));
+                for (const cell of cells) {
+                  if (cell.cellId === row.cells[cell.columnId]?.cellId) {
+                    newRow.cells[cell.columnId] = {
+                      cellId: cell.cellId,
+                      value: "",
+                      status: "running",
+                    };
+                  }
+                }
+                return newRow;
+              }) ?? [],
+          };
+        }
+      );
+
+      // sleep 10 seconds
+      await new Promise((resolve) => setTimeout(resolve, 10000));
       const jawnClient = getJawnClient(orgId || "");
       await jawnClient.POST("/v1/experiment/run", {
         body: {
           experimentTableId,
           hypothesisId,
-          cells,
+          cells: cells.map((cell) => ({
+            cellId: cell.cellId,
+          })),
         },
       });
     },

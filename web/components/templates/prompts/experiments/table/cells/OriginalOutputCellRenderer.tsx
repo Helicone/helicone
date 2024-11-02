@@ -72,6 +72,7 @@ export const OriginalOutputCellRenderer: React.FC<any> = (params) => {
                   params.handleRunHypothesis("original", [
                     {
                       cellId: cellData.cellId,
+                      columnId: colDef.cellRendererParams.columnId,
                     },
                   ]);
                 }}

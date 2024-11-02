@@ -147,6 +147,7 @@ export const HypothesisCellRenderer: React.FC<any> = (params) => {
             params.handleRunHypothesis(hypothesisId, [
               {
                 cellId: cellData.cellId,
+                columnId: colDef.cellRendererParams.columnId,
               },
             ]);
           }}

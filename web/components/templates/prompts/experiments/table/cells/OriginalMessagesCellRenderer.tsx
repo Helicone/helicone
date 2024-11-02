@@ -41,20 +41,7 @@ export const OriginalMessagesCellRenderer: React.FC<any> = (params) => {
               {content}
             </div>
           ) : (
-            <div>
-              {/* <Button
-                variant="ghost"
-                className="w-6 h-6 p-0 border-slate-200 border rounded-md bg-slate-50 text-slate-500"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  params.handleRunHypothesis(hypothesisId, [
-                    data.dataset_row_id,
-                  ]);
-                }}
-              >
-                <PlayIcon className="w-4 h-4" />
-              </Button> */}
-            </div>
+            <div></div>
           )}
         </div>
       </PopoverTrigger>
