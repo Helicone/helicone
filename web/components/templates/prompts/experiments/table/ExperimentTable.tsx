@@ -92,17 +92,9 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
         columnId: string;
       }>
     ) => {
-      cells.forEach((cell) => {
-        updateExperimentCell.mutate({
-          cellId: cell.cellId,
-          status: "running",
-          value: "",
-        });
-      });
-
       runHypothesisMutation.mutate({ hypothesisId, cells });
     },
-    [runHypothesisMutation, updateExperimentCell]
+    [runHypothesisMutation]
   );
 
   const [columnWidths, setColumnWidths] = useState<{ [key: string]: number }>(
