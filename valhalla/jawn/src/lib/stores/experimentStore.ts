@@ -848,7 +848,7 @@ export class ExperimentStore extends BaseStore {
       FROM experiment_v2_hypothesis_run hr
       JOIN request r ON r.id = hr.result_request_id
       JOIN response resp ON resp.request = r.id
-      WHERE hr.experiment_hypothesis = $1
+      WHERE hr.experiment_hypothesis = $1 AND r.helicone_org_id = $2
     `;
 
     const result = await dbExecute<{
