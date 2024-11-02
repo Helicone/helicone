@@ -373,8 +373,6 @@ export function useExperimentTable(orgId: string, experimentTableId: string) {
         }
       );
 
-      // sleep 10 seconds
-      await new Promise((resolve) => setTimeout(resolve, 10000));
       const jawnClient = getJawnClient(orgId || "");
       await jawnClient.POST("/v1/experiment/run", {
         body: {

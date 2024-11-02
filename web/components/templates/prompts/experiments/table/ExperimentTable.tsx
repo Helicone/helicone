@@ -143,11 +143,16 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
   );
 
   const handleAddColumn = useCallback(
-    (columnName: string, columnType: "experiment" | "input" | "output") => {
+    (
+      columnName: string,
+      columnType: "experiment" | "input" | "output",
+      hypothesisId?: string
+    ) => {
       addExperimentTableColumn.mutate({
         promptVersionId: promptSubversionId ?? "",
         columnName,
         columnType,
+        hypothesisId,
       });
     },
     [addExperimentTableColumn, promptSubversionId]
