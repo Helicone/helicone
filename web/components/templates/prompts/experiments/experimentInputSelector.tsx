@@ -17,6 +17,7 @@ interface ExperimentInputSelectorProps {
       inputRecordId: string;
       datasetId: string;
       inputs: Record<string, string>;
+      sourceRequest?: string;
     }[]
   ) => void;
 }
@@ -201,6 +202,7 @@ const ExperimentInputSelector = (props: ExperimentInputSelectorProps) => {
                   inputRecordId: request.id,
                   datasetId: datasetId ?? "",
                   inputs: request.inputs,
+                  sourceRequest: request.source_request,
                 }))
               );
 
