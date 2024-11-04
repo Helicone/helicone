@@ -28,14 +28,28 @@ export const OriginalOutputCellRenderer: React.FC<any> = (params) => {
     }
 
     // If there are tool calls, extract the content from the arguments
-    if (message?.tool_calls?.[0]?.function?.arguments) {
-      try {
-        const args = JSON.parse(message.tool_calls[0].function.arguments);
-        return args.content || "";
-      } catch (e) {
-        console.error("Failed to parse tool call arguments:", e);
-        return "";
+    if (message?.tool_calls && message.tool_calls.length > 0) {
+      let extractedContent = "";
+      for (const toolCall of message.tool_calls) {
+        if (toolCall.function?.arguments) {
+          try {
+            const args = JSON.parse(toolCall.function.arguments);
+            // If the content is in args.content
+            if (args.content) {
+              extractedContent += args.content + "\n";
+            }
+            // If there's an array of titles in args.titles
+            if (args.titles && Array.isArray(args.titles)) {
+              extractedContent += args.titles.join("\n") + "\n";
+            }
+            // Add any other properties you need to extract here
+          } catch (e) {
+            console.error("Failed to parse tool call arguments:", e);
+            continue;
+          }
+        }
       }
+      return extractedContent.trim();
     }
 
     return "";
