@@ -30,6 +30,12 @@ interface AddColumnHeaderProps {
   promptVersionTemplate: any;
   selectedProviderKey: string | null;
   refetchData: () => Promise<void>; // Add this line
+  handleAddColumn: (
+    columnName: string,
+    columnType: "experiment" | "input" | "output",
+    hypothesisId?: string,
+    promptVersionId?: string
+  ) => Promise<void>;
 }
 
 const SCORES = [
@@ -46,6 +52,7 @@ const AddColumnHeader: React.FC<AddColumnHeaderProps> = ({
   experimentId,
   selectedProviderKey,
   refetchData, // Add this line
+  handleAddColumn,
 }) => {
   const [open, setOpen] = useState(false);
   const jawn = useJawnClient();
@@ -237,19 +244,30 @@ const AddColumnHeader: React.FC<AddColumnHeaderProps> = ({
                       return;
                     }
 
-                    await jawn.POST("/v1/experiment/hypothesis", {
-                      body: {
-                        experimentId: experimentId,
-                        model: model,
-                        promptVersion: result.data.data?.id ?? "",
-                        providerKeyId: selectedProviderKey ?? "NOKEY",
-                        status: "RUNNING",
-                      },
-                    });
+                    const hypothesisResult = await jawn.POST(
+                      "/v1/experiment/hypothesis",
+                      {
+                        body: {
+                          experimentId: experimentId,
+                          model: model,
+                          promptVersion: result.data.data?.id ?? "",
+                          providerKeyId: "NOKEY",
+                          status: "RUNNING",
+                        },
+                      }
+                    );
+                    if (hypothesisResult.error || !hypothesisResult.data) {
+                      console.error(hypothesisResult);
+                      return;
+                    }
+
+                    await handleAddColumn(
+                      "Experiment",
+                      "experiment",
+                      hypothesisResult.data.data?.hypothesisId
+                    );
 
                     setOpen(false); // Close the drawer after adding the column
-
-                    await refetchData(); // Refetch the table data
                   }}
                   submitText="Test"
                   initialModel={"gpt-4o"}

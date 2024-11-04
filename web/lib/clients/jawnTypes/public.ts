@@ -216,6 +216,76 @@ export interface paths {
   "/v1/integration/slack/channels": {
     get: operations["GetSlackChannels"];
   };
+  "/v1/evaluator": {
+    post: operations["CreateEvaluator"];
+  };
+  "/v1/evaluator/{evaluatorId}": {
+    get: operations["GetEvaluator"];
+    put: operations["UpdateEvaluator"];
+    delete: operations["DeleteEvaluator"];
+  };
+  "/v1/evaluator/query": {
+    post: operations["QueryEvaluators"];
+  };
+  "/v1/evaluator/{evaluatorId}/experiments": {
+    get: operations["GetExperimentsForEvaluator"];
+  };
+  "/v1/experiment/new-empty": {
+    post: operations["CreateNewEmptyExperiment"];
+  };
+  "/v1/experiment/table/new": {
+    post: operations["CreateNewExperimentTable"];
+  };
+  "/v1/experiment/table/{experimentTableId}/query": {
+    post: operations["GetExperimentTableById"];
+  };
+  "/v1/experiment/table/{experimentTableId}/metadata/query": {
+    post: operations["GetExperimentTableMetadata"];
+  };
+  "/v1/experiment/tables/query": {
+    post: operations["GetExperimentTables"];
+  };
+  "/v1/experiment/table/{experimentTableId}/cell": {
+    post: operations["CreateExperimentCell"];
+    patch: operations["UpdateExperimentCell"];
+  };
+  "/v1/experiment/table/{experimentTableId}/column": {
+    post: operations["CreateExperimentColumn"];
+  };
+  "/v1/experiment/table/{experimentTableId}/row/new": {
+    post: operations["CreateExperimentTableRow"];
+  };
+  "/v1/experiment/table/{experimentTableId}/row/insert/batch": {
+    post: operations["CreateExperimentTableRowWithCellsBatch"];
+  };
+  "/v1/experiment/update-meta": {
+    post: operations["UpdateExperimentMeta"];
+  };
+  "/v1/experiment": {
+    post: operations["CreateNewExperiment"];
+  };
+  "/v1/experiment/hypothesis": {
+    post: operations["CreateNewExperimentHypothesis"];
+  };
+  "/v1/experiment/hypothesis/{hypothesisId}/scores/query": {
+    post: operations["GetExperimentHypothesisScores"];
+  };
+  "/v1/experiment/{experimentId}/evaluators": {
+    get: operations["GetExperimentEvaluators"];
+    post: operations["CreateExperimentEvaluator"];
+  };
+  "/v1/experiment/{experimentId}/evaluators/run": {
+    post: operations["RunExperimentEvaluators"];
+  };
+  "/v1/experiment/{experimentId}/evaluators/{evaluatorId}": {
+    delete: operations["DeleteExperimentEvaluator"];
+  };
+  "/v1/experiment/query": {
+    post: operations["GetExperiments"];
+  };
+  "/v1/experiment/run": {
+    post: operations["RunExperiment"];
+  };
   "/v1/experiment/dataset": {
     post: operations["AddDataset"];
   };
@@ -254,48 +324,6 @@ export interface paths {
   };
   "/v1/helicone-dataset/{datasetId}/request/{requestId}": {
     post: operations["UpdateHeliconeDatasetRequest"];
-  };
-  "/v1/experiment/new-empty": {
-    post: operations["CreateNewEmptyExperiment"];
-  };
-  "/v1/experiment/update-meta": {
-    post: operations["UpdateExperimentMeta"];
-  };
-  "/v1/experiment": {
-    post: operations["CreateNewExperiment"];
-  };
-  "/v1/experiment/hypothesis": {
-    post: operations["CreateNewExperimentHypothesis"];
-  };
-  "/v1/experiment/{experimentId}/evaluators": {
-    get: operations["GetExperimentEvaluators"];
-    post: operations["CreateExperimentEvaluator"];
-  };
-  "/v1/experiment/{experimentId}/evaluators/run": {
-    post: operations["RunExperimentEvaluators"];
-  };
-  "/v1/experiment/{experimentId}/evaluators/{evaluatorId}": {
-    delete: operations["DeleteExperimentEvaluator"];
-  };
-  "/v1/experiment/query": {
-    post: operations["GetExperiments"];
-  };
-  "/v1/experiment/run": {
-    post: operations["RunExperiment"];
-  };
-  "/v1/evaluator": {
-    post: operations["CreateEvaluator"];
-  };
-  "/v1/evaluator/{evaluatorId}": {
-    get: operations["GetEvaluator"];
-    put: operations["UpdateEvaluator"];
-    delete: operations["DeleteEvaluator"];
-  };
-  "/v1/evaluator/query": {
-    post: operations["QueryEvaluators"];
-  };
-  "/v1/evaluator/{evaluatorId}/experiments": {
-    get: operations["GetExperimentsForEvaluator"];
   };
   "/v1/public/dataisbeautiful/total-values": {
     post: operations["GetTotalValues"];
@@ -1410,6 +1438,8 @@ export interface components {
         id: string;
       };
       request: {
+        experimentRowIndex?: string;
+        experimentColumnId?: string;
         heliconeTemplate?: components["schemas"]["TemplateWithInputs"];
         isStream: boolean;
         /** Format: date-time */
@@ -1931,6 +1961,277 @@ Json: JsonObject;
       error: null;
     };
     "Result_Array__id-string--name-string__.string_": components["schemas"]["ResultSuccess_Array__id-string--name-string___"] | components["schemas"]["ResultError_string_"];
+    EvaluatorResult: {
+      id: string;
+      created_at: string;
+      scoring_type: string;
+      llm_template: unknown;
+      organization_id: string;
+      updated_at: string;
+      name: string;
+    };
+    ResultSuccess_EvaluatorResult_: {
+      data: components["schemas"]["EvaluatorResult"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_EvaluatorResult.string_": components["schemas"]["ResultSuccess_EvaluatorResult_"] | components["schemas"]["ResultError_string_"];
+    CreateEvaluatorParams: {
+      scoring_type: string;
+      llm_template: unknown;
+      name: string;
+    };
+    "ResultSuccess_EvaluatorResult-Array_": {
+      data: components["schemas"]["EvaluatorResult"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_EvaluatorResult-Array.string_": components["schemas"]["ResultSuccess_EvaluatorResult-Array_"] | components["schemas"]["ResultError_string_"];
+    UpdateEvaluatorParams: {
+      scoring_type?: string;
+      llm_template?: unknown;
+    };
+    "ResultSuccess__experiment_id-string--experiment_created_at-string_-Array_": {
+      data: {
+          experiment_created_at: string;
+          experiment_id: string;
+        }[];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__experiment_id-string--experiment_created_at-string_-Array.string_": components["schemas"]["ResultSuccess__experiment_id-string--experiment_created_at-string_-Array_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__experimentId-string__": {
+      data: {
+        experimentId: string;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__experimentId-string_.string_": components["schemas"]["ResultSuccess__experimentId-string__"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__tableId-string--experimentId-string__": {
+      data: {
+        experimentId: string;
+        tableId: string;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__tableId-string--experimentId-string_.string_": components["schemas"]["ResultSuccess__tableId-string--experimentId-string__"] | components["schemas"]["ResultError_string_"];
+    CreateExperimentTableParams: {
+      datasetId: string;
+      experimentMetadata: components["schemas"]["Record_string.any_"];
+      promptVersionId: string;
+      newHeliconeTemplate: string;
+      isMajorVersion: boolean;
+      promptSubversionMetadata: components["schemas"]["Record_string.any_"];
+      experimentTableMetadata?: components["schemas"]["Record_string.any_"];
+    };
+    ExperimentTableColumn: {
+      id: string;
+      columnName: string;
+      columnType: string;
+      hypothesisId?: string;
+      cells: ({
+          metadata?: components["schemas"]["Record_string.any_"];
+          value: string | null;
+          requestId?: string;
+          /** Format: double */
+          rowIndex: number;
+          id: string;
+        })[];
+      metadata?: components["schemas"]["Record_string.any_"];
+    };
+    ExperimentTable: {
+      id: string;
+      name: string;
+      experimentId: string;
+      columns: components["schemas"]["ExperimentTableColumn"][];
+      metadata?: components["schemas"]["Record_string.any_"];
+    };
+    ResultSuccess_ExperimentTable_: {
+      data: components["schemas"]["ExperimentTable"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ExperimentTable.string_": components["schemas"]["ResultSuccess_ExperimentTable_"] | components["schemas"]["ResultError_string_"];
+    ExperimentTableSimplified: {
+      id: string;
+      name: string;
+      experimentId: string;
+      createdAt: string;
+      metadata?: unknown;
+    };
+    ResultSuccess_ExperimentTableSimplified_: {
+      data: components["schemas"]["ExperimentTableSimplified"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ExperimentTableSimplified.string_": components["schemas"]["ResultSuccess_ExperimentTableSimplified_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess_ExperimentTableSimplified-Array_": {
+      data: components["schemas"]["ExperimentTableSimplified"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ExperimentTableSimplified-Array.string_": components["schemas"]["ResultSuccess_ExperimentTableSimplified-Array_"] | components["schemas"]["ResultError_string_"];
+    /**
+     * @description Error format
+     *
+     * {@link https://postgrest.org/en/stable/api.html?highlight=options#errors-and-http-status-codes}
+     */
+    PostgrestError: {
+      code: string;
+      hint: string;
+      details: string;
+      message: string;
+    };
+    ResultError_PostgrestError_: {
+      /** @enum {number|null} */
+      data: null;
+      error: components["schemas"]["PostgrestError"];
+    };
+    NewExperimentParams: {
+      datasetId: string;
+      promptVersion: string;
+      model: string;
+      providerKeyId: string;
+      meta?: unknown;
+    };
+    "ResultSuccess__hypothesisId-string__": {
+      data: {
+        hypothesisId: string;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__hypothesisId-string_.string_": components["schemas"]["ResultSuccess__hypothesisId-string__"] | components["schemas"]["ResultError_string_"];
+    Score: {
+      valueType: string;
+      value: number | string;
+    };
+    /** @description Construct a type with a set of properties K of type T */
+    "Record_string.Score_": {
+      [key: string]: components["schemas"]["Score"];
+    };
+    "ResultSuccess__scores-Record_string.Score___": {
+      data: {
+        scores: components["schemas"]["Record_string.Score_"];
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__scores-Record_string.Score__.string_": components["schemas"]["ResultSuccess__scores-Record_string.Score___"] | components["schemas"]["ResultError_string_"];
+    ResponseObj: {
+      body: unknown;
+      createdAt: string;
+      /** Format: double */
+      completionTokens: number;
+      /** Format: double */
+      promptTokens: number;
+      /** Format: double */
+      delayMs: number;
+      model: string;
+    };
+    RequestObj: {
+      id: string;
+      provider: string;
+    };
+    ExperimentDatasetRow: {
+      rowId: string;
+      inputRecord: {
+        request: components["schemas"]["RequestObj"];
+        response: components["schemas"]["ResponseObj"];
+        autoInputs: components["schemas"]["Record_string.string_"][];
+        inputs: components["schemas"]["Record_string.string_"];
+        requestPath: string;
+        requestId: string;
+        id: string;
+      };
+      /** Format: double */
+      rowIndex: number;
+      columnId: string;
+      scores: components["schemas"]["Record_string.Score_"];
+    };
+    ExperimentScores: {
+      dataset: {
+        scores: components["schemas"]["Record_string.Score_"];
+      };
+      hypothesis: {
+        scores: components["schemas"]["Record_string.Score_"];
+      };
+    };
+    Experiment: {
+      id: string;
+      organization: string;
+      dataset: {
+        rows: components["schemas"]["ExperimentDatasetRow"][];
+        name: string;
+        id: string;
+      };
+      meta: unknown;
+      createdAt: string;
+      hypotheses: {
+          runs: {
+              request?: components["schemas"]["RequestObj"];
+              scores: components["schemas"]["Record_string.Score_"];
+              response?: components["schemas"]["ResponseObj"];
+              resultRequestId: string;
+              datasetRowId: string;
+            }[];
+          providerKey: string;
+          createdAt: string;
+          status: string;
+          model: string;
+          parentPromptVersion?: {
+            template: unknown;
+          };
+          promptVersion?: {
+            template: unknown;
+          };
+          promptVersionId: string;
+          id: string;
+        }[];
+      scores: components["schemas"]["ExperimentScores"] | null;
+    };
+    "ResultSuccess_Experiment-Array_": {
+      data: components["schemas"]["Experiment"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Experiment-Array.string_": components["schemas"]["ResultSuccess_Experiment-Array_"] | components["schemas"]["ResultError_string_"];
+    /** @description Make all properties in T optional */
+    Partial_ExperimentToOperators_: {
+      id?: components["schemas"]["Partial_TextOperators_"];
+      prompt_v2?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description From T, pick a set of properties whose keys are in the union K */
+    "Pick_FilterLeaf.experiment_": {
+      experiment?: components["schemas"]["Partial_ExperimentToOperators_"];
+    };
+    FilterLeafSubset_experiment_: components["schemas"]["Pick_FilterLeaf.experiment_"];
+    ExperimentFilterNode: components["schemas"]["FilterLeafSubset_experiment_"] | components["schemas"]["ExperimentFilterBranch"] | "all";
+    ExperimentFilterBranch: {
+      right: components["schemas"]["ExperimentFilterNode"];
+      /** @enum {string} */
+      operator: "or" | "and";
+      left: components["schemas"]["ExperimentFilterNode"];
+    };
+    IncludeExperimentKeys: {
+      /** @enum {boolean} */
+      inputs?: true;
+      /** @enum {boolean} */
+      promptVersion?: true;
+      /** @enum {boolean} */
+      responseBodies?: true;
+      /** @enum {boolean} */
+      score?: true;
+    };
+    ExperimentRun: Record<string, never>;
+    ResultSuccess_ExperimentRun_: {
+      data: components["schemas"]["ExperimentRun"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ExperimentRun.string_": components["schemas"]["ResultSuccess_ExperimentRun_"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess__datasetId-string__": {
       data: {
         datasetId: string;
@@ -2043,201 +2344,6 @@ Json: JsonObject;
       /** @enum {number|null} */
       error: null;
     };
-    "ResultSuccess__experimentId-string__": {
-      data: {
-        experimentId: string;
-      };
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__experimentId-string_.string_": components["schemas"]["ResultSuccess__experimentId-string__"] | components["schemas"]["ResultError_string_"];
-    /**
-     * @description Error format
-     *
-     * {@link https://postgrest.org/en/stable/api.html?highlight=options#errors-and-http-status-codes}
-     */
-    PostgrestError: {
-      code: string;
-      hint: string;
-      details: string;
-      message: string;
-    };
-    ResultError_PostgrestError_: {
-      /** @enum {number|null} */
-      data: null;
-      error: components["schemas"]["PostgrestError"];
-    };
-    NewExperimentParams: {
-      datasetId: string;
-      promptVersion: string;
-      model: string;
-      providerKeyId: string;
-      meta?: unknown;
-    };
-    "ResultSuccess__hypothesisId-string__": {
-      data: {
-        hypothesisId: string;
-      };
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__hypothesisId-string_.string_": components["schemas"]["ResultSuccess__hypothesisId-string__"] | components["schemas"]["ResultError_string_"];
-    EvaluatorResult: {
-      id: string;
-      created_at: string;
-      scoring_type: string;
-      llm_template: unknown;
-      organization_id: string;
-      updated_at: string;
-      name: string;
-    };
-    "ResultSuccess_EvaluatorResult-Array_": {
-      data: components["schemas"]["EvaluatorResult"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_EvaluatorResult-Array.string_": components["schemas"]["ResultSuccess_EvaluatorResult-Array_"] | components["schemas"]["ResultError_string_"];
-    ResponseObj: {
-      body: unknown;
-      createdAt: string;
-      /** Format: double */
-      completionTokens: number;
-      /** Format: double */
-      promptTokens: number;
-      /** Format: double */
-      delayMs: number;
-      model: string;
-    };
-    RequestObj: {
-      id: string;
-      provider: string;
-    };
-    Score: {
-      valueType: string;
-      value: number | string;
-    };
-    /** @description Construct a type with a set of properties K of type T */
-    "Record_string.Score_": {
-      [key: string]: components["schemas"]["Score"];
-    };
-    ExperimentDatasetRow: {
-      rowId: string;
-      inputRecord: {
-        request: components["schemas"]["RequestObj"];
-        response: components["schemas"]["ResponseObj"];
-        autoInputs: components["schemas"]["Record_string.string_"][];
-        inputs: components["schemas"]["Record_string.string_"];
-        requestPath: string;
-        requestId: string;
-        id: string;
-      };
-      scores: components["schemas"]["Record_string.Score_"];
-    };
-    ExperimentScores: {
-      dataset: {
-        scores: components["schemas"]["Record_string.Score_"];
-      };
-      hypothesis: {
-        scores: components["schemas"]["Record_string.Score_"];
-      };
-    };
-    Experiment: {
-      id: string;
-      organization: string;
-      dataset: {
-        rows: components["schemas"]["ExperimentDatasetRow"][];
-        name: string;
-        id: string;
-      };
-      meta: unknown;
-      createdAt: string;
-      hypotheses: {
-          runs: {
-              request?: components["schemas"]["RequestObj"];
-              scores: components["schemas"]["Record_string.Score_"];
-              response?: components["schemas"]["ResponseObj"];
-              resultRequestId: string;
-              datasetRowId: string;
-            }[];
-          providerKey: string;
-          createdAt: string;
-          status: string;
-          model: string;
-          parentPromptVersion?: {
-            template: unknown;
-          };
-          promptVersion?: {
-            template: unknown;
-          };
-          promptVersionId: string;
-          id: string;
-        }[];
-      scores: components["schemas"]["ExperimentScores"] | null;
-    };
-    "ResultSuccess_Experiment-Array_": {
-      data: components["schemas"]["Experiment"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_Experiment-Array.string_": components["schemas"]["ResultSuccess_Experiment-Array_"] | components["schemas"]["ResultError_string_"];
-    /** @description Make all properties in T optional */
-    Partial_ExperimentToOperators_: {
-      id?: components["schemas"]["Partial_TextOperators_"];
-      prompt_v2?: components["schemas"]["Partial_TextOperators_"];
-    };
-    /** @description From T, pick a set of properties whose keys are in the union K */
-    "Pick_FilterLeaf.experiment_": {
-      experiment?: components["schemas"]["Partial_ExperimentToOperators_"];
-    };
-    FilterLeafSubset_experiment_: components["schemas"]["Pick_FilterLeaf.experiment_"];
-    ExperimentFilterNode: components["schemas"]["FilterLeafSubset_experiment_"] | components["schemas"]["ExperimentFilterBranch"] | "all";
-    ExperimentFilterBranch: {
-      right: components["schemas"]["ExperimentFilterNode"];
-      /** @enum {string} */
-      operator: "or" | "and";
-      left: components["schemas"]["ExperimentFilterNode"];
-    };
-    IncludeExperimentKeys: {
-      /** @enum {boolean} */
-      inputs?: true;
-      /** @enum {boolean} */
-      promptVersion?: true;
-      /** @enum {boolean} */
-      responseBodies?: true;
-      /** @enum {boolean} */
-      score?: true;
-    };
-    ExperimentRun: Record<string, never>;
-    ResultSuccess_ExperimentRun_: {
-      data: components["schemas"]["ExperimentRun"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_ExperimentRun.string_": components["schemas"]["ResultSuccess_ExperimentRun_"] | components["schemas"]["ResultError_string_"];
-    ResultSuccess_EvaluatorResult_: {
-      data: components["schemas"]["EvaluatorResult"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_EvaluatorResult.string_": components["schemas"]["ResultSuccess_EvaluatorResult_"] | components["schemas"]["ResultError_string_"];
-    CreateEvaluatorParams: {
-      scoring_type: string;
-      llm_template: unknown;
-      name: string;
-    };
-    UpdateEvaluatorParams: {
-      scoring_type?: string;
-      llm_template?: unknown;
-    };
-    "ResultSuccess__experiment_id-string--experiment_created_at-string_-Array_": {
-      data: {
-          experiment_created_at: string;
-          experiment_id: string;
-        }[];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__experiment_id-string--experiment_created_at-string_-Array.string_": components["schemas"]["ResultSuccess__experiment_id-string--experiment_created_at-string_-Array_"] | components["schemas"]["ResultError_string_"];
     TotalValuesForAllOfTime: {
       /** Format: double */
       total_cost: number;
@@ -3854,6 +3960,481 @@ export interface operations {
       };
     };
   };
+  CreateEvaluator: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateEvaluatorParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_EvaluatorResult.string_"];
+        };
+      };
+    };
+  };
+  GetEvaluator: {
+    parameters: {
+      path: {
+        evaluatorId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_EvaluatorResult.string_"];
+        };
+      };
+    };
+  };
+  UpdateEvaluator: {
+    parameters: {
+      path: {
+        evaluatorId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateEvaluatorParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_EvaluatorResult.string_"];
+        };
+      };
+    };
+  };
+  DeleteEvaluator: {
+    parameters: {
+      path: {
+        evaluatorId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  QueryEvaluators: {
+    requestBody: {
+      content: {
+        "application/json": Record<string, never>;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_EvaluatorResult-Array.string_"];
+        };
+      };
+    };
+  };
+  GetExperimentsForEvaluator: {
+    parameters: {
+      path: {
+        evaluatorId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__experiment_id-string--experiment_created_at-string_-Array.string_"];
+        };
+      };
+    };
+  };
+  CreateNewEmptyExperiment: {
+    requestBody: {
+      content: {
+        "application/json": {
+          datasetId: string;
+          metadata: components["schemas"]["Record_string.string_"];
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__experimentId-string_.string_"];
+        };
+      };
+    };
+  };
+  CreateNewExperimentTable: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateExperimentTableParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__tableId-string--experimentId-string_.string_"];
+        };
+      };
+    };
+  };
+  GetExperimentTableById: {
+    parameters: {
+      path: {
+        experimentTableId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ExperimentTable.string_"];
+        };
+      };
+    };
+  };
+  GetExperimentTableMetadata: {
+    parameters: {
+      path: {
+        experimentTableId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ExperimentTableSimplified.string_"];
+        };
+      };
+    };
+  };
+  GetExperimentTables: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ExperimentTableSimplified-Array.string_"];
+        };
+      };
+    };
+  };
+  CreateExperimentCell: {
+    parameters: {
+      path: {
+        experimentTableId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          value: string | null;
+          /** Format: double */
+          rowIndex: number;
+          columnId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  UpdateExperimentCell: {
+    parameters: {
+      path: {
+        experimentTableId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          updateInputs?: boolean;
+          metadata?: components["schemas"]["Record_string.string_"];
+          value?: string;
+          status?: string;
+          cellId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  CreateExperimentColumn: {
+    parameters: {
+      path: {
+        experimentTableId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          promptVersionId?: string;
+          hypothesisId?: string;
+          columnType: string;
+          columnName: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  CreateExperimentTableRow: {
+    parameters: {
+      path: {
+        experimentTableId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          inputs?: components["schemas"]["Record_string.string_"];
+          sourceRequest?: string;
+          promptVersionId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  CreateExperimentTableRowWithCellsBatch: {
+    parameters: {
+      path: {
+        experimentTableId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          rows: ({
+              cells: ({
+                  value: string | null;
+                  columnId: string;
+                })[];
+              datasetId: string;
+              inputs: components["schemas"]["Record_string.string_"];
+              inputRecordId: string;
+            })[];
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  UpdateExperimentMeta: {
+    requestBody: {
+      content: {
+        "application/json": {
+          meta: components["schemas"]["Record_string.string_"];
+          experimentId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ResultSuccess_unknown_"] | components["schemas"]["ResultError_PostgrestError_"];
+        };
+      };
+    };
+  };
+  CreateNewExperiment: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["NewExperimentParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__experimentId-string_.string_"];
+        };
+      };
+    };
+  };
+  CreateNewExperimentHypothesis: {
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @enum {string} */
+          status: "PENDING" | "RUNNING" | "COMPLETED" | "FAILED";
+          providerKeyId: string;
+          promptVersion: string;
+          model: string;
+          experimentId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__hypothesisId-string_.string_"];
+        };
+      };
+    };
+  };
+  GetExperimentHypothesisScores: {
+    parameters: {
+      path: {
+        hypothesisId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__scores-Record_string.Score__.string_"];
+        };
+      };
+    };
+  };
+  GetExperimentEvaluators: {
+    parameters: {
+      path: {
+        experimentId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_EvaluatorResult-Array.string_"];
+        };
+      };
+    };
+  };
+  CreateExperimentEvaluator: {
+    parameters: {
+      path: {
+        experimentId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          evaluatorId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  RunExperimentEvaluators: {
+    parameters: {
+      path: {
+        experimentId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  DeleteExperimentEvaluator: {
+    parameters: {
+      path: {
+        experimentId: string;
+        evaluatorId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  GetExperiments: {
+    requestBody: {
+      content: {
+        "application/json": {
+          include?: components["schemas"]["IncludeExperimentKeys"];
+          filter: components["schemas"]["ExperimentFilterNode"];
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Experiment-Array.string_"];
+        };
+      };
+    };
+  };
+  RunExperiment: {
+    requestBody: {
+      content: {
+        "application/json": {
+          cells: {
+              cellId: string;
+            }[];
+          hypothesisId: string;
+          experimentTableId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ExperimentRun.string_"];
+        };
+      };
+    };
+  };
   AddDataset: {
     requestBody: {
       content: {
@@ -3910,6 +4491,8 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": {
+          originalColumnId?: string;
+          inputs: components["schemas"]["Record_string.string_"];
           inputRecordId: string;
         };
       };
@@ -4092,279 +4675,6 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["ResultError_unknown_"] | components["schemas"]["ResultSuccess_any_"];
-        };
-      };
-    };
-  };
-  CreateNewEmptyExperiment: {
-    requestBody: {
-      content: {
-        "application/json": {
-          datasetId: string;
-          metadata: components["schemas"]["Record_string.string_"];
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__experimentId-string_.string_"];
-        };
-      };
-    };
-  };
-  UpdateExperimentMeta: {
-    requestBody: {
-      content: {
-        "application/json": {
-          meta: components["schemas"]["Record_string.string_"];
-          experimentId: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["ResultSuccess_unknown_"] | components["schemas"]["ResultError_PostgrestError_"];
-        };
-      };
-    };
-  };
-  CreateNewExperiment: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["NewExperimentParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__experimentId-string_.string_"];
-        };
-      };
-    };
-  };
-  CreateNewExperimentHypothesis: {
-    requestBody: {
-      content: {
-        "application/json": {
-          /** @enum {string} */
-          status: "PENDING" | "RUNNING" | "COMPLETED" | "FAILED";
-          providerKeyId: string;
-          promptVersion: string;
-          model: string;
-          experimentId: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__hypothesisId-string_.string_"];
-        };
-      };
-    };
-  };
-  GetExperimentEvaluators: {
-    parameters: {
-      path: {
-        experimentId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_EvaluatorResult-Array.string_"];
-        };
-      };
-    };
-  };
-  CreateExperimentEvaluator: {
-    parameters: {
-      path: {
-        experimentId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          evaluatorId: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  RunExperimentEvaluators: {
-    parameters: {
-      path: {
-        experimentId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  DeleteExperimentEvaluator: {
-    parameters: {
-      path: {
-        experimentId: string;
-        evaluatorId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  GetExperiments: {
-    requestBody: {
-      content: {
-        "application/json": {
-          include?: components["schemas"]["IncludeExperimentKeys"];
-          filter: components["schemas"]["ExperimentFilterNode"];
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_Experiment-Array.string_"];
-        };
-      };
-    };
-  };
-  RunExperiment: {
-    requestBody: {
-      content: {
-        "application/json": {
-          datasetRowIds: string[];
-          hypothesisId: string;
-          experimentId: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_ExperimentRun.string_"];
-        };
-      };
-    };
-  };
-  CreateEvaluator: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CreateEvaluatorParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_EvaluatorResult.string_"];
-        };
-      };
-    };
-  };
-  GetEvaluator: {
-    parameters: {
-      path: {
-        evaluatorId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_EvaluatorResult.string_"];
-        };
-      };
-    };
-  };
-  UpdateEvaluator: {
-    parameters: {
-      path: {
-        evaluatorId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UpdateEvaluatorParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_EvaluatorResult.string_"];
-        };
-      };
-    };
-  };
-  DeleteEvaluator: {
-    parameters: {
-      path: {
-        evaluatorId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  QueryEvaluators: {
-    requestBody: {
-      content: {
-        "application/json": Record<string, never>;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_EvaluatorResult-Array.string_"];
-        };
-      };
-    };
-  };
-  GetExperimentsForEvaluator: {
-    parameters: {
-      path: {
-        evaluatorId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__experiment_id-string--experiment_created_at-string_-Array.string_"];
         };
       };
     };

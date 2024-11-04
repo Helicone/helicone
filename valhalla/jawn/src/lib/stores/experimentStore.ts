@@ -1,6 +1,8 @@
 import { ENVIRONMENT } from "../..";
 import { getAllSignedURLsFromInputs } from "../../managers/inputs/InputsManager";
 import { costOfPrompt } from "../../packages/cost";
+import { Database } from "../db/database.types";
+import { supabaseServer } from "../db/supabase";
 import { dbExecute } from "../shared/db/dbExecute";
 import { FilterNode } from "../shared/filters/filterDefs";
 import { buildFilterPostgres } from "../shared/filters/filters";
@@ -38,6 +40,8 @@ export interface ExperimentDatasetRow {
     response: ResponseObj;
     request: RequestObj;
   };
+  rowIndex: number;
+  columnId: string;
   scores: Record<string, Score>;
 }
 
@@ -89,6 +93,37 @@ export interface IncludeExperimentKeys {
   promptVersion?: true;
   responseBodies?: true;
   score?: true;
+}
+
+export interface ExperimentTableColumn {
+  id: string;
+  columnName: string;
+  columnType: string;
+  hypothesisId?: string;
+  cells: {
+    id: string;
+    rowIndex: number;
+    requestId?: string;
+    value: string | null;
+    metadata?: Record<string, any>;
+  }[];
+  metadata?: Record<string, any>;
+}
+
+export interface ExperimentTable {
+  id: string;
+  name: string;
+  experimentId: string;
+  columns: ExperimentTableColumn[];
+  metadata?: Record<string, any>;
+}
+
+export interface ExperimentTableSimplified {
+  id: string;
+  name: string;
+  experimentId: string;
+  createdAt: string;
+  metadata?: any;
 }
 
 function getExperimentsQuery(
@@ -358,6 +393,693 @@ export class ExperimentStore extends BaseStore {
     return ok(experimentResults);
   }
 
+  async createNewExperimentTable(
+    datasetId: string,
+    name: string,
+    experimentMetadata: Record<string, string>,
+    experimentTableMetadata?: Record<string, any>
+  ): Promise<
+    Result<{ experimentTableId: string; experimentId: string }, string>
+  > {
+    const result = await supabaseServer.client
+      .from("experiment_v2")
+      .insert({
+        dataset: datasetId,
+        organization: this.organizationId,
+        meta: experimentMetadata,
+      })
+      .select("*")
+      .single();
+    if (result.error || !result.data) {
+      return err(result.error?.message ?? "Failed to create experiment table");
+    }
+    const experimentTable = await supabaseServer.client
+      .from("experiment_table")
+      .insert({
+        experiment_id: result.data.id,
+        name: name,
+        organization_id: this.organizationId,
+        metadata: experimentTableMetadata ?? null,
+      })
+      .select("*")
+      .single();
+    if (experimentTable.error || !experimentTable.data) {
+      return err(
+        experimentTable.error?.message ?? "Failed to create experiment table"
+      );
+    }
+    return ok({
+      experimentTableId: experimentTable.data.id,
+      experimentId: result.data.id,
+    });
+  }
+
+  async getMaxRowIndex(
+    experimentTableId: string
+  ): Promise<Result<number, string>> {
+    const query = `
+      SELECT COALESCE(MAX(ecv.row_index), 0) as max_row_index
+      FROM experiment_cell ecv
+      JOIN experiment_column ec ON ec.id = ecv.column_id
+      JOIN experiment_table et ON et.id = ec.table_id
+      WHERE et.id = $1
+    `;
+
+    const result = await dbExecute<{ max_row_index: number }>(query, [
+      experimentTableId,
+    ]);
+
+    if (result.error || result.data === null || result.data.length === 0) {
+      return err(result.error ?? "Failed to get max row index");
+    }
+
+    return ok(result.data[0].max_row_index);
+  }
+
+  async createExperimentTableColumn(
+    experimentTableId: string,
+    columnName: string,
+    columnType: "input" | "output" | "experiment",
+    hypothesisId?: string,
+    promptVersionId?: string
+  ): Promise<Result<{ id: string }, string>> {
+    const metadata: Record<string, any> = {};
+    if (hypothesisId) {
+      metadata.hypothesisId = hypothesisId;
+    }
+    if (promptVersionId) {
+      metadata.promptVersionId = promptVersionId;
+    }
+
+    // Create the column using Supabase
+    const columnResult = await supabaseServer.client
+      .from("experiment_column")
+      .insert({
+        table_id: experimentTableId,
+        column_name: columnName,
+        column_type: columnType,
+        metadata: metadata,
+      })
+      .select("*")
+      .single();
+
+    if (columnResult.error || !columnResult.data) {
+      return err(columnResult.error?.message ?? "Failed to create column");
+    }
+
+    // Fetch existing columns for the experiment table
+    const existingColumnsResult = await supabaseServer.client
+      .from("experiment_column")
+      .select("id")
+      .eq("table_id", experimentTableId);
+
+    if (
+      existingColumnsResult.error ||
+      !existingColumnsResult.data ||
+      existingColumnsResult.data.length === 0
+    ) {
+      return err("No existing columns found in the experiment table.");
+    }
+
+    // Use the first existing column to copy metadata from
+    const existingColumnId = existingColumnsResult.data[0].id;
+
+    // If there are existing rows, create cells with updated metadata
+    const cellsQuery = `
+      INSERT INTO experiment_cell (column_id, row_index, status, value, metadata)
+      SELECT 
+        $1 AS column_id,
+        ecv.row_index,
+        'initialized' AS status,
+        NULL AS value,
+        ecv.metadata || jsonb_build_object('cellType', $3::text) AS metadata
+      FROM experiment_cell ecv
+      WHERE ecv.column_id = $2
+      ORDER BY ecv.row_index
+    `;
+
+    const cellsResult = await dbExecute(cellsQuery, [
+      columnResult.data.id, // $1: the new column ID
+      existingColumnId, // $2: the existing column ID to copy metadata from
+      columnType, // $3: the columnType to be used as cellType
+    ]);
+
+    if (cellsResult.error) {
+      return err(cellsResult.error);
+    }
+
+    return ok({ id: columnResult.data.id });
+  }
+
+  async createExperimentTableColumns(
+    experimentTableId: string,
+    columns: {
+      name: string;
+      type: "input" | "output" | "experiment";
+      hypothesisId?: string;
+      promptVersionId?: string;
+    }[]
+  ): Promise<Result<{ ids: string[] }, string>> {
+    const results = await Promise.all(
+      columns.map((column) =>
+        this.createExperimentTableColumn(
+          experimentTableId,
+          column.name,
+          column.type,
+          column.hypothesisId,
+          column.promptVersionId
+        )
+      )
+    );
+    if (results.some((result) => result.error)) {
+      return err("Failed to create experiment table columns");
+    }
+    return ok({ ids: results.map((result) => result.data!.id) });
+  }
+
+  async createExperimentCell(
+    columnId: string,
+    rowIndex: number,
+    value: string | null,
+    metadata?: Record<string, any>
+  ): Promise<Result<{ id: string }, string>> {
+    const result = await supabaseServer.client
+      .from("experiment_cell")
+      .insert({
+        column_id: columnId,
+        row_index: rowIndex,
+        value: value ?? null,
+        status: "initialized",
+        metadata: metadata ?? null,
+      })
+      .select("*")
+      .single();
+
+    if (result.error || !result.data) {
+      return err(result.error?.message ?? "Failed to create experiment cell");
+    }
+    return ok({ id: result.data.id });
+  }
+
+  async getExperimentCellsByIds(cellIds: string[]): Promise<
+    Result<
+      {
+        cellId: string;
+        status: string | null;
+        value: string | null;
+        metadata: Record<string, any> | null;
+        rowIndex: number;
+        columnId: string;
+      }[],
+      string
+    >
+  > {
+    const query = `
+    SELECT
+      ec.id,
+      ec.status,
+      ec.value,
+      ec.metadata,
+      ec.row_index,
+      ec.column_id
+    FROM experiment_cell ec
+    WHERE ec.id = ANY($1::uuid[])
+  `;
+    const result = await dbExecute<{
+      id: string;
+      status: string | null;
+      value: string | null;
+      metadata: Record<string, any> | null;
+      row_index: number;
+      column_id: string;
+    }>(query, [cellIds]);
+
+    if (result.error || !result.data) {
+      return err(result.error ?? "Failed to get experiment cells");
+    }
+    return ok(
+      result.data.map((cell) => ({
+        cellId: cell.id,
+        status: cell.status,
+        value: cell.value,
+        metadata: cell.metadata,
+        rowIndex: cell.row_index,
+        columnId: cell.column_id,
+      }))
+    );
+  }
+
+  async updateExperimentCell(params: {
+    cellId: string;
+    status: string | null;
+    value?: string | null;
+    metadata?: Record<string, any> | null;
+  }): Promise<
+    Result<
+      {
+        cellId: string;
+        status: string | null;
+        value: string | null;
+        metadata: Record<string, any> | null;
+        columnName: string;
+      },
+      string
+    >
+  > {
+    const { cellId, status, value, metadata } = params;
+
+    // Build the updates dynamically
+    const updates: string[] = [];
+    const values: any[] = [];
+    let index = 1;
+
+    if (status !== null && status !== undefined && status !== "") {
+      updates.push(`status = $${index++}`);
+      values.push(status);
+    }
+
+    if (value !== null && value !== undefined && value !== "") {
+      updates.push(`value = $${index++}`);
+      values.push(value);
+    }
+
+    if (metadata) {
+      // Use jsonb concatenation operator to merge existing and new metadata
+      updates.push(
+        `metadata = COALESCE(metadata, '{}'::jsonb) || $${index++}::jsonb`
+      );
+      values.push(JSON.stringify(metadata));
+    }
+
+    if (updates.length === 0) {
+      return err("No fields to update");
+    }
+
+    const query = `
+      UPDATE experiment_cell ec
+      SET ${updates.join(", ")}
+      FROM experiment_column col
+      WHERE ec.id = $${index}
+        AND ec.column_id = col.id
+      RETURNING ec.id, ec.status, ec.value, ec.metadata, col.column_name;
+    `;
+
+    values.push(cellId);
+
+    const result = await dbExecute<{
+      id: string;
+      status: string | null;
+      value: string | null;
+      metadata: Record<string, any> | null;
+      column_name: string;
+    }>(query, values);
+
+    if (result.error || !result.data || result.data.length === 0) {
+      return err(result.error ?? "Failed to update experiment cell");
+    }
+
+    return ok({
+      cellId: result.data[0].id,
+      status: result.data[0].status,
+      value: result.data[0].value,
+      metadata: result.data[0].metadata,
+      columnName: result.data[0].column_name,
+    });
+  }
+
+  async updateExperimentCells(params: {
+    cells: {
+      cellId: string;
+      status: string | null;
+      value?: string | null;
+      metadata?: Record<string, any> | null;
+    }[];
+  }): Promise<
+    Result<
+      {
+        cellId: string;
+        status: string | null;
+        value?: string | null;
+        metadata?: Record<string, any> | null;
+        columnName: string;
+      }[],
+      string
+    >
+  > {
+    const results = await Promise.all(
+      params.cells.map((cell) => this.updateExperimentCell(cell))
+    );
+    if (results.some((result) => result.error)) {
+      return err("Failed to update experiment cell statuses");
+    }
+    return ok(results.map((result) => result.data!));
+  }
+
+  async createExperimentTableRow(params: {
+    experimentTableId: string;
+    rowIndex: number;
+    metadata?: Record<string, any>;
+    inputs?: Record<string, string>;
+  }): Promise<Result<{ ids: string[] }, string>> {
+    // First, get all columns for this experiment table
+    const columnsResult = await supabaseServer.client
+      .from("experiment_column")
+      .select("*")
+      .eq("table_id", params.experimentTableId);
+
+    if (columnsResult.error) {
+      return err(columnsResult.error.message);
+    }
+
+    // Create empty cells for each column
+    let cellPromises: Promise<Result<{ id: string }, string>>[] = [];
+
+    if (params.inputs && Object.keys(params.inputs).length > 0) {
+      cellPromises = columnsResult.data.map((column) =>
+        this.createExperimentCell(
+          column.id,
+          params.rowIndex,
+          params?.inputs?.[column.column_name] ?? null,
+          {
+            ...params.metadata,
+            cellType: column.column_type,
+          }
+        )
+      );
+    } else {
+      columnsResult.data.map((column) =>
+        this.createExperimentCell(column.id, params.rowIndex, null, {
+          ...params.metadata,
+          cellType: column.column_type,
+        })
+      );
+    }
+
+    try {
+      const results = await Promise.all(cellPromises);
+
+      // Check if any cell creation failed
+      const failedResults = results.filter((result) => result.error);
+      if (failedResults.length > 0) {
+        return err(`Failed to create cells: ${failedResults[0].error}`);
+      }
+
+      // Return the first cell's ID as the row identifier
+      // Since all cells are created for the same row, any cell ID can serve as the row ID
+      return ok({ ids: results.map((result) => result.data!.id) });
+    } catch (error) {
+      return err(`Failed to create experiment row: ${error}`);
+    }
+  }
+
+  async createExperimentCells(
+    cells: {
+      columnId: string;
+      rowIndex: number;
+      value: string | null;
+      metadata?: Record<string, any>;
+    }[]
+  ): Promise<Result<{ ids: string[] }, string>> {
+    const results = await Promise.all(
+      cells.map((cell) =>
+        this.createExperimentCell(
+          cell.columnId,
+          cell.rowIndex,
+          cell.value === null || cell.value === "" ? null : cell.value,
+          cell.metadata
+        )
+      )
+    );
+    if (results.some((result) => result.error)) {
+      return err("Failed to create experiment cells");
+    }
+    return ok({ ids: results.map((result) => result.data!.id) });
+  }
+
+  async getExperimentHypothesisScores(params: {
+    hypothesisId: string;
+  }): Promise<Result<ExperimentScores["hypothesis"], string>> {
+    const { hypothesisId } = params;
+
+    const query = `
+      SELECT 
+        hr.result_request_id,
+        r.provider,
+        r.model,
+        r.created_at,
+        resp.completion_tokens, 
+        resp.prompt_tokens, 
+        resp.delay_ms,
+        COALESCE(
+          (
+            SELECT jsonb_object_agg(
+            sa.score_key,
+            jsonb_build_object(
+              'value', sv.int_value,
+              'valueType', sa.value_type
+            )
+          )
+        FROM score_value sv
+        JOIN score_attribute sa ON sa.id = sv.score_attribute
+            WHERE sv.request_id = r.id and sa.organization = $2
+          ),
+          '{}'::jsonb
+        ) as scores
+      FROM experiment_v2_hypothesis_run hr
+      JOIN request r ON r.id = hr.result_request_id
+      JOIN response resp ON resp.request = r.id
+      WHERE hr.experiment_hypothesis = $1 AND r.helicone_org_id = $2
+    `;
+
+    const result = await dbExecute<{
+      result_request_id: string;
+      provider: string;
+      model: string;
+      created_at: string;
+      completion_tokens: number;
+      prompt_tokens: number;
+      delay_ms: number;
+      scores: Record<string, Score>;
+    }>(query, [hypothesisId, this.organizationId]);
+
+    if (result.error) {
+      return err(result.error);
+    }
+
+    const runs = result.data;
+
+    if (!runs || runs.length === 0) {
+      return err("No runs found");
+    }
+
+    try {
+      const totalCost = runs.reduce((sum, run) => {
+        const cost =
+          modelCost({
+            model: run.model,
+            provider: run.provider,
+            sum_prompt_tokens: run.prompt_tokens,
+            sum_completion_tokens: run.completion_tokens,
+          }) ?? 0;
+        return sum + cost;
+      }, 0);
+
+      const totalLatency = runs.reduce((sum, run) => sum + run.delay_ms, 0);
+
+      // Collect the custom scores from each run
+      const customScoresArray = runs.map((run) => run.scores);
+
+      const customScores = getCustomScores(customScoresArray);
+
+      const scores: ExperimentScores["hypothesis"] = {
+        scores: {
+          dateCreated: {
+            value: new Date(runs[0].created_at),
+            valueType: "date",
+          },
+          model: { value: runs[0].model, valueType: "string" },
+          cost: {
+            value: totalCost / runs.length,
+            valueType: "number",
+          },
+          latency: {
+            value: totalLatency / runs.length,
+            valueType: "number",
+          },
+          ...customScores,
+        },
+      };
+
+      return ok(scores);
+    } catch (error) {
+      console.error("Error calculating hypothesis scores", error);
+      return err("Error calculating hypothesis scores");
+    }
+  }
+
+  async getExperimentTable(
+    experimentTableId: string
+  ): Promise<Result<ExperimentTable, string>> {
+    const query = `
+      SELECT 
+        et.id,
+        et.name,
+        et.experiment_id as "experimentId",
+        et.metadata,
+        COALESCE(
+          jsonb_agg(
+            jsonb_build_object(
+              'id', ec.id,
+              'columnName', ec.column_name,
+              'columnType', ec.column_type,
+              'metadata', ec.metadata,
+              'cells', (
+                SELECT jsonb_agg(
+                  jsonb_build_object(
+                    'id', ecv.id,
+                    'rowIndex', ecv.row_index,
+                    'value', ecv.value,
+                    'status', ecv.status,
+                    'metadata', CASE 
+                      WHEN ecv.metadata IS NULL THEN NULL 
+                      ELSE ecv.metadata::jsonb 
+                    END
+                  )
+                  ORDER BY ecv.row_index
+                )
+                FROM experiment_cell ecv
+                WHERE ecv.column_id = ec.id
+              )
+            )
+            ORDER BY 
+              CASE 
+                WHEN ec.column_type = 'input' THEN 1
+                WHEN ec.column_type = 'output' THEN 2
+                WHEN ec.column_type = 'experiment' THEN 3
+                ELSE 4
+              END,
+              ec.created_at ASC
+          ),
+          '[]'
+        ) as columns
+      FROM experiment_table et
+      LEFT JOIN experiment_column ec ON ec.table_id = et.id
+      WHERE et.id = $1 AND et.organization_id = $2
+      GROUP BY et.id, et.name, et.experiment_id, et.metadata;
+    `;
+
+    try {
+      const { data, error } = await dbExecute<{
+        id: string;
+        name: string;
+        experimentId: string;
+        columns: ExperimentTableColumn[];
+      }>(query, [experimentTableId, this.organizationId]);
+
+      if (error) {
+        console.error("Query Error:", error);
+        return err(error);
+      }
+
+      if (!data || data.length === 0) {
+        return err("Experiment table not found");
+      }
+
+      // Sort columns by columnType: input, output, experiment
+      const result = {
+        ...data[0],
+        columns: data[0].columns
+          .sort((a, b) => {
+            const order = { input: 0, output: 1, experiment: 2 };
+            return (
+              order[a.columnType as keyof typeof order] -
+              order[b.columnType as keyof typeof order]
+            );
+          })
+          .map((col) => ({
+            ...col,
+            cells: col.cells || [],
+          })),
+      };
+
+      return ok(result);
+    } catch (e) {
+      console.error("Exception:", e);
+      return err("An unexpected error occurred");
+    }
+  }
+
+  async getExperimentTableById(
+    experimentTableId: string
+  ): Promise<Result<ExperimentTableSimplified, string>> {
+    const result = await supabaseServer.client
+      .from("experiment_table")
+      .select("*")
+      .eq("id", experimentTableId)
+      .eq("organization_id", this.organizationId)
+      .single();
+
+    if (result.error || !result.data) {
+      return err(result.error?.message ?? "Experiment table not found");
+    }
+
+    return ok({
+      id: result.data.id,
+      name: result.data.name,
+      experimentId: result.data.experiment_id,
+      metadata: result.data.metadata,
+      createdAt: result.data.created_at,
+    });
+  }
+
+  async updateExperimentTableMetadata(params: {
+    experimentTableId: string;
+    metadata: Record<string, any>;
+  }): Promise<Result<null, string>> {
+    const existingMetadata = await this.getExperimentTable(
+      params.experimentTableId
+    );
+    const result = await supabaseServer.client
+      .from("experiment_table")
+      .update({
+        metadata: {
+          ...existingMetadata.data?.metadata,
+          ...params.metadata,
+        },
+      })
+      .eq("id", params.experimentTableId)
+      .eq("organization_id", this.organizationId);
+
+    if (result.error) {
+      return err(result.error.message);
+    }
+    return ok(null);
+  }
+
+  async getExperimentTables(): Promise<
+    Result<ExperimentTableSimplified[], string>
+  > {
+    const { data, error } = await supabaseServer.client
+      .from("experiment_table")
+      .select("*")
+      .eq("organization_id", this.organizationId)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      return err(error.message);
+    }
+
+    return ok(
+      data.map((table) => ({
+        id: table.id,
+        name: table.name,
+        experimentId: table.experiment_id,
+        metadata: table.metadata,
+        createdAt: table.created_at,
+      }))
+    );
+  }
+
   async getExperimentById(
     experimentId: string,
     include: IncludeExperimentKeys
@@ -472,6 +1194,162 @@ export class ExperimentStore extends BaseStore {
     } catch (e) {
       console.error("Exception:", e);
       return err("An unexpected error occurred");
+    }
+  }
+
+  async createExperimentTableRowWithCells(params: {
+    experimentTableId: string;
+    rowIndex: number;
+    metadata?: Record<string, any>;
+    cells: {
+      columnId: string;
+      value: string | null;
+      metadata?: Record<string, any>;
+    }[];
+  }): Promise<Result<{ ids: string[] }, string>> {
+    // Fetch all columns for the experiment table
+    const columnsResult = await supabaseServer.client
+      .from("experiment_column")
+      .select("id")
+      .eq("table_id", params.experimentTableId);
+
+    if (columnsResult.error) {
+      return err(columnsResult.error.message);
+    }
+
+    const allColumnIds = columnsResult.data.map((col) => col.id);
+
+    // Create cells for specified columns
+    const cellPromises = params.cells.map((cell) =>
+      this.createExperimentCell(
+        cell.columnId,
+        params.rowIndex,
+        cell.value,
+        cell.metadata ?? params.metadata
+      )
+    );
+
+    // Create empty cells for other columns
+    const specifiedColumnIds = params.cells.map((cell) => cell.columnId);
+    const otherColumnIds = allColumnIds.filter(
+      (id) => !specifiedColumnIds.includes(id)
+    );
+
+    for (const columnId of otherColumnIds) {
+      cellPromises.push(
+        this.createExperimentCell(
+          columnId,
+          params.rowIndex,
+          null,
+          params.metadata
+        )
+      );
+    }
+
+    try {
+      const results = await Promise.all(cellPromises);
+
+      // Check if any cell creation failed
+      const failedResults = results.filter((result) => result.error);
+      if (failedResults.length > 0) {
+        return err(`Failed to create cells: ${failedResults[0].error}`);
+      }
+
+      // Return the IDs of the created cells
+      return ok({ ids: results.map((result) => result.data!.id) });
+    } catch (error) {
+      return err(`Failed to create experiment row: ${error}`);
+    }
+  }
+
+  async createExperimentTableRowsWithCells(params: {
+    experimentTableId: string;
+    rows: {
+      metadata?: Record<string, any>;
+      cells: {
+        columnId: string;
+        value: string | null;
+        metadata?: Record<string, any>;
+      }[];
+    }[];
+  }): Promise<Result<{ ids: string[] }, string>> {
+    // Fetch all columns for the experiment table
+    const columnsResult = await supabaseServer.client
+      .from("experiment_column")
+      .select("id")
+      .eq("table_id", params.experimentTableId);
+
+    if (columnsResult.error) {
+      return err(columnsResult.error.message);
+    }
+
+    const allColumns = columnsResult.data.map((col) => col);
+
+    // Get the current max row index
+    const maxRowIndexResult = await this.getMaxRowIndex(
+      params.experimentTableId
+    );
+    if (maxRowIndexResult.error || maxRowIndexResult.data === null) {
+      return err(maxRowIndexResult.error ?? "Failed to get max row index");
+    }
+
+    let currentRowIndex = maxRowIndexResult.data + 1;
+
+    // Collect all cells to create
+    const cellsToCreate: {
+      columnId: string;
+      rowIndex: number;
+      value: string | null;
+      metadata?: Record<string, any>;
+    }[] = [];
+
+    for (const row of params.rows) {
+      // Create cells for specified columns
+      const specifiedColumnIds = row.cells.map((cell) => cell.columnId);
+      const otherColumnIds = allColumns.filter(
+        (col) => !specifiedColumnIds.includes(col.id)
+      );
+
+      // Cells for specified columns
+      for (const cell of row.cells) {
+        cellsToCreate.push({
+          columnId: cell.columnId,
+          rowIndex: currentRowIndex,
+          value: cell.value,
+          metadata: cell.metadata ?? row.metadata,
+        });
+      }
+
+      // Cells for other columns (empty)
+      for (const columnId of otherColumnIds) {
+        cellsToCreate.push({
+          columnId: columnId.id,
+          rowIndex: currentRowIndex,
+          value: null,
+          metadata: {
+            ...row.metadata,
+            cellType: "output",
+          },
+        });
+      }
+      console.log("cellsToCreate", cellsToCreate);
+
+      // Increment rowIndex for next row
+      currentRowIndex++;
+    }
+
+    // Now, bulk insert all cells
+    try {
+      const results = await this.createExperimentCells(cellsToCreate);
+
+      if (results.error) {
+        return err(results.error);
+      }
+
+      // Return the IDs of the created cells
+      return ok({ ids: results.data?.ids ?? [] });
+    } catch (error) {
+      return err(`Failed to create experiment rows: ${error}`);
     }
   }
 }

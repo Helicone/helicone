@@ -5,7 +5,11 @@ import { err, ok, PromiseGenericResult, Result } from "../shared/result";
 import { LogStore } from "../stores/LogStore";
 import { VersionedRequestStore } from "../stores/request/VersionedRequestStore";
 import { AbstractLogHandler } from "./AbstractLogHandler";
-import { HandlerContext, PromptRecord } from "./HandlerContext";
+import {
+  ExperimentCellValue,
+  HandlerContext,
+  PromptRecord,
+} from "./HandlerContext";
 
 type S3Record = {
   requestId: string;
@@ -31,6 +35,7 @@ export type BatchPayload = {
   s3Records: S3Record[];
   requestResponseVersionedCH: RequestResponseRMT[];
   searchRecords: Database["public"]["Tables"]["request_response_search"]["Insert"][];
+  experimentCellValues: ExperimentCellValue[];
 };
 
 export class LoggingHandler extends AbstractLogHandler {
@@ -56,6 +61,7 @@ export class LoggingHandler extends AbstractLogHandler {
       s3Records: [],
       requestResponseVersionedCH: [],
       searchRecords: [],
+      experimentCellValues: [],
     };
   }
 
@@ -73,6 +79,7 @@ export class LoggingHandler extends AbstractLogHandler {
         context.processedLog.request.heliconeTemplate
           ? this.mapPrompt(context)
           : null;
+      const experimentCellValueMapped = this.mapExperimentCellValues(context);
       const requestResponseVersionedCHMapped =
         this.mapRequestResponseVersionedCH(context);
 
@@ -87,6 +94,10 @@ export class LoggingHandler extends AbstractLogHandler {
 
       if (promptMapped) {
         this.batchPayload.prompts.push(promptMapped);
+      }
+
+      if (experimentCellValueMapped) {
+        this.batchPayload.experimentCellValues.push(experimentCellValueMapped);
       }
 
       this.batchPayload.requestResponseVersionedCH.push(
@@ -361,6 +372,22 @@ export class LoggingHandler extends AbstractLogHandler {
       }));
 
     return assetInserts;
+  }
+
+  mapExperimentCellValues(context: HandlerContext): ExperimentCellValue | null {
+    const request = context.message.log.request;
+    const experimentColumnId = request.experimentColumnId;
+    const experimentRowIndex = request.experimentRowIndex;
+
+    if (!experimentColumnId || !experimentRowIndex) {
+      return null;
+    }
+
+    return {
+      columnId: experimentColumnId,
+      rowIndex: parseInt(experimentRowIndex),
+      value: request.id,
+    };
   }
 
   mapPrompt(context: HandlerContext): PromptRecord | null {

@@ -606,4 +606,56 @@ export class PromptManager extends BaseManager {
 
     return ok(null);
   }
+
+  public getHeliconeTemplateKeys(template: string | object): string[] {
+    try {
+      // Convert to string if it's an object
+      const templateString =
+        typeof template === "string"
+          ? template
+          : JSON.stringify(template, null, 2);
+
+      // Helper function to find keys in a string
+      const findKeys = (str: string): string[] => {
+        const regex = /<helicone-prompt-input key="([^"]+)"\s*\/>/g;
+        const matches = str.match(regex);
+        return matches
+          ? matches.map((match) =>
+              match.replace(/<helicone-prompt-input key="|"\s*\/>/g, "")
+            )
+          : [];
+      };
+
+      // For objects, we need to search through all nested properties
+      if (typeof template === "object") {
+        const keys: string[] = [];
+        const searchObject = (obj: any) => {
+          for (const value of Object.values(obj)) {
+            if (typeof value === "string") {
+              keys.push(...findKeys(value));
+            } else if (Array.isArray(value)) {
+              value.forEach((item) => {
+                if (typeof item === "string") {
+                  keys.push(...findKeys(item));
+                } else if (typeof item === "object") {
+                  searchObject(item);
+                }
+              });
+            } else if (typeof value === "object" && value !== null) {
+              searchObject(value);
+            }
+          }
+        };
+        searchObject(template);
+        return [...new Set(keys)]; // Remove duplicates
+      }
+
+      // For strings, just search directly
+      return findKeys(templateString);
+    } catch (error) {
+      // Log the error if needed
+      console.error("Error in getHeliconeTemplateKeys:", error);
+      return [];
+    }
+  }
 }

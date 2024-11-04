@@ -1,19 +1,15 @@
 import { ExperimentTable } from "./ExperimentTable";
 
-interface PromptIdPageProps {
-  promptSubversionId?: string;
-  experimentId?: string;
+interface ExperimentTablePageEmptyProps {
+  experimentTableId?: string;
 }
 
-const ExperimentTablePageEmpty = (props: PromptIdPageProps) => {
-  const { promptSubversionId, experimentId } = props;
+const ExperimentTablePageEmpty = (props: ExperimentTablePageEmptyProps) => {
+  const { experimentTableId } = props;
 
   return (
     <div className="flex flex-col w-full space-y-4 pt-4">
-      <ExperimentTable
-        promptSubversionId={promptSubversionId}
-        experimentId={experimentId}
-      />
+      <ExperimentTable experimentTableId={experimentTableId ?? ""} />
     </div>
   );
 };

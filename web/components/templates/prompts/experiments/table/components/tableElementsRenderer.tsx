@@ -1,9 +1,4 @@
-import {
-  FolderIcon,
-  ListBulletIcon,
-  PlayIcon,
-  TableCellsIcon,
-} from "@heroicons/react/24/outline";
+import { ListBulletIcon, PlayIcon } from "@heroicons/react/24/outline";
 import { Button } from "../../../../../ui/button";
 import {
   Popover,
@@ -14,18 +9,17 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { Badge } from "../../../../../ui/badge";
 import PromptPlayground from "../../../id/promptPlayground";
 import { Input } from "../../../../../ui/input";
-import { Dices } from "lucide-react";
 import ArrayDiffViewer from "../../../id/arrayDiffViewer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useQuery } from "@tanstack/react-query";
+import { useJawnClient } from "../../../../../../lib/clients/jawnHook";
 
 const InputCellRenderer: React.FC<any> = (props) => {
-  const [popoverOpen, setPopoverOpen] = useState(false);
-  const [inputValue, setInputValue] = useState(props.value || "");
+  const [isEditing, setIsEditing] = useState(false);
+  const [inputValue, setInputValue] = useState(
+    props.data.cells[props.colDef.cellRendererParams.columnId]?.value || ""
+  );
   const inputRef = useRef<HTMLInputElement>(null);
-
-  const isEmptyTable =
-    props.context.rowData?.length === 0 ||
-    !props.context.rowData?.some((row: any) => row.dataset_row_id);
 
   // Determine the display value
   const displayValue = inputValue || "Click to add input";
@@ -33,126 +27,63 @@ const InputCellRenderer: React.FC<any> = (props) => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     setInputValue(newValue);
-    props.context.handleInputChange(props.column.colId, newValue);
-  };
-
-  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      handleInputSubmit();
-    }
   };
 
   const handleInputSubmit = () => {
-    if (inputValue.trim() === "") {
-      // Don't submit if the value is empty
-      return;
-    }
+    if (inputValue.trim() === "") return;
 
-    setPopoverOpen(false);
+    const cell = props.data.cells[props.column.colId];
 
-    const nextInputField = props.context.inputColumnFields[props.index + 1];
-    if (nextInputField) {
-      const currentRowData = props.context.rowData.find(
-        (row: any) => row.id === props.node.id
-      );
-      const nextCellValue = currentRowData
-        ? currentRowData[nextInputField]
-        : undefined;
+    props.context.handleUpdateExperimentCell({
+      cellId: cell.cellId,
+      value: inputValue.trim(),
+    });
 
-      if (nextCellValue === "" || nextCellValue === undefined) {
-        props.context.setActivePopoverCell({
-          rowIndex: props.node.rowIndex,
-          colId: nextInputField,
-        });
-      }
-    } else {
-      // This is the last input column
-      props.context.handleLastInputSubmit();
+    setIsEditing(false);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleInputSubmit();
+    } else if (e.key === "Escape") {
+      setIsEditing(false);
     }
   };
 
   useEffect(() => {
-    if (popoverOpen && inputRef.current) {
+    if (isEditing && inputRef.current) {
       inputRef.current.focus();
     }
-  }, [popoverOpen]);
+  }, [isEditing]);
 
-  useEffect(() => {
-    const isActiveCell =
-      props.context.activePopoverCell?.rowIndex === props.node.rowIndex &&
-      props.context.activePopoverCell?.colId === props.column.colId;
-    if (isActiveCell) {
-      setPopoverOpen(true);
-    } else {
-      setPopoverOpen(false);
-    }
-  }, [
-    props.context.activePopoverCell,
-    props.node.rowIndex,
-    props.column.colId,
-  ]);
+  if (isEditing) {
+    return (
+      <Input
+        ref={inputRef}
+        className="h-full w-full text-sm border-none focus:ring-0"
+        value={inputValue}
+        onChange={handleInputChange}
+        onKeyDown={handleKeyDown}
+        onBlur={handleInputSubmit}
+        autoFocus
+      />
+    );
+  }
 
   return (
-    <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
-      <PopoverTrigger asChild>
-        <div
-          className="cursor-pointer"
-          style={{
-            whiteSpace: "inherit",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            color: inputValue ? "inherit" : "#6B7280",
-            minHeight: "20px",
-          }}
-        >
-          {displayValue}
-        </div>
-      </PopoverTrigger>
-      <PopoverContent align="start" className="w-52 p-0">
-        <Input
-          ref={inputRef}
-          className="text-sm w-full font-semibold px-2 pt-2 border-none"
-          placeholder="Enter manually, or:"
-          value={inputValue}
-          onChange={handleInputChange}
-          onKeyDown={handleInputKeyDown}
-          onBlur={handleInputSubmit}
-        />
-
-        <div className="flex flex-col space-y-2 p-2 items-start justify-start">
-          <Button
-            onClick={() => {
-              setPopoverOpen(false);
-              props.context.setShowExperimentInputSelector(true);
-            }}
-            className="h-8 w-full flex items-center justify-start"
-            variant="ghost"
-          >
-            <TableCellsIcon className="inline h-4 w-4 mr-2" />
-            Select an input set
-          </Button>
-          <Button
-            onClick={() => {
-              setPopoverOpen(false);
-              props.context.setShowRandomInputSelector(true);
-            }}
-            className="h-8 w-full flex items-center justify-start"
-            variant="ghost"
-          >
-            <Dices className="inline h-4 w-4 mr-2" />
-            Random prod
-          </Button>
-          <Button
-            className="w-full h-8 flex items-center justify-start"
-            variant="ghost"
-          >
-            <FolderIcon className="inline h-4 w-4 mr-2" />
-            Select a dataset
-          </Button>
-        </div>
-      </PopoverContent>
-    </Popover>
+    <div
+      className="cursor-pointer h-full w-full px-2 flex items-center"
+      onClick={() => setIsEditing(true)}
+      style={{
+        whiteSpace: "inherit",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        color: inputValue ? "inherit" : "#6B7280",
+      }}
+    >
+      {displayValue}
+    </div>
   );
 };
 
@@ -164,8 +95,37 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
     onRunColumn,
     onHeaderClick,
     orginalPromptTemplate,
+    promptVersionId,
+    originalPromptTemplate,
   } = props;
+
   const [showPromptPlayground, setShowPromptPlayground] = useState(false);
+  const jawnClient = useJawnClient();
+
+  // Use React Query to fetch and cache the prompt template
+  const { data: promptTemplate } = useQuery(
+    ["promptTemplate", promptVersionId],
+    async () => {
+      if (!props.context.orgId || !promptVersionId) return null;
+
+      const res = await jawnClient.GET("/v1/prompt/version/{promptVersionId}", {
+        params: {
+          path: {
+            promptVersionId: promptVersionId,
+          },
+        },
+      });
+      return res.data?.data;
+    },
+    {
+      enabled:
+        !!props.context.orgId && !!promptVersionId && showPromptPlayground,
+      staleTime: Infinity,
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+      refetchOnReconnect: false,
+    }
+  );
 
   const handleHeaderClick = (e: React.MouseEvent) => {
     setShowPromptPlayground(true);
@@ -178,17 +138,15 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
     }
   };
 
+  //TODO: FIX!!!
+
   const hasDiff = useMemo(() => {
     return (
-      props.context?.promptVersionTemplateRef?.current?.helicone_template
-        ?.messages && props.hypothesis?.promptVersion?.template?.messages
+      (promptTemplate?.helicone_template as any)?.messages &&
+      (originalPromptTemplate?.helicone_template as any)?.messages
     );
-  }, [
-    props.context?.promptVersionTemplateRef,
-    props.hypothesis?.promptVersion?.template?.messages,
-  ]);
+  }, [promptTemplate, originalPromptTemplate]);
 
-  const [showDiff, setShowDiff] = useState(false);
   return (
     <Popover open={showPromptPlayground} onOpenChange={setShowPromptPlayground}>
       <PopoverTrigger asChild>
@@ -220,7 +178,7 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
       </PopoverTrigger>
       <PopoverContent className="w-[800px] p-0" side="bottom">
         {hasDiff ? (
-          <Tabs defaultValue="diff" className="w-full">
+          <Tabs defaultValue="preview" className="w-full">
             <TabsList
               className="w-full flex justify-end rounded-none"
               variant={"secondary"}
@@ -231,18 +189,17 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
             <TabsContent value="diff">
               <ArrayDiffViewer
                 origin={
-                  props.context?.promptVersionTemplateRef?.current
-                    ?.helicone_template?.messages ?? []
+                  originalPromptTemplate?.helicone_template?.messages ?? []
                 }
                 target={
-                  props.hypothesis?.promptVersion?.template?.messages ?? []
+                  (promptTemplate?.helicone_template as any)?.messages ?? []
                 }
               />
             </TabsContent>
             <TabsContent value="preview">
               <PromptPlayground
                 prompt={
-                  props.promptVersionTemplate?.helicone_template ??
+                  promptTemplate?.helicone_template ??
                   (props.hypothesis?.promptVersion?.template || "")
                 }
                 selectedInput={undefined}
@@ -251,7 +208,7 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
                 }}
                 submitText="Save"
                 initialModel={
-                  props.promptVersionTemplate?.model ||
+                  promptTemplate?.model ||
                   props.hypothesis?.promptVersion?.model ||
                   ""
                 }
@@ -264,7 +221,7 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
         ) : (
           <PromptPlayground
             prompt={
-              props.promptVersionTemplate?.helicone_template ??
+              promptTemplate?.helicone_template ??
               (props.hypothesis?.promptVersion?.template || "")
             }
             selectedInput={undefined}
@@ -273,7 +230,7 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
             }}
             submitText="Save"
             initialModel={
-              props.promptVersionTemplate?.model ||
+              promptTemplate?.model ||
               props.hypothesis?.promptVersion?.model ||
               ""
             }
@@ -331,17 +288,8 @@ const RowNumberCellRenderer: React.FC<any> = (props) => {
       : "N/A";
 
   const handleRunClick = () => {
-    const hypothesesToRun = props.context.hypothesesToRun; // Get the hypotheses IDs to run
-    const datasetRowId = props.data.dataset_row_id; // Get the dataset row ID
-
-    if (!datasetRowId || !hypothesesToRun || hypothesesToRun.length === 0) {
-      return;
-    }
-
-    // Run each hypothesis for this dataset row
-    hypothesesToRun.forEach((hypothesisId: string) => {
-      props.context.handleRunHypothesis(hypothesisId, [datasetRowId]);
-    });
+    const rowIndex = props.node.rowIndex;
+    props.context.handleRunRow(rowIndex);
   };
 
   return (

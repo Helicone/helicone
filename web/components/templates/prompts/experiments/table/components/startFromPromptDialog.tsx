@@ -14,7 +14,6 @@ import PromptPlayground, { PromptObject } from "../../../id/promptPlayground";
 import { Input } from "../../../../../ui/input";
 import LoadingAnimation from "../../../../../shared/loadingAnimation";
 
-// Move NewExperimentDialog outside of StartFromPromptDialog
 export const NewExperimentDialog = () => {
   const notification = useNotification();
   const [basePrompt, setBasePrompt] = useState<PromptObject>({
@@ -266,48 +265,38 @@ export const StartFromPromptDialog = ({
       (p) => p.id === selectedVersionId
     );
     const prompt = prompts?.find((p) => p.id === selectedPromptId);
-    const experiment = await jawn.POST("/v1/experiment/new-empty", {
+
+    const experimentTableResult = await jawn.POST("/v1/experiment/table/new", {
       body: {
-        metadata: {
-          prompt_id: selectedPromptId,
-          prompt_version: selectedVersionId || "",
+        datasetId: dataset.data?.data?.datasetId!,
+        promptVersionId: selectedVersionId!,
+        newHeliconeTemplate: JSON.stringify(promptVersion?.helicone_template),
+        isMajorVersion: false,
+        promptSubversionMetadata: {
+          experimentAssigned: true,
+        },
+        experimentMetadata: {
+          prompt_id: selectedPromptId!,
+          prompt_version: selectedVersionId!,
           experiment_name:
             `${prompt?.user_defined_id}_V${promptVersion?.major_version}.${promptVersion?.minor_version}` ||
             "",
         },
-        datasetId: dataset.data?.data?.datasetId,
+        experimentTableMetadata: {
+          datasetId: dataset.data?.data?.datasetId!,
+          model: promptVersion?.model,
+          prompt_id: selectedPromptId!,
+          prompt_version: selectedVersionId!,
+        },
       },
     });
-    if (!experiment.data?.data?.experimentId) {
-      notification.setNotification("Failed to create experiment", "error");
-      return;
-    }
-    const result = await jawn.POST(
-      "/v1/prompt/version/{promptVersionId}/subversion",
-      {
-        params: {
-          path: {
-            promptVersionId: selectedVersionId,
-          },
-        },
-        body: {
-          newHeliconeTemplate: JSON.stringify(promptVersion?.helicone_template),
-          isMajorVersion: false,
-          metadata: {
-            experimentAssigned: true,
-          },
-        },
-      }
-    );
 
-    if (result.error || !result.data) {
+    if (experimentTableResult.error || !experimentTableResult.data) {
       notification.setNotification("Failed to create subversion", "error");
       return;
     }
 
-    router.push(
-      `/prompts/${selectedPromptId}/subversion/${selectedVersionId}/experiment/${experiment.data?.data?.experimentId}`
-    );
+    router.push(`/experiments/${experimentTableResult.data?.data?.tableId}`);
   };
 
   return (

@@ -77,6 +77,73 @@ const useExperiments = (
   };
 };
 
+const useExperimentTables = () => {
+  const org = useOrg();
+  const { data, isLoading, refetch, isRefetching } = useQuery({
+    queryKey: ["experimentTables", org?.currentOrg?.id],
+    queryFn: async (query) => {
+      const orgId = query.queryKey[1] as string;
+      const jawn = getJawnClient(orgId);
+
+      return jawn.POST("/v1/experiment/tables/query", {});
+    },
+    refetchOnWindowFocus: false,
+    refetchInterval: 5_000,
+  });
+
+  const experiments = data?.data?.data;
+
+  if (!experiments) {
+    return {
+      isLoading,
+      refetch,
+      isRefetching,
+      experiments: [],
+    };
+  }
+
+  return {
+    isLoading,
+    refetch,
+    isRefetching,
+    experiments: experiments.map((experiment) => ({
+      ...experiment,
+      model: (experiment.metadata as any)?.model ?? "not found",
+    })),
+  };
+};
+
+const useExperimentTableMetadata = (req: { id: string }) => {
+  const org = useOrg();
+  const { data, isLoading, refetch, isRefetching } = useQuery({
+    queryKey: ["experimentTableMetadata", req.id, org?.currentOrg?.id],
+    queryFn: async (query) => {
+      const id = query.queryKey[1] as string;
+      const jawn = getJawnClient(org?.currentOrg?.id);
+
+      const res = await jawn.POST(
+        "/v1/experiment/table/{experimentTableId}/metadata/query",
+        {
+          params: {
+            path: {
+              experimentTableId: id ?? "",
+            },
+          },
+        }
+      );
+
+      return res.data?.data;
+    },
+  });
+
+  return {
+    isLoading,
+    refetch,
+    isRefetching,
+    experiment: data,
+  };
+};
+
 const useExperiment = (id: string) => {
   const org = useOrg();
   const { data, isLoading, refetch, isRefetching } = useQuery({
@@ -113,4 +180,9 @@ const useExperiment = (id: string) => {
   };
 };
 
-export { useExperiment, useExperiments };
+export {
+  useExperiment,
+  useExperiments,
+  useExperimentTables,
+  useExperimentTableMetadata,
+};

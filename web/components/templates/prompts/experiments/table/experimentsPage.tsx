@@ -1,5 +1,5 @@
 import AuthHeader from "../../../../shared/authHeader";
-import { useExperiments } from "../../../../../services/hooks/prompts/experiments";
+import { useExperimentTables } from "../../../../../services/hooks/prompts/experiments";
 import ThemedTable from "../../../../shared/themed/table/themedTable";
 import { useRouter } from "next/router";
 import { PlusIcon, DocumentPlusIcon } from "@heroicons/react/24/outline";
@@ -16,10 +16,7 @@ const ExperimentsPage = (props: ExperimentsPageProps) => {
   const { prompts } = usePrompts();
   const [dialogOpen, setDialogOpen] = useState(false);
   const router = useRouter();
-  const { experiments, isLoading } = useExperiments({
-    page: 1,
-    pageSize: 25,
-  });
+  const { experiments, isLoading } = useExperimentTables();
 
   const templateOptions = [
     { id: "text-classification", name: "Text classification" },
@@ -87,7 +84,7 @@ const ExperimentsPage = (props: ExperimentsPageProps) => {
           {
             header: "Name",
             accessorFn: (row) => {
-              return row.experimentName || row.datasetName;
+              return row.name;
             },
           },
           {
@@ -108,13 +105,11 @@ const ExperimentsPage = (props: ExperimentsPageProps) => {
         id="experiments"
         skeletonLoading={false}
         onRowSelect={(row) => {
-          const promptVersion = prompts?.find(
-            (p) => p.id === row.promptId || ""
-          );
-
-          router.push(
-            `/prompts/${row.promptId}/subversion/${row.promptVersionId}/experiment/${row.id}`
-          );
+          const promptId = (row.metadata as any)?.prompt_id;
+          const promptVersion = (row.metadata as any)?.prompt_version;
+          if (promptId && promptVersion) {
+            router.push(`/experiments/${row.id}`);
+          }
         }}
         fullWidth={true}
       />

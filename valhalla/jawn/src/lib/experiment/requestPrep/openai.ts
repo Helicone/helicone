@@ -4,7 +4,9 @@ import { PreparedRequest, PreparedRequestArgs } from "./PreparedRequest";
 function prepareRequestAzure(
   requestPath: string,
   apiKey: string,
-  requestId: string
+  requestId: string,
+  columnId?: string,
+  rowIndex?: number
 ): {
   url: URL;
   headers: { [key: string]: string };
@@ -18,9 +20,15 @@ function prepareRequestAzure(
     "Accept-Encoding": "",
   };
 
+  if (columnId) {
+    headers["Helicone-Experiment-Column-Id"] = columnId;
+  }
+  if (rowIndex !== undefined) {
+    headers["Helicone-Experiment-Row-Index"] = rowIndex.toString();
+  }
+
   const heliconeWorkerUrl = process.env.HELICONE_WORKER_URL ?? "";
   let fetchUrl = `${heliconeWorkerUrl}/v1/chat/completions`;
-  console.log("fetchUrl", fetchUrl);
 
   return {
     url: new URL(fetchUrl),
@@ -58,6 +66,8 @@ export function prepareRequestOpenAIOnPremFull({
   secretKey: apiKey,
   datasetRow,
   requestId,
+  columnId,
+  rowIndex,
 }: PreparedRequestArgs): PreparedRequest {
   const newRequestBody = autoFillInputs({
     template: template ?? {},
@@ -68,8 +78,11 @@ export function prepareRequestOpenAIOnPremFull({
   const { url: fetchUrl, headers } = prepareRequestAzure(
     datasetRow.inputRecord!.requestPath,
     apiKey,
-    requestId
+    requestId,
+    columnId,
+    rowIndex
   );
+
   return {
     url: fetchUrl,
     headers,

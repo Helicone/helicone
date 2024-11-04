@@ -41,6 +41,8 @@ export type Log = {
     requestCreatedAt: Date;
     isStream: boolean;
     heliconeTemplate?: TemplateWithInputs;
+    experimentColumnId?: string;
+    experimentRowIndex?: string;
   };
   response: {
     id: string;
@@ -118,4 +120,10 @@ export type PromptRecord = {
   model?: string;
   heliconeTemplate: TemplateWithInputs;
   createdAt: Date;
+};
+
+export type ExperimentCellValue = {
+  columnId: string;
+  rowIndex: number;
+  value: string;
 };

@@ -773,6 +773,8 @@ export class DBLoggable {
           requestCreatedAt: this.request.startTime ?? new Date(),
           isStream: this.request.isStream,
           heliconeTemplate: this.request.heliconeTemplate ?? undefined,
+          experimentColumnId: requestHeaders.experimentColumnId ?? undefined,
+          experimentRowIndex: requestHeaders.experimentRowIndex ?? undefined,
         },
         response: {
           id: this.response.responseId,
