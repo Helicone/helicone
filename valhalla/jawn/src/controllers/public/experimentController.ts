@@ -359,6 +359,7 @@ export class ExperimentController extends Controller {
           columnId: string;
           value: string | null;
         }[];
+        sourceRequest?: string;
       }[];
     },
     @Request() request: JawnAuthenticatedRequest
@@ -402,6 +403,7 @@ export class ExperimentController extends Controller {
         cellType: "input",
       },
       cells: row.cells,
+      sourceRequest: row.sourceRequest,
     }));
 
     // Now call the bulk insertion function

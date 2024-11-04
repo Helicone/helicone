@@ -12046,6 +12046,9 @@
 									"rows": {
 										"items": {
 											"properties": {
+												"sourceRequest": {
+													"type": "string"
+												},
 												"cells": {
 													"items": {
 														"properties": {

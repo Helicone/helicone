@@ -1293,12 +1293,13 @@ export class ExperimentStore extends BaseStore {
         value: string | null;
         metadata?: Record<string, any>;
       }[];
+      sourceRequest?: string;
     }[];
   }): Promise<Result<{ ids: string[] }, string>> {
     // Fetch all columns for the experiment table
     const columnsResult = await supabaseServer.client
       .from("experiment_column")
-      .select("id")
+      .select("*")
       .eq("table_id", params.experimentTableId);
 
     if (columnsResult.error) {
@@ -1323,6 +1324,7 @@ export class ExperimentStore extends BaseStore {
       rowIndex: number;
       value: string | null;
       metadata?: Record<string, any>;
+      sourceRequest?: string;
     }[] = [];
 
     for (const row of params.rows) {
@@ -1347,7 +1349,10 @@ export class ExperimentStore extends BaseStore {
         cellsToCreate.push({
           columnId: columnId.id,
           rowIndex: currentRowIndex,
-          value: null,
+          value:
+            columnId.column_type === "output"
+              ? row.sourceRequest ?? null
+              : null,
           metadata: {
             ...row.metadata,
             cellType: "output",

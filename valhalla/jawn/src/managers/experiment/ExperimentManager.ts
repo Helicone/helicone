@@ -440,6 +440,7 @@ export class ExperimentManager extends BaseManager {
         columnId: string;
         value: string | null;
       }[];
+      sourceRequest?: string;
     }[];
   }): Promise<Result<{ ids: string[] }, string>> {
     return this.ExperimentStore.createExperimentTableRowsWithCells(params);

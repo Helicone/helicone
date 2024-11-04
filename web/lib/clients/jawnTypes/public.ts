@@ -4275,6 +4275,7 @@ export interface operations {
       content: {
         "application/json": {
           rows: ({
+              sourceRequest?: string;
               cells: ({
                   value: string | null;
                   columnId: string;
