@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { supabaseServer } from "../../../../lib/supabaseServer";
+import generateApiKey from "generate-api-key";
 
 export type Tier = "free" | "pro" | "growth" | "enterprise";
 
@@ -7,7 +8,13 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<string>
 ) {
+  if (req.method !== "POST") {
+    res.status(405).json("Method not allowed");
+    return;
+  }
+  const heliconeAuthorizationHeader = req.headers["helicone-authorization"];
   const userId = req.query.id as string;
+  const isEu = req.body.isEu;
 
   const orgs = await supabaseServer
     .from("organization")
@@ -20,10 +27,11 @@ export default async function handler(
       .from("organization")
       .insert([
         {
-          name: "My Organization",
+          name: "Xpedia AI",
           owner: userId,
           tier: "free",
           is_personal: true,
+          has_onboarded: true,
         },
       ])
       .select("*")
@@ -41,6 +49,32 @@ export default async function handler(
           org_role: "owner",
         })
         .select("*");
+
+      const orgId = result.data.id;
+
+      const apiKey = `sk-helicone${isEu ? "-eu" : ""}-${generateApiKey({
+        method: "base32",
+        dashes: true,
+      }).toString()}`.toLowerCase();
+
+      console.log("fetching setup demo");
+      console.log(
+        process.env.NEXT_PUBLIC_HELICONE_JAWN_SERVICE,
+        heliconeAuthorizationHeader
+      );
+      await fetch(
+        `${process.env.NEXT_PUBLIC_HELICONE_JAWN_SERVICE}/v1/organization/setup-demo`,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            apiKey,
+          }),
+          headers: {
+            "helicone-authorization": heliconeAuthorizationHeader as string,
+          },
+        }
+      );
+
       res.status(200).json("Added successfully");
     }
   } else {

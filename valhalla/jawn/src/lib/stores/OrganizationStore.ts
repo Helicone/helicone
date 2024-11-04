@@ -6,7 +6,9 @@ import {
   OrganizationOwner,
   UpdateOrganizationParams,
 } from "../../managers/organization/OrganizationManager";
+import { hashAuth } from "../../utils/hash";
 import { supabaseServer } from "../db/supabase";
+import { setupDemoOrganizationRequests } from "../onboarding";
 import { dbExecute } from "../shared/db/dbExecute";
 import { err, ok, Result } from "../shared/result";
 import { BaseStore } from "./baseStore";
@@ -381,5 +383,57 @@ export class OrganizationStore extends BaseStore {
     }>(query, [orgId, userId]);
 
     return error === null && data?.length > 0;
+  }
+
+  public async setupDemo(
+    userId: string,
+    organizationId: string,
+    apiKey: string
+  ): Promise<Result<null, string>> {
+    const promiseRes = await this.generateHash(
+      apiKey,
+      userId,
+      "Default",
+      organizationId
+    );
+
+    try {
+      await setupDemoOrganizationRequests({
+        heliconeApiKey: apiKey,
+      });
+
+      return ok(null);
+    } catch (error) {
+      return err(`Failed to setup demo: ${error}`);
+    }
+  }
+
+  public async generateHash(
+    apiKey: string,
+    userId: string,
+    keyName: string,
+    organizationId: string
+  ): Promise<Result<string, string>> {
+    try {
+      const hashedKey = await hashAuth(apiKey);
+
+      const insertRes = await supabaseServer.client
+        .from("helicone_api_keys")
+        .insert({
+          api_key_hash: hashedKey,
+          user_id: userId,
+          api_key_name: keyName,
+          organization_id: organizationId,
+          key_permissions: "rw",
+        });
+
+      if (insertRes.error) {
+        return err(`Failed to insert key: ${insertRes.error.message}`);
+      }
+
+      return ok("success");
+    } catch (error: any) {
+      return err(`Failed to generate key hash: ${error}`);
+    }
   }
 }

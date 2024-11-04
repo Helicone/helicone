@@ -7,6 +7,7 @@ import { OrgContextValue } from "../../components/layout/organizationContext";
 import { ORG_ID_COOKIE_KEY } from "../../lib/constants";
 import { getJawnClient } from "../../lib/clients/jawn";
 import posthog from "posthog-js";
+import { getHeliconeCookie } from "@/lib/cookies";
 
 const useGetOrgMembers = (orgId: string) => {
   const jawn = getJawnClient(orgId);
@@ -222,12 +223,31 @@ const useOrgsContextManager = () => {
 
   useEffect(() => {
     if ((!orgs || orgs.length === 0) && user?.id) {
-      fetch(`/api/user/${user.id}/ensure-one-org`).then((res) => {
+      const jwtToken = getHeliconeCookie().data?.jwtToken;
+      const isEu = window.location.hostname.includes("eu.");
+      fetch(`/api/user/${user.id}/ensure-one-org`, {
+        method: "POST",
+        body: JSON.stringify({
+          isEu,
+        }),
+        headers: {
+          "helicone-authorization": JSON.stringify({
+            _type: "jwt",
+            token: jwtToken,
+            orgId: user.id,
+          }),
+        },
+      }).then((res) => {
         if (res.status === 201) {
         } else if (res.status !== 200) {
           console.error("Failed to create org", res.json());
         } else {
-          refreshCurrentOrg();
+          console.log("org created, refreshing");
+          // const jawn = getJawnClient(user.id);
+          // jawn.GET("/v1/organization/demo").then((res) => {
+          //   console.log("org created", res);
+          //   refreshCurrentOrg();
+          // });
         }
       });
     }

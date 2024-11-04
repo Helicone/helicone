@@ -14861,6 +14861,50 @@
 				]
 			}
 		},
+		"/v1/organization/setup-demo": {
+			"post": {
+				"operationId": "SetupDemo",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Organization"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"apiKey": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"apiKey"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
 		"/v1/dashboard/scores/query": {
 			"post": {
 				"operationId": "GetScoresOverTime",

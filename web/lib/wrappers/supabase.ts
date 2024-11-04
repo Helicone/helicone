@@ -52,6 +52,7 @@ export class SupabaseServerWrapper<T> {
     if (!user.data || !user.data.user) {
       return { error: "Unauthorized User", data: null };
     }
+    console.log("debug 1");
 
     const orgAccessCheck = await this.client
       .from("organization")
@@ -59,6 +60,8 @@ export class SupabaseServerWrapper<T> {
       .eq("id", this.ctx.req.cookies[ORG_ID_COOKIE_KEY] || "");
 
     if (orgAccessCheck.data?.length === 0) {
+      console.log("debug 2");
+      // maybe then we should call the create dummy org api
       return ok({
         userId: user.data.user.id,
         orgId: "na",
@@ -68,6 +71,7 @@ export class SupabaseServerWrapper<T> {
       });
     }
     if (!orgAccessCheck.data || orgAccessCheck.error !== null) {
+      console.log("debug 3");
       return {
         error: `Unauthorized orgChecking ${this.ctx.req.cookies[ORG_ID_COOKIE_KEY]}`,
         data: null,
@@ -77,6 +81,8 @@ export class SupabaseServerWrapper<T> {
 
     // If owner, return role as owner
     if (org.owner === user.data.user.id) {
+      console.log("debug 4");
+      console.log(org);
       return {
         data: {
           userId: user.data.user.id,
@@ -106,6 +112,7 @@ export class SupabaseServerWrapper<T> {
       (org.reseller_id && (await checkMembership(org.reseller_id)));
 
     if (!role) {
+      console.log("debug 5");
       return { error: "Unauthorized", data: null };
     }
 

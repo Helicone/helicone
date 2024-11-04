@@ -2,7 +2,7 @@ import { GetServerSidePropsContext } from "next";
 import MetaData from "../components/layout/public/authMetaData";
 import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
 import WelcomePage from "../components/templates/welcome/welcomePage";
-import "prismjs/themes/prism.css";
+// import "prismjs/themes/prism.css";
 interface WelcomeProps {
   currentStep: number;
 }
@@ -11,6 +11,7 @@ const Welcome = (props: WelcomeProps) => {
   const { currentStep } = props;
   return (
     <MetaData title="Welcome">
+      {/* <div>Welcome</div> */}
       <WelcomePage currentStep={currentStep} />
     </MetaData>
   );
