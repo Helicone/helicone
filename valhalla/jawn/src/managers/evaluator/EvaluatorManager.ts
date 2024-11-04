@@ -101,7 +101,7 @@ export class EvaluatorManager extends BaseManager {
     const x = await Promise.all(
       experimentData.data?.hypotheses.map(async (hypothesis) => {
         return await Promise.all(
-          hypothesis.runs.map(async (run) => {
+          hypothesis?.runs?.map(async (run) => {
             for (const evaluator of evaluators.data ?? []) {
               const scoreName = getEvaluatorScoreName(evaluator.name);
               if (!(run.scores && scoreName in run.scores)) {

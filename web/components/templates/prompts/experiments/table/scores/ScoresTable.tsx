@@ -16,11 +16,27 @@ const ScoresTable = memo(
     columnWidths,
     columnOrder,
     experimentId,
+    scores,
   }: {
     columnDefs: ColDef[];
     columnWidths: { [key: string]: number };
     columnOrder: string[];
     experimentId: string;
+    scores: Record<
+      string,
+      {
+        data: {
+          scores: Record<
+            string,
+            {
+              value: any;
+              valueType: string;
+            }
+          >;
+        } | null;
+        error: string | null;
+      }
+    >;
   }) => {
     const {
       outputColumns,
@@ -34,14 +50,12 @@ const ScoresTable = memo(
           col.field !== "messages"
         ) {
           acc.outputColumns.push(col);
-          const scores = col.headerComponentParams?.hypothesis.runs
-            ?.map((run: any) =>
-              run?.scores ? Object.keys(run.scores as Record<string, any>) : []
-            )
-            .flat() as string[];
-          console.log("scores", scores);
-          if (scores && scores.length > 0) {
-            acc.scores = Array.from(new Set([...acc.scores, ...scores]));
+          const hypothesisScores =
+            scores[col.headerComponentParams?.hypothesisId]?.data?.scores;
+          if (hypothesisScores) {
+            acc.scores = Array.from(
+              new Set([...acc.scores, ...Object.keys(hypothesisScores)])
+            ).filter((key) => !key.includes("dateCreated")); // Exclude dateCreated from scores
           }
         } else if (
           col.headerComponentParams?.badgeText === "Input" ||
@@ -80,26 +94,49 @@ const ScoresTable = memo(
           outputColumns.map((col) => [
             col.field!,
             (() => {
-              const values = col.headerComponentParams?.hypothesis.runs
-                ?.map((run: any) => run.scores?.[score]?.value)
-                .filter((value: any) => value !== undefined);
+              const hypothesisScores =
+                scores[col.headerComponentParams?.hypothesisId]?.data?.scores;
+              const value = hypothesisScores?.[score]?.value;
+              const valueType = hypothesisScores?.[score]?.valueType;
+
+              if (
+                !hypothesisScores ||
+                scores[col.headerComponentParams?.hypothesisId]?.error
+              ) {
+                return {
+                  percentage: 0,
+                  average: 0,
+                  count: 0,
+                };
+              }
+
+              if (valueType === "boolean") {
+                return {
+                  percentage: value ? 100 : 0,
+                  average: value ? 1 : 0,
+                  count: 1,
+                };
+              } else if (valueType === "number") {
+                return {
+                  percentage: (value * 100).toFixed(2),
+                  average:
+                    value.toString().length > 3
+                      ? value.toFixed(5)
+                      : value.toFixed(2),
+                  count: 1,
+                };
+              } else if (valueType === "string") {
+                return {
+                  percentage: 0,
+                  average: value,
+                  count: 1,
+                };
+              }
+
               return {
-                percentage: (
-                  ((1.0 *
-                    (values?.reduce(
-                      (acc: number, curr: number) => acc + curr,
-                      0
-                    ) ?? 0)) /
-                    (col.headerComponentParams?.hypothesis.runs?.length ?? 1)) *
-                  100.0
-                ).toFixed(2),
-                average: (
-                  (values?.reduce(
-                    (acc: number, curr: number) => acc + curr,
-                    0
-                  ) ?? 0) / (values?.length ?? 1)
-                ).toFixed(2),
-                count: values?.length ?? 0,
+                percentage: 0,
+                average: 0,
+                count: 0,
               };
             })(),
           ])
@@ -232,20 +269,22 @@ const ScoresTable = memo(
                             {isBoolean ? (
                               <span>{value.percentage}%</span>
                             ) : (
-                              <span>avg: {value.average}</span>
+                              <span>
+                                {typeof value.average !== "string"
+                                  ? `avg: ${value.average}`
+                                  : value.average}
+                              </span>
                             )}
 
                             {value.count > 0 && (
                               <span>
                                 {value.count}/
-                                {
-                                  col.headerComponentParams?.hypothesis.runs
-                                    ?.length
-                                }
+                                {col.headerComponentParams?.runs?.length}
                               </span>
                             )}
                           </div>
                         )}
+                        {typeof value === "string" && <span>{value}</span>}
                       </td>
                     );
                   })}

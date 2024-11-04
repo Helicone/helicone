@@ -60,6 +60,8 @@ export interface IHeliconeHeaders {
   lytixHost: Nullable<string>;
   posthogHost: Nullable<string>;
   webhookEnabled: boolean;
+  experimentColumnId: Nullable<string>;
+  experimentRowIndex: Nullable<string>;
 }
 
 export class HeliconeHeaders implements IHeliconeHeaders {
@@ -104,6 +106,8 @@ export class HeliconeHeaders implements IHeliconeHeaders {
   posthogKey: Nullable<string>;
   posthogHost: Nullable<string>;
   webhookEnabled: boolean;
+  experimentColumnId: Nullable<string>;
+  experimentRowIndex: Nullable<string>;
   lytixKey: Nullable<string>;
   lytixHost: Nullable<string>;
 
@@ -139,6 +143,8 @@ export class HeliconeHeaders implements IHeliconeHeaders {
     this.posthogKey = heliconeHeaders.posthogKey;
     this.posthogHost = heliconeHeaders.posthogHost;
     this.webhookEnabled = heliconeHeaders.webhookEnabled;
+    this.experimentColumnId = heliconeHeaders.experimentColumnId;
+    this.experimentRowIndex = heliconeHeaders.experimentRowIndex;
   }
 
   private getFallBacks(): Nullable<HeliconeFallback[]> {
@@ -271,6 +277,10 @@ export class HeliconeHeaders implements IHeliconeHeaders {
       posthogHost: this.headers.get("Helicone-Posthog-Host") ?? null,
       webhookEnabled:
         this.headers.get("Helicone-Webhook-Enabled") == "true" ? true : false,
+      experimentColumnId:
+        this.headers.get("Helicone-Experiment-Column-Id") ?? null,
+      experimentRowIndex:
+        this.headers.get("Helicone-Experiment-Row-Index") ?? null,
     };
   }
 

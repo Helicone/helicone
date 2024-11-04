@@ -24,7 +24,7 @@ import { cacheResultCustom } from "../../utils/cacheResult";
 import { KVCache } from "../../lib/cache/kvCache";
 
 const deltaTime = (date: Date, minutes: number) => {
-  return new Date(date.getTime() - minutes * 60000);
+  return new Date(date.getTime() + minutes * 60000);
 };
 
 function toISOStringClickhousePatch(date: string): string {
@@ -107,7 +107,7 @@ export class RequestManager extends BaseManager {
           right: {
             request_response_rmt: {
               model: {
-                equals: requestFromPostgres?.request_model ?? "",
+                equals: requestFromPostgres?.response_model ?? "",
               },
             },
           },

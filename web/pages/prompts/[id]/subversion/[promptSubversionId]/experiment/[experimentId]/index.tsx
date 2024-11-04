@@ -5,8 +5,6 @@ import { ReactElement } from "react";
 import AuthLayout from "../../../../../../../components/layout/auth/authLayout";
 import { SupabaseServerWrapper } from "../../../../../../../lib/wrappers/supabase";
 
-import ExperimentTablePage from "@/components/templates/prompts/experiments/table/experimentTablePage";
-
 interface ExperimentPage {
   user: User;
   experimentId: string;
@@ -17,13 +15,7 @@ interface ExperimentPage {
 const Experiments = (props: ExperimentPage) => {
   const { user, experimentId, promptSubversionId, promptId } = props;
 
-  return (
-    <ExperimentTablePage
-      experimentId={experimentId}
-      promptSubversionId={promptSubversionId}
-      promptId={promptId}
-    />
-  );
+  return <></>;
 };
 
 export default Experiments;

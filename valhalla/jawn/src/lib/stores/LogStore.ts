@@ -98,6 +98,16 @@ const onConflictRequestResponseSearch = `ON CONFLICT (request_id, organization_i
 request_body_vector = EXCLUDED.request_body_vector,
 response_body_vector = EXCLUDED.response_body_vector`;
 
+const experimentCellValueColumns = new pgp.helpers.ColumnSet(
+  ["column_id", "row_index", "value", "status"],
+  { table: "experiment_cell" }
+);
+
+const onConflictExperimentCellValue =
+  " ON CONFLICT (column_id, row_index) DO UPDATE SET " +
+  "value = EXCLUDED.value, " +
+  "status = EXCLUDED.status";
+
 export class LogStore {
   constructor() {}
 
@@ -189,6 +199,41 @@ export class LogStore {
           }
         } catch (error: any) {
           console.error("Error inserting search records", error);
+          throw error;
+        }
+
+        try {
+          if (
+            payload.experimentCellValues &&
+            payload.experimentCellValues.length > 0
+          ) {
+            const cellValues = payload.experimentCellValues.map((cell) => ({
+              column_id: cell.columnId,
+              row_index: cell.rowIndex,
+              value: cell.value,
+              status: "success",
+            }));
+
+            const insertExperimentCellValues =
+              pgp.helpers.insert(cellValues, experimentCellValueColumns) +
+              onConflictExperimentCellValue;
+
+            await t.none(insertExperimentCellValues);
+          }
+        } catch (error: any) {
+          const cellValues = payload.experimentCellValues.map((cell) => ({
+            column_id: cell.columnId,
+            row_index: cell.rowIndex,
+            value: cell.value,
+            status: "failed",
+          }));
+
+          const insertExperimentCellValues =
+            pgp.helpers.insert(cellValues, experimentCellValueColumns) +
+            onConflictExperimentCellValue;
+
+          await t.none(insertExperimentCellValues);
+          console.error("Error inserting experiment cell values", error);
           throw error;
         }
       });

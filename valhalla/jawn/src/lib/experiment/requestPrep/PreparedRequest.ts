@@ -12,4 +12,6 @@ export interface PreparedRequestArgs {
   secretKey: string;
   datasetRow: Experiment["dataset"]["rows"][number];
   requestId: string;
+  columnId?: string;
+  rowIndex?: number;
 }
