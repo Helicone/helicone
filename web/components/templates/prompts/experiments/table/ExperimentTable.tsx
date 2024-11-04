@@ -138,16 +138,17 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
     (
       columnName: string,
       columnType: "experiment" | "input" | "output",
-      hypothesisId?: string
+      hypothesisId?: string,
+      promptVersionId?: string
     ) => {
       addExperimentTableColumn.mutate({
-        promptVersionId: promptSubversionId ?? "",
+        promptVersionId: promptVersionId ?? "",
         columnName,
         columnType,
         hypothesisId,
       });
     },
-    [addExperimentTableColumn, promptSubversionId]
+    [addExperimentTableColumn]
   );
 
   const handleAddRowInsertBatch = useCallback(
@@ -156,6 +157,7 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
         inputRecordId: string;
         datasetId: string;
         inputs: Record<string, string>;
+        sourceRequest?: string;
       }[]
     ) => {
       const columns = experimentTableQuery?.columns?.filter(
@@ -176,10 +178,10 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
           datasetId: row.datasetId,
           inputs: row.inputs,
           cells,
+          sourceRequest: row.sourceRequest,
         };
       });
 
-      console.log("newRows", newRows);
       if (!newRows) return;
 
       addExperimentTableRowInsertBatch.mutate({

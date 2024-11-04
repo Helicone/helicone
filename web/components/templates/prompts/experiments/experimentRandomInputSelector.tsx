@@ -18,6 +18,7 @@ interface ExperimentInputSelectorProps {
       inputRecordId: string;
       datasetId: string;
       inputs: Record<string, string>;
+      sourceRequest?: string;
     }[]
   ) => void;
 }
@@ -161,6 +162,7 @@ export const ExperimentRandomInputSelector = (
                   inputRecordId: request.id,
                   datasetId: props.datasetId ?? "",
                   inputs: request.inputs,
+                  sourceRequest: request.source_request,
                 }))
               );
 

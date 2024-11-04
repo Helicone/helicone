@@ -62,6 +62,7 @@ const ScoresTableContainer = ({
           string,
           {
             data: {
+              runsCount: number;
               scores: Record<string, { value: any; valueType: string }>;
             } | null;
             error: string | null;

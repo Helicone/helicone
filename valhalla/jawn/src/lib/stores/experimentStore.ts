@@ -84,6 +84,7 @@ export interface ExperimentScores {
     scores: Record<string, Score>;
   };
   hypothesis: {
+    runsCount: number;
     scores: Record<string, Score>;
   };
 }
@@ -822,6 +823,17 @@ export class ExperimentStore extends BaseStore {
     const { hypothesisId } = params;
 
     const query = `
+      WITH latest_runs AS (
+        SELECT DISTINCT ON (hr.dataset_row) 
+          hr.result_request_id,
+          hr.dataset_row,
+          r.created_at
+        FROM experiment_v2_hypothesis_run hr
+        JOIN request r ON r.id = hr.result_request_id
+        WHERE hr.experiment_hypothesis = $1 
+        AND r.helicone_org_id = $2
+        ORDER BY hr.dataset_row, r.created_at DESC
+      )
       SELECT 
         hr.result_request_id,
         r.provider,
@@ -833,22 +845,24 @@ export class ExperimentStore extends BaseStore {
         COALESCE(
           (
             SELECT jsonb_object_agg(
-            sa.score_key,
-            jsonb_build_object(
-              'value', sv.int_value,
-              'valueType', sa.value_type
+              sa.score_key,
+              jsonb_build_object(
+                'value', sv.int_value,
+                'valueType', sa.value_type
+              )
             )
-          )
-        FROM score_value sv
-        JOIN score_attribute sa ON sa.id = sv.score_attribute
+            FROM score_value sv
+            JOIN score_attribute sa ON sa.id = sv.score_attribute
             WHERE sv.request_id = r.id and sa.organization = $2
           ),
           '{}'::jsonb
         ) as scores
-      FROM experiment_v2_hypothesis_run hr
+      FROM latest_runs lr
+      JOIN experiment_v2_hypothesis_run hr ON hr.result_request_id = lr.result_request_id
       JOIN request r ON r.id = hr.result_request_id
       JOIN response resp ON resp.request = r.id
-      WHERE hr.experiment_hypothesis = $1 AND r.helicone_org_id = $2
+      WHERE hr.experiment_hypothesis = $1 
+      AND r.helicone_org_id = $2
     `;
 
     const result = await dbExecute<{
@@ -869,7 +883,14 @@ export class ExperimentStore extends BaseStore {
     const runs = result.data;
 
     if (!runs || runs.length === 0) {
-      return err("No runs found");
+      return ok({
+        runsCount: 0,
+        scores: {
+          model: { value: "No data", valueType: "string" },
+          cost: { value: -1, valueType: "number" },
+          latency: { value: -1, valueType: "number" },
+        },
+      });
     }
 
     try {
@@ -892,6 +913,7 @@ export class ExperimentStore extends BaseStore {
       const customScores = getCustomScores(customScoresArray);
 
       const scores: ExperimentScores["hypothesis"] = {
+        runsCount: runs.length,
         scores: {
           dateCreated: {
             value: new Date(runs[0].created_at),
@@ -1271,12 +1293,13 @@ export class ExperimentStore extends BaseStore {
         value: string | null;
         metadata?: Record<string, any>;
       }[];
+      sourceRequest?: string;
     }[];
   }): Promise<Result<{ ids: string[] }, string>> {
     // Fetch all columns for the experiment table
     const columnsResult = await supabaseServer.client
       .from("experiment_column")
-      .select("id")
+      .select("*")
       .eq("table_id", params.experimentTableId);
 
     if (columnsResult.error) {
@@ -1301,6 +1324,7 @@ export class ExperimentStore extends BaseStore {
       rowIndex: number;
       value: string | null;
       metadata?: Record<string, any>;
+      sourceRequest?: string;
     }[] = [];
 
     for (const row of params.rows) {
@@ -1325,7 +1349,10 @@ export class ExperimentStore extends BaseStore {
         cellsToCreate.push({
           columnId: columnId.id,
           rowIndex: currentRowIndex,
-          value: null,
+          value:
+            columnId.column_type === "output"
+              ? row.sourceRequest ?? null
+              : null,
           metadata: {
             ...row.metadata,
             cellType: "output",

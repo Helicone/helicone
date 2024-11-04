@@ -114,9 +114,10 @@ export async function getTableData({
 
           if (cell.value !== undefined && cell.value !== null) {
             if (
-              (cell.metadata?.cellType === "output" ||
-                cell.metadata?.cellType === "experiment") &&
-              (cell.status === "initialized" || cell.status === "success")
+              (cell.metadata?.cellType === "output" &&
+                (cell.status === "initialized" || cell.status === "success")) ||
+              (cell.metadata?.cellType === "experiment" &&
+                cell.status === "success")
             ) {
               // Check cache first
               const cacheKey = [CELL_RESPONSE_CACHE_KEY, cell.value];
@@ -287,6 +288,7 @@ export function useExperimentTable(orgId: string, experimentTableId: string) {
           columnId: string;
           value: string | null;
         }[];
+        sourceRequest?: string;
       }[];
     }) => {
       const jawnClient = getJawnClient(orgId);
