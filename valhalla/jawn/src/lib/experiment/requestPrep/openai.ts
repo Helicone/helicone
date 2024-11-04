@@ -75,6 +75,11 @@ export function prepareRequestOpenAIOnPremFull({
     autoInputs: datasetRow.inputRecord?.autoInputs ?? [],
   });
 
+  const requestBodyRemoved = removeKeysWithValue(
+    newRequestBody,
+    "helicone-to-remove"
+  );
+
   const { url: fetchUrl, headers } = prepareRequestAzure(
     datasetRow.inputRecord!.requestPath,
     apiKey,
@@ -86,7 +91,7 @@ export function prepareRequestOpenAIOnPremFull({
   return {
     url: fetchUrl,
     headers,
-    body: newRequestBody,
+    body: requestBodyRemoved,
   };
 }
 
@@ -102,6 +107,11 @@ export function prepareRequestAnthropicFull({
     autoInputs: datasetRow.inputRecord?.autoInputs ?? [],
   });
 
+  const requestBodyRemoved = removeKeysWithValue(
+    newRequestBody,
+    "helicone-to-remove"
+  );
+
   const { url: fetchUrl, headers } = prepareRequestAnthropic(
     `${process.env.HELICONE_LLMMAPPER_URL}/oai2ant/v1`,
     proxyKey,
@@ -110,6 +120,39 @@ export function prepareRequestAnthropicFull({
   return {
     url: fetchUrl,
     headers,
-    body: newRequestBody,
+    body: requestBodyRemoved,
   };
+}
+
+function removeKeysWithValue(obj: any, valueToRemove: any): any {
+  if (Array.isArray(obj)) {
+    const newArray = obj
+      .map((item) => removeKeysWithValue(item, valueToRemove))
+      .filter((item) => {
+        if (item === valueToRemove) return false;
+        if (Array.isArray(item) && item.length === 0) return false;
+        if (
+          typeof item === "object" &&
+          item !== null &&
+          Object.keys(item).length === 0
+        )
+          return false;
+        return true;
+      });
+    return newArray;
+  } else if (obj && typeof obj === "object") {
+    const newObj: any = {};
+    for (const [key, value] of Object.entries(obj)) {
+      const newValue = removeKeysWithValue(value, valueToRemove);
+      const shouldRemove =
+        newValue === valueToRemove ||
+        (Array.isArray(newValue) && newValue.length === 0);
+      if (!shouldRemove) {
+        newObj[key] = newValue;
+      }
+    }
+    return newObj;
+  } else {
+    return obj;
+  }
 }

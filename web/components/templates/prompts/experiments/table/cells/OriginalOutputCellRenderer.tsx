@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { PlayIcon } from "@heroicons/react/24/outline";
 import {
@@ -19,8 +19,27 @@ export const OriginalOutputCellRenderer: React.FC<any> = (params) => {
   const [showPromptPlayground, setShowPromptPlayground] = useState(false);
   const cellData = data.cells[colDef.cellRendererParams.columnId] as CellData;
 
-  const content =
-    cellData?.value?.response?.choices?.[0]?.message?.content || "";
+  const content = useMemo(() => {
+    const message = cellData?.value?.response?.choices?.[0]?.message;
+
+    // If there's direct content, use it
+    if (message?.content) {
+      return message.content;
+    }
+
+    // If there are tool calls, extract the content from the arguments
+    if (message?.tool_calls?.[0]?.function?.arguments) {
+      try {
+        const args = JSON.parse(message.tool_calls[0].function.arguments);
+        return args.content || "";
+      } catch (e) {
+        console.error("Failed to parse tool call arguments:", e);
+        return "";
+      }
+    }
+
+    return "";
+  }, [cellData]);
 
   const handleCellClick = (e: React.MouseEvent) => {
     e.stopPropagation();
