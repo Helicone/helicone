@@ -284,12 +284,12 @@ const ScoresTable = memo(
                               </span>
                             )}
 
-                            {value.count > 0 && (
+                            {/* {value.count > 0 && (
                               <span>
                                 {value.count}/
                                 {col.headerComponentParams?.runs?.length}
                               </span>
-                            )}
+                            )} */}
                           </div>
                         )}
                         {typeof value === "string" && <span>{value}</span>}
