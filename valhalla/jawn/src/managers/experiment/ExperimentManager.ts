@@ -399,7 +399,9 @@ export class ExperimentManager extends BaseManager {
 
   async getExperimentHypothesisScores(params: {
     hypothesisId: string;
-  }): Promise<Result<{ scores: Record<string, Score> }, string>> {
+  }): Promise<
+    Result<{ runsCount: number; scores: Record<string, Score> }, string>
+  > {
     return this.ExperimentStore.getExperimentHypothesisScores(params);
   }
 
@@ -438,6 +440,7 @@ export class ExperimentManager extends BaseManager {
         columnId: string;
         value: string | null;
       }[];
+      sourceRequest?: string;
     }[];
   }): Promise<Result<{ ids: string[] }, string>> {
     return this.ExperimentStore.createExperimentTableRowsWithCells(params);

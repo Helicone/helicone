@@ -359,6 +359,7 @@ export class ExperimentController extends Controller {
           columnId: string;
           value: string | null;
         }[];
+        sourceRequest?: string;
       }[];
     },
     @Request() request: JawnAuthenticatedRequest
@@ -402,6 +403,7 @@ export class ExperimentController extends Controller {
         cellType: "input",
       },
       cells: row.cells,
+      sourceRequest: row.sourceRequest,
     }));
 
     // Now call the bulk insertion function
@@ -503,7 +505,9 @@ export class ExperimentController extends Controller {
   public async getExperimentHypothesisScores(
     @Path() hypothesisId: string,
     @Request() request: JawnAuthenticatedRequest
-  ): Promise<Result<{ scores: Record<string, Score> }, string>> {
+  ): Promise<
+    Result<{ runsCount: number; scores: Record<string, Score> }, string>
+  > {
     const experimentManager = new ExperimentManager(request.authParams);
     const result = await experimentManager.getExperimentHypothesisScores({
       hypothesisId,
