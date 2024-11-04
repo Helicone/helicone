@@ -883,7 +883,14 @@ export class ExperimentStore extends BaseStore {
     const runs = result.data;
 
     if (!runs || runs.length === 0) {
-      return err("No runs found");
+      return ok({
+        runsCount: 0,
+        scores: {
+          model: { value: "No data", valueType: "string" },
+          cost: { value: -1, valueType: "number" },
+          latency: { value: -1, valueType: "number" },
+        },
+      });
     }
 
     try {

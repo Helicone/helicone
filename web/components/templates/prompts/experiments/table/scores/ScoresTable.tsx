@@ -274,8 +274,12 @@ const ScoresTable = memo(
                               <span>{value.percentage}%</span>
                             ) : (
                               <span>
-                                {typeof value.average !== "string"
+                                {typeof value.average !== "string" &&
+                                value.count > 0 &&
+                                value.average > 0
                                   ? `avg: ${value.average}`
+                                  : value.average < 0
+                                  ? "No data"
                                   : value.average}
                               </span>
                             )}
