@@ -26,6 +26,7 @@ const ScoresTable = memo(
       string,
       {
         data: {
+          runsCount: number;
           scores: Record<
             string,
             {
@@ -88,7 +89,7 @@ const ScoresTable = memo(
         [key: string]:
           | { percentage: number; count: number; average: number }
           | string;
-      }[] = scoreCriterias.map((score) => ({
+      }[] = scoreCriterias.map((score, index) => ({
         score_key: score,
         ...Object.fromEntries(
           outputColumns.map((col) => [
@@ -96,6 +97,9 @@ const ScoresTable = memo(
             (() => {
               const hypothesisScores =
                 scores[col.headerComponentParams?.hypothesisId]?.data?.scores;
+              const runsCount =
+                scores[col.headerComponentParams?.hypothesisId]?.data
+                  ?.runsCount;
               const value = hypothesisScores?.[score]?.value;
               const valueType = hypothesisScores?.[score]?.valueType;
 
@@ -114,7 +118,7 @@ const ScoresTable = memo(
                 return {
                   percentage: value ? 100 : 0,
                   average: value ? 1 : 0,
-                  count: 1,
+                  count: runsCount ?? 1,
                 };
               } else if (valueType === "number") {
                 return {
@@ -123,13 +127,13 @@ const ScoresTable = memo(
                     value.toString().length > 3
                       ? value.toFixed(5)
                       : value.toFixed(2),
-                  count: 1,
+                  count: runsCount ?? 1,
                 };
               } else if (valueType === "string") {
                 return {
                   percentage: 0,
                   average: value,
-                  count: 1,
+                  count: runsCount ?? 1,
                 };
               }
 

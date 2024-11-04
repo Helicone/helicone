@@ -399,7 +399,9 @@ export class ExperimentManager extends BaseManager {
 
   async getExperimentHypothesisScores(params: {
     hypothesisId: string;
-  }): Promise<Result<{ scores: Record<string, Score> }, string>> {
+  }): Promise<
+    Result<{ runsCount: number; scores: Record<string, Score> }, string>
+  > {
     return this.ExperimentStore.getExperimentHypothesisScores(params);
   }
 

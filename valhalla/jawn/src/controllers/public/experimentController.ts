@@ -503,7 +503,9 @@ export class ExperimentController extends Controller {
   public async getExperimentHypothesisScores(
     @Path() hypothesisId: string,
     @Request() request: JawnAuthenticatedRequest
-  ): Promise<Result<{ scores: Record<string, Score> }, string>> {
+  ): Promise<
+    Result<{ runsCount: number; scores: Record<string, Score> }, string>
+  > {
     const experimentManager = new ExperimentManager(request.authParams);
     const result = await experimentManager.getExperimentHypothesisScores({
       hypothesisId,

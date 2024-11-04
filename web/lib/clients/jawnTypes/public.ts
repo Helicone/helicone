@@ -2112,14 +2112,16 @@ Json: JsonObject;
     "Record_string.Score_": {
       [key: string]: components["schemas"]["Score"];
     };
-    "ResultSuccess__scores-Record_string.Score___": {
+    "ResultSuccess__runsCount-number--scores-Record_string.Score___": {
       data: {
         scores: components["schemas"]["Record_string.Score_"];
+        /** Format: double */
+        runsCount: number;
       };
       /** @enum {number|null} */
       error: null;
     };
-    "Result__scores-Record_string.Score__.string_": components["schemas"]["ResultSuccess__scores-Record_string.Score___"] | components["schemas"]["ResultError_string_"];
+    "Result__runsCount-number--scores-Record_string.Score__.string_": components["schemas"]["ResultSuccess__runsCount-number--scores-Record_string.Score___"] | components["schemas"]["ResultError_string_"];
     ResponseObj: {
       body: unknown;
       createdAt: string;
@@ -2157,6 +2159,8 @@ Json: JsonObject;
       };
       hypothesis: {
         scores: components["schemas"]["Record_string.Score_"];
+        /** Format: double */
+        runsCount: number;
       };
     };
     Experiment: {
@@ -4323,7 +4327,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result__scores-Record_string.Score__.string_"];
+          "application/json": components["schemas"]["Result__runsCount-number--scores-Record_string.Score__.string_"];
         };
       };
     };

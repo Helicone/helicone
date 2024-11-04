@@ -5664,16 +5664,21 @@
 				"type": "object",
 				"description": "Construct a type with a set of properties K of type T"
 			},
-			"ResultSuccess__scores-Record_string.Score___": {
+			"ResultSuccess__runsCount-number--scores-Record_string.Score___": {
 				"properties": {
 					"data": {
 						"properties": {
 							"scores": {
 								"$ref": "#/components/schemas/Record_string.Score_"
+							},
+							"runsCount": {
+								"type": "number",
+								"format": "double"
 							}
 						},
 						"required": [
-							"scores"
+							"scores",
+							"runsCount"
 						],
 						"type": "object"
 					},
@@ -5692,10 +5697,10 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"Result__scores-Record_string.Score__.string_": {
+			"Result__runsCount-number--scores-Record_string.Score__.string_": {
 				"anyOf": [
 					{
-						"$ref": "#/components/schemas/ResultSuccess__scores-Record_string.Score___"
+						"$ref": "#/components/schemas/ResultSuccess__runsCount-number--scores-Record_string.Score___"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
@@ -5899,10 +5904,15 @@
 						"properties": {
 							"scores": {
 								"$ref": "#/components/schemas/Record_string.Score_"
+							},
+							"runsCount": {
+								"type": "number",
+								"format": "double"
 							}
 						},
 						"required": [
-							"scores"
+							"scores",
+							"runsCount"
 						],
 						"type": "object"
 					}
@@ -12252,7 +12262,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Result__scores-Record_string.Score__.string_"
+									"$ref": "#/components/schemas/Result__runsCount-number--scores-Record_string.Score__.string_"
 								}
 							}
 						}
