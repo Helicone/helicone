@@ -216,7 +216,6 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
   const headerComponentParams = useMemo(
     () => ({
       promptVersionId: experimentTableQuery?.promptSubversionId ?? "",
-      promptVersionTemplate: promptVersionTemplateData,
       experimentId: experimentTableQuery?.experimentId,
       selectedProviderKey: "",
       handleAddColumn,
@@ -224,7 +223,6 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
     }),
     [
       experimentTableQuery?.promptSubversionId,
-      promptVersionTemplateData,
       experimentTableQuery?.experimentId,
       handleAddColumn,
       wrapText,
@@ -443,6 +441,7 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
     experimentTableQuery?.columns,
     columnView,
     columnWidths,
+    headerComponentParams,
   ]);
 
   const [showRandomInputSelector, setShowRandomInputSelector] = useState(false);
