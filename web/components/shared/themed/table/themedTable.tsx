@@ -8,7 +8,7 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Result } from "../../../../lib/result";
 import { TimeInterval } from "../../../../lib/timeCalculations/time";
 import { useLocalStorage } from "../../../../services/hooks/localStorage";
@@ -35,6 +35,11 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
+import useOnboardingContext from "@/components/layout/onboardingContext";
+import { Popover, PopoverTrigger } from "@/components/ui/popover";
+import { SheetIcon } from "lucide-react";
+import OnboardingPopover from "@/components/templates/onboarding/OnboardingPopover";
+import { useRouter } from "next/navigation";
 
 interface ThemedTableV5Props<T extends { id?: string }> {
   id: string;
@@ -191,6 +196,28 @@ export default function ThemedTable<T extends { id?: string }>(
     }
   }, [rightPanel]);
 
+  console.log({ row0: rows[0] });
+
+  const sessionData = useMemo(() => {
+    if (rows.length === 0) {
+      return undefined;
+    }
+    // @ts-ignore
+    const sessionId = rows[0].original?.customProperties?.[
+      "Helicone-Session-Id"
+    ] as string | undefined;
+    return { sessionId };
+  }, [rows]);
+
+  const {
+    currentStep,
+    setCurrentStep,
+    setCurrentElementId,
+    isOnboardingVisible,
+  } = useOnboardingContext();
+
+  const router = useRouter();
+
   return (
     <div className="h-full flex flex-col border-b divide-y divide-slate-300 dark:divide-slate-700">
       <div className="p-1 flex-shrink-0">
@@ -335,72 +362,163 @@ export default function ThemedTable<T extends { id?: string }>(
                       ))}
                     </thead>
                     <tbody className="text-[13px] ">
-                      {rows.map((row, index) => (
-                        <tr
-                          key={row.id}
-                          className={clsx(
-                            " hover:cursor-pointer",
-                            checkedIds?.includes(row.original?.id ?? "")
-                              ? "bg-sky-100 border-l border-sky-500 pl-2 dark:bg-slate-800/50 dark:border-sky-900"
-                              : "hover:bg-sky-50 dark:hover:bg-slate-700/50"
-                          )}
-                          onClick={
-                            onRowSelect &&
-                            (() => handleRowSelect(row.original, index))
-                          }
-                        >
-                          {showCheckboxes && (
-                            <td className="w-8 px-2">
-                              <Checkbox
-                                checked={selectedIds?.includes(
-                                  row.original?.id ?? ""
+                      {rows.map((row, index) =>
+                        index === 0 &&
+                        currentStep === 0 &&
+                        id === "requests-table" &&
+                        isOnboardingVisible ? (
+                          <Popover key={row.id} open={true}>
+                            <PopoverTrigger asChild>
+                              <tr
+                                id="onboarding-row-1"
+                                className={clsx(
+                                  " hover:cursor-pointer",
+                                  checkedIds?.includes(row.original?.id ?? "")
+                                    ? "bg-sky-100 border-l border-sky-500 pl-2 dark:bg-slate-800/50 dark:border-sky-900"
+                                    : "hover:bg-sky-50 dark:hover:bg-slate-700/50"
                                 )}
-                                onChange={() => {}} // Handle individual row selection
-                                className="text-slate-700 dark:text-slate-400"
-                              />
-                            </td>
-                          )}
-                          {row.getVisibleCells().map((cell, i) => (
-                            <td
-                              key={i}
-                              className={clsx(
-                                "py-3 border-t border-slate-300 dark:border-slate-700 px-2 text-slate-700 dark:text-slate-300",
-                                i === 0 && "pl-10", // Add left padding to the first column
-                                i === row.getVisibleCells().length - 1 &&
-                                  "pr-10 border-r border-slate-300 dark:border-slate-700"
-                              )}
-                              style={{
-                                maxWidth: cell.column.getSize(),
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                                whiteSpace: "nowrap",
-                              }}
-                            >
-                              {dataLoading &&
-                              (cell.column.id == "requestText" ||
-                                cell.column.id == "responseText") ? (
-                                <span
-                                  className={clsx(
-                                    "w-full flex flex-grow",
+                                onClick={
+                                  onRowSelect &&
+                                  (() => {
+                                    handleRowSelect(row.original, index);
+                                    setCurrentStep(1);
+                                  })
+                                }
+                              >
+                                {showCheckboxes && (
+                                  <td className="w-8 px-2">
+                                    <Checkbox
+                                      checked={selectedIds?.includes(
+                                        row.original?.id ?? ""
+                                      )}
+                                      onChange={() => {}} // Handle individual row selection
+                                      className="text-slate-700 dark:text-slate-400"
+                                    />
+                                  </td>
+                                )}
+                                {row.getVisibleCells().map((cell, i) => (
+                                  <td
+                                    key={i}
+                                    className={clsx(
+                                      "py-3 border-t border-slate-300 dark:border-slate-700 px-2 text-slate-700 dark:text-slate-300",
+                                      i === 0 && "pl-10", // Add left padding to the first column
+                                      i === row.getVisibleCells().length - 1 &&
+                                        "pr-10 border-r border-slate-300 dark:border-slate-700"
+                                    )}
+                                    style={{
+                                      maxWidth: cell.column.getSize(),
+                                      overflow: "hidden",
+                                      textOverflow: "ellipsis",
+                                      whiteSpace: "nowrap",
+                                    }}
+                                  >
+                                    {dataLoading &&
                                     (cell.column.id == "requestText" ||
-                                      cell.column.id == "responseText") &&
-                                      dataLoading
-                                      ? "animate-pulse bg-slate-200 rounded-md"
-                                      : "hidden"
+                                      cell.column.id == "responseText") ? (
+                                      <span
+                                        className={clsx(
+                                          "w-full flex flex-grow",
+                                          (cell.column.id == "requestText" ||
+                                            cell.column.id == "responseText") &&
+                                            dataLoading
+                                            ? "animate-pulse bg-slate-200 rounded-md"
+                                            : "hidden"
+                                        )}
+                                      >
+                                        &nbsp;
+                                      </span>
+                                    ) : (
+                                      flexRender(
+                                        cell.column.columnDef.cell,
+                                        cell.getContext()
+                                      )
+                                    )}
+                                  </td>
+                                ))}
+                              </tr>
+                            </PopoverTrigger>
+                            <OnboardingPopover
+                              id="onboarding-row-1"
+                              icon={<SheetIcon className="h-4 w-4" />}
+                              title="Welcome to Requests!"
+                              stepNumber={1}
+                              description="Here is where your request and response data lives. Simply add one line of code to track requests from any providers."
+                              next={() => {
+                                setCurrentStep(1);
+                                setCurrentElementId("onboarding-request-panel");
+                                handleRowSelect(row.original, index);
+                              }}
+                              align="start"
+                              className="z-[10000] bg-white p-4 w-11/12 sm:max-w-md flex flex-col gap-2"
+                            />
+                          </Popover>
+                        ) : (
+                          <tr
+                            key={row.id}
+                            className={clsx(
+                              " hover:cursor-pointer",
+                              checkedIds?.includes(row.original?.id ?? "")
+                                ? "bg-sky-100 border-l border-sky-500 pl-2 dark:bg-slate-800/50 dark:border-sky-900"
+                                : "hover:bg-sky-50 dark:hover:bg-slate-700/50"
+                            )}
+                            onClick={
+                              onRowSelect &&
+                              (() => handleRowSelect(row.original, index))
+                            }
+                          >
+                            {showCheckboxes && (
+                              <td className="w-8 px-2">
+                                <Checkbox
+                                  checked={selectedIds?.includes(
+                                    row.original?.id ?? ""
                                   )}
-                                >
-                                  &nbsp;
-                                </span>
-                              ) : (
-                                flexRender(
-                                  cell.column.columnDef.cell,
-                                  cell.getContext()
-                                )
-                              )}
-                            </td>
-                          ))}
-                        </tr>
-                      ))}
+                                  onChange={() => {}} // Handle individual row selection
+                                  className="text-slate-700 dark:text-slate-400"
+                                />
+                              </td>
+                            )}
+                            {row.getVisibleCells().map((cell, i) => (
+                              <td
+                                key={i}
+                                className={clsx(
+                                  "py-3 border-t border-slate-300 dark:border-slate-700 px-2 text-slate-700 dark:text-slate-300",
+                                  i === 0 && "pl-10", // Add left padding to the first column
+                                  i === row.getVisibleCells().length - 1 &&
+                                    "pr-10 border-r border-slate-300 dark:border-slate-700"
+                                )}
+                                style={{
+                                  maxWidth: cell.column.getSize(),
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {dataLoading &&
+                                (cell.column.id == "requestText" ||
+                                  cell.column.id == "responseText") ? (
+                                  <span
+                                    className={clsx(
+                                      "w-full flex flex-grow",
+                                      (cell.column.id == "requestText" ||
+                                        cell.column.id == "responseText") &&
+                                        dataLoading
+                                        ? "animate-pulse bg-slate-200 rounded-md"
+                                        : "hidden"
+                                    )}
+                                  >
+                                    &nbsp;
+                                  </span>
+                                ) : (
+                                  flexRender(
+                                    cell.column.columnDef.cell,
+                                    cell.getContext()
+                                  )
+                                )}
+                              </td>
+                            ))}
+                          </tr>
+                        )
+                      )}
                     </tbody>
                   </table>
                 </div>
@@ -410,12 +528,41 @@ export default function ThemedTable<T extends { id?: string }>(
         </ResizablePanel>
         {rightPanel && (
           <>
-            <ResizableHandle withHandle />
-            <ResizablePanel minSize={25} maxSize={75}>
-              <div className="h-full flex-shrink-0 flex flex-col">
-                {rightPanel}
-              </div>
-            </ResizablePanel>
+            {isOnboardingVisible && currentStep === 1 ? (
+              <Popover open={true}>
+                <PopoverTrigger asChild>
+                  <div className="h-full w-1/2" id="onboarding-request-panel">
+                    {rightPanel}
+                  </div>
+                </PopoverTrigger>
+                <OnboardingPopover
+                  id="onboarding-request-panel"
+                  icon={<SheetIcon className="h-4 w-4" />}
+                  title="Let’s dive deeper"
+                  stepNumber={1}
+                  description="Here you can view the additional metadata and the LLM messages. You might have noticed that the response doesn’t look quite right. Let’s dive deeper to see what might have gone wrong."
+                  next={() => {
+                    router.push(`/sessions/${sessionData?.sessionId}`);
+                    setCurrentElementId(
+                      "onboarding-request-session-left-panel"
+                    );
+                    setCurrentStep(2);
+                  }}
+                  align="center"
+                  side="left"
+                  className="z-[10000] bg-white p-4 w-11/12 sm:max-w-md flex flex-col gap-2"
+                />
+              </Popover>
+            ) : (
+              <>
+                <ResizableHandle withHandle />
+                <ResizablePanel minSize={25} maxSize={75}>
+                  <div className="h-full flex-shrink-0 flex flex-col">
+                    {rightPanel}
+                  </div>
+                </ResizablePanel>
+              </>
+            )}
           </>
         )}
       </ResizablePanelGroup>

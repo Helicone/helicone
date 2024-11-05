@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { tracesToTreeNodeData } from "../../../../../lib/sessions/helpers";
 import { Session } from "../../../../../lib/sessions/sessionTypes";
 import { Row } from "../../../../layout/common/row";
@@ -45,6 +45,15 @@ const TreeView: React.FC<TreeViewProps> = ({
   const [expandSpan, setExpandSpan] = useState(false);
   const [collapseAll, setCollapseAll] = useState(false);
   const [showDrawer, setShowDrawer] = useState(false);
+
+  const onBoardingRequestTrace = useMemo(
+    () =>
+      session.traces.find((t) => t.path === "/RequestsPage/structure-analysis"),
+    [session.traces]
+  );
+
+  console.log({ onBoardingRequestTrace });
+
   return (
     <>
       <Col className="h-full">
@@ -120,6 +129,7 @@ const TreeView: React.FC<TreeViewProps> = ({
                   ]}
                   collapseAll={collapseAll}
                   setShowDrawer={setShowDrawer}
+                  onBoardingRequestTrace={onBoardingRequestTrace}
                 />
               </Col>
             </ScrollArea>

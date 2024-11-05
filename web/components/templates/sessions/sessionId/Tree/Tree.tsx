@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { TreeNodeData } from "../../../../../lib/sessions/sessionTypes";
+import { Trace, TreeNodeData } from "../../../../../lib/sessions/sessionTypes";
 import { clsx } from "../../../../shared/clsx";
 import { PathNode } from "./PathNode";
 import { RequestNode } from "./RequestNode";
 import { Col, Row } from "@/components/layout/common";
-import { SidebarCloseIcon } from "lucide-react";
+import { SidebarCloseIcon, WorkflowIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -12,6 +12,9 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import useOnboardingContext from "@/components/layout/onboardingContext";
+import { Popover, PopoverTrigger } from "@/components/ui/popover";
+import OnboardingPopover from "@/components/templates/onboarding/OnboardingPopover";
 
 export interface TreeNodeProps {
   node: TreeNodeData;
@@ -21,6 +24,7 @@ export interface TreeNodeProps {
   collapseAll?: boolean;
   setShowDrawer: (x: boolean) => void;
   isRequestSingleChild?: boolean;
+  onBoardingRequestTrace?: Trace;
 }
 
 const TreeNode: React.FC<TreeNodeProps> = ({
@@ -31,6 +35,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({
   collapseAll,
   setShowDrawer,
   isRequestSingleChild,
+  onBoardingRequestTrace,
 }) => {
   const [closeChildren, setCloseChildren] = useState(collapseAll ?? false);
   const [selectedRequestId, setSelectedRequestId] = selectedRequestIdDispatch;
@@ -74,6 +79,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({
           {!closeChildren &&
             node.children.map((child, index) => (
               <TreeNode
+                onBoardingRequestTrace={onBoardingRequestTrace}
                 key={index}
                 node={child}
                 selectedRequestIdDispatch={selectedRequestIdDispatch}
@@ -149,6 +155,9 @@ const TreeNode: React.FC<TreeNodeProps> = ({
             ))}
 
           <RequestNode
+            isOnboardingRequest={
+              onBoardingRequestTrace?.request_id === node.trace?.request_id
+            }
             selectedRequestId={selectedRequestId}
             node={node}
             setCloseChildren={setCloseChildren}
@@ -169,6 +178,7 @@ interface TreeProps {
   selectedRequestIdDispatch: [string, (x: string) => void];
   collapseAll?: boolean;
   setShowDrawer: (x: boolean) => void;
+  onBoardingRequestTrace?: Trace;
 }
 
 export const Tree: React.FC<TreeProps> = ({
@@ -177,24 +187,89 @@ export const Tree: React.FC<TreeProps> = ({
   selectedRequestIdDispatch,
   collapseAll,
   setShowDrawer,
-}) => (
-  <div
-    className={clsx(
-      "font-sans bg-slate-50 dark:bg-black border-t border-slate-200 dark:border-slate-700",
-      className
-    )}
-  >
-    {data.children &&
-      data.children.map((child, index) => (
-        <TreeNode
-          key={index}
-          node={child}
-          selectedRequestIdDispatch={selectedRequestIdDispatch}
-          isLastChild={!!data.children && index === data.children.length - 1}
-          level={0}
-          collapseAll={collapseAll}
-          setShowDrawer={setShowDrawer}
+  onBoardingRequestTrace,
+}) => {
+  const {
+    currentStep,
+    setCurrentElementId,
+    isOnboardingVisible,
+    setCurrentStep,
+  } = useOnboardingContext();
+
+  // find the first request that is a request node (children can have multiple children)
+  const firstRequest = data.children?.find(
+    (child) => child.name === "request"
+  ) as TreeNodeData;
+
+  if (isOnboardingVisible && currentStep === 2) {
+    return (
+      <Popover open={true}>
+        <PopoverTrigger asChild>
+          <div
+            className={clsx(
+              "font-sans bg-slate-50 dark:bg-black border-t border-slate-200 dark:border-slate-700",
+              className
+            )}
+            id="onboarding-request-session-left-panel"
+          >
+            {data.children &&
+              data.children.map((child, index) => (
+                <TreeNode
+                  key={index}
+                  node={child}
+                  selectedRequestIdDispatch={selectedRequestIdDispatch}
+                  onBoardingRequestTrace={onBoardingRequestTrace}
+                  isLastChild={
+                    !!data.children && index === data.children.length - 1
+                  }
+                  level={0}
+                  collapseAll={collapseAll}
+                  setShowDrawer={setShowDrawer}
+                />
+              ))}
+          </div>
+        </PopoverTrigger>
+        <OnboardingPopover
+          id="onboarding-request-session-left-panel"
+          icon={<WorkflowIcon className="h-6 w-6" />}
+          title="We are in the travel planning session"
+          stepNumber={2}
+          description="The goal is to figure out where the original failure occured."
+          next={() => {
+            selectedRequestIdDispatch[1](
+              onBoardingRequestTrace?.request_id ?? ""
+            );
+            setCurrentElementId("onboarding-request-session-culprit");
+            setCurrentStep(3);
+          }}
+          align="start"
+          side="right"
+          className="z-[10000] bg-white p-4 w-[calc(100vw-2rem)] sm:max-w-md flex flex-col gap-2"
         />
-      ))}
-  </div>
-);
+      </Popover>
+    );
+  }
+
+  return (
+    <div
+      className={clsx(
+        "font-sans bg-slate-50 dark:bg-black border-t border-slate-200 dark:border-slate-700",
+        className
+      )}
+    >
+      {data.children &&
+        data.children.map((child, index) => (
+          <TreeNode
+            key={index}
+            node={child}
+            selectedRequestIdDispatch={selectedRequestIdDispatch}
+            isLastChild={!!data.children && index === data.children.length - 1}
+            onBoardingRequestTrace={onBoardingRequestTrace}
+            level={0}
+            collapseAll={collapseAll}
+            setShowDrawer={setShowDrawer}
+          />
+        ))}
+    </div>
+  );
+};

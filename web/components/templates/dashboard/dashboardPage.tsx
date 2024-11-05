@@ -57,6 +57,8 @@ import SuggestionModal from "./suggestionsModal";
 import { useDashboardPage } from "./useDashboardPage";
 import OnboardingDemoModal from "./OnboardingDemoModal";
 import OnboardingQuickTourModal from "./OnboardingQuickTourModal";
+import useOnboardingContext from "@/components/layout/onboardingContext";
+import { useRouter } from "next/navigation";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -106,6 +108,9 @@ const DashboardPage = (props: DashboardPageProps) => {
   const [isDemo, setIsDemo] = useState(orgContext?.currentOrg?.tier === "demo");
   const [openDemo, setOpenDemo] = useState(true);
   const [openQuickTour, setOpenQuickTour] = useState(false);
+  const onboardingContext = useOnboardingContext();
+
+  const router = useRouter();
 
   useEffect(() => {
     setIsDemo(orgContext?.currentOrg?.tier === "demo");
@@ -1017,7 +1022,11 @@ const DashboardPage = (props: DashboardPageProps) => {
                 setOpenQuickTour(false);
                 setOpenDemo(true);
               }}
-              // startTour={() => {}}
+              startTour={() => {
+                onboardingContext.setCurrentElementId("onboarding-row-1");
+                onboardingContext.startOnboarding();
+                router.push("/requests");
+              }}
             />
           </>
         )}

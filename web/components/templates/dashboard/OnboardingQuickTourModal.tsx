@@ -21,10 +21,12 @@ const OnboardingQuickTourModal = ({
   open,
   setOpen,
   back,
+  startTour,
 }: {
   open: boolean;
   setOpen: (open: boolean) => void;
   back: () => void;
+  startTour: () => void;
 }) => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -80,7 +82,7 @@ const OnboardingQuickTourModal = ({
           <Button variant="outline" onClick={back}>
             Go Back
           </Button>
-          <Button>Let&apos;s go!</Button>
+          <Button onClick={startTour}>Let&apos;s go!</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
