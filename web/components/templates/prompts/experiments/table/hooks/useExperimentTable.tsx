@@ -165,6 +165,13 @@ export async function getTableData({
   );
 }
 
+interface UpdateExperimentCellVariables {
+  cellId: string;
+  status?: string;
+  value: string;
+  metadata?: Record<string, any>;
+}
+
 export function useExperimentTable(orgId: string, experimentTableId: string) {
   const queryClient = useQueryClient();
   const {
@@ -245,7 +252,50 @@ export function useExperimentTable(orgId: string, experimentTableId: string) {
         },
       });
     },
-    onSuccess: () => {
+    onMutate: async (newColumn) => {
+      await queryClient.cancelQueries({
+        queryKey: ["experimentTable", orgId, experimentTableId],
+      });
+
+      const previousData = queryClient.getQueryData([
+        "experimentTable",
+        orgId,
+        experimentTableId,
+      ]);
+
+      queryClient.setQueryData(
+        ["experimentTable", orgId, experimentTableId],
+        (oldData: any) => {
+          const newColumnId = `col-${Date.now()}`; // Temporary ID
+          const updatedColumns = [
+            ...oldData.columns,
+            {
+              id: newColumnId,
+              cells: [], // Or initialize cells as needed
+              metadata: {
+                hypothesisId: newColumn.hypothesisId,
+                promptVersionId: newColumn.promptVersionId,
+              },
+              columnName: newColumn.columnName,
+              columnType: newColumn.columnType,
+            },
+          ];
+          return {
+            ...oldData,
+            columns: updatedColumns,
+          };
+        }
+      );
+
+      return { previousData };
+    },
+    onError: (err, newColumn, context) => {
+      queryClient.setQueryData(
+        ["experimentTable", orgId, experimentTableId],
+        context?.previousData
+      );
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({
         queryKey: ["experimentTable", orgId, experimentTableId],
       });
@@ -269,7 +319,47 @@ export function useExperimentTable(orgId: string, experimentTableId: string) {
         }
       );
     },
-    onSuccess: () => {
+    onMutate: async (newRow) => {
+      await queryClient.cancelQueries({
+        queryKey: ["experimentTable", orgId, experimentTableId],
+      });
+
+      const previousData = queryClient.getQueryData([
+        "experimentTable",
+        orgId,
+        experimentTableId,
+      ]);
+
+      queryClient.setQueryData(
+        ["experimentTable", orgId, experimentTableId],
+        (oldData: any = { rows: [], columns: [] }) => {
+          const newRowIndex =
+            oldData.rows.length > 0
+              ? Math.max(...oldData.rows.map((row: any) => row.rowIndex)) + 1
+              : 0;
+
+          const newRowData = {
+            id: `row-${newRowIndex}`,
+            rowIndex: newRowIndex,
+            cells: {}, // Initialize cells if needed
+          };
+
+          return {
+            ...oldData,
+            rows: [...oldData.rows, newRowData],
+          };
+        }
+      );
+
+      return { previousData };
+    },
+    onError: (err, newRow, context) => {
+      queryClient.setQueryData(
+        ["experimentTable", orgId, experimentTableId],
+        context?.previousData
+      );
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({
         queryKey: ["experimentTable", orgId, experimentTableId],
       });
@@ -307,34 +397,69 @@ export function useExperimentTable(orgId: string, experimentTableId: string) {
     },
   });
 
-  const updateExperimentCell = useMutation({
+  const updateExperimentCell = useMutation<
+    unknown,
+    unknown,
+    UpdateExperimentCellVariables,
+    { previousData: any }
+  >({
     mutationFn: async ({
       cellId,
       status = "initialized",
       value,
       metadata,
-    }: {
-      cellId: string;
-      status?: string;
-      value: string;
-      metadata?: Record<string, any>;
-    }) => {
+    }: UpdateExperimentCellVariables) => {
       const jawnClient = getJawnClient(orgId);
       await jawnClient.PATCH("/v1/experiment/table/{experimentTableId}/cell", {
         params: { path: { experimentTableId: experimentTableId } },
         body: { cellId, status, value, metadata, updateInputs: true },
       });
     },
-    onSuccess: (_, variables) => {
-      if (
-        variables.metadata?.cellType === "output" ||
-        variables.metadata?.cellType === "experiment"
-      ) {
-        queryClient.invalidateQueries([
-          CELL_RESPONSE_CACHE_KEY,
-          variables.value,
-        ]);
-      }
+    onMutate: async (updatedCell: UpdateExperimentCellVariables) => {
+      await queryClient.cancelQueries({
+        queryKey: ["experimentTable", orgId, experimentTableId],
+      });
+
+      const previousData = queryClient.getQueryData([
+        "experimentTable",
+        orgId,
+        experimentTableId,
+      ]);
+
+      queryClient.setQueryData(
+        ["experimentTable", orgId, experimentTableId],
+        (oldData: any) => {
+          const updatedRows = oldData.rows.map((row: any) => {
+            const newRow = { ...row };
+            Object.keys(newRow.cells).forEach((columnId) => {
+              const cell = newRow.cells[columnId];
+              if (cell.cellId === updatedCell.cellId) {
+                newRow.cells[columnId] = {
+                  ...cell,
+                  value: updatedCell.value,
+                  status: updatedCell.status,
+                  metadata: updatedCell.metadata,
+                };
+              }
+            });
+            return newRow;
+          });
+          return {
+            ...oldData,
+            rows: updatedRows,
+          };
+        }
+      );
+
+      return { previousData };
+    },
+    onError: (err, updatedCell, context) => {
+      queryClient.setQueryData(
+        ["experimentTable", orgId, experimentTableId],
+        context?.previousData
+      );
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({
         queryKey: ["experimentTable", orgId, experimentTableId],
       });
