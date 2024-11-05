@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import { useJawnClient } from "@/lib/clients/jawnHook";
 import { Button } from "@/components/ui/button";
@@ -301,8 +301,7 @@ const AddColumnHeader: React.FC<AddColumnHeaderProps> = ({
                     result.data.data?.id
                   );
 
-                  setIsOpen(false);
-                  setOpenAddExperimentModal(false);
+                  setOpenAddExperimentModal(false); // Close the drawer after adding the column
                 }}
                 submitText="Test"
                 initialModel={"gpt-4o"}
