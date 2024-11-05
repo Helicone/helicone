@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import { useJawnClient } from "@/lib/clients/jawnHook";
 import { Button } from "@/components/ui/button";
@@ -21,11 +21,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "../../../../ui/scroll-area";
 import { useExperimentsStore } from "@/store/store";
+import { useQuery } from "@tanstack/react-query";
+import { getJawnClient } from "@/lib/clients/jawn";
+import { useOrg } from "@/components/layout/organizationContext";
 
 interface AddColumnHeaderProps {
   promptVersionId: string;
   experimentId: string;
-  promptVersionTemplate: any;
   selectedProviderKey: string | null;
   handleAddColumn: (
     columnName: string,
@@ -33,6 +35,7 @@ interface AddColumnHeaderProps {
     hypothesisId?: string,
     promptVersionId?: string
   ) => Promise<void>;
+  wrapText: boolean;
 }
 
 const SCORES = [
@@ -45,10 +48,10 @@ const SCORES = [
 
 const AddColumnHeader: React.FC<AddColumnHeaderProps> = ({
   promptVersionId,
-  promptVersionTemplate,
   experimentId,
   selectedProviderKey,
   handleAddColumn,
+  wrapText,
 }) => {
   const { openAddExperimentModal, setOpenAddExperimentModal } =
     useExperimentsStore();
@@ -63,9 +66,44 @@ const AddColumnHeader: React.FC<AddColumnHeaderProps> = ({
     }[]
   >([]);
 
-  useEffect(() => {
-    setIsOpen(openAddExperimentModal);
-  }, [openAddExperimentModal]);
+  const org = useOrg();
+  const orgId = org?.currentOrg?.id;
+
+  // Fetch promptVersionTemplateData
+  const {
+    data: promptVersionTemplateData,
+    isLoading,
+    error,
+  } = useQuery(
+    ["promptVersionTemplate", promptVersionId],
+    async () => {
+      if (!promptVersionId || !orgId) {
+        return null;
+      }
+      const jawnClient = getJawnClient(orgId);
+      const res = await jawnClient.GET("/v1/prompt/version/{promptVersionId}", {
+        params: {
+          path: {
+            promptVersionId: promptVersionId,
+          },
+        },
+      });
+      return res.data?.data;
+    },
+    {
+      enabled: !!promptVersionId && !!orgId,
+    }
+  );
+
+  // Handle loading or error states if necessary
+  if (isLoading) {
+    return null; // Or a loading indicator
+  }
+
+  if (error) {
+    console.error("Error fetching prompt version template:", error);
+    return null; // Or render an error message
+  }
 
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open);
@@ -203,7 +241,7 @@ const AddColumnHeader: React.FC<AddColumnHeaderProps> = ({
               )}
               <PromptPlayground
                 defaultEditMode={true}
-                prompt={promptVersionTemplate?.helicone_template ?? ""}
+                prompt={promptVersionTemplateData?.helicone_template ?? ""}
                 selectedInput={undefined}
                 onSubmit={async (history, model) => {
                   const promptData = {
