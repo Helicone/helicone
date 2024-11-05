@@ -439,7 +439,7 @@ export class ExperimentStore extends BaseStore {
     experimentTableId: string
   ): Promise<Result<number, string>> {
     const query = `
-      SELECT COALESCE(MAX(ecv.row_index), 0) as max_row_index
+      SELECT COALESCE(MAX(ecv.row_index), -1) as max_row_index
       FROM experiment_cell ecv
       JOIN experiment_column ec ON ec.id = ecv.column_id
       JOIN experiment_table et ON et.id = ec.table_id
@@ -800,14 +800,13 @@ export class ExperimentStore extends BaseStore {
     const { experimentTableId, rowIndex } = params;
 
     try {
-      // Update all cells in the specified row to set metadata.deleted = true
       const query = `
-        UPDATE experiment_cell
-        SET metadata = COALESCE(metadata, '{}'::jsonb) || '{"deleted": true}'::jsonb
-        FROM experiment_column
-        WHERE experiment_cell.column_id = experiment_column.id
-          AND experiment_column.table_id = $1
-          AND experiment_cell.row_index = $2
+        UPDATE experiment_cell AS ec
+        SET metadata = COALESCE(ec.metadata, '{}'::jsonb) || '{"deleted": true}'::jsonb
+        FROM experiment_column AS col
+        WHERE ec.column_id = col.id
+          AND col.table_id = $1
+          AND ec.row_index = $2
       `;
 
       const result = await dbExecute(query, [experimentTableId, rowIndex]);

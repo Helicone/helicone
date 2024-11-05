@@ -2,6 +2,7 @@ import {
   ListBulletIcon,
   PlayIcon,
   DotsHorizontalIcon,
+  TrashIcon,
 } from "@heroicons/react/24/outline";
 import { Button } from "../../../../../ui/button";
 import {
@@ -299,28 +300,42 @@ const RowNumberCellRenderer: React.FC<any> = (props) => {
 
   const handleDeleteClick = () => {
     const rowIndex = props.node.rowIndex;
+    console.log("handleDeleteClick", rowIndex);
+    return;
     props.context.handleDeleteRow(rowIndex);
     setPopoverOpen(false); // Close popover after action
   };
 
   return (
-    <div className="flex items-center justify-center w-full h-full">
+    <div className="w-full h-full">
       <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
-        <PopoverTrigger asChild>
-          <button
-            className="text-left w-full h-full bg-transparent border-none outline-none cursor-pointer"
+        <PopoverTrigger asChild className="w-full h-full">
+          <Button
+            variant="ghost"
+            className="flex items-center justify-center w-full h-full cursor-pointer"
             onClick={() => setPopoverOpen(!popoverOpen)}
           >
             {rowNumber}
-          </button>
+          </Button>
         </PopoverTrigger>
-        <PopoverContent side="right" align="start" className="p-2">
-          <div className="flex flex-col space-y-2">
-            <Button variant="ghost" size="sm" onClick={handleRunClick}>
+        <PopoverContent side="right" align="start" className="p-2 w-32">
+          <div className="flex flex-col items-center justify-start px-0">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full flex items-center justify-start"
+              onClick={handleRunClick}
+            >
               <PlayIcon className="w-4 h-4 mr-2" />
               Run
             </Button>
-            <Button variant="ghost" size="sm" onClick={handleDeleteClick}>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full flex items-center justify-start"
+              onClick={handleDeleteClick}
+            >
+              <TrashIcon className="w-4 h-4 mr-2 text-red-500" />
               Delete
             </Button>
           </div>

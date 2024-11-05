@@ -41,6 +41,7 @@ export type TableRow = {
   id: string;
   rowIndex: number;
   cells: Record<string, TableCell>; // columnId -> TableCell
+  deleted?: boolean;
 };
 
 type ColumnType = "input" | "output" | "experiment";
@@ -107,9 +108,14 @@ export async function getTableData({
               id: `row-${rowIndex}`,
               rowIndex,
               cells: {},
+              deleted: false,
             };
             rowIndexToRow.set(rowIndex, newRow);
             row = newRow;
+          }
+
+          if (cell.metadata?.deleted === true) {
+            row.deleted = true;
           }
 
           if (cell.value !== undefined && cell.value !== null) {
@@ -160,9 +166,9 @@ export async function getTableData({
     })
   );
 
-  return Array.from(rowIndexToRow.values()).sort(
-    (a, b) => a.rowIndex - b.rowIndex
-  );
+  return Array.from(rowIndexToRow.values())
+    .filter((row) => !row.deleted)
+    .sort((a, b) => a.rowIndex - b.rowIndex);
 }
 
 interface UpdateExperimentCellVariables {
@@ -397,6 +403,80 @@ export function useExperimentTable(orgId: string, experimentTableId: string) {
     },
   });
 
+  const deleteExperimentTableRow = useMutation({
+    mutationFn: async (rowIndex: number) => {
+      const jawnClient = getJawnClient(orgId);
+      await jawnClient.DELETE(
+        "/v1/experiment/table/{experimentTableId}/row/{rowIndex}",
+        {
+          params: { path: { experimentTableId, rowIndex } },
+        }
+      );
+    },
+    onMutate: async (rowIndex) => {
+      await queryClient.cancelQueries({
+        queryKey: ["experimentTable", orgId, experimentTableId],
+      });
+      const previousData = queryClient.getQueryData([
+        "experimentTable",
+        orgId,
+        experimentTableId,
+      ]);
+
+      queryClient.setQueryData(
+        ["experimentTable", orgId, experimentTableId],
+        (oldData: any) => {
+          if (!oldData) return oldData;
+
+          const updatedRows = oldData.rows.map((row: any) => {
+            if (row.rowIndex === rowIndex) {
+              const updatedCells = Object.keys(row.cells).reduce(
+                (cells: any, columnId) => {
+                  const cell = row.cells[columnId];
+                  return {
+                    ...cells,
+                    [columnId]: {
+                      ...cell,
+                      metadata: {
+                        ...cell.metadata,
+                        deleted: true,
+                      },
+                    },
+                  };
+                },
+                {}
+              );
+
+              return {
+                ...row,
+                cells: updatedCells,
+              };
+            }
+            return row;
+          });
+
+          return {
+            ...oldData,
+            rows: updatedRows,
+          };
+        }
+      );
+
+      return { previousData };
+    },
+    onError: (err, variables, context) => {
+      queryClient.setQueryData(
+        ["experimentTable", orgId, experimentTableId],
+        context?.previousData
+      );
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["experimentTable", orgId, experimentTableId],
+      });
+    },
+  });
+
   const updateExperimentCell = useMutation<
     unknown,
     unknown,
@@ -549,6 +629,7 @@ export function useExperimentTable(orgId: string, experimentTableId: string) {
     promptVersionTemplateData,
     addExperimentTableColumn,
     addExperimentTableRow,
+    deleteExperimentTableRow,
     updateExperimentCell,
     runHypothesisMutation,
     addExperimentTableRowInsertBatch,

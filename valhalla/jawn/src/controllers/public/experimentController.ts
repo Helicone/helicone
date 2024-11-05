@@ -346,17 +346,26 @@ export class ExperimentController extends Controller {
     return ok(null);
   }
 
-  @Delete("/table/{experimentTableId}/row/{rowId}")
+  @Delete("/table/{experimentTableId}/row/{rowIndex}")
   public async deleteExperimentTableRow(
     @Path() experimentTableId: string,
-    @Path() rowId: string,
+    @Path() rowIndex: number,
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<null, string>> {
     const experimentManager = new ExperimentManager(request.authParams);
-    const result = await experimentManager.deleteExperimentTableRow(
+    const experimentTable =
+      await experimentManager.getExperimentTableSimplifiedById(
+        experimentTableId
+      );
+    if (experimentTable.error || !experimentTable.data) {
+      this.setStatus(500);
+      console.error(experimentTable.error);
+      return err(experimentTable.error);
+    }
+    const result = await experimentManager.deleteExperimentTableRow({
       experimentTableId,
-      rowId
-    );
+      rowIndex,
+    });
     return result;
   }
 

@@ -56,6 +56,7 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
     isExperimentTableLoading,
     addExperimentTableColumn,
     addExperimentTableRow,
+    deleteExperimentTableRow,
     updateExperimentCell,
     runHypothesisMutation,
     addExperimentTableRowInsertBatch,
@@ -132,6 +133,13 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
       });
     },
     [addExperimentTableRow, experimentTableQuery?.promptSubversionId]
+  );
+
+  const handleDeleteRow = useCallback(
+    (rowIndex: number) => {
+      deleteExperimentTableRow.mutate(rowIndex);
+    },
+    [deleteExperimentTableRow]
   );
 
   const handleAddColumn = useCallback(
@@ -584,6 +592,7 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
               rowData: experimentTableQuery?.rows,
               handleUpdateExperimentCell: updateExperimentCell.mutate,
               handleRunRow,
+              handleDeleteRow,
             }}
             rowClass="border-b border-gray-200 hover:bg-gray-50"
             headerHeight={40}
