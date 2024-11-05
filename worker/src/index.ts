@@ -75,6 +75,7 @@ export interface BASE_Env {
   UPSTASH_KAFKA_USERNAME: string;
   UPSTASH_KAFKA_API_KEY: string;
   UPSTASH_KAFKA_PASSWORD: string;
+  HELICONE_MANUAL_ACCESS_KEY: string;
   ORG_IDS?: string;
   PERCENT_LOG_KAFKA?: string;
   WORKER_DEFINED_REDIRECT_URL?: string;
