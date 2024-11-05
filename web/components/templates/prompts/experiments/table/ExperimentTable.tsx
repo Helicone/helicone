@@ -213,6 +213,24 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
     [orgId]
   );
 
+  const headerComponentParams = useMemo(
+    () => ({
+      promptVersionId: experimentTableQuery?.promptSubversionId ?? "",
+      promptVersionTemplate: promptVersionTemplateData,
+      experimentId: experimentTableQuery?.experimentId,
+      selectedProviderKey: "",
+      handleAddColumn,
+      wrapText,
+    }),
+    [
+      experimentTableQuery?.promptSubversionId,
+      promptVersionTemplateData,
+      experimentTableQuery?.experimentId,
+      handleAddColumn,
+      wrapText,
+    ]
+  );
+
   const columnDefs = useMemo<ColDef[]>(() => {
     let columns: ColDef[] = [
       // Row number column (keep as is)
@@ -387,6 +405,7 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
     }
 
     columns.push({
+      colId: "addExperiment",
       headerName: "Add Experiment",
       width: 170,
       suppressSizeToFit: true,
@@ -396,15 +415,7 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
       resizable: false,
       headerComponent: AddColumnHeader,
       headerClass: "border-r border-[#E2E8F0]",
-      headerComponentParams: {
-        promptVersionId:
-          (experimentTableQuery?.promptSubversionId as string) ?? "",
-        promptVersionTemplate: promptVersionTemplateData,
-        experimentId: experimentTableQuery?.experimentId,
-        selectedProviderKey: "",
-        handleAddColumn,
-        wrapText,
-      },
+      headerComponentParams: headerComponentParams,
     });
 
     // Update column widths based on the columnWidths state
@@ -430,13 +441,6 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
     headerClass,
     wrapText,
     experimentTableQuery?.columns,
-    experimentTableQuery?.promptSubversionId,
-    experimentTableQuery?.experimentId,
-    experimentTableQuery?.rows,
-    promptVersionTemplateData,
-    addExperimentTableColumn.mutate,
-    columnOrder,
-    handleRunHypothesis,
     columnView,
     columnWidths,
   ]);
