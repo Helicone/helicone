@@ -80,8 +80,6 @@ export class KafkaProducer {
   }
 
   async sendMessage(msg: KafkaMessage) {
-    console.log("their's", msg.heliconeMeta.heliconeManualAccessKey);
-    console.log("mine", this.HELICONE_MANUAL_ACCESS_KEY);
     if (
       !this.kafka ||
       msg.heliconeMeta.heliconeManualAccessKey ===
