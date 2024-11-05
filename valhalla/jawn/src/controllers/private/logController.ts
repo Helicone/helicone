@@ -17,6 +17,14 @@ export class LogController extends Controller {
     @Request() request: JawnAuthenticatedRequest
   ): Promise<void> {
     const logManager = new LogManager();
+    if (
+      logMessage.heliconeMeta.heliconeManualAccessKey &&
+      logMessage.heliconeMeta.heliconeManualAccessKey !==
+        process.env.HELICONE_MANUAL_ACCESS_KEY
+    ) {
+      this.setStatus(401);
+      return;
+    }
     try {
       await logManager.processLogEntry(logMessage);
       this.setStatus(200);

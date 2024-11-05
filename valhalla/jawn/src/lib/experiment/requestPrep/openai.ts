@@ -18,6 +18,7 @@ function prepareRequestAzure(
     "Helicone-Auth": `Bearer ${apiKey}`,
     Accept: "application/json",
     "Accept-Encoding": "",
+    "Helicone-Manual-Access-Key": process.env.HELICONE_MANUAL_ACCESS_KEY ?? "",
   };
 
   if (columnId) {
@@ -51,6 +52,7 @@ function prepareRequestAnthropic(
     "Helicone-Auth": `Bearer ${apiKey}`,
     Accept: "application/json",
     "Accept-Encoding": "",
+    "Helicone-Manual-Access-Key": process.env.HELICONE_MANUAL_ACCESS_KEY ?? "",
   };
 
   const fetchUrl = `${process.env.HELICONE_LLMMAPPER_URL}/oai2ant/v1`;
