@@ -314,7 +314,6 @@ export default {
     ctx: ExecutionContext
   ): Promise<Response> {
     try {
-      console.log({ env });
       const requestWrapper = await RequestWrapper.create(request, env);
       if (requestWrapper.error || !requestWrapper.data) {
         return handleError(requestWrapper.error);
