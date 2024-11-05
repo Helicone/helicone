@@ -456,7 +456,9 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
 
   const handleRunRow = useCallback(
     (rowIndex: number) => {
-      const row = experimentTableQuery?.rows[rowIndex];
+      const row = experimentTableQuery?.rows.find(
+        (row) => row.rowIndex === rowIndex
+      );
       if (!row) return;
 
       const experimentColumns = experimentTableQuery?.columns?.filter(

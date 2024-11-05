@@ -286,23 +286,17 @@ const PromptCellRenderer: React.FC<any> = (props) => {
 
 const RowNumberCellRenderer: React.FC<any> = (props) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
-
-  const rowNumber =
-    props.node?.rowIndex !== undefined
-      ? props.node.rowIndex + 1 // Assuming 0-based index, adjust as needed
-      : "N/A";
+  const dataRowIndex = props.data.rowIndex;
+  const gridRowIndex =
+    props.node.rowIndex !== undefined ? props.node.rowIndex + 1 : "N/A";
 
   const handleRunClick = () => {
-    const rowIndex = props.node.rowIndex;
-    props.context.handleRunRow(rowIndex);
+    props.context.handleRunRow(dataRowIndex);
     setPopoverOpen(false); // Close popover after action
   };
 
   const handleDeleteClick = () => {
-    const rowIndex = props.node.rowIndex;
-    console.log("handleDeleteClick", rowIndex);
-    return;
-    props.context.handleDeleteRow(rowIndex);
+    props.context.handleDeleteRow(dataRowIndex);
     setPopoverOpen(false); // Close popover after action
   };
 
@@ -315,7 +309,7 @@ const RowNumberCellRenderer: React.FC<any> = (props) => {
             className="flex items-center justify-center w-full h-full cursor-pointer"
             onClick={() => setPopoverOpen(!popoverOpen)}
           >
-            {rowNumber}
+            {gridRowIndex}
           </Button>
         </PopoverTrigger>
         <PopoverContent side="right" align="start" className="p-2 w-32">
