@@ -55,7 +55,7 @@ const AddColumnHeader: React.FC<AddColumnHeaderProps> = ({
 }) => {
   const { openAddExperimentModal, setOpenAddExperimentModal } =
     useExperimentsStore();
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(openAddExperimentModal);
   const jawn = useJawnClient();
 
   const [showSuggestionPanel, setShowSuggestionPanel] = useState(false);
@@ -301,7 +301,8 @@ const AddColumnHeader: React.FC<AddColumnHeaderProps> = ({
                     result.data.data?.id
                   );
 
-                  setOpenAddExperimentModal(false); // Close the drawer after adding the column
+                  setOpenAddExperimentModal(false);
+                  setIsOpen(false);
                 }}
                 submitText="Test"
                 initialModel={"gpt-4o"}
