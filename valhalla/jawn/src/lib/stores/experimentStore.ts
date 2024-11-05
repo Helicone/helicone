@@ -793,6 +793,36 @@ export class ExperimentStore extends BaseStore {
     }
   }
 
+  async softDeleteExperimentTableRow(params: {
+    experimentTableId: string;
+    rowIndex: number;
+  }): Promise<Result<null, string>> {
+    const { experimentTableId, rowIndex } = params;
+
+    try {
+      // Update all cells in the specified row to set metadata.deleted = true
+      const query = `
+        UPDATE experiment_cell
+        SET metadata = COALESCE(metadata, '{}'::jsonb) || '{"deleted": true}'::jsonb
+        FROM experiment_column
+        WHERE experiment_cell.column_id = experiment_column.id
+          AND experiment_column.table_id = $1
+          AND experiment_cell.row_index = $2
+      `;
+
+      const result = await dbExecute(query, [experimentTableId, rowIndex]);
+
+      if (result.error) {
+        return err(`Failed to soft delete row ${rowIndex}: ${result.error}`);
+      }
+
+      return ok(null);
+    } catch (error) {
+      console.error(`Error soft deleting experiment table row: ${error}`);
+      return err(`Error soft deleting row ${rowIndex}: ${error}`);
+    }
+  }
+
   async createExperimentCells(
     cells: {
       columnId: string;

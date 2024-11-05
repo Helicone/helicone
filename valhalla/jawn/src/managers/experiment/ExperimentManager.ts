@@ -445,4 +445,11 @@ export class ExperimentManager extends BaseManager {
   }): Promise<Result<{ ids: string[] }, string>> {
     return this.ExperimentStore.createExperimentTableRowsWithCells(params);
   }
+
+  async deleteExperimentTableRow(params: {
+    experimentTableId: string;
+    rowId: string;
+  }): Promise<Result<null, string>> {
+    return this.ExperimentStore.deleteExperimentTableRow(params);
+  }
 }

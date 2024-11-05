@@ -1,4 +1,8 @@
-import { ListBulletIcon, PlayIcon } from "@heroicons/react/24/outline";
+import {
+  ListBulletIcon,
+  PlayIcon,
+  DotsHorizontalIcon,
+} from "@heroicons/react/24/outline";
 import { Button } from "../../../../../ui/button";
 import {
   Popover,
@@ -280,35 +284,48 @@ const PromptCellRenderer: React.FC<any> = (props) => {
 };
 
 const RowNumberCellRenderer: React.FC<any> = (props) => {
-  const [hovered, setHovered] = useState(false);
+  const [popoverOpen, setPopoverOpen] = useState(false);
 
   const rowNumber =
     props.node?.rowIndex !== undefined
-      ? (props.node?.rowIndex || 0) + 1
+      ? props.node.rowIndex + 1 // Assuming 0-based index, adjust as needed
       : "N/A";
 
   const handleRunClick = () => {
     const rowIndex = props.node.rowIndex;
     props.context.handleRunRow(rowIndex);
+    setPopoverOpen(false); // Close popover after action
+  };
+
+  const handleDeleteClick = () => {
+    const rowIndex = props.node.rowIndex;
+    props.context.handleDeleteRow(rowIndex);
+    setPopoverOpen(false); // Close popover after action
   };
 
   return (
-    <div
-      className="flex items-center justify-center w-full h-full"
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-    >
-      {!hovered ? (
-        <span>{rowNumber}</span>
-      ) : (
-        <Button
-          variant="ghost"
-          className="p-0 border-slate-200 border rounded-md bg-slate-50 text-slate-500 h-[22px] w-[26px] flex items-center justify-center"
-          onClick={handleRunClick}
-        >
-          <PlayIcon className="w-4 h-4 text-gray-600 dark:text-gray-300" />
-        </Button>
-      )}
+    <div className="flex items-center justify-center w-full h-full">
+      <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+        <PopoverTrigger asChild>
+          <button
+            className="text-left w-full h-full bg-transparent border-none outline-none cursor-pointer"
+            onClick={() => setPopoverOpen(!popoverOpen)}
+          >
+            {rowNumber}
+          </button>
+        </PopoverTrigger>
+        <PopoverContent side="right" align="start" className="p-2">
+          <div className="flex flex-col space-y-2">
+            <Button variant="ghost" size="sm" onClick={handleRunClick}>
+              <PlayIcon className="w-4 h-4 mr-2" />
+              Run
+            </Button>
+            <Button variant="ghost" size="sm" onClick={handleDeleteClick}>
+              Delete
+            </Button>
+          </div>
+        </PopoverContent>
+      </Popover>
     </div>
   );
 };
