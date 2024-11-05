@@ -104,7 +104,8 @@
     "rss-parser": "^3.13.0",
     "stripe": "^16.11.0",
     "tailwind-merge": "^2.5.2",
-    "vaul": "^1.0.0"
+    "vaul": "^1.0.0",
+    "zustand": "^5.0.1"
   },
   "devDependencies": {
     "@graphql-eslint/eslint-plugin": "^3.17.0",

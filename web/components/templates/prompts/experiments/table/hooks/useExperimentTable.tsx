@@ -171,54 +171,37 @@ export function useExperimentTable(orgId: string, experimentTableId: string) {
     data: experimentTableQuery,
 
     isLoading: isExperimentTableLoading,
-  } = useQuery(
-    ["experimentTable", orgId, experimentTableId],
-    async () => {
-      if (!orgId || !experimentTableId) return null;
-      const jawnClient = getJawnClient(orgId);
-      const res = await jawnClient.POST(
-        "/v1/experiment/table/{experimentTableId}/query",
-        {
-          params: {
-            path: {
-              experimentTableId: experimentTableId,
-            },
+  } = useQuery(["experimentTable", orgId, experimentTableId], async () => {
+    if (!orgId || !experimentTableId) return null;
+    const jawnClient = getJawnClient(orgId);
+    const res = await jawnClient.POST(
+      "/v1/experiment/table/{experimentTableId}/query",
+      {
+        params: {
+          path: {
+            experimentTableId: experimentTableId,
           },
-        }
-      );
-      const rowData = await getTableData({
-        experimentTableData: res.data?.data as ExperimentTable,
-        getRequestDataByIds: (requestIds) =>
-          getRequestDataByIds(orgId, requestIds),
-        responseBodyCache: {},
-        queryClient,
-      });
-      return {
-        id: res.data?.data?.id,
-        name: res.data?.data?.name,
-        experimentId: res.data?.data?.experimentId,
-        promptSubversionId: res.data?.data?.metadata?.prompt_version as string,
-        datasetId: res.data?.data?.metadata?.datasetId as string,
-        metadata: res.data?.data?.metadata,
-        columns: res.data?.data?.columns,
-        rows: rowData,
-      };
-    },
-    {
-      // Add polling configuration
-      refetchInterval: (data) => {
-        // Check if any cells are in "running" status
-        const hasRunningCells = data?.rows?.some((row) =>
-          Object.values(row.cells).some((cell) => cell.status === "running")
-        );
-
-        // Refetch every 3 seconds if there are running cells, otherwise stop polling
-        return hasRunningCells ? 3000 : false;
-      },
-      // Continue polling even when the window loses focus
-      refetchIntervalInBackground: true,
-    }
-  );
+        },
+      }
+    );
+    const rowData = await getTableData({
+      experimentTableData: res.data?.data as ExperimentTable,
+      getRequestDataByIds: (requestIds) =>
+        getRequestDataByIds(orgId, requestIds),
+      responseBodyCache: {},
+      queryClient,
+    });
+    return {
+      id: res.data?.data?.id,
+      name: res.data?.data?.name,
+      experimentId: res.data?.data?.experimentId,
+      promptSubversionId: res.data?.data?.metadata?.prompt_version as string,
+      datasetId: res.data?.data?.metadata?.datasetId as string,
+      metadata: res.data?.data?.metadata,
+      columns: res.data?.data?.columns,
+      rows: rowData,
+    };
+  });
 
   const addExperimentTableColumn = useMutation({
     mutationFn: async ({
