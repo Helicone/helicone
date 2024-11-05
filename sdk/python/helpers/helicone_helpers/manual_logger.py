@@ -1,13 +1,14 @@
 import time
 import requests
-from typing import Callable, TypeVar
+from typing import Callable, Literal, Optional, TypeVar, Union
 
 
 T = TypeVar('T')
 
 
 class HeliconeResultRecorder:
-    def __init__(self):
+    def __init__(self, request: dict):
+        self.request = request
         self.results = {}
 
     def append_results(self, data: dict):
@@ -22,16 +23,17 @@ class HeliconeManualLogger:
     headers: dict
     logging_endpoint: str
 
-    def __init__(self, api_key: str, headers: dict = {}, logging_endpoint: str = "https://api.hconeai.com/custom/v1/log"):
+    def __init__(self, api_key: str, headers: dict = {}, logging_endpoint: str = "https://api.hconeai.com"):
         self.api_key = api_key
-        self.headers = headers
+        self.headers = dict(headers)
         self.logging_endpoint = logging_endpoint
 
     def log_request(
         self,
         request: dict,
         operation: Callable[[HeliconeResultRecorder], T],
-        additional_headers: dict = {}
+        additional_headers: dict = {},
+        provider: Optional[Union[Literal["openai", "anthropic"], str]] = None,
     ) -> T:
         """
         Logs a custom request to Helicone
@@ -45,13 +47,13 @@ class HeliconeManualLogger:
             The result of the `operation` function
         """
         start_time = time.time()
-        result_recorder = HeliconeResultRecorder()
+        result_recorder = HeliconeResultRecorder(request)
 
         try:
             result = operation(result_recorder)
             end_time = time.time()
 
-            self.__send_log(request, result_recorder.get_results(), {
+            self.__send_log(provider, request, result_recorder.get_results(), {
                 "start_time": start_time,
                 "end_time": end_time,
                 "additional_headers": additional_headers
@@ -62,15 +64,24 @@ class HeliconeManualLogger:
             print("Error during operation:", e)
             raise e
 
+    def __get_logging_endpoint(self, provider: Optional[str]):
+        if provider == "openai":
+            return self.logging_endpoint + "/oai/v1/log"
+        elif provider == "anthropic":
+            return self.logging_endpoint + "/anthropic/v1/log"
+        else:
+            return self.logging_endpoint + "/custom/v1/log"
+
     def __send_log(
         self,
+        provider: Optional[str],
         request: dict,
         response: dict,
         options: dict
     ):
         start_time = options.get("start_time")
         end_time = options.get("end_time")
-        additional_headers = options.get("additional_headers")
+        additional_headers = dict(options.get("additional_headers", {}))
 
         provider_request = {
             "url": "custom-model-nopath",
@@ -85,8 +96,8 @@ class HeliconeManualLogger:
             "status": 200,
             "json": {
                 **response,
-                "_type": request["_type"],
-                "toolName": request["toolName"]
+                "_type": request.get("_type", "unknown"),
+                "toolName": request.get("toolName", "unknown"),
             }
         }
 
@@ -106,7 +117,7 @@ class HeliconeManualLogger:
             "headers": {
                 "Authorization": f"Bearer {self.api_key}",
                 "Content-Type": "application/json",
-                **self.headers,
+                **dict(self.headers),
                 **additional_headers
             },
             "body": {
@@ -118,7 +129,7 @@ class HeliconeManualLogger:
 
         try:
             requests.post(
-                self.logging_endpoint,
+                self.__get_logging_endpoint(provider),
                 json=fetch_options["body"],
                 headers=fetch_options["headers"]
             )
