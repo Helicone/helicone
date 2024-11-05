@@ -430,8 +430,10 @@ export function useExperimentTable(orgId: string, experimentTableId: string) {
 
           const updatedRows = oldData.rows.map((row: any) => {
             if (row.rowIndex === rowIndex) {
-              const updatedCells = Object.keys(row.cells).reduce(
-                (cells: any, columnId) => {
+              return {
+                ...row,
+                deleted: true,
+                cells: Object.keys(row.cells).reduce((cells: any, columnId) => {
                   const cell = row.cells[columnId];
                   return {
                     ...cells,
@@ -443,13 +445,7 @@ export function useExperimentTable(orgId: string, experimentTableId: string) {
                       },
                     },
                   };
-                },
-                {}
-              );
-
-              return {
-                ...row,
-                cells: updatedCells,
+                }, {}),
               };
             }
             return row;
