@@ -228,6 +228,13 @@ const Footer = () => {
           >
             Email
           </a>
+          <a
+            className="hover:underline"
+            href="https://www.helicone.ai/career"
+            target="_blank"
+          >
+            Work with Us
+          </a>
         </div>
       </div>
     </footer>
