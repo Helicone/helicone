@@ -55,6 +55,8 @@ import { QuantilesGraph } from "./quantilesGraph";
 import StyledAreaChart from "./styledAreaChart";
 import SuggestionModal from "./suggestionsModal";
 import { useDashboardPage } from "./useDashboardPage";
+import OnboardingDemoModal from "./OnboardingDemoModal";
+import OnboardingQuickTourModal from "./OnboardingQuickTourModal";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -100,6 +102,14 @@ const DashboardPage = (props: DashboardPageProps) => {
   const searchParams = useSearchParams();
 
   const orgContext = useOrg();
+
+  const [isDemo, setIsDemo] = useState(orgContext?.currentOrg?.tier === "demo");
+  const [openDemo, setOpenDemo] = useState(true);
+  const [openQuickTour, setOpenQuickTour] = useState(false);
+
+  useEffect(() => {
+    setIsDemo(orgContext?.currentOrg?.tier === "demo");
+  }, [orgContext?.currentOrg?.tier]);
 
   const {
     organizationLayout: orgLayout,
@@ -195,7 +205,12 @@ const DashboardPage = (props: DashboardPageProps) => {
     return JSON.stringify(encode(filters));
   };
 
-  const [isLive, setIsLive] = useLocalStorage("isLive-DashboardPage", false);
+  const [isLive, setIsLive] = useLocalStorage(
+    "isLive-DashboardPage",
+    // TODO: Uncomment this once we have a demo
+    // orgContext?.currentOrg?.tier === "demo"
+    false
+  );
 
   const [advancedFilters, setAdvancedFilters] = useState<UIFilterRowTree>(
     getRootFilterNode()
@@ -983,6 +998,29 @@ const DashboardPage = (props: DashboardPageProps) => {
         />
 
         <UpgradeProModal open={open} setOpen={setOpen} />
+
+        {isDemo && (
+          <>
+            <OnboardingDemoModal
+              open={openDemo}
+              setOpen={setOpenDemo}
+              quickStart={() => {}}
+              quickTour={() => {
+                setOpenDemo(false);
+                setOpenQuickTour(true);
+              }}
+            />
+            <OnboardingQuickTourModal
+              open={openQuickTour}
+              setOpen={setOpenQuickTour}
+              back={() => {
+                setOpenQuickTour(false);
+                setOpenDemo(true);
+              }}
+              // startTour={() => {}}
+            />
+          </>
+        )}
       </IslandContainer>
     </>
   );

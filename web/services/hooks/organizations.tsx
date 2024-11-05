@@ -8,6 +8,7 @@ import { ORG_ID_COOKIE_KEY } from "../../lib/constants";
 import { getJawnClient } from "../../lib/clients/jawn";
 import posthog from "posthog-js";
 import { getHeliconeCookie } from "@/lib/cookies";
+import { generateApiKey } from "generate-api-key";
 
 const useGetOrgMembers = (orgId: string) => {
   const jawn = getJawnClient(orgId);
@@ -230,24 +231,37 @@ const useOrgsContextManager = () => {
         body: JSON.stringify({
           isEu,
         }),
-        headers: {
-          "helicone-authorization": JSON.stringify({
-            _type: "jwt",
-            token: jwtToken,
-            orgId: user.id,
-          }),
-        },
       }).then((res) => {
         if (res.status === 201) {
         } else if (res.status !== 200) {
           console.error("Failed to create org", res.json());
         } else {
-          console.log("org created, refreshing");
-          // const jawn = getJawnClient(user.id);
-          // jawn.GET("/v1/organization/demo").then((res) => {
-          //   console.log("org created", res);
-          //   refreshCurrentOrg();
-          // });
+          const apiKey = `sk-helicone${isEu ? "-eu" : ""}-${generateApiKey({
+            method: "base32",
+            dashes: true,
+          }).toString()}`.toLowerCase();
+
+          res.json().then((x) => {
+            fetch(
+              `${process.env.NEXT_PUBLIC_HELICONE_JAWN_SERVICE}/v1/organization/setup-demo`,
+              {
+                method: "POST",
+                body: JSON.stringify({
+                  apiKey,
+                }),
+                headers: {
+                  "Content-Type": "application/json",
+                  "helicone-authorization": JSON.stringify({
+                    _type: "jwt",
+                    token: jwtToken,
+                    orgId: x.orgId,
+                  }),
+                },
+              }
+            ).then((res) => {
+              refreshCurrentOrg();
+            });
+          });
         }
       });
     }

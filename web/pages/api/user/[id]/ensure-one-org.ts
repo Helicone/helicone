@@ -1,18 +1,16 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { supabaseServer } from "../../../../lib/supabaseServer";
-import generateApiKey from "generate-api-key";
 
 export type Tier = "free" | "pro" | "growth" | "enterprise";
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<string>
+  res: NextApiResponse<{ orgId?: string; error?: string }>
 ) {
   if (req.method !== "POST") {
-    res.status(405).json("Method not allowed");
+    res.status(405).json({ error: "Method not allowed" });
     return;
   }
-  const heliconeAuthorizationHeader = req.headers["helicone-authorization"];
   const userId = req.query.id as string;
   const isEu = req.body.isEu;
 
@@ -29,7 +27,7 @@ export default async function handler(
         {
           name: "Xpedia AI",
           owner: userId,
-          tier: "free",
+          tier: "demo",
           is_personal: true,
           has_onboarded: true,
         },
@@ -38,7 +36,7 @@ export default async function handler(
       .single();
 
     if (result.error) {
-      res.status(500).json(result.error.message);
+      res.status(500).json({ error: result.error.message });
     } else {
       const { data: memberInsert, error: memberError } = await supabaseServer
         .from("organization_member")
@@ -50,34 +48,9 @@ export default async function handler(
         })
         .select("*");
 
-      const orgId = result.data.id;
-
-      const apiKey = `sk-helicone${isEu ? "-eu" : ""}-${generateApiKey({
-        method: "base32",
-        dashes: true,
-      }).toString()}`.toLowerCase();
-
-      console.log("fetching setup demo");
-      console.log(
-        process.env.NEXT_PUBLIC_HELICONE_JAWN_SERVICE,
-        heliconeAuthorizationHeader
-      );
-      await fetch(
-        `${process.env.NEXT_PUBLIC_HELICONE_JAWN_SERVICE}/v1/organization/setup-demo`,
-        {
-          method: "POST",
-          body: JSON.stringify({
-            apiKey,
-          }),
-          headers: {
-            "helicone-authorization": heliconeAuthorizationHeader as string,
-          },
-        }
-      );
-
-      res.status(200).json("Added successfully");
+      res.status(200).json({ orgId: result.data.id });
     }
   } else {
-    res.status(201).json("Already exists");
+    res.status(201).json({ error: "Already exists" });
   }
 }

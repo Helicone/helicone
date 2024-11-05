@@ -2,6 +2,10 @@ import { GetServerSidePropsContext } from "next";
 import MetaData from "../components/layout/public/authMetaData";
 import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
 import WelcomePage from "../components/templates/welcome/welcomePage";
+import { useOrg } from "@/components/layout/organizationContext";
+import { useEffect } from "react";
+import LoadingAnimation from "@/components/shared/loadingAnimation";
+import { useRouter } from "next/router";
 // import "prismjs/themes/prism.css";
 interface WelcomeProps {
   currentStep: number;
@@ -9,11 +13,23 @@ interface WelcomeProps {
 
 const Welcome = (props: WelcomeProps) => {
   const { currentStep } = props;
+  const org = useOrg();
+  const router = useRouter();
+  console.log("org", org);
+
+  useEffect(() => {
+    if (org) {
+      if (org.allOrgs.length === 1) {
+        router.push("/");
+      }
+    }
+  }, [org, router]);
   return (
-    <MetaData title="Welcome">
-      {/* <div>Welcome</div> */}
-      <WelcomePage currentStep={currentStep} />
-    </MetaData>
+    <LoadingAnimation />
+    // <MetaData title="Welcome">
+    //   {/* <div>Welcome</div> */}
+    //   <WelcomePage currentStep={currentStep} />
+    // </MetaData>
   );
 };
 

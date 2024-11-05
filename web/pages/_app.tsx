@@ -20,6 +20,10 @@ import ThemeProvider from "../components/shared/theme/themeContext";
 import Script from "next/script";
 import { PostHogProvider } from "posthog-js/react";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { Inter } from "next/font/google";
+import { OnboardingProvider } from "@/components/layout/onboardingContext";
+
+const inter = Inter({ subsets: ["latin"] });
 
 declare global {
   interface Window {
@@ -71,12 +75,16 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
             <NotificationProvider>
               <DndProvider backend={HTML5Backend}>
                 <OrgContextProvider>
-                  <ThemeProvider attribute="class" defaultTheme="light">
-                    <TooltipProvider>
-                      {getLayout(<Component {...pageProps} />)}
-                    </TooltipProvider>
-                  </ThemeProvider>
-                  <Notification />
+                  <OnboardingProvider>
+                    <ThemeProvider attribute="class" defaultTheme="light">
+                      <TooltipProvider>
+                        <div className={inter.className}>
+                          {getLayout(<Component {...pageProps} />)}
+                        </div>
+                      </TooltipProvider>
+                    </ThemeProvider>
+                    <Notification />
+                  </OnboardingProvider>
                 </OrgContextProvider>
               </DndProvider>
             </NotificationProvider>
