@@ -29,7 +29,8 @@ export default async function handler(
           owner: userId,
           tier: "demo",
           is_personal: true,
-          has_onboarded: true,
+          has_onboarded: false,
+          soft_delete: false,
         },
       ])
       .select("*")

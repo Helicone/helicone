@@ -213,8 +213,8 @@ const DashboardPage = (props: DashboardPageProps) => {
   const [isLive, setIsLive] = useLocalStorage(
     "isLive-DashboardPage",
     // TODO: Uncomment this once we have a demo
-    // orgContext?.currentOrg?.tier === "demo"
-    false
+    orgContext?.currentOrg?.tier === "demo"
+    // false
   );
 
   const [advancedFilters, setAdvancedFilters] = useState<UIFilterRowTree>(

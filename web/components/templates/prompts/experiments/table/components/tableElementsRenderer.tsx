@@ -1,7 +1,7 @@
 import {
+  BeakerIcon,
   ListBulletIcon,
   PlayIcon,
-  TrashIcon,
 } from "@heroicons/react/24/outline";
 import { Button } from "../../../../../ui/button";
 import {
@@ -17,6 +17,8 @@ import ArrayDiffViewer from "../../../id/arrayDiffViewer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
 import { useJawnClient } from "../../../../../../lib/clients/jawnHook";
+import useOnboardingContext from "@/components/layout/onboardingContext";
+import OnboardingPopover from "@/components/templates/onboarding/OnboardingPopover";
 
 const InputCellRenderer: React.FC<any> = (props) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -103,7 +105,15 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
     originalPromptTemplate,
   } = props;
 
+  const {
+    isOnboardingVisible,
+    currentStep,
+    setCurrentStep,
+    setCurrentElementId,
+  } = useOnboardingContext();
+
   const [showPromptPlayground, setShowPromptPlayground] = useState(false);
+
   const jawnClient = useJawnClient();
 
   // Use React Query to fetch and cache the prompt template
@@ -152,7 +162,10 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
   }, [promptTemplate, originalPromptTemplate]);
 
   return (
-    <Popover open={showPromptPlayground} onOpenChange={setShowPromptPlayground}>
+    <Popover
+      open={showPromptPlayground || (isOnboardingVisible && currentStep === 8)}
+      onOpenChange={setShowPromptPlayground}
+    >
       <PopoverTrigger asChild>
         <div
           className="flex items-center justify-between w-full h-full pl-2 cursor-pointer"
@@ -181,68 +194,100 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
         </div>
       </PopoverTrigger>
       <PopoverContent className="w-[800px] p-0" side="bottom">
-        {hasDiff ? (
-          <Tabs defaultValue="preview" className="w-full">
-            <TabsList
-              className="w-full flex justify-end rounded-none"
-              variant={"secondary"}
+        <Popover open={isOnboardingVisible && currentStep === 8}>
+          <PopoverTrigger asChild>
+            <div
+              id={
+                isOnboardingVisible && currentStep === 8
+                  ? "onboarding-prompt-original"
+                  : undefined
+              }
             >
-              <TabsTrigger value="diff">Diff</TabsTrigger>
-              <TabsTrigger value="preview">Preview</TabsTrigger>
-            </TabsList>
-            <TabsContent value="diff">
-              <ArrayDiffViewer
-                origin={
-                  originalPromptTemplate?.helicone_template?.messages ?? []
-                }
-                target={
-                  (promptTemplate?.helicone_template as any)?.messages ?? []
-                }
-              />
-            </TabsContent>
-            <TabsContent value="preview">
-              <PromptPlayground
-                prompt={
-                  promptTemplate?.helicone_template ??
-                  (props.hypothesis?.promptVersion?.template || "")
-                }
-                selectedInput={undefined}
-                onSubmit={(history, model) => {
-                  setShowPromptPlayground(false);
-                }}
-                submitText="Save"
-                initialModel={
-                  promptTemplate?.model ||
-                  props.hypothesis?.promptVersion?.model ||
-                  ""
-                }
-                isPromptCreatedFromUi={false}
-                defaultEditMode={false}
-                editMode={false}
-              />
-            </TabsContent>
-          </Tabs>
-        ) : (
-          <PromptPlayground
-            prompt={
-              promptTemplate?.helicone_template ??
-              (props.hypothesis?.promptVersion?.template || "")
+              {hasDiff ? (
+                <Tabs defaultValue="preview" className="w-full">
+                  <TabsList
+                    className="w-full flex justify-end rounded-none"
+                    variant={"secondary"}
+                  >
+                    <TabsTrigger value="diff">Diff</TabsTrigger>
+                    <TabsTrigger value="preview">Preview</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="diff">
+                    <ArrayDiffViewer
+                      origin={
+                        originalPromptTemplate?.helicone_template?.messages ??
+                        []
+                      }
+                      target={
+                        (promptTemplate?.helicone_template as any)?.messages ??
+                        []
+                      }
+                    />
+                  </TabsContent>
+                  <TabsContent value="preview">
+                    <PromptPlayground
+                      prompt={
+                        promptTemplate?.helicone_template ??
+                        (props.hypothesis?.promptVersion?.template || "")
+                      }
+                      selectedInput={undefined}
+                      onSubmit={(history, model) => {
+                        setShowPromptPlayground(false);
+                      }}
+                      submitText="Save"
+                      initialModel={
+                        promptTemplate?.model ||
+                        props.hypothesis?.promptVersion?.model ||
+                        ""
+                      }
+                      isPromptCreatedFromUi={false}
+                      defaultEditMode={false}
+                      editMode={false}
+                    />
+                  </TabsContent>
+                </Tabs>
+              ) : (
+                <PromptPlayground
+                  prompt={
+                    promptTemplate?.helicone_template ??
+                    (props.hypothesis?.promptVersion?.template || "")
+                  }
+                  selectedInput={undefined}
+                  onSubmit={(history, model) => {
+                    setShowPromptPlayground(false);
+                  }}
+                  submitText="Save"
+                  initialModel={
+                    promptTemplate?.model ||
+                    props.hypothesis?.promptVersion?.model ||
+                    ""
+                  }
+                  isPromptCreatedFromUi={false}
+                  defaultEditMode={false}
+                  editMode={false}
+                />
+              )}
+            </div>
+          </PopoverTrigger>
+          <OnboardingPopover
+            icon={<BeakerIcon className="h-6 w-6" />}
+            title="Here's your original prompt"
+            stepNumber={4}
+            description={
+              <>
+                This is your <strong>“extract-travel-plan”</strong> production
+                prompt. Let&apos;s experiment on this.
+              </>
             }
-            selectedInput={undefined}
-            onSubmit={(history, model) => {
-              setShowPromptPlayground(false);
+            next={() => {
+              setCurrentStep(9);
+              setCurrentElementId("onboarding-prompt-add-experiment");
             }}
-            submitText="Save"
-            initialModel={
-              promptTemplate?.model ||
-              props.hypothesis?.promptVersion?.model ||
-              ""
-            }
-            isPromptCreatedFromUi={false}
-            defaultEditMode={false}
-            editMode={false}
+            align="start"
+            side="bottom"
+            className="z-[10000] bg-white p-4 w-[calc(100vw-2rem)] sm:max-w-md flex flex-col gap-2"
           />
-        )}
+        </Popover>
       </PopoverContent>
     </Popover>
   );

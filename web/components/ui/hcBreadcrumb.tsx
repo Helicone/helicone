@@ -3,14 +3,15 @@ import Link from "next/link";
 
 interface HcBreadcrumbProps {
   pages: { name: string; href: string }[];
+  id?: string;
 }
 
 export default function HcBreadcrumb(props: HcBreadcrumbProps) {
-  const { pages } = props;
+  const { pages, id } = props;
   // rerender if pages changes
 
   return (
-    <nav className="flex" aria-label="Breadcrumb">
+    <nav className="flex" aria-label="Breadcrumb" id={id}>
       <ol role="list" className="flex items-center space-x-2">
         {pages.map((page, index) => (
           <li key={page.name}>

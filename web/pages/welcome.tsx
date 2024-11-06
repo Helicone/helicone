@@ -1,7 +1,5 @@
 import { GetServerSidePropsContext } from "next";
-import MetaData from "../components/layout/public/authMetaData";
 import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
-import WelcomePage from "../components/templates/welcome/welcomePage";
 import { useOrg } from "@/components/layout/organizationContext";
 import { useEffect } from "react";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
@@ -19,8 +17,9 @@ const Welcome = (props: WelcomeProps) => {
 
   useEffect(() => {
     if (org) {
-      if (org.allOrgs.length === 1) {
-        router.push("/");
+      if (org.allOrgs.length > 0) {
+        console.log("HELLOO");
+        router.push("/dashboard");
       }
     }
   }, [org, router]);

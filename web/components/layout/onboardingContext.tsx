@@ -6,8 +6,10 @@ import {
   useCallback,
   useState,
   useEffect,
+  useRef,
 } from "react";
 import { motion } from "framer-motion";
+import { Portal } from "@radix-ui/react-portal";
 
 export type OnboardingContextType = {
   currentStep: number;
@@ -49,6 +51,8 @@ export const OnboardingProvider = ({
   const [currentElementId, setCurrentElementIdState] = useState("");
   const [isOnboardingVisible, setIsOnboardingVisible] = useState(false);
 
+  const observeRef = useRef(null); // Ref for the observer element
+
   const setCurrentStep = useCallback((step: number) => {
     setCurrentStepState(step);
     setIsOnboardingVisible(true);
@@ -62,8 +66,6 @@ export const OnboardingProvider = ({
     setIsOnboardingVisible(true);
     setCurrentStep(0);
   }, [setCurrentStep]);
-
-  // const { currentElementId, isOnboardingVisible } = useOnboardingContext();
 
   const getElementPosition = (element: Element) => {
     if (!element) return null;
@@ -99,11 +101,16 @@ export const OnboardingProvider = ({
 
   useEffect(() => {
     if (currentElementId && isOnboardingVisible) {
+      let timeout: NodeJS.Timeout;
       const observer = new MutationObserver(() => {
         const element = document.getElementById(currentElementId);
         if (element) {
           const position = getElementPosition(element);
           setElementPointerPosition(position);
+
+          timeout = setTimeout(() => {
+            updatePointerPosition();
+          }, 1000);
 
           // const popover = document.getElementById(
           //   `${currentElementId}--popover`
@@ -120,6 +127,7 @@ export const OnboardingProvider = ({
         childList: true,
         subtree: true,
       });
+      return () => clearTimeout(timeout);
     }
   }, [currentElementId, isOnboardingVisible]);
 
@@ -162,37 +170,39 @@ export const OnboardingProvider = ({
     >
       {children}
       {isOnboardingVisible && (
-        <motion.div
-          id="onboarding-pointer"
-          className="absolute pointer-events-none"
-          // initial={{ opacity: 0 }}
-          // animate={{ opacity: 1 }}
-          // exit={{ opacity: 0 }}
-          initial={
-            elementPointerPosition
-              ? {
-                  left: elementPointerPosition?.x,
-                  top: elementPointerPosition?.y,
-                  width: elementPointerPosition?.width,
-                  height: elementPointerPosition?.height,
-                }
-              : {}
-          }
-          animate={
-            elementPointerPosition
-              ? {
-                  left: elementPointerPosition?.x,
-                  top: elementPointerPosition?.y,
-                  width: elementPointerPosition?.width,
-                  height: elementPointerPosition?.height,
-                }
-              : {}
-          }
-          style={{
-            boxShadow: "0 0 200vw 200vh rgba(0, 0, 0, 0.5)",
-            zIndex: 9999,
-          }}
-        />
+        <Portal>
+          <motion.div
+            id="onboarding-pointer"
+            className="absolute !pointer-events-none"
+            // initial={{ opacity: 0 }}
+            // animate={{ opacity: 1 }}
+            // exit={{ opacity: 0 }}
+            initial={
+              elementPointerPosition
+                ? {
+                    left: elementPointerPosition?.x,
+                    top: elementPointerPosition?.y,
+                    width: elementPointerPosition?.width,
+                    height: elementPointerPosition?.height,
+                  }
+                : {}
+            }
+            animate={
+              elementPointerPosition
+                ? {
+                    left: elementPointerPosition?.x,
+                    top: elementPointerPosition?.y,
+                    width: elementPointerPosition?.width,
+                    height: elementPointerPosition?.height,
+                  }
+                : {}
+            }
+            style={{
+              boxShadow: "0 0 200vw 200vh rgba(0, 0, 0, 0.5)",
+              zIndex: 9999,
+            }}
+          />
+        </Portal>
       )}
     </OnboardingContext.Provider>
   );

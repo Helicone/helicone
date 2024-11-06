@@ -3,7 +3,7 @@ import { PopoverContent } from "@/components/ui/popover";
 import { PopoverContentProps } from "@radix-ui/react-popover";
 
 interface OnboardingPopoverProps extends PopoverContentProps {
-  id: string;
+  id?: string;
   icon: React.ReactNode;
   title: string;
   stepNumber: number;
@@ -24,7 +24,7 @@ const OnboardingPopover = ({
 }: OnboardingPopoverProps) => {
   return (
     <PopoverContent {...props}>
-      <div className="flex justify-between items-center" id={`${id}--popover`}>
+      <div className="flex justify-between items-center">
         <div className="flex gap-2 items-center text-slate-900 dark:text-slate-100">
           {icon}
           <h3 className="font-semibold text-base">{title}</h3>

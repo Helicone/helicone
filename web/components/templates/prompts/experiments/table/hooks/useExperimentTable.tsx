@@ -211,8 +211,9 @@ export function useExperimentTable(orgId: string, experimentTableId: string) {
   const queryClient = useQueryClient();
   const {
     data: experimentTableQuery,
-
+    refetch: refetchExperimentTable,
     isLoading: isExperimentTableLoading,
+    isRefetching: isExperimentTableRefetching,
   } = useQuery(
     ["experimentTable", orgId, experimentTableId],
     async () => {
@@ -416,6 +417,7 @@ export function useExperimentTable(orgId: string, experimentTableId: string) {
         sourceRequest?: string;
       }[];
     }) => {
+      console.log("adding rows batch");
       const jawnClient = getJawnClient(orgId);
       await jawnClient.POST(
         "/v1/experiment/table/{experimentTableId}/row/insert/batch",
@@ -658,5 +660,7 @@ export function useExperimentTable(orgId: string, experimentTableId: string) {
     updateExperimentCell,
     runHypothesisMutation,
     addExperimentTableRowInsertBatch,
+    refetchExperimentTable,
+    isExperimentTableRefetching,
   };
 }

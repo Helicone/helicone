@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useMemo } from "react";
 import { TreeNodeData } from "../../../../../lib/sessions/sessionTypes";
 import { Row } from "../../../../layout/common/row";
 import StatusBadge from "../../../requestsV2/statusBadge";
@@ -12,6 +12,10 @@ import useOnboardingContext from "@/components/layout/onboardingContext";
 import { Popover, PopoverTrigger } from "@/components/ui/popover";
 import { WorkflowIcon } from "lucide-react";
 import OnboardingPopover from "@/components/templates/onboarding/OnboardingPopover";
+import { useRouter } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
+import { useOrg } from "@/components/layout/organizationContext";
+import { getJawnClient } from "@/lib/clients/jawn";
 
 export function RequestNode(props: {
   isOnboardingRequest: boolean;
@@ -24,7 +28,14 @@ export function RequestNode(props: {
   level: number;
   setShowDrawer: (x: boolean) => void;
 }) {
-  const { isOnboardingRequest } = props;
+  const { isOnboardingRequest, node } = props;
+
+  const promptId = useMemo(() => {
+    return node.trace?.request.customProperties?.["Helicone-Prompt-Id"] as
+      | string
+      | undefined;
+  }, [node.trace?.request.customProperties]);
+
   // const {
   //   isOnboardingRequest,
   //   isRequestSingleChild,
@@ -54,6 +65,29 @@ export function RequestNode(props: {
     isOnboardingVisible,
   } = useOnboardingContext();
 
+  const router = useRouter();
+
+  const org = useOrg();
+
+  const promptData = useQuery({
+    queryKey: ["prompt", promptId, org?.currentOrg?.id],
+    queryFn: async (query) => {
+      const jawn = getJawnClient(query.queryKey[2]);
+      const prompt = await jawn.POST("/v1/prompt/query", {
+        body: {
+          filter: {
+            prompt_v2: {
+              user_defined_id: {
+                equals: query.queryKey[1],
+              },
+            },
+          },
+        },
+      });
+      return prompt.data?.data?.[0];
+    },
+  });
+
   if (isOnboardingRequest && currentStep === 3 && isOnboardingVisible) {
     return (
       <Popover open={true}>
@@ -73,7 +107,9 @@ export function RequestNode(props: {
             </>
           }
           next={() => {
+            setCurrentElementId("onboarding-prompt");
             setCurrentStep(5);
+            router.push(`/prompts/${promptData.data?.id}`);
           }}
           align="start"
           side="right"

@@ -48,11 +48,9 @@ const TreeView: React.FC<TreeViewProps> = ({
 
   const onBoardingRequestTrace = useMemo(
     () =>
-      session.traces.find((t) => t.path === "/RequestsPage/structure-analysis"),
+      session.traces.find((t) => t.path === "/EvalsPage/structure-analysis"),
     [session.traces]
   );
-
-  console.log({ onBoardingRequestTrace });
 
   return (
     <>

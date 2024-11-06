@@ -65,7 +65,7 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hoverCard";
-import { InfoIcon } from "lucide-react";
+import { InfoIcon, NotepadTextIcon } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -76,6 +76,9 @@ import { clsx } from "clsx";
 import PromptInputItem from "./promptInputItem";
 import { IslandContainer } from "@/components/ui/islandContainer";
 import { cn } from "@/lib/utils";
+import useOnboardingContext from "@/components/layout/onboardingContext";
+import { Popover, PopoverTrigger } from "@/components/ui/popover";
+import OnboardingPopover from "../../onboarding/OnboardingPopover";
 
 interface PromptIdPageProps {
   id: string;
@@ -473,7 +476,13 @@ const PromptIdPage = (props: PromptIdPageProps) => {
     promptVersionId: string,
     promptData: string
   ) => {
-    if (!(experimentFlags?.hasFlag || user?.email?.includes("helicone.ai"))) {
+    if (
+      !(
+        experimentFlags?.hasFlag ||
+        user?.email?.includes("helicone.ai") ||
+        org?.currentOrg?.tier === "demo"
+      )
+    ) {
       notification.setNotification(
         "Experiment feature is not enabled - sign up for the waitlist to use it",
         "error"
@@ -598,6 +607,13 @@ const PromptIdPage = (props: PromptIdPageProps) => {
     setIsSearchVisible(!isSearchVisible);
   };
 
+  const {
+    isOnboardingVisible,
+    currentStep,
+    setCurrentStep,
+    setCurrentElementId,
+  } = useOnboardingContext();
+
   return (
     <IslandContainer className="mx-0">
       <div className="w-full h-full flex flex-col space-y-4 pt-4">
@@ -609,15 +625,53 @@ const PromptIdPage = (props: PromptIdPageProps) => {
             )}
           >
             <div className="flex items-center space-x-4">
-              <HcBreadcrumb
-                pages={[
-                  { href: "/prompts", name: "Prompts" },
-                  {
-                    href: `/prompts/${id}`,
-                    name: prompt?.user_defined_id || "Loading...",
-                  },
-                ]}
-              />
+              {isOnboardingVisible && currentStep === 5 ? (
+                <Popover open={true}>
+                  <PopoverTrigger>
+                    <HcBreadcrumb
+                      id="onboarding-prompt"
+                      pages={[
+                        { href: "/prompts", name: "Prompts" },
+                        {
+                          href: `/prompts/${id}`,
+                          name: prompt?.user_defined_id || "Loading...",
+                        },
+                      ]}
+                    />
+                  </PopoverTrigger>
+                  <OnboardingPopover
+                    id="onboarding-prompt"
+                    icon={<NotepadTextIcon className="h-6 w-6" />}
+                    title="Welcome to Prompts!"
+                    stepNumber={3}
+                    description={
+                      <>
+                        Here, you can view the latest{" "}
+                        <strong>“extract-travel-plan”</strong>
+                        prompt in production, view its version history and
+                        previous requests.
+                      </>
+                    }
+                    next={() => {
+                      setCurrentStep(6);
+                      setCurrentElementId("onboarding-prompt-iterate");
+                    }}
+                    align="center"
+                    side="bottom"
+                    className="z-[10000] bg-white p-4 w-[calc(100vw-2rem)] sm:max-w-md flex flex-col gap-2"
+                  />
+                </Popover>
+              ) : (
+                <HcBreadcrumb
+                  pages={[
+                    { href: "/prompts", name: "Prompts" },
+                    {
+                      href: `/prompts/${id}`,
+                      name: prompt?.user_defined_id || "Loading...",
+                    },
+                  ]}
+                />
+              )}
 
               <HoverCard>
                 <HoverCardTrigger>
@@ -901,6 +955,58 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                                                   </DropdownMenuItem>
                                                 )}
                                               </DropdownMenuContent>
+                                            </DropdownMenu>
+                                          ) : isOnboardingVisible &&
+                                            currentStep === 6 ? (
+                                            <DropdownMenu open={true}>
+                                              <DropdownMenuTrigger asChild>
+                                                <button
+                                                  className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full"
+                                                  id="onboarding-prompt-experiment"
+                                                >
+                                                  <EllipsisHorizontalIcon className="h-6 w-6 text-slate-500" />
+                                                </button>
+                                              </DropdownMenuTrigger>
+                                              <Popover open={true}>
+                                                <PopoverTrigger>
+                                                  <DropdownMenuContent id="onboarding-prompt-iterate">
+                                                    <DropdownMenuItem
+                                                      onClick={() =>
+                                                        startExperiment(
+                                                          promptVersion.id,
+                                                          promptVersion.helicone_template
+                                                        )
+                                                      }
+                                                    >
+                                                      <BeakerIcon className="h-4 w-4 mr-2" />
+                                                      Experiment
+                                                    </DropdownMenuItem>
+                                                  </DropdownMenuContent>
+                                                </PopoverTrigger>
+                                                <OnboardingPopover
+                                                  id="onboarding-prompt-iterate"
+                                                  icon={
+                                                    <BeakerIcon className="h-6 w-6" />
+                                                  }
+                                                  title="Let's iterate on this prompt"
+                                                  stepNumber={3}
+                                                  description="The goal is to converge to 100% accurancy while preventing regressions."
+                                                  next={() => {
+                                                    setCurrentStep(7);
+                                                    setCurrentElementId(
+                                                      "onboarding-experiment-playground"
+                                                    );
+                                                    startExperiment(
+                                                      promptVersion.id,
+                                                      promptVersion.helicone_template
+                                                    );
+                                                  }}
+                                                  align="start"
+                                                  side="left"
+                                                  sideOffset={140}
+                                                  className="z-[10000] bg-white p-4 w-[calc(100vw-2rem)] sm:max-w-md flex flex-col gap-2"
+                                                />
+                                              </Popover>
                                             </DropdownMenu>
                                           ) : (
                                             <DropdownMenu>

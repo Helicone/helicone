@@ -48,7 +48,15 @@ async function analyzePageStructure(
     }
   );
 
-  return JSON.parse(chatCompletion.choices[0].message.content || "{}");
+  try {
+    const result = JSON.parse(
+      chatCompletion.choices[0].message.content || "{}"
+    );
+    return result;
+  } catch (e) {
+    console.error(e);
+    return {};
+  }
 }
 
 async function identifyInteractiveElements(
@@ -100,7 +108,15 @@ async function identifyInteractiveElements(
     }
   );
 
-  return JSON.parse(chatCompletion.choices[0].message.content || "{}");
+  try {
+    const result = JSON.parse(
+      chatCompletion.choices[0].message.content || "{}"
+    );
+    return result;
+  } catch (e) {
+    console.error(e);
+    return {};
+  }
 }
 
 async function generateTestCases(
@@ -154,7 +170,15 @@ async function generateTestCases(
     }
   );
 
-  return JSON.parse(chatCompletion.choices[0].message.content || "{}");
+  try {
+    const result = JSON.parse(
+      chatCompletion.choices[0].message.content || "{}"
+    );
+    return result;
+  } catch (e) {
+    console.error(e);
+    return {};
+  }
 }
 
 async function simulateTestExecution(
@@ -202,7 +226,15 @@ async function simulateTestExecution(
     }
   );
 
-  return JSON.parse(chatCompletion.choices[0].message.content || "{}");
+  try {
+    const result = JSON.parse(
+      chatCompletion.choices[0].message.content || "{}"
+    );
+    return result;
+  } catch (err) {
+    console.error(err);
+    return {};
+  }
 }
 
 async function processExample(example: (typeof examples)[0], openai: OpenAI) {
@@ -247,9 +279,12 @@ export async function setupDemoOrganizationRequests({
     },
   });
 
-  await Promise.all(
-    examples.map(async (example) => {
-      processExample(example, openai);
-    })
-  );
+  // await Promise.all(
+  //   examples.map(async (example) => {
+  //     await processExample(example, openai);
+  //   })
+  // );
+  for (const example of examples) {
+    await processExample(example, openai);
+  }
 }
