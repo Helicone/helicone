@@ -96,75 +96,106 @@ export async function getTableData({
 
   const rowIndexToRow = new Map<number, TableRow>();
 
-  await Promise.all(
-    experimentTableData.columns.map(async (column) => {
-      const columnId = column.id;
-      await Promise.all(
-        column.cells.map(async (cell) => {
-          const rowIndex = cell.rowIndex;
-          let row = rowIndexToRow.get(rowIndex);
-          if (!row) {
-            const newRow: TableRow = {
-              id: `row-${rowIndex}`,
-              rowIndex,
-              cells: {},
+  // Collect all request IDs that need to be fetched
+  const requestIdsToFetch = new Set<string>();
+
+  // Map to store cell info by request ID
+  const requestIdToCellInfo: Map<
+    string,
+    Array<{ rowIndex: number; columnId: string; cell: Cell }>
+  > = new Map();
+
+  // First pass: Collect request IDs and initialize rows and cells
+  for (const column of experimentTableData.columns) {
+    const columnId = column.id;
+    for (const cell of column.cells) {
+      const rowIndex = cell.rowIndex;
+      let row = rowIndexToRow.get(rowIndex);
+      if (!row) {
+        const newRow: TableRow = {
+          id: `row-${rowIndex}`,
+          rowIndex,
+          cells: {},
               deleted: false,
-            };
-            rowIndexToRow.set(rowIndex, newRow);
-            row = newRow;
-          }
+        };
+        rowIndexToRow.set(rowIndex, newRow);
+        row = newRow;
+      }
 
           if (cell.metadata?.deleted === true) {
             row.deleted = true;
           }
 
-          if (cell.value !== undefined && cell.value !== null) {
-            if (
-              (cell.metadata?.cellType === "output" &&
-                (cell.status === "initialized" || cell.status === "success")) ||
-              (cell.metadata?.cellType === "experiment" &&
-                cell.status === "success")
-            ) {
-              // Check cache first
-              const cacheKey = [CELL_RESPONSE_CACHE_KEY, cell.value];
-              let responseBody = queryClient.getQueryData(cacheKey);
-
-              if (!responseBody) {
-                const requestDataArray = await getRequestDataByIds([
-                  cell.value,
-                ]);
-                if (requestDataArray && requestDataArray.length > 0) {
-                  responseBody = await fetchRequestResponseBody(
-                    requestDataArray[0]
-                  );
-                  // Cache the response
-                  queryClient.setQueryData(cacheKey, responseBody);
-                }
-              }
-
-              row.cells[columnId] = {
-                cellId: cell.id,
-                value: responseBody,
-                status: cell.status,
-              };
-            } else {
-              row.cells[columnId] = {
-                cellId: cell.id,
-                value: cell.value,
-                status: cell.status,
-              };
-            }
-          } else {
-            row.cells[columnId] = {
-              cellId: cell.id,
-              value: null,
-              status: cell.status,
-            };
+      if (cell.value !== undefined && cell.value !== null) {
+        if (
+          (cell.metadata?.cellType === "output" &&
+            (cell.status === "initialized" || cell.status === "success")) ||
+          (cell.metadata?.cellType === "experiment" &&
+            cell.status === "success")
+        ) {
+          // Add to request IDs to fetch
+          requestIdsToFetch.add(cell.value);
+          // Map the request ID to cell info for later assignment
+          if (!requestIdToCellInfo.has(cell.value)) {
+            requestIdToCellInfo.set(cell.value, []);
           }
-        })
-      );
+          requestIdToCellInfo
+            .get(cell.value)
+            ?.push({ rowIndex, columnId, cell });
+        } else {
+          row.cells[columnId] = {
+            cellId: cell.id,
+            value: cell.value,
+            status: cell.status,
+          };
+        }
+      } else {
+        row.cells[columnId] = {
+          cellId: cell.id,
+          value: null,
+          status: cell.status,
+        };
+      }
+    }
+  }
+
+  // Batch fetch all request data
+  const requestDataArray = await getRequestDataByIds(
+    Array.from(requestIdsToFetch)
+  );
+
+  // Fetch response bodies
+  const responseBodies = await Promise.all(
+    requestDataArray.map(async (requestData) => {
+      const responseBody = await fetchRequestResponseBody(requestData);
+      console.log("responseBody", responseBody);
+      // Cache the response
+      const cacheKey = [CELL_RESPONSE_CACHE_KEY, requestData.id];
+      queryClient.setQueryData(cacheKey, responseBody);
+      return { id: requestData.request_id, responseBody };
     })
   );
+
+  // Map response bodies by request ID
+  const idToResponseBody = new Map(
+    responseBodies.map((item) => [item.id, item.responseBody])
+  );
+
+  // Second pass: Assign fetched data to cells
+  requestIdToCellInfo.forEach((cellInfos, requestId) => {
+    const responseBody = idToResponseBody.get(requestId);
+    for (const cellInfo of cellInfos) {
+      const { rowIndex, columnId, cell } = cellInfo;
+      const row = rowIndexToRow.get(rowIndex);
+      if (row) {
+        row.cells[columnId] = {
+          cellId: cell.id,
+          value: responseBody,
+          status: cell.status,
+        };
+      }
+    }
+  });
 
   return Array.from(rowIndexToRow.values())
     .filter((row) => !row.deleted)
