@@ -131,12 +131,6 @@ export class FineTuningManager {
     return err("Failed to start openai training");
   }
 
-  convertToolCallMessagesToFunction(
-    messages: ChatCompletionCreateParamsBase["messages"]
-  ): ChatCompletionCreateParamsBase["messages"] {
-    return messages.map(this.convertToolCallMessageToFunction);
-  }
-
   convertToolCallMessageToFunction = (
     message: ChatCompletionCreateParamsBase["messages"][0]
   ) => {
