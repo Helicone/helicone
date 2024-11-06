@@ -168,8 +168,6 @@ export async function getTableData({
   const responseBodies = await Promise.all(
     requestDataArray.map(async (requestData) => {
       const responseBody = await fetchRequestResponseBody(requestData);
-      console.log("responseBody", responseBody);
-      // Cache the response
       const cacheKey = [CELL_RESPONSE_CACHE_KEY, requestData.id];
       queryClient.setQueryData(cacheKey, responseBody);
       return { id: requestData.request_id, responseBody };
