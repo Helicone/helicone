@@ -344,19 +344,28 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
               originalPromptTemplate: promptVersionTemplateData,
               runs: column.cells.filter((cell) => cell.value),
               onRunColumn: async (colId: string) => {
-                experimentTableQuery?.rows.map(async (row, index) => {
-                  const cells = [
-                    {
-                      cellId: row.cells[colId].cellId,
-                      columnId: colId,
-                    },
-                  ];
+                const cells = experimentTableQuery?.rows
+                  .map((row) => {
+                    const cell = row.cells[colId];
+                    if (cell && cell.cellId) {
+                      return {
+                        cellId: cell.cellId,
+                        columnId: colId,
+                      };
+                    } else {
+                      return null;
+                    }
+                  })
+                  .filter((cell) => cell !== null) as Array<{
+                  cellId: string;
+                  columnId: string;
+                }>;
 
-                  handleRunHypothesis(
-                    (column.metadata?.hypothesisId as string) ?? "",
-                    cells
-                  );
-                });
+                // Call handleRunHypothesis only once with all cells
+                handleRunHypothesis(
+                  (column.metadata?.hypothesisId as string) ?? "",
+                  cells
+                );
               },
             },
             cellClass: "border-r border-[#E2E8F0] text-slate-700 pt-2.5",
