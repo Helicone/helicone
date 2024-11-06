@@ -56,6 +56,7 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
     isExperimentTableLoading,
     addExperimentTableColumn,
     addExperimentTableRow,
+    deleteExperimentTableRow,
     updateExperimentCell,
     runHypothesisMutation,
     addExperimentTableRowInsertBatch,
@@ -132,6 +133,13 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
       });
     },
     [addExperimentTableRow, experimentTableQuery?.promptSubversionId]
+  );
+
+  const handleDeleteRow = useCallback(
+    (rowIndex: number) => {
+      deleteExperimentTableRow.mutate(rowIndex);
+    },
+    [deleteExperimentTableRow]
   );
 
   const handleAddColumn = useCallback(
@@ -336,19 +344,28 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
               originalPromptTemplate: promptVersionTemplateData,
               runs: column.cells.filter((cell) => cell.value),
               onRunColumn: async (colId: string) => {
-                experimentTableQuery?.rows.map(async (row, index) => {
-                  const cells = [
-                    {
-                      cellId: row.cells[colId].cellId,
-                      columnId: colId,
-                    },
-                  ];
+                const cells = experimentTableQuery?.rows
+                  .map((row) => {
+                    const cell = row.cells[colId];
+                    if (cell && cell.cellId) {
+                      return {
+                        cellId: cell.cellId,
+                        columnId: colId,
+                      };
+                    } else {
+                      return null;
+                    }
+                  })
+                  .filter((cell) => cell !== null) as Array<{
+                  cellId: string;
+                  columnId: string;
+                }>;
 
-                  handleRunHypothesis(
-                    (column.metadata?.hypothesisId as string) ?? "",
-                    cells
-                  );
-                });
+                // Call handleRunHypothesis only once with all cells
+                handleRunHypothesis(
+                  (column.metadata?.hypothesisId as string) ?? "",
+                  cells
+                );
               },
             },
             cellClass: "border-r border-[#E2E8F0] text-slate-700 pt-2.5",
@@ -448,7 +465,9 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
 
   const handleRunRow = useCallback(
     (rowIndex: number) => {
-      const row = experimentTableQuery?.rows[rowIndex];
+      const row = experimentTableQuery?.rows.find(
+        (row) => row.rowIndex === rowIndex
+      );
       if (!row) return;
 
       const experimentColumns = experimentTableQuery?.columns?.filter(
@@ -584,6 +603,7 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
               rowData: experimentTableQuery?.rows,
               handleUpdateExperimentCell: updateExperimentCell.mutate,
               handleRunRow,
+              handleDeleteRow,
             }}
             rowClass="border-b border-gray-200 hover:bg-gray-50"
             headerHeight={40}

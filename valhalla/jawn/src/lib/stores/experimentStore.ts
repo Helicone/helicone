@@ -439,7 +439,7 @@ export class ExperimentStore extends BaseStore {
     experimentTableId: string
   ): Promise<Result<number, string>> {
     const query = `
-      SELECT COALESCE(MAX(ecv.row_index), 0) as max_row_index
+      SELECT COALESCE(MAX(ecv.row_index), -1) as max_row_index
       FROM experiment_cell ecv
       JOIN experiment_column ec ON ec.id = ecv.column_id
       JOIN experiment_table et ON et.id = ec.table_id
@@ -790,6 +790,35 @@ export class ExperimentStore extends BaseStore {
       return ok({ ids: results.map((result) => result.data!.id) });
     } catch (error) {
       return err(`Failed to create experiment row: ${error}`);
+    }
+  }
+
+  async softDeleteExperimentTableRow(params: {
+    experimentTableId: string;
+    rowIndex: number;
+  }): Promise<Result<null, string>> {
+    const { experimentTableId, rowIndex } = params;
+
+    try {
+      const query = `
+        UPDATE experiment_cell AS ec
+        SET metadata = COALESCE(ec.metadata, '{}'::jsonb) || '{"deleted": true}'::jsonb
+        FROM experiment_column AS col
+        WHERE ec.column_id = col.id
+          AND col.table_id = $1
+          AND ec.row_index = $2
+      `;
+
+      const result = await dbExecute(query, [experimentTableId, rowIndex]);
+
+      if (result.error) {
+        return err(`Failed to soft delete row ${rowIndex}: ${result.error}`);
+      }
+
+      return ok(null);
+    } catch (error) {
+      console.error(`Error soft deleting experiment table row: ${error}`);
+      return err(`Error soft deleting row ${rowIndex}: ${error}`);
     }
   }
 

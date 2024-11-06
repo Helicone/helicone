@@ -1,4 +1,8 @@
-import { ListBulletIcon, PlayIcon } from "@heroicons/react/24/outline";
+import {
+  ListBulletIcon,
+  PlayIcon,
+  TrashIcon,
+} from "@heroicons/react/24/outline";
 import { Button } from "../../../../../ui/button";
 import {
   Popover,
@@ -280,35 +284,56 @@ const PromptCellRenderer: React.FC<any> = (props) => {
 };
 
 const RowNumberCellRenderer: React.FC<any> = (props) => {
-  const [hovered, setHovered] = useState(false);
-
-  const rowNumber =
-    props.node?.rowIndex !== undefined
-      ? (props.node?.rowIndex || 0) + 1
-      : "N/A";
+  const [popoverOpen, setPopoverOpen] = useState(false);
+  const dataRowIndex = props.data.rowIndex;
+  const gridRowIndex =
+    props.node.rowIndex !== undefined ? props.node.rowIndex + 1 : "N/A";
 
   const handleRunClick = () => {
-    const rowIndex = props.node.rowIndex;
-    props.context.handleRunRow(rowIndex);
+    props.context.handleRunRow(dataRowIndex);
+    setPopoverOpen(false); // Close popover after action
+  };
+
+  const handleDeleteClick = () => {
+    props.context.handleDeleteRow(dataRowIndex);
+    setPopoverOpen(false); // Close popover after action
   };
 
   return (
-    <div
-      className="flex items-center justify-center w-full h-full"
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-    >
-      {!hovered ? (
-        <span>{rowNumber}</span>
-      ) : (
-        <Button
-          variant="ghost"
-          className="p-0 border-slate-200 border rounded-md bg-slate-50 text-slate-500 h-[22px] w-[26px] flex items-center justify-center"
-          onClick={handleRunClick}
-        >
-          <PlayIcon className="w-4 h-4 text-gray-600 dark:text-gray-300" />
-        </Button>
-      )}
+    <div className="w-full h-full">
+      <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+        <PopoverTrigger asChild className="w-full h-full">
+          <Button
+            variant="ghost"
+            className="flex items-center justify-center w-full h-full cursor-pointer"
+            onClick={() => setPopoverOpen(!popoverOpen)}
+          >
+            {gridRowIndex}
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent side="right" align="start" className="p-2 w-32">
+          <div className="flex flex-col items-center justify-start px-0">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full flex items-center justify-start"
+              onClick={handleRunClick}
+            >
+              <PlayIcon className="w-4 h-4 mr-2" />
+              Run
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full flex items-center justify-start"
+              onClick={handleDeleteClick}
+            >
+              <TrashIcon className="w-4 h-4 mr-2 text-red-500" />
+              Delete
+            </Button>
+          </div>
+        </PopoverContent>
+      </Popover>
     </div>
   );
 };
