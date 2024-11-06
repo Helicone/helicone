@@ -346,6 +346,29 @@ export class ExperimentController extends Controller {
     return ok(null);
   }
 
+  @Delete("/table/{experimentTableId}/row/{rowIndex}")
+  public async deleteExperimentTableRow(
+    @Path() experimentTableId: string,
+    @Path() rowIndex: number,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<null, string>> {
+    const experimentManager = new ExperimentManager(request.authParams);
+    const experimentTable =
+      await experimentManager.getExperimentTableSimplifiedById(
+        experimentTableId
+      );
+    if (experimentTable.error || !experimentTable.data) {
+      this.setStatus(500);
+      console.error(experimentTable.error);
+      return err(experimentTable.error);
+    }
+    const result = await experimentManager.deleteExperimentTableRow({
+      experimentTableId,
+      rowIndex,
+    });
+    return result;
+  }
+
   @Post("/table/{experimentTableId}/row/insert/batch")
   public async createExperimentTableRowWithCellsBatch(
     @Path() experimentTableId: string,

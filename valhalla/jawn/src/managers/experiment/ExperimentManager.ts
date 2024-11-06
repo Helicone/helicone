@@ -311,8 +311,7 @@ export class ExperimentManager extends BaseManager {
     );
     if (
       maxRowIndex.error ||
-      maxRowIndex.data === null ||
-      maxRowIndex.data === -1
+      maxRowIndex.data === null
     ) {
       return err(maxRowIndex.error ?? "Failed to get max row index");
     }
@@ -418,8 +417,7 @@ export class ExperimentManager extends BaseManager {
     );
     if (
       maxRowIndex.error ||
-      maxRowIndex.data === null ||
-      maxRowIndex.data === -1
+      maxRowIndex.data === null
     ) {
       return err(maxRowIndex.error ?? "Failed to get max row index");
     }
@@ -444,5 +442,12 @@ export class ExperimentManager extends BaseManager {
     }[];
   }): Promise<Result<{ ids: string[] }, string>> {
     return this.ExperimentStore.createExperimentTableRowsWithCells(params);
+  }
+
+  async deleteExperimentTableRow(params: {
+    experimentTableId: string;
+    rowIndex: number;
+  }): Promise<Result<null, string>> {
+    return this.ExperimentStore.softDeleteExperimentTableRow(params);
   }
 }
