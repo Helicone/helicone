@@ -751,6 +751,8 @@ export class DBLoggable {
         lytixKey: requestHeaders.lytixKey ?? undefined,
         lytixHost: requestHeaders.lytixHost ?? undefined,
         posthogHost: requestHeaders.posthogHost ?? undefined,
+        heliconeManualAccessKey:
+          requestHeaders.heliconeManualAccessKey ?? undefined,
       },
       log: {
         request: {

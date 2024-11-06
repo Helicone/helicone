@@ -401,4 +401,103 @@ export const costs: ModelRow[] = [
       completion_token: 0.0000003,
     },
   },
+
+  {
+    model: {
+      operator: "equals",
+      value: "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
+    },
+    cost: {
+      prompt_token: 0.00000018,
+      completion_token: 0.00000018,
+    },
+  },
+
+  {
+    model: {
+      operator: "equals",
+      value: "meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo",
+    },
+    cost: {
+      prompt_token: 0.00000088,
+      completion_token: 0.00000088,
+    },
+  },
+
+  {
+    model: {
+      operator: "equals",
+      value: "meta-llama/Meta-Llama-3.1-405B-Instruct-Turbo",
+    },
+    cost: {
+      prompt_token: 0.0000035,
+      completion_token: 0.0000035,
+    },
+  },
+
+  {
+    model: {
+      operator: "equals",
+      value: "meta-llama/Meta-Llama-3-8B-Instruct-Turbo",
+    },
+    cost: {
+      prompt_token: 0.00000018,
+      completion_token: 0.00000018,
+    },
+  },
+
+  {
+    model: {
+      operator: "equals",
+      value: "meta-llama/Meta-Llama-3-70B-Instruct-Turbo",
+    },
+    cost: {
+      prompt_token: 0.00000088,
+      completion_token: 0.00000088,
+    },
+  },
+
+  {
+    model: {
+      operator: "equals",
+      value: "meta-llama/Meta-Llama-3-8B-Instruct-Lite",
+    },
+    cost: {
+      prompt_token: 0.0000001,
+      completion_token: 0.0000001,
+    },
+  },
+
+  {
+    model: {
+      operator: "equals",
+      value: "meta-llama/Meta-Llama-3-70B-Instruct-Lite",
+    },
+    cost: {
+      prompt_token: 0.00000054,
+      completion_token: 0.00000054,
+    },
+  },
+
+  {
+    model: {
+      operator: "equals",
+      value: "microsoft/WizardLM-2-8x22B",
+    },
+    cost: {
+      prompt_token: 0.0000012,
+      completion_token: 0.0000012,
+    },
+  },
+
+  {
+    model: {
+      operator: "equals",
+      value: "mistralai/Mixtral-8x22B-Instruct-v0.1",
+    },
+    cost: {
+      prompt_token: 0.0000024,
+      completion_token: 0.0000024,
+    },
+  },
 ];

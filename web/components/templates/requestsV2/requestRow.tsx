@@ -484,14 +484,23 @@ const RequestRow = (props: {
                 const key = Object.keys(property)[0];
                 return (
                   <li className="flex flex-row items-center space-x-2" key={i}>
-                    {/* TODO: Add Property link */}
-                    <Button
-                      variant="outline"
-                      size="sm_sleek"
-                      className="flex flex-row items-center space-x-2 truncate cursor-default "
-                    >
-                      <span>{key}:</span> <span>{property[key]}</span>
-                    </Button>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="sm_sleek"
+                            className="flex flex-row items-center space-x-2 truncate select-text"
+                            onClick={() => {
+                              navigator.clipboard.writeText(`${property[key]}`);
+                            }}
+                          >
+                            <span>{key}:</span> <span>{property[key]}</span>
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Click to copy</TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   </li>
                 );
               })}

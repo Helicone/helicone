@@ -1375,6 +1375,7 @@ export interface components {
     };
     "Result_PromptVersionResultFilled.string_": components["schemas"]["ResultSuccess_PromptVersionResultFilled_"] | components["schemas"]["ResultError_string_"];
     HeliconeMeta: {
+      heliconeManualAccessKey?: string;
       lytixHost?: string;
       lytixKey?: string;
       posthogHost?: string;
