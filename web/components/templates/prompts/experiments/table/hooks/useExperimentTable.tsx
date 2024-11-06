@@ -116,15 +116,15 @@ export async function getTableData({
           id: `row-${rowIndex}`,
           rowIndex,
           cells: {},
-              deleted: false,
+          deleted: false,
         };
         rowIndexToRow.set(rowIndex, newRow);
         row = newRow;
       }
 
-          if (cell.metadata?.deleted === true) {
-            row.deleted = true;
-          }
+      if (cell.metadata?.deleted === true) {
+        row.deleted = true;
+      }
 
       if (cell.value !== undefined && cell.value !== null) {
         if (
