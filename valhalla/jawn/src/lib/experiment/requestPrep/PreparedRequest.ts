@@ -14,4 +14,5 @@ export interface PreparedRequestArgs {
   requestId: string;
   columnId?: string;
   rowIndex?: number;
+  experimentId?: string;
 }

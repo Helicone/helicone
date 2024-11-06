@@ -91,6 +91,7 @@ export async function runOriginalExperiment(
           requestId,
           columnId: data.columnId,
           rowIndex: data.rowIndex,
+          experimentId: experiment.id,
         },
         {
           deployment: experiment.meta?.deployment ?? "AZURE",
