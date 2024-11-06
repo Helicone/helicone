@@ -6,7 +6,8 @@ function prepareRequestAzure(
   apiKey: string,
   requestId: string,
   columnId?: string,
-  rowIndex?: number
+  rowIndex?: number,
+  experimentId?: string
 ): {
   url: URL;
   headers: { [key: string]: string };
@@ -26,6 +27,9 @@ function prepareRequestAzure(
   }
   if (rowIndex !== undefined) {
     headers["Helicone-Experiment-Row-Index"] = rowIndex.toString();
+  }
+  if (experimentId) {
+    headers["Helicone-Experiment-Id"] = experimentId;
   }
 
   const heliconeWorkerUrl = process.env.HELICONE_WORKER_URL ?? "";
@@ -70,6 +74,7 @@ export function prepareRequestOpenAIOnPremFull({
   requestId,
   columnId,
   rowIndex,
+  experimentId,
 }: PreparedRequestArgs): PreparedRequest {
   const newRequestBody = autoFillInputs({
     template: template ?? {},
@@ -87,7 +92,8 @@ export function prepareRequestOpenAIOnPremFull({
     apiKey,
     requestId,
     columnId,
-    rowIndex
+    rowIndex,
+    experimentId
   );
 
   return {

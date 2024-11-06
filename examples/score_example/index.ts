@@ -16,11 +16,11 @@ const openai = new OpenAI({
 
 async function main() {
   while (true) {
-    //sleep for 1 second
     await new Promise((resolve) => setTimeout(resolve, 1000));
     const requestId = uuid();
     const names = ["John", "Jane", "Jim", "Jill"];
-    const chatCompletion = await openai.chat.completions.create(
+
+    const stream = await openai.chat.completions.create(
       {
         messages: [
           {
@@ -31,17 +31,24 @@ async function main() {
           },
         ],
         model: "gpt-3.5-turbo",
+        stream: true, // Enable streaming
       },
       {
         headers: {
           "Helicone-Request-Id": requestId,
-          // "Helicone-Property-testing": "true",
           "Helicone-Property-Environment": "development",
           "Helicone-Prompt-Id": "say-hello-to",
+          "helicone-stream-usage": "true",
         },
       }
     );
-    console.log(chatCompletion);
+
+    // Process the stream
+
+    for await (const chunk of stream) {
+      const content = chunk.choices[0]?.delta?.content || "";
+      console.log(content);
+    }
   }
 }
 
