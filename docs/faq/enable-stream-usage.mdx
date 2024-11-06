@@ -3,9 +3,9 @@ title: "Incorrect Cost Calculation While Streaming?"
 description: "Learn how to accurately calculate costs when using streaming features."
 ---
 
-To accurately calculate costs when using streaming features, you can include a `include_usage` key in the body of your request.
+To accurately calculate costs when using streaming features, you can either include a `include_usage` key in the body of your request or use the Helicone header.
 
-### Example
+### Method 1: Request Body
 
 <CodeGroup>
 
@@ -37,6 +37,44 @@ openai.chat.completions.create({
   stream_options: {
     include_usage: true, // set to true
   },
+});
+```
+
+</CodeGroup>
+
+### Method 2: Helicone Header
+
+You can also enable stream usage by adding the `helicone-stream-usage` header to your request:
+
+<CodeGroup>
+
+```python Python
+client = OpenAI(
+    # ...
+    headers={
+        "helicone-stream-usage": "true"
+    }
+)
+
+client.chat.completions.create(
+    model="gpt-4",
+    messages=[{"role": "user", "content": "Hello!"}],
+    stream=True
+)
+```
+
+```ts TypeScript
+const openai = new OpenAI({
+  // ...
+  headers: {
+    "helicone-stream-usage": "true",
+  },
+});
+
+openai.chat.completions.create({
+  messages: [{ role: "user", content: "Hello!" }],
+  model: "gpt-4",
+  stream: true,
 });
 ```
 
