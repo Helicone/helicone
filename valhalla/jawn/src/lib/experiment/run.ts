@@ -47,7 +47,8 @@ async function prepareRequest(
 
 export async function runOriginalExperiment(
   experiment: Experiment,
-  datasetRows: ExperimentDatasetRow[]
+  datasetRows: ExperimentDatasetRow[],
+  experimentTableId: string
 ): Promise<Result<string, string>> {
   const tempKey: Result<BaseTempKey, string> = await generateHeliconeAPIKey(
     experiment.organization
@@ -91,7 +92,7 @@ export async function runOriginalExperiment(
           requestId,
           columnId: data.columnId,
           rowIndex: data.rowIndex,
-          experimentId: experiment.id,
+          experimentId: experimentTableId,
         },
         {
           deployment: experiment.meta?.deployment ?? "AZURE",
