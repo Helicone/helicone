@@ -77,6 +77,7 @@ export interface Experiment {
     }[];
   }[];
   scores: ExperimentScores | null;
+  tableId: string | null;
 }
 
 export interface ExperimentScores {

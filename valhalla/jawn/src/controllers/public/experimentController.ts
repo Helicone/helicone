@@ -714,7 +714,11 @@ export class ExperimentController extends Controller {
     experiment.dataset.rows = newDatasetRows;
 
     if (requestBody.hypothesisId === "original") {
-      return runOriginalExperiment(experiment, newDatasetRows);
+      return runOriginalExperiment(
+        experiment,
+        newDatasetRows,
+        requestBody.experimentTableId
+      );
     }
 
     const hypothesis = experiment.hypotheses.find(
@@ -729,7 +733,7 @@ export class ExperimentController extends Controller {
 
     experiment.hypotheses = [hypothesis];
 
-    const runResult = await run(experiment);
+    const runResult = await run(experiment, requestBody.experimentTableId);
 
     return runResult;
   }
