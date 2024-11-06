@@ -126,7 +126,60 @@ export class ExperimentController extends Controller {
     const result = await experimentManager.createNewExperimentTable(
       requestBody
     );
-    return result;
+    if (result.error || !result.data) {
+      this.setStatus(500);
+      console.error(result.error);
+      return err(result.error);
+    }
+    const inputManager = new InputsManager(request.authParams);
+    const inputRecordResult = await inputManager.createInputRecord(
+      requestBody.promptVersionId,
+      {}
+    );
+
+    if (inputRecordResult.error || !inputRecordResult.data) {
+      this.setStatus(500);
+      console.error(inputRecordResult.error);
+      return err(inputRecordResult.error ?? "Failed to create input record");
+    }
+
+    const datasetManager = new DatasetManager(request.authParams);
+    const datasetRowResult = await datasetManager.addDatasetRow(
+      (requestBody.experimentTableMetadata as any)?.datasetId,
+      inputRecordResult.data
+    );
+
+    if (datasetRowResult.error || !datasetRowResult.data) {
+      console.error(datasetRowResult.error);
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
+    }
+    const inputs = Object.fromEntries(
+      result.data.inputKeys.map((key) => [key, ""])
+    );
+    const experimentTableRowResult =
+      await experimentManager.createExperimentTableRow({
+        experimentTableId: result.data.tableId,
+        metadata: {
+          datasetRowId: datasetRowResult.data,
+          inputId: inputRecordResult.data,
+        },
+        inputs,
+      });
+    console.log(experimentTableRowResult);
+
+    if (experimentTableRowResult.error || !experimentTableRowResult.data) {
+      this.setStatus(500);
+      console.error(experimentTableRowResult.error);
+      return err(experimentTableRowResult.error);
+    }
+
+    this.setStatus(200);
+    return ok({
+      tableId: result.data.tableId,
+      experimentId: result.data.experimentId,
+    });
   }
 
   @Post("/table/{experimentTableId}/query")

@@ -190,7 +190,12 @@ export class ExperimentManager extends BaseManager {
 
   async createNewExperimentTable(
     params: CreateExperimentTableParams
-  ): Promise<Result<{ tableId: string; experimentId: string }, string>> {
+  ): Promise<
+    Result<
+      { tableId: string; experimentId: string; inputKeys: string[] },
+      string
+    >
+  > {
     const experimentTableResult =
       await this.ExperimentStore.createNewExperimentTable(
         params.datasetId,
@@ -249,6 +254,7 @@ export class ExperimentManager extends BaseManager {
     return ok({
       tableId: experimentTableResult.data.experimentTableId,
       experimentId: experimentTableResult.data.experimentId,
+      inputKeys: heliconeInputKeys,
     });
   }
 
@@ -309,10 +315,7 @@ export class ExperimentManager extends BaseManager {
     const maxRowIndex = await this.ExperimentStore.getMaxRowIndex(
       params.experimentTableId
     );
-    if (
-      maxRowIndex.error ||
-      maxRowIndex.data === null
-    ) {
+    if (maxRowIndex.error || maxRowIndex.data === null) {
       return err(maxRowIndex.error ?? "Failed to get max row index");
     }
 
@@ -415,10 +418,7 @@ export class ExperimentManager extends BaseManager {
     const maxRowIndex = await this.ExperimentStore.getMaxRowIndex(
       params.experimentTableId
     );
-    if (
-      maxRowIndex.error ||
-      maxRowIndex.data === null
-    ) {
+    if (maxRowIndex.error || maxRowIndex.data === null) {
       return err(maxRowIndex.error ?? "Failed to get max row index");
     }
 
