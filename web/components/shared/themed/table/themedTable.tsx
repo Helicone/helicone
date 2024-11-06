@@ -209,12 +209,7 @@ export default function ThemedTable<T extends { id?: string }>(
     return { sessionId };
   }, [rows]);
 
-  const {
-    currentStep,
-    setCurrentStep,
-    setCurrentElementId,
-    isOnboardingVisible,
-  } = useOnboardingContext();
+  const { currentStep, isOnboardingVisible } = useOnboardingContext();
 
   const router = useRouter();
 
@@ -370,7 +365,7 @@ export default function ThemedTable<T extends { id?: string }>(
                           <Popover key={row.id} open={true}>
                             <PopoverTrigger asChild>
                               <tr
-                                id="onboarding-row-1"
+                                data-onboarding-step={0}
                                 className={clsx(
                                   " hover:cursor-pointer",
                                   checkedIds?.includes(row.original?.id ?? "")
@@ -381,7 +376,6 @@ export default function ThemedTable<T extends { id?: string }>(
                                   onRowSelect &&
                                   (() => {
                                     handleRowSelect(row.original, index);
-                                    setCurrentStep(1);
                                   })
                                 }
                               >
@@ -438,14 +432,11 @@ export default function ThemedTable<T extends { id?: string }>(
                               </tr>
                             </PopoverTrigger>
                             <OnboardingPopover
-                              id="onboarding-row-1"
                               icon={<SheetIcon className="h-4 w-4" />}
                               title="Welcome to Requests!"
                               stepNumber={1}
                               description="Here is where your request and response data lives. Simply add one line of code to track requests from any providers."
                               next={() => {
-                                setCurrentStep(1);
-                                setCurrentElementId("onboarding-request-panel");
                                 handleRowSelect(row.original, index);
                               }}
                               align="start"
@@ -531,22 +522,17 @@ export default function ThemedTable<T extends { id?: string }>(
             {isOnboardingVisible && currentStep === 1 ? (
               <Popover open={true}>
                 <PopoverTrigger asChild>
-                  <div className="h-full w-1/2" id="onboarding-request-panel">
+                  <div className="h-full w-1/2" data-onboarding-step={1}>
                     {rightPanel}
                   </div>
                 </PopoverTrigger>
                 <OnboardingPopover
-                  id="onboarding-request-panel"
                   icon={<SheetIcon className="h-4 w-4" />}
                   title="Let’s dive deeper"
                   stepNumber={1}
                   description="Here you can view the additional metadata and the LLM messages. You might have noticed that the response doesn’t look quite right. Let’s dive deeper to see what might have gone wrong."
                   next={() => {
                     router.push(`/sessions/${sessionData?.sessionId}`);
-                    setCurrentElementId(
-                      "onboarding-request-session-left-panel"
-                    );
-                    setCurrentStep(2);
                   }}
                   align="center"
                   side="left"

@@ -189,12 +189,7 @@ export const Tree: React.FC<TreeProps> = ({
   setShowDrawer,
   onBoardingRequestTrace,
 }) => {
-  const {
-    currentStep,
-    setCurrentElementId,
-    isOnboardingVisible,
-    setCurrentStep,
-  } = useOnboardingContext();
+  const { currentStep, isOnboardingVisible } = useOnboardingContext();
 
   // find the first request that is a request node (children can have multiple children)
   const firstRequest = data.children?.find(
@@ -210,7 +205,7 @@ export const Tree: React.FC<TreeProps> = ({
               "font-sans bg-slate-50 dark:bg-black border-t border-slate-200 dark:border-slate-700",
               className
             )}
-            id="onboarding-request-session-left-panel"
+            data-onboarding-step={2}
           >
             {data.children &&
               data.children.map((child, index) => (
@@ -230,7 +225,6 @@ export const Tree: React.FC<TreeProps> = ({
           </div>
         </PopoverTrigger>
         <OnboardingPopover
-          id="onboarding-request-session-left-panel"
           icon={<WorkflowIcon className="h-6 w-6" />}
           title="We are in the travel planning session"
           stepNumber={2}
@@ -239,8 +233,6 @@ export const Tree: React.FC<TreeProps> = ({
             selectedRequestIdDispatch[1](
               onBoardingRequestTrace?.request_id ?? ""
             );
-            setCurrentElementId("onboarding-request-session-culprit");
-            setCurrentStep(3);
           }}
           align="start"
           side="right"

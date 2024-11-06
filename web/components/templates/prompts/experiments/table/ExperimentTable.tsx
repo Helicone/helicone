@@ -509,12 +509,8 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
     ]
   );
 
-  const {
-    setCurrentStep,
-    setCurrentElementId,
-    currentStep,
-    isOnboardingVisible,
-  } = useOnboardingContext();
+  const { setCurrentStep, currentStep, isOnboardingVisible } =
+    useOnboardingContext();
 
   const jawn = useJawnClient();
   const [onboardingAddedRows, setOnboardingAddedRows] = useState(false);
@@ -666,13 +662,17 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
           </div>
         )}
 
-        <Popover open={isOnboardingVisible && currentStep === 7}>
+        <Popover
+          open={
+            isOnboardingVisible &&
+            currentStep === 6 &&
+            !!experimentTableQuery?.rows.length
+          }
+        >
           <PopoverTrigger asChild>
             <div
-              id={
-                isOnboardingVisible && currentStep === 7
-                  ? "onboarding-experiment-playground"
-                  : ""
+              data-onboarding-step={
+                !!experimentTableQuery?.rows.length ? 6 : undefined
               }
               className="ag-theme-alpine w-full overflow-hidden "
               ref={experimentTableRef}
@@ -729,7 +729,6 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
             description="This is your playground to experiment on the original prompt. Seamlessly iterate, test and evaluate the output at scale. "
             next={() => {
               setCurrentStep(8);
-              setCurrentElementId("onboarding-prompt-original");
             }}
             align="start"
             side="bottom"

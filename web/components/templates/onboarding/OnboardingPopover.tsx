@@ -1,3 +1,4 @@
+import useOnboardingContext from "@/components/layout/onboardingContext";
 import { Button } from "@/components/ui/button";
 import { PopoverContent } from "@/components/ui/popover";
 import { PopoverContentProps } from "@radix-ui/react-popover";
@@ -9,7 +10,9 @@ interface OnboardingPopoverProps extends PopoverContentProps {
   stepNumber: number;
   description: string | React.ReactNode;
   moreInfo?: React.ReactNode;
-  next: () => void;
+  next?: () => void;
+  nextOverride?: () => void;
+  delayMs?: number;
 }
 
 const OnboardingPopover = ({
@@ -19,9 +22,13 @@ const OnboardingPopover = ({
   stepNumber,
   description,
   next,
+  nextOverride,
   moreInfo,
+  delayMs,
   ...props
 }: OnboardingPopoverProps) => {
+  const { setCurrentStep, currentStep } = useOnboardingContext();
+
   return (
     <PopoverContent {...props}>
       <div className="flex justify-between items-center">
@@ -34,7 +41,18 @@ const OnboardingPopover = ({
         </div>
       </div>
       <p className="text-slate-500 text-[13px] leading-normal">{description}</p>
-      <Button variant="outline" className="w-full" onClick={next}>
+      <Button
+        variant="outline"
+        className="w-full"
+        onClick={
+          nextOverride
+            ? nextOverride
+            : () => {
+                next && next();
+                setCurrentStep(currentStep + 1, delayMs);
+              }
+        }
+      >
         Next
       </Button>
     </PopoverContent>

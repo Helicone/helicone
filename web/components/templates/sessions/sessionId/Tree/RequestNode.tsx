@@ -58,12 +58,7 @@ export function RequestNode(props: {
   //   }
   // }, [node.trace?.request.model]);
 
-  const {
-    currentStep,
-    setCurrentStep,
-    setCurrentElementId,
-    isOnboardingVisible,
-  } = useOnboardingContext();
+  const { currentStep, isOnboardingVisible } = useOnboardingContext();
 
   const router = useRouter();
 
@@ -88,38 +83,33 @@ export function RequestNode(props: {
     },
   });
 
-  if (isOnboardingRequest && currentStep === 3 && isOnboardingVisible) {
-    return (
-      <Popover open={true}>
-        <PopoverTrigger>
-          <RequestNodeRow {...props} />
-        </PopoverTrigger>
-        <OnboardingPopover
-          id="onboarding-request-session-culprit"
-          icon={<WorkflowIcon className="h-6 w-6" />}
-          title="The culprit"
-          stepNumber={2}
-          description={
-            <>
-              Tracing the session made it clear that the problem happened during
-              the <strong>“extract-travel-plan”</strong> step. Let&apos;s go
-              improve this prompt.
-            </>
-          }
-          next={() => {
-            setCurrentElementId("onboarding-prompt");
-            setCurrentStep(5);
-            router.push(`/prompts/${promptData.data?.id}`);
-          }}
-          align="start"
-          side="right"
-          className="z-[10000] bg-white p-4 w-[calc(100vw-2rem)] sm:max-w-md flex flex-col gap-2"
-        />
-      </Popover>
-    );
-  }
-
-  return <RequestNodeRow {...props} />;
+  return (
+    <Popover
+      open={isOnboardingRequest && currentStep === 3 && isOnboardingVisible}
+    >
+      <PopoverTrigger>
+        <RequestNodeRow {...props} />
+      </PopoverTrigger>
+      <OnboardingPopover
+        icon={<WorkflowIcon className="h-6 w-6" />}
+        title="The culprit"
+        stepNumber={2}
+        description={
+          <>
+            Tracing the session made it clear that the problem happened during
+            the <strong>“extract-travel-plan”</strong> step. Let&apos;s go
+            improve this prompt.
+          </>
+        }
+        next={() => {
+          router.push(`/prompts/${promptData.data?.id}`);
+        }}
+        align="start"
+        side="right"
+        className="z-[10000] bg-white p-4 w-[calc(100vw-2rem)] sm:max-w-md flex flex-col gap-2"
+      />
+    </Popover>
+  );
 }
 
 export function RequestNodeRow(props: {
@@ -157,7 +147,7 @@ export function RequestNodeRow(props: {
 
   return (
     <div
-      id={isOnboardingRequest ? "onboarding-request-session-culprit" : ""}
+      data-onboarding-step={isOnboardingRequest ? 3 : undefined}
       className={clsx(
         "flex flex-col dark:bg-slate-900 py-[8px] pl-4 px-4 group-hover:cursor-pointer w-full",
         selectedRequestId === node.trace?.request_id
