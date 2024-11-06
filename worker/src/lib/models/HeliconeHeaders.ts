@@ -22,6 +22,7 @@ export interface IHeliconeHeaders {
   featureFlags: {
     streamForceFormat: boolean;
     increaseTimeout: boolean;
+    streamUsage: boolean;
   };
   retryHeaders: Nullable<{
     enabled: boolean;
@@ -73,7 +74,11 @@ export class HeliconeHeaders implements IHeliconeHeaders {
     orgId?: string;
   }>;
   rateLimitPolicy: Nullable<string>;
-  featureFlags: { streamForceFormat: boolean; increaseTimeout: boolean };
+  featureFlags: {
+    streamForceFormat: boolean;
+    increaseTimeout: boolean;
+    streamUsage: boolean;
+  };
   retryHeaders: Nullable<{
     enabled: boolean;
     retries: number;
@@ -307,9 +312,11 @@ export class HeliconeHeaders implements IHeliconeHeaders {
   private getHeliconeFeatureFlags(): IHeliconeHeaders["featureFlags"] {
     const streamForceFormat = this.headers.get("helicone-stream-force-format");
     const increaseTimeout = this.headers.get("helicone-increase-timeout");
+    const streamUsage = this.headers.get("helicone-stream-usage");
     return {
       streamForceFormat: streamForceFormat === "true",
       increaseTimeout: increaseTimeout === "true",
+      streamUsage: streamUsage === "true",
     };
   }
 

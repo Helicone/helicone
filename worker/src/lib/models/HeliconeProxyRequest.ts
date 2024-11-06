@@ -137,6 +137,16 @@ export class HeliconeProxyRequestMapper {
       return null;
     }
 
+    if (this.request.heliconeHeaders.featureFlags.streamUsage) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const jsonBody = (await this.request.getJson()) as any;
+      if (!jsonBody["stream_options"]) {
+        jsonBody["stream_options"] = {};
+      }
+      jsonBody["stream_options"]["include_usage"] = true;
+      return JSON.stringify(jsonBody);
+    }
+
     return await this.request.getText();
   }
 

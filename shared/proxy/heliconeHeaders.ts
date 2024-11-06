@@ -22,6 +22,7 @@ export interface IHeliconeHeaders {
 
   featureFlags: {
     streamForceFormat: boolean;
+    streamUsage: boolean;
     increaseTimeout: boolean;
   };
   retryHeaders: Nullable<{
@@ -310,9 +311,11 @@ export class HeliconeHeaders<T extends IInternalHeaders>
   private getHeliconeFeatureFlags(): IHeliconeHeaders["featureFlags"] {
     const streamForceFormat = this.headers.get("helicone-stream-force-format");
     const increaseTimeout = this.headers.get("helicone-increase-timeout");
+    const streamUsage = this.headers.get("helicone-stream-usage");
     return {
       streamForceFormat: streamForceFormat === "true",
       increaseTimeout: increaseTimeout === "true",
+      streamUsage: streamUsage === "true",
     };
   }
 
