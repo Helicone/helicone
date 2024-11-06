@@ -19,6 +19,7 @@ import { FeatureFlagStore } from "../lib/stores/FeatureFlagStore";
 import { supabaseServer } from "../lib/db/supabase";
 import { dataDogClient } from "../lib/clients/DataDogClient";
 import { LytixHandler } from "../lib/handlers/LytixHandler";
+import { ExperimentHandler } from "../lib/handlers/ExperimentHandler";
 
 export class LogManager {
   public async processLogEntry(logMessage: Message): Promise<void> {
@@ -62,6 +63,8 @@ export class LogManager {
     const posthogHandler = new PostHogHandler();
     const lytixHandler = new LytixHandler();
 
+    const experimentHandler = new ExperimentHandler();
+
     const webhookHandler = new WebhookHandler(
       new WebhookStore(supabaseServer.client)
     );
@@ -75,6 +78,7 @@ export class LogManager {
       .setNext(loggingHandler)
       .setNext(posthogHandler)
       .setNext(lytixHandler)
+      .setNext(experimentHandler)
       .setNext(webhookHandler);
 
     await Promise.all(
