@@ -127,22 +127,31 @@ export async function getTableData({
       }
 
       if (column.columnType === "input") {
-        // Handle input columns (collapse into 'inputs' cell)
+        // Handle input columns (collapse into 'inputs' cell as an array)
         const inputKey = column.columnName; // Assuming columnName is the input key
         const inputValue = cell.value;
 
         // Initialize the 'inputs' cell if it doesn't exist
         if (!row.cells["inputs"]) {
           row.cells["inputs"] = {
-            cellId: cell.id, // You might want to store cellIds differently if necessary
-            value: {},
+            cellId: "", // Not applicable for the entire inputs cell
+            value: [], // Initialize as an array
             status: cell.status,
           };
         }
 
-        // Merge input key-value pairs
-        (row.cells["inputs"].value as Record<string, any>)[inputKey] =
-          inputValue;
+        // Append the input entry to the inputs array
+        const inputsArray = row.cells["inputs"].value as Array<{
+          cellId: string;
+          key: string;
+          value: string;
+        }>;
+
+        inputsArray.push({
+          cellId: cell.id,
+          key: inputKey,
+          value: inputValue,
+        });
       } else if (cell.value !== undefined && cell.value !== null) {
         if (
           (cell.metadata?.cellType === "output" &&

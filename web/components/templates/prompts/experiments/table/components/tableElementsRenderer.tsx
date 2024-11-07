@@ -19,8 +19,14 @@ import { useQuery } from "@tanstack/react-query";
 import { useJawnClient } from "../../../../../../lib/clients/jawnHook";
 import React from "react";
 
+interface InputEntry {
+  cellId: string;
+  key: string;
+  value: string;
+}
+
 interface InputCellRendererProps {
-  value?: Record<string, string>;
+  value?: InputEntry[];
   data: any; // The full row data
   context: any; // Grid context
   node: any; // Grid node
@@ -31,27 +37,31 @@ const InputCellRenderer: React.FC<InputCellRendererProps> = (props) => {
 
   console.log("props", props);
   // Initialize inputs state with the value from props
-  const [inputs, setInputs] = useState<Record<string, string>>(
-    props?.data?.cells?.inputs?.value || {}
+  const [inputs, setInputs] = useState<InputEntry[]>(
+    props?.data?.cells?.inputs?.value || []
   );
 
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const handleInputChange = (key: string, value: string) => {
-    setInputs((prevInputs) => ({
-      ...prevInputs,
-      [key]: value,
-    }));
+  const handleInputChange = (index: number, newValue: string) => {
+    setInputs((prevInputs) => {
+      const updatedInputs = [...prevInputs];
+      updatedInputs[index] = {
+        ...updatedInputs[index],
+        value: newValue,
+      };
+      return updatedInputs;
+    });
   };
-
-  //use cell id 
 
   const handleInputSubmit = () => {
     // Pass the updated inputs to the context's update function
-    if (props.context && props.context.handleUpdateInputs) {
-      props.context.handleUpdateInputs({
-        rowId: props.node.data.id,
-        inputs,
+    if (props.context && props.context.handleUpdateExperimentCell) {
+      inputs.forEach((input) => {
+        props.context.handleUpdateExperimentCell({
+          cellId: input.cellId,
+          value: input.value.trim(),
+        });
       });
     }
     setIsEditing(false);
@@ -82,7 +92,7 @@ const InputCellRenderer: React.FC<InputCellRendererProps> = (props) => {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [isEditing, containerRef]);
+  }, [isEditing]);
 
   useEffect(() => {
     if (isEditing && containerRef.current) {
@@ -97,13 +107,15 @@ const InputCellRenderer: React.FC<InputCellRendererProps> = (props) => {
   if (isEditing) {
     return (
       <div ref={containerRef} className="p-2">
-        {Object.entries(inputs).map(([key, value]) => (
-          <div key={key} className="flex items-center mb-1">
-            <label className="mr-2 font-semibold text-sm">{key}:</label>
+        {inputs.map((inputEntry, index) => (
+          <div key={inputEntry.cellId} className="flex items-center mb-1">
+            <label className="mr-2 font-semibold text-sm">
+              {inputEntry.key}:
+            </label>
             <Input
               className="h-8 text-sm flex-1"
-              value={value}
-              onChange={(e) => handleInputChange(key, e.target.value)}
+              value={inputEntry.value}
+              onChange={(e) => handleInputChange(index, e.target.value)}
               onKeyDown={handleKeyDown}
             />
           </div>
@@ -122,10 +134,10 @@ const InputCellRenderer: React.FC<InputCellRendererProps> = (props) => {
         textOverflow: "ellipsis",
       }}
     >
-      {Object.entries(inputs).map(([key, value]) => (
-        <div key={key}>
-          <span className="mr-1 font-semibold">{key}:</span>
-          <span>{value}</span>
+      {inputs.map((inputEntry) => (
+        <div key={inputEntry.cellId}>
+          <span className="mr-1 font-semibold">{inputEntry.key}:</span>
+          <span>{inputEntry.value}</span>
         </div>
       ))}
     </div>
