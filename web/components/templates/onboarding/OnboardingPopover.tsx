@@ -1,14 +1,19 @@
-import useOnboardingContext from "@/components/layout/onboardingContext";
+import useOnboardingContext, {
+  ONBOARDING_STEPS,
+  OnboardingStepLabel,
+} from "@/components/layout/onboardingContext";
 import { Button } from "@/components/ui/button";
 import { PopoverContent } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 import { PopoverContentProps } from "@radix-ui/react-popover";
 
 interface OnboardingPopoverProps extends PopoverContentProps {
   id?: string;
-  icon: React.ReactNode;
-  title: string;
-  stepNumber: number;
-  description: string | React.ReactNode;
+  // icon: React.ReactNode;
+  // title: string;
+  // stepNumber: number;
+  // description: string | React.ReactNode;
+  onboardingStep: OnboardingStepLabel;
   moreInfo?: React.ReactNode;
   next?: () => void;
   nextOverride?: () => void;
@@ -17,10 +22,11 @@ interface OnboardingPopoverProps extends PopoverContentProps {
 
 const OnboardingPopover = ({
   id,
-  icon,
-  title,
-  stepNumber,
-  description,
+  // icon,
+  // title,
+  // stepNumber,
+  // description,
+  onboardingStep,
   next,
   nextOverride,
   moreInfo,
@@ -28,9 +34,17 @@ const OnboardingPopover = ({
   ...props
 }: OnboardingPopoverProps) => {
   const { setCurrentStep, currentStep } = useOnboardingContext();
+  const { popoverData } = ONBOARDING_STEPS[onboardingStep];
+  const { icon, title, stepNumber, description } = popoverData ?? {};
 
   return (
-    <PopoverContent {...props}>
+    <PopoverContent
+      {...props}
+      className={cn(
+        "z-[10000] bg-white p-4 w-[calc(100vw-2rem)] sm:max-w-md flex flex-col gap-2",
+        props.className
+      )}
+    >
       <div className="flex justify-between items-center">
         <div className="flex gap-2 items-center text-slate-900 dark:text-slate-100">
           {icon}

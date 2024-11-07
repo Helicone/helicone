@@ -25,6 +25,11 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import useOnboardingContext, {
+  ONBOARDING_STEPS,
+} from "@/components/layout/onboardingContext";
+import OnboardingPopover from "../../onboarding/OnboardingPopover";
+import { Popover, PopoverTrigger } from "@/components/ui/popover";
 
 export type Input = {
   id: string;
@@ -286,6 +291,8 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
 
   const [isAccordionOpen, setIsAccordionOpen] = useState(false);
 
+  const { isOnboardingVisible, currentStep } = useOnboardingContext();
+
   return (
     <div className="flex flex-col space-y-4">
       <div
@@ -369,16 +376,38 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
                 </SelectContent>
               </Select>
               {playgroundMode === "prompt" && (
-                <Button
-                  onClick={() =>
-                    onSubmit && onSubmit(currentChat, selectedModel || "")
+                <Popover
+                  open={
+                    isOnboardingVisible &&
+                    currentStep ===
+                      ONBOARDING_STEPS.EXPERIMENTS_ADD_SAVE.stepNumber
                   }
-                  variant="default"
-                  size="sm"
-                  className="px-4 font-normal"
                 >
-                  Save prompt
-                </Button>
+                  <PopoverTrigger>
+                    <Button
+                      onClick={() =>
+                        onSubmit && onSubmit(currentChat, selectedModel || "")
+                      }
+                      variant="default"
+                      size="sm"
+                      className="px-4 font-normal"
+                      data-onboarding-step={
+                        isOnboardingVisible &&
+                        currentStep ===
+                          ONBOARDING_STEPS.EXPERIMENTS_ADD_SAVE.stepNumber
+                          ? ONBOARDING_STEPS.EXPERIMENTS_ADD_SAVE.stepNumber
+                          : undefined
+                      }
+                    >
+                      Save prompt
+                    </Button>
+                  </PopoverTrigger>
+                  <OnboardingPopover
+                    onboardingStep="EXPERIMENTS_ADD_SAVE"
+                    align="end"
+                    side="right"
+                  />
+                </Popover>
               )}
             </div>
           </div>

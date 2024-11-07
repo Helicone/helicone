@@ -24,6 +24,10 @@ import { useExperimentsStore } from "@/store/store";
 import { useQuery } from "@tanstack/react-query";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { useOrg } from "@/components/layout/organizationContext";
+import useOnboardingContext, {
+  ONBOARDING_STEPS,
+} from "@/components/layout/onboardingContext";
+import OnboardingPopover from "@/components/templates/onboarding/OnboardingPopover";
 
 interface AddColumnHeaderProps {
   promptVersionId: string;
@@ -95,6 +99,8 @@ const AddColumnHeader: React.FC<AddColumnHeaderProps> = ({
     }
   );
 
+  const { isOnboardingVisible, currentStep } = useOnboardingContext();
+
   // Handle loading or error states if necessary
   if (isLoading) {
     return null; // Or a loading indicator
@@ -111,18 +117,46 @@ const AddColumnHeader: React.FC<AddColumnHeaderProps> = ({
   };
 
   return (
-    <Popover open={isOpen} onOpenChange={handleOpenChange}>
-      <PopoverTrigger asChild>
-        <button className="p-1 text-gray-500 hover:text-gray-700 flex flex-row items-center space-x-2">
-          <PlusIcon className="w-5 h-5 text-slate-700" />
-          <span className="text-sm font-medium text-slate-700">
-            Add Experiment
-          </span>
-        </button>
+    <Popover
+      open={
+        isOpen ||
+        (isOnboardingVisible &&
+          currentStep ===
+            ONBOARDING_STEPS.EXPERIMENTS_ADD_CHANGE_PROMPT.stepNumber)
+      }
+      onOpenChange={handleOpenChange}
+    >
+      <PopoverTrigger>
+        <Popover
+          open={
+            isOnboardingVisible &&
+            currentStep === ONBOARDING_STEPS.EXPERIMENTS_ADD.stepNumber
+          }
+        >
+          <PopoverTrigger>
+            <button
+              className="p-1 text-gray-500 hover:text-gray-700 flex flex-row items-center space-x-2"
+              data-onboarding-step={ONBOARDING_STEPS.EXPERIMENTS_ADD.stepNumber}
+            >
+              <PlusIcon className="w-5 h-5 text-slate-700" />
+              <span className="text-sm font-medium text-slate-700">
+                Add Experiment
+              </span>
+            </button>
+          </PopoverTrigger>
+          <OnboardingPopover
+            onboardingStep="EXPERIMENTS_ADD"
+            align="center"
+            side="bottom"
+          />
+        </Popover>
       </PopoverTrigger>
 
       <PopoverContent className="w-[700px] p-4 bg-white" align="end">
-        <ScrollArea className="flex flex-col overflow-y-auto max-h-[700px]">
+        <ScrollArea
+          className="flex flex-col overflow-y-auto max-h-[700px]"
+          viewportId="add-experiment-scroll-area"
+        >
           <div className="space-y-4">
             <h3 className="font-semibold">Add New Experiment</h3>
             {showSuggestionPanel && (
@@ -306,11 +340,11 @@ const AddColumnHeader: React.FC<AddColumnHeaderProps> = ({
               initialModel={"gpt-4o"}
               editMode={false}
             />
-            <div className="flex justify-end pt-4">
-              <Button onClick={() => setOpenAddExperimentModal(false)}>
-                Close
-              </Button>
-            </div>
+          </div>
+          <div className="flex justify-end pt-4">
+            <Button onClick={() => setOpenAddExperimentModal(false)}>
+              Close
+            </Button>
           </div>
         </ScrollArea>
       </PopoverContent>

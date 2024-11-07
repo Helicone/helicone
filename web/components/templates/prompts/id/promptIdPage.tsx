@@ -65,7 +65,7 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hoverCard";
-import { InfoIcon, NotepadTextIcon } from "lucide-react";
+import { InfoIcon } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -76,7 +76,9 @@ import { clsx } from "clsx";
 import PromptInputItem from "./promptInputItem";
 import { IslandContainer } from "@/components/ui/islandContainer";
 import { cn } from "@/lib/utils";
-import useOnboardingContext from "@/components/layout/onboardingContext";
+import useOnboardingContext, {
+  ONBOARDING_STEPS,
+} from "@/components/layout/onboardingContext";
 import { Popover, PopoverTrigger } from "@/components/ui/popover";
 import OnboardingPopover from "../../onboarding/OnboardingPopover";
 
@@ -631,7 +633,9 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                   <HcBreadcrumb
                     data-onboarding-step={
                       // this is so that the onboarding popover doesn't show up on the loading state
-                      prompt?.user_defined_id ? 4 : undefined
+                      prompt?.user_defined_id
+                        ? ONBOARDING_STEPS.PROMPTS_PAGE.stepNumber
+                        : undefined
                     }
                     pages={[
                       { href: "/prompts", name: "Prompts" },
@@ -643,17 +647,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                   />
                 </PopoverTrigger>
                 <OnboardingPopover
-                  icon={<NotepadTextIcon className="h-6 w-6" />}
-                  title="Welcome to Prompts!"
-                  stepNumber={3}
-                  description={
-                    <>
-                      Here, you can view the latest{" "}
-                      <strong>“extract-travel-plan”</strong>
-                      prompt in production, view its version history and
-                      previous requests.
-                    </>
-                  }
+                  onboardingStep="PROMPTS_PAGE"
                   align="center"
                   side="bottom"
                   className="z-[10000] bg-white p-4 w-[calc(100vw-2rem)] sm:max-w-md flex flex-col gap-2"
@@ -963,8 +957,13 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                                                   <DropdownMenuContent
                                                     data-onboarding-step={
                                                       isOnboardingVisible &&
-                                                      currentStep === 5
-                                                        ? 5
+                                                      currentStep ===
+                                                        ONBOARDING_STEPS
+                                                          .PROMPTS_EXPERIMENT
+                                                          .stepNumber
+                                                        ? ONBOARDING_STEPS
+                                                            .PROMPTS_EXPERIMENT
+                                                            .stepNumber
                                                         : undefined
                                                     }
                                                   >
@@ -982,12 +981,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                                                   </DropdownMenuContent>
                                                 </PopoverTrigger>
                                                 <OnboardingPopover
-                                                  icon={
-                                                    <BeakerIcon className="h-6 w-6" />
-                                                  }
-                                                  title="Let's iterate on this prompt"
-                                                  stepNumber={3}
-                                                  description="The goal is to converge to 100% accurancy while preventing regressions."
+                                                  onboardingStep="PROMPTS_EXPERIMENT"
                                                   next={() => {
                                                     startExperiment(
                                                       promptVersion.id,

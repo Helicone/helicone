@@ -10,19 +10,13 @@ import {
 } from "ag-grid-community";
 import "ag-grid-community/styles/ag-grid.css";
 import { AgGridReact } from "ag-grid-react";
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import AddColumnHeader from "./AddColumnHeader";
 import { HypothesisCellRenderer } from "./cells/HypothesisCellRenderer";
 import { OriginalMessagesCellRenderer } from "./cells/OriginalMessagesCellRenderer";
 import { OriginalOutputCellRenderer } from "./cells/OriginalOutputCellRenderer";
 
-import { BeakerIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { PlusIcon } from "@heroicons/react/24/outline";
 import ExperimentInputSelector from "../experimentInputSelector";
 
 import {
@@ -48,10 +42,10 @@ import {
 import { useExperimentTable } from "./hooks/useExperimentTable";
 import ScoresEvaluatorsConfig from "./scores/ScoresEvaluatorsConfig";
 import ScoresTableContainer from "./scores/ScoresTableContainer";
-import useOnboardingContext from "@/components/layout/onboardingContext";
+import useOnboardingContext, {
+  ONBOARDING_STEPS,
+} from "@/components/layout/onboardingContext";
 import OnboardingPopover from "@/components/templates/onboarding/OnboardingPopover";
-import { useQuery } from "@tanstack/react-query";
-import { useJawnClient } from "@/lib/clients/jawnHook";
 
 interface ExperimentTableProps {
   experimentTableId: string;
@@ -512,91 +506,91 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
   const { setCurrentStep, currentStep, isOnboardingVisible } =
     useOnboardingContext();
 
-  const jawn = useJawnClient();
-  const [onboardingAddedRows, setOnboardingAddedRows] = useState(false);
+  // const jawn = useJawnClient();
+  // const [onboardingAddedRows, setOnboardingAddedRows] = useState(false);
 
-  // Fetch input records using useQuery
-  const {
-    data: inputRecordsData,
-    isLoading,
-    isError,
-  } = useQuery(
-    ["inputRecords", promptSubversionId],
-    async () => {
-      const res = await jawn.POST(
-        "/v1/prompt/version/{promptVersionId}/inputs/query",
-        {
-          params: {
-            path: {
-              promptVersionId: promptSubversionId ?? "",
-            },
-          },
-          body: {
-            limit: 1000, // Adjust limit as needed
-          },
-        }
-      );
-      return res.data?.data ?? [];
-    },
-    {
-      enabled: isOnboardingVisible && promptSubversionId !== undefined, // Fetch only when the drawer is open
-    }
-  );
+  // // Fetch input records using useQuery
+  // const {
+  //   data: inputRecordsData,
+  //   isLoading,
+  //   isError,
+  // } = useQuery(
+  //   ["inputRecords", promptSubversionId],
+  //   async () => {
+  //     const res = await jawn.POST(
+  //       "/v1/prompt/version/{promptVersionId}/inputs/query",
+  //       {
+  //         params: {
+  //           path: {
+  //             promptVersionId: promptSubversionId ?? "",
+  //           },
+  //         },
+  //         body: {
+  //           limit: 1000, // Adjust limit as needed
+  //         },
+  //       }
+  //     );
+  //     return res.data?.data ?? [];
+  //   },
+  //   {
+  //     enabled: isOnboardingVisible && promptSubversionId !== undefined, // Fetch only when the drawer is open
+  //   }
+  // );
 
-  // Process input records
-  const inputRecords = useMemo(() => {
-    if (!inputRecordsData) return [];
-    return inputRecordsData.map((record) => ({
-      id: record.id,
-      inputs: record.inputs,
-      source_request: record.source_request,
-      prompt_version: record.prompt_version,
-      created_at: record.created_at,
-      response: record.response_body,
-    }));
-  }, [inputRecordsData]);
+  // // Process input records
+  // const inputRecords = useMemo(() => {
+  //   if (!inputRecordsData) return [];
+  //   return inputRecordsData.map((record) => ({
+  //     id: record.id,
+  //     inputs: record.inputs,
+  //     source_request: record.source_request,
+  //     prompt_version: record.prompt_version,
+  //     created_at: record.created_at,
+  //     response: record.response_body,
+  //   }));
+  // }, [inputRecordsData]);
 
-  useEffect(() => {
-    console.log(
-      inputRecords.length > 0,
-      experimentTableQuery?.rows.length === 0,
-      !isExperimentTableLoading,
-      !isExperimentTableRefetching,
-      isOnboardingVisible,
-      org?.currentOrg?.tier === "demo"
-    );
-    if (
-      inputRecords.length > 0 &&
-      !isExperimentTableLoading &&
-      !isExperimentTableRefetching &&
-      experimentTableQuery?.rows.length === 0 &&
-      isOnboardingVisible &&
-      org?.currentOrg?.tier === "demo" &&
-      !onboardingAddedRows
-    ) {
-      console.log("adding rows once");
-      handleAddRowInsertBatch(
-        inputRecords.map((record) => ({
-          inputRecordId: record.id,
-          datasetId: experimentTableQuery?.datasetId ?? "",
-          inputs: record.inputs,
-        }))
-      );
-      setOnboardingAddedRows(true);
-      refetchExperimentTable();
-    }
-  }, [
-    inputRecords,
-    handleAddRowInsertBatch,
-    experimentTableQuery?.rows,
-    experimentTableQuery?.datasetId,
-    isExperimentTableLoading,
-    refetchExperimentTable,
-    isExperimentTableRefetching,
-    isOnboardingVisible,
-    org?.currentOrg?.tier,
-    onboardingAddedRows,
-  ]);
+  // useEffect(() => {
+  //   console.log(
+  //     inputRecords.length > 0,
+  //     experimentTableQuery?.rows.length === 0,
+  //     !isExperimentTableLoading,
+  //     !isExperimentTableRefetching,
+  //     isOnboardingVisible,
+  //     org?.currentOrg?.tier === "demo"
+  //   );
+  //   if (
+  //     inputRecords.length > 0 &&
+  //     !isExperimentTableLoading &&
+  //     !isExperimentTableRefetching &&
+  //     experimentTableQuery?.rows.length === 0 &&
+  //     isOnboardingVisible &&
+  //     org?.currentOrg?.tier === "demo" &&
+  //     !onboardingAddedRows
+  //   ) {
+  //     console.log("adding rows once");
+  //     handleAddRowInsertBatch(
+  //       inputRecords.map((record) => ({
+  //         inputRecordId: record.id,
+  //         datasetId: experimentTableQuery?.datasetId ?? "",
+  //         inputs: record.inputs,
+  //       }))
+  //     );
+  //     setOnboardingAddedRows(true);
+  //     refetchExperimentTable();
+  //   }
+  // }, [
+  //   inputRecords,
+  //   handleAddRowInsertBatch,
+  //   experimentTableQuery?.rows,
+  //   experimentTableQuery?.datasetId,
+  //   isExperimentTableLoading,
+  //   refetchExperimentTable,
+  //   isExperimentTableRefetching,
+  //   isOnboardingVisible,
+  //   org?.currentOrg?.tier,
+  //   onboardingAddedRows,
+  // ]);
 
   if (isExperimentTableLoading) {
     return (
@@ -665,14 +659,15 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
         <Popover
           open={
             isOnboardingVisible &&
-            currentStep === 6 &&
-            !!experimentTableQuery?.rows.length
+            currentStep === ONBOARDING_STEPS.EXPERIMENTS_TABLE.stepNumber
+            //  &&
+            // !!experimentTableQuery?.rows.length
           }
         >
           <PopoverTrigger asChild>
             <div
               data-onboarding-step={
-                !!experimentTableQuery?.rows.length ? 6 : undefined
+                ONBOARDING_STEPS.EXPERIMENTS_TABLE.stepNumber
               }
               className="ag-theme-alpine w-full overflow-hidden "
               ref={experimentTableRef}
@@ -723,13 +718,7 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
             </div>
           </PopoverTrigger>
           <OnboardingPopover
-            icon={<BeakerIcon className="h-6 w-6" />}
-            title="A playground for prompts"
-            stepNumber={4}
-            description="This is your playground to experiment on the original prompt. Seamlessly iterate, test and evaluate the output at scale. "
-            next={() => {
-              setCurrentStep(8);
-            }}
+            onboardingStep="EXPERIMENTS_TABLE"
             align="start"
             side="bottom"
             className="z-[10000] bg-white p-4 w-[calc(100vw-2rem)] sm:max-w-md flex flex-col gap-2"

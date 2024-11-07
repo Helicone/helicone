@@ -8,9 +8,10 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import useOnboardingContext from "@/components/layout/onboardingContext";
+import useOnboardingContext, {
+  ONBOARDING_STEPS,
+} from "@/components/layout/onboardingContext";
 import { Popover, PopoverTrigger } from "@/components/ui/popover";
-import { WorkflowIcon } from "lucide-react";
 import OnboardingPopover from "@/components/templates/onboarding/OnboardingPopover";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
@@ -91,16 +92,7 @@ export function RequestNode(props: {
         <RequestNodeRow {...props} />
       </PopoverTrigger>
       <OnboardingPopover
-        icon={<WorkflowIcon className="h-6 w-6" />}
-        title="The culprit"
-        stepNumber={2}
-        description={
-          <>
-            Tracing the session made it clear that the problem happened during
-            the <strong>“extract-travel-plan”</strong> step. Let&apos;s go
-            improve this prompt.
-          </>
-        }
+        onboardingStep="SESSIONS_CULPRIT"
         next={() => {
           router.push(`/prompts/${promptData.data?.id}`);
         }}
@@ -147,7 +139,11 @@ export function RequestNodeRow(props: {
 
   return (
     <div
-      data-onboarding-step={isOnboardingRequest ? 3 : undefined}
+      data-onboarding-step={
+        isOnboardingRequest
+          ? ONBOARDING_STEPS.SESSIONS_CULPRIT.stepNumber
+          : undefined
+      }
       className={clsx(
         "flex flex-col dark:bg-slate-900 py-[8px] pl-4 px-4 group-hover:cursor-pointer w-full",
         selectedRequestId === node.trace?.request_id

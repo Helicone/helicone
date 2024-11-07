@@ -18,6 +18,11 @@ import AddFileButton from "../../playground/new/addFileButton";
 import ThemedModal from "../../../shared/themed/themedModal";
 import MarkdownEditor from "../../../shared/markdownEditor";
 import { Message } from "../../requests/chatComponent/types";
+import useOnboardingContext, {
+  ONBOARDING_STEPS,
+} from "@/components/layout/onboardingContext";
+import { Popover, PopoverTrigger } from "@/components/ui/popover";
+import OnboardingPopover from "../../onboarding/OnboardingPopover";
 
 interface PromptChatRowProps {
   index: number;
@@ -442,6 +447,43 @@ const PromptChatRow = (props: PromptChatRowProps) => {
     setRole(message.role);
   }, [message]);
 
+  const { isOnboardingVisible, currentStep } = useOnboardingContext();
+
+  const setText = (text: string): void => {
+    const newVariables = extractVariables(text);
+    const replacedText = replaceVariablesWithTags(text, newVariables);
+    const newMessages = { ...currentMessage };
+    const messageContent = newMessages.content;
+    if (Array.isArray(messageContent)) {
+      const textMessage = messageContent.find(
+        (element) => element.type === "text"
+      );
+      if (textMessage) {
+        textMessage.text = replacedText;
+      }
+    } else {
+      newMessages.content = replacedText;
+    }
+
+    setCurrentMessage(newMessages);
+    callback(replacedText, role, file);
+    setPromptVariables(newVariables);
+  };
+
+  useEffect(() => {
+    if (
+      isOnboardingVisible &&
+      currentStep === ONBOARDING_STEPS.EXPERIMENTS_ADD_CHANGE_PROMPT.stepNumber
+    ) {
+      setText(
+        contentAsString.replace(
+          "As a QA engineer, analyze the structure of the following page:",
+          "As a QA engineer, analyze the structure of the following page, I am providing the file name:"
+        )
+      );
+    }
+  }, [isOnboardingVisible, currentStep]);
+
   return (
     <li
       className={clsx(
@@ -525,33 +567,51 @@ const PromptChatRow = (props: PromptChatRowProps) => {
             <div className="w-full px-4 pb-3">
               {isEditing ? (
                 <div className="space-y-4">
-                  <MarkdownEditor
-                    text={contentAsString || ""}
-                    setText={function (text: string): void {
-                      const newVariables = extractVariables(text);
-                      const replacedText = replaceVariablesWithTags(
-                        text,
-                        newVariables
-                      );
-                      const newMessages = { ...currentMessage };
-                      const messageContent = newMessages.content;
-                      if (Array.isArray(messageContent)) {
-                        const textMessage = messageContent.find(
-                          (element) => element.type === "text"
-                        );
-                        if (textMessage) {
-                          textMessage.text = replacedText;
+                  <Popover
+                    open={
+                      isOnboardingVisible &&
+                      currentStep ===
+                        ONBOARDING_STEPS.EXPERIMENTS_ADD_CHANGE_PROMPT
+                          .stepNumber
+                    }
+                  >
+                    <PopoverTrigger asChild>
+                      <div
+                        data-onboarding-step={
+                          isOnboardingVisible &&
+                          currentStep ===
+                            ONBOARDING_STEPS.EXPERIMENTS_ADD_CHANGE_PROMPT
+                              .stepNumber
+                            ? ONBOARDING_STEPS.EXPERIMENTS_ADD_CHANGE_PROMPT
+                                .stepNumber
+                            : undefined
                         }
-                      } else {
-                        newMessages.content = replacedText;
-                      }
-
-                      setCurrentMessage(newMessages);
-                      callback(replacedText, role, file);
-                      setPromptVariables(newVariables);
-                    }}
-                    language="markdown"
-                  />
+                      >
+                        <MarkdownEditor
+                          text={contentAsString || ""}
+                          setText={setText}
+                          language="markdown"
+                        />
+                      </div>
+                    </PopoverTrigger>
+                    <OnboardingPopover
+                      next={() => {
+                        const scrollArea = document.getElementById(
+                          "add-experiment-scroll-area"
+                        );
+                        if (scrollArea) {
+                          scrollArea.scrollTo({
+                            top: scrollArea.scrollHeight,
+                            behavior: "smooth",
+                          });
+                        }
+                      }}
+                      delayMs={1000}
+                      onboardingStep="EXPERIMENTS_ADD_CHANGE_PROMPT"
+                      align="start"
+                      side="right"
+                    />
+                  </Popover>
                   {promptVariables.length > 0 && (
                     <div className="flex flex-col space-y-2">
                       <label className="text-sm font-medium text-slate-700 dark:text-slate-300">

@@ -17,6 +17,10 @@ import ArrayDiffViewer from "../../../id/arrayDiffViewer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
 import { useJawnClient } from "../../../../../../lib/clients/jawnHook";
+import useOnboardingContext, {
+  ONBOARDING_STEPS,
+} from "@/components/layout/onboardingContext";
+import OnboardingPopover from "@/components/templates/onboarding/OnboardingPopover";
 
 const InputCellRenderer: React.FC<any> = (props) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -106,8 +110,10 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
   const [showPromptPlayground, setShowPromptPlayground] = useState(false);
   const jawnClient = useJawnClient();
 
+  const { isOnboardingVisible, currentStep } = useOnboardingContext();
+
   // Use React Query to fetch and cache the prompt template
-  const { data: promptTemplate } = useQuery(
+  const { data: promptTemplate, isLoading: isPromptTemplateLoading } = useQuery(
     ["promptTemplate", promptVersionId],
     async () => {
       if (!props.context.orgId || !promptVersionId) return null;
@@ -123,7 +129,12 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
     },
     {
       enabled:
-        !!props.context.orgId && !!promptVersionId && showPromptPlayground,
+        !!props.context.orgId &&
+        !!promptVersionId &&
+        (showPromptPlayground ||
+          (isOnboardingVisible &&
+            currentStep === ONBOARDING_STEPS.EXPERIMENTS_ORIGINAL.stepNumber &&
+            displayName === "Original")),
       staleTime: Infinity,
       refetchOnWindowFocus: false,
       refetchOnMount: false,
@@ -151,8 +162,26 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
     );
   }, [promptTemplate, originalPromptTemplate]);
 
+  useEffect(() => {
+    if (
+      isOnboardingVisible &&
+      currentStep === ONBOARDING_STEPS.EXPERIMENTS_ORIGINAL.stepNumber &&
+      displayName === "Original"
+    ) {
+      setShowPromptPlayground(true);
+    }
+  }, [isOnboardingVisible, currentStep, displayName]);
+
   return (
-    <Popover open={showPromptPlayground} onOpenChange={setShowPromptPlayground}>
+    <Popover
+      open={
+        showPromptPlayground ||
+        (isOnboardingVisible &&
+          currentStep === ONBOARDING_STEPS.EXPERIMENTS_ORIGINAL.stepNumber &&
+          displayName === "Original")
+      }
+      onOpenChange={setShowPromptPlayground}
+    >
       <PopoverTrigger asChild>
         <div
           className="flex items-center justify-between w-full h-full pl-2 cursor-pointer"
@@ -223,25 +252,54 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
             </TabsContent>
           </Tabs>
         ) : (
-          <PromptPlayground
-            prompt={
-              promptTemplate?.helicone_template ??
-              (props.hypothesis?.promptVersion?.template || "")
+          <Popover
+            open={
+              !isPromptTemplateLoading &&
+              isOnboardingVisible &&
+              currentStep ===
+                ONBOARDING_STEPS.EXPERIMENTS_ORIGINAL.stepNumber &&
+              displayName === "Original"
             }
-            selectedInput={undefined}
-            onSubmit={(history, model) => {
-              setShowPromptPlayground(false);
-            }}
-            submitText="Save"
-            initialModel={
-              promptTemplate?.model ||
-              props.hypothesis?.promptVersion?.model ||
-              ""
-            }
-            isPromptCreatedFromUi={false}
-            defaultEditMode={false}
-            editMode={false}
-          />
+          >
+            <PopoverTrigger asChild>
+              <div
+                data-onboarding-step={
+                  !isPromptTemplateLoading &&
+                  isOnboardingVisible &&
+                  currentStep ===
+                    ONBOARDING_STEPS.EXPERIMENTS_ORIGINAL.stepNumber &&
+                  displayName === "Original"
+                    ? ONBOARDING_STEPS.EXPERIMENTS_ORIGINAL.stepNumber
+                    : undefined
+                }
+              >
+                <PromptPlayground
+                  prompt={
+                    promptTemplate?.helicone_template ??
+                    (props.hypothesis?.promptVersion?.template || "")
+                  }
+                  selectedInput={undefined}
+                  onSubmit={(history, model) => {
+                    setShowPromptPlayground(false);
+                  }}
+                  submitText="Save"
+                  initialModel={
+                    promptTemplate?.model ||
+                    props.hypothesis?.promptVersion?.model ||
+                    ""
+                  }
+                  isPromptCreatedFromUi={false}
+                  defaultEditMode={false}
+                  editMode={false}
+                />
+              </div>
+            </PopoverTrigger>
+            <OnboardingPopover
+              onboardingStep="EXPERIMENTS_ORIGINAL"
+              align="start"
+              side="bottom"
+            />
+          </Popover>
         )}
       </PopoverContent>
     </Popover>

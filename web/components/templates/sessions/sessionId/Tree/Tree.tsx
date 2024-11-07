@@ -4,7 +4,7 @@ import { clsx } from "../../../../shared/clsx";
 import { PathNode } from "./PathNode";
 import { RequestNode } from "./RequestNode";
 import { Col, Row } from "@/components/layout/common";
-import { SidebarCloseIcon, WorkflowIcon } from "lucide-react";
+import { SidebarCloseIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -12,7 +12,9 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import useOnboardingContext from "@/components/layout/onboardingContext";
+import useOnboardingContext, {
+  ONBOARDING_STEPS,
+} from "@/components/layout/onboardingContext";
 import { Popover, PopoverTrigger } from "@/components/ui/popover";
 import OnboardingPopover from "@/components/templates/onboarding/OnboardingPopover";
 
@@ -205,7 +207,7 @@ export const Tree: React.FC<TreeProps> = ({
               "font-sans bg-slate-50 dark:bg-black border-t border-slate-200 dark:border-slate-700",
               className
             )}
-            data-onboarding-step={2}
+            data-onboarding-step={ONBOARDING_STEPS.SESSIONS_PAGE.stepNumber}
           >
             {data.children &&
               data.children.map((child, index) => (
@@ -225,10 +227,7 @@ export const Tree: React.FC<TreeProps> = ({
           </div>
         </PopoverTrigger>
         <OnboardingPopover
-          icon={<WorkflowIcon className="h-6 w-6" />}
-          title="We are in the travel planning session"
-          stepNumber={2}
-          description="The goal is to figure out where the original failure occured."
+          onboardingStep="SESSIONS_PAGE"
           next={() => {
             selectedRequestIdDispatch[1](
               onBoardingRequestTrace?.request_id ?? ""

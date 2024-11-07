@@ -9,6 +9,264 @@ import {
 } from "react";
 import { motion } from "framer-motion";
 import { Portal } from "@radix-ui/react-portal";
+import {
+  HomeIcon,
+  NotepadTextIcon,
+  SheetIcon,
+  SparklesIcon,
+  WorkflowIcon,
+} from "lucide-react";
+import { BeakerIcon } from "@heroicons/react/24/outline";
+
+// type OnboardingStepLabel =
+//   | "REQUESTS_TABLE"
+//   | "REQUESTS_DRAWER"
+//   | "SESSIONS_PAGE"
+//   | "SESSIONS_CULPRIT"
+//   | "PROMPTS_PAGE"
+//   | "PROMPTS_EXPERIMENT"
+//   | "EXPERIMENTS_TABLE"
+//   | "EXPERIMENTS_ORIGINAL"
+//   | "EXPERIMENTS_ADD"
+//   | "EXPERIMENTS_ADD_CHANGE_PROMPT"
+//   | "EXPERIMENTS_ADD_SAVE"
+//   | "EXPERIMENTS_FIND_EXPERIMENT"
+//   | "EXPERIMENTS_ADD_TEST_CASES"
+//   | "EXPERIMENTS_RUN_EXPERIMENTS"
+//   | "EXPERIMENTS_CLICK_SHOW_SCORES"
+//   | "EXPERIMENTS_CLICK_ADD_EVAL"
+//   | "EXPERIMENTS_SPECIFIC_EVAL"
+//   | "EXPERIMENTS_RUN_EVAL"
+//   | "EXPERIMENTS_BETTER_PROMPT"
+//   | "DASHBOARD_SUCCESS";
+
+const ONBOARDING_STEP_LABELS = [
+  "REQUESTS_TABLE",
+  "REQUESTS_DRAWER",
+  "SESSIONS_PAGE",
+  "SESSIONS_CULPRIT",
+  "PROMPTS_PAGE",
+  "PROMPTS_EXPERIMENT",
+  "EXPERIMENTS_TABLE",
+  "EXPERIMENTS_ORIGINAL",
+  "EXPERIMENTS_ADD",
+  "EXPERIMENTS_ADD_CHANGE_PROMPT",
+  "EXPERIMENTS_ADD_SAVE",
+  "EXPERIMENTS_FIND_EXPERIMENT",
+  "EXPERIMENTS_ADD_TEST_CASES",
+  "EXPERIMENTS_RUN_EXPERIMENTS",
+  "EXPERIMENTS_CLICK_SHOW_SCORES",
+  "EXPERIMENTS_CLICK_ADD_EVAL",
+  "EXPERIMENTS_SPECIFIC_EVAL",
+  "EXPERIMENTS_RUN_EVAL",
+  "EXPERIMENTS_BETTER_PROMPT",
+  "DASHBOARD_SUCCESS",
+] as const;
+
+export type OnboardingStepLabel = (typeof ONBOARDING_STEP_LABELS)[number];
+
+interface OnboardingStep {
+  stepNumber: number;
+  popoverData: {
+    icon: React.ReactNode;
+    title: string;
+    stepNumber: number;
+    description: string | React.ReactNode;
+    additionalData?: React.ReactNode;
+  } | null;
+}
+
+export const ONBOARDING_STEPS: Record<OnboardingStepLabel, OnboardingStep> = {
+  REQUESTS_TABLE: {
+    stepNumber: 0,
+    popoverData: {
+      icon: <SheetIcon className="h-4 w-4" />,
+      title: "Welcome to Requests!",
+      stepNumber: 1,
+      description:
+        "Here is where your request and response data lives. Simply add one line of code to track requests from any providers.",
+    },
+  },
+  REQUESTS_DRAWER: {
+    stepNumber: 1,
+    popoverData: {
+      icon: <SheetIcon className="h-4 w-4" />,
+      title: "Let’s dive deeper",
+      stepNumber: 1,
+      description:
+        "Here you can view the additional metadata and the LLM messages. You might have noticed that the response doesn’t look quite right. Let’s dive deeper to see what might have gone wrong.",
+    },
+  },
+  SESSIONS_PAGE: {
+    stepNumber: 2,
+    popoverData: {
+      icon: <WorkflowIcon className="h-6 w-6" />,
+      title: "We are in the travel planning session",
+      stepNumber: 2,
+      description:
+        "The goal is to figure out where the original failure occurred.",
+    },
+  },
+  SESSIONS_CULPRIT: {
+    stepNumber: 3,
+    popoverData: {
+      icon: <WorkflowIcon className="h-6 w-6" />,
+      title: "The Culprit",
+      stepNumber: 2,
+      description:
+        "Tracing the session made it clear that the problem happened during the “extract-travel-plan” step. Let’s go improve this prompt. ",
+    },
+  },
+  PROMPTS_PAGE: {
+    stepNumber: 4,
+    popoverData: {
+      icon: <NotepadTextIcon className="h-6 w-6" />,
+      title: "Welcome to Prompts!",
+      stepNumber: 3,
+      description: (
+        <>
+          Here, you can view the latest <strong>“extract-travel-plan”</strong>
+          prompt in production, view its version history and previous requests.
+        </>
+      ),
+    },
+  },
+  PROMPTS_EXPERIMENT: {
+    stepNumber: 5,
+    popoverData: {
+      icon: <BeakerIcon className="h-6 w-6" />,
+      title: "Let’s iterate on this prompt",
+      stepNumber: 3,
+      description:
+        "The goal is to converge to 100% accuracy while preventing regressions.",
+    },
+  },
+  EXPERIMENTS_TABLE: {
+    stepNumber: 6,
+    popoverData: {
+      icon: <BeakerIcon className="h-6 w-6" />,
+      title: "A playground for prompts",
+      stepNumber: 4,
+      description:
+        "This is your playground to experiment on the original prompt. Seamlessly iterate, test and evaluate the output at scale. ",
+    },
+  },
+  EXPERIMENTS_ORIGINAL: {
+    stepNumber: 7,
+    popoverData: {
+      icon: <BeakerIcon className="h-6 w-6" />,
+      title: "Here’s your original prompt",
+      stepNumber: 4,
+      description: (
+        <>
+          This is your <strong>“extract-travel-plan”</strong> production prompt.
+          Let&apos;s experiment on this.{" "}
+        </>
+      ),
+    },
+  },
+  EXPERIMENTS_ADD: {
+    stepNumber: 8,
+    popoverData: {
+      icon: <BeakerIcon className="h-6 w-6" />,
+      title: "Add an experiment",
+      stepNumber: 4,
+      description: "Click here to create a new variation of your prompt.",
+    },
+  },
+  EXPERIMENTS_ADD_CHANGE_PROMPT: {
+    stepNumber: 9,
+    popoverData: {
+      icon: <BeakerIcon className="h-6 w-6" />,
+      title: "Change the prompt",
+      stepNumber: 4,
+      description:
+        "Let’s prompt the model to generate step-by-step reasoning, which will help the model better extract the user’s travel plan. ",
+    },
+  },
+  EXPERIMENTS_ADD_SAVE: {
+    stepNumber: 10,
+    popoverData: {
+      icon: <BeakerIcon className="h-6 w-6" />,
+      title: "Save changes",
+      stepNumber: 4,
+      description:
+        "We already picked a model for you. Go ahead and save your prompt. ",
+    },
+  },
+  EXPERIMENTS_FIND_EXPERIMENT: {
+    stepNumber: 11,
+    popoverData: {
+      icon: <BeakerIcon className="h-6 w-6" />,
+      title: "You can find your experiment here",
+      stepNumber: 4,
+      description:
+        "Now let’s test it on some production inputs. This is a crucial step to make sure our new prompt didn’t regress.  ",
+    },
+  },
+  EXPERIMENTS_ADD_TEST_CASES: {
+    stepNumber: 12,
+    popoverData: {
+      icon: <BeakerIcon className="h-6 w-6" />,
+      title: "Add infinite test cases",
+      stepNumber: 4,
+      description:
+        "Testing with real data is always more reliable than testing on mock data, as it contains more realistic user queries. ",
+    },
+  },
+  EXPERIMENTS_RUN_EXPERIMENTS: {
+    stepNumber: 13,
+    popoverData: {
+      icon: <BeakerIcon className="h-6 w-6" />,
+      title: "Run experiments",
+      stepNumber: 4,
+      description:
+        "Sometimes it takes multiple experiments to achieve the highest prompt accuracy. Add as many as you need. ",
+    },
+  },
+  EXPERIMENTS_CLICK_SHOW_SCORES: {
+    stepNumber: 14,
+    popoverData: null,
+  },
+  EXPERIMENTS_CLICK_ADD_EVAL: {
+    stepNumber: 15,
+    popoverData: null,
+  },
+  EXPERIMENTS_SPECIFIC_EVAL: {
+    stepNumber: 16,
+    popoverData: {
+      icon: <SparklesIcon className="h-6 w-6" />,
+      title: "Evaluate your output",
+      stepNumber: 4,
+      description:
+        "Let’s attach an LLM-as-a-judge evaluator that assesses the output to make sure the user’s travel plan is successfully extracted. ",
+    },
+  },
+  EXPERIMENTS_RUN_EVAL: {
+    stepNumber: 17,
+    popoverData: {
+      icon: <SparklesIcon className="h-6 w-6" />,
+      title: "Run evaluator",
+      stepNumber: 4,
+      description:
+        "Running evaluators will quantify the output quality and make sure it didn’t regress. ",
+    },
+  },
+  EXPERIMENTS_BETTER_PROMPT: {
+    stepNumber: 18,
+    popoverData: null,
+  },
+  DASHBOARD_SUCCESS: {
+    stepNumber: 19,
+    popoverData: {
+      icon: <HomeIcon className="h-6 w-6" />,
+      title: "Congrats! You resolved the issue",
+      stepNumber: 5,
+      description:
+        "Now you can monitor the error rates, latency, and cost over time, and watch out for any anomalies that could suggest new issues. ",
+    },
+  },
+};
 
 export type OnboardingContextType = {
   currentStep: number;

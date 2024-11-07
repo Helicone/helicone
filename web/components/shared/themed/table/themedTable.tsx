@@ -35,9 +35,10 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import useOnboardingContext from "@/components/layout/onboardingContext";
+import useOnboardingContext, {
+  ONBOARDING_STEPS,
+} from "@/components/layout/onboardingContext";
 import { Popover, PopoverTrigger } from "@/components/ui/popover";
-import { SheetIcon } from "lucide-react";
 import OnboardingPopover from "@/components/templates/onboarding/OnboardingPopover";
 import { useRouter } from "next/navigation";
 
@@ -365,7 +366,9 @@ export default function ThemedTable<T extends { id?: string }>(
                           <Popover key={row.id} open={true}>
                             <PopoverTrigger asChild>
                               <tr
-                                data-onboarding-step={0}
+                                data-onboarding-step={
+                                  ONBOARDING_STEPS["REQUESTS_TABLE"].stepNumber
+                                }
                                 className={clsx(
                                   " hover:cursor-pointer",
                                   checkedIds?.includes(row.original?.id ?? "")
@@ -432,10 +435,7 @@ export default function ThemedTable<T extends { id?: string }>(
                               </tr>
                             </PopoverTrigger>
                             <OnboardingPopover
-                              icon={<SheetIcon className="h-4 w-4" />}
-                              title="Welcome to Requests!"
-                              stepNumber={1}
-                              description="Here is where your request and response data lives. Simply add one line of code to track requests from any providers."
+                              onboardingStep="REQUESTS_TABLE"
                               next={() => {
                                 handleRowSelect(row.original, index);
                               }}
@@ -522,15 +522,17 @@ export default function ThemedTable<T extends { id?: string }>(
             {isOnboardingVisible && currentStep === 1 ? (
               <Popover open={true}>
                 <PopoverTrigger asChild>
-                  <div className="h-full w-1/2" data-onboarding-step={1}>
+                  <div
+                    className="h-full w-1/2"
+                    data-onboarding-step={
+                      ONBOARDING_STEPS.REQUESTS_DRAWER.stepNumber
+                    }
+                  >
                     {rightPanel}
                   </div>
                 </PopoverTrigger>
                 <OnboardingPopover
-                  icon={<SheetIcon className="h-4 w-4" />}
-                  title="Let’s dive deeper"
-                  stepNumber={1}
-                  description="Here you can view the additional metadata and the LLM messages. You might have noticed that the response doesn’t look quite right. Let’s dive deeper to see what might have gone wrong."
+                  onboardingStep="REQUESTS_DRAWER"
                   next={() => {
                     router.push(`/sessions/${sessionData?.sessionId}`);
                   }}
