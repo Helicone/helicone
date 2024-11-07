@@ -126,7 +126,24 @@ export async function getTableData({
         row.deleted = true;
       }
 
-      if (cell.value !== undefined && cell.value !== null) {
+      if (column.columnType === "input") {
+        // Handle input columns (collapse into 'inputs' cell)
+        const inputKey = column.columnName; // Assuming columnName is the input key
+        const inputValue = cell.value;
+
+        // Initialize the 'inputs' cell if it doesn't exist
+        if (!row.cells["inputs"]) {
+          row.cells["inputs"] = {
+            cellId: cell.id, // You might want to store cellIds differently if necessary
+            value: {},
+            status: cell.status,
+          };
+        }
+
+        // Merge input key-value pairs
+        (row.cells["inputs"].value as Record<string, any>)[inputKey] =
+          inputValue;
+      } else if (cell.value !== undefined && cell.value !== null) {
         if (
           (cell.metadata?.cellType === "output" &&
             (cell.status === "initialized" || cell.status === "success")) ||

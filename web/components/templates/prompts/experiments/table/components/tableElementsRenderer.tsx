@@ -17,32 +17,43 @@ import ArrayDiffViewer from "../../../id/arrayDiffViewer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
 import { useJawnClient } from "../../../../../../lib/clients/jawnHook";
+import React from "react";
 
-const InputCellRenderer: React.FC<any> = (props) => {
+interface InputCellRendererProps {
+  value?: Record<string, string>;
+  data: any; // The full row data
+  context: any; // Grid context
+  node: any; // Grid node
+}
+
+const InputCellRenderer: React.FC<InputCellRendererProps> = (props) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [inputValue, setInputValue] = useState(
-    props.data.cells[props.colDef.cellRendererParams.columnId]?.value || ""
+
+  console.log("props", props);
+  // Initialize inputs state with the value from props
+  const [inputs, setInputs] = useState<Record<string, string>>(
+    props?.data?.cells?.inputs?.value || {}
   );
-  const inputRef = useRef<HTMLInputElement>(null);
 
-  // Determine the display value
-  const displayValue = inputValue || "Click to add input";
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = e.target.value;
-    setInputValue(newValue);
+  const handleInputChange = (key: string, value: string) => {
+    setInputs((prevInputs) => ({
+      ...prevInputs,
+      [key]: value,
+    }));
   };
 
+  //use cell id 
+
   const handleInputSubmit = () => {
-    if (inputValue.trim() === "") return;
-
-    const cell = props.data.cells[props.column.colId];
-
-    props.context.handleUpdateExperimentCell({
-      cellId: cell.cellId,
-      value: inputValue.trim(),
-    });
-
+    // Pass the updated inputs to the context's update function
+    if (props.context && props.context.handleUpdateInputs) {
+      props.context.handleUpdateInputs({
+        rowId: props.node.data.id,
+        inputs,
+      });
+    }
     setIsEditing(false);
   };
 
@@ -51,42 +62,72 @@ const InputCellRenderer: React.FC<any> = (props) => {
       e.preventDefault();
       handleInputSubmit();
     } else if (e.key === "Escape") {
+      e.preventDefault();
       setIsEditing(false);
     }
   };
 
   useEffect(() => {
-    if (isEditing && inputRef.current) {
-      inputRef.current.focus();
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        isEditing &&
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
+        handleInputSubmit();
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isEditing, containerRef]);
+
+  useEffect(() => {
+    if (isEditing && containerRef.current) {
+      // Focus on the first input field
+      const inputElements = containerRef.current.querySelectorAll("input");
+      if (inputElements.length > 0) {
+        (inputElements[0] as HTMLElement).focus();
+      }
     }
   }, [isEditing]);
 
   if (isEditing) {
     return (
-      <Input
-        ref={inputRef}
-        className="h-full w-full text-sm border-none focus:ring-0"
-        value={inputValue}
-        onChange={handleInputChange}
-        onKeyDown={handleKeyDown}
-        onBlur={handleInputSubmit}
-        autoFocus
-      />
+      <div ref={containerRef} className="p-2">
+        {Object.entries(inputs).map(([key, value]) => (
+          <div key={key} className="flex items-center mb-1">
+            <label className="mr-2 font-semibold text-sm">{key}:</label>
+            <Input
+              className="h-8 text-sm flex-1"
+              value={value}
+              onChange={(e) => handleInputChange(key, e.target.value)}
+              onKeyDown={handleKeyDown}
+            />
+          </div>
+        ))}
+      </div>
     );
   }
 
   return (
     <div
-      className="cursor-pointer h-full w-full px-2 flex items-center"
+      className="cursor-pointer"
       onClick={() => setIsEditing(true)}
       style={{
-        whiteSpace: "inherit",
+        whiteSpace: "normal",
         overflow: "hidden",
         textOverflow: "ellipsis",
-        color: inputValue ? "inherit" : "#6B7280",
       }}
     >
-      {displayValue}
+      {Object.entries(inputs).map(([key, value]) => (
+        <div key={key}>
+          <span className="mr-1 font-semibold">{key}:</span>
+          <span>{value}</span>
+        </div>
+      ))}
     </div>
   );
 };

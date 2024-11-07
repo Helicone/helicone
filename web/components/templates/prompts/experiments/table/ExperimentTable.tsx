@@ -261,36 +261,34 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
     ];
     let experimentColumnId = 1;
 
+    columns.push({
+      field: "inputs", // Unique identifier for the inputs column
+      headerName: "Inputs",
+      width: 250, // Adjust as necessary
+      cellRenderer: InputCellRenderer,
+      cellRendererParams: {
+        wrapText,
+        // any other necessary params
+      },
+      cellClass: "border-r border-[#E2E8F0] text-slate-700 pt-2.5",
+      headerClass: "border-r border-[#E2E8F0]",
+      headerComponent: InputsHeaderComponent, // Use your existing header component or create a new one
+      headerComponentParams: {
+        displayName: "Inputs",
+        badgeText: "Input",
+        columnName: "Inputs",
+        type: "input",
+      },
+      cellStyle: {
+        justifyContent: "start",
+        whiteSpace: wrapText ? "normal" : "nowrap",
+      },
+      autoHeight: wrapText,
+      editable: false, // Set this to false to prevent default editing
+    });
+
     Array.from(experimentTableQuery?.columns || []).forEach((column, index) => {
-      if (column.columnType === "input") {
-        columns.push({
-          field: column.id,
-          headerName: column.columnName,
-          width: 150,
-          cellRenderer: InputCellRenderer,
-          cellRendererParams: {
-            index: index,
-            wrapText,
-            columnId: column.id,
-          },
-          cellClass: "border-r border-[#E2E8F0] text-slate-700 pt-2.5",
-          headerClass: "border-r border-[#E2E8F0]",
-          headerComponent: InputsHeaderComponent,
-          headerComponentParams: {
-            index: index,
-            displayName: column.columnName,
-            badgeText: "Input",
-            columnName: column.columnName,
-            type: column.columnType,
-          },
-          cellStyle: {
-            justifyContent: "start",
-            whiteSpace: wrapText ? "normal" : "nowrap",
-          },
-          autoHeight: wrapText,
-          editable: false, // Set this to false to prevent default editing
-        });
-      } else if (column.columnType === "output") {
+      if (column.columnType === "output") {
         columns.push({
           field: column.id,
           headerName: "Original",
