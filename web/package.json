@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev:local": "next dev --turbo -p 3000",
+    "dev:local": "next dev -p 3000",
     "dev": "vercel env pull .env && next dev --turbo -p 3000",
     "dev:preview": "vercel env pull .env --environment preview && next dev -p 3001",
     "build": "next build",
@@ -52,6 +52,7 @@
     "@radix-ui/react-switch": "^1.1.0",
     "@radix-ui/react-tabs": "^1.1.0",
     "@radix-ui/react-tooltip": "^1.1.2",
+    "@sentry/nextjs": "^8",
     "@stripe/stripe-js": "^1.46.0",
     "@supabase/auth-helpers-nextjs": "^0.5.4",
     "@supabase/auth-helpers-react": "^0.3.1",
