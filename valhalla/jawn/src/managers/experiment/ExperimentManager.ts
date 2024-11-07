@@ -333,6 +333,12 @@ export class ExperimentManager extends BaseManager {
     return this.ExperimentStore.getExperimentTable(experimentTableId);
   }
 
+  async getExperimentTableColumns(
+    experimentTableId: string
+  ): Promise<Result<{ id: string; name: string }[], string>> {
+    return this.ExperimentStore.getExperimentTableColumns(experimentTableId);
+  }
+
   async getExperimentTableSimplifiedById(
     experimentTableId: string
   ): Promise<Result<ExperimentTableSimplified, string>> {
@@ -358,6 +364,7 @@ export class ExperimentManager extends BaseManager {
     columnType: string;
     hypothesisId?: string;
     promptVersionId?: string;
+    inputKeys?: string[];
   }): Promise<
     Result<
       {
@@ -378,7 +385,8 @@ export class ExperimentManager extends BaseManager {
         params.columnName,
         params.columnType as "experiment" | "input" | "output",
         params.hypothesisId,
-        params.promptVersionId
+        params.promptVersionId,
+        params.inputKeys
       );
 
     if (experimentColumnResult.error || !experimentColumnResult.data) {

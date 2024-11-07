@@ -306,6 +306,7 @@ export class ExperimentController extends Controller {
       columnType: string;
       hypothesisId?: string;
       promptVersionId?: string;
+      inputKeys?: string[];
     },
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<null, string>> {
@@ -319,6 +320,31 @@ export class ExperimentController extends Controller {
       console.error(experimentTable.error);
       return err(experimentTable.error);
     }
+
+    const experimentTableColumns =
+      await experimentManager.getExperimentTableColumns(experimentTableId);
+    if (experimentTableColumns.error || !experimentTableColumns.data) {
+      this.setStatus(500);
+      console.error(experimentTableColumns.error);
+      return err(experimentTableColumns.error);
+    }
+    const missingInputKeys = requestBody.inputKeys?.filter(
+      (key) => !experimentTableColumns.data.map((col) => col.name).includes(key)
+    );
+
+    if (missingInputKeys && missingInputKeys.length > 0) {
+      await Promise.all(
+        missingInputKeys.map(async (key) => {
+          return experimentManager.createExperimentColumn({
+            experimentTableId,
+            columnName: key,
+            columnType: "input",
+            inputKeys: [key],
+          });
+        })
+      );
+    }
+
     const result = await experimentManager.createExperimentColumn({
       experimentTableId,
       columnName: requestBody.columnName,
@@ -326,11 +352,13 @@ export class ExperimentController extends Controller {
       hypothesisId: requestBody.hypothesisId,
       promptVersionId: requestBody.promptVersionId,
     });
+
     if (result.error) {
       this.setStatus(500);
       console.error(result.error);
       return err(result.error);
     }
+
     this.setStatus(204);
     return ok(null);
   }

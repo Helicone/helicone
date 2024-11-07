@@ -268,11 +268,13 @@ export function useExperimentTable(orgId: string, experimentTableId: string) {
       columnType,
       hypothesisId,
       promptVersionId,
+      promptVariables,
     }: {
       columnName: string;
       columnType: string;
       hypothesisId?: string;
       promptVersionId?: string;
+      promptVariables?: string[];
     }) => {
       const jawnClient = getJawnClient(orgId);
       await jawnClient.POST("/v1/experiment/table/{experimentTableId}/column", {
@@ -284,6 +286,7 @@ export function useExperimentTable(orgId: string, experimentTableId: string) {
           columnType,
           hypothesisId,
           promptVersionId,
+          inputKeys: promptVariables,
         },
       });
     },

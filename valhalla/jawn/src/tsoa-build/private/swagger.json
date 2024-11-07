@@ -12175,6 +12175,12 @@
 						"application/json": {
 							"schema": {
 								"properties": {
+									"inputKeys": {
+										"items": {
+											"type": "string"
+										},
+										"type": "array"
+									},
 									"promptVersionId": {
 										"type": "string"
 									},

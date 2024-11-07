@@ -4352,6 +4352,7 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": {
+          inputKeys?: string[];
           promptVersionId?: string;
           hypothesisId?: string;
           columnType: string;

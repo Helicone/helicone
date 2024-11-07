@@ -147,13 +147,15 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
       columnName: string,
       columnType: "experiment" | "input" | "output",
       hypothesisId?: string,
-      promptVersionId?: string
+      promptVersionId?: string,
+      promptVariables?: string[]
     ) => {
       addExperimentTableColumn.mutate({
         promptVersionId: promptVersionId ?? "",
         columnName,
         columnType,
         hypothesisId,
+        promptVariables,
       });
     },
     [addExperimentTableColumn]
