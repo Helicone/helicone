@@ -64,7 +64,7 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
   } = useExperimentTable(orgId || "", experimentTableId);
   const promptSubversionId = experimentTableQuery?.promptSubversionId;
 
-  const [wrapText, setWrapText] = useState(false);
+  const [wrapText, setWrapText] = useState(true);
   const [columnView, setColumnView] = useState<"all" | "inputs" | "outputs">(
     "all"
   );
@@ -292,7 +292,7 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
         columns.push({
           field: column.id,
           headerName: "Original",
-          width: 200,
+          width: 400,
           headerComponent: CustomHeaderComponent,
           headerComponentParams: {
             displayName: "Original",
@@ -325,7 +325,7 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
           columns.push({
             field: column.id,
             headerName: column.columnName,
-            width: 230,
+            width: 400,
             suppressSizeToFit: true,
             cellRenderer: HypothesisCellRenderer,
             cellRendererParams: {
@@ -607,7 +607,7 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
             }}
             rowClass="border-b border-gray-200 hover:bg-gray-50"
             headerHeight={40}
-            rowHeight={50}
+            rowHeight={300}
           />
         </div>
         <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
