@@ -279,12 +279,6 @@ const InputsHeaderComponent: React.FC<any> = (props) => {
         <span className="text-md font-semibold text-slate-900">
           {displayName}
         </span>
-        <Badge
-          variant={badgeVariant}
-          className="text-[#334155] bg-[#F8FAFC] border border-[#E2E8F0] rounded-md font-medium hover:bg-slate-100"
-        >
-          {badgeText}
-        </Badge>
       </div>
     </div>
   );
