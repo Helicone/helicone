@@ -8,9 +8,11 @@ import {
 export function TooltipLegacy({
   children,
   title,
+  placement,
 }: {
   children: React.ReactNode;
   title: string;
+  placement?: "top" | "top-end" | "top-start";
 }) {
   return (
     <TooltipProvider>
