@@ -170,24 +170,31 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
         sourceRequest?: string;
       }[]
     ) => {
-      const columns = experimentTableQuery?.columns?.filter(
+      const inputColumn = experimentTableQuery?.columns?.filter(
         (column) => column.columnType === "input"
       );
 
-      if (!columns) return;
+      console.log("columns", inputColumn);
+
+      if (!inputColumn) return;
 
       const newRows = rows.map((row) => {
-        const cells = Object.entries(row.inputs ?? {}).map(([key, value]) => ({
-          columnId:
-            columns.find((column) => column.columnName === key)?.id ?? "",
-          value,
-        }));
+        const inputCell = {
+          columnId: inputColumn[0].id,
+          value: "inputs",
+          metadata: {
+            inputs: Object.entries(row.inputs ?? {}).map(([key, value]) => ({
+              key,
+              value,
+            })),
+          },
+        };
 
         return {
           inputRecordId: row.inputRecordId,
           datasetId: row.datasetId,
           inputs: row.inputs,
-          cells,
+          cells: [inputCell],
           sourceRequest: row.sourceRequest,
         };
       });

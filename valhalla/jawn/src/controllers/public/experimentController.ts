@@ -320,13 +320,18 @@ export class ExperimentController extends Controller {
           if (cell.metadata?.inputId && cell.metadata.inputs) {
             // Transform the inputs array into a Record<string, string>
             const inputData = Object.fromEntries(
-              cell.metadata.inputs.map((input: { key: string; value: string }) => [
-                input.key,
-                input.value ?? "",
-              ])
+              cell.metadata.inputs.map(
+                (input: { key: string; value: string }) => [
+                  input.key,
+                  input.value ?? "",
+                ]
+              )
             );
 
-            return inputManager.updateInputRecord(cell.metadata.inputId, inputData);
+            return inputManager.updateInputRecord(
+              cell.metadata.inputId,
+              inputData
+            );
           }
         })
       );
@@ -501,7 +506,7 @@ export class ExperimentController extends Controller {
         cells: {
           columnId: string;
           value: string | null;
-          metadata?: Record<string, string>;
+          metadata?: any;
         }[];
         sourceRequest?: string;
       }[];
