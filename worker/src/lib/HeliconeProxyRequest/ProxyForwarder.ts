@@ -100,8 +100,13 @@ export async function proxyForwarder(
     if (authError == null) {
       const db = new DBWrapper(env, auth);
       const { data: orgData, error: orgError } = await db.getAuthParams();
+
       if (orgError !== null || !orgData?.organizationId) {
         console.error("Error getting org", orgError);
+      } else if (!orgData.accessDict.cache) {
+        console.error(
+          `Cache is disabled for this organization. ${orgData.organizationId}`
+        );
       } else {
         try {
           const cachedResponse = await getCachedResponse(
