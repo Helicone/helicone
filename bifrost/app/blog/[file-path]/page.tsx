@@ -7,6 +7,8 @@ import { notFound } from "next/navigation";
 import path from "path";
 import { RemoteMdxPage } from "./mdxRenderer";
 import remarkGfm from "remark-gfm";
+import rehypeHighlight from "rehype-highlight";
+import "highlight.js/styles/atom-one-dark.css";
 
 export default async function Home({
   params,
@@ -29,6 +31,7 @@ export default async function Home({
   const mdxSource = await serialize(source, {
     mdxOptions: {
       remarkPlugins: [remarkGfm],
+      rehypePlugins: [rehypeHighlight],
     },
   });
 

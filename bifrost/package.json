@@ -44,6 +44,7 @@
     "react": "^18",
     "react-dom": "^18",
     "react-hot-toast": "^2.4.1",
+    "rehype-highlight": "^7.0.1",
     "remark-gfm": "^4.0.0",
     "rss": "^1.2.2",
     "tailwind-merge": "^2.5.2",
