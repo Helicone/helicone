@@ -6175,6 +6175,10 @@
 							}
 						],
 						"nullable": true
+					},
+					"tableId": {
+						"type": "string",
+						"nullable": true
 					}
 				},
 				"required": [
@@ -6184,7 +6188,8 @@
 					"meta",
 					"createdAt",
 					"hypotheses",
-					"scores"
+					"scores",
+					"tableId"
 				],
 				"type": "object",
 				"additionalProperties": false

@@ -2361,6 +2361,7 @@ Json: JsonObject;
           id: string;
         }[];
       scores: components["schemas"]["ExperimentScores"] | null;
+      tableId: string | null;
     };
     "ResultSuccess_Experiment-Array_": {
       data: components["schemas"]["Experiment"][];
