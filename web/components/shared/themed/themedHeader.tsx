@@ -22,7 +22,10 @@ import {
 import { useMemo, useState } from "react";
 import { TimeInterval } from "../../../lib/timeCalculations/time";
 import { FilterLeaf } from "../../../services/lib/filters/filterDefs";
-import { SingleFilterDef } from "../../../services/lib/filters/frontendFilterDefs";
+import {
+  ColumnType,
+  SingleFilterDef,
+} from "../../../services/lib/filters/frontendFilterDefs";
 import { clsx } from "../clsx";
 import ThemedTimeFilter from "./themedTimeFilter";
 import { AdvancedFilters } from "./themedAdvancedFilters";
@@ -35,9 +38,15 @@ import FiltersButton from "./table/filtersButton";
 import { OrganizationFilter } from "../../../services/lib/organization_layout/organization_layout";
 import { UIFilterRowTree } from "../../../services/lib/filters/uiFilterRowTree";
 import { Button } from "@/components/ui/button";
+import {
+  SortDirection,
+  SortLeafRequest,
+} from "../../../services/lib/sorts/requests/sorts";
+import { UserMetric } from "../../../lib/api/users/users";
+import { SortLeafUsers } from "../../../services/lib/sorts/users/sorts";
 
 export interface Column {
-  key: keyof RequestWrapper | keyof UserMetric;
+  key: keyof UserMetric;
   label: string;
   active: boolean;
   type?: ColumnType;
