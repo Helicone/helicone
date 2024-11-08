@@ -335,7 +335,7 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
           width: 400,
           headerComponent: CustomHeaderComponent,
           headerComponentParams: {
-            displayName: "Original",
+            displayName: "Original Prompt",
             badgeText: "Output",
             badgeVariant: "secondary",
             promptVersionId: promptVersionTemplateData?.id ?? "",
@@ -376,7 +376,7 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
             },
             headerComponent: CustomHeaderComponent,
             headerComponentParams: {
-              displayName: `Experiment ${experimentColumnId++}`,
+              displayName: `Prompt ${experimentColumnId++}`,
               badgeText: "Output",
               badgeVariant: "secondary",
               hypothesisId: column.metadata?.hypothesisId ?? "",
