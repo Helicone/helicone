@@ -9,19 +9,18 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "../../../../../ui/popover";
-import { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { Badge } from "../../../../../ui/badge";
 import PromptPlayground from "../../../id/promptPlayground";
-import { Input } from "../../../../../ui/input";
-import ArrayDiffViewer from "../../../id/arrayDiffViewer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
 import { useJawnClient } from "../../../../../../lib/clients/jawnHook";
 import React from "react";
-import InputEditor from "./inputEditor";
 import useNotification from "../../../../../shared/notification/useNotification";
+import InputEditorDrawer from "./inputEditorDrawer"; // Import the InputEditorDrawer component
+import ArrayDiffViewer from "../../../id/arrayDiffViewer";
 
-interface InputEntry {
+export interface InputEntry {
   key: string;
   value: string;
 }
@@ -35,129 +34,87 @@ interface InputCellRendererProps {
 
 const InputCellRenderer: React.FC<InputCellRendererProps> = (props) => {
   const notification = useNotification();
-  const [isEditing, setIsEditing] = useState(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
-  const [inputs, setInputs] = useState<InputEntry[]>(
-    props?.data?.cells?.inputs?.value || []
+  // Use the inputs from props
+  const inputs: InputEntry[] = useMemo(() => {
+    const inputValue = props?.data?.cells?.inputs?.value;
+    if (Array.isArray(inputValue)) {
+      return inputValue;
+    } else {
+      return [];
+    }
+  }, [props?.data?.cells?.inputs?.value]);
+
+  // Handle saving inputs from the drawer
+  const handleSave = useCallback(
+    (updatedInputs: InputEntry[]) => {
+      const cellId = props?.data?.cells?.inputs?.cellId;
+
+      // Validate inputs
+      const validateInputs = (inputs: InputEntry[]) => {
+        return inputs.every((input) => input.key && input.value);
+      };
+
+      if (!validateInputs(updatedInputs)) {
+        notification.setNotification("Please add valid inputs", "error");
+        return;
+      }
+
+      try {
+        props.context.handleUpdateExperimentCell({
+          cellId: cellId,
+          value: "inputs",
+          metadata: {
+            inputs: updatedInputs,
+          },
+        });
+        console.log("handleUpdateExperimentCell called successfully");
+
+        // Update latest input keys
+        const latestInputKeys = updatedInputs.map((input) => input.key);
+        props.context.updateLatestInputKeys(latestInputKeys);
+      } catch (error) {
+        console.error("Error calling handleUpdateExperimentCell:", error);
+      }
+    },
+    [props, notification]
   );
 
-  const validateInputs = (inputs: InputEntry[]) => {
-    return inputs.every((input) => input.key && input.value);
-  };
-
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  // Initialize yamlContent once when editing starts
-  const [yamlContent, setYamlContent] = useState<string>("");
-
-  const handleInputSubmit = useCallback(() => {
-    // Pass the updated inputs to the context's update function
-    const cellId = props?.data?.cells?.inputs?.cellId;
-    if (!validateInputs(inputs)) {
-      notification.setNotification("Please add valid inputs", "error");
-      return;
-    }
-
-    try {
-      props.context.handleUpdateExperimentCell({
-        cellId: cellId,
-        value: "inputs",
-        metadata: {
-          inputs: inputs,
-        },
-      });
-      console.log("handleUpdateExperimentCell called successfully");
-    } catch (error) {
-      console.error("Error calling handleUpdateExperimentCell:", error);
-    }
-
-    setIsEditing(false);
-  }, [inputs, props.context, notification]);
-
-  // Adjusted useEffect to only depend on isEditing
-  useEffect(() => {
-    if (isEditing) {
-      // Convert inputs to YAML string only when editing starts
-      const yamlString = inputs
-        .map((entry) => `${entry.key}: ${entry.value}`)
-        .join("\n");
-      setYamlContent(yamlString);
-    }
-  }, [isEditing]);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        isEditing &&
-        containerRef.current &&
-        !containerRef.current.contains(event.target as Node)
-      ) {
-        handleInputSubmit();
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [isEditing, handleInputSubmit]);
-
-  const handleContentChange = (content: string) => {
-    // No need to update yamlContent here
-    // setYamlContent(content);
-
-    // Parse YAML content back to inputs
-    const lines = content.split("\n");
-    const newInputs = lines
-      .map((line) => {
-        const [key, ...rest] = line.split(":");
-        const value = rest.join(":").trim(); // In case value contains ':'
-        return { key: key.trim(), value };
-      })
-      .filter((entry) => entry.key !== "");
-
-    setInputs(newInputs);
-  };
-
-  if (isEditing) {
-    return (
-      <div ref={containerRef}>
-        <InputEditor
-          initialContent={yamlContent}
-          onContentChange={handleContentChange}
-          isEditing={isEditing}
-        />
-        <div className="mb-2 flex justify-end">
-          <Button variant={"ghost"} onClick={handleInputSubmit}>
-            Save
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div
-      className="cursor-pointer p-2"
-      onClick={() => setIsEditing(true)}
-      style={{
-        whiteSpace: "normal",
-        overflow: "hidden",
-        textOverflow: "ellipsis",
-        minHeight: "20px",
-      }}
-    >
-      {inputs.length > 0 ? (
-        inputs.map((inputEntry, index) => (
-          <div key={`${inputEntry.key}-${index}`}>
-            <span className="mr-1 font-semibold">{inputEntry.key}:</span>
-            <span>{inputEntry.value}</span>
-          </div>
-        ))
-      ) : (
-        <div className="text-gray-500">Click to add inputs</div>
+    <>
+      <div
+        className="cursor-pointer p-2"
+        onClick={() => setIsDrawerOpen(true)}
+        style={{
+          whiteSpace: "normal",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          minHeight: "20px",
+        }}
+      >
+        {inputs.length > 0 ? (
+          inputs.map((inputEntry, index) => (
+            <div key={`${inputEntry.key}-${index}`}>
+              <span className="mr-1 font-semibold">{inputEntry.key}:</span>
+              <span>{inputEntry.value}</span>
+            </div>
+          ))
+        ) : (
+          <div className="text-gray-500">Click to add inputs</div>
+        )}
+      </div>
+
+      {/* Render the InputEditorDrawer when isDrawerOpen is true */}
+      {isDrawerOpen && (
+        <InputEditorDrawer
+          open={isDrawerOpen}
+          setOpen={setIsDrawerOpen}
+          initialInputs={inputs}
+          onSave={handleSave}
+        />
       )}
-    </div>
+    </>
   );
 };
 
@@ -407,7 +364,6 @@ const RowNumberCellRenderer: React.FC<any> = (props) => {
     </div>
   );
 };
-
 export {
   InputCellRenderer,
   CustomHeaderComponent,
