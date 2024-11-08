@@ -127,7 +127,7 @@ const InputCellRenderer: React.FC<InputCellRendererProps> = (props) => {
           onContentChange={handleContentChange}
           isEditing={isEditing}
         />
-        <div className="pb-2 flex justify-end">
+        <div className="mb-2 flex justify-end">
           <Button variant={"ghost"} onClick={handleInputSubmit}>
             Save
           </Button>
