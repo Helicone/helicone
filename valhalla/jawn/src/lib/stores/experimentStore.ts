@@ -128,6 +128,11 @@ export interface ExperimentTableSimplified {
   experimentId: string;
   createdAt: string;
   metadata?: any;
+  columns: {
+    id: string;
+    columnName: string;
+    columnType: string;
+  }[];
 }
 
 function getExperimentsQuery(
@@ -1132,7 +1137,21 @@ export class ExperimentStore extends BaseStore {
   ): Promise<Result<ExperimentTableSimplified, string>> {
     const result = await supabaseServer.client
       .from("experiment_table")
-      .select("*")
+      .select(
+        `
+        id,
+        name,
+        experiment_id,
+        metadata,
+        created_at,
+        experiment_column (
+          id,
+          column_name,
+          column_type,
+          metadata
+        )
+      `
+      )
       .eq("id", experimentTableId)
       .eq("organization_id", this.organizationId)
       .single();
@@ -1141,12 +1160,20 @@ export class ExperimentStore extends BaseStore {
       return err(result.error?.message ?? "Experiment table not found");
     }
 
+    const columns = result.data.experiment_column.map((col: any) => ({
+      id: col.id,
+      columnName: col.column_name,
+      columnType: col.column_type,
+      metadata: col.metadata,
+    }));
+
     return ok({
       id: result.data.id,
       name: result.data.name,
       experimentId: result.data.experiment_id,
       metadata: result.data.metadata,
       createdAt: result.data.created_at,
+      columns: columns,
     });
   }
 
@@ -1214,6 +1241,7 @@ export class ExperimentStore extends BaseStore {
         experimentId: table.experiment_id,
         metadata: table.metadata,
         createdAt: table.created_at,
+        columns: [],
       }))
     );
   }

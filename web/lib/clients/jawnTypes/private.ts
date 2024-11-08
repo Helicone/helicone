@@ -2185,6 +2185,11 @@ Json: JsonObject;
       experimentId: string;
       createdAt: string;
       metadata?: unknown;
+      columns: {
+          columnType: string;
+          columnName: string;
+          id: string;
+        }[];
     };
     ResultSuccess_ExperimentTableSimplified_: {
       data: components["schemas"]["ExperimentTableSimplified"];

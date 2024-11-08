@@ -463,11 +463,33 @@ export class ExperimentController extends Controller {
       inputs: requestBody.inputs,
     });
 
-    if (result.error || !result.data) {
+    if (!result.data || result.error) {
       this.setStatus(500);
       console.error(result.error);
       return err(result.error);
     }
+
+    const inputCell = result.data.find((cell) => cell.cellType === "input");
+    if (inputCell) {
+      await experimentManager.updateExperimentCells({
+        cells: [
+          {
+            cellId: inputCell.id,
+            value: "inputs",
+            status: "initialized",
+            metadata: {
+              inputs: Object.entries(requestBody.inputs ?? {}).map(
+                ([key, value]) => ({
+                  key,
+                  value: "",
+                })
+              ),
+            },
+          },
+        ],
+      });
+    }
+
     return ok(null);
   }
 

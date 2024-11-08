@@ -1934,6 +1934,7 @@ const models: TsoaRoute.Models = {
             "experimentId": {"dataType":"string","required":true},
             "createdAt": {"dataType":"string","required":true},
             "metadata": {"dataType":"any"},
+            "columns": {"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"columnType":{"dataType":"string","required":true},"columnName":{"dataType":"string","required":true},"id":{"dataType":"string","required":true}}},"required":true},
         },
         "additionalProperties": false,
     },

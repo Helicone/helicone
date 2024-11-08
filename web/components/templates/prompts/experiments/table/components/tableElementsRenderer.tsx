@@ -97,7 +97,7 @@ const InputCellRenderer: React.FC<InputCellRendererProps> = (props) => {
           inputs.map((inputEntry, index) => (
             <div key={`${inputEntry.key}-${index}`}>
               <span className="mr-1 font-semibold">{inputEntry.key}:</span>
-              <span>{inputEntry.value}</span>
+              <span>{inputEntry.value === "" ? "null" : inputEntry.value}</span>
             </div>
           ))
         ) : (

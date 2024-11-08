@@ -5612,13 +5612,36 @@
 					"createdAt": {
 						"type": "string"
 					},
-					"metadata": {}
+					"metadata": {},
+					"columns": {
+						"items": {
+							"properties": {
+								"columnType": {
+									"type": "string"
+								},
+								"columnName": {
+									"type": "string"
+								},
+								"id": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"columnType",
+								"columnName",
+								"id"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					}
 				},
 				"required": [
 					"id",
 					"name",
 					"experimentId",
-					"createdAt"
+					"createdAt",
+					"columns"
 				],
 				"type": "object",
 				"additionalProperties": false

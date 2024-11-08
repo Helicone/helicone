@@ -135,6 +135,39 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
     [addExperimentTableRow, experimentTableQuery?.promptSubversionId]
   );
 
+  const handleAddRowWithPreviousInputs = useCallback(() => {
+    const lastRow =
+      experimentTableQuery?.rows?.[experimentTableQuery.rows.length - 1];
+
+    console.log("lastRow", lastRow);
+
+    let inputs: Record<string, string> = {};
+
+    const inputColumn = experimentTableQuery?.columns?.find(
+      (column) => column.columnType === "input"
+    );
+    console.log("inputColumn", inputColumn);
+
+    if (lastRow && inputColumn) {
+      const inputCell = lastRow.cells["inputs"]; // Assuming 'inputs' is the field for the inputs cell
+      if (inputCell && inputCell.value && Array.isArray(inputCell.value)) {
+        inputs = inputCell.value.reduce(
+          (
+            acc: Record<string, string>,
+            input: { key: string; value: string }
+          ) => {
+            acc[input.key] = input.value;
+            return acc;
+          },
+          {}
+        );
+      }
+    }
+    console.log("inputs123", inputs);
+
+    handleAddRow(inputs);
+  }, [experimentTableQuery?.rows, handleAddRow]);
+
   const handleDeleteRow = useCallback(
     (rowIndex: number) => {
       deleteExperimentTableRow.mutate(rowIndex);
@@ -632,7 +665,7 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
               setPopoverOpen={setPopoverOpen}
               setShowExperimentInputSelector={setShowExperimentInputSelector}
               setShowRandomInputSelector={setShowRandomInputSelector}
-              handleAddRow={handleAddRow}
+              handleAddRow={handleAddRowWithPreviousInputs}
             />
           </PopoverContent>
         </Popover>

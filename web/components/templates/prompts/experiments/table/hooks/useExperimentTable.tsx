@@ -35,6 +35,7 @@ export type TableCell = {
   value: string | any | null;
   cellId: string;
   status: CellStatus;
+  metadata?: Record<string, any>;
 };
 
 export type TableRow = {
@@ -135,6 +136,7 @@ export async function getTableData({
           cellId: cell.id,
           value: inputs, // This should be an array of { key, value }
           status: cell.status,
+          metadata: cell.metadata,
         };
       } else if (cell.value !== undefined && cell.value !== null) {
         if (
@@ -157,6 +159,7 @@ export async function getTableData({
             cellId: cell.id,
             value: cell.value,
             status: cell.status,
+            metadata: cell.metadata,
           };
         }
       } else {
@@ -164,6 +167,7 @@ export async function getTableData({
           cellId: cell.id,
           value: null,
           status: cell.status,
+          metadata: cell.metadata,
         };
       }
     }

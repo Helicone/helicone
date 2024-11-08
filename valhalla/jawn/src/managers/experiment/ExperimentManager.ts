@@ -415,28 +415,6 @@ export class ExperimentManager extends BaseManager {
     return this.ExperimentStore.getExperimentHypothesisScores(params);
   }
 
-  async createExperimentTableRowWithCells(params: {
-    experimentTableId: string;
-    metadata?: Record<string, any>;
-    cells: {
-      columnId: string;
-      value: string | null;
-    }[];
-  }): Promise<Result<{ ids: string[] }, string>> {
-    const maxRowIndex = await this.ExperimentStore.getMaxRowIndex(
-      params.experimentTableId
-    );
-    if (maxRowIndex.error || maxRowIndex.data === null) {
-      return err(maxRowIndex.error ?? "Failed to get max row index");
-    }
-
-    return this.ExperimentStore.createExperimentTableRowWithCells({
-      experimentTableId: params.experimentTableId,
-      rowIndex: maxRowIndex.data + 1,
-      metadata: params.metadata,
-      cells: params.cells,
-    });
-  }
 
   async createExperimentTableRowWithCellsBatch(params: {
     experimentTableId: string;
