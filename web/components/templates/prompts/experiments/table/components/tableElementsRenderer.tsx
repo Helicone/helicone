@@ -10,14 +10,13 @@ import {
   PopoverTrigger,
 } from "../../../../../ui/popover";
 import { useState, useCallback, useMemo } from "react";
-import { Badge } from "../../../../../ui/badge";
 import PromptPlayground from "../../../id/promptPlayground";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
 import { useJawnClient } from "../../../../../../lib/clients/jawnHook";
 import React from "react";
 import useNotification from "../../../../../shared/notification/useNotification";
-import InputEditorDrawer from "./inputEditorDrawer"; // Import the InputEditorDrawer component
+import InputEditorDrawer from "./inputEditorDrawer";
 import ArrayDiffViewer from "../../../id/arrayDiffViewer";
 
 export interface InputEntry {

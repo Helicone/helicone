@@ -4,8 +4,7 @@ import React, { useState, useEffect } from "react";
 import ThemedDrawer from "@/components/shared/themed/themedDrawer";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { InputEntry } from "./tableElementsRenderer"; // Import InputEntry type
-import { Textarea } from "../../../../../ui/textarea";
+import { InputEntry } from "./tableElementsRenderer";
 import { MinusCircleIcon, PlusCircleIcon } from "@heroicons/react/24/outline";
 import { AutosizeTextarea } from "../../../../../ui/autosizeTextArea";
 
