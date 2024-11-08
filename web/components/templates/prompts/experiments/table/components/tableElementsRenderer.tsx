@@ -9,7 +9,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "../../../../../ui/popover";
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { Badge } from "../../../../../ui/badge";
 import PromptPlayground from "../../../id/promptPlayground";
 import { Input } from "../../../../../ui/input";
@@ -45,36 +45,12 @@ const InputCellRenderer: React.FC<InputCellRendererProps> = (props) => {
     return inputs.every((input) => input.key && input.value);
   };
 
-  const [yamlContent, setYamlContent] = useState<string>("");
   const containerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (isEditing) {
-      // Convert inputs to YAML string
-      const yamlString = inputs
-        .map((entry) => `${entry.key}: ${entry.value}`)
-        .join("\n");
-      setYamlContent(yamlString);
-    }
-  }, [isEditing]);
+  // Initialize yamlContent once when editing starts
+  const [yamlContent, setYamlContent] = useState<string>("");
 
-  const handleContentChange = (content: string) => {
-    setYamlContent(content);
-
-    // Parse YAML content back to inputs
-    const lines = content.split("\n");
-    const newInputs = lines
-      .map((line) => {
-        const [key, ...rest] = line.split(":");
-        const value = rest.join(":").trim(); // In case value contains ':'
-        return { key: key.trim(), value };
-      })
-      .filter((entry) => entry.key !== "");
-
-    setInputs(newInputs);
-  };
-
-  const handleInputSubmit = () => {
+  const handleInputSubmit = useCallback(() => {
     // Pass the updated inputs to the context's update function
     const cellId = props?.data?.cells?.inputs?.cellId;
     if (!validateInputs(inputs)) {
@@ -96,7 +72,18 @@ const InputCellRenderer: React.FC<InputCellRendererProps> = (props) => {
     }
 
     setIsEditing(false);
-  };
+  }, [inputs, props.context, notification]);
+
+  // Adjusted useEffect to only depend on isEditing
+  useEffect(() => {
+    if (isEditing) {
+      // Convert inputs to YAML string only when editing starts
+      const yamlString = inputs
+        .map((entry) => `${entry.key}: ${entry.value}`)
+        .join("\n");
+      setYamlContent(yamlString);
+    }
+  }, [isEditing]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -113,7 +100,24 @@ const InputCellRenderer: React.FC<InputCellRendererProps> = (props) => {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [isEditing]);
+  }, [isEditing, handleInputSubmit]);
+
+  const handleContentChange = (content: string) => {
+    // No need to update yamlContent here
+    // setYamlContent(content);
+
+    // Parse YAML content back to inputs
+    const lines = content.split("\n");
+    const newInputs = lines
+      .map((line) => {
+        const [key, ...rest] = line.split(":");
+        const value = rest.join(":").trim(); // In case value contains ':'
+        return { key: key.trim(), value };
+      })
+      .filter((entry) => entry.key !== "");
+
+    setInputs(newInputs);
+  };
 
   if (isEditing) {
     return (
@@ -123,8 +127,10 @@ const InputCellRenderer: React.FC<InputCellRendererProps> = (props) => {
           onContentChange={handleContentChange}
           isEditing={isEditing}
         />
-        <div className="mt-2 flex justify-end">
-          <Button onClick={handleInputSubmit}>Save</Button>
+        <div className="pb-2 flex justify-end">
+          <Button variant={"ghost"} onClick={handleInputSubmit}>
+            Save
+          </Button>
         </div>
       </div>
     );
