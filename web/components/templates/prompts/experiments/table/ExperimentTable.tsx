@@ -256,7 +256,7 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
           alignItems: "center",
           justifyContent: "center",
         },
-        autoHeight: wrapText,
+        wrapText,
       },
     ];
     let experimentColumnId = 1;
@@ -283,7 +283,7 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
         justifyContent: "start",
         whiteSpace: wrapText ? "normal" : "nowrap",
       },
-      autoHeight: wrapText,
+      wrapText,
       editable: false, // Set this to false to prevent default editing
     });
 
@@ -318,7 +318,7 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
             textOverflow: "ellipsis",
             whiteSpace: wrapText ? "normal" : "nowrap",
           },
-          autoHeight: wrapText,
+          wrapText,
         });
       } else if (column.columnType === "experiment") {
         if (columnView === "all" || columnView === "outputs") {
@@ -377,7 +377,7 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
               textOverflow: "ellipsis",
               whiteSpace: wrapText ? "normal" : "nowrap",
             },
-            autoHeight: wrapText,
+            wrapText,
           });
         }
       }
@@ -415,7 +415,6 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
           textOverflow: "ellipsis",
           whiteSpace: wrapText ? "normal" : "nowrap",
         },
-        autoHeight: wrapText,
       });
     }
 
