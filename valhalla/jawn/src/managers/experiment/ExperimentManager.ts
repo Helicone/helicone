@@ -164,7 +164,12 @@ export class ExperimentManager extends BaseManager {
 
   async createNewExperimentTable(
     params: CreateExperimentTableParams
-  ): Promise<Result<{ tableId: string; experimentId: string }, string>> {
+  ): Promise<
+    Result<
+      { tableId: string; experimentId: string; inputKeys: string[] },
+      string
+    >
+  > {
     const experimentTableResult =
       await this.ExperimentStore.createNewExperimentTable(
         params.datasetId,
@@ -199,10 +204,10 @@ export class ExperimentManager extends BaseManager {
       await this.ExperimentStore.createExperimentTableColumns(
         experimentTableResult.data.experimentTableId,
         [
-          ...heliconeInputKeys.map((key) => ({
-            name: key,
+          {
+            name: "inputs",
             type: "input",
-          })),
+          },
           {
             name: "original",
             type: "output",
@@ -223,6 +228,7 @@ export class ExperimentManager extends BaseManager {
     return ok({
       tableId: experimentTableResult.data.experimentTableId,
       experimentId: experimentTableResult.data.experimentId,
+      inputKeys: heliconeInputKeys,
     });
   }
 
@@ -279,7 +285,7 @@ export class ExperimentManager extends BaseManager {
     experimentTableId: string;
     metadata?: Record<string, any>;
     inputs?: Record<string, string>;
-  }): Promise<Result<{ ids: string[] }, string>> {
+  }): Promise<Result<{ id: string; cellType: string }[], string>> {
     const maxRowIndex = await this.ExperimentStore.getMaxRowIndex(
       params.experimentTableId
     );
@@ -299,6 +305,12 @@ export class ExperimentManager extends BaseManager {
     experimentTableId: string
   ): Promise<Result<ExperimentTable, string>> {
     return this.ExperimentStore.getExperimentTable(experimentTableId);
+  }
+
+  async getExperimentTableColumns(
+    experimentTableId: string
+  ): Promise<Result<{ id: string; name: string }[], string>> {
+    return this.ExperimentStore.getExperimentTableColumns(experimentTableId);
   }
 
   async getExperimentTableSimplifiedById(
@@ -326,6 +338,7 @@ export class ExperimentManager extends BaseManager {
     columnType: string;
     hypothesisId?: string;
     promptVersionId?: string;
+    inputKeys?: string[];
   }): Promise<
     Result<
       {
@@ -346,7 +359,8 @@ export class ExperimentManager extends BaseManager {
         params.columnName,
         params.columnType as "experiment" | "input" | "output",
         params.hypothesisId,
-        params.promptVersionId
+        params.promptVersionId,
+        params.inputKeys
       );
 
     if (experimentColumnResult.error || !experimentColumnResult.data) {
@@ -375,29 +389,6 @@ export class ExperimentManager extends BaseManager {
     return this.ExperimentStore.getExperimentHypothesisScores(params);
   }
 
-  async createExperimentTableRowWithCells(params: {
-    experimentTableId: string;
-    metadata?: Record<string, any>;
-    cells: {
-      columnId: string;
-      value: string | null;
-    }[];
-  }): Promise<Result<{ ids: string[] }, string>> {
-    const maxRowIndex = await this.ExperimentStore.getMaxRowIndex(
-      params.experimentTableId
-    );
-    if (maxRowIndex.error || maxRowIndex.data === null) {
-      return err(maxRowIndex.error ?? "Failed to get max row index");
-    }
-
-    return this.ExperimentStore.createExperimentTableRowWithCells({
-      experimentTableId: params.experimentTableId,
-      rowIndex: maxRowIndex.data + 1,
-      metadata: params.metadata,
-      cells: params.cells,
-    });
-  }
-
   async createExperimentTableRowWithCellsBatch(params: {
     experimentTableId: string;
     rows: {
@@ -405,6 +396,7 @@ export class ExperimentManager extends BaseManager {
       cells: {
         columnId: string;
         value: string | null;
+        metadata?: Record<string, any>;
       }[];
       sourceRequest?: string;
     }[];
