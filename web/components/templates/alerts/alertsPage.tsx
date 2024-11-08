@@ -9,7 +9,7 @@ import ThemedTable from "../../shared/themed/themedTable";
 import { User } from "@supabase/auth-helpers-react";
 import { Database } from "../../../supabase/database.types";
 import { getUSDate } from "../../shared/utils/utils";
-import { Tooltip } from "@mui/material";
+import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
 import EditAlertModal from "./editAlertModal";
 import { useGetOrgSlackChannels } from "@/services/hooks/organizations";
 import { ProFeatureWrapper } from "@/components/shared/ProBlockerComponents/ProFeatureWrapper";

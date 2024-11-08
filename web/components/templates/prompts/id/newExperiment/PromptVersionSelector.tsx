@@ -10,7 +10,7 @@ import { clsx } from "../../../../shared/clsx";
 import MarkdownEditor from "../../../../shared/markdownEditor";
 import { ArrowsPointingOutIcon } from "@heroicons/react/24/outline";
 import ThemedModal from "../../../../shared/themed/themedModal";
-import { Tooltip } from "@mui/material";
+import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
 import { Button } from "../../../../ui/button";
 import { Prompt } from "./types";
 import useNotification from "../../../../shared/notification/useNotification";
