@@ -145,6 +145,7 @@ const AddColumnHeader: React.FC<AddColumnHeaderProps> = ({
             </button>
           </PopoverTrigger>
           <OnboardingPopover
+            delayMs={500}
             onboardingStep="EXPERIMENTS_ADD"
             align="center"
             side="bottom"
@@ -152,7 +153,10 @@ const AddColumnHeader: React.FC<AddColumnHeaderProps> = ({
         </Popover>
       </PopoverTrigger>
 
-      <PopoverContent className="w-[700px] p-4 bg-white" align="end">
+      <PopoverContent
+        className="w-[700px] p-4 bg-white"
+        align={isOnboardingVisible ? "start" : "end"}
+      >
         <ScrollArea
           className="flex flex-col overflow-y-auto max-h-[700px]"
           viewportId="add-experiment-scroll-area"

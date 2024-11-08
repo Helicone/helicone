@@ -578,13 +578,8 @@ const PromptChatRow = (props: PromptChatRowProps) => {
                     <PopoverTrigger asChild>
                       <div
                         data-onboarding-step={
-                          isOnboardingVisible &&
-                          currentStep ===
-                            ONBOARDING_STEPS.EXPERIMENTS_ADD_CHANGE_PROMPT
-                              .stepNumber
-                            ? ONBOARDING_STEPS.EXPERIMENTS_ADD_CHANGE_PROMPT
-                                .stepNumber
-                            : undefined
+                          ONBOARDING_STEPS.EXPERIMENTS_ADD_CHANGE_PROMPT
+                            .stepNumber
                         }
                       >
                         <MarkdownEditor
@@ -606,7 +601,7 @@ const PromptChatRow = (props: PromptChatRowProps) => {
                           });
                         }
                       }}
-                      delayMs={1000}
+                      delayMs={500}
                       onboardingStep="EXPERIMENTS_ADD_CHANGE_PROMPT"
                       align="start"
                       side="right"

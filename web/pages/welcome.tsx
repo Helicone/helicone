@@ -24,7 +24,7 @@ const Welcome = (props: WelcomeProps) => {
     }
   }, [org, router]);
   return (
-    <LoadingAnimation />
+    <LoadingAnimation title="Just setting up your account..." />
     // <MetaData title="Welcome">
     //   {/* <div>Welcome</div> */}
     //   <WelcomePage currentStep={currentStep} />

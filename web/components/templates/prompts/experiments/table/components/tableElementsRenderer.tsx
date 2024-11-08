@@ -153,6 +153,12 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
     }
   };
 
+  const handleRunClickOnboarding = () => {
+    if (onRunColumn) {
+      onRunColumn(props.column.colId);
+    }
+  };
+
   //TODO: FIX!!!
 
   const hasDiff = useMemo(() => {
@@ -161,16 +167,6 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
       (originalPromptTemplate?.helicone_template as any)?.messages
     );
   }, [promptTemplate, originalPromptTemplate]);
-
-  useEffect(() => {
-    if (
-      isOnboardingVisible &&
-      currentStep === ONBOARDING_STEPS.EXPERIMENTS_ORIGINAL.stepNumber &&
-      displayName === "Original"
-    ) {
-      setShowPromptPlayground(true);
-    }
-  }, [isOnboardingVisible, currentStep, displayName]);
 
   return (
     <Popover
@@ -187,25 +183,67 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
           className="flex items-center justify-between w-full h-full pl-2 cursor-pointer"
           onClick={handleHeaderClick}
         >
-          <div className="flex items-center space-x-2">
-            <span className="text-md font-semibold text-slate-900">
-              {displayName}
-            </span>
-            <Badge
-              variant={badgeVariant}
-              className="text-[#334155] bg-[#F8FAFC] border border-[#E2E8F0] rounded-md font-medium hover:bg-slate-100"
-            >
-              {badgeText}
-            </Badge>
-          </div>
+          <Popover
+            open={
+              isOnboardingVisible &&
+              currentStep ===
+                ONBOARDING_STEPS.EXPERIMENTS_FIND_EXPERIMENT.stepNumber &&
+              displayName === "Experiment 1"
+            }
+          >
+            <PopoverTrigger>
+              <div
+                className="flex items-center space-x-2"
+                data-onboarding-step={
+                  displayName === "Experiment 1" &&
+                  ONBOARDING_STEPS.EXPERIMENTS_FIND_EXPERIMENT.stepNumber
+                }
+              >
+                <span className="text-md font-semibold text-slate-900">
+                  {displayName}
+                </span>
+                <Badge
+                  variant={badgeVariant}
+                  className="text-[#334155] bg-[#F8FAFC] border border-[#E2E8F0] rounded-md font-medium hover:bg-slate-100"
+                >
+                  {badgeText}
+                </Badge>
+              </div>
+            </PopoverTrigger>
+            <OnboardingPopover
+              onboardingStep="EXPERIMENTS_FIND_EXPERIMENT"
+              align="center"
+              side="bottom"
+            />
+          </Popover>
           {onRunColumn && (
-            <Button
-              variant="ghost"
-              className="ml-2 p-0 border-slate-200 border rounded-md bg-slate-50 text-slate-500 h-[22px] w-[24px] flex items-center justify-center"
-              onClick={handleRunClick}
+            <Popover
+              open={
+                isOnboardingVisible &&
+                currentStep ===
+                  ONBOARDING_STEPS.EXPERIMENTS_RUN_EXPERIMENTS.stepNumber
+              }
             >
-              <PlayIcon className="w-4 h-4 text-gray-600 dark:text-gray-300" />
-            </Button>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="ml-2 p-0 border-slate-200 border rounded-md bg-slate-50 text-slate-500 h-[22px] w-[24px] flex items-center justify-center"
+                  onClick={handleRunClick}
+                  data-onboarding-step={
+                    displayName === "Experiment 1" &&
+                    ONBOARDING_STEPS.EXPERIMENTS_RUN_EXPERIMENTS.stepNumber
+                  }
+                >
+                  <PlayIcon className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+                </Button>
+              </PopoverTrigger>
+              <OnboardingPopover
+                next={handleRunClickOnboarding}
+                onboardingStep="EXPERIMENTS_RUN_EXPERIMENTS"
+                align="start"
+                side="right"
+              />
+            </Popover>
           )}
         </div>
       </PopoverTrigger>

@@ -647,6 +647,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                   />
                 </PopoverTrigger>
                 <OnboardingPopover
+                  delayMs={500}
                   onboardingStep="PROMPTS_PAGE"
                   align="center"
                   side="bottom"
@@ -938,7 +939,15 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                                               </DropdownMenuContent>
                                             </DropdownMenu>
                                           ) : (
-                                            <DropdownMenu open={true}>
+                                            <DropdownMenu
+                                              open={
+                                                isOnboardingVisible &&
+                                                currentStep ===
+                                                  ONBOARDING_STEPS
+                                                    .PROMPTS_EXPERIMENT
+                                                    .stepNumber
+                                              }
+                                            >
                                               <DropdownMenuTrigger asChild>
                                                 <button
                                                   className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full"

@@ -8,7 +8,6 @@ import {
   useEffect,
 } from "react";
 import { motion } from "framer-motion";
-import { Portal } from "@radix-ui/react-portal";
 import {
   HomeIcon,
   NotepadTextIcon,
@@ -40,7 +39,7 @@ import { BeakerIcon } from "@heroicons/react/24/outline";
 //   | "EXPERIMENTS_BETTER_PROMPT"
 //   | "DASHBOARD_SUCCESS";
 
-const ONBOARDING_STEP_LABELS = [
+export const ONBOARDING_STEP_LABELS = [
   "REQUESTS_TABLE",
   "REQUESTS_DRAWER",
   "SESSIONS_PAGE",
@@ -68,12 +67,12 @@ export type OnboardingStepLabel = (typeof ONBOARDING_STEP_LABELS)[number];
 interface OnboardingStep {
   stepNumber: number;
   popoverData: {
-    icon: React.ReactNode;
-    title: string;
+    icon?: React.ReactNode;
+    title?: string;
     stepNumber: number;
-    description: string | React.ReactNode;
+    description?: string | React.ReactNode;
     additionalData?: React.ReactNode;
-  } | null;
+  };
 }
 
 export const ONBOARDING_STEPS: Record<OnboardingStepLabel, OnboardingStep> = {
@@ -226,11 +225,15 @@ export const ONBOARDING_STEPS: Record<OnboardingStepLabel, OnboardingStep> = {
   },
   EXPERIMENTS_CLICK_SHOW_SCORES: {
     stepNumber: 14,
-    popoverData: null,
+    popoverData: {
+      stepNumber: 4,
+    },
   },
   EXPERIMENTS_CLICK_ADD_EVAL: {
     stepNumber: 15,
-    popoverData: null,
+    popoverData: {
+      stepNumber: 4,
+    },
   },
   EXPERIMENTS_SPECIFIC_EVAL: {
     stepNumber: 16,
@@ -254,7 +257,9 @@ export const ONBOARDING_STEPS: Record<OnboardingStepLabel, OnboardingStep> = {
   },
   EXPERIMENTS_BETTER_PROMPT: {
     stepNumber: 18,
-    popoverData: null,
+    popoverData: {
+      stepNumber: 4,
+    },
   },
   DASHBOARD_SUCCESS: {
     stepNumber: 19,
@@ -273,6 +278,12 @@ export type OnboardingContextType = {
   setCurrentStep: (step: number, delay?: number) => void;
   closeOnboarding: () => void;
   startOnboarding: () => void;
+  elementPointerPosition: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  } | null;
   isOnboardingVisible: boolean;
 };
 
@@ -291,8 +302,10 @@ const useOnboardingContext = () => {
 };
 
 export const OnboardingProvider = ({
+  sidebarRef,
   children,
 }: {
+  sidebarRef: React.RefObject<HTMLDivElement>;
   children: React.ReactNode;
 }) => {
   const [currentStep, setCurrentStepState] = useState(0);
@@ -326,7 +339,7 @@ export const OnboardingProvider = ({
     const scrollTop = window.scrollY || document.documentElement.scrollTop;
     const scrollLeft = window.scrollX || document.documentElement.scrollLeft;
     return {
-      x: left + scrollLeft,
+      x: left + scrollLeft - (sidebarRef.current?.offsetWidth || 0),
       y: top + scrollTop,
       width,
       height,
@@ -398,43 +411,50 @@ export const OnboardingProvider = ({
         closeOnboarding: () => setIsOnboardingVisible(false),
         startOnboarding,
         isOnboardingVisible,
+        elementPointerPosition,
       }}
     >
       {children}
-      {isOnboardingVisible && (
-        <Portal>
-          <div className="fixed inset-0 z-[9998] pointer-events-auto">
-            <motion.div
-              className="absolute z-[9999] pointer-events-none"
-              initial={
-                elementPointerPosition
-                  ? {
-                      left: elementPointerPosition?.x,
-                      top: elementPointerPosition?.y,
-                      width: elementPointerPosition?.width,
-                      height: elementPointerPosition?.height,
-                    }
-                  : {}
-              }
-              animate={
-                elementPointerPosition
-                  ? {
-                      left: elementPointerPosition?.x,
-                      top: elementPointerPosition?.y,
-                      width: elementPointerPosition?.width,
-                      height: elementPointerPosition?.height,
-                    }
-                  : {}
-              }
-              style={{
-                boxShadow: "0 0 200vw 200vh rgba(0, 0, 0, 0.5)",
-                zIndex: 9999,
-              }}
-            />
-          </div>
-        </Portal>
-      )}
     </OnboardingContext.Provider>
+  );
+};
+
+export const OnboardingBackground = () => {
+  const { isOnboardingVisible, elementPointerPosition } =
+    useOnboardingContext();
+  // return <div className="absolute inset-0 z-[9998] pointer-events-auto"></div>;
+
+  if (!isOnboardingVisible) return null;
+  return (
+    // <div className="absolute inset-0 z-[9998] pointer-events-auto">
+    <motion.div
+      className="absolute z-[9999] pointer-events-none"
+      initial={
+        elementPointerPosition
+          ? {
+              left: elementPointerPosition?.x,
+              top: elementPointerPosition?.y,
+              width: elementPointerPosition?.width,
+              height: elementPointerPosition?.height,
+            }
+          : {}
+      }
+      animate={
+        elementPointerPosition
+          ? {
+              left: elementPointerPosition?.x,
+              top: elementPointerPosition?.y,
+              width: elementPointerPosition?.width,
+              height: elementPointerPosition?.height,
+            }
+          : {}
+      }
+      style={{
+        boxShadow: "0 0 200vw 200vh rgba(0, 0, 0, 0.5)",
+        zIndex: 9999,
+      }}
+    />
+    //   </div>
   );
 };
 

@@ -258,7 +258,7 @@ const useOrgsContextManager = () => {
                   }),
                 },
               }
-            ).then((res) => {
+            ).then(() => {
               refreshCurrentOrg();
             });
           });

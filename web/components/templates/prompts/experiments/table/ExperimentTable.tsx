@@ -46,6 +46,8 @@ import useOnboardingContext, {
   ONBOARDING_STEPS,
 } from "@/components/layout/onboardingContext";
 import OnboardingPopover from "@/components/templates/onboarding/OnboardingPopover";
+import { useJawnClient } from "@/lib/clients/jawnHook";
+import { useQuery } from "@tanstack/react-query";
 
 interface ExperimentTableProps {
   experimentTableId: string;
@@ -506,91 +508,66 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
   const { setCurrentStep, currentStep, isOnboardingVisible } =
     useOnboardingContext();
 
-  // const jawn = useJawnClient();
-  // const [onboardingAddedRows, setOnboardingAddedRows] = useState(false);
+  const jawn = useJawnClient();
+  const [onboardingAddedRows, setOnboardingAddedRows] = useState(false);
 
-  // // Fetch input records using useQuery
-  // const {
-  //   data: inputRecordsData,
-  //   isLoading,
-  //   isError,
-  // } = useQuery(
-  //   ["inputRecords", promptSubversionId],
-  //   async () => {
-  //     const res = await jawn.POST(
-  //       "/v1/prompt/version/{promptVersionId}/inputs/query",
-  //       {
-  //         params: {
-  //           path: {
-  //             promptVersionId: promptSubversionId ?? "",
-  //           },
-  //         },
-  //         body: {
-  //           limit: 1000, // Adjust limit as needed
-  //         },
-  //       }
-  //     );
-  //     return res.data?.data ?? [];
-  //   },
-  //   {
-  //     enabled: isOnboardingVisible && promptSubversionId !== undefined, // Fetch only when the drawer is open
-  //   }
-  // );
+  // Fetch input records using useQuery
+  const {
+    data: inputRecordsData,
+    isLoading,
+    isError,
+  } = useQuery(
+    ["inputRecords", promptSubversionId],
+    async () => {
+      const res = await jawn.POST(
+        "/v1/prompt/version/{promptVersionId}/inputs/query",
+        {
+          params: {
+            path: {
+              promptVersionId: promptSubversionId ?? "",
+            },
+          },
+          body: {
+            limit: 1000, // Adjust limit as needed
+          },
+        }
+      );
+      return res.data?.data ?? [];
+    },
+    {
+      enabled: isOnboardingVisible && promptSubversionId !== undefined, // Fetch only when the drawer is open
+    }
+  );
 
-  // // Process input records
-  // const inputRecords = useMemo(() => {
-  //   if (!inputRecordsData) return [];
-  //   return inputRecordsData.map((record) => ({
-  //     id: record.id,
-  //     inputs: record.inputs,
-  //     source_request: record.source_request,
-  //     prompt_version: record.prompt_version,
-  //     created_at: record.created_at,
-  //     response: record.response_body,
-  //   }));
-  // }, [inputRecordsData]);
+  // Process input records
+  const inputRecords = useMemo(() => {
+    if (!inputRecordsData) return [];
+    return inputRecordsData.map((record) => ({
+      id: record.id,
+      inputs: record.inputs,
+      source_request: record.source_request,
+      prompt_version: record.prompt_version,
+      created_at: record.created_at,
+      response: record.response_body,
+    }));
+  }, [inputRecordsData]);
 
-  // useEffect(() => {
-  //   console.log(
-  //     inputRecords.length > 0,
-  //     experimentTableQuery?.rows.length === 0,
-  //     !isExperimentTableLoading,
-  //     !isExperimentTableRefetching,
-  //     isOnboardingVisible,
-  //     org?.currentOrg?.tier === "demo"
-  //   );
-  //   if (
-  //     inputRecords.length > 0 &&
-  //     !isExperimentTableLoading &&
-  //     !isExperimentTableRefetching &&
-  //     experimentTableQuery?.rows.length === 0 &&
-  //     isOnboardingVisible &&
-  //     org?.currentOrg?.tier === "demo" &&
-  //     !onboardingAddedRows
-  //   ) {
-  //     console.log("adding rows once");
-  //     handleAddRowInsertBatch(
-  //       inputRecords.map((record) => ({
-  //         inputRecordId: record.id,
-  //         datasetId: experimentTableQuery?.datasetId ?? "",
-  //         inputs: record.inputs,
-  //       }))
-  //     );
-  //     setOnboardingAddedRows(true);
-  //     refetchExperimentTable();
-  //   }
-  // }, [
-  //   inputRecords,
-  //   handleAddRowInsertBatch,
-  //   experimentTableQuery?.rows,
-  //   experimentTableQuery?.datasetId,
-  //   isExperimentTableLoading,
-  //   refetchExperimentTable,
-  //   isExperimentTableRefetching,
-  //   isOnboardingVisible,
-  //   org?.currentOrg?.tier,
-  //   onboardingAddedRows,
-  // ]);
+  const addRowsBatchForOnboarding = useCallback(() => {
+    handleAddRowInsertBatch(
+      inputRecords.map((record) => ({
+        inputRecordId: record.id,
+        datasetId: experimentTableQuery?.datasetId ?? "",
+        inputs: record.inputs,
+      }))
+    );
+    setOnboardingAddedRows(true);
+    refetchExperimentTable();
+  }, [
+    inputRecords,
+    handleAddRowInsertBatch,
+    experimentTableQuery?.datasetId,
+    refetchExperimentTable,
+  ]);
 
   if (isExperimentTableLoading) {
     return (
@@ -607,10 +584,20 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
         <div className="flex flex-row space-x-2 justify-end w-full pr-4">
           <Button
             variant="outline"
-            className="py-0 px-2 border border-slate-200 h-8 items-center justify-center space-x-1 flex gap-2"
+            className="py-0 px-2 border border-slate-200 h-8 items-center justify-center space-x-1 flex gap-2 relative"
             onClick={() => setShowScoresTable(!showScoresTable)}
+            data-onboarding-step={
+              ONBOARDING_STEPS.EXPERIMENTS_CLICK_SHOW_SCORES.stepNumber
+            }
           >
             <div>{"{ }"}</div> {showScoresTable ? "Hide" : "Show"} Scores
+            {isOnboardingVisible &&
+              currentStep ===
+                ONBOARDING_STEPS.EXPERIMENTS_CLICK_SHOW_SCORES.stepNumber && (
+                <div className="absolute right-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-red-500 animate-ping">
+                  <div className="w-full h-full bg-red-500"></div>
+                </div>
+              )}
           </Button>
           <ColumnsDropdown
             wrapText={wrapText}
@@ -724,24 +711,44 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
             className="z-[10000] bg-white p-4 w-[calc(100vw-2rem)] sm:max-w-md flex flex-col gap-2"
           />
         </Popover>
-        <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+        <Popover
+          open={
+            popoverOpen ||
+            (isOnboardingVisible &&
+              currentStep ===
+                ONBOARDING_STEPS.EXPERIMENTS_ADD_TEST_CASES.stepNumber)
+          }
+          onOpenChange={setPopoverOpen}
+        >
           <PopoverTrigger asChild>
             <Button
               variant="ghost"
               size="sm"
               className="self-start flex flex-row space-x-2 text-slate-700 mt-0"
+              data-onboarding-step={
+                ONBOARDING_STEPS.EXPERIMENTS_ADD_TEST_CASES.stepNumber
+              }
             >
               <PlusIcon className="h-4 w-4" />
               Add row
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-full px-2 py-2">
-            <AddRowPopover
-              setPopoverOpen={setPopoverOpen}
-              setShowExperimentInputSelector={setShowExperimentInputSelector}
-              setShowRandomInputSelector={setShowRandomInputSelector}
-              handleAddRow={handleAddRow}
-            />
+            {popoverOpen ? (
+              <AddRowPopover
+                setPopoverOpen={setPopoverOpen}
+                setShowExperimentInputSelector={setShowExperimentInputSelector}
+                setShowRandomInputSelector={setShowRandomInputSelector}
+                handleAddRow={handleAddRow}
+              />
+            ) : (
+              <OnboardingPopover
+                next={addRowsBatchForOnboarding}
+                onboardingStep="EXPERIMENTS_ADD_TEST_CASES"
+                align="center"
+                side="bottom"
+              />
+            )}
           </PopoverContent>
         </Popover>
       </div>

@@ -357,33 +357,41 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
                 Add Message
               </Button>
             </div>
-            <div className="flex space-x-4 w-full justify-end items-center">
-              <div className="font-normal">Model</div>
-              <Select
-                value={selectedModel}
-                onValueChange={setSelectedModel}
-                defaultValue={initialModel}
-              >
-                <SelectTrigger className="w-[200px]">
-                  <SelectValue placeholder="Select a model" />
-                </SelectTrigger>
-                <SelectContent>
-                  {MODEL_LIST.map((model) => (
-                    <SelectItem key={model.value} value={model.value}>
-                      {model.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {playgroundMode === "prompt" && (
-                <Popover
-                  open={
+            <Popover
+              open={
+                isOnboardingVisible &&
+                currentStep === ONBOARDING_STEPS.EXPERIMENTS_ADD_SAVE.stepNumber
+              }
+            >
+              <PopoverTrigger>
+                <div
+                  className="flex space-x-4 w-full justify-end items-center"
+                  data-onboarding-step={
                     isOnboardingVisible &&
                     currentStep ===
                       ONBOARDING_STEPS.EXPERIMENTS_ADD_SAVE.stepNumber
+                      ? ONBOARDING_STEPS.EXPERIMENTS_ADD_SAVE.stepNumber
+                      : undefined
                   }
                 >
-                  <PopoverTrigger>
+                  <div className="font-normal">Model</div>
+                  <Select
+                    value={selectedModel}
+                    onValueChange={setSelectedModel}
+                    defaultValue={initialModel}
+                  >
+                    <SelectTrigger className="w-[200px]">
+                      <SelectValue placeholder="Select a model" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {MODEL_LIST.map((model) => (
+                        <SelectItem key={model.value} value={model.value}>
+                          {model.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {playgroundMode === "prompt" && (
                     <Button
                       onClick={() =>
                         onSubmit && onSubmit(currentChat, selectedModel || "")
@@ -391,25 +399,21 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
                       variant="default"
                       size="sm"
                       className="px-4 font-normal"
-                      data-onboarding-step={
-                        isOnboardingVisible &&
-                        currentStep ===
-                          ONBOARDING_STEPS.EXPERIMENTS_ADD_SAVE.stepNumber
-                          ? ONBOARDING_STEPS.EXPERIMENTS_ADD_SAVE.stepNumber
-                          : undefined
-                      }
                     >
                       Save prompt
                     </Button>
-                  </PopoverTrigger>
-                  <OnboardingPopover
-                    onboardingStep="EXPERIMENTS_ADD_SAVE"
-                    align="end"
-                    side="right"
-                  />
-                </Popover>
-              )}
-            </div>
+                  )}
+                </div>
+              </PopoverTrigger>
+              <OnboardingPopover
+                next={() => {
+                  onSubmit && onSubmit(currentChat, selectedModel || "");
+                }}
+                onboardingStep="EXPERIMENTS_ADD_SAVE"
+                align="end"
+                side="right"
+              />
+            </Popover>
           </div>
         )}
       </div>

@@ -16,6 +16,8 @@ import { ChangelogItem } from "./Sidebar";
 import ChangelogModal from "../ChangelogModal";
 import SidebarHelpDropdown from "../SidebarHelpDropdown";
 import { useTheme } from "next-themes";
+import OnboardingNavItems from "./OnboardingNavItems";
+import useOnboardingContext from "../onboardingContext";
 
 export interface NavigationItem {
   name: string;
@@ -30,9 +32,14 @@ interface SidebarProps {
   NAVIGATION: NavigationItem[];
   changelog: ChangelogItem[];
   setOpen: (open: boolean) => void;
+  sidebarRef: React.RefObject<HTMLDivElement>;
 }
 
-const DesktopSidebar = ({ changelog, NAVIGATION }: SidebarProps) => {
+const DesktopSidebar = ({
+  changelog,
+  NAVIGATION,
+  sidebarRef,
+}: SidebarProps) => {
   const org = useOrg();
   const tier = org?.currentOrg?.tier;
   const router = useRouter();
@@ -90,7 +97,6 @@ const DesktopSidebar = ({ changelog, NAVIGATION }: SidebarProps) => {
     });
   }, [NAVIGATION, isCollapsed, expandedItems]);
 
-  const sidebarRef = useRef<HTMLDivElement>(null);
   const navItemsRef = useRef<HTMLDivElement>(null);
   const [canShowInfoBox, setCanShowInfoBox] = useState(false);
 
@@ -166,6 +172,8 @@ const DesktopSidebar = ({ changelog, NAVIGATION }: SidebarProps) => {
     }
     setModalOpen(open);
   };
+
+  const { isOnboardingVisible } = useOnboardingContext();
 
   return (
     <>
@@ -276,20 +284,22 @@ const DesktopSidebar = ({ changelog, NAVIGATION }: SidebarProps) => {
                   className="group flex flex-col py-2 data-[collapsed=true]:py-2 "
                 >
                   <nav className="grid flex-grow overflow-y-auto px-2 group-[[data-collapsed=true]]:justify-center group-[[data-collapsed=true]]:px-2">
-                    {NAVIGATION_ITEMS.map((link) => (
-                      <NavItem
-                        key={link.name}
-                        link={link}
-                        isCollapsed={isCollapsed}
-                        expandedItems={expandedItems}
-                        toggleExpand={toggleExpand}
-                        onClick={() => {
-                          setIsCollapsed(false);
-                          setIsMobileMenuOpen(false);
-                        }}
-                        deep={0}
-                      />
-                    ))}
+                    {isOnboardingVisible && <OnboardingNavItems />}
+                    {!isOnboardingVisible &&
+                      NAVIGATION_ITEMS.map((link) => (
+                        <NavItem
+                          key={link.name}
+                          link={link}
+                          isCollapsed={isCollapsed}
+                          expandedItems={expandedItems}
+                          toggleExpand={toggleExpand}
+                          onClick={() => {
+                            setIsCollapsed(false);
+                            setIsMobileMenuOpen(false);
+                          }}
+                          deep={0}
+                        />
+                      ))}
                   </nav>
                 </div>
               </div>
