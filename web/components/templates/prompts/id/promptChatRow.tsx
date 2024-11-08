@@ -12,7 +12,8 @@ import { removeLeadingWhitespace } from "../../../shared/utils/utils";
 
 import RoleButton from "../../playground/new/roleButton";
 import useNotification from "../../../shared/notification/useNotification";
-import { Tooltip } from "@mui/material";
+import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
+
 import { enforceString } from "../../../../lib/helpers/typeEnforcers";
 import AddFileButton from "../../playground/new/addFileButton";
 import ThemedModal from "../../../shared/themed/themedModal";

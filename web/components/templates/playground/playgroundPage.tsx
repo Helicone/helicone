@@ -26,7 +26,7 @@ import {
 } from "../../../packages/cost/providers/mappings";
 import FunctionButton from "./functionButton";
 import { ChatCompletionTool } from "openai/resources";
-import { Tooltip } from "@mui/material";
+import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
 
 import {
   AssistantPlayground,

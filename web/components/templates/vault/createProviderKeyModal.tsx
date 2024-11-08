@@ -17,9 +17,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Tooltip } from "@mui/material";
+
 import { useGetOrgMembers } from "../../../services/hooks/organizations";
 import { useUser } from "@supabase/auth-helpers-react";
+import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
 
 interface CreateProviderKeyModalProps {
   open: boolean;

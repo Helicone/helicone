@@ -6,7 +6,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { clsx } from "../clsx";
 import { useState } from "react";
-import { Tooltip } from "@mui/material";
+import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
 import useNotification from "../notification/useNotification";
 import {
   useGetOrgMembers,

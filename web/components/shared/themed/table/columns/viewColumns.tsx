@@ -3,9 +3,13 @@ import {
   AdjustmentsHorizontalIcon,
   InformationCircleIcon,
 } from "@heroicons/react/24/outline";
-import { Divider } from "@mui/material";
-import Tooltip, { tooltipClasses, TooltipProps } from "@mui/material/Tooltip";
-import { styled } from "@mui/material/styles";
+import { Separator } from "@/components/ui/separator";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Column } from "@tanstack/react-table";
 import { Fragment, useState } from "react";
 import { Col } from "../../../../layout/common/col";
@@ -43,20 +47,8 @@ export default function ViewColumns<T>(props: ViewColumnsProps<T>) {
     string | undefined | "All columns"
   >(categories[0]);
 
-  const BlackTooltip = styled(({ className, ...props }: TooltipProps) => (
-    <Tooltip {...props} classes={{ popper: className }} />
-  ))(({ theme }) => ({
-    [`& .${tooltipClasses.arrow}`]: {
-      color: theme.palette.common.black,
-    },
-    [`& .${tooltipClasses.tooltip}`]: {
-      backgroundColor: theme.palette.common.black,
-      fontSize: "0.8rem",
-    },
-  }));
-
   return (
-    <Menu as="div" className="relative inline-block text-left ">
+    <Menu as="div" className="relative inline-block text-left">
       <div>
         <Menu.Button
           as={Button}
@@ -76,26 +68,23 @@ export default function ViewColumns<T>(props: ViewColumnsProps<T>) {
         leaveFrom="transform opacity-100 scale-100"
         leaveTo="transform opacity-0 scale-95"
       >
-        <Menu.Items
-          className={`border border-slate-300 dark:border-slate-700 absolute z-20 right-0 sm:right-0 mt-2 mx-auto w-[calc(100vw-2rem)] sm:w-[calc(100vw-4rem)] md:w-[calc(100vw-8rem)] max-w-4xl origin-top-right rounded-lg bg-white dark:bg-black shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none h-[66vh] overflow-hidden ${
-            isDatasetsPage
-              ? "border border-slate-300 dark:border-slate-700 absolute z-10 right-0 sm:right-0 mt-2 mx-auto w-[calc(100vw-2rem)] sm:w-[calc(100vw-4rem)] md:w-[calc(100vw-8rem)] max-w-4xl origin-top-right rounded-lg bg-white dark:bg-black shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none h-[66vh] overflow-hidden"
-              : "border border-slate-300 dark:border-slate-700 absolute z-10 right-0 sm:right-0 mt-2 mx-auto w-[calc(100vw-2rem)] sm:w-[calc(100vw-4rem)] md:w-[calc(100vw-8rem)] max-w-4xl origin-top-right rounded-lg bg-white dark:bg-black shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none h-[66vh] overflow-hidden"
-          }`}
-        >
+        <Menu.Items className="border border-slate-300 dark:border-slate-700 absolute z-20 right-0 sm:right-0 mt-2 mx-auto w-[calc(100vw-2rem)] sm:w-[calc(100vw-4rem)] md:w-[calc(100vw-8rem)] max-w-4xl origin-top-right rounded-lg bg-white dark:bg-black shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none h-[66vh] overflow-hidden">
           <Row className="h-full">
             <Col className="relative flex-1 h-full p-4">
               <div className="flex flex-row items-center justify-start space-x-2 mb-4">
-                <h3 className="text-xs text-black dark:text-white font-medium">
+                <h3 className="text-xs text-foreground font-medium">
                   Column Reorder
                 </h3>
-                <BlackTooltip
-                  title="The ordering only affects your Requests table"
-                  placement="top"
-                  arrow
-                >
-                  <InformationCircleIcon className="h-5 w-5 text-slate-500 inline" />
-                </BlackTooltip>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <InformationCircleIcon className="h-5 w-5 text-muted-foreground" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>The ordering only affects your Requests table</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </div>
               <i className="text-xs text-slate-500">
                 Note: If something is not shown, or your columns are in an
@@ -109,10 +98,9 @@ export default function ViewColumns<T>(props: ViewColumnsProps<T>) {
               </div>
               <div className="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-white dark:from-black to-transparent pointer-events-none"></div>
             </Col>
-            <Divider
+            <Separator
               className="dark:border-slate-800"
               orientation="vertical"
-              flexItem
             />
             <Col className="flex-1 flex flex-col h-full">
               <div className="flex-grow overflow-hidden p-4">
@@ -125,37 +113,43 @@ export default function ViewColumns<T>(props: ViewColumnsProps<T>) {
                   setActiveColumns={setActiveColumns}
                 />
               </div>
-              <div className="border-t border-slate-200 dark:border-slate-700 p-4">
+              <div className="border-t border-border p-4">
                 <Row className="flex justify-between items-center gap-2">
-                  <button
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={() =>
                       setActiveColumns(columnDefsToDragColumnItems(columns))
                     }
-                    className="text-xs flex items-center justify-center gap-x-2.5 px-2 py-1 font-medium text-slate-500 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-lg"
+                    className="text-xs"
                   >
                     Back to preset
-                  </button>
+                  </Button>
                   <Row>
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       onClick={() =>
                         setActiveColumns(
                           activeColumns.map((c) => ({ ...c, shown: false }))
                         )
                       }
-                      className="text-xs flex items-center justify-center gap-x-2.5 px-2 py-1 font-medium text-slate-500 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-lg"
+                      className="text-xs"
                     >
                       Deselect All
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       onClick={() =>
                         setActiveColumns(
                           activeColumns.map((c) => ({ ...c, shown: true }))
                         )
                       }
-                      className="text-xs flex items-center justify-center gap-x-2.5 px-2 py-1 font-medium text-slate-500 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-lg"
+                      className="text-xs"
                     >
                       Select All
-                    </button>
+                    </Button>
                   </Row>
                 </Row>
               </div>
