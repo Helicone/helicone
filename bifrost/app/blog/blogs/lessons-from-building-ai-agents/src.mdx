@@ -1,0 +1,88 @@
+**Patrick Dougherty** shares his hands-on experience from a year of developing AI agents in the blog <a href="https://medium.com/@cpdough/building-ai-agents-lessons-learned-over-the-past-year-41dc4725d8e5" target="_blank" rel="noopener noreferrer">Building AI Agents: Lessons Learned over the Past Year</a>. He emphasizes that making AI agents think better is more crucial than just feeding them more data. Patrick highlights that **<span style={{color: '#03A9F4'}}>the real competitive edge isn't just in the agents themselves but in the infrastructure supporting them.</span>**
+
+![Key lessons learned from building AI agents](/static/blog/lessons-from-building-ai-agents.webp)
+
+
+## Key Lessons for Building Effective AI Agents
+
+1. Reasoning over memorization: improve AI agent thought processes
+2. The critical role of iterating on the agent-computer interface (ACI)
+3. Navigating the limitations of current AI models
+4. Why fine-tuning may hinder your AI agent
+5. Steer clear of over-abstraction with third-party libraries
+6. Infrastructure is your competitive advantage, not the agent
+7. Preparing for future advances in AI models
+
+
+## About the Author
+
+**<span style={{color: '#03A9F4'}}>Patrick Dougherty</span>** is an AI practitioner who has spent the past year in building and refining AI agents. Collaborating with engineers and UX designers, he’s focused on creating platforms that allow businesses to use standard data analysis agents and develop custom ones tailored to specific tasks. With hands-on experience integrating AI agents into Fortune 500 companies, Patrick brings practical insights into deploying AI in real-world scenarios.
+
+
+## What We've Learned
+
+#### 1. Reasoning is more important than knowledge.
+    - Models should be used primarily as **<span style={{color: '#03A9F4'}}>reasoning engines rather than knowledge bases</span>**
+    - Design agents to handle errors. For example, SQL queries, make sure your agents have robust error handling and ability to retrieve context to reason through the errors on its own to iteratively improve outcomes, rather than expecting perfect first-time query generation.
+
+#### 2. The best way to improve performance is by iterating on the Agent-Computer Interface (ACI)
+    - The ACI refers to the exact syntax and structure of the agent’s tool calls, which is critical for performance.
+    - Different models (GPT-4, Claude) require different ACI structures, tailor it to the strengths and weaknesses of your model. Patrick found that formatting changes (e.g., switching from markdown to JSON) significantly improved model comprehension.
+
+#### 3. Agents are limited by their model(s)
+    - The underlying AI model significantly affects agent performance and decision-making capabilities.
+    - For example, Patrick found that GPT-3.5 would frequently skip necessary tool calls and make incorrect assumptions, while GPT-4 would plan and execute more methodically. **<span style={{color: '#03A9F4'}}>So higher-end models like GPT-4 outperform others in planning and executing complex tasks.</span>**
+    - *Patrick also notes to pay attention to ***how*** your agent failed or hallucinated as it’s an indication of what improvements you may need to make.*
+
+#### 4. Fine-tuning models to improve agent performance is a waste of time
+    - Fine-tuning base models for agent tasks generally reduces reasoning capability. Fine-tuned agents tend to "cheat" by following training examples rather than reasoning independently.
+    - Better approach: Use fine-tuned models for specific tool calls (e.g., using models fine-tuned on SQL queries for SQL generation) while keeping main agent on base model.
+
+#### 5. If you’re building a product, avoid using abstractions like LangChain and LlamaIndex
+    - Avoid abstraction layers like LangChain/LlamaIndex for production systems because you will want to maintain direct control over model inputs/outputs for debugging, scaling, and logging.
+    - But if you just want to quickly prototype to validate the agent’s ability to perform a task, abstraction frameworks will be fine.
+
+#### 6. Your agent is not your moat
+    - Focus on the infrastructure. Your *c*ompetitive advantage lies in security, data connectors, user interface, long-term memory, and evaluation frameworks
+    - Key infrastructure components needed:
+        - Security (OAuth, SSO, token management)
+        - Data connectors for live data access
+        - User interface for audit/transparency
+        - Long-term memory systems
+        - Evaluation frameworks for non-deterministic workflows
+
+
+---
+    
+#### 💡 Note: using Helicone's Evaluators
+
+Building evaluation frameworks is challenging, but tools like Helicone make it easier. Helicone lets you <a href="https://docs.helicone.ai/features/prompts" target="_blank" rel="noopener noreferrer">quantify prompt changes, run A/B tests, and validate updates before they impact production</a>. Using exising tools saves resources compared to building it in-house. Just ensure any tool you choose can handle the non-deterministic nature of agent workflows.
+
+
+---
+
+#### 7. Don’t bet against models continuing to improve
+    - Resist the urge to over-optimize for current model limitations, and design model agnostic architecture to support:
+        1. Multiple model providers (OpenAI, Anthropic, etc.)
+        2. Rapid adoption of new model versions
+        3. Customer choice in model selection
+    - Model flexibility is a competitive advantage in production systems. For example, Patrick was able to deploy GPT-4-Turbo within 15 minutes of release, which demonstrates good architecture.
+
+#### 8. Additional lessons
+    - Open-source models may lag behind. Currently, they might not match proprietary models in reasoning abilities.
+    - Premature optimization can backfire. Focus on functionality before cost-cutting.
+    - Improve the user experience. Implement features like token streaming to improve perceived latency.
+
+## Additonal Resources
+
+When building agents that make multiple tool calls and chain complex workflows together, visibility becomes critical. Helicone's Sessions feature help you trace multi-step LLM interactions easily. Here are some resources to help you get started: 
+
+- <a href="https://docs.helicone.ai/features/sessions" target="_blank" rel="noopener noreferrer">Setting up agent tracing & debugging - Helicone</a>
+- <a href="https://www.helicone.ai/blog/debugging-chatbots-and-ai-agents-with-sessions" target="_blank" rel="noopener noreferrer">Debugging RAG chatbot and AI agents with Sessions - Helicone</a>
+- <a href="https://www.helicone.ai/blog/replaying-llm-sessions" target="_blank" rel="noopener noreferrer">Optimizing AI agents by replaying LLM Sessions - Helicone</a>
+
+### What are your thoughts?
+
+Anything else you’d like to add? Please raise an issue to let us know what you’d add to this list.
+
+
