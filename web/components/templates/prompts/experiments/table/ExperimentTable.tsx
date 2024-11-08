@@ -139,17 +139,14 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
     const lastRow =
       experimentTableQuery?.rows?.[experimentTableQuery.rows.length - 1];
 
-    console.log("lastRow", lastRow);
-
     let inputs: Record<string, string> = {};
 
     const inputColumn = experimentTableQuery?.columns?.find(
       (column) => column.columnType === "input"
     );
-    console.log("inputColumn", inputColumn);
 
     if (lastRow && inputColumn) {
-      const inputCell = lastRow.cells["inputs"]; // Assuming 'inputs' is the field for the inputs cell
+      const inputCell = lastRow.cells["inputs"];
       if (inputCell && inputCell.value && Array.isArray(inputCell.value)) {
         inputs = inputCell.value.reduce(
           (
@@ -163,7 +160,6 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
         );
       }
     }
-    console.log("inputs123", inputs);
 
     handleAddRow(inputs);
   }, [experimentTableQuery?.rows, handleAddRow]);
@@ -206,8 +202,6 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
       const inputColumn = experimentTableQuery?.columns?.filter(
         (column) => column.columnType === "input"
       );
-
-      console.log("columns", inputColumn);
 
       if (!inputColumn) return;
 

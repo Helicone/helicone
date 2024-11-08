@@ -167,7 +167,6 @@ export class ExperimentController extends Controller {
         },
         inputs,
       });
-    console.log(experimentTableRowResult);
 
     if (experimentTableRowResult.error || !experimentTableRowResult.data) {
       this.setStatus(500);

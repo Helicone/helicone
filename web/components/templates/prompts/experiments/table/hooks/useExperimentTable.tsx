@@ -249,7 +249,6 @@ export function useExperimentTable(orgId: string, experimentTableId: string) {
         responseBodyCache: {},
         queryClient,
       });
-      console.log("rowData", rowData);
       return {
         id: res.data?.data?.id,
         name: res.data?.data?.name,
