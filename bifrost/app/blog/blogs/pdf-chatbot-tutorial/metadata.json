@@ -3,7 +3,7 @@
   "title1": "Building a RAG-Powered PDF Chatbot with LLMs and Vector Search",
   "title2": "Building a RAG-Powered PDF Chatbot with LLMs and Vector Search",
   "description": "Build a smart chatbot that can understand and answer questions about PDF documents using Retrieval-Augmented Generation (RAG), LLMs, and vector search. Perfect for developers looking to create AI-powered document assistants.",
-  "images": "/static/blog/pdf-chatbot-tutorial/demo.webp",
+  "images": "/static/blog/pdf-chatbot-tutorial/pdf-chatbot-cover.webp",
   "time": "20 minute read",
   "author": "Kavin Desi",
   "date": "November 7, 2024"
