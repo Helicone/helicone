@@ -1,8 +1,8 @@
-Ever tried having a conversation with a 100-page PDF? It's like trying to find a needle in a haystack - except the needle is buried in dense technical documentation, and you need answers fast. This post walks through how to build a RAG chatbot that can actually understand and discuss PDF documents, using **Retrieval Augmented Generation (RAG)** architecture. We'll explore how to create an intelligent PDF to AI conversion system and use **Helicone** to gain visibility into our system's performance.
+Ever tried having a meaningful conversation with a 100-page technical document? Between dense specifications, scattered references, and complex terminology, extracting specific information from PDFs remains a persistent challenge. This post walks through how to build a RAG chatbot that can actually understand and discuss PDF documents, using **Retrieval Augmented Generation (RAG)**, LLMs, and vector search. We'll explore how to create an intelligent PDF to AI chatbot and use **<span style={{color: '#0ea5e9'}}>Helicone</span>** to gain visibility into our system's performance.
 
 ## The Problem: PDFs Are Hard to Query
 
-PDFs are everywhere in business - technical specs, research papers, legal documents, you name it. While tools like ChatGPT can enhance PDF files through conversation, extracting specific information traditionally has been painful:
+PDFs are everywhere in business - technical specs, research papers, legal documents, you name it. While tools like ChatGPT can enhance PDF files through conversation, extracting specific information from large PDFs continues to be a challenge:
 
 - Ctrl+F only works if you know exactly what to search for
 - Reading the entire document for each question is time-consuming
@@ -12,7 +12,7 @@ By leveraging natural language processing (NLP) and vector databases, we built a
 
 ## Architecture Overview
 
-Let's dive into how RAG GenAI works in practice. Our question-answering document retrieval LLM has several key components:
+Let's dive into how a RAG chatbot works in practice. Our question-answering document retrieval LLM has several key components:
 
 1. **PDF Processing**: Converting unstructured PDFs into clean, usable text
 2. **Text Chunking**: Intelligently splitting text to maintain context
@@ -291,14 +291,31 @@ The `main` function orchestrates the entire process:
 
 ```typescript
 async function main() {
-  // ... [Initialization and PDF processing] ...
   try {
-    // ... [PDF extraction, chunking, embedding generation] ...
-    // Initialize FAISS index
+    // 1. Validate input and extract PDF text
+    const pdfPath = process.argv[2];
+    if (!pdfPath) {
+      throw new Error("Please provide a PDF file path");
+    }
+    console.log("Extracting text from PDF...");
+    const text = await extractText(pdfPath);
+
+    // 2. Chunk the text
+    console.log("Chunking text...");
+    const chunks = chunkText(text);
+
+    // 3. Generate embeddings for each chunk
+    console.log("Generating embeddings...");
+    const embeddings = await Promise.all(
+      chunks.map((chunk) => generateEmbeddings(chunk))
+    );
+
+    // 4. Initialize and populate FAISS index
+    console.log("Initializing FAISS index...");
     const dimension = embeddings[0].length;
     const indexPath = path.join(__dirname, "faiss.index");
     const faissIndex = initializeFAISS(dimension);
-    // Add embeddings to FAISS index and save
+
     console.log("Adding embeddings to FAISS index...");
     await heliconeLogger.logRequest(
       {
@@ -307,7 +324,7 @@ async function main() {
         vectors: embeddings,
       },
       async (resultRecorder) => {
-        embeddings.forEach(async (embedding) => {
+        embeddings.forEach((embedding) => {
           addEmbeddingToFAISS(faissIndex, embedding);
         });
         saveFAISSIndex(faissIndex, indexPath);
@@ -318,17 +335,114 @@ async function main() {
         "Helicone-Session-Name": HELICONE_SESSION_NAME,
       }
     );
-    // ... [Chat interface setup and handling] ...
+
+    // 5. Set up chat interface
+    console.log("\nChat with your PDF! Type 'exit' to end the session.");
+    const rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout,
+      prompt: "You: ",
+    });
+
+    let questionNumber = 1;
+    rl.prompt();
+
+    // 6. Handle chat interactions
+    rl.on("line", async (line) => {
+      const query = line.trim();
+      if (query.toLowerCase() === "exit") {
+        rl.close();
+        return;
+      }
+
+      try {
+        // Generate embedding for the query
+        console.log("Processing your question...");
+        const queryEmbedding = await generateEmbeddings(query);
+
+        // Search for relevant chunks
+        const searchResults = await heliconeLogger.logRequest(
+          {
+            _type: "vector_db",
+            operation: "search",
+            vector: queryEmbedding,
+          },
+          async (resultRecorder) => {
+            const results = searchFAISS(faissIndex, queryEmbedding, 3);
+            resultRecorder.appendResults(results);
+            return results;
+          },
+          {
+            "Helicone-Session-Id": sessionId,
+            "Helicone-Session-Path": `/chat/${questionNumber}`,
+            "Helicone-Session-Name": HELICONE_SESSION_NAME,
+          }
+        );
+
+        // Get relevant text chunks
+        const relevantChunks = searchResults.labels.map((idx) => chunks[idx]);
+
+        // Generate response using OpenAI
+        const prompt = `Context:\n${relevantChunks.join(
+          "\n\n"
+        )}\n\nQuestion: ${query}\nAnswer:`;
+        const response = await openai.chat.completions.create(
+          {
+            model: "gpt-4o",
+            messages: [
+              {
+                role: "system",
+                content:
+                  "You are a helpful assistant that answers questions based on the provided context.",
+              },
+              {
+                role: "user",
+                content: prompt,
+              },
+            ],
+          },
+          {
+            headers: {
+              "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+              "Helicone-Session-Id": sessionId,
+              "Helicone-Session-Path": `/chat/${questionNumber}`,
+              "Helicone-Session-Name": HELICONE_SESSION_NAME,
+            },
+          }
+        );
+
+        if (response.choices[0].message?.content) {
+          console.log(`\nAI: ${response.choices[0].message.content.trim()}\n`);
+        } else {
+          console.log("\nAI: I couldn't generate a response.\n");
+        }
+
+        questionNumber++;
+        rl.prompt();
+      } catch (error: any) {
+        console.error("Error processing your query:", error.message);
+        rl.prompt();
+      }
+    }).on("close", () => {
+      console.log("\nThanks for chatting!");
+      process.exit(0);
+    });
   } catch (error: any) {
     console.error("An error occurred:", error.message);
     process.exit(1);
   }
 }
+
+// Start the application
+main().catch(console.error);
 ```
 
 **Explanation**: The `main` function ensures a seamless flow from PDF processing to user interaction, with Helicone monitoring each critical step.
 
----
+All of these requests are logged to **<span style={{color: '#0ea5e9'}}>Helicone</span>** and leverage [session tracking](https://docs.helicone.ai/features/sessions). This groups related multi-step requests into a single session, allowing you to view the complete request/response chain in Helicone.
+
+**Example**:
+![Helicone Session](/static/blog/pdf-chatbot-tutorial/helicone-session-ui.webp)
 
 ## Conclusion
 
