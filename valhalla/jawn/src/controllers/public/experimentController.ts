@@ -126,7 +126,90 @@ export class ExperimentController extends Controller {
     const result = await experimentManager.createNewExperimentTable(
       requestBody
     );
-    return result;
+    if (result.error || !result.data) {
+      this.setStatus(500);
+      console.error(result.error);
+      return err(result.error);
+    }
+    const inputManager = new InputsManager(request.authParams);
+    const inputRecordResult = await inputManager.createInputRecord(
+      requestBody.promptVersionId,
+      {}
+    );
+
+    if (inputRecordResult.error || !inputRecordResult.data) {
+      this.setStatus(500);
+      console.error(inputRecordResult.error);
+      return err(inputRecordResult.error ?? "Failed to create input record");
+    }
+
+    const datasetManager = new DatasetManager(request.authParams);
+    const datasetRowResult = await datasetManager.addDatasetRow(
+      (requestBody.experimentTableMetadata as any)?.datasetId,
+      inputRecordResult.data
+    );
+
+    if (datasetRowResult.error || !datasetRowResult.data) {
+      console.error(datasetRowResult.error);
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
+    }
+    const inputs = Object.fromEntries(
+      result.data.inputKeys.map((key) => [key, ""])
+    );
+    const experimentTableRowResult =
+      await experimentManager.createExperimentTableRow({
+        experimentTableId: result.data.tableId,
+        metadata: {
+          datasetRowId: datasetRowResult.data,
+          inputId: inputRecordResult.data,
+        },
+        inputs,
+      });
+
+    if (experimentTableRowResult.error || !experimentTableRowResult.data) {
+      this.setStatus(500);
+      console.error(experimentTableRowResult.error);
+      return err(experimentTableRowResult.error);
+    }
+
+    const inputCellId = experimentTableRowResult.data.find(
+      (cell) => cell.cellType === "input"
+    )?.id;
+
+    if (!inputCellId) {
+      this.setStatus(500);
+      return err("Failed to find input cell");
+    }
+
+    const inputCellResult = await experimentManager.updateExperimentCells({
+      cells: [
+        {
+          cellId: inputCellId,
+          status: "initialized",
+          value: "inputs",
+          metadata: {
+            inputs: result.data.inputKeys.map((key) => ({
+              key,
+              value: "",
+            })),
+          },
+        },
+      ],
+    });
+
+    if (inputCellResult.error || !inputCellResult.data) {
+      this.setStatus(500);
+      console.error(inputCellResult.error);
+      return err(inputCellResult.error);
+    }
+
+    this.setStatus(200);
+    return ok({
+      tableId: result.data.tableId,
+      experimentId: result.data.experimentId,
+    });
   }
 
   @Post("/table/{experimentTableId}/query")
@@ -196,7 +279,7 @@ export class ExperimentController extends Controller {
       cellId: string;
       status?: string;
       value?: string;
-      metadata?: Record<string, string>;
+      metadata?: string;
       updateInputs?: boolean;
     },
     @Request() request: JawnAuthenticatedRequest
@@ -217,7 +300,9 @@ export class ExperimentController extends Controller {
           cellId: requestBody.cellId,
           status: requestBody.status ?? null,
           value: requestBody.value ?? null,
-          metadata: requestBody.metadata ?? null,
+          metadata: requestBody.metadata
+            ? JSON.parse(requestBody.metadata)
+            : null,
         },
       ],
     });
@@ -231,10 +316,21 @@ export class ExperimentController extends Controller {
       const inputManager = new InputsManager(request.authParams);
       await Promise.all(
         result.data.map((cell) => {
-          if (cell.metadata?.inputId) {
-            return inputManager.updateInputRecord(cell.metadata.inputId, {
-              [cell.columnName]: cell.value ?? "",
-            });
+          if (cell.metadata?.inputId && cell.metadata.inputs) {
+            // Transform the inputs array into a Record<string, string>
+            const inputData = Object.fromEntries(
+              cell.metadata.inputs.map(
+                (input: { key: string; value: string }) => [
+                  input.key,
+                  input.value ?? "",
+                ]
+              )
+            );
+
+            return inputManager.updateInputRecord(
+              cell.metadata.inputId,
+              inputData
+            );
           }
         })
       );
@@ -253,6 +349,7 @@ export class ExperimentController extends Controller {
       columnType: string;
       hypothesisId?: string;
       promptVersionId?: string;
+      inputKeys?: string[];
     },
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<null, string>> {
@@ -266,6 +363,31 @@ export class ExperimentController extends Controller {
       console.error(experimentTable.error);
       return err(experimentTable.error);
     }
+
+    const experimentTableColumns =
+      await experimentManager.getExperimentTableColumns(experimentTableId);
+    if (experimentTableColumns.error || !experimentTableColumns.data) {
+      this.setStatus(500);
+      console.error(experimentTableColumns.error);
+      return err(experimentTableColumns.error);
+    }
+    // const missingInputKeys = requestBody.inputKeys?.filter(
+    //   (key) => !experimentTableColumns.data.map((col) => col.name).includes(key)
+    // );
+
+    // if (missingInputKeys && missingInputKeys.length > 0) {
+    //   await Promise.all(
+    //     missingInputKeys.map(async (key) => {
+    //       return experimentManager.createExperimentColumn({
+    //         experimentTableId,
+    //         columnName: key,
+    //         columnType: "input",
+    //         inputKeys: [key],
+    //       });
+    //     })
+    //   );
+    // }
+
     const result = await experimentManager.createExperimentColumn({
       experimentTableId,
       columnName: requestBody.columnName,
@@ -273,11 +395,13 @@ export class ExperimentController extends Controller {
       hypothesisId: requestBody.hypothesisId,
       promptVersionId: requestBody.promptVersionId,
     });
+
     if (result.error) {
       this.setStatus(500);
       console.error(result.error);
       return err(result.error);
     }
+
     this.setStatus(204);
     return ok(null);
   }
@@ -338,11 +462,33 @@ export class ExperimentController extends Controller {
       inputs: requestBody.inputs,
     });
 
-    if (result.error || !result.data) {
+    if (!result.data || result.error) {
       this.setStatus(500);
       console.error(result.error);
       return err(result.error);
     }
+
+    const inputCell = result.data.find((cell) => cell.cellType === "input");
+    if (inputCell) {
+      await experimentManager.updateExperimentCells({
+        cells: [
+          {
+            cellId: inputCell.id,
+            value: "inputs",
+            status: "initialized",
+            metadata: {
+              inputs: Object.entries(requestBody.inputs ?? {}).map(
+                ([key, value]) => ({
+                  key,
+                  value: "",
+                })
+              ),
+            },
+          },
+        ],
+      });
+    }
+
     return ok(null);
   }
 
@@ -381,6 +527,7 @@ export class ExperimentController extends Controller {
         cells: {
           columnId: string;
           value: string | null;
+          metadata?: any;
         }[];
         sourceRequest?: string;
       }[];

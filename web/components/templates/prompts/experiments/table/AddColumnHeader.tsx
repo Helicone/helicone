@@ -33,7 +33,8 @@ interface AddColumnHeaderProps {
     columnName: string,
     columnType: "experiment" | "input" | "output",
     hypothesisId?: string,
-    promptVersionId?: string
+    promptVersionId?: string,
+    promptVariables?: string[]
   ) => Promise<void>;
   wrapText: boolean;
 }
@@ -59,6 +60,13 @@ const AddColumnHeader: React.FC<AddColumnHeaderProps> = ({
   const jawn = useJawnClient();
 
   const [showSuggestionPanel, setShowSuggestionPanel] = useState(false);
+  const [promptVariables, setPromptVariables] = useState<
+    {
+      original: string;
+      heliconeTag: string;
+      value: string;
+    }[]
+  >([]);
   const [scoreCriterias, setScoreCriterias] = useState<
     {
       scoreType?: (typeof SCORES)[number];
@@ -243,6 +251,9 @@ const AddColumnHeader: React.FC<AddColumnHeaderProps> = ({
                 defaultEditMode={true}
                 prompt={promptVersionTemplateData?.helicone_template ?? ""}
                 selectedInput={undefined}
+                onExtractPromptVariables={(promptInputKeys) => {
+                  setPromptVariables(promptInputKeys);
+                }}
                 onSubmit={async (history, model) => {
                   const promptData = {
                     model: model,
@@ -298,7 +309,8 @@ const AddColumnHeader: React.FC<AddColumnHeaderProps> = ({
                     "Experiment",
                     "experiment",
                     hypothesisResult.data.data?.hypothesisId,
-                    result.data.data?.id
+                    result.data.data?.id,
+                    promptVariables.map((p) => p.original)
                   );
 
                   setOpenAddExperimentModal(false);

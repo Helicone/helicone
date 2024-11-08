@@ -5693,13 +5693,36 @@
 					"createdAt": {
 						"type": "string"
 					},
-					"metadata": {}
+					"metadata": {},
+					"columns": {
+						"items": {
+							"properties": {
+								"columnType": {
+									"type": "string"
+								},
+								"columnName": {
+									"type": "string"
+								},
+								"id": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"columnType",
+								"columnName",
+								"id"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					}
 				},
 				"required": [
 					"id",
 					"name",
 					"experimentId",
-					"createdAt"
+					"createdAt",
+					"columns"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -6300,6 +6323,10 @@
 							}
 						],
 						"nullable": true
+					},
+					"tableId": {
+						"type": "string",
+						"nullable": true
 					}
 				},
 				"required": [
@@ -6309,7 +6336,8 @@
 					"meta",
 					"createdAt",
 					"hypotheses",
-					"scores"
+					"scores",
+					"tableId"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -12114,7 +12142,7 @@
 										"type": "boolean"
 									},
 									"metadata": {
-										"$ref": "#/components/schemas/Record_string.string_"
+										"type": "string"
 									},
 									"value": {
 										"type": "string"
@@ -12175,6 +12203,12 @@
 						"application/json": {
 							"schema": {
 								"properties": {
+									"inputKeys": {
+										"items": {
+											"type": "string"
+										},
+										"type": "array"
+									},
 									"promptVersionId": {
 										"type": "string"
 									},
@@ -12350,6 +12384,7 @@
 												"cells": {
 													"items": {
 														"properties": {
+															"metadata": {},
 															"value": {
 																"type": "string",
 																"nullable": true

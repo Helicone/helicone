@@ -1,5 +1,8 @@
 import { ENVIRONMENT } from "../..";
-import { getAllSignedURLsFromInputs } from "../../managers/inputs/InputsManager";
+import {
+  getAllSignedURLsFromInputs,
+  InputsManager,
+} from "../../managers/inputs/InputsManager";
 import { costOfPrompt } from "../../packages/cost";
 import { Database } from "../db/database.types";
 import { supabaseServer } from "../db/supabase";
@@ -126,6 +129,11 @@ export interface ExperimentTableSimplified {
   experimentId: string;
   createdAt: string;
   metadata?: any;
+  columns: {
+    id: string;
+    columnName: string;
+    columnType: string;
+  }[];
 }
 
 function getExperimentsQuery(
@@ -463,7 +471,8 @@ export class ExperimentStore extends BaseStore {
     columnName: string,
     columnType: "input" | "output" | "experiment",
     hypothesisId?: string,
-    promptVersionId?: string
+    promptVersionId?: string,
+    inputKeys?: string[]
   ): Promise<Result<{ id: string }, string>> {
     const metadata: Record<string, any> = {};
     if (hypothesisId) {
@@ -506,28 +515,81 @@ export class ExperimentStore extends BaseStore {
     // Use the first existing column to copy metadata from
     const existingColumnId = existingColumnsResult.data[0].id;
 
-    // If there are existing rows, create cells with updated metadata
-    const cellsQuery = `
-      INSERT INTO experiment_cell (column_id, row_index, status, value, metadata)
-      SELECT 
-        $1 AS column_id,
-        ecv.row_index,
-        'initialized' AS status,
-        NULL AS value,
-        ecv.metadata || jsonb_build_object('cellType', $3::text) AS metadata
-      FROM experiment_cell ecv
-      WHERE ecv.column_id = $2
-      ORDER BY ecv.row_index
-    `;
+    // Fetch existing cells to obtain inputIds
+    const existingCellsResult = await supabaseServer.client
+      .from("experiment_cell")
+      .select("row_index, metadata")
+      .eq("column_id", existingColumnId);
 
-    const cellsResult = await dbExecute(cellsQuery, [
-      columnResult.data.id, // $1: the new column ID
-      existingColumnId, // $2: the existing column ID to copy metadata from
-      columnType, // $3: the columnType to be used as cellType
-    ]);
+    if (existingCellsResult.error || !existingCellsResult.data) {
+      return err(
+        existingCellsResult.error?.message ?? "Failed to fetch existing cells"
+      );
+    }
 
-    if (cellsResult.error) {
-      return err(cellsResult.error);
+    // Prepare arrays to collect updates and new cells
+    const inputUpdates: { inputId: string; inputs: Record<string, string> }[] =
+      [];
+    const newCellsData: any[] = [];
+
+    // Iterate over existing cells
+    for (const cell of existingCellsResult.data) {
+      const inputId = (cell.metadata as any)?.inputId;
+      if (inputId) {
+        // Build the inputs object you wish to add
+        const inputs = Object.fromEntries(
+          (inputKeys ?? []).map((key) => [key, ""])
+        );
+
+        // Collect data for bulk input record update
+        inputUpdates.push({ inputId, inputs });
+      }
+
+      // Prepare new cell data
+      newCellsData.push({
+        column_id: columnResult.data.id,
+        row_index: cell.row_index,
+        status: "initialized",
+        value: null,
+        //@ts-ignore
+        metadata: { ...(cell.metadata ?? {}), cellType: columnType },
+      });
+    }
+
+    // Insert new cells into the database
+    const cellsInsertResult = await supabaseServer.client
+      .from("experiment_cell")
+      .insert(newCellsData);
+
+    if (cellsInsertResult.error) {
+      return err(cellsInsertResult.error.message);
+    }
+
+    // Perform bulk update of input records
+    if (inputUpdates.length > 0) {
+      // Build the SQL query for batch updating input records
+      const updateQueries = inputUpdates
+        .map((update, index) => {
+          const paramIdx1 = index * 2 + 1;
+          const paramIdx2 = index * 2 + 2;
+          return `
+          UPDATE prompt_input_record
+          SET inputs = COALESCE(inputs, '{}'::jsonb) || $${paramIdx1}::jsonb
+          WHERE id = $${paramIdx2};
+        `;
+        })
+        .join("\n");
+
+      const queryParams = inputUpdates.flatMap((update) => [
+        JSON.stringify(update.inputs),
+        update.inputId,
+      ]);
+
+      const result = await dbExecute<any>(updateQueries, queryParams);
+
+      if (result.error) {
+        return err(result.error ?? "Failed to update input records");
+      }
     }
 
     return ok({ id: columnResult.data.id });
@@ -564,7 +626,7 @@ export class ExperimentStore extends BaseStore {
     rowIndex: number,
     value: string | null,
     metadata?: Record<string, any>
-  ): Promise<Result<{ id: string }, string>> {
+  ): Promise<Result<{ id: string; cellType: string }, string>> {
     const result = await supabaseServer.client
       .from("experiment_cell")
       .insert({
@@ -580,7 +642,10 @@ export class ExperimentStore extends BaseStore {
     if (result.error || !result.data) {
       return err(result.error?.message ?? "Failed to create experiment cell");
     }
-    return ok({ id: result.data.id });
+    return ok({
+      id: result.data.id,
+      cellType: (result.data.metadata as any)?.cellType,
+    });
   }
 
   async getExperimentCellsByIds(cellIds: string[]): Promise<
@@ -668,7 +733,7 @@ export class ExperimentStore extends BaseStore {
     if (metadata) {
       // Use jsonb concatenation operator to merge existing and new metadata
       updates.push(
-        `metadata = COALESCE(metadata, '{}'::jsonb) || $${index++}::jsonb`
+        `metadata = COALESCE(ec.metadata, '{}'::jsonb) || $${index++}::jsonb`
       );
       values.push(JSON.stringify(metadata));
     }
@@ -742,7 +807,7 @@ export class ExperimentStore extends BaseStore {
     rowIndex: number;
     metadata?: Record<string, any>;
     inputs?: Record<string, string>;
-  }): Promise<Result<{ ids: string[] }, string>> {
+  }): Promise<Result<{ id: string; cellType: string }[], string>> {
     // First, get all columns for this experiment table
     const columnsResult = await supabaseServer.client
       .from("experiment_column")
@@ -754,7 +819,9 @@ export class ExperimentStore extends BaseStore {
     }
 
     // Create empty cells for each column
-    let cellPromises: Promise<Result<{ id: string }, string>>[] = [];
+    let cellPromises: Promise<
+      Result<{ id: string; cellType: string }, string>
+    >[] = [];
 
     if (params.inputs && Object.keys(params.inputs).length > 0) {
       cellPromises = columnsResult.data.map((column) =>
@@ -788,7 +855,12 @@ export class ExperimentStore extends BaseStore {
 
       // Return the first cell's ID as the row identifier
       // Since all cells are created for the same row, any cell ID can serve as the row ID
-      return ok({ ids: results.map((result) => result.data!.id) });
+      return ok(
+        results.map((result) => ({
+          id: result.data!.id,
+          cellType: result.data!.cellType,
+        }))
+      );
     } catch (error) {
       return err(`Failed to create experiment row: ${error}`);
     }
@@ -1066,7 +1138,21 @@ export class ExperimentStore extends BaseStore {
   ): Promise<Result<ExperimentTableSimplified, string>> {
     const result = await supabaseServer.client
       .from("experiment_table")
-      .select("*")
+      .select(
+        `
+        id,
+        name,
+        experiment_id,
+        metadata,
+        created_at,
+        experiment_column (
+          id,
+          column_name,
+          column_type,
+          metadata
+        )
+      `
+      )
       .eq("id", experimentTableId)
       .eq("organization_id", this.organizationId)
       .single();
@@ -1075,13 +1161,41 @@ export class ExperimentStore extends BaseStore {
       return err(result.error?.message ?? "Experiment table not found");
     }
 
+    const columns = result.data.experiment_column.map((col: any) => ({
+      id: col.id,
+      columnName: col.column_name,
+      columnType: col.column_type,
+      metadata: col.metadata,
+    }));
+
     return ok({
       id: result.data.id,
       name: result.data.name,
       experimentId: result.data.experiment_id,
       metadata: result.data.metadata,
       createdAt: result.data.created_at,
+      columns: columns,
     });
+  }
+
+  async getExperimentTableColumns(
+    experimentTableId: string
+  ): Promise<Result<Array<{ id: string; name: string }>, string>> {
+    const result = await supabaseServer.client
+      .from("experiment_column")
+      .select("id, column_name")
+      .eq("table_id", experimentTableId);
+
+    if (result.error || !result.data) {
+      return err(result.error?.message ?? "Experiment columns not found");
+    }
+
+    const columns = result.data.map((col: any) => ({
+      id: col.id,
+      name: col.column_name,
+    }));
+
+    return ok(columns);
   }
 
   async updateExperimentTableMetadata(params: {
@@ -1128,6 +1242,7 @@ export class ExperimentStore extends BaseStore {
         experimentId: table.experiment_id,
         metadata: table.metadata,
         createdAt: table.created_at,
+        columns: [],
       }))
     );
   }
@@ -1307,7 +1422,8 @@ export class ExperimentStore extends BaseStore {
         return err(`Failed to create cells: ${failedResults[0].error}`);
       }
 
-      // Return the IDs of the created cells
+      // Return the first cell's ID as the row identifier
+      // Since all cells are created for the same row, any cell ID can serve as the row ID
       return ok({ ids: results.map((result) => result.data!.id) });
     } catch (error) {
       return err(`Failed to create experiment row: ${error}`);
