@@ -29,7 +29,7 @@ import DraggableColumnHeader from "./columns/draggableColumnHeader";
 import RequestRowView from "./requestRowView";
 import ThemedTableHeader from "./themedTableHeader";
 
-import { Checkbox } from "@mui/material";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -296,16 +296,20 @@ export default function ThemedTable<T extends { id?: string }>(
                           {showCheckboxes && (
                             <th className="w-8 px-2 sticky left-0 z-20 bg-slate-50 dark:bg-slate-900">
                               <Checkbox
-                                onChange={(e) =>
-                                  handleSelectAll(e.target.checked)
-                                }
+                                variant="blue"
+                                onCheckedChange={handleSelectAll}
                                 checked={selectedIds?.length === rows.length}
-                                indeterminate={
-                                  selectedIds &&
-                                  selectedIds?.length > 0 &&
-                                  selectedIds?.length < rows.length
-                                }
-                                className="text-slate-700 dark:text-slate-400"
+                                ref={(ref) => {
+                                  if (ref) {
+                                    (
+                                      ref as unknown as HTMLInputElement
+                                    ).indeterminate =
+                                      selectedIds !== undefined &&
+                                      selectedIds.length > 0 &&
+                                      selectedIds.length < rows.length;
+                                  }
+                                }}
+                                className="data-[state=checked]:bg-primary data-[state=indeterminate]:bg-primary"
                               />
                               <div className="absolute bottom-0 left-0 right-0 h-px bg-slate-300 dark:bg-slate-700" />
                             </th>
@@ -352,6 +356,7 @@ export default function ThemedTable<T extends { id?: string }>(
                           {showCheckboxes && (
                             <td className="w-8 px-2">
                               <Checkbox
+                                variant="blue"
                                 checked={selectedIds?.includes(
                                   row.original?.id ?? ""
                                 )}

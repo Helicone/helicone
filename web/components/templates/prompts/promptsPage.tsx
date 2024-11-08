@@ -227,7 +227,7 @@ const PromptsPage = (props: PromptsPageProps) => {
                       <DialogTrigger asChild className="w-min">
                         {hasAccess ? (
                           <Button variant="default" size="sm">
-                            Create Experiment
+                            Create Prompt
                           </Button>
                         ) : (
                           <ProFeatureWrapper
@@ -235,7 +235,7 @@ const PromptsPage = (props: PromptsPageProps) => {
                             enabled={false}
                           >
                             <Button variant="default" size="sm">
-                              Create Experiment
+                              Create Prompt
                             </Button>
                           </ProFeatureWrapper>
                         )}
