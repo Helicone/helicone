@@ -19,6 +19,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useJawnClient } from "../../../../../../lib/clients/jawnHook";
 import React from "react";
 import InputEditor from "./inputEditor";
+import useNotification from "../../../../../shared/notification/useNotification";
 
 interface InputEntry {
   key: string;
@@ -33,101 +34,68 @@ interface InputCellRendererProps {
 }
 
 const InputCellRenderer: React.FC<InputCellRendererProps> = (props) => {
+  const notification = useNotification();
   const [isEditing, setIsEditing] = useState(false);
 
-  console.log("props", props);
-  // Initialize inputs state with the value from props
   const [inputs, setInputs] = useState<InputEntry[]>(
     props?.data?.cells?.inputs?.value || []
   );
 
+  const validateInputs = (inputs: InputEntry[]) => {
+    return inputs.every((input) => input.key && input.value);
+  };
+
+  const [yamlContent, setYamlContent] = useState<string>("");
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // State variables for adding new inputs
-  const [showAddInputFields, setShowAddInputFields] = useState(false);
-  const [newKey, setNewKey] = useState("");
-  const [newValue, setNewValue] = useState("");
+  useEffect(() => {
+    if (isEditing) {
+      // Convert inputs to YAML string
+      const yamlString = inputs
+        .map((entry) => `${entry.key}: ${entry.value}`)
+        .join("\n");
+      setYamlContent(yamlString);
+    }
+  }, [isEditing]);
 
-  const handleInputChange = (index: number, newValue: string) => {
-    setInputs((prevInputs) => {
-      const updatedInputs = [...prevInputs];
-      updatedInputs[index] = {
-        ...updatedInputs[index],
-        value: newValue,
-      };
-      return updatedInputs;
-    });
+  const handleContentChange = (content: string) => {
+    setYamlContent(content);
+
+    // Parse YAML content back to inputs
+    const lines = content.split("\n");
+    const newInputs = lines
+      .map((line) => {
+        const [key, ...rest] = line.split(":");
+        const value = rest.join(":").trim(); // In case value contains ':'
+        return { key: key.trim(), value };
+      })
+      .filter((entry) => entry.key !== "");
+
+    setInputs(newInputs);
   };
 
   const handleInputSubmit = () => {
     // Pass the updated inputs to the context's update function
     const cellId = props?.data?.cells?.inputs?.cellId;
-
-    props.context.handleUpdateExperimentCell({
-      cellId: cellId,
-      value: "inputs",
-      metadata: {
-        inputs: inputs,
-      },
-    });
-
-    setIsEditing(false);
-    setShowAddInputFields(false);
-    setNewKey("");
-    setNewValue("");
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      handleInputSubmit();
-    } else if (e.key === "Escape") {
-      e.preventDefault();
-      setIsEditing(false);
-      setShowAddInputFields(false);
+    if (!validateInputs(inputs)) {
+      notification.setNotification("Please add valid inputs", "error");
+      return;
     }
-  };
 
-  const handleAddInputClick = () => {
-    setShowAddInputFields(true);
-  };
-
-  const handleNewInputKeyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setNewKey(e.target.value);
-  };
-
-  const handleNewInputValueChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setNewValue(e.target.value);
-  };
-
-  const handleAddNewInput = () => {
-    if (newKey.trim() !== "") {
-      const updatedInputs = [
-        ...inputs,
-        {
-          key: newKey,
-          value: newValue,
-        },
-      ];
-      setInputs(updatedInputs);
-      setNewKey("");
-      setNewValue("");
-      setShowAddInputFields(false);
-
-      // Call handleUpdateExperimentCell with updated inputs
-      const cellId = props?.data?.cells?.inputs?.cellId;
-      console.log("updatedInputs", updatedInputs);
-
+    try {
       props.context.handleUpdateExperimentCell({
         cellId: cellId,
         value: "inputs",
         metadata: {
-          inputs: updatedInputs,
+          inputs: inputs,
         },
       });
+      console.log("handleUpdateExperimentCell called successfully");
+    } catch (error) {
+      console.error("Error calling handleUpdateExperimentCell:", error);
     }
+
+    setIsEditing(false);
   };
 
   useEffect(() => {
@@ -147,69 +115,17 @@ const InputCellRenderer: React.FC<InputCellRendererProps> = (props) => {
     };
   }, [isEditing]);
 
-  useEffect(() => {
-    if (isEditing && containerRef.current) {
-      // Focus on the first input field
-      const inputElements = containerRef.current.querySelectorAll("input");
-      if (inputElements.length > 0) {
-        (inputElements[0] as HTMLElement).focus();
-      }
-    }
-  }, [isEditing]);
-
   if (isEditing) {
     return (
-      <div ref={containerRef} className="p-2">
-        <InputEditor />
-        {inputs.map((inputEntry, index) => (
-          <div
-            key={`${inputEntry.key}-${index}`}
-            className="flex items-center mb-1"
-          >
-            <label className="mr-2 font-semibold text-sm">
-              {inputEntry.key}:
-            </label>
-            <Input
-              className="h-8 text-sm flex-1"
-              value={inputEntry.value}
-              onChange={(e) => handleInputChange(index, e.target.value)}
-              onKeyDown={handleKeyDown}
-            />
-          </div>
-        ))}
-
-        {showAddInputFields ? (
-          <div className="flex flex-row items-center mb-1">
-            <Input
-              placeholder="Key"
-              className="h-8 text-sm mr-2 w-2/5"
-              value={newKey}
-              onChange={handleNewInputKeyChange}
-            />
-            <Input
-              placeholder="Value"
-              className="h-8 text-sm flex-1 w-2/5"
-              value={newValue}
-              onChange={handleNewInputValueChange}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  handleAddNewInput();
-                }
-              }}
-            />
-            <Button
-              onClick={handleAddNewInput}
-              className="ml-2 w-1/5 h-8"
-              variant="secondary"
-            >
-              Add
-            </Button>
-          </div>
-        ) : (
-          <Button variant="link" onClick={handleAddInputClick} className="mt-2">
-            Add Input
-          </Button>
-        )}
+      <div ref={containerRef}>
+        <InputEditor
+          initialContent={yamlContent}
+          onContentChange={handleContentChange}
+          isEditing={isEditing}
+        />
+        <div className="mt-2 flex justify-end">
+          <Button onClick={handleInputSubmit}>Save</Button>
+        </div>
       </div>
     );
   }
@@ -222,7 +138,7 @@ const InputCellRenderer: React.FC<InputCellRendererProps> = (props) => {
         whiteSpace: "normal",
         overflow: "hidden",
         textOverflow: "ellipsis",
-        minHeight: "20px", // Ensure the div has some height even when empty
+        minHeight: "20px",
       }}
     >
       {inputs.length > 0 ? (

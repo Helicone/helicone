@@ -4,16 +4,18 @@ import React, { useState, useRef, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 
-export default function InputEditor() {
-  const [content, setContent] = useState(`name123: null
-user_name: null
-name: null
-user_name: null
-asdasd: dasdjehe
-test: 12312Create nextjs component where
-  we can edit text in kinda yaml file and
-  highlight keys. But keys and variables
-  will be without nesting`);
+interface InputEditorProps {
+  initialContent: string;
+  onContentChange: (content: string) => void;
+  isEditing: boolean;
+}
+
+export default function InputEditor({
+  initialContent,
+  onContentChange,
+  isEditing,
+}: InputEditorProps) {
+  const [content, setContent] = useState(initialContent);
 
   const editorRef = useRef<HTMLDivElement>(null);
 
@@ -39,7 +41,7 @@ test: 12312Create nextjs component where
         const [key, ...rest] = line.split(":");
         if (rest.length) {
           const restOfLine = rest.join(":");
-          return `<span style="color: #C678DD;">${escapeHTML(
+          return `<span style="color: #334155; font-weight: 600;">${escapeHTML(
             key
           )}</span>:${escapeHTML(restOfLine)}`;
         }
@@ -99,6 +101,7 @@ test: 12312Create nextjs component where
       const caretOffset = getCaretCharacterOffsetWithin(editorRef.current);
 
       setContent(newContent);
+      onContentChange(newContent); // Notify parent of content change
 
       requestAnimationFrame(() => {
         if (editorRef.current) {
@@ -114,10 +117,19 @@ test: 12312Create nextjs component where
     if (editorRef.current) {
       editorRef.current.innerHTML = highlightYAML(content);
     }
-  }, []);
+  }, [content]);
+
+  // Update content if initialContent prop changes
+  useEffect(() => {
+    setContent(initialContent);
+  }, [initialContent]);
 
   return (
-    <Card className="w-full overflow-hidden border border-border bg-[#282C34] p-4">
+    <Card
+      className={`w-full overflow-hidden p-2 hover:bg-[#F9FAFB] ${
+        isEditing ? "border-none shadow-none bg-[#F9FAFB]" : "border"
+      }`}
+    >
       <Label htmlFor="yaml-editor" className="sr-only">
         YAML Editor
       </Label>
@@ -126,11 +138,13 @@ test: 12312Create nextjs component where
         id="yaml-editor"
         contentEditable
         onInput={handleInput}
-        className="h-[400px] w-full overflow-auto whitespace-pre-wrap break-words text-sm text-[#ABB2BF] outline-none"
-        style={{ fontFamily: "monospace", whiteSpace: "pre-wrap" }}
+        className="h-[400px] w-full overflow-auto whitespace-pre-wrap break-words outline-none"
+        style={{ whiteSpace: "pre-wrap" }}
         role="textbox"
         aria-multiline="true"
-      />
+      >
+        {editorRef.current ? null : highlightYAML(content)}
+      </div>
     </Card>
   );
 }
