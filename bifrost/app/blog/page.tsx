@@ -215,6 +215,11 @@ export type BlogStructure =
 const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
+      folderName: "crewai-vs-autogen",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "llamaindex-vs-langchain",
     },
   },
