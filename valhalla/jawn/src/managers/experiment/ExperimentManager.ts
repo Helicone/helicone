@@ -38,32 +38,6 @@ export class ExperimentManager extends BaseManager {
     this.ExperimentStore = new ExperimentStore(authParams.organizationId);
   }
 
-  async runOriginalExperiment(params: {
-    experimentId: string;
-    datasetRowIds: string[];
-  }): Promise<Result<ExperimentRun, string>> {
-    const result = await this.getExperimentById(params.experimentId, {
-      inputs: true,
-      promptVersion: true,
-    });
-
-    if (result.error || !result.data) {
-      return err(result.error);
-    }
-
-    const experiment = result.data;
-    const datasetRows = await this.getDatasetRowsByIds({
-      datasetRowIds: params.datasetRowIds,
-    });
-
-    if (datasetRows.error || !datasetRows.data) {
-      console.error(datasetRows.error);
-      return err(datasetRows.error);
-    }
-
-    return runOriginalExperiment(experiment, datasetRows.data);
-  }
-
   async hasAccessToExperiment(experimentId: string): Promise<boolean> {
     const experiment = await supabaseServer.client
       .from("experiment_v2")
@@ -415,6 +389,28 @@ export class ExperimentManager extends BaseManager {
     return this.ExperimentStore.getExperimentHypothesisScores(params);
   }
 
+  async createExperimentTableRowWithCells(params: {
+    experimentTableId: string;
+    metadata?: Record<string, any>;
+    cells: {
+      columnId: string;
+      value: string | null;
+    }[];
+  }): Promise<Result<{ ids: string[] }, string>> {
+    const maxRowIndex = await this.ExperimentStore.getMaxRowIndex(
+      params.experimentTableId
+    );
+    if (maxRowIndex.error || maxRowIndex.data === null) {
+      return err(maxRowIndex.error ?? "Failed to get max row index");
+    }
+
+    return this.ExperimentStore.createExperimentTableRowWithCells({
+      experimentTableId: params.experimentTableId,
+      rowIndex: maxRowIndex.data + 1,
+      metadata: params.metadata,
+      cells: params.cells,
+    });
+  }
 
   async createExperimentTableRowWithCellsBatch(params: {
     experimentTableId: string;

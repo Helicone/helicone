@@ -1,3 +1,7 @@
+scripts/ 
+dist/
+server.py
+
 .vercel
 .env
 Localhost.session.sql

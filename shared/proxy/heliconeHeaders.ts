@@ -22,7 +22,6 @@ export interface IHeliconeHeaders {
 
   featureFlags: {
     streamForceFormat: boolean;
-    streamUsage: boolean;
     increaseTimeout: boolean;
   };
   retryHeaders: Nullable<{
@@ -315,7 +314,6 @@ export class HeliconeHeaders<T extends IInternalHeaders>
     return {
       streamForceFormat: streamForceFormat === "true",
       increaseTimeout: increaseTimeout === "true",
-      streamUsage: streamUsage === "true",
     };
   }
 
