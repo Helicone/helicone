@@ -18,6 +18,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
 import { useJawnClient } from "../../../../../../lib/clients/jawnHook";
 import React from "react";
+import InputEditor from "./inputEditor";
 
 interface InputEntry {
   key: string;
@@ -159,6 +160,7 @@ const InputCellRenderer: React.FC<InputCellRendererProps> = (props) => {
   if (isEditing) {
     return (
       <div ref={containerRef} className="p-2">
+        <InputEditor />
         {inputs.map((inputEntry, index) => (
           <div
             key={`${inputEntry.key}-${index}`}
