@@ -12356,6 +12356,9 @@
 												"cells": {
 													"items": {
 														"properties": {
+															"metadata": {
+																"$ref": "#/components/schemas/Record_string.string_"
+															},
 															"value": {
 																"type": "string",
 																"nullable": true

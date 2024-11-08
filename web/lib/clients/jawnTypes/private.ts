@@ -4421,6 +4421,7 @@ export interface operations {
           rows: ({
               sourceRequest?: string;
               cells: ({
+                  metadata?: components["schemas"]["Record_string.string_"];
                   value: string | null;
                   columnId: string;
                 })[];

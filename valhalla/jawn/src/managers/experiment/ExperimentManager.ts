@@ -445,6 +445,7 @@ export class ExperimentManager extends BaseManager {
       cells: {
         columnId: string;
         value: string | null;
+        metadata?: Record<string, any>;
       }[];
       sourceRequest?: string;
     }[];

@@ -501,6 +501,7 @@ export class ExperimentController extends Controller {
         cells: {
           columnId: string;
           value: string | null;
+          metadata?: Record<string, string>;
         }[];
         sourceRequest?: string;
       }[];

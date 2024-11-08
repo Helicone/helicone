@@ -426,6 +426,7 @@ export function useExperimentTable(orgId: string, experimentTableId: string) {
         cells: {
           columnId: string;
           value: string | null;
+          metadata?: Record<string, any>;
         }[];
         sourceRequest?: string;
       }[];
