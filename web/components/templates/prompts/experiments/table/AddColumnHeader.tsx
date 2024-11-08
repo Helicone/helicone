@@ -33,7 +33,8 @@ interface AddColumnHeaderProps {
     columnName: string,
     columnType: "experiment" | "input" | "output",
     hypothesisId?: string,
-    promptVersionId?: string
+    promptVersionId?: string,
+    promptVariables?: string[]
   ) => Promise<void>;
   wrapText: boolean;
 }
@@ -59,6 +60,13 @@ const AddColumnHeader: React.FC<AddColumnHeaderProps> = ({
   const jawn = useJawnClient();
 
   const [showSuggestionPanel, setShowSuggestionPanel] = useState(false);
+  const [promptVariables, setPromptVariables] = useState<
+    {
+      original: string;
+      heliconeTag: string;
+      value: string;
+    }[]
+  >([]);
   const [scoreCriterias, setScoreCriterias] = useState<
     {
       scoreType?: (typeof SCORES)[number];
@@ -115,9 +123,7 @@ const AddColumnHeader: React.FC<AddColumnHeaderProps> = ({
       <PopoverTrigger asChild>
         <button className="p-1 text-gray-500 hover:text-gray-700 flex flex-row items-center space-x-2">
           <PlusIcon className="w-5 h-5 text-slate-700" />
-          <span className="text-sm font-medium text-slate-700">
-            Add Experiment
-          </span>
+          <span className="text-sm font-medium text-slate-700">Add Prompt</span>
         </button>
       </PopoverTrigger>
       {isOpen && (
@@ -243,6 +249,9 @@ const AddColumnHeader: React.FC<AddColumnHeaderProps> = ({
                 defaultEditMode={true}
                 prompt={promptVersionTemplateData?.helicone_template ?? ""}
                 selectedInput={undefined}
+                onExtractPromptVariables={(promptInputKeys) => {
+                  setPromptVariables(promptInputKeys);
+                }}
                 onSubmit={async (history, model) => {
                   const promptData = {
                     model: model,
@@ -298,7 +307,8 @@ const AddColumnHeader: React.FC<AddColumnHeaderProps> = ({
                     "Experiment",
                     "experiment",
                     hypothesisResult.data.data?.hypothesisId,
-                    result.data.data?.id
+                    result.data.data?.id,
+                    promptVariables.map((p) => p.original)
                   );
 
                   setOpenAddExperimentModal(false);

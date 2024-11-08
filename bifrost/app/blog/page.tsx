@@ -40,6 +40,7 @@ const HEADSHOTS = {
   "Stefan Bokarev": "/static/blog/stefanbokarev-headshot.webp",
   "Justin Torre": "/static/blog/justintorre-headshot.webp",
   "Scott Nguyen": "/static/blog/scottnguyen-headshot.webp",
+  "Kavin Desi": "/static/blog/kavin-headshot.webp",
 };
 
 function metaDataToBlogStructure(
@@ -216,6 +217,11 @@ const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
       folderName: "lessons-from-building-ai-agents",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "pdf-chatbot-tutorial",
     },
   },
   {

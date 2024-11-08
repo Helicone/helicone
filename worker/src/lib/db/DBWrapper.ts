@@ -7,10 +7,16 @@ import { SecureCacheEnv, getAndStoreInCache } from "../util/cache/secureCache";
 import { Result, err, ok } from "../util/results";
 import { RateLimiter } from "../clients/RequestRateLimiter";
 
+export interface InternalAuthParams {
+  organizationId: string;
+  userId?: string;
+  heliconeApiKeyId?: number;
+}
+
 async function getHeliconeApiKeyRow(
   dbClient: SupabaseClient<Database>,
   heliconeApi: string
-): Promise<Result<AuthParams, string>> {
+): Promise<Result<InternalAuthParams, string>> {
   const { data, error } = await dbClient
     .from("helicone_api_keys")
     .select("*")
@@ -34,7 +40,7 @@ async function getHeliconeProxyKeyRow(
   dbClient: SupabaseClient<Database>,
   { token }: BearerAuthProxy,
   env: Env
-): Promise<Result<AuthParams, string>> {
+): Promise<Result<InternalAuthParams, string>> {
   const { data, error } = await getProviderKeyFromProxyCache(
     token,
     env,
@@ -56,7 +62,7 @@ async function getHeliconeJwtAuthParams(
   dbClient: SupabaseClient<Database>,
   orgId: string,
   heliconeJwt: string
-): Promise<Result<AuthParams, string>> {
+): Promise<Result<InternalAuthParams, string>> {
   const user = await dbClient.auth.getUser(heliconeJwt);
   if (user.error) {
     console.error("Error fetching user:", user.error.message);
@@ -165,7 +171,9 @@ export class DBWrapper {
     return ok(this.rateLimiter);
   }
 
-  private async _getAuthParams(): Promise<Result<AuthParams, string>> {
+  private async _getAuthParamsInternal(): Promise<
+    Result<InternalAuthParams, string>
+  > {
     switch (this.auth._type) {
       case "jwt":
         if (!this.auth.orgId) {
@@ -187,13 +195,45 @@ export class DBWrapper {
     throw new Error("Invalid authentication."); // this is unreachable
   }
 
+  private async _getAuthParams(): Promise<Result<AuthParams, string>> {
+    const internalAuthParams = await this._getAuthParamsInternal();
+    if (internalAuthParams.error !== null) {
+      return err(internalAuthParams.error);
+    }
+
+    const org = await this.supabaseClient
+      .from("organization")
+      .select("*")
+      .eq("id", internalAuthParams.data.organizationId)
+      .single();
+
+    if (org.error !== null) {
+      return err(org.error.message);
+    }
+
+    const tier = org.data.tier ?? "free";
+    return ok({
+      organizationId: internalAuthParams.data.organizationId,
+      userId: internalAuthParams.data.userId,
+      heliconeApiKeyId: internalAuthParams.data.heliconeApiKeyId,
+      tier: org.data.tier ?? "free",
+      accessDict: {
+        cache:
+          tier === "enterprise" ||
+          tier === "pro" ||
+          tier === "pro-20240913" ||
+          tier === "growth",
+      },
+    });
+  }
+
   async getAuthParams(): Promise<Result<AuthParams, string>> {
     if (this.authParams !== undefined) {
       return ok(this.authParams);
     }
     const cacheKey = (await hash(JSON.stringify(this.auth))).substring(0, 32);
     const authParams = await getAndStoreInCache(
-      `authParams2-${cacheKey}`,
+      `authParams3-${cacheKey}`,
       this.env,
       async () => await this._getAuthParams()
     );
