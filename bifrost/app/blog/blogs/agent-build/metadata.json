@@ -1,0 +1,10 @@
+{
+  "title": "Building a RAG-Powered PDF Chatbot with Helicone Integration",
+  "title1": "Building a RAG-Powered PDF Chatbot with Helicone Integration",
+  "title2": "Building a RAG-Powered PDF Chatbot with Helicone Integration",
+  "description": "Learn how to build a Retrieve-and-Generate (RAG) chatbot that can intelligently interact with PDF documents, enhanced with Helicone for better monitoring and logging capabilities.",
+  "images": "/static/blog/building-a-rag-app/demo.webp",
+  "time": "15 minute read",
+  "author": "Kavin Desi",
+  "date": "November 7, 2024"
+}

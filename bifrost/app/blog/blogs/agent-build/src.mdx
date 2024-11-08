@@ -1,0 +1,407 @@
+Ever tried having a conversation with a 100-page PDF? It's like trying to find a needle in a haystack - except the needle is buried in dense technical documentation, and you need answers fast. This post walks through how we built a chatbot that can actually understand and discuss PDF documents, using **Retrieval Augmented Generation (RAG)** architecture. We'll also explore how we used **Helicone** to gain visibility into our system's performance and behavior.
+
+## The Problem: PDFs Are Hard to Query
+
+PDFs are everywhere in business - technical specs, research papers, legal documents, you name it. But extracting specific information from them is painful:
+
+- Ctrl+F only works if you know exactly what to search for
+- Reading the entire document for each question is time-consuming
+- Important context often spans multiple sections
+
+By leveraging natural language processing (NLP) and vector databases, we built a system that can retrieve relevant information from documents and generate coherent responses. Here's how we did it.
+
+## Architecture Overview
+
+Let's dive into how RAG actually works in practice. Our architecture has several key components, each solving a specific challenge:
+
+1. **PDF Processing**: Converting unstructured PDFs into clean, usable text
+2. **Text Chunking**: Intelligently splitting text to maintain context
+3. **Embedding Generation**: Converting text into vector representations
+4. **Vector Storage**: Efficiently storing and searching embeddings
+5. **Chat Interface**: Managing conversation flow and context
+6. **Monitoring**: Tracking system performance and behavior
+
+I'll walk you through each component, sharing the challenges we faced and how we solved them.
+
+## The Building Blocks
+
+### 1. PDF Processing: The Messy Reality
+
+PDFs might look simple to humans, but they're surprisingly complex to process. Here's what we learned:
+
+```typescript
+async function extractText(filePath: string): Promise<string> {
+  const dataBuffer = fs.readFileSync(filePath);
+  const data = await pdfParse(dataBuffer);
+  return data.text;
+}
+```
+
+This looks straightforward, but we quickly hit issues:
+
+- Tables would merge into unreadable text blocks
+- Multi-column layouts got scrambled
+- Headers and footers interrupted content flow
+- Special characters caused encoding problems
+
+We ended up adding preprocessing steps to handle these cases:
+// ... [show specific code for handling edge cases] ...
+
+### 2. Text Chunking: The Art of Splitting
+
+Initially, we naively split text into fixed-size chunks. Big mistake. Here's why:
+
+```typescript
+// Our initial approach - don't do this!
+function naiveChunking(text: string, size: number): string[] {
+  return text.match(new RegExp(`.{1,${size}}`, "g")) || [];
+}
+
+// What we actually needed
+function intelligentChunking(text: string, targetSize: number): string[] {
+  const chunks: string[] = [];
+  let start = 0;
+
+  while (start < text.length) {
+    let end = findOptimalBreakPoint(text, start, targetSize);
+    chunks.push(text.slice(start, end).trim());
+    start = end;
+  }
+
+  return chunks;
+}
+```
+
+The key insights we learned:
+
+- Sentence boundaries matter - splitting mid-sentence loses context
+- Paragraphs often contain related information
+- Some concepts span multiple paragraphs
+- Overlap between chunks helps maintain context
+
+### 3. Vector Magic: Embeddings and Storage
+
+This is where RA
+
+---
+
+## Demo
+
+```sh
+ts-node index.ts Resume.pdf
+```
+
+![Chat with PDF](/static/blog/building-a-rag-app/demo.webp)
+
+## Building the Chatbot
+
+### 1. PDF Text Extraction
+
+The first step involves extracting text from the uploaded PDF. This is achieved using the [`pdf-parse`](https://www.npmjs.com/package/pdf-parse) library, which reads the PDF file and retrieves its textual content.
+
+```typescript
+// Function to extract text from PDF
+async function extractText(filePath: string): Promise<string> {
+  const dataBuffer = fs.readFileSync(filePath);
+  const data = await pdfParse(dataBuffer);
+  return data.text;
+}
+```
+
+### 2. Text Chunking
+
+Processing large texts can be computationally intensive. To optimize, the extracted text is divided into smaller chunks, typically around 1000 characters each. This ensures efficient embedding generation and retrieval.
+
+```typescript
+// Function to chunk text into smaller segments
+function chunkText(text: string, chunkSize: number = 1000): string[] {
+  const chunks: string[] = [];
+  let start = 0;
+  while (start < text.length) {
+    let end = start + chunkSize;
+    // Ensure we don't split in the middle of a word
+    if (end < text.length) {
+      const lastSpace = text.lastIndexOf(" ", end);
+      if (lastSpace > start) {
+        end = lastSpace;
+      }
+    }
+    chunks.push(text.slice(start, end));
+    start = end;
+  }
+  return chunks;
+}
+```
+
+**Explanation**:  
+The `chunkText` function iteratively slices the text into chunks, ensuring that words aren't split between chunks by identifying the last space before the chunk size limit.
+
+### 3. Embedding Generation
+
+Embeddings transform textual data into numerical vectors, capturing semantic meanings. Utilizing OpenAI's `text-embedding-ada-002` model, each text chunk is converted into a corresponding embedding.
+
+```typescript
+// Function to generate embeddings
+async function generateEmbeddings(
+  text: string,
+  questionNumber?: number
+): Promise<number[]> {
+  const response = await openai.embeddings.create({
+    model: "text-embedding-ada-002",
+    input: text,
+  });
+
+  if (response.data && response.data.length > 0 && response.data[0].embedding) {
+    return response.data[0].embedding;
+  } else {
+    throw new Error("Failed to generate embeddings.");
+  }
+}
+```
+
+An embedding is nothing but a text converted into a vector of numbers.
+
+### 4. Vector Storage
+
+To store the embeddings between different runs, we need to save the vectors to a database. In this tutorial, we will be using [FAISS (Facebook AI Similarity Search)](https://github.com/facebookresearch/faiss) for storing our vectors since it's easy to setup and it resides right in your file system. FAISS is a library for efficient similarity search of dense vectors. It facilitates rapid retrieval of relevant embeddings based on similarity metrics.
+You can also try out other vector databases like [Chroma](https://docs.trychroma.com/getting-started), [Pinecone](https://www.pinecone.io/docs/getting-started/), etc.
+
+```typescript
+// Initialize FAISS index
+function initializeFAISS(dimension: number): FAISS.IndexFlatL2 {
+  const faissIndex = new FAISS.IndexFlatL2(dimension);
+
+  return faissIndex;
+}
+```
+
+The `initializeFAISS` function creates a FAISS index using the L2 (Euclidean) distance metric. The `dimension` parameter corresponds to the size of the embedding vectors.
+**Adding Embeddings to FAISS:**
+
+```typescript
+// Add embedding to FAISS index
+function addEmbeddingToFAISS(
+  faissIndex: FAISS.IndexFlatL2,
+  embedding: number[]
+) {
+  faissIndex.add(embedding);
+}
+```
+
+**Saving the FAISS Index:**
+
+```typescript
+// Save FAISS index to disk
+function saveFAISSIndex(faissIndex: FAISS.IndexFlatL2, indexPath: string) {
+  faissIndex.write(indexPath);
+  console.log("FAISS index saved to disk.");
+}
+```
+
+To persist the FAISS index, this function writes the index to the specified `indexPath`, ensuring that embeddings aren't lost between sessions.
+
+### 5. Chat Interface
+
+The chatbot provides an interactive command-line interface (CLI) where users can pose questions related to the PDF content. It leverages the OpenAI GPT model to generate coherent and contextually relevant responses.
+
+```typescript
+// Setup Readline for Chat Interface
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+  prompt: "You: ",
+});
+
+let questionNumber = 1;
+
+console.log("Chat with the PDF. Type your questions below.");
+rl.prompt();
+
+rl.on("line", async (line) => {
+  const query = line.trim();
+  if (query.toLowerCase() === "exit") {
+    rl.close();
+    return;
+  }
+
+  // ... [Handling the query] ...
+
+  questionNumber++;
+  rl.prompt();
+}).on("close", () => {
+  console.log("Chat session ended.");
+  process.exit(0);
+});
+```
+
+**Processing User Queries:**
+
+```typescript
+// Inside rl.on("line") event handler
+try {
+  console.log("Generating embedding for your query...");
+  // Generate embedding for the query
+  const queryEmbedding = await generateEmbeddings(query);
+
+  // Search in FAISS index
+  console.log("Searching FAISS index for relevant information...");
+  const searchResults = searchFAISS(faissIndex, queryEmbedding, 3); // Top 3 relevant chunks
+  resultRecorder.appendResults(searchResults);
+  return searchResults;
+
+  // Retrieve the most relevant text chunks
+  const relevantChunks = searchResults.labels.map((idx) => chunks[idx]);
+
+  // Create a prompt for OpenAI
+  const prompt = `Context:\n${relevantChunks.join(
+    "\n\n"
+  )}\n\nQuestion: ${query}\nAnswer:`;
+
+  // Get response from OpenAI
+  const response = await openai.chat.completions.create({
+    model: "gpt-4o",
+    messages: [
+      {
+        role: "system",
+        content: "You are a helpful assistant.",
+      },
+      {
+        role: "user",
+        content: prompt,
+      },
+    ],
+    max_tokens: 150,
+    temperature: 0.7,
+  });
+
+  if (
+    response &&
+    response.choices &&
+    response.choices.length > 0 &&
+    response.choices[0].message &&
+    response.choices[0].message.content
+  ) {
+    console.log(`AI: ${response.choices[0].message.content.trim()}`);
+  } else {
+    console.log("AI: I couldn't find an appropriate answer.");
+  }
+} catch (error: any) {
+  console.error("Error processing your query:", error.message);
+}
+```
+
+**Explanation**:  
+Upon receiving a query, the chatbot:
+
+1. Generates an embedding for the user's question.
+2. Searches the FAISS index to find the top 3 most relevant text chunks.
+3. Constructs a prompt combining these chunks with the user's question.
+4. Sends this prompt to the OpenAI GPT model to generate a response.
+5. Displays the AI's answer or an error message if applicable.
+
+---
+
+## Helicone Integration
+
+The more and more you start using LLMs, the more you realize the importance of monitoring and logging your requests. **Helicone** plays a pivotal role in monitoring and logging LLM interactions. By integrating Helicone, developers gain visibility into how the chatbot is utilized, track performance metrics, and identify potential bottlenecks.
+
+### Logging Requests
+
+Throughout the code, Helicone's `HeliconeManualLogger` is used to log specific operations, such as embedding generation and FAISS searches.
+
+```typescript:index.ts
+const heliconeLogger = new HeliconeManualLogger({
+  apiKey: heliconeApiKey,
+  loggingEndpoint: "http://127.0.0.1:8788/custom/v1/log",
+});
+```
+
+- **File Path**: `index.ts`
+- **Class**: `HeliconeManualLogger`
+  **Explanation**:  
+  The `HeliconeManualLogger` is initialized with the necessary API key and logging endpoint. It wraps around critical operations to record their details.
+
+### Example: Logging a FAISS Search
+
+```typescript:index.ts
+const searchResults = await heliconeLogger.logRequest(
+  {
+    _type: "vector_db",
+    operation: "search",
+    vector: queryEmbedding,
+  },
+  async (resultRecorder) => {
+    const searchResults = searchFAISS(faissIndex, queryEmbedding, 3); // Top 3 relevant chunks
+    resultRecorder.appendResults(searchResults);
+    return searchResults;
+  },
+  {
+    "Helicone-Session-Id": sessionId,
+    "Helicone-Session-Path": `/chat/${questionNumber}`,
+    "Helicone-Session-Name": HELICONE_SESSION_NAME,
+  }
+);
+```
+
+**Explanation**:  
+When performing a search in the FAISS index, the operation details and results are logged. This includes the type of operation (`search`), the vector used for searching, and metadata such as session ID and path.
+
+---
+
+## Putting It All Together
+
+The `main` function orchestrates the entire process:
+
+1. **Input Validation**: Ensures a PDF file path is provided and exists.
+2. **PDF Processing**: Extracts and chunks text from the PDF.
+3. **Embedding Generation**: Creates embeddings for each text chunk.
+4. **FAISS Indexing**: Initializes the FAISS index, adds embeddings, and saves the index to disk.
+5. **Chat Setup**: Initializes the chat interface for user interaction.
+6. **Query Handling**: Processes user questions, retrieves relevant information, and generates AI responses.
+
+```typescript:index.ts
+async function main() {
+  // ... [Initialization and PDF processing] ...
+  try {
+    // ... [PDF extraction, chunking, embedding generation] ...
+    // Initialize FAISS index
+    const dimension = embeddings[0].length;
+    const indexPath = path.join(__dirname, "faiss.index");
+    const faissIndex = initializeFAISS(dimension);
+    // Add embeddings to FAISS index and save
+    console.log("Adding embeddings to FAISS index...");
+    await heliconeLogger.logRequest(
+      {
+        _type: "vector_db",
+        operation: "insert",
+        vectors: embeddings,
+      },
+      async (resultRecorder) => {
+        embeddings.forEach(async (embedding) => {
+          addEmbeddingToFAISS(faissIndex, embedding);
+        });
+        saveFAISSIndex(faissIndex, indexPath);
+      },
+      {
+        "Helicone-Session-Id": sessionId,
+        "Helicone-Session-Path": `/pre-process`,
+        "Helicone-Session-Name": HELICONE_SESSION_NAME,
+      }
+    );
+    // ... [Chat interface setup and handling] ...
+  } catch (error: any) {
+    console.error("An error occurred:", error.message);
+    process.exit(1);
+  }
+}
+```
+
+**Explanation**:  
+The `main` function ensures a seamless flow from PDF processing to user interaction, with Helicone monitoring each critical step.
+
+---
+
+## Conclusion
+
+Building a RAG-powered chatbot that interacts with PDF documents involves orchestrating various components, from text extraction to embedding generation and efficient vector searches. By integrating **Helicone**, developers gain enhanced visibility into the chatbot's operations, facilitating better monitoring and performance optimization. This synergy of NLP, vector databases, and monitoring tools culminates in a robust system capable of delivering intelligent and context-aware conversational experiences.
+Whether you're looking to implement a similar solution or seeking insights into optimizing AI-driven applications, this comprehensive breakdown serves as a foundational guide to crafting sophisticated chatbots tailored to specific document-based interactions.
