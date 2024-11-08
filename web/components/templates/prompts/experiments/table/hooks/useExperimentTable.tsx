@@ -128,30 +128,14 @@ export async function getTableData({
 
       if (column.columnType === "input") {
         // Handle input columns (collapse into 'inputs' cell as an array)
-        const inputKey = column.columnName; // Assuming columnName is the input key
-        const inputValue = cell.value;
+        const inputs = cell.metadata?.inputs ?? [];
 
-        // Initialize the 'inputs' cell if it doesn't exist
-        if (!row.cells["inputs"]) {
-          row.cells["inputs"] = {
-            cellId: "", // Not applicable for the entire inputs cell
-            value: [], // Initialize as an array
-            status: cell.status,
-          };
-        }
-
-        // Append the input entry to the inputs array
-        const inputsArray = row.cells["inputs"].value as Array<{
-          cellId: string;
-          key: string;
-          value: string;
-        }>;
-
-        inputsArray.push({
+        // Store inputs in the 'inputs' cell
+        row.cells["inputs"] = {
           cellId: cell.id,
-          key: inputKey,
-          value: inputValue,
-        });
+          value: inputs, // This should be an array of { key, value }
+          status: cell.status,
+        };
       } else if (cell.value !== undefined && cell.value !== null) {
         if (
           (cell.metadata?.cellType === "output" &&
@@ -261,6 +245,7 @@ export function useExperimentTable(orgId: string, experimentTableId: string) {
         responseBodyCache: {},
         queryClient,
       });
+      console.log("rowData", rowData);
       return {
         id: res.data?.data?.id,
         name: res.data?.data?.name,
@@ -546,7 +531,13 @@ export function useExperimentTable(orgId: string, experimentTableId: string) {
       const jawnClient = getJawnClient(orgId);
       await jawnClient.PATCH("/v1/experiment/table/{experimentTableId}/cell", {
         params: { path: { experimentTableId: experimentTableId } },
-        body: { cellId, status, value, metadata, updateInputs: true },
+        body: {
+          cellId,
+          status,
+          value,
+          metadata: JSON.stringify(metadata),
+          updateInputs: true,
+        },
       });
     },
     onMutate: async (updatedCell: UpdateExperimentCellVariables) => {

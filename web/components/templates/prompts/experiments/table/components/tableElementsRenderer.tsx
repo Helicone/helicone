@@ -20,7 +20,6 @@ import { useJawnClient } from "../../../../../../lib/clients/jawnHook";
 import React from "react";
 
 interface InputEntry {
-  cellId: string;
   key: string;
   value: string;
 }
@@ -43,6 +42,11 @@ const InputCellRenderer: React.FC<InputCellRendererProps> = (props) => {
 
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // State variables for adding new inputs
+  const [showAddInputFields, setShowAddInputFields] = useState(false);
+  const [newKey, setNewKey] = useState("");
+  const [newValue, setNewValue] = useState("");
+
   const handleInputChange = (index: number, newValue: string) => {
     setInputs((prevInputs) => {
       const updatedInputs = [...prevInputs];
@@ -56,15 +60,20 @@ const InputCellRenderer: React.FC<InputCellRendererProps> = (props) => {
 
   const handleInputSubmit = () => {
     // Pass the updated inputs to the context's update function
-    if (props.context && props.context.handleUpdateExperimentCell) {
-      inputs.forEach((input) => {
-        props.context.handleUpdateExperimentCell({
-          cellId: input.cellId,
-          value: input.value.trim(),
-        });
-      });
-    }
+    const cellId = props?.data?.cells?.inputs?.cellId;
+
+    props.context.handleUpdateExperimentCell({
+      cellId: cellId,
+      value: "inputs",
+      metadata: {
+        inputs: inputs,
+      },
+    });
+
     setIsEditing(false);
+    setShowAddInputFields(false);
+    setNewKey("");
+    setNewValue("");
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -74,6 +83,49 @@ const InputCellRenderer: React.FC<InputCellRendererProps> = (props) => {
     } else if (e.key === "Escape") {
       e.preventDefault();
       setIsEditing(false);
+      setShowAddInputFields(false);
+    }
+  };
+
+  const handleAddInputClick = () => {
+    setShowAddInputFields(true);
+  };
+
+  const handleNewInputKeyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNewKey(e.target.value);
+  };
+
+  const handleNewInputValueChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setNewValue(e.target.value);
+  };
+
+  const handleAddNewInput = () => {
+    if (newKey.trim() !== "") {
+      const updatedInputs = [
+        ...inputs,
+        {
+          key: newKey,
+          value: newValue,
+        },
+      ];
+      setInputs(updatedInputs);
+      setNewKey("");
+      setNewValue("");
+      setShowAddInputFields(false);
+
+      // Call handleUpdateExperimentCell with updated inputs
+      const cellId = props?.data?.cells?.inputs?.cellId;
+      console.log("updatedInputs", updatedInputs);
+
+      props.context.handleUpdateExperimentCell({
+        cellId: cellId,
+        value: "inputs",
+        metadata: {
+          inputs: updatedInputs,
+        },
+      });
     }
   };
 
@@ -108,7 +160,10 @@ const InputCellRenderer: React.FC<InputCellRendererProps> = (props) => {
     return (
       <div ref={containerRef} className="p-2">
         {inputs.map((inputEntry, index) => (
-          <div key={inputEntry.cellId} className="flex items-center mb-1">
+          <div
+            key={`${inputEntry.key}-${index}`}
+            className="flex items-center mb-1"
+          >
             <label className="mr-2 font-semibold text-sm">
               {inputEntry.key}:
             </label>
@@ -120,26 +175,64 @@ const InputCellRenderer: React.FC<InputCellRendererProps> = (props) => {
             />
           </div>
         ))}
+
+        {showAddInputFields ? (
+          <div className="flex flex-row items-center mb-1">
+            <Input
+              placeholder="Key"
+              className="h-8 text-sm mr-2 w-2/5"
+              value={newKey}
+              onChange={handleNewInputKeyChange}
+            />
+            <Input
+              placeholder="Value"
+              className="h-8 text-sm flex-1 w-2/5"
+              value={newValue}
+              onChange={handleNewInputValueChange}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleAddNewInput();
+                }
+              }}
+            />
+            <Button
+              onClick={handleAddNewInput}
+              className="ml-2 w-1/5 h-8"
+              variant="secondary"
+            >
+              Add
+            </Button>
+          </div>
+        ) : (
+          <Button variant="link" onClick={handleAddInputClick} className="mt-2">
+            Add Input
+          </Button>
+        )}
       </div>
     );
   }
 
   return (
     <div
-      className="cursor-pointer"
+      className="cursor-pointer p-2"
       onClick={() => setIsEditing(true)}
       style={{
         whiteSpace: "normal",
         overflow: "hidden",
         textOverflow: "ellipsis",
+        minHeight: "20px", // Ensure the div has some height even when empty
       }}
     >
-      {inputs.map((inputEntry) => (
-        <div key={inputEntry.cellId}>
-          <span className="mr-1 font-semibold">{inputEntry.key}:</span>
-          <span>{inputEntry.value}</span>
-        </div>
-      ))}
+      {inputs.length > 0 ? (
+        inputs.map((inputEntry, index) => (
+          <div key={`${inputEntry.key}-${index}`}>
+            <span className="mr-1 font-semibold">{inputEntry.key}:</span>
+            <span>{inputEntry.value}</span>
+          </div>
+        ))
+      ) : (
+        <div className="text-gray-500">Click to add inputs</div>
+      )}
     </div>
   );
 };

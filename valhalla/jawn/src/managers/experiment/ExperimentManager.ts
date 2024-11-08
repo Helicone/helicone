@@ -230,10 +230,10 @@ export class ExperimentManager extends BaseManager {
       await this.ExperimentStore.createExperimentTableColumns(
         experimentTableResult.data.experimentTableId,
         [
-          ...heliconeInputKeys.map((key) => ({
-            name: key,
+          {
+            name: "inputs",
             type: "input",
-          })),
+          },
           {
             name: "original",
             type: "output",
@@ -311,7 +311,7 @@ export class ExperimentManager extends BaseManager {
     experimentTableId: string;
     metadata?: Record<string, any>;
     inputs?: Record<string, string>;
-  }): Promise<Result<{ ids: string[] }, string>> {
+  }): Promise<Result<{ id: string; cellType: string }[], string>> {
     const maxRowIndex = await this.ExperimentStore.getMaxRowIndex(
       params.experimentTableId
     );

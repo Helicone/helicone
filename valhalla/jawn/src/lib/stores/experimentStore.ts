@@ -620,7 +620,7 @@ export class ExperimentStore extends BaseStore {
     rowIndex: number,
     value: string | null,
     metadata?: Record<string, any>
-  ): Promise<Result<{ id: string }, string>> {
+  ): Promise<Result<{ id: string; cellType: string }, string>> {
     const result = await supabaseServer.client
       .from("experiment_cell")
       .insert({
@@ -636,7 +636,10 @@ export class ExperimentStore extends BaseStore {
     if (result.error || !result.data) {
       return err(result.error?.message ?? "Failed to create experiment cell");
     }
-    return ok({ id: result.data.id });
+    return ok({
+      id: result.data.id,
+      cellType: (result.data.metadata as any)?.cellType,
+    });
   }
 
   async getExperimentCellsByIds(cellIds: string[]): Promise<
@@ -724,7 +727,7 @@ export class ExperimentStore extends BaseStore {
     if (metadata) {
       // Use jsonb concatenation operator to merge existing and new metadata
       updates.push(
-        `metadata = COALESCE(metadata, '{}'::jsonb) || $${index++}::jsonb`
+        `metadata = COALESCE(ec.metadata, '{}'::jsonb) || $${index++}::jsonb`
       );
       values.push(JSON.stringify(metadata));
     }
@@ -798,7 +801,7 @@ export class ExperimentStore extends BaseStore {
     rowIndex: number;
     metadata?: Record<string, any>;
     inputs?: Record<string, string>;
-  }): Promise<Result<{ ids: string[] }, string>> {
+  }): Promise<Result<{ id: string; cellType: string }[], string>> {
     // First, get all columns for this experiment table
     const columnsResult = await supabaseServer.client
       .from("experiment_column")
@@ -810,7 +813,9 @@ export class ExperimentStore extends BaseStore {
     }
 
     // Create empty cells for each column
-    let cellPromises: Promise<Result<{ id: string }, string>>[] = [];
+    let cellPromises: Promise<
+      Result<{ id: string; cellType: string }, string>
+    >[] = [];
 
     if (params.inputs && Object.keys(params.inputs).length > 0) {
       cellPromises = columnsResult.data.map((column) =>
@@ -844,7 +849,12 @@ export class ExperimentStore extends BaseStore {
 
       // Return the first cell's ID as the row identifier
       // Since all cells are created for the same row, any cell ID can serve as the row ID
-      return ok({ ids: results.map((result) => result.data!.id) });
+      return ok(
+        results.map((result) => ({
+          id: result.data!.id,
+          cellType: result.data!.cellType,
+        }))
+      );
     } catch (error) {
       return err(`Failed to create experiment row: ${error}`);
     }
