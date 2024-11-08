@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { removeLeadingWhitespace } from "../../shared/utils/utils";
 import { ChevronUpDownIcon } from "@heroicons/react/20/solid";
-import { Tooltip } from "@mui/material";
+import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
 
 interface CompletionProps {
   request: string;

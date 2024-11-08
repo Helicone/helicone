@@ -1,5 +1,5 @@
 import { BeakerIcon, ClipboardDocumentIcon } from "@heroicons/react/24/outline";
-import { Tooltip } from "@mui/material";
+import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
 import { useRouter } from "next/router";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedDrawer from "../../shared/themed/themedDrawer";

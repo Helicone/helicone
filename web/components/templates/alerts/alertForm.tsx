@@ -18,7 +18,7 @@ import {
   CurrencyDollarIcon,
   InformationCircleIcon,
 } from "@heroicons/react/24/outline";
-import { Tooltip } from "@mui/material";
+import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
 import { clsx } from "../../shared/clsx";
 import { alertTimeWindows } from "./alertsPage";
 import { Database } from "../../../supabase/database.types";

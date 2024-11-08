@@ -8,7 +8,7 @@ import {
 import { useState } from "react";
 import { clsx } from "../../shared/clsx";
 import useNotification from "../../shared/notification/useNotification";
-import { Tooltip } from "@mui/material";
+import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
 import {
   ChatCompletionCreateParams,
   ChatCompletionTool,
