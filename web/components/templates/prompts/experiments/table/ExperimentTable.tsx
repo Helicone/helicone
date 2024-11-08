@@ -594,9 +594,15 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
             {isOnboardingVisible &&
               currentStep ===
                 ONBOARDING_STEPS.EXPERIMENTS_CLICK_SHOW_SCORES.stepNumber && (
-                <div className="absolute right-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-red-500 animate-ping">
-                  <div className="w-full h-full bg-red-500"></div>
+                <div className="absolute right-1/2 top-1/2 translate-x-2 -translate-y-1/2">
+                  <span className="relative flex h-3 w-3">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-sky-500"></span>
+                  </span>
                 </div>
+                // <div className="absolute right-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-red-500 animate-ping rounded-full">
+                //   <div className="w-full h-full bg-red-500 rounded-full"></div>
+                // </div>
               )}
           </Button>
           <ColumnsDropdown

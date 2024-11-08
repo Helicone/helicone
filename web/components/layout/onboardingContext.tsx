@@ -284,6 +284,8 @@ export type OnboardingContextType = {
     width: number;
     height: number;
   } | null;
+  onClickElement: () => void;
+  setOnClickElement: (onClickElement: () => void) => void;
   isOnboardingVisible: boolean;
 };
 
@@ -310,6 +312,7 @@ export const OnboardingProvider = ({
 }) => {
   const [currentStep, setCurrentStepState] = useState(0);
   const [isOnboardingVisible, setIsOnboardingVisible] = useState(false);
+  const [onClickElement, setOnClickElement] = useState<() => void>(() => {});
 
   const setCurrentStep = useCallback((step: number, delayMs?: number) => {
     if (delayMs) {
@@ -412,6 +415,8 @@ export const OnboardingProvider = ({
         startOnboarding,
         isOnboardingVisible,
         elementPointerPosition,
+        onClickElement,
+        setOnClickElement,
       }}
     >
       {children}
@@ -420,41 +425,42 @@ export const OnboardingProvider = ({
 };
 
 export const OnboardingBackground = () => {
-  const { isOnboardingVisible, elementPointerPosition } =
+  const { isOnboardingVisible, elementPointerPosition, onClickElement } =
     useOnboardingContext();
   // return <div className="absolute inset-0 z-[9998] pointer-events-auto"></div>;
 
   if (!isOnboardingVisible) return null;
   return (
-    // <div className="absolute inset-0 z-[9998] pointer-events-auto">
-    <motion.div
-      className="absolute z-[9999] pointer-events-none"
-      initial={
-        elementPointerPosition
-          ? {
-              left: elementPointerPosition?.x,
-              top: elementPointerPosition?.y,
-              width: elementPointerPosition?.width,
-              height: elementPointerPosition?.height,
-            }
-          : {}
-      }
-      animate={
-        elementPointerPosition
-          ? {
-              left: elementPointerPosition?.x,
-              top: elementPointerPosition?.y,
-              width: elementPointerPosition?.width,
-              height: elementPointerPosition?.height,
-            }
-          : {}
-      }
-      style={{
-        boxShadow: "0 0 200vw 200vh rgba(0, 0, 0, 0.5)",
-        zIndex: 9999,
-      }}
-    />
-    //   </div>
+    <div className="absolute inset-0 z-[9998] pointer-events-auto">
+      <motion.div
+        className="absolute z-[9999] pointer-events-none"
+        onClick={onClickElement}
+        initial={
+          elementPointerPosition
+            ? {
+                left: elementPointerPosition?.x,
+                top: elementPointerPosition?.y,
+                width: elementPointerPosition?.width,
+                height: elementPointerPosition?.height,
+              }
+            : {}
+        }
+        animate={
+          elementPointerPosition
+            ? {
+                left: elementPointerPosition?.x,
+                top: elementPointerPosition?.y,
+                width: elementPointerPosition?.width,
+                height: elementPointerPosition?.height,
+              }
+            : {}
+        }
+        style={{
+          boxShadow: "0 0 200vw 200vh rgba(0, 0, 0, 0.5)",
+          zIndex: 9999,
+        }}
+      />
+    </div>
   );
 };
 

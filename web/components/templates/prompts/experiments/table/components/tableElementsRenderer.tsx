@@ -224,18 +224,20 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
                   ONBOARDING_STEPS.EXPERIMENTS_RUN_EXPERIMENTS.stepNumber
               }
             >
-              <PopoverTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className="ml-2 p-0 border-slate-200 border rounded-md bg-slate-50 text-slate-500 h-[22px] w-[24px] flex items-center justify-center"
-                  onClick={handleRunClick}
-                  data-onboarding-step={
-                    displayName === "Experiment 1" &&
-                    ONBOARDING_STEPS.EXPERIMENTS_RUN_EXPERIMENTS.stepNumber
-                  }
-                >
-                  <PlayIcon className="w-4 h-4 text-gray-600 dark:text-gray-300" />
-                </Button>
+              <PopoverTrigger>
+                <div>
+                  <Button
+                    variant="ghost"
+                    className="ml-2 p-0 border-slate-200 border rounded-md bg-slate-50 text-slate-500 h-[22px] w-[24px] flex items-center justify-center"
+                    onClick={handleRunClick}
+                    data-onboarding-step={
+                      displayName === "Experiment 1" &&
+                      ONBOARDING_STEPS.EXPERIMENTS_RUN_EXPERIMENTS.stepNumber
+                    }
+                  >
+                    <PlayIcon className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+                  </Button>
+                </div>
               </PopoverTrigger>
               <OnboardingPopover
                 next={handleRunClickOnboarding}
