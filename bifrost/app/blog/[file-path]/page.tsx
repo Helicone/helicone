@@ -9,6 +9,9 @@ import { RemoteMdxPage } from "./mdxRenderer";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
 import "highlight.js/styles/atom-one-dark.css";
+import { Card, CardContent } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { ChevronRight, Share2 } from "lucide-react"
 
 export default async function Home({
   params,
@@ -66,6 +69,23 @@ export default async function Home({
               {String(metadata.author)}
             </h3>
           )}
+            <Card className="w-full max-w-sm bg-[#F2F9FC] border-[#E3EFF3]">
+            <CardContent className="p-16 space-y-4">
+              <p className="text-[#6B8C9C] text-base leading-relaxed">
+                Join Helicone's community to monitor and optimize your LLM app in real-time.
+              </p>
+              <Link href="https://us.helicone.ai/signin" className="block">
+                <Button className="w-full bg-[#0DA5E8] hover:bg-[#0C94D1] text-white font-medium">
+                  Log in
+                  <ChevronRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
+              <Button variant="ghost" className="w-full text-[#6B8C9C] hover:text-[#5a7a8a] hover:bg-[#E3EFF3] justify-between">
+                Share
+                <Share2 className="h-4 w-4" />
+              </Button>
+            </CardContent>
+          </Card>
         </div>
         <article className="prose w-full h-full">
           <h1 className="text-bold text-sky-500 mt-16 md:mt-0">
