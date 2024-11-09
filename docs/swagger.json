@@ -6152,6 +6152,10 @@
 							}
 						],
 						"nullable": true
+					},
+					"tableId": {
+						"type": "string",
+						"nullable": true
 					}
 				},
 				"required": [
@@ -6161,7 +6165,8 @@
 					"meta",
 					"createdAt",
 					"hypotheses",
-					"scores"
+					"scores",
+					"tableId"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -14369,6 +14374,41 @@
 						}
 					}
 				}
+			}
+		},
+		"/v1/public/status/provider/{provider}": {
+			"get": {
+				"operationId": "GetProviderStatus",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_string.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Status"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "provider",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
 			}
 		},
 		"/v1/settings/query": {
