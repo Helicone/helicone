@@ -1,0 +1,47 @@
+---
+title: "Retrieving Sessions"
+sidebarTitle: "Retrieve Sessions"
+description: "Use the Request API to retrieve session data, allowing you to analyze conversation threads."
+"twitter:title": "Retrieving Sessions - Helicone OSS LLM Observability"
+---
+
+import QuestionsSection from "/snippets/questions-section.mdx";
+
+The [Request API](/rest/request/post-v1requestquery) allows you to fetch all requests associated with a specific session ID, making it easy to analyze conversation threads.
+
+## Retrieving Session Data
+
+Here's how to fetch all requests for a specific session:
+
+```javascript
+const response = await fetch("https://api.helicone.ai/v1/request/query", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${HELICONE_API_KEY}`,
+  },
+  body: JSON.stringify({
+    filter: {
+      properties: {
+        "Helicone-Session-Id": {
+          equals: SESSION_ID_TO_REPLAY,
+        },
+      },
+    },
+  }),
+});
+const data = await response.json();
+```
+
+The response includes these key fields for each request:
+
+- `request_created_at`: Timestamp of the request
+- `request_properties["Helicone-Session-Id"]`: Session identifier
+- `signed_body_url`: URL to access the request and response body from S3
+- `request_path`: API endpoint path
+- `request_properties["Helicone-Session-Path"]`: Session path
+- `request_properties["Helicone-Prompt-Id"]`: Unique prompt identifier
+- `body`: Deprecated, use `signed_body_url` instead
+- `other fields`: See the [Request API reference](/rest/request/post-v1requestquery) for more details
+
+<QuestionsSection />
