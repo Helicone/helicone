@@ -7917,6 +7917,149 @@
 				],
 				"type": "object",
 				"additionalProperties": false
+			},
+			"ProviderMetrics": {
+				"properties": {
+					"metrics": {
+						"properties": {
+							"timeSeriesData": {
+								"items": {
+									"properties": {
+										"requestCount": {
+											"type": "number",
+											"format": "double"
+										},
+										"errorCount": {
+											"type": "number",
+											"format": "double"
+										},
+										"errorRate": {
+											"type": "number",
+											"format": "double"
+										},
+										"timestamp": {
+											"type": "string",
+											"format": "date-time"
+										}
+									},
+									"required": [
+										"requestCount",
+										"errorCount",
+										"errorRate",
+										"timestamp"
+									],
+									"type": "object"
+								},
+								"type": "array"
+							},
+							"errorRateChange": {
+								"type": "number",
+								"format": "double"
+							},
+							"errorRatePrevious24h": {
+								"type": "number",
+								"format": "double"
+							},
+							"errorRate24h": {
+								"type": "number",
+								"format": "double"
+							},
+							"requestVolumeChange": {
+								"type": "number",
+								"format": "double"
+							},
+							"requestCountPrevious24h": {
+								"type": "number",
+								"format": "double"
+							},
+							"totalRequests": {
+								"type": "number",
+								"format": "double"
+							}
+						},
+						"required": [
+							"timeSeriesData",
+							"errorRateChange",
+							"errorRatePrevious24h",
+							"errorRate24h",
+							"requestVolumeChange",
+							"requestCountPrevious24h",
+							"totalRequests"
+						],
+						"type": "object"
+					},
+					"providerName": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"metrics",
+					"providerName"
+				],
+				"type": "object"
+			},
+			"ResultSuccess_ProviderMetrics-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/ProviderMetrics"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_ProviderMetrics-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_ProviderMetrics-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess_ProviderMetrics_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/ProviderMetrics"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_ProviderMetrics.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_ProviderMetrics_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
 			}
 		},
 		"securitySchemes": {
@@ -14915,6 +15058,32 @@
 				}
 			}
 		},
+		"/v1/public/status/provider": {
+			"get": {
+				"operationId": "GetAllProviderStatus",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_ProviderMetrics-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Status"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
 		"/v1/public/status/provider/{provider}": {
 			"get": {
 				"operationId": "GetProviderStatus",
@@ -14924,7 +15093,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Result_string.string_"
+									"$ref": "#/components/schemas/Result_ProviderMetrics.string_"
 								}
 							}
 						}

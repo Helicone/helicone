@@ -28,7 +28,7 @@ export const metadata: Metadata = {
 export default function PriceCalcPage() {
   return (
     <div className="container mx-auto py-8">
-      <ProviderStatusPage />
+      <ProviderStatusPage provider="all" />
     </div>
   );
 }

@@ -437,6 +437,9 @@ export interface paths {
   "/v1/dashboard/scores/query": {
     post: operations["GetScoresOverTime"];
   };
+  "/v1/public/status/provider": {
+    get: operations["GetAllProviderStatus"];
+  };
   "/v1/public/status/provider/{provider}": {
     get: operations["GetProviderStatus"];
   };
@@ -2743,6 +2746,45 @@ Json: JsonObject;
       /** Format: double */
       timeZoneDifference: number;
     };
+    ProviderMetrics: {
+      metrics: {
+        timeSeriesData: {
+            /** Format: double */
+            requestCount: number;
+            /** Format: double */
+            errorCount: number;
+            /** Format: double */
+            errorRate: number;
+            /** Format: date-time */
+            timestamp: string;
+          }[];
+        /** Format: double */
+        errorRateChange: number;
+        /** Format: double */
+        errorRatePrevious24h: number;
+        /** Format: double */
+        errorRate24h: number;
+        /** Format: double */
+        requestVolumeChange: number;
+        /** Format: double */
+        requestCountPrevious24h: number;
+        /** Format: double */
+        totalRequests: number;
+      };
+      providerName: string;
+    };
+    "ResultSuccess_ProviderMetrics-Array_": {
+      data: components["schemas"]["ProviderMetrics"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ProviderMetrics-Array.string_": components["schemas"]["ResultSuccess_ProviderMetrics-Array_"] | components["schemas"]["ResultError_string_"];
+    ResultSuccess_ProviderMetrics_: {
+      data: components["schemas"]["ProviderMetrics"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ProviderMetrics.string_": components["schemas"]["ResultSuccess_ProviderMetrics_"] | components["schemas"]["ResultError_string_"];
   };
   responses: {
   };
@@ -5417,6 +5459,16 @@ export interface operations {
       };
     };
   };
+  GetAllProviderStatus: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ProviderMetrics-Array.string_"];
+        };
+      };
+    };
+  };
   GetProviderStatus: {
     parameters: {
       path: {
@@ -5427,7 +5479,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result_string.string_"];
+          "application/json": components["schemas"]["Result_ProviderMetrics.string_"];
         };
       };
     };
