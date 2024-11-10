@@ -1,8 +1,13 @@
 import { Col, Row } from "@/components/layout/common";
+import useOnboardingContext, {
+  ONBOARDING_STEPS,
+} from "@/components/layout/onboardingContext";
 import { useOrg } from "@/components/layout/organizationContext";
 import { CreateNewEvaluatorSheetContent } from "@/components/shared/CreateNewEvaluator/CreateNewEvaluatorSheetContent";
 import useNotification from "@/components/shared/notification/useNotification";
+import OnboardingPopover from "@/components/templates/onboarding/OnboardingPopover";
 import { Button } from "@/components/ui/button";
+import { Popover, PopoverTrigger } from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -15,7 +20,7 @@ import { Sheet } from "@/components/ui/sheet";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Loader2, TrashIcon } from "lucide-react";
-import { memo, useState } from "react";
+import { memo, useEffect, useState } from "react";
 
 const ScoresEvaluatorsConfig = memo(
   ({ experimentId }: { experimentId: string }) => {
@@ -117,10 +122,33 @@ const ScoresEvaluatorsConfig = memo(
       },
     });
 
+    const {
+      isOnboardingVisible,
+      currentStep,
+      setCurrentStep,
+      setOnClickElement,
+    } = useOnboardingContext();
+
     const [open, setOpen] = useState<boolean>(false);
+    const [selectOpen, setSelectOpen] = useState<boolean>(false);
+
+    useEffect(() => {
+      if (
+        isOnboardingVisible &&
+        currentStep === ONBOARDING_STEPS.EXPERIMENTS_CLICK_ADD_EVAL.stepNumber
+      ) {
+        setOnClickElement(() => () => {
+          setCurrentStep(ONBOARDING_STEPS.EXPERIMENTS_SPECIFIC_EVAL.stepNumber);
+          setSelectOpen(true);
+        });
+      }
+    }, [isOnboardingVisible, currentStep, setOnClickElement]);
+
     return (
       <Row className="gap-2 items-center p-1 w-full">
         <Select
+          open={selectOpen}
+          onOpenChange={setSelectOpen}
           value={"default"}
           onValueChange={(value) => {
             if (value === "helicone-new-custom") {
@@ -131,8 +159,23 @@ const ScoresEvaluatorsConfig = memo(
             }
           }}
         >
-          <SelectTrigger className="w-[200px]">
+          <SelectTrigger
+            className="w-[200px] relative"
+            data-onboarding-step={
+              ONBOARDING_STEPS.EXPERIMENTS_CLICK_ADD_EVAL.stepNumber
+            }
+          >
             <SelectValue />
+            {isOnboardingVisible &&
+              currentStep ===
+                ONBOARDING_STEPS.EXPERIMENTS_CLICK_ADD_EVAL.stepNumber && (
+                <div className="absolute right-1/2 top-1/2 translate-x-2 -translate-y-1/2">
+                  <span className="relative flex h-3 w-3">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-sky-500"></span>
+                  </span>
+                </div>
+              )}
           </SelectTrigger>
 
           <SelectContent>
@@ -148,17 +191,37 @@ const ScoresEvaluatorsConfig = memo(
             </SelectItem>
 
             {allEvaluators.data?.data?.data?.map((evaluator) => (
-              <SelectItemRawNotText
+              <Popover
                 key={evaluator.id}
-                value={evaluator.id}
-                className=""
+                open={
+                  isOnboardingVisible &&
+                  currentStep ===
+                    ONBOARDING_STEPS.EXPERIMENTS_SPECIFIC_EVAL.stepNumber
+                }
               >
-                <div className="flex flex-row items-center justify-between w-full gap-5">
-                  <span>
-                    + {evaluator.name} ({evaluator.scoring_type})
-                  </span>
-                </div>
-              </SelectItemRawNotText>
+                <PopoverTrigger asChild>
+                  <SelectItemRawNotText
+                    key={evaluator.id}
+                    value={evaluator.id}
+                    className=""
+                    data-onboarding-step={
+                      ONBOARDING_STEPS.EXPERIMENTS_SPECIFIC_EVAL.stepNumber
+                    }
+                  >
+                    <div className="flex flex-row items-center justify-between w-full gap-5">
+                      <span>
+                        + {evaluator.name} ({evaluator.scoring_type})
+                      </span>
+                    </div>
+                  </SelectItemRawNotText>
+                </PopoverTrigger>
+                <OnboardingPopover
+                  onboardingStep="EXPERIMENTS_SPECIFIC_EVAL"
+                  align="start"
+                  side="right"
+                  next={() => addEvaluator.mutate(evaluator.id)}
+                />
+              </Popover>
             ))}
           </SelectContent>
         </Select>
@@ -191,14 +254,32 @@ const ScoresEvaluatorsConfig = memo(
         </div>
         <Col className="items-end">
           <div className="flex items-center gap-2">
-            <Button
-              size="sm_sleek"
-              variant={"outline"}
-              onClick={() => runEvaluators.mutate()}
-              disabled={runEvaluators.isLoading}
+            <Popover
+              open={
+                isOnboardingVisible &&
+                currentStep === ONBOARDING_STEPS.EXPERIMENTS_RUN_EVAL.stepNumber
+              }
             >
-              {runEvaluators.isLoading ? "Running..." : "Run Evaluators"}
-            </Button>
+              <PopoverTrigger asChild>
+                <Button
+                  size="sm_sleek"
+                  variant={"outline"}
+                  onClick={() => runEvaluators.mutate()}
+                  disabled={runEvaluators.isLoading}
+                  data-onboarding-step={
+                    ONBOARDING_STEPS.EXPERIMENTS_RUN_EVAL.stepNumber
+                  }
+                >
+                  {runEvaluators.isLoading ? "Running..." : "Run Evaluators"}
+                </Button>
+              </PopoverTrigger>
+              <OnboardingPopover
+                onboardingStep="EXPERIMENTS_RUN_EVAL"
+                align="end"
+                side="bottom"
+                next={() => runEvaluators.mutate()}
+              />
+            </Popover>
             {runEvaluators.isLoading && (
               <Loader2 className="w-4 h-4 animate-spin" />
             )}

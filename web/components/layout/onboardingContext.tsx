@@ -16,6 +16,7 @@ import {
   WorkflowIcon,
 } from "lucide-react";
 import { BeakerIcon } from "@heroicons/react/24/outline";
+import { cn } from "@/lib/utils";
 
 // type OnboardingStepLabel =
 //   | "REQUESTS_TABLE"
@@ -427,13 +428,20 @@ export const OnboardingProvider = ({
 export const OnboardingBackground = () => {
   const { isOnboardingVisible, elementPointerPosition, onClickElement } =
     useOnboardingContext();
+
+  console.log({ onClickElement });
   // return <div className="absolute inset-0 z-[9998] pointer-events-auto"></div>;
 
   if (!isOnboardingVisible) return null;
   return (
     <div className="absolute inset-0 z-[9998] pointer-events-auto">
       <motion.div
-        className="absolute z-[9999] pointer-events-none"
+        className={cn(
+          "absolute z-[9999]",
+          onClickElement !== null && onClickElement !== undefined
+            ? "cursor-pointer"
+            : ""
+        )}
         onClick={onClickElement}
         initial={
           elementPointerPosition

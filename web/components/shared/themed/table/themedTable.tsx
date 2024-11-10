@@ -367,7 +367,7 @@ export default function ThemedTable<T extends { id?: string }>(
                             <PopoverTrigger asChild>
                               <tr
                                 data-onboarding-step={
-                                  ONBOARDING_STEPS["REQUESTS_TABLE"].stepNumber
+                                  ONBOARDING_STEPS.REQUESTS_TABLE.stepNumber
                                 }
                                 className={clsx(
                                   " hover:cursor-pointer",

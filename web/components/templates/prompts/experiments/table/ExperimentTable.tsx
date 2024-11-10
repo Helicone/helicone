@@ -10,7 +10,13 @@ import {
 } from "ag-grid-community";
 import "ag-grid-community/styles/ag-grid.css";
 import { AgGridReact } from "ag-grid-react";
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import AddColumnHeader from "./AddColumnHeader";
 import { HypothesisCellRenderer } from "./cells/HypothesisCellRenderer";
 import { OriginalMessagesCellRenderer } from "./cells/OriginalMessagesCellRenderer";
@@ -48,6 +54,7 @@ import useOnboardingContext, {
 import OnboardingPopover from "@/components/templates/onboarding/OnboardingPopover";
 import { useJawnClient } from "@/lib/clients/jawnHook";
 import { useQuery } from "@tanstack/react-query";
+import { generateOpenAITemplate } from "@/components/shared/CreateNewEvaluator/evaluatorHelpers";
 
 interface ExperimentTableProps {
   experimentTableId: string;
@@ -505,8 +512,12 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
     ]
   );
 
-  const { setCurrentStep, currentStep, isOnboardingVisible } =
-    useOnboardingContext();
+  const {
+    setCurrentStep,
+    currentStep,
+    isOnboardingVisible,
+    setOnClickElement,
+  } = useOnboardingContext();
 
   const jawn = useJawnClient();
   const [onboardingAddedRows, setOnboardingAddedRows] = useState(false);
@@ -567,6 +578,78 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
     handleAddRowInsertBatch,
     experimentTableQuery?.datasetId,
     refetchExperimentTable,
+  ]);
+
+  // const openAIFunction = useMemo(() => {
+  //   return generateOpenAITemplate({
+  //     name: configFormParams.name,
+  //     description: configFormParams.description,
+  //     expectedValueType: configFormParams.expectedValueType,
+  //     choiceScores: configFormParams.choiceScores,
+  //     rangeMin: configFormParams.rangeMin,
+  //     rangeMax: configFormParams.rangeMax,
+  //     model: configFormParams.model,
+  //   });
+  // }, [configFormParams]);
+
+  useEffect(() => {
+    if (
+      isOnboardingVisible &&
+      currentStep === ONBOARDING_STEPS.EXPERIMENTS_CLICK_SHOW_SCORES.stepNumber
+    ) {
+      setOnClickElement(() => () => {
+        setShowScoresTable(!showScoresTable);
+        setCurrentStep(currentStep + 1);
+      });
+
+      const openAIFunction = generateOpenAITemplate({
+        name: "Humor",
+        description: "Check if the response is funny",
+        expectedValueType: "choice",
+        choiceScores: [
+          {
+            score: 1,
+            description: "Not Funny",
+          },
+          {
+            score: 2,
+            description: "Slightly Funny",
+          },
+          {
+            score: 3,
+            description: "Funny",
+          },
+          {
+            score: 4,
+            description: "Very Funny",
+          },
+          {
+            score: 5,
+            description: "Hilarious",
+          },
+        ],
+        model: "gpt-4o-mini",
+      });
+
+      jawn
+        .POST("/v1/evaluator", {
+          body: {
+            llm_template: openAIFunction,
+            scoring_type: `LLM-CHOICE`,
+            name: "Humor",
+          },
+        })
+        .then((res) => {
+          console.log(res.data?.data);
+        });
+    }
+  }, [
+    isOnboardingVisible,
+    currentStep,
+    setOnClickElement,
+    showScoresTable,
+    setShowScoresTable,
+    setCurrentStep,
   ]);
 
   if (isExperimentTableLoading) {
