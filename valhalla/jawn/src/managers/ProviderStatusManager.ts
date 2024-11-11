@@ -10,11 +10,16 @@ export type ProviderMetrics = {
     errorRate24h: number;
     errorRatePrevious24h: number;
     errorRateChange: number;
+    averageLatency: number;
+    averageLatencyPerToken: number;
+    latencyChange: number;
+    latencyPerTokenChange: number;
     timeSeriesData: {
       timestamp: Date;
-      errorRate: number;
       errorCount: number;
       requestCount: number;
+      errorRate: number;
+      averageLatency: number;
     }[];
   };
 };
@@ -46,11 +51,14 @@ export type ProviderMetrics2 = {
     errorRate24h: number;
     errorRatePrevious24h: number;
     errorRateChange: number;
+    latencyChange: number;
+    latencyPerTokenChange: number;
     timeSeriesData: {
       timestamp: Date;
       errorCount: number;
       requestCount: number;
       errorRate: number;
+      averageLatency: number;
     }[];
   };
 };
@@ -64,7 +72,8 @@ export class ProviderStatusManager {
         countIf(status >= 500) as error_count,
         count(*) as request_count,
         error_count,
-        (error_count / request_count) * 100 as error_rate
+        (error_count / request_count) * 100 as error_rate,
+        avg(latency) as average_latency
       FROM request_response_rmt
       WHERE 
         request_created_at >= now() - INTERVAL 1 DAY
@@ -83,7 +92,9 @@ export class ProviderStatusManager {
             provider,
             count(*) as previous_request_count,
             countIf(status >= 500) as previous_error_count,
-            (previous_error_count / nullif(previous_request_count, 0)) * 100 as previous_error_rate
+            (previous_error_count / nullif(previous_request_count, 0)) * 100 as previous_error_rate,
+            avg(latency) as average_latency,
+            avg(latency / nullif(completion_tokens, 0)) as average_latency_per_token
         FROM request_response_rmt
         WHERE 
             request_created_at >= now() - INTERVAL 2 DAY
@@ -96,7 +107,9 @@ export class ProviderStatusManager {
             provider,
             count(*) as current_request_count,
             countIf(status >= 500) as current_error_count,
-            (current_error_count / nullif(current_request_count, 0)) * 100 as current_error_rate
+            (current_error_count / nullif(current_request_count, 0)) * 100 as current_error_rate,
+            avg(latency) as average_latency,
+            avg(latency / nullif(completion_tokens, 0)) as average_latency_per_token
         FROM request_response_rmt
         WHERE 
             request_created_at >= now() - INTERVAL 1 DAY
@@ -110,7 +123,11 @@ export class ProviderStatusManager {
         ((c.current_request_count - p.previous_request_count) / nullif(p.previous_request_count, 0)) * 100 as request_volume_change,
         c.current_error_rate as error_rate_24h,
         p.previous_error_rate as error_rate_previous_24h,
-        (c.current_error_rate - p.previous_error_rate) as error_rate_change
+        (c.current_error_rate - p.previous_error_rate) as error_rate_change,
+        c.average_latency,
+        c.average_latency_per_token,
+        ((c.average_latency - p.average_latency) / nullif(p.average_latency, 0)) * 100 as latency_change,
+        ((c.average_latency_per_token - p.average_latency_per_token) / nullif(p.average_latency_per_token, 0)) * 100 as latency_per_token_change
         FROM current_period c
         LEFT JOIN previous_period p ON c.provider = p.provider
     `;
@@ -122,6 +139,8 @@ export class ProviderStatusManager {
         error_count: number;
         request_count: number;
         error_rate: number;
+        average_latency: number;
+        average_latency_per_token: number;
       }>(timeSeriesQuery, []),
       clickhouseDb.dbQuery<{
         provider: string;
@@ -131,6 +150,10 @@ export class ProviderStatusManager {
         error_rate_24h: number;
         error_rate_previous_24h: number;
         error_rate_change: number;
+        average_latency: number;
+        average_latency_per_token: number;
+        latency_change: number;
+        latency_per_token_change: number;
       }>(totalQuery, []),
     ]);
 
@@ -148,6 +171,10 @@ export class ProviderStatusManager {
           errorRate24h: d.error_rate_24h,
           errorRatePrevious24h: d.error_rate_previous_24h,
           errorRateChange: d.error_rate_change,
+          averageLatency: d.average_latency,
+          averageLatencyPerToken: d.average_latency_per_token,
+          latencyChange: d.latency_change,
+          latencyPerTokenChange: d.latency_per_token_change,
         },
       ]) ?? []
     );
@@ -163,6 +190,8 @@ export class ProviderStatusManager {
           errorCount: curr.error_count ?? 0,
           errorRate: curr.error_rate ?? 0,
           requestCount: curr.request_count ?? 0,
+          averageLatency: curr.average_latency ?? 0,
+          averageLatencyPerToken: curr.average_latency_per_token ?? 0,
         });
         return acc;
       }, {} as Record<string, any>) ?? {};
@@ -176,6 +205,10 @@ export class ProviderStatusManager {
         errorRate24h: 0,
         errorRatePrevious24h: 0,
         errorRateChange: 0,
+        averageLatency: 0,
+        averageLatencyPerToken: 0,
+        latencyChange: 0,
+        latencyPerTokenChange: 0,
       };
 
       return {
@@ -187,6 +220,10 @@ export class ProviderStatusManager {
           errorRate24h: providerMetric.errorRate24h,
           errorRatePrevious24h: providerMetric.errorRatePrevious24h,
           errorRateChange: providerMetric.errorRateChange,
+          averageLatency: providerMetric.averageLatency,
+          averageLatencyPerToken: providerMetric.averageLatencyPerToken,
+          latencyChange: providerMetric.latencyChange,
+          latencyPerTokenChange: providerMetric.latencyPerTokenChange,
           timeSeriesData: timeSeriesByProvider[provider] ?? [],
         },
       };
@@ -210,6 +247,10 @@ export class ProviderStatusManager {
           errorRate24h: 0,
           errorRatePrevious24h: 0,
           errorRateChange: 0,
+          averageLatency: 0,
+          averageLatencyPerToken: 0,
+          latencyChange: 0,
+          latencyPerTokenChange: 0,
           timeSeriesData: [],
         },
       });
@@ -223,7 +264,9 @@ export class ProviderStatusManager {
         countIf(status >= 500) as error_count,
         count(*) as request_count,
         error_count,
-        (error_count / request_count) * 100 as error_rate
+        (error_count / request_count) * 100 as error_rate,
+        avg(latency) as average_latency,
+        avg(latency / nullif(completion_tokens, 0)) as average_latency_per_token
       FROM request_response_rmt
       WHERE 
         request_created_at >= now() - INTERVAL 1 DAY
@@ -241,7 +284,9 @@ export class ProviderStatusManager {
         SELECT 
           count(*) as previous_request_count,
           countIf(status >= 500) as previous_error_count,
-          (previous_error_count / nullif(previous_request_count, 0)) * 100 as previous_error_rate
+          (previous_error_count / nullif(previous_request_count, 0)) * 100 as previous_error_rate,
+          avg(latency) as average_latency,
+          avg(latency / nullif(completion_tokens, 0)) as average_latency_per_token
         FROM request_response_rmt
         WHERE 
           request_created_at >= now() - INTERVAL 2 DAY
@@ -252,7 +297,9 @@ export class ProviderStatusManager {
         SELECT 
           count(*) as current_request_count,
           countIf(status >= 500) as current_error_count,
-          (current_error_count / nullif(current_request_count, 0)) * 100 as current_error_rate
+          (current_error_count / nullif(current_request_count, 0)) * 100 as current_error_rate,
+          avg(latency) as average_latency,
+          avg(latency / nullif(completion_tokens, 0)) as average_latency_per_token
         FROM request_response_rmt
         WHERE 
           request_created_at >= now() - INTERVAL 1 DAY
@@ -264,7 +311,11 @@ export class ProviderStatusManager {
           ((c.current_request_count - p.previous_request_count) / nullif(p.previous_request_count, 0)) * 100 as request_volume_change,
           c.current_error_rate as error_rate_24h,
           p.previous_error_rate as error_rate_previous_24h,
-          (c.current_error_rate - p.previous_error_rate) as error_rate_change
+          (c.current_error_rate - p.previous_error_rate) as error_rate_change,
+          c.average_latency,
+          c.average_latency_per_token,
+          ((c.average_latency - p.average_latency) / nullif(p.average_latency, 0)) * 100 as latency_change,
+          ((c.average_latency_per_token - p.average_latency_per_token) / nullif(p.average_latency_per_token, 0)) * 100 as latency_per_token_change
         FROM current_period c
         LEFT JOIN previous_period p ON 1=1
     `;
@@ -275,6 +326,8 @@ export class ProviderStatusManager {
         error_count: number;
         request_count: number;
         error_rate: number;
+        average_latency: number;
+        average_latency_per_token: number;
       }>(timeSeriesQuery, []),
       clickhouseDb.dbQuery<{
         request_count_24h: number;
@@ -283,6 +336,10 @@ export class ProviderStatusManager {
         error_rate_24h: number;
         error_rate_previous_24h: number;
         error_rate_change: number;
+        average_latency: number;
+        average_latency_per_token: number;
+        latency_change: number;
+        latency_per_token_change: number;
       }>(totalQuery, []),
     ]);
 
@@ -300,6 +357,10 @@ export class ProviderStatusManager {
           errorRate24h: 0,
           errorRatePrevious24h: 0,
           errorRateChange: 0,
+          averageLatency: 0,
+          averageLatencyPerToken: 0,
+          latencyChange: 0,
+          latencyPerTokenChange: 0,
           timeSeriesData: [],
         },
       });
@@ -315,12 +376,18 @@ export class ProviderStatusManager {
         errorRate24h: data.error_rate_24h,
         errorRatePrevious24h: data.error_rate_previous_24h,
         errorRateChange: data.error_rate_change,
+        averageLatency: data.average_latency,
+        averageLatencyPerToken: data.average_latency_per_token,
+        latencyChange: data.latency_change,
+        latencyPerTokenChange: data.latency_per_token_change,
         timeSeriesData:
           timeSeriesResult.data?.map((d) => ({
             timestamp: new Date(d.timestamp),
             errorRate: d.error_rate ?? 0,
             errorCount: d.error_count ?? 0,
             requestCount: d.request_count ?? 0,
+            averageLatency: d.average_latency ?? 0,
+            averageLatencyPerToken: d.average_latency_per_token ?? 0,
           })) ?? [],
       },
     });

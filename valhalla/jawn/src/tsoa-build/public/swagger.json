@@ -7908,15 +7908,19 @@
 							"timeSeriesData": {
 								"items": {
 									"properties": {
+										"averageLatency": {
+											"type": "number",
+											"format": "double"
+										},
+										"errorRate": {
+											"type": "number",
+											"format": "double"
+										},
 										"requestCount": {
 											"type": "number",
 											"format": "double"
 										},
 										"errorCount": {
-											"type": "number",
-											"format": "double"
-										},
-										"errorRate": {
 											"type": "number",
 											"format": "double"
 										},
@@ -7926,14 +7930,31 @@
 										}
 									},
 									"required": [
+										"averageLatency",
+										"errorRate",
 										"requestCount",
 										"errorCount",
-										"errorRate",
 										"timestamp"
 									],
 									"type": "object"
 								},
 								"type": "array"
+							},
+							"latencyPerTokenChange": {
+								"type": "number",
+								"format": "double"
+							},
+							"latencyChange": {
+								"type": "number",
+								"format": "double"
+							},
+							"averageLatencyPerToken": {
+								"type": "number",
+								"format": "double"
+							},
+							"averageLatency": {
+								"type": "number",
+								"format": "double"
 							},
 							"errorRateChange": {
 								"type": "number",
@@ -7962,6 +7983,10 @@
 						},
 						"required": [
 							"timeSeriesData",
+							"latencyPerTokenChange",
+							"latencyChange",
+							"averageLatencyPerToken",
+							"averageLatency",
 							"errorRateChange",
 							"errorRatePrevious24h",
 							"errorRate24h",

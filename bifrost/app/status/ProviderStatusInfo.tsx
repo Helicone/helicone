@@ -70,15 +70,16 @@ export function ProviderStatusInfo({ provider }: ProviderStatusInfoProps) {
     }),
     requestCount: data.requestCount,
     errorCount: data.errorCount,
+    latency: data.averageLatency,
   }));
 
   const maxErrorCount = Math.max(...chartData.map((data) => data.errorCount));
+  const maxLatency = Math.max(...chartData.map((data) => data.latency));
 
   return (
-    <div className="w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-4">
-      {/* Left column - Status cards */}
-      <div className="lg:col-span-2 space-y-4">
-        <Card className="shadow-none border">
+    <div className="w-full max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-5 gap-4">
+      <div className="lg:col-span-3 space-y-4">
+        <Card className="shadow-none border h-[120px]">
           <CardContent className="pt-6">
             {(() => {
               const status = getProviderStatus(provider.metrics.errorRate24h);
@@ -88,7 +89,7 @@ export function ProviderStatusInfo({ provider }: ProviderStatusInfoProps) {
                 <>
                   <div className="flex items-center justify-between mb-2">
                     <h2 className="text-2xl font-bold">
-                      {formatProviderName(provider.providerName)} Status
+                      Is {formatProviderName(provider.providerName)} down?
                     </h2>
                     <Badge
                       variant="secondary"
@@ -99,9 +100,13 @@ export function ProviderStatusInfo({ provider }: ProviderStatusInfoProps) {
                     </Badge>
                   </div>
                   <div className="text-gray-500 text-lg">
-                    {status.description} (
-                    {(provider.metrics.errorRate24h * 100).toFixed(1)}% error
-                    rate)
+                    <span>{status.description}</span>
+                    {provider.metrics.errorRate24h > 0 && (
+                      <span className="text-gray-400 text-base ml-2">
+                        ({provider.metrics.errorRate24h.toFixed(2)}% of requests
+                        failing)
+                      </span>
+                    )}
                   </div>
                 </>
               );
@@ -112,7 +117,7 @@ export function ProviderStatusInfo({ provider }: ProviderStatusInfoProps) {
         <Card className="shadow-none border">
           <CardHeader>
             <CardTitle className="text-xl font-semibold">
-              Error Count History
+              Errors in the last 24 hours
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -146,26 +151,95 @@ export function ProviderStatusInfo({ provider }: ProviderStatusInfoProps) {
                 </AreaChart>
               </ResponsiveContainer>
             </div>
-            <div className="flex items-center mt-4 text-sm text-muted-foreground">
-              <TrendingDown className="w-4 h-4 mr-1" />
-              Trending down by{" "}
-              {Math.abs(provider.metrics.errorRateChange * 100).toFixed(4)}%
-              (Past 24 hours vs previous 24 hours)
+            <div className="flex w-full items-start gap-2 text-sm">
+              <div className="grid gap-2">
+                <div className="flex items-center gap-2 font-medium leading-none">
+                  <TrendingDown className="w-4 h-4 mr-1" />
+                  {Math.abs(provider.metrics.errorRateChange).toFixed(4)}%{" "}
+                  {provider.metrics.errorRateChange < 0 ? "fewer" : "more"}{" "}
+                  errors than average
+                </div>
+                <div className="flex items-center gap-2 leading-none text-muted-foreground">
+                  Compared to previous 24 hours
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      <div className="lg:col-span-1">
+      <div className="lg:col-span-2 space-y-4">
+        <Card className="shadow-none border h-[120px]">
+          <CardContent className="pt-4">
+            <h2 className="text-xl font-bold mb-2">
+              Latency in the last 24 hours
+            </h2>
+            <div className="grid grid-cols-3 gap-4 text-sm">
+              <div>
+                <div className="text-muted-foreground">Average latency</div>
+                {/* <div className="font-medium">{averageLatency.toFixed(0)}ms</div> */}
+              </div>
+              <div>
+                <div className="text-muted-foreground">Peak latency</div>
+                {/* <div className="font-medium">{peakLatency.toFixed(0)}ms</div> */}
+              </div>
+              <div>
+                <div className="text-muted-foreground">P95 latency</div>
+                {/* <div className="font-medium">{p95Latency.toFixed(0)}ms</div> */}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         <Card className="shadow-none border">
           <CardHeader>
             <CardTitle className="text-xl font-semibold">
-              Recent Updates
+              Latency in the last 24 hours
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              <p className="text-muted-foreground">No recent updates</p>
+            <div className="h-[200px] mt-4">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={chartData}>
+                  <XAxis
+                    dataKey="timestamp"
+                    stroke="#888888"
+                    fontSize={12}
+                    tickLine={false}
+                    axisLine={false}
+                    interval={30}
+                    domain={[0, maxLatency]}
+                  />
+                  <YAxis
+                    stroke="#888888"
+                    fontSize={12}
+                    tickLine={false}
+                    axisLine={false}
+                    tickFormatter={(value) => `${value}ms`}
+                  />
+                  <Tooltip />
+                  <Area
+                    type="monotone"
+                    dataKey="latency"
+                    stroke="#3b82f6"
+                    fill="#bfdbfe"
+                    fillOpacity={0.2}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="flex w-full items-start gap-2 text-sm">
+              <div className="grid gap-2">
+                <div className="flex items-center gap-2 font-medium leading-none">
+                  <TrendingDown className="w-4 h-4 mr-1" />
+                  {Math.abs(provider.metrics.latencyChange).toFixed(2)}%{" "}
+                  {provider.metrics.latencyChange < 0 ? "faster" : "slower"}{" "}
+                  than average
+                </div>
+                <div className="flex items-center gap-2 leading-none text-muted-foreground">
+                  Compared to previous 24 hours
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>

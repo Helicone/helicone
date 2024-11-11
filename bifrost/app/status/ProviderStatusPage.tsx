@@ -18,11 +18,14 @@ export type ProviderMetrics = {
     errorRate24h: number;
     errorRatePrevious24h: number;
     errorRateChange: number;
+    latencyChange: number;
+    latencyPerTokenChange: number;
     timeSeriesData: {
       timestamp: string;
-      errorRate: number;
       errorCount: number;
       requestCount: number;
+      errorRate: number;
+      averageLatency: number;
     }[];
   };
 };

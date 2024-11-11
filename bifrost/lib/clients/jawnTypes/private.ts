@@ -2750,14 +2750,24 @@ Json: JsonObject;
       metrics: {
         timeSeriesData: {
             /** Format: double */
+            averageLatency: number;
+            /** Format: double */
+            errorRate: number;
+            /** Format: double */
             requestCount: number;
             /** Format: double */
             errorCount: number;
-            /** Format: double */
-            errorRate: number;
             /** Format: date-time */
             timestamp: string;
           }[];
+        /** Format: double */
+        latencyPerTokenChange: number;
+        /** Format: double */
+        latencyChange: number;
+        /** Format: double */
+        averageLatencyPerToken: number;
+        /** Format: double */
+        averageLatency: number;
         /** Format: double */
         errorRateChange: number;
         /** Format: double */
