@@ -1,0 +1,10 @@
+{
+  "title": "Out with the Golden Datasets, Here's Why Random Sampling is Better",
+  "title1": "Out with the Golden Datasets, Here's Why Random Sampling is Better",
+  "title2": "Out with the Golden Datasets, Here's Why Random Sampling is Better",
+  "description": "Crafting high-quality prompts and evaluating them has become a pressing issue for AI teams. A well-designed prompt can elicit highly relevant, coherent, and useful responses, while a suboptimal one can lead to irrelevant, incoherent, or even harmful outputs. To create high-performing prompts, teams need both high-quality input variables and clearly defined tasks. However, since LLMs are inherently unpredictable, quantifying the impact of even small prompt changes is extremely difficult.",
+  "images": "/static/blog/prompt-evaluation-for-llms/cover.webp",
+  "time": "6 minute read",
+  "author": "Lina Lam",
+  "date": "November 11, 2024"
+}
