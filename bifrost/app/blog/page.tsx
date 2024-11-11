@@ -216,6 +216,11 @@ export type BlogStructure =
 const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
+      folderName: "prompt-evaluation-for-llms",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "pdf-chatbot-tutorial",
     },
   },

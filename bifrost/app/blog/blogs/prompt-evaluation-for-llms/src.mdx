@@ -1,280 +1,77 @@
-Lately, there's been a lot of chatter about AI agents—some enthusiastic, some skeptical. The reality is that AI agents are still in their early stages of development, and their full potential is just beginning to unfold.
+Crafting high-quality prompts and evaluating them has become a pressing issue for AI teams. A well-designed prompt can elicit highly relevant, coherent, and useful responses, while a suboptimal one can lead to irrelevant, incoherent, or even harmful outputs. To create high-performing prompts, teams need both high-quality input variables and clearly defined tasks. However, since LLMs are inherently unpredictable, quantifying the impact of even small prompt changes is extremely difficult.
 
-![Open-Source AI Agent Builder Cover](/static/blog/ai-agent-builders/cover.webp)
+![Prompt Evaluation for Large Language Models: Golden Datasets vs. Random Sampling](/static/blog/prompt-evaluation-for-llms/cover.webp)
 
-### AI Agents — Hype vs. Reality
 
-For some, AI agents are groundbreaking ways to solve big problems by **breaking them down into smaller, manageable tasks**. AI Agents are particularly great at handling repetitive or complex work. Critics, on the other hand, often imagine **<span style={{color: '#0ea5e9'}}>“Super Agents”</span>** that could fully replace humans—but we're not quite there yet.
+In a recent QA Wolf webinar, Nishant Shukla, the senior director of AI at QA Wolf, and Justin Torre, the CEO and co-founder of Helicone, shared their insights on how they tackled the challenge of effective prompt evaluation.
 
-However, this doesn't mean that AI agents aren’t incredibly useful today. Many platforms are already making meaningful strides in building robust, practical AI agents that empower teams, streamline processes, and unlock new possibilities across industries.
 
-Today, we are covering our favorite **<span style={{color: '#0ea5e9'}}>open-source frameworks & platforms for building AI agents, how they compare, and our recommendations for different use cases</span>** — whether you need complex multi-agent systems or a simple no-code solution, these will help you get started.
+## The Old Approach: Curating Golden Datasets
 
-1. Dify `freemium` `no-code` `open-source`
-2. AutoGen `free` `open-source`
-3. LlamaIndex `freemium` `open-source`
-4. LangChain `freemium` `open-source`
-5. crewAI `free` `waitlist` `open-source`
-6. (Bonus) Wordware `freemium` `not open-source`
+To address this challenge, teams have traditionally turned to the use of Golden Datasets. Golden Datasets are widely used because they are great for benchmarking and evaluating problems that are well-defined and easily reproducible.
 
----
+Golden Datasets are meticulously cleaned, labeled, and verified. Teams use Golden Datasets to make sure their applications perform optimally under controlled conditions. 
 
-### Plug 🧊
 
-Once you build an AI agent, how do you know if it’s performing well? Introducing **<span style={{color: '#0ea5e9'}}>Helicone's Sessions feature</span>** to help you analyze complex multi-step workflows.
+## The Limitation of the Golden Dataset Approach
 
-**Watch:** [Trace and debug your AI agents with Sessions](https://www.linkedin.com/posts/colegottdank_re-launching-helicone-day-23-sessions-activity-7231793935285714944-bKI8/).
+While using Golden Datasets to evaluate prompts can work well for certain applications, it’s not the best suited for today's generative AI products that demands speed. In the webinar, Nishant and Justin explained some significant drawbacks:
 
-Helicone has integrations with many platforms we will mention soon. Try it, and let us know what you think!
+### 1. Rapid prompt iteration outpaces dataset m**aintenance**
 
----
+In fast-moving AI companies like QA Wolf, prompts are constantly being updated and improved. By the time a Golden Dataset is created, the prompts have often already changed, rendering the dataset obsolete.
 
-## First, what are AI agents anyway?
+### 2. **Overfitting due to lack of g**eneralization and performance drift
 
-**An AI agent is a software tool designed to handle tasks autonomously**. It observes its environment, makes decisions based on data, and takes action to achieve specific goals with minimal human intervention. Think of it as your code working smarter — automating processes, analyzing data, and scaling seamlessly alongside your application
+Golden Datasets tend to be simplified or idealized examples that may not accurately reflect the true complexity and variability of real-world data. This can lead to overfitting and poor generalization to production scenarios.
 
-AI agents can handle a variety of tasks in enterprise software:
+### 3. Curation and m**aintenance results in high** costs and scaling challenges
 
-✅ Automate repetitive tasks to save time and manual work
+Keeping a Golden Dataset up-to-date and representative of the evolving data and prompt structures is an ongoing and resource-intensive task.
 
-✅ Analyze data and identify patterns quickly
 
-✅ Operate 24/7 with no downtime
+## The New Approach: Random Sampling for Prompt Evaluation
 
-✅ Scale with your app and adapting to increased demand.
+To overcome these limitations, QA Wolf and Helicone have turned to a more innovative approach: **random sampling of production data**. By randomly selecting a small subset of actual user interactions and using that as the evaluation benchmark, they've been able to achieve several key benefits:
 
-✅ Maintain consistent performance
+### 1. Agility and Faster Iteration
 
-## Some real-life examples
+The ability to quickly test prompt changes against real-world data allows QA Wolf to iterate and improve their multi-agent system more efficiently, without being bogged down by the maintenance overhead of a Golden Dataset.
 
-**Customer support bots**
+### 2. Real-world Representation
 
-Platforms like **<span style={{color: '#0ea5e9'}}>ChatGPT</span>** and **<span style={{color: '#0ea5e9'}}>Zendesk</span>**'s answer bot handle customer inquiries, provide instant support, and can often resolve issues without human intervention.
+Random sampling ensures that the evaluation data accurately reflects the complexity and diversity of actual user interactions, reducing the risk of overfitting and improving the generalization of the AI agents.
 
-**Code completion agents**
+### 3. Cost-effectiveness
 
-Tools such as **<span style={{color: '#0ea5e9'}}>GitHub Copilot</span>** and **<span style={{color: '#0ea5e9'}}>Cursor</span>** suggest code completions, generate functions from natural language descriptions, and explain complex code segments, significantly boosting programmer productivity.
+By sampling a subset of production data rather than evaluating against the entire dataset, QA Wolf has been able to significantly reduce the computational resources and costs associated with prompt evaluation.
 
-**AI research agents**
 
-Platforms like **<span style={{color: '#0ea5e9'}}>Perplexity</span>** and **<span style={{color: '#0ea5e9'}}>Elicit</span>** process vast amounts of information, summarize academic papers, answer complex questions, and even generate hypotheses, changing how researchers approach information gathering and analysis.
+## Implement Random Sampling in Helicone
 
----
+To implement this random sampling approach, QA Wolf has partnered with Helicone, a platform that specializes in managing and optimizing LLM-powered workflows. Helicone's ability to log and track all production data, combined with its experimentation capabilities, has been a key enabler for QA Wolf's success.
 
-## 1. [Dify](https://dify.ai/): The No-Code Platform for Building Agents
+![Prompt Evaluation for Large Language Models: Golden Datasets vs. Random Sampling](/static/blog/prompt-evaluation-for-llms/cover.webp)
 
-**Best for**: Rapid prototyping and non-technical team collaboration
+As Justin explained, Helicone allows QA Wolf to randomly sample production data, use it to iterate on prompt definitions, and then evaluate the impact of those changes against the real-world benchmark. This iterative process helps the QA Wolf team converge on prompts that are well-aligned with actual user needs and behaviors.
 
-`Freemium` `no-code` `open-source`
 
-![Dify AI: AI Agent Builder](/static/blog/ai-agent-builders/dify-ai.webp)
+## Conclusion
 
-[![Dify AI](https://img.shields.io/github/stars/langgenius/dify.svg?stylAe=social)](https://github.com/langgenius/dify)
+| **Golden Datasets** | **Random Sampling** |
+| --- | --- |
+| • Meticulously cleaned and labeled data
+• Controlled conditions
+• High maintenance costs
+• Risk of overfitting (Model performing well on training data but poorly on new data)  
+• Slower iteration due to dataset updates | • Real-world production data
+• Reflects actual user interactions
+• Cost-effective
+• Better generalization
+• Faster iteration cycles |
+|  |  |
 
-Dify AI is an open-source large language model (LLM) application development platform for building AI agents and complex workflows. It combines the concepts of Backend-as-a-Service and LLMOps to enable developers to quickly build production-grade generative AI applications. Even non-technical people can participate in defining the AI applications and the data operations.
-
-### Key Features of Dify
-
-- 🎨 **Visual Prompt Orchestration**: Design and manage prompts visually to simplify LLM app development.
-- 📜 **Long Context Integration**: Handle extensive context windows to retain and process more information during conversations.
-- 🔌 **API-Based Development**: Build and deploy AI applications using a flexible API that integrates with various systems.
-- 🌍 **Multi-Model Support**: Utilize multiple LLMs, including GPT, Mistral, and Llama, to fit diverse use cases.
-- 🔍 **RAG Pipeline**: Integrate Retrieval-Augmented Generation (RAG) for more accurate and context-aware responses.
-
-### Pros and Cons of Dify
-
-| **Pros**                                                                                                                         | **Cons**                                                                                                                                                                                     |
-| -------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| • **Beginner friendly**: Dify’s intuitive interface makes it easy for beginners and non-technical users to build AI apps.        | • **Limited customization**: While limited to pre-built components and visual workflows, users have flexibility in configuration, custom code snippets and can integrate with external APIs. |
-| • **Strong data security**: Robust encryption and protection mechanisms to ensure data confidentiality and safety.               | • **Complex data processing**: Constraints in handling intricate machine learning models or extensive computational tasks.                                                                   |
-| • **Seamless integration**: Connects with popular AI models and supports integration with external tools like Zapier, Make, etc. | • **Scalability**: While there are limitations when it comes to building highly complex or large-scale tasks, Dify is suitable for building most AI apps.                                    |
-
----
-
-### 2. [AutoGen](https://microsoft.github.io/autogen/): The Multitasking Framework
-
-**Best for**: Building complex, multi-agent systems with high customization needs
-
-`free` `open-source`
-
-![AutoGen: AI Agent Builder](/static/blog/ai-agent-builders/autogen.webp)
-
-[![AutoGen](https://img.shields.io/github/stars/microsoft/autogen.svg?stylAe=social)](https://github.com/microsoft/autogen)
-
-AutoGen is Microsoft’s open-source framework providing developers with tools to build multi-agent systems, supporting diverse conversation patterns and customizable agents.
-
-### Key features of AutoGen
-
-- 🤝 **Multi-agent architecture:** Supports creating multiple agents that collaborate efficiently.
-- 🎭 **Customizable agents:** Easily tailor agents for specific tasks and use cases.
-- 🧠 **Compatible with large language models:** Leverages the capabilities of advanced LLMs.
-- 💻 **Code execution support:** Agents can write and run code autonomously.
-- 👥 **Flexible human involvement:** Allows varying levels of human control, from full automation to manual oversight.
-
-### Pros and Cons o**f AutoGen**
-
-| **Pros**                                                                                                   | **Cons**                                                                                                                                                                  |
-| ---------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| • **High customization:** extensive options for agent definition, LLM integration, and conversation flows. | • **Steeper learning curve**: Requires proficiency in Python and a strong understanding of AI concepts.                                                                   |
-| • **Advanced code execution**: Supports containerized code execution for complex tasks and simulations.    | • **Complex setup**: Higher technical requirements can be challenging for users without coding expertise.                                                                 |
-| • **Deep NLP Integration**: Flexibility in integrating and fine-tuning various LLMs.                       | • **Dependency on input quality**: The output is contingent on the quality of input data. To get optimal results, users must meticulously choose and verify their inputs. |
-| • **Scalability**: Integrates with cloud services like Azure for handling large-scale operations.          |                                                                                                                                                                           |
-
----
-
-### 3. [LlamaIndex](https://www.llamaindex.ai/): Build Your Ideal AI Team
-
-**Best for**: Data-intensive applications requiring efficient indexing and retrieval
-
-`freemium` `open-source`
-
-![LlamaIndex: AI Agent Builder](/static/blog/ai-agent-builders/llamaindex.webp)
-
-[![LlamaIndex](https://img.shields.io/github/stars/run-llama/llama_index.svg?stylAe=social)](https://github.com/run-llama/llama_index)
-
-### Key features of LlamaIndex
-
-- 🏗️ **Distributed service-oriented architecture**: It's like a well-organized llama farm, but for data services
-- 🤝 **Standardized API interfaces:** Because even llamas need to speak the same language
-- 🎭 **Agentic and explicit orchestration flows:** It's like being the conductor of an AI orchestra
-- 🚀 **Ease of deployment:** Easier than convincing a llama to wear a hat (trust us, we've tried)
-- 📈 **Scalability and resource management:** It grows with you, unlike that cactus you forgot to water
-
-### Pros and Cons of LlamaIndex
-
-| **Pros**                                                                                                                                        | **Cons**                                                                                                                        |
-| ----------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| • **Integrating multiple data sources:** handles a wide range of data formats(support for 160+ data sources - APIs, PDF, Documents, SQL..etc).  | • **Steeper learning curve**: Powerful, but can be complex compared to some other frameworks to beginners to AI agent building. |
-| • **Focused on indexing and efficient retrieval**: its advanced indexing techniques ensure fast and accurate retrieval of relevant information. | • **Limited functionality:** Primarily focused on data retrieval, less suitable for complex NLP tasks.                          |
-| • **Customizable workflows:** tailor the RAG process to specific use cases, including model options, retrieval strategy, etc.                   |                                                                                                                                 |
-
----
-
-### 4. [crewAI](https://www.crewai.com/): Build Your Ideal AI Team
-
-**Best for**: Creating role-based AI agent teams for specific workflows
-
-`free` `waitlist` `open-source`
-
-![crewAI: AI Agent Builder](/static/blog/ai-agent-builders/crewai.webp)
-
-[![crewAI](https://img.shields.io/github/stars/crewAIInc/crewAI.svg?stylAe=social)](https://github.com/crewAIInc/crewAI)
-
-crewAI is an open-source framework focused on creating AI agents with specialized roles and capabilities. It helps you build teams of agents with distinct tasks, making it suitable for complex, multi-faceted projects.
-
-A structured platform for creating and managing AI agents, allowing users to define agents with specific roles, goals, and backstories.
-
-### Key features of crewAI
-
-- 🎭 **Role-based agent design:** Define specific roles for agents, from data analysis to customer support.
-- 🧠 **Flexible memory system:** Enables agents to retain and use relevant information over time.
-- 🛠️ **Extensible tools framework:** Supports adding custom tools and functionalities.
-- 👥 **Multi-agent collaboration:** Facilitates effective teamwork among agents.
-- 🛡️ **Built-in error handling and guardrails:** Provides safety checks and robust error management.
-
-### Pros and Cons of crewAI
-
-| **Pros**                                                                                                                                                   | **Cons**                                                                                                           |
-| ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| **• Role-based collaboration:** allows for defining agents with specific roles & goals. Agents work as a team, can review and improve each other's output. | • **Basic code execution:** Not as robust in handling complex code execution as some other platforms like AutoGen. |
-| • **Quick prototype & deployment:** fast set-up and highly modular design that lets you test complex agent interaction and deploy them easily.             | • **Lack advanced features:** Less suited for highly specialized or computation-heavy tasks.                       |
-| • **Integration with LangChain**: Integrates well with LangChain and its related tools.                                                                    | • **Limited customization:** Less flexibility compared to more developer-centric platforms.                        |
-
----
-
-### 5. [LangChain](https://www.langchain.com/): A Modular Approach to AI Development
-
-**Best for**: Modular, flexible AI application development
-
-`freemium` `open-source`
-
-![LangChain: AI Agent Builder](/static/blog/ai-agent-builders/langchain.webp)
-
-[![LangChain](https://img.shields.io/github/stars/langchain-ai/langchain.svg?stylAe=social)](https://github.com/langchain-ai/langchain)
-
-LangChain is an open-source framework designed for building applications powered by large language models. It provides a modular and extensible architecture, making it easy to combine different AI components for custom solutions.
-
-### Key features of LangChain
-
-- 🧱 **Modular and extensible architecture:** Build applications by combining reusable components.
-- 🤝 **Unified interface for LLMs:** Offers a consistent API for working with various language models.
-- 🎁 **Pre-built components:** Comes with ready-to-use modules to speed up development.
-- 🕵️ **Agent functionality:** Supports creating agents with specific roles and tasks.
-- 🧠 **Memory management:** Manages state and context to keep interactions relevant.
-
-### Pros and Cons of LangChain
-
-| **Pros**                                                                                                                           | **Cons**                                                                                                                          |
-| ---------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| • **User-friendly interface:** Intuitive and beginner-friendly as developers with basic knowledge of LLMs can also build an agent. | • **Steep learning curve:** Offers greater flexibility and customizability, more suitable for users of higher coding proficiency. |
-| • **Scalability:** Useful for prototyping complex AI solutions and large datasets efficiently.                                     | • **Poor documentation:** often outdated or unclear, however, has a large active community for support.                           |
-| • **Integrations:** Has many integrations which requires more coding effort, but offers flexibility for custom models.             | • **Not suitable for production environments**: due to instability and frequent changes.                                          |
-
----
-
-### 6. [Wordware](https://www.wordware.ai/): The Versatile AI Toolkit
-
-**Best for**: Rapid AI agent development with collaborative features
-
-`freemium` `not open-source`
-
-![Wordware: AI Agent Builder](/static/blog/ai-agent-builders/wordware.webp)
-
-Wordware is an AI toolkit designed to streamline the creation and deployment (via API) of production-ready AI agents that are highly custom, complex, and powerful. Its user-friendly, Notion-like interface combined with powerful technical capabilities allows both technical and non-technical users to collaborate effectively.
-
-### Key features of Wordware:
-
-- 🌐 **Web-Hosted IDE**: Access and develop your projects from anywhere with a cloud-based development environment.
-- 🗣️ **Natural Language Programming**: Write and understand code using natural language, making development more accessible.
-- 🖼️ **Multimodal Support**: Handle various types of data including text, images, and more for versatile AI applications.
-- 🔄 **Version Control**: Keep track of changes and manage different versions of your AI projects with ease.
-- 🚀 **One-Click API Deployment**: Deploy AI agents quickly and effortlessly with a single click, speeding up time to market.
-
-### Pros and Cons of Wordware
-
-| **Pros**                                                                                                           | **Cons**                                                                                                                                               |
-| ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| • **User-friendly interface:** Notion-like interface makes it suitable for both technical and non-technical users. | • **Code completion:** Does not have a robust coding environment with advanced code completion features, however does support custom code integration. |
-| • **Collaborative:** Strong emphasis on collaboration and team features.                                           | • **Steeper pricing**: Pricing details are less transparent, potentially higher for advanced features.                                                 |
-| • **Multi-modal & flexible:** Users can incorporate text, images, audio, and video into their AI agents.           | • **Community:** Relatively new platform with fewer community resources compared to more established tools like LangChain.                             |
-| • **Rapid deployment:** One-click deployment for streamlined workflows.                                            |                                                                                                                                                        |
-
----
-
-## Choosing the Right Platform
-
-**Dify, AutoGen, LlamaIndex, crewAI, LangChain, Wordware — <span style={{color: '#0ea5e9'}}>which is better for your use case?</span>** We have a short and long answer.
-
-### The short answer
-
-| Criteria            | Dify   | AutoGen | LlamaIndex | crewAI | LangChain | Wordware |
-| ------------------- | ------ | ------- | ---------- | ------ | --------- | -------- |
-| Rapid development   | ✔️✔️✔️ | ✔️      | ✔️✔️       | ✔️✔️✔️ | ✔️✔️      | ✔️✔️✔️   |
-| Deep customization  | ✔️     | ✔️✔️✔️  | ✔️✔️       | ✔️✔️   | ✔️✔️✔️    | ✔️✔️     |
-| Data integration    | ✔️✔️   | ✔️✔️    | ✔️✔️✔️     | ✔️     | ✔️✔️      | ✔️✔️     |
-| Scalability         | ✔️✔️   | ✔️✔️✔️  | ✔️✔️✔️     | ✔️✔️   | ✔️✔️      | ✔️✔️     |
-| Ease of use         | ✔️✔️✔️ | ✔️      | ✔️         | ✔️✔️   | ✔️        | ✔️✔️✔️   |
-| Multi-agent support | ✔️     | ✔️✔️✔️  | ✔️         | ✔️✔️✔️ | ✔️✔️      | ✔️       |
-| Code execution      | ✔️     | ✔️✔️✔️  | ✔️         | ✔️     | ✔️✔️      | ✔️✔️     |
-| Community support   | ✔️✔️   | ✔️✔️    | ✔️✔️       | ✔️     | ✔️✔️✔️    | ✔️       |
-
-### The long answer…
-
-Picking the right AI agent platform comes down to understanding your needs and matching them with the right tools. Consider the following factors:
-
-- **For rapid prototyping**, go for **<span style={{color: '#0ea5e9'}}>Dify</span>** or **<span style={{color: '#0ea5e9'}}>Wordware</span>** for their no-code/low-code platform.
-- **For deep customization**, go for **<span style={{color: '#0ea5e9'}}>AutoGen</span>** or **<span style={{color: '#0ea5e9'}}>LangChain</span>** for their extensive customization capabilities.
-- **For teams with mixed technical backgrounds**, **<span style={{color: '#0ea5e9'}}>Dify</span>** is ideal due to its user-friendly interface for both developers and non-technical users.
-- **For highly technical teams**, **<span style={{color: '#0ea5e9'}}>AutoGen</span>** or **<span style={{color: '#0ea5e9'}}>LangChain</span>** may be better choices as they provide the depth and flexibility advanced developers often require.
-- **If your project involves complex data integration**, **<span style={{color: '#0ea5e9'}}>LlamaIndex</span>** does well for handling diverse data sources and efficient retrieval.
-- **For projects focused on language processing**, **<span style={{color: '#0ea5e9'}}>LangChain</span>** offers more robust NLP capabilities and integrations with various language models.
-- **For enterprise-grade scalability**, **<span style={{color: '#0ea5e9'}}>AutoGen</span>** integrates well with cloud services for large-scale operations.
-- **For efficient handling of large datasets**, **<span style={{color: '#0ea5e9'}}>LlamaIndex</span>** provides optimized indexing and retrieval mechanisms.
-- **For building conversational AI or chatbots**, **<span style={{color: '#0ea5e9'}}>Dify</span>** or **<span style={{color: '#0ea5e9'}}>LangChain</span>** have strong support for dialogue management and NLP tasks.
-- **For data analysis and research applications**, **<span style={{color: '#0ea5e9'}}>LlamaIndex</span>** or **<span style={{color: '#0ea5e9'}}>AutoGen</span>** will be better suited for their robust data processing and analysis capabilities.
-- **For workflow automation with distinct AI roles**, **<span style={{color: '#0ea5e9'}}>crewAI</span>** specializes in creating teams of AI agents with defined roles and collaboration patterns.
-
-Don’t forget to consider the learning curves of each platform and the kind of support available, especially if your team is new to AI development.
+The QA Wolf and Helicone collaboration showcases how taking different approaches to prompt evaluation can enable progression for AI teams. By using random sampling of production data instead of using Golden Datasets, teams can become more agile and more cost-effective. This case study is a valuable example as the AI landscape evolves as companies building better observability tools continue to improve developer’s workflow for prompt engineering and evaluation.
 
 ---
 
