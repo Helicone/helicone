@@ -73,7 +73,7 @@ export default async function Home({
             <CardContent className="px-4 py-3.5 space-y-2">
               <p className="text-[#6B8C9C] text-sm leading-relaxed font-medium">
                 Join Helicone&apos;s community to monitor and optimize your LLM
-                app in real-time.
+                app in real-time. 
               </p>
               <Link href="https://us.helicone.ai/signin" className="block">
                 <Button className="w-full bg-[#0DA5E8] hover:bg-[#0C94D1] text-white font-medium">
