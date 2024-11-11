@@ -293,6 +293,7 @@
             "guides/cookbooks/fine-tune",
             "guides/cookbooks/experiments",
             "guides/cookbooks/getting-user-requests",
+            "guides/cookbooks/getting-sessions",
             "guides/cookbooks/etl",
             "guides/cookbooks/replay-session",
             "guides/cookbooks/predefining-request-id",
