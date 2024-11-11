@@ -2740,42 +2740,47 @@ Json: JsonObject;
       /** Format: double */
       timeZoneDifference: number;
     };
+    MetricsData: {
+      /** Format: double */
+      totalRequests: number;
+      /** Format: double */
+      requestCountPrevious24h: number;
+      /** Format: double */
+      requestVolumeChange: number;
+      /** Format: double */
+      errorRate24h: number;
+      /** Format: double */
+      errorRatePrevious24h: number;
+      /** Format: double */
+      errorRateChange: number;
+      /** Format: double */
+      averageLatency: number;
+      /** Format: double */
+      averageLatencyPerToken: number;
+      /** Format: double */
+      latencyChange: number;
+      /** Format: double */
+      latencyPerTokenChange: number;
+    };
+    TimeSeriesDataPoint: {
+      /** Format: date-time */
+      timestamp: string;
+      /** Format: double */
+      errorCount: number;
+      /** Format: double */
+      requestCount: number;
+      /** Format: double */
+      errorRate: number;
+      /** Format: double */
+      averageLatency: number;
+      /** Format: double */
+      averageLatencyPerToken: number;
+    };
     ProviderMetrics: {
-      metrics: {
-        timeSeriesData: {
-            /** Format: double */
-            averageLatency: number;
-            /** Format: double */
-            errorRate: number;
-            /** Format: double */
-            requestCount: number;
-            /** Format: double */
-            errorCount: number;
-            /** Format: date-time */
-            timestamp: string;
-          }[];
-        /** Format: double */
-        latencyPerTokenChange: number;
-        /** Format: double */
-        latencyChange: number;
-        /** Format: double */
-        averageLatencyPerToken: number;
-        /** Format: double */
-        averageLatency: number;
-        /** Format: double */
-        errorRateChange: number;
-        /** Format: double */
-        errorRatePrevious24h: number;
-        /** Format: double */
-        errorRate24h: number;
-        /** Format: double */
-        requestVolumeChange: number;
-        /** Format: double */
-        requestCountPrevious24h: number;
-        /** Format: double */
-        totalRequests: number;
-      };
       providerName: string;
+      metrics: components["schemas"]["MetricsData"] & {
+        timeSeriesData: components["schemas"]["TimeSeriesDataPoint"][];
+      };
     };
     "ResultSuccess_ProviderMetrics-Array_": {
       data: components["schemas"]["ProviderMetrics"][];

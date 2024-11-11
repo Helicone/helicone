@@ -2712,15 +2712,49 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "MetricsData": {
+        "dataType": "refObject",
+        "properties": {
+            "totalRequests": {"dataType":"double","required":true},
+            "requestCountPrevious24h": {"dataType":"double","required":true},
+            "requestVolumeChange": {"dataType":"double","required":true},
+            "errorRate24h": {"dataType":"double","required":true},
+            "errorRatePrevious24h": {"dataType":"double","required":true},
+            "errorRateChange": {"dataType":"double","required":true},
+            "averageLatency": {"dataType":"double","required":true},
+            "averageLatencyPerToken": {"dataType":"double","required":true},
+            "latencyChange": {"dataType":"double","required":true},
+            "latencyPerTokenChange": {"dataType":"double","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "TimeSeriesDataPoint": {
+        "dataType": "refObject",
+        "properties": {
+            "timestamp": {"dataType":"datetime","required":true},
+            "errorCount": {"dataType":"double","required":true},
+            "requestCount": {"dataType":"double","required":true},
+            "errorRate": {"dataType":"double","required":true},
+            "averageLatency": {"dataType":"double","required":true},
+            "averageLatencyPerToken": {"dataType":"double","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ProviderMetrics": {
-        "dataType": "refAlias",
-        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"metrics":{"dataType":"nestedObjectLiteral","nestedProperties":{"timeSeriesData":{"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"averageLatency":{"dataType":"double","required":true},"errorRate":{"dataType":"double","required":true},"requestCount":{"dataType":"double","required":true},"errorCount":{"dataType":"double","required":true},"timestamp":{"dataType":"datetime","required":true}}},"required":true},"latencyPerTokenChange":{"dataType":"double","required":true},"latencyChange":{"dataType":"double","required":true},"averageLatencyPerToken":{"dataType":"double","required":true},"averageLatency":{"dataType":"double","required":true},"errorRateChange":{"dataType":"double","required":true},"errorRatePrevious24h":{"dataType":"double","required":true},"errorRate24h":{"dataType":"double","required":true},"requestVolumeChange":{"dataType":"double","required":true},"requestCountPrevious24h":{"dataType":"double","required":true},"totalRequests":{"dataType":"double","required":true}},"required":true},"providerName":{"dataType":"string","required":true}},"validators":{}},
+        "dataType": "refObject",
+        "properties": {
+            "providerName": {"dataType":"string","required":true},
+            "metrics": {"dataType":"intersection","subSchemas":[{"ref":"MetricsData"},{"dataType":"nestedObjectLiteral","nestedProperties":{"timeSeriesData":{"dataType":"array","array":{"dataType":"refObject","ref":"TimeSeriesDataPoint"},"required":true}}}],"required":true},
+        },
+        "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ResultSuccess_ProviderMetrics-Array_": {
         "dataType": "refObject",
         "properties": {
-            "data": {"dataType":"array","array":{"dataType":"refAlias","ref":"ProviderMetrics"},"required":true},
+            "data": {"dataType":"array","array":{"dataType":"refObject","ref":"ProviderMetrics"},"required":true},
             "error": {"dataType":"enum","enums":[null],"required":true},
         },
         "additionalProperties": false,

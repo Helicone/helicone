@@ -1,4 +1,13 @@
-import { Controller, Route, Security, Tags, Request, Get, Path } from "tsoa";
+import {
+  Controller,
+  Route,
+  Security,
+  Tags,
+  Request,
+  Get,
+  Path,
+  Body,
+} from "tsoa";
 import { Result } from "../../lib/shared/result";
 import { JawnAuthenticatedRequest } from "../../types/request";
 import {
@@ -30,4 +39,17 @@ export class StatusController extends Controller {
 
     return result;
   }
+
+  // @Get("/{provider}/latency")
+  // public async getProviderLatency(
+  //   @Request() request: JawnAuthenticatedRequest,
+  //   @Path() provider: string,
+  //   @Body()
+  //   body: {
+  //     timeFilter: "24h" | "7d" | "30d";
+  //   }
+  // ): Promise<Result<ProviderMetrics, string>> {
+  //   const providerStatusManager = new ProviderStatusManager();
+  //   const result = await providerStatusManager.getLatency(provider);
+  // }
 }

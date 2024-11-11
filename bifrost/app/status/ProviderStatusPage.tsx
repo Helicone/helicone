@@ -4,44 +4,25 @@ import { useJawnClient } from "../../lib/clients/jawnHook";
 import { useState, useEffect } from "react";
 import { AllProvidersTable } from "./AllProvidersTable";
 import { ProviderStatusInfo } from "./ProviderStatusInfo";
+import { components } from "@/lib/clients/jawnTypes/public";
 
 type ProviderStatusPageProps = {
   provider: string | "all";
 };
 
-export type ProviderMetrics = {
-  providerName: string;
-  metrics: {
-    totalRequests: number;
-    requestCountPrevious24h: number;
-    requestVolumeChange: number;
-    errorRate24h: number;
-    errorRatePrevious24h: number;
-    errorRateChange: number;
-    latencyChange: number;
-    latencyPerTokenChange: number;
-    timeSeriesData: {
-      timestamp: string;
-      errorCount: number;
-      requestCount: number;
-      errorRate: number;
-      averageLatency: number;
-    }[];
-  };
-};
-
 export function ProviderStatusPage({ provider }: ProviderStatusPageProps) {
   const jawnClient = useJawnClient();
-  const [allProviderStatus, setAllProviderStatus] = useState<ProviderMetrics[]>(
-    []
-  );
-  const [providerStatus, setProviderStatus] = useState<ProviderMetrics | null>(
-    null
-  );
+  const [allProviderStatus, setAllProviderStatus] = useState<
+    components["schemas"]["ProviderMetrics"][]
+  >([]);
+  const [providerStatus, setProviderStatus] = useState<
+    components["schemas"]["ProviderMetrics"] | null
+  >(null);
   const [isLoading, setIsLoading] = useState({ all: true, detailed: false });
   const [error, setError] = useState<{ all?: string; detailed?: string }>({});
-  const [selectedProvider, setSelectedProvider] =
-    useState<ProviderMetrics | null>(null);
+  const [selectedProvider, setSelectedProvider] = useState<
+    components["schemas"]["ProviderMetrics"] | null
+  >(null);
 
   useEffect(() => {
     async function fetchAllProviderStatus() {

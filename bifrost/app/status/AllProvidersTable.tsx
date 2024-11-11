@@ -14,23 +14,7 @@ import {
 } from "../utils/formattingUtils";
 import { ArrowUpIcon, ArrowDownIcon } from "@heroicons/react/24/solid";
 import Link from "next/link";
-
-interface ProviderMetrics {
-  providerName: string;
-  metrics: {
-    totalRequests: number;
-    requestCountPrevious24h: number;
-    requestVolumeChange: number;
-    errorRate24h: number;
-    errorRatePrevious24h: number;
-    errorRateChange: number;
-    timeSeriesData: {
-      timestamp: string;
-      errorRate: number;
-      requestCount: number;
-    }[];
-  };
-}
+import { components } from "@/lib/clients/jawnTypes/public";
 
 function TrendIndicator({ change }: { change: number }) {
   if (Math.abs(change) < 0.1) return null;
@@ -53,7 +37,7 @@ function TrendIndicator({ change }: { change: number }) {
 }
 
 interface AllProvidersTableProps {
-  providers: ProviderMetrics[];
+  providers: components["schemas"]["ProviderMetrics"][];
 }
 
 export function AllProvidersTable({ providers }: AllProvidersTableProps) {
@@ -63,7 +47,7 @@ export function AllProvidersTable({ providers }: AllProvidersTableProps) {
         <TableRow>
           <TableHead>Provider</TableHead>
           <TableHead>Status</TableHead>
-          <TableHead>Requests (24h)</TableHead>
+          <TableHead>Avg Latency Per Token (24h)</TableHead>
           <TableHead>Error Rate (10m)</TableHead>
           <TableHead>Error Rate (24h)</TableHead>
         </TableRow>
@@ -117,8 +101,10 @@ export function AllProvidersTable({ providers }: AllProvidersTableProps) {
                   href={`/status/provider/${providerName}`}
                   className="block w-full h-full px-6 py-2"
                 >
-                  {humanReadableNumber(totalRequests)}
-                  <TrendIndicator change={requestVolumeChange} />
+                  {providerInfo.metrics.averageLatencyPerToken.toFixed(0)}ms
+                  <TrendIndicator
+                    change={providerInfo.metrics.latencyPerTokenChange}
+                  />
                 </Link>
               </TableCell>
               <TableCell className="p-0">

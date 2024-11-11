@@ -7901,110 +7901,135 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"ProviderMetrics": {
+			"MetricsData": {
 				"properties": {
-					"metrics": {
-						"properties": {
-							"timeSeriesData": {
-								"items": {
-									"properties": {
-										"averageLatency": {
-											"type": "number",
-											"format": "double"
-										},
-										"errorRate": {
-											"type": "number",
-											"format": "double"
-										},
-										"requestCount": {
-											"type": "number",
-											"format": "double"
-										},
-										"errorCount": {
-											"type": "number",
-											"format": "double"
-										},
-										"timestamp": {
-											"type": "string",
-											"format": "date-time"
-										}
-									},
-									"required": [
-										"averageLatency",
-										"errorRate",
-										"requestCount",
-										"errorCount",
-										"timestamp"
-									],
-									"type": "object"
-								},
-								"type": "array"
-							},
-							"latencyPerTokenChange": {
-								"type": "number",
-								"format": "double"
-							},
-							"latencyChange": {
-								"type": "number",
-								"format": "double"
-							},
-							"averageLatencyPerToken": {
-								"type": "number",
-								"format": "double"
-							},
-							"averageLatency": {
-								"type": "number",
-								"format": "double"
-							},
-							"errorRateChange": {
-								"type": "number",
-								"format": "double"
-							},
-							"errorRatePrevious24h": {
-								"type": "number",
-								"format": "double"
-							},
-							"errorRate24h": {
-								"type": "number",
-								"format": "double"
-							},
-							"requestVolumeChange": {
-								"type": "number",
-								"format": "double"
-							},
-							"requestCountPrevious24h": {
-								"type": "number",
-								"format": "double"
-							},
-							"totalRequests": {
-								"type": "number",
-								"format": "double"
-							}
-						},
-						"required": [
-							"timeSeriesData",
-							"latencyPerTokenChange",
-							"latencyChange",
-							"averageLatencyPerToken",
-							"averageLatency",
-							"errorRateChange",
-							"errorRatePrevious24h",
-							"errorRate24h",
-							"requestVolumeChange",
-							"requestCountPrevious24h",
-							"totalRequests"
-						],
-						"type": "object"
+					"totalRequests": {
+						"type": "number",
+						"format": "double"
 					},
-					"providerName": {
-						"type": "string"
+					"requestCountPrevious24h": {
+						"type": "number",
+						"format": "double"
+					},
+					"requestVolumeChange": {
+						"type": "number",
+						"format": "double"
+					},
+					"errorRate24h": {
+						"type": "number",
+						"format": "double"
+					},
+					"errorRatePrevious24h": {
+						"type": "number",
+						"format": "double"
+					},
+					"errorRateChange": {
+						"type": "number",
+						"format": "double"
+					},
+					"averageLatency": {
+						"type": "number",
+						"format": "double"
+					},
+					"averageLatencyPerToken": {
+						"type": "number",
+						"format": "double"
+					},
+					"latencyChange": {
+						"type": "number",
+						"format": "double"
+					},
+					"latencyPerTokenChange": {
+						"type": "number",
+						"format": "double"
 					}
 				},
 				"required": [
-					"metrics",
-					"providerName"
+					"totalRequests",
+					"requestCountPrevious24h",
+					"requestVolumeChange",
+					"errorRate24h",
+					"errorRatePrevious24h",
+					"errorRateChange",
+					"averageLatency",
+					"averageLatencyPerToken",
+					"latencyChange",
+					"latencyPerTokenChange"
 				],
-				"type": "object"
+				"type": "object",
+				"additionalProperties": false
+			},
+			"TimeSeriesDataPoint": {
+				"properties": {
+					"timestamp": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"errorCount": {
+						"type": "number",
+						"format": "double"
+					},
+					"requestCount": {
+						"type": "number",
+						"format": "double"
+					},
+					"errorRate": {
+						"type": "number",
+						"format": "double"
+					},
+					"averageLatency": {
+						"type": "number",
+						"format": "double"
+					},
+					"averageLatencyPerToken": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"timestamp",
+					"errorCount",
+					"requestCount",
+					"errorRate",
+					"averageLatency",
+					"averageLatencyPerToken"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ProviderMetrics": {
+				"properties": {
+					"providerName": {
+						"type": "string"
+					},
+					"metrics": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/MetricsData"
+							},
+							{
+								"properties": {
+									"timeSeriesData": {
+										"items": {
+											"$ref": "#/components/schemas/TimeSeriesDataPoint"
+										},
+										"type": "array"
+									}
+								},
+								"required": [
+									"timeSeriesData"
+								],
+								"type": "object"
+							}
+						]
+					}
+				},
+				"required": [
+					"providerName",
+					"metrics"
+				],
+				"type": "object",
+				"additionalProperties": false
 			},
 			"ResultSuccess_ProviderMetrics-Array_": {
 				"properties": {
