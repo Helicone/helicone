@@ -9,9 +9,9 @@ import { RemoteMdxPage } from "./mdxRenderer";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
 import "highlight.js/styles/atom-one-dark.css";
-import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { ChevronRight, Twitter } from "lucide-react"
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { ChevronRight, Twitter } from "lucide-react";
 
 export default async function Home({
   params,
@@ -72,7 +72,8 @@ export default async function Home({
           <Card className="w-full bg-[#F2F9FC] border-[#E3EFF3]">
             <CardContent className="px-4 py-3.5 space-y-2">
               <p className="text-[#6B8C9C] text-sm leading-relaxed font-medium">
-                Join Helicone's community to monitor and optimize your LLM app in real-time.
+                Join Helicone&apos;s community to monitor and optimize your LLM
+                app in real-time.
               </p>
               <Link href="https://us.helicone.ai/signin" className="block">
                 <Button className="w-full bg-[#0DA5E8] hover:bg-[#0C94D1] text-white font-medium">
@@ -80,7 +81,9 @@ export default async function Home({
                   <ChevronRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
-              <Button variant="ghost" className="w-full text-[#6B8C9C] hover:text-[#5a7a8a] hover:bg-[#E3EFF3]"
+              <Button
+                variant="ghost"
+                className="w-full text-[#6B8C9C] hover:text-[#5a7a8a] hover:bg-[#E3EFF3]"
               >
                 Share
                 <Twitter className="ml-2 h-4 w-4" />
