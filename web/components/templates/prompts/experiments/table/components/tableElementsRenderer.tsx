@@ -20,7 +20,7 @@ import { useJawnClient } from "../../../../../../lib/clients/jawnHook";
 import useOnboardingContext, {
   ONBOARDING_STEPS,
 } from "@/components/layout/onboardingContext";
-import OnboardingPopover from "@/components/templates/onboarding/OnboardingPopover";
+import { OnboardingPopoverContent } from "@/components/templates/onboarding/OnboardingPopover";
 
 const InputCellRenderer: React.FC<any> = (props) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -210,7 +210,7 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
                 </Badge>
               </div>
             </PopoverTrigger>
-            <OnboardingPopover
+            <OnboardingPopoverContent
               onboardingStep="EXPERIMENTS_FIND_EXPERIMENT"
               align="center"
               side="bottom"
@@ -239,7 +239,7 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
                   </Button>
                 </div>
               </PopoverTrigger>
-              <OnboardingPopover
+              <OnboardingPopoverContent
                 next={handleRunClickOnboarding}
                 onboardingStep="EXPERIMENTS_RUN_EXPERIMENTS"
                 align="start"
@@ -334,7 +334,7 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
                 />
               </div>
             </PopoverTrigger>
-            <OnboardingPopover
+            <OnboardingPopoverContent
               onboardingStep="EXPERIMENTS_ORIGINAL"
               align="start"
               side="bottom"

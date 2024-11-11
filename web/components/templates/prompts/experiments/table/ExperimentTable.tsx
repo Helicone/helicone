@@ -51,7 +51,7 @@ import ScoresTableContainer from "./scores/ScoresTableContainer";
 import useOnboardingContext, {
   ONBOARDING_STEPS,
 } from "@/components/layout/onboardingContext";
-import OnboardingPopover from "@/components/templates/onboarding/OnboardingPopover";
+import { OnboardingPopoverContent } from "@/components/templates/onboarding/OnboardingPopover";
 import { useJawnClient } from "@/lib/clients/jawnHook";
 import { useQuery } from "@tanstack/react-query";
 import { generateOpenAITemplate } from "@/components/shared/CreateNewEvaluator/evaluatorHelpers";
@@ -793,7 +793,7 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
               />
             </div>
           </PopoverTrigger>
-          <OnboardingPopover
+          <OnboardingPopoverContent
             onboardingStep="EXPERIMENTS_TABLE"
             align="start"
             side="bottom"
@@ -831,7 +831,7 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
                 handleAddRow={handleAddRow}
               />
             ) : (
-              <OnboardingPopover
+              <OnboardingPopoverContent
                 next={addRowsBatchForOnboarding}
                 onboardingStep="EXPERIMENTS_ADD_TEST_CASES"
                 align="center"

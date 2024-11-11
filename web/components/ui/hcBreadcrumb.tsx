@@ -6,6 +6,7 @@ import useOnboardingContext, {
 import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 import { LinkIcon, NotepadTextIcon } from "lucide-react";
 import { Button } from "./button";
+import { useRouter } from "next/navigation";
 
 interface HcBreadcrumbProps {
   pages: { name: string; href: string }[];
@@ -150,6 +151,8 @@ export default function HcBreadcrumb(props: HcBreadcrumbProps) {
   const { isOnboardingVisible, currentStep, setCurrentStep } =
     useOnboardingContext();
 
+  const router = useRouter();
+
   return (
     <nav
       className="flex"
@@ -207,7 +210,10 @@ export default function HcBreadcrumb(props: HcBreadcrumbProps) {
                 </p>
                 <Button
                   className="w-auto self-start bg-[#29973E] text-white text-[13px] font-semibold leading-normal mt-6 mb-8"
-                  onClick={() => setCurrentStep(currentStep + 1)}
+                  onClick={() => {
+                    setCurrentStep(currentStep + 1);
+                    router.push("/dashboard");
+                  }}
                 >
                   Squash and Merge
                 </Button>

@@ -3,40 +3,72 @@ import useOnboardingContext, {
   OnboardingStepLabel,
 } from "@/components/layout/onboardingContext";
 import { Button } from "@/components/ui/button";
-import { PopoverContent } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { PopoverContentProps } from "@radix-ui/react-popover";
-
-interface OnboardingPopoverProps extends PopoverContentProps {
+import { PopoverContentProps, PopoverProps } from "@radix-ui/react-popover";
+import { cloneElement } from "react";
+interface OnboardingPopoverContentProps extends PopoverContentProps {
   id?: string;
-  // icon: React.ReactNode;
-  // title: string;
-  // stepNumber: number;
-  // description: string | React.ReactNode;
   onboardingStep: OnboardingStepLabel;
   moreInfo?: React.ReactNode;
   next?: () => void;
   nextOverride?: () => void;
   delayMs?: number;
+  triggerAsChild?: boolean;
 }
 
-const OnboardingPopover = ({
+interface OnboardingPopoverProps extends PopoverProps {
+  open?: boolean;
+  children: React.ReactNode;
+  popoverContentProps: OnboardingPopoverContentProps;
+  triggerAsChild?: boolean;
+  setDataWhen?: boolean;
+}
+
+export const OnboardingPopover = ({
+  children,
+  open,
+  popoverContentProps,
+  triggerAsChild = true,
+  setDataWhen = true,
+  ...props
+}: OnboardingPopoverProps) => {
+  const { isOnboardingVisible, currentStep } = useOnboardingContext();
+  return (
+    <Popover
+      open={
+        isOnboardingVisible &&
+        currentStep ===
+          ONBOARDING_STEPS[popoverContentProps.onboardingStep].stepNumber &&
+        (open !== undefined ? open : true)
+      }
+      {...props}
+    >
+      <PopoverTrigger asChild={triggerAsChild}>
+        {cloneElement(children as React.ReactElement, {
+          "data-onboarding-step": setDataWhen
+            ? ONBOARDING_STEPS[popoverContentProps.onboardingStep].stepNumber
+            : undefined,
+        })}
+      </PopoverTrigger>
+      <OnboardingPopoverContent {...popoverContentProps} />
+    </Popover>
+  );
+};
+
+export const OnboardingPopoverContent = ({
   id,
-  // icon,
-  // title,
-  // stepNumber,
-  // description,
   onboardingStep,
   next,
   nextOverride,
   moreInfo,
   delayMs,
   ...props
-}: OnboardingPopoverProps) => {
-  const { setCurrentStep, currentStep } = useOnboardingContext();
-  const { popoverData } = ONBOARDING_STEPS[onboardingStep];
-  const { icon, title, stepNumber, description } = popoverData ?? {};
-
+}: OnboardingPopoverContentProps) => {
   return (
     <PopoverContent
       {...props}
@@ -45,6 +77,29 @@ const OnboardingPopover = ({
         props.className
       )}
     >
+      <OnboardingPopoverInside
+        onboardingStep={onboardingStep}
+        next={next}
+        nextOverride={nextOverride}
+        moreInfo={moreInfo}
+        delayMs={delayMs}
+      />
+    </PopoverContent>
+  );
+};
+
+export const OnboardingPopoverInside = ({
+  onboardingStep,
+  next,
+  nextOverride,
+  moreInfo,
+  delayMs,
+}: OnboardingPopoverContentProps) => {
+  const { setCurrentStep, currentStep } = useOnboardingContext();
+  const { popoverData } = ONBOARDING_STEPS[onboardingStep];
+  const { icon, title, stepNumber, description } = popoverData ?? {};
+  return (
+    <>
       <div className="flex justify-between items-center">
         <div className="flex gap-2 items-center text-slate-900 dark:text-slate-100">
           {icon}
@@ -62,6 +117,8 @@ const OnboardingPopover = ({
           nextOverride
             ? nextOverride
             : () => {
+                console.log("clicked next");
+                console.log(next);
                 next && next();
                 setCurrentStep(currentStep + 1, delayMs);
               }
@@ -69,8 +126,6 @@ const OnboardingPopover = ({
       >
         Next
       </Button>
-    </PopoverContent>
+    </>
   );
 };
-
-export default OnboardingPopover;

@@ -22,7 +22,7 @@ import useOnboardingContext, {
   ONBOARDING_STEPS,
 } from "@/components/layout/onboardingContext";
 import { Popover, PopoverTrigger } from "@/components/ui/popover";
-import OnboardingPopover from "../../onboarding/OnboardingPopover";
+import { OnboardingPopoverContent } from "../../onboarding/OnboardingPopover";
 
 interface PromptChatRowProps {
   index: number;
@@ -589,7 +589,7 @@ const PromptChatRow = (props: PromptChatRowProps) => {
                         />
                       </div>
                     </PopoverTrigger>
-                    <OnboardingPopover
+                    <OnboardingPopoverContent
                       next={() => {
                         const scrollArea = document.getElementById(
                           "add-experiment-scroll-area"

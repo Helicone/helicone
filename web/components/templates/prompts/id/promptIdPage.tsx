@@ -79,8 +79,7 @@ import { cn } from "@/lib/utils";
 import useOnboardingContext, {
   ONBOARDING_STEPS,
 } from "@/components/layout/onboardingContext";
-import { Popover, PopoverTrigger } from "@/components/ui/popover";
-import OnboardingPopover from "../../onboarding/OnboardingPopover";
+import { OnboardingPopover } from "../../onboarding/OnboardingPopover";
 
 interface PromptIdPageProps {
   id: string;
@@ -622,38 +621,25 @@ const PromptIdPage = (props: PromptIdPageProps) => {
             )}
           >
             <div className="flex items-center space-x-4">
-              <Popover
-                open={
-                  isOnboardingVisible &&
-                  currentStep === 4 &&
-                  typeof prompt?.user_defined_id === "string"
-                }
+              <OnboardingPopover
+                open={typeof prompt?.user_defined_id === "string"}
+                popoverContentProps={{
+                  onboardingStep: "PROMPTS_PAGE",
+                  align: "center",
+                  side: "bottom",
+                }}
+                triggerAsChild={false}
               >
-                <PopoverTrigger>
-                  <HcBreadcrumb
-                    data-onboarding-step={
-                      // this is so that the onboarding popover doesn't show up on the loading state
-                      prompt?.user_defined_id
-                        ? ONBOARDING_STEPS.PROMPTS_PAGE.stepNumber
-                        : undefined
-                    }
-                    pages={[
-                      { href: "/prompts", name: "Prompts" },
-                      {
-                        href: `/prompts/${id}`,
-                        name: prompt?.user_defined_id || "Loading...",
-                      },
-                    ]}
-                  />
-                </PopoverTrigger>
-                <OnboardingPopover
-                  delayMs={500}
-                  onboardingStep="PROMPTS_PAGE"
-                  align="center"
-                  side="bottom"
-                  className="z-[10000] bg-white p-4 w-[calc(100vw-2rem)] sm:max-w-md flex flex-col gap-2"
+                <HcBreadcrumb
+                  pages={[
+                    { href: "/prompts", name: "Prompts" },
+                    {
+                      href: `/prompts/${id}`,
+                      name: prompt?.user_defined_id || "Loading...",
+                    },
+                  ]}
                 />
-              </Popover>
+              </OnboardingPopover>
 
               <HoverCard>
                 <HoverCardTrigger>
@@ -956,53 +942,36 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                                                   <EllipsisHorizontalIcon className="h-6 w-6 text-slate-500" />
                                                 </button>
                                               </DropdownMenuTrigger>
-                                              <Popover
-                                                open={
-                                                  isOnboardingVisible &&
-                                                  currentStep === 5
-                                                }
-                                              >
-                                                <PopoverTrigger>
-                                                  <DropdownMenuContent
-                                                    data-onboarding-step={
-                                                      isOnboardingVisible &&
-                                                      currentStep ===
-                                                        ONBOARDING_STEPS
-                                                          .PROMPTS_EXPERIMENT
-                                                          .stepNumber
-                                                        ? ONBOARDING_STEPS
-                                                            .PROMPTS_EXPERIMENT
-                                                            .stepNumber
-                                                        : undefined
-                                                    }
-                                                  >
-                                                    <DropdownMenuItem
-                                                      onClick={() =>
-                                                        startExperiment(
-                                                          promptVersion.id,
-                                                          promptVersion.helicone_template
-                                                        )
-                                                      }
-                                                    >
-                                                      <BeakerIcon className="h-4 w-4 mr-2" />
-                                                      Experiment
-                                                    </DropdownMenuItem>
-                                                  </DropdownMenuContent>
-                                                </PopoverTrigger>
-                                                <OnboardingPopover
-                                                  onboardingStep="PROMPTS_EXPERIMENT"
-                                                  next={() => {
+                                              <OnboardingPopover
+                                                popoverContentProps={{
+                                                  onboardingStep:
+                                                    "PROMPTS_EXPERIMENT",
+                                                  next: () => {
                                                     startExperiment(
                                                       promptVersion.id,
                                                       promptVersion.helicone_template
                                                     );
-                                                  }}
-                                                  align="start"
-                                                  side="left"
-                                                  sideOffset={140}
-                                                  className="z-[10000] bg-white p-4 w-[calc(100vw-2rem)] sm:max-w-md flex flex-col gap-2"
-                                                />
-                                              </Popover>
+                                                  },
+                                                  align: "start",
+                                                  side: "left",
+                                                  sideOffset: 140,
+                                                }}
+                                                triggerAsChild={false}
+                                              >
+                                                <DropdownMenuContent>
+                                                  <DropdownMenuItem
+                                                    onClick={() =>
+                                                      startExperiment(
+                                                        promptVersion.id,
+                                                        promptVersion.helicone_template
+                                                      )
+                                                    }
+                                                  >
+                                                    <BeakerIcon className="h-4 w-4 mr-2" />
+                                                    Experiment
+                                                  </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                              </OnboardingPopover>
                                             </DropdownMenu>
                                           )}
                                         </div>

@@ -57,8 +57,12 @@ import SuggestionModal from "./suggestionsModal";
 import { useDashboardPage } from "./useDashboardPage";
 import OnboardingDemoModal from "./OnboardingDemoModal";
 import OnboardingQuickTourModal from "./OnboardingQuickTourModal";
-import useOnboardingContext from "@/components/layout/onboardingContext";
+import useOnboardingContext, {
+  ONBOARDING_STEPS,
+} from "@/components/layout/onboardingContext";
 import { useRouter } from "next/navigation";
+import { OnboardingPopoverInside } from "../onboarding/OnboardingPopover";
+import { Dialog, DialogContent, DialogOverlay } from "@/components/ui/dialog";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -995,6 +999,39 @@ const DashboardPage = (props: DashboardPageProps) => {
                 </div>
               </ResponsiveGridLayout>
             </section>
+            <Dialog
+              open={
+                onboardingContext.isOnboardingVisible &&
+                onboardingContext.currentStep ===
+                  ONBOARDING_STEPS.DASHBOARD_SUCCESS.stepNumber
+              }
+            >
+              <DialogOverlay className="!bg-transparent" />
+              <DialogContent className="left-[calc(100%-2rem)] -translate-x-full top-[calc(100%-2rem)] -translate-y-full">
+                <OnboardingPopoverInside onboardingStep="DASHBOARD_SUCCESS" />
+              </DialogContent>
+            </Dialog>
+            {/* <Popover
+              open={
+                onboardingContext.isOnboardingVisible &&
+                onboardingContext.currentStep ===
+                  ONBOARDING_STEPS.DASHBOARD_SUCCESS.stepNumber
+              }
+            >
+              <PopoverTrigger>
+                <div
+                  className="fixed bottom-2 right-2 w-1 h-1"
+                  data-onboarding-step={
+                    ONBOARDING_STEPS.DASHBOARD_SUCCESS.stepNumber
+                  }
+                />
+              </PopoverTrigger>
+              <OnboardingPopover
+                onboardingStep="DASHBOARD_SUCCESS"
+                // align="end"
+                // side="top"
+              />
+            </Popover> */}
           </div>
         )}
         <SuggestionModal
@@ -1004,7 +1041,7 @@ const DashboardPage = (props: DashboardPageProps) => {
 
         <UpgradeProModal open={open} setOpen={setOpen} />
 
-        {isDemo && (
+        {isDemo && !onboardingContext.isOnboardingVisible && (
           <>
             <OnboardingDemoModal
               open={openDemo}

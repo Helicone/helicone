@@ -5,7 +5,7 @@ import useOnboardingContext, {
 import { useOrg } from "@/components/layout/organizationContext";
 import { CreateNewEvaluatorSheetContent } from "@/components/shared/CreateNewEvaluator/CreateNewEvaluatorSheetContent";
 import useNotification from "@/components/shared/notification/useNotification";
-import OnboardingPopover from "@/components/templates/onboarding/OnboardingPopover";
+import { OnboardingPopoverContent } from "@/components/templates/onboarding/OnboardingPopover";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverTrigger } from "@/components/ui/popover";
 import {
@@ -215,7 +215,7 @@ const ScoresEvaluatorsConfig = memo(
                     </div>
                   </SelectItemRawNotText>
                 </PopoverTrigger>
-                <OnboardingPopover
+                <OnboardingPopoverContent
                   onboardingStep="EXPERIMENTS_SPECIFIC_EVAL"
                   align="start"
                   side="right"
@@ -273,7 +273,7 @@ const ScoresEvaluatorsConfig = memo(
                   {runEvaluators.isLoading ? "Running..." : "Run Evaluators"}
                 </Button>
               </PopoverTrigger>
-              <OnboardingPopover
+              <OnboardingPopoverContent
                 onboardingStep="EXPERIMENTS_RUN_EVAL"
                 align="end"
                 side="bottom"

@@ -52,7 +52,6 @@ const steps = [
 ];
 
 const OnboardingNavItems = () => {
-  const { currentStep } = useOnboardingContext();
   return (
     <>
       <p className="text-[12px] font-medium text-slate-500 mt-3 mb-4 mx-1">
@@ -91,7 +90,7 @@ const OnboardingNavItem = ({
     <div className="flex flex-col gap-2" key={number}>
       <div
         className={cn(
-          "flex flex-col p-2 gap-3",
+          "flex flex-col p-2",
           isActive && "bg-slate-100 dark:bg-slate-800 rounded"
         )}
       >
@@ -112,9 +111,14 @@ const OnboardingNavItem = ({
             {title}
           </p>
         </div>
-        {isActive ? (
+        <div
+          className={cn(
+            "transition-all duration-300",
+            isActive ? "max-h-[200px] opacity-100 mt-3" : "max-h-0 opacity-0"
+          )}
+        >
           <p className="text-[12px] text-slate-500">{description}</p>
-        ) : null}
+        </div>
       </div>
       {number !== steps.length && <Separator className="w-full mb-2" />}
     </div>

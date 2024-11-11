@@ -35,11 +35,8 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import useOnboardingContext, {
-  ONBOARDING_STEPS,
-} from "@/components/layout/onboardingContext";
-import { Popover, PopoverTrigger } from "@/components/ui/popover";
-import OnboardingPopover from "@/components/templates/onboarding/OnboardingPopover";
+import useOnboardingContext from "@/components/layout/onboardingContext";
+import { OnboardingPopover } from "@/components/templates/onboarding/OnboardingPopover";
 import { useRouter } from "next/navigation";
 
 interface ThemedTableV5Props<T extends { id?: string }> {
@@ -358,94 +355,19 @@ export default function ThemedTable<T extends { id?: string }>(
                       ))}
                     </thead>
                     <tbody className="text-[13px] ">
-                      {rows.map((row, index) =>
-                        index === 0 &&
-                        currentStep === 0 &&
-                        id === "requests-table" &&
-                        isOnboardingVisible ? (
-                          <Popover key={row.id} open={true}>
-                            <PopoverTrigger asChild>
-                              <tr
-                                data-onboarding-step={
-                                  ONBOARDING_STEPS.REQUESTS_TABLE.stepNumber
-                                }
-                                className={clsx(
-                                  " hover:cursor-pointer",
-                                  checkedIds?.includes(row.original?.id ?? "")
-                                    ? "bg-sky-100 border-l border-sky-500 pl-2 dark:bg-slate-800/50 dark:border-sky-900"
-                                    : "hover:bg-sky-50 dark:hover:bg-slate-700/50"
-                                )}
-                                onClick={
-                                  onRowSelect &&
-                                  (() => {
-                                    handleRowSelect(row.original, index);
-                                  })
-                                }
-                              >
-                                {showCheckboxes && (
-                                  <td className="w-8 px-2">
-                                    <Checkbox
-                                      checked={selectedIds?.includes(
-                                        row.original?.id ?? ""
-                                      )}
-                                      onChange={() => {}} // Handle individual row selection
-                                      className="text-slate-700 dark:text-slate-400"
-                                    />
-                                  </td>
-                                )}
-                                {row.getVisibleCells().map((cell, i) => (
-                                  <td
-                                    key={i}
-                                    className={clsx(
-                                      "py-3 border-t border-slate-300 dark:border-slate-700 px-2 text-slate-700 dark:text-slate-300",
-                                      i === 0 && "pl-10", // Add left padding to the first column
-                                      i === row.getVisibleCells().length - 1 &&
-                                        "pr-10 border-r border-slate-300 dark:border-slate-700"
-                                    )}
-                                    style={{
-                                      maxWidth: cell.column.getSize(),
-                                      overflow: "hidden",
-                                      textOverflow: "ellipsis",
-                                      whiteSpace: "nowrap",
-                                    }}
-                                  >
-                                    {dataLoading &&
-                                    (cell.column.id == "requestText" ||
-                                      cell.column.id == "responseText") ? (
-                                      <span
-                                        className={clsx(
-                                          "w-full flex flex-grow",
-                                          (cell.column.id == "requestText" ||
-                                            cell.column.id == "responseText") &&
-                                            dataLoading
-                                            ? "animate-pulse bg-slate-200 rounded-md"
-                                            : "hidden"
-                                        )}
-                                      >
-                                        &nbsp;
-                                      </span>
-                                    ) : (
-                                      flexRender(
-                                        cell.column.columnDef.cell,
-                                        cell.getContext()
-                                      )
-                                    )}
-                                  </td>
-                                ))}
-                              </tr>
-                            </PopoverTrigger>
-                            <OnboardingPopover
-                              onboardingStep="REQUESTS_TABLE"
-                              next={() => {
-                                handleRowSelect(row.original, index);
-                              }}
-                              align="start"
-                              className="z-[10000] bg-white p-4 w-11/12 sm:max-w-md flex flex-col gap-2"
-                            />
-                          </Popover>
-                        ) : (
+                      {rows.map((row, index) => (
+                        <OnboardingPopover
+                          key={row.id}
+                          open={index === 0 && id === "requests-table"}
+                          popoverContentProps={{
+                            onboardingStep: "REQUESTS_TABLE",
+                            next: () => {
+                              handleRowSelect(row.original, index);
+                            },
+                            align: "start",
+                          }}
+                        >
                           <tr
-                            key={row.id}
                             className={clsx(
                               " hover:cursor-pointer",
                               checkedIds?.includes(row.original?.id ?? "")
@@ -454,7 +376,9 @@ export default function ThemedTable<T extends { id?: string }>(
                             )}
                             onClick={
                               onRowSelect &&
-                              (() => handleRowSelect(row.original, index))
+                              (() => {
+                                handleRowSelect(row.original, index);
+                              })
                             }
                           >
                             {showCheckboxes && (
@@ -508,8 +432,8 @@ export default function ThemedTable<T extends { id?: string }>(
                               </td>
                             ))}
                           </tr>
-                        )
-                      )}
+                        </OnboardingPopover>
+                      ))}
                     </tbody>
                   </table>
                 </div>
@@ -520,27 +444,18 @@ export default function ThemedTable<T extends { id?: string }>(
         {rightPanel && (
           <>
             {isOnboardingVisible && currentStep === 1 ? (
-              <Popover open={true}>
-                <PopoverTrigger asChild>
-                  <div
-                    className="h-full w-1/2"
-                    data-onboarding-step={
-                      ONBOARDING_STEPS.REQUESTS_DRAWER.stepNumber
-                    }
-                  >
-                    {rightPanel}
-                  </div>
-                </PopoverTrigger>
-                <OnboardingPopover
-                  onboardingStep="REQUESTS_DRAWER"
-                  next={() => {
+              <OnboardingPopover
+                popoverContentProps={{
+                  onboardingStep: "REQUESTS_DRAWER",
+                  next: () => {
                     router.push(`/sessions/${sessionData?.sessionId}`);
-                  }}
-                  align="center"
-                  side="left"
-                  className="z-[10000] bg-white p-4 w-11/12 sm:max-w-md flex flex-col gap-2"
-                />
-              </Popover>
+                  },
+                  align: "center",
+                  side: "left",
+                }}
+              >
+                <div className="h-full w-1/2">{rightPanel}</div>
+              </OnboardingPopover>
             ) : (
               <>
                 <ResizableHandle withHandle />

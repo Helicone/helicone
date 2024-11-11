@@ -12,11 +12,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import useOnboardingContext, {
-  ONBOARDING_STEPS,
-} from "@/components/layout/onboardingContext";
-import { Popover, PopoverTrigger } from "@/components/ui/popover";
-import OnboardingPopover from "@/components/templates/onboarding/OnboardingPopover";
+import { OnboardingPopover } from "@/components/templates/onboarding/OnboardingPopover";
 
 export interface TreeNodeProps {
   node: TreeNodeData;
@@ -191,76 +187,36 @@ export const Tree: React.FC<TreeProps> = ({
   setShowDrawer,
   onBoardingRequestTrace,
 }) => {
-  const { currentStep, isOnboardingVisible } = useOnboardingContext();
-
-  // find the first request that is a request node (children can have multiple children)
-  const firstRequest = data.children?.find(
-    (child) => child.name === "request"
-  ) as TreeNodeData;
-
-  if (isOnboardingVisible && currentStep === 2) {
-    return (
-      <Popover open={true}>
-        <PopoverTrigger asChild>
-          <div
-            className={clsx(
-              "font-sans bg-slate-50 dark:bg-black border-t border-slate-200 dark:border-slate-700",
-              className
-            )}
-            data-onboarding-step={ONBOARDING_STEPS.SESSIONS_PAGE.stepNumber}
-          >
-            {data.children &&
-              data.children.map((child, index) => (
-                <TreeNode
-                  key={index}
-                  node={child}
-                  selectedRequestIdDispatch={selectedRequestIdDispatch}
-                  onBoardingRequestTrace={onBoardingRequestTrace}
-                  isLastChild={
-                    !!data.children && index === data.children.length - 1
-                  }
-                  level={0}
-                  collapseAll={collapseAll}
-                  setShowDrawer={setShowDrawer}
-                />
-              ))}
-          </div>
-        </PopoverTrigger>
-        <OnboardingPopover
-          onboardingStep="SESSIONS_PAGE"
-          next={() => {
-            selectedRequestIdDispatch[1](
-              onBoardingRequestTrace?.request_id ?? ""
-            );
-          }}
-          align="start"
-          side="right"
-          className="z-[10000] bg-white p-4 w-[calc(100vw-2rem)] sm:max-w-md flex flex-col gap-2"
-        />
-      </Popover>
-    );
-  }
-
   return (
-    <div
-      className={clsx(
-        "font-sans bg-slate-50 dark:bg-black border-t border-slate-200 dark:border-slate-700",
-        className
-      )}
+    <OnboardingPopover
+      popoverContentProps={{
+        onboardingStep: "SESSIONS_PAGE",
+        align: "start",
+        side: "right",
+      }}
     >
-      {data.children &&
-        data.children.map((child, index) => (
-          <TreeNode
-            key={index}
-            node={child}
-            selectedRequestIdDispatch={selectedRequestIdDispatch}
-            isLastChild={!!data.children && index === data.children.length - 1}
-            onBoardingRequestTrace={onBoardingRequestTrace}
-            level={0}
-            collapseAll={collapseAll}
-            setShowDrawer={setShowDrawer}
-          />
-        ))}
-    </div>
+      <div
+        className={clsx(
+          "font-sans bg-slate-50 dark:bg-black border-t border-slate-200 dark:border-slate-700",
+          className
+        )}
+      >
+        {data.children &&
+          data.children.map((child, index) => (
+            <TreeNode
+              key={index}
+              node={child}
+              selectedRequestIdDispatch={selectedRequestIdDispatch}
+              isLastChild={
+                !!data.children && index === data.children.length - 1
+              }
+              onBoardingRequestTrace={onBoardingRequestTrace}
+              level={0}
+              collapseAll={collapseAll}
+              setShowDrawer={setShowDrawer}
+            />
+          ))}
+      </div>
+    </OnboardingPopover>
   );
 };

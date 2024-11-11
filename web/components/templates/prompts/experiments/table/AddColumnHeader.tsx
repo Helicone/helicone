@@ -27,7 +27,7 @@ import { useOrg } from "@/components/layout/organizationContext";
 import useOnboardingContext, {
   ONBOARDING_STEPS,
 } from "@/components/layout/onboardingContext";
-import OnboardingPopover from "@/components/templates/onboarding/OnboardingPopover";
+import { OnboardingPopoverContent } from "@/components/templates/onboarding/OnboardingPopover";
 
 interface AddColumnHeaderProps {
   promptVersionId: string;
@@ -144,7 +144,7 @@ const AddColumnHeader: React.FC<AddColumnHeaderProps> = ({
               </span>
             </button>
           </PopoverTrigger>
-          <OnboardingPopover
+          <OnboardingPopoverContent
             delayMs={500}
             onboardingStep="EXPERIMENTS_ADD"
             align="center"

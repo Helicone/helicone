@@ -28,7 +28,7 @@ import {
 import useOnboardingContext, {
   ONBOARDING_STEPS,
 } from "@/components/layout/onboardingContext";
-import OnboardingPopover from "../../onboarding/OnboardingPopover";
+import { OnboardingPopoverContent } from "../../onboarding/OnboardingPopover";
 import { Popover, PopoverTrigger } from "@/components/ui/popover";
 
 export type Input = {
@@ -405,7 +405,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
                   )}
                 </div>
               </PopoverTrigger>
-              <OnboardingPopover
+              <OnboardingPopoverContent
                 next={() => {
                   onSubmit && onSubmit(currentChat, selectedModel || "");
                 }}

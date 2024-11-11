@@ -316,6 +316,7 @@ export const OnboardingProvider = ({
   const [onClickElement, setOnClickElement] = useState<() => void>(() => {});
 
   const setCurrentStep = useCallback((step: number, delayMs?: number) => {
+    console.log("delayMs", delayMs);
     if (delayMs) {
       setTimeout(() => {
         setCurrentStepState(step);
@@ -367,7 +368,9 @@ export const OnboardingProvider = ({
         console.log({ element });
         if (element) {
           const position = getElementPosition(element);
-          setElementPointerPosition(position);
+          if (position) {
+            setElementPointerPosition(position);
+          }
 
           timeout = setTimeout(() => {
             updatePointerPosition();
@@ -392,7 +395,9 @@ export const OnboardingProvider = ({
       );
       if (element) {
         const position = getElementPosition(element);
-        setElementPointerPosition(position);
+        if (position) {
+          setElementPointerPosition(position);
+        }
       }
     }
   };
@@ -426,13 +431,18 @@ export const OnboardingProvider = ({
 };
 
 export const OnboardingBackground = () => {
-  const { isOnboardingVisible, elementPointerPosition, onClickElement } =
-    useOnboardingContext();
+  const {
+    isOnboardingVisible,
+    elementPointerPosition,
+    onClickElement,
+    currentStep,
+  } = useOnboardingContext();
 
-  console.log({ onClickElement });
-  // return <div className="absolute inset-0 z-[9998] pointer-events-auto"></div>;
-
-  if (!isOnboardingVisible) return null;
+  if (
+    !isOnboardingVisible ||
+    currentStep === ONBOARDING_STEPS.DASHBOARD_SUCCESS.stepNumber
+  )
+    return null;
   return (
     <div className="absolute inset-0 z-[9998] pointer-events-auto">
       <motion.div
@@ -464,7 +474,7 @@ export const OnboardingBackground = () => {
             : {}
         }
         style={{
-          boxShadow: "0 0 200vw 200vh rgba(0, 0, 0, 0.5)",
+          boxShadow: "0 0 300vw 300vh rgba(0, 0, 0, 0.5)",
           zIndex: 9999,
         }}
       />

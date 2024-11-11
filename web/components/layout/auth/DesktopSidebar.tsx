@@ -305,7 +305,7 @@ const DesktopSidebar = ({
               </div>
 
               {/* InfoBox */}
-              {canShowInfoBox && !isCollapsed && (
+              {canShowInfoBox && !isCollapsed && !isOnboardingVisible && (
                 <div className="bg-slate-50 dark:bg-slate-900 rounded border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 flex flex-col md:flex-row md:gap-2 gap-4 justify-between md:justify-center md:items-center items-start px-3 py-2  mt-2 mx-2 mb-8 font-medium">
                   <h1 className="text-xs text-start tracking-tight leading-[1.35rem]">
                     ⚡ Introducing a new way to perfect your prompts.{" "}
@@ -323,12 +323,14 @@ const DesktopSidebar = ({
           </div>
 
           {/* Sticky help dropdown */}
-          <div className="absolute bottom-3 left-3 z-10">
-            <SidebarHelpDropdown
-              changelog={changelog}
-              handleChangelogClick={handleChangelogClick}
-            />
-          </div>
+          {!isOnboardingVisible && (
+            <div className="absolute bottom-3 left-3 z-10">
+              <SidebarHelpDropdown
+                changelog={changelog}
+                handleChangelogClick={handleChangelogClick}
+              />
+            </div>
+          )}
         </div>
       </div>
       <ChangelogModal
