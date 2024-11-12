@@ -93,7 +93,7 @@ const EventListen = ({ setOpen }: { setOpen: (open: boolean) => void }) => {
         </div>
       )}
       <DialogFooter className="mt-4">
-        {data && data.data && (
+        {!(data && data.data) && (
           <Button variant="outline" onClick={() => setOpen(false)}>
             Skip
           </Button>
