@@ -35,7 +35,7 @@ export class LytixHandler extends AbstractLogHandler {
       modelOutput: JSON.stringify(context.processedLog.response.body) ?? "",
       metaData: context.processedLog.request.properties ?? {},
       session:
-        context.message.log.request.properties?.["Helicone-Session-ID"] ?? "",
+        context.message.log.request.properties?.["Helicone-Session-Id"] ?? "",
       sessionPath:
         context.message.log.request.properties?.["Helicone-Session-Path"] ?? "",
       sessionName:
