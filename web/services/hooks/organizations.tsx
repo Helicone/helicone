@@ -214,12 +214,10 @@ const useOrgsContextManager = () => {
   const refreshCurrentOrg = useCallback(() => {
     refetch().then((x) => {
       if (x.data && x.data.length > 0) {
-        console.log("org", org);
         const currentOrg = x.data.find(
           (organization) => organization.id === org?.id
         );
         if (currentOrg) {
-          console.log("currentOrg", currentOrg);
           setOrg(currentOrg);
           setOrgCookie(currentOrg.id);
           setRenderKey((key) => key + 1);
