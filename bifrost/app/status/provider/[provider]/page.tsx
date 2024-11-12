@@ -1,5 +1,6 @@
 import { ProviderStatusPage } from "@/app/status/ProviderStatusPage";
 import { providers } from "@/packages/cost/providers/mappings";
+import { Suspense } from "react";
 
 const displayToBackendName: Record<string, string> = {
   "Together AI": "TOGETHER",
@@ -20,7 +21,9 @@ export default async function Home({
 
   return (
     <div className="container mx-auto py-8">
-      <ProviderStatusPage provider={backendProvider} />
+      <Suspense fallback={<div>Loading...</div>}>
+        <ProviderStatusPage provider={backendProvider} />
+      </Suspense>
     </div>
   );
 }
