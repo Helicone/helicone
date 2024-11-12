@@ -13,9 +13,8 @@ export async function generateMetadata({
     decodeURIComponent(provider || "")
   );
 
-  const title = `${decodedProvider} Status - Helicone`;
-  const description = `Live status monitoring for ${decodedProvider}. Track API availability, latency, and performance metrics in real-time.`;
-
+  const title = getProviderTitle(decodedProvider);
+  const description = getProviderDescription(decodedProvider);
   const imageUrl = "/static/status/status-open-graph.webp";
 
   return {
@@ -47,3 +46,21 @@ export default function RootLayout({
 }>) {
   return <>{children}</>;
 }
+
+const getProviderTitle = (provider: string) => {
+  if (provider.toLowerCase() === "anthropic") {
+    return "Is Claude Down? Live Status & Performance Monitor - Helicone";
+  }
+
+  return `Is ${provider} Down? Live Status & Performance Monitor - Helicone`;
+};
+
+const getProviderDescription = (provider: string) => {
+  if (provider.toLowerCase() === "anthropic") {
+    return `Check if Claude or Anthropic API is working. Live status monitoring, current outages, API availability, and performance metrics for Claude 3.5 Sonnet, Claude 3 Opus, Claude 2.1, and Claude Instant. Real-time Anthropic system status.`;
+  }
+  if (provider.toLowerCase() === "openai") {
+    return `Check if ChatGPT or OpenAI API is working. Live status monitoring, current outages, and performance metrics for GPT-4o, GPT-4o-mini, o1-preview, o1-mini, and DALL-E. Real-time OpenAI system status.`;
+  }
+  return `Real-time ${provider} status checker. Monitor API availability, response times, and error rates. Track ${provider} performance metrics and service reliability with live data.`;
+};

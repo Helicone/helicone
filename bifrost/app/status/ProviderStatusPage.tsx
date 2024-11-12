@@ -166,7 +166,7 @@ export function ProviderStatusPage({ provider }: ProviderStatusPageProps) {
           <AllProvidersTable providers={allProviderStatus} />
         )}
       </div>
-      <StatusFAQ />
+      <StatusFAQ provider={provider} />
     </div>
   );
 }

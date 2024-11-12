@@ -36,34 +36,89 @@ function FAQItem({ question, children, isOpen, onClick }: FAQItemProps) {
   );
 }
 
-export function StatusFAQ() {
+const providerSpecificFAQs = {
+  openai: {
+    metrics: (
+      <p>
+        As an LLM observability platform,{" "}
+        <span style={{ color: "#0ea5e9" }}>Helicone</span> collects and
+        processes billions of ChatGPT and OpenAI API interactions. Our metrics
+        cover all OpenAI models including GPT-4 Turbo, GPT-4, GPT-3.5 Turbo,
+        DALL-E 3, and more. The statistics you see are calculated from millions
+        of real, anonymized production requests, making them highly accurate for
+        monitoring OpenAI's service status and performance.
+      </p>
+    ),
+    reliability: (
+      <p>
+        Unlike traditional status pages, our ChatGPT and OpenAI status metrics
+        are derived from actual production traffic. We analyze millions of
+        GPT-4, GPT-3.5, and DALL-E requests in real-time to calculate error
+        rates, latency distributions, and availability metrics, providing a more
+        accurate picture of OpenAI's system status and performance.
+      </p>
+    ),
+  },
+  anthropic: {
+    metrics: (
+      <p>
+        As an LLM observability platform,{" "}
+        <span style={{ color: "#0ea5e9" }}>Helicone</span> collects and
+        processes billions of Claude API interactions. Our metrics cover all
+        Anthropic models including Claude 3.5 Sonnet, Claude 3 Opus, Claude 2.1,
+        and Claude Instant. The statistics you see are calculated from millions
+        of real, anonymized production requests, making them highly accurate for
+        monitoring Claude's service status and performance.
+      </p>
+    ),
+    reliability: (
+      <p>
+        Unlike traditional status pages, our Claude and Anthropic status metrics
+        are derived from actual production traffic. We analyze millions of
+        Claude API requests in real-time to calculate error rates, latency
+        distributions, and availability metrics, providing a more accurate
+        picture of Anthropic's system status and performance.
+      </p>
+    ),
+  },
+  default: {
+    metrics: (
+      <p>
+        As an LLM observability platform,{" "}
+        <span style={{ color: "#0ea5e9" }}>Helicone</span> collects and
+        processes billions of LLM interactions from tens of thousands of users.
+        The metrics you see are calculated from millions of real, anonymized
+        production requests, making them highly accurate and representative of
+        real-world performance.
+      </p>
+    ),
+    reliability: (
+      <p>
+        Unlike traditional status pages that rely on periodic health checks, our
+        metrics are derived from actual production traffic. We analyze millions
+        of requests in real-time to calculate error rates, latency
+        distributions, and availability metrics, providing a more accurate
+        picture of LLM provider performance.
+      </p>
+    ),
+  },
+};
+
+export function StatusFAQ({ provider = "default" }: { provider?: string }) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const faqContent =
+    providerSpecificFAQs[
+      provider.toLowerCase() as keyof typeof providerSpecificFAQs
+    ] || providerSpecificFAQs.default;
 
   const faqs = [
     {
       question: "How are these metrics calculated?",
-      content: (
-        <p>
-          As an LLM observability platform,{" "}
-          <span style={{ color: "#0ea5e9" }}>Helicone</span> collects and
-          processes billions of LLM interactions from tens of thousands of
-          users. The metrics you see are calculated from millions of real,
-          anonymized production requests, making them highly accurate and
-          representative of real-world performance.
-        </p>
-      ),
+      content: faqContent.metrics,
     },
     {
       question: "What makes these status checks reliable?",
-      content: (
-        <p>
-          Unlike traditional status pages that rely on periodic health checks,
-          our metrics are derived from actual production traffic. We analyze
-          millions of requests in real-time to calculate error rates, latency
-          distributions, and availability metrics, providing a more accurate
-          picture of LLM provider performance.
-        </p>
-      ),
+      content: faqContent.reliability,
     },
     {
       question: "What should I do if a provider goes down?",
