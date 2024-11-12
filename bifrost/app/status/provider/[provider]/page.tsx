@@ -1,6 +1,21 @@
 import { ProviderStatusPage } from "@/app/status/ProviderStatusPage";
-import { providers } from "@/packages/cost/providers/mappings";
 import { Suspense } from "react";
+import { components } from "@/lib/clients/jawnTypes/public";
+
+const PROVIDERS = [
+  "OPENAI",
+  "ANTHROPIC",
+  "TOGETHER",
+  "FIREWORKS",
+  "GOOGLE",
+  "OPENROUTER",
+  "GROQ",
+  "MISTRAL",
+  "DEEPINFRA",
+  "QSTASH",
+  "PERPLEXITY",
+  "HYPERBOLIC",
+] as const;
 
 const displayToBackendName: Record<string, string> = {
   "Together AI": "TOGETHER",
@@ -31,9 +46,9 @@ export default async function Home({
 export async function generateStaticParams() {
   const paths = [];
 
-  for (const provider of providers) {
+  for (const provider of PROVIDERS) {
     paths.push({
-      provider: encodeURIComponent(provider.provider.toLowerCase()),
+      provider: encodeURIComponent(provider.toLowerCase()),
     });
   }
 
