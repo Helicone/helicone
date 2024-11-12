@@ -1,5 +1,4 @@
 import React from "react";
-import { ProviderMetrics } from "./ProviderStatusPage";
 import {
   XAxis,
   YAxis,
@@ -8,7 +7,7 @@ import {
   AreaChart,
   Tooltip,
 } from "recharts";
-import { ChartConfig } from "@/components/ui/chart";
+import { ChartTooltip } from "@/components/ui/chart";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -18,56 +17,99 @@ import {
   XCircle,
 } from "lucide-react";
 import { formatProviderName } from "../utils/formattingUtils";
+import { components } from "@/lib/clients/jawnTypes/public";
+import { getProviderStatus, TimeFrame } from "./ProviderStatusPage";
 
 interface ProviderStatusInfoProps {
-  provider: ProviderMetrics | null;
+  provider: components["schemas"]["ProviderMetrics"] | null;
+  timeFrame: TimeFrame;
+  onTimeFrameChange: (timeFrame: TimeFrame) => void;
 }
 
-const errorChartConfig = {
-  errorCount: {
-    label: "Errors",
-    color: "hsl(var(--chart-1))",
-  },
-} satisfies ChartConfig;
+const formatLatency = (value: number) => `${Math.round(value)}ms`;
 
-// Helper function to determine status
-const getProviderStatus = (errorRate: number) => {
-  if (errorRate <= 0.05) {
-    return {
-      status: "Operational",
-      description: "Low error rate",
-      icon: CheckCircle,
-      color: "text-emerald-700",
-      bgColor: "bg-emerald-50",
-    };
-  } else if (errorRate <= 0.5) {
-    return {
-      status: "Degraded",
-      description: "Elevated error rate",
-      icon: AlertTriangle,
-      color: "text-amber-700",
-      bgColor: "bg-amber-50",
-    };
-  } else {
-    return {
-      status: "Critical",
-      description: "High error rate",
-      icon: XCircle,
-      color: "text-red-700",
-      bgColor: "bg-red-50",
-    };
-  }
-};
-
-export function ProviderStatusInfo({ provider }: ProviderStatusInfoProps) {
-  if (!provider) return null;
-
-  const chartData = provider.metrics.timeSeriesData.map((data) => ({
-    timestamp: new Date(data.timestamp).toLocaleTimeString([], {
+const formatTooltipTimestamp = (timestamp: string) => {
+  const date = new Date(timestamp);
+  return (
+    date.toLocaleDateString([], {
+      month: "short",
+      day: "numeric",
+    }) +
+    " " +
+    date.toLocaleTimeString([], {
       hour: "numeric",
       minute: "2-digit",
       hour12: true,
-    }),
+    })
+  );
+};
+
+// Add this near the top with other constants
+const timeFrameLabels: Record<TimeFrame, string> = {
+  "24h": "24 hours",
+  "7d": "7 days",
+  "30d": "30 days",
+};
+
+export function ProviderStatusInfo({
+  provider,
+  timeFrame,
+  onTimeFrameChange,
+}: ProviderStatusInfoProps) {
+  if (!provider) return null;
+
+  const formatTimestamp = (timestamp: string) => {
+    const date = new Date(timestamp);
+    switch (timeFrame) {
+      case "24h":
+        return date.toLocaleTimeString([], {
+          hour: "numeric",
+          minute: "2-digit",
+          hour12: true,
+        });
+      case "7d":
+        return date.toLocaleDateString([], {
+          month: "short",
+          day: "numeric",
+        });
+      case "30d":
+        return date.toLocaleDateString([], {
+          month: "short",
+          day: "numeric",
+        });
+    }
+  };
+
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (!active || !payload?.length) return null;
+
+    const value = payload[0].value;
+    const name = payload[0].name;
+    const timestamp = formatTooltipTimestamp(label);
+
+    if (name === "errorCount") {
+      return (
+        <div className="bg-white p-2 border rounded shadow">
+          <div className="text-sm text-gray-500">{timestamp}</div>
+          <div className="font-medium">{value}</div>
+          <div className="text-sm">500 Errors</div>
+        </div>
+      );
+    } else if (name === "latency") {
+      return (
+        <div className="bg-white p-2 border rounded shadow">
+          <div className="text-sm text-gray-500">{timestamp}</div>
+          <div className="font-medium">{formatLatency(value)}</div>
+          <div className="text-sm">Latency</div>
+        </div>
+      );
+    }
+    return null;
+  };
+
+  const chartData = provider.metrics.timeSeriesData.map((data) => ({
+    timestamp: data.timestamp,
+    originalTimestamp: data.timestamp,
     requestCount: data.requestCount,
     errorCount: data.errorCount,
     latency: data.averageLatency,
@@ -76,8 +118,47 @@ export function ProviderStatusInfo({ provider }: ProviderStatusInfoProps) {
   const maxErrorCount = Math.max(...chartData.map((data) => data.errorCount));
   const maxLatency = Math.max(...chartData.map((data) => data.latency));
 
+  const getXAxisInterval = (chartType: "error" | "latency") => {
+    const dataLength = chartData.length;
+    let targetTicks;
+
+    switch (timeFrame) {
+      case "7d":
+        targetTicks = 7;
+        break;
+      case "24h":
+        targetTicks = chartType === "error" ? 8 : 6;
+        break;
+      case "30d":
+        targetTicks = chartType === "error" ? 10 : 8;
+        break;
+      default:
+        targetTicks = chartType === "error" ? 8 : 6;
+    }
+
+    return Math.max(1, Math.floor(dataLength / targetTicks));
+  };
+
   return (
     <div className="w-full max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-5 gap-4">
+      <div className="lg:col-span-5">
+        <div className="flex justify-end gap-2 mb-4">
+          {["24h", "7d", "30d"].map((tf) => (
+            <button
+              key={tf}
+              onClick={() => onTimeFrameChange(tf as TimeFrame)}
+              className={`px-3 py-1 rounded-md text-sm ${
+                timeFrame === tf
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+              }`}
+            >
+              {tf}
+            </button>
+          ))}
+        </div>
+      </div>
+
       <div className="lg:col-span-3 space-y-4">
         <Card className="shadow-none border h-[120px]">
           <CardContent className="pt-6">
@@ -103,8 +184,7 @@ export function ProviderStatusInfo({ provider }: ProviderStatusInfoProps) {
                     <span>{status.description}</span>
                     {provider.metrics.errorRate24h > 0 && (
                       <span className="text-gray-400 text-base ml-2">
-                        ({provider.metrics.errorRate24h.toFixed(2)}% of requests
-                        failing)
+                        ({provider.metrics.errorRate24h.toFixed(2)}% in 24h)
                       </span>
                     )}
                   </div>
@@ -117,12 +197,16 @@ export function ProviderStatusInfo({ provider }: ProviderStatusInfoProps) {
         <Card className="shadow-none border">
           <CardHeader>
             <CardTitle className="text-xl font-semibold">
-              Errors in the last 24 hours
+              500 Errors in the last {timeFrameLabels[timeFrame]}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-[200px] mt-4">
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer
+                width="100%"
+                height="100%"
+                key={`error-${timeFrame}`}
+              >
                 <AreaChart data={chartData}>
                   <XAxis
                     dataKey="timestamp"
@@ -130,7 +214,8 @@ export function ProviderStatusInfo({ provider }: ProviderStatusInfoProps) {
                     fontSize={12}
                     tickLine={false}
                     axisLine={false}
-                    interval={15}
+                    interval={getXAxisInterval("error")}
+                    tickFormatter={(timestamp) => formatTimestamp(timestamp)}
                   />
                   <YAxis
                     stroke="#888888"
@@ -140,7 +225,7 @@ export function ProviderStatusInfo({ provider }: ProviderStatusInfoProps) {
                     tickFormatter={(value) => `${value}`}
                     domain={[0, maxErrorCount]}
                   />
-                  <Tooltip />
+                  <ChartTooltip content={<CustomTooltip />} />
                   <Area
                     type="monotone"
                     dataKey="errorCount"
@@ -160,7 +245,7 @@ export function ProviderStatusInfo({ provider }: ProviderStatusInfoProps) {
                   errors than average
                 </div>
                 <div className="flex items-center gap-2 leading-none text-muted-foreground">
-                  Compared to previous 24 hours
+                  Compared to previous {timeFrameLabels[timeFrame]}
                 </div>
               </div>
             </div>
@@ -172,7 +257,7 @@ export function ProviderStatusInfo({ provider }: ProviderStatusInfoProps) {
         <Card className="shadow-none border h-[120px]">
           <CardContent className="pt-4">
             <h2 className="text-xl font-bold mb-2">
-              Latency in the last 24 hours
+              Latency in the last {timeFrameLabels[timeFrame]}
             </h2>
             <div className="grid grid-cols-3 gap-4 text-sm">
               <div>
@@ -194,12 +279,16 @@ export function ProviderStatusInfo({ provider }: ProviderStatusInfoProps) {
         <Card className="shadow-none border">
           <CardHeader>
             <CardTitle className="text-xl font-semibold">
-              Latency in the last 24 hours
+              Latency in the last {timeFrameLabels[timeFrame]}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-[200px] mt-4">
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer
+                width="100%"
+                height="100%"
+                key={`latency-${timeFrame}`}
+              >
                 <AreaChart data={chartData}>
                   <XAxis
                     dataKey="timestamp"
@@ -207,8 +296,8 @@ export function ProviderStatusInfo({ provider }: ProviderStatusInfoProps) {
                     fontSize={12}
                     tickLine={false}
                     axisLine={false}
-                    interval={30}
-                    domain={[0, maxLatency]}
+                    interval={getXAxisInterval("latency")}
+                    tickFormatter={(timestamp) => formatTimestamp(timestamp)}
                   />
                   <YAxis
                     stroke="#888888"
@@ -216,8 +305,9 @@ export function ProviderStatusInfo({ provider }: ProviderStatusInfoProps) {
                     tickLine={false}
                     axisLine={false}
                     tickFormatter={(value) => `${value}ms`}
+                    domain={[0, maxLatency]}
                   />
-                  <Tooltip />
+                  <ChartTooltip content={<CustomTooltip />} />
                   <Area
                     type="monotone"
                     dataKey="latency"
@@ -237,7 +327,7 @@ export function ProviderStatusInfo({ provider }: ProviderStatusInfoProps) {
                   than average
                 </div>
                 <div className="flex items-center gap-2 leading-none text-muted-foreground">
-                  Compared to previous 24 hours
+                  Compared to previous {timeFrameLabels[timeFrame]}
                 </div>
               </div>
             </div>

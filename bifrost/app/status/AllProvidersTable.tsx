@@ -8,13 +8,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  formatProviderName,
-  humanReadableNumber,
-} from "../utils/formattingUtils";
+import { formatProviderName } from "../utils/formattingUtils";
 import { ArrowUpIcon, ArrowDownIcon } from "@heroicons/react/24/solid";
 import Link from "next/link";
 import { components } from "@/lib/clients/jawnTypes/public";
+import { getProviderStatus } from "./ProviderStatusPage";
+import { Badge } from "@/components/ui/badge";
 
 function TrendIndicator({ change }: { change: number }) {
   if (Math.abs(change) < 0.1) return null;
@@ -27,11 +26,11 @@ function TrendIndicator({ change }: { change: number }) {
       }`}
     >
       {isPositive ? (
-        <ArrowUpIcon className="h-4 w-4" />
+        <ArrowUpIcon className="h-3.5 w-3.5" />
       ) : (
-        <ArrowDownIcon className="h-4 w-4" />
+        <ArrowDownIcon className="h-3.5 w-3.5" />
       )}
-      <span className="text-xs ml-1">{Math.abs(change).toFixed(1)}%</span>
+      <span className="text-xs ml-0.5">{Math.abs(change).toFixed(1)}%</span>
     </span>
   );
 }
@@ -42,92 +41,120 @@ interface AllProvidersTableProps {
 
 export function AllProvidersTable({ providers }: AllProvidersTableProps) {
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Provider</TableHead>
-          <TableHead>Status</TableHead>
-          <TableHead>Avg Latency Per Token (24h)</TableHead>
-          <TableHead>Error Rate (10m)</TableHead>
-          <TableHead>Error Rate (24h)</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {providers.map((providerInfo) => {
-          const providerName = formatProviderName(providerInfo.providerName);
-          const {
-            totalRequests,
-            requestVolumeChange,
-            errorRate24h,
-            errorRateChange,
-            timeSeriesData,
-          } = providerInfo.metrics;
+    <div className="border rounded-lg overflow-hidden">
+      <Table>
+        <TableHeader>
+          <TableRow className="bg-gray-50 hover:bg-gray-50">
+            <TableHead className="font-semibold">Provider</TableHead>
+            <TableHead className="font-semibold">Status</TableHead>
+            <TableHead className="font-semibold">
+              Avg Latency Per Token
+              <span className="block text-xs font-normal text-gray-500">
+                Last 24 hours
+              </span>
+            </TableHead>
+            <TableHead className="font-semibold">
+              500 Error Rate
+              <span className="block text-xs font-normal text-gray-500">
+                Last 10 minutes
+              </span>
+            </TableHead>
+            <TableHead className="font-semibold">
+              500 Error Rate
+              <span className="block text-xs font-normal text-gray-500">
+                Last 24 hours
+              </span>
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {providers.map((providerInfo) => {
+            const providerName = formatProviderName(providerInfo.providerName);
+            const {
+              errorRate24h,
+              errorRateChange,
+              recentErrorCount,
+              recentRequestCount,
+            } = providerInfo.metrics;
 
-          const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
-          const recentData = timeSeriesData.filter(
-            (entry) => new Date(entry.timestamp) >= tenMinutesAgo
-          );
-          const recentErrorRate = recentData.length
-            ? recentData.reduce((acc, curr) => acc + curr.errorRate, 0) /
-              recentData.length
-            : 0;
+            const recentErrorRate =
+              recentRequestCount > 0
+                ? (recentErrorCount / recentRequestCount) * 100
+                : 0;
 
-          return (
-            <TableRow key={providerName} className="hover:bg-gray-50">
-              <TableCell className="p-0">
-                <Link
-                  href={`/status/provider/${providerName}`}
-                  className="block w-full h-full px-6 py-2"
-                >
-                  {providerName}
-                </Link>
-              </TableCell>
-              <TableCell className="p-0">
-                <Link
-                  href={`/status/provider/${providerName}`}
-                  className="block w-full h-full px-6 py-2"
-                >
-                  {recentErrorRate < 5 ? (
-                    <span className="text-green-500">Online</span>
-                  ) : recentErrorRate < 15 ? (
-                    <span className="text-yellow-500">Degraded</span>
-                  ) : (
-                    <span className="text-red-500">Down</span>
-                  )}
-                </Link>
-              </TableCell>
-              <TableCell className="whitespace-nowrap p-0">
-                <Link
-                  href={`/status/provider/${providerName}`}
-                  className="block w-full h-full px-6 py-2"
-                >
-                  {providerInfo.metrics.averageLatencyPerToken.toFixed(0)}ms
-                  <TrendIndicator
-                    change={providerInfo.metrics.latencyPerTokenChange}
-                  />
-                </Link>
-              </TableCell>
-              <TableCell className="p-0">
-                <Link
-                  href={`/status/provider/${providerName}`}
-                  className="block w-full h-full px-6 py-2"
-                >
-                  {recentErrorRate.toFixed(2)}%
-                </Link>
-              </TableCell>
-              <TableCell className="whitespace-nowrap p-0">
-                <Link
-                  href={`/status/provider/${providerName}`}
-                  className="block w-full h-full px-6 py-2"
-                >
-                  {errorRate24h.toFixed(2)}%
-                  <TrendIndicator change={errorRateChange} />
-                </Link>
-              </TableCell>
-            </TableRow>
-          );
-        })}
-      </TableBody>
-    </Table>
+            const status = getProviderStatus(errorRate24h);
+            const StatusIcon = status.icon;
+
+            return (
+              <TableRow
+                key={providerName}
+                className="bg-white hover:bg-gray-50/50 transition-colors"
+              >
+                <TableCell className="p-0 font-medium">
+                  <Link
+                    href={`/status/provider/${encodeURIComponent(
+                      providerName
+                    )}`}
+                    className="block w-full h-full px-4 py-3 hover:text-blue-600 transition-colors"
+                  >
+                    {providerName}
+                  </Link>
+                </TableCell>
+                <TableCell className="p-0">
+                  <Link
+                    href={`/status/provider/${encodeURIComponent(
+                      providerName
+                    )}`}
+                    className="block w-full h-full px-4 py-3"
+                  >
+                    <Badge
+                      variant="secondary"
+                      className={`${status.bgColor} ${status.color} hover:${status.bgColor} px-3 py-1 text-sm font-medium`}
+                    >
+                      <StatusIcon className="w-4 h-4 mr-1.5" />
+                      {status.status}
+                    </Badge>
+                  </Link>
+                </TableCell>
+                <TableCell className="whitespace-nowrap p-0">
+                  <Link
+                    href={`/status/provider/${encodeURIComponent(
+                      providerName
+                    )}`}
+                    className="block w-full h-full px-6 py-2"
+                  >
+                    {providerInfo.metrics.averageLatencyPerToken.toFixed(0)}ms
+                    <TrendIndicator
+                      change={providerInfo.metrics.latencyPerTokenChange}
+                    />
+                  </Link>
+                </TableCell>
+                <TableCell className="p-0">
+                  <Link
+                    href={`/status/provider/${encodeURIComponent(
+                      providerName
+                    )}`}
+                    className="block w-full h-full px-6 py-2"
+                  >
+                    {recentErrorRate.toFixed(4)}%
+                  </Link>
+                </TableCell>
+                <TableCell className="whitespace-nowrap p-0">
+                  <Link
+                    href={`/status/provider/${encodeURIComponent(
+                      providerName
+                    )}`}
+                    className="block w-full h-full px-6 py-2"
+                  >
+                    {errorRate24h.toFixed(4)}%
+                    <TrendIndicator change={errorRateChange} />
+                  </Link>
+                </TableCell>
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </Table>
+    </div>
   );
 }

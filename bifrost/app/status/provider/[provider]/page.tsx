@@ -1,6 +1,10 @@
 import { ProviderStatusPage } from "@/app/status/ProviderStatusPage";
 import { providers } from "@/packages/cost/providers/mappings";
 
+const displayToBackendName: Record<string, string> = {
+  "Together AI": "TOGETHER",
+};
+
 export default async function Home({
   params,
 }: {
@@ -11,9 +15,12 @@ export default async function Home({
   const { provider } = params;
   const decodedProvider = decodeURIComponent(provider || "");
 
+  const backendProvider =
+    displayToBackendName[decodedProvider] || decodedProvider;
+
   return (
     <div className="container mx-auto py-8">
-      <ProviderStatusPage provider={decodedProvider} />
+      <ProviderStatusPage provider={backendProvider} />
     </div>
   );
 }

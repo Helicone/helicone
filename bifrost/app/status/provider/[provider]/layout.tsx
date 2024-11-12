@@ -5,18 +5,16 @@ export async function generateMetadata({
   params,
 }: {
   params: {
-    model: string;
     provider: string;
   };
 }): Promise<Metadata> {
-  const { model, provider } = params;
-  const decodedModel = decodeURIComponent(model || "");
+  const { provider } = params;
   const decodedProvider = formatProviderName(
     decodeURIComponent(provider || "")
   );
 
-  const title = `${decodedProvider} ${decodedModel} Status - Helicone`;
-  const description = `Live status monitoring for ${decodedProvider} ${decodedModel}. Track API availability, latency, and performance metrics in real-time.`;
+  const title = `${decodedProvider} Status - Helicone`;
+  const description = `Live status monitoring for ${decodedProvider}. Track API availability, latency, and performance metrics in real-time.`;
 
   const imageUrl = "/static/status/status-open-graph.webp";
 
@@ -27,7 +25,7 @@ export async function generateMetadata({
     openGraph: {
       type: "website",
       siteName: "Helicone.ai",
-      url: `https://www.helicone.ai/status/provider/${provider}/model/${model}`,
+      url: `https://www.helicone.ai/status/provider/${provider}`,
       title,
       description,
       images: imageUrl,

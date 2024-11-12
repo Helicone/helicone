@@ -7,6 +7,7 @@ import {
   Get,
   Path,
   Body,
+  Query,
 } from "tsoa";
 import { Result } from "../../lib/shared/result";
 import { JawnAuthenticatedRequest } from "../../types/request";
@@ -14,6 +15,8 @@ import {
   ProviderMetrics,
   ProviderStatusManager,
 } from "../../managers/ProviderStatusManager";
+
+export type TimeFrame = "24h" | "7d" | "30d";
 
 @Route("v1/public/status/provider")
 @Tags("Status")
@@ -32,10 +35,14 @@ export class StatusController extends Controller {
   @Get("/{provider}")
   public async getProviderStatus(
     @Request() request: JawnAuthenticatedRequest,
-    @Path() provider: string
+    @Path() provider: string,
+    @Query() timeFrame: TimeFrame
   ): Promise<Result<ProviderMetrics, string>> {
     const providerStatusManager = new ProviderStatusManager();
-    const result = await providerStatusManager.getProviderStatus(provider);
+    const result = await providerStatusManager.getProviderStatus(
+      provider,
+      timeFrame
+    );
 
     return result;
   }
