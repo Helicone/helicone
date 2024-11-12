@@ -214,10 +214,16 @@ const useOrgsContextManager = () => {
   const refreshCurrentOrg = useCallback(() => {
     refetch().then((x) => {
       if (x.data && x.data.length > 0) {
-        const firstOrg = x.data[0];
-        setOrg(firstOrg);
-        setOrgCookie(firstOrg.id);
-        setRenderKey((key) => key + 1);
+        console.log("org", org);
+        const currentOrg = x.data.find(
+          (organization) => organization.id === org?.id
+        );
+        if (currentOrg) {
+          console.log("currentOrg", currentOrg);
+          setOrg(currentOrg);
+          setOrgCookie(currentOrg.id);
+          setRenderKey((key) => key + 1);
+        }
       }
     });
   }, [refetch]);
@@ -339,9 +345,9 @@ const useOrgsContextManager = () => {
     isResellerOfCurrentCustomerOrg,
     refreshCurrentOrg,
     setCurrentOrg: (orgId) => {
-      refetch().then(() => {
-        const org = orgs?.find((org) => org.id === orgId);
-        if (org) {
+      refetch().then((data) => {
+        const org = data?.data?.find((org) => org.id === orgId);
+        if (org && org.tier !== "demo") {
           setOrg(org);
           setOrgCookie(org.id);
           setRenderKey((key) => key + 1);

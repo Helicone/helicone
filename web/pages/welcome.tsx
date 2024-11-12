@@ -13,23 +13,15 @@ const Welcome = (props: WelcomeProps) => {
   const { currentStep } = props;
   const org = useOrg();
   const router = useRouter();
-  console.log("org", org);
 
   useEffect(() => {
     if (org) {
       if (org.allOrgs.length > 0) {
-        console.log("HELLOO");
         router.push("/dashboard");
       }
     }
   }, [org, router]);
-  return (
-    <LoadingAnimation title="Just setting up your account..." />
-    // <MetaData title="Welcome">
-    //   {/* <div>Welcome</div> */}
-    //   <WelcomePage currentStep={currentStep} />
-    // </MetaData>
-  );
+  return <LoadingAnimation title="Just setting up your account..." />;
 };
 
 export default Welcome;

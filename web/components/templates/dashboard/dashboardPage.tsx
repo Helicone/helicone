@@ -62,7 +62,9 @@ import useOnboardingContext, {
 } from "@/components/layout/onboardingContext";
 import { useRouter } from "next/navigation";
 import { OnboardingPopoverInside } from "../onboarding/OnboardingPopover";
-import { Dialog, DialogContent, DialogOverlay } from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import CreateOrgForm from "../organization/createOrgForm";
+import OnboardingQuickStartModal from "./OnboardingQuickStartModal";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -112,6 +114,13 @@ const DashboardPage = (props: DashboardPageProps) => {
   const [isDemo, setIsDemo] = useState(orgContext?.currentOrg?.tier === "demo");
   const [openDemo, setOpenDemo] = useState(true);
   const [openQuickTour, setOpenQuickTour] = useState(false);
+  const [openCreateFirstOrg, setOpenCreateFirstOrg] = useState(false);
+
+  const [showQuickStartModal, setShowQuickStartModal] = useState(
+    orgContext?.currentOrg?.has_onboarded != undefined
+      ? !orgContext?.currentOrg?.has_onboarded
+      : false
+  );
   const onboardingContext = useOnboardingContext();
 
   const router = useRouter();
@@ -119,6 +128,14 @@ const DashboardPage = (props: DashboardPageProps) => {
   useEffect(() => {
     setIsDemo(orgContext?.currentOrg?.tier === "demo");
   }, [orgContext?.currentOrg?.tier]);
+
+  useEffect(() => {
+    setShowQuickStartModal(
+      orgContext?.currentOrg?.has_onboarded != undefined
+        ? !orgContext?.currentOrg?.has_onboarded
+        : false
+    );
+  }, [orgContext?.currentOrg?.has_onboarded]);
 
   const {
     organizationLayout: orgLayout,
@@ -214,12 +231,7 @@ const DashboardPage = (props: DashboardPageProps) => {
     return JSON.stringify(encode(filters));
   };
 
-  const [isLive, setIsLive] = useLocalStorage(
-    "isLive-DashboardPage",
-    // TODO: Uncomment this once we have a demo
-    // orgContext?.currentOrg?.tier === "demo"
-    false
-  );
+  const [isLive, setIsLive] = useLocalStorage("isLive-DashboardPage", false);
 
   const [advancedFilters, setAdvancedFilters] = useState<UIFilterRowTree>(
     getRootFilterNode()
@@ -1006,32 +1018,16 @@ const DashboardPage = (props: DashboardPageProps) => {
                   ONBOARDING_STEPS.DASHBOARD_SUCCESS.stepNumber
               }
             >
-              <DialogOverlay className="!bg-transparent" />
               <DialogContent className="left-[calc(100%-2rem)] -translate-x-full top-[calc(100%-2rem)] -translate-y-full">
-                <OnboardingPopoverInside onboardingStep="DASHBOARD_SUCCESS" />
+                <OnboardingPopoverInside
+                  onboardingStep="DASHBOARD_SUCCESS"
+                  nextOverride={() => {
+                    onboardingContext.endOnboarding();
+                    setOpenQuickTour(true);
+                  }}
+                />
               </DialogContent>
             </Dialog>
-            {/* <Popover
-              open={
-                onboardingContext.isOnboardingVisible &&
-                onboardingContext.currentStep ===
-                  ONBOARDING_STEPS.DASHBOARD_SUCCESS.stepNumber
-              }
-            >
-              <PopoverTrigger>
-                <div
-                  className="fixed bottom-2 right-2 w-1 h-1"
-                  data-onboarding-step={
-                    ONBOARDING_STEPS.DASHBOARD_SUCCESS.stepNumber
-                  }
-                />
-              </PopoverTrigger>
-              <OnboardingPopover
-                onboardingStep="DASHBOARD_SUCCESS"
-                // align="end"
-                // side="top"
-              />
-            </Popover> */}
           </div>
         )}
         <SuggestionModal
@@ -1044,16 +1040,23 @@ const DashboardPage = (props: DashboardPageProps) => {
         {isDemo && !onboardingContext.isOnboardingVisible && (
           <>
             <OnboardingDemoModal
-              open={openDemo}
+              open={
+                openDemo &&
+                !openCreateFirstOrg &&
+                !onboardingContext.isOnboardingComplete
+              }
               setOpen={setOpenDemo}
-              quickStart={() => {}}
+              quickStart={() => {
+                setOpenDemo(false);
+                setOpenCreateFirstOrg(true);
+              }}
               quickTour={() => {
                 setOpenDemo(false);
                 setOpenQuickTour(true);
               }}
             />
             <OnboardingQuickTourModal
-              open={openQuickTour}
+              open={openQuickTour && !openCreateFirstOrg}
               setOpen={setOpenQuickTour}
               back={() => {
                 setOpenQuickTour(false);
@@ -1063,8 +1066,34 @@ const DashboardPage = (props: DashboardPageProps) => {
                 onboardingContext.startOnboarding();
                 router.push("/requests");
               }}
+              integrateApp={() => {
+                setOpenQuickTour(false);
+                setOpenCreateFirstOrg(true);
+              }}
             />
+            <Dialog
+              open={openCreateFirstOrg}
+              onOpenChange={setOpenCreateFirstOrg}
+            >
+              <DialogContent className="w-11/12 sm:max-w-2xl gap-8 rounded-md">
+                <CreateOrgForm
+                  firstOrg={true}
+                  onCancelHandler={setOpenCreateFirstOrg}
+                  onSuccess={(orgId) => {
+                    setTimeout(() => {
+                      orgContext?.setCurrentOrg(orgId ?? "");
+                    }, 3000);
+                  }}
+                />
+              </DialogContent>
+            </Dialog>
           </>
+        )}
+        {orgContext?.currentOrg?.tier !== "demo" && (
+          <OnboardingQuickStartModal
+            open={showQuickStartModal ?? false}
+            setOpen={setShowQuickStartModal}
+          />
         )}
       </IslandContainer>
     </>

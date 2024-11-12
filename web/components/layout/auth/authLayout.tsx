@@ -5,7 +5,6 @@ import { useMemo, useRef, useState } from "react";
 import { useAlertBanners, useChangelog } from "../../../services/hooks/admin";
 import UpgradeProModal from "../../shared/upgradeProModal";
 import { Row } from "../common";
-import { useOrg } from "../organizationContext";
 import MetaData from "../public/authMetaData";
 import AcceptTermsModal from "./AcceptTermsModal";
 import DemoModal from "./DemoModal";
@@ -22,7 +21,6 @@ const AuthLayout = (props: AuthLayoutProps) => {
   const { children } = props;
   const router = useRouter();
   const { pathname } = router;
-  const org = useOrg();
 
   const [open, setOpen] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
@@ -57,11 +55,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
   const sidebarRef = useRef<HTMLDivElement>(null);
 
   return (
-    <MetaData
-      title={`${currentPage} ${
-        org?.currentOrg?.name ? `- ${org.currentOrg.name}` : ""
-      }`}
-    >
+    <MetaData title={currentPage}>
       <div>
         <DemoModal />
         <OnboardingProvider sidebarRef={sidebarRef}>
@@ -100,7 +94,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
       </div>
 
       <UpgradeProModal open={open} setOpen={setOpen} />
-      <AcceptTermsModal />
+      {/* <AcceptTermsModal /> */}
     </MetaData>
   );
 };

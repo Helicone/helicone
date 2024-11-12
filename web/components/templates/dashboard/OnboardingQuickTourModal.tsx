@@ -1,3 +1,4 @@
+import useOnboardingContext from "@/components/layout/onboardingContext";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -22,12 +23,16 @@ const OnboardingQuickTourModal = ({
   setOpen,
   back,
   startTour,
+  integrateApp,
 }: {
   open: boolean;
   setOpen: (open: boolean) => void;
   back: () => void;
   startTour: () => void;
+  integrateApp: () => void;
 }) => {
+  const { isOnboardingComplete } = useOnboardingContext();
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="w-11/12 sm:max-w-2xl gap-8 rounded-md">
@@ -69,6 +74,7 @@ const OnboardingQuickTourModal = ({
                   <Checkbox
                     disabled
                     className="border-gray-200 dark:border-gray-800"
+                    checked={isOnboardingComplete}
                   />
                   <p className="text-sm text-slate-700 dark:text-slate-300 font-medium">
                     {item}
@@ -79,10 +85,16 @@ const OnboardingQuickTourModal = ({
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={back}>
-            Go Back
-          </Button>
-          <Button onClick={startTour}>Let&apos;s go!</Button>
+          {!isOnboardingComplete ? (
+            <>
+              <Button variant="outline" onClick={back}>
+                Go Back
+              </Button>
+              <Button onClick={startTour}>Let&apos;s go!</Button>
+            </>
+          ) : (
+            <Button onClick={integrateApp}>Integrate my app</Button>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -46,11 +46,17 @@ export default function OrgDropdown({}: OrgDropdownProps) {
   const { ownedOrgs, memberOrgs, customerOrgs } = useMemo(() => {
     const owned =
       orgContext?.allOrgs.filter(
-        (org) => org.owner === user?.id && org.organization_type !== "customer"
+        (org) =>
+          org.owner === user?.id &&
+          org.organization_type !== "customer" &&
+          org.tier !== "demo"
       ) || [];
     const member =
       orgContext?.allOrgs.filter(
-        (org) => org.owner !== user?.id && org.organization_type !== "customer"
+        (org) =>
+          org.owner !== user?.id &&
+          org.organization_type !== "customer" &&
+          org.tier !== "demo"
       ) || [];
     const customer =
       orgContext?.allOrgs.filter(

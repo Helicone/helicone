@@ -194,8 +194,6 @@ export default function ThemedTable<T extends { id?: string }>(
     }
   }, [rightPanel]);
 
-  console.log({ row0: rows[0] });
-
   const sessionData = useMemo(() => {
     if (rows.length === 0) {
       return undefined;

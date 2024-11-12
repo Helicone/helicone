@@ -631,17 +631,13 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
         model: "gpt-4o-mini",
       });
 
-      jawn
-        .POST("/v1/evaluator", {
-          body: {
-            llm_template: openAIFunction,
-            scoring_type: `LLM-CHOICE`,
-            name: "Humor",
-          },
-        })
-        .then((res) => {
-          console.log(res.data?.data);
-        });
+      jawn.POST("/v1/evaluator", {
+        body: {
+          llm_template: openAIFunction,
+          scoring_type: `LLM-CHOICE`,
+          name: "Humor",
+        },
+      });
     }
   }, [
     isOnboardingVisible,

@@ -58,7 +58,7 @@ export class OrganizationController extends Controller {
     @Body()
     requestBody: NewOrganizationParams,
     @Request() request: JawnAuthenticatedRequest
-  ): Promise<Result<null, string>> {
+  ): Promise<Result<string, string>> {
     const organizationManager = new OrganizationManager(request.authParams);
 
     const result = await organizationManager.createOrganization(requestBody);
@@ -67,7 +67,7 @@ export class OrganizationController extends Controller {
       return err(result.error ?? "Error creating organization");
     } else {
       this.setStatus(201); // set return status 201
-      return ok(null);
+      return ok(result.data.id ?? "");
     }
   }
 

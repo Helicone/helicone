@@ -288,6 +288,9 @@ export type OnboardingContextType = {
   onClickElement: () => void;
   setOnClickElement: (onClickElement: () => void) => void;
   isOnboardingVisible: boolean;
+  isOnboardingComplete: boolean;
+  setIsOnboardingComplete: (isOnboardingComplete: boolean) => void;
+  endOnboarding: () => void;
 };
 
 const OnboardingContext = createContext<OnboardingContextType | undefined>(
@@ -314,17 +317,14 @@ export const OnboardingProvider = ({
   const [currentStep, setCurrentStepState] = useState(0);
   const [isOnboardingVisible, setIsOnboardingVisible] = useState(false);
   const [onClickElement, setOnClickElement] = useState<() => void>(() => {});
-
+  const [isOnboardingComplete, setIsOnboardingComplete] = useState(false);
   const setCurrentStep = useCallback((step: number, delayMs?: number) => {
-    console.log("delayMs", delayMs);
     if (delayMs) {
       setTimeout(() => {
         setCurrentStepState(step);
-        setIsOnboardingVisible(true);
       }, delayMs);
     } else {
       setCurrentStepState(step);
-      setIsOnboardingVisible(true);
     }
   }, []);
 
@@ -332,6 +332,12 @@ export const OnboardingProvider = ({
     setIsOnboardingVisible(true);
     setCurrentStep(0);
   }, [setCurrentStep]);
+
+  const endOnboarding = useCallback(() => {
+    setCurrentStep(0);
+    setIsOnboardingVisible(false);
+    setIsOnboardingComplete(true);
+  }, [setIsOnboardingComplete, setCurrentStep]);
 
   const getElementPosition = (element: Element) => {
     if (!element) return null;
@@ -423,6 +429,9 @@ export const OnboardingProvider = ({
         elementPointerPosition,
         onClickElement,
         setOnClickElement,
+        isOnboardingComplete,
+        setIsOnboardingComplete,
+        endOnboarding,
       }}
     >
       {children}

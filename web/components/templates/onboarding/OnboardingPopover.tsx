@@ -117,8 +117,6 @@ export const OnboardingPopoverInside = ({
           nextOverride
             ? nextOverride
             : () => {
-                console.log("clicked next");
-                console.log(next);
                 next && next();
                 setCurrentStep(currentStep + 1, delayMs);
               }

@@ -417,7 +417,6 @@ export function useExperimentTable(orgId: string, experimentTableId: string) {
         sourceRequest?: string;
       }[];
     }) => {
-      console.log("adding rows batch");
       const jawnClient = getJawnClient(orgId);
       await jawnClient.POST(
         "/v1/experiment/table/{experimentTableId}/row/insert/batch",
