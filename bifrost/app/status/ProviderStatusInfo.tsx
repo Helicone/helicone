@@ -250,15 +250,27 @@ export function ProviderStatusInfo({
             <div className="grid grid-cols-3 gap-4 text-sm">
               <div>
                 <div className="text-muted-foreground">Average latency</div>
-                {/* <div className="font-medium">{averageLatency.toFixed(0)}ms</div> */}
+                <div className="font-medium">
+                  {formatLatency(provider.metrics.averageLatency)}
+                </div>
               </div>
               <div>
                 <div className="text-muted-foreground">Peak latency</div>
-                {/* <div className="font-medium">{peakLatency.toFixed(0)}ms</div> */}
+                <div className="font-medium">
+                  {formatLatency(
+                    Math.max(...chartData.map((data) => data.latency))
+                  )}
+                </div>
               </div>
               <div>
                 <div className="text-muted-foreground">P95 latency</div>
-                {/* <div className="font-medium">{p95Latency.toFixed(0)}ms</div> */}
+                <div className="font-medium">
+                  {formatLatency(
+                    chartData.map((data) => data.latency).sort((a, b) => a - b)[
+                      Math.floor(chartData.length * 0.95)
+                    ]
+                  )}
+                </div>
               </div>
             </div>
           </CardContent>
