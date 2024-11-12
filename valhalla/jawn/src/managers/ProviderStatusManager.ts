@@ -43,7 +43,7 @@ interface MetricsData {
 }
 
 export interface ProviderMetrics {
-  providerName: Provider;
+  providerName: string;
   metrics: MetricsData & {
     timeSeriesData: TimeSeriesDataPoint[];
   };
@@ -201,7 +201,7 @@ export class ProviderStatusManager {
       providerName = "HYPERBOLIC";
     }
     return {
-      providerName: providerName as Provider,
+      providerName,
       metrics: {
         totalRequests: data?.request_count_24h ?? 0,
         requestCountPrevious24h: data?.request_count_previous_24h ?? 0,
