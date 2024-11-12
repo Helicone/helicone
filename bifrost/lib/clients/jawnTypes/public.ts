@@ -2210,11 +2210,6 @@ Json: JsonObject;
       experimentId: string;
       createdAt: string;
       metadata?: unknown;
-      columns: {
-          columnType: string;
-          columnName: string;
-          id: string;
-        }[];
     };
     ResultSuccess_ExperimentTableSimplified_: {
       data: components["schemas"]["ExperimentTableSimplified"];
@@ -4397,7 +4392,7 @@ export interface operations {
       content: {
         "application/json": {
           updateInputs?: boolean;
-          metadata?: string;
+          metadata?: components["schemas"]["Record_string.string_"];
           value?: string;
           status?: string;
           cellId: string;
@@ -4422,7 +4417,6 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": {
-          inputKeys?: string[];
           promptVersionId?: string;
           hypothesisId?: string;
           columnType: string;
@@ -4491,7 +4485,6 @@ export interface operations {
           rows: ({
               sourceRequest?: string;
               cells: ({
-                  metadata?: unknown;
                   value: string | null;
                   columnId: string;
                 })[];
