@@ -1,21 +1,9 @@
 import React from "react";
-import {
-  XAxis,
-  YAxis,
-  ResponsiveContainer,
-  Area,
-  AreaChart,
-  Tooltip,
-} from "recharts";
+import { XAxis, YAxis, ResponsiveContainer, Area, AreaChart } from "recharts";
 import { ChartTooltip } from "@/components/ui/chart";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  TrendingDown,
-  CheckCircle,
-  AlertTriangle,
-  XCircle,
-} from "lucide-react";
+import { TrendingDown } from "lucide-react";
 import { formatProviderName } from "../utils/formattingUtils";
 import { components } from "@/lib/clients/jawnTypes/public";
 import { getProviderStatus, TimeFrame } from "./ProviderStatusPage";

@@ -13,6 +13,8 @@ const PROVIDERS = [
   "MISTRAL",
   "DEEPINFRA",
   "QSTASH",
+  "PERPLEXITY",
+  "HYPERBOLIC",
 ] as const;
 
 type Provider = (typeof PROVIDERS)[number];
@@ -158,7 +160,7 @@ export class ProviderStatusManager {
           GROUP BY provider
         )
       SELECT 
-        c.provider as provider,
+        if(c.provider = 'https://api.hyperbolic.xyz', 'HYPERBOLIC', c.provider) as provider,
         c.current_request_count as request_count_24h,
         p.previous_request_count as request_count_previous_24h,
         ((c.current_request_count - p.previous_request_count) / nullif(p.previous_request_count, 0)) * 100 as request_volume_change,
@@ -194,8 +196,12 @@ export class ProviderStatusManager {
     data?: TotalMetricsQueryResult,
     timeSeriesData: TimeSeriesDataPoint[] = []
   ): ProviderMetrics {
+    let providerName = data?.provider ?? "";
+    if (providerName === "https://api.hyperbolic.xyz") {
+      providerName = "HYPERBOLIC";
+    }
     return {
-      providerName: data?.provider ?? "",
+      providerName,
       metrics: {
         totalRequests: data?.request_count_24h ?? 0,
         requestCountPrevious24h: data?.request_count_previous_24h ?? 0,
@@ -215,7 +221,9 @@ export class ProviderStatusManager {
   }
 
   async getAllProviderStatus(): Promise<Result<ProviderMetrics[], string>> {
-    const providerList = `(${PROVIDERS.map((p) => `'${p}'`).join(",")})`;
+    const providerList = `(${PROVIDERS.map((p) =>
+      p === "HYPERBOLIC" ? "'https://api.hyperbolic.xyz'" : `'${p}'`
+    ).join(",")})`;
 
     const [timeSeriesResult, totalResult] = await Promise.all([
       clickhouseDb.dbQuery<TimeSeriesQueryResult>(
@@ -266,9 +274,16 @@ export class ProviderStatusManager {
     provider: string,
     timeFrame: TimeFrame
   ): Promise<Result<ProviderMetrics, string>> {
-    const upperProvider = provider.toUpperCase();
+    let upperProvider = provider.toUpperCase();
 
-    if (!PROVIDERS.includes(upperProvider as Provider)) {
+    if (upperProvider === "HYPERBOLIC") {
+      upperProvider = "https://api.hyperbolic.xyz";
+    }
+
+    if (
+      upperProvider !== "https://api.hyperbolic.xyz" &&
+      !PROVIDERS.includes(upperProvider as Provider)
+    ) {
       return ok(this.transformTotalMetrics());
     }
 

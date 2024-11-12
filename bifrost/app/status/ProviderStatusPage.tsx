@@ -58,9 +58,6 @@ export function ProviderStatusPage({ provider }: ProviderStatusPageProps) {
   const [allProviderStatus, setAllProviderStatus] = useState<
     components["schemas"]["ProviderMetrics"][]
   >([]);
-  const [providerStatus, setProviderStatus] = useState<
-    components["schemas"]["ProviderMetrics"] | null
-  >(null);
   const [isLoading, setIsLoading] = useState({ all: true, detailed: false });
   const [error, setError] = useState<{ all?: string; detailed?: string }>({});
   const [selectedProvider, setSelectedProvider] = useState<
@@ -103,7 +100,6 @@ export function ProviderStatusPage({ provider }: ProviderStatusPageProps) {
 
   useEffect(() => {
     if (provider === "all") {
-      setProviderStatus(null);
       setSelectedProvider(null);
       return;
     }
@@ -118,7 +114,6 @@ export function ProviderStatusPage({ provider }: ProviderStatusPageProps) {
           }
         );
 
-        setProviderStatus(response.data?.data ?? null);
         setSelectedProvider(response.data?.data ?? null);
       } catch (error) {
         console.error("Failed to fetch detailed provider status:", error);
@@ -133,10 +128,6 @@ export function ProviderStatusPage({ provider }: ProviderStatusPageProps) {
 
     fetchDetailedStatus();
   }, [provider, timeFrame]);
-
-  useEffect(() => {
-    console.log("All provider status state updated:", allProviderStatus);
-  }, [allProviderStatus]);
 
   return (
     <div className="flex flex-col gap-4 w-full max-w-6xl mx-auto">

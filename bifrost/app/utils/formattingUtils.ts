@@ -20,6 +20,7 @@ export function formatProviderName(provider: string): string {
     VERTEX: "Vertex AI",
     BEDROCK: "Bedrock",
     CLOUDFLARE: "Cloudflare",
+    HYPERBOLIC: "Hyperbolic",
   };
 
   return (
