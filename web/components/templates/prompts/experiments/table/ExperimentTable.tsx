@@ -58,7 +58,6 @@ import {
 import { useJawnClient } from "@/lib/clients/jawnHook";
 import { useQuery } from "@tanstack/react-query";
 import { generateOpenAITemplate } from "@/components/shared/CreateNewEvaluator/evaluatorHelpers";
-import { useRouter } from "next/navigation";
 
 interface ExperimentTableProps {
   experimentTableId: string;

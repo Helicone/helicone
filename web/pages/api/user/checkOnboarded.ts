@@ -6,7 +6,6 @@ import {
   withAuth,
 } from "../../../lib/api/handlerWrappers";
 import { Result } from "../../../lib/result";
-import { Database } from "../../../supabase/database.types";
 
 async function checkAndUpdateOrgs(orgId: string): Promise<boolean> {
   const count = (await getRequestCountClickhouse(orgId, "all")).data ?? 0;

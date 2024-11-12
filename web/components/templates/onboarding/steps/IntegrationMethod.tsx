@@ -3,7 +3,6 @@ import { CheckIcon } from "lucide-react";
 import { ArrowUpRightIcon } from "lucide-react";
 import { BookOpenIcon } from "lucide-react";
 
-import { Link } from "lucide-react";
 import { INTEGRATION_METHODS } from "../../dashboard/OnboardingQuickStartModal";
 import { cn } from "@/lib/utils";
 
@@ -31,6 +30,7 @@ const IntegrationMethod = ({
       <a
         href="https://docs.helicone.ai/references/proxy-vs-async"
         target="_blank"
+        rel="noreferrer"
       >
         <div className="w-full bg-slate-50 dark:bg-slate-950 rounded-md p-4 flex justify-between items-center border border-slate-200 dark:border-slate-800">
           <div className="flex flex gap-2 items-center">
