@@ -20,13 +20,11 @@ const checklistItems = [
 
 const OnboardingQuickTourModal = ({
   open,
-  setOpen,
   back,
   startTour,
   integrateApp,
 }: {
   open: boolean;
-  setOpen: (open: boolean) => void;
   back: () => void;
   startTour: () => void;
   integrateApp: () => void;
@@ -34,8 +32,11 @@ const OnboardingQuickTourModal = ({
   const { isOnboardingComplete } = useOnboardingContext();
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="w-11/12 sm:max-w-2xl gap-8 rounded-md">
+    <Dialog open={open}>
+      <DialogContent
+        className="w-11/12 sm:max-w-2xl gap-8 rounded-md"
+        closeButton={false}
+      >
         <DialogHeader className="space-y-2">
           <DialogTitle>Take a quick tour</DialogTitle>
           <DialogDescription>

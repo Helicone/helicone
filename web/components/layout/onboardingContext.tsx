@@ -10,6 +10,7 @@ import {
 import { motion } from "framer-motion";
 import {
   HomeIcon,
+  MessageCircleQuestionIcon,
   NotepadTextIcon,
   SheetIcon,
   SparklesIcon,
@@ -17,28 +18,8 @@ import {
 } from "lucide-react";
 import { BeakerIcon } from "@heroicons/react/24/outline";
 import { cn } from "@/lib/utils";
-
-// type OnboardingStepLabel =
-//   | "REQUESTS_TABLE"
-//   | "REQUESTS_DRAWER"
-//   | "SESSIONS_PAGE"
-//   | "SESSIONS_CULPRIT"
-//   | "PROMPTS_PAGE"
-//   | "PROMPTS_EXPERIMENT"
-//   | "EXPERIMENTS_TABLE"
-//   | "EXPERIMENTS_ORIGINAL"
-//   | "EXPERIMENTS_ADD"
-//   | "EXPERIMENTS_ADD_CHANGE_PROMPT"
-//   | "EXPERIMENTS_ADD_SAVE"
-//   | "EXPERIMENTS_FIND_EXPERIMENT"
-//   | "EXPERIMENTS_ADD_TEST_CASES"
-//   | "EXPERIMENTS_RUN_EXPERIMENTS"
-//   | "EXPERIMENTS_CLICK_SHOW_SCORES"
-//   | "EXPERIMENTS_CLICK_ADD_EVAL"
-//   | "EXPERIMENTS_SPECIFIC_EVAL"
-//   | "EXPERIMENTS_RUN_EVAL"
-//   | "EXPERIMENTS_BETTER_PROMPT"
-//   | "DASHBOARD_SUCCESS";
+import { OnboardingPopoverAccordion } from "../templates/onboarding/OnboardingPopoverMore";
+import { DiffHighlight } from "../templates/welcome/diffHighlight";
 
 export const ONBOARDING_STEP_LABELS = [
   "REQUESTS_TABLE",
@@ -76,6 +57,67 @@ interface OnboardingStep {
   };
 }
 
+const HELICONE_SESSIONS_JS_CODE = `
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+  baseURL: "https://oai.helicone.ai/v1",
+  defaultHeaders: {
+    "Helicone-Auth": \`Bearer ${process.env.HELICONE_API_KEY}\`,
+  },
+});
+
+const session = randomUUID();
+
+openai.chat.completions.create(
+  {
+    messages: [
+      {
+        role: "user",
+        content: "Generate an abstract for a course on space.",
+      },
+    ],
+    model: "gpt-4",
+  },
+  {
+    headers: {
+      "Helicone-Session-Id": session,
+      "Helicone-Session-Path": "/abstract",
+      "Helicone-Session-Name": "Course Plan",
+    },
+  }
+);
+`;
+
+const HELICONE_PROMPTS_JS_CODE = `
+// 1. Add these lines
+import { hpf, hpstatic } from "@helicone/prompts";
+
+const chatCompletion = await openai.chat.completions.create(
+  {
+    messages: [
+      {
+        role: "system",
+        // 2. Use hpstatic for static prompts
+        content: hpstatic\`You are a creative storyteller.\`,
+      },
+      {
+        role: "user",
+        // 3: Add hpf to any string, and nest any variable in additional brackets \`{}\`
+        content: hpf\`Write a story about \${{ character }}\`,
+      },
+    ],
+    model: "gpt-3.5-turbo",
+  },
+  {
+    // 3. Add Prompt Id Header
+    headers: {
+      "Helicone-Prompt-Id": "prompt_story",
+    },
+  }
+);
+
+`;
+
 export const ONBOARDING_STEPS: Record<OnboardingStepLabel, OnboardingStep> = {
   REQUESTS_TABLE: {
     stepNumber: 0,
@@ -85,6 +127,22 @@ export const ONBOARDING_STEPS: Record<OnboardingStepLabel, OnboardingStep> = {
       stepNumber: 1,
       description:
         "Here is where your request and response data lives. Simply add one line of code to track requests from any providers.",
+      additionalData: (
+        <OnboardingPopoverAccordion
+          icon={<MessageCircleQuestionIcon className="h-4 w-4" />}
+          title="How to send requests to Helicone? "
+          button={{
+            text: "Doc",
+            link: "https://docs.helicone.ai/getting-started/quick-start",
+          }}
+        >
+          <p>
+            If you are using the proxy method (recommended), simply add one line
+            of code to start sending requests to Helicone.{" "}
+            <span className="text-blue-700">Available for any providers.</span>
+          </p>
+        </OnboardingPopoverAccordion>
+      ),
     },
   },
   REQUESTS_DRAWER: {
@@ -113,8 +171,34 @@ export const ONBOARDING_STEPS: Record<OnboardingStepLabel, OnboardingStep> = {
       icon: <WorkflowIcon className="h-6 w-6" />,
       title: "The Culprit",
       stepNumber: 2,
-      description:
-        "Tracing the session made it clear that the problem happened during the “extract-travel-plan” step. Let’s go improve this prompt. ",
+      description: (
+        <>
+          Tracing the session made it clear that the problem happened during the{" "}
+          <strong>“extract-travel-plan”</strong> step. Let&apos;s go improve
+          this prompt.
+        </>
+      ),
+      additionalData: (
+        <OnboardingPopoverAccordion
+          icon={<MessageCircleQuestionIcon className="h-4 w-4" />}
+          title="How do I track sessions in Helicone? "
+          button={{
+            text: "Doc",
+            link: "https://docs.helicone.ai/features/sessions",
+          }}
+        >
+          <p>
+            Depending on your library, you will need to add 3 headers to your
+            request to start tracking your sessions and traces.
+          </p>
+          <DiffHighlight
+            code={HELICONE_SESSIONS_JS_CODE}
+            language="javascript"
+            newLines={[22, 23, 24]}
+            oldLines={[]}
+          />
+        </OnboardingPopoverAccordion>
+      ),
     },
   },
   PROMPTS_PAGE: {
@@ -128,6 +212,24 @@ export const ONBOARDING_STEPS: Record<OnboardingStepLabel, OnboardingStep> = {
           Here, you can view the latest <strong>“extract-travel-plan”</strong>
           prompt in production, view its version history and previous requests.
         </>
+      ),
+      additionalData: (
+        <OnboardingPopoverAccordion
+          icon={<MessageCircleQuestionIcon className="h-4 w-4" />}
+          title="How do I track my prompts in Helicone? "
+          button={{
+            text: "Doc",
+            link: "https://docs.helicone.ai/features/prompts",
+          }}
+        >
+          <p>Here&apos;s an example:</p>
+          <DiffHighlight
+            code={HELICONE_PROMPTS_JS_CODE}
+            language="javascript"
+            newLines={[22, 23, 24]}
+            oldLines={[]}
+          />
+        </OnboardingPopoverAccordion>
       ),
     },
   },

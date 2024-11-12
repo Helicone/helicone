@@ -9,18 +9,19 @@ import { RabbitIcon, TurtleIcon } from "lucide-react";
 
 const OnboardingDemoModal = ({
   open,
-  setOpen,
   quickStart,
   quickTour,
 }: {
   open: boolean;
-  setOpen: (open: boolean) => void;
   quickStart: () => void;
   quickTour: () => void;
 }) => {
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="w-11/12 sm:max-w-2xl gap-8 rounded-md">
+    <Dialog open={open}>
+      <DialogContent
+        className="w-11/12 sm:max-w-2xl gap-8 rounded-md"
+        closeButton={false}
+      >
         <DialogHeader className="space-y-2">
           <DialogTitle>Welcome to Helicone!</DialogTitle>
           <DialogDescription className="text-sm">

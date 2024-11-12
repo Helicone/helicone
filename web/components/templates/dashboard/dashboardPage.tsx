@@ -1045,7 +1045,6 @@ const DashboardPage = (props: DashboardPageProps) => {
                 !openCreateFirstOrg &&
                 !onboardingContext.isOnboardingComplete
               }
-              setOpen={setOpenDemo}
               quickStart={() => {
                 setOpenDemo(false);
                 setOpenCreateFirstOrg(true);
@@ -1057,7 +1056,6 @@ const DashboardPage = (props: DashboardPageProps) => {
             />
             <OnboardingQuickTourModal
               open={openQuickTour && !openCreateFirstOrg}
-              setOpen={setOpenQuickTour}
               back={() => {
                 setOpenQuickTour(false);
                 setOpenDemo(true);
@@ -1071,11 +1069,11 @@ const DashboardPage = (props: DashboardPageProps) => {
                 setOpenCreateFirstOrg(true);
               }}
             />
-            <Dialog
-              open={openCreateFirstOrg}
-              onOpenChange={setOpenCreateFirstOrg}
-            >
-              <DialogContent className="w-11/12 sm:max-w-2xl gap-8 rounded-md">
+            <Dialog open={openCreateFirstOrg}>
+              <DialogContent
+                className="w-11/12 sm:max-w-2xl gap-8 rounded-md"
+                closeButton={false}
+              >
                 <CreateOrgForm
                   firstOrg={true}
                   onCancelHandler={setOpenCreateFirstOrg}

@@ -14,7 +14,6 @@ import { cloneElement } from "react";
 interface OnboardingPopoverContentProps extends PopoverContentProps {
   id?: string;
   onboardingStep: OnboardingStepLabel;
-  moreInfo?: React.ReactNode;
   next?: () => void;
   nextOverride?: () => void;
   delayMs?: number;
@@ -65,7 +64,6 @@ export const OnboardingPopoverContent = ({
   onboardingStep,
   next,
   nextOverride,
-  moreInfo,
   delayMs,
   ...props
 }: OnboardingPopoverContentProps) => {
@@ -81,7 +79,6 @@ export const OnboardingPopoverContent = ({
         onboardingStep={onboardingStep}
         next={next}
         nextOverride={nextOverride}
-        moreInfo={moreInfo}
         delayMs={delayMs}
       />
     </PopoverContent>
@@ -92,12 +89,12 @@ export const OnboardingPopoverInside = ({
   onboardingStep,
   next,
   nextOverride,
-  moreInfo,
   delayMs,
 }: OnboardingPopoverContentProps) => {
   const { setCurrentStep, currentStep } = useOnboardingContext();
   const { popoverData } = ONBOARDING_STEPS[onboardingStep];
-  const { icon, title, stepNumber, description } = popoverData ?? {};
+  const { icon, title, stepNumber, description, additionalData } =
+    popoverData ?? {};
   return (
     <>
       <div className="flex justify-between items-center">
@@ -110,6 +107,7 @@ export const OnboardingPopoverInside = ({
         </div>
       </div>
       <p className="text-slate-500 text-[13px] leading-normal">{description}</p>
+      {additionalData && additionalData}
       <Button
         variant="outline"
         className="w-full"
