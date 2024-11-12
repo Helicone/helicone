@@ -249,7 +249,11 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
           )}
         </div>
       </PopoverTrigger>
-      <PopoverContent className="w-[800px] p-0" side="bottom">
+      <PopoverContent
+        className="w-[800px] p-0"
+        side="bottom"
+        align={isOnboardingVisible ? "start" : undefined}
+      >
         {hasDiff ? (
           <Tabs defaultValue="preview" className="w-full">
             <TabsList

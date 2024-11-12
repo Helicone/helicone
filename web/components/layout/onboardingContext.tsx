@@ -541,7 +541,6 @@ export const OnboardingProvider = ({
   const router = useRouter();
 
   useEffect(() => {
-    console.log({ isOnboardingVisible, org, pathname });
     if (
       !isOnboardingVisible &&
       org?.currentOrg?.tier === "demo" &&

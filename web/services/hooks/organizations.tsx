@@ -228,8 +228,11 @@ const useOrgsContextManager = () => {
     });
   }, [refetch]);
 
+  const [ensuringOneOrg, setEnsuringOneOrg] = useState(false);
+
   useEffect(() => {
-    if ((!orgs || orgs.length === 0) && user?.id) {
+    if ((!orgs || orgs.length === 0) && user?.id && !ensuringOneOrg) {
+      setEnsuringOneOrg(true);
       const jwtToken = getHeliconeCookie().data?.jwtToken;
       const isEu = window.location.hostname.includes("eu.");
       fetch(`/api/user/${user.id}/ensure-one-org`, {
@@ -238,6 +241,7 @@ const useOrgsContextManager = () => {
           isEu,
         }),
       }).then((res) => {
+        setEnsuringOneOrg(false);
         if (res.status === 201) {
         } else if (res.status !== 200) {
           console.error("Failed to create org", res.json());

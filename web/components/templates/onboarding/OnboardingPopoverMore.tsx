@@ -40,7 +40,7 @@ export const OnboardingPopoverAccordion = ({
             <Link href={button.link} target="_blank">
               <Button
                 variant="secondary"
-                className="text-slate-900 dark:text-slate-100 w-full mt-4"
+                className="text-slate-900 dark:text-slate-100 w-full mt-4 gap-2.5"
               >
                 {button.text}
                 <ArrowUpRightIcon className="h-4 w-4 text-slate-500" />

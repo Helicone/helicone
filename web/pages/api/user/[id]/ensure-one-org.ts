@@ -21,6 +21,7 @@ export default async function handler(
     .eq("owner", userId);
 
   if (!orgs.data || orgs.data.length === 0) {
+    console.log("creating org for user", userId);
     const result = await supabaseServer
       .from("organization")
       .insert([
