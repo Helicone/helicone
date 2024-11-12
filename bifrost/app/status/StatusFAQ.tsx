@@ -46,7 +46,7 @@ const providerSpecificFAQs = {
         cover all OpenAI models including GPT-4 Turbo, GPT-4, GPT-3.5 Turbo,
         DALL-E 3, and more. The statistics you see are calculated from millions
         of real, anonymized production requests, making them highly accurate for
-        monitoring OpenAI's service status and performance.
+        monitoring OpenAI&apos;s service status and performance.
       </p>
     ),
     reliability: (
@@ -55,7 +55,7 @@ const providerSpecificFAQs = {
         are derived from actual production traffic. We analyze millions of
         GPT-4, GPT-3.5, and DALL-E requests in real-time to calculate error
         rates, latency distributions, and availability metrics, providing a more
-        accurate picture of OpenAI's system status and performance.
+        accurate picture of OpenAI&apos;s system status and performance.
       </p>
     ),
   },
@@ -68,7 +68,7 @@ const providerSpecificFAQs = {
         Anthropic models including Claude 3.5 Sonnet, Claude 3 Opus, Claude 2.1,
         and Claude Instant. The statistics you see are calculated from millions
         of real, anonymized production requests, making them highly accurate for
-        monitoring Claude's service status and performance.
+        monitoring Claude&apos;s service status and performance.
       </p>
     ),
     reliability: (
@@ -77,7 +77,7 @@ const providerSpecificFAQs = {
         are derived from actual production traffic. We analyze millions of
         Claude API requests in real-time to calculate error rates, latency
         distributions, and availability metrics, providing a more accurate
-        picture of Anthropic's system status and performance.
+        picture of Anthropic&apos;s system status and performance.
       </p>
     ),
   },
