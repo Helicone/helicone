@@ -62,7 +62,13 @@ const AcceptTermsModal = () => {
     ) {
       setShowTermsModal(true);
     }
-  }, [acceptedTermsLocalStorage, user]);
+  }, [
+    acceptedTermsLocalStorage,
+    user,
+    org?.currentOrg?.tier,
+    pathname,
+    org?.currentOrg?.has_onboarded,
+  ]);
 
   const handleCheckedChange = useCallback(
     (checked: boolean) => {
