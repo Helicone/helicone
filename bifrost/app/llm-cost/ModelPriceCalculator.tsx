@@ -638,7 +638,7 @@ Optimize your AI API costs:`;
                 value={outputTokens}
                 onChange={(e) => setOutputTokens(e.target.value)}
                 className="pl-3 pr-3 py-2 bg-white rounded-md border border-slate-300 text-slate-700 text-sm font-normal leading-tight w-full [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                />
+              />
             </div>
           </div>
         </div>
@@ -710,11 +710,15 @@ Optimize your AI API costs:`;
             </div>
 
             <div className="pt-1"></div>
-            
+
             <div className="flex bg-sky-50 border-sky-100 border-2 text-slate-500 font-medium rounded-lg justify-left items-left px-4 py-3 flex-col gap-1">
-              <span>Helicone users save <span className="text-sky-500 font-bold">up to 70%</span> on their LLM costs...</span>
+              <span>
+                Helicone users save{" "}
+                <span className="text-sky-500 font-bold">up to 70%</span> on
+                their LLM costs...
+              </span>
               <span className="text-slate-400 font-normal text-sm mb-1">
-                by caching, improving prompts, fine-tuning, etc. 
+                by caching, improving prompts, fine-tuning, etc.
               </span>
               <div className="mt-2">
                 <a

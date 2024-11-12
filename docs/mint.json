@@ -240,7 +240,7 @@
       "group": "Features",
       "pages": [
         {
-          "group": "Evaulation",
+          "group": "Evaluation",
           "pages": [
             "features/advanced-usage/feedback",
             "features/advanced-usage/scores"
@@ -251,7 +251,7 @@
         "features/sessions",
         "features/prompts",
         {
-          "group": "Webooks",
+          "group": "Webhooks",
           "pages": ["features/webhooks", "features/webhooks-testing"],
           "icon": "webhook",
           "iconType": "solid"
@@ -293,6 +293,7 @@
             "guides/cookbooks/fine-tune",
             "guides/cookbooks/experiments",
             "guides/cookbooks/getting-user-requests",
+            "guides/cookbooks/getting-sessions",
             "guides/cookbooks/etl",
             "guides/cookbooks/replay-session",
             "guides/cookbooks/predefining-request-id",

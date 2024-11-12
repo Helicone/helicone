@@ -1,7 +1,8 @@
 import { RadioGroup } from "@headlessui/react";
 import { CheckCircleIcon } from "@heroicons/react/20/solid";
 import { KeyIcon, TrashIcon } from "@heroicons/react/24/outline";
-import { Tooltip } from "@mui/material";
+import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
+
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useCallback, useState } from "react";
 import { DecryptedProviderKey } from "../../../../../services/lib/keys";

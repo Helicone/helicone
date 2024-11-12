@@ -83,6 +83,12 @@ const RequestRow = (props: {
     return { sessionId };
   }, [request.customProperties]);
 
+  const experimentId = useMemo(() => {
+    return request.customProperties?.["Helicone-Experiment-Id"] as
+      | string
+      | undefined;
+  }, [request.customProperties]);
+
   const promptData = useQuery({
     queryKey: ["prompt", promptId, org?.currentOrg?.id],
     queryFn: async (query) => {
@@ -476,9 +482,11 @@ const RequestRow = (props: {
             {currentProperties
               .filter(
                 (property) =>
-                  !["Helicone-Prompt-Id", "Helicone-Session-Id"].includes(
-                    Object.keys(property)[0]
-                  )
+                  ![
+                    "Helicone-Prompt-Id",
+                    "Helicone-Session-Id",
+                    "Helicone-Experiment-Id",
+                  ].includes(Object.keys(property)[0])
               )
               .map((property, i) => {
                 const key = Object.keys(property)[0];
@@ -626,7 +634,7 @@ const RequestRow = (props: {
               </Button>
             </div>
           )}
-          {sessionData && (
+          {sessionData.sessionId && (
             <>
               <div className="flex flex-row items-center space-x-2">
                 <Button
@@ -641,6 +649,15 @@ const RequestRow = (props: {
                 </Button>
               </div>
             </>
+          )}
+          {experimentId && (
+            <div className="flex flex-row items-center space-x-2">
+              <Button variant="outline" size="sm_sleek" asChild>
+                <Link href={`/experiments/${experimentId}`}>
+                  Experiment: {experimentId}
+                </Link>
+              </Button>
+            </div>
           )}
         </div>
         <FeedbackButtons

@@ -1,0 +1,4 @@
+{
+  "title": "Cerebras: New Model Provider Integration",
+  "description": "Added support for Cerebras as a new model provider, enabling access to Cerebras AI models through helicone."
+}

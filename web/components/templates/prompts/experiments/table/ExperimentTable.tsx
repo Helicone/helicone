@@ -83,7 +83,7 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
   } = useExperimentTable(orgId || "", experimentTableId);
   const promptSubversionId = experimentTableQuery?.promptSubversionId;
 
-  const [wrapText, setWrapText] = useState(false);
+  const [wrapText, setWrapText] = useState(true);
   const [columnView, setColumnView] = useState<"all" | "inputs" | "outputs">(
     "all"
   );
@@ -154,6 +154,35 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
     [addExperimentTableRow, experimentTableQuery?.promptSubversionId]
   );
 
+  const handleAddRowWithPreviousInputs = useCallback(() => {
+    const lastRow =
+      experimentTableQuery?.rows?.[experimentTableQuery.rows.length - 1];
+
+    let inputs: Record<string, string> = {};
+
+    const inputColumn = experimentTableQuery?.columns?.find(
+      (column) => column.columnType === "input"
+    );
+
+    if (lastRow && inputColumn) {
+      const inputCell = lastRow.cells["inputs"];
+      if (inputCell && inputCell.value && Array.isArray(inputCell.value)) {
+        inputs = inputCell.value.reduce(
+          (
+            acc: Record<string, string>,
+            input: { key: string; value: string }
+          ) => {
+            acc[input.key] = input.value;
+            return acc;
+          },
+          {}
+        );
+      }
+    }
+
+    handleAddRow(inputs);
+  }, [experimentTableQuery?.rows, handleAddRow]);
+
   const handleDeleteRow = useCallback(
     (rowIndex: number) => {
       deleteExperimentTableRow.mutate(rowIndex);
@@ -166,13 +195,15 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
       columnName: string,
       columnType: "experiment" | "input" | "output",
       hypothesisId?: string,
-      promptVersionId?: string
+      promptVersionId?: string,
+      promptVariables?: string[]
     ) => {
       addExperimentTableColumn.mutate({
         promptVersionId: promptVersionId ?? "",
         columnName,
         columnType,
         hypothesisId,
+        promptVariables,
       });
     },
     [addExperimentTableColumn]
@@ -187,24 +218,29 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
         sourceRequest?: string;
       }[]
     ) => {
-      const columns = experimentTableQuery?.columns?.filter(
+      const inputColumn = experimentTableQuery?.columns?.filter(
         (column) => column.columnType === "input"
       );
 
-      if (!columns) return;
+      if (!inputColumn) return;
 
       const newRows = rows.map((row) => {
-        const cells = Object.entries(row.inputs ?? {}).map(([key, value]) => ({
-          columnId:
-            columns.find((column) => column.columnName === key)?.id ?? "",
-          value,
-        }));
+        const inputCell = {
+          columnId: inputColumn[0].id,
+          value: "inputs",
+          metadata: {
+            inputs: Object.entries(row.inputs ?? {}).map(([key, value]) => ({
+              key,
+              value,
+            })),
+          },
+        };
 
         return {
           inputRecordId: row.inputRecordId,
           datasetId: row.datasetId,
           inputs: row.inputs,
-          cells,
+          cells: [inputCell],
           sourceRequest: row.sourceRequest,
         };
       });
@@ -273,48 +309,46 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
           alignItems: "center",
           justifyContent: "center",
         },
-        autoHeight: wrapText,
+        wrapText,
       },
     ];
     let experimentColumnId = 1;
 
+    columns.push({
+      field: "inputs", // Unique identifier for the inputs column
+      headerName: "Inputs",
+      width: 250, // Adjust as necessary
+      cellRenderer: InputCellRenderer,
+      cellRendererParams: {
+        wrapText,
+        // any other necessary params
+      },
+      cellClass: "border-r border-[#E2E8F0] text-slate-700 pt-2.5",
+      headerClass: "border-r border-[#E2E8F0]",
+      headerComponent: InputsHeaderComponent, // Use your existing header component or create a new one
+      headerComponentParams: {
+        displayName: "Inputs",
+        badgeText: "Input",
+        columnName: "Inputs",
+        type: "input",
+      },
+      cellStyle: {
+        justifyContent: "start",
+        whiteSpace: wrapText ? "normal" : "nowrap",
+      },
+      wrapText,
+      editable: false, // Set this to false to prevent default editing
+    });
+
     Array.from(experimentTableQuery?.columns || []).forEach((column, index) => {
-      if (column.columnType === "input") {
-        columns.push({
-          field: column.id,
-          headerName: column.columnName,
-          width: 150,
-          cellRenderer: InputCellRenderer,
-          cellRendererParams: {
-            index: index,
-            wrapText,
-            columnId: column.id,
-          },
-          cellClass: "border-r border-[#E2E8F0] text-slate-700 pt-2.5",
-          headerClass: "border-r border-[#E2E8F0]",
-          headerComponent: InputsHeaderComponent,
-          headerComponentParams: {
-            index: index,
-            displayName: column.columnName,
-            badgeText: "Input",
-            columnName: column.columnName,
-            type: column.columnType,
-          },
-          cellStyle: {
-            justifyContent: "start",
-            whiteSpace: wrapText ? "normal" : "nowrap",
-          },
-          autoHeight: wrapText,
-          editable: false, // Set this to false to prevent default editing
-        });
-      } else if (column.columnType === "output") {
+      if (column.columnType === "output") {
         columns.push({
           field: column.id,
           headerName: "Original",
-          width: 200,
+          width: 400,
           headerComponent: CustomHeaderComponent,
           headerComponentParams: {
-            displayName: "Original",
+            displayName: "Original Prompt",
             badgeText: "Output",
             badgeVariant: "secondary",
             promptVersionId: promptVersionTemplateData?.id ?? "",
@@ -337,14 +371,14 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
             textOverflow: "ellipsis",
             whiteSpace: wrapText ? "normal" : "nowrap",
           },
-          autoHeight: wrapText,
+          wrapText,
         });
       } else if (column.columnType === "experiment") {
         if (columnView === "all" || columnView === "outputs") {
           columns.push({
             field: column.id,
             headerName: column.columnName,
-            width: 230,
+            width: 400,
             suppressSizeToFit: true,
             cellRenderer: HypothesisCellRenderer,
             cellRendererParams: {
@@ -355,7 +389,7 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
             },
             headerComponent: CustomHeaderComponent,
             headerComponentParams: {
-              displayName: `Experiment ${experimentColumnId++}`,
+              displayName: `Prompt ${experimentColumnId++}`,
               badgeText: "Output",
               badgeVariant: "secondary",
               hypothesisId: column.metadata?.hypothesisId ?? "",
@@ -396,7 +430,7 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
               textOverflow: "ellipsis",
               whiteSpace: wrapText ? "normal" : "nowrap",
             },
-            autoHeight: wrapText,
+            wrapText,
           });
         }
       }
@@ -434,7 +468,6 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
           textOverflow: "ellipsis",
           whiteSpace: wrapText ? "normal" : "nowrap",
         },
-        autoHeight: wrapText,
       });
     }
 
@@ -786,7 +819,7 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
               }}
               rowClass="border-b border-gray-200 hover:bg-gray-50"
               headerHeight={40}
-              rowHeight={50}
+              rowHeight={300}
             />
           </div>
         </OnboardingPopover>
@@ -818,7 +851,7 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
                 setPopoverOpen={setPopoverOpen}
                 setShowExperimentInputSelector={setShowExperimentInputSelector}
                 setShowRandomInputSelector={setShowRandomInputSelector}
-                handleAddRow={handleAddRow}
+                handleAddRow={handleAddRowWithPreviousInputs}
               />
             ) : (
               <OnboardingPopoverContent

@@ -292,7 +292,7 @@ export default function Home() {
             className="text-center flex flex-col space-y-4 pt-[24px] pb-[48px] max-w-6xl mx-auto w-full"
           >
             <h2 className="hidden md:block text-gray-600 text-lg md:text-xl text-start md:text-center">
-              Trusted by the thousands of companies and developers.
+              Trusted by thousands of companies and developers.
             </h2>
             <ul className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 px-4 md:px-8 grayscale opacity-80 items-center">
               {(

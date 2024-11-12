@@ -538,7 +538,12 @@ const DashboardPage = (props: DashboardPageProps) => {
               },
             }
           );
-          if (data?.data?.length && data?.data?.length > 1) {
+          if (
+            data?.data?.length &&
+            data?.data?.length > 1 &&
+            onboardingContext.currentStep !==
+              ONBOARDING_STEPS.DASHBOARD_SUCCESS.stepNumber
+          ) {
             onboardingContext.endOnboarding();
             setOpenQuickTour(true);
           }

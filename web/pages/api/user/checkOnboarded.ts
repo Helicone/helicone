@@ -8,9 +8,7 @@ import {
 import { Result } from "../../../lib/result";
 import { Database } from "../../../supabase/database.types";
 
-async function checkAndUpdateOrgs(
-  orgId: string,
-): Promise<boolean> {
+async function checkAndUpdateOrgs(orgId: string): Promise<boolean> {
   const count = (await getRequestCountClickhouse(orgId, "all")).data ?? 0;
   if (count > 0) {
     const { error } = await supabaseServer
@@ -35,7 +33,7 @@ async function handler({
     res.status(200).json({ error: null, data: true });
     return;
   }
-  const data = await checkAndUpdateOrgs(orgId));
+  const data = await checkAndUpdateOrgs(orgId);
   if (data) {
     res.status(200).json({ error: null, data });
   } else {

@@ -406,6 +406,12 @@ export interface paths {
   "/v1/dashboard/scores/query": {
     post: operations["GetScoresOverTime"];
   };
+  "/v1/public/status/provider": {
+    get: operations["GetAllProviderStatus"];
+  };
+  "/v1/public/status/provider/{provider}": {
+    get: operations["GetProviderStatus"];
+  };
   "/v1/settings/query": {
     get: operations["GetSettings"];
   };
@@ -2188,6 +2194,11 @@ Json: JsonObject;
       experimentId: string;
       createdAt: string;
       metadata?: unknown;
+      columns: {
+          columnType: string;
+          columnName: string;
+          id: string;
+        }[];
     };
     ResultSuccess_ExperimentTableSimplified_: {
       data: components["schemas"]["ExperimentTableSimplified"];
@@ -2325,6 +2336,7 @@ Json: JsonObject;
           id: string;
         }[];
       scores: components["schemas"]["ExperimentScores"] | null;
+      tableId: string | null;
     };
     "ResultSuccess_Experiment-Array_": {
       data: components["schemas"]["Experiment"][];
@@ -2736,6 +2748,64 @@ Json: JsonObject;
       /** Format: double */
       timeZoneDifference: number;
     };
+    MetricsData: {
+      /** Format: double */
+      totalRequests: number;
+      /** Format: double */
+      requestCountPrevious24h: number;
+      /** Format: double */
+      requestVolumeChange: number;
+      /** Format: double */
+      errorRate24h: number;
+      /** Format: double */
+      errorRatePrevious24h: number;
+      /** Format: double */
+      errorRateChange: number;
+      /** Format: double */
+      averageLatency: number;
+      /** Format: double */
+      averageLatencyPerToken: number;
+      /** Format: double */
+      latencyChange: number;
+      /** Format: double */
+      latencyPerTokenChange: number;
+      /** Format: double */
+      recentRequestCount: number;
+      /** Format: double */
+      recentErrorCount: number;
+    };
+    TimeSeriesDataPoint: {
+      /** Format: date-time */
+      timestamp: string;
+      /** Format: double */
+      errorCount: number;
+      /** Format: double */
+      requestCount: number;
+      /** Format: double */
+      averageLatency: number;
+      /** Format: double */
+      averageLatencyPerCompletionToken: number;
+    };
+    ProviderMetrics: {
+      providerName: string;
+      metrics: components["schemas"]["MetricsData"] & {
+        timeSeriesData: components["schemas"]["TimeSeriesDataPoint"][];
+      };
+    };
+    "ResultSuccess_ProviderMetrics-Array_": {
+      data: components["schemas"]["ProviderMetrics"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ProviderMetrics-Array.string_": components["schemas"]["ResultSuccess_ProviderMetrics-Array_"] | components["schemas"]["ResultError_string_"];
+    ResultSuccess_ProviderMetrics_: {
+      data: components["schemas"]["ProviderMetrics"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ProviderMetrics.string_": components["schemas"]["ResultSuccess_ProviderMetrics_"] | components["schemas"]["ResultError_string_"];
+    /** @enum {string} */
+    TimeFrame: "24h" | "7d" | "30d";
     UpgradeToProRequest: {
       addons?: {
         prompts?: boolean;
@@ -4297,7 +4367,7 @@ export interface operations {
       content: {
         "application/json": {
           updateInputs?: boolean;
-          metadata?: components["schemas"]["Record_string.string_"];
+          metadata?: string;
           value?: string;
           status?: string;
           cellId: string;
@@ -4322,6 +4392,7 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": {
+          inputKeys?: string[];
           promptVersionId?: string;
           hypothesisId?: string;
           columnType: string;
@@ -4390,6 +4461,7 @@ export interface operations {
           rows: ({
               sourceRequest?: string;
               cells: ({
+                  metadata?: unknown;
                   value: string | null;
                   columnId: string;
                 })[];
@@ -5242,6 +5314,34 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result__score_key-string--score_sum-number--created_at_trunc-string_-Array.string_"];
+        };
+      };
+    };
+  };
+  GetAllProviderStatus: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ProviderMetrics-Array.string_"];
+        };
+      };
+    };
+  };
+  GetProviderStatus: {
+    parameters: {
+      query: {
+        timeFrame: components["schemas"]["TimeFrame"];
+      };
+      path: {
+        provider: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ProviderMetrics.string_"];
         };
       };
     };

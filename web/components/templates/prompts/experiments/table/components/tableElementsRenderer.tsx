@@ -9,11 +9,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "../../../../../ui/popover";
-import { useState, useEffect, useRef, useMemo } from "react";
-import { Badge } from "../../../../../ui/badge";
+import { useState, useCallback, useMemo } from "react";
 import PromptPlayground from "../../../id/promptPlayground";
-import { Input } from "../../../../../ui/input";
-import ArrayDiffViewer from "../../../id/arrayDiffViewer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
 import { useJawnClient } from "../../../../../../lib/clients/jawnHook";
@@ -21,77 +18,107 @@ import useOnboardingContext, {
   ONBOARDING_STEPS,
 } from "@/components/layout/onboardingContext";
 import { OnboardingPopoverContent } from "@/components/templates/onboarding/OnboardingPopover";
+import { Badge } from "@/components/ui/badge";
+import React from "react";
+import useNotification from "../../../../../shared/notification/useNotification";
+import InputEditorDrawer from "./inputEditorDrawer";
+import ArrayDiffViewer from "../../../id/arrayDiffViewer";
 
-const InputCellRenderer: React.FC<any> = (props) => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [inputValue, setInputValue] = useState(
-    props.data.cells[props.colDef.cellRendererParams.columnId]?.value || ""
+export interface InputEntry {
+  key: string;
+  value: string;
+}
+
+interface InputCellRendererProps {
+  value?: InputEntry[];
+  data: any; // The full row data
+  context: any; // Grid context
+  node: any; // Grid node
+}
+
+const InputCellRenderer: React.FC<InputCellRendererProps> = (props) => {
+  const notification = useNotification();
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  // Use the inputs from props
+  const inputs: InputEntry[] = useMemo(() => {
+    const inputValue = props?.data?.cells?.inputs?.value;
+    if (Array.isArray(inputValue)) {
+      return inputValue;
+    } else {
+      return [];
+    }
+  }, [props?.data?.cells?.inputs?.value]);
+
+  // Handle saving inputs from the drawer
+  const handleSave = useCallback(
+    (updatedInputs: InputEntry[]) => {
+      const cellId = props?.data?.cells?.inputs?.cellId;
+
+      // Validate inputs
+      const validateInputs = (inputs: InputEntry[]) => {
+        return inputs.every((input) => input.key && input.value);
+      };
+
+      if (!validateInputs(updatedInputs)) {
+        notification.setNotification("Please add valid inputs", "error");
+        return;
+      }
+
+      try {
+        props.context.handleUpdateExperimentCell({
+          cellId: cellId,
+          value: "inputs",
+          metadata: {
+            inputs: updatedInputs,
+          },
+        });
+        console.log("handleUpdateExperimentCell called successfully");
+
+        // Update latest input keys
+        const latestInputKeys = updatedInputs.map((input) => input.key);
+        props.context.updateLatestInputKeys(latestInputKeys);
+      } catch (error) {
+        console.error("Error calling handleUpdateExperimentCell:", error);
+      }
+    },
+    [props, notification]
   );
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  // Determine the display value
-  const displayValue = inputValue || "Click to add input";
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = e.target.value;
-    setInputValue(newValue);
-  };
-
-  const handleInputSubmit = () => {
-    if (inputValue.trim() === "") return;
-
-    const cell = props.data.cells[props.column.colId];
-
-    props.context.handleUpdateExperimentCell({
-      cellId: cell.cellId,
-      value: inputValue.trim(),
-    });
-
-    setIsEditing(false);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      handleInputSubmit();
-    } else if (e.key === "Escape") {
-      setIsEditing(false);
-    }
-  };
-
-  useEffect(() => {
-    if (isEditing && inputRef.current) {
-      inputRef.current.focus();
-    }
-  }, [isEditing]);
-
-  if (isEditing) {
-    return (
-      <Input
-        ref={inputRef}
-        className="h-full w-full text-sm border-none focus:ring-0"
-        value={inputValue}
-        onChange={handleInputChange}
-        onKeyDown={handleKeyDown}
-        onBlur={handleInputSubmit}
-        autoFocus
-      />
-    );
-  }
 
   return (
-    <div
-      className="cursor-pointer h-full w-full px-2 flex items-center"
-      onClick={() => setIsEditing(true)}
-      style={{
-        whiteSpace: "inherit",
-        overflow: "hidden",
-        textOverflow: "ellipsis",
-        color: inputValue ? "inherit" : "#6B7280",
-      }}
-    >
-      {displayValue}
-    </div>
+    <>
+      <div
+        className="cursor-pointer p-2"
+        onClick={() => setIsDrawerOpen(true)}
+        style={{
+          whiteSpace: "normal",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          minHeight: "20px",
+        }}
+      >
+        {inputs.length > 0 ? (
+          inputs.map((inputEntry, index) => (
+            <div key={`${inputEntry.key}-${index}`}>
+              <span className="mr-1 font-semibold">{inputEntry.key}:</span>
+              <span>{inputEntry.value === "" ? "null" : inputEntry.value}</span>
+            </div>
+          ))
+        ) : (
+          <div className="text-gray-500">Click to add inputs</div>
+        )}
+      </div>
+
+      {/* Render the InputEditorDrawer when isDrawerOpen is true */}
+      {isDrawerOpen && (
+        <InputEditorDrawer
+          open={isDrawerOpen}
+          setOpen={setIsDrawerOpen}
+          initialInputs={inputs}
+          onSave={handleSave}
+        />
+      )}
+    </>
   );
 };
 
@@ -134,7 +161,7 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
         (showPromptPlayground ||
           (isOnboardingVisible &&
             currentStep === ONBOARDING_STEPS.EXPERIMENTS_ORIGINAL.stepNumber &&
-            displayName === "Original")),
+            displayName === "Original Prompt")),
       staleTime: Infinity,
       refetchOnWindowFocus: false,
       refetchOnMount: false,
@@ -174,7 +201,7 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
         showPromptPlayground ||
         (isOnboardingVisible &&
           currentStep === ONBOARDING_STEPS.EXPERIMENTS_ORIGINAL.stepNumber &&
-          displayName === "Original")
+          displayName === "Original Prompt")
       }
       onOpenChange={setShowPromptPlayground}
     >
@@ -188,14 +215,14 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
               isOnboardingVisible &&
               currentStep ===
                 ONBOARDING_STEPS.EXPERIMENTS_FIND_EXPERIMENT.stepNumber &&
-              displayName === "Experiment 1"
+              displayName === "Prompt 1"
             }
           >
             <PopoverTrigger>
               <div
                 className="flex items-center space-x-2"
                 data-onboarding-step={
-                  displayName === "Experiment 1" &&
+                  displayName === "Prompt 1" &&
                   ONBOARDING_STEPS.EXPERIMENTS_FIND_EXPERIMENT.stepNumber
                 }
               >
@@ -231,7 +258,7 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
                     className="ml-2 p-0 border-slate-200 border rounded-md bg-slate-50 text-slate-500 h-[22px] w-[24px] flex items-center justify-center"
                     onClick={handleRunClick}
                     data-onboarding-step={
-                      displayName === "Experiment 1" &&
+                      displayName === "Prompt 1" &&
                       ONBOARDING_STEPS.EXPERIMENTS_RUN_EXPERIMENTS.stepNumber
                     }
                   >
@@ -302,7 +329,7 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
               isOnboardingVisible &&
               currentStep ===
                 ONBOARDING_STEPS.EXPERIMENTS_ORIGINAL.stepNumber &&
-              displayName === "Original"
+              displayName === "Original Prompt"
             }
           >
             <PopoverTrigger asChild>
@@ -312,7 +339,7 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
                   isOnboardingVisible &&
                   currentStep ===
                     ONBOARDING_STEPS.EXPERIMENTS_ORIGINAL.stepNumber &&
-                  displayName === "Original"
+                  displayName === "Original Prompt"
                     ? ONBOARDING_STEPS.EXPERIMENTS_ORIGINAL.stepNumber
                     : undefined
                 }
@@ -360,12 +387,6 @@ const InputsHeaderComponent: React.FC<any> = (props) => {
         <span className="text-md font-semibold text-slate-900">
           {displayName}
         </span>
-        <Badge
-          variant={badgeVariant}
-          className="text-[#334155] bg-[#F8FAFC] border border-[#E2E8F0] rounded-md font-medium hover:bg-slate-100"
-        >
-          {badgeText}
-        </Badge>
       </div>
     </div>
   );
@@ -439,7 +460,6 @@ const RowNumberCellRenderer: React.FC<any> = (props) => {
     </div>
   );
 };
-
 export {
   InputCellRenderer,
   CustomHeaderComponent,

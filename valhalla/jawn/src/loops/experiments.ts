@@ -12,7 +12,7 @@ export const experimentsLoop = async () => {
       return;
     }
 
-    const experimentResult = await run(experiment.data);
+    const experimentResult = await run(experiment.data, "unknown");
   } catch (e) {
     console.error("Error running experiment", e);
   }

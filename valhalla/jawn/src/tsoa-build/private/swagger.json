@@ -5693,13 +5693,36 @@
 					"createdAt": {
 						"type": "string"
 					},
-					"metadata": {}
+					"metadata": {},
+					"columns": {
+						"items": {
+							"properties": {
+								"columnType": {
+									"type": "string"
+								},
+								"columnName": {
+									"type": "string"
+								},
+								"id": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"columnType",
+								"columnName",
+								"id"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					}
 				},
 				"required": [
 					"id",
 					"name",
 					"experimentId",
-					"createdAt"
+					"createdAt",
+					"columns"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -6300,6 +6323,10 @@
 							}
 						],
 						"nullable": true
+					},
+					"tableId": {
+						"type": "string",
+						"nullable": true
 					}
 				},
 				"required": [
@@ -6309,7 +6336,8 @@
 					"meta",
 					"createdAt",
 					"hypotheses",
-					"scores"
+					"scores",
+					"tableId"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -7912,6 +7940,212 @@
 				],
 				"type": "object",
 				"additionalProperties": false
+			},
+			"MetricsData": {
+				"properties": {
+					"totalRequests": {
+						"type": "number",
+						"format": "double"
+					},
+					"requestCountPrevious24h": {
+						"type": "number",
+						"format": "double"
+					},
+					"requestVolumeChange": {
+						"type": "number",
+						"format": "double"
+					},
+					"errorRate24h": {
+						"type": "number",
+						"format": "double"
+					},
+					"errorRatePrevious24h": {
+						"type": "number",
+						"format": "double"
+					},
+					"errorRateChange": {
+						"type": "number",
+						"format": "double"
+					},
+					"averageLatency": {
+						"type": "number",
+						"format": "double"
+					},
+					"averageLatencyPerToken": {
+						"type": "number",
+						"format": "double"
+					},
+					"latencyChange": {
+						"type": "number",
+						"format": "double"
+					},
+					"latencyPerTokenChange": {
+						"type": "number",
+						"format": "double"
+					},
+					"recentRequestCount": {
+						"type": "number",
+						"format": "double"
+					},
+					"recentErrorCount": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"totalRequests",
+					"requestCountPrevious24h",
+					"requestVolumeChange",
+					"errorRate24h",
+					"errorRatePrevious24h",
+					"errorRateChange",
+					"averageLatency",
+					"averageLatencyPerToken",
+					"latencyChange",
+					"latencyPerTokenChange",
+					"recentRequestCount",
+					"recentErrorCount"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"TimeSeriesDataPoint": {
+				"properties": {
+					"timestamp": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"errorCount": {
+						"type": "number",
+						"format": "double"
+					},
+					"requestCount": {
+						"type": "number",
+						"format": "double"
+					},
+					"averageLatency": {
+						"type": "number",
+						"format": "double"
+					},
+					"averageLatencyPerCompletionToken": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"timestamp",
+					"errorCount",
+					"requestCount",
+					"averageLatency",
+					"averageLatencyPerCompletionToken"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ProviderMetrics": {
+				"properties": {
+					"providerName": {
+						"type": "string"
+					},
+					"metrics": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/MetricsData"
+							},
+							{
+								"properties": {
+									"timeSeriesData": {
+										"items": {
+											"$ref": "#/components/schemas/TimeSeriesDataPoint"
+										},
+										"type": "array"
+									}
+								},
+								"required": [
+									"timeSeriesData"
+								],
+								"type": "object"
+							}
+						]
+					}
+				},
+				"required": [
+					"providerName",
+					"metrics"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_ProviderMetrics-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/ProviderMetrics"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_ProviderMetrics-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_ProviderMetrics-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess_ProviderMetrics_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/ProviderMetrics"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_ProviderMetrics.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_ProviderMetrics_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"TimeFrame": {
+				"type": "string",
+				"enum": [
+					"24h",
+					"7d",
+					"30d"
+				]
 			}
 		},
 		"securitySchemes": {
@@ -12114,7 +12348,7 @@
 										"type": "boolean"
 									},
 									"metadata": {
-										"$ref": "#/components/schemas/Record_string.string_"
+										"type": "string"
 									},
 									"value": {
 										"type": "string"
@@ -12175,6 +12409,12 @@
 						"application/json": {
 							"schema": {
 								"properties": {
+									"inputKeys": {
+										"items": {
+											"type": "string"
+										},
+										"type": "array"
+									},
 									"promptVersionId": {
 										"type": "string"
 									},
@@ -12350,6 +12590,7 @@
 												"cells": {
 													"items": {
 														"properties": {
+															"metadata": {},
 															"value": {
 																"type": "string",
 																"nullable": true
@@ -14952,6 +15193,75 @@
 						}
 					}
 				}
+			}
+		},
+		"/v1/public/status/provider": {
+			"get": {
+				"operationId": "GetAllProviderStatus",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_ProviderMetrics-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Status"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/public/status/provider/{provider}": {
+			"get": {
+				"operationId": "GetProviderStatus",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_ProviderMetrics.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Status"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "provider",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "timeFrame",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/TimeFrame"
+						}
+					}
+				]
 			}
 		},
 		"/v1/settings/query": {

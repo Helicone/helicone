@@ -35,6 +35,7 @@ export type TableCell = {
   value: string | any | null;
   cellId: string;
   status: CellStatus;
+  metadata?: Record<string, any>;
 };
 
 export type TableRow = {
@@ -126,7 +127,18 @@ export async function getTableData({
         row.deleted = true;
       }
 
-      if (cell.value !== undefined && cell.value !== null) {
+      if (column.columnType === "input") {
+        // Handle input columns (collapse into 'inputs' cell as an array)
+        const inputs = cell.metadata?.inputs ?? [];
+
+        // Store inputs in the 'inputs' cell
+        row.cells["inputs"] = {
+          cellId: cell.id,
+          value: inputs, // This should be an array of { key, value }
+          status: cell.status,
+          metadata: cell.metadata,
+        };
+      } else if (cell.value !== undefined && cell.value !== null) {
         if (
           (cell.metadata?.cellType === "output" &&
             (cell.status === "initialized" || cell.status === "success")) ||
@@ -147,6 +159,7 @@ export async function getTableData({
             cellId: cell.id,
             value: cell.value,
             status: cell.status,
+            metadata: cell.metadata,
           };
         }
       } else {
@@ -154,6 +167,7 @@ export async function getTableData({
           cellId: cell.id,
           value: null,
           status: cell.status,
+          metadata: cell.metadata,
         };
       }
     }
@@ -269,11 +283,13 @@ export function useExperimentTable(orgId: string, experimentTableId: string) {
       columnType,
       hypothesisId,
       promptVersionId,
+      promptVariables,
     }: {
       columnName: string;
       columnType: string;
       hypothesisId?: string;
       promptVersionId?: string;
+      promptVariables?: string[];
     }) => {
       const jawnClient = getJawnClient(orgId);
       await jawnClient.POST("/v1/experiment/table/{experimentTableId}/column", {
@@ -285,6 +301,7 @@ export function useExperimentTable(orgId: string, experimentTableId: string) {
           columnType,
           hypothesisId,
           promptVersionId,
+          inputKeys: promptVariables,
         },
       });
     },
@@ -413,6 +430,7 @@ export function useExperimentTable(orgId: string, experimentTableId: string) {
         cells: {
           columnId: string;
           value: string | null;
+          metadata?: Record<string, any>;
         }[];
         sourceRequest?: string;
       }[];
@@ -518,7 +536,13 @@ export function useExperimentTable(orgId: string, experimentTableId: string) {
       const jawnClient = getJawnClient(orgId);
       await jawnClient.PATCH("/v1/experiment/table/{experimentTableId}/cell", {
         params: { path: { experimentTableId: experimentTableId } },
-        body: { cellId, status, value, metadata, updateInputs: true },
+        body: {
+          cellId,
+          status,
+          value,
+          metadata: JSON.stringify(metadata),
+          updateInputs: true,
+        },
       });
     },
     onMutate: async (updatedCell: UpdateExperimentCellVariables) => {
