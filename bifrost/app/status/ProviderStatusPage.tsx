@@ -138,9 +138,9 @@ export function ProviderStatusPage({ provider }: ProviderStatusPageProps) {
       />
 
       <div className="bg-gradient-to-r from-blue-50 to-blue-100/50 rounded-xl p-6 border border-blue-200/40">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="bg-blue-600 text-white text-sm font-medium px-3 py-1 rounded-full">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="bg-blue-600 text-white text-sm font-medium px-3 py-1 rounded-full whitespace-nowrap">
               Pro Tip
             </div>
             <p className="text-gray-600">
