@@ -46,6 +46,8 @@ const deepinfra = /^https:\/\/api\.deepinfra\.com/;
 const qstash = /^https:\/\/qstash\.upstash\.io/;
 //https://www.firecrawl.dev/
 const firecrawl = /^https:\/\/api\.firecrawl\.dev/;
+//https://api.cerebras.ai
+const cerebras = /^https:\/\/api\.cerebras\.ai/;
 
 export const providersNames = [
   "OPENAI",
@@ -70,6 +72,7 @@ export const providersNames = [
   "DEEPINFRA",
   "QSTASH",
   "FIRECRAWL",
+  "CEREBRAS",
 ] as const;
 
 export type ProviderName = (typeof providersNames)[number];
@@ -184,6 +187,10 @@ export const providers: {
   {
     pattern: firecrawl,
     provider: "FIRECRAWL",
+  },
+  {
+    pattern: cerebras,
+    provider: "CEREBRAS",
   },
 ];
 

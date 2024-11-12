@@ -225,6 +225,18 @@ function modifyEnvBasedOnPath(env: Env, request: RequestWrapper): Env {
         WORKER_TYPE: "GATEWAY_API",
         GATEWAY_TARGET: "https://api.hyperbolic.xyz",
       };
+    } else if (hostParts[0].includes("cerebras")) {
+      return {
+        ...env,
+        WORKER_TYPE: "GATEWAY_API",
+        GATEWAY_TARGET: "https://api.cerebras.ai",
+      };
+    } else if (hostParts[0].includes("mistral")) {
+      return {
+        ...env,
+        WORKER_TYPE: "GATEWAY_API",
+        GATEWAY_TARGET: "https://api.mistral.ai",
+      };
     } else if (hostParts[0].includes("fireworks")) {
       if (isRootPath(url) && request.getMethod() === "GET") {
         return {
