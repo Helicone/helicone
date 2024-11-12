@@ -123,6 +123,12 @@ const DashboardPage = (props: DashboardPageProps) => {
   );
   const onboardingContext = useOnboardingContext();
 
+  useEffect(() => {
+    if (isDemo && onboardingContext.isOnboardingComplete) {
+      setOpenQuickTour(true);
+    }
+  }, [isDemo, onboardingContext.isOnboardingComplete]);
+
   const router = useRouter();
 
   useEffect(() => {

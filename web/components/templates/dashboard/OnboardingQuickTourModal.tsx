@@ -74,7 +74,8 @@ const OnboardingQuickTourModal = ({
                 <div className="flex items-center gap-2" key={item}>
                   <Checkbox
                     disabled
-                    className="border-gray-200 dark:border-gray-800"
+                    className="border-gray-200 dark:border-gray-800 data-[state=checked]:bg-[#34C759] data-[state=checked]:text-white data-[state=checked]:rounded-full disabled:opacity-100"
+                    iconClassName="h-3 w-3"
                     checked={isOnboardingComplete}
                   />
                   <p className="text-sm text-slate-700 dark:text-slate-300 font-medium">

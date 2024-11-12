@@ -18,6 +18,7 @@ import SidebarHelpDropdown from "../SidebarHelpDropdown";
 import { useTheme } from "next-themes";
 import OnboardingNavItems from "./OnboardingNavItems";
 import useOnboardingContext from "../onboardingContext";
+import EndOnboardingConfirmation from "@/components/templates/onboarding/EndOnboardingConfirmation";
 
 export interface NavigationItem {
   name: string;
@@ -174,6 +175,8 @@ const DesktopSidebar = ({
   };
 
   const { isOnboardingVisible } = useOnboardingContext();
+  const [showEndOnboardingConfirmation, setShowEndOnboardingConfirmation] =
+    useState(false);
 
   return (
     <>
@@ -303,6 +306,17 @@ const DesktopSidebar = ({
                   </nav>
                 </div>
               </div>
+              {isOnboardingVisible && (
+                <Button
+                  className="mx-2 text-[13px] font-medium"
+                  variant="outline"
+                  onClick={() => {
+                    setShowEndOnboardingConfirmation(true);
+                  }}
+                >
+                  Ready to integrate
+                </Button>
+              )}
 
               {/* InfoBox */}
               {canShowInfoBox && !isCollapsed && !isOnboardingVisible && (
@@ -337,6 +351,10 @@ const DesktopSidebar = ({
         open={modalOpen}
         setOpen={handleModalOpen}
         changelog={changelogToView}
+      />
+      <EndOnboardingConfirmation
+        open={showEndOnboardingConfirmation}
+        setOpen={setShowEndOnboardingConfirmation}
       />
     </>
   );
