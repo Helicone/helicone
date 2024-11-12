@@ -44,7 +44,7 @@ const SuggestionModal = (props: SuggestionModalProps) => {
                 type="text"
                 placeholder="e.g. Average Tokens per Request"
                 required
-                className="block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6"
+                className="block w-full rounded-md border-0 py-1.5 shadow-none ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6"
               />
             </div>
           </div>
@@ -63,7 +63,7 @@ const SuggestionModal = (props: SuggestionModalProps) => {
                 type="text"
                 placeholder="Time Graph | Number | Other"
                 required
-                className="block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6"
+                className="block w-full rounded-md border-0 py-1.5 shadow-none ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6"
               />
             </div>
           </div>
@@ -83,7 +83,7 @@ const SuggestionModal = (props: SuggestionModalProps) => {
                 autoComplete="email"
                 defaultValue={user?.email}
                 required
-                className="block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6"
+                className="block w-full rounded-md border-0 py-1.5 shadow-none ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6"
               />
             </div>
           </div>
@@ -102,7 +102,7 @@ const SuggestionModal = (props: SuggestionModalProps) => {
                 type="text"
                 required
                 placeholder="e.g. Monitor how close we are to OpenAI API limits."
-                className="block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6"
+                className="block w-full rounded-md border-0 py-1.5 shadow-none ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6"
               />
             </div>
           </div>
@@ -121,7 +121,7 @@ const SuggestionModal = (props: SuggestionModalProps) => {
                 required
                 rows={4}
                 placeholder={"Hello"}
-                className="block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6"
+                className="block w-full rounded-md border-0 py-1.5 shadow-none ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6"
               />
             </div>
           </div>
@@ -157,7 +157,7 @@ const SuggestionModal = (props: SuggestionModalProps) => {
                     }
                   });
               }}
-              className="items-center rounded-md bg-black px-4 py-2 text-sm flex font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              className="items-center rounded-md bg-black px-4 py-2 text-sm flex font-semibold text-white shadow-none hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             >
               Submit
             </button>

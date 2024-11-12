@@ -574,7 +574,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                   </div>
                 ))}
                 <div key="requests">
-                  <Card className="border border-slate-200 bg-white text-slate-950 !shadow-sm dark:border-slate-800 dark:bg-black dark:text-slate-50 rounded-lg ring-0">
+                  <Card className="border border-slate-200 bg-white text-slate-950 shadow-none dark:border-slate-800 dark:bg-black dark:text-slate-50 rounded-lg ring-0">
                     <div className="flex flex-row items-center justify-between">
                       <div className="flex flex-col space-y-0.5">
                         <p className="text-slate-500 text-sm">Requests</p>
@@ -615,7 +615,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                   </Card>
                 </div>
                 <div key="errors">
-                  <Card className="h-full w-full flex flex-col border border-slate-200 bg-white text-slate-950 !shadow-sm dark:border-slate-800 dark:bg-black dark:text-slate-50 rounded-lg ring-0">
+                  <Card className="h-full w-full flex flex-col border border-slate-200 bg-white text-slate-950 shadow-none dark:border-slate-800 dark:bg-black dark:text-slate-50 rounded-lg ring-0">
                     <div className="flex flex-col h-full">
                       <h2 className="text-slate-500 text-sm mb-2">
                         All Errors
@@ -894,7 +894,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                   </StyledAreaChart>
                 </div>
                 <div key="suggest-more-graphs">
-                  <div className="space-y-2 bg-white dark:bg-black border border-slate-200 dark:border-slate-900 border-dashed w-full h-full p-2 text-slate-950 dark:text-slate-50 shadow-sm rounded-lg flex flex-col items-center justify-center">
+                  <div className="space-y-2 bg-white dark:bg-black border border-slate-200 dark:border-slate-900 border-dashed w-full h-full p-2 text-slate-950 dark:text-slate-50 shadow-none rounded-lg flex flex-col items-center justify-center">
                     <PresentationChartLineIcon className="h-12 w-12 text-black dark:text-white" />
                     <button
                       className="p-4 text-semibold text-lg"
