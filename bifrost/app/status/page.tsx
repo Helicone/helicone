@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import { ProviderStatusPage } from "./ProviderStatusPage";
+import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "AI Provider Status Dashboard - Helicone",
@@ -28,7 +29,9 @@ export const metadata: Metadata = {
 export default function PriceCalcPage() {
   return (
     <div className="container mx-auto py-8">
-      <ProviderStatusPage provider="all" />
+      <Suspense fallback={<div>Loading...</div>}>
+        <ProviderStatusPage provider="all" />
+      </Suspense>
     </div>
   );
 }
