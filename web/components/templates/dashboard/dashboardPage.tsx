@@ -65,6 +65,8 @@ import { OnboardingPopoverInside } from "../onboarding/OnboardingPopover";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import CreateOrgForm from "../organization/createOrgForm";
 import OnboardingQuickStartModal from "./OnboardingQuickStartModal";
+import { usePrompts } from "@/services/hooks/prompts/prompts";
+import { useJawnClient } from "@/lib/clients/jawnHook";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -510,6 +512,41 @@ const DashboardPage = (props: DashboardPageProps) => {
       onSetAdvancedFiltersHandler({ operator: "and", rows: [] }, null);
     }
   };
+
+  const { prompts, isLoading: isPromptsLoading } = usePrompts();
+
+  const jawn = useJawnClient();
+
+  // this is to prevent the quick tour from being access if an experiment is already created (will cause issues with the onboarding flow)
+  useEffect(() => {
+    const getPromptVersions = async () => {
+      if (prompts && orgContext?.currentOrg?.tier === "demo") {
+        const promptId = prompts.find(
+          (p) => p.user_defined_id === "qa-structure-analysis"
+        )?.id;
+        if (promptId) {
+          const { data } = await jawn.POST(
+            "/v1/prompt/{promptId}/versions/query",
+            {
+              params: {
+                path: {
+                  promptId: promptId,
+                },
+              },
+              body: {
+                includeExperimentVersions: false,
+              },
+            }
+          );
+          if (data?.data?.length && data?.data?.length > 1) {
+            onboardingContext.endOnboarding();
+            setOpenQuickTour(true);
+          }
+        }
+      }
+    };
+    getPromptVersions();
+  }, [prompts]);
 
   return (
     <>
@@ -1024,7 +1061,10 @@ const DashboardPage = (props: DashboardPageProps) => {
                   ONBOARDING_STEPS.DASHBOARD_SUCCESS.stepNumber
               }
             >
-              <DialogContent className="left-[calc(100%-2rem)] -translate-x-full top-[calc(100%-2rem)] -translate-y-full">
+              <DialogContent
+                className="left-[calc(100%-2rem)] -translate-x-full top-[calc(100%-2rem)] -translate-y-full"
+                closeButton={false}
+              >
                 <OnboardingPopoverInside
                   onboardingStep="DASHBOARD_SUCCESS"
                   nextOverride={() => {
@@ -1082,7 +1122,10 @@ const DashboardPage = (props: DashboardPageProps) => {
               >
                 <CreateOrgForm
                   firstOrg={true}
-                  onCancelHandler={setOpenCreateFirstOrg}
+                  onCancelHandler={() => {
+                    setOpenCreateFirstOrg(false);
+                    setOpenDemo(true);
+                  }}
                   onSuccess={(orgId) => {
                     setTimeout(() => {
                       orgContext?.setCurrentOrg(orgId ?? "");

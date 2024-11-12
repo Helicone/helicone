@@ -39,19 +39,6 @@ const AuthLayout = (props: AuthLayoutProps) => {
 
   const { changelog, isLoading: isChangelogLoading } = useChangelog();
 
-  // TODO: uncomment before merging
-  // const { isOnboardingVisible } = useOnboardingContext();
-
-  // useEffect(() => {
-  //   if (
-  //     !isOnboardingVisible &&
-  //     org?.currentOrg?.tier === "demo" &&
-  //     router.pathname !== "/dashboard"
-  //   ) {
-  //     router.push("/dashboard");
-  //   }
-  // }, [isOnboardingVisible, org, router]);
-
   const sidebarRef = useRef<HTMLDivElement>(null);
 
   return (

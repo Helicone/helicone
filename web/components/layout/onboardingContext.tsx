@@ -20,6 +20,9 @@ import { BeakerIcon } from "@heroicons/react/24/outline";
 import { cn } from "@/lib/utils";
 import { OnboardingPopoverAccordion } from "../templates/onboarding/OnboardingPopoverMore";
 import { DiffHighlight } from "../templates/welcome/diffHighlight";
+import { useOrg } from "./organizationContext";
+import { useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 export const ONBOARDING_STEP_LABELS = [
   "REQUESTS_TABLE",
@@ -48,6 +51,7 @@ export type OnboardingStepLabel = (typeof ONBOARDING_STEP_LABELS)[number];
 
 interface OnboardingStep {
   stepNumber: number;
+  delayBoxShiftMs?: number;
   popoverData: {
     icon?: React.ReactNode;
     title?: string;
@@ -235,6 +239,7 @@ export const ONBOARDING_STEPS: Record<OnboardingStepLabel, OnboardingStep> = {
   },
   PROMPTS_EXPERIMENT: {
     stepNumber: 5,
+    delayBoxShiftMs: 700,
     popoverData: {
       icon: <BeakerIcon className="h-6 w-6" />,
       title: "Let’s iterate on this prompt",
@@ -255,6 +260,7 @@ export const ONBOARDING_STEPS: Record<OnboardingStepLabel, OnboardingStep> = {
   },
   EXPERIMENTS_ORIGINAL: {
     stepNumber: 7,
+    delayBoxShiftMs: 700,
     popoverData: {
       icon: <BeakerIcon className="h-6 w-6" />,
       title: "Here’s your original prompt",
@@ -278,6 +284,7 @@ export const ONBOARDING_STEPS: Record<OnboardingStepLabel, OnboardingStep> = {
   },
   EXPERIMENTS_ADD_CHANGE_PROMPT: {
     stepNumber: 9,
+    delayBoxShiftMs: 700,
     popoverData: {
       icon: <BeakerIcon className="h-6 w-6" />,
       title: "Change the prompt",
@@ -476,7 +483,16 @@ export const OnboardingProvider = ({
         console.log({ element });
         if (element) {
           const position = getElementPosition(element);
-          if (position) {
+          if (
+            ONBOARDING_STEPS[ONBOARDING_STEP_LABELS[currentStep]]
+              .delayBoxShiftMs
+          ) {
+            setTimeout(() => {
+              if (position) {
+                setElementPointerPosition(position);
+              }
+            }, ONBOARDING_STEPS[ONBOARDING_STEP_LABELS[currentStep]].delayBoxShiftMs);
+          } else if (position) {
             setElementPointerPosition(position);
           }
 
@@ -519,6 +535,21 @@ export const OnboardingProvider = ({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentStep, isOnboardingVisible]);
+
+  const org = useOrg();
+  const pathname = usePathname();
+  const router = useRouter();
+
+  useEffect(() => {
+    console.log({ isOnboardingVisible, org, pathname });
+    if (
+      !isOnboardingVisible &&
+      org?.currentOrg?.tier === "demo" &&
+      pathname !== "/dashboard"
+    ) {
+      router.push("/dashboard");
+    }
+  }, [isOnboardingVisible, org, router]);
 
   return (
     <OnboardingContext.Provider

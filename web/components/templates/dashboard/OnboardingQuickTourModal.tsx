@@ -9,6 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
 
 const checklistItems = [
   "Review the requests",
@@ -46,23 +47,37 @@ const OnboardingQuickTourModal = ({
           </DialogDescription>
         </DialogHeader>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="p-4 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col gap-4">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/assets/welcome/xpedia.png"
-              alt="Xpedia"
-              className="rounded-md w-full h-auto"
-            />
+          <div
+            className={cn(
+              "p-4 rounded-lg bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex flex-col gap-4",
+              isOnboardingComplete && "bg-slate-50 dark:bg-slate-900"
+            )}
+          >
+            {!isOnboardingComplete ? (
+              <>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
 
-            <div className="flex flex-col gap-2">
-              <h3 className="text-sm font-medium text-slate-900 dark:text-slate-50 leading-4">
-                Xpedia AI
-              </h3>
-              <p className="text-sm text-slate-500 dark:text-slate-400">
-                AI-powered travel planner to streamline trip planning. Find
-                flights, accommodation and activities at your fingertip.
-              </p>
-            </div>
+                <img
+                  src="/assets/welcome/xpedia.png"
+                  alt="Xpedia"
+                  className="rounded-md w-full h-auto"
+                />
+
+                <div className="flex flex-col gap-2">
+                  <h3 className="text-sm font-medium text-slate-900 dark:text-slate-50 leading-4">
+                    Xpedia AI
+                  </h3>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">
+                    AI-powered travel planner to streamline trip planning. Find
+                    flights, accommodation and activities at your fingertip.
+                  </p>
+                </div>
+              </>
+            ) : (
+              <div className="flex items-center justify-center w-full h-full text-9xl">
+                🎉
+              </div>
+            )}
           </div>
 
           <div className="p-4 flex flex-col gap-4">

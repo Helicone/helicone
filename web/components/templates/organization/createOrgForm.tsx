@@ -28,6 +28,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useTranslation } from "react-i18next";
+import useOnboardingContext from "@/components/layout/onboardingContext";
 
 interface CreateOrgFormProps {
   variant?: "organization" | "reseller";
@@ -111,6 +112,8 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
     { value: "product_hunt", label: t("Product Hunt") },
     { value: "other", label: t("Other") },
   ];
+
+  const { isOnboardingComplete } = useOnboardingContext();
 
   return (
     <>
@@ -382,7 +385,7 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
             </>
           )}
           <DialogFooter>
-            {!firstOrg && (
+            {!(firstOrg && isOnboardingComplete) && (
               <Button
                 variant="outline"
                 onClick={() => {

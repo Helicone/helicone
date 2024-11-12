@@ -1,4 +1,5 @@
 import useOnboardingContext, {
+  ONBOARDING_STEP_LABELS,
   ONBOARDING_STEPS,
   OnboardingStepLabel,
 } from "@/components/layout/onboardingContext";
@@ -10,7 +11,8 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { PopoverContentProps, PopoverProps } from "@radix-ui/react-popover";
-import { cloneElement } from "react";
+import { cloneElement, useEffect } from "react";
+
 interface OnboardingPopoverContentProps extends PopoverContentProps {
   id?: string;
   onboardingStep: OnboardingStepLabel;
@@ -95,6 +97,26 @@ export const OnboardingPopoverInside = ({
   const { popoverData } = ONBOARDING_STEPS[onboardingStep];
   const { icon, title, stepNumber, description, additionalData } =
     popoverData ?? {};
+
+  useEffect(() => {
+    const keydownHandler = (e: KeyboardEvent) => {
+      if (
+        (e.key === "ArrowRight" || e.key === "ArrowDown") &&
+        currentStep < ONBOARDING_STEP_LABELS.length - 1
+      ) {
+        e.preventDefault();
+        if (nextOverride) {
+          nextOverride();
+        } else {
+          next && next();
+          setCurrentStep(currentStep + 1, delayMs);
+        }
+      }
+    };
+    window.addEventListener("keydown", keydownHandler);
+    return () => window.removeEventListener("keydown", keydownHandler);
+  }, [currentStep, next, nextOverride, delayMs]);
+
   return (
     <>
       <div className="flex justify-between items-center">

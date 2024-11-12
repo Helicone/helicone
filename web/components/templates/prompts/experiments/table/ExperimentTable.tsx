@@ -51,10 +51,14 @@ import ScoresTableContainer from "./scores/ScoresTableContainer";
 import useOnboardingContext, {
   ONBOARDING_STEPS,
 } from "@/components/layout/onboardingContext";
-import { OnboardingPopoverContent } from "@/components/templates/onboarding/OnboardingPopover";
+import {
+  OnboardingPopover,
+  OnboardingPopoverContent,
+} from "@/components/templates/onboarding/OnboardingPopover";
 import { useJawnClient } from "@/lib/clients/jawnHook";
 import { useQuery } from "@tanstack/react-query";
 import { generateOpenAITemplate } from "@/components/shared/CreateNewEvaluator/evaluatorHelpers";
+import { useRouter } from "next/navigation";
 
 interface ExperimentTableProps {
   experimentTableId: string;
@@ -728,74 +732,64 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
           </div>
         )}
 
-        <Popover
-          open={
-            isOnboardingVisible &&
-            currentStep === ONBOARDING_STEPS.EXPERIMENTS_TABLE.stepNumber
-            //  &&
-            // !!experimentTableQuery?.rows.length
-          }
+        <OnboardingPopover
+          popoverContentProps={{
+            onboardingStep: "EXPERIMENTS_TABLE",
+            align: "start",
+            alignOffset: 10,
+          }}
         >
-          <PopoverTrigger asChild>
-            <div
-              data-onboarding-step={
-                ONBOARDING_STEPS.EXPERIMENTS_TABLE.stepNumber
-              }
-              className="ag-theme-alpine w-full overflow-hidden "
-              ref={experimentTableRef}
-              style={
-                {
-                  "--ag-header-height": "40px",
-                  "--ag-header-background-color": "#f3f4f6", // Light gray background
-                  "--ag-header-foreground-color": "#1f2937", // Dark gray text
-                  "--ag-header-cell-hover-background-color": "#e5e7eb", // Slightly darker gray on hover
-                  "--ag-header-column-separator-color": "#d1d5db", // Medium gray for separators
-                  "--ag-cell-horizontal-border": "solid #E2E8F0",
-                  "--ag-border-color": "#E2E8F0",
-                  "--ag-borders": "none",
-                } as React.CSSProperties
-              }
-            >
-              <AgGridReact
-                ref={gridRef as any}
-                rowData={experimentTableQuery?.rows}
-                columnDefs={columnDefs}
-                onGridReady={onGridReady}
-                onColumnResized={onColumnResized}
-                onColumnMoved={onColumnMoved}
-                enableCellTextSelection={true}
-                suppressRowTransform={true}
-                suppressColumnVirtualisation={true}
-                suppressColumnMoveAnimation={true}
-                domLayout="autoHeight"
-                // getRowId={getRowId}
-                context={{
-                  handleRunHypothesis,
-                  setShowExperimentInputSelector,
-                  setShowRandomInputSelector,
-                  experimentTableData: experimentTableQuery,
-                  hypotheses: [],
-                  experimentId: experimentTableQuery?.metadata?.experimentId,
-                  orgId,
-                  promptVersionTemplateRef: promptVersionTemplateData ?? {},
+          <div
+            className="ag-theme-alpine w-full overflow-hidden "
+            ref={experimentTableRef}
+            style={
+              {
+                "--ag-header-height": "40px",
+                "--ag-header-background-color": "#f3f4f6", // Light gray background
+                "--ag-header-foreground-color": "#1f2937", // Dark gray text
+                "--ag-header-cell-hover-background-color": "#e5e7eb", // Slightly darker gray on hover
+                "--ag-header-column-separator-color": "#d1d5db", // Medium gray for separators
+                "--ag-cell-horizontal-border": "solid #E2E8F0",
+                "--ag-border-color": "#E2E8F0",
+                "--ag-borders": "none",
+              } as React.CSSProperties
+            }
+          >
+            <AgGridReact
+              suppressHeaderFocus={org?.currentOrg?.tier === "demo"}
+              suppressCellFocus={org?.currentOrg?.tier === "demo"}
+              ref={gridRef as any}
+              rowData={experimentTableQuery?.rows}
+              columnDefs={columnDefs}
+              onGridReady={onGridReady}
+              onColumnResized={onColumnResized}
+              onColumnMoved={onColumnMoved}
+              enableCellTextSelection={true}
+              suppressRowTransform={true}
+              suppressColumnVirtualisation={true}
+              suppressColumnMoveAnimation={true}
+              domLayout="autoHeight"
+              // getRowId={getRowId}
+              context={{
+                handleRunHypothesis,
+                setShowExperimentInputSelector,
+                setShowRandomInputSelector,
+                experimentTableData: experimentTableQuery,
+                hypotheses: [],
+                experimentId: experimentTableQuery?.metadata?.experimentId,
+                orgId,
+                promptVersionTemplateRef: promptVersionTemplateData ?? {},
 
-                  rowData: experimentTableQuery?.rows,
-                  handleUpdateExperimentCell: updateExperimentCell.mutate,
-                  handleRunRow,
-                }}
-                rowClass="border-b border-gray-200 hover:bg-gray-50"
-                headerHeight={40}
-                rowHeight={50}
-              />
-            </div>
-          </PopoverTrigger>
-          <OnboardingPopoverContent
-            onboardingStep="EXPERIMENTS_TABLE"
-            align="start"
-            side="bottom"
-            className="z-[10000] bg-white p-4 w-[calc(100vw-2rem)] sm:max-w-md flex flex-col gap-2"
-          />
-        </Popover>
+                rowData: experimentTableQuery?.rows,
+                handleUpdateExperimentCell: updateExperimentCell.mutate,
+                handleRunRow,
+              }}
+              rowClass="border-b border-gray-200 hover:bg-gray-50"
+              headerHeight={40}
+              rowHeight={50}
+            />
+          </div>
+        </OnboardingPopover>
         <Popover
           open={
             popoverOpen ||

@@ -13,6 +13,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { OnboardingPopover } from "@/components/templates/onboarding/OnboardingPopover";
+import { useRouter } from "next/navigation";
 
 export interface TreeNodeProps {
   node: TreeNodeData;
@@ -187,6 +188,8 @@ export const Tree: React.FC<TreeProps> = ({
   setShowDrawer,
   onBoardingRequestTrace,
 }) => {
+  const router = useRouter();
+
   return (
     <OnboardingPopover
       popoverContentProps={{

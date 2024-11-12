@@ -122,7 +122,11 @@ const DesktopSidebar = ({
     calculateAvailableSpace();
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "b" && event.metaKey) {
+      if (
+        event.key === "b" &&
+        event.metaKey &&
+        org?.currentOrg?.tier !== "demo"
+      ) {
         event.preventDefault();
         setIsCollapsed(!isCollapsed);
       } else if (event.metaKey && event.shiftKey && event.key === "l") {

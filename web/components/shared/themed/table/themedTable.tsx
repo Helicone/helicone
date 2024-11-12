@@ -37,7 +37,7 @@ import {
 } from "@/components/ui/resizable";
 import useOnboardingContext from "@/components/layout/onboardingContext";
 import { OnboardingPopover } from "@/components/templates/onboarding/OnboardingPopover";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 interface ThemedTableV5Props<T extends { id?: string }> {
   id: string;
@@ -208,6 +208,7 @@ export default function ThemedTable<T extends { id?: string }>(
   const { currentStep, isOnboardingVisible } = useOnboardingContext();
 
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   return (
     <div className="h-full flex flex-col border-b divide-y divide-slate-300 dark:divide-slate-700">
@@ -363,6 +364,7 @@ export default function ThemedTable<T extends { id?: string }>(
                               handleRowSelect(row.original, index);
                             },
                             align: "start",
+                            alignOffset: 10,
                           }}
                         >
                           <tr
