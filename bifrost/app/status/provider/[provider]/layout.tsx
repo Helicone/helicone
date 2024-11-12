@@ -15,7 +15,7 @@ export async function generateMetadata({
 
   const title = getProviderTitle(decodedProvider);
   const description = getProviderDescription(decodedProvider);
-  const imageUrl = "/static/status/status-open-graph.webp";
+  const imageUrl = "/static/status/status-page-open-graph.webp";
 
   return {
     title,
