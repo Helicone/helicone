@@ -113,4 +113,15 @@ export const costs: ModelRow[] = [
     },
     showInPlayground: true,
   },
+  {
+    model: {
+      operator: "equals",
+      value: "claude-3-5-haiku-20241022",
+    },
+    cost: {
+      prompt_token: 0.000001,
+      completion_token: 0.000005,
+    },
+    showInPlayground: true,
+  },
 ];
