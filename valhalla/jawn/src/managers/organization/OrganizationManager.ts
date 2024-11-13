@@ -402,7 +402,7 @@ export class OrganizationManager extends BaseManager {
     return ok(members);
   }
 
-  async setupDemo(organizationId: string): Promise<Result<string, string>> {
+  async setupDemo(organizationId: string): Promise<Result<null, string>> {
     if (!this.authParams.userId) return err("Unauthorized");
     const hasAccess = await this.organizationStore.checkUserBelongsToOrg(
       organizationId,
@@ -419,9 +419,9 @@ export class OrganizationManager extends BaseManager {
         organizationId
       );
 
-    if (orgError || !org) {
+    if (orgError) {
       return err(orgError ?? "Error setting up demo");
     }
-    return ok(org);
+    return ok(null);
   }
 }

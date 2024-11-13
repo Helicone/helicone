@@ -358,7 +358,7 @@ export class OrganizationController extends Controller {
     const result = await organizationManager.setupDemo(
       request.authParams.organizationId ?? ""
     );
-    if (result.error || !result.data) {
+    if (result.error) {
       this.setStatus(500);
       console.error(result.error);
       return err(result.error ?? "Error setting up demo");

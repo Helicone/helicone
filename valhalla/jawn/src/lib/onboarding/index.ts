@@ -3,6 +3,7 @@ import { OpenAI } from "openai";
 import { v4 as uuid } from "uuid";
 import { hpf } from "@helicone/prompts";
 import { examples } from "./examples";
+import { OPENAI_KEY } from "../clients/constant";
 
 const sessionId = uuid();
 
@@ -272,7 +273,7 @@ export async function setupDemoOrganizationRequests({
   heliconeApiKey: string;
 }) {
   const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
+    apiKey: OPENAI_KEY,
     baseURL: "https://oai.helicone.ai/v1",
     defaultHeaders: {
       "Helicone-Auth": `Bearer ${heliconeApiKey}`,
