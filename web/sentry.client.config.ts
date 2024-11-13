@@ -11,7 +11,13 @@ if (REGION === "us") {
     dsn: "https://b0bf4af8adaecf90a2efaff9fb4ed029@o4506562130280448.ingest.us.sentry.io/4508259500687360",
 
     // Add optional integrations for additional features
-    integrations: [Sentry.replayIntegration()],
+    integrations: [
+      Sentry.replayIntegration({
+        maskAllText: false,
+        maskAllInputs: true,
+        mask: [".sentry-mask-me"],
+      }),
+    ],
 
     // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
     tracesSampleRate: 1,
