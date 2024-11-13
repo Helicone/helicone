@@ -351,20 +351,16 @@ export class OrganizationController extends Controller {
 
   @Post("/setup-demo")
   public async setupDemo(
-    @Body()
-    requestBody: {
-      apiKey: string;
-    },
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<null, string>> {
     const organizationManager = new OrganizationManager(request.authParams);
 
     const result = await organizationManager.setupDemo(
-      request.authParams.organizationId ?? "",
-      requestBody.apiKey
+      request.authParams.organizationId ?? ""
     );
     if (result.error || !result.data) {
       this.setStatus(500);
+      console.error(result.error);
       return err(result.error ?? "Error setting up demo");
     } else {
       this.setStatus(201);

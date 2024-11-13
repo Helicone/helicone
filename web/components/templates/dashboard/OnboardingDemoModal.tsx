@@ -5,6 +5,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useJawnClient } from "@/lib/clients/jawnHook";
 import { RabbitIcon, TurtleIcon } from "lucide-react";
 
 const OnboardingDemoModal = ({
@@ -16,6 +17,7 @@ const OnboardingDemoModal = ({
   quickStart: () => void;
   quickTour: () => void;
 }) => {
+  const jawn = useJawnClient();
   return (
     <Dialog open={open}>
       <DialogContent
@@ -24,6 +26,14 @@ const OnboardingDemoModal = ({
       >
         <DialogHeader className="space-y-2">
           <DialogTitle>Welcome to Helicone!</DialogTitle>
+          safkjsad
+          <button
+            onClick={() => {
+              jawn.POST("/v1/organization/setup-demo");
+            }}
+          >
+            safkjsad
+          </button>
           <DialogDescription className="text-sm">
             To help you get started, take a tour or integrate with your LLM app.
           </DialogDescription>

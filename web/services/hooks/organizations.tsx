@@ -244,19 +244,11 @@ const useOrgsContextManager = () => {
         } else if (res.status !== 200) {
           console.error("Failed to create org", res.json());
         } else {
-          const apiKey = `sk-helicone${isEu ? "-eu" : ""}-${generateApiKey({
-            method: "base32",
-            dashes: true,
-          }).toString()}`.toLowerCase();
-
           res.json().then((x) => {
             fetch(
               `${process.env.NEXT_PUBLIC_HELICONE_JAWN_SERVICE}/v1/organization/setup-demo`,
               {
                 method: "POST",
-                body: JSON.stringify({
-                  apiKey,
-                }),
                 headers: {
                   "Content-Type": "application/json",
                   "helicone-authorization": JSON.stringify({

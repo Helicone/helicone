@@ -23,7 +23,6 @@ const AuthLayout = (props: AuthLayoutProps) => {
   const { pathname } = router;
 
   const [open, setOpen] = useState(false);
-  const [showTermsModal, setShowTermsModal] = useState(false);
 
   const currentPage = useMemo(() => {
     const path = pathname.split("/")[1];
@@ -81,7 +80,6 @@ const AuthLayout = (props: AuthLayoutProps) => {
       </div>
 
       <UpgradeProModal open={open} setOpen={setOpen} />
-      <AcceptTermsModal />
     </MetaData>
   );
 };
