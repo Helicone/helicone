@@ -151,7 +151,14 @@ export function ProviderStatusInfo({
         <Card className="shadow-none border h-[120px]">
           <CardContent className="pt-6">
             {(() => {
-              const status = getProviderStatus(provider.metrics.errorRate24h);
+              const recentErrorRate =
+                provider.metrics.recentRequestCount > 0
+                  ? (provider.metrics.recentErrorCount /
+                      provider.metrics.recentRequestCount) *
+                    100
+                  : 0;
+
+              const status = getProviderStatus(recentErrorRate);
               const StatusIcon = status.icon;
 
               return (
