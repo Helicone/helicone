@@ -141,6 +141,18 @@ const ScoresEvaluatorsConfig = memo(
           setCurrentStep(ONBOARDING_STEPS.EXPERIMENTS_SPECIFIC_EVAL.stepNumber);
           setSelectOpen(true);
         });
+
+        const keydownHandler = (e: KeyboardEvent) => {
+          if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+            e.preventDefault();
+            setCurrentStep(
+              ONBOARDING_STEPS.EXPERIMENTS_SPECIFIC_EVAL.stepNumber
+            );
+            setSelectOpen(true);
+          }
+        };
+        window.addEventListener("keydown", keydownHandler);
+        return () => window.removeEventListener("keydown", keydownHandler);
       }
     }, [isOnboardingVisible, currentStep, setOnClickElement]);
 

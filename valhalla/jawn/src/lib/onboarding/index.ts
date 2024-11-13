@@ -274,7 +274,7 @@ export async function setupDemoOrganizationRequests({
 }) {
   const openai = new OpenAI({
     apiKey: OPENAI_KEY,
-    baseURL: "https://oai.helicone.ai/v1",
+    baseURL: "http://localhost:8787/v1",
     defaultHeaders: {
       "Helicone-Auth": `Bearer ${heliconeApiKey}`,
     },

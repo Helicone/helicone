@@ -133,14 +133,16 @@ export const OnboardingPopoverInside = ({
       <Button
         variant="outline"
         className="w-full"
-        onClick={
-          nextOverride
-            ? nextOverride
-            : () => {
-                next && next();
-                setCurrentStep(currentStep + 1, delayMs);
-              }
-        }
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          if (nextOverride) {
+            nextOverride();
+          } else {
+            next && next();
+            setCurrentStep(currentStep + 1, delayMs);
+          }
+        }}
       >
         Next
       </Button>

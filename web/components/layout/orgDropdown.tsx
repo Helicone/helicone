@@ -29,6 +29,7 @@ import { LogOutIcon } from "lucide-react";
 import Link from "next/link";
 import OrgMoreDropdown from "./orgMoreDropdown";
 import { Cog6ToothIcon } from "@heroicons/react/24/outline";
+import useOnboardingContext from "./onboardingContext";
 
 interface OrgDropdownProps {}
 
@@ -92,6 +93,8 @@ export default function OrgDropdown({}: OrgDropdownProps) {
   const handleSignOut = useCallback(() => {
     signOut(supabaseClient).then(() => router.push("/"));
   }, [supabaseClient, router]);
+
+  const { isOnboardingVisible } = useOnboardingContext();
 
   return (
     <>
@@ -181,10 +184,12 @@ export default function OrgDropdown({}: OrgDropdownProps) {
           <DropdownMenuSeparator />
 
           <Link href="/settings" rel="noopener noreferrer">
-            <DropdownMenuItem className="text-xs">
-              <Cog6ToothIcon className="h-4 w-4 mr-2" />
-              Settings
-            </DropdownMenuItem>
+            {!isOnboardingVisible && (
+              <DropdownMenuItem className="text-xs">
+                <Cog6ToothIcon className="h-4 w-4 mr-2" />
+                Settings
+              </DropdownMenuItem>
+            )}
           </Link>
           <DropdownMenuItem onSelect={handleSignOut} className="text-xs">
             <LogOutIcon className="h-4 w-4 mr-2" />

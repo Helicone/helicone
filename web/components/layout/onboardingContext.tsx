@@ -480,7 +480,6 @@ export const OnboardingProvider = ({
         const element = document.querySelector(
           `[data-onboarding-step="${currentStep}"]`
         );
-        console.log({ element });
         if (element) {
           const position = getElementPosition(element);
           if (

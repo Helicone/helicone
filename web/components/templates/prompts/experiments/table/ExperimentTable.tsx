@@ -638,6 +638,15 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
         setCurrentStep(currentStep + 1);
       });
 
+      const keydownHandler = (e: KeyboardEvent) => {
+        if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+          e.preventDefault();
+          setShowScoresTable(!showScoresTable);
+          setCurrentStep(currentStep + 1);
+        }
+      };
+      window.addEventListener("keydown", keydownHandler);
+
       const openAIFunction = generateOpenAITemplate({
         name: "Humor",
         description: "Check if the response is funny",
@@ -674,6 +683,7 @@ export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
           name: "Humor",
         },
       });
+      return () => window.removeEventListener("keydown", keydownHandler);
     }
   }, [
     isOnboardingVisible,

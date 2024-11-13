@@ -7,6 +7,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 import { LinkIcon, NotepadTextIcon } from "lucide-react";
 import { Button } from "./button";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 interface HcBreadcrumbProps {
   pages: { name: string; href: string }[];
@@ -152,6 +153,21 @@ export default function HcBreadcrumb(props: HcBreadcrumbProps) {
     useOnboardingContext();
 
   const router = useRouter();
+
+  useEffect(() => {
+    if (
+      isOnboardingVisible &&
+      onboardingStep === ONBOARDING_STEPS.EXPERIMENTS_BETTER_PROMPT.stepNumber
+    ) {
+      const keydownHandler = (e: KeyboardEvent) => {
+        if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+          e.preventDefault();
+          setCurrentStep(ONBOARDING_STEPS.DASHBOARD_SUCCESS.stepNumber);
+        }
+      };
+      window.addEventListener("keydown", keydownHandler);
+    }
+  }, [isOnboardingVisible, onboardingStep, setCurrentStep]);
 
   return (
     <nav

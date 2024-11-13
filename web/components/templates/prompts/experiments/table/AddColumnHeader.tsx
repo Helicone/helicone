@@ -129,8 +129,9 @@ const AddColumnHeader: React.FC<AddColumnHeaderProps> = ({
       open={
         isOpen ||
         (isOnboardingVisible &&
-          currentStep ===
-            ONBOARDING_STEPS.EXPERIMENTS_ADD_CHANGE_PROMPT.stepNumber)
+          (currentStep ===
+            ONBOARDING_STEPS.EXPERIMENTS_ADD_CHANGE_PROMPT.stepNumber ||
+            currentStep === ONBOARDING_STEPS.EXPERIMENTS_ADD_SAVE.stepNumber))
       }
       onOpenChange={handleOpenChange}
     >
