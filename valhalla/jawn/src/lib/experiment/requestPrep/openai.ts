@@ -1,5 +1,6 @@
 import { autoFillInputs } from "@helicone/prompts";
 import { PreparedRequest, PreparedRequestArgs } from "./PreparedRequest";
+import { OPENAI_KEY } from "../../clients/constant";
 
 function prepareRequestAzure(
   requestPath: string,
@@ -15,7 +16,7 @@ function prepareRequestAzure(
   let headers: { [key: string]: string } = {
     "Content-Type": "application/json",
     "Helicone-Request-Id": requestId,
-    Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+    Authorization: `Bearer ${OPENAI_KEY}`,
     "Helicone-Auth": `Bearer ${apiKey}`,
     Accept: "application/json",
     "Accept-Encoding": "",

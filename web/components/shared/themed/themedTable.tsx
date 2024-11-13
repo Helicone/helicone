@@ -95,7 +95,7 @@ export const SecretInput = (props: {
           </button>
           <div className="flex w-full min-w-[15rem]">
             {show ? (
-              <Tooltip title="Click to Copy" placement="top" arrow>
+              <Tooltip title="Click to Copy" placement="top">
                 <button
                   id="secret-key"
                   onClick={(e) => {

@@ -79,6 +79,10 @@ export interface AuthParams {
   organizationId: string;
   userId?: string;
   heliconeApiKeyId?: number;
+  tier: string;
+  accessDict: {
+    cache: boolean;
+  };
 }
 
 export function dbLoggableRequestFromProxyRequest(

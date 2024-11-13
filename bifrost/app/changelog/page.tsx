@@ -123,6 +123,9 @@ export default async function Home() {
 
                 <article className="prose w-full h-full">
                   <Link href={link} className="no-underline" key={i}>
+                    <h1 className="text-sky-500 mt-16 md:mt-0 font-bold text-2xl">
+                      {String(title)}
+                    </h1>
                     {imageExists ? (
                       <Image
                         src={imagePath}
@@ -130,15 +133,13 @@ export default async function Home() {
                         width={500}
                         height={300}
                         layout="responsive"
+                        style={{ borderRadius: '16px', border: '1px solid #D3DCE6' }}
                       />
                     ) : (
                       <div className="bg-gray-200 w-full flex items-center justify-center"></div>
                     )}
-                    <h1 className="text-sky-500 mt-16 md:mt-0 font-semibold">
-                      {String(title)}
-                    </h1>
                   </Link>
-                  <p>{content}</p>
+                  <p className="text-base">{content}</p>
                 </article>
               </div>
             )

@@ -7,11 +7,12 @@ import useNotification from "../../../../shared/notification/useNotification";
 import { usePrompts } from "../../../../../services/hooks/prompts/prompts";
 import { StartFromPromptDialog } from "./components/startFromPromptDialog";
 import { Dialog, DialogTrigger } from "../../../../ui/dialog";
-
-interface ExperimentsPageProps {}
-
 import { useState } from "react";
-const ExperimentsPage = (props: ExperimentsPageProps) => {
+import { useJawnClient } from "../../../../../lib/clients/jawnHook";
+import { getExampleExperimentPrompt } from "./helpers/basePrompt";
+
+const ExperimentsPage = () => {
+  const jawn = useJawnClient();
   const notification = useNotification();
   const { prompts } = usePrompts();
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -23,6 +24,69 @@ const ExperimentsPage = (props: ExperimentsPageProps) => {
     { id: "knowledge-retrieval", name: "Knowledge retrieval" },
     { id: "step-by-step", name: "Step-by-step instructions" },
   ];
+
+  const handleStartFromScratch = async () => {
+    const exampleExperimentPrompt = getExampleExperimentPrompt();
+    const res = await jawn.POST("/v1/prompt/create", {
+      body: {
+        userDefinedId: exampleExperimentPrompt.promptName,
+        prompt: exampleExperimentPrompt.basePrompt,
+        metadata: {
+          createdFromUi: true,
+        },
+      },
+    });
+    if (res.error || !res.data) {
+      notification.setNotification("Failed to create prompt", "error");
+      return;
+    }
+
+    if (!res.data?.data?.id || !res.data?.data?.prompt_version_id) {
+      notification.setNotification("Failed to create prompt", "error");
+      return;
+    }
+
+    const dataset = await jawn.POST("/v1/helicone-dataset", {
+      body: {
+        datasetName: "Dataset for Experiment",
+        requestIds: [],
+      },
+    });
+    if (!dataset.data?.data?.datasetId) {
+      notification.setNotification("Failed to create dataset", "error");
+      return;
+    }
+    const experimentTableResult = await jawn.POST("/v1/experiment/table/new", {
+      body: {
+        datasetId: dataset.data?.data?.datasetId!,
+        promptVersionId: res.data?.data?.prompt_version_id!,
+        newHeliconeTemplate: JSON.stringify(exampleExperimentPrompt.basePrompt),
+        isMajorVersion: false,
+        promptSubversionMetadata: {
+          experimentAssigned: true,
+        },
+        experimentMetadata: {
+          prompt_id: res.data?.data?.id!,
+          prompt_version: res.data?.data?.prompt_version_id!,
+          experiment_name: `${exampleExperimentPrompt.promptName}_V1.0` || "",
+        },
+        experimentTableMetadata: {
+          datasetId: dataset.data?.data?.datasetId!,
+          model: exampleExperimentPrompt.basePrompt.model,
+          prompt_id: res.data?.data?.id!,
+          prompt_version: res.data?.data?.prompt_version_id!,
+        },
+      },
+    });
+    if (!experimentTableResult.data?.data?.experimentId) {
+      notification.setNotification("Failed to create experiment", "error");
+      return;
+    }
+
+    await router.push(
+      `/experiments/${experimentTableResult.data?.data?.tableId}`
+    );
+  };
 
   return (
     <>
@@ -36,7 +100,7 @@ const ExperimentsPage = (props: ExperimentsPageProps) => {
           <div>
             <button
               className="flex flex-col items-center justify-center w-40 h-32 bg-white rounded-lg hover:bg-transparent transition-colors border-2 border-slate-100"
-              onClick={() => router.push("/experiments/new")}
+              onClick={handleStartFromScratch}
             >
               <PlusIcon className="w-16 h-16 text-slate-200" />
             </button>
