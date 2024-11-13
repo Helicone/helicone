@@ -166,6 +166,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({
             level={level}
             setShowDrawer={setShowDrawer}
             isRequestSingleChild={isRequestSingleChild ?? false}
+            label={node.children ? node.name : undefined}
           />
         </Row>
       )}
