@@ -32,8 +32,6 @@ export const ProPlanCard = () => {
   const org = useOrg();
   const [isAlertsDialogOpen, setIsAlertsDialogOpen] = useState(false);
   const [isPromptsDialogOpen, setIsPromptsDialogOpen] = useState(false);
-  const [isEnablingAlerts, setIsEnablingAlerts] = useState(false);
-  const [isEnablingPrompts, setIsEnablingPrompts] = useState(false);
 
   const subscription = useQuery({
     queryKey: ["subscription", org?.currentOrg?.id],
@@ -115,40 +113,33 @@ export const ProPlanCard = () => {
     (item: any) => item.price.product?.name === "Prompts" && item.quantity > 0
   );
 
-  const [alertSwitchEnabled, setAlertSwitchEnabled] = useState(hasAlerts);
-  const [promptSwitchEnabled, setPromptSwitchEnabled] = useState(hasPrompts);
-
   const handleAlertsToggle = () => {
-    setIsEnablingAlerts(!hasAlerts);
-    setAlertSwitchEnabled(!hasAlerts);
     setIsAlertsDialogOpen(true);
   };
 
   const handlePromptsToggle = () => {
-    setIsEnablingPrompts(!hasPrompts);
-    setPromptSwitchEnabled(!hasPrompts);
     setIsPromptsDialogOpen(true);
   };
 
   const confirmAlertsChange = async () => {
-    if (isEnablingAlerts) {
+    if (!hasAlerts) {
       await addProductToSubscription.mutateAsync("alerts");
     } else {
       await deleteProductFromSubscription.mutateAsync("alerts");
     }
     setIsAlertsDialogOpen(false);
-    setAlertSwitchEnabled(isEnablingAlerts);
+
     subscription.refetch();
   };
 
   const confirmPromptsChange = async () => {
-    if (isEnablingPrompts) {
+    if (!hasPrompts) {
       await addProductToSubscription.mutateAsync("prompts");
     } else {
       await deleteProductFromSubscription.mutateAsync("prompts");
     }
     setIsPromptsDialogOpen(false);
-    setPromptSwitchEnabled(isEnablingPrompts);
+
     subscription.refetch();
   };
 
@@ -242,7 +233,7 @@ export const ProPlanCard = () => {
                 <Label htmlFor="alerts-toggle">Alerts ($15/mo)</Label>
                 <Switch
                   id="alerts-toggle"
-                  checked={alertSwitchEnabled}
+                  checked={hasAlerts}
                   onCheckedChange={handleAlertsToggle}
                 />
               </div>
@@ -257,7 +248,7 @@ export const ProPlanCard = () => {
                 <Label htmlFor="prompts-toggle">Prompts ($30/mo)</Label>
                 <Switch
                   id="prompts-toggle"
-                  checked={promptSwitchEnabled}
+                  checked={hasPrompts}
                   onCheckedChange={handlePromptsToggle}
                 />
               </div>
@@ -334,17 +325,16 @@ export const ProPlanCard = () => {
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>
-              {isEnablingAlerts ? "Enable Alerts" : "Disable Alerts"}
+              {!hasAlerts ? "Enable Alerts" : "Disable Alerts"}
             </DialogTitle>
             <DialogDescription>
-              {getDialogDescription(isEnablingAlerts, "Alerts", "$15")}
+              {getDialogDescription(!hasAlerts, "Alerts", "$15")}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button
               variant="outline"
               onClick={() => {
-                setAlertSwitchEnabled(!isEnablingAlerts);
                 setIsAlertsDialogOpen(false);
               }}
             >
@@ -359,17 +349,16 @@ export const ProPlanCard = () => {
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>
-              {isEnablingPrompts ? "Enable Prompts" : "Disable Prompts"}
+              {!hasPrompts ? "Enable Prompts" : "Disable Prompts"}
             </DialogTitle>
             <DialogDescription>
-              {getDialogDescription(isEnablingPrompts, "Prompts", "$30")}
+              {getDialogDescription(!hasPrompts, "Prompts", "$30")}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button
               variant="outline"
               onClick={() => {
-                setPromptSwitchEnabled(!isEnablingPrompts);
                 setIsPromptsDialogOpen(false);
               }}
             >
