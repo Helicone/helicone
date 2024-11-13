@@ -739,7 +739,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
         {unauthorized ? (
           <UnauthorizedView currentTier={currentTier || ""} />
         ) : (
-          <div className="flex flex-col h-full overflow-hidden">
+          <div className="flex flex-col h-full overflow-hidden sentry-mask-me">
             <div
               className={clsx(
                 isShiftPressed && "no-select",
