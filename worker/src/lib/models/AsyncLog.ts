@@ -24,6 +24,7 @@ type ProviderResponse = {
 
 type Timing = {
   // From Unix epoch in Milliseconds
+  timeToFirstToken?: number;
   startTime: {
     seconds: number;
     milliseconds: number;
