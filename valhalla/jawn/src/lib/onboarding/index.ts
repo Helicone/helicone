@@ -1,5 +1,4 @@
 import { OpenAI } from "openai";
-// import { hprompt, HeliconeAPIClient } from "@helicone/helicone";
 import { v4 as uuid } from "uuid";
 import { hpf } from "@helicone/prompts";
 import { examples } from "./examples";
