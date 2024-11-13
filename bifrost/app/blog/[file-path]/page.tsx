@@ -70,12 +70,12 @@ export default async function Home({
               {String(metadata.author)}
             </h3>
           )}
-          <section className="w-full max-w-4xl mx-auto mt-6 mb-2 pt-3">
+          <section className="w-52 mt-6 mb-2 pt-3">
             <div className="rounded-lg bg-[#F2F9FC] px-4 py-3 space-y-2 border border-[#E3EFF3]">
               <div className="hidden md:block">
                 <p className="text-[#6B8C9C] text-sm leading-relaxed">
-                  Join Helicone&apos;s community to monitor and optimize your LLM
-                  app in real-time. 
+                  Join Helicone&apos;s community to monitor and optimize your
+                  LLM app in real-time.
                 </p>
               </div>
               <Link href="https://us.helicone.ai/signin" className="block">
@@ -84,7 +84,7 @@ export default async function Home({
                   <ChevronRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
-              <TwitterShareButton 
+              <TwitterShareButton
                 title={String(metadata.title)}
                 path={params["file-path"]}
               />
