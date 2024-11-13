@@ -1,0 +1,10 @@
+{
+  "title": "Comparing CrewAI vs. AutoGen for Building AI Agents",
+  "title1": "Comparing CrewAI vs. AutoGen for Building AI Agents",
+  "title2": "Comparing CrewAI vs. AutoGen for Building AI Agents",
+  "description": "CrewAI and AutoGen are two notable frameworks in the AI agent landscape. We will cover the key differences, example implementations and share our recommendations if you are starting out in agent-building.",
+  "images": "/static/blog/crewai-vs-autogen.webp",
+  "time": "5 minute read",
+  "author": "Lina Lam",
+  "date": "November 8, 2024"
+}

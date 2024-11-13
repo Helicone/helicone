@@ -3,6 +3,7 @@ import {
   EvaluatorResult,
   UpdateEvaluatorParams,
 } from "../../controllers/public/evaluatorController";
+import { OPENAI_KEY } from "../../lib/clients/constant";
 import { LLMAsAJudge } from "../../lib/clients/LLMAsAJudge/LLMAsAJudge";
 import { generateHeliconeAPIKey } from "../../lib/experiment/tempKeys/tempAPIKey";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
@@ -53,7 +54,7 @@ export class EvaluatorManager extends BaseManager {
     run: Experiment["hypotheses"][number]["runs"][number];
   }): Promise<Result<null, string>> {
     const llmAsAJudge = new LLMAsAJudge({
-      openAIApiKey: process.env.OPENAI_API_KEY!,
+      openAIApiKey: OPENAI_KEY!,
       scoringType,
       llmTemplate: evaluator.llm_template,
       inputRecord,
