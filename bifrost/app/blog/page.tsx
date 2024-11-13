@@ -216,6 +216,11 @@ export type BlogStructure =
 const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
+      folderName: "crewai-vs-autogen",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "prompt-evaluation-for-llms",
     },
   },
