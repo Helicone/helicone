@@ -85,10 +85,10 @@ const useExperimentTables = () => {
       const orgId = query.queryKey[1] as string;
       const jawn = getJawnClient(orgId);
 
-      return jawn.POST("/v1/experiment/tables/query", {});
+      return jawn.GET("/v2/experiment", {});
     },
     refetchOnWindowFocus: false,
-    refetchInterval: 5_000,
+    // refetchInterval: 5_000,
   });
 
   const experiments = data?.data?.data;

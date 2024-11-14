@@ -22,7 +22,7 @@ import { autoFillInputs } from "@helicone/prompts";
 export class PromptManager extends BaseManager {
   async createNewPromptVersion(
     parentPromptVersionId: string,
-    params: PromptCreateSubversionParams
+    params: PromptCreateSubversionParams & { experimentId?: string }
   ): Promise<Result<PromptVersionResult, string>> {
     if (JSON.stringify(params.newHeliconeTemplate).length > 1_000_000_000) {
       return err("Helicone template too large");
@@ -53,12 +53,13 @@ export class PromptManager extends BaseManager {
       model: string;
       created_at: string;
       metadata: Record<string, any>;
+      experiment_id: string | null;
     }>(
       `
     WITH parent_prompt_version AS (
       SELECT * FROM prompts_versions WHERE id = $1
     )
-    INSERT INTO prompts_versions (prompt_v2, helicone_template, model, organization, major_version, minor_version, metadata)
+    INSERT INTO prompts_versions (prompt_v2, helicone_template, model, organization, major_version, minor_version, metadata, experiment_id)
     SELECT
         ppv.prompt_v2,
         $2, 
@@ -74,7 +75,8 @@ export class PromptManager extends BaseManager {
                 ORDER BY pv1.major_version DESC, pv1.minor_version DESC
                 LIMIT 1)
         END,
-        $6
+        $6,
+        $7
     FROM parent_prompt_version ppv
     RETURNING 
         id,
@@ -82,16 +84,17 @@ export class PromptManager extends BaseManager {
         major_version,
         helicone_template,
         prompt_v2,
-        model;
-    
+        model,
+        experiment_id;
     `,
       [
         parentPromptVersionId,
         params.newHeliconeTemplate,
         model,
         this.authParams.organizationId,
-        isMajorVersion, // New parameter for determining major/minor version
+        isMajorVersion,
         metadata,
+        params.experimentId || null,
       ]
     );
 

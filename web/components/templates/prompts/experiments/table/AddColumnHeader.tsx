@@ -21,7 +21,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "../../../../ui/scroll-area";
 import { useExperimentsStore } from "@/store/store";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { useOrg } from "@/components/layout/organizationContext";
 
@@ -58,6 +58,7 @@ const AddColumnHeader: React.FC<AddColumnHeaderProps> = ({
     useExperimentsStore();
   const [isOpen, setIsOpen] = useState(openAddExperimentModal);
   const jawn = useJawnClient();
+  const queryClient = useQueryClient();
 
   const [showSuggestionPanel, setShowSuggestionPanel] = useState(false);
   const [promptVariables, setPromptVariables] = useState<
@@ -277,39 +278,26 @@ const AddColumnHeader: React.FC<AddColumnHeaderProps> = ({
                       body: {
                         newHeliconeTemplate: JSON.stringify(promptData),
                         isMajorVersion: false,
+                        experimentId: experimentId,
                       },
                     }
                   );
+
+                  queryClient.invalidateQueries({
+                    queryKey: ["promptVersions", orgId, experimentId],
+                  });
 
                   if (result.error || !result.data) {
                     console.error(result);
                     return;
                   }
-
-                  const hypothesisResult = await jawn.POST(
-                    "/v1/experiment/hypothesis",
-                    {
-                      body: {
-                        experimentId: experimentId,
-                        model: model,
-                        promptVersion: result.data.data?.id ?? "",
-                        providerKeyId: "NOKEY",
-                        status: "RUNNING",
-                      },
-                    }
-                  );
-                  if (hypothesisResult.error || !hypothesisResult.data) {
-                    console.error(hypothesisResult);
-                    return;
-                  }
-
-                  await handleAddColumn(
-                    "Experiment",
-                    "experiment",
-                    hypothesisResult.data.data?.hypothesisId,
-                    result.data.data?.id,
-                    promptVariables.map((p) => p.original)
-                  );
+                  // await handleAddColumn(
+                  //   "Experiment",
+                  //   "experiment",
+                  //   hypothesisResult.data.data?.hypothesisId,
+                  //   result.data.data?.id,
+                  //   promptVariables.map((p) => p.original)
+                  // );
 
                   setOpenAddExperimentModal(false);
                   setIsOpen(false);

@@ -117,6 +117,7 @@ export interface PromptCreateSubversionParams {
   newHeliconeTemplate: any;
   isMajorVersion?: boolean;
   metadata?: Record<string, any>;
+  experimentId?: string;
 }
 
 export interface PromptInputRecord {

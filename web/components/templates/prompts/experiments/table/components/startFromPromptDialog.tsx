@@ -251,52 +251,51 @@ export const StartFromPromptDialog = ({
       );
       return;
     }
-    const dataset = await jawn.POST("/v1/helicone-dataset", {
-      body: {
-        datasetName: "Dataset for Experiment",
-        requestIds: [],
-      },
-    });
-    if (!dataset.data?.data?.datasetId) {
-      notification.setNotification("Failed to create dataset", "error");
-      return;
-    }
     const promptVersion = promptVersions?.find(
       (p) => p.id === selectedVersionId
     );
     const prompt = prompts?.find((p) => p.id === selectedPromptId);
 
-    const experimentTableResult = await jawn.POST("/v1/experiment/table/new", {
+    const experimentTableResult = await jawn.POST("/v2/experiment/new", {
       body: {
-        datasetId: dataset.data?.data?.datasetId!,
-        promptVersionId: selectedVersionId!,
-        newHeliconeTemplate: JSON.stringify(promptVersion?.helicone_template),
-        isMajorVersion: false,
-        promptSubversionMetadata: {
-          experimentAssigned: true,
-        },
-        experimentMetadata: {
-          prompt_id: selectedPromptId!,
-          prompt_version: selectedVersionId!,
-          experiment_name:
-            `${prompt?.user_defined_id}_V${promptVersion?.major_version}.${promptVersion?.minor_version}` ||
-            "",
-        },
-        experimentTableMetadata: {
-          datasetId: dataset.data?.data?.datasetId!,
-          model: promptVersion?.model,
-          prompt_id: selectedPromptId!,
-          prompt_version: selectedVersionId!,
-        },
+        name: `${prompt?.user_defined_id}_V${promptVersion?.major_version}.${promptVersion?.minor_version}`,
+        originalPromptVersion: selectedVersionId,
       },
     });
 
+    // const experimentTableResult = await jawn.POST("/v1/experiment/table/new", {
+    //   body: {
+    //     datasetId: dataset.data?.data?.datasetId!,
+    //     promptVersionId: selectedVersionId!,
+    //     newHeliconeTemplate: JSON.stringify(promptVersion?.helicone_template),
+    //     isMajorVersion: false,
+    //     promptSubversionMetadata: {
+    //       experimentAssigned: true,
+    //     },
+    //     experimentMetadata: {
+    //       prompt_id: selectedPromptId!,
+    //       prompt_version: selectedVersionId!,
+    //       experiment_name:
+    //         `${prompt?.user_defined_id}_V${promptVersion?.major_version}.${promptVersion?.minor_version}` ||
+    //         "",
+    //     },
+    //     experimentTableMetadata: {
+    //       datasetId: dataset.data?.data?.datasetId!,
+    //       model: promptVersion?.model,
+    //       prompt_id: selectedPromptId!,
+    //       prompt_version: selectedVersionId!,
+    //     },
+    //   },
+    // });
+
     if (experimentTableResult.error || !experimentTableResult.data) {
-      notification.setNotification("Failed to create subversion", "error");
+      notification.setNotification("Failed to create experiment", "error");
       return;
     }
 
-    router.push(`/experiments/${experimentTableResult.data?.data?.tableId}`);
+    router.push(
+      `/experiments/${experimentTableResult.data?.data?.experimentId}`
+    );
   };
 
   return (

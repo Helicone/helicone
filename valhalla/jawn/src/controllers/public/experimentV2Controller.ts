@@ -1,0 +1,180 @@
+import {
+  Body,
+  Controller,
+  Get,
+  Path,
+  Post,
+  Request,
+  Route,
+  Security,
+  Tags,
+} from "tsoa";
+import { Result } from "../../lib/shared/result";
+import { JawnAuthenticatedRequest } from "../../types/request";
+import { ExperimentV2Manager } from "../../managers/experiment/ExperimentV2Manager";
+import { Json } from "../../lib/db/database.types";
+
+export interface ExperimentV2 {
+  id: string;
+  name: string;
+  original_prompt_version: string;
+  created_at: string;
+}
+
+export interface ExperimentV2Output {
+  id: string;
+  request_id: string;
+  is_original: boolean;
+  prompt_version_id: string;
+  created_at: string;
+}
+
+export interface ExperimentV2PromptVersion {
+  created_at: string | null;
+  experiment_id: string | null;
+  helicone_template: Json | null;
+  id: string;
+  major_version: number;
+  metadata: Json | null;
+  minor_version: number;
+  model: string | null;
+  organization: string;
+  prompt_v2: string;
+  soft_delete: boolean | null;
+}
+
+export interface ExperimentV2Row {
+  id: string;
+  inputs: Record<string, string>;
+  prompt_version: string;
+  requests: ExperimentV2Output[];
+}
+
+export interface ExtendedExperimentData extends ExperimentV2 {
+  rows: ExperimentV2Row[];
+  // prompt_versions: ExperimentV2PromptVersion[];
+}
+
+@Route("v2/experiment")
+@Tags("Experiment")
+@Security("api_key")
+export class ExperimentV2Controller extends Controller {
+  @Post("/new")
+  public async createNewExperiment(
+    @Body()
+    requestBody: {
+      name: string;
+      originalPromptVersion: string;
+    },
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<{ experimentId: string }, string>> {
+    const experimentManager = new ExperimentV2Manager(request.authParams);
+    const result = await experimentManager.createNewExperiment(
+      requestBody.name,
+      requestBody.originalPromptVersion
+    );
+
+    if (result.error || !result.data) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
+    }
+    return result;
+  }
+
+  @Get("/")
+  public async getExperiments(
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<ExperimentV2[], string>> {
+    const experimentManager = new ExperimentV2Manager(request.authParams);
+    const result = await experimentManager.getExperiments();
+
+    if (result.error || !result.data) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
+    }
+    return result;
+  }
+
+  @Get("/{experimentId}")
+  public async getExperimentById(
+    @Path() experimentId: string,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<ExtendedExperimentData, string>> {
+    const experimentManager = new ExperimentV2Manager(request.authParams);
+    const result = await experimentManager.getExperimentWithRowsById(
+      experimentId
+    );
+    if (result.error || !result.data) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
+    }
+    return result;
+  }
+
+  @Get("/{experimentId}/prompt-versions")
+  public async getPromptVersionsForExperiment(
+    @Path() experimentId: string,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<ExperimentV2PromptVersion[], string>> {
+    const experimentManager = new ExperimentV2Manager(request.authParams);
+    const result = await experimentManager.getPromptVersionsForExperiment(
+      experimentId
+    );
+
+    if (result.error || !result.data) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
+    }
+    return result;
+  }
+
+  @Post("/{experimentId}/add-manual-row")
+  public async addManualRowToExperiment(
+    @Path() experimentId: string,
+    @Body() requestBody: { inputs: Record<string, string> },
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<string, string>> {
+    const experimentManager = new ExperimentV2Manager(request.authParams);
+    const result = await experimentManager.addManualRowToExperiment(
+      experimentId,
+      requestBody.inputs
+    );
+
+    if (result.error || !result.data) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
+    }
+    return result;
+  }
+
+  @Post("/{experimentId}/row/insert/batch")
+  public async createExperimentTableRowBatch(
+    @Path() experimentId: string,
+    @Body()
+    requestBody: {
+      rows: {
+        inputRecordId: string;
+        inputs: Record<string, string>;
+      }[];
+    },
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<null, string>> {
+    const experimentManager = new ExperimentV2Manager(request.authParams);
+    const result = await experimentManager.createExperimentTableRowBatch(
+      experimentId,
+      requestBody.rows
+    );
+
+    if (result.error || !result.data) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
+    }
+    return result;
+  }
+}

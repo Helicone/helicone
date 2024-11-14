@@ -443,6 +443,24 @@ export interface paths {
   "/v1/public/status/provider/{provider}": {
     get: operations["GetProviderStatus"];
   };
+  "/v2/experiment/new": {
+    post: operations["CreateNewExperiment"];
+  };
+  "/v2/experiment": {
+    get: operations["GetExperiments"];
+  };
+  "/v2/experiment/{experimentId}": {
+    get: operations["GetExperimentById"];
+  };
+  "/v2/experiment/{experimentId}/prompt-versions": {
+    get: operations["GetPromptVersionsForExperiment"];
+  };
+  "/v2/experiment/{experimentId}/add-manual-row": {
+    post: operations["AddManualRowToExperiment"];
+  };
+  "/v2/experiment/{experimentId}/row/insert/batch": {
+    post: operations["CreateExperimentTableRowBatch"];
+  };
   "/v1/settings/query": {
     get: operations["GetSettings"];
   };
@@ -1283,6 +1301,7 @@ export interface components {
       newHeliconeTemplate: unknown;
       isMajorVersion?: boolean;
       metadata?: components["schemas"]["Record_string.any_"];
+      experimentId?: string;
     };
     PromptInputRecord: {
       id: string;
@@ -2809,6 +2828,65 @@ Json: JsonObject;
     "Result_ProviderMetrics.string_": components["schemas"]["ResultSuccess_ProviderMetrics_"] | components["schemas"]["ResultError_string_"];
     /** @enum {string} */
     TimeFrame: "24h" | "7d" | "30d";
+    ExperimentV2: {
+      id: string;
+      name: string;
+      original_prompt_version: string;
+      created_at: string;
+    };
+    "ResultSuccess_ExperimentV2-Array_": {
+      data: components["schemas"]["ExperimentV2"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ExperimentV2-Array.string_": components["schemas"]["ResultSuccess_ExperimentV2-Array_"] | components["schemas"]["ResultError_string_"];
+    ExperimentV2Output: {
+      id: string;
+      request_id: string;
+      is_original: boolean;
+      prompt_version_id: string;
+      created_at: string;
+    };
+    ExperimentV2Row: {
+      id: string;
+      inputs: components["schemas"]["Record_string.string_"];
+      prompt_version: string;
+      requests: components["schemas"]["ExperimentV2Output"][];
+    };
+    ExtendedExperimentData: {
+      id: string;
+      name: string;
+      original_prompt_version: string;
+      created_at: string;
+      rows: components["schemas"]["ExperimentV2Row"][];
+    };
+    ResultSuccess_ExtendedExperimentData_: {
+      data: components["schemas"]["ExtendedExperimentData"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ExtendedExperimentData.string_": components["schemas"]["ResultSuccess_ExtendedExperimentData_"] | components["schemas"]["ResultError_string_"];
+    ExperimentV2PromptVersion: {
+      created_at: string | null;
+      experiment_id: string | null;
+      helicone_template: components["schemas"]["Json"] | null;
+      id: string;
+      /** Format: double */
+      major_version: number;
+      metadata: components["schemas"]["Json"] | null;
+      /** Format: double */
+      minor_version: number;
+      model: string | null;
+      organization: string;
+      prompt_v2: string;
+      soft_delete: boolean | null;
+    };
+    "ResultSuccess_ExperimentV2PromptVersion-Array_": {
+      data: components["schemas"]["ExperimentV2PromptVersion"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ExperimentV2PromptVersion-Array.string_": components["schemas"]["ResultSuccess_ExperimentV2PromptVersion-Array_"] | components["schemas"]["ResultError_string_"];
   };
   responses: {
   };
@@ -4499,7 +4577,10 @@ export interface operations {
   CreateNewExperiment: {
     requestBody: {
       content: {
-        "application/json": components["schemas"]["NewExperimentParams"];
+        "application/json": {
+          originalPromptVersion: string;
+          name: string;
+        };
       };
     };
     responses: {
@@ -4617,19 +4698,11 @@ export interface operations {
     };
   };
   GetExperiments: {
-    requestBody: {
-      content: {
-        "application/json": {
-          include?: components["schemas"]["IncludeExperimentKeys"];
-          filter: components["schemas"]["ExperimentFilterNode"];
-        };
-      };
-    };
     responses: {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result_Experiment-Array.string_"];
+          "application/json": components["schemas"]["Result_ExperimentV2-Array.string_"];
         };
       };
     };
@@ -5509,6 +5582,83 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_ProviderMetrics.string_"];
+        };
+      };
+    };
+  };
+  GetExperimentById: {
+    parameters: {
+      path: {
+        experimentId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ExtendedExperimentData.string_"];
+        };
+      };
+    };
+  };
+  GetPromptVersionsForExperiment: {
+    parameters: {
+      path: {
+        experimentId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ExperimentV2PromptVersion-Array.string_"];
+        };
+      };
+    };
+  };
+  AddManualRowToExperiment: {
+    parameters: {
+      path: {
+        experimentId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          inputs: components["schemas"]["Record_string.string_"];
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_string.string_"];
+        };
+      };
+    };
+  };
+  CreateExperimentTableRowBatch: {
+    parameters: {
+      path: {
+        experimentId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          rows: {
+              inputs: components["schemas"]["Record_string.string_"];
+              inputRecordId: string;
+            }[];
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
         };
       };
     };

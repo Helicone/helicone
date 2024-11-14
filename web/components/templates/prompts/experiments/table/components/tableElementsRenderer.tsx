@@ -136,7 +136,7 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
   const { data: promptTemplate } = useQuery(
     ["promptTemplate", promptVersionId],
     async () => {
-      if (!props.context.orgId || !promptVersionId) return null;
+      if (!promptVersionId) return null;
 
       const res = await jawnClient.GET("/v1/prompt/version/{promptVersionId}", {
         params: {
@@ -148,8 +148,7 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
       return res.data?.data;
     },
     {
-      enabled:
-        !!props.context.orgId && !!promptVersionId && showPromptPlayground,
+      enabled: !!promptVersionId && showPromptPlayground,
       staleTime: Infinity,
       refetchOnWindowFocus: false,
       refetchOnMount: false,

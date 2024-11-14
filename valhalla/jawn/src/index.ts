@@ -3,7 +3,11 @@ require("dotenv").config({
 });
 
 import bodyParser from "body-parser";
-import express, { NextFunction } from "express";
+import express, {
+  NextFunction,
+  Request as ExRequest,
+  Response as ExResponse,
+} from "express";
 import swaggerUi from "swagger-ui-express";
 import { proxyRouter } from "./controllers/public/proxyController";
 import {
@@ -22,6 +26,7 @@ import { initLogs } from "./utils/injectLogs";
 import { initSentry } from "./utils/injectSentry";
 import { startConsumers } from "./workers/consumerInterface";
 import { DelayedOperationService } from "./lib/shared/delayedOperationService";
+import { ValidateError } from "tsoa";
 
 export const ENVIRONMENT: "production" | "development" = (process.env
   .VERCEL_ENV ?? "development") as any;

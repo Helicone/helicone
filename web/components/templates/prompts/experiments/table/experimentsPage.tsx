@@ -100,7 +100,7 @@ const ExperimentsPage = () => {
           <div>
             <button
               className="flex flex-col items-center justify-center w-40 h-32 bg-white rounded-lg hover:bg-transparent transition-colors border-2 border-slate-100"
-              onClick={handleStartFromScratch}
+              onClick={() => {}}
             >
               <PlusIcon className="w-16 h-16 text-slate-200" />
             </button>
@@ -156,12 +156,8 @@ const ExperimentsPage = () => {
             accessorKey: "created_at",
             minSize: 100,
             accessorFn: (row) => {
-              return new Date(row.createdAt ?? 0).toLocaleString();
+              return new Date(row.created_at ?? 0).toLocaleString();
             },
-          },
-          {
-            header: "Model",
-            accessorKey: "model",
           },
         ]}
         defaultData={experiments}
@@ -169,9 +165,8 @@ const ExperimentsPage = () => {
         id="experiments"
         skeletonLoading={false}
         onRowSelect={(row) => {
-          const promptId = (row.metadata as any)?.prompt_id;
-          const promptVersion = (row.metadata as any)?.prompt_version;
-          if (promptId && promptVersion) {
+          const promptId = row.original_prompt_version;
+          if (promptId) {
             router.push(`/experiments/${row.id}`);
           }
         }}
