@@ -408,7 +408,7 @@ export const consumeScores = async () => {
 
         while (i < batch.messages.length) {
           const messagesPerMiniBatchSetting = await settingsManager.getSetting(
-            "kafka:log"
+            "kafka:score"
           );
 
           const miniBatchSize =
@@ -513,7 +513,7 @@ export const consumeScoresDlq = async () => {
 
         while (i < batch.messages.length) {
           const messagesPerMiniBatchSetting = await settingsManager.getSetting(
-            "kafka:log"
+            "kafka:dlq:score"
           );
 
           const miniBatchSize =
