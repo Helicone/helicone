@@ -328,6 +328,27 @@ export const useExperimentTable = (experimentTableId: string) => {
     },
   });
 
+  const runHypothesis = useMutation({
+    mutationFn: async ({
+      promptVersionId,
+      inputRecordId,
+    }: {
+      promptVersionId: string;
+      inputRecordId: string;
+    }) => {
+      const jawnClient = getJawnClient(orgId);
+      const res = await jawnClient.POST(
+        "/v2/experiment/{experimentId}/run-hypothesis",
+        {
+          params: { path: { experimentId: experimentTableId } },
+          body: { promptVersionId, inputRecordId },
+        }
+      );
+
+      return res.data?.data;
+    },
+  });
+
   return {
     experimentTableQuery,
     isExperimentTableLoading,
@@ -336,6 +357,7 @@ export const useExperimentTable = (experimentTableId: string) => {
     promptVersionTemplateData,
     isPromptVersionTemplateLoading,
     addExperimentTableRowInsertBatch,
+    runHypothesis,
   };
 };
 

@@ -27,6 +27,7 @@ export interface ExperimentV2Output {
   is_original: boolean;
   prompt_version_id: string;
   created_at: string;
+  input_record_id: string;
 }
 
 export interface ExperimentV2PromptVersion {
@@ -168,6 +169,27 @@ export class ExperimentV2Controller extends Controller {
     const result = await experimentManager.createExperimentTableRowBatch(
       experimentId,
       requestBody.rows
+    );
+
+    if (result.error || !result.data) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
+    }
+    return result;
+  }
+
+  @Post("/{experimentId}/run-hypothesis")
+  public async runHypothesis(
+    @Path() experimentId: string,
+    @Body() requestBody: { promptVersionId: string; inputRecordId: string },
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<string, string>> {
+    const experimentManager = new ExperimentV2Manager(request.authParams);
+    const result = await experimentManager.runHypothesis(
+      experimentId,
+      requestBody.promptVersionId,
+      requestBody.inputRecordId
     );
 
     if (result.error || !result.data) {

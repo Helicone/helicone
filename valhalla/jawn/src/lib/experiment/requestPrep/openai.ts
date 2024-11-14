@@ -71,7 +71,9 @@ function prepareRequestAnthropic(
 export function prepareRequestOpenAIOnPremFull({
   template,
   secretKey: apiKey,
-  datasetRow,
+  inputs,
+  autoInputs,
+  requestPath,
   requestId,
   columnId,
   rowIndex,
@@ -79,8 +81,8 @@ export function prepareRequestOpenAIOnPremFull({
 }: PreparedRequestArgs): PreparedRequest {
   const newRequestBody = autoFillInputs({
     template: template ?? {},
-    inputs: datasetRow.inputRecord?.inputs ?? {},
-    autoInputs: datasetRow.inputRecord?.autoInputs ?? [],
+    inputs: inputs ?? {},
+    autoInputs: autoInputs ?? [],
   });
 
   const requestBodyRemoved = removeKeysWithValue(
@@ -89,7 +91,7 @@ export function prepareRequestOpenAIOnPremFull({
   );
 
   const { url: fetchUrl, headers } = prepareRequestAzure(
-    datasetRow.inputRecord!.requestPath,
+    requestPath ?? "",
     apiKey,
     requestId,
     columnId,
@@ -107,13 +109,15 @@ export function prepareRequestOpenAIOnPremFull({
 export function prepareRequestAnthropicFull({
   template,
   secretKey: proxyKey,
-  datasetRow,
+  inputs,
+  autoInputs,
+  requestPath,
   requestId,
 }: PreparedRequestArgs): PreparedRequest {
   const newRequestBody = autoFillInputs({
     template: template ?? {},
-    inputs: datasetRow.inputRecord?.inputs ?? {},
-    autoInputs: datasetRow.inputRecord?.autoInputs ?? [],
+    inputs: inputs ?? {},
+    autoInputs: autoInputs ?? [],
   });
 
   const requestBodyRemoved = removeKeysWithValue(

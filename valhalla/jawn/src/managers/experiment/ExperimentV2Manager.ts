@@ -11,6 +11,7 @@ import {
   ExperimentV2Row,
   ExtendedExperimentData,
 } from "../../controllers/public/experimentV2Controller";
+import { run } from "../../lib/experiment/run";
 
 export class ExperimentV2Manager extends BaseManager {
   private ExperimentStore: ExperimentStore;
@@ -93,12 +94,7 @@ export class ExperimentV2Manager extends BaseManager {
     //   .eq("organization", this.authParams.organizationId);
 
     try {
-      const rows = await dbExecute<{
-        id: string;
-        inputs: Record<string, string>;
-        prompt_version: string;
-        requests: ExperimentV2Output[];
-      }>(
+      const rows = await dbExecute<ExperimentV2Row>(
         `
     SELECT 
       pir.id,
@@ -112,6 +108,7 @@ export class ExperimentV2Manager extends BaseManager {
               'request_id', eo.request_id,
               'is_original', eo.is_original,
               'prompt_version_id', eo.prompt_version_id,
+              'input_record_id', eo.input_record_id,
               'created_at', eo.created_at
             )
           )
@@ -124,25 +121,6 @@ export class ExperimentV2Manager extends BaseManager {
     WHERE pir.experiment_id = $1
         `,
         [experimentId]
-      );
-
-      console.log(
-        (
-          await dbExecute(
-            `
-    SELECT 
-      pir.id as pir_id,
-      eo.id as eo_id,
-      eo.input_record_id as eo_input_record_id,
-      pir.experiment_id as pir_experiment_id,
-      eo.experiment_id as eo_experiment_id
-    FROM prompt_input_record pir
-    LEFT JOIN experiment_output eo ON pir.id = eo.input_record_id
-    WHERE pir.experiment_id = $1
-        `,
-            [experimentId]
-          )
-        ).data
       );
 
       if (rows.error || !rows.data) {
@@ -262,6 +240,25 @@ export class ExperimentV2Manager extends BaseManager {
       return ok(null);
     } catch (e) {
       return err("Failed to create experiment table row");
+    }
+  }
+
+  async runHypothesis(
+    experimentId: string,
+    promptVersionId: string,
+    inputRecordId: string
+  ): Promise<Result<string, string>> {
+    try {
+      const result = await run(
+        experimentId,
+        promptVersionId,
+        inputRecordId,
+        this.authParams.organizationId
+      );
+
+      return result;
+    } catch (e) {
+      return err("Failed to run hypothesis");
     }
   }
 }

@@ -50,13 +50,15 @@ export async function prepareRequestAzure(
 export async function prepareRequestAzureFull({
   template,
   secretKey: apiKey,
-  datasetRow,
+  inputs,
+  autoInputs,
+  requestPath,
   requestId,
 }: PreparedRequestArgs): Promise<PreparedRequest> {
   const newRequestBody = autoFillInputs({
     template: template ?? {},
-    inputs: datasetRow.inputRecord?.inputs ?? {},
-    autoInputs: datasetRow.inputRecord?.autoInputs ?? [],
+    inputs: inputs ?? {},
+    autoInputs: autoInputs ?? [],
   });
 
   const { url: fetchUrl, headers } = await prepareRequestAzure(

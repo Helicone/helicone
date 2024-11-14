@@ -46,6 +46,7 @@ export function ExperimentTable({
       add_prompt: string;
       inputs: string;
       original: string | undefined;
+      originalInputRecordId: string | undefined;
     }>[]
   >(
     () => [
@@ -84,6 +85,7 @@ export function ExperimentTable({
         },
       },
       ...(promptVersionsData ?? []).map((pv, i) => ({
+        id: pv.id,
         header: () => (
           <CustomHeaderComponent
             displayName={`Prompt ${i + 1}`}
@@ -93,12 +95,25 @@ export function ExperimentTable({
             promptVersionTemplate={promptVersionTemplateData}
           />
         ),
-        accessorKey: `prompt_version_${pv.id}`,
+        // accessorKey: `prompt_version_${pv.id}`,
+        // accessorFn: (row) => ({
+        //   requestId: row.original[`prompt_version_${pv.id}`],
+        //   inputRecordId: row.original?.input_record_id,
+        // }),
+        // @ts-ignore
         cell: ({ row }) => {
           return (
             <HypothesisCellRenderer
-              requestId={row.original[`prompt_version_${pv.id}`] ?? ""}
+              experimentTableId={experimentTableId}
+              requestId={
+                row.original[`prompt_version_${pv.id}`]?.request_id ?? ""
+              }
+              inputRecordId={
+                row.original[`prompt_version_${pv.id}`]?.input_record_id ??
+                row.original.originalInputRecordId
+              }
               prompt={promptVersionTemplateData}
+              promptVersionId={pv.id}
               wrapText={false}
             />
           );
@@ -139,11 +154,13 @@ export function ExperimentTable({
           ...acc,
           [`prompt_version_${pv.id}`]: row.requests.find(
             (r) => r.prompt_version_id === pv.id
-          )?.request_id,
+          ),
         }),
         {}
       ),
       add_prompt: "",
+      originalInputRecordId: row.requests.find((r) => r.is_original)
+        ?.input_record_id,
     }));
   }, [experimentTableQuery?.rows, promptVersionsData]);
 

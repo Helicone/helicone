@@ -6,7 +6,10 @@ interface RunnerProps {
   headers: { [key: string]: string };
   body: any;
   requestId: string;
-  datasetRowId: string;
+  experimentId: string;
+  promptVersionId: string;
+  inputRecordId: string;
+  isOriginalRequest?: boolean;
 }
 
 interface DatabaseOperation {
@@ -18,7 +21,16 @@ async function runWithRetry(
   props: RunnerProps,
   dbOp: DatabaseOperation
 ): Promise<Result<string, string>> {
-  const { url, headers, body, requestId, datasetRowId } = props;
+  const {
+    url,
+    headers,
+    body,
+    requestId,
+    experimentId,
+    inputRecordId,
+    promptVersionId,
+    isOriginalRequest,
+  } = props;
   const response = await fetch(url, {
     method: "POST",
     headers: headers,
@@ -28,7 +40,10 @@ async function runWithRetry(
   if (response.status !== 200) {
     console.error(
       "error running operation",
-      datasetRowId,
+      experimentId,
+      inputRecordId,
+      promptVersionId,
+      isOriginalRequest,
       requestId,
       response.status
     );
@@ -59,19 +74,25 @@ async function runWithRetry(
 }
 
 export async function runHypothesis(
-  props: RunnerProps & { hypothesisId: string }
+  props: RunnerProps
 ): Promise<Result<string, string>> {
-  const { datasetRowId, requestId, hypothesisId } = props;
+  const {
+    experimentId,
+    inputRecordId,
+    requestId,
+    promptVersionId,
+    isOriginalRequest,
+  } = props;
   const dbOp: DatabaseOperation = {
     execute: async () =>
       mapPostgrestErr(
-        await supabaseServer.client
-          .from("experiment_v2_hypothesis_run")
-          .insert({
-            dataset_row: datasetRowId,
-            result_request_id: requestId,
-            experiment_hypothesis: hypothesisId,
-          })
+        await supabaseServer.client.from("experiment_output").insert({
+          experiment_id: experimentId,
+          input_record_id: inputRecordId ?? "",
+          request_id: requestId,
+          prompt_version_id: promptVersionId,
+          is_original: isOriginalRequest ?? false,
+        })
       ),
     errorMessage: "Failed to insert hypothesis run after multiple attempts",
   };
