@@ -284,7 +284,7 @@ const AddColumnHeader: React.FC<AddColumnHeaderProps> = ({
                   );
 
                   queryClient.invalidateQueries({
-                    queryKey: ["promptVersions", orgId, experimentId],
+                    queryKey: ["experimentPromptVersions", orgId, experimentId],
                   });
 
                   if (result.error || !result.data) {

@@ -1,12 +1,7 @@
 import { useOrg } from "@/components/layout/organizationContext";
 import { getJawnClient } from "../../../../../../lib/clients/jawn";
 import { placeAssetIdValues } from "../../../../../../services/lib/requestTraverseHelper";
-import {
-  QueryClient,
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export type ExperimentTable = {
   id: string;
@@ -81,139 +76,139 @@ export const fetchRequestResponseBody = async (request_response: any) => {
 // Add a new query key constant
 const CELL_RESPONSE_CACHE_KEY = "cellResponseCache";
 
-export async function getTableData({
-  experimentTableData,
-  responseBodyCache,
-  getRequestDataByIds,
-  queryClient,
-}: {
-  experimentTableData: ExperimentTable | null;
-  responseBodyCache: Record<string, any>;
-  getRequestDataByIds: (requestIds: string[]) => Promise<any[]>;
-  queryClient: QueryClient;
-}): Promise<TableRow[]> {
-  if (!experimentTableData) {
-    return [];
-  }
+// export async function getTableData({
+//   experimentTableData,
+//   responseBodyCache,
+//   getRequestDataByIds,
+//   queryClient,
+// }: {
+//   experimentTableData: ExperimentTable | null;
+//   responseBodyCache: Record<string, any>;
+//   getRequestDataByIds: (requestIds: string[]) => Promise<any[]>;
+//   queryClient: QueryClient;
+// }): Promise<TableRow[]> {
+//   if (!experimentTableData) {
+//     return [];
+//   }
 
-  const rowIndexToRow = new Map<number, TableRow>();
+//   const rowIndexToRow = new Map<number, TableRow>();
 
-  // Collect all request IDs that need to be fetched
-  const requestIdsToFetch = new Set<string>();
+//   // Collect all request IDs that need to be fetched
+//   const requestIdsToFetch = new Set<string>();
 
-  // Map to store cell info by request ID
-  const requestIdToCellInfo: Map<
-    string,
-    Array<{ rowIndex: number; columnId: string; cell: Cell }>
-  > = new Map();
+//   // Map to store cell info by request ID
+//   const requestIdToCellInfo: Map<
+//     string,
+//     Array<{ rowIndex: number; columnId: string; cell: Cell }>
+//   > = new Map();
 
-  // First pass: Collect request IDs and initialize rows and cells
-  for (const column of experimentTableData.columns) {
-    const columnId = column.id;
-    for (const cell of column.cells) {
-      const rowIndex = cell.rowIndex;
-      let row = rowIndexToRow.get(rowIndex);
-      if (!row) {
-        const newRow: TableRow = {
-          id: `row-${rowIndex}`,
-          rowIndex,
-          cells: {},
-          deleted: false,
-        };
-        rowIndexToRow.set(rowIndex, newRow);
-        row = newRow;
-      }
+//   // First pass: Collect request IDs and initialize rows and cells
+//   for (const column of experimentTableData.columns) {
+//     const columnId = column.id;
+//     for (const cell of column.cells) {
+//       const rowIndex = cell.rowIndex;
+//       let row = rowIndexToRow.get(rowIndex);
+//       if (!row) {
+//         const newRow: TableRow = {
+//           id: `row-${rowIndex}`,
+//           rowIndex,
+//           cells: {},
+//           deleted: false,
+//         };
+//         rowIndexToRow.set(rowIndex, newRow);
+//         row = newRow;
+//       }
 
-      if (cell.metadata?.deleted === true) {
-        row.deleted = true;
-      }
+//       if (cell.metadata?.deleted === true) {
+//         row.deleted = true;
+//       }
 
-      if (column.columnType === "input") {
-        // Handle input columns (collapse into 'inputs' cell as an array)
-        const inputs = cell.metadata?.inputs ?? [];
+//       if (column.columnType === "input") {
+//         // Handle input columns (collapse into 'inputs' cell as an array)
+//         const inputs = cell.metadata?.inputs ?? [];
 
-        // Store inputs in the 'inputs' cell
-        row.cells["inputs"] = {
-          cellId: cell.id,
-          value: inputs, // This should be an array of { key, value }
-          status: cell.status,
-          metadata: cell.metadata,
-        };
-      } else if (cell.value !== undefined && cell.value !== null) {
-        if (
-          (cell.metadata?.cellType === "output" &&
-            (cell.status === "initialized" || cell.status === "success")) ||
-          (cell.metadata?.cellType === "experiment" &&
-            cell.status === "success")
-        ) {
-          // Add to request IDs to fetch
-          requestIdsToFetch.add(cell.value);
-          // Map the request ID to cell info for later assignment
-          if (!requestIdToCellInfo.has(cell.value)) {
-            requestIdToCellInfo.set(cell.value, []);
-          }
-          requestIdToCellInfo
-            .get(cell.value)
-            ?.push({ rowIndex, columnId, cell });
-        } else {
-          row.cells[columnId] = {
-            cellId: cell.id,
-            value: cell.value,
-            status: cell.status,
-            metadata: cell.metadata,
-          };
-        }
-      } else {
-        row.cells[columnId] = {
-          cellId: cell.id,
-          value: null,
-          status: cell.status,
-          metadata: cell.metadata,
-        };
-      }
-    }
-  }
+//         // Store inputs in the 'inputs' cell
+//         row.cells["inputs"] = {
+//           cellId: cell.id,
+//           value: inputs, // This should be an array of { key, value }
+//           status: cell.status,
+//           metadata: cell.metadata,
+//         };
+//       } else if (cell.value !== undefined && cell.value !== null) {
+//         if (
+//           (cell.metadata?.cellType === "output" &&
+//             (cell.status === "initialized" || cell.status === "success")) ||
+//           (cell.metadata?.cellType === "experiment" &&
+//             cell.status === "success")
+//         ) {
+//           // Add to request IDs to fetch
+//           requestIdsToFetch.add(cell.value);
+//           // Map the request ID to cell info for later assignment
+//           if (!requestIdToCellInfo.has(cell.value)) {
+//             requestIdToCellInfo.set(cell.value, []);
+//           }
+//           requestIdToCellInfo
+//             .get(cell.value)
+//             ?.push({ rowIndex, columnId, cell });
+//         } else {
+//           row.cells[columnId] = {
+//             cellId: cell.id,
+//             value: cell.value,
+//             status: cell.status,
+//             metadata: cell.metadata,
+//           };
+//         }
+//       } else {
+//         row.cells[columnId] = {
+//           cellId: cell.id,
+//           value: null,
+//           status: cell.status,
+//           metadata: cell.metadata,
+//         };
+//       }
+//     }
+//   }
 
-  // Batch fetch all request data
-  const requestDataArray = await getRequestDataByIds(
-    Array.from(requestIdsToFetch)
-  );
+//   // Batch fetch all request data
+//   const requestDataArray = await getRequestDataByIds(
+//     Array.from(requestIdsToFetch)
+//   );
 
-  // Fetch response bodies
-  const responseBodies = await Promise.all(
-    requestDataArray.map(async (requestData) => {
-      const responseBody = await fetchRequestResponseBody(requestData);
-      const cacheKey = [CELL_RESPONSE_CACHE_KEY, requestData.id];
-      queryClient.setQueryData(cacheKey, responseBody);
-      return { id: requestData.request_id, responseBody };
-    })
-  );
+//   // Fetch response bodies
+//   const responseBodies = await Promise.all(
+//     requestDataArray.map(async (requestData) => {
+//       const responseBody = await fetchRequestResponseBody(requestData);
+//       const cacheKey = [CELL_RESPONSE_CACHE_KEY, requestData.id];
+//       queryClient.setQueryData(cacheKey, responseBody);
+//       return { id: requestData.request_id, responseBody };
+//     })
+//   );
 
-  // Map response bodies by request ID
-  const idToResponseBody = new Map(
-    responseBodies.map((item) => [item.id, item.responseBody])
-  );
+//   // Map response bodies by request ID
+//   const idToResponseBody = new Map(
+//     responseBodies.map((item) => [item.id, item.responseBody])
+//   );
 
-  // Second pass: Assign fetched data to cells
-  requestIdToCellInfo.forEach((cellInfos, requestId) => {
-    const responseBody = idToResponseBody.get(requestId);
-    for (const cellInfo of cellInfos) {
-      const { rowIndex, columnId, cell } = cellInfo;
-      const row = rowIndexToRow.get(rowIndex);
-      if (row) {
-        row.cells[columnId] = {
-          cellId: cell.id,
-          value: responseBody,
-          status: cell.status,
-        };
-      }
-    }
-  });
+//   // Second pass: Assign fetched data to cells
+//   requestIdToCellInfo.forEach((cellInfos, requestId) => {
+//     const responseBody = idToResponseBody.get(requestId);
+//     for (const cellInfo of cellInfos) {
+//       const { rowIndex, columnId, cell } = cellInfo;
+//       const row = rowIndexToRow.get(rowIndex);
+//       if (row) {
+//         row.cells[columnId] = {
+//           cellId: cell.id,
+//           value: responseBody,
+//           status: cell.status,
+//         };
+//       }
+//     }
+//   });
 
-  return Array.from(rowIndexToRow.values())
-    .filter((row) => !row.deleted)
-    .sort((a, b) => a.rowIndex - b.rowIndex);
-}
+//   return Array.from(rowIndexToRow.values())
+//     .filter((row) => !row.deleted)
+//     .sort((a, b) => a.rowIndex - b.rowIndex);
+// }
 
 interface UpdateExperimentCellVariables {
   cellId: string;
@@ -221,6 +216,24 @@ interface UpdateExperimentCellVariables {
   value: string;
   metadata?: Record<string, any>;
 }
+
+export const useExperimentRequestData = (requestId?: string) => {
+  const org = useOrg();
+  const orgId = org?.currentOrg?.id;
+
+  const { data: requestsData, isLoading: isRequestsLoading } = useQuery({
+    queryKey: ["experimentRequestData", orgId, requestId],
+    queryFn: async () => {
+      if (!orgId || !requestId) return null;
+      const requestsData = await getRequestDataByIds(orgId, [requestId]);
+
+      const responseBody = await fetchRequestResponseBody(requestsData?.[0]);
+      return { ...requestsData?.[0], responseBody };
+    },
+  });
+
+  return { requestsData, isRequestsLoading };
+};
 
 export const useExperimentTable = (experimentTableId: string) => {
   const org = useOrg();

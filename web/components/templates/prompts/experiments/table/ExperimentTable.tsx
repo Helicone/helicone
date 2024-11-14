@@ -1,6 +1,7 @@
 import { useExperimentTable } from "./hooks/useExperimentTable";
 import { useCallback, useMemo, useState } from "react";
 import {
+  ColumnDef,
   flexRender,
   getCoreRowModel,
   useReactTable,
@@ -20,6 +21,8 @@ import { PlusIcon } from "lucide-react";
 import { AddRowPopover } from "./components/addRowPopover";
 import ExperimentInputSelector from "../experimentInputSelector";
 import { ExperimentRandomInputSelector } from "../experimentRandomInputSelector";
+import { OriginalOutputCellRenderer } from "./cells/OriginalOutputCellRenderer";
+import { HypothesisCellRenderer } from "./cells/HypothesisCellRenderer";
 
 export function ExperimentTable({
   experimentTableId,
@@ -38,7 +41,13 @@ export function ExperimentTable({
     useState(false);
   const [showRandomInputSelector, setShowRandomInputSelector] = useState(false);
 
-  const columnDef = useMemo(
+  const columnDef = useMemo<
+    ColumnDef<{
+      add_prompt: string;
+      inputs: string;
+      original: string | undefined;
+    }>[]
+  >(
     () => [
       {
         header: () => (
@@ -64,6 +73,15 @@ export function ExperimentTable({
           />
         ),
         accessorKey: "original",
+        cell: ({ row }) => {
+          return (
+            <OriginalOutputCellRenderer
+              requestId={row.original?.original ?? ""}
+              wrapText={false}
+              prompt={promptVersionTemplateData}
+            />
+          );
+        },
       },
       ...(promptVersionsData ?? []).map((pv, i) => ({
         header: () => (
@@ -76,6 +94,15 @@ export function ExperimentTable({
           />
         ),
         accessorKey: `prompt_version_${pv.id}`,
+        cell: ({ row }) => {
+          return (
+            <HypothesisCellRenderer
+              requestId={row.original[`prompt_version_${pv.id}`] ?? ""}
+              prompt={promptVersionTemplateData}
+              wrapText={false}
+            />
+          );
+        },
       })),
       {
         header: () => (
@@ -100,37 +127,19 @@ export function ExperimentTable({
     ]
   );
 
-  console.log({
-    requests: experimentTableQuery?.rows.map((row) => row.requests),
-    rows: experimentTableQuery?.rows.map((row) => ({
-      inputs: row.inputs,
-      original: row.requests.find((r) => r.is_original)?.created_at,
-      ...(promptVersionsData ?? []).reduce(
-        (acc, pv) => ({
-          ...acc,
-          [`prompt_version_${pv.id}`]: row.requests.find(
-            (r) => r.prompt_version_id === pv.id
-          )?.created_at,
-        }),
-        {}
-      ),
-      add_prompt: "",
-    })),
-  });
-
   // Memoize the table data
   const tableData = useMemo(() => {
     if (!experimentTableQuery?.rows) return [];
 
     return experimentTableQuery.rows.map((row) => ({
       inputs: JSON.stringify(row.inputs),
-      original: row.requests.find((r) => r.is_original)?.created_at,
+      original: row.requests.find((r) => r.is_original)?.request_id,
       ...(promptVersionsData ?? []).reduce(
         (acc, pv) => ({
           ...acc,
           [`prompt_version_${pv.id}`]: row.requests.find(
             (r) => r.prompt_version_id === pv.id
-          )?.created_at,
+          )?.request_id,
         }),
         {}
       ),

@@ -146,3 +146,8 @@ grant truncate on table "public"."experiment_v3" to "service_role";
 grant update on table "public"."experiment_v3" to "service_role";
 
 
+alter table "public"."experiment_v3" add column "organization" uuid;
+
+alter table "public"."experiment_v3" add constraint "public_experiment_v3_organization_fkey" FOREIGN KEY (organization) REFERENCES organization(id) not valid;
+
+alter table "public"."experiment_v3" validate constraint "public_experiment_v3_organization_fkey"
