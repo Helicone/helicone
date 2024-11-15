@@ -1,5 +1,5 @@
 import { useExperimentTable } from "./hooks/useExperimentTable";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import {
   ColumnDef,
   flexRender,
@@ -55,6 +55,8 @@ export function ExperimentTable({
   const queryClient = useQueryClient();
   const org = useOrg();
   const orgId = org?.currentOrg?.id;
+
+  const cellRefs = useRef<Record<string, any>>({});
 
   const columnDef = useMemo<
     ColumnDef<{
@@ -125,30 +127,30 @@ export function ExperimentTable({
             promptTemplate={promptVersionTemplateData}
             onRunColumn={async () => {
               const rows = table.getRowModel().rows;
+
+              // Run each cell using its ref
               await Promise.all(
                 rows.map(async (row) => {
-                  const inputRecordId =
+                  const cellRef = cellRefs.current[`${row.id}-${pv.id}`];
+                  if (cellRef) {
                     // @ts-ignore
-                    row.original[`prompt_version_${pv.id}`]?.input_record_id ??
-                    row.original.originalInputRecordId;
-                  const res = await runHypothesis.mutateAsync({
-                    inputRecordId: inputRecordId ?? "",
-                    promptVersionId: pv.id,
-                  });
-                  if (res) {
-                    queryClient.invalidateQueries({
-                      queryKey: ["experimentTable", orgId, experimentTableId],
-                    });
+                    await cellRef.runHypothesis();
                   }
                 })
               );
             }}
+            originalPromptTemplate={promptVersionTemplateData}
           />
         ),
         // @ts-ignore
         cell: ({ row }) => {
           return (
             <HypothesisCellRenderer
+              ref={(el) => {
+                if (el) {
+                  cellRefs.current[`${row.id}-${pv.id}`] = el;
+                }
+              }}
               experimentTableId={experimentTableId}
               requestId={
                 row.original[`prompt_version_${pv.id}`]?.request_id ?? ""
