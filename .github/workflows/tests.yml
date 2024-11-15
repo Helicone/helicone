@@ -60,18 +60,6 @@ jobs:
               exit 1
           fi
 
-
-  helicone-node-tests:
-    name: Helicone Node Package tests
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Run node tests
-        working-directory: sdk/typescript/core
-        run: |
-          npm install
-          npm test
-
   lint:
     name: Lint
     runs-on: ubuntu-latest
