@@ -14,6 +14,7 @@ interface LytixModelIO {
   sessionPath: string;
   sessionName: string;
   userIdentifier: string;
+  logId: string;
 }
 
 export class LytixHandler extends AbstractLogHandler {
@@ -41,6 +42,7 @@ export class LytixHandler extends AbstractLogHandler {
       sessionName:
         context.message.log.request.properties?.["Helicone-Session-Name"] ?? "",
       userIdentifier: context.message.log.request.userId,
+      logId: context.message.log.request.id ?? "",
     });
 
     return await super.handle(context);
@@ -65,6 +67,7 @@ export class LytixHandler extends AbstractLogHandler {
             sessionId: lytixModelIO.session,
             sessionPath: lytixModelIO.sessionPath,
             sessionName: lytixModelIO.sessionName,
+            logId: lytixModelIO.logId,
           }),
         });
       } catch (error: any) {
