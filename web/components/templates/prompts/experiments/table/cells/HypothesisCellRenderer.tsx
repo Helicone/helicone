@@ -115,7 +115,7 @@ export const HypothesisCellRenderer = ({
               onClick={handleCellClick}
             >
               <div className={clsx(wrapText && "whitespace-pre-wrap")}>
-                OH {content}
+                {content}
               </div>
             </div>
           </DialogTrigger>
@@ -156,7 +156,7 @@ export const HypothesisCellRenderer = ({
               onClick={handleCellClick}
             >
               <div className={clsx(wrapText && "whitespace-pre-wrap")}>
-                AAJHAKJHJAKHKJAHKAJHAKJH {content}
+                {content}
               </div>
             </div>
           </PopoverTrigger>

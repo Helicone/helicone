@@ -23,6 +23,17 @@ import ExperimentInputSelector from "../experimentInputSelector";
 import { ExperimentRandomInputSelector } from "../experimentRandomInputSelector";
 import { OriginalOutputCellRenderer } from "./cells/OriginalOutputCellRenderer";
 import { HypothesisCellRenderer } from "./cells/HypothesisCellRenderer";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import clsx from "clsx";
+import { useQueryClient } from "@tanstack/react-query";
+import { useOrg } from "@/components/layout/organizationContext";
 
 export function ExperimentTable({
   experimentTableId,
@@ -34,12 +45,16 @@ export function ExperimentTable({
     promptVersionTemplateData,
     promptVersionsData,
     addExperimentTableRowInsertBatch,
+    runHypothesis,
   } = useExperimentTable(experimentTableId);
 
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [showExperimentInputSelector, setShowExperimentInputSelector] =
     useState(false);
   const [showRandomInputSelector, setShowRandomInputSelector] = useState(false);
+  const queryClient = useQueryClient();
+  const org = useOrg();
+  const orgId = org?.currentOrg?.id;
 
   const columnDef = useMemo<
     ColumnDef<{
@@ -60,6 +75,21 @@ export function ExperimentTable({
           />
         ),
         accessorKey: "inputs",
+        cell: ({ row }) => {
+          return (
+            <div>
+              <ul>
+                {Object.entries(JSON.parse(row.original.inputs)).map(
+                  ([key, value]) => (
+                    <li key={key}>
+                      <strong>{key}</strong>: {value?.toString().slice(0, 10)}
+                    </li>
+                  )
+                )}
+              </ul>
+            </div>
+          );
+        },
       },
       {
         header: () => (
@@ -92,14 +122,29 @@ export function ExperimentTable({
             badgeText="Output"
             badgeVariant="secondary"
             promptVersionId={pv.id}
-            promptVersionTemplate={promptVersionTemplateData}
+            promptTemplate={promptVersionTemplateData}
+            onRunColumn={async () => {
+              const rows = table.getRowModel().rows;
+              await Promise.all(
+                rows.map(async (row) => {
+                  const inputRecordId =
+                    // @ts-ignore
+                    row.original[`prompt_version_${pv.id}`]?.input_record_id ??
+                    row.original.originalInputRecordId;
+                  const res = await runHypothesis.mutateAsync({
+                    inputRecordId: inputRecordId ?? "",
+                    promptVersionId: pv.id,
+                  });
+                  if (res) {
+                    queryClient.invalidateQueries({
+                      queryKey: ["experimentTable", orgId, experimentTableId],
+                    });
+                  }
+                })
+              );
+            }}
           />
         ),
-        // accessorKey: `prompt_version_${pv.id}`,
-        // accessorFn: (row) => ({
-        //   requestId: row.original[`prompt_version_${pv.id}`],
-        //   inputRecordId: row.original?.input_record_id,
-        // }),
         // @ts-ignore
         cell: ({ row }) => {
           return (
@@ -139,6 +184,8 @@ export function ExperimentTable({
       experimentTableId,
       experimentTableQuery?.original_prompt_version,
       promptVersionTemplateData,
+      // runHypothesis,
+      // table,
     ]
   );
 
@@ -163,11 +210,23 @@ export function ExperimentTable({
         ?.input_record_id,
     }));
   }, [experimentTableQuery?.rows, promptVersionsData]);
+  // const [data, setData] = useState(tableData);
+
+  // useEffect(() => {
+  //   setData(tableData);
+  // }, [tableData]);
 
   const table = useReactTable({
     data: tableData,
     columns: columnDef,
+    defaultColumn: {
+      minSize: 20,
+      maxSize: 800,
+    },
     getCoreRowModel: getCoreRowModel(),
+    enableColumnResizing: true,
+    columnResizeMode: "onChange",
+    // columnResizeDirection: "ltr",
   });
 
   const handleAddRowInsertBatch = useCallback(
@@ -192,46 +251,82 @@ export function ExperimentTable({
   );
 
   return (
-    <div>
-      <table className="table-auto w-full">
-        <thead>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <tr key={headerGroup.id}>
-              {headerGroup.headers.map((header) => {
-                return (
-                  <th key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </th>
-                );
-              })}
-            </tr>
-          ))}
-        </thead>
-        <tbody>
-          {table.getRowModel().rows?.length ? (
-            table.getRowModel().rows.map((row) => (
-              <tr key={row.id} data-state={row.getIsSelected() && "selected"}>
-                {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </td>
-                ))}
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan={columnDef.length} className="h-24 text-center">
-                No results.
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+    <div className="max-w-[100vw] relative">
+      <div className="overflow-x-auto w-full" style={{ display: "block" }}>
+        <Table className="w-max text-[13px]" style={{ tableLayout: "fixed" }}>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id} className="whitespace-nowrap">
+                {headerGroup.headers.map((header) => {
+                  return (
+                    <TableHead
+                      style={{
+                        position: "relative",
+                        width: header.getSize(),
+                        minWidth: header.column.columnDef.minSize,
+                      }}
+                      key={header.id}
+                      className="bg-white dark:bg-neutral-950"
+                    >
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                      <button
+                        onClick={() => header.column.getToggleSortingHandler()}
+                        className="resizer absolute right-0 top-0 h-full w-4 cursor-col-resize"
+                        {...{
+                          onMouseDown: header.getResizeHandler(),
+                          onTouchStart: header.getResizeHandler(),
+                        }}
+                      >
+                        <div
+                          className={clsx(
+                            header.column.getIsResizing()
+                              ? "bg-blue-700 dark:bg-blue-300"
+                              : "bg-gray-500",
+                            "h-full w-1"
+                          )}
+                        />
+                      </button>
+                    </TableHead>
+                  );
+                })}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody className="bg-white dark:bg-neutral-950">
+            {table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell
+                  colSpan={columnDef.length}
+                  className="h-24 text-center"
+                >
+                  No results.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
       <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
         <PopoverTrigger asChild>
           <Button

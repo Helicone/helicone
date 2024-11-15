@@ -163,12 +163,11 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
   const handleRunClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (onRunColumn) {
-      await onRunColumn(props.column.colId);
+      await onRunColumn();
     }
   };
 
   //TODO: FIX!!!
-
   const hasDiff = useMemo(() => {
     return (
       (promptTemplate?.helicone_template as any)?.messages &&
@@ -184,7 +183,7 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
           onClick={handleHeaderClick}
         >
           <div className="flex items-center space-x-2">
-            <span className="text-md font-semibold text-slate-900">
+            <span className="text-md font-semibold text-slate-900 dark:text-slate-100">
               {displayName}
             </span>
           </div>
@@ -221,20 +220,13 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
             </TabsContent>
             <TabsContent value="preview">
               <PromptPlayground
-                prompt={
-                  promptTemplate?.helicone_template ??
-                  (props.hypothesis?.promptVersion?.template || "")
-                }
+                prompt={promptTemplate?.helicone_template ?? ""}
                 selectedInput={undefined}
                 onSubmit={(history, model) => {
                   setShowPromptPlayground(false);
                 }}
                 submitText="Save"
-                initialModel={
-                  promptTemplate?.model ||
-                  props.hypothesis?.promptVersion?.model ||
-                  ""
-                }
+                initialModel={promptTemplate?.model ?? ""}
                 isPromptCreatedFromUi={false}
                 defaultEditMode={false}
                 editMode={false}
@@ -243,20 +235,13 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
           </Tabs>
         ) : (
           <PromptPlayground
-            prompt={
-              promptTemplate?.helicone_template ??
-              (props.hypothesis?.promptVersion?.template || "")
-            }
+            prompt={promptTemplate?.helicone_template ?? ""}
             selectedInput={undefined}
             onSubmit={(history, model) => {
               setShowPromptPlayground(false);
             }}
             submitText="Save"
-            initialModel={
-              promptTemplate?.model ||
-              props.hypothesis?.promptVersion?.model ||
-              ""
-            }
+            initialModel={promptTemplate?.model ?? ""}
             isPromptCreatedFromUi={false}
             defaultEditMode={false}
             editMode={false}
@@ -274,7 +259,7 @@ const InputsHeaderComponent: React.FC<any> = (props) => {
   return (
     <div className="flex items-center justify-between w-full h-full pl-2 cursor-pointer">
       <div className="flex items-center space-x-2">
-        <span className="text-md font-semibold text-slate-900">
+        <span className="text-md font-semibold text-slate-900 dark:text-slate-100">
           {displayName}
         </span>
       </div>

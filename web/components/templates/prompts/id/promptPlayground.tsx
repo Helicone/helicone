@@ -88,8 +88,6 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
     });
   };
 
-  console.log("prompt playground rerenders for", prompt);
-
   const parsePromptToMessages = (
     promptInput: string | PromptObject,
     inputs?: Record<string, string>
