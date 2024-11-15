@@ -1371,7 +1371,7 @@ export interface components {
     };
     Setting: components["schemas"]["KafkaSettings"] | components["schemas"]["AzureExperiment"];
     /** @enum {string} */
-    SettingName: "kafka:dlq" | "kafka:log" | "kafka:dlq:eu" | "kafka:log:eu" | "kafka:orgs-to-dlq" | "azure:experiment";
+    SettingName: "kafka:dlq" | "kafka:log" | "kafka:score" | "kafka:dlq:score" | "kafka:dlq:eu" | "kafka:log:eu" | "kafka:orgs-to-dlq" | "azure:experiment";
     /**
      * @description The URL interface represents an object providing static methods used for creating object URLs.
      *

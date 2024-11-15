@@ -131,6 +131,8 @@
 				"enum": [
 					"kafka:dlq",
 					"kafka:log",
+					"kafka:score",
+					"kafka:dlq:score",
 					"kafka:dlq:eu",
 					"kafka:log:eu",
 					"kafka:orgs-to-dlq",
