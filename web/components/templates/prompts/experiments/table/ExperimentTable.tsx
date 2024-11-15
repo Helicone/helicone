@@ -17,7 +17,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { PlusIcon } from "lucide-react";
+import { ListIcon, PlayIcon, PlusIcon } from "lucide-react";
 import { AddRowPopover } from "./components/addRowPopover";
 import ExperimentInputSelector from "../experimentInputSelector";
 import { ExperimentRandomInputSelector } from "../experimentRandomInputSelector";
@@ -64,9 +64,42 @@ export function ExperimentTable({
       inputs: string;
       original: string | undefined;
       originalInputRecordId: string | undefined;
+      index: number;
     }>[]
   >(
     () => [
+      {
+        id: "index",
+        header: () => (
+          <div className="flex flex-row items-center space-x-2">
+            <ListIcon className="w-4 h-4" />
+          </div>
+        ),
+        accessorFn: (row) => row.index,
+        cell: ({ row }) => (
+          <div>
+            {row.original.index}
+            <Button
+              variant="ghost"
+              className="ml-2 p-0 border-slate-200 border rounded-md bg-slate-50 text-slate-500 h-[22px] w-[24px] flex items-center justify-center"
+              onClick={async () => {
+                await Promise.all(
+                  (promptVersionsData ?? []).map((pv) => {
+                    const cellRef = cellRefs.current[`${row.id}-${pv.id}`];
+                    if (cellRef) {
+                      // @ts-ignore
+                      cellRef.runHypothesis();
+                    }
+                  })
+                );
+              }}
+            >
+              <PlayIcon className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+            </Button>
+          </div>
+        ),
+        size: 5,
+      },
       {
         header: () => (
           <InputsHeaderComponent
@@ -195,7 +228,8 @@ export function ExperimentTable({
   const tableData = useMemo(() => {
     if (!experimentTableQuery?.rows) return [];
 
-    return experimentTableQuery.rows.map((row) => ({
+    return experimentTableQuery.rows.map((row, i) => ({
+      index: i + 1,
       inputs: JSON.stringify(row.inputs),
       original: row.requests.find((r) => r.is_original)?.request_id,
       ...(promptVersionsData ?? []).reduce(
