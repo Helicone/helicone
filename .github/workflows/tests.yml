@@ -183,8 +183,8 @@ jobs:
           ANTHROPIC_API_KEY: ${{ secrets.CI_ANTHROPIC_API_KEY }}
         run: |
           # pytest python_integration_tests.py
-      - name: Run helicone-python tests
-        working-directory: helicone-python
+      - name: Run examples tests
+        working-directory: examples
         env:
           HELICONE_PROXY_URL: "http://127.0.0.1:8787/v1"
           HELICONE_ASYNC_URL: "http://127.0.0.1:8788"
@@ -197,9 +197,8 @@ jobs:
           OPENAI_ORG: ${{ secrets.CI_OPENAI_ORG }}
           ANTHROPIC_API_KEY: ${{ secrets.CI_ANTHROPIC_API_KEY }}
         run: |
-          curl -sSL https://install.python-poetry.org | python3 -
-          poetry install
-          # poetry run pytest -s tests/test_async.py
+          # TODO run e2e tests from the example folder
+         
       - name: Upload logs on failure
         if: failure()
         uses: actions/upload-artifact@v3
