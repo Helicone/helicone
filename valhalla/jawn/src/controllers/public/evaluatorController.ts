@@ -38,6 +38,11 @@ export interface EvaluatorResult {
   name: string;
 }
 
+type EvaluatorExperiment = {
+  experiment_id: string;
+  experiment_created_at: string;
+};
+
 @Route("v1/evaluator")
 @Tags("Evaluator")
 @Security("api_key")
@@ -130,7 +135,7 @@ export class EvaluatorController extends Controller {
   public async getExperimentsForEvaluator(
     @Request() request: JawnAuthenticatedRequest,
     @Path() evaluatorId: string
-  ) {
+  ): Promise<Result<EvaluatorExperiment[], string>> {
     const evaluatorManager = new EvaluatorManager(request.authParams);
     const result = await evaluatorManager.getExperiments(evaluatorId);
 
