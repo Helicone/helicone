@@ -14,6 +14,7 @@ const AdminMetrics = (props: AdminStatsProps) => {
     "7 days",
     "1 month",
     "3 months",
+    "6 months",
     "12 months",
     "24 months",
   ] as const;
