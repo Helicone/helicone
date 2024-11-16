@@ -4,15 +4,21 @@ import Footer from "@/components/layout/footer";
 import NavBar from "@/components/layout/navbar";
 import { usePathname } from "next/navigation";
 
-export const Layout = ({ children }: { children: React.ReactNode }) => {
+export const Layout = ({
+  children,
+  stars,
+}: {
+  children: React.ReactNode;
+  stars: number;
+}) => {
   const path = usePathname();
-  const isExperimentsWaitlist = path.includes("experiments");
+  const showFooter = !(path.includes("experiments") || path === "/");
 
   return (
     <>
-      <NavBar />
+      <NavBar stars={stars} />
       {children}
-      {!isExperimentsWaitlist && <Footer />}
+      {showFooter && <Footer />}
     </>
   );
 };

@@ -1,0 +1,114 @@
+import { cn } from "@/lib/utils";
+import { ChevronRightIcon } from "lucide-react";
+
+const Hero = () => {
+  return (
+    <div className="flex flex-col w-full h-[calc(75vh)] justify-center px-4 sm:px-16 md:px-24 2xl:px-40 max-w-[2000px] mx-auto relative">
+      <div className="flex gap-12 items-center mb-12">
+        <div className="flex items-center gap-2 text-sm font-medium">
+          <p>Backed by</p>
+          <div className="h-5 w-5 rounded border border-[#64748B] text-slate-500 font-medium text-sm flex items-center justify-center">
+            Y
+          </div>
+          <p>Combinator</p>
+        </div>
+        <img
+          src="/static/home/productoftheday.webp"
+          alt="Product of the Day"
+          className="w-36"
+        />
+      </div>
+      <h1 className="text-5xl sm:text-7xl md:text-[84px] font-semibold mb-3 w-full max-w-3xl text-wrap text-black z-[10]">
+        Ship your AI app with <span className="text-brand">confidence</span>
+      </h1>
+      <p className="text-xl 2xl:text-2xl text-landing-secondary max-w-3xl text-wrap font-light mb-12 z-[10]">
+        The all-in-one platform to monitor, debug and improve production-ready
+        LLM applications.
+      </p>
+      <button className="bg-brand py-3 px-8 lg:py-[18px] lg:px-9 text-lg lg:text-[22px] 2xl:text-[26px] font-normal flex gap-3 rounded-lg text-white self-start items-center z-[10]">
+        Get started for free
+        <ChevronRightIcon className="w-7 h-7" strokeWidth={2.33} />
+      </button>
+
+      <LogoBox
+        imgSrc="/static/home/gemini.webp"
+        className="w-24 h-24 2xl:w-28 2xl:h-28 absolute top-20 right-1/3 2xl:translate-x-[-200px] translate-x-[-100px] rotate-[-15deg]"
+        innerClassName="bg-white"
+      />
+
+      <LogoBox
+        imgSrc="/static/home/logo2.webp"
+        className="w-[140px] h-[140px] 2xl:w-[180px] 2xl:h-[180px] absolute top-40 right-1/3 2xl:translate-x-[50px] translate-x-[80px] rotate-[13deg]"
+      />
+
+      <LogoBox
+        imgSrc="/static/home/chatgpt.webp"
+        className="w-[140px] h-[140px] 2xl:w-[180px] 2xl:h-[180px] absolute top-16 right-1/4 2xl:translate-x-[150px] translate-x-[150px] rotate-[15deg]"
+        innerClassName="bg-[#0FA37F] rounded-3xl"
+      />
+      <LogoBox
+        imgSrc="/static/home/togetherai.webp"
+        className="w-[120px] h-[120px] 2xl:w-[160px] 2xl:h-[160px] absolute top-12 right-0 2xl:-translate-x-[100px] -translate-x-[40px] rotate-[6deg]"
+        innerClassName="rounded-3xl"
+      />
+      <LogoBox
+        imgSrc="/static/home/anthropic.webp"
+        className="w-[150px] h-[150px] 2xl:w-[190px] 2xl:h-[190px] absolute bottom-20 right-1/3 2xl:translate-x-[50px] translate-x-[50px] rotate-[13deg]"
+        innerClassName="bg-white p-4"
+      />
+      <LogoBox
+        imgSrc="/static/home/mistral.webp"
+        className="w-24 h-24 2xl:w-28 2xl:h-28 absolute bottom-1/3 right-1/4 2xl:translate-x-[100px] translate-x-[100px] -rotate-[15deg]"
+        innerClassName="bg-white p-2"
+      />
+      <LogoBox
+        imgSrc="/static/home/groq.svg"
+        className="w-[120px] h-[120px] 2xl:w-[160px] 2xl:h-[160px] absolute top-1/2 2xl:-translate-y-[100px] -translate-y-[50px] right-0 2xl:-translate-x-[150px] -translate-x-[80px] rotate-[27deg]"
+        innerClassName="bg-white p-2"
+      />
+      <LogoBox
+        imgSrc="/static/home/logo3.webp"
+        className="w-28 h-28 2xl:w-32 2xl:h-32 absolute bottom-0 right-1/4 2xl:translate-x-[100px] translate-x-[180px] rotate-[-32deg]"
+        innerClassName="bg-white p-2"
+      />
+      <LogoBox
+        imgSrc="/static/home/logo4.webp"
+        className="w-20 h-20 2xl:w-24 2xl:h-24 absolute bottom-24 right-0 2xl:-translate-x-[150px] -translate-x-[60px] rotate-[-15deg]"
+      />
+    </div>
+  );
+};
+
+const LogoBox = ({
+  className,
+  innerClassName,
+  imgSrc,
+}: {
+  className?: string;
+  innerClassName?: string;
+  imgSrc: string;
+}) => {
+  return (
+    <div
+      className={cn(
+        "bg-[#E2F1FD66] rounded-3xl p-2.5 2xl:p-3.5 shadow-xl hidden lg:block",
+        className
+      )}
+    >
+      <div
+        className={cn(
+          "w-full h-full flex items-center justify-center rounded-2xl",
+          innerClassName
+        )}
+      >
+        <img
+          src={imgSrc}
+          alt="Logo"
+          className="w-full h-full object-contain rounded-2xl"
+        />
+      </div>
+    </div>
+  );
+};
+
+export default Hero;
