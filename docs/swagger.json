@@ -1751,7 +1751,10 @@
 					"latest_request_created_at": {
 						"type": "string"
 					},
-					"session": {
+					"session_id": {
+						"type": "string"
+					},
+					"session_name": {
 						"type": "string"
 					},
 					"total_cost": {
@@ -1778,7 +1781,8 @@
 				"required": [
 					"created_at",
 					"latest_request_created_at",
-					"session",
+					"session_id",
+					"session_name",
 					"total_cost",
 					"total_requests",
 					"prompt_tokens",
@@ -1823,7 +1827,7 @@
 			},
 			"SessionQueryParams": {
 				"properties": {
-					"sessionIdContains": {
+					"search": {
 						"type": "string"
 					},
 					"timeFilter": {
@@ -1843,7 +1847,7 @@
 						],
 						"type": "object"
 					},
-					"sessionName": {
+					"nameEquals": {
 						"type": "string"
 					},
 					"timezoneDifference": {
@@ -1855,9 +1859,8 @@
 					}
 				},
 				"required": [
-					"sessionIdContains",
+					"search",
 					"timeFilter",
-					"sessionName",
 					"timezoneDifference",
 					"filter"
 				],

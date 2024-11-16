@@ -649,7 +649,8 @@ const models: TsoaRoute.Models = {
         "properties": {
             "created_at": {"dataType":"string","required":true},
             "latest_request_created_at": {"dataType":"string","required":true},
-            "session": {"dataType":"string","required":true},
+            "session_id": {"dataType":"string","required":true},
+            "session_name": {"dataType":"string","required":true},
             "total_cost": {"dataType":"double","required":true},
             "total_requests": {"dataType":"double","required":true},
             "prompt_tokens": {"dataType":"double","required":true},
@@ -676,9 +677,9 @@ const models: TsoaRoute.Models = {
     "SessionQueryParams": {
         "dataType": "refObject",
         "properties": {
-            "sessionIdContains": {"dataType":"string","required":true},
+            "search": {"dataType":"string","required":true},
             "timeFilter": {"dataType":"nestedObjectLiteral","nestedProperties":{"endTimeUnixMs":{"dataType":"double","required":true},"startTimeUnixMs":{"dataType":"double","required":true}},"required":true},
-            "sessionName": {"dataType":"string","required":true},
+            "nameEquals": {"dataType":"string"},
             "timezoneDifference": {"dataType":"double","required":true},
             "filter": {"ref":"RequestFilterNode","required":true},
         },

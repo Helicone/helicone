@@ -971,7 +971,8 @@ export interface components {
     SessionResult: {
       created_at: string;
       latest_request_created_at: string;
-      session: string;
+      session_id: string;
+      session_name: string;
       /** Format: double */
       total_cost: number;
       /** Format: double */
@@ -990,14 +991,14 @@ export interface components {
     };
     "Result_SessionResult-Array.string_": components["schemas"]["ResultSuccess_SessionResult-Array_"] | components["schemas"]["ResultError_string_"];
     SessionQueryParams: {
-      sessionIdContains: string;
+      search: string;
       timeFilter: {
         /** Format: double */
         endTimeUnixMs: number;
         /** Format: double */
         startTimeUnixMs: number;
       };
-      sessionName: string;
+      nameEquals?: string;
       /** Format: double */
       timezoneDifference: number;
       filter: components["schemas"]["RequestFilterNode"];
