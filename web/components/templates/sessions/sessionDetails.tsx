@@ -1,5 +1,4 @@
 import { useRouter } from "next/router";
-import { useMemo } from "react";
 import {
   getTimeIntervalAgo,
   TimeInterval,
@@ -11,9 +10,7 @@ import ThemedTable from "../../shared/themed/table/themedTable";
 import { INITIAL_COLUMNS } from "./initialColumns";
 
 import SessionMetrics from "./SessionMetrics";
-import { PiGraphLight } from "react-icons/pi";
 import { TabsContent } from "@/components/ui/tabs";
-import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { SESSIONS_TABLE_FILTERS } from "@/services/lib/filters/frontendFilterDefs";
 import { UIFilterRowTree } from "@/services/lib/filters/uiFilterRowTree";
 
