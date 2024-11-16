@@ -711,6 +711,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          input_keys: string[] | null
           name: string
           organization: string | null
           original_prompt_version: string
@@ -718,6 +719,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          input_keys?: string[] | null
           name: string
           organization?: string | null
           original_prompt_version: string
@@ -725,13 +727,14 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          input_keys?: string[] | null
           name?: string
           organization?: string | null
           original_prompt_version?: string
         }
         Relationships: [
           {
-            foreignKeyName: "public_experiment_v3_organization_id_fkey"
+            foreignKeyName: "public_experiment_v3_organization_fkey"
             columns: ["organization"]
             isOneToOne: false
             referencedRelation: "organization"
@@ -1879,6 +1882,7 @@ export type Database = {
           minor_version: number
           model: string | null
           organization: string
+          parent_prompt_version: string | null
           prompt_v2: string
           soft_delete: boolean | null
         }
@@ -1892,6 +1896,7 @@ export type Database = {
           minor_version: number
           model?: string | null
           organization: string
+          parent_prompt_version?: string | null
           prompt_v2: string
           soft_delete?: boolean | null
         }
@@ -1905,6 +1910,7 @@ export type Database = {
           minor_version?: number
           model?: string | null
           organization?: string
+          parent_prompt_version?: string | null
           prompt_v2?: string
           soft_delete?: boolean | null
         }
@@ -1928,6 +1934,13 @@ export type Database = {
             columns: ["experiment_id"]
             isOneToOne: false
             referencedRelation: "experiment_v3"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "public_prompts_versions_parent_prompt_version_fkey"
+            columns: ["parent_prompt_version"]
+            isOneToOne: false
+            referencedRelation: "prompts_versions"
             referencedColumns: ["id"]
           },
         ]

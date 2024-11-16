@@ -118,6 +118,7 @@ export interface PromptCreateSubversionParams {
   isMajorVersion?: boolean;
   metadata?: Record<string, any>;
   experimentId?: string;
+  bumpForMajorPromptVersionId?: string;
 }
 
 export interface PromptInputRecord {

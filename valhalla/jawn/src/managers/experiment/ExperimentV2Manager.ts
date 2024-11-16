@@ -5,6 +5,7 @@ import { err, ok, Result } from "../../lib/shared/result";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { InputsManager } from "../inputs/InputsManager";
 import {
+  CreateNewPromptVersionForExperimentParams,
   ExperimentV2,
   ExperimentV2Output,
   ExperimentV2PromptVersion,
@@ -12,6 +13,9 @@ import {
   ExtendedExperimentData,
 } from "../../controllers/public/experimentV2Controller";
 import { run } from "../../lib/experiment/run";
+import { PromptManager } from "../prompt/PromptManager";
+import { PromptVersionResult } from "../../controllers/public/promptController";
+import { parseJSXObject } from "@helicone/prompts";
 
 export class ExperimentV2Manager extends BaseManager {
   private ExperimentStore: ExperimentStore;
@@ -58,17 +62,54 @@ export class ExperimentV2Manager extends BaseManager {
     originalPromptVersion: string
   ): Promise<Result<{ experimentId: string }, string>> {
     try {
+      const promptManager = new PromptManager(this.authParams);
+      const originalPromptVersionRes = await promptManager.getPromptVersions({
+        prompts_versions: {
+          id: {
+            equals: originalPromptVersion,
+          },
+        },
+      });
+
+      if (originalPromptVersionRes.error || !originalPromptVersionRes.data) {
+        return err("Failed to get original prompt version");
+      }
+
+      if (originalPromptVersionRes.data[0].minor_version !== 0) {
+        return err("Original prompt version is not a major prompt version");
+      }
+
+      const originalPromptVersionData = originalPromptVersionRes.data[0];
+
+      const inputKeys = await supabaseServer.client
+        .from("prompt_input_keys")
+        .select("key")
+        .eq("prompt_version", originalPromptVersion);
+
       const result = await supabaseServer.client
         .from("experiment_v3")
         .insert({
           name,
           original_prompt_version: originalPromptVersion,
           organization: this.authParams.organizationId,
+          input_keys: inputKeys.data?.map((key) => key.key) ?? [],
         })
         .select();
 
       if (result.error || !result.data || result.data.length === 0) {
         return err("Failed to create new experiment");
+      }
+
+      const newPromptVersion = await promptManager.createNewPromptVersion(
+        originalPromptVersion,
+        {
+          newHeliconeTemplate: originalPromptVersionData.helicone_template,
+          experimentId: result.data[0].id,
+        }
+      );
+
+      if (newPromptVersion.error || !newPromptVersion.data) {
+        return err("Failed to create new prompt version");
       }
 
       return ok({ experimentId: result.data[0].id });
@@ -142,6 +183,65 @@ export class ExperimentV2Manager extends BaseManager {
     }
   }
 
+  async createNewPromptVersionForExperiment(
+    experimentId: string,
+    requestBody: CreateNewPromptVersionForExperimentParams
+  ): Promise<Result<PromptVersionResult, string>> {
+    try {
+      const promptManager = new PromptManager(this.authParams);
+      const result = await promptManager.createNewPromptVersion(
+        requestBody.parentPromptVersionId,
+        requestBody
+      );
+
+      if (result.error || !result.data) {
+        return err("Failed to create new prompt version");
+      }
+      console.log(JSON.stringify(result.data.helicone_template));
+
+      const newPromptVersionInputKeys = Array.from(
+        JSON.stringify(result.data.helicone_template).matchAll(
+          /<helicone-prompt-input key=\\"(\w+)\\" \/>/g
+        )
+      ).map((match) => match[1]);
+      console.log(newPromptVersionInputKeys);
+
+      const existingExperimentInputKeys = await supabaseServer.client
+        .from("experiment_v3")
+        .select("input_keys")
+        .eq("id", experimentId)
+        .single();
+
+      const res = await Promise.all([
+        supabaseServer.client
+          .from("experiment_v3")
+          .update({
+            input_keys: [
+              ...new Set([
+                ...(existingExperimentInputKeys.data?.input_keys ?? []),
+                ...newPromptVersionInputKeys,
+              ]),
+            ],
+          })
+          .eq("id", experimentId),
+        dbExecute(
+          `INSERT INTO prompt_input_keys (key, prompt_version)
+       SELECT unnest($1::text[]), $2
+       ON CONFLICT (key, prompt_version) DO NOTHING`,
+          [`{${newPromptVersionInputKeys.join(",")}}`, result.data.id]
+        ),
+      ]);
+
+      if (res.some((r) => r.error)) {
+        return err("Failed to create new prompt version for experiment");
+      }
+
+      return ok(result.data);
+    } catch (e) {
+      return err("Failed to create new prompt version for experiment");
+    }
+  }
+
   async getPromptVersionsForExperiment(
     experimentId: string
   ): Promise<Result<ExperimentV2PromptVersion[], string>> {
@@ -149,7 +249,8 @@ export class ExperimentV2Manager extends BaseManager {
       .from("prompts_versions")
       .select("*")
       .eq("experiment_id", experimentId)
-      .eq("organization", this.authParams.organizationId);
+      .eq("organization", this.authParams.organizationId)
+      .order("minor_version", { ascending: true });
     return ok(promptVersions.data ?? []);
   }
 

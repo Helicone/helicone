@@ -66,8 +66,8 @@ export function ExperimentTable({
       originalInputRecordId: string | undefined;
       index: number;
     }>[]
-  >(
-    () => [
+  >(() => {
+    return [
       {
         id: "index",
         header: () => (
@@ -132,9 +132,7 @@ export function ExperimentTable({
             displayName="Original"
             badgeText="Output"
             badgeVariant="secondary"
-            promptVersionId={
-              experimentTableQuery?.original_prompt_version ?? ""
-            }
+            promptVersionId={promptVersionsData?.[0]?.id ?? ""}
             promptVersionTemplate={promptVersionTemplateData}
           />
         ),
@@ -149,31 +147,34 @@ export function ExperimentTable({
           );
         },
       },
-      ...(promptVersionsData ?? []).map((pv, i) => ({
+      ...(promptVersionsData?.slice(1) ?? []).map((pv, i) => ({
         id: pv.id,
         header: () => (
-          <CustomHeaderComponent
-            displayName={`Prompt ${i + 1}`}
-            badgeText="Output"
-            badgeVariant="secondary"
-            promptVersionId={pv.id}
-            promptTemplate={promptVersionTemplateData}
-            onRunColumn={async () => {
-              const rows = table.getRowModel().rows;
+          <>
+            {pv.id}
+            <CustomHeaderComponent
+              displayName={`Prompt ${i + 1}`}
+              badgeText="Output"
+              badgeVariant="secondary"
+              promptVersionId={pv.id}
+              promptTemplate={promptVersionTemplateData}
+              onRunColumn={async () => {
+                const rows = table.getRowModel().rows;
 
-              // Run each cell using its ref
-              await Promise.all(
-                rows.map(async (row) => {
-                  const cellRef = cellRefs.current[`${row.id}-${pv.id}`];
-                  if (cellRef) {
-                    // @ts-ignore
-                    await cellRef.runHypothesis();
-                  }
-                })
-              );
-            }}
-            originalPromptTemplate={promptVersionTemplateData}
-          />
+                // Run each cell using its ref
+                await Promise.all(
+                  rows.map(async (row) => {
+                    const cellRef = cellRefs.current[`${row.id}-${pv.id}`];
+                    if (cellRef) {
+                      // @ts-ignore
+                      await cellRef.runHypothesis();
+                    }
+                  })
+                );
+              }}
+              originalPromptTemplate={promptVersionTemplateData}
+            />
+          </>
         ),
         // @ts-ignore
         cell: ({ row }) => {
@@ -209,20 +210,21 @@ export function ExperimentTable({
             selectedProviderKey=""
             handleAddColumn={async () => {}}
             wrapText={false}
+            originalColumnPromptVersionId={promptVersionsData?.[0]?.id ?? ""}
+            experimentPromptVersions={promptVersionsData ?? []}
           />
         ),
         accessorKey: "add_prompt",
       },
-    ],
-    [
-      promptVersionsData,
-      experimentTableId,
-      experimentTableQuery?.original_prompt_version,
-      promptVersionTemplateData,
-      // runHypothesis,
-      // table,
-    ]
-  );
+    ];
+  }, [
+    promptVersionsData,
+    experimentTableId,
+    experimentTableQuery?.original_prompt_version,
+    promptVersionTemplateData,
+    // runHypothesis,
+    // table,
+  ]);
 
   // Memoize the table data
   const tableData = useMemo(() => {
@@ -232,7 +234,7 @@ export function ExperimentTable({
       index: i + 1,
       inputs: JSON.stringify(row.inputs),
       original: row.requests.find((r) => r.is_original)?.request_id,
-      ...(promptVersionsData ?? []).reduce(
+      ...(promptVersionsData?.slice(1) ?? []).reduce(
         (acc, pv) => ({
           ...acc,
           [`prompt_version_${pv.id}`]: row.requests.find(

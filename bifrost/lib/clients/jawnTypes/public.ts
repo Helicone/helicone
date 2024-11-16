@@ -418,6 +418,9 @@ export interface paths {
   "/v2/experiment/{experimentId}": {
     get: operations["GetExperimentById"];
   };
+  "/v2/experiment/{experimentId}/prompt-version": {
+    post: operations["CreateNewPromptVersionForExperiment"];
+  };
   "/v2/experiment/{experimentId}/prompt-versions": {
     get: operations["GetPromptVersionsForExperiment"];
   };
@@ -1274,6 +1277,7 @@ export interface components {
       isMajorVersion?: boolean;
       metadata?: components["schemas"]["Record_string.any_"];
       experimentId?: string;
+      bumpForMajorPromptVersionId?: string;
     };
     PromptInputRecord: {
       id: string;
@@ -2864,6 +2868,14 @@ Json: JsonObject;
       error: null;
     };
     "Result_ExtendedExperimentData.string_": components["schemas"]["ResultSuccess_ExtendedExperimentData_"] | components["schemas"]["ResultError_string_"];
+    CreateNewPromptVersionForExperimentParams: {
+      newHeliconeTemplate: unknown;
+      isMajorVersion?: boolean;
+      metadata?: components["schemas"]["Record_string.any_"];
+      experimentId?: string;
+      bumpForMajorPromptVersionId?: string;
+      parentPromptVersionId: string;
+    };
     ExperimentV2PromptVersion: {
       created_at: string | null;
       experiment_id: string | null;
@@ -5414,6 +5426,26 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_ExtendedExperimentData.string_"];
+        };
+      };
+    };
+  };
+  CreateNewPromptVersionForExperiment: {
+    parameters: {
+      path: {
+        experimentId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateNewPromptVersionForExperimentParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_PromptVersionResult.string_"];
         };
       };
     };

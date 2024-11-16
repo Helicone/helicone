@@ -22,7 +22,7 @@ import { autoFillInputs } from "@helicone/prompts";
 export class PromptManager extends BaseManager {
   async createNewPromptVersion(
     parentPromptVersionId: string,
-    params: PromptCreateSubversionParams & { experimentId?: string }
+    params: PromptCreateSubversionParams
   ): Promise<Result<PromptVersionResult, string>> {
     if (JSON.stringify(params.newHeliconeTemplate).length > 1_000_000_000) {
       return err("Helicone template too large");
@@ -58,25 +58,45 @@ export class PromptManager extends BaseManager {
       `
     WITH parent_prompt_version AS (
       SELECT * FROM prompts_versions WHERE id = $1
+    ),
+    bump_version AS (
+      SELECT major_version, minor_version 
+      FROM prompts_versions 
+      WHERE id = $8
     )
-    INSERT INTO prompts_versions (prompt_v2, helicone_template, model, organization, major_version, minor_version, metadata, experiment_id)
+    INSERT INTO prompts_versions (prompt_v2, helicone_template, model, organization, major_version, minor_version, metadata, experiment_id, parent_prompt_version)
     SELECT
         ppv.prompt_v2,
         $2, 
         $3,
         $4,
-        CASE WHEN $5 THEN ppv.major_version + 1 ELSE ppv.major_version END,
         CASE 
+          WHEN $8 IS NOT NULL AND $8 != ppv.id THEN (SELECT major_version FROM bump_version)
+          WHEN $5 THEN ppv.major_version + 1 
+          ELSE ppv.major_version 
+        END,
+        CASE 
+          WHEN $8 IS NOT NULL AND $8 != ppv.id THEN (
+            SELECT minor_version + 1
+            FROM prompts_versions pv1
+            WHERE pv1.major_version = (SELECT major_version FROM bump_version)
+            AND pv1.prompt_v2 = ppv.prompt_v2
+            ORDER BY pv1.major_version DESC, pv1.minor_version DESC
+            LIMIT 1
+          )
           WHEN $5 THEN 0
-          ELSE (SELECT minor_version + 1
-                FROM prompts_versions pv1
-                WHERE pv1.major_version = ppv.major_version
-                AND pv1.prompt_v2 = ppv.prompt_v2
-                ORDER BY pv1.major_version DESC, pv1.minor_version DESC
-                LIMIT 1)
+          ELSE (
+            SELECT minor_version + 1
+            FROM prompts_versions pv1
+            WHERE pv1.major_version = ppv.major_version
+            AND pv1.prompt_v2 = ppv.prompt_v2
+            ORDER BY pv1.major_version DESC, pv1.minor_version DESC
+            LIMIT 1
+          )
         END,
         $6,
-        $7
+        $7,
+        ppv.id
     FROM parent_prompt_version ppv
     RETURNING 
         id,
@@ -95,6 +115,7 @@ export class PromptManager extends BaseManager {
         isMajorVersion,
         metadata,
         params.experimentId || null,
+        params.bumpForMajorPromptVersionId || null,
       ]
     );
 

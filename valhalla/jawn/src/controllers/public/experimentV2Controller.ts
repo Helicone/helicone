@@ -13,6 +13,10 @@ import { Result } from "../../lib/shared/result";
 import { JawnAuthenticatedRequest } from "../../types/request";
 import { ExperimentV2Manager } from "../../managers/experiment/ExperimentV2Manager";
 import { Json } from "../../lib/db/database.types";
+import {
+  PromptCreateSubversionParams,
+  PromptVersionResult,
+} from "./promptController";
 
 export interface ExperimentV2 {
   id: string;
@@ -54,6 +58,11 @@ export interface ExperimentV2Row {
 export interface ExtendedExperimentData extends ExperimentV2 {
   rows: ExperimentV2Row[];
   // prompt_versions: ExperimentV2PromptVersion[];
+}
+
+export interface CreateNewPromptVersionForExperimentParams
+  extends PromptCreateSubversionParams {
+  parentPromptVersionId: string;
 }
 
 @Route("v2/experiment")
@@ -107,6 +116,26 @@ export class ExperimentV2Controller extends Controller {
     const result = await experimentManager.getExperimentWithRowsById(
       experimentId
     );
+    if (result.error || !result.data) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
+    }
+    return result;
+  }
+
+  @Post("/{experimentId}/prompt-version")
+  public async createNewPromptVersionForExperiment(
+    @Path() experimentId: string,
+    @Body() requestBody: CreateNewPromptVersionForExperimentParams,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<PromptVersionResult, string>> {
+    const experimentManager = new ExperimentV2Manager(request.authParams);
+    const result = await experimentManager.createNewPromptVersionForExperiment(
+      experimentId,
+      requestBody
+    );
+
     if (result.error || !result.data) {
       this.setStatus(500);
     } else {
