@@ -1,9 +1,15 @@
+import { ISLAND_WIDTH } from "@/app/page";
 import { cn } from "@/lib/utils";
 import { ChevronRightIcon } from "lucide-react";
 
 const Hero = () => {
   return (
-    <div className="flex flex-col w-full h-[calc(75vh)] justify-center px-4 sm:px-16 md:px-24 2xl:px-40 max-w-[2000px] mx-auto relative">
+    <div
+      className={cn(
+        "flex flex-col justify-center h-[calc(75vh)] relative",
+        ISLAND_WIDTH
+      )}
+    >
       <div className="flex gap-12 items-center mb-12">
         <div className="flex items-center gap-2 text-sm font-medium">
           <p>Backed by</p>
