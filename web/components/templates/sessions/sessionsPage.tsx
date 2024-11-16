@@ -58,15 +58,22 @@ const SessionsPage = (props: SessionsPageProps) => {
     end: new Date(),
   });
 
-  const [sessionIdSearch, setSessionIdSearch] = useState<string>("");
-  const [sessionNameSearch, setSessionNameSearch] = useState<string>("");
+  const [sessionIdSearch, setSessionIdSearch] = useState<string | undefined>(
+    undefined
+  );
+  const [sessionNameSearch, setSessionNameSearch] = useState<
+    string | undefined
+  >(undefined);
+
   const debouncedSessionNameSearch = useDebounce(sessionNameSearch, 500);
 
   const names = useSessionNames(debouncedSessionNameSearch ?? "");
   const allNames = useSessionNames("");
 
   const debouncedSessionIdSearch = useDebounce(sessionIdSearch, 500); // 0.5 seconds
-  const [selectedName, setSelectedName] = useState<string>("");
+  const [selectedName, setSelectedName] = useState<string | undefined>(
+    undefined
+  );
 
   const [advancedFilters, setAdvancedFilters] = useState<UIFilterRowTree>(
     getRootFilterNode()
@@ -82,12 +89,12 @@ const SessionsPage = (props: SessionsPageProps) => {
 
   const { sessions, refetch, isLoading } = useSessions(
     timeFilter,
-    debouncedSessionIdSearch,
-    selectedName,
+    debouncedSessionIdSearch ?? "",
     filterUITreeToFilterNode(
       SESSIONS_TABLE_FILTERS,
       debouncedAdvancedFilters
-    ) as any
+    ) as any,
+    selectedName
   );
 
   const org = useOrg();
@@ -118,19 +125,17 @@ const SessionsPage = (props: SessionsPageProps) => {
         isWithinIsland={true}
         title={<div className="flex items-center gap-2 ml-8">Sessions</div>}
         actions={
-          selectedName && (
-            <TabsList className="grid w-full grid-cols-2 mr-8">
-              {TABS.map((tab) => (
-                <TabsTrigger
-                  key={tab.id}
-                  value={tab.id}
-                  className="flex items-center gap-2"
-                >
-                  {tab.label}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          )
+          <TabsList className="grid w-full grid-cols-2 mr-8">
+            {TABS.map((tab) => (
+              <TabsTrigger
+                key={tab.id}
+                value={tab.id}
+                className="flex items-center gap-2"
+              >
+                {tab.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
         }
       />
       {org?.currentOrg?.tier === "free" && (
@@ -154,10 +159,8 @@ const SessionsPage = (props: SessionsPageProps) => {
           <Row className="border-t border-slate-200 dark:border-slate-800">
             <SessionNameSelection
               sessionNameSearch={sessionNameSearch}
-              setSessionNameSearch={setSessionNameSearch}
-              sessionIdSearch={sessionIdSearch}
-              setSessionIdSearch={setSessionIdSearch}
               selectedName={selectedName}
+              setSessionNameSearch={setSessionNameSearch}
               setSelectedName={setSelectedName}
               sessionNames={names.sessions}
             />
@@ -168,7 +171,7 @@ const SessionsPage = (props: SessionsPageProps) => {
                   (session) => session.name === selectedName
                 ) ?? null
               }
-              sessionIdSearch={sessionIdSearch}
+              sessionIdSearch={sessionIdSearch ?? ""}
               setSessionIdSearch={setSessionIdSearch}
               sessions={sessions}
               isLoading={isLoading}
