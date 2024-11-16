@@ -35,7 +35,7 @@ const Prototype = () => {
     <div className=" bg-gradient-to-b from-white from-50% via-[#f2f9fc80] via-[61%] to-[#f2f9fc]">
       <div className={cn(ISLAND_WIDTH, "py-12")}>
         <div className="bg-white rounded-[20px] p-3 border border-[#D1D5DC] aspect-[2/1] shadow-md">
-          <div className="w-full h-full bg-[#f8fafc] border border-[#f0f0f0] rounded-xl grid grid-cols-6">
+          <div className="hidden lg:grid w-full h-full bg-[#f8fafc] border border-[#f0f0f0] rounded-xl grid-cols-6">
             <PrototypeSidebar
               openedPage={openedPage}
               setOpenedPage={setOpenedPage}
@@ -47,6 +47,13 @@ const Prototype = () => {
                 className="w-full h-full object-contain"
               />
             </div>
+          </div>
+          <div className="block lg:hidden">
+            <img
+              src="/static/home/dashboard_with_sidebar.png"
+              alt="dashboard"
+              className="w-full h-full object-contain"
+            />
           </div>
         </div>
       </div>
@@ -62,7 +69,7 @@ const PrototypeSidebar = ({
   setOpenedPage: (page: "dashboard" | "requests" | "sessions") => void;
 }) => {
   return (
-    <div className="bg-white border-r border-[#e5e7eb] h-full flex-1 rounded-l-xl">
+    <div className="bg-white border-r border-[#e5e7eb] h-full flex-1 rounded-l-xl overflow-y-auto">
       <div className="w-full flex flex-col h-full border-r dark:border-slate-800">
         <div className="flex-grow overflow-y-auto pb-14">
           <div className="flex items-center justify-between gap-2 h-14 border-b dark:border-slate-800 mx-1">

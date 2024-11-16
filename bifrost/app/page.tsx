@@ -1,3 +1,4 @@
+import Companies from "@/components/home/Companies";
 import Hero from "@/components/home/Hero";
 import Prototype from "@/components/home/Prototype";
 
@@ -10,6 +11,7 @@ export default function Home() {
       <div className="max-w-8xl mx-auto">
         <Hero />
         <Prototype />
+        <Companies />
       </div>
     </main>
   );
