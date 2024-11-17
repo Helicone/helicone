@@ -1,6 +1,7 @@
 import Companies from "@/components/home/Companies";
 import Hero from "@/components/home/Hero";
 import Prototype from "@/components/home/Prototype";
+import Quote from "@/components/home/Quote";
 
 export const ISLAND_WIDTH =
   " w-full px-4 sm:px-16 md:px-24 2xl:px-40 max-w-[2000px] mx-auto";
@@ -12,6 +13,7 @@ export default function Home() {
         <Hero />
         <Prototype />
         <Companies />
+        <Quote />
       </div>
     </main>
   );
