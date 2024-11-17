@@ -2,6 +2,7 @@ import Companies from "@/components/home/Companies";
 import Hero from "@/components/home/Hero";
 import Prototype from "@/components/home/Prototype";
 import Quote from "@/components/home/Quote";
+import Integrations from "@/components/templates/landing/integrations";
 
 export const ISLAND_WIDTH =
   " w-full px-4 sm:px-16 md:px-24 2xl:px-40 max-w-[2000px] mx-auto";
@@ -14,6 +15,7 @@ export default function Home() {
         <Prototype />
         <Companies />
         <Quote />
+        <Integrations />
       </div>
     </main>
   );
