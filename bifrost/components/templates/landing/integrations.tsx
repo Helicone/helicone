@@ -1,6 +1,6 @@
 "use client";
 
-import { ISLAND_WIDTH } from "@/app/page";
+import { ISLAND_WIDTH } from "@/lib/utils";
 import { DiffHighlight } from "@/components/shared/diffHighlight";
 import { cn } from "@/lib/utils";
 import { ArrowUpRightIcon, ClipboardIcon } from "@heroicons/react/24/outline";

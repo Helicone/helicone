@@ -1,6 +1,6 @@
 "use client";
 
-import { ISLAND_WIDTH } from "@/app/page";
+import { ISLAND_WIDTH } from "@/lib/utils";
 // import { humanReadableNumber } from "@/app/utils/formattingUtils";
 import { cn } from "@/lib/utils";
 import { ArrowUpRightIcon } from "lucide-react";

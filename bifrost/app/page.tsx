@@ -17,9 +17,6 @@ import Stats from "@/components/home/Stats";
 import Footer from "@/components/layout/footer";
 import Integrations from "@/components/templates/landing/integrations";
 
-export const ISLAND_WIDTH =
-  " w-full px-4 sm:px-16 md:px-24 2xl:px-40 max-w-[2000px] mx-auto";
-
 export default async function Home() {
   const response = await fetch(
     "https://api.helicone.ai/v1/public/dataisbeautiful/total-values",

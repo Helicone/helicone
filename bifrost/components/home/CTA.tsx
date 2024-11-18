@@ -5,7 +5,7 @@ import { Button } from "../ui/button";
 import Link from "next/link";
 import LogoBox from "./LogoBox";
 import { useState } from "react";
-import { ISLAND_WIDTH } from "@/app/page";
+import { ISLAND_WIDTH } from "@/lib/utils";
 import Image from "next/image";
 
 const CTA = () => {

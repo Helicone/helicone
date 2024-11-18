@@ -1,7 +1,7 @@
 import { ArrowUpRightIcon } from "lucide-react";
 import { Button } from "../ui/button";
 import { cn } from "@/lib/utils";
-import { ISLAND_WIDTH } from "@/app/page";
+import { ISLAND_WIDTH } from "@/lib/utils";
 
 const Production = () => {
   return (

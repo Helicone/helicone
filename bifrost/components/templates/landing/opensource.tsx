@@ -4,7 +4,7 @@ import Link from "next/link";
 import ContributorsImg from "@/public/static/contributors.png";
 import DeployImg from "@/public/static/deploy-cube.png";
 import { cn } from "@/lib/utils";
-import { ISLAND_WIDTH } from "@/app/page";
+import { ISLAND_WIDTH } from "@/lib/utils";
 
 export default function OpenSource() {
   return (

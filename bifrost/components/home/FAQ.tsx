@@ -1,4 +1,4 @@
-import { ISLAND_WIDTH } from "@/app/page";
+import { ISLAND_WIDTH } from "@/lib/utils";
 
 import { cn } from "@/lib/utils";
 import {

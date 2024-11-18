@@ -1,6 +1,6 @@
 "use client";
 
-import { ISLAND_WIDTH } from "@/app/page";
+import { ISLAND_WIDTH } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { Button, buttonVariants } from "../ui/button";
