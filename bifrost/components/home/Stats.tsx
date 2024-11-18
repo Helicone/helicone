@@ -54,16 +54,16 @@ const Stats = ({
       <div
         className={cn(
           ISLAND_WIDTH,
-          "flex justify-between items-start  pt-12 py-24"
+          "flex justify-between items-start pt-12 py-24"
         )}
       >
-        <div className="flex flex-col text-6xl font-semibold leading-normal text-black">
-          <div className="flex gap-8">
+        <div className="flex flex-wrap flex-col text-3xl md:text-6xl font-semibold leading-normal text-black">
+          <div className="flex flex-wrap gap-x-3 md:gap-x-8">
             <h1>Today,</h1>
             <div
               ref={elementRef}
               className={cn(
-                "bg-[#E7F6FD] border-4 border-brand rounded-xl py-1 px-7 text-brand translate-y-[-10px] transition-transform duration-500",
+                "bg-[#E7F6FD] border-4 border-brand rounded-xl py-1 px-7 text-brand translate-y-[-10px] transition-transform duration-500 text-nowrap",
                 isVisible ? "rotate-[-3deg]" : "rotate-[0deg]"
               )}
             >
@@ -84,7 +84,7 @@ const Stats = ({
             and <span className="text-brand">18.3 million</span> users tracked
           </h1>
         </div>
-        <a href="https://us.helicone.ai/open-stats">
+        <a href="https://us.helicone.ai/open-stats" className="hidden xl:block">
           <ArrowUpRightIcon
             className="w-10 h-10 text-landing-secondary"
             strokeWidth={2}

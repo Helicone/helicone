@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const animatedStyles = {
   transform: "translateY(0px)",
@@ -56,12 +56,39 @@ const DashboardBig = () => {
   useIntersectionAnimation(rect5Ref, 400);
   useIntersectionAnimation(rect6Ref, 500);
 
+  // Add state for window width
+  const [windowWidth, setWindowWidth] = useState(0);
+
+  // Add resize handler
+  useEffect(() => {
+    // Set initial width (safely)
+    if (typeof window !== "undefined") {
+      setWindowWidth(window.innerWidth);
+    }
+
+    // Handle resize
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+
+    // Add event listener
+    window.addEventListener("resize", handleResize);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
   return (
     <>
       <svg
         // width="1514"
         // height="909"
-        className="w-full translate-y-[-100px] "
+        className="w-full"
+        style={{
+          transform: `translateY(${windowWidth >= 768 ? "-100px" : "0"})`,
+        }}
         viewBox="0 0 1514 909"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"

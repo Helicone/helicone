@@ -10,17 +10,17 @@ import {
 
 const FAQ = () => {
   return (
-    <div className={cn(ISLAND_WIDTH, "pt-20 pb-14")}>
-      <div className="flex flex-col gap-10">
-        <h2 className="text-5xl font-semibold text-black">
+    <div className={cn(ISLAND_WIDTH, "pt-14 sm:pt-20 pb-12 md:pb-14")}>
+      <div className="flex flex-col gap-6 md:gap-10">
+        <h2 className="text-4xl sm:text-5xl font-semibold text-black">
           Questions &amp; Answers
         </h2>
         <Accordion type="multiple">
           <AccordionItem value="item-1" className="border-b-0">
-            <AccordionTrigger className="text-slate-500 text-lg font-medium">
+            <AccordionTrigger className="text-slate-500 text-base sm:text-lg font-medium text-left">
               Is there an impact to the latency of the calls to LLM?
             </AccordionTrigger>
-            <AccordionContent className="text-[#ACB3BA] text-lg font-normal">
+            <AccordionContent className="text-[#ACB3BA] text-base sm:text-lg font-normal">
               There are two ways to interface with Helicone - Proxy and Async.
               You can integrate with Helicone using the async integration to
               ensure zero propagation delay, or choose proxy for the simplest
@@ -29,10 +29,10 @@ const FAQ = () => {
             </AccordionContent>
           </AccordionItem>
           <AccordionItem value="item-2" className="border-b-0">
-            <AccordionTrigger className="text-slate-500 text-lg font-medium">
+            <AccordionTrigger className="text-slate-500 text-base sm:text-lg font-medium text-left">
               I don't want to use Helicone's Proxy, can I still use Helicone?
             </AccordionTrigger>
-            <AccordionContent className="text-[#ACB3BA] text-lg font-medium">
+            <AccordionContent className="text-[#ACB3BA] text-base sm:text-lg font-medium">
               Yes, you can still use Helicone to log your requests using the
               Helicone SDK's Async Integration without proxying. However, it's
               worth noting that thousands of companies use our proxy in
@@ -44,10 +44,10 @@ const FAQ = () => {
             </AccordionContent>
           </AccordionItem>
           <AccordionItem value="item-3" className="border-b-0">
-            <AccordionTrigger className="text-slate-500 text-lg font-medium">
+            <AccordionTrigger className="text-slate-500 text-base sm:text-lg font-medium text-left">
               How do you calculate the cost of LLM requests?{" "}
             </AccordionTrigger>
-            <AccordionContent className="text-[#ACB3BA] text-lg font-medium">
+            <AccordionContent className="text-[#ACB3BA] text-base sm:text-lg font-medium">
               We use the usage tag returned by OpenAI, Anthropic, and other
               providers to calculate the cost of LLM requests. For more details,
               see How we calculate costs.

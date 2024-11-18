@@ -308,16 +308,16 @@ const Experiment = () => {
   return (
     <div className={cn(ISLAND_WIDTH, "pt-28")}>
       <div className="flex flex-col gap-14">
-        <div className="grid grid-cols-1 md:grid-cols-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-y-8">
           <div className="flex flex-col gap-9 z-[10]">
             <div className="flex items-center gap-2.5">
-              <p className="text-xl">03</p>
-              <div className="text-lg font-medium text-slate-700">
+              <p className="text-base sm:text-xl">03</p>
+              <div className="text-base sm:text-lg font-medium text-slate-700">
                 Experiment
               </div>
             </div>
             <div className="flex flex-col gap-6">
-              <h2 className="font-semibold text-5xl leading-[120%] max-w-[600px] text-wrap text-black">
+              <h2 className="font-semibold text-4xl sm:text-5xl leading-[120%] max-w-[600px] text-wrap text-black">
                 Push <span className="text-brand">high-quality</span> prompt
                 changes to production
               </h2>

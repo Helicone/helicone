@@ -3,10 +3,10 @@ import { cn } from "@/lib/utils";
 
 const Quote = () => {
   return (
-    <div className="bg-[#f2f9fc] pt-12 pb-48 px-16">
+    <div className="bg-[#f2f9fc] pt-12 pb-20 lg:pb-48 lg:px-16">
       <div className={cn(ISLAND_WIDTH)}>
-        <div className="flex justify-between items-end">
-          <h2 className="text-lg md:text-[40px] tracking-tight leading-normal md:leading-[52px] font-semibold text-[#ACB3BA] max-w-[780px] text-wrap mr-20">
+        <div className="flex flex-col gap-y-9 lg:flex-row justify-between items-start lg:items-end">
+          <h2 className="text-2xl md:text-[40px] tracking-tight leading-normal md:leading-[52px] font-semibold text-[#ACB3BA] lg:max-w-[780px] text-wrap mr-20">
             The ability to test prompt variations on production traffic without
             touching a line of code is magical.{" "}
             <span className="text-black">
@@ -14,7 +14,11 @@ const Quote = () => {
             </span>
           </h2>
           <div className="flex flex-col gap-3">
-            <img src="/static/qawolf.webp" alt="qawolf" className="w-36" />
+            <img
+              src="/static/qawolf.webp"
+              alt="qawolf"
+              className="w-20 sm:w-36"
+            />
             <div className="flex items-center gap-6">
               <img
                 src="/static/home/nishantshukla.webp"
@@ -22,8 +26,10 @@ const Quote = () => {
                 className="w-12 h-12"
               />
               <div className="flex flex-col gap-1">
-                <h4 className="text-xl font-medium">Nishant Shukla</h4>
-                <p className="text-lg">Sr. Director of AI</p>
+                <h4 className="text-[13px] sm:text-xl font-medium">
+                  Nishant Shukla
+                </h4>
+                <p className="text-[11px] sm:text-lg">Sr. Director of AI</p>
               </div>
             </div>
           </div>

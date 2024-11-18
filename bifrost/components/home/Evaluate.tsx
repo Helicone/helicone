@@ -12,13 +12,15 @@ const Evaluate = () => {
     <div className="w-full pr-4 sm:pr-16 md:pr-24 2xl:pr-40 max-w-[2000px] mx-auto pt-28">
       <div className="grid grid-cols-1 md:grid-cols-2">
         <EvaluateSVG />
-        <div className="flex flex-col items-end gap-9">
+        <div className="flex flex-col items-start md:items-end gap-3 md:gap-9 order-1 md:order-2 pl-4 md:pl-0">
           <div className="flex items-center gap-2.5">
-            <p className="text-xl">02</p>
-            <div className="text-lg font-medium text-slate-700">Evaluate</div>
+            <p className="text-base sm:text-xl">02</p>
+            <div className="text-base sm:text-lg font-medium text-slate-700">
+              Evaluate
+            </div>
           </div>
-          <div className="flex flex-col items-end gap-6 text-right">
-            <h2 className="font-semibold text-5xl leading-[120%] max-w-[600px] text-wrap text-black">
+          <div className="flex flex-col items-start md:items-end gap-6 text-left md:text-right">
+            <h2 className="font-semibold text-4xl sm:text-5xl leading-[120%] max-w-[600px] text-wrap text-black">
               <span className="text-brand">Prevent regression</span> and improve
               quality over-time
             </h2>

@@ -319,18 +319,18 @@ self.model = AzureChatOpenAI(
   const currentCodeBlock = selectedProvider?.integrations[currentIntegration];
 
   return (
-    <div className={cn(ISLAND_WIDTH, "py-32 flex flex-col gap-8")}>
-      <div className="flex justify-between items-center">
+    <div className={cn(ISLAND_WIDTH, "py-16 md:py-32 flex flex-col gap-8")}>
+      <div className="flex flex-col lg:flex-row gap-y-8 justify-between items-center">
         <div className="flex flex-col gap-3">
-          <h2 className="text-5xl font-semibold text-black">
+          <h2 className="text-3xl sm:text-5xl font-semibold text-black">
             Get integrated in <span className="text-brand">seconds</span>
           </h2>
-          <p className="text-xl text-landing-description">
+          <p className="text-lg sm:text-xl text-landing-description">
             Use any model and monitor applications at any scale.{" "}
           </p>
         </div>
         <div className="flex flex-col items-end gap-1">
-          <div className="flex">
+          <div className="flex flex-wrap">
             {PROVIDERS.map((provider) => (
               <div
                 key={provider.name}

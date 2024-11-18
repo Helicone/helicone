@@ -14,7 +14,7 @@ const CTA = () => {
   return (
     <div className="bg-[#F2F9FC] h-[80vh] relative overflow-hidden flex flex-col">
       <div
-        className="absolute inset-0 w-full h-full z-[0]"
+        className="hidden md:blockabsolute inset-0 w-full h-full z-[0]"
         style={{
           backgroundImage: "url(/static/home/cta-bg.webp)",
           backgroundSize: "cover",
@@ -22,8 +22,27 @@ const CTA = () => {
           backgroundRepeat: "no-repeat",
         }}
       ></div>
-      <div className="flex flex-col justify-center items-center gap-12 z-[1] h-full w-full">
-        <div className="flex flex-col items-center text-5xl font-semibold text-slate-500 leading-snug z-[1]">
+
+      <div className="flex flex-col justify-center items-center gap-6 md:gap-12 z-[10] h-full w-full relative">
+        <div
+          className="block md:hidden absolute inset-0 w-full h-full z-[0]"
+          style={{
+            backgroundImage: "url(/static/home/cta-mobile.png)",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat",
+          }}
+        ></div>
+        <div
+          className="block md:hidden absolute inset-0 w-full h-full z-[1]"
+          style={{
+            backgroundImage: "url(/static/home/cta-mobile.png)",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat",
+          }}
+        ></div>
+        <div className="flex flex-col items-center text-4xl md:text-5xl font-semibold text-slate-500 leading-snug z-[10]">
           <div className="flex gap-3 items-center">
             <div
               className={cn(
@@ -40,7 +59,7 @@ const CTA = () => {
         <Link href="https://us.helicone.ai/signup" className="z-[10]">
           <Button
             size="lg"
-            className="text-[40px] py-12 bg-brand hover:bg-brand/90 text-white font-normal rounded-2xl z-[10]"
+            className="text-base md:text-[40px] py-[10px] md:py-12 px-4 md:px-8 bg-brand hover:bg-brand/90 text-white font-normal rounded-lg md:rounded-2xl z-[10]"
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
           >
@@ -51,28 +70,28 @@ const CTA = () => {
       <div
         className={cn(
           ISLAND_WIDTH,
-          "z-[10] flex justify-between items-center mb-11"
+          "z-[10] flex flex-col md:flex-row justify-between items-start md:items-center gap-y-6 md:gap-y-0 mt-11 md:mt-0 mb-11"
         )}
       >
-        <p className="font-medium text-xl">We protect your data.</p>
+        <p className="font-medium text-sm md:text-xl">We protect your data.</p>
         <div className="flex items-center gap-12">
-          <div className="flex items-center gap-3">
+          <div className="flex flex-col md:flex-row items-center gap-3">
             <Image
               src="/static/home/soc2.webp"
               alt="SOC 2"
               width={48}
               height={48}
             />
-            <p className="text-sm">SOC2 Certified</p>
+            <p className="text-xs md:text-sm">SOC2 Certified</p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-col md:flex-row items-center gap-3">
             <Image
               src="/static/home/hipaa.webp"
               alt="HIPAA"
               width={48}
               height={48}
             />
-            <p className="text-sm">HIPAA Compliant</p>
+            <p className="text-xs md:text-sm">HIPAA Compliant</p>
           </div>
         </div>
       </div>

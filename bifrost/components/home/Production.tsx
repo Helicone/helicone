@@ -5,21 +5,23 @@ import { ISLAND_WIDTH } from "@/app/page";
 
 const Production = () => {
   return (
-    <div className={cn(ISLAND_WIDTH, "pt-28")}>
-      <div className="flex flex-col items-end gap-9">
+    <div className={cn(ISLAND_WIDTH, "pt-28 pb-12 sm:pb-0")}>
+      <div className="flex flex-col items-start md:items-end gap-3 md:gap-9">
         <div className="flex items-center gap-2.5">
-          <p className="text-xl">04</p>
-          <div className="text-lg font-medium text-slate-700">Production</div>
+          <p className="text-base sm:text-xl">04</p>
+          <div className="text-base sm:text-lg font-medium text-slate-700">
+            Deploy
+          </div>
         </div>
-        <div className="flex flex-col items-end gap-6 text-right">
-          <h2 className="font-semibold text-5xl leading-[120%] max-w-[800px] text-wrap text-black">
+        <div className="flex flex-col items-start md:items-end gap-6 text-left md:text-right">
+          <h2 className="font-semibold text-4xl sm:text-5xl leading-[120%] max-w-[800px] text-wrap text-black">
             Turn complexity and abstraction to{" "}
             <span className="text-brand">actionable insights</span>
           </h2>
-          {/* <p className="text-lg max-w-[520px]">
-            Monitor performance in real-time and catch regressions
-            pre-deployment with LLM-as-a-judge or custom evals
-          </p> */}
+          <p className="text-base sm:text-lg max-w-[520px]">
+            Unified insights across all providers to quickly detect
+            hallucinations, abuse and performance issues.
+          </p>
         </div>
         <div className="flex gap-3 items-center">
           <a

@@ -3,10 +3,11 @@ import { cn } from "@/lib/utils";
 
 const Quote3 = () => {
   return (
-    <div className="bg-gradient-to-b from-white to-[#F2F9FC] pt-10 pb-40">
+    <div className="bg-white sm:bg-gradient-to-b sm:from-white sm:to-[#F2F9FC] pt-10 pb-20 sm:pb-40">
       <div className={cn(ISLAND_WIDTH)}>
-        <div className="flex justify-between items-end">
-          <h2 className="text-lg md:text-[40px] tracking-tight leading-normal md:leading-[52px] font-semibold text-[#ACB3BA] max-w-[780px] text-wrap mr-20">
+        <div className="flex flex-col gap-y-9 lg:flex-row justify-between items-start lg:items-end">
+          <h2 className="text-2xl md:text-[40px] tracking-tight leading-normal md:leading-[52px] font-semibold text-[#ACB3BA] lg:max-w-[780px] text-wrap mr-20">
+            {" "}
             Thank you for an{" "}
             <span className="text-black">
               excellent observability platform!
@@ -22,8 +23,10 @@ const Quote3 = () => {
                 className="w-12 h-12"
               />
               <div className="flex flex-col gap-1">
-                <h4 className="text-xl font-medium">Hassan El Mghari</h4>
-                <p className="text-lg">Devrel Lead</p>
+                <h4 className="text-[13px] sm:text-xl font-medium">
+                  Hassan El Mghari
+                </h4>
+                <p className="text-[11px] sm:text-lg">Devrel Lead</p>
               </div>
             </div>
           </div>

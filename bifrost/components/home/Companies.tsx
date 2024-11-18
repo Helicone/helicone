@@ -6,7 +6,7 @@ const Companies = () => {
   return (
     <div className="bg-[#f2f9fc] pb-12">
       <div className={cn(ISLAND_WIDTH, "flex flex-col gap-4 ")}>
-        <ul className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-8 md:gap-12 px-4 md:px-8 grayscale opacity-40 items-center">
+        <ul className="grid grid-cols-4 lg:grid-cols-8 gap-8 md:gap-12 px-4 md:px-8 grayscale opacity-40 items-center">
           {(
             [
               ["/static/qawolf.webp", "qawolf", 99, 33],

@@ -2,7 +2,7 @@ const EvaluateSVG = () => (
   <svg
     // width="850"
     // height="697"
-    className="w-full h-full"
+    className="w-full h-full order-2 md:order-1"
     viewBox="0 0 850 697"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"

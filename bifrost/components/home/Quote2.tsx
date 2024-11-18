@@ -8,11 +8,12 @@ import { useState } from "react";
 const Quote2 = () => {
   const [isQuestionOpen, setIsQuestionOpen] = useState(false);
   return (
-    <div className="flex flex-col items-center gap-12 mb-36">
-      <h2 className="text-lg md:text-[40px] tracking-tight leading-normal md:leading-[52px] font-semibold text-[#ACB3BA] max-w-[816px] text-wrap text-center">
-        “Probably{" "}
+    <div className="flex flex-col items-center gap-y-9 gap-x-12 mb-16 md:mb-36 px-4 sm:px-16 md:px-0">
+      <h2 className="text-2xl md:text-[40px] tracking-tight leading-normal md:leading-[52px] font-semibold text-[#ACB3BA] max-w-[816px] text-wrap text-left md:text-center">
+        <span className="hidden md:inline">“</span>Probably{" "}
         <span className="text-black">the most impactful one-line change</span>{" "}
-        I’ve seen applied to our codebase.”
+        I&apos;ve seen applied to our codebase.
+        <span className="hidden md:inline">”</span>
       </h2>
 
       <div
@@ -28,7 +29,7 @@ const Quote2 = () => {
             isQuestionOpen && "justify-between"
           )}
         >
-          <p className="text-lg">
+          <p className="text-sm sm:text-lg">
             What if I don’t want Helicone to be in my critical path.{" "}
           </p>
           <div className="transition-transform duration-300">
@@ -48,7 +49,7 @@ const Quote2 = () => {
           )}
         >
           <div className="overflow-hidden">
-            <p className="text-lg text-[#ACB3BA]">
+            <p className="text-sm sm:text-lg text-[#ACB3BA]">
               There are two ways to interface with Helicone - Proxy and Async.
               You can integrate with Helicone using the async integration to
               ensure zero propagation delay, or choose proxy for the simplest

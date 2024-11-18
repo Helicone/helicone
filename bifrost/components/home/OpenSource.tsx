@@ -191,14 +191,18 @@ const OpenSource = async () => {
     <div className={cn(ISLAND_WIDTH, "flex flex-col gap-12 pt-32 pb-20")}>
       <div className="flex justify-between items-end">
         <div className="flex flex-col gap-4">
-          <h2 className="font-semibold text-5xl leading-[120%]  text-black">
+          <h2 className="font-semibold text-4xl sm:text-5xl leading-[120%]  text-black">
             Proudly <span className="text-brand">open-source</span>
           </h2>
-          <p className="text-xl">
+          <p className="text-base sm:text-xl">
             We value transparency and we believe in the power of community.
           </p>
         </div>
-        <a href="https://github.com/helicone/helicone" target="_blank">
+        <a
+          href="https://github.com/helicone/helicone"
+          target="_blank"
+          className="hidden sm:block"
+        >
           <div className="flex items-center">
             <Button
               className="flex items-center gap-2 rounded-r-none border border-slate-200 text-landing-description"
@@ -228,10 +232,10 @@ const OpenSource = async () => {
       <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
         <div className="col-span-1 md:col-span-3 p-6 bg-slate-50 rounded-xl border border-slate-200 flex flex-col gap-9">
           <div className="flex flex-col gap-2">
-            <h3 className="text-2xl font-semibold text-black">
+            <h3 className="text-xl sm:text-2xl font-semibold text-black">
               Join our community
             </h3>
-            <p className="text-lg">
+            <p className="text-base sm:text-lg">
               Come say hi to us on{" "}
               <a
                 href="https://discord.com/invite/2TkeWdXNPQ"
@@ -245,7 +249,7 @@ const OpenSource = async () => {
             <a
               href="https://github.com/helicone/helicone"
               target="_blank"
-              className="text-brand text-lg font-medium flex items-center gap-1"
+              className="text-brand text-base sm:text-lg font-medium flex items-center gap-1"
             >
               Fork Helicone
               <ArrowUpRightIcon className="w-4 h-4" />
@@ -255,17 +259,17 @@ const OpenSource = async () => {
         </div>
         <div className="col-span-1 md:col-span-3  bg-slate-50 rounded-xl border border-slate-200 flex flex-col gap-9">
           <div className="flex flex-col gap-2 p-6">
-            <h3 className="text-2xl font-semibold text-black">
+            <h3 className="text-xl sm:text-2xl font-semibold text-black">
               Deploy on-prem
             </h3>
-            <p className="text-lg">
+            <p className="text-base sm:text-lg">
               Cloud-host or deploy on-prem with our production-ready HELM chart
               for maximum security. Chat with us about other options.
             </p>
             <Link
               href="/contact"
               target="_blank"
-              className="text-brand text-lg font-medium flex items-center gap-1"
+              className="text-brand text-base sm:text-lg font-medium flex items-center gap-1"
             >
               Get in touch
               <ArrowUpRightIcon className="w-4 h-4" />
@@ -286,13 +290,13 @@ const OpenSource = async () => {
                 target="_blank"
                 className="flex items-center gap-2"
               >
-                <h3 className="text-2xl font-semibold text-black">
+                <h3 className="text-xl sm:text-2xl font-semibold text-black">
                   API Cost Calculator
                 </h3>
                 <ArrowUpRightIcon className="w-4 h-4 text-brand" />
               </Link>
             </div>
-            <p className="text-lg max-w-[486px] text-wrap">
+            <p className="text-base sm:text-lg max-w-[486px] text-wrap">
               Compare LLM costs with the largest open-source API pricing
               database with 300+ models and providers such as OpenAI, Anthropic
               and more.
@@ -311,13 +315,13 @@ const OpenSource = async () => {
                 target="_blank"
                 className="flex items-center gap-2"
               >
-                <h3 className="text-2xl font-semibold text-black">
+                <h3 className="text-xl sm:text-2xl font-semibold text-black">
                   Open Stats
                 </h3>
                 <ArrowUpRightIcon className="w-4 h-4 text-brand" />
               </Link>
             </div>
-            <p className="text-lg max-w-[380px] text-wrap">
+            <p className="text-base sm:text-lg max-w-[380px] text-wrap">
               The largest public AI conversation datasets consisting of all of
               Helicone’s LLM usage data. All anonymized.
             </p>

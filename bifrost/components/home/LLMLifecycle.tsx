@@ -2345,13 +2345,18 @@ const LLMLifecycle = () => {
             "radial-gradient(353.66% 90.59% at 17.8% 43.09%, #F1F5F9 0%, rgba(241, 245, 249, 0.60) 44%, rgba(241, 245, 249, 0.20) 100%)",
         }}
       ></div>
-      <div className={cn(ISLAND_WIDTH, "py-36 grid grid-cols-2 relative z-10")}>
+      <div
+        className={cn(
+          ISLAND_WIDTH,
+          "py-16 md:py-36 grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-16 relative z-10"
+        )}
+      >
         <div className="flex flex-col flex-1 gap-6">
-          <h2 className="text-5xl font-semibold text-black max-w-[520px] text-wrap leading-[57.6px]">
+          <h2 className="text-4xl sm:text-5xl font-semibold text-black max-w-[520px] text-wrap sm:leading-[57.6px]">
             Designed for the{" "}
             <span className="text-brand">entire LLM lifecycle</span>
           </h2>
-          <p className="text-xl max-w-[480px] leading-relaxed text-wrap">
+          <p className="text-lg sm:text-xl max-w-[480px] leading-relaxed text-wrap">
             The CI workflow to take your LLM application from MVP to production,
             and from production to perfection.
           </p>
