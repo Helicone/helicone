@@ -11,8 +11,8 @@ const Hero = () => {
         ISLAND_WIDTH
       )}
     >
-      <div className="flex gap-12 items-center mb-12">
-        <div className="flex items-center gap-2 text-sm font-medium">
+      <div className="flex flex-wrap gap-x-12 items-center mb-12">
+        <div className="flex items-center gap-2 text-sm font-medium whitespace-nowrap">
           <p>Backed by</p>
           <div className="h-5 w-5 rounded border border-[#64748B] text-slate-500 font-medium text-sm flex items-center justify-center">
             Y
@@ -22,19 +22,22 @@ const Hero = () => {
         <img
           src="/static/home/productoftheday.webp"
           alt="Product of the Day"
-          className="w-36"
+          className="w-36 h-auto"
         />
       </div>
       <h1 className="text-5xl sm:text-7xl md:text-[84px] font-semibold mb-3 w-full max-w-3xl text-wrap text-black z-[10]">
         Ship your AI app with <span className="text-brand">confidence</span>
       </h1>
-      <p className="text-xl 2xl:text-2xl text-landing-secondary max-w-3xl text-wrap font-light mb-12 z-[10]">
+      <p className="text-lg sm:text-xl 2xl:text-2xl text-landing-secondary max-w-3xl text-wrap font-light mb-12 z-[10]">
         The all-in-one platform to monitor, debug and improve production-ready
         LLM applications.
       </p>
-      <button className="bg-brand py-3 px-8 lg:py-[18px] lg:px-9 text-lg lg:text-[22px] 2xl:text-[26px] font-normal flex gap-3 rounded-lg text-white self-start items-center z-[10]">
+      <button className="bg-brand py-3 px-6 lg:py-[18px] lg:px-9 text-base lg:text-[22px] 2xl:text-[26px] font-normal flex gap-3 rounded-lg text-white self-start items-center z-[10]">
         Get started for free
-        <ChevronRightIcon className="w-7 h-7" strokeWidth={2.33} />
+        <ChevronRightIcon
+          className="w-5 sm:w-7 h-5 sm:h-7"
+          strokeWidth={2.33}
+        />
       </button>
 
       <LogoBox
