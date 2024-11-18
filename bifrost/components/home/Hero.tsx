@@ -22,7 +22,7 @@ const Hero = () => {
         <img
           src="/static/home/productoftheday.webp"
           alt="Product of the Day"
-          className="w-36 h-auto"
+          className="w-32 h-auto"
         />
       </div>
       <h1 className="text-5xl sm:text-7xl md:text-[84px] font-semibold mb-3 w-full max-w-3xl text-wrap text-black z-[10]">
