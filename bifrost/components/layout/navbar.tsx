@@ -27,7 +27,7 @@ const MobileHeader = (props: {
         "w-full grid grid-cols-8 max-w-6xl items-center py-3 " + props.className
       }
     >
-      <div className="flex items-center col-span-7 md:col-span-1 order-1">
+      <div className="flex items-center col-span-7 lg:col-span-1 order-1">
         <Link href="/" className="-m-1.5">
           <span className="sr-only">Helicone</span>
           <Image
@@ -38,7 +38,7 @@ const MobileHeader = (props: {
             height={150}
             width={150}
             priority={true}
-            className="w-auto h-auto md:block hidden"
+            className="w-auto h-auto lg:block hidden"
           />
           <Image
             src={"/static/logo.svg"}
@@ -48,12 +48,12 @@ const MobileHeader = (props: {
             height={150}
             width={150}
             priority={true}
-            className="block md:hidden"
+            className="block lg:hidden"
           />
         </Link>
       </div>
       <button
-        className="transform scale-[90 %] flex flex-col gap-1 items-end justify-end gap-x-2 col-span-1 order-2 md:order-3"
+        className="transform scale-[90 %] flex flex-col gap-1 items-end justify-end gap-x-2 col-span-1 order-2 lg:order-3"
         onClick={() => {
           setMenuOpen(!menuOpen);
         }}
@@ -106,7 +106,7 @@ const NavLinks = () => {
     },
   ];
   return (
-    <div className="flex gap-x-2 flex-col md:flex-row">
+    <div className="flex gap-x-2 flex-col lg:flex-row">
       {links.map((link, i) => (
         <Link
           href={link.href}
@@ -176,7 +176,7 @@ const MobileNav = () => {
     setMenuOpen(false);
   }, [path]);
   return (
-    <nav className="md:hidden" aria-label="Global">
+    <nav className="lg:hidden" aria-label="Global">
       <MobileHeader menuDispatch={[menuOpen, setMenuOpen]} className="px-10" />
       {menuOpen && (
         <div className="absolute top-0 right-0 bottom-0 left-0 z-10 h-screen w-full flex flex-col px-10 bg-white gap-5 ">
@@ -208,10 +208,10 @@ const NavBar = (props: NavBarProps) => {
     <div className="bg-white top-0 sticky z-30 border-b border-gray-200">
       <MobileNav />
       <nav
-        className="gap-x-3 mx-auto md:flex sm:px-16 md:px-24 2xl:px-40 max-w-[2000px] items-center py-3 hidden justify-between"
+        className="gap-x-3 mx-auto lg:flex sm:px-16 lg:px-24 2xl:px-40 max-w-[2000px] items-center py-3 hidden justify-between"
         aria-label="Global"
       >
-        <div className="flex items-center md:col-span-1 order-1">
+        <div className="flex items-center lg:col-span-1 order-1">
           <Link href="/" className="-m-1.5 w-[154px]">
             <span className="sr-only">Helicone</span>
             <Image
@@ -222,7 +222,7 @@ const NavBar = (props: NavBarProps) => {
               height={150}
               width={150}
               priority={true}
-              className="w-auto h-auto md:block hidden"
+              className="w-auto h-auto lg:block hidden"
             />
             <Image
               src={"/static/logo.svg"}
@@ -232,11 +232,11 @@ const NavBar = (props: NavBarProps) => {
               height={150}
               width={150}
               priority={true}
-              className="block md:hidden"
+              className="block lg:hidden"
             />
           </Link>
         </div>
-        <div className="w-full mt-4 md:mt-0 flex gap-x-1 items-center text-sm col-span-8 md:col-span-6 order-3 md:order-2 justify-between">
+        <div className="w-full mt-4 lg:mt-0 flex gap-x-1 items-center text-sm col-span-8 lg:col-span-6 order-3 lg:order-2 justify-between">
           <NavLinks />
           <div className="flex items-center gap-x-3">
             <a
