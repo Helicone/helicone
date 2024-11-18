@@ -30,17 +30,19 @@ const FAQ = () => {
           </AccordionItem>
           <AccordionItem value="item-2" className="border-b-0">
             <AccordionTrigger className="text-slate-500 text-base sm:text-lg font-medium text-left">
-              I don't want to use Helicone's Proxy, can I still use Helicone?
+              I don&apos;t want to use Helicone&apos;s Proxy, can I still use
+              Helicone?
             </AccordionTrigger>
             <AccordionContent className="text-[#ACB3BA] text-base sm:text-lg font-medium">
               Yes, you can still use Helicone to log your requests using the
-              Helicone SDK's Async Integration without proxying. However, it's
-              worth noting that thousands of companies use our proxy in
-              production with high reliability. We leverage Cloudflare's global
-              network to ensure minimal latency and maximum uptime. If you have
-              concerns about using our proxy in your critical path, we have a
-              detailed documentation on our availability and reliability that
-              addresses common concerns and explains our robust infrastructure.
+              Helicone SDK&apos;s Async Integration without proxying. However,
+              it&apos;s worth noting that thousands of companies use our proxy
+              in production with high reliability. We leverage Cloudflare&apos;s
+              global network to ensure minimal latency and maximum uptime. If
+              you have concerns about using our proxy in your critical path, we
+              have a detailed documentation on our availability and reliability
+              that addresses common concerns and explains our robust
+              infrastructure.
             </AccordionContent>
           </AccordionItem>
           <AccordionItem value="item-3" className="border-b-0">
