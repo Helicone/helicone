@@ -2388,7 +2388,7 @@ const LLMLifecycle = () => {
       <div
         className="absolute inset-0 w-full h-full z-[1]"
         style={{
-          backgroundImage: "url(/static/home/grid.png",
+          backgroundImage: "url(/static/home/grid.png)",
           backgroundSize: "contain",
           backgroundPosition: "center",
           backgroundRepeat: "repeat",
