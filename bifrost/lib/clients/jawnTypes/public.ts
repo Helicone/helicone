@@ -2833,6 +2833,7 @@ Json: JsonObject;
       id: string;
       name: string;
       original_prompt_version: string;
+      input_keys: string[];
       created_at: string;
     };
     "ResultSuccess_ExperimentV2-Array_": {
@@ -2859,6 +2860,7 @@ Json: JsonObject;
       id: string;
       name: string;
       original_prompt_version: string;
+      input_keys: string[];
       created_at: string;
       rows: components["schemas"]["ExperimentV2Row"][];
     };

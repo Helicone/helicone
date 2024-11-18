@@ -18,6 +18,8 @@ import React from "react";
 import useNotification from "../../../../../shared/notification/useNotification";
 import InputEditorDrawer from "./inputEditorDrawer";
 import ArrayDiffViewer from "../../../id/arrayDiffViewer";
+import { Badge } from "@/components/ui/badge";
+import { BadgeProps } from "@/components/ui/badge";
 
 export interface InputEntry {
   key: string;
@@ -252,17 +254,14 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
   );
 };
 
-const InputsHeaderComponent: React.FC<any> = (props) => {
-  const { displayName, badgeText, badgeVariant, onRunColumn, onHeaderClick } =
-    props;
-
+const InputsHeaderComponent = ({ inputs }: { inputs: string[] }) => {
   return (
-    <div className="flex items-center justify-between w-full h-full pl-2 cursor-pointer">
-      <div className="flex items-center space-x-2">
-        <span className="text-md font-semibold text-slate-900 dark:text-slate-100">
-          {displayName}
-        </span>
-      </div>
+    <div className="flex flex-col gap-y-2">
+      {inputs?.map((input) => (
+        <Badge variant="helicone" key={input}>
+          {input}
+        </Badge>
+      ))}
     </div>
   );
 };
@@ -335,6 +334,7 @@ const RowNumberCellRenderer: React.FC<any> = (props) => {
     </div>
   );
 };
+
 export {
   InputCellRenderer,
   CustomHeaderComponent,

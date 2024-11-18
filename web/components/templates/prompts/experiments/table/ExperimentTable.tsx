@@ -34,6 +34,11 @@ import {
 import clsx from "clsx";
 import { useQueryClient } from "@tanstack/react-query";
 import { useOrg } from "@/components/layout/organizationContext";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable";
 
 export function ExperimentTable({
   experimentTableId,
@@ -52,9 +57,8 @@ export function ExperimentTable({
   const [showExperimentInputSelector, setShowExperimentInputSelector] =
     useState(false);
   const [showRandomInputSelector, setShowRandomInputSelector] = useState(false);
-  const queryClient = useQueryClient();
-  const org = useOrg();
-  const orgId = org?.currentOrg?.id;
+
+  const [rightPanel, setRightPanel] = useState<React.ReactNode | null>(null);
 
   const cellRefs = useRef<Record<string, any>>({});
 
@@ -65,6 +69,9 @@ export function ExperimentTable({
       original: string | undefined;
       originalInputRecordId: string | undefined;
       index: number;
+      [key: `prompt_version_${string}`]:
+        | { request_id: string; input_record_id: string }
+        | undefined;
     }>[]
   >(() => {
     return [
@@ -101,41 +108,46 @@ export function ExperimentTable({
         size: 5,
       },
       {
-        header: () => (
-          <InputsHeaderComponent
-            displayName="Inputs"
-            badgeText="Input"
-            columnName="Inputs"
-            type="input"
-          />
-        ),
-        accessorKey: "inputs",
-        cell: ({ row }) => {
-          return (
-            <div>
-              <ul>
-                {Object.entries(JSON.parse(row.original.inputs)).map(
-                  ([key, value]) => (
-                    <li key={key}>
-                      <strong>{key}</strong>: {value?.toString().slice(0, 10)}
-                    </li>
-                  )
-                )}
-              </ul>
-            </div>
-          );
-        },
+        id: "inputs-upper",
+        header: () => <div>Inputs</div>,
+        columns: [
+          {
+            header: () => (
+              <InputsHeaderComponent
+                inputs={experimentTableQuery?.input_keys ?? []}
+              />
+            ),
+            accessorKey: "inputs",
+            cell: ({ row }) => {
+              return (
+                <div>
+                  <ul>
+                    {Object.entries(JSON.parse(row.original.inputs)).map(
+                      ([key, value]) => (
+                        <li key={key}>
+                          <strong>{key}</strong>:{" "}
+                          {value?.toString().slice(0, 10)}
+                        </li>
+                      )
+                    )}
+                  </ul>
+                </div>
+              );
+            },
+          },
+        ],
       },
       {
-        header: () => (
-          <CustomHeaderComponent
-            displayName="Original"
-            badgeText="Output"
-            badgeVariant="secondary"
-            promptVersionId={promptVersionsData?.[0]?.id ?? ""}
-            promptVersionTemplate={promptVersionTemplateData}
-          />
-        ),
+        header: "Original",
+        // header: () => (
+        //   <CustomHeaderComponent
+        //     displayName="Original"
+        //     badgeText="Output"
+        //     badgeVariant="secondary"
+        //     promptVersionId={promptVersionsData?.[0]?.id ?? ""}
+        //     promptVersionTemplate={promptVersionTemplateData}
+        //   />
+        // ),
         accessorKey: "original",
         cell: ({ row }) => {
           return (
@@ -147,59 +159,72 @@ export function ExperimentTable({
           );
         },
       },
-      ...(promptVersionsData?.slice(1) ?? []).map((pv, i) => ({
-        id: pv.id,
-        header: () => (
-          <>
-            {pv.id}
-            <CustomHeaderComponent
-              displayName={`Prompt ${i + 1}`}
-              badgeText="Output"
-              badgeVariant="secondary"
-              promptVersionId={pv.id}
-              promptTemplate={promptVersionTemplateData}
-              onRunColumn={async () => {
-                const rows = table.getRowModel().rows;
+      ...(promptVersionsData?.slice(1) ?? []).map(
+        (
+          pv,
+          i
+        ): ColumnDef<{
+          add_prompt: string;
+          inputs: string;
+          original: string | undefined;
+          originalInputRecordId: string | undefined;
+          index: number;
+          [key: `prompt_version_${string}`]:
+            | { request_id: string; input_record_id: string }
+            | undefined;
+        }> => ({
+          id: pv.id,
+          header: `Prompt ${i + 1}`,
+          // header: () => (
+          //   <CustomHeaderComponent
+          //     displayName={`Prompt ${i + 1}`}
+          //     badgeText="Output"
+          //     badgeVariant="secondary"
+          //     promptVersionId={pv.id}
+          //     promptTemplate={promptVersionTemplateData}
+          //     onRunColumn={async () => {
+          //       const rows = table.getRowModel().rows;
 
-                // Run each cell using its ref
-                await Promise.all(
-                  rows.map(async (row) => {
-                    const cellRef = cellRefs.current[`${row.id}-${pv.id}`];
-                    if (cellRef) {
-                      // @ts-ignore
-                      await cellRef.runHypothesis();
-                    }
-                  })
-                );
-              }}
-              originalPromptTemplate={promptVersionTemplateData}
-            />
-          </>
-        ),
-        // @ts-ignore
-        cell: ({ row }) => {
-          return (
-            <HypothesisCellRenderer
-              ref={(el) => {
-                if (el) {
-                  cellRefs.current[`${row.id}-${pv.id}`] = el;
+          //       // Run each cell using its ref
+          //       await Promise.all(
+          //         rows.map(async (row) => {
+          //           const cellRef = cellRefs.current[`${row.id}-${pv.id}`];
+          //           if (cellRef) {
+          //             // @ts-ignore
+          //             await cellRef.runHypothesis();
+          //           }
+          //         })
+          //       );
+          //     }}
+          //     originalPromptTemplate={promptVersionTemplateData}
+          //   />
+          // ),
+          // @ts-ignore
+          cell: ({ row }) => {
+            return (
+              <HypothesisCellRenderer
+                ref={(el) => {
+                  if (el) {
+                    cellRefs.current[`${row.id}-${pv.id}`] = el;
+                  }
+                }}
+                experimentTableId={experimentTableId}
+                requestId={
+                  row.original[`prompt_version_${pv.id}`]?.request_id ?? ""
                 }
-              }}
-              experimentTableId={experimentTableId}
-              requestId={
-                row.original[`prompt_version_${pv.id}`]?.request_id ?? ""
-              }
-              inputRecordId={
-                row.original[`prompt_version_${pv.id}`]?.input_record_id ??
-                row.original.originalInputRecordId
-              }
-              prompt={promptVersionTemplateData}
-              promptVersionId={pv.id}
-              wrapText={false}
-            />
-          );
-        },
-      })),
+                inputRecordId={
+                  row.original[`prompt_version_${pv.id}`]?.input_record_id ??
+                  row.original.originalInputRecordId ??
+                  ""
+                }
+                prompt={promptVersionTemplateData}
+                promptVersionId={pv.id}
+                wrapText={false}
+              />
+            );
+          },
+        })
+      ),
       {
         header: () => (
           <AddColumnHeader
@@ -258,8 +283,9 @@ export function ExperimentTable({
     data: tableData,
     columns: columnDef,
     defaultColumn: {
-      minSize: 20,
+      minSize: 10,
       maxSize: 800,
+      size: 500,
     },
     getCoreRowModel: getCoreRowModel(),
     enableColumnResizing: true,
@@ -289,118 +315,152 @@ export function ExperimentTable({
   );
 
   return (
-    <div className="max-w-[100vw] relative">
-      <div className="overflow-x-auto w-full" style={{ display: "block" }}>
-        <Table className="w-max text-[13px]" style={{ tableLayout: "fixed" }}>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id} className="whitespace-nowrap">
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead
-                      style={{
-                        position: "relative",
-                        width: header.getSize(),
-                        minWidth: header.column.columnDef.minSize,
-                      }}
-                      key={header.id}
-                      className="bg-white dark:bg-neutral-950"
+    <ResizablePanelGroup direction="horizontal">
+      <ResizablePanel defaultSize={75}>
+        <div className="h-full flex flex-col border-b divide-y divide-slate-300 dark:divide-slate-700">
+          <div className="h-full overflow-x-auto bg-slate-100 dark:bg-slate-800">
+            <div className="bg-slate-50 dark:bg-black rounded-sm h-full">
+              <Table
+                className="w-full bg-white dark:bg-black"
+                style={{ tableLayout: "fixed" }}
+              >
+                <TableHeader>
+                  {table.getHeaderGroups().map((headerGroup) => (
+                    <TableRow
+                      key={headerGroup.id}
+                      className="sticky top-0 bg-slate-50 dark:bg-slate-900 shadow-sm"
                     >
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                      <button
-                        onClick={() => header.column.getToggleSortingHandler()}
-                        className="resizer absolute right-0 top-0 h-full w-4 cursor-col-resize"
-                        {...{
-                          onMouseDown: header.getResizeHandler(),
-                          onTouchStart: header.getResizeHandler(),
-                        }}
-                      >
-                        <div
+                      {headerGroup.headers.map((header, index) => (
+                        <TableHead
+                          key={header.id}
+                          style={{
+                            position: "relative",
+                            width: header.getSize(),
+                            minWidth: header.column.columnDef.minSize,
+                          }}
                           className={clsx(
-                            header.column.getIsResizing()
-                              ? "bg-blue-700 dark:bg-blue-300"
-                              : "bg-gray-500",
-                            "h-full w-1"
+                            "bg-white dark:bg-neutral-950 relative",
+                            index === headerGroup.headers.length - 1 &&
+                              "border-r border-slate-300 dark:border-slate-700"
                           )}
-                        />
-                      </button>
-                    </TableHead>
-                  );
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody className="bg-white dark:bg-neutral-950">
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
+                        >
+                          {header.isPlaceholder
+                            ? null
+                            : flexRender(
+                                header.column.columnDef.header,
+                                header.getContext()
+                              )}
+                          <div
+                            className="resizer absolute right-0 top-0 h-full w-4 cursor-col-resize"
+                            {...{
+                              onMouseDown: header.getResizeHandler(),
+                              onTouchStart: header.getResizeHandler(),
+                            }}
+                          >
+                            <div
+                              className={clsx(
+                                "h-full w-1",
+                                header.column.getIsResizing()
+                                  ? "bg-blue-700 dark:bg-blue-300"
+                                  : "bg-gray-500"
+                              )}
+                            />
+                          </div>
+                          {index < headerGroup.headers.length - 1 && (
+                            <div className="absolute top-0 right-0 h-full w-px bg-slate-300 dark:bg-slate-700" />
+                          )}
+                          <div className="absolute bottom-0 left-0 right-0 h-[0.5px] bg-slate-300 dark:bg-slate-700" />
+                        </TableHead>
+                      ))}
+                    </TableRow>
                   ))}
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columnDef.length}
-                  className="h-24 text-center"
-                >
-                  No results.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
-      <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="self-start flex flex-row space-x-2 text-slate-700 mt-0"
-          >
-            <PlusIcon className="h-4 w-4" />
-            Add row
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-full px-2 py-2">
-          <AddRowPopover
-            setPopoverOpen={setPopoverOpen}
-            setShowExperimentInputSelector={setShowExperimentInputSelector}
-            setShowRandomInputSelector={setShowRandomInputSelector}
-            handleAddRow={() => {}}
+                </TableHeader>
+                <TableBody className="text-[13px]">
+                  {table.getRowModel().rows?.length ? (
+                    table.getRowModel().rows.map((row) => (
+                      <TableRow
+                        key={row.id}
+                        data-state={row.getIsSelected() && "selected"}
+                      >
+                        {row.getVisibleCells().map((cell) => (
+                          <TableCell key={cell.id}>
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext()
+                            )}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell
+                        colSpan={columnDef.length}
+                        className="h-24 text-center"
+                      >
+                        No results.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
+
+          <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="self-start flex flex-row space-x-2 text-slate-700 mt-0"
+              >
+                <PlusIcon className="h-4 w-4" />
+                Add row
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-full px-2 py-2">
+              <AddRowPopover
+                setPopoverOpen={setPopoverOpen}
+                setShowExperimentInputSelector={setShowExperimentInputSelector}
+                setShowRandomInputSelector={setShowRandomInputSelector}
+                handleAddRow={() => {}}
+              />
+            </PopoverContent>
+          </Popover>
+
+          <ExperimentRandomInputSelector
+            open={showRandomInputSelector}
+            setOpen={setShowRandomInputSelector}
+            handleAddRows={handleAddRowInsertBatch}
+            promptVersionId={
+              experimentTableQuery?.original_prompt_version ?? ""
+            }
+            onSuccess={async (success) => {}}
           />
-        </PopoverContent>
-      </Popover>
 
-      <ExperimentRandomInputSelector
-        open={showRandomInputSelector}
-        setOpen={setShowRandomInputSelector}
-        handleAddRows={handleAddRowInsertBatch}
-        promptVersionId={experimentTableQuery?.original_prompt_version ?? ""}
-        onSuccess={async (success) => {}}
-      />
+          <ExperimentInputSelector
+            open={showExperimentInputSelector}
+            setOpen={setShowExperimentInputSelector}
+            promptVersionId={
+              experimentTableQuery?.original_prompt_version ?? ""
+            }
+            handleAddRows={handleAddRowInsertBatch}
+            onSuccess={async (success) => {}}
+          />
+        </div>
+      </ResizablePanel>
 
-      <ExperimentInputSelector
-        open={showExperimentInputSelector}
-        setOpen={setShowExperimentInputSelector}
-        promptVersionId={experimentTableQuery?.original_prompt_version ?? ""}
-        handleAddRows={handleAddRowInsertBatch}
-        onSuccess={async (success) => {}}
-      />
-    </div>
+      {/* Add right panel if needed */}
+      {rightPanel && (
+        <>
+          <ResizableHandle withHandle />
+          <ResizablePanel minSize={25} maxSize={75}>
+            <div className="h-full flex-shrink-0 flex flex-col">
+              {rightPanel}
+            </div>
+          </ResizablePanel>
+        </>
+      )}
+    </ResizablePanelGroup>
   );
 }

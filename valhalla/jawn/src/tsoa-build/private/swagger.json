@@ -8164,6 +8164,12 @@
 					"original_prompt_version": {
 						"type": "string"
 					},
+					"input_keys": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
 					"created_at": {
 						"type": "string"
 					}
@@ -8172,6 +8178,7 @@
 					"id",
 					"name",
 					"original_prompt_version",
+					"input_keys",
 					"created_at"
 				],
 				"type": "object",
@@ -8280,6 +8287,12 @@
 					"original_prompt_version": {
 						"type": "string"
 					},
+					"input_keys": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
 					"created_at": {
 						"type": "string"
 					},
@@ -8294,6 +8307,7 @@
 					"id",
 					"name",
 					"original_prompt_version",
+					"input_keys",
 					"created_at",
 					"rows"
 				],

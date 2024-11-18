@@ -18,7 +18,9 @@ class MyDocument extends Document {
 
     return (
       <Html className={isOpenStatsPage ? "open-stats-html" : ""}>
-        <Head />
+        <Head>
+          <script src="https://unpkg.com/react-scan/dist/auto.global.js"></script>
+        </Head>
         <body className={isOpenStatsPage ? "open-stats-body" : ""}>
           <Main />
           <NextScript />
