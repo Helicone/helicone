@@ -14,7 +14,7 @@ const CTA = () => {
   return (
     <div className="bg-[#F2F9FC] h-[80vh] relative overflow-hidden flex flex-col">
       <div
-        className="hidden md:blockabsolute inset-0 w-full h-full z-[0]"
+        className="hidden md:block absolute inset-0 w-full h-full z-[0]"
         style={{
           backgroundImage: "url(/static/home/cta-bg.webp)",
           backgroundSize: "cover",
