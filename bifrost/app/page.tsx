@@ -57,7 +57,6 @@ export default async function Home() {
         <FAQ />
         <Quote3 />
         <CTA />
-        <Footer />
       </div>
     </main>
   );

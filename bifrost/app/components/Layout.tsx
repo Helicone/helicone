@@ -12,7 +12,7 @@ export const Layout = ({
   stars: number;
 }) => {
   const path = usePathname();
-  const showFooter = !(path.includes("experiments") || path === "/");
+  const showFooter = !path.includes("experiments");
 
   return (
     <>
