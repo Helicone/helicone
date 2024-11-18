@@ -1,6 +1,7 @@
 import { ISLAND_WIDTH } from "@/app/page";
 import { cn } from "@/lib/utils";
 import { ChevronRightIcon } from "lucide-react";
+import LogoBox from "./LogoBox";
 
 const Hero = () => {
   return (
@@ -81,38 +82,6 @@ const Hero = () => {
         imgSrc="/static/home/logo4.webp"
         className="w-20 h-20 2xl:w-24 2xl:h-24 absolute bottom-24 right-0 2xl:-translate-x-[150px] -translate-x-[60px] rotate-[-15deg]"
       />
-    </div>
-  );
-};
-
-const LogoBox = ({
-  className,
-  innerClassName,
-  imgSrc,
-}: {
-  className?: string;
-  innerClassName?: string;
-  imgSrc: string;
-}) => {
-  return (
-    <div
-      className={cn(
-        "bg-[#E2F1FD66] rounded-3xl p-2.5 2xl:p-3.5 shadow-xl hidden lg:block",
-        className
-      )}
-    >
-      <div
-        className={cn(
-          "w-full h-full flex items-center justify-center rounded-2xl",
-          innerClassName
-        )}
-      >
-        <img
-          src={imgSrc}
-          alt="Logo"
-          className="w-full h-full object-contain rounded-2xl"
-        />
-      </div>
     </div>
   );
 };

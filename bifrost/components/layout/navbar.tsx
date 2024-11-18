@@ -11,7 +11,6 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { Button } from "../ui/button";
-import { GithubIcon } from "lucide-react";
 
 interface NavBarProps {
   stars?: number;
@@ -205,9 +204,6 @@ const MobileNav = () => {
 };
 
 const NavBar = (props: NavBarProps) => {
-  const { stars } = props;
-  const path = usePathname();
-
   return (
     <div className="bg-white top-0 sticky z-30 border-b border-gray-200">
       <MobileNav />
