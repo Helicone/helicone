@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import Image from "next/image";
 
 const floatingAnimation = "floating 3s ease-in-out infinite";
+const arrowAnimation = "dash 3s ease-in-out infinite";
 
 const SVG = () => (
   <svg
@@ -13,34 +14,79 @@ const SVG = () => (
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
-    <path
-      d="M250.516 147.68L343.18 94.1797C352.746 88.6568 368.256 88.6568 377.821 94.1797L470.486 147.68"
-      stroke="#3479FF"
-      strokeWidth="4"
-      strokeDasharray="4 4"
-    />
-    <path
-      d="M624.5 222.086L736.693 287.063C746.251 292.598 746.251 301.574 736.693 307.109L624.5 372.086"
-      stroke="#3479FF"
-      strokeWidth="4"
-      strokeDasharray="4 4"
-    />
-    <path
-      d="M140.5 377.086L17.1121 302.438C7.66136 296.721 7.66135 287.451 17.1121 281.733L140.5 207.086"
-      stroke="#3479FF"
-      strokeWidth="4"
-      strokeDasharray="4 4"
-    />
+    <g>
+      <path
+        d="M250.516 147.68L343.18 94.1797C352.746 88.6568 368.256 88.6568 377.821 94.1797L470.486 147.68"
+        stroke="#3479FF"
+        strokeWidth="4"
+        strokeDasharray="4"
+        strokeDashoffset="4"
+        style={{ animation: arrowAnimation }}
+      />
+      <circle r="8" fill="#3479FF">
+        <animateMotion
+          dur="2s"
+          repeatCount="indefinite"
+          path="M250.516 147.68L343.18 94.1797C352.746 88.6568 368.256 88.6568 377.821 94.1797L470.486 147.68"
+        />
+      </circle>
+    </g>
+
+    <g>
+      <path
+        d="M624.5 222.086L736.693 287.063C746.251 292.598 746.251 301.574 736.693 307.109L624.5 372.086"
+        stroke="#3479FF"
+        strokeWidth="4"
+        strokeDasharray="4"
+        strokeDashoffset="4"
+        style={{ animation: arrowAnimation }}
+      />
+      <circle r="8" fill="#3479FF">
+        <animateMotion
+          dur="2s"
+          repeatCount="indefinite"
+          path="M624.5 222.086L736.693 287.063C746.251 292.598 746.251 301.574 736.693 307.109L624.5 372.086"
+        />
+      </circle>
+    </g>
+    <g>
+      <path
+        d="M140.5 377.086L17.1121 302.438C7.66136 296.721 7.66135 287.451 17.1121 281.733L140.5 207.086"
+        stroke="#3479FF"
+        strokeWidth="4"
+        strokeDasharray="4"
+        strokeDashoffset="4"
+        style={{ animation: arrowAnimation }}
+      />
+      <circle r="8" fill="#3479FF">
+        <animateMotion
+          dur="2s"
+          repeatCount="indefinite"
+          path="M140.5 377.086L17.1121 302.438C7.66136 296.721 7.66135 287.451 17.1121 281.733L140.5 207.086"
+        />
+      </circle>
+    </g>
     <path
       d="M150.11 203.086C150.11 202.305 149.013 201.672 147.66 201.672L125.615 201.672C124.262 201.672 123.165 202.305 123.165 203.086C123.165 203.867 124.262 204.5 125.615 204.5L145.211 204.5L145.211 215.814C145.211 216.595 146.307 217.228 147.66 217.228C149.013 217.228 150.11 216.595 150.11 215.814L150.11 203.086ZM140.732 209.086L142.897 207.836L139.433 205.836L137.268 207.086L140.732 209.086ZM147.227 205.336L149.392 204.086L145.928 202.086L143.763 203.336L147.227 205.336Z"
       fill="#3479FF"
     />
-    <path
-      d="M270 454.586L373.175 514.094C382.743 519.612 398.257 519.612 407.825 514.094L511 454.586"
-      stroke="#3479FF"
-      strokeWidth="4"
-      strokeDasharray="4 4"
-    />
+    <g>
+      <path
+        d="M511 454.586L407.825 514.094C398.257 519.612 382.743 519.612 373.175 514.094L270 454.586"
+        stroke="#3479FF"
+        strokeWidth="4"
+        strokeDasharray="4"
+        strokeDashoffset="4"
+        style={{ animation: arrowAnimation }}
+      />
+      <circle r="8" fill="#3479FF">
+        <animateMotion
+          dur="2s"
+          repeatCount="indefinite"
+          path="M511 454.586L407.825 514.094C398.257 519.612 382.743 519.612 373.175 514.094L270 454.586"
+        />
+      </circle>
+    </g>
     <path
       d="M613.551 377.086C613.551 377.867 614.647 378.5 616 378.5L638.045 378.5C639.398 378.5 640.495 377.867 640.495 377.086C640.495 376.305 639.398 375.672 638.045 375.672L618.449 375.672L618.449 364.358C618.449 363.577 617.353 362.944 616 362.944C614.647 362.944 613.551 363.577 613.551 364.358L613.551 377.086ZM617.732 378.086L619.897 376.836L616.433 374.836L614.268 376.086L617.732 378.086ZM624.227 374.336L626.392 373.086L622.928 371.086L620.763 372.336L624.227 374.336Z"
       fill="#3479FF"
@@ -1312,6 +1358,16 @@ const SVG = () => (
       fill="#7587BA"
     />
     <defs>
+      <marker
+        id="arrowhead"
+        markerWidth="10"
+        markerHeight="7"
+        refX="9"
+        refY="3.5"
+        orient="auto"
+      >
+        <polygon points="0 0, 10 3.5, 0 7" fill="#3479FF" />
+      </marker>
       <filter
         id="filter0_d_3292_13057"
         x="323"
