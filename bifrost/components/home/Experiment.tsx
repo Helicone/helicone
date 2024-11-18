@@ -22,69 +22,69 @@ const data: {
 }[] = [
   {
     messages: `{"role": "system", "content": "Get...`,
-    original: `This beginner-level co...`,
-    prompt1: `In this five-session begi...`,
-    prompt2: `Through five practical s...`,
+    original: `This beginner-friendly course guides you through foundational concepts with real-world examples...`,
+    prompt1: `Master the fundamentals in this hands-on learning journey, featuring practical exercises...`,
+    prompt2: `A practical journey through essential topics, designed to build your confidence...`,
   },
   {
     messages: `{"role": "system", "content": "Get...`,
-    original: `This beginner-level co...`,
-    prompt1: `In this five-session begi...`,
-    prompt2: `Through five practical s...`,
+    original: `An introductory series covering key principles through interactive lessons and projects...`,
+    prompt1: `Step-by-step tutorials designed for newcomers, with comprehensive practice materials...`,
+    prompt2: `Build your skills with this comprehensive guide, featuring hands-on workshops...`,
   },
   {
     messages: `{"role": "system", "content": "Get...`,
-    original: `This beginner-level co...`,
-    prompt1: `In this five-session begi...`,
-    prompt2: `Through five practical s...`,
+    original: `Learn the basics through interactive sessions and guided practice assignments...`,
+    prompt1: `A structured approach to mastering core concepts, with real-world applications...`,
+    prompt2: `Dive into core concepts with guided exercises and practical implementations...`,
   },
   {
     messages: `{"role": "system", "content": "Get...`,
-    original: `This beginner-level co...`,
-    prompt1: `In this five-session begi...`,
-    prompt2: `Through five practical s...`,
+    original: `Start your journey with this accessible introduction to fundamental principles...`,
+    prompt1: `From novice to practitioner: a carefully structured learning experience...`,
+    prompt2: `An engaging introduction that transforms complex topics into digestible lessons...`,
   },
   {
     messages: `{"role": "system", "content": "Get...`,
-    original: `This beginner-level co...`,
-    prompt1: `In this five-session begi...`,
-    prompt2: `Through five practical s...`,
+    original: `A comprehensive beginner's guide featuring step-by-step instruction and exercises...`,
+    prompt1: `Progress through carefully crafted lessons designed for optimal learning...`,
+    prompt2: `Experience a thoughtfully designed curriculum that builds lasting knowledge...`,
   },
   {
     messages: `{"role": "system", "content": "Get...`,
-    original: `This beginner-level co...`,
-    prompt1: `In this five-session begi...`,
-    prompt2: `Through five practical s...`,
+    original: `Begin your learning journey with this foundational course packed with examples...`,
+    prompt1: `A beginner-focused approach that ensures steady progress through key concepts...`,
+    prompt2: `Master essential skills through this methodically structured learning path...`,
   },
   {
     messages: `{"role": "system", "content": "Get...`,
-    original: `This beginner-level co...`,
-    prompt1: `In this five-session begi...`,
-    prompt2: `Through five practical s...`,
+    original: `Perfect for newcomers: a gentle introduction to core principles and practices...`,
+    prompt1: `Build confidence through structured learning and hands-on practice sessions...`,
+    prompt2: `Transform your understanding with this carefully paced learning experience...`,
   },
   {
     messages: `{"role": "system", "content": "Get...`,
-    original: `This beginner-level co...`,
-    prompt1: `In this five-session begi...`,
-    prompt2: `Through five practical s...`,
+    original: `Start strong with this beginner-oriented course featuring practical exercises...`,
+    prompt1: `An accessible approach to mastering fundamentals through guided practice...`,
+    prompt2: `Develop your skills progressively with this well-structured learning path...`,
   },
   {
     messages: `{"role": "system", "content": "Get...`,
-    original: `This beginner-level co...`,
-    prompt1: `In this five-session begi...`,
-    prompt2: `Through five practical s...`,
+    original: `A foundation-building course designed to make complex concepts approachable...`,
+    prompt1: `Learn at your pace with this methodically structured beginner's guide...`,
+    prompt2: `A comprehensive introduction focusing on practical skill development...`,
   },
   {
     messages: `{"role": "system", "content": "Get...`,
-    original: `This beginner-level co...`,
-    prompt1: `In this five-session begi...`,
-    prompt2: `Through five practical s...`,
+    original: `Begin your learning adventure with this accessible, example-rich course...`,
+    prompt1: `A carefully crafted journey from basic concepts to practical mastery...`,
+    prompt2: `Gain confidence through this structured approach to essential skills...`,
   },
   {
     messages: `{"role": "system", "content": "Get...`,
-    original: `This beginner-level co...`,
-    prompt1: `In this five-session begi...`,
-    prompt2: `Through five practical s...`,
+    original: `An entry-level course that breaks down complex topics into manageable steps...`,
+    prompt1: `Master the basics through this engaging, practice-oriented curriculum...`,
+    prompt2: `A systematic approach to building fundamental knowledge and skills...`,
   },
 ];
 
@@ -213,7 +213,7 @@ const ExperimentTable = () => {
 
   return (
     <div ref={tableRef} className="relative w-full h-full z-[1]">
-      <div className="absolute inset-0 h-full w-full pointer-events-none bg-gradient-to-r from-white to-transparent z-[2]"></div>
+      <div className="absolute inset-0 h-full w-1/6 pointer-events-none bg-gradient-to-r from-white to-transparent z-[2]"></div>
       <div className="absolute h-[100px] w-full bottom-0 right-0 pointer-events-none bg-gradient-to-t from-white to-transparent z-[2]"></div>
       <div className="w-full h-full p-2 border border-slate-200 rounded-2xl overflow-hidden">
         <Table className="divide w-full table-fixed">
@@ -336,19 +336,7 @@ const Experiment = () => {
                   variant="outline"
                 >
                   <ArrowUpRightIcon className="w-4 h-4" />
-                  Prompts
-                </Button>
-              </a>
-              <a
-                href="https://docs.helicone.ai/features/prompts"
-                target="_blank"
-              >
-                <Button
-                  className="items-center gap-2 text-landing-secondary self-start"
-                  variant="outline"
-                >
-                  <ArrowUpRightIcon className="w-4 h-4" />
-                  Experiments
+                  Prompts &amp; Experiments
                 </Button>
               </a>
             </div>

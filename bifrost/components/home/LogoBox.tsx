@@ -12,7 +12,7 @@ const LogoBox = ({
   return (
     <div
       className={cn(
-        "bg-[#E2F1FD66] rounded-3xl p-2.5 2xl:p-3.5 shadow-xl hidden lg:block",
+        "bg-[#E2F1FD66] rounded-3xl p-3 2xl:p-3.5 shadow-xl hidden lg:block border-2 border-white",
         className
       )}
     >

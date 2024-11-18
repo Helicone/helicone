@@ -296,20 +296,25 @@ const EvaluateSVG = () => (
             ref={(el) => {
               if (!el) return;
 
+              // Only set up the observer once
               const observer = new IntersectionObserver(
                 ([entry]) => {
                   if (entry.isIntersecting) {
-                    // Reset the animation by removing it
-                    el.style.animation = "none";
-                    // Force a reflow (reflow is needed to restart the animation)
+                    // Force reflow
                     void el.getBoundingClientRect();
-                    // Add the animation back
-                    el.style.animation = "drawLine 2s ease-out forwards";
+
+                    // Add animation with a delayeset first
+                    setTimeout(() => {
+                      el.style.animation = "drawLine 2s ease-out forwards";
+                    }, 1000);
+                  } else {
+                    el.style.animation = "none";
                   }
                 },
                 { threshold: 0.1 }
               );
 
+              // Start observing
               observer.observe(el);
             }}
             d="M217.281 478.679C252.987 458.723 258.302 437.817 294.168 436.297C327.434 434.888 338.554 462.097 371.412 466.68C401.322 470.851 420.175 469.675 448.775 461.223C484.083 450.789 496.954 422.565 524.829 412.223C559.403 399.395 565.285 397.632 601.716 389.18"

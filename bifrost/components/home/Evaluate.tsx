@@ -64,8 +64,7 @@ const Evaluate = () => {
           >
             <div
               className={cn(
-                "flex gap-2.5 items-center transition-all duration-300",
-                isQuestionOpen && "justify-between"
+                "flex justify-between items-center transition-all duration-300"
               )}
             >
               <p className="text-lg">What is online and offline evaluation?</p>
@@ -87,12 +86,14 @@ const Evaluate = () => {
             >
               <div className="overflow-hidden">
                 <p className="text-lg text-[#ACB3BA]">
-                  {/* TODO: Change copy */}
-                  There are two ways to interface with Helicone - Proxy and
-                  Async. You can integrate with Helicone using the async
-                  integration to ensure zero propagation delay, or choose proxy
-                  for the simplest integration and access to gateway features
-                  like caching, rate limiting, API key management.
+                  Online evaluation tests systems in real-time using live data
+                  and actual user interactions. It’s useful to capture dynamic
+                  real-world scenarios. <br />
+                  <br />
+                  In contrast, offline evaluation occurs in controlled,
+                  simulated environments using previous requests or synthetic
+                  data, allowing safe and reproducible system assessment before
+                  deployment.
                 </p>
               </div>
             </div>

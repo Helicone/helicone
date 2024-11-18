@@ -11,13 +11,14 @@ const Hero = () => {
         ISLAND_WIDTH
       )}
     >
-      <div className="flex flex-wrap gap-x-12 items-center mt-12 lg:mt-0 mb-12">
+      <div className="flex flex-wrap gap-x-12 gap-y-4 items-center mt-12 lg:mt-0 mb-12">
         <div className="flex items-center gap-2 text-sm font-medium whitespace-nowrap">
           <p>Backed by</p>
-          <div className="h-5 w-5 rounded border border-[#64748B] text-slate-500 font-medium text-sm flex items-center justify-center">
-            Y
-          </div>
-          <p>Combinator</p>
+          <img
+            src="/static/home/yc-logo.webp"
+            alt="Y Combinator"
+            className="w-24 h-auto"
+          />
         </div>
         <img
           src="/static/home/productoftheday.webp"
@@ -28,9 +29,9 @@ const Hero = () => {
       <h1 className="text-5xl sm:text-7xl md:text-[84px] font-semibold mb-3 w-full max-w-3xl text-wrap text-black z-[10]">
         Ship your AI app with <span className="text-brand">confidence</span>
       </h1>
-      <p className="text-lg sm:text-xl 2xl:text-2xl text-landing-secondary max-w-3xl text-wrap font-light mb-6 lg:mb-12 z-[10]">
-        The all-in-one platform to monitor, debug and improve production-ready
-        LLM applications.
+      <p className="text-lg sm:text-xl 2xl:text-2xl text-landing-secondary font-light mb-6 lg:mb-12 z-[10]">
+        The all-in-one platform to monitor, debug and improve <br />
+        production-ready LLM applications.
       </p>
       <button className="bg-brand py-3 px-6 lg:py-[18px] lg:px-9 text-base lg:text-[22px] 2xl:text-[26px] font-normal flex gap-3 rounded-lg text-white self-start items-center z-[10]">
         Get started for free

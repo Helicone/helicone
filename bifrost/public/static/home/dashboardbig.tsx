@@ -226,6 +226,7 @@ const DashboardBig = () => {
           height="50%"
           fill="url(#gradient-overlay)"
         />
+
         <g className="z-10">
           <g filter="url(#filter0_d_3306_15511)">
             <g clip-path="url(#clip0_3306_15511)">
@@ -921,6 +922,7 @@ const DashboardBig = () => {
                 strokeWidth="1.08178"
               />
             </g>
+
             <rect
               x="-0.242878"
               y="-0.555805"
@@ -931,6 +933,14 @@ const DashboardBig = () => {
               stroke="#E2E8F0"
             />
           </g>
+          <rect
+            x="-79.9453"
+            y="0.412109"
+            width="1768.24"
+            height="819.326"
+            transform="rotate(13.7851 -79.9453 0.412109)"
+            fill="url(#paint0_linear_3259_12491)"
+          />
           <g
             filter="url(#filter1_d_3306_15511)"
             ref={rect1Ref}
@@ -1463,6 +1473,18 @@ const DashboardBig = () => {
         </g>
 
         <defs>
+          <linearGradient
+            id="paint0_linear_3259_12491"
+            x1="705.483"
+            y1="0.412109"
+            x2="705.483"
+            y2="819.738"
+            gradientUnits="userSpaceOnUse"
+          >
+            <stop stop-color="white" stop-opacity="0" />
+            <stop offset="0.445" stop-color="#F0F9FF" />
+            <stop offset="1" stop-color="#F0F9FF" />
+          </linearGradient>
           <filter
             id="filter0_d_3306_15511"
             x="23.912"

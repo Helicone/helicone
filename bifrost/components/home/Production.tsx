@@ -23,7 +23,7 @@ const Production = () => {
             hallucinations, abuse and performance issues.
           </p>
         </div>
-        <div className="flex gap-3 items-center">
+        <div className="flex gap-3 items-center z-[20]">
           <a
             href="https://docs.helicone.ai/features/advanced-usage/user-metrics"
             target="_blank"

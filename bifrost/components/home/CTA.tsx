@@ -42,11 +42,11 @@ const CTA = () => {
             backgroundRepeat: "no-repeat",
           }}
         ></div>
-        <div className="flex flex-col items-center text-4xl md:text-5xl font-semibold text-slate-500 leading-snug z-[10]">
-          <div className="flex gap-3 items-center">
+        <div className="flex flex-col items-center text-wrap text-4xl md:text-5xl font-semibold text-slate-500 leading-snug z-[10]">
+          <div className="flex flex-wrap gap-x-3 gap-y-1 items-center justify-center ">
             <div
               className={cn(
-                "bg-[#E7F6FD] border-2 border-brand rounded-xl py-1 px-7 text-brand translate-y-[-10px] transition-transform duration-500",
+                "bg-[#E7F6FD] border-2 border-brand rounded-xl py-2 px-7 text-brand transition-transform duration-1000",
                 "rotate-[-3deg]"
               )}
             >
@@ -59,7 +59,7 @@ const CTA = () => {
         <Link href="https://us.helicone.ai/signup" className="z-[10]">
           <Button
             size="lg"
-            className="text-base md:text-[40px] py-[10px] md:py-12 px-4 md:px-8 bg-brand hover:bg-brand/90 text-white font-normal rounded-lg md:rounded-2xl z-[10]"
+            className="text-base md:text-[40px] py-[10px] md:py-12 px-4 md:px-6 bg-brand hover:bg-brand/90 text-white font-normal rounded-lg md:rounded-2xl z-[10]"
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
           >
@@ -98,9 +98,9 @@ const CTA = () => {
       <LogoBox
         imgSrc="/static/home/gemini.webp"
         className={cn(
-          "w-[178px] h-[178px] 2xl:w-[220px] 2xl:h-[220px] absolute bottom-28 left-4 rotate-[-27deg] transition-all duration-500",
+          "w-[178px] h-[178px] 2xl:w-[220px] 2xl:h-[220px] absolute bottom-28 left-4 rotate-[-27deg] transition-all duration-1000",
           isHovered &&
-            "left-1/2 translate-x-[-500px] 2xl:translate-x-[-600px] bottom-8 rotate-[-27deg]"
+            "w-[160px] h-[160px] 2xl:w-[200px] 2xl:h-[200px] left-1/2 translate-x-[-380px] 2xl:translate-x-[-600px] bottom-16 rotate-[-27deg]"
         )}
         innerClassName="bg-white"
       />
@@ -108,16 +108,16 @@ const CTA = () => {
       <LogoBox
         imgSrc="/static/home/logo2.webp"
         className={cn(
-          "w-[140px] h-[140px] 2xl:w-[180px] 2xl:h-[180px] absolute top-1/3 left-44 2xl:left-56 transition-all duration-500",
+          "w-[140px] h-[140px] 2xl:w-[180px] 2xl:h-[180px] absolute top-1/3 left-44 2xl:left-56 transition-all duration-1000",
           isHovered &&
-            "!left-1/2 translate-x-[-450px] 2xl:translate-x-[-550px] translate-y-[20px] rotate-[17deg]"
+            "!left-1/2 translate-x-[-450px] 2xl:translate-x-[-550px] translate-y-[50px] rotate-[17deg]"
         )}
       />
 
       <LogoBox
         imgSrc="/static/home/mistral.webp"
         className={cn(
-          "w-[140px] h-[140px] 2xl:w-[180px] 2xl:h-[180px] absolute left-0 top-1/4 -rotate-[25deg] transition-all duration-500",
+          "w-[140px] h-[140px] 2xl:w-[180px] 2xl:h-[180px] absolute left-0 top-1/4 -rotate-[25deg] transition-all duration-1000",
           isHovered &&
             "left-1/2 translate-x-[-620px] 2xl:translate-x-[-720px] translate-y-[10px] rotate-[20deg]"
         )}
@@ -127,8 +127,8 @@ const CTA = () => {
       <LogoBox
         imgSrc="/static/home/chatgpt.webp"
         className={cn(
-          "w-[194px] h-[194px] 2xl:w-[240px] 2xl:h-[240px] absolute top-0 left-36 2xl:left-48 transition-all duration-500",
-          isHovered && "!left-1/2 translate-x-[-400px] rotate-[-45deg]"
+          "w-[194px] h-[194px] 2xl:w-[240px] 2xl:h-[240px] absolute top-0 left-36 2xl:left-48 transition-all duration-1000",
+          isHovered && "!left-1/2 translate-x-[-470px] top-10 rotate-[-45deg]"
         )}
         innerClassName="bg-[#0FA37F] rounded-3xl"
       />
@@ -136,7 +136,7 @@ const CTA = () => {
       <LogoBox
         imgSrc="/static/home/togetherai.webp"
         className={cn(
-          "w-[142px] h-[142px] 2xl:w-[180px] 2xl:h-[180px] absolute top-0 right-4 rotate-[40deg] transition-all duration-500",
+          "w-[142px] h-[142px] 2xl:w-[180px] 2xl:h-[180px] absolute top-0 right-4 rotate-[40deg] transition-all duration-1000",
           isHovered && "right-1/2 translate-x-[400px] rotate-[-3deg]"
         )}
         innerClassName="rounded-3xl"
@@ -145,9 +145,9 @@ const CTA = () => {
       <LogoBox
         imgSrc="/static/home/anthropic.webp"
         className={cn(
-          "w-[176px] h-[176px] 2xl:w-[220px] 2xl:h-[220px] absolute bottom-40 right-20 2xl:translate-x-[50px] translate-x-[50px] rotate-[15deg] transition-all duration-500",
+          "w-[176px] h-[176px] 2xl:w-[220px] 2xl:h-[220px] absolute bottom-40 right-20 2xl:translate-x-[50px] translate-x-[50px] rotate-[15deg] transition-all duration-1000",
           isHovered &&
-            "w-[220px] h-[220px] 2xl:w-[260px] 2xl:h-[260px] bottom-0 right-1/2 translate-x-[460px] 2xl:translate-x-[560px] rotate-[28deg]"
+            "bottom-20 right-1/2 translate-x-[400px] 2xl:translate-x-[560px] rotate-[28deg]"
         )}
         innerClassName="bg-white p-4"
       />
@@ -155,7 +155,7 @@ const CTA = () => {
       <LogoBox
         imgSrc="/static/home/groq.svg"
         className={cn(
-          "w-[135px] h-[135px] 2xl:w-[160px] 2xl:h-[160px] absolute top-1/3 right-56 rotate-[43deg] transition-all duration-500",
+          "w-[135px] h-[135px] 2xl:w-[160px] 2xl:h-[160px] absolute top-1/3 right-56 rotate-[43deg] transition-all duration-1000",
           isHovered &&
             "right-1/2 translate-x-[400px] 2xl:translate-x-[500px] translate-y-[-30px] rotate-[15deg]"
         )}
@@ -165,7 +165,7 @@ const CTA = () => {
       <LogoBox
         imgSrc="/static/home/logo3.webp"
         className={cn(
-          "w-28 h-28 2xl:w-32 2xl:h-32 absolute top-10 right-56 rotate-[-16deg] transition-all duration-500",
+          "w-28 h-28 2xl:w-32 2xl:h-32 absolute top-10 right-56 rotate-[-16deg] transition-all duration-1000",
           isHovered && "top-6 right-1/2 translate-x-[200px] rotate-[-76deg]"
         )}
         innerClassName="bg-white p-2"
@@ -174,7 +174,7 @@ const CTA = () => {
       <LogoBox
         imgSrc="/static/home/logo4.webp"
         className={cn(
-          "w-28 h-28 2xl:w-32 2xl:h-32 absolute top-1/4 right-10 transition-all duration-500",
+          "w-28 h-28 2xl:w-32 2xl:h-32 absolute top-1/4 right-10 transition-all duration-1000",
           isHovered && "right-1/2 translate-x-[550px] top-1/2 rotate-[-45deg]"
         )}
       />

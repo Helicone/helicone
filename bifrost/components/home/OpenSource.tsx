@@ -230,7 +230,7 @@ const OpenSource = async () => {
         </a>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
-        <div className="col-span-1 md:col-span-3 p-6 bg-slate-50 rounded-xl border border-slate-200 flex flex-col gap-9">
+        <div className="col-span-1 md:col-span-3 p-6 bg-slate-50 rounded-xl border border-slate-200 flex flex-col gap-9 justify-between">
           <div className="flex flex-col gap-2">
             <h3 className="text-xl sm:text-2xl font-semibold text-black">
               Join our community
@@ -257,7 +257,7 @@ const OpenSource = async () => {
           </div>
           <Image src={ContributorsImg} alt="Contributors" className="w-full" />
         </div>
-        <div className="col-span-1 md:col-span-3  bg-slate-50 rounded-xl border border-slate-200 flex flex-col gap-9">
+        <div className="col-span-1 md:col-span-3  bg-slate-50 rounded-xl border border-slate-200 flex flex-col gap-6">
           <div className="flex flex-col gap-2 p-6">
             <h3 className="text-xl sm:text-2xl font-semibold text-black">
               Deploy on-prem
@@ -276,25 +276,25 @@ const OpenSource = async () => {
             </Link>
           </div>
           <Image
-            className="self-end pl-8 w-9/12"
+            className="self-end pl-8 w-3/5"
             src={DeployImg}
             alt="Deploy on prem"
           />
         </div>
-        <div className="col-span-1 md:col-span-4 p-6 bg-slate-50 rounded-xl border border-slate-200 flex justify-between relative">
+        <Link
+          href="/llm-cost"
+          target="_blank"
+          className="col-span-1 md:col-span-4 p-6 bg-slate-50 rounded-xl border border-slate-200 flex justify-between relative hover:bg-slate-100"
+        >
           <div className="flex flex-col gap-10">
             <div className="flex flex-col gap-2">
               <p className="text-sm text-slate-500">Built by Helicone</p>
-              <Link
-                href="/llm-cost"
-                target="_blank"
-                className="flex items-center gap-2"
-              >
+              <div className="flex items-center gap-2">
                 <h3 className="text-xl sm:text-2xl font-semibold text-black">
                   API Cost Calculator
                 </h3>
                 <ArrowUpRightIcon className="w-4 h-4 text-brand" />
-              </Link>
+              </div>
             </div>
             <p className="text-base sm:text-lg max-w-[486px] text-wrap">
               Compare LLM costs with the largest open-source API pricing
@@ -305,21 +305,22 @@ const OpenSource = async () => {
           <div className="h-[200px]">
             <CostCalculatorSvg />
           </div>
-        </div>
-        <div className="col-span-1 md:col-span-2 p-6 bg-slate-50 rounded-xl border border-slate-200 relative">
+        </Link>
+        <Link
+          href="https://us.helicone.ai/open-stats"
+          target="_blank"
+          className="block col-span-1 md:col-span-2 p-6 bg-slate-50 rounded-xl border border-slate-200 relative hover:bg-slate-100"
+        >
           <div className="flex flex-col h-full justify-between">
             <div className="flex flex-col gap-2">
               <p className="text-sm text-slate-500">Built by Helicone</p>
-              <Link
-                href="https://us.helicone.ai/open-stats"
-                target="_blank"
-                className="flex items-center gap-2"
-              >
+
+              <div className="flex items-center gap-2">
                 <h3 className="text-xl sm:text-2xl font-semibold text-black">
                   Open Stats
                 </h3>
                 <ArrowUpRightIcon className="w-4 h-4 text-brand" />
-              </Link>
+              </div>
             </div>
             <p className="text-base sm:text-lg max-w-[380px] text-wrap">
               The largest public AI conversation datasets consisting of all of
@@ -327,7 +328,7 @@ const OpenSource = async () => {
             </p>
           </div>
           <OpenStatsSVG />
-        </div>
+        </Link>
       </div>
     </div>
   );

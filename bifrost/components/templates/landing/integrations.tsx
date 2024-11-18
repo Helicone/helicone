@@ -8,6 +8,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
+import { toast, Toaster } from "react-hot-toast";
 
 interface IntegrationsProps {}
 
@@ -105,12 +106,6 @@ const anthropic = new Anthropic({
     "Helicone-Auth": <HELICONE_API_KEY>,
   },
 });
-
-await anthropic.messages.create({
-  model: "claude-3-opus-20240229",
-  max_tokens: 1024,
-  messages: [{ role: "user", content: "Hello, world" }],
-});
 `,
         },
         python: {
@@ -123,14 +118,6 @@ client = anthropic.Anthropic(
   defaultHeaders={
     "Helicone-Auth": <HELICONE_API_KEY>,
   },
-)
-
-client.messages.create(
-  model="claude-3-opus-20240229",
-  max_tokens=1024,
-  messages=[
-    {"role": "user", "content": "Hello, world"}
-  ]
 )
 `,
         },
@@ -251,24 +238,25 @@ self.model = AzureChatOpenAI(
           />
         </div>
       ),
-      integrations: {},
+      integrations: {
+        curl: {
+          language: "shell",
+          code: `curl --request POST \\
+  --url "https://gateway.helicone.ai/v1beta/models/model-name:generateContent?key=$\{GOOGLE_GENERATIVE_API_KEY\}" \\
+  --header "Content-Type: application/json" \\
+  --header "Helicone-Auth: Bearer $\{HELICONE_API_KEY\}" \\
+  --header "Helicone-Target-URL: https://generativelanguage.googleapis.com" \\
+  --data '{
+    "contents": [{
+      "parts":[{
+        "text": "Write a story about a magic backpack."
+      }]
+    }]
+  }'`,
+        },
+      },
       href: "https://docs.helicone.ai/integrations/gemini/api/curl",
     },
-    // {
-    //   name: "Anyscale",
-    //   logo: (
-    //     <div className="p-3">
-    //       <Image
-    //         src={"/static/anyscale.webp"}
-    //         alt={"Anyscale"}
-    //         width={2048}
-    //         height={2048}
-    //       />
-    //     </div>
-    //   ),
-    //   integrations: {},
-    //   href: "https://docs.helicone.ai/getting-started/integration-method/anyscale",
-    // },
     {
       name: "OpenRouter",
       logo: (
@@ -281,7 +269,26 @@ self.model = AzureChatOpenAI(
           />
         </div>
       ),
-      integrations: {},
+      integrations: {
+        "node.js": {
+          language: "tsx",
+          code: `fetch("https://openrouter.helicone.ai/api/v1/chat/completions", {
+  method: "POST",
+  headers: {
+    Authorization: \`Bearer $\{OPENROUTER_API_KEY\}\`,
+    "Helicone-Auth": \`Bearer $\{HELICONE_API_KEY\}\`,
+    "HTTP-Referer": \`$\{YOUR_SITE_URL\}\`, // Optional, for including your app on openrouter.ai rankings.
+    "X-Title": \`$\{YOUR_SITE_NAME\}\`, // Optional. Shows in rankings on openrouter.ai.
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    model: "openai/gpt-3.5-turbo", // Optional (user controls the default),
+    messages: [{ role: "user", content: "What is the meaning of life?" }],
+    stream: true,
+  }),
+});`,
+        },
+      },
       href: "https://docs.helicone.ai/getting-started/integration-method/openrouter",
     },
     {
@@ -348,7 +355,11 @@ self.model = AzureChatOpenAI(
                   }
                   setCurrentProvider(provider.name);
                   if (!provider.integrations[currentIntegration]) {
-                    setCurrentIntregration("node.js");
+                    if (provider.name === "Gemini") {
+                      setCurrentIntregration("curl");
+                    } else {
+                      setCurrentIntregration("node.js");
+                    }
                   }
                 }}
               >
@@ -367,7 +378,7 @@ self.model = AzureChatOpenAI(
           </Link>
         </div>
       </div>
-      <div className="border rounded-2xl hidden md:flex flex-col divide-y divide-gray-700 mx-8 mt-4">
+      <div className="border rounded-2xl hidden md:flex flex-col divide-y divide-gray-700 mt-4">
         <div className="flex items-center justify-between py-2 px-8 bg-gray-900 rounded-t-2xl">
           <ul className="flex items-center space-x-0">
             {Object.keys(selectedProvider?.integrations || {}).map(
@@ -387,7 +398,13 @@ self.model = AzureChatOpenAI(
             )}
           </ul>
           <button className="text-gray-300">
-            <ClipboardIcon className="h-6 w-6" />
+            <ClipboardIcon
+              onClick={() => {
+                navigator.clipboard.writeText(currentCodeBlock?.code || "");
+                toast.success("Copied to clipboard");
+              }}
+              className="h-6 w-6"
+            />
           </button>
         </div>
         <div className="w-full">
@@ -397,93 +414,7 @@ self.model = AzureChatOpenAI(
           />
         </div>
       </div>
-      {/* <ul className="grid grid-cols-3 md:grid-cols-8 gap-8 md:gap-4 px-4 md:px-16 pb-4">
-        {PROVIDERS.map((provider, index) => (
-          <li
-            key={index}
-            className="hover:bg-sky-100 group m-auto p-1 rounded-lg transition-colors ease-in-out duration-200"
-          >
-            <button
-              onClick={() => {
-                if (
-                  Object.keys(provider.integrations).length == 0 ||
-                  window.matchMedia("(max-width: 768px)").matches
-                ) {
-                  window.open(provider.href, "_blank");
-                  return;
-                }
-                setCurrentProvider(provider.name);
-                if (!provider.integrations[currentIntegration]) {
-                  setCurrentIntregration("node.js");
-                }
-              }}
-              className="flex flex-col items-center space-y-2"
-            >
-              <div className="col-span-1 rounded-lg border border-gray-300 bg-white h-16 w-16 flex items-center justify-center">
-                {provider.logo}
-              </div>
-              <span
-                className={`text-sm flex items-center gap-2 ${
-                  currentProvider === provider.name
-                    ? "font-bold text-black"
-                    : "text-gray-500"
-                }`}
-              >
-                {provider.name}
-                <ArrowUpRightIcon
-                  className={`h-4 w-4 hidden transition-all duration-200 ease-in-out ${
-                    Object.keys(provider.integrations).length > 0
-                      ? ""
-                      : "group-hover:flex"
-                  }`}
-                />
-              </span>
-            </button>
-          </li>
-        ))}
-      </ul>
-      <div className="border rounded-2xl hidden md:flex flex-col divide-y divide-gray-700 mx-8 mt-4 hidden md:flex">
-        <div className="flex items-center justify-between py-2 px-8 bg-gray-900 rounded-t-2xl">
-          <ul className="flex items-center space-x-0">
-            {Object.keys(selectedProvider?.integrations || {}).map(
-              (integration) => (
-                <li
-                  key={integration}
-                  className={`text-gray-300 cursor-pointer text-sm px-4 py-2 ${
-                    currentIntegration === integration
-                      ? "border border-gray-500 rounded-lg bg-gray-700"
-                      : ""
-                  }`}
-                  onClick={() => setCurrentIntregration(integration)}
-                >
-                  {integration}
-                </li>
-              )
-            )}
-          </ul>
-          <button className="text-gray-300">
-            <ClipboardIcon className="h-6 w-6" />
-          </button>
-        </div>
-        <div className="">
-          <DiffHighlight
-            code={currentCodeBlock?.code || ""}
-            language={currentCodeBlock?.language || "tsx"}
-          />
-        </div>
-      </div>
-      <div className="flex items-center justify-center mt-4 mx-5">
-        <p className="text-gray-400 text-sm m-auto">
-          Don&apos;t see your model? Let us know by creating a Github{" "}
-          <a
-            href="https://github.com/helicone/helicone/issues"
-            target="_blank"
-            className="text-sky-500"
-          >
-            Issue.
-          </a>
-        </p>
-      </div> */}
+      <Toaster />
     </div>
   );
 };

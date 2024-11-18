@@ -34,7 +34,7 @@ const Prototype = () => {
   return (
     <div className=" bg-gradient-to-b from-white from-50% via-[#f2f9fc80] via-[61%] to-[#f2f9fc]">
       <div className={cn(ISLAND_WIDTH, "py-12")}>
-        <div className="bg-white rounded-[20px] p-3 border border-[#D1D5DC] aspect-[2/1] shadow-md">
+        <div className="bg-white rounded-[20px] p-1 lg:p-3 border border-[#D1D5DC] aspect-[2/1] shadow-md">
           <div className="hidden lg:grid w-full h-full bg-[#f8fafc] border border-[#f0f0f0] rounded-xl grid-cols-6">
             <PrototypeSidebar
               openedPage={openedPage}
@@ -70,7 +70,7 @@ const PrototypeSidebar = ({
 }) => {
   return (
     <div className="bg-white border-r border-[#e5e7eb] h-full flex-1 rounded-l-xl overflow-y-auto">
-      <div className="w-full flex flex-col h-full border-r dark:border-slate-800">
+      <div className="w-full flex flex-col h-full border-r dark:border-slate-800 px-2">
         <div className="flex-grow overflow-y-auto pb-14">
           <div className="flex items-center justify-between gap-2 h-14 border-b dark:border-slate-800 mx-1">
             <Button
@@ -86,11 +86,11 @@ const PrototypeSidebar = ({
               <ChevronLeftIcon className="h-4 w-4" />
             </Button>
           </div>
-          <div className="flex flex-col justify-between h-[calc(100%-16px)]">
+          <div className="flex flex-col justify-between h-[calc(100%-16px)] ">
             {/* Navigation items */}
             <div className="flex flex-col justify-between">
               <div className="group flex flex-col py-2 data-[collapsed=true]:py-2 ">
-                <nav className="grid flex-grow overflow-y-auto px-2 group-[[data-collapsed=true]]:justify-center group-[[data-collapsed=true]]:px-2">
+                <nav className="grid gap-y-1 flex-grow overflow-y-auto px-2 group-[[data-collapsed=true]]:justify-center group-[[data-collapsed=true]]:px-2">
                   <div
                     className={cn(
                       buttonVariants({
@@ -122,12 +122,12 @@ const PrototypeSidebar = ({
                       <TableCellsIcon className="mr-2 h-4 w-4" />
                       <div className="relative">
                         Requests
-                        <div className="absolute w-1.5 h-1.5 bg-[#32ACEB] rounded-full top-[-1px] right-[-5px]"></div>
-                        <div className="absolute w-1.5 h-1.5 bg-[#32ACEB] rounded-full top-[-1px] right-[-5px] animate-ping"></div>
+                        <div className="absolute w-1.5 h-1.5 bg-[#32ACEB] rounded-full top-[1px] right-[-9px]"></div>
+                        <div className="absolute w-1.5 h-1.5 bg-[#32ACEB] rounded-full top-[1px] right-[-9px] animate-ping"></div>
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1 font-normal text-slate-400 text-xs mt-[10px] text-[11px]">
+                  <div className="flex items-center gap-1 font-normal text-slate-400 mt-[10px] text-[11px]">
                     <div className="flex items-center">
                       Segments
                       <ChevronDownIcon className="h-3 w-3 transition-transform" />
@@ -148,8 +148,8 @@ const PrototypeSidebar = ({
                       <ListTreeIcon className="mr-2 h-4 w-4" />
                       <div className="relative">
                         Sessions
-                        <div className="absolute w-1.5 h-1.5 bg-[#32ACEB] rounded-full top-[-1px] right-[-5px]"></div>
-                        <div className="absolute w-1.5 h-1.5 bg-[#32ACEB] rounded-full top-[-1px] right-[-5px] animate-ping"></div>
+                        <div className="absolute w-1.5 h-1.5 bg-[#32ACEB] rounded-full top-[1px] right-[-9px]"></div>
+                        <div className="absolute w-1.5 h-1.5 bg-[#32ACEB] rounded-full top-[1px] right-[-9px] animate-ping"></div>
                       </div>
                     </div>
                   </div>
@@ -181,7 +181,7 @@ const PrototypeSidebar = ({
                       Users
                     </div>
                   </div>
-                  <div className="flex items-center gap-1 font-normal text-slate-400 text-xs mt-[10px] text-[11px]">
+                  <div className="flex items-center gap-1 font-normal text-slate-400 mt-[10px] text-[11px]">
                     <div className="flex items-center">
                       Improve
                       <ChevronDownIcon className="h-3 w-3 transition-transform" />
@@ -249,21 +249,21 @@ const PrototypeSidebar = ({
                         variant: "ghost",
                         size: "sm",
                       }),
-                      "justify-start w-full text-[12px] h-8 px-2"
+                      "justify-start w-full text-[11px] h-8 px-2"
                     )}
                   >
-                    <div className="flex items-center">
+                    <div className="flex items-center text-[11px]">
                       <CircleStackIcon className="mr-2 h-4 w-4" />
                       Datasets
                     </div>
                   </div>
-                  <div className="flex items-center gap-1 font-normal text-slate-400 text-xs mt-[10px] text-[11px]">
+                  <div className="flex items-center gap-1 font-normal text-slate-400 mt-[10px] text-[11px]">
                     <div className="flex items-center">
-                      Datasets
+                      Developer
                       <ChevronRightIcon className="h-3 w-3 transition-transform" />
                     </div>
                   </div>
-                  <div className="flex items-center gap-1 font-normal text-slate-400 text-xs mt-[10px] text-[11px]">
+                  <div className="flex items-center gap-1 font-normal text-slate-400 mt-[10px] text-[11px]">
                     <div className="flex items-center">
                       Enterprise
                       <ChevronRightIcon className="h-3 w-3 transition-transform" />

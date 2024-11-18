@@ -25,8 +25,7 @@ const Quote2 = () => {
       >
         <div
           className={cn(
-            "flex gap-2.5 items-center transition-all duration-300",
-            isQuestionOpen && "justify-between"
+            "flex justify-between items-center transition-all duration-300"
           )}
         >
           <p className="text-sm sm:text-lg">
