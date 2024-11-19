@@ -1,6 +1,7 @@
 import {
   ListBulletIcon,
   PlayIcon,
+  SparklesIcon,
   TrashIcon,
 } from "@heroicons/react/24/outline";
 import { Button } from "../../../../../ui/button";
@@ -26,110 +27,36 @@ export interface InputEntry {
   value: string;
 }
 
-interface InputCellRendererProps {
-  value?: InputEntry[];
-  data: any; // The full row data
-  context: any; // Grid context
-  node: any; // Grid node
+interface ExperimentHeaderProps {
+  isOriginal: boolean;
+  onRunColumn?: () => Promise<void>;
+  orginalPromptTemplate?: any;
+  promptVersionId?: string;
+  originalPromptTemplate?: any;
 }
 
-const InputCellRenderer: React.FC<InputCellRendererProps> = (props) => {
-  const notification = useNotification();
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-
-  // Use the inputs from props
-  const inputs: InputEntry[] = useMemo(() => {
-    const inputValue = props?.data?.cells?.inputs?.value;
-    if (Array.isArray(inputValue)) {
-      return inputValue;
-    } else {
-      return [];
-    }
-  }, [props?.data?.cells?.inputs?.value]);
-
-  // Handle saving inputs from the drawer
-  const handleSave = useCallback(
-    (updatedInputs: InputEntry[]) => {
-      const cellId = props?.data?.cells?.inputs?.cellId;
-
-      // Validate inputs
-      const validateInputs = (inputs: InputEntry[]) => {
-        return inputs.every((input) => input.key && input.value);
-      };
-
-      if (!validateInputs(updatedInputs)) {
-        notification.setNotification("Please add valid inputs", "error");
-        return;
-      }
-
-      try {
-        props.context.handleUpdateExperimentCell({
-          cellId: cellId,
-          value: "inputs",
-          metadata: {
-            inputs: updatedInputs,
-          },
-        });
-        console.log("handleUpdateExperimentCell called successfully");
-
-        // Update latest input keys
-        const latestInputKeys = updatedInputs.map((input) => input.key);
-        props.context.updateLatestInputKeys(latestInputKeys);
-      } catch (error) {
-        console.error("Error calling handleUpdateExperimentCell:", error);
-      }
-    },
-    [props, notification]
-  );
-
-  return (
-    <>
-      <div
-        className="cursor-pointer p-2"
-        onClick={() => setIsDrawerOpen(true)}
-        style={{
-          whiteSpace: "normal",
-          overflow: "hidden",
-          textOverflow: "ellipsis",
-          minHeight: "20px",
-        }}
+const icon = (model: string) => {
+  if (model.includes("gpt")) {
+    return (
+      <svg
+        className="w-4 h-4"
+        viewBox="0 0 12 13"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
       >
-        {inputs.length > 0 ? (
-          inputs.map((inputEntry, index) => (
-            <div key={`${inputEntry.key}-${index}`}>
-              <span className="mr-1 font-semibold">{inputEntry.key}:</span>
-              <span>{inputEntry.value === "" ? "null" : inputEntry.value}</span>
-            </div>
-          ))
-        ) : (
-          <div className="text-gray-500">Click to add inputs</div>
-        )}
-      </div>
-
-      {/* Render the InputEditorDrawer when isDrawerOpen is true */}
-      {isDrawerOpen && (
-        <InputEditorDrawer
-          open={isDrawerOpen}
-          setOpen={setIsDrawerOpen}
-          initialInputs={inputs}
-          onSave={handleSave}
+        <path
+          d="M11.1415 5.41054C11.2756 5.00648 11.322 4.57843 11.2776 4.15501C11.2331 3.73158 11.0988 3.32251 10.8836 2.95514C10.5646 2.39985 10.0775 1.96022 9.4925 1.69962C8.90752 1.43902 8.25489 1.37092 7.62871 1.50514C7.27296 1.10942 6.81935 0.814273 6.31344 0.649344C5.80753 0.484414 5.26712 0.455508 4.7465 0.565527C4.22588 0.675546 3.74337 0.920619 3.34744 1.27613C2.95151 1.63164 2.65609 2.08507 2.49086 2.59089C2.07369 2.67643 1.67959 2.85003 1.33489 3.10008C0.990185 3.35014 0.702825 3.67088 0.49201 4.04089C0.169527 4.59525 0.0317005 5.2378 0.0984554 5.87566C0.16521 6.51351 0.433088 7.11361 0.86336 7.58919C0.728692 7.99305 0.681822 8.42102 0.725885 8.84446C0.769947 9.2679 0.903926 9.67705 1.11886 10.0445C1.43828 10.6 1.92582 11.0398 2.51121 11.3004C3.09661 11.561 3.74963 11.629 4.37616 11.4946C4.65879 11.8129 5.00607 12.0672 5.39481 12.2406C5.78356 12.4139 6.20481 12.5024 6.63046 12.5C7.27228 12.5006 7.89768 12.2972 8.4164 11.9192C8.93511 11.5413 9.3203 11.0082 9.51636 10.3971C9.93348 10.3114 10.3275 10.1377 10.6722 9.88768C11.0169 9.63764 11.3043 9.31695 11.5152 8.94704C11.8339 8.39349 11.9693 7.75335 11.9022 7.11816C11.8351 6.48298 11.5688 5.88524 11.1415 5.41054ZM6.63046 11.7146C6.10482 11.7154 5.59566 11.5312 5.19226 11.1942L5.26321 11.154L7.65236 9.77489C7.71182 9.74001 7.76119 9.69027 7.79562 9.63055C7.83004 9.57082 7.84834 9.50317 7.84871 9.43424V6.06579L8.85871 6.65009C8.8637 6.65262 8.86803 6.65629 8.87133 6.66081C8.87463 6.66533 8.87682 6.67056 8.87771 6.67609V9.46739C8.87644 10.063 8.63927 10.6339 8.2181 11.055C7.79693 11.4762 7.22607 11.7133 6.63046 11.7146ZM1.80011 9.65189C1.5365 9.1967 1.44185 8.66313 1.53281 8.14504L1.60381 8.18764L3.99531 9.56674C4.05448 9.60146 4.12185 9.61977 4.19046 9.61977C4.25907 9.61977 4.32644 9.60146 4.38561 9.56674L7.30701 7.88249V9.04869C7.30674 9.05473 7.3051 9.06064 7.30223 9.06596C7.29935 9.07128 7.29531 9.07589 7.29041 9.07944L4.87051 10.4751C4.35407 10.7726 3.74068 10.853 3.16501 10.6987C2.58935 10.5443 2.09845 10.1678 1.80011 9.65189ZM1.17091 4.44779C1.43635 3.98967 1.85533 3.64025 2.35366 3.46139V6.29999C2.35276 6.36857 2.37028 6.43613 2.4044 6.49562C2.43851 6.55512 2.48797 6.60437 2.54761 6.63824L5.45481 8.31539L4.44476 8.89964C4.43929 8.90254 4.4332 8.90406 4.42701 8.90406C4.42082 8.90406 4.41473 8.90254 4.40926 8.89964L1.99411 7.50639C1.47864 7.20759 1.10258 6.71671 0.948293 6.14123C0.794002 5.56574 0.874051 4.95257 1.17091 4.43599V4.44779ZM9.46906 6.37569L6.55241 4.68199L7.56011 4.09999C7.56558 4.09709 7.57167 4.09557 7.57786 4.09557C7.58405 4.09557 7.59014 4.09709 7.59561 4.09999L10.0108 5.49564C10.38 5.70871 10.6811 6.02244 10.8787 6.40019C11.0764 6.77794 11.1625 7.20413 11.1271 7.62899C11.0916 8.05385 10.936 8.45986 10.6784 8.79961C10.4209 9.13936 10.072 9.39883 9.67251 9.54774V6.70914C9.67042 6.64068 9.65056 6.57393 9.61488 6.51547C9.5792 6.457 9.52898 6.40886 9.46906 6.37569ZM10.4744 4.86414L10.4034 4.82154L8.01666 3.43064C7.95712 3.3957 7.88934 3.37728 7.82031 3.37728C7.75128 3.37728 7.6835 3.3957 7.62396 3.43064L4.70501 5.11484V3.94869C4.70439 3.94276 4.70538 3.93677 4.70788 3.93136C4.71038 3.92595 4.71429 3.92131 4.71921 3.91794L7.13436 2.52464C7.50452 2.3114 7.92774 2.20796 8.35452 2.22642C8.78131 2.24488 9.19402 2.38447 9.54438 2.62888C9.89474 2.87329 10.1683 3.2124 10.333 3.60655C10.4977 4.00071 10.5468 4.43361 10.4745 4.85464L10.4744 4.86414ZM4.15376 6.93149L3.14376 6.34959C3.13871 6.34654 3.13439 6.34243 3.1311 6.33753C3.12782 6.33263 3.12565 6.32707 3.12476 6.32124V3.53709C3.12532 3.10997 3.24745 2.69184 3.47689 2.33159C3.70632 1.97133 4.03357 1.68383 4.42038 1.50271C4.80719 1.32158 5.23757 1.25432 5.66119 1.30878C6.08482 1.36324 6.48419 1.53717 6.81261 1.81024L6.74161 1.85049L4.35251 3.22949C4.29305 3.26436 4.24368 3.3141 4.20925 3.37383C4.17483 3.43355 4.15653 3.5012 4.15616 3.57014L4.15376 6.93149ZM4.70256 5.74879L6.00356 4.99889L7.30701 5.74879V7.24849L6.00831 7.99834L4.70496 7.24849L4.70256 5.74879Z"
+          fill="#64748B"
         />
-      )}
-    </>
-  );
+      </svg>
+    );
+  }
+  return <SparklesIcon className="w-4 h-4" />;
 };
 
-const CustomHeaderComponent: React.FC<any> = (props) => {
-  const {
-    displayName,
-    badgeText,
-    badgeVariant,
-    onRunColumn,
-    onHeaderClick,
-    orginalPromptTemplate,
-    promptVersionId,
-    originalPromptTemplate,
-  } = props;
+const ExperimentTableHeader = (props: ExperimentHeaderProps) => {
+  const { onRunColumn, promptVersionId, originalPromptTemplate, isOriginal } =
+    props;
 
   const [showPromptPlayground, setShowPromptPlayground] = useState(false);
   const jawnClient = useJawnClient();
@@ -150,7 +77,6 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
       return res.data?.data;
     },
     {
-      enabled: !!promptVersionId && showPromptPlayground,
       staleTime: Infinity,
       refetchOnWindowFocus: false,
       refetchOnMount: false,
@@ -178,85 +104,106 @@ const CustomHeaderComponent: React.FC<any> = (props) => {
   }, [promptTemplate, originalPromptTemplate]);
 
   return (
-    <Popover open={showPromptPlayground} onOpenChange={setShowPromptPlayground}>
-      <PopoverTrigger asChild>
-        <div
-          className="flex items-center justify-between w-full h-full pl-2 cursor-pointer"
-          onClick={handleHeaderClick}
-        >
-          <div className="flex items-center space-x-2">
-            <span className="text-md font-semibold text-slate-900 dark:text-slate-100">
-              {displayName}
-            </span>
-          </div>
-          {onRunColumn && (
-            <Button
-              variant="ghost"
-              className="ml-2 p-0 border-slate-200 border rounded-md bg-slate-50 text-slate-500 h-[22px] w-[24px] flex items-center justify-center"
-              onClick={handleRunClick}
-            >
-              <PlayIcon className="w-4 h-4 text-gray-600 dark:text-gray-300" />
-            </Button>
-          )}
-        </div>
-      </PopoverTrigger>
-      <PopoverContent className="w-[800px] p-0" side="bottom">
-        {hasDiff ? (
-          <Tabs defaultValue="preview" className="w-full">
-            <TabsList
-              className="w-full flex justify-end rounded-none"
-              variant={"secondary"}
-            >
-              <TabsTrigger value="diff">Diff</TabsTrigger>
-              <TabsTrigger value="preview">Preview</TabsTrigger>
-            </TabsList>
-            <TabsContent value="diff">
-              <ArrayDiffViewer
-                origin={
-                  originalPromptTemplate?.helicone_template?.messages ?? []
-                }
-                target={
-                  (promptTemplate?.helicone_template as any)?.messages ?? []
-                }
-              />
-            </TabsContent>
-            <TabsContent value="preview">
-              <PromptPlayground
-                prompt={promptTemplate?.helicone_template ?? ""}
-                selectedInput={undefined}
-                onSubmit={(history, model) => {
-                  setShowPromptPlayground(false);
-                }}
-                submitText="Save"
-                initialModel={promptTemplate?.model ?? ""}
-                isPromptCreatedFromUi={false}
-                defaultEditMode={false}
-                editMode={false}
-              />
-            </TabsContent>
-          </Tabs>
-        ) : (
-          <PromptPlayground
-            prompt={promptTemplate?.helicone_template ?? ""}
-            selectedInput={undefined}
-            onSubmit={(history, model) => {
-              setShowPromptPlayground(false);
-            }}
-            submitText="Save"
-            initialModel={promptTemplate?.model ?? ""}
-            isPromptCreatedFromUi={false}
-            defaultEditMode={false}
-            editMode={false}
-          />
-        )}
-      </PopoverContent>
-    </Popover>
+    <div className="flex flex-col gap-2">
+      <div className="flex gap-2 items-center ml-0.5">
+        {icon(promptTemplate?.model ?? "")}
+        <span className="text-xs font-medium text-slate-700 dark:text-slate-300">
+          {promptTemplate?.model}
+        </span>
+      </div>
+      <PromptPlayground
+        prompt={promptTemplate?.helicone_template ?? ""}
+        selectedInput={undefined}
+        onSubmit={(history, model) => {
+          setShowPromptPlayground(false);
+        }}
+        submitText="Save"
+        initialModel={promptTemplate?.model ?? ""}
+        isPromptCreatedFromUi={false}
+        defaultEditMode={false}
+        editMode={false}
+        playgroundMode="experiment-compact"
+      />
+    </div>
+    // <Popover open={showPromptPlayground} onOpenChange={setShowPromptPlayground}>
+    //   <PopoverTrigger asChild>
+    //     <div
+    //       className="flex items-center justify-between w-full h-full pl-2 cursor-pointer"
+    //       onClick={handleHeaderClick}
+    //     >
+    //       <div className="flex items-center space-x-2">
+    //         <span className="text-md font-semibold text-slate-900 dark:text-slate-100">
+    //           {displayName}
+    //         </span>
+    //       </div>
+    //       {onRunColumn && (
+    //         <Button
+    //           variant="ghost"
+    //           className="ml-2 p-0 border-slate-200 border rounded-md bg-slate-50 text-slate-500 h-[22px] w-[24px] flex items-center justify-center"
+    //           onClick={handleRunClick}
+    //         >
+    //           <PlayIcon className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+    //         </Button>
+    //       )}
+    //     </div>
+    //   </PopoverTrigger>
+    //   <PopoverContent className="w-[800px] p-0" side="bottom">
+    //     {hasDiff ? (
+    //       <Tabs defaultValue="preview" className="w-full">
+    //         <TabsList
+    //           className="w-full flex justify-end rounded-none"
+    //           variant={"secondary"}
+    //         >
+    //           <TabsTrigger value="diff">Diff</TabsTrigger>
+    //           <TabsTrigger value="preview">Preview</TabsTrigger>
+    //         </TabsList>
+    //         <TabsContent value="diff">
+    //           <ArrayDiffViewer
+    //             origin={
+    //               originalPromptTemplate?.helicone_template?.messages ?? []
+    //             }
+    //             target={
+    //               (promptTemplate?.helicone_template as any)?.messages ?? []
+    //             }
+    //           />
+    //         </TabsContent>
+    //         <TabsContent value="preview">
+    //           <PromptPlayground
+    //             prompt={promptTemplate?.helicone_template ?? ""}
+    //             selectedInput={undefined}
+    //             onSubmit={(history, model) => {
+    //               setShowPromptPlayground(false);
+    //             }}
+    //             submitText="Save"
+    //             initialModel={promptTemplate?.model ?? ""}
+    //             isPromptCreatedFromUi={false}
+    //             defaultEditMode={false}
+    //             editMode={false}
+    //           />
+    //         </TabsContent>
+    //       </Tabs>
+    //     ) : (
+    //       <PromptPlayground
+    //         prompt={promptTemplate?.helicone_template ?? ""}
+    //         selectedInput={undefined}
+    //         onSubmit={(history, model) => {
+    //           setShowPromptPlayground(false);
+    //         }}
+    //         submitText="Save"
+    //         initialModel={promptTemplate?.model ?? ""}
+    //         isPromptCreatedFromUi={false}
+    //         defaultEditMode={false}
+    //         editMode={false}
+    //       />
+    //     )}
+    //   </PopoverContent>
+    // </Popover>
   );
 };
 
 const InputsHeaderComponent = ({ inputs }: { inputs: string[] }) => {
   return (
-    <div className="flex flex-col gap-y-2">
+    <div className="flex flex-col h-full items-start justify-start gap-y-2">
       {inputs?.map((input) => (
         <Badge variant="helicone" key={input}>
           {input}
@@ -266,80 +213,4 @@ const InputsHeaderComponent = ({ inputs }: { inputs: string[] }) => {
   );
 };
 
-const RowNumberHeaderComponent: React.FC<any> = (props) => {
-  return (
-    <div className="flex-1 text-center items-center space-x-2 justify-center ml-1">
-      <ListBulletIcon className="h-5 w-5 text-slate-400" />
-    </div>
-  );
-};
-
-const PromptCellRenderer: React.FC<any> = (props) => {
-  return (
-    <div className="w-full h-full text-center items-center">{props.value}</div>
-  );
-};
-
-const RowNumberCellRenderer: React.FC<any> = (props) => {
-  const [popoverOpen, setPopoverOpen] = useState(false);
-  const dataRowIndex = props.data.rowIndex;
-  const gridRowIndex =
-    props.node.rowIndex !== undefined ? props.node.rowIndex + 1 : "N/A";
-
-  const handleRunClick = () => {
-    props.context.handleRunRow(dataRowIndex);
-    setPopoverOpen(false); // Close popover after action
-  };
-
-  const handleDeleteClick = () => {
-    props.context.handleDeleteRow(dataRowIndex);
-    setPopoverOpen(false); // Close popover after action
-  };
-
-  return (
-    <div className="w-full h-full">
-      <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
-        <PopoverTrigger asChild className="w-full h-full">
-          <Button
-            variant="ghost"
-            className="flex items-center justify-center w-full h-full cursor-pointer"
-            onClick={() => setPopoverOpen(!popoverOpen)}
-          >
-            {gridRowIndex}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent side="right" align="start" className="p-2 w-32">
-          <div className="flex flex-col items-center justify-start px-0">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="w-full flex items-center justify-start"
-              onClick={handleRunClick}
-            >
-              <PlayIcon className="w-4 h-4 mr-2" />
-              Run
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="w-full flex items-center justify-start"
-              onClick={handleDeleteClick}
-            >
-              <TrashIcon className="w-4 h-4 mr-2 text-red-500" />
-              Delete
-            </Button>
-          </div>
-        </PopoverContent>
-      </Popover>
-    </div>
-  );
-};
-
-export {
-  InputCellRenderer,
-  CustomHeaderComponent,
-  RowNumberHeaderComponent,
-  PromptCellRenderer,
-  RowNumberCellRenderer,
-  InputsHeaderComponent,
-};
+export { InputsHeaderComponent, ExperimentTableHeader };

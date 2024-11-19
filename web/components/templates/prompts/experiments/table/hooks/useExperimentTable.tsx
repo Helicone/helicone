@@ -280,6 +280,26 @@ export const useExperimentTable = (experimentTableId: string) => {
       },
     });
 
+  const { data: inputKeysData, isLoading: isInputKeysLoading } = useQuery({
+    queryKey: ["experimentInputKeys", orgId, experimentTableId],
+    queryFn: async () => {
+      if (!orgId || !experimentTableId) return null;
+
+      const jawnClient = getJawnClient(orgId);
+      const res = await jawnClient.GET(
+        "/v2/experiment/{experimentId}/input-keys",
+        {
+          params: {
+            path: {
+              experimentId: experimentTableId,
+            },
+          },
+        }
+      );
+      return res.data?.data;
+    },
+  });
+
   const promptSubversionId = experimentTableQuery?.original_prompt_version;
 
   const {
@@ -354,6 +374,8 @@ export const useExperimentTable = (experimentTableId: string) => {
     isExperimentTableLoading,
     promptVersionsData,
     isPromptVersionsLoading,
+    inputKeysData,
+    isInputKeysLoading,
     promptVersionTemplateData,
     isPromptVersionTemplateLoading,
     addExperimentTableRowInsertBatch,

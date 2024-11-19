@@ -8,7 +8,7 @@ import {
 } from "@tanstack/react-table";
 import AddColumnHeader from "./AddColumnHeader";
 import {
-  CustomHeaderComponent,
+  ExperimentTableHeader,
   InputsHeaderComponent,
 } from "./components/tableElementsRenderer";
 import {
@@ -39,6 +39,8 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
+import PromptPlayground from "../../id/promptPlayground";
+import ExperimentHeader from "../../id/newExperiment/ExperimentHeader";
 
 export function ExperimentTable({
   experimentTableId,
@@ -51,6 +53,8 @@ export function ExperimentTable({
     promptVersionsData,
     addExperimentTableRowInsertBatch,
     runHypothesis,
+    inputKeysData,
+    isInputKeysLoading,
   } = useExperimentTable(experimentTableId);
 
   const [popoverOpen, setPopoverOpen] = useState(false);
@@ -105,7 +109,7 @@ export function ExperimentTable({
             </Button>
           </div>
         ),
-        size: 5,
+        size: 80,
       },
       {
         id: "inputs-upper",
@@ -113,9 +117,7 @@ export function ExperimentTable({
         columns: [
           {
             header: () => (
-              <InputsHeaderComponent
-                inputs={experimentTableQuery?.input_keys ?? []}
-              />
+              <InputsHeaderComponent inputs={inputKeysData ?? []} />
             ),
             accessorKey: "inputs",
             cell: ({ row }) => {
@@ -134,11 +136,13 @@ export function ExperimentTable({
                 </div>
               );
             },
+            size: 250,
           },
         ],
       },
       {
         header: "Original",
+        id: "original-outer",
         // header: () => (
         //   <CustomHeaderComponent
         //     displayName="Original"
@@ -148,16 +152,28 @@ export function ExperimentTable({
         //     promptVersionTemplate={promptVersionTemplateData}
         //   />
         // ),
-        accessorKey: "original",
-        cell: ({ row }) => {
-          return (
-            <OriginalOutputCellRenderer
-              requestId={row.original?.original ?? ""}
-              wrapText={false}
-              prompt={promptVersionTemplateData}
-            />
-          );
-        },
+        columns: [
+          {
+            accessorKey: "original",
+            header: () => (
+              <ExperimentTableHeader
+                isOriginal={true}
+                promptVersionId={promptVersionsData?.[0]?.id ?? ""}
+                originalPromptTemplate={promptVersionTemplateData}
+              />
+            ),
+            cell: ({ row }) => {
+              return (
+                <OriginalOutputCellRenderer
+                  requestId={row.original?.original ?? ""}
+                  wrapText={false}
+                  prompt={promptVersionTemplateData}
+                />
+              );
+            },
+          },
+        ],
+        size: 300,
       },
       ...(promptVersionsData?.slice(1) ?? []).map(
         (
@@ -174,7 +190,9 @@ export function ExperimentTable({
             | undefined;
         }> => ({
           id: pv.id,
-          header: `Prompt ${i + 1}`,
+          header: pv.metadata?.label
+            ? `${pv.metadata?.label}`
+            : `Prompt ${i + 1}`,
           // header: () => (
           //   <CustomHeaderComponent
           //     displayName={`Prompt ${i + 1}`}
@@ -223,9 +241,11 @@ export function ExperimentTable({
               />
             );
           },
+          size: 300,
         })
       ),
       {
+        id: "add_prompt",
         header: () => (
           <AddColumnHeader
             experimentId={experimentTableId}
@@ -239,7 +259,13 @@ export function ExperimentTable({
             experimentPromptVersions={promptVersionsData ?? []}
           />
         ),
-        accessorKey: "add_prompt",
+        columns: [
+          {
+            header: "",
+            accessorKey: "add_prompt",
+            size: 200,
+          },
+        ],
       },
     ];
   }, [
@@ -283,9 +309,9 @@ export function ExperimentTable({
     data: tableData,
     columns: columnDef,
     defaultColumn: {
-      minSize: 10,
-      maxSize: 800,
-      size: 500,
+      minSize: 50,
+      maxSize: 1000,
+      size: 300,
     },
     getCoreRowModel: getCoreRowModel(),
     enableColumnResizing: true,
@@ -319,30 +345,24 @@ export function ExperimentTable({
       <ResizablePanel defaultSize={75}>
         <div className="h-full flex flex-col border-b divide-y divide-slate-300 dark:divide-slate-700">
           <div className="h-full overflow-x-auto bg-slate-100 dark:bg-slate-800">
-            <div className="bg-slate-50 dark:bg-black rounded-sm h-full">
-              <Table
-                className="w-full bg-white dark:bg-black"
-                style={{ tableLayout: "fixed" }}
-              >
+            <div className="inline-block bg-slate-50 dark:bg-black rounded-sm h-full">
+              <Table className="border-collapse w-auto">
                 <TableHeader>
-                  {table.getHeaderGroups().map((headerGroup) => (
+                  {table.getHeaderGroups().map((headerGroup, i) => (
                     <TableRow
                       key={headerGroup.id}
-                      className="sticky top-0 bg-slate-50 dark:bg-slate-900 shadow-sm"
+                      className={clsx(
+                        "sticky top-0 bg-slate-50 dark:bg-slate-900 shadow-sm",
+                        i === 1 && "h-[300px]"
+                      )}
                     >
                       {headerGroup.headers.map((header, index) => (
                         <TableHead
                           key={header.id}
                           style={{
-                            position: "relative",
                             width: header.getSize(),
-                            minWidth: header.column.columnDef.minSize,
                           }}
-                          className={clsx(
-                            "bg-white dark:bg-neutral-950 relative",
-                            index === headerGroup.headers.length - 1 &&
-                              "border-r border-slate-300 dark:border-slate-700"
-                          )}
+                          className="bg-white dark:bg-neutral-950 relative px-3"
                         >
                           {header.isPlaceholder
                             ? null
@@ -383,7 +403,14 @@ export function ExperimentTable({
                         data-state={row.getIsSelected() && "selected"}
                       >
                         {row.getVisibleCells().map((cell) => (
-                          <TableCell key={cell.id}>
+                          <TableCell
+                            key={cell.id}
+                            style={{
+                              width: cell.column.getSize(),
+                              maxWidth: cell.column.getSize(),
+                              minWidth: cell.column.getSize(),
+                            }}
+                          >
                             {flexRender(
                               cell.column.columnDef.cell,
                               cell.getContext()

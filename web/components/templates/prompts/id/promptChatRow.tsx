@@ -19,6 +19,8 @@ import AddFileButton from "../../playground/new/addFileButton";
 import ThemedModal from "../../../shared/themed/themedModal";
 import MarkdownEditor from "../../../shared/markdownEditor";
 import { Message } from "../../requests/chatComponent/types";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 interface PromptChatRowProps {
   index: number;
@@ -30,7 +32,7 @@ interface PromptChatRowProps {
   ) => void;
   deleteRow: (rowId: string) => void;
   editMode?: boolean;
-  promptMode?: boolean;
+  playgroundMode?: "prompt" | "experiment" | "experiment-compact";
   selectedProperties: Record<string, string> | undefined;
   onExtractVariables?: (
     variables: Array<{ original: string; heliconeTag: string }>
@@ -49,9 +51,11 @@ export const hasImage = (content: string | any[] | null) => {
 export const PrettyInput = ({
   keyName,
   selectedProperties,
+  playgroundMode = "prompt",
 }: {
   keyName: string;
   selectedProperties: Record<string, string> | undefined;
+  playgroundMode?: "prompt" | "experiment" | "experiment-compact";
 }) => {
   const getRenderText = () => {
     if (selectedProperties) {
@@ -63,6 +67,13 @@ export const PrettyInput = ({
   const renderText = getRenderText();
   const [open, setOpen] = useState(false);
   const TEXT_LIMIT = 120;
+
+  if (
+    playgroundMode === "experiment" ||
+    playgroundMode === "experiment-compact"
+  ) {
+    return <span className="text-[#2463EB]">{`{{ ${renderText} }}`}</span>;
+  }
 
   return (
     <>
@@ -122,10 +133,11 @@ export const PrettyInput = ({
 
 const RenderWithPrettyInputKeys = (props: {
   text: string;
-
+  playgroundMode?: "prompt" | "experiment" | "experiment-compact";
   selectedProperties: Record<string, string> | undefined;
 }) => {
-  const { text, selectedProperties } = props;
+  console.log(props);
+  const { text, selectedProperties, playgroundMode = "prompt" } = props;
 
   // Function to replace matched patterns with JSX components
   const replaceInputKeysWithComponents = (inputText: string) => {
@@ -152,6 +164,7 @@ const RenderWithPrettyInputKeys = (props: {
           keyName={keyName}
           key={offset}
           selectedProperties={selectedProperties}
+          playgroundMode={playgroundMode}
         />
       );
 
@@ -170,7 +183,15 @@ const RenderWithPrettyInputKeys = (props: {
   };
 
   return (
-    <div className="text-sm leading-7 text-slate-900 dark:text-slate-100 whitespace-pre-wrap">
+    <div
+      className={cn(
+        "text-sm leading-7 text-slate-900 dark:text-slate-100 whitespace-pre-wrap",
+        playgroundMode === "experiment" ||
+          playgroundMode === "experiment-compact"
+          ? "text-slate-700 dark:text-slate-300 text-xs"
+          : ""
+      )}
+    >
       {replaceInputKeysWithComponents(text)}
     </div>
   );
@@ -185,6 +206,7 @@ const PromptChatRow = (props: PromptChatRowProps) => {
     editMode,
     selectedProperties,
     onExtractVariables,
+    playgroundMode = "prompt",
   } = props;
 
   const [currentMessage, setCurrentMessage] = useState(message);
@@ -273,7 +295,11 @@ const PromptChatRow = (props: PromptChatRowProps) => {
     return keyName ? keyName[1] : "";
   };
 
-  const getContent = (message: Message, minimize: boolean) => {
+  const getContent = (
+    message: Message,
+    minimize: boolean,
+    playgroundMode?: "prompt" | "experiment" | "experiment-compact"
+  ) => {
     // check if the content is an array and it has an image type or image_url type
     const content = message.content;
 
@@ -289,6 +315,7 @@ const PromptChatRow = (props: PromptChatRowProps) => {
           <RenderWithPrettyInputKeys
             text={removeLeadingWhitespace(text)}
             selectedProperties={selectedProperties}
+            playgroundMode={playgroundMode}
           />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           {hasImage(content) && (
@@ -385,6 +412,7 @@ const PromptChatRow = (props: PromptChatRowProps) => {
                 : contentString
             }
             selectedProperties={selectedProperties}
+            playgroundMode={playgroundMode}
           />
         </div>
       );
@@ -443,6 +471,19 @@ const PromptChatRow = (props: PromptChatRowProps) => {
     setRole(message.role);
   }, [message]);
 
+  if (playgroundMode === "experiment-compact") {
+    return (
+      <div className="flex flex-col gap-1 items-start">
+        <Badge variant="helicone">
+          {role.slice(0, 1).toUpperCase() + role.slice(1)}
+        </Badge>
+        <div className="text-xs text-slate-700 dark:text-slate-300">
+          {getContent(currentMessage, minimize, playgroundMode)}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <li
       className={clsx(
@@ -454,21 +495,27 @@ const PromptChatRow = (props: PromptChatRowProps) => {
       <div className="flex flex-col gap-4 w-full">
         <div className="flex flex-col w-full h-full relative space-y-2">
           <div className="flex w-full justify-between px-4 pt-3 rounded-t-lg">
-            <RoleButton
-              size="small"
-              role={role}
-              onRoleChange={(newRole) => {
-                setRole(newRole);
-                const newMessage = {
-                  ...currentMessage,
-                };
+            {playgroundMode === "prompt" ? (
+              <RoleButton
+                size="small"
+                role={role}
+                onRoleChange={(newRole) => {
+                  setRole(newRole);
+                  const newMessage = {
+                    ...currentMessage,
+                  };
 
-                newMessage.role = newRole;
-                setCurrentMessage(newMessage);
-                callback(contentAsString || "", newRole, file);
-              }}
-              disabled={!editMode}
-            />
+                  newMessage.role = newRole;
+                  setCurrentMessage(newMessage);
+                  callback(contentAsString || "", newRole, file);
+                }}
+                disabled={!editMode}
+              />
+            ) : (
+              <Badge variant="helicone">
+                {role.slice(0, 1).toUpperCase() + role.slice(1)}
+              </Badge>
+            )}
             <div className="flex justify-end items-center space-x-2 w-full">
               {!editMode && (
                 <Tooltip title={minimize ? "Expand" : "Shrink"} placement="top">
@@ -576,7 +623,7 @@ const PromptChatRow = (props: PromptChatRowProps) => {
                   )}
                 </div>
               ) : (
-                <>{getContent(currentMessage, minimize)}</>
+                <>{getContent(currentMessage, minimize, playgroundMode)}</>
               )}
             </div>
           </div>

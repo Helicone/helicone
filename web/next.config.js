@@ -6,6 +6,7 @@ const withBundleAnalyzer = require("@next/bundle-analyzer")({
 const nextConfig = {
   reactStrictMode: false,
   swcMinify: true,
+  transpilePackages: ["@lobehub/icons"],
   webpack: (config) => {
     config.module.rules.push({
       test: /\.(graphql|gql)$/,

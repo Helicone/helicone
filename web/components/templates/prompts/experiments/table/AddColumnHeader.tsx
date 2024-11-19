@@ -312,18 +312,14 @@ const AddColumnHeader: React.FC<AddColumnHeaderProps> = ({
                         experimentId,
                       ],
                     });
+                    queryClient.invalidateQueries({
+                      queryKey: ["experimentInputKeys", orgId, experimentId],
+                    });
 
                     if (result.error || !result.data) {
                       console.error(result);
                       return;
                     }
-                    // await handleAddColumn(
-                    //   "Experiment",
-                    //   "experiment",
-                    //   hypothesisResult.data.data?.hypothesisId,
-                    //   result.data.data?.id,
-                    //   promptVariables.map((p) => p.original)
-                    // );
 
                     setOpenAddExperimentModal(false);
                     setIsOpen(false);

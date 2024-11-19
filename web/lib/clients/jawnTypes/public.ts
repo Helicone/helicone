@@ -424,6 +424,9 @@ export interface paths {
   "/v2/experiment/{experimentId}/prompt-versions": {
     get: operations["GetPromptVersionsForExperiment"];
   };
+  "/v2/experiment/{experimentId}/input-keys": {
+    get: operations["GetInputKeysForExperiment"];
+  };
   "/v2/experiment/{experimentId}/add-manual-row": {
     post: operations["AddManualRowToExperiment"];
   };
@@ -2833,7 +2836,7 @@ Json: JsonObject;
       id: string;
       name: string;
       original_prompt_version: string;
-      input_keys: string[];
+      input_keys: string[] | null;
       created_at: string;
     };
     "ResultSuccess_ExperimentV2-Array_": {
@@ -2860,7 +2863,7 @@ Json: JsonObject;
       id: string;
       name: string;
       original_prompt_version: string;
-      input_keys: string[];
+      input_keys: string[] | null;
       created_at: string;
       rows: components["schemas"]["ExperimentV2Row"][];
     };
@@ -5463,6 +5466,21 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_ExperimentV2PromptVersion-Array.string_"];
+        };
+      };
+    };
+  };
+  GetInputKeysForExperiment: {
+    parameters: {
+      path: {
+        experimentId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_string-Array.string_"];
         };
       };
     };
