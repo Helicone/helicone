@@ -8168,7 +8168,8 @@
 						"items": {
 							"type": "string"
 						},
-						"type": "array"
+						"type": "array",
+						"nullable": true
 					},
 					"created_at": {
 						"type": "string"
@@ -8291,7 +8292,8 @@
 						"items": {
 							"type": "string"
 						},
-						"type": "array"
+						"type": "array",
+						"nullable": true
 					},
 					"created_at": {
 						"type": "string"
@@ -15708,6 +15710,41 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/Result_ExperimentV2PromptVersion-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Experiment"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "experimentId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v2/experiment/{experimentId}/input-keys": {
+			"get": {
+				"operationId": "GetInputKeysForExperiment",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_string-Array.string_"
 								}
 							}
 						}

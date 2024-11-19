@@ -254,6 +254,18 @@ export class ExperimentV2Manager extends BaseManager {
     return ok(promptVersions.data ?? []);
   }
 
+  async getInputKeysForExperiment(
+    experimentId: string
+  ): Promise<Result<string[], string>> {
+    const inputKeys = await supabaseServer.client
+      .from("experiment_v3")
+      .select("input_keys")
+      .eq("id", experimentId)
+      .eq("organization", this.authParams.organizationId)
+      .single();
+    return ok(inputKeys.data?.input_keys ?? []);
+  }
+
   async addManualRowToExperiment(
     experimentId: string,
     inputs: Record<string, string>

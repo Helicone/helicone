@@ -35,13 +35,25 @@ export class PromptManager extends BaseManager {
       isProduction: false, // Set isProduction to false for new versions
     };
 
-    // Parse the newHeliconeTemplate to extract the model
     let model = "";
     try {
-      const templateObj = JSON.parse(params.newHeliconeTemplate);
-      model = templateObj.model || "";
+      const templateObj =
+        typeof params.newHeliconeTemplate === "string"
+          ? JSON.parse(params.newHeliconeTemplate)
+          : params.newHeliconeTemplate;
+
+      model =
+        templateObj.model ||
+        templateObj.messages?.[0]?.model ||
+        (Array.isArray(templateObj) ? templateObj[0]?.model : "") ||
+        "";
+
+      if (!model) {
+        console.warn("No model found in template:", templateObj);
+      }
     } catch (error) {
-      console.error("Error parsing newHeliconeTemplate:", error);
+      console.error("Error parsing or extracting model from template:", error);
+      console.error("Template:", params.newHeliconeTemplate);
     }
 
     const result = await dbExecute<{

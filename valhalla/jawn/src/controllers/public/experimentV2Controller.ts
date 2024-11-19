@@ -22,7 +22,7 @@ export interface ExperimentV2 {
   id: string;
   name: string;
   original_prompt_version: string;
-  input_keys: string[];
+  input_keys: string[] | null;
   created_at: string;
 }
 
@@ -152,6 +152,24 @@ export class ExperimentV2Controller extends Controller {
   ): Promise<Result<ExperimentV2PromptVersion[], string>> {
     const experimentManager = new ExperimentV2Manager(request.authParams);
     const result = await experimentManager.getPromptVersionsForExperiment(
+      experimentId
+    );
+
+    if (result.error || !result.data) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
+    }
+    return result;
+  }
+
+  @Get("/{experimentId}/input-keys")
+  public async getInputKeysForExperiment(
+    @Path() experimentId: string,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<string[], string>> {
+    const experimentManager = new ExperimentV2Manager(request.authParams);
+    const result = await experimentManager.getInputKeysForExperiment(
       experimentId
     );
 
