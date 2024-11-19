@@ -2,6 +2,7 @@ import { ISLAND_WIDTH } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 import { ChevronRightIcon } from "lucide-react";
 import LogoBox from "./LogoBox";
+import Link from "next/link";
 
 const Hero = () => {
   return (
@@ -33,13 +34,15 @@ const Hero = () => {
         The all-in-one platform to monitor, debug and improve <br />
         production-ready LLM applications.
       </p>
-      <button className="bg-brand py-3 px-6 lg:py-[18px] lg:px-9 text-base lg:text-[22px] 2xl:text-[26px] font-normal flex gap-3 rounded-lg text-white self-start items-center z-[10]">
-        Get started for free
-        <ChevronRightIcon
-          className="w-5 sm:w-7 h-5 sm:h-7"
-          strokeWidth={2.33}
-        />
-      </button>
+      <Link href="https://us.helicone.ai/signup">
+        <button className="bg-brand py-3 px-6 lg:py-[18px] lg:px-9 text-base lg:text-[22px] 2xl:text-[26px] font-normal flex gap-3 rounded-lg text-white self-start items-center z-[10]">
+          Get started for free
+          <ChevronRightIcon
+            className="w-5 sm:w-7 h-5 sm:h-7"
+            strokeWidth={2.33}
+          />
+        </button>
+      </Link>
 
       <LogoBox
         imgSrc="/static/home/gemini.webp"
