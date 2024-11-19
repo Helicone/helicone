@@ -19,12 +19,7 @@ import {
   getRequestMessages,
   getResponseMessage,
 } from "../../requests/chatComponent/messageUtils";
-import { Ellipsis } from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 
 export type Input = {
   id: string;
@@ -241,7 +236,12 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
     switch (mode) {
       case "Pretty":
         return (
-          <ul className="w-full relative h-fit">
+          <ul
+            className={cn(
+              "w-full relative h-fit",
+              playgroundMode === "experiment-compact" && "space-y-2"
+            )}
+          >
             {messages.map((message, index) => (
               <PromptChatRow
                 playgroundMode={playgroundMode}
@@ -287,9 +287,21 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
 
   const [isAccordionOpen, setIsAccordionOpen] = useState(false);
 
-  if (playgroundMode === "experiment-compact") {
+  if (
+    playgroundMode === "experiment-compact" ||
+    playgroundMode === "experiment"
+  ) {
     return (
-      <div className="flex flex-col gap-1">{renderMessages(messages)}</div>
+      <div
+        className={cn(
+          "h-full rounded-md",
+          playgroundMode === "experiment-compact" && "space-y-2",
+          playgroundMode === "experiment" &&
+            "border border-slate-200 dark:border-slate-800"
+        )}
+      >
+        {renderMessages(messages)}
+      </div>
     );
   }
 

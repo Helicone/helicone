@@ -234,6 +234,8 @@ export class PromptManager extends BaseManager {
       model: string;
       created_at: string;
       metadata: Record<string, any>;
+      experiment_id?: string | null;
+      parent_prompt_version?: string | null;
     }>(
       `
     SELECT 
@@ -244,7 +246,9 @@ export class PromptManager extends BaseManager {
       prompt_v2,
       model,
       prompts_versions.created_at,
-      prompts_versions.metadata
+      prompts_versions.metadata,
+      prompts_versions.experiment_id,
+      prompts_versions.parent_prompt_version
     FROM prompts_versions
     left join prompt_v2 on prompt_v2.id = prompts_versions.prompt_v2
     WHERE prompt_v2.organization = $1

@@ -105,6 +105,9 @@ export class ExperimentV2Manager extends BaseManager {
         {
           newHeliconeTemplate: originalPromptVersionData.helicone_template,
           experimentId: result.data[0].id,
+          metadata: {
+            label: "Original",
+          },
         }
       );
 

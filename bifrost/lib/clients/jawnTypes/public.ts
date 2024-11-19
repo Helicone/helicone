@@ -1268,6 +1268,8 @@ export interface components {
       helicone_template: string;
       created_at: string;
       metadata: components["schemas"]["Record_string.any_"];
+      parent_prompt_version?: string | null;
+      experiment_id?: string | null;
     };
     ResultSuccess_PromptVersionResult_: {
       data: components["schemas"]["PromptVersionResult"];

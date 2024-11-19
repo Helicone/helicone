@@ -1,26 +1,13 @@
-import {
-  ListBulletIcon,
-  PlayIcon,
-  SparklesIcon,
-  TrashIcon,
-} from "@heroicons/react/24/outline";
+import { PlayIcon, SparklesIcon } from "@heroicons/react/24/outline";
 import { Button } from "../../../../../ui/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "../../../../../ui/popover";
-import { useState, useCallback, useMemo } from "react";
+import { useState, useMemo } from "react";
 import PromptPlayground from "../../../id/promptPlayground";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
 import { useJawnClient } from "../../../../../../lib/clients/jawnHook";
 import React from "react";
-import useNotification from "../../../../../shared/notification/useNotification";
-import InputEditorDrawer from "./inputEditorDrawer";
-import ArrayDiffViewer from "../../../id/arrayDiffViewer";
 import { Badge } from "@/components/ui/badge";
-import { BadgeProps } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { FlaskConicalIcon, LightbulbIcon } from "lucide-react";
 
 export interface InputEntry {
   key: string;
@@ -30,9 +17,10 @@ export interface InputEntry {
 interface ExperimentHeaderProps {
   isOriginal: boolean;
   onRunColumn?: () => Promise<void>;
-  orginalPromptTemplate?: any;
-  promptVersionId?: string;
   originalPromptTemplate?: any;
+  promptVersionId?: string;
+  originalPromptVersionId?: string;
+  onForkPromptVersion?: (promptVersionId: string) => void;
 }
 
 const icon = (model: string) => {
@@ -55,10 +43,16 @@ const icon = (model: string) => {
 };
 
 const ExperimentTableHeader = (props: ExperimentHeaderProps) => {
-  const { onRunColumn, promptVersionId, originalPromptTemplate, isOriginal } =
-    props;
+  const {
+    onRunColumn,
+    promptVersionId,
+    originalPromptTemplate,
+    isOriginal,
+    originalPromptVersionId,
+    onForkPromptVersion,
+  } = props;
 
-  const [showPromptPlayground, setShowPromptPlayground] = useState(false);
+  const [showViewPrompt, setShowViewPrompt] = useState(false);
   const jawnClient = useJawnClient();
 
   // Use React Query to fetch and cache the prompt template
@@ -74,7 +68,22 @@ const ExperimentTableHeader = (props: ExperimentHeaderProps) => {
           },
         },
       });
-      return res.data?.data;
+
+      const parentPromptVersion = await jawnClient.GET(
+        "/v1/prompt/version/{promptVersionId}",
+        {
+          params: {
+            path: {
+              promptVersionId: res.data?.data?.parent_prompt_version ?? "",
+            },
+          },
+        }
+      );
+
+      return {
+        ...res.data?.data,
+        parent_prompt_version: parentPromptVersion?.data?.data,
+      };
     },
     {
       staleTime: Infinity,
@@ -83,10 +92,6 @@ const ExperimentTableHeader = (props: ExperimentHeaderProps) => {
       refetchOnReconnect: false,
     }
   );
-
-  const handleHeaderClick = (e: React.MouseEvent) => {
-    setShowPromptPlayground(true);
-  };
 
   const handleRunClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -104,27 +109,89 @@ const ExperimentTableHeader = (props: ExperimentHeaderProps) => {
   }, [promptTemplate, originalPromptTemplate]);
 
   return (
-    <div className="flex flex-col gap-2">
-      <div className="flex gap-2 items-center ml-0.5">
-        {icon(promptTemplate?.model ?? "")}
-        <span className="text-xs font-medium text-slate-700 dark:text-slate-300">
-          {promptTemplate?.model}
-        </span>
-      </div>
-      <PromptPlayground
-        prompt={promptTemplate?.helicone_template ?? ""}
-        selectedInput={undefined}
-        onSubmit={(history, model) => {
-          setShowPromptPlayground(false);
-        }}
-        submitText="Save"
-        initialModel={promptTemplate?.model ?? ""}
-        isPromptCreatedFromUi={false}
-        defaultEditMode={false}
-        editMode={false}
-        playgroundMode="experiment-compact"
-      />
-    </div>
+    <Dialog open={showViewPrompt} onOpenChange={setShowViewPrompt}>
+      <DialogTrigger asChild>
+        <div
+          className="flex flex-col gap-2 h-full overflow-y-auto p-3 cursor-pointer"
+          onClick={() => setShowViewPrompt(true)}
+        >
+          <div className="flex gap-2 items-center ml-0.5">
+            {icon(promptTemplate?.model ?? "")}
+            <span className="text-xs font-medium text-slate-700 dark:text-slate-300">
+              {promptTemplate?.model}
+            </span>
+          </div>
+          <PromptPlayground
+            prompt={promptTemplate?.helicone_template ?? ""}
+            selectedInput={undefined}
+            onSubmit={(history, model) => {
+              setShowViewPrompt(false);
+            }}
+            submitText="Save"
+            initialModel={promptTemplate?.model ?? ""}
+            isPromptCreatedFromUi={false}
+            defaultEditMode={false}
+            editMode={false}
+            playgroundMode="experiment-compact"
+          />
+        </div>
+      </DialogTrigger>
+      <DialogContent className="w-[95vw] max-w-2xl gap-0">
+        <div className="flex justify-between items-center mb-8">
+          <div className="flex items-center">
+            <FlaskConicalIcon className="w-5 h-5 mr-2.5 text-slate-500" />
+            <h3 className="text-base font-medium text-slate-950 dark:text-white mr-3">
+              View Prompt
+            </h3>
+            <div className="flex gap-1 items-center">
+              <p className="text-slate-500 text-sm font-medium leading-4">
+                Forked from
+              </p>
+              <Badge variant="helicone" className="text-slate-500">
+                <FlaskConicalIcon className="w-3.5 h-3.5 mr-1" />
+                {(promptTemplate?.parent_prompt_version?.metadata
+                  ?.label as string) ??
+                  `v${promptTemplate?.parent_prompt_version?.major_version}.${promptTemplate?.parent_prompt_version?.minor_version}`}
+              </Badge>
+            </div>
+          </div>
+        </div>
+        <PromptPlayground
+          prompt={promptTemplate?.helicone_template ?? ""}
+          selectedInput={undefined}
+          onSubmit={(history, model) => {
+            setShowViewPrompt(false);
+          }}
+          submitText="Save"
+          initialModel={promptTemplate?.model ?? ""}
+          isPromptCreatedFromUi={false}
+          defaultEditMode={false}
+          editMode={false}
+          playgroundMode="experiment"
+        />
+        <div className="flex justify-between items-center mt-8">
+          <div className="flex items-center gap-1">
+            <LightbulbIcon className="w-4 h-4 text-slate-500" />
+            <p className="text-sm text-slate-500">
+              To make changes, please create a new prompt.
+            </p>
+          </div>
+
+          <Button
+            variant="ghost"
+            className="text-slate-900 dark:text-slate-100"
+            onClick={() => {
+              if (onForkPromptVersion) {
+                onForkPromptVersion(promptVersionId ?? "");
+                setShowViewPrompt(false);
+              }
+            }}
+          >
+            Fork Prompt
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
     // <Popover open={showPromptPlayground} onOpenChange={setShowPromptPlayground}>
     //   <PopoverTrigger asChild>
     //     <div
@@ -203,7 +270,7 @@ const ExperimentTableHeader = (props: ExperimentHeaderProps) => {
 
 const InputsHeaderComponent = ({ inputs }: { inputs: string[] }) => {
   return (
-    <div className="flex flex-col h-full items-start justify-start gap-y-2">
+    <div className="flex flex-col h-full items-start justify-start gap-y-2 p-3">
       {inputs?.map((input) => (
         <Badge variant="helicone" key={input}>
           {input}
@@ -213,4 +280,27 @@ const InputsHeaderComponent = ({ inputs }: { inputs: string[] }) => {
   );
 };
 
-export { InputsHeaderComponent, ExperimentTableHeader };
+const PromptColumnHeader = ({
+  label,
+  onRunColumn,
+}: {
+  label: string;
+  onRunColumn: () => void;
+}) => {
+  return (
+    <div className="flex justify-between w-full items-center py-2 px-4">
+      <h3 className="font-semibold text-sm text-slate-900 dark:text-slate-100 leading-[130%]">
+        {label}
+      </h3>
+      <Button
+        variant="ghost"
+        className="ml-2 p-0 border-slate-200 border rounded-md bg-slate-50 text-slate-500 h-[22px] w-[24px] flex items-center justify-center"
+        onClick={onRunColumn}
+      >
+        <PlayIcon className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+      </Button>
+    </div>
+  );
+};
+
+export { InputsHeaderComponent, ExperimentTableHeader, PromptColumnHeader };

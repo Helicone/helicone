@@ -1038,6 +1038,8 @@ const models: TsoaRoute.Models = {
             "helicone_template": {"dataType":"string","required":true},
             "created_at": {"dataType":"string","required":true},
             "metadata": {"ref":"Record_string.any_","required":true},
+            "parent_prompt_version": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
+            "experiment_id": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
         },
         "additionalProperties": false,
     },

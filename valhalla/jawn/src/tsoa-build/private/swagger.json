@@ -3000,6 +3000,14 @@
 					},
 					"metadata": {
 						"$ref": "#/components/schemas/Record_string.any_"
+					},
+					"parent_prompt_version": {
+						"type": "string",
+						"nullable": true
+					},
+					"experiment_id": {
+						"type": "string",
+						"nullable": true
 					}
 				},
 				"required": [

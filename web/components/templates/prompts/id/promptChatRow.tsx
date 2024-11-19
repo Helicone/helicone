@@ -1,8 +1,5 @@
 import {
   ArrowsPointingOutIcon,
-  ClipboardIcon,
-  EyeIcon,
-  EyeSlashIcon,
   TrashIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
@@ -21,6 +18,7 @@ import MarkdownEditor from "../../../shared/markdownEditor";
 import { Message } from "../../requests/chatComponent/types";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { ClipboardIcon, EyeIcon, EyeOffIcon } from "lucide-react";
 
 interface PromptChatRowProps {
   index: number;
@@ -136,7 +134,6 @@ const RenderWithPrettyInputKeys = (props: {
   playgroundMode?: "prompt" | "experiment" | "experiment-compact";
   selectedProperties: Record<string, string> | undefined;
 }) => {
-  console.log(props);
   const { text, selectedProperties, playgroundMode = "prompt" } = props;
 
   // Function to replace matched patterns with JSX components
@@ -188,7 +185,7 @@ const RenderWithPrettyInputKeys = (props: {
         "text-sm leading-7 text-slate-900 dark:text-slate-100 whitespace-pre-wrap",
         playgroundMode === "experiment" ||
           playgroundMode === "experiment-compact"
-          ? "text-slate-700 dark:text-slate-300 text-xs"
+          ? "text-slate-700 dark:text-slate-300 text-xs leading-[140%]"
           : ""
       )}
     >
@@ -306,14 +303,24 @@ const PromptChatRow = (props: PromptChatRowProps) => {
     if (Array.isArray(content)) {
       const textMessage = content.find((element) => element.type === "text");
       // if minimize is true, substring the text to 100 characters
-      const text = minimize
-        ? `${textMessage?.text.substring(0, 100)}...`
-        : textMessage?.text;
+      const text =
+        minimize && textMessage?.text.length > 100
+          ? `${textMessage?.text.substring(0, 100)}...`
+          : `${textMessage?.text}`;
+
+      const isStatic = textMessage?.text.includes("<helicone-prompt-static>");
 
       return (
         <div className="flex flex-col space-y-4 whitespace-pre-wrap">
           <RenderWithPrettyInputKeys
-            text={removeLeadingWhitespace(text)}
+            text={removeLeadingWhitespace(
+              isStatic
+                ? text.replace(
+                    /<helicone-prompt-static>(.*?)<\/helicone-prompt-static>/g,
+                    "$1"
+                  )
+                : text
+            )}
             selectedProperties={selectedProperties}
             playgroundMode={playgroundMode}
           />
@@ -471,29 +478,52 @@ const PromptChatRow = (props: PromptChatRowProps) => {
     setRole(message.role);
   }, [message]);
 
+  const isStatic = contentAsString?.includes("<helicone-prompt-static>");
+
+  const currentMessageContent = currentMessage.content;
+  const isCurrentMessageContentArray = Array.isArray(currentMessageContent);
+  const textMessage = isCurrentMessageContentArray
+    ? currentMessageContent.find((element) => element.type === "text")
+    : null;
+  const showMinimizeButton = textMessage && textMessage.text.length > 100;
+
   if (playgroundMode === "experiment-compact") {
     return (
-      <div className="flex flex-col gap-1 items-start">
-        <Badge variant="helicone">
-          {role.slice(0, 1).toUpperCase() + role.slice(1)}
-        </Badge>
-        <div className="text-xs text-slate-700 dark:text-slate-300">
-          {getContent(currentMessage, minimize, playgroundMode)}
+      <li className="flex flex-col gap-1 items-start">
+        <div className="flex w-full justify-between items-center">
+          <Badge variant="helicone">
+            {role.slice(0, 1).toUpperCase() + role.slice(1)}
+          </Badge>
+          {isStatic && (
+            <Badge className="bg-[#3C82F6] text-[10px] py-[3px] px-2 leading-tight hover:bg-[#3C82F6]">
+              Static
+            </Badge>
+          )}
         </div>
-      </div>
+        <div className="text-xs text-slate-700 dark:text-slate-300">
+          {isStatic
+            ? contentAsString?.replace(
+                /<helicone-prompt-static>(.*?)<\/helicone-prompt-static>/g,
+                "$1"
+              )
+            : getContent(currentMessage, minimize, playgroundMode)}
+        </div>
+      </li>
     );
   }
 
   return (
     <li
       className={clsx(
-        index === 0 ? "" : "border-t",
-        "bg-white dark:bg-black",
+        index === 0 ? "rounded-t-lg" : "border-t",
+        playgroundMode === "experiment"
+          ? "bg-slate-50 dark:bg-slate-950"
+          : "bg-white dark:bg-black",
         "flex flex-row justify-between gap-8 border-slate-300 dark:border-slate-700"
       )}
     >
-      <div className="flex flex-col gap-4 w-full">
-        <div className="flex flex-col w-full h-full relative space-y-2">
+      <div className="flex flex-col gap-4 w-full rounded-t-lg">
+        <div className="flex flex-col w-full h-full relative space-y-2 rounded-t-lg">
           <div className="flex w-full justify-between px-4 pt-3 rounded-t-lg">
             {playgroundMode === "prompt" ? (
               <RoleButton
@@ -517,18 +547,23 @@ const PromptChatRow = (props: PromptChatRowProps) => {
               </Badge>
             )}
             <div className="flex justify-end items-center space-x-2 w-full">
-              {!editMode && (
+              {!editMode && isStatic && (
+                <Badge className="bg-[#3C82F6] text-[10px] py-[3px] px-2 leading-tight hover:bg-[#3C82F6]">
+                  Static
+                </Badge>
+              )}
+              {!editMode && showMinimizeButton && (
                 <Tooltip title={minimize ? "Expand" : "Shrink"} placement="top">
                   <button
                     onClick={() => {
                       setMinimize(!minimize);
                     }}
-                    className="text-slate-700 font-semibold"
+                    className="text-slate-500 font-semibold"
                   >
                     {minimize ? (
-                      <EyeIcon className="h-4 w-4" />
+                      <EyeIcon className="h-3 w-3" />
                     ) : (
-                      <EyeSlashIcon className="h-4 w-4" />
+                      <EyeOffIcon className="h-3 w-3" />
                     )}
                   </button>
                 </Tooltip>
@@ -540,9 +575,9 @@ const PromptChatRow = (props: PromptChatRowProps) => {
                       navigator.clipboard.writeText(contentAsString || "");
                       setNotification("Copied to clipboard", "success");
                     }}
-                    className="text-slate-700 font-semibold"
+                    className="text-slate-500"
                   >
-                    <ClipboardIcon className="h-4 w-4" />
+                    <ClipboardIcon className="h-3 w-3" />
                   </button>
                 </Tooltip>
               )}
