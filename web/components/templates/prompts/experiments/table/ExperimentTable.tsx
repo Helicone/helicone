@@ -164,6 +164,10 @@ export function ExperimentTable({
                 promptVersionId={promptVersionsData?.[0]?.id ?? ""}
                 originalPromptTemplate={promptVersionTemplateData}
                 originalPromptVersionId={promptVersionsData?.[0]?.id ?? ""}
+                onForkPromptVersion={(promptVersionId: string) => {
+                  setExternallySelectedForkFromPromptVersionId(promptVersionId);
+                  setIsAddColumnDialogOpen(true);
+                }}
               />
             ),
             cell: ({ row }) => {
