@@ -29,6 +29,8 @@ CREATE UNIQUE INDEX experiment_output_pkey ON public.experiment_output USING btr
 
 CREATE UNIQUE INDEX experiment_v3_pkey ON public.experiment_v3 USING btree (id);
 
+CREATE UNIQUE INDEX experiment_output_experiment_id_input_record_id_prompt_version_id_key ON public.experiment_output USING btree (experiment_id, input_record_id, prompt_version_id);
+
 alter table "public"."experiment_output" add constraint "experiment_output_pkey" PRIMARY KEY using index "experiment_output_pkey";
 
 alter table "public"."experiment_v3" add constraint "experiment_v3_pkey" PRIMARY KEY using index "experiment_v3_pkey";

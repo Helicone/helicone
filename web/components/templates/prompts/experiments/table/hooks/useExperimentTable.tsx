@@ -326,6 +326,22 @@ export const useExperimentTable = (experimentTableId: string) => {
     }
   );
 
+  const addManualRow = useMutation({
+    mutationFn: async ({ inputs }: { inputs: Record<string, string> }) => {
+      const jawnClient = getJawnClient(orgId);
+
+      await jawnClient.POST("/v2/experiment/{experimentId}/add-manual-row", {
+        params: { path: { experimentId: experimentTableId } },
+        body: { inputs },
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["experimentTable", orgId, experimentTableId],
+      });
+    },
+  });
+
   const addExperimentTableRowInsertBatch = useMutation({
     mutationFn: async ({
       rows,
@@ -339,6 +355,27 @@ export const useExperimentTable = (experimentTableId: string) => {
       await jawnClient.POST("/v2/experiment/{experimentId}/row/insert/batch", {
         params: { path: { experimentId: experimentTableId } },
         body: { rows },
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["experimentTable", orgId, experimentTableId],
+      });
+    },
+  });
+
+  const updateExperimentTableRow = useMutation({
+    mutationFn: async ({
+      inputRecordId,
+      inputs,
+    }: {
+      inputRecordId: string;
+      inputs: Record<string, string>;
+    }) => {
+      const jawnClient = getJawnClient(orgId);
+      await jawnClient.POST("/v2/experiment/{experimentId}/row/update", {
+        params: { path: { experimentId: experimentTableId } },
+        body: { inputRecordId, inputs },
       });
     },
     onSuccess: () => {
@@ -378,7 +415,9 @@ export const useExperimentTable = (experimentTableId: string) => {
     isInputKeysLoading,
     promptVersionTemplateData,
     isPromptVersionTemplateLoading,
+    addManualRow,
     addExperimentTableRowInsertBatch,
+    updateExperimentTableRow,
     runHypothesis,
   };
 };

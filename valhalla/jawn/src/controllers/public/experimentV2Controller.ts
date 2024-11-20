@@ -227,6 +227,31 @@ export class ExperimentV2Controller extends Controller {
     return result;
   }
 
+  @Post("/{experimentId}/row/update")
+  public async updateExperimentTableRow(
+    @Path() experimentId: string,
+    @Body()
+    requestBody: {
+      inputRecordId: string;
+      inputs: Record<string, string>;
+    },
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<null, string>> {
+    const experimentManager = new ExperimentV2Manager(request.authParams);
+    const result = await experimentManager.updateExperimentTableRow(
+      experimentId,
+      requestBody.inputRecordId,
+      requestBody.inputs
+    );
+
+    if (result.error || !result.data) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
+    }
+    return result;
+  }
+
   @Post("/{experimentId}/run-hypothesis")
   public async runHypothesis(
     @Path() experimentId: string,

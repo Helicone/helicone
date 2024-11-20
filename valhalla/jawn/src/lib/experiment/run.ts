@@ -162,8 +162,6 @@ export async function run(
       );
     }
 
-    console.log("im here 2");
-
     const preparedRequest = await prepareRequest(
       {
         template: promptVersion.data.helicone_template,

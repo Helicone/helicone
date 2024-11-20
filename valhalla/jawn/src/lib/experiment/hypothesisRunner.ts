@@ -86,13 +86,18 @@ export async function runHypothesis(
   const dbOp: DatabaseOperation = {
     execute: async () =>
       mapPostgrestErr(
-        await supabaseServer.client.from("experiment_output").insert({
-          experiment_id: experimentId,
-          input_record_id: inputRecordId ?? "",
-          request_id: requestId,
-          prompt_version_id: promptVersionId,
-          is_original: isOriginalRequest ?? false,
-        })
+        await supabaseServer.client.from("experiment_output").upsert(
+          {
+            experiment_id: experimentId,
+            input_record_id: inputRecordId ?? "",
+            request_id: requestId,
+            prompt_version_id: promptVersionId,
+            is_original: isOriginalRequest ?? false,
+          },
+          {
+            onConflict: "experiment_id, input_record_id, prompt_version_id",
+          }
+        )
       ),
     errorMessage: "Failed to insert hypothesis run after multiple attempts",
   };

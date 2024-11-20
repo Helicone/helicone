@@ -467,6 +467,9 @@ export interface paths {
   "/v2/experiment/{experimentId}/row/insert/batch": {
     post: operations["CreateExperimentTableRowBatch"];
   };
+  "/v2/experiment/{experimentId}/row/update": {
+    post: operations["UpdateExperimentTableRow"];
+  };
   "/v2/experiment/{experimentId}/run-hypothesis": {
     post: operations["RunHypothesis"];
   };
@@ -5709,6 +5712,29 @@ export interface operations {
               inputs: components["schemas"]["Record_string.string_"];
               inputRecordId: string;
             }[];
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  UpdateExperimentTableRow: {
+    parameters: {
+      path: {
+        experimentId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          inputs: components["schemas"]["Record_string.string_"];
+          inputRecordId: string;
         };
       };
     };

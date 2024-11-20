@@ -22,7 +22,6 @@ import { ListIcon, PlayIcon, PlusIcon } from "lucide-react";
 import { AddRowPopover } from "./components/addRowPopover";
 import ExperimentInputSelector from "../experimentInputSelector";
 import { ExperimentRandomInputSelector } from "../experimentRandomInputSelector";
-import { OriginalOutputCellRenderer } from "./cells/OriginalOutputCellRenderer";
 import { HypothesisCellRenderer } from "./cells/HypothesisCellRenderer";
 import {
   Table,
@@ -39,6 +38,8 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import AddColumnDialog from "./AddColumnDialog";
+import EditInputsPanel from "./EditInputsPanel";
+import AddManualRowPanel from "./AddManualRowPanel";
 
 export function ExperimentTable({
   experimentTableId,
@@ -60,7 +61,13 @@ export function ExperimentTable({
     useState(false);
   const [showRandomInputSelector, setShowRandomInputSelector] = useState(false);
 
-  const [rightPanel, setRightPanel] = useState<React.ReactNode | null>(null);
+  const [rightPanel, setRightPanel] = useState<
+    "edit_inputs" | "add_manual" | null
+  >(null);
+  const [toEditInputRecord, setToEditInputRecord] = useState<{
+    id: string;
+    inputKV: Record<string, string>;
+  } | null>(null);
 
   const cellRefs = useRef<Record<string, any>>({});
   const [
@@ -76,6 +83,7 @@ export function ExperimentTable({
       original: string | undefined;
       originalInputRecordId: string | undefined;
       index: number;
+      rowRecordId: string;
       [key: `prompt_version_${string}`]:
         | { request_id: string; input_record_id: string }
         | undefined;
@@ -132,16 +140,28 @@ export function ExperimentTable({
             accessorKey: "inputs",
             cell: ({ row }) => {
               return (
-                <div>
+                <div
+                  className="cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 h-full"
+                  style={{ cursor: "pointer" }}
+                  onClick={() => {
+                    console.log({
+                      id: row.original.originalInputRecordId,
+                      inputKV: JSON.parse(row.original.inputs),
+                    });
+                    setToEditInputRecord({
+                      id: row.original.originalInputRecordId ?? "",
+                      inputKV: JSON.parse(row.original.inputs),
+                    });
+                    setRightPanel("edit_inputs");
+                  }}
+                >
                   <ul>
-                    {Object.entries(JSON.parse(row.original.inputs)).map(
-                      ([key, value]) => (
-                        <li key={key}>
-                          <strong>{key}</strong>:{" "}
-                          {value?.toString().slice(0, 10)}
-                        </li>
-                      )
-                    )}
+                    {inputKeysData?.map((input) => (
+                      <li key={input}>
+                        <strong>{input}</strong>:{" "}
+                        {JSON.parse(row.original.inputs)[input]?.toString()}
+                      </li>
+                    ))}
                   </ul>
                 </div>
               );
@@ -150,40 +170,55 @@ export function ExperimentTable({
           },
         ],
       },
-      {
-        header:
-          promptVersionsData?.[0]?.metadata?.label ??
-          `v${promptVersionsData?.[0]?.major_version}.${promptVersionsData?.[0]?.minor_version}`,
-        id: "original-outer",
-        columns: [
-          {
-            accessorKey: "original",
-            header: () => (
-              <ExperimentTableHeader
-                isOriginal={true}
-                promptVersionId={promptVersionsData?.[0]?.id ?? ""}
-                originalPromptTemplate={promptVersionTemplateData}
-                originalPromptVersionId={promptVersionsData?.[0]?.id ?? ""}
-                onForkPromptVersion={(promptVersionId: string) => {
-                  setExternallySelectedForkFromPromptVersionId(promptVersionId);
-                  setIsAddColumnDialogOpen(true);
-                }}
-              />
-            ),
-            cell: ({ row }) => {
-              return (
-                <OriginalOutputCellRenderer
-                  requestId={row.original?.original ?? ""}
-                  wrapText={false}
-                  prompt={promptVersionTemplateData}
-                />
-              );
-            },
-          },
-        ],
-        size: 300,
-      },
-      ...(promptVersionsData?.slice(1) ?? []).map(
+      // {
+      //   header:
+      //     promptVersionsData?.[0]?.metadata?.label ??
+      //     `v${promptVersionsData?.[0]?.major_version}.${promptVersionsData?.[0]?.minor_version}`,
+      //   id: "original-outer",
+      //   columns: [
+      //     {
+      //       accessorKey: "original",
+      //       header: () => (
+      //         <ExperimentTableHeader
+      //           isOriginal={true}
+      //           promptVersionId={promptVersionsData?.[0]?.id ?? ""}
+      //           originalPromptTemplate={promptVersionTemplateData}
+      //           originalPromptVersionId={promptVersionsData?.[0]?.id ?? ""}
+      //           onForkPromptVersion={(promptVersionId: string) => {
+      //             setExternallySelectedForkFromPromptVersionId(promptVersionId);
+      //             setIsAddColumnDialogOpen(true);
+      //           }}
+      //         />
+      //       ),
+      //       cell: ({ row }) => {
+      //         return (
+      //           <HypothesisCellRenderer
+      //             ref={(el) => {
+      //               if (el) {
+      //                 cellRefs.current[
+      //                   `${row.id}-${promptVersionsData?.[0]?.id}`
+      //                 ] = el;
+      //               }
+      //             }}
+      //             experimentTableId={experimentTableId}
+      //             requestId={row.original.original}
+      //             inputRecordId={row.original.rowRecordId ?? ""}
+      //             prompt={promptVersionTemplateData}
+      //             promptVersionId={promptVersionsData?.[0]?.id ?? ""}
+      //             wrapText={false}
+      //           />
+      //           // <OriginalOutputCellRenderer
+      //           //   requestId={row.original?.original ?? ""}
+      //           //   wrapText={false}
+      //           //   prompt={promptVersionTemplateData}
+      //           // />
+      //         );
+      //       },
+      //     },
+      //   ],
+      //   size: 300,
+      // },
+      ...(promptVersionsData ?? []).map(
         (
           pv,
           i
@@ -193,6 +228,7 @@ export function ExperimentTable({
           original: string | undefined;
           originalInputRecordId: string | undefined;
           index: number;
+          rowRecordId: string;
           [key: `prompt_version_${string}`]:
             | { request_id: string; input_record_id: string }
             | undefined;
@@ -251,12 +287,7 @@ export function ExperimentTable({
                     requestId={
                       row.original[`prompt_version_${pv.id}`]?.request_id ?? ""
                     }
-                    inputRecordId={
-                      row.original[`prompt_version_${pv.id}`]
-                        ?.input_record_id ??
-                      row.original.originalInputRecordId ??
-                      ""
-                    }
+                    inputRecordId={row.original.rowRecordId ?? ""}
                     prompt={promptVersionTemplateData}
                     promptVersionId={pv.id}
                     wrapText={false}
@@ -343,8 +374,9 @@ export function ExperimentTable({
     return experimentTableQuery.rows.map((row, i) => ({
       index: i + 1,
       inputs: JSON.stringify(row.inputs),
-      original: row.requests.find((r) => r.is_original)?.request_id,
-      ...(promptVersionsData?.slice(1) ?? []).reduce(
+      rowRecordId: row.id,
+      // original: row.requests.find((r) => r.is_original)?.request_id,
+      ...(promptVersionsData ?? []).reduce(
         (acc, pv) => ({
           ...acc,
           [`prompt_version_${pv.id}`]: row.requests.find(
@@ -366,6 +398,7 @@ export function ExperimentTable({
 
   const table = useReactTable({
     data: tableData,
+    // @ts-ignore
     columns: columnDef,
     defaultColumn: {
       minSize: 50,
@@ -404,7 +437,7 @@ export function ExperimentTable({
       <ResizablePanelGroup direction="horizontal">
         <ResizablePanel defaultSize={75}>
           <div className="h-full flex flex-col border-b divide-y divide-slate-300 dark:divide-slate-700">
-            <div className="h-full overflow-x-auto bg-slate-100 dark:bg-slate-800">
+            <div className="max-h-[calc(100vh-100px)] h-full overflow-y-auto overflow-x-auto bg-slate-100 dark:bg-slate-800">
               <div className="inline-block min-w-max bg-slate-50 dark:bg-black rounded-sm h-full">
                 <Table className="border-collapse w-full">
                   <TableHeader>
@@ -508,11 +541,11 @@ export function ExperimentTable({
               <PopoverContent className="w-full px-2 py-2">
                 <AddRowPopover
                   setPopoverOpen={setPopoverOpen}
+                  setShowAddManualRow={() => setRightPanel("add_manual")}
                   setShowExperimentInputSelector={
                     setShowExperimentInputSelector
                   }
                   setShowRandomInputSelector={setShowRandomInputSelector}
-                  handleAddRow={() => {}}
                 />
               </PopoverContent>
             </Popover>
@@ -545,7 +578,24 @@ export function ExperimentTable({
             <ResizableHandle withHandle />
             <ResizablePanel minSize={25} maxSize={75}>
               <div className="h-full flex-shrink-0 flex flex-col">
-                {rightPanel}
+                {rightPanel === "edit_inputs" && (
+                  <EditInputsPanel
+                    experimentId={experimentTableId}
+                    inputRecord={toEditInputRecord}
+                    inputKeys={inputKeysData ?? []}
+                    onClose={() => {
+                      setToEditInputRecord(null);
+                      setRightPanel(null);
+                    }}
+                  />
+                )}
+                {rightPanel === "add_manual" && (
+                  <AddManualRowPanel
+                    experimentId={experimentTableId}
+                    inputKeys={inputKeysData ?? []}
+                    onClose={() => setRightPanel(null)}
+                  />
+                )}
               </div>
             </ResizablePanel>
           </>

@@ -155,6 +155,7 @@ export class ExperimentV2Manager extends BaseManager {
               'input_record_id', eo.input_record_id,
               'created_at', eo.created_at
             )
+            ORDER BY eo.created_at DESC
           )
           FROM experiment_output eo 
           WHERE pir.id = eo.input_record_id
@@ -163,6 +164,7 @@ export class ExperimentV2Manager extends BaseManager {
       ) AS requests
     FROM prompt_input_record pir
     WHERE pir.experiment_id = $1
+    ORDER BY pir.created_at DESC
         `,
         [experimentId]
       );
@@ -359,12 +361,34 @@ export class ExperimentV2Manager extends BaseManager {
     }
   }
 
+  async updateExperimentTableRow(
+    experimentId: string,
+    inputRecordId: string,
+    inputs: Record<string, string>
+  ): Promise<Result<null, string>> {
+    try {
+      const result = await supabaseServer.client
+        .from("prompt_input_record")
+        .update({ inputs })
+        .eq("id", inputRecordId);
+
+      if (result.error) {
+        return err("Failed to update experiment table row");
+      }
+
+      return ok(null);
+    } catch (e) {
+      return err("Failed to update experiment table row");
+    }
+  }
+
   async runHypothesis(
     experimentId: string,
     promptVersionId: string,
     inputRecordId: string
   ): Promise<Result<string, string>> {
     try {
+      console.log({ experimentId, promptVersionId, inputRecordId });
       const result = await run(
         experimentId,
         promptVersionId,
