@@ -8,6 +8,8 @@ import React from "react";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { FlaskConicalIcon, LightbulbIcon } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import ArrayDiffViewer from "../../../id/arrayDiffViewer";
 
 export interface InputEntry {
   key: string;
@@ -136,7 +138,7 @@ const ExperimentTableHeader = (props: ExperimentHeaderProps) => {
           />
         </div>
       </DialogTrigger>
-      <DialogContent className="w-[95vw] max-w-2xl gap-0">
+      <DialogContent className="w-[95vw] max-w-2xl gap-0 overflow-y-auto">
         <div className="flex justify-between items-center mb-8">
           <div className="flex items-center">
             <FlaskConicalIcon className="w-5 h-5 mr-2.5 text-slate-500" />
@@ -156,19 +158,37 @@ const ExperimentTableHeader = (props: ExperimentHeaderProps) => {
             </div>
           </div>
         </div>
-        <PromptPlayground
-          prompt={promptTemplate?.helicone_template ?? ""}
-          selectedInput={undefined}
-          onSubmit={(history, model) => {
-            setShowViewPrompt(false);
-          }}
-          submitText="Save"
-          initialModel={promptTemplate?.model ?? ""}
-          isPromptCreatedFromUi={false}
-          defaultEditMode={false}
-          editMode={false}
-          playgroundMode="experiment"
-        />
+        <Tabs defaultValue="preview">
+          {!isOriginal && hasDiff && (
+            <TabsList>
+              <TabsTrigger value="preview">Preview</TabsTrigger>
+              <TabsTrigger value="diff">Diff</TabsTrigger>
+            </TabsList>
+          )}
+          <TabsContent value="preview">
+            <PromptPlayground
+              prompt={promptTemplate?.helicone_template ?? ""}
+              selectedInput={undefined}
+              onSubmit={(history, model) => {
+                setShowViewPrompt(false);
+              }}
+              submitText="Save"
+              initialModel={promptTemplate?.model ?? ""}
+              isPromptCreatedFromUi={false}
+              defaultEditMode={false}
+              editMode={false}
+              playgroundMode="experiment"
+            />
+          </TabsContent>
+          <TabsContent value="diff">
+            <ArrayDiffViewer
+              origin={originalPromptTemplate?.helicone_template?.messages ?? []}
+              target={
+                (promptTemplate?.helicone_template as any)?.messages ?? []
+              }
+            />
+          </TabsContent>
+        </Tabs>
         <div className="flex justify-between items-center mt-8">
           <div className="flex items-center gap-1">
             <LightbulbIcon className="w-4 h-4 text-slate-500" />
@@ -192,79 +212,6 @@ const ExperimentTableHeader = (props: ExperimentHeaderProps) => {
         </div>
       </DialogContent>
     </Dialog>
-    // <Popover open={showPromptPlayground} onOpenChange={setShowPromptPlayground}>
-    //   <PopoverTrigger asChild>
-    //     <div
-    //       className="flex items-center justify-between w-full h-full pl-2 cursor-pointer"
-    //       onClick={handleHeaderClick}
-    //     >
-    //       <div className="flex items-center space-x-2">
-    //         <span className="text-md font-semibold text-slate-900 dark:text-slate-100">
-    //           {displayName}
-    //         </span>
-    //       </div>
-    //       {onRunColumn && (
-    //         <Button
-    //           variant="ghost"
-    //           className="ml-2 p-0 border-slate-200 border rounded-md bg-slate-50 text-slate-500 h-[22px] w-[24px] flex items-center justify-center"
-    //           onClick={handleRunClick}
-    //         >
-    //           <PlayIcon className="w-4 h-4 text-gray-600 dark:text-gray-300" />
-    //         </Button>
-    //       )}
-    //     </div>
-    //   </PopoverTrigger>
-    //   <PopoverContent className="w-[800px] p-0" side="bottom">
-    //     {hasDiff ? (
-    //       <Tabs defaultValue="preview" className="w-full">
-    //         <TabsList
-    //           className="w-full flex justify-end rounded-none"
-    //           variant={"secondary"}
-    //         >
-    //           <TabsTrigger value="diff">Diff</TabsTrigger>
-    //           <TabsTrigger value="preview">Preview</TabsTrigger>
-    //         </TabsList>
-    //         <TabsContent value="diff">
-    //           <ArrayDiffViewer
-    //             origin={
-    //               originalPromptTemplate?.helicone_template?.messages ?? []
-    //             }
-    //             target={
-    //               (promptTemplate?.helicone_template as any)?.messages ?? []
-    //             }
-    //           />
-    //         </TabsContent>
-    //         <TabsContent value="preview">
-    //           <PromptPlayground
-    //             prompt={promptTemplate?.helicone_template ?? ""}
-    //             selectedInput={undefined}
-    //             onSubmit={(history, model) => {
-    //               setShowPromptPlayground(false);
-    //             }}
-    //             submitText="Save"
-    //             initialModel={promptTemplate?.model ?? ""}
-    //             isPromptCreatedFromUi={false}
-    //             defaultEditMode={false}
-    //             editMode={false}
-    //           />
-    //         </TabsContent>
-    //       </Tabs>
-    //     ) : (
-    //       <PromptPlayground
-    //         prompt={promptTemplate?.helicone_template ?? ""}
-    //         selectedInput={undefined}
-    //         onSubmit={(history, model) => {
-    //           setShowPromptPlayground(false);
-    //         }}
-    //         submitText="Save"
-    //         initialModel={promptTemplate?.model ?? ""}
-    //         isPromptCreatedFromUi={false}
-    //         defaultEditMode={false}
-    //         editMode={false}
-    //       />
-    //     )}
-    //   </PopoverContent>
-    // </Popover>
   );
 };
 
