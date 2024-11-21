@@ -20,7 +20,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { ListIcon, PlusIcon } from "lucide-react";
+import { ListIcon, PlusIcon, PlayIcon } from "lucide-react";
 import { AddRowPopover } from "./components/addRowPopover";
 import ExperimentInputSelector from "../experimentInputSelector";
 import { ExperimentRandomInputSelector } from "../experimentRandomInputSelector";
@@ -42,6 +42,10 @@ import {
 import AddColumnDialog from "./AddColumnDialog";
 import EditInputsPanel from "./EditInputsPanel";
 import AddManualRowPanel from "./AddManualRowPanel";
+import { IslandContainer } from "@/components/ui/islandContainer";
+import HcBreadcrumb from "@/components/ui/hcBreadcrumb";
+import { Switch } from "@/components/ui/switch";
+import { useQueryClient } from "@tanstack/react-query";
 
 type TableDataType = {
   index: number;
@@ -66,15 +70,13 @@ export function ExperimentTable({
     promptVersionsData,
     addExperimentTableRowInsertBatch,
     inputKeysData,
+    wrapText,
   } = useExperimentTable(experimentTableId);
-
-  console.log(experimentTableQuery);
 
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [showExperimentInputSelector, setShowExperimentInputSelector] =
     useState(false);
   const [showRandomInputSelector, setShowRandomInputSelector] = useState(false);
-
   const [rightPanel, setRightPanel] = useState<
     "edit_inputs" | "add_manual" | null
   >(null);
@@ -97,8 +99,31 @@ export function ExperimentTable({
       columnHelper.group({
         id: "index__outer",
         header: () => (
-          <div className="flex justify-center items-center text-slate-400 dark:text-slate-600">
-            <ListIcon className="w-4 h-4" />
+          <div className="flex justify-center items-center text-slate-400 dark:text-slate-600 group relative">
+            <span className="group-hover:invisible transition-opacity duration-200">
+              <ListIcon className="w-4 h-4" />
+            </span>
+            <Button
+              variant="ghost"
+              className="ml-2 p-0 border rounded-md h-[22px] w-[24px] items-center justify-center absolute invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+              onClick={async () => {
+                await Promise.all(
+                  (promptVersionsData ?? []).map(async (pv) => {
+                    const rows = table.getRowModel().rows;
+                    await Promise.all(
+                      rows.map(async (row) => {
+                        const cellRef = cellRefs.current[`${row.id}-${pv.id}`];
+                        if (cellRef) {
+                          await cellRef.runHypothesis();
+                        }
+                      })
+                    );
+                  })
+                );
+              }}
+            >
+              <PlayIcon className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+            </Button>
           </div>
         ),
         columns: [
@@ -166,12 +191,10 @@ export function ExperimentTable({
               onRunColumn={async () => {
                 const rows = table.getRowModel().rows;
 
-                // Run each cell using its ref
                 await Promise.all(
                   rows.map(async (row) => {
                     const cellRef = cellRefs.current[`${row.id}-${pv.id}`];
                     if (cellRef) {
-                      // @ts-ignore
                       await cellRef.runHypothesis();
                     }
                   })
@@ -211,7 +234,6 @@ export function ExperimentTable({
                   inputRecordId={row.original.rowRecordId ?? ""}
                   prompt={promptVersionTemplateData}
                   promptVersionId={pv.id}
-                  wrapText={false}
                 />
               ),
             }),
@@ -253,6 +275,7 @@ export function ExperimentTable({
         size: 200,
       }),
     ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       inputKeysData,
       promptVersionsData,
@@ -333,189 +356,215 @@ export function ExperimentTable({
     [addExperimentTableRowInsertBatch]
   );
 
+  const queryClient = useQueryClient();
+
   return (
-    <div className="h-[calc(100vh-100px)]">
-      <ResizablePanelGroup direction="horizontal" className="h-full">
-        <ResizablePanel defaultSize={75}>
-          <div className="flex flex-col">
-            <div className="max-h-[calc(100vh-100px)] h-full overflow-y-auto overflow-x-auto bg-slate-100 dark:bg-neutral-950">
-              <div className="w-fit h-full bg-slate-50 dark:bg-black rounded-sm">
-                <Table className="border-collapse w-full">
-                  <TableHeader>
-                    {table.getHeaderGroups().map((headerGroup, i) => (
-                      <TableRow
-                        key={headerGroup.id}
-                        className={clsx(
-                          "sticky top-0 bg-slate-50 dark:bg-slate-900 shadow-sm border-b border-slate-300 dark:border-slate-700",
-                          i === 1 && "h-[225px]"
-                        )}
-                      >
-                        {headerGroup.headers.map((header, index) => (
-                          <TableHead
-                            key={header.id}
-                            style={{
-                              width: header.getSize(),
-                            }}
-                            className="bg-white dark:bg-neutral-950 relative px-0"
-                          >
-                            {header.isPlaceholder
-                              ? null
-                              : flexRender(
-                                  header.column.columnDef.header,
-                                  header.getContext()
-                                )}
-                            <div
-                              className="resizer absolute right-0 top-0 h-full w-4 cursor-col-resize"
-                              {...{
-                                onMouseDown: header.getResizeHandler(),
-                                onTouchStart: header.getResizeHandler(),
-                              }}
-                            >
-                              <div
-                                className={clsx(
-                                  "h-full w-1",
-                                  header.column.getIsResizing()
-                                    ? "bg-blue-700 dark:bg-blue-300"
-                                    : "bg-gray-500"
-                                )}
-                              />
-                            </div>
-                            {/* {index < headerGroup.headers.length - 1 && ( */}
-                            <div className="absolute top-0 right-0 h-full w-px bg-slate-300 dark:bg-slate-700" />
-                            {/* )} */}
-                            <div className="absolute bottom-0 left-0 right-0 h-[0.5px] bg-slate-300 dark:bg-slate-700" />
-                          </TableHead>
-                        ))}
-                      </TableRow>
-                    ))}
-                  </TableHeader>
-                  <TableBody className="text-[13px] bg-white dark:bg-neutral-950 flex-1">
-                    {table.getRowModel().rows?.length ? (
-                      table.getRowModel().rows.map((row) => (
+    <>
+      <div className="flex justify-between items-center py-4 pr-4">
+        <IslandContainer>
+          <HcBreadcrumb
+            pages={[
+              {
+                href: "/experiments",
+                name: "Experiments",
+              },
+              {
+                href: `/experiments/${experimentTableId}`,
+                name: experimentTableQuery?.name ?? "Experiment",
+              },
+            ]}
+          />
+        </IslandContainer>
+        <Switch
+          checked={wrapText}
+          onCheckedChange={(checked) => {
+            queryClient.setQueryData(["wrapText", experimentTableId], checked);
+          }}
+        />
+      </div>
+      <div className="h-[calc(100vh-50px)]">
+        <ResizablePanelGroup direction="horizontal" className="h-full">
+          <ResizablePanel defaultSize={75}>
+            <div className="flex flex-col">
+              <div className="max-h-[calc(100vh-90px)] overflow-y-auto overflow-x-auto bg-slate-100 dark:bg-neutral-950">
+                <div className="w-fit h-full bg-slate-50 dark:bg-black rounded-sm">
+                  <Table className="border-collapse w-full">
+                    <TableHeader>
+                      {table.getHeaderGroups().map((headerGroup, i) => (
                         <TableRow
-                          key={row.id}
-                          data-state={row.getIsSelected() && "selected"}
-                          className="border-b border-slate-300 dark:border-slate-700 hover:bg-white dark:hover:bg-neutral-950"
+                          key={headerGroup.id}
+                          className={clsx(
+                            "sticky top-0 bg-slate-50 dark:bg-slate-900 shadow-sm border-b border-slate-300 dark:border-slate-700",
+                            i === 1 && "h-[225px]"
+                          )}
                         >
-                          {row.getVisibleCells().map((cell) => (
-                            <TableCell
-                              className="p-0 align-baseline border-r border-slate-300 dark:border-slate-700"
-                              key={cell.id}
+                          {headerGroup.headers.map((header, index) => (
+                            <TableHead
+                              key={header.id}
                               style={{
-                                width: cell.column.getSize(),
-                                maxWidth: cell.column.getSize(),
-                                minWidth: cell.column.getSize(),
+                                width: header.getSize(),
                               }}
+                              className="bg-white dark:bg-neutral-950 relative px-0"
                             >
-                              {flexRender(
-                                cell.column.columnDef.cell,
-                                cell.getContext()
-                              )}
-                            </TableCell>
+                              {header.isPlaceholder
+                                ? null
+                                : flexRender(
+                                    header.column.columnDef.header,
+                                    header.getContext()
+                                  )}
+                              <div
+                                className="resizer absolute right-0 top-0 h-full w-4 cursor-col-resize"
+                                {...{
+                                  onMouseDown: header.getResizeHandler(),
+                                  onTouchStart: header.getResizeHandler(),
+                                }}
+                              >
+                                <div
+                                  className={clsx(
+                                    "h-full w-1",
+                                    header.column.getIsResizing()
+                                      ? "bg-blue-700 dark:bg-blue-300"
+                                      : "bg-gray-500"
+                                  )}
+                                />
+                              </div>
+                              {/* {index < headerGroup.headers.length - 1 && ( */}
+                              <div className="absolute top-0 right-0 h-full w-px bg-slate-300 dark:bg-slate-700" />
+                              {/* )} */}
+                              <div className="absolute bottom-0 left-0 right-0 h-[0.5px] bg-slate-300 dark:bg-slate-700" />
+                            </TableHead>
                           ))}
                         </TableRow>
-                      ))
-                    ) : (
-                      <TableRow>
-                        <TableCell
-                          colSpan={columnDef.length}
-                          className="h-24 text-center"
-                        >
-                          No results.
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
+                      ))}
+                    </TableHeader>
+                    <TableBody className="text-[13px] bg-white dark:bg-neutral-950 flex-1">
+                      {table.getRowModel().rows?.length ? (
+                        table.getRowModel().rows.map((row) => (
+                          <TableRow
+                            key={row.id}
+                            data-state={row.getIsSelected() && "selected"}
+                            className="border-b border-slate-300 dark:border-slate-700 hover:bg-white dark:hover:bg-neutral-950"
+                          >
+                            {row.getVisibleCells().map((cell) => (
+                              <TableCell
+                                className="p-0 align-baseline border-r border-slate-300 dark:border-slate-700"
+                                key={cell.id}
+                                style={{
+                                  width: cell.column.getSize(),
+                                  maxWidth: cell.column.getSize(),
+                                  minWidth: cell.column.getSize(),
+                                }}
+                              >
+                                {flexRender(
+                                  cell.column.columnDef.cell,
+                                  cell.getContext()
+                                )}
+                              </TableCell>
+                            ))}
+                          </TableRow>
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell
+                            colSpan={columnDef.length}
+                            className="h-24 text-center"
+                          >
+                            No results.
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
               </div>
+
+              <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="self-start flex flex-row space-x-2 text-slate-700 mt-0 shadow-none"
+                  >
+                    <PlusIcon className="h-4 w-4" />
+                    Add row
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-full px-2 py-2">
+                  <AddRowPopover
+                    setPopoverOpen={setPopoverOpen}
+                    setShowAddManualRow={() => setRightPanel("add_manual")}
+                    setShowExperimentInputSelector={
+                      setShowExperimentInputSelector
+                    }
+                    setShowRandomInputSelector={setShowRandomInputSelector}
+                  />
+                </PopoverContent>
+              </Popover>
+
+              <ExperimentRandomInputSelector
+                open={showRandomInputSelector}
+                setOpen={setShowRandomInputSelector}
+                handleAddRows={handleAddRowInsertBatch}
+                promptVersionId={
+                  experimentTableQuery?.original_prompt_version ?? ""
+                }
+                onSuccess={async (success) => {}}
+              />
+
+              <ExperimentInputSelector
+                open={showExperimentInputSelector}
+                setOpen={setShowExperimentInputSelector}
+                promptVersionId={
+                  experimentTableQuery?.original_prompt_version ?? ""
+                }
+                handleAddRows={handleAddRowInsertBatch}
+                onSuccess={async (success) => {}}
+              />
             </div>
+          </ResizablePanel>
 
-            <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="self-start flex flex-row space-x-2 text-slate-700 mt-0 shadow-none"
-                >
-                  <PlusIcon className="h-4 w-4" />
-                  Add row
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-full px-2 py-2">
-                <AddRowPopover
-                  setPopoverOpen={setPopoverOpen}
-                  setShowAddManualRow={() => setRightPanel("add_manual")}
-                  setShowExperimentInputSelector={
-                    setShowExperimentInputSelector
-                  }
-                  setShowRandomInputSelector={setShowRandomInputSelector}
-                />
-              </PopoverContent>
-            </Popover>
-
-            <ExperimentRandomInputSelector
-              open={showRandomInputSelector}
-              setOpen={setShowRandomInputSelector}
-              handleAddRows={handleAddRowInsertBatch}
-              promptVersionId={
-                experimentTableQuery?.original_prompt_version ?? ""
-              }
-              onSuccess={async (success) => {}}
-            />
-
-            <ExperimentInputSelector
-              open={showExperimentInputSelector}
-              setOpen={setShowExperimentInputSelector}
-              promptVersionId={
-                experimentTableQuery?.original_prompt_version ?? ""
-              }
-              handleAddRows={handleAddRowInsertBatch}
-              onSuccess={async (success) => {}}
-            />
-          </div>
-        </ResizablePanel>
-
-        {/* Add right panel if needed */}
-        {rightPanel && (
-          <>
-            <ResizableHandle withHandle />
-            <ResizablePanel minSize={25} maxSize={75}>
-              <div className="h-full flex-shrink-0 flex flex-col">
-                {rightPanel === "edit_inputs" && (
-                  <EditInputsPanel
-                    experimentId={experimentTableId}
-                    inputRecord={toEditInputRecord}
-                    inputKeys={inputKeysData ?? []}
-                    onClose={() => {
-                      setToEditInputRecord(null);
-                      setRightPanel(null);
-                    }}
-                  />
-                )}
-                {rightPanel === "add_manual" && (
-                  <AddManualRowPanel
-                    experimentId={experimentTableId}
-                    inputKeys={inputKeysData ?? []}
-                    onClose={() => setRightPanel(null)}
-                  />
-                )}
-              </div>
-            </ResizablePanel>
-          </>
-        )}
-      </ResizablePanelGroup>
-      <AddColumnDialog
-        isOpen={isAddColumnDialogOpen}
-        onOpenChange={setIsAddColumnDialogOpen}
-        experimentId={experimentTableId}
-        originalColumnPromptVersionId={promptVersionsData?.[0]?.id ?? ""}
-        selectedForkFromPromptVersionId={
-          externallySelectedForkFromPromptVersionId ?? ""
-        }
-        numberOfExistingPromptVersions={
-          promptVersionsData?.length ? promptVersionsData.length - 1 : 0
-        }
-      />
-    </div>
+          {/* Add right panel if needed */}
+          {rightPanel && (
+            <>
+              <ResizableHandle withHandle />
+              <ResizablePanel minSize={25} maxSize={75}>
+                <div className="h-full flex-shrink-0 flex flex-col">
+                  {rightPanel === "edit_inputs" && (
+                    <EditInputsPanel
+                      experimentId={experimentTableId}
+                      inputRecord={toEditInputRecord}
+                      inputKeys={inputKeysData ?? []}
+                      onClose={() => {
+                        setToEditInputRecord(null);
+                        setRightPanel(null);
+                      }}
+                    />
+                  )}
+                  {rightPanel === "add_manual" && (
+                    <AddManualRowPanel
+                      experimentId={experimentTableId}
+                      inputKeys={inputKeysData ?? []}
+                      onClose={() => setRightPanel(null)}
+                    />
+                  )}
+                </div>
+              </ResizablePanel>
+            </>
+          )}
+        </ResizablePanelGroup>
+        <AddColumnDialog
+          isOpen={isAddColumnDialogOpen}
+          onOpenChange={setIsAddColumnDialogOpen}
+          experimentId={experimentTableId}
+          originalColumnPromptVersionId={promptVersionsData?.[0]?.id ?? ""}
+          selectedForkFromPromptVersionId={
+            externallySelectedForkFromPromptVersionId ?? ""
+          }
+          numberOfExistingPromptVersions={
+            promptVersionsData?.length ? promptVersionsData.length - 1 : 0
+          }
+        />
+      </div>
+    </>
   );
 }

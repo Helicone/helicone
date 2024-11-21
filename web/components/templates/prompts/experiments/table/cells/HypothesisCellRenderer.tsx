@@ -29,7 +29,6 @@ export type HypothesisCellRef = {
 export const HypothesisCellRenderer = forwardRef<
   HypothesisCellRef,
   {
-    wrapText: boolean;
     requestId?: string;
     prompt?: any;
     experimentTableId: string;
@@ -38,14 +37,7 @@ export const HypothesisCellRenderer = forwardRef<
   }
 >(
   (
-    {
-      wrapText,
-      requestId,
-      prompt,
-      experimentTableId,
-      inputRecordId,
-      promptVersionId,
-    },
+    { requestId, prompt, experimentTableId, inputRecordId, promptVersionId },
     ref
   ) => {
     const [running, setRunning] = useState(false);
@@ -66,7 +58,7 @@ export const HypothesisCellRenderer = forwardRef<
       setHypothesisRequestId(requestId ?? "");
     }, [requestId]);
 
-    const { runHypothesis } = useExperimentTable(experimentTableId);
+    const { runHypothesis, wrapText } = useExperimentTable(experimentTableId);
 
     const { data: promptTemplate } = useQuery(
       ["promptTemplate", promptVersionId],
@@ -198,7 +190,12 @@ export const HypothesisCellRenderer = forwardRef<
                   className="w-full h-full items-center flex justify-start cursor-pointer py-2 px-4 text-slate-700 dark:text-slate-300"
                   onClick={handleCellClick}
                 >
-                  <div className={clsx(wrapText && "whitespace-pre-wrap")}>
+                  <div
+                    className={clsx(
+                      wrapText &&
+                        "whitespace-pre-wrap max-h-[100px] overflow-y-hidden line-clamp-4"
+                    )}
+                  >
                     {content}
                   </div>
                 </div>
@@ -247,7 +244,12 @@ export const HypothesisCellRenderer = forwardRef<
                   className="w-full h-full items-center flex justify-start cursor-pointer py-2 px-4 text-slate-700 dark:text-slate-300"
                   onClick={handleCellClick}
                 >
-                  <div className={clsx(wrapText && "whitespace-pre-wrap")}>
+                  <div
+                    className={clsx(
+                      wrapText &&
+                        "whitespace-pre-wrap max-h-[100px] overflow-y-hidden line-clamp-4"
+                    )}
+                  >
                     {content}
                   </div>
                 </div>

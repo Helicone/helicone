@@ -72,8 +72,10 @@ const EditInputsPanel = ({
     onClose();
   };
 
+  const [openAccordions, setOpenAccordions] = useState<string[]>(inputKeys);
+
   return (
-    <div className="bg-white dark:bg-neutral-950 flex flex-col relative max-h-[calc(100vh-100px)] h-full overflow-y-auto ">
+    <div className="bg-white dark:bg-neutral-950 flex flex-col relative h-full overflow-y-auto ">
       <div className="flex border-b border-slate-200 dark:border-slate-800 p-4 justify-between items-center">
         <div className="flex gap-3 items-center">
           <TextCursorInputIcon className="text-slate-500" />
@@ -90,20 +92,41 @@ const EditInputsPanel = ({
           )}
           <XIcon
             className="text-slate-500 hover:text-slate-700 cursor-pointer"
-            onClick={onClose}
+            onClick={() => {
+              if (hasUnsavedChanges) {
+                setShowAlertDialog(true);
+              } else {
+                onClose();
+              }
+            }}
           />
         </div>
       </div>
-      <div className="p-4">
-        <Accordion type="multiple" className="w-full" defaultValue={inputKeys}>
+      <div className="p-4 max-h-[calc(100vh-150px)] overflow-y-auto">
+        <Accordion
+          type="multiple"
+          className="w-full"
+          defaultValue={inputKeys}
+          value={openAccordions}
+          onValueChange={setOpenAccordions}
+        >
           {inputKeys.map((inputKey) => (
-            <AccordionItem key={inputKey} value={inputKey}>
+            <AccordionItem
+              key={inputKey}
+              value={inputKey}
+              className="border-b-0"
+            >
               <AccordionTrigger
                 iconPosition="start"
                 iconClassName="text-slate-500"
-                className="text-slate-700 dark:text-slate-300 text-[13px] font-medium"
+                className="text-slate-700 dark:text-slate-300 text-[13px] max-w-full hover:no-underline"
               >
-                {inputKey}:
+                <span className="font-medium">{inputKey}:</span>
+                {!openAccordions.includes(inputKey) && (
+                  <span className="font-normal max-w-full overflow-hidden text-ellipsis whitespace-nowrap">
+                    {inputKV[inputKey]}
+                  </span>
+                )}
               </AccordionTrigger>
               <AccordionContent>
                 <MarkdownEditor
@@ -123,7 +146,7 @@ const EditInputsPanel = ({
         </Accordion>
       </div>
       {hasUnsavedChanges && (
-        <div className="fixed bottom-0 left-0 right-0 p-4 border-t border-slate-200 dark:border-slate-800 flex justify-end items-center w-full gap-3">
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-200 dark:border-slate-800 flex justify-end items-center w-full gap-3 bg-white dark:bg-neutral-950">
           <AlertDialog open={showAlertDialog} onOpenChange={setShowAlertDialog}>
             <AlertDialogTrigger asChild>
               <Button

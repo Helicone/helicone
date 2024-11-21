@@ -258,6 +258,13 @@ export const useExperimentTable = (experimentTableId: string) => {
     },
   });
 
+  const { data: wrapText } = useQuery(
+    ["wrapText", experimentTableId],
+    async () => {
+      return false;
+    }
+  );
+
   return {
     experimentTableQuery,
     isExperimentTableLoading,
@@ -271,5 +278,6 @@ export const useExperimentTable = (experimentTableId: string) => {
     updateExperimentTableRow,
     runHypothesis,
     addManualRow,
+    wrapText,
   };
 };
