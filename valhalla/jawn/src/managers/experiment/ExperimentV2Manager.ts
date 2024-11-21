@@ -16,6 +16,7 @@ import { run } from "../../lib/experiment/run";
 import { PromptManager } from "../prompt/PromptManager";
 import { PromptVersionResult } from "../../controllers/public/promptController";
 import { parseJSXObject } from "@helicone/prompts";
+import { uuid } from "uuidv4";
 
 export class ExperimentV2Manager extends BaseManager {
   private ExperimentStore: ExperimentStore;
@@ -57,6 +58,7 @@ export class ExperimentV2Manager extends BaseManager {
     return experiment.data ?? null;
   }
 
+  // this query needs to be better imo
   async createNewExperiment(
     name: string,
     originalPromptVersion: string
@@ -113,6 +115,17 @@ export class ExperimentV2Manager extends BaseManager {
 
       if (newPromptVersion.error || !newPromptVersion.data) {
         return err("Failed to create new prompt version");
+      }
+
+      const updatedExperiment = await supabaseServer.client
+        .from("experiment_v3")
+        .update({
+          copied_original_prompt_version: newPromptVersion.data.id,
+        })
+        .eq("id", result.data[0].id);
+
+      if (updatedExperiment.error) {
+        return err("Failed to update experiment");
       }
 
       return ok({ experimentId: result.data[0].id });
@@ -283,7 +296,7 @@ export class ExperimentV2Manager extends BaseManager {
 
       const inputManager = new InputsManager(this.authParams);
       const result = await inputManager.createInputRecord(
-        experiment.original_prompt_version,
+        experiment.copied_original_prompt_version ?? "",
         inputs,
         undefined,
         experimentId
@@ -324,21 +337,28 @@ export class ExperimentV2Manager extends BaseManager {
     inputs: Record<string, string>
   ): Promise<Result<null, string>> {
     try {
-      const originalPIR = await supabaseServer.client
-        .from("prompt_input_record")
-        .select("*")
-        .eq("id", inputRecordId)
-        .single();
+      const [originalPIR, experiment] = await Promise.all([
+        supabaseServer.client
+          .from("prompt_input_record")
+          .select("*")
+          .eq("id", inputRecordId)
+          .single(),
+        this.getExperimentById(experimentId),
+      ]);
 
       if (!originalPIR.data) {
         return err("Original prompt input record not found");
+      }
+
+      if (!experiment) {
+        return err("Experiment not found");
       }
 
       const response = await supabaseServer.client
         .from("prompt_input_record")
         .insert({
           inputs,
-          prompt_version: originalPIR.data.prompt_version,
+          prompt_version: experiment?.copied_original_prompt_version ?? "",
           experiment_id: experimentId,
         })
         .select();
@@ -349,7 +369,7 @@ export class ExperimentV2Manager extends BaseManager {
 
       await supabaseServer.client.from("experiment_output").insert({
         input_record_id: response.data[0].id,
-        prompt_version_id: originalPIR.data.prompt_version,
+        prompt_version_id: experiment?.copied_original_prompt_version ?? "",
         is_original: true,
         experiment_id: experimentId,
         request_id: originalPIR.data.source_request,
@@ -388,7 +408,6 @@ export class ExperimentV2Manager extends BaseManager {
     inputRecordId: string
   ): Promise<Result<string, string>> {
     try {
-      console.log({ experimentId, promptVersionId, inputRecordId });
       const result = await run(
         experimentId,
         promptVersionId,

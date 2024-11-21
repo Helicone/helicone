@@ -250,4 +250,57 @@ const PromptColumnHeader = ({
   );
 };
 
-export { InputsHeaderComponent, ExperimentTableHeader, PromptColumnHeader };
+const IndexColumnCell = ({
+  index,
+  onRunRow,
+}: {
+  index: number;
+  onRunRow: () => void;
+}) => {
+  return (
+    <div>
+      {index}
+      <Button
+        variant="ghost"
+        className="ml-2 p-0 border-slate-200 border rounded-md bg-slate-50 text-slate-500 h-[22px] w-[24px] flex items-center justify-center"
+        onClick={onRunRow}
+      >
+        <PlayIcon className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+      </Button>
+    </div>
+  );
+};
+
+const InputCell = ({
+  experimentInputs,
+  rowInputs,
+  onClick,
+}: {
+  experimentInputs: string[];
+  rowInputs: Record<string, string>;
+  onClick: () => void;
+}) => {
+  return (
+    <div
+      className="cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 h-full"
+      style={{ cursor: "pointer" }}
+      onClick={onClick}
+    >
+      <ul>
+        {experimentInputs?.map((input) => (
+          <li key={input}>
+            <strong>{input}</strong>: {rowInputs[input]?.toString()}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
+export {
+  InputsHeaderComponent,
+  ExperimentTableHeader,
+  PromptColumnHeader,
+  IndexColumnCell,
+  InputCell,
+};

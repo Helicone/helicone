@@ -47,8 +47,7 @@ async function prepareRequest(
 
 export async function runOriginalExperiment(
   experiment: Experiment,
-  datasetRows: ExperimentDatasetRow[],
-  experimentTableId: string
+  datasetRows: ExperimentDatasetRow[]
 ): Promise<Result<string, string>> {
   const tempKey: Result<BaseTempKey, string> = await generateHeliconeAPIKey(
     experiment.organization
@@ -60,8 +59,6 @@ export async function runOriginalExperiment(
 
   return tempKey.data.with<Result<string, string>>(async (secretKey) => {
     for (const data of datasetRows) {
-      const requestId = uuid();
-
       if (data.inputRecord?.inputs) {
         data.inputRecord.inputs = await getAllSignedURLsFromInputs(
           data.inputRecord.inputs,
@@ -82,40 +79,12 @@ export async function runOriginalExperiment(
       if (promptVersion.error || !promptVersion.data) {
         return err(promptVersion.error.message);
       }
-
-      // const preparedRequest = await prepareRequest(
-      //   {
-      //     template: promptVersion.data.helicone_template,
-      //     providerKey: null,
-      //     secretKey,
-      //     datasetRow: data,
-      //     requestId,
-      //     columnId: data.columnId,
-      //     rowIndex: data.rowIndex,
-      //     experimentId: experimentTableId,
-      //   },
-      //   {
-      //     deployment: experiment.meta?.deployment ?? "AZURE",
-      //   },
-      //   providerByModelName(promptVersion.data.model ?? "")
-      // );
-
-      // await runOriginalRequest({
-      //   url: preparedRequest.url,
-      //   headers: preparedRequest.headers,
-      //   body: preparedRequest.body,
-      //   requestId,
-      //   datasetRowId: data.rowId,
-      //   inputRecordId: data.inputRecord.id,
-      // });
     }
     return ok("success");
   });
 }
 
 export async function run(
-  // experiment: Experiment,
-  // experimentTableId: string
   experimentId: string,
   promptVersionId: string,
   inputRecordId: string,

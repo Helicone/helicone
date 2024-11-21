@@ -8155,6 +8155,10 @@
 					"original_prompt_version": {
 						"type": "string"
 					},
+					"copied_original_prompt_version": {
+						"type": "string",
+						"nullable": true
+					},
 					"input_keys": {
 						"items": {
 							"type": "string"
@@ -8170,6 +8174,7 @@
 					"id",
 					"name",
 					"original_prompt_version",
+					"copied_original_prompt_version",
 					"input_keys",
 					"created_at"
 				],
@@ -8279,6 +8284,10 @@
 					"original_prompt_version": {
 						"type": "string"
 					},
+					"copied_original_prompt_version": {
+						"type": "string",
+						"nullable": true
+					},
 					"input_keys": {
 						"items": {
 							"type": "string"
@@ -8300,6 +8309,7 @@
 					"id",
 					"name",
 					"original_prompt_version",
+					"copied_original_prompt_version",
 					"input_keys",
 					"created_at",
 					"rows"

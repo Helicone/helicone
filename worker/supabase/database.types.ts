@@ -709,6 +709,7 @@ export type Database = {
       }
       experiment_v3: {
         Row: {
+          copied_original_prompt_version: string | null
           created_at: string
           id: string
           input_keys: string[] | null
@@ -717,6 +718,7 @@ export type Database = {
           original_prompt_version: string
         }
         Insert: {
+          copied_original_prompt_version?: string | null
           created_at?: string
           id?: string
           input_keys?: string[] | null
@@ -725,6 +727,7 @@ export type Database = {
           original_prompt_version: string
         }
         Update: {
+          copied_original_prompt_version?: string | null
           created_at?: string
           id?: string
           input_keys?: string[] | null
@@ -733,6 +736,13 @@ export type Database = {
           original_prompt_version?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "public_experiment_v3_copied_original_prompt_version_fkey"
+            columns: ["copied_original_prompt_version"]
+            isOneToOne: false
+            referencedRelation: "prompts_versions"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "public_experiment_v3_organization_fkey"
             columns: ["organization"]

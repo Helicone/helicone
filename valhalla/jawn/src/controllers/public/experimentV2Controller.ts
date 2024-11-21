@@ -22,6 +22,7 @@ export interface ExperimentV2 {
   id: string;
   name: string;
   original_prompt_version: string;
+  copied_original_prompt_version: string | null;
   input_keys: string[] | null;
   created_at: string;
 }

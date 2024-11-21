@@ -2,6 +2,7 @@ import { useExperimentTable } from "./hooks/useExperimentTable";
 import { useCallback, useMemo, useRef, useState } from "react";
 import {
   ColumnDef,
+  createColumnHelper,
   flexRender,
   getCoreRowModel,
   useReactTable,
@@ -9,6 +10,8 @@ import {
 import AddColumnHeader from "./AddColumnHeader";
 import {
   ExperimentTableHeader,
+  IndexColumnCell,
+  InputCell,
   InputsHeaderComponent,
   PromptColumnHeader,
 } from "./components/tableElementsRenderer";
@@ -41,6 +44,18 @@ import AddColumnDialog from "./AddColumnDialog";
 import EditInputsPanel from "./EditInputsPanel";
 import AddManualRowPanel from "./AddManualRowPanel";
 
+type TableDataType = {
+  index: number;
+  inputs: Record<string, string>;
+  rowRecordId: string;
+  add_prompt: string;
+  originalInputRecordId: string;
+  [key: `prompt_version_${string}`]: {
+    request_id: string;
+    input_record_id: string;
+  };
+};
+
 export function ExperimentTable({
   experimentTableId,
 }: {
@@ -51,9 +66,7 @@ export function ExperimentTable({
     promptVersionTemplateData,
     promptVersionsData,
     addExperimentTableRowInsertBatch,
-    runHypothesis,
     inputKeysData,
-    isInputKeysLoading,
   } = useExperimentTable(experimentTableId);
 
   const [popoverOpen, setPopoverOpen] = useState(false);
@@ -76,164 +89,67 @@ export function ExperimentTable({
   ] = useState<string | null>(null);
   const [isAddColumnDialogOpen, setIsAddColumnDialogOpen] = useState(false);
 
-  const columnDef = useMemo<
-    ColumnDef<{
-      add_prompt: string;
-      inputs: string;
-      original: string | undefined;
-      originalInputRecordId: string | undefined;
-      index: number;
-      rowRecordId: string;
-      [key: `prompt_version_${string}`]:
-        | { request_id: string; input_record_id: string }
-        | undefined;
-    }>[]
-    // @ts-ignore
-  >(() => {
-    return [
-      {
-        id: "index-outer",
+  const columnHelper = createColumnHelper<TableDataType>();
+
+  const columnDef = useMemo(
+    () => [
+      columnHelper.group({
+        id: "index__outer",
         header: () => (
           <div className="flex justify-center items-center text-slate-400 dark:text-slate-600">
             <ListIcon className="w-4 h-4" />
           </div>
         ),
         columns: [
-          {
-            id: "index",
-            header: "",
-            accessorFn: (row) => row.index,
+          columnHelper.accessor("index", {
+            header: () => <></>,
             cell: ({ row }) => (
-              <div>
-                {row.original.index}
-                <Button
-                  variant="ghost"
-                  className="ml-2 p-0 border-slate-200 border rounded-md bg-slate-50 text-slate-500 h-[22px] w-[24px] flex items-center justify-center"
-                  onClick={async () => {
-                    await Promise.all(
-                      (promptVersionsData ?? []).map((pv) => {
-                        const cellRef = cellRefs.current[`${row.id}-${pv.id}`];
-                        if (cellRef) {
-                          // @ts-ignore
-                          cellRef.runHypothesis();
-                        }
-                      })
-                    );
-                  }}
-                >
-                  <PlayIcon className="w-4 h-4 text-gray-600 dark:text-gray-300" />
-                </Button>
-              </div>
+              <IndexColumnCell
+                index={row.original.index}
+                onRunRow={async () => {
+                  await Promise.all(
+                    (promptVersionsData ?? []).map((pv) => {
+                      const cellRef = cellRefs.current[`${row.id}-${pv.id}`];
+                      if (cellRef) {
+                        cellRef.runHypothesis();
+                      }
+                    })
+                  );
+                }}
+              />
             ),
             size: 20,
-          },
+          }),
         ],
-      },
-      {
-        id: "inputs-upper",
+      }),
+      columnHelper.group({
+        id: "inputs__outer",
         header: () => <div>Inputs</div>,
         columns: [
-          {
+          columnHelper.accessor("inputs", {
             header: () => (
               <InputsHeaderComponent inputs={inputKeysData ?? []} />
             ),
-            accessorKey: "inputs",
-            cell: ({ row }) => {
-              return (
-                <div
-                  className="cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 h-full"
-                  style={{ cursor: "pointer" }}
-                  onClick={() => {
-                    console.log({
-                      id: row.original.originalInputRecordId,
-                      inputKV: JSON.parse(row.original.inputs),
-                    });
-                    setToEditInputRecord({
-                      id: row.original.originalInputRecordId ?? "",
-                      inputKV: JSON.parse(row.original.inputs),
-                    });
-                    setRightPanel("edit_inputs");
-                  }}
-                >
-                  <ul>
-                    {inputKeysData?.map((input) => (
-                      <li key={input}>
-                        <strong>{input}</strong>:{" "}
-                        {JSON.parse(row.original.inputs)[input]?.toString()}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              );
-            },
+            cell: ({ row }) => (
+              <InputCell
+                experimentInputs={inputKeysData ?? []}
+                rowInputs={row.original.inputs}
+                onClick={() => {
+                  setToEditInputRecord({
+                    id: row.original.originalInputRecordId ?? "",
+                    inputKV: row.original.inputs,
+                  });
+                  setRightPanel("edit_inputs");
+                }}
+              />
+            ),
             size: 250,
-          },
+          }),
         ],
-      },
-      // {
-      //   header:
-      //     promptVersionsData?.[0]?.metadata?.label ??
-      //     `v${promptVersionsData?.[0]?.major_version}.${promptVersionsData?.[0]?.minor_version}`,
-      //   id: "original-outer",
-      //   columns: [
-      //     {
-      //       accessorKey: "original",
-      //       header: () => (
-      //         <ExperimentTableHeader
-      //           isOriginal={true}
-      //           promptVersionId={promptVersionsData?.[0]?.id ?? ""}
-      //           originalPromptTemplate={promptVersionTemplateData}
-      //           originalPromptVersionId={promptVersionsData?.[0]?.id ?? ""}
-      //           onForkPromptVersion={(promptVersionId: string) => {
-      //             setExternallySelectedForkFromPromptVersionId(promptVersionId);
-      //             setIsAddColumnDialogOpen(true);
-      //           }}
-      //         />
-      //       ),
-      //       cell: ({ row }) => {
-      //         return (
-      //           <HypothesisCellRenderer
-      //             ref={(el) => {
-      //               if (el) {
-      //                 cellRefs.current[
-      //                   `${row.id}-${promptVersionsData?.[0]?.id}`
-      //                 ] = el;
-      //               }
-      //             }}
-      //             experimentTableId={experimentTableId}
-      //             requestId={row.original.original}
-      //             inputRecordId={row.original.rowRecordId ?? ""}
-      //             prompt={promptVersionTemplateData}
-      //             promptVersionId={promptVersionsData?.[0]?.id ?? ""}
-      //             wrapText={false}
-      //           />
-      //           // <OriginalOutputCellRenderer
-      //           //   requestId={row.original?.original ?? ""}
-      //           //   wrapText={false}
-      //           //   prompt={promptVersionTemplateData}
-      //           // />
-      //         );
-      //       },
-      //     },
-      //   ],
-      //   size: 300,
-      // },
-      ...(promptVersionsData ?? []).map(
-        (
-          pv,
-          i
-        ): ColumnDef<{
-          add_prompt: string;
-          inputs: string;
-          original: string | undefined;
-          originalInputRecordId: string | undefined;
-          index: number;
-          rowRecordId: string;
-          [key: `prompt_version_${string}`]:
-            | { request_id: string; input_record_id: string }
-            | undefined;
-        }> => ({
-          id: `${pv.id}`,
+      }),
+      ...(promptVersionsData ?? []).map((pv) =>
+        columnHelper.group({
+          id: `prompt_version_${pv.id}__outer`,
           header: () => (
             <PromptColumnHeader
               label={
@@ -258,11 +174,12 @@ export function ExperimentTable({
             />
           ),
           columns: [
-            {
-              id: `prompt_version_${pv.id}`,
+            columnHelper.accessor(`prompt_version_${pv.id}`, {
               header: () => (
                 <ExperimentTableHeader
-                  isOriginal={false}
+                  isOriginal={
+                    pv.id === experimentTableQuery?.original_prompt_version
+                  }
                   promptVersionId={pv.id}
                   originalPromptTemplate={promptVersionTemplateData}
                   originalPromptVersionId={promptVersionsData?.[0]?.id ?? ""}
@@ -274,58 +191,29 @@ export function ExperimentTable({
                   }}
                 />
               ),
-              accessorKey: `prompt_version_${pv.id}`,
-              cell: ({ row }) => {
-                return (
-                  <HypothesisCellRenderer
-                    ref={(el) => {
-                      if (el) {
-                        cellRefs.current[`${row.id}-${pv.id}`] = el;
-                      }
-                    }}
-                    experimentTableId={experimentTableId}
-                    requestId={
-                      row.original[`prompt_version_${pv.id}`]?.request_id ?? ""
+              cell: ({ row }) => (
+                <HypothesisCellRenderer
+                  ref={(el) => {
+                    if (el) {
+                      cellRefs.current[`${row.id}-${pv.id}`] = el;
                     }
-                    inputRecordId={row.original.rowRecordId ?? ""}
-                    prompt={promptVersionTemplateData}
-                    promptVersionId={pv.id}
-                    wrapText={false}
-                  />
-                );
-              },
-              size: 300,
-            },
+                  }}
+                  experimentTableId={experimentTableId}
+                  requestId={
+                    row.original[`prompt_version_${pv.id}`]?.request_id ?? ""
+                  }
+                  inputRecordId={row.original.rowRecordId ?? ""}
+                  prompt={promptVersionTemplateData}
+                  promptVersionId={pv.id}
+                  wrapText={false}
+                />
+              ),
+            }),
           ],
-          // header: () => (
-          //   <CustomHeaderComponent
-          //     displayName={`Prompt ${i + 1}`}
-          //     badgeText="Output"
-          //     badgeVariant="secondary"
-          //     promptVersionId={pv.id}
-          //     promptTemplate={promptVersionTemplateData}
-          //     onRunColumn={async () => {
-          //       const rows = table.getRowModel().rows;
-
-          //       // Run each cell using its ref
-          //       await Promise.all(
-          //         rows.map(async (row) => {
-          //           const cellRef = cellRefs.current[`${row.id}-${pv.id}`];
-          //           if (cellRef) {
-          //             // @ts-ignore
-          //             await cellRef.runHypothesis();
-          //           }
-          //         })
-          //       );
-          //     }}
-          //     originalPromptTemplate={promptVersionTemplateData}
-          //   />
-          // ),
-          // @ts-ignore
         })
       ),
-      {
-        id: "add_prompt",
+      columnHelper.group({
+        id: "add_prompt__outer",
         header: () => (
           <AddColumnHeader
             experimentId={experimentTableId}
@@ -350,32 +238,24 @@ export function ExperimentTable({
           />
         ),
         columns: [
-          {
-            header: "",
-            accessorKey: "add_prompt",
-            size: 200,
-          },
+          columnHelper.accessor("add_prompt", {
+            header: () => <></>,
+            cell: ({ row }) => <div></div>,
+            size: 50,
+          }),
         ],
-      },
-    ];
-  }, [
-    promptVersionsData,
-    experimentTableId,
-    experimentTableQuery?.original_prompt_version,
-    promptVersionTemplateData,
-    // runHypothesis,
-    // table,
-  ]);
+      }),
+    ],
+    [inputKeysData]
+  );
 
-  // Memoize the table data
-  const tableData = useMemo(() => {
-    if (!experimentTableQuery?.rows) return [];
+  const tableData = useMemo<TableDataType[]>(() => {
+    if (!experimentTableQuery?.rows || !promptVersionsData) return [];
 
     return experimentTableQuery.rows.map((row, i) => ({
       index: i + 1,
-      inputs: JSON.stringify(row.inputs),
+      inputs: row.inputs,
       rowRecordId: row.id,
-      // original: row.requests.find((r) => r.is_original)?.request_id,
       ...(promptVersionsData ?? []).reduce(
         (acc, pv) => ({
           ...acc,
@@ -386,30 +266,32 @@ export function ExperimentTable({
         {}
       ),
       add_prompt: "",
-      originalInputRecordId: row.requests.find((r) => r.is_original)
-        ?.input_record_id,
+      originalInputRecordId:
+        row.requests.find(
+          (r) =>
+            r.prompt_version_id ===
+            experimentTableQuery?.copied_original_prompt_version
+        )?.input_record_id ?? "",
     }));
   }, [experimentTableQuery?.rows, promptVersionsData]);
-  // const [data, setData] = useState(tableData);
 
-  // useEffect(() => {
-  //   setData(tableData);
-  // }, [tableData]);
+  const tableConfig = useMemo(
+    () => ({
+      data: tableData,
+      columns: columnDef,
+      defaultColumn: {
+        minSize: 50,
+        maxSize: 1000,
+        size: 300,
+      },
+      getCoreRowModel: getCoreRowModel(),
+      enableColumnResizing: true,
+      columnResizeMode: "onChange" as const,
+    }),
+    [tableData, columnDef]
+  );
 
-  const table = useReactTable({
-    data: tableData,
-    // @ts-ignore
-    columns: columnDef,
-    defaultColumn: {
-      minSize: 50,
-      maxSize: 1000,
-      size: 300,
-    },
-    getCoreRowModel: getCoreRowModel(),
-    enableColumnResizing: true,
-    columnResizeMode: "onChange",
-    // columnResizeDirection: "ltr",
-  });
+  const table = useReactTable(tableConfig);
 
   const handleAddRowInsertBatch = useCallback(
     (
@@ -423,20 +305,20 @@ export function ExperimentTable({
         inputs: row.inputs,
       }));
 
-      if (!newRows) return;
+      if (!newRows.length) return;
 
       addExperimentTableRowInsertBatch.mutate({
         rows: newRows,
       });
     },
-    [addExperimentTableRowInsertBatch, experimentTableQuery]
+    [addExperimentTableRowInsertBatch]
   );
 
   return (
     <>
       <ResizablePanelGroup direction="horizontal">
         <ResizablePanel defaultSize={75}>
-          <div className="h-full flex flex-col border-b divide-y divide-slate-300 dark:divide-slate-700">
+          <div className="h-[calc(100vh-100px)] flex flex-col border-b divide-y divide-slate-300 dark:divide-slate-700">
             <div className="max-h-[calc(100vh-100px)] h-full overflow-y-auto overflow-x-auto bg-slate-100 dark:bg-slate-800">
               <div className="inline-block min-w-max bg-slate-50 dark:bg-black rounded-sm h-full">
                 <Table className="border-collapse w-full">
