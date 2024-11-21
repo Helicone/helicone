@@ -69,6 +69,8 @@ export function ExperimentTable({
     inputKeysData,
   } = useExperimentTable(experimentTableId);
 
+  console.log({ experimentTableQuery, promptVersionsData });
+
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [showExperimentInputSelector, setShowExperimentInputSelector] =
     useState(false);
@@ -246,7 +248,15 @@ export function ExperimentTable({
         ],
       }),
     ],
-    [inputKeysData]
+    [
+      inputKeysData,
+      promptVersionsData,
+      experimentTableQuery,
+      experimentTableId,
+      promptVersionTemplateData,
+      setExternallySelectedForkFromPromptVersionId,
+      setIsAddColumnDialogOpen,
+    ]
   );
 
   const tableData = useMemo<TableDataType[]>(() => {
@@ -273,7 +283,11 @@ export function ExperimentTable({
             experimentTableQuery?.copied_original_prompt_version
         )?.input_record_id ?? "",
     }));
-  }, [experimentTableQuery?.rows, promptVersionsData]);
+  }, [
+    experimentTableQuery?.rows,
+    promptVersionsData,
+    experimentTableQuery?.copied_original_prompt_version,
+  ]);
 
   const tableConfig = useMemo(
     () => ({
@@ -315,10 +329,10 @@ export function ExperimentTable({
   );
 
   return (
-    <>
-      <ResizablePanelGroup direction="horizontal">
+    <div className="h-[calc(100vh-100px)]">
+      <ResizablePanelGroup direction="horizontal" className="h-full">
         <ResizablePanel defaultSize={75}>
-          <div className="h-[calc(100vh-100px)] flex flex-col border-b divide-y divide-slate-300 dark:divide-slate-700">
+          <div className="flex flex-col">
             <div className="max-h-[calc(100vh-100px)] h-full overflow-y-auto overflow-x-auto bg-slate-100 dark:bg-slate-800">
               <div className="inline-block min-w-max bg-slate-50 dark:bg-black rounded-sm h-full">
                 <Table className="border-collapse w-full">
@@ -370,7 +384,7 @@ export function ExperimentTable({
                       </TableRow>
                     ))}
                   </TableHeader>
-                  <TableBody className="text-[13px]">
+                  <TableBody className="text-[13px] bg-white dark:bg-neutral-950">
                     {table.getRowModel().rows?.length ? (
                       table.getRowModel().rows.map((row) => (
                         <TableRow
@@ -414,7 +428,7 @@ export function ExperimentTable({
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="self-start flex flex-row space-x-2 text-slate-700 mt-0"
+                  className="self-start flex flex-row space-x-2 text-slate-700 mt-0 shadow-none"
                 >
                   <PlusIcon className="h-4 w-4" />
                   Add row
@@ -495,6 +509,6 @@ export function ExperimentTable({
           promptVersionsData?.length ? promptVersionsData.length - 1 : 0
         }
       />
-    </>
+    </div>
   );
 }
