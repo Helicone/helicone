@@ -73,7 +73,7 @@ const EditInputsPanel = ({
   };
 
   return (
-    <div className="bg-white dark:bg-neutral-950 flex flex-col relative z-10 max-h-[calc(100vh-100px)] h-full overflow-y-auto ">
+    <div className="bg-white dark:bg-neutral-950 flex flex-col relative max-h-[calc(100vh-100px)] h-full overflow-y-auto ">
       <div className="flex border-b border-slate-200 dark:border-slate-800 p-4 justify-between items-center">
         <div className="flex gap-3 items-center">
           <TextCursorInputIcon className="text-slate-500" />
@@ -101,6 +101,7 @@ const EditInputsPanel = ({
               <AccordionTrigger
                 iconPosition="start"
                 iconClassName="text-slate-500"
+                className="text-slate-700 dark:text-slate-300 text-[13px] font-medium"
               >
                 {inputKey}:
               </AccordionTrigger>

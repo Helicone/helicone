@@ -335,11 +335,6 @@ export const useExperimentTable = (experimentTableId: string) => {
         body: { inputs },
       });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["experimentTable", orgId, experimentTableId],
-      });
-    },
   });
 
   const addExperimentTableRowInsertBatch = useMutation({
@@ -378,7 +373,39 @@ export const useExperimentTable = (experimentTableId: string) => {
         body: { inputRecordId, inputs },
       });
     },
-    onSuccess: () => {
+    onMutate: async (variables) => {
+      await queryClient.cancelQueries([
+        "experimentTable",
+        orgId,
+        experimentTableId,
+      ]);
+      const previousData = queryClient.getQueryData([
+        "experimentTable",
+        orgId,
+        experimentTableId,
+      ]);
+
+      queryClient.setQueryData(
+        ["experimentTable", orgId, experimentTableId],
+        (old: any) => ({
+          ...old,
+          rows: old.rows.map((row: any) =>
+            row.inputRecordId === variables.inputRecordId
+              ? { ...row, inputs: variables.inputs }
+              : row
+          ),
+        })
+      );
+
+      return { previousData };
+    },
+    onError: (err, variables, context) => {
+      queryClient.setQueryData(
+        ["experimentTable", orgId, experimentTableId],
+        context?.previousData
+      );
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({
         queryKey: ["experimentTable", orgId, experimentTableId],
       });
@@ -415,7 +442,6 @@ export const useExperimentTable = (experimentTableId: string) => {
     isInputKeysLoading,
     promptVersionTemplateData,
     isPromptVersionTemplateLoading,
-    addManualRow,
     addExperimentTableRowInsertBatch,
     updateExperimentTableRow,
     runHypothesis,

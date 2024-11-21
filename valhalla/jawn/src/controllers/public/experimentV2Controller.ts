@@ -245,7 +245,7 @@ export class ExperimentV2Controller extends Controller {
       requestBody.inputs
     );
 
-    if (result.error || !result.data) {
+    if (result.error) {
       this.setStatus(500);
     } else {
       this.setStatus(200);
