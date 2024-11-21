@@ -192,8 +192,9 @@ export const HypothesisCellRenderer = forwardRef<
                 >
                   <div
                     className={clsx(
-                      wrapText &&
-                        "whitespace-pre-wrap max-h-[100px] overflow-y-hidden line-clamp-4"
+                      wrapText.data
+                        ? "whitespace-nowrap max-h-[100px] overflow-y-hidden line-clamp-4 truncate text-ellipsis"
+                        : "break-words whitespace-normal"
                     )}
                   >
                     {content}
@@ -246,8 +247,9 @@ export const HypothesisCellRenderer = forwardRef<
                 >
                   <div
                     className={clsx(
-                      wrapText &&
-                        "whitespace-pre-wrap max-h-[100px] overflow-y-hidden line-clamp-4"
+                      wrapText.data
+                        ? "whitespace-nowrap max-h-[100px] overflow-y-hidden line-clamp-4 truncate text-ellipsis"
+                        : "break-words whitespace-normal"
                     )}
                   >
                     {content}

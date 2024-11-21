@@ -375,12 +375,20 @@ export function ExperimentTable({
             ]}
           />
         </IslandContainer>
-        <Switch
-          checked={wrapText}
-          onCheckedChange={(checked) => {
-            queryClient.setQueryData(["wrapText", experimentTableId], checked);
-          }}
-        />
+        <div className="flex items-center gap-2">
+          <Switch
+            checked={wrapText.data ?? false}
+            onCheckedChange={(checked) => {
+              queryClient.setQueryData(
+                ["wrapText", experimentTableId],
+                checked
+              );
+            }}
+          />
+          <p className="text-slate-700 dark:text-slate-300 text-sm font-medium">
+            Wrap text
+          </p>
+        </div>
       </div>
       <div className="h-[calc(100vh-50px)]">
         <ResizablePanelGroup direction="horizontal" className="h-full">

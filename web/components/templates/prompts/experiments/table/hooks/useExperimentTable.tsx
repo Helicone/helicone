@@ -258,12 +258,13 @@ export const useExperimentTable = (experimentTableId: string) => {
     },
   });
 
-  const { data: wrapText } = useQuery(
-    ["wrapText", experimentTableId],
-    async () => {
+  const wrapText = useQuery({
+    queryKey: ["wrapText", experimentTableId],
+    queryFn: async () => {
       return false;
-    }
-  );
+    },
+    refetchOnWindowFocus: false,
+  });
 
   return {
     experimentTableQuery,
