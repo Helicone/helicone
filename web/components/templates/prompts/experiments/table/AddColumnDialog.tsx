@@ -124,6 +124,7 @@ const AddColumnDialog = ({
             onExtractPromptVariables={(promptInputKeys) => {
               setPromptVariables(promptInputKeys);
             }}
+            className="border rounded-md border-slate-200 dark:border-slate-700"
             onSubmit={async (history, model) => {
               console.log({ history });
               const promptData = {

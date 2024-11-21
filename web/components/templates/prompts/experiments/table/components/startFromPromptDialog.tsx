@@ -299,18 +299,18 @@ export const StartFromPromptDialog = ({
   };
 
   return (
-    <DialogContent className="w-[500px] p-4 bg-white shadow-lg rounded-md">
+    <DialogContent className="w-[500px] p-4 shadow-lg rounded-md">
       <div>
         <div className="flex flex-row items-center space-x-2 text-center">
           <BeakerIcon className="w-4 h-4 " />
           <h3 className="font-medium mb-2 text-lg">Start with a prompt</h3>
         </div>
 
-        <p className="text-sm text-gray-500 mb-2">
+        <p className="text-sm text-slate-500 mb-2">
           Choose an existing prompt and select the version you want to
           experiment on.
         </p>
-        <div className="border border-slate-200 rounded-md">
+        <div className="border border-slate-200 dark:border-slate-700 rounded-md">
           <ScrollArea className="flex flex-col overflow-y-auto max-h-[30vh]  py-2  px-1 pt-0">
             {prompts &&
               prompts?.map((prompt) => (
@@ -319,7 +319,7 @@ export const StartFromPromptDialog = ({
                   variant="ghost"
                   className={`w-full justify-start mt-2 ${
                     selectedPromptId === prompt.id
-                      ? "bg-slate-200"
+                      ? "bg-slate-200 dark:bg-slate-800"
                       : "hover:bg-accent"
                   }`}
                   onClick={() => handlePromptSelect(prompt.id)}
@@ -329,11 +329,11 @@ export const StartFromPromptDialog = ({
                 </Button>
               ))}
           </ScrollArea>
-          <div className="flex flex-row border-t border-[#E2E8F0] items-center space-x-2 py-4 px-4 cursor-pointer">
-            <PlusIcon className="h-6 w-6 text-[#334155]" />
+          <div className="flex flex-row border-t border-slate-200 dark:border-slate-700 items-center space-x-2 py-4 px-4 cursor-pointer">
+            <PlusIcon className="h-6 w-6 text-slate-700 dark:text-slate-300" />
             <Dialog>
               <DialogTrigger asChild>
-                <span className="text-md font-normal text-[#334155]">
+                <span className="text-md font-normal text-slate-700 dark:text-slate-300">
                   Create a new prompt
                 </span>
               </DialogTrigger>

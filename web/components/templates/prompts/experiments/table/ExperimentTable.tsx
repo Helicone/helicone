@@ -1,7 +1,6 @@
 import { useExperimentTable } from "./hooks/useExperimentTable";
 import { useCallback, useMemo, useRef, useState } from "react";
 import {
-  ColumnDef,
   createColumnHelper,
   flexRender,
   getCoreRowModel,
@@ -21,7 +20,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { ListIcon, PlayIcon, PlusIcon } from "lucide-react";
+import { ListIcon, PlusIcon } from "lucide-react";
 import { AddRowPopover } from "./components/addRowPopover";
 import ExperimentInputSelector from "../experimentInputSelector";
 import { ExperimentRandomInputSelector } from "../experimentRandomInputSelector";
@@ -69,7 +68,7 @@ export function ExperimentTable({
     inputKeysData,
   } = useExperimentTable(experimentTableId);
 
-  console.log({ experimentTableQuery, promptVersionsData });
+  console.log(experimentTableQuery);
 
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [showExperimentInputSelector, setShowExperimentInputSelector] =
@@ -126,7 +125,7 @@ export function ExperimentTable({
       }),
       columnHelper.group({
         id: "inputs__outer",
-        header: () => <div>Inputs</div>,
+        header: () => <PromptColumnHeader label="Inputs" />,
         columns: [
           columnHelper.accessor("inputs", {
             header: () => (
@@ -136,6 +135,7 @@ export function ExperimentTable({
               <InputCell
                 experimentInputs={inputKeysData ?? []}
                 rowInputs={row.original.inputs}
+                rowRecordId={row.original.rowRecordId}
                 onClick={() => {
                   setToEditInputRecord({
                     id: row.original.originalInputRecordId ?? "",
@@ -159,6 +159,10 @@ export function ExperimentTable({
                   ? `${pv.metadata?.label}`
                   : `v${pv.major_version}.${pv.minor_version}`
               }
+              onForkColumn={() => {
+                setExternallySelectedForkFromPromptVersionId(pv.id);
+                setIsAddColumnDialogOpen(true);
+              }}
               onRunColumn={async () => {
                 const rows = table.getRowModel().rows;
 
@@ -180,11 +184,11 @@ export function ExperimentTable({
               header: () => (
                 <ExperimentTableHeader
                   isOriginal={
-                    pv.id === experimentTableQuery?.original_prompt_version
+                    pv.id ===
+                    experimentTableQuery?.copied_original_prompt_version
                   }
                   promptVersionId={pv.id}
                   originalPromptTemplate={promptVersionTemplateData}
-                  originalPromptVersionId={promptVersionsData?.[0]?.id ?? ""}
                   onForkPromptVersion={(promptVersionId: string) => {
                     setExternallySelectedForkFromPromptVersionId(
                       promptVersionId
@@ -243,9 +247,10 @@ export function ExperimentTable({
           columnHelper.accessor("add_prompt", {
             header: () => <></>,
             cell: ({ row }) => <div></div>,
-            size: 50,
+            size: 200,
           }),
         ],
+        size: 200,
       }),
     ],
     [
@@ -333,15 +338,15 @@ export function ExperimentTable({
       <ResizablePanelGroup direction="horizontal" className="h-full">
         <ResizablePanel defaultSize={75}>
           <div className="flex flex-col">
-            <div className="max-h-[calc(100vh-100px)] h-full overflow-y-auto overflow-x-auto bg-slate-100 dark:bg-slate-800">
-              <div className="inline-block min-w-max bg-slate-50 dark:bg-black rounded-sm h-full">
+            <div className="max-h-[calc(100vh-100px)] h-full overflow-y-auto overflow-x-auto bg-slate-100 dark:bg-neutral-950">
+              <div className="w-fit h-full bg-slate-50 dark:bg-black rounded-sm">
                 <Table className="border-collapse w-full">
                   <TableHeader>
                     {table.getHeaderGroups().map((headerGroup, i) => (
                       <TableRow
                         key={headerGroup.id}
                         className={clsx(
-                          "sticky top-0 bg-slate-50 dark:bg-slate-900 shadow-sm",
+                          "sticky top-0 bg-slate-50 dark:bg-slate-900 shadow-sm border-b border-slate-300 dark:border-slate-700",
                           i === 1 && "h-[225px]"
                         )}
                       >
@@ -375,24 +380,26 @@ export function ExperimentTable({
                                 )}
                               />
                             </div>
-                            {index < headerGroup.headers.length - 1 && (
-                              <div className="absolute top-0 right-0 h-full w-px bg-slate-300 dark:bg-slate-700" />
-                            )}
+                            {/* {index < headerGroup.headers.length - 1 && ( */}
+                            <div className="absolute top-0 right-0 h-full w-px bg-slate-300 dark:bg-slate-700" />
+                            {/* )} */}
                             <div className="absolute bottom-0 left-0 right-0 h-[0.5px] bg-slate-300 dark:bg-slate-700" />
                           </TableHead>
                         ))}
                       </TableRow>
                     ))}
                   </TableHeader>
-                  <TableBody className="text-[13px] bg-white dark:bg-neutral-950">
+                  <TableBody className="text-[13px] bg-white dark:bg-neutral-950 flex-1">
                     {table.getRowModel().rows?.length ? (
                       table.getRowModel().rows.map((row) => (
                         <TableRow
                           key={row.id}
                           data-state={row.getIsSelected() && "selected"}
+                          className="border-b border-slate-300 dark:border-slate-700 hover:bg-white dark:hover:bg-neutral-950"
                         >
                           {row.getVisibleCells().map((cell) => (
                             <TableCell
+                              className="p-0 align-baseline border-r border-slate-300 dark:border-slate-700"
                               key={cell.id}
                               style={{
                                 width: cell.column.getSize(),

@@ -99,7 +99,7 @@ const ExperimentsPage = () => {
         <div className="flex space-x-4 p-4">
           <div>
             <button
-              className="flex flex-col items-center justify-center w-40 h-32 bg-white rounded-lg hover:bg-transparent transition-colors border-2 border-slate-100"
+              className="flex flex-col items-center justify-center w-40 h-32 bg-white dark:bg-slate-800 rounded-lg hover:bg-transparent transition-colors border-2 border-slate-100 dark:border-slate-700"
               onClick={() => {}}
             >
               <PlusIcon className="w-16 h-16 text-slate-200" />
@@ -111,7 +111,7 @@ const ExperimentsPage = () => {
           <div className="flex flex-col items-center justify-center space-y-1">
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
               <DialogTrigger asChild>
-                <button className="flex flex-col items-center justify-center w-40 h-32 bg-white rounded-lg hover:bg-transparent transition-colors border-2 border-slate-100">
+                <button className="flex flex-col items-center justify-center w-40 h-32 bg-white dark:bg-slate-800 rounded-lg hover:bg-transparent transition-colors border-2 border-slate-100 dark:border-slate-700">
                   <DocumentPlusIcon className="w-16 h-16 text-slate-200" />
                 </button>
               </DialogTrigger>
@@ -127,7 +127,7 @@ const ExperimentsPage = () => {
           {templateOptions.map((template) => (
             <div key={template.id}>
               <button
-                className="flex flex-col items-center justify-center w-40 h-32 bg-white rounded-lg hover:bg-transparent  transition-colors border-2 border-slate-100"
+                className="flex flex-col items-center justify-center w-40 h-32 bg-white dark:bg-slate-800 rounded-lg hover:bg-transparent transition-colors border-2 border-slate-100 dark:border-slate-700"
                 onClick={() =>
                   notification.setNotification(
                     "Templates are coming soon!",

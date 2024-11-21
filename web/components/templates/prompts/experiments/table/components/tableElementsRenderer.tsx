@@ -1,13 +1,13 @@
 import { PlayIcon, SparklesIcon } from "@heroicons/react/24/outline";
 import { Button } from "../../../../../ui/button";
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import PromptPlayground from "../../../id/promptPlayground";
 import { useQuery } from "@tanstack/react-query";
 import { useJawnClient } from "../../../../../../lib/clients/jawnHook";
 import React from "react";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { FlaskConicalIcon, LightbulbIcon } from "lucide-react";
+import { FlaskConicalIcon, GitForkIcon, LightbulbIcon } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ArrayDiffViewer from "../../../id/arrayDiffViewer";
 
@@ -46,11 +46,9 @@ const icon = (model: string) => {
 
 const ExperimentTableHeader = (props: ExperimentHeaderProps) => {
   const {
-    onRunColumn,
     promptVersionId,
     originalPromptTemplate,
     isOriginal,
-    originalPromptVersionId,
     onForkPromptVersion,
   } = props;
 
@@ -95,21 +93,6 @@ const ExperimentTableHeader = (props: ExperimentHeaderProps) => {
     }
   );
 
-  const handleRunClick = async (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (onRunColumn) {
-      await onRunColumn();
-    }
-  };
-
-  //TODO: FIX!!!
-  const hasDiff = useMemo(() => {
-    return (
-      (promptTemplate?.helicone_template as any)?.messages &&
-      (originalPromptTemplate?.helicone_template as any)?.messages
-    );
-  }, [promptTemplate, originalPromptTemplate]);
-
   return (
     <Dialog open={showViewPrompt} onOpenChange={setShowViewPrompt}>
       <DialogTrigger asChild>
@@ -135,6 +118,7 @@ const ExperimentTableHeader = (props: ExperimentHeaderProps) => {
             defaultEditMode={false}
             editMode={false}
             playgroundMode="experiment-compact"
+            className="border rounded-md border-slate-200 dark:border-slate-700"
           />
         </div>
       </DialogTrigger>
@@ -159,7 +143,7 @@ const ExperimentTableHeader = (props: ExperimentHeaderProps) => {
           </div>
         </div>
         <Tabs defaultValue="preview">
-          {!isOriginal && hasDiff && (
+          {!isOriginal && (
             <TabsList>
               <TabsTrigger value="preview">Preview</TabsTrigger>
               <TabsTrigger value="diff">Diff</TabsTrigger>
@@ -178,6 +162,7 @@ const ExperimentTableHeader = (props: ExperimentHeaderProps) => {
               defaultEditMode={false}
               editMode={false}
               playgroundMode="experiment"
+              className="border rounded-md border-slate-200 dark:border-slate-700"
             />
           </TabsContent>
           <TabsContent value="diff">
@@ -229,23 +214,37 @@ const InputsHeaderComponent = ({ inputs }: { inputs: string[] }) => {
 
 const PromptColumnHeader = ({
   label,
+  onForkColumn,
   onRunColumn,
 }: {
   label: string;
-  onRunColumn: () => void;
+  onForkColumn?: () => void;
+  onRunColumn?: () => void;
 }) => {
   return (
-    <div className="flex justify-between w-full items-center py-2 px-4">
+    <div className="flex justify-between w-full items-center py-2 px-4 group">
       <h3 className="font-semibold text-sm text-slate-900 dark:text-slate-100 leading-[130%]">
         {label}
       </h3>
-      <Button
-        variant="ghost"
-        className="ml-2 p-0 border-slate-200 border rounded-md bg-slate-50 text-slate-500 h-[22px] w-[24px] flex items-center justify-center"
-        onClick={onRunColumn}
-      >
-        <PlayIcon className="w-4 h-4 text-gray-600 dark:text-gray-300" />
-      </Button>
+      {onForkColumn && onRunColumn && (
+        <div className="items-center justify-center hidden group-hover:flex">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="p-0 h-auto w-auto !hover:bg-transparent"
+            onClick={onForkColumn}
+          >
+            <GitForkIcon className="w-4 h-4 text-slate-500" />
+          </Button>
+          <Button
+            variant="outline"
+            className="ml-2 p-0 border rounded-md text-slate-500 h-[22px] w-[24px] items-center justify-center flex"
+            onClick={onRunColumn}
+          >
+            <PlayIcon className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
@@ -258,11 +257,13 @@ const IndexColumnCell = ({
   onRunRow: () => void;
 }) => {
   return (
-    <div>
-      {index}
+    <div className="group relative flex justify-center h-full w-full">
+      <span className="group-hover:invisible transition-opacity duration-200">
+        {index}
+      </span>
       <Button
         variant="ghost"
-        className="ml-2 p-0 border-slate-200 border rounded-md bg-slate-50 text-slate-500 h-[22px] w-[24px] flex items-center justify-center"
+        className="ml-2 p-0 border rounded-md h-[22px] w-[24px] items-center justify-center absolute invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-opacity duration-200"
         onClick={onRunRow}
       >
         <PlayIcon className="w-4 h-4 text-gray-600 dark:text-gray-300" />
@@ -275,21 +276,32 @@ const InputCell = ({
   experimentInputs,
   rowInputs,
   onClick,
+  rowRecordId,
 }: {
   experimentInputs: string[];
   rowInputs: Record<string, string>;
   onClick: () => void;
+  rowRecordId: string;
 }) => {
+  const inputs = useQuery({
+    queryKey: ["inputs", rowRecordId],
+    queryFn: () => rowInputs,
+  });
+
   return (
     <div
-      className="cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 h-full"
+      className="cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 h-full w-full py-2 px-4"
       style={{ cursor: "pointer" }}
       onClick={onClick}
     >
-      <ul>
+      <ul className="w-full flex flex-col gap-y-1">
         {experimentInputs?.map((input) => (
-          <li key={input}>
-            <strong>{input}</strong>: {rowInputs[input]?.toString()}
+          <li
+            key={input}
+            className="text-slate-700 dark:text-slate-300 leading-[130%] text-[13px] max-w-full overflow-hidden whitespace-nowrap truncate"
+          >
+            <span className="font-medium">{input}</span>:{" "}
+            {inputs.data?.[input]?.toString()}
           </li>
         ))}
       </ul>

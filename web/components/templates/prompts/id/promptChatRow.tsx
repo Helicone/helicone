@@ -495,7 +495,7 @@ const PromptChatRow = (props: PromptChatRowProps) => {
             {role.slice(0, 1).toUpperCase() + role.slice(1)}
           </Badge>
           {isStatic && (
-            <Badge className="bg-[#3C82F6] text-[10px] py-[3px] px-2 leading-tight hover:bg-[#3C82F6]">
+            <Badge className="bg-[#3C82F6] dark:bg-[#3C82F6] text-white dark:text-white text-[10px] py-[3px] px-2 leading-tight hover:bg-[#3C82F6]">
               Static
             </Badge>
           )}
@@ -548,7 +548,7 @@ const PromptChatRow = (props: PromptChatRowProps) => {
             )}
             <div className="flex justify-end items-center space-x-2 w-full">
               {!editMode && isStatic && (
-                <Badge className="bg-[#3C82F6] text-[10px] py-[3px] px-2 leading-tight hover:bg-[#3C82F6]">
+                <Badge className="bg-[#3C82F6] dark:bg-[#3C82F6] text-white dark:text-white text-[10px] py-[3px] px-2 leading-tight hover:bg-[#3C82F6]">
                   Static
                 </Badge>
               )}
