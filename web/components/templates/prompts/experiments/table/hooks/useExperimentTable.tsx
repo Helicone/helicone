@@ -445,6 +445,7 @@ export const useExperimentTable = (experimentTableId: string) => {
     addExperimentTableRowInsertBatch,
     updateExperimentTableRow,
     runHypothesis,
+    addManualRow,
   };
 };
 
