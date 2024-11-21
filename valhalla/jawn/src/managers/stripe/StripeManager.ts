@@ -277,7 +277,6 @@ WHERE (${builtFilter.filter})`,
           tier: "pro-20240913",
         },
       },
-      allow_promotion_codes: true,
     };
 
     const isWaterlooEmail = await this.shouldApplyWaterlooCoupon(customerId);
@@ -287,6 +286,8 @@ WHERE (${builtFilter.filter})`,
           coupon: "WATERLOO2025",
         },
       ];
+    } else {
+      sessionParams.allow_promotion_codes = true;
     }
 
     const session = await this.stripe.checkout.sessions.create(sessionParams);
