@@ -11,6 +11,8 @@ create table "public"."experiment_output" (
 
 alter table "public"."experiment_output" enable row level security;
 
+REVOKE ALL ON TABLE "public"."experiment_output" FROM anon, authenticated, public;
+
 create table "public"."experiment_v3" (
     "id" uuid not null default gen_random_uuid(),
     "created_at" timestamp with time zone not null default now(),
@@ -20,6 +22,8 @@ create table "public"."experiment_v3" (
 
 
 alter table "public"."experiment_v3" enable row level security;
+
+REVOKE ALL ON TABLE "public"."experiment_v3" FROM anon, authenticated, public;
 
 alter table "public"."prompt_input_record" add column "experiment_id" uuid;
 
@@ -63,93 +67,26 @@ alter table "public"."prompts_versions" add constraint "public_prompts_versions_
 
 alter table "public"."prompts_versions" validate constraint "public_prompts_versions_experiment_id_fkey";
 
-grant delete on table "public"."experiment_output" to "anon";
-
-grant insert on table "public"."experiment_output" to "anon";
-
-grant references on table "public"."experiment_output" to "anon";
-
-grant select on table "public"."experiment_output" to "anon";
-
-grant trigger on table "public"."experiment_output" to "anon";
-
-grant truncate on table "public"."experiment_output" to "anon";
-
-grant update on table "public"."experiment_output" to "anon";
-
-grant delete on table "public"."experiment_output" to "authenticated";
-
-grant insert on table "public"."experiment_output" to "authenticated";
-
-grant references on table "public"."experiment_output" to "authenticated";
-
-grant select on table "public"."experiment_output" to "authenticated";
-
-grant trigger on table "public"."experiment_output" to "authenticated";
-
-grant truncate on table "public"."experiment_output" to "authenticated";
-
-grant update on table "public"."experiment_output" to "authenticated";
-
-grant delete on table "public"."experiment_output" to "service_role";
-
-grant insert on table "public"."experiment_output" to "service_role";
-
-grant references on table "public"."experiment_output" to "service_role";
-
-grant select on table "public"."experiment_output" to "service_role";
-
-grant trigger on table "public"."experiment_output" to "service_role";
-
-grant truncate on table "public"."experiment_output" to "service_role";
-
-grant update on table "public"."experiment_output" to "service_role";
-
-grant delete on table "public"."experiment_v3" to "anon";
-
-grant insert on table "public"."experiment_v3" to "anon";
-
-grant references on table "public"."experiment_v3" to "anon";
-
-grant select on table "public"."experiment_v3" to "anon";
-
-grant trigger on table "public"."experiment_v3" to "anon";
-
-grant truncate on table "public"."experiment_v3" to "anon";
-
-grant update on table "public"."experiment_v3" to "anon";
-
-grant delete on table "public"."experiment_v3" to "authenticated";
-
-grant insert on table "public"."experiment_v3" to "authenticated";
-
-grant references on table "public"."experiment_v3" to "authenticated";
-
-grant select on table "public"."experiment_v3" to "authenticated";
-
-grant trigger on table "public"."experiment_v3" to "authenticated";
-
-grant truncate on table "public"."experiment_v3" to "authenticated";
-
-grant update on table "public"."experiment_v3" to "authenticated";
-
-grant delete on table "public"."experiment_v3" to "service_role";
-
-grant insert on table "public"."experiment_v3" to "service_role";
-
-grant references on table "public"."experiment_v3" to "service_role";
-
-grant select on table "public"."experiment_v3" to "service_role";
-
-grant trigger on table "public"."experiment_v3" to "service_role";
-
-grant truncate on table "public"."experiment_v3" to "service_role";
-
-grant update on table "public"."experiment_v3" to "service_role";
-
 
 alter table "public"."experiment_v3" add column "organization" uuid;
 
 alter table "public"."experiment_v3" add constraint "public_experiment_v3_organization_fkey" FOREIGN KEY (organization) REFERENCES organization(id) not valid;
 
 alter table "public"."experiment_v3" validate constraint "public_experiment_v3_organization_fkey"
+
+
+alter table "public"."experiment_v3" add column "input_keys" text[] default '{}'::text[];
+
+alter table "public"."experiment_v3" add column "copied_original_prompt_version" uuid;
+
+alter table "public"."experiment_v3" add constraint "public_experiment_v3_copied_original_prompt_version_fkey" FOREIGN KEY (copied_original_prompt_version) REFERENCES prompts_versions(id) not valid;
+
+alter table "public"."experiment_v3" validate constraint "public_experiment_v3_copied_original_prompt_version_fkey";
+
+alter table "public"."prompts_versions" add column "parent_prompt_version" uuid;
+
+alter table "public"."prompts_versions" add constraint "public_prompts_versions_parent_prompt_version_fkey" FOREIGN KEY (parent_prompt_version) REFERENCES prompts_versions(id) not valid;
+
+alter table "public"."prompts_versions" validate constraint "public_prompts_versions_parent_prompt_version_fkey";
+
+
