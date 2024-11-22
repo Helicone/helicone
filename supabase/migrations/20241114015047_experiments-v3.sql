@@ -73,7 +73,7 @@ alter table "public"."prompts_versions" validate constraint "public_prompts_vers
 
 alter table "public"."experiment_v3" add constraint "public_experiment_v3_organization_fkey" FOREIGN KEY (organization) REFERENCES organization(id) not valid;
 
-alter table "public"."experiment_v3" validate constraint "public_experiment_v3_organization_fkey"
+alter table "public"."experiment_v3" validate constraint "public_experiment_v3_organization_fkey";
 
 
 
