@@ -698,7 +698,7 @@ export class ExperimentController extends Controller {
   }
 
   @Post("/{experimentId}/evaluators/run")
-  public async runExperimentEvaluators(
+  public async runExperimentEvaluatorsOld(
     @Path() experimentId: string,
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<null, string>> {
@@ -708,7 +708,7 @@ export class ExperimentController extends Controller {
   }
 
   @Post("/{experimentId}/evaluators")
-  public async createExperimentEvaluator(
+  public async createExperimentEvaluatorOld(
     @Path() experimentId: string,
     @Body()
     requestBody: {
@@ -725,7 +725,7 @@ export class ExperimentController extends Controller {
   }
 
   @Delete("/{experimentId}/evaluators/{evaluatorId}")
-  public async deleteExperimentEvaluator(
+  public async deleteExperimentEvaluatorOld(
     @Path() experimentId: string,
     @Path() evaluatorId: string,
     @Request() request: JawnAuthenticatedRequest
@@ -739,7 +739,7 @@ export class ExperimentController extends Controller {
   }
 
   @Post("/query")
-  public async getExperiments(
+  public async getExperimentsOld(
     @Body()
     requestBody: {
       filter: ExperimentFilterNode;

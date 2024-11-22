@@ -13076,7 +13076,7 @@
 				]
 			},
 			"post": {
-				"operationId": "CreateExperimentEvaluator",
+				"operationId": "CreateExperimentEvaluatorOld",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -13129,7 +13129,7 @@
 		},
 		"/v1/experiment/{experimentId}/evaluators/run": {
 			"post": {
-				"operationId": "RunExperimentEvaluators",
+				"operationId": "RunExperimentEvaluatorsOld",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -13164,7 +13164,7 @@
 		},
 		"/v1/experiment/{experimentId}/evaluators/{evaluatorId}": {
 			"delete": {
-				"operationId": "DeleteExperimentEvaluator",
+				"operationId": "DeleteExperimentEvaluatorOld",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -13207,7 +13207,7 @@
 		},
 		"/v1/experiment/query": {
 			"post": {
-				"operationId": "GetExperiments",
+				"operationId": "GetExperimentsOld",
 				"responses": {
 					"200": {
 						"description": "Ok",

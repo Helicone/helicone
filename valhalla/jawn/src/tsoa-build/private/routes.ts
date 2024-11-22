@@ -5981,9 +5981,9 @@ export function RegisterRoutes(app: Router) {
         app.post('/v1/experiment/:experimentId/evaluators/run',
             authenticateMiddleware([{"api_key":[]}]),
             ...(fetchMiddlewares<RequestHandler>(ExperimentController)),
-            ...(fetchMiddlewares<RequestHandler>(ExperimentController.prototype.runExperimentEvaluators)),
+            ...(fetchMiddlewares<RequestHandler>(ExperimentController.prototype.runExperimentEvaluatorsOld)),
 
-            async function ExperimentController_runExperimentEvaluators(request: ExRequest, response: ExResponse, next: any) {
+            async function ExperimentController_runExperimentEvaluatorsOld(request: ExRequest, response: ExResponse, next: any) {
             const args: Record<string, TsoaRoute.ParameterSchema> = {
                     experimentId: {"in":"path","name":"experimentId","required":true,"dataType":"string"},
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
@@ -5998,7 +5998,7 @@ export function RegisterRoutes(app: Router) {
                 const controller = new ExperimentController();
 
               await templateService.apiHandler({
-                methodName: 'runExperimentEvaluators',
+                methodName: 'runExperimentEvaluatorsOld',
                 controller,
                 response,
                 next,
@@ -6013,9 +6013,9 @@ export function RegisterRoutes(app: Router) {
         app.post('/v1/experiment/:experimentId/evaluators',
             authenticateMiddleware([{"api_key":[]}]),
             ...(fetchMiddlewares<RequestHandler>(ExperimentController)),
-            ...(fetchMiddlewares<RequestHandler>(ExperimentController.prototype.createExperimentEvaluator)),
+            ...(fetchMiddlewares<RequestHandler>(ExperimentController.prototype.createExperimentEvaluatorOld)),
 
-            async function ExperimentController_createExperimentEvaluator(request: ExRequest, response: ExResponse, next: any) {
+            async function ExperimentController_createExperimentEvaluatorOld(request: ExRequest, response: ExResponse, next: any) {
             const args: Record<string, TsoaRoute.ParameterSchema> = {
                     experimentId: {"in":"path","name":"experimentId","required":true,"dataType":"string"},
                     requestBody: {"in":"body","name":"requestBody","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"evaluatorId":{"dataType":"string","required":true}}},
@@ -6031,7 +6031,7 @@ export function RegisterRoutes(app: Router) {
                 const controller = new ExperimentController();
 
               await templateService.apiHandler({
-                methodName: 'createExperimentEvaluator',
+                methodName: 'createExperimentEvaluatorOld',
                 controller,
                 response,
                 next,
@@ -6046,9 +6046,9 @@ export function RegisterRoutes(app: Router) {
         app.delete('/v1/experiment/:experimentId/evaluators/:evaluatorId',
             authenticateMiddleware([{"api_key":[]}]),
             ...(fetchMiddlewares<RequestHandler>(ExperimentController)),
-            ...(fetchMiddlewares<RequestHandler>(ExperimentController.prototype.deleteExperimentEvaluator)),
+            ...(fetchMiddlewares<RequestHandler>(ExperimentController.prototype.deleteExperimentEvaluatorOld)),
 
-            async function ExperimentController_deleteExperimentEvaluator(request: ExRequest, response: ExResponse, next: any) {
+            async function ExperimentController_deleteExperimentEvaluatorOld(request: ExRequest, response: ExResponse, next: any) {
             const args: Record<string, TsoaRoute.ParameterSchema> = {
                     experimentId: {"in":"path","name":"experimentId","required":true,"dataType":"string"},
                     evaluatorId: {"in":"path","name":"evaluatorId","required":true,"dataType":"string"},
@@ -6064,7 +6064,7 @@ export function RegisterRoutes(app: Router) {
                 const controller = new ExperimentController();
 
               await templateService.apiHandler({
-                methodName: 'deleteExperimentEvaluator',
+                methodName: 'deleteExperimentEvaluatorOld',
                 controller,
                 response,
                 next,
@@ -6079,9 +6079,9 @@ export function RegisterRoutes(app: Router) {
         app.post('/v1/experiment/query',
             authenticateMiddleware([{"api_key":[]}]),
             ...(fetchMiddlewares<RequestHandler>(ExperimentController)),
-            ...(fetchMiddlewares<RequestHandler>(ExperimentController.prototype.getExperiments)),
+            ...(fetchMiddlewares<RequestHandler>(ExperimentController.prototype.getExperimentsOld)),
 
-            async function ExperimentController_getExperiments(request: ExRequest, response: ExResponse, next: any) {
+            async function ExperimentController_getExperimentsOld(request: ExRequest, response: ExResponse, next: any) {
             const args: Record<string, TsoaRoute.ParameterSchema> = {
                     requestBody: {"in":"body","name":"requestBody","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"include":{"ref":"IncludeExperimentKeys"},"filter":{"ref":"ExperimentFilterNode","required":true}}},
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
@@ -6096,7 +6096,7 @@ export function RegisterRoutes(app: Router) {
                 const controller = new ExperimentController();
 
               await templateService.apiHandler({
-                methodName: 'getExperiments',
+                methodName: 'getExperimentsOld',
                 controller,
                 response,
                 next,
