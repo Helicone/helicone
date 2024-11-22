@@ -99,8 +99,8 @@ const ExperimentsPage = () => {
         <div className="flex space-x-4 p-4">
           <div>
             <button
-              className="flex flex-col items-center justify-center w-40 h-32 bg-white rounded-lg hover:bg-transparent transition-colors border-2 border-slate-100"
-              onClick={handleStartFromScratch}
+              className="flex flex-col items-center justify-center w-40 h-32 bg-white dark:bg-slate-800 rounded-lg hover:bg-transparent transition-colors border-2 border-slate-100 dark:border-slate-700"
+              onClick={() => {}}
             >
               <PlusIcon className="w-16 h-16 text-slate-200" />
             </button>
@@ -111,7 +111,7 @@ const ExperimentsPage = () => {
           <div className="flex flex-col items-center justify-center space-y-1">
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
               <DialogTrigger asChild>
-                <button className="flex flex-col items-center justify-center w-40 h-32 bg-white rounded-lg hover:bg-transparent transition-colors border-2 border-slate-100">
+                <button className="flex flex-col items-center justify-center w-40 h-32 bg-white dark:bg-slate-800 rounded-lg hover:bg-transparent transition-colors border-2 border-slate-100 dark:border-slate-700">
                   <DocumentPlusIcon className="w-16 h-16 text-slate-200" />
                 </button>
               </DialogTrigger>
@@ -127,7 +127,7 @@ const ExperimentsPage = () => {
           {templateOptions.map((template) => (
             <div key={template.id}>
               <button
-                className="flex flex-col items-center justify-center w-40 h-32 bg-white rounded-lg hover:bg-transparent  transition-colors border-2 border-slate-100"
+                className="flex flex-col items-center justify-center w-40 h-32 bg-white dark:bg-slate-800 rounded-lg hover:bg-transparent transition-colors border-2 border-slate-100 dark:border-slate-700"
                 onClick={() =>
                   notification.setNotification(
                     "Templates are coming soon!",
@@ -156,12 +156,8 @@ const ExperimentsPage = () => {
             accessorKey: "created_at",
             minSize: 100,
             accessorFn: (row) => {
-              return new Date(row.createdAt ?? 0).toLocaleString();
+              return new Date(row.created_at ?? 0).toLocaleString();
             },
-          },
-          {
-            header: "Model",
-            accessorKey: "model",
           },
         ]}
         defaultData={experiments}
@@ -169,9 +165,8 @@ const ExperimentsPage = () => {
         id="experiments"
         skeletonLoading={false}
         onRowSelect={(row) => {
-          const promptId = (row.metadata as any)?.prompt_id;
-          const promptVersion = (row.metadata as any)?.prompt_version;
-          if (promptId && promptVersion) {
+          const promptId = row.original_prompt_version;
+          if (promptId) {
             router.push(`/experiments/${row.id}`);
           }
         }}

@@ -1,687 +1,578 @@
-import { useOrg } from "@/components/layout/organizationContext";
-import { Button } from "@/components/ui/button";
-import { getJawnClient } from "@/lib/clients/jawn";
+import { useExperimentTable } from "./hooks/useExperimentTable";
+import { useCallback, useMemo, useRef, useState } from "react";
 import {
-  ColDef,
-  ColumnMovedEvent,
-  ColumnResizedEvent,
-  GridApi,
-  GridReadyEvent,
-} from "ag-grid-community";
-import "ag-grid-community/styles/ag-grid.css";
-import { AgGridReact } from "ag-grid-react";
-import React, { useCallback, useMemo, useRef, useState } from "react";
+  createColumnHelper,
+  flexRender,
+  getCoreRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
 import AddColumnHeader from "./AddColumnHeader";
-import { HypothesisCellRenderer } from "./cells/HypothesisCellRenderer";
-import { OriginalMessagesCellRenderer } from "./cells/OriginalMessagesCellRenderer";
-import { OriginalOutputCellRenderer } from "./cells/OriginalOutputCellRenderer";
-
-import { PlusIcon } from "@heroicons/react/24/outline";
-import ExperimentInputSelector from "../experimentInputSelector";
-
+import {
+  ExperimentTableHeader,
+  IndexColumnCell,
+  InputCell,
+  InputsHeaderComponent,
+  PromptColumnHeader,
+} from "./components/tableElementsRenderer";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { useLocalStorage } from "@/services/hooks/localStorage";
-import clsx from "clsx";
-import LoadingAnimation from "../../../../shared/loadingAnimation";
-import ExportButton from "../../../../shared/themed/table/exportButton";
-import { ExperimentRandomInputSelector } from "../experimentRandomInputSelector";
+import { Button } from "@/components/ui/button";
+import { ListIcon, PlusIcon, PlayIcon } from "lucide-react";
 import { AddRowPopover } from "./components/addRowPopover";
-import { ColumnsDropdown } from "./components/customButtonts";
-import { NewExperimentPopover } from "./components/newExperimentPopover";
+import ExperimentInputSelector from "../experimentInputSelector";
+import { ExperimentRandomInputSelector } from "../experimentRandomInputSelector";
+import { HypothesisCellRenderer } from "./cells/HypothesisCellRenderer";
 import {
-  CustomHeaderComponent,
-  InputCellRenderer,
-  InputsHeaderComponent,
-  RowNumberCellRenderer,
-  RowNumberHeaderComponent,
-} from "./components/tableElementsRenderer";
-import { useExperimentTable } from "./hooks/useExperimentTable";
-import ScoresEvaluatorsConfig from "./scores/ScoresEvaluatorsConfig";
-import ScoresTableContainer from "./scores/ScoresTableContainer";
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import clsx from "clsx";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable";
+import AddColumnDialog from "./AddColumnDialog";
+import EditInputsPanel from "./EditInputsPanel";
+import AddManualRowPanel from "./AddManualRowPanel";
+import { IslandContainer } from "@/components/ui/islandContainer";
+import HcBreadcrumb from "@/components/ui/hcBreadcrumb";
+import { Switch } from "@/components/ui/switch";
+import { useQueryClient } from "@tanstack/react-query";
 
-interface ExperimentTableProps {
+type TableDataType = {
+  index: number;
+  inputs: Record<string, string>;
+  rowRecordId: string;
+  add_prompt: string;
+  originalInputRecordId: string;
+  [key: `prompt_version_${string}`]: {
+    request_id: string;
+    input_record_id: string;
+  };
+};
+
+export function ExperimentTable({
+  experimentTableId,
+}: {
   experimentTableId: string;
-}
-
-export function ExperimentTable({ experimentTableId }: ExperimentTableProps) {
-  const org = useOrg();
-  const orgId = org?.currentOrg?.id;
-
+}) {
   const {
     experimentTableQuery,
-    isExperimentTableLoading,
-    addExperimentTableColumn,
-    addExperimentTableRow,
-    deleteExperimentTableRow,
-    updateExperimentCell,
-    runHypothesisMutation,
-    addExperimentTableRowInsertBatch,
     promptVersionTemplateData,
-  } = useExperimentTable(orgId || "", experimentTableId);
-  const promptSubversionId = experimentTableQuery?.promptSubversionId;
-
-  const [wrapText, setWrapText] = useState(true);
-  const [columnView, setColumnView] = useState<"all" | "inputs" | "outputs">(
-    "all"
-  );
-  const [showScoresTable, setShowScoresTable] = useLocalStorage(
-    "showScoresTable",
-    false
-  );
+    promptVersionsData,
+    addExperimentTableRowInsertBatch,
+    inputKeysData,
+    wrapText,
+  } = useExperimentTable(experimentTableId);
 
   const [popoverOpen, setPopoverOpen] = useState(false);
-
   const [showExperimentInputSelector, setShowExperimentInputSelector] =
     useState(false);
+  const [showRandomInputSelector, setShowRandomInputSelector] = useState(false);
+  const [rightPanel, setRightPanel] = useState<
+    "edit_inputs" | "add_manual" | null
+  >(null);
+  const [toEditInputRecord, setToEditInputRecord] = useState<{
+    id: string;
+    inputKV: Record<string, string>;
+  } | null>(null);
 
-  const experimentTableRef = useRef<HTMLDivElement>(null);
-  const gridRef = useRef<GridApi | null>(null);
+  const cellRefs = useRef<Record<string, any>>({});
+  const [
+    externallySelectedForkFromPromptVersionId,
+    setExternallySelectedForkFromPromptVersionId,
+  ] = useState<string | null>(null);
+  const [isAddColumnDialogOpen, setIsAddColumnDialogOpen] = useState(false);
 
-  const onGridReady = useCallback((params: GridReadyEvent) => {
-    gridRef.current = params.api;
-  }, []);
+  const columnHelper = createColumnHelper<TableDataType>();
 
-  const handleRunHypothesis = useCallback(
-    (
-      hypothesisId: string,
-      cells: Array<{
-        cellId: string;
-        columnId: string;
-      }>
-    ) => {
-      runHypothesisMutation.mutate({ hypothesisId, cells });
-    },
-    [runHypothesisMutation]
+  const columnDef = useMemo(
+    () => [
+      columnHelper.group({
+        id: "index__outer",
+        header: () => (
+          <div className="flex justify-center items-center text-slate-400 dark:text-slate-600 group relative">
+            <span className="group-hover:invisible transition-opacity duration-200">
+              <ListIcon className="w-4 h-4" />
+            </span>
+            <Button
+              variant="ghost"
+              className="ml-2 p-0 border rounded-md h-[22px] w-[24px] items-center justify-center absolute invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+              onClick={async () => {
+                await Promise.all(
+                  (promptVersionsData ?? []).map(async (pv) => {
+                    const rows = table.getRowModel().rows;
+                    await Promise.all(
+                      rows.map(async (row) => {
+                        const cellRef = cellRefs.current[`${row.id}-${pv.id}`];
+                        if (cellRef) {
+                          await cellRef.runHypothesis();
+                        }
+                      })
+                    );
+                  })
+                );
+              }}
+            >
+              <PlayIcon className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+            </Button>
+          </div>
+        ),
+        columns: [
+          columnHelper.accessor("index", {
+            header: () => <></>,
+            cell: ({ row }) => (
+              <IndexColumnCell
+                index={row.original.index}
+                onRunRow={async () => {
+                  await Promise.all(
+                    (promptVersionsData ?? []).map((pv) => {
+                      const cellRef = cellRefs.current[`${row.id}-${pv.id}`];
+                      if (cellRef) {
+                        cellRef.runHypothesis();
+                      }
+                    })
+                  );
+                }}
+              />
+            ),
+            size: 20,
+          }),
+        ],
+      }),
+      columnHelper.group({
+        id: "inputs__outer",
+        header: () => <PromptColumnHeader label="Inputs" />,
+        columns: [
+          columnHelper.accessor("inputs", {
+            header: () => (
+              <InputsHeaderComponent inputs={inputKeysData ?? []} />
+            ),
+            cell: ({ row }) => (
+              <InputCell
+                experimentInputs={inputKeysData ?? []}
+                rowInputs={row.original.inputs}
+                rowRecordId={row.original.rowRecordId}
+                onClick={() => {
+                  setToEditInputRecord({
+                    id: row.original.originalInputRecordId ?? "",
+                    inputKV: row.original.inputs,
+                  });
+                  setRightPanel("edit_inputs");
+                }}
+              />
+            ),
+            size: 250,
+          }),
+        ],
+      }),
+      ...(promptVersionsData ?? []).map((pv) =>
+        columnHelper.group({
+          id: `prompt_version_${pv.id}__outer`,
+          header: () => (
+            <PromptColumnHeader
+              label={
+                pv.metadata?.label
+                  ? `${pv.metadata?.label}`
+                  : `v${pv.major_version}.${pv.minor_version}`
+              }
+              onForkColumn={() => {
+                setExternallySelectedForkFromPromptVersionId(pv.id);
+                setIsAddColumnDialogOpen(true);
+              }}
+              onRunColumn={async () => {
+                const rows = table.getRowModel().rows;
+
+                await Promise.all(
+                  rows.map(async (row) => {
+                    const cellRef = cellRefs.current[`${row.id}-${pv.id}`];
+                    if (cellRef) {
+                      await cellRef.runHypothesis();
+                    }
+                  })
+                );
+              }}
+            />
+          ),
+          columns: [
+            columnHelper.accessor(`prompt_version_${pv.id}`, {
+              header: () => (
+                <ExperimentTableHeader
+                  isOriginal={
+                    pv.id ===
+                    experimentTableQuery?.copied_original_prompt_version
+                  }
+                  promptVersionId={pv.id}
+                  originalPromptTemplate={promptVersionTemplateData}
+                  onForkPromptVersion={(promptVersionId: string) => {
+                    setExternallySelectedForkFromPromptVersionId(
+                      promptVersionId
+                    );
+                    setIsAddColumnDialogOpen(true);
+                  }}
+                />
+              ),
+              cell: ({ row }) => (
+                <HypothesisCellRenderer
+                  ref={(el) => {
+                    if (el) {
+                      cellRefs.current[`${row.id}-${pv.id}`] = el;
+                    }
+                  }}
+                  experimentTableId={experimentTableId}
+                  requestId={
+                    row.original[`prompt_version_${pv.id}`]?.request_id ?? ""
+                  }
+                  inputRecordId={row.original.rowRecordId ?? ""}
+                  prompt={promptVersionTemplateData}
+                  promptVersionId={pv.id}
+                />
+              ),
+            }),
+          ],
+        })
+      ),
+      columnHelper.group({
+        id: "add_prompt__outer",
+        header: () => (
+          <AddColumnHeader
+            experimentId={experimentTableId}
+            promptVersionId={
+              experimentTableQuery?.original_prompt_version ?? ""
+            }
+            selectedProviderKey=""
+            handleAddColumn={async () => {}}
+            wrapText={false}
+            originalColumnPromptVersionId={promptVersionsData?.[0]?.id ?? ""}
+            experimentPromptVersions={
+              promptVersionsData?.map((pv) => ({
+                id: pv.id,
+                metadata: pv.metadata ?? {},
+                major_version: pv.major_version,
+                minor_version: pv.minor_version,
+              })) ?? []
+            }
+            numberOfExistingPromptVersions={
+              promptVersionsData?.length ? promptVersionsData.length - 1 : 0
+            }
+          />
+        ),
+        columns: [
+          columnHelper.accessor("add_prompt", {
+            header: () => <></>,
+            cell: ({ row }) => <div></div>,
+            size: 200,
+          }),
+        ],
+        size: 200,
+      }),
+    ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      inputKeysData,
+      promptVersionsData,
+      experimentTableQuery,
+      experimentTableId,
+      promptVersionTemplateData,
+      setExternallySelectedForkFromPromptVersionId,
+      setIsAddColumnDialogOpen,
+    ]
   );
 
-  const [columnWidths, setColumnWidths] = useState<{ [key: string]: number }>(
-    {}
+  const tableData = useMemo<TableDataType[]>(() => {
+    if (!experimentTableQuery?.rows || !promptVersionsData) return [];
+
+    return experimentTableQuery.rows.map((row, i) => ({
+      index: i + 1,
+      inputs: row.inputs,
+      rowRecordId: row.id,
+      ...(promptVersionsData ?? []).reduce(
+        (acc, pv) => ({
+          ...acc,
+          [`prompt_version_${pv.id}`]: row.requests.find(
+            (r) => r.prompt_version_id === pv.id
+          ),
+        }),
+        {}
+      ),
+      add_prompt: "",
+      originalInputRecordId:
+        row.requests.find(
+          (r) =>
+            r.prompt_version_id ===
+            experimentTableQuery?.copied_original_prompt_version
+        )?.input_record_id ?? "",
+    }));
+  }, [
+    experimentTableQuery?.rows,
+    promptVersionsData,
+    experimentTableQuery?.copied_original_prompt_version,
+  ]);
+
+  const tableConfig = useMemo(
+    () => ({
+      data: tableData,
+      columns: columnDef,
+      defaultColumn: {
+        minSize: 50,
+        maxSize: 1000,
+        size: 300,
+      },
+      getCoreRowModel: getCoreRowModel(),
+      enableColumnResizing: true,
+      columnResizeMode: "onChange" as const,
+    }),
+    [tableData, columnDef]
   );
 
-  const onColumnResized = useCallback((event: ColumnResizedEvent) => {
-    if (event.finished && event.columns && event.columns.length > 0) {
-      const newWidths: { [key: string]: number } = {};
-      event.columns.forEach((column) => {
-        if (column && column.getColId()) {
-          newWidths[column.getColId()] = column.getActualWidth();
-        }
-      });
-      setColumnWidths((prev) => ({
-        ...prev,
-        ...newWidths,
-      }));
-    }
-  }, []);
-
-  const [columnOrder, setColumnOrder] = useState<string[]>([]);
-
-  const onColumnMoved = useCallback((event: ColumnMovedEvent) => {
-    const newOrder = event.api.getAllGridColumns().map((col) => col.getColId());
-    setColumnOrder(newOrder);
-  }, []);
-
-  const handleAddRow = useCallback(
-    (inputs?: Record<string, string>) => {
-      addExperimentTableRow.mutate({
-        promptVersionId:
-          (experimentTableQuery?.promptSubversionId as string) ?? "",
-        inputs,
-      });
-    },
-    [addExperimentTableRow, experimentTableQuery?.promptSubversionId]
-  );
-
-  const handleAddRowWithPreviousInputs = useCallback(() => {
-    const lastRow =
-      experimentTableQuery?.rows?.[experimentTableQuery.rows.length - 1];
-
-    let inputs: Record<string, string> = {};
-
-    const inputColumn = experimentTableQuery?.columns?.find(
-      (column) => column.columnType === "input"
-    );
-
-    if (lastRow && inputColumn) {
-      const inputCell = lastRow.cells["inputs"];
-      if (inputCell && inputCell.value && Array.isArray(inputCell.value)) {
-        inputs = inputCell.value.reduce(
-          (
-            acc: Record<string, string>,
-            input: { key: string; value: string }
-          ) => {
-            acc[input.key] = input.value;
-            return acc;
-          },
-          {}
-        );
-      }
-    }
-
-    handleAddRow(inputs);
-  }, [experimentTableQuery?.rows, handleAddRow]);
-
-  const handleDeleteRow = useCallback(
-    (rowIndex: number) => {
-      deleteExperimentTableRow.mutate(rowIndex);
-    },
-    [deleteExperimentTableRow]
-  );
-
-  const handleAddColumn = useCallback(
-    (
-      columnName: string,
-      columnType: "experiment" | "input" | "output",
-      hypothesisId?: string,
-      promptVersionId?: string,
-      promptVariables?: string[]
-    ) => {
-      addExperimentTableColumn.mutate({
-        promptVersionId: promptVersionId ?? "",
-        columnName,
-        columnType,
-        hypothesisId,
-        promptVariables,
-      });
-    },
-    [addExperimentTableColumn]
-  );
+  const table = useReactTable(tableConfig);
 
   const handleAddRowInsertBatch = useCallback(
     (
       rows: {
         inputRecordId: string;
-        datasetId: string;
         inputs: Record<string, string>;
-        sourceRequest?: string;
       }[]
     ) => {
-      const inputColumn = experimentTableQuery?.columns?.filter(
-        (column) => column.columnType === "input"
-      );
+      const newRows = rows.map((row) => ({
+        inputRecordId: row.inputRecordId,
+        inputs: row.inputs,
+      }));
 
-      if (!inputColumn) return;
-
-      const newRows = rows.map((row) => {
-        const inputCell = {
-          columnId: inputColumn[0].id,
-          value: "inputs",
-          metadata: {
-            inputs: Object.entries(row.inputs ?? {}).map(([key, value]) => ({
-              key,
-              value,
-            })),
-          },
-        };
-
-        return {
-          inputRecordId: row.inputRecordId,
-          datasetId: row.datasetId,
-          inputs: row.inputs,
-          cells: [inputCell],
-          sourceRequest: row.sourceRequest,
-        };
-      });
-
-      if (!newRows) return;
+      if (!newRows.length) return;
 
       addExperimentTableRowInsertBatch.mutate({
         rows: newRows,
       });
     },
-    [addExperimentTableRowInsertBatch, experimentTableQuery]
+    [addExperimentTableRowInsertBatch]
   );
 
-  const headerClass = clsx(
-    "border-r border-[#E2E8F0] text-center items-center justify-center"
-  );
-
-  const fetchExperimentHypothesisScores = useCallback(
-    async (hypothesisId: string) => {
-      const jawnClient = getJawnClient(orgId);
-      const result = await jawnClient.POST(
-        "/v1/experiment/hypothesis/{hypothesisId}/scores/query",
-        {
-          params: {
-            path: {
-              hypothesisId,
-            },
-          },
-        }
-      );
-      return result.data ?? {};
-    },
-    [orgId]
-  );
-
-  const headerComponentParams = useMemo(
-    () => ({
-      promptVersionId: experimentTableQuery?.promptSubversionId ?? "",
-      experimentId: experimentTableQuery?.experimentId,
-      selectedProviderKey: "",
-      handleAddColumn,
-      wrapText,
-    }),
-    [
-      experimentTableQuery?.promptSubversionId,
-      experimentTableQuery?.experimentId,
-      handleAddColumn,
-      wrapText,
-    ]
-  );
-
-  const columnDefs = useMemo<ColDef[]>(() => {
-    let columns: ColDef[] = [
-      // Row number column (keep as is)
-      {
-        headerComponent: RowNumberHeaderComponent,
-        field: "rowNumber",
-        width: 50,
-        cellRenderer: RowNumberCellRenderer,
-        pinned: "left",
-        cellClass:
-          "border-r border-[#E2E8F0] text-center text-slate-700 justify-center flex-1 items-center",
-        headerClass,
-        cellStyle: {
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        },
-        wrapText,
-      },
-    ];
-    let experimentColumnId = 1;
-
-    columns.push({
-      field: "inputs", // Unique identifier for the inputs column
-      headerName: "Inputs",
-      width: 250, // Adjust as necessary
-      cellRenderer: InputCellRenderer,
-      cellRendererParams: {
-        wrapText,
-        // any other necessary params
-      },
-      cellClass: "border-r border-[#E2E8F0] text-slate-700 pt-2.5",
-      headerClass: "border-r border-[#E2E8F0]",
-      headerComponent: InputsHeaderComponent, // Use your existing header component or create a new one
-      headerComponentParams: {
-        displayName: "Inputs",
-        badgeText: "Input",
-        columnName: "Inputs",
-        type: "input",
-      },
-      cellStyle: {
-        justifyContent: "start",
-        whiteSpace: wrapText ? "normal" : "nowrap",
-      },
-      wrapText,
-      editable: false, // Set this to false to prevent default editing
-    });
-
-    Array.from(experimentTableQuery?.columns || []).forEach((column, index) => {
-      if (column.columnType === "output") {
-        columns.push({
-          field: column.id,
-          headerName: "Original",
-          width: 400,
-          headerComponent: CustomHeaderComponent,
-          headerComponentParams: {
-            displayName: "Original Prompt",
-            badgeText: "Output",
-            badgeVariant: "secondary",
-            promptVersionId: promptVersionTemplateData?.id ?? "",
-            promptVersionTemplate: promptVersionTemplateData || {},
-          },
-          cellClass: "border-r border-[#E2E8F0] text-slate-700 pt-2.5",
-          headerClass: headerClass,
-          cellRenderer: OriginalOutputCellRenderer,
-          cellRendererParams: {
-            prompt: promptVersionTemplateData,
-            hypothesisId: "original",
-            handleRunHypothesis,
-            wrapText,
-            columnId: column.id,
-          },
-          cellStyle: {
-            verticalAlign: "middle",
-            textAlign: "left",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: wrapText ? "normal" : "nowrap",
-          },
-          wrapText,
-        });
-      } else if (column.columnType === "experiment") {
-        if (columnView === "all" || columnView === "outputs") {
-          columns.push({
-            field: column.id,
-            headerName: column.columnName,
-            width: 400,
-            suppressSizeToFit: true,
-            cellRenderer: HypothesisCellRenderer,
-            cellRendererParams: {
-              hypothesisId: column.metadata?.hypothesisId,
-              handleRunHypothesis,
-              wrapText,
-              columnId: column.id,
-            },
-            headerComponent: CustomHeaderComponent,
-            headerComponentParams: {
-              displayName: `Prompt ${experimentColumnId++}`,
-              badgeText: "Output",
-              badgeVariant: "secondary",
-              hypothesisId: column.metadata?.hypothesisId ?? "",
-              promptVersionId: column.metadata?.promptVersionId ?? "",
-              originalPromptTemplate: promptVersionTemplateData,
-              runs: column.cells.filter((cell) => cell.value),
-              onRunColumn: async (colId: string) => {
-                const cells = experimentTableQuery?.rows
-                  .map((row) => {
-                    const cell = row.cells[colId];
-                    if (cell && cell.cellId) {
-                      return {
-                        cellId: cell.cellId,
-                        columnId: colId,
-                      };
-                    } else {
-                      return null;
-                    }
-                  })
-                  .filter((cell) => cell !== null) as Array<{
-                  cellId: string;
-                  columnId: string;
-                }>;
-
-                // Call handleRunHypothesis only once with all cells
-                handleRunHypothesis(
-                  (column.metadata?.hypothesisId as string) ?? "",
-                  cells
-                );
-              },
-            },
-            cellClass: "border-r border-[#E2E8F0] text-slate-700 pt-2.5",
-            headerClass: "border-r border-[#E2E8F0]",
-            cellStyle: {
-              verticalAlign: "middle",
-              textAlign: "left",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: wrapText ? "normal" : "nowrap",
-            },
-            wrapText,
-          });
-        }
-      }
-    });
-
-    if (
-      JSON.stringify(promptVersionTemplateData?.helicone_template)?.includes(
-        "auto-inputs"
-      )
-    ) {
-      // Add the "Messages" column
-      columns.push({
-        field: "messages",
-        headerName: "Messages",
-        width: 200,
-        headerComponent: CustomHeaderComponent,
-        headerComponentParams: {
-          displayName: "Messages",
-          badgeText: "Input",
-          badgeVariant: "secondary",
-          promptVersionTemplate: promptVersionTemplateData,
-        },
-        cellClass:
-          "border-r border-[#E2E8F0] text-slate-700 flex items-center justify-start pt-2.5",
-        headerClass,
-        cellRenderer: OriginalMessagesCellRenderer,
-        cellRendererParams: {
-          prompt: promptVersionTemplateData,
-          wrapText,
-        },
-        cellStyle: {
-          verticalAlign: "middle",
-          textAlign: "left",
-          overflow: "hidden",
-          textOverflow: "ellipsis",
-          whiteSpace: wrapText ? "normal" : "nowrap",
-        },
-      });
-    }
-
-    columns.push({
-      colId: "addExperiment",
-      headerName: "Add Experiment",
-      width: 170,
-      suppressSizeToFit: true,
-      suppressMenu: true,
-      sortable: false,
-      filter: false,
-      resizable: false,
-      headerComponent: AddColumnHeader,
-      headerClass: "border-r border-[#E2E8F0]",
-      headerComponentParams: headerComponentParams,
-    });
-
-    // Update column widths based on the columnWidths state
-    columns.forEach((col) => {
-      if (col.field && columnWidths[col.field]) {
-        col.width = columnWidths[col.field];
-      }
-    });
-
-    // Sort columns based on columnOrder if it's not empty
-    if (columnOrder.length > 0) {
-      columns = columns.sort((a, b) => {
-        const aIndex = columnOrder.indexOf(a.field!);
-        const bIndex = columnOrder.indexOf(b.field!);
-        if (aIndex === -1) return 1;
-        if (bIndex === -1) return -1;
-        return aIndex - bIndex;
-      });
-    }
-
-    return columns;
-  }, [
-    headerClass,
-    wrapText,
-    experimentTableQuery?.columns,
-    columnView,
-    columnWidths,
-    headerComponentParams,
-  ]);
-
-  const [showRandomInputSelector, setShowRandomInputSelector] = useState(false);
-
-  const handleRunRow = useCallback(
-    (rowIndex: number) => {
-      const row = experimentTableQuery?.rows.find(
-        (row) => row.rowIndex === rowIndex
-      );
-      if (!row) return;
-
-      const experimentColumns = experimentTableQuery?.columns?.filter(
-        (column) => column.columnType === "experiment"
-      );
-
-      if (!experimentColumns) return;
-
-      experimentColumns.forEach((column) => {
-        const hypothesisId = (column.metadata?.hypothesisId as string) ?? "";
-        if (!hypothesisId) return;
-
-        const cells = [
-          {
-            cellId: row.cells[column.id].cellId,
-            columnId: column.id,
-          },
-        ];
-
-        handleRunHypothesis(hypothesisId, cells);
-      });
-    },
-    [
-      experimentTableQuery?.rows,
-      experimentTableQuery?.columns,
-      handleRunHypothesis,
-    ]
-  );
-
-  if (isExperimentTableLoading) {
-    return (
-      <div className="flex items-center justify-center h-screen flex-col">
-        <LoadingAnimation />
-        <h1 className="text-4xl font-semibold">Getting your experiments</h1>
-      </div>
-    );
-  }
+  const queryClient = useQueryClient();
 
   return (
-    <div className="relative w-full">
-      <div className="flex flex-col space-y-1 w-full">
-        <div className="flex flex-row space-x-2 justify-end w-full pr-4">
-          <Button
-            variant="outline"
-            className="py-0 px-2 border border-slate-200 h-8 items-center justify-center space-x-1 flex gap-2"
-            onClick={() => setShowScoresTable(!showScoresTable)}
-          >
-            <div>{"{ }"}</div> {showScoresTable ? "Hide" : "Show"} Scores
-          </Button>
-          <ColumnsDropdown
-            wrapText={wrapText}
-            setWrapText={setWrapText}
-            columnView={columnView}
-            setColumnView={setColumnView}
+    <>
+      <div className="flex justify-between items-center py-4 pr-4">
+        <IslandContainer>
+          <HcBreadcrumb
+            pages={[
+              {
+                href: "/experiments",
+                name: "Experiments",
+              },
+              {
+                href: `/experiments/${experimentTableId}`,
+                name: experimentTableQuery?.name ?? "Experiment",
+              },
+            ]}
           />
-          <ExportButton
-            className="py-0 px-2 border border-slate-200 h-8 flex items-center justify-center space-x-1 bg-white"
-            key="export-button"
-            rows={experimentTableQuery?.rows ?? []}
+        </IslandContainer>
+        <div className="flex items-center gap-2">
+          <Switch
+            checked={wrapText.data ?? false}
+            onCheckedChange={(checked) => {
+              queryClient.setQueryData(
+                ["wrapText", experimentTableId],
+                checked
+              );
+            }}
           />
-          {!experimentTableQuery?.metadata?.experimentId && (
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="py-0 px-2 border border-slate-200 h-8 flex items-center justify-center space-x-1 gap-2"
-                >
-                  <PlusIcon className="h-4 w-4" />
-                  New Experiment
-                </Button>
-              </PopoverTrigger>
-              <NewExperimentPopover />
-            </Popover>
-          )}
+          <p className="text-slate-700 dark:text-slate-300 text-sm font-medium">
+            Wrap text
+          </p>
         </div>
+      </div>
+      <div className="h-[calc(100vh-50px)]">
+        <ResizablePanelGroup direction="horizontal" className="h-full">
+          <ResizablePanel defaultSize={75}>
+            <div className="flex flex-col">
+              <div className="max-h-[calc(100vh-90px)] overflow-y-auto overflow-x-auto bg-slate-100 dark:bg-neutral-950">
+                <div className="w-fit h-full bg-slate-50 dark:bg-black rounded-sm">
+                  <Table className="border-collapse w-full">
+                    <TableHeader>
+                      {table.getHeaderGroups().map((headerGroup, i) => (
+                        <TableRow
+                          key={headerGroup.id}
+                          className={clsx(
+                            "sticky top-0 bg-slate-50 dark:bg-slate-900 shadow-sm border-b border-slate-300 dark:border-slate-700",
+                            i === 1 && "h-[225px]"
+                          )}
+                        >
+                          {headerGroup.headers.map((header, index) => (
+                            <TableHead
+                              key={header.id}
+                              style={{
+                                width: header.getSize(),
+                              }}
+                              className="bg-white dark:bg-neutral-950 relative px-0"
+                            >
+                              {header.isPlaceholder
+                                ? null
+                                : flexRender(
+                                    header.column.columnDef.header,
+                                    header.getContext()
+                                  )}
+                              <div
+                                className="resizer absolute right-0 top-0 h-full w-4 cursor-col-resize"
+                                {...{
+                                  onMouseDown: header.getResizeHandler(),
+                                  onTouchStart: header.getResizeHandler(),
+                                }}
+                              >
+                                <div
+                                  className={clsx(
+                                    "h-full w-1",
+                                    header.column.getIsResizing()
+                                      ? "bg-blue-700 dark:bg-blue-300"
+                                      : "bg-gray-500"
+                                  )}
+                                />
+                              </div>
+                              {/* {index < headerGroup.headers.length - 1 && ( */}
+                              <div className="absolute top-0 right-0 h-full w-px bg-slate-300 dark:bg-slate-700" />
+                              {/* )} */}
+                              <div className="absolute bottom-0 left-0 right-0 h-[0.5px] bg-slate-300 dark:bg-slate-700" />
+                            </TableHead>
+                          ))}
+                        </TableRow>
+                      ))}
+                    </TableHeader>
+                    <TableBody className="text-[13px] bg-white dark:bg-neutral-950 flex-1">
+                      {table.getRowModel().rows?.length ? (
+                        table.getRowModel().rows.map((row) => (
+                          <TableRow
+                            key={row.id}
+                            data-state={row.getIsSelected() && "selected"}
+                            className="border-b border-slate-300 dark:border-slate-700 hover:bg-white dark:hover:bg-neutral-950"
+                          >
+                            {row.getVisibleCells().map((cell) => (
+                              <TableCell
+                                className="p-0 align-baseline border-r border-slate-300 dark:border-slate-700"
+                                key={cell.id}
+                                style={{
+                                  width: cell.column.getSize(),
+                                  maxWidth: cell.column.getSize(),
+                                  minWidth: cell.column.getSize(),
+                                }}
+                              >
+                                {flexRender(
+                                  cell.column.columnDef.cell,
+                                  cell.getContext()
+                                )}
+                              </TableCell>
+                            ))}
+                          </TableRow>
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell
+                            colSpan={columnDef.length}
+                            className="h-24 text-center"
+                          >
+                            No results.
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
 
-        {showScoresTable && experimentTableQuery?.experimentId && (
-          <div className="w-full bg-white border-y border-r">
-            <div className="flex justify-between items-center bg-white p-2 border-b">
-              <ScoresEvaluatorsConfig
-                experimentId={experimentTableQuery?.experimentId ?? ""}
+              <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="self-start flex flex-row space-x-2 text-slate-700 mt-0 shadow-none"
+                  >
+                    <PlusIcon className="h-4 w-4" />
+                    Add row
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-full px-2 py-2">
+                  <AddRowPopover
+                    setPopoverOpen={setPopoverOpen}
+                    setShowAddManualRow={() => setRightPanel("add_manual")}
+                    setShowExperimentInputSelector={
+                      setShowExperimentInputSelector
+                    }
+                    setShowRandomInputSelector={setShowRandomInputSelector}
+                  />
+                </PopoverContent>
+              </Popover>
+
+              <ExperimentRandomInputSelector
+                open={showRandomInputSelector}
+                setOpen={setShowRandomInputSelector}
+                handleAddRows={handleAddRowInsertBatch}
+                promptVersionId={
+                  experimentTableQuery?.original_prompt_version ?? ""
+                }
+                onSuccess={async (success) => {}}
+              />
+
+              <ExperimentInputSelector
+                open={showExperimentInputSelector}
+                setOpen={setShowExperimentInputSelector}
+                promptVersionId={
+                  experimentTableQuery?.original_prompt_version ?? ""
+                }
+                handleAddRows={handleAddRowInsertBatch}
+                onSuccess={async (success) => {}}
               />
             </div>
-            <ScoresTableContainer
-              columnDefs={columnDefs}
-              columnWidths={columnWidths}
-              columnOrder={columnOrder}
-              experimentId={experimentTableQuery?.experimentId ?? ""}
-              fetchExperimentHypothesisScores={fetchExperimentHypothesisScores}
-            />
-          </div>
-        )}
+          </ResizablePanel>
 
-        <div
-          className="ag-theme-alpine w-full overflow-hidden "
-          ref={experimentTableRef}
-          style={
-            {
-              "--ag-header-height": "40px",
-              "--ag-header-background-color": "#f3f4f6", // Light gray background
-              "--ag-header-foreground-color": "#1f2937", // Dark gray text
-              "--ag-header-cell-hover-background-color": "#e5e7eb", // Slightly darker gray on hover
-              "--ag-header-column-separator-color": "#d1d5db", // Medium gray for separators
-              "--ag-cell-horizontal-border": "solid #E2E8F0",
-              "--ag-border-color": "#E2E8F0",
-              "--ag-borders": "none",
-            } as React.CSSProperties
+          {/* Add right panel if needed */}
+          {rightPanel && (
+            <>
+              <ResizableHandle withHandle />
+              <ResizablePanel minSize={25} maxSize={75}>
+                <div className="h-full flex-shrink-0 flex flex-col">
+                  {rightPanel === "edit_inputs" && (
+                    <EditInputsPanel
+                      experimentId={experimentTableId}
+                      inputRecord={toEditInputRecord}
+                      inputKeys={inputKeysData ?? []}
+                      onClose={() => {
+                        setToEditInputRecord(null);
+                        setRightPanel(null);
+                      }}
+                    />
+                  )}
+                  {rightPanel === "add_manual" && (
+                    <AddManualRowPanel
+                      experimentId={experimentTableId}
+                      inputKeys={inputKeysData ?? []}
+                      onClose={() => setRightPanel(null)}
+                    />
+                  )}
+                </div>
+              </ResizablePanel>
+            </>
+          )}
+        </ResizablePanelGroup>
+        <AddColumnDialog
+          isOpen={isAddColumnDialogOpen}
+          onOpenChange={setIsAddColumnDialogOpen}
+          experimentId={experimentTableId}
+          originalColumnPromptVersionId={promptVersionsData?.[0]?.id ?? ""}
+          selectedForkFromPromptVersionId={
+            externallySelectedForkFromPromptVersionId ?? ""
           }
-        >
-          <AgGridReact
-            ref={gridRef as any}
-            rowData={experimentTableQuery?.rows}
-            columnDefs={columnDefs}
-            onGridReady={onGridReady}
-            onColumnResized={onColumnResized}
-            onColumnMoved={onColumnMoved}
-            enableCellTextSelection={true}
-            suppressRowTransform={true}
-            suppressColumnVirtualisation={true}
-            suppressColumnMoveAnimation={true}
-            domLayout="autoHeight"
-            // getRowId={getRowId}
-            context={{
-              handleRunHypothesis,
-              setShowExperimentInputSelector,
-              setShowRandomInputSelector,
-              experimentTableData: experimentTableQuery,
-              hypotheses: [],
-              experimentId: experimentTableQuery?.metadata?.experimentId,
-              orgId,
-              promptVersionTemplateRef: promptVersionTemplateData ?? {},
-
-              rowData: experimentTableQuery?.rows,
-              handleUpdateExperimentCell: updateExperimentCell.mutate,
-              handleRunRow,
-              handleDeleteRow,
-            }}
-            rowClass="border-b border-gray-200 hover:bg-gray-50"
-            headerHeight={40}
-            rowHeight={300}
-          />
-        </div>
-        <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
-          <PopoverTrigger asChild>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="self-start flex flex-row space-x-2 text-slate-700 mt-0"
-            >
-              <PlusIcon className="h-4 w-4" />
-              Add row
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-full px-2 py-2">
-            <AddRowPopover
-              setPopoverOpen={setPopoverOpen}
-              setShowExperimentInputSelector={setShowExperimentInputSelector}
-              setShowRandomInputSelector={setShowRandomInputSelector}
-              handleAddRow={handleAddRowWithPreviousInputs}
-            />
-          </PopoverContent>
-        </Popover>
+          numberOfExistingPromptVersions={
+            promptVersionsData?.length ? promptVersionsData.length - 1 : 0
+          }
+        />
       </div>
-
-      <ExperimentRandomInputSelector
-        open={showRandomInputSelector}
-        setOpen={setShowRandomInputSelector}
-        handleAddRows={handleAddRowInsertBatch}
-        promptVersionId={promptSubversionId}
-        datasetId={experimentTableQuery?.datasetId ?? ""}
-        onSuccess={async (success) => {}}
-      />
-
-      <ExperimentInputSelector
-        open={showExperimentInputSelector}
-        setOpen={setShowExperimentInputSelector}
-        promptVersionId={promptSubversionId}
-        datasetId={experimentTableQuery?.datasetId ?? ""}
-        handleAddRows={handleAddRowInsertBatch}
-        onSuccess={async (success) => {}}
-      />
-    </div>
+    </>
   );
 }
