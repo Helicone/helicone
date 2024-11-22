@@ -201,41 +201,6 @@ export class LogStore {
           console.error("Error inserting search records", error);
           throw error;
         }
-
-        try {
-          if (
-            payload.experimentCellValues &&
-            payload.experimentCellValues.length > 0
-          ) {
-            const cellValues = payload.experimentCellValues.map((cell) => ({
-              column_id: cell.columnId,
-              row_index: cell.rowIndex,
-              value: cell.value,
-              status: "success",
-            }));
-
-            const insertExperimentCellValues =
-              pgp.helpers.insert(cellValues, experimentCellValueColumns) +
-              onConflictExperimentCellValue;
-
-            await t.none(insertExperimentCellValues);
-          }
-        } catch (error: any) {
-          const cellValues = payload.experimentCellValues.map((cell) => ({
-            column_id: cell.columnId,
-            row_index: cell.rowIndex,
-            value: cell.value,
-            status: "failed",
-          }));
-
-          const insertExperimentCellValues =
-            pgp.helpers.insert(cellValues, experimentCellValueColumns) +
-            onConflictExperimentCellValue;
-
-          await t.none(insertExperimentCellValues);
-          console.error("Error inserting experiment cell values", error);
-          throw error;
-        }
       });
 
       return ok("Successfully inserted log batch");

@@ -91,7 +91,8 @@ export class InputsManager extends BaseManager {
   async createInputRecord(
     promptVersionId: string,
     inputs: Record<string, string>,
-    sourceRequest?: string
+    sourceRequest?: string,
+    experimentId?: string
   ): Promise<Result<string, string>> {
     const inputRecordId = randomUUID();
     const existingPrompt = await supabaseServer.client
@@ -106,8 +107,8 @@ export class InputsManager extends BaseManager {
     }
 
     const insertQuery = `
-      INSERT INTO prompt_input_record (id, inputs, source_request, prompt_version)
-      VALUES ($1, $2, $3, $4)
+      INSERT INTO prompt_input_record (id, inputs, source_request, prompt_version, experiment_id)
+      VALUES ($1, $2, $3, $4, $5)
     `;
 
     const result = await dbExecute<PromptInputRecord>(insertQuery, [
@@ -115,6 +116,7 @@ export class InputsManager extends BaseManager {
       JSON.stringify(inputs),
       sourceRequest,
       promptVersionId,
+      experimentId,
     ]);
 
     if (result.error) {

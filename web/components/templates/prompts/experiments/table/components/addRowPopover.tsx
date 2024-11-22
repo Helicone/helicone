@@ -8,23 +8,23 @@ import { Dices } from "lucide-react";
 
 interface AddRowPopoverProps {
   setPopoverOpen: (open: boolean) => void;
+  setShowAddManualRow: () => void;
   setShowExperimentInputSelector: (open: boolean) => void;
   setShowRandomInputSelector: (open: boolean) => void;
-  handleAddRow: (inputs?: Record<string, any>) => void;
 }
 
 export const AddRowPopover: React.FC<AddRowPopoverProps> = ({
   setPopoverOpen,
+  setShowAddManualRow,
   setShowExperimentInputSelector,
   setShowRandomInputSelector,
-  handleAddRow,
 }) => {
   return (
     <div>
       <Button
         onClick={() => {
           setPopoverOpen(false);
-          handleAddRow();
+          setShowAddManualRow();
         }}
         className="h-8 w-full flex items-center justify-start"
         variant="ghost"
