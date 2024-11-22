@@ -360,20 +360,22 @@ export const StartFromPromptDialog = ({
             </SelectTrigger>
             <SelectContent className="text-xl">
               {!isLoadingVersions &&
-                promptVersions?.map((version: any) => (
-                  <SelectItem
-                    key={version.id}
-                    value={version.id}
-                    className={`cursor-pointer ${
-                      selectedVersionId === version.id
-                        ? "bg-accent"
-                        : "hover:bg-accent"
-                    }`}
-                  >
-                    {version.name ||
-                      `V ${version.major_version}.${version.minor_version}`}
-                  </SelectItem>
-                ))}
+                promptVersions
+                  ?.filter((version) => version.minor_version === 0)
+                  ?.map((version: any) => (
+                    <SelectItem
+                      key={version.id}
+                      value={version.id}
+                      className={`cursor-pointer ${
+                        selectedVersionId === version.id
+                          ? "bg-accent"
+                          : "hover:bg-accent"
+                      }`}
+                    >
+                      {version.name ||
+                        `V ${version.major_version}.${version.minor_version}`}
+                    </SelectItem>
+                  ))}
             </SelectContent>
           </Select>
         </div>
