@@ -875,7 +875,8 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                                                 )}
                                               </DropdownMenuContent>
                                             </DropdownMenu>
-                                          ) : (
+                                          ) : promptVersion.minor_version ===
+                                            0 ? (
                                             <DropdownMenu>
                                               <DropdownMenuTrigger asChild>
                                                 <button className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full">
@@ -896,6 +897,8 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                                                 </DropdownMenuItem>
                                               </DropdownMenuContent>
                                             </DropdownMenu>
+                                          ) : (
+                                            <></>
                                           )}
                                         </div>
                                       </div>
