@@ -1,4 +1,4 @@
-// src/uźsers/usersController.ts
+// src/users/usersController.ts
 import {
   Body,
   Controller,
