@@ -108,7 +108,7 @@ const useExperimentTables = () => {
     isRefetching,
     experiments: experiments.map((experiment) => ({
       ...experiment,
-      model: (experiment.metadata as any)?.model ?? "not found",
+      model: "unknown",
     })),
   };
 };

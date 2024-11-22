@@ -282,16 +282,16 @@ export interface paths {
   };
   "/v1/experiment/{experimentId}/evaluators": {
     get: operations["GetExperimentEvaluators"];
-    post: operations["CreateExperimentEvaluator"];
+    post: operations["CreateExperimentEvaluatorOld"];
   };
   "/v1/experiment/{experimentId}/evaluators/run": {
-    post: operations["RunExperimentEvaluators"];
+    post: operations["RunExperimentEvaluatorsOld"];
   };
   "/v1/experiment/{experimentId}/evaluators/{evaluatorId}": {
-    delete: operations["DeleteExperimentEvaluator"];
+    delete: operations["DeleteExperimentEvaluatorOld"];
   };
   "/v1/experiment/query": {
-    post: operations["GetExperiments"];
+    post: operations["GetExperimentsOld"];
   };
   "/v1/evaluator": {
     post: operations["CreateEvaluator"];
@@ -4697,7 +4697,7 @@ export interface operations {
       };
     };
   };
-  CreateExperimentEvaluator: {
+  CreateExperimentEvaluatorOld: {
     parameters: {
       path: {
         experimentId: string;
@@ -4719,7 +4719,7 @@ export interface operations {
       };
     };
   };
-  RunExperimentEvaluators: {
+  RunExperimentEvaluatorsOld: {
     parameters: {
       path: {
         experimentId: string;
@@ -4734,7 +4734,7 @@ export interface operations {
       };
     };
   };
-  DeleteExperimentEvaluator: {
+  DeleteExperimentEvaluatorOld: {
     parameters: {
       path: {
         experimentId: string;
@@ -4750,12 +4750,20 @@ export interface operations {
       };
     };
   };
-  GetExperiments: {
+  GetExperimentsOld: {
+    requestBody: {
+      content: {
+        "application/json": {
+          include?: components["schemas"]["IncludeExperimentKeys"];
+          filter: components["schemas"]["ExperimentFilterNode"];
+        };
+      };
+    };
     responses: {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result_ExperimentV2-Array.string_"];
+          "application/json": components["schemas"]["Result_Experiment-Array.string_"];
         };
       };
     };
@@ -5394,6 +5402,16 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_ProviderMetrics.string_"];
+        };
+      };
+    };
+  };
+  GetExperiments: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ExperimentV2-Array.string_"];
         };
       };
     };
