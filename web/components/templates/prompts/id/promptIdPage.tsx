@@ -473,55 +473,28 @@ const PromptIdPage = (props: PromptIdPageProps) => {
     promptVersionId: string,
     promptData: string
   ) => {
-    if (!(experimentFlags?.hasFlag || user?.email?.includes("helicone.ai"))) {
-      notification.setNotification(
-        "Experiment feature is not enabled - sign up for the waitlist to use it",
-        "error"
-      );
-      return;
-    }
-    const dataset = await jawn.POST("/v1/helicone-dataset", {
-      body: {
-        datasetName: "Dataset for Experiment",
-        requestIds: [],
-      },
-    });
-    if (!dataset.data?.data?.datasetId) {
-      notification.setNotification("Failed to create dataset", "error");
-      return;
-    }
     const promptVersion = prompts?.find((p) => p.id === promptVersionId);
 
-    const experimentTableResult = await jawn.POST("/v1/experiment/table/new", {
+    if (!promptVersion) {
+      notification.setNotification("Prompt version not found", "error");
+      return;
+    }
+
+    const experimentTableResult = await jawn.POST("/v2/experiment/new", {
       body: {
-        datasetId: dataset.data?.data?.datasetId!,
-        promptVersionId: promptVersionId,
-        newHeliconeTemplate: JSON.stringify(promptData),
-        isMajorVersion: false,
-        promptSubversionMetadata: {
-          experimentAssigned: true,
-        },
-        experimentMetadata: {
-          prompt_id: id,
-          prompt_version: promptVersionId,
-          experiment_name:
-            `${prompt?.user_defined_id}_V${promptVersion?.major_version}.${promptVersion?.minor_version}` ||
-            "",
-        },
-        experimentTableMetadata: {
-          datasetId: dataset.data?.data?.datasetId!,
-          model: promptVersion?.model,
-          prompt_id: id,
-          prompt_version: promptVersionId,
-        },
+        name: `${prompt?.user_defined_id}_V${promptVersion?.major_version}.${promptVersion?.minor_version}`,
+        originalPromptVersion: promptVersionId,
       },
     });
-    if (!experimentTableResult.data?.data?.experimentId) {
+
+    if (experimentTableResult.error || !experimentTableResult.data) {
       notification.setNotification("Failed to create experiment", "error");
       return;
     }
 
-    router.push(`/experiments/${experimentTableResult.data?.data?.tableId}`);
+    router.push(
+      `/experiments/${experimentTableResult.data.data?.experimentId}`
+    );
   };
 
   const deletePromptVersion = async (promptVersionId: string) => {
