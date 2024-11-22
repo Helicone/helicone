@@ -60,7 +60,7 @@ function prepareRequestAnthropic(
     "Helicone-Manual-Access-Key": process.env.HELICONE_MANUAL_ACCESS_KEY ?? "",
   };
 
-  const fetchUrl = `${process.env.HELICONE_LLMMAPPER_URL}/oai2ant/v1`;
+  const fetchUrl = `${process.env.HELICONE_LLMMAPPER_URL}/oai2ant/v1/chat/completions`;
 
   return {
     url: new URL(fetchUrl),
@@ -126,7 +126,7 @@ export function prepareRequestAnthropicFull({
   );
 
   const { url: fetchUrl, headers } = prepareRequestAnthropic(
-    `${process.env.HELICONE_LLMMAPPER_URL}/oai2ant/v1`,
+    `${process.env.HELICONE_LLMMAPPER_URL}/oai2ant/v1/chat/completions`,
     proxyKey,
     requestId
   );
