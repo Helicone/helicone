@@ -215,14 +215,12 @@ export class ExperimentV2Manager extends BaseManager {
       if (result.error || !result.data) {
         return err("Failed to create new prompt version");
       }
-      console.log(JSON.stringify(result.data.helicone_template));
 
       const newPromptVersionInputKeys = Array.from(
         JSON.stringify(result.data.helicone_template).matchAll(
           /<helicone-prompt-input key=\\"(\w+)\\" \/>/g
         )
       ).map((match) => match[1]);
-      console.log(newPromptVersionInputKeys);
 
       const existingExperimentInputKeys = await supabaseServer.client
         .from("experiment_v3")
@@ -241,6 +239,7 @@ export class ExperimentV2Manager extends BaseManager {
               ]),
             ],
           })
+          .eq("organization", this.authParams.organizationId)
           .eq("id", experimentId),
         dbExecute(
           `INSERT INTO prompt_input_keys (key, prompt_version)
@@ -387,10 +386,15 @@ export class ExperimentV2Manager extends BaseManager {
     inputs: Record<string, string>
   ): Promise<Result<null, string>> {
     try {
+      const experiment = await this.getExperimentById(experimentId);
+      if (!experiment) {
+        return err("Experiment not found");
+      }
       const result = await supabaseServer.client
         .from("prompt_input_record")
         .update({ inputs })
-        .eq("id", inputRecordId);
+        .eq("id", inputRecordId)
+        .eq("experiment_id", experimentId);
 
       if (result.error) {
         return err("Failed to update experiment table row");
@@ -408,6 +412,10 @@ export class ExperimentV2Manager extends BaseManager {
     inputRecordId: string
   ): Promise<Result<string, string>> {
     try {
+      const experiment = await this.getExperimentById(experimentId);
+      if (!experiment) {
+        return err("Experiment not found");
+      }
       const result = await run(
         experimentId,
         promptVersionId,

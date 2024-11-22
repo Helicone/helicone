@@ -17,7 +17,10 @@ create table "public"."experiment_v3" (
     "id" uuid not null default gen_random_uuid(),
     "created_at" timestamp with time zone not null default now(),
     "name" character varying not null,
-    "original_prompt_version" uuid not null
+    "original_prompt_version" uuid not null,
+    "organization" uuid not null,
+    "input_keys" text[] default '{}'::text[],
+    "copied_original_prompt_version" uuid
 );
 
 
@@ -68,16 +71,11 @@ alter table "public"."prompts_versions" add constraint "public_prompts_versions_
 alter table "public"."prompts_versions" validate constraint "public_prompts_versions_experiment_id_fkey";
 
 
-alter table "public"."experiment_v3" add column "organization" uuid;
-
 alter table "public"."experiment_v3" add constraint "public_experiment_v3_organization_fkey" FOREIGN KEY (organization) REFERENCES organization(id) not valid;
 
 alter table "public"."experiment_v3" validate constraint "public_experiment_v3_organization_fkey"
 
 
-alter table "public"."experiment_v3" add column "input_keys" text[] default '{}'::text[];
-
-alter table "public"."experiment_v3" add column "copied_original_prompt_version" uuid;
 
 alter table "public"."experiment_v3" add constraint "public_experiment_v3_copied_original_prompt_version_fkey" FOREIGN KEY (copied_original_prompt_version) REFERENCES prompts_versions(id) not valid;
 
