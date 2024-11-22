@@ -226,25 +226,7 @@ const CreateOrg = (props: CreateOrgProps) => {
                 </div>
               </div>
             </div>
-            {referralType === "friend_referral" && (
-              <div className="flex flex-col space-y-2">
-                <label
-                  htmlFor="referral-code"
-                  className="block text-md font-semibold leading-6"
-                >
-                  Referral Code (optional)
-                </label>
-                <div className="">
-                  <Input
-                    id="referral-code"
-                    name="referral-code"
-                    placeholder="Referral code"
-                    value={referralCode}
-                    onChange={(e) => setReferralCode(e.target.value)}
-                  />
-                </div>
-              </div>
-            )}
+
             <div className="flex flex-col space-y-4">
               <div className="flex items-center space-x-2">
                 <Checkbox

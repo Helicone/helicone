@@ -11,6 +11,8 @@ import { Button } from "@/components/ui/button";
 const settingNames: Array<components["schemas"]["SettingName"]> = [
   "kafka:dlq",
   "kafka:log",
+  "kafka:score",
+  "kafka:dlq:score",
   "kafka:dlq:eu",
   "kafka:log:eu",
 ];

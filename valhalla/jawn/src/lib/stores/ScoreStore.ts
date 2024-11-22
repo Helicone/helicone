@@ -132,6 +132,7 @@ export class ScoreStore extends BaseStore {
         SELECT *
         FROM request_response_rmt
         WHERE (request_id, organization_id) IN (${queryPlaceholders})
+        AND request_created_at > now() - INTERVAL 30 DAY
         `,
         queryParams
       ),

@@ -39,11 +39,17 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const githubResponse = await fetch(
+    "https://api.github.com/repos/helicone/helicone"
+  );
+  const githubData = await githubResponse.json();
+  const stars = githubData.stargazers_count;
+
   return (
     <html lang="en">
       <Head>
@@ -68,7 +74,7 @@ export default function RootLayout({
       <PHProvider>
         <body>
           <div className={`bg-[#f8feff] flex flex-col ${inter.className}`}>
-            <Layout>{children}</Layout>
+            <Layout stars={stars}>{children}</Layout>
           </div>
           <PostHogPageView />
           <Analytics />

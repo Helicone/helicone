@@ -20,6 +20,8 @@ export interface OrgsToDLQ {
 export interface SettingsType {
   "kafka:dlq": KafkaSettings;
   "kafka:log": KafkaSettings;
+  "kafka:score": KafkaSettings;
+  "kafka:dlq:score": KafkaSettings;
   "kafka:dlq:eu": KafkaSettings;
   "kafka:log:eu": KafkaSettings;
   "kafka:orgs-to-dlq": OrgsToDLQ;
