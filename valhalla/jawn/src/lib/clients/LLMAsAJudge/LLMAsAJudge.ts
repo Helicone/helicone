@@ -11,7 +11,10 @@ export class LLMAsAJudge {
       openAIApiKey: string;
       scoringType: "LLM-CHOICE" | "LLM-BOOLEAN" | "LLM-RANGE";
       llmTemplate: any;
-      inputRecord: ExperimentDatasetRow["inputRecord"];
+      inputRecord: {
+        inputs: Record<string, string>;
+        autoInputs?: Record<string, string>;
+      };
       output: string;
       evaluatorName: string;
     }
@@ -64,7 +67,8 @@ export class LLMAsAJudge {
       body: JSON.stringify(requestBody),
     });
 
-    return await res.json();
+    const data = await res.json();
+    return data;
   }
 
   async evaluate(): Promise<ScoreResult> {

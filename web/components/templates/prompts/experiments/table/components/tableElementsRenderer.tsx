@@ -2,7 +2,7 @@ import { PlayIcon, SparklesIcon } from "@heroicons/react/24/outline";
 import { Button } from "../../../../../ui/button";
 import { useState } from "react";
 import PromptPlayground from "../../../id/promptPlayground";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useJawnClient } from "../../../../../../lib/clients/jawnHook";
 import React from "react";
 import { Badge } from "@/components/ui/badge";
@@ -17,12 +17,14 @@ export interface InputEntry {
 }
 
 interface ExperimentHeaderProps {
+  experimentId: string;
   isOriginal: boolean;
   onRunColumn?: () => Promise<void>;
   originalPromptTemplate?: any;
   promptVersionId?: string;
   originalPromptVersionId?: string;
   onForkPromptVersion?: (promptVersionId: string) => void;
+  showScores?: boolean;
 }
 
 const icon = (model: string) => {
@@ -50,6 +52,8 @@ const ExperimentTableHeader = (props: ExperimentHeaderProps) => {
     originalPromptTemplate,
     isOriginal,
     onForkPromptVersion,
+    experimentId,
+    showScores,
   } = props;
 
   const [showViewPrompt, setShowViewPrompt] = useState(false);
@@ -92,6 +96,18 @@ const ExperimentTableHeader = (props: ExperimentHeaderProps) => {
       refetchOnReconnect: false,
     }
   );
+  const queryClient = useQueryClient();
+
+  const promptVersionIdScore = useQuery({
+    queryKey: ["experimentScores", experimentId, promptVersionId],
+    queryFn: () => {
+      const scores = queryClient.getQueryData<Record<string, any>>([
+        "experimentScores",
+        experimentId,
+      ]);
+      return scores?.[promptVersionId ?? ""];
+    },
+  });
 
   return (
     <Dialog open={showViewPrompt} onOpenChange={setShowViewPrompt}>
@@ -100,6 +116,21 @@ const ExperimentTableHeader = (props: ExperimentHeaderProps) => {
           className="flex flex-col gap-2 h-full overflow-y-auto p-3 cursor-pointer"
           onClick={() => setShowViewPrompt(true)}
         >
+          {promptVersionIdScore.data ? (
+            <div className="flex gap-2 flex-wrap">
+              {Object.keys(
+                (
+                  promptVersionIdScore.data as {
+                    data: Record<string, unknown>;
+                  }
+                ).data
+              ).map((key) => (
+                <div key={key}>{String(key)}</div>
+              ))}
+            </div>
+          ) : (
+            <></>
+          )}
           <div className="flex gap-2 items-center ml-0.5">
             {icon(promptTemplate?.model ?? "")}
             <span className="text-xs font-medium text-slate-700 dark:text-slate-300">

@@ -1,7 +1,5 @@
 import { Col, Row } from "@/components/layout/common";
-import { useOrg } from "@/components/layout/organizationContext";
 import { CreateNewEvaluatorSheetContent } from "@/components/shared/CreateNewEvaluator/CreateNewEvaluatorSheetContent";
-import useNotification from "@/components/shared/notification/useNotification";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -12,112 +10,22 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Sheet } from "@/components/ui/sheet";
-import { getJawnClient } from "@/lib/clients/jawn";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useExperimentScores } from "@/services/hooks/prompts/experiment-scores";
 import { Loader2, TrashIcon } from "lucide-react";
 import { memo, useState } from "react";
 
 const ScoresEvaluatorsConfig = memo(
   ({ experimentId }: { experimentId: string }) => {
-    const org = useOrg();
-    const evaluators = useQuery({
-      queryKey: ["evaluators", org?.currentOrg?.id],
-      queryFn: async (query) => {
-        const currentOrgId = query.queryKey[1];
-        const jawn = getJawnClient(currentOrgId);
-        const evaluators = await jawn.GET(
-          "/v1/experiment/{experimentId}/evaluators",
-          {
-            params: {
-              path: {
-                experimentId: experimentId,
-              },
-            },
-          }
-        );
-        return evaluators;
-      },
-    });
-
-    const notification = useNotification();
-
-    const addEvaluator = useMutation({
-      mutationFn: async (evaluatorId: string) => {
-        const jawn = getJawnClient(org?.currentOrg?.id);
-        const evaluator = await jawn.POST(
-          "/v1/experiment/{experimentId}/evaluators",
-          {
-            params: {
-              path: {
-                experimentId: experimentId,
-              },
-            },
-            body: {
-              evaluatorId: evaluatorId,
-            },
-          }
-        );
-        if (!evaluator.response.ok) {
-          notification.setNotification(
-            `Failed to add evaluator: ${evaluator.response.statusText}`,
-            "error"
-          );
-        }
-      },
-      onSuccess: () => {
-        evaluators.refetch();
-        allEvaluators.refetch();
-      },
-    });
-
-    const allEvaluators = useQuery({
-      queryKey: ["all-evaluators", org?.currentOrg?.id],
-      queryFn: async (query) => {
-        const currentOrgId = query.queryKey[1];
-
-        const jawn = getJawnClient(currentOrgId);
-        const evaluators = await jawn.POST("/v1/evaluator/query", {
-          body: {},
-        });
-        return evaluators;
-      },
-    });
-
-    const removeEvaluator = useMutation({
-      mutationFn: async (evaluatorId: string) => {
-        const jawn = getJawnClient(org?.currentOrg?.id);
-        const evaluator = await jawn.DELETE(
-          "/v1/experiment/{experimentId}/evaluators/{evaluatorId}",
-          {
-            params: {
-              path: {
-                experimentId: experimentId,
-                evaluatorId: evaluatorId,
-              },
-            },
-          }
-        );
-      },
-      onSuccess: () => {
-        evaluators.refetch();
-        allEvaluators.refetch();
-      },
-    });
-
-    const runEvaluators = useMutation({
-      mutationFn: async () => {
-        const jawn = getJawnClient(org?.currentOrg?.id);
-        return await jawn.POST(`/v1/experiment/{experimentId}/evaluators/run`, {
-          params: {
-            path: {
-              experimentId: experimentId,
-            },
-          },
-        });
-      },
-    });
+    const {
+      evaluators,
+      addEvaluator,
+      removeEvaluator,
+      runEvaluators,
+      allEvaluators,
+    } = useExperimentScores(experimentId);
 
     const [open, setOpen] = useState<boolean>(false);
+
     return (
       <Row className="gap-2 items-center p-1 w-full">
         <Select
@@ -147,7 +55,7 @@ const ScoresEvaluatorsConfig = memo(
               Create New Custom Evaluator
             </SelectItem>
 
-            {allEvaluators.data?.data?.data?.map((evaluator) => (
+            {allEvaluators?.data?.data?.map((evaluator) => (
               <SelectItemRawNotText
                 key={evaluator.id}
                 value={evaluator.id}
@@ -174,11 +82,11 @@ const ScoresEvaluatorsConfig = memo(
         </Sheet>
 
         <div className="grid grid-cols-5 gap-2 items-center text-xs mr-auto">
-          {evaluators.data?.data?.data?.map((evaluator, index) => {
+          {evaluators?.data?.data?.map((evaluator, index) => {
             return (
               <Row
                 key={`evaluator-${evaluator.id}-${index}`}
-                className="gap-2 items-center border border-slate-200 rounded-sm p-2 bg-white"
+                className="gap-2 items-center border border-slate-200 dark:border-slate-700 rounded-sm p-2 bg-white dark:bg-neutral-950 "
               >
                 {evaluator.name}
                 <TrashIcon

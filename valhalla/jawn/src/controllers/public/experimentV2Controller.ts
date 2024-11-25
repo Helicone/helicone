@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Path,
   Post,
@@ -11,12 +12,17 @@ import {
 } from "tsoa";
 import { Result } from "../../lib/shared/result";
 import { JawnAuthenticatedRequest } from "../../types/request";
-import { ExperimentV2Manager } from "../../managers/experiment/ExperimentV2Manager";
+import {
+  ExperimentV2Manager,
+  ScoreV2,
+} from "../../managers/experiment/ExperimentV2Manager";
 import { Json } from "../../lib/db/database.types";
 import {
   PromptCreateSubversionParams,
   PromptVersionResult,
 } from "./promptController";
+import { EvaluatorManager } from "../../managers/evaluator/EvaluatorManager";
+import { EvaluatorResult } from "./evaluatorController";
 
 export interface ExperimentV2 {
   id: string;
@@ -271,6 +277,70 @@ export class ExperimentV2Controller extends Controller {
     } else {
       this.setStatus(200);
     }
+    return result;
+  }
+
+  @Get("/{experimentId}/evaluators")
+  public async getExperimentEvaluators(
+    @Path() experimentId: string,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<EvaluatorResult[], string>> {
+    const evaluatorManager = new EvaluatorManager(request.authParams);
+    const result = await evaluatorManager.getEvaluatorsForExperiment(
+      experimentId
+    );
+    return result;
+  }
+
+  @Post("/{experimentId}/evaluators")
+  public async createExperimentEvaluator(
+    @Path() experimentId: string,
+    @Body() requestBody: { evaluatorId: string },
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<null, string>> {
+    const evaluatorManager = new EvaluatorManager(request.authParams);
+    const result = await evaluatorManager.createExperimentEvaluator(
+      experimentId,
+      requestBody.evaluatorId
+    );
+    return result;
+  }
+
+  @Delete("/{experimentId}/evaluators/{evaluatorId}")
+  public async deleteExperimentEvaluator(
+    @Path() experimentId: string,
+    @Path() evaluatorId: string,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<null, string>> {
+    const evaluatorManager = new EvaluatorManager(request.authParams);
+    const result = await evaluatorManager.deleteExperimentEvaluator(
+      experimentId,
+      evaluatorId
+    );
+    return result;
+  }
+
+  @Post("/{experimentId}/evaluators/run")
+  public async runExperimentEvaluators(
+    @Path() experimentId: string,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<null, string>> {
+    const evaluatorManager = new EvaluatorManager(request.authParams);
+    const result = await evaluatorManager.runExperimentEvaluators(experimentId);
+    return result;
+  }
+
+  @Get("/{experimentId}/{promptVersionId}/scores")
+  public async getExperimentPromptVersionScores(
+    @Path() experimentId: string,
+    @Path() promptVersionId: string,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<Record<string, ScoreV2>, string>> {
+    const experimentManager = new ExperimentV2Manager(request.authParams);
+    const result = await experimentManager.getExperimentPromptVersionScores(
+      experimentId,
+      promptVersionId
+    );
     return result;
   }
 }

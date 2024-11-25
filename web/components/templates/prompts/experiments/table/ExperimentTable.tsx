@@ -46,6 +46,9 @@ import { IslandContainer } from "@/components/ui/islandContainer";
 import HcBreadcrumb from "@/components/ui/hcBreadcrumb";
 import { Switch } from "@/components/ui/switch";
 import { useQueryClient } from "@tanstack/react-query";
+import ScoresEvaluatorsConfig from "./scores/ScoresEvaluatorsConfig";
+import ScoresGraphContainer from "./scores/ScoresGraphContainer";
+import { useOrg } from "@/components/layout/organizationContext";
 
 type TableDataType = {
   index: number;
@@ -84,6 +87,7 @@ export function ExperimentTable({
     id: string;
     inputKV: Record<string, string>;
   } | null>(null);
+  const [showScores, setShowScores] = useState(false);
 
   const cellRefs = useRef<Record<string, any>>({});
   const [
@@ -91,6 +95,9 @@ export function ExperimentTable({
     setExternallySelectedForkFromPromptVersionId,
   ] = useState<string | null>(null);
   const [isAddColumnDialogOpen, setIsAddColumnDialogOpen] = useState(false);
+
+  const org = useOrg();
+  const orgId = org?.currentOrg?.id ?? "";
 
   const columnHelper = createColumnHelper<TableDataType>();
 
@@ -206,6 +213,7 @@ export function ExperimentTable({
             columnHelper.accessor(`prompt_version_${pv.id}`, {
               header: () => (
                 <ExperimentTableHeader
+                  experimentId={experimentTableId}
                   isOriginal={
                     pv.id ===
                     experimentTableQuery?.copied_original_prompt_version
@@ -377,6 +385,15 @@ export function ExperimentTable({
         </IslandContainer>
         <div className="flex items-center gap-2">
           <Switch
+            checked={showScores}
+            onCheckedChange={(checked) => {
+              setShowScores(checked);
+            }}
+          />
+          <p className="text-slate-700 dark:text-slate-300 text-sm font-medium">
+            Show scores
+          </p>
+          <Switch
             checked={wrapText.data ?? false}
             onCheckedChange={(checked) => {
               queryClient.setQueryData(
@@ -394,7 +411,28 @@ export function ExperimentTable({
         <ResizablePanelGroup direction="horizontal" className="h-full">
           <ResizablePanel defaultSize={75}>
             <div className="flex flex-col">
-              <div className="max-h-[calc(100vh-90px)] overflow-y-auto overflow-x-auto bg-slate-100 dark:bg-neutral-950">
+              {showScores && (
+                <div className="flex flex-col w-full bg-white dark:bg-neutral-950 border-y border-r border-slate-200 dark:border-slate-700">
+                  <div className="flex justify-between items-center bg-white dark:bg-neutral-950 p-2 border-b border-slate-200 dark:border-slate-700">
+                    <ScoresEvaluatorsConfig experimentId={experimentTableId} />
+                  </div>
+                  {promptVersionsData && (
+                    <ScoresGraphContainer
+                      promptVersions={(promptVersionsData ?? []).map((pv) => ({
+                        ...pv,
+                        metadata: pv.metadata ?? {},
+                      }))}
+                      experimentId={experimentTableId}
+                    />
+                  )}
+                </div>
+              )}
+              <div
+                className={clsx(
+                  "max-h-[calc(100vh-90px)] overflow-y-auto overflow-x-auto bg-slate-100 dark:bg-neutral-950",
+                  showScores && "max-h-[calc(100vh-90px-300px-59px)]"
+                )}
+              >
                 <div className="w-fit h-full bg-slate-50 dark:bg-black rounded-sm">
                   <Table className="border-collapse w-full">
                     <TableHeader>

@@ -1,3 +1,13 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  :root {
+    --chart-1: 0.852 0.199 91.936;
+    --chart-2: 0.656 0.241 354.308;
+    --chart-3: 0.792 0.209 151.711;
+    --chart-4: 0.637 0.237 25.331;
+    --chart-5: 0.667 0.295 322.15;
+  }
+}
