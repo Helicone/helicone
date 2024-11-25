@@ -119,7 +119,6 @@ export class SegmentLogHandler extends AbstractLogHandler {
     const usage = context.usage;
 
     return {
-      // writeKey: context.message.heliconeMeta.segmentWriteKey,
       user: request.userId,
       requestId: request.id,
       completionTokens: usage.completionTokens ?? 0,
