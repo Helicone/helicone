@@ -20,6 +20,7 @@ import { supabaseServer } from "../lib/db/supabase";
 import { dataDogClient } from "../lib/clients/DataDogClient";
 import { LytixHandler } from "../lib/handlers/LytixHandler";
 import { ExperimentHandler } from "../lib/handlers/ExperimentHandler";
+import { SegmentLogHandler } from "../lib/handlers/SegmentLogHandler";
 
 export class LogManager {
   public async processLogEntry(logMessage: Message): Promise<void> {
@@ -68,6 +69,7 @@ export class LogManager {
     const webhookHandler = new WebhookHandler(
       new WebhookStore(supabaseServer.client)
     );
+    const segmentHandler = new SegmentLogHandler();
 
     authHandler
       .setNext(rateLimitHandler)
@@ -79,7 +81,8 @@ export class LogManager {
       .setNext(posthogHandler)
       .setNext(lytixHandler)
       .setNext(experimentHandler)
-      .setNext(webhookHandler);
+      .setNext(webhookHandler)
+      .setNext(segmentHandler);
 
     await Promise.all(
       logMessages.map(async (logMessage) => {
