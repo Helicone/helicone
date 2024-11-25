@@ -5,7 +5,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { ChevronRightIcon } from "@heroicons/react/24/outline";
+import { ChevronDownIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
@@ -92,15 +92,16 @@ const NavItem: React.FC<NavItemProps> = ({
         onClick={hasSubItems ? () => toggleExpand(link.name) : onClick}
         className={cn(
           hasSubItems
-            ? "flex items-center gap-1 font-medium text-slate-400 text-xs mt-[10px] text-[11px]"
+            ? "flex items-center gap-0.5 text-slate-400 text-xs mt-[14px] text-[11px] font-normal pl-2"
             : cn(
                 buttonVariants({
                   variant: link.current ? "secondary" : "ghost",
                   size: "xs",
                 }),
                 deep && deep > 1 ? "h-6" : "h-8",
-                "justify-start w-full",
-                "text-sm font-medium  text-[12px]"
+                "justify-start w-full font-normal",
+                "text-sm  text-[12px] text-slate-500",
+                link.current && "text-slate-800 dark:text-slate-200"
               ),
           ""
         )}
@@ -109,18 +110,18 @@ const NavItem: React.FC<NavItemProps> = ({
           {link.icon && (
             <link.icon
               className={cn(
-                "mr-2 h-4 w-4",
-                link.current && "text-accent-foreground"
+                "mr-2 h-3.5 w-3.5 text-slate-500",
+                link.current && "text-slate-800 dark:text-slate-200"
               )}
             />
           )}
           {link.name}
         </div>
         {hasSubItems && (
-          <ChevronRightIcon
+          <ChevronDownIcon
             className={cn(
-              "h-3 w-3 transition-transform fill-slate-400",
-              expandedItems.includes(link.name) && "rotate-90"
+              "h-3 w-3 transition-transform text-slate-400",
+              !expandedItems.includes(link.name) && "-rotate-90"
             )}
           />
         )}
