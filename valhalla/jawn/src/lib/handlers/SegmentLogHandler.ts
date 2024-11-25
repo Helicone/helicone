@@ -107,7 +107,7 @@ export class SegmentLogHandler extends AbstractLogHandler {
       }
     }
 
-    return ok("Successfully handled lytix logs");
+    return ok("Successfully handled segment logs");
   }
 
   private mapSegmentEvent(
