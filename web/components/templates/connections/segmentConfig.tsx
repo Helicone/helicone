@@ -6,7 +6,6 @@ import { Label } from "@/components/ui/label";
 import { EyeIcon, EyeOffIcon, Loader2 } from "lucide-react";
 import { useSegmentKey } from "@/services/hooks/useSegmentKey";
 import { useIntegration } from "@/services/hooks/useIntegrations";
-import properties from "@/pages/api/properties";
 
 interface SegmentConfigProps {
   onClose: () => void;
@@ -67,10 +66,7 @@ const SegmentConfig: React.FC<SegmentConfigProps> = ({ onClose }) => {
       },
       body: JSON.stringify({
         writeKey: apiKey,
-        event: "test-event",
-        properties: {
-          test: "test",
-        },
+        ...getExampleEvent(),
       }),
     })
       .then((res) => res.json())
