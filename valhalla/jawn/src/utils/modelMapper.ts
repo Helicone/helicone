@@ -60,9 +60,16 @@ export function getModelFromResponse(responseBody: any) {
 export function calculateModel(
   requestModel?: string,
   responseModel?: string,
-  modelOverride?: string
+  modelOverride?: string,
+  modelFromPath?: string
 ): string | null {
-  return modelOverride ?? responseModel ?? requestModel ?? null;
+  return (
+    (modelOverride || null) ??
+    (responseModel || null) ??
+    (requestModel || null) ??
+    (modelFromPath || null) ??
+    null
+  );
 }
 
 const requestModels = new Set<string>([
