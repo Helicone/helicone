@@ -71,7 +71,7 @@ const PrototypeSidebar = ({
   return (
     <div className="bg-white border-r border-[#e5e7eb] h-full flex-1 rounded-l-xl overflow-y-auto">
       <div className="w-full flex flex-col h-full border-r dark:border-slate-800 px-2">
-        <div className="flex-grow overflow-y-auto pb-14">
+        <div className="flex-grow pb-14">
           <div className="flex items-center justify-between gap-2 h-14 border-b dark:border-slate-800 mx-1">
             <Button
               variant="ghost"
@@ -156,7 +156,7 @@ const PrototypeSidebar = ({
                   <div
                     className={cn(
                       buttonVariants({
-                        variant: "ghost",
+                        variant: "fake_button",
                         size: "sm",
                       }),
                       "justify-start w-full text-[12px] h-8 px-2"
@@ -170,7 +170,7 @@ const PrototypeSidebar = ({
                   <div
                     className={cn(
                       buttonVariants({
-                        variant: "ghost",
+                        variant: "fake_button",
                         size: "sm",
                       }),
                       "justify-start w-full text-[12px] h-8 px-2"
@@ -190,7 +190,7 @@ const PrototypeSidebar = ({
                   <div
                     className={cn(
                       buttonVariants({
-                        variant: "ghost",
+                        variant: "fake_button",
                         size: "sm",
                       }),
                       "justify-start w-full text-[12px] h-8 px-2"
@@ -204,7 +204,7 @@ const PrototypeSidebar = ({
                   <div
                     className={cn(
                       buttonVariants({
-                        variant: "ghost",
+                        variant: "fake_button",
                         size: "sm",
                       }),
                       "justify-start w-full text-[12px] h-8 px-2"
@@ -218,7 +218,7 @@ const PrototypeSidebar = ({
                   <div
                     className={cn(
                       buttonVariants({
-                        variant: "ghost",
+                        variant: "fake_button",
                         size: "sm",
                       }),
                       "justify-start w-full text-[12px] h-8 px-2"
@@ -232,7 +232,7 @@ const PrototypeSidebar = ({
                   <div
                     className={cn(
                       buttonVariants({
-                        variant: "ghost",
+                        variant: "fake_button",
                         size: "sm",
                       }),
                       "justify-start w-full text-[12px] h-8 px-2"
@@ -246,7 +246,7 @@ const PrototypeSidebar = ({
                   <div
                     className={cn(
                       buttonVariants({
-                        variant: "ghost",
+                        variant: "fake_button",
                         size: "sm",
                       }),
                       "justify-start w-full text-[11px] h-8 px-2"
