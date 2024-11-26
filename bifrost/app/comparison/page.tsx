@@ -146,6 +146,19 @@ export default function ComparisonIndexPage() {
           )}
         </div>
       </div>
+
+      {model1 && model2 && (
+        <div className="text-center mt-8">
+          <Link
+            href={`/comparison/${encodeURIComponent(
+              model1
+            )}-vs-${encodeURIComponent(model2)}`}
+            className="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold shadow-md hover:bg-blue-700 transition-colors"
+          >
+            Compare {model1} vs {model2}
+          </Link>
+        </div>
+      )}
     </div>
   );
 }
