@@ -1,4 +1,4 @@
-import { PlayIcon, SparklesIcon } from "@heroicons/react/24/outline";
+import { PlayIcon, SparklesIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { Button } from "../../../../../ui/button";
 import { useState } from "react";
 import PromptPlayground from "../../../id/promptPlayground";
@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { FlaskConicalIcon, GitForkIcon, LightbulbIcon } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ArrayDiffViewer from "../../../id/arrayDiffViewer";
+import { useExperimentTable } from "../hooks/useExperimentTable";
 
 export interface InputEntry {
   key: string;
@@ -98,16 +99,22 @@ const ExperimentTableHeader = (props: ExperimentHeaderProps) => {
   );
   const queryClient = useQueryClient();
 
-  const promptVersionIdScore = useQuery({
+  const promptVersionIdScore = useQuery<{
+    data: Record<string, { value: any; max: number; min: number }>;
+  }>({
     queryKey: ["experimentScores", experimentId, promptVersionId],
     queryFn: () => {
       const scores = queryClient.getQueryData<Record<string, any>>([
         "experimentScores",
         experimentId,
       ]);
-      return scores?.[promptVersionId ?? ""];
+      return scores?.[promptVersionId ?? ""] ?? { data: {} };
     },
   });
+
+  const { selectedScoreKey } = useExperimentTable(experimentId);
+
+  console.log("selectedScoreKey", selectedScoreKey);
 
   return (
     <Dialog open={showViewPrompt} onOpenChange={setShowViewPrompt}>
@@ -116,26 +123,101 @@ const ExperimentTableHeader = (props: ExperimentHeaderProps) => {
           className="flex flex-col gap-2 h-full overflow-y-auto p-3 cursor-pointer"
           onClick={() => setShowViewPrompt(true)}
         >
-          {promptVersionIdScore.data ? (
-            <div className="flex gap-2 flex-wrap">
-              {Object.keys(
-                (
-                  promptVersionIdScore.data as {
-                    data: Record<string, unknown>;
-                  }
-                ).data
-              ).map((key) => (
-                <div key={key}>{String(key)}</div>
-              ))}
+          <div className="flex flex-col gap-2">
+            {promptVersionIdScore.data ? (
+              <div className="flex gap-x-2 gap-y-1 flex-wrap">
+                {selectedScoreKey ? (
+                  <div
+                    className="w-full flex flex-col gap-1 py-1.5 px-2 rounded-md bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div className="flex justify-between items-center">
+                      <p className="text-[11px] font-medium text-slate-700 dark:text-slate-300 leading-tight">
+                        {(selectedScoreKey ?? "")
+                          .toString()
+                          .replace("-hcone-bool", "") ?? ""}
+                      </p>
+                      <XMarkIcon
+                        className="w-2.5 h-2.5 text-slate-500 dark:text-slate-400"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          queryClient.setQueryData(
+                            ["selectedScoreKey", experimentId],
+                            null
+                          );
+                        }}
+                      />
+                    </div>
+                    <div className="flex gap-3 items-center text-slate-500 text-[11px] leading-tight">
+                      <p>
+                        avg:{" "}
+                        {
+                          promptVersionIdScore.data?.data?.[selectedScoreKey]
+                            ?.value
+                        }
+                      </p>
+                      <p>
+                        max:{" "}
+                        {
+                          promptVersionIdScore.data?.data?.[selectedScoreKey]
+                            ?.max
+                        }
+                      </p>
+                      <p>
+                        min:{" "}
+                        {
+                          promptVersionIdScore.data?.data?.[selectedScoreKey]
+                            ?.min
+                        }
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  // <Badge
+                  //   variant="helicone"
+                  //   onClick={(e) => {
+                  //     e.stopPropagation();
+                  //     setSelectedScoreKey(null);
+                  //   }}
+                  // >
+                  //   {selectedScoreKey?.toString().replace("-hcone-bool", "") ??
+                  //     ""}
+                  //   :{" "}
+                  //   {promptVersionIdScore.data?.data?.[selectedScoreKey]?.value}
+                  // </Badge>
+                  Object.entries(
+                    (
+                      promptVersionIdScore.data as {
+                        data: Record<string, { value: any }>;
+                      }
+                    ).data
+                  ).map(([key, value]) => (
+                    <Badge
+                      variant="helicone"
+                      key={key}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        queryClient.setQueryData(
+                          ["selectedScoreKey", experimentId],
+                          key
+                        );
+                      }}
+                    >
+                      {key?.toString().replace("-hcone-bool", "") ?? ""}:{" "}
+                      {value?.value}
+                    </Badge>
+                  ))
+                )}
+              </div>
+            ) : (
+              <></>
+            )}
+            <div className="flex gap-2 items-center ml-0.5">
+              {icon(promptTemplate?.model ?? "")}
+              <span className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                {promptTemplate?.model}
+              </span>
             </div>
-          ) : (
-            <></>
-          )}
-          <div className="flex gap-2 items-center ml-0.5">
-            {icon(promptTemplate?.model ?? "")}
-            <span className="text-xs font-medium text-slate-700 dark:text-slate-300">
-              {promptTemplate?.model}
-            </span>
           </div>
           <PromptPlayground
             prompt={promptTemplate?.helicone_template ?? ""}

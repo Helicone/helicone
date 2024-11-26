@@ -19,7 +19,7 @@ import {
   useExperimentRequestData,
   useExperimentTable,
 } from "../hooks/useExperimentTable";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useJawnClient } from "../../../../../../lib/clients/jawnHook";
 
 export type HypothesisCellRef = {
@@ -58,7 +58,8 @@ export const HypothesisCellRenderer = forwardRef<
       setHypothesisRequestId(requestId ?? "");
     }, [requestId]);
 
-    const { runHypothesis, wrapText } = useExperimentTable(experimentTableId);
+    const { runHypothesis, wrapText, selectedScoreKey } =
+      useExperimentTable(experimentTableId);
 
     const { data: promptTemplate } = useQuery(
       ["promptTemplate", promptVersionId],
@@ -99,6 +100,50 @@ export const HypothesisCellRenderer = forwardRef<
         refetchOnReconnect: false,
       }
     );
+
+    const queryClient = useQueryClient();
+
+    const { data: score } = useQuery({
+      queryKey: [
+        "experimentScore",
+        experimentTableId,
+        hypothesisRequestId,
+        selectedScoreKey,
+      ],
+      queryFn: async () => {
+        if (!hypothesisRequestId || !selectedScoreKey) return null;
+
+        console.log("hey thereeeee");
+
+        const res = await jawnClient.GET(
+          "/v2/experiment/{experimentId}/{requestId}/{scoreKey}",
+          {
+            params: {
+              path: {
+                experimentId: experimentTableId,
+                requestId: hypothesisRequestId,
+                scoreKey: selectedScoreKey,
+              },
+            },
+          }
+        );
+
+        const promptVersionIdScores = queryClient.getQueryData<{
+          data: Record<string, { value: any; max: number; min: number }>;
+        }>(["experimentScores", experimentTableId, promptVersionId]);
+
+        return {
+          cellValue: res.data?.data,
+          max: promptVersionIdScores?.data?.[selectedScoreKey]?.max,
+          min: promptVersionIdScores?.data?.[selectedScoreKey]?.min,
+          avg: promptVersionIdScores?.data?.[selectedScoreKey]?.value,
+        };
+      },
+      enabled: !!hypothesisRequestId && !!selectedScoreKey,
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+      refetchOnReconnect: false,
+    });
 
     const handleCellClick = (e: React.MouseEvent) => {
       e.stopPropagation();
@@ -187,9 +232,26 @@ export const HypothesisCellRenderer = forwardRef<
                   <PlayIcon className="w-4 h-4" />
                 </Button>
                 <div
-                  className="w-full h-full items-center flex justify-start cursor-pointer py-2 px-4 text-slate-700 dark:text-slate-300"
+                  className="w-full h-full flex flex-col justify-start cursor-pointer py-2 px-4 text-slate-700 dark:text-slate-300"
                   onClick={handleCellClick}
                 >
+                  {selectedScoreKey && score && (
+                    <div className="flex items-center gap-2">
+                      <div
+                        className={clsx(
+                          "h-3 w-3 rounded-sm",
+                          score.cellValue?.value &&
+                            score.cellValue?.value > score.avg
+                            ? "bg-green-500"
+                            : "bg-red-500"
+                        )}
+                      ></div>
+                      <p className="text-[11px] font-medium text-slate-700 dark:text-slate-300">
+                        {selectedScoreKey.replace("-hcone-bool", "")}:{" "}
+                        {score.cellValue?.value}
+                      </p>
+                    </div>
+                  )}
                   <div
                     className={clsx(
                       wrapText.data
@@ -242,9 +304,26 @@ export const HypothesisCellRenderer = forwardRef<
                   <PlayIcon className="w-4 h-4" />
                 </Button>
                 <div
-                  className="w-full h-full items-center flex justify-start cursor-pointer py-2 px-4 text-slate-700 dark:text-slate-300"
+                  className="w-full h-full flex flex-col justify-start cursor-pointer py-2 px-4 text-slate-700 dark:text-slate-300"
                   onClick={handleCellClick}
                 >
+                  {selectedScoreKey && score && (
+                    <div className="flex items-center gap-2">
+                      <div
+                        className={clsx(
+                          "h-3 w-3 rounded-sm",
+                          score.cellValue?.value &&
+                            score.cellValue?.value > score.avg
+                            ? "bg-green-500"
+                            : "bg-red-500"
+                        )}
+                      ></div>
+                      <p className="text-[11px] font-medium text-slate-700 dark:text-slate-300">
+                        {selectedScoreKey.replace("-hcone-bool", "")}:{" "}
+                        {score.cellValue?.value}
+                      </p>
+                    </div>
+                  )}
                   <div
                     className={clsx(
                       wrapText.data

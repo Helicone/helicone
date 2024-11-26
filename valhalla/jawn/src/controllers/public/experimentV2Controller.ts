@@ -343,4 +343,20 @@ export class ExperimentV2Controller extends Controller {
     );
     return result;
   }
+
+  @Get("/{experimentId}/{requestId}/{scoreKey}")
+  public async getExperimentScore(
+    @Path() experimentId: string,
+    @Path() requestId: string,
+    @Path() scoreKey: string,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<ScoreV2 | null, string>> {
+    const experimentManager = new ExperimentV2Manager(request.authParams);
+    const result = await experimentManager.getExperimentRequestScore(
+      experimentId,
+      requestId,
+      scoreKey
+    );
+    return result;
+  }
 }

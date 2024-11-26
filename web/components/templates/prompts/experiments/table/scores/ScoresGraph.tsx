@@ -16,6 +16,8 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { CartesianGrid, Line, LineChart, XAxis, Legend } from "recharts";
+import { useQueryClient } from "@tanstack/react-query";
+import { useExperimentTable } from "../hooks/useExperimentTable";
 
 const ScoresGraph = ({
   promptVersions,
@@ -118,6 +120,10 @@ const ScoresGraph = ({
     });
   }, [promptVersions, scoreCriterias, scores]);
 
+  const queryClient = useQueryClient();
+
+  const { selectedScoreKey } = useExperimentTable(experimentId);
+
   return (
     <div className="w-full h-[300px] overflow-auto bg-white dark:bg-neutral-950">
       <ChartContainer config={chartConfig} className="h-full w-full">
@@ -128,6 +134,9 @@ const ScoresGraph = ({
             left: 12,
             right: 12,
             top: 20,
+          }}
+          onClick={() => {
+            queryClient.setQueryData(["selectedScoreKey", experimentId], null);
           }}
         >
           <CartesianGrid vertical={false} />
@@ -148,14 +157,31 @@ const ScoresGraph = ({
               key={score}
               dataKey={score}
               type="linear"
-              stroke={chartConfig[score].color}
+              stroke={
+                selectedScoreKey
+                  ? selectedScoreKey === score
+                    ? chartConfig[score].color
+                    : "gray"
+                  : chartConfig[score].color
+              }
+              strokeOpacity={
+                selectedScoreKey ? (selectedScoreKey === score ? 1 : 0.5) : 1
+              }
               strokeWidth={2}
               dot={{
-                fill: chartConfig[score].color,
+                fill: selectedScoreKey
+                  ? selectedScoreKey === score
+                    ? chartConfig[score].color
+                    : "gray"
+                  : chartConfig[score].color,
                 opacity: 1,
               }}
-              onClick={() => {
-                console.log("clicked", score);
+              onClick={(_e, event) => {
+                event.stopPropagation();
+                queryClient.setQueryData(
+                  ["selectedScoreKey", experimentId],
+                  score
+                );
               }}
               name={score.replace("-hcone-bool", "")}
             />

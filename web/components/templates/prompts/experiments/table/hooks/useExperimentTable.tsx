@@ -2,6 +2,7 @@ import { useOrg } from "@/components/layout/organizationContext";
 import { getJawnClient } from "../../../../../../lib/clients/jawn";
 import { placeAssetIdValues } from "../../../../../../services/lib/requestTraverseHelper";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 
 export type ExperimentTable = {
   id: string;
@@ -266,6 +267,16 @@ export const useExperimentTable = (experimentTableId: string) => {
     refetchOnWindowFocus: false,
   });
 
+  const { data: selectedScoreKey } = useQuery<string | null>({
+    queryKey: ["selectedScoreKey", experimentTableId],
+    queryFn: () => {
+      return null;
+    },
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    enabled: !!experimentTableId,
+  });
+
   return {
     experimentTableQuery,
     isExperimentTableLoading,
@@ -280,5 +291,6 @@ export const useExperimentTable = (experimentTableId: string) => {
     runHypothesis,
     addManualRow,
     wrapText,
+    selectedScoreKey,
   };
 };

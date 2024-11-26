@@ -259,6 +259,9 @@ export interface paths {
   "/v2/experiment/{experimentId}/{promptVersionId}/scores": {
     get: operations["GetExperimentPromptVersionScores"];
   };
+  "/v2/experiment/{experimentId}/{requestId}/{scoreKey}": {
+    get: operations["GetExperimentScore"];
+  };
   "/v1/evaluator": {
     post: operations["CreateEvaluator"];
   };
@@ -2235,6 +2238,10 @@ Json: JsonObject;
     ScoreV2: {
       valueType: string;
       value: number | string;
+      /** Format: double */
+      max: number;
+      /** Format: double */
+      min: number;
     };
     /** @description Construct a type with a set of properties K of type T */
     "Record_string.ScoreV2_": {
@@ -2246,6 +2253,12 @@ Json: JsonObject;
       error: null;
     };
     "Result_Record_string.ScoreV2_.string_": components["schemas"]["ResultSuccess_Record_string.ScoreV2__"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess_ScoreV2-or-null_": {
+      data: components["schemas"]["ScoreV2"] | null;
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ScoreV2-or-null.string_": components["schemas"]["ResultSuccess_ScoreV2-or-null_"] | components["schemas"]["ResultError_string_"];
     ResultSuccess_EvaluatorResult_: {
       data: components["schemas"]["EvaluatorResult"];
       /** @enum {number|null} */
@@ -4549,6 +4562,23 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_Record_string.ScoreV2_.string_"];
+        };
+      };
+    };
+  };
+  GetExperimentScore: {
+    parameters: {
+      path: {
+        experimentId: string;
+        requestId: string;
+        scoreKey: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ScoreV2-or-null.string_"];
         };
       };
     };

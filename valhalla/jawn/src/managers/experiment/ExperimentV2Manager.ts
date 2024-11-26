@@ -18,6 +18,8 @@ import { PromptVersionResult } from "../../controllers/public/promptController";
 export interface ScoreV2 {
   valueType: string;
   value: number | Date | string;
+  max: number;
+  min: number;
 }
 
 export interface ExperimentOutputForScores {
@@ -37,20 +39,30 @@ function getCustomScores(
     for (const key in record) {
       if (record.hasOwnProperty(key) && typeof record[key].value === "number") {
         if (!acc[key]) {
-          acc[key] = { sum: 0, count: 0, valueType: record[key].valueType };
+          acc[key] = {
+            sum: 0,
+            count: 0,
+            valueType: record[key].valueType,
+            max: record[key].value as number,
+            min: record[key].value as number,
+          };
         }
         acc[key].sum += record[key].value as number;
         acc[key].count += 1;
+        acc[key].max = Math.max(acc[key].max, record[key].value as number);
+        acc[key].min = Math.min(acc[key].min, record[key].value as number);
       }
     }
     return acc;
-  }, {} as Record<string, { sum: number; count: number; valueType: string }>);
+  }, {} as Record<string, { sum: number; count: number; valueType: string; max: number; min: number }>);
 
   return Object.fromEntries(
-    Object.entries(scoresValues).map(([key, { sum, count, valueType }]) => [
-      key,
-      { value: sum / count, valueType },
-    ])
+    Object.entries(scoresValues).map(
+      ([key, { sum, count, valueType, max, min }]) => [
+        key,
+        { value: sum / count, valueType, max, min },
+      ]
+    )
   );
 }
 
@@ -536,5 +548,24 @@ export class ExperimentV2Manager extends BaseManager {
     const scores = getCustomScores(scoresArray);
 
     return ok(scores);
+  }
+
+  async getExperimentRequestScore(
+    experimentId: string,
+    requestId: string,
+    scoreKey: string
+  ): Promise<Result<ScoreV2 | null, string>> {
+    const rows = await dbExecute<{ score: ScoreV2 }>(
+      `SELECT jsonb_build_object(
+          'value', sv.int_value,
+          'valueType', sa.value_type
+        ) as score
+      FROM score_value sv
+      JOIN score_attribute sa ON sa.id = sv.score_attribute
+      WHERE sv.request_id = $1 AND sa.score_key = $2`,
+      [requestId, scoreKey]
+    );
+
+    return ok(rows.data?.[0]?.score ?? null);
   }
 }

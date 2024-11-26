@@ -1,6 +1,7 @@
 import ScoresGraph from "./ScoresGraph";
 import { useExperimentScores } from "@/services/hooks/prompts/experiment-scores";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 
 export type PromptVersion = {
   id: string;
@@ -33,16 +34,31 @@ const ScoresGraphContainer = ({
     queryKey: ["experimentScores", experimentId],
     queryFn: async () => {
       const scoresData: Record<string, Record<string, any>> = {};
-      await Promise.all(
+
+      // Add signal handling to prevent query cancellation
+      const results = await Promise.all(
         promptVersions.map(async (promptVersion) => {
           if (promptVersion.id) {
-            scoresData[promptVersion.id] =
-              await fetchExperimentHypothesisScores(promptVersion.id);
+            return {
+              id: promptVersion.id,
+              data: await fetchExperimentHypothesisScores(promptVersion.id),
+            };
           }
         })
       );
+
+      // Process results after Promise.all completes
+      results.forEach((result) => {
+        if (result) {
+          scoresData[result.id] = result.data;
+        }
+      });
+
       return scoresData;
     },
+    // Add these options to prevent cancellation
+    staleTime: 0,
+    refetchOnWindowFocus: false,
     onSuccess: (data) => {
       Object.entries(data).forEach(([promptVersionId, score]) => {
         queryClient.setQueryData(
@@ -51,29 +67,11 @@ const ScoresGraphContainer = ({
         );
       });
     },
-    cacheTime: 0,
-    staleTime: 0,
-    refetchOnWindowFocus: false,
   });
 
-  // useEffect(() => {
-  // const fetchScores = async () => {
-  //   const scoresData: Record<string, Record<string, any>> = {};
-  //   await Promise.all(
-  //     promptVersions.map(async (promptVersion) => {
-  //       if (promptVersion.id) {
-  //         scoresData[promptVersion.id] =
-  //           await fetchExperimentHypothesisScores(promptVersion.id);
-  //       }
-  //     })
-  //   );
-
-  //   setScores(scoresData);
-  //   setLoading(false);
-  // };
-
-  // fetchScores();
-  // }, [promptVersions, fetchExperimentHypothesisScores]);
+  useEffect(() => {
+    refetch();
+  }, [promptVersions]);
 
   if (isLoading) {
     return <div>Loading...</div>; // Or your loading component
