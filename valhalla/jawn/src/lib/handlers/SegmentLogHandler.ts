@@ -54,21 +54,25 @@ async function sendSegmentEvent(segmentEvent: SegmentEvent) {
 }
 
 interface SegmentEvent {
-  status: number;
-  properties: Record<string, string>;
-  model: string;
-  provider: string;
-  promptTokens: number;
-  completionTokens: number;
-  latencyMs: number;
-  user: string;
-  costUSD: number; // in cents
-  countryCode: string;
-  heliconeUrl: string;
-  requestId: string;
-  timestamp: string;
+  event: "helicone-request";
+  userId: string;
   writeKey: string;
-  timeToFirstTokenMs: number;
+  properties: {
+    status: number;
+    properties: Record<string, string>;
+    model: string;
+    provider: string;
+    promptTokens: number;
+    completionTokens: number;
+    latencyMs: number;
+    costUSD: number; // in cents
+    countryCode: string;
+    heliconeUrl: string;
+    requestId: string;
+    timestamp: string;
+
+    timeToFirstTokenMs: number;
+  };
 }
 export class SegmentLogHandler extends AbstractLogHandler {
   private segmentEvents: SegmentEvent[] = [];
@@ -101,7 +105,13 @@ export class SegmentLogHandler extends AbstractLogHandler {
   public async handleResults(): PromiseGenericResult<string> {
     for (const segmentEvent of this.segmentEvents) {
       try {
-        await sendSegmentEvent(segmentEvent);
+        console.log("Sending segment event", segmentEvent);
+        const response = await sendSegmentEvent(segmentEvent);
+        if (!response.ok) {
+          console.error("Failed to send segment event", await response.text());
+        } else {
+          console.log("Successfully sent segment event", await response.text());
+        }
       } catch (error) {
         console.error(error);
       }
@@ -119,20 +129,23 @@ export class SegmentLogHandler extends AbstractLogHandler {
     const usage = context.usage;
 
     return {
-      user: request.userId,
-      requestId: request.id,
-      completionTokens: usage.completionTokens ?? 0,
-      latencyMs: response.delayMs ?? 0,
-      model: context.processedLog.model ?? "",
-      promptTokens: usage.promptTokens ?? 0,
-      timestamp: formatTimeString(request.requestCreatedAt.toISOString()),
-      status: response.status ?? 0,
-      timeToFirstTokenMs: response.timeToFirstToken ?? 0,
-      provider: request.provider ?? "",
-      countryCode: request.countryCode ?? "",
-      properties: context.processedLog.request.properties ?? {},
-      costUSD: context.usage.cost ?? 0,
-      heliconeUrl: `https://us.helicone.ai/requests?requestId=${request.id}`,
+      event: "helicone-request",
+      properties: {
+        requestId: request.id,
+        completionTokens: usage.completionTokens ?? 0,
+        latencyMs: response.delayMs ?? 0,
+        model: context.processedLog.model ?? "",
+        promptTokens: usage.promptTokens ?? 0,
+        timestamp: formatTimeString(request.requestCreatedAt.toISOString()),
+        status: response.status ?? 0,
+        timeToFirstTokenMs: response.timeToFirstToken ?? 0,
+        provider: request.provider ?? "",
+        countryCode: request.countryCode ?? "",
+        properties: context.processedLog.request.properties ?? {},
+        costUSD: context.usage.cost ?? 0,
+        heliconeUrl: `https://us.helicone.ai/requests?requestId=${request.id}`,
+      },
+      userId: request.userId,
       writeKey,
     };
   }
