@@ -46,7 +46,7 @@ const Integrations = (props: IntegrationsProps) => {
       ),
       href: "https://docs.helicone.ai/integrations/openai/javascript#openai-javascript-sdk-integration",
       integrations: {
-        "node.js": {
+        javascript: {
           language: "tsx",
           code: `import OpenAI from "openai";
 
@@ -95,12 +95,12 @@ client = OpenAI(
       ),
       href: "https://docs.helicone.ai/integrations/anthropic/javascript",
       integrations: {
-        "node.js": {
+        javascript: {
           language: "tsx",
           code: `import Anthropic from "@anthropic-ai/sdk";
 
 const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
+  apiKey: ANTHROPIC_API_KEY,
   baseURL: "https://anthropic.helicone.ai/\$\{HELICONE_API_KEY\}/\",
 });`,
         },
@@ -109,7 +109,7 @@ const anthropic = new Anthropic({
           code: `import anthropic
 
 client = anthropic.Anthropic(
-  api_key=os.environ.get("ANTHROPIC_API_KEY"),
+  api_key=ANTHROPIC_API_KEY,
   base_url="https://anthropic.helicone.ai/{HELICONE_API_KEY}/"
 )`,
         },
@@ -139,7 +139,7 @@ client = anthropic.Anthropic(
       ),
       href: "https://docs.helicone.ai/integrations/azure/javascript",
       integrations: {
-        "node.js": {
+        javascript: {
           language: "tsx",
           code: `import OpenAI from "openai";
 
@@ -258,7 +258,7 @@ self.model = AzureChatOpenAI(
         </div>
       ),
       integrations: {
-        "node.js": {
+        javascript: {
           language: "tsx",
           code: `fetch("https://openrouter.helicone.ai/api/v1/chat/completions", {
   method: "POST",
@@ -305,7 +305,7 @@ self.model = AzureChatOpenAI(
 
   const [currentProvider, setCurrentProvider] = useState("OpenAI");
 
-  const [currentIntegration, setCurrentIntregration] = useState("node.js");
+  const [currentIntegration, setCurrentIntregration] = useState("javascript");
 
   const selectedProvider = PROVIDERS.find(
     (provider) => provider.name === currentProvider
@@ -346,7 +346,7 @@ self.model = AzureChatOpenAI(
                     if (provider.name === "Gemini") {
                       setCurrentIntregration("curl");
                     } else {
-                      setCurrentIntregration("node.js");
+                      setCurrentIntregration("javascript");
                     }
                   }
                 }}

@@ -46,7 +46,7 @@ const CTA = () => {
           <div className="flex flex-wrap gap-x-3 gap-y-1 items-center justify-center ">
             <div
               className={cn(
-                "bg-[#E7F6FD] border-2 border-brand rounded-xl py-2 px-7 text-brand transition-transform duration-1000",
+                "bg-[#E7F6FD] border-[3px] border-brand rounded-xl py-4 px-7 text-brand transition-transform duration-1000",
                 "rotate-[-3deg]"
               )}
             >
@@ -59,7 +59,7 @@ const CTA = () => {
         <Link href="https://us.helicone.ai/signup" className="z-[10]">
           <Button
             size="lg"
-            className="text-base md:text-[40px] py-[10px] md:py-12 px-4 md:px-6 bg-brand hover:bg-brand/90 text-white font-normal rounded-lg md:rounded-2xl z-[10]"
+            className="text-base md:text-[40px] py-[18px] md:py-12 px-4 md:px-12 bg-brand hover:bg-brand/90 text-white font-normal rounded-lg md:rounded-2xl z-[10]"
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
           >
@@ -98,9 +98,9 @@ const CTA = () => {
       <LogoBox
         imgSrc="/static/home/gemini.webp"
         className={cn(
-          "w-[178px] h-[178px] 2xl:w-[220px] 2xl:h-[220px] absolute bottom-28 left-4 rotate-[-27deg] transition-all duration-1000",
+          "w-[135px] h-[135px] 2xl:w-[220px] 2xl:h-[220px] absolute 2xl:bottom-44 bottom-28 left-4 rotate-[-27deg] transition-all duration-1000",
           isHovered &&
-            "w-[160px] h-[160px] 2xl:w-[200px] 2xl:h-[200px] left-1/2 translate-x-[-380px] 2xl:translate-x-[-600px] bottom-16 rotate-[-27deg]"
+            "w-[150px] h-[150px] 2xl:w-[200px] 2xl:h-[200px] left-1/2 translate-x-[-380px] 2xl:translate-x-[-600px] bottom-16 rotate-[-27deg]"
         )}
         innerClassName="bg-white"
       />
@@ -108,9 +108,9 @@ const CTA = () => {
       <LogoBox
         imgSrc="/static/home/logo2.webp"
         className={cn(
-          "w-[140px] h-[140px] 2xl:w-[180px] 2xl:h-[180px] absolute top-1/3 left-44 2xl:left-56 transition-all duration-1000",
+          "w-[115px] h-[115px] 2xl:w-[180px] 2xl:h-[180px] absolute top-1/3 left-44 2xl:left-56 transition-all duration-1000",
           isHovered &&
-            "!left-1/2 translate-x-[-450px] 2xl:translate-x-[-550px] translate-y-[50px] rotate-[17deg]"
+            "!left-1/2 translate-x-[-450px] 2xl:translate-x-[-500px] translate-y-[50px] rotate-[36deg]"
         )}
       />
 
@@ -127,8 +127,9 @@ const CTA = () => {
       <LogoBox
         imgSrc="/static/home/chatgpt.webp"
         className={cn(
-          "w-[194px] h-[194px] 2xl:w-[240px] 2xl:h-[240px] absolute top-0 left-36 2xl:left-48 transition-all duration-1000",
-          isHovered && "!left-1/2 translate-x-[-470px] top-10 rotate-[-45deg]"
+          "w-[170px] h-[170px] 2xl:w-[240px] 2xl:h-[240px] absolute top-0 left-36 2xl:left-48 2xl:p-4 transition-all duration-1000 rounded-[1.9rem] p-3.5",
+          isHovered &&
+            "!left-1/2 translate-x-[-470px] top-10 2xl:p-4 rotate-[-45deg]"
         )}
         innerClassName="bg-[#0FA37F] rounded-3xl"
       />
@@ -136,8 +137,9 @@ const CTA = () => {
       <LogoBox
         imgSrc="/static/home/togetherai.webp"
         className={cn(
-          "w-[142px] h-[142px] 2xl:w-[180px] 2xl:h-[180px] absolute top-0 right-4 rotate-[40deg] transition-all duration-1000",
-          isHovered && "right-1/2 translate-x-[400px] rotate-[-3deg]"
+          "w-[132px] h-[132px] 2xl:w-[180px] 2xl:h-[180px] absolute top-0 right-4 rotate-[40deg] transition-all duration-1000",
+          isHovered &&
+            "right-1/2 translate-x-[400px] 2xl:translate-y-[70px] rotate-[-30deg]"
         )}
         innerClassName="rounded-3xl"
       />
@@ -145,9 +147,9 @@ const CTA = () => {
       <LogoBox
         imgSrc="/static/home/anthropic.webp"
         className={cn(
-          "w-[176px] h-[176px] 2xl:w-[220px] 2xl:h-[220px] absolute bottom-40 right-20 2xl:translate-x-[50px] translate-x-[50px] rotate-[15deg] transition-all duration-1000",
+          "w-[150px] h-[150px] 2xl:w-[220px] 2xl:h-[220px] absolute bottom-24 right-20 2xl:translate-x-[50px] translate-x-[50px] rotate-[15deg] transition-all duration-1000",
           isHovered &&
-            "bottom-20 right-1/2 translate-x-[400px] 2xl:translate-x-[560px] rotate-[28deg]"
+            "bottom-20 right-1/2 translate-x-[400px] 2xl:translate-x-[600px] 2xl:translate-y-[-100px] rotate-[40deg]"
         )}
         innerClassName="bg-white p-4"
       />
@@ -155,9 +157,9 @@ const CTA = () => {
       <LogoBox
         imgSrc="/static/home/groq.svg"
         className={cn(
-          "w-[135px] h-[135px] 2xl:w-[160px] 2xl:h-[160px] absolute top-1/3 right-56 rotate-[43deg] transition-all duration-1000",
+          "w-[120px] h-[120px] 2xl:w-[160px] 2xl:h-[160px] absolute top-1/3 2xl:top-1/2 right-56 rotate-[43deg] transition-all duration-1000",
           isHovered &&
-            "right-1/2 translate-x-[400px] 2xl:translate-x-[500px] translate-y-[-30px] rotate-[15deg]"
+            "right-1/2 translate-x-[400px] 2xl:translate-x-[500px] translate-y-[-60px] 2xl:translate-y-[-110px] rotate-[15deg]"
         )}
         innerClassName="bg-white p-2"
       />
@@ -165,8 +167,9 @@ const CTA = () => {
       <LogoBox
         imgSrc="/static/home/logo3.webp"
         className={cn(
-          "w-28 h-28 2xl:w-32 2xl:h-32 absolute top-10 right-56 rotate-[-16deg] transition-all duration-1000",
-          isHovered && "top-6 right-1/2 translate-x-[200px] rotate-[-76deg]"
+          "w-28 h-28 2xl:w-40 2xl:h-40 absolute top-10 2xl:top-40 right-56 rotate-[-16deg] transition-all duration-1000",
+          isHovered &&
+            "top-6 right-1/2 translate-x-[200px] rotate-[-76deg] 2xl:w-36 2xl:h-36"
         )}
         innerClassName="bg-white p-2"
       />
@@ -175,7 +178,8 @@ const CTA = () => {
         imgSrc="/static/home/logo4.webp"
         className={cn(
           "w-28 h-28 2xl:w-32 2xl:h-32 absolute top-1/4 right-10 transition-all duration-1000",
-          isHovered && "right-1/2 translate-x-[550px] top-1/2 rotate-[-45deg]"
+          isHovered &&
+            "right-1/2 translate-x-[550px] top-1/2 2xl:top-1/4 rotate-[-45deg]"
         )}
       />
     </div>

@@ -12,22 +12,24 @@ const Quote3 = () => {
             <span className="text-black">
               excellent observability platform!
             </span>{" "}
-            . I pretty much use it for all my AI apps now.
+            I pretty much use it for all my AI apps now.
           </h2>
-          <div className="flex flex-col gap-3">
-            <img src="/static/togetherai.webp" alt="qawolf" className="w-36" />
-            <div className="flex items-center gap-6">
+          <div className="flex items-end gap-6">
+            <img
+              src="/static/home/hassan.webp"
+              alt="Hassan El Mghari"
+              className="w-12 h-12"
+            />
+            <div className="flex flex-col gap-2">
               <img
-                src="/static/home/hassan.webp"
-                alt="Hassan El Mghari"
-                className="w-12 h-12"
+                src="/static/togetherai.webp"
+                alt="qawolf"
+                className="w-24 pb-2"
               />
-              <div className="flex flex-col gap-1">
-                <h4 className="text-[13px] sm:text-xl font-medium">
-                  Hassan El Mghari
-                </h4>
-                <p className="text-[11px] sm:text-lg">Devrel Lead</p>
-              </div>
+              <h4 className="text-[13px] sm:text-xl font-medium whitespace-nowrap">
+                Hassan El Mghari
+              </h4>
+              <p className="text-[11px] sm:text-lg w-auto">DevRel Lead</p>
             </div>
           </div>
         </div>
