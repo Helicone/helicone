@@ -100,13 +100,9 @@ client = OpenAI(
           code: `import Anthropic from "@anthropic-ai/sdk";
 
 const anthropic = new Anthropic({
-  baseURL: "https://anthropic.helicone.ai/",
   apiKey: process.env.ANTHROPIC_API_KEY,
-  defaultHeaders: {
-    "Helicone-Auth": <HELICONE_API_KEY>,
-  },
-});
-`,
+  baseURL: "https://anthropic.helicone.ai/\$\{HELICONE_API_KEY\}/\",
+});`,
         },
         python: {
           language: "python",
@@ -114,12 +110,8 @@ const anthropic = new Anthropic({
 
 client = anthropic.Anthropic(
   api_key=os.environ.get("ANTHROPIC_API_KEY"),
-  base_url="https://anthropic.helicone.ai"
-  defaultHeaders={
-    "Helicone-Auth": <HELICONE_API_KEY>,
-  },
-)
-`,
+  base_url="https://anthropic.helicone.ai/{HELICONE_API_KEY}/"
+)`,
         },
         langchain: {
           language: "python",
@@ -127,13 +119,9 @@ client = anthropic.Anthropic(
   modelName: "claude-2",
   anthropicApiKey: "ANTHROPIC_API_KEY",
   clientOptions: {
-    baseURL: "https://anthropic.helicone.ai/",
-    defaultHeaders: {
-      "Helicone-Auth": Bearer <HELICONE_API_KEY>,
-    },
+    baseURL: "https://anthropic.helicone.ai/{HELICONE_API_KEY}/",
   },
-});
-`,
+});`,
         },
       },
     },
@@ -327,8 +315,8 @@ self.model = AzureChatOpenAI(
 
   return (
     <div className={cn(ISLAND_WIDTH, "py-16 md:py-32 flex flex-col gap-8")}>
-      <div className="flex flex-col lg:flex-row gap-y-8 justify-between items-start">
-        <div className="flex bg-blue-200 flex-col items-start gap-3 w-full">
+      <div className="flex flex-col lgxl:flex-row gap-4 justify-between items-start">
+        <div className="flex flex-col items-start gap-3 w-auto">
           <h2 className="text-3xl sm:text-5xl font-semibold text-black">
             Get integrated in <span className="text-brand">seconds</span>
           </h2>
@@ -336,8 +324,8 @@ self.model = AzureChatOpenAI(
             Use any model and monitor applications at any scale.{" "}
           </p>
         </div>
-        <div className="flex flex-col items-center gap-1">
-          <div className="flex flex-wrap">
+        <div className="flex flex-col gap-1 w-full lgxl:w-auto lg:items-center">
+          <div className="flex flex-wrap w-full lg:w-11/12 lgxl:w-full justify-start sm:justify-evenly lgxl:justify-start">
             {PROVIDERS.map((provider) => (
               <div
                 key={provider.name}
@@ -372,9 +360,9 @@ self.model = AzureChatOpenAI(
           <Link
             href="https://docs.helicone.ai/getting-started/quick-start"
             target="_blank"
-            className="text-sm text-landing-secondary flex gap-1 items-center"
+            className="text-md flex w-full justify-end items-center gap-1"
           >
-            Other providers? See docs <ArrowUpRightIcon className="h-3 w-3" />
+            Other providers? See docs <ArrowUpRightIcon className="h-4 w-4" />
           </Link>
         </div>
       </div>
