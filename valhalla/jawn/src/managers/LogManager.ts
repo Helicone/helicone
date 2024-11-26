@@ -145,6 +145,7 @@ export class LogManager {
 
     await this.logPosthogEvents(posthogHandler, batchContext);
     await this.logLytixEvents(lytixHandler, batchContext);
+    await this.logSegmentEvents(segmentHandler, batchContext);
     await this.logWebhooks(webhookHandler, batchContext);
     console.log(`Finished processing batch ${batchContext.batchId}`);
   }
@@ -280,6 +281,29 @@ export class LogManager {
       methodName: "handleResults",
       messageCount: batchContext.messageCount,
       message: "Lytix events",
+    });
+  }
+
+  private async logSegmentEvents(
+    handler: SegmentLogHandler,
+    batchContext: {
+      batchId: string;
+      partition: number;
+      lastOffset: string;
+      messageCount: number;
+    }
+  ): Promise<void> {
+    const start = performance.now();
+    await handler.handleResults();
+    const end = performance.now();
+    const executionTimeMs = end - start;
+
+    dataDogClient.logHandleResults({
+      executionTimeMs,
+      handlerName: handler.constructor.name,
+      methodName: "handleResults",
+      messageCount: batchContext.messageCount,
+      message: "Segment events",
     });
   }
 

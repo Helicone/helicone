@@ -13,17 +13,25 @@ interface SegmentConfigProps {
 
 const getExampleEvent = () => {
   return {
-    requestId: "00000000-0000-0000-0000-000000000000",
-    event: "test-event",
-    timestamp: new Date().toISOString(),
-    latencyMs: 100,
     properties: {
-      environment: "production",
+      status: 200,
+      properties: {},
+      model: "gpt-4o",
+      provider: "openai",
+      promptTokens: 100,
+      completionTokens: 100,
+      latencyMs: 100,
+      user: "test-user",
+      costUSD: 100,
+      countryCode: "US",
+      heliconeUrl:
+        "https://us.helicone.ai/requests?requestId=00000000-0000-0000-0000-000000000000",
+      requestId: "00000000-0000-0000-0000-000000000000",
+      timestamp: new Date().toISOString(),
+      timeToFirstTokenMs: 100,
     },
     userId: "1234567890",
-    sessionId: "1234567890",
-    heliconeUrl:
-      "https://us.helicone.ai/requests?requestId=00000000-0000-0000-0000-000000000000",
+    event: "test-event",
   };
 };
 
@@ -42,14 +50,7 @@ const SegmentConfig: React.FC<SegmentConfigProps> = ({ onClose }) => {
 
   useEffect(() => {
     if (existingKey?.provider_key) setApiKey(existingKey.provider_key);
-    if (integration?.settings?.autoDatasetSync !== undefined) {
-      setAutoDatasetSync(integration.settings?.autoDatasetSync as boolean);
-    }
   }, [existingKey, integration]);
-
-  const handleAutoDatasetSyncChange = (checked: boolean) => {
-    setAutoDatasetSync(checked);
-  };
 
   const isSaving = isSavingKey || isUpdatingIntegration;
   const isLoading = isLoadingVault || isLoadingIntegration;
@@ -67,6 +68,11 @@ const SegmentConfig: React.FC<SegmentConfigProps> = ({ onClose }) => {
       body: JSON.stringify({
         writeKey: apiKey,
         ...getExampleEvent(),
+        // event: "test-event",
+        // properties: {
+        //   test: "test",
+        // },
+        // userId: "1234567890",
       }),
     })
       .then((res) => res.json())
@@ -123,7 +129,13 @@ const SegmentConfig: React.FC<SegmentConfigProps> = ({ onClose }) => {
         <Button variant="outline" onClick={handleTestEvent}>
           Test event
         </Button>
-        <Button onClick={onClose} disabled={isSaving || isLoading}>
+        <Button
+          onClick={() => {
+            saveKey(apiKey);
+            onClose();
+          }}
+          disabled={isSaving || isLoading}
+        >
           {isSaving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
           Save Configuration
         </Button>
