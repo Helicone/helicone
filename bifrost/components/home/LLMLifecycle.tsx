@@ -2407,14 +2407,27 @@ const LLMLifecycle = () => {
           "py-16 md:py-36 grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-16 relative z-10"
         )}
       >
-        <div className="flex flex-col flex-1 gap-6">
-          <h2 className="text-4xl sm:text-5xl font-semibold text-black max-w-[520px] text-wrap sm:leading-[57.6px]">
-            Designed for the{" "}
-            <span className="text-brand">entire LLM lifecycle</span>
-          </h2>
-          <p className="text-lg sm:text-xl max-w-[400px] leading-relaxed text-wrap">
-            The CI workflow to take your LLM application from MVP to production,
-            and from production to perfection.
+        <div className="flex flex-col h-full justify-between">
+          <div className="flex flex-col flex-1 gap-6">
+            <h2 className="text-4xl sm:text-5xl font-semibold text-black max-w-[520px] text-wrap sm:leading-[57.6px]">
+              Designed for the{" "}
+              <span className="text-brand">entire LLM lifecycle</span>
+            </h2>
+            <p className="text-lg sm:text-xl max-w-[400px] leading-relaxed text-wrap">
+              The CI workflow to take your LLM application from MVP to
+              production, and from production to perfection.
+            </p>
+          </div>
+          <p className="items-center text-xs max-w-[300px] gap-2 text-slate-300 self-start text-wrap">
+            Adapted from an illustration by GeeTest and YorKun 右可, licensed
+            under{" "}
+            <a
+              href="https://creativecommons.org/licenses/by/4.0/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              CC BY 4.0.
+            </a>
           </p>
         </div>
         <SVG />

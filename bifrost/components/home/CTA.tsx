@@ -7,6 +7,7 @@ import LogoBox from "./LogoBox";
 import { useState } from "react";
 import { ISLAND_WIDTH } from "@/lib/utils";
 import Image from "next/image";
+import { ChevronRight as ChevronRightIcon } from "lucide-react";
 
 const CTA = () => {
   const [isHovered, setIsHovered] = useState(false);
@@ -46,7 +47,7 @@ const CTA = () => {
           <div className="flex flex-wrap gap-x-3 gap-y-1 items-center justify-center ">
             <div
               className={cn(
-                "bg-[#E7F6FD] border-[3px] border-brand rounded-xl py-4 px-7 text-brand transition-transform duration-1000",
+                "bg-[#E7F6FD] border-[3px] border-brand rounded-xl py-2 xl:py-4 px-7 text-brand transition-transform duration-1000",
                 "rotate-[-3deg]"
               )}
             >
@@ -59,11 +60,17 @@ const CTA = () => {
         <Link href="https://us.helicone.ai/signup" className="z-[10]">
           <Button
             size="lg"
-            className="text-base md:text-[40px] py-[18px] md:py-12 px-4 md:px-12 bg-brand hover:bg-brand/90 text-white font-normal rounded-lg md:rounded-2xl z-[10]"
+            className="lgxl:gap-8 text-base md:text-[40px] py-[18px] md:py-12 px-4 md:px-12 bg-brand hover:bg-brand/100 text-white font-normal rounded-lg md:rounded-2xl z-[10]"
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
           >
             Try Helicone for free
+            {isHovered && (
+              <ChevronRightIcon
+                className="w-12 sm:w-5 h-12 sm:h-5"
+                strokeWidth={3}
+              />
+            )}
           </Button>
         </Link>
       </div>
@@ -137,7 +144,7 @@ const CTA = () => {
       <LogoBox
         imgSrc="/static/home/togetherai.webp"
         className={cn(
-          "w-[132px] h-[132px] 2xl:w-[180px] 2xl:h-[180px] absolute top-0 right-4 rotate-[40deg] transition-all duration-1000",
+          "w-[124px] h-[124px] 2xl:w-[180px] 2xl:h-[180px] absolute top-0 right-4 rotate-[40deg] transition-all duration-1000",
           isHovered &&
             "right-1/2 translate-x-[400px] 2xl:translate-y-[70px] rotate-[-30deg]"
         )}
@@ -159,7 +166,7 @@ const CTA = () => {
         className={cn(
           "w-[120px] h-[120px] 2xl:w-[160px] 2xl:h-[160px] absolute top-1/3 2xl:top-1/2 right-56 rotate-[43deg] transition-all duration-1000",
           isHovered &&
-            "right-1/2 translate-x-[400px] 2xl:translate-x-[500px] translate-y-[-60px] 2xl:translate-y-[-110px] rotate-[15deg]"
+            "right-1/2 translate-x-[400px] 2xl:translate-x-[500px] translate-y-[-40px] 2xl:translate-y-[-110px] rotate-[15deg]"
         )}
         innerClassName="bg-white p-2"
       />
@@ -169,7 +176,7 @@ const CTA = () => {
         className={cn(
           "w-28 h-28 2xl:w-40 2xl:h-40 absolute top-10 2xl:top-40 right-56 rotate-[-16deg] transition-all duration-1000",
           isHovered &&
-            "top-6 right-1/2 translate-x-[200px] rotate-[-76deg] 2xl:w-36 2xl:h-36"
+            "top-6 right-1/2 translate-x-[180px] translate-y-[-30px] rotate-[-76deg] 2xl:w-36 2xl:h-36"
         )}
         innerClassName="bg-white p-2"
       />

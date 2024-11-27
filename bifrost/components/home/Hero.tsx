@@ -46,48 +46,48 @@ const Hero = () => {
 
       <LogoBox
         imgSrc="/static/home/gemini.webp"
-        className="w-24 h-24 2xl:w-28 2xl:h-28 absolute top-20 right-1/3 2xl:translate-x-[-200px] translate-x-[-100px] rotate-[-15deg]"
+        className="w-24 h-24 2xl:w-28 2xl:h-28 absolute top-20 right-1/3 2xl:translate-x-[-200px] translate-x-[-100px] translate-y-[-60px] 2xl:translate-y-0 rotate-[-15deg]"
         innerClassName="bg-white"
       />
 
       <LogoBox
         imgSrc="/static/home/logo2.webp"
-        className="w-[140px] h-[140px] 2xl:w-[180px] 2xl:h-[180px] absolute top-40 right-1/3 2xl:translate-x-[50px] translate-x-[80px] rotate-[13deg]"
+        className="w-[120px] h-[120px] 2xl:w-[180px] 2xl:h-[180px] absolute top-40 right-1/3 2xl:translate-x-[50px] translate-x-[80px] rotate-[13deg]"
       />
 
       <LogoBox
         imgSrc="/static/home/chatgpt.webp"
-        className="w-[140px] h-[140px] 2xl:w-[180px] 2xl:h-[180px] absolute top-16 right-1/4 2xl:translate-x-[150px] translate-x-[150px] rotate-[15deg]"
+        className="w-[160px] h-[160px] 2xl:w-[180px] 2xl:h-[180px] absolute top-16 right-1/4 2xl:translate-x-[150px] translate-x-[140px] 2xl:translate-y-0 translate-y-[-20px] rotate-[15deg]"
         innerClassName="bg-[#0FA37F] rounded-3xl"
       />
       <LogoBox
         imgSrc="/static/home/togetherai.webp"
-        className="w-[120px] h-[120px] 2xl:w-[160px] 2xl:h-[160px] absolute top-12 right-0 2xl:-translate-x-[100px] -translate-x-[40px] rotate-[6deg]"
+        className="w-[110px] h-[110px] 2xl:w-[160px] 2xl:h-[160px] absolute top-12 right-0 2xl:-translate-x-[100px] -translate-x-[10px] rotate-[6deg]"
         innerClassName="rounded-3xl"
       />
       <LogoBox
         imgSrc="/static/home/anthropic.webp"
-        className="w-[150px] h-[150px] 2xl:w-[190px] 2xl:h-[190px] absolute bottom-20 right-1/3 2xl:translate-x-[50px] translate-x-[50px] rotate-[13deg]"
+        className="w-[150px] h-[150px] 2xl:w-[190px] 2xl:h-[190px] absolute bottom-20 right-1/3 2xl:translate-x-[50px] translate-x-[50px] 2xl:translate-y-0 translate-y-[50px] rotate-[13deg]"
         innerClassName="bg-white p-4"
       />
       <LogoBox
         imgSrc="/static/home/mistral.webp"
-        className="w-24 h-24 2xl:w-28 2xl:h-28 absolute bottom-1/3 right-1/4 2xl:translate-x-[100px] translate-x-[100px] -rotate-[15deg]"
+        className="w-24 h-24 2xl:w-36 2xl:h-36 absolute bottom-1/3 right-1/4 2xl:translate-x-[100px] translate-x-[100px] -rotate-[15deg]"
         innerClassName="bg-white p-2"
       />
       <LogoBox
         imgSrc="/static/home/groq.svg"
-        className="w-[120px] h-[120px] 2xl:w-[160px] 2xl:h-[160px] absolute top-1/2 2xl:-translate-y-[100px] -translate-y-[50px] right-0 2xl:-translate-x-[150px] -translate-x-[80px] rotate-[27deg]"
+        className="w-[120px] h-[120px] 2xl:w-[160px] 2xl:h-[160px] absolute top-1/2 2xl:-translate-y-[100px] -translate-y-[50px] right-0 2xl:-translate-x-[150px] -translate-x-[40px] rotate-[27deg]"
         innerClassName="bg-white p-2"
       />
       <LogoBox
         imgSrc="/static/home/logo3.webp"
-        className="w-28 h-28 2xl:w-32 2xl:h-32 absolute bottom-0 right-1/4 2xl:translate-x-[100px] translate-x-[180px] rotate-[-32deg]"
+        className="w-28 h-28 2xl:w-32 2xl:h-32 absolute bottom-0 right-1/4 2xl:translate-x-[100px] translate-x-[150px] rotate-[-32deg]"
         innerClassName="bg-white p-2"
       />
       <LogoBox
         imgSrc="/static/home/logo4.webp"
-        className="w-20 h-20 2xl:w-24 2xl:h-24 absolute bottom-24 right-0 2xl:-translate-x-[150px] -translate-x-[60px] rotate-[-15deg]"
+        className="w-20 h-20 2xl:w-28 2xl:h-28 absolute bottom-28 right-0 2xl:-translate-x-[150px] -translate-x-[20px]  2xl:translate-y-0 translate-y-[100px] rotate-[-15deg]"
       />
     </div>
   );
