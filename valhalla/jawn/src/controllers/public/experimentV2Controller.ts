@@ -330,6 +330,16 @@ export class ExperimentV2Controller extends Controller {
     return result;
   }
 
+  @Get("/{experimentId}/should-run-evaluators")
+  public async shouldRunEvaluators(
+    @Path() experimentId: string,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<boolean, string>> {
+    const evaluatorManager = new EvaluatorManager(request.authParams);
+    const result = await evaluatorManager.shouldRunEvaluators(experimentId);
+    return result;
+  }
+
   @Get("/{experimentId}/{promptVersionId}/scores")
   public async getExperimentPromptVersionScores(
     @Path() experimentId: string,

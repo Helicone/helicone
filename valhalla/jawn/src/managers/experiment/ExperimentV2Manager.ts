@@ -534,7 +534,11 @@ export class ExperimentV2Manager extends BaseManager {
         ) 
       FROM score_value sv
       JOIN score_attribute sa ON sa.id = sv.score_attribute
+      JOIN evaluator_experiments_v3 ee ON ee.experiment = $1
+      JOIN evaluator e ON e.id = ee.evaluator
       WHERE sv.request_id = eo.request_id
+      AND sa.score_key = REGEXP_REPLACE(LOWER(REPLACE(e.name, ' ', '_')), '[^a-z0-9]+', '_', 'g') || 
+          CASE WHEN sa.value_type = 'boolean' THEN '-hcone-bool' ELSE '' END
       ), '{}'::jsonb) as scores
     FROM experiment_output eo
     WHERE eo.experiment_id = $1

@@ -155,10 +155,6 @@ export class EvaluatorManager extends BaseManager {
 
     const x = await Promise.all(
       experimentData.data?.map(async (request) => {
-        console.log(
-          "we have the following evaluators",
-          evaluators.data?.map((e) => e.name)
-        );
         const evaluationPromises = [];
         for (const evaluator of evaluators.data ?? []) {
           const scoreName = getEvaluatorScoreName(evaluator.name);
@@ -183,6 +179,43 @@ export class EvaluatorManager extends BaseManager {
     );
 
     return ok(null);
+  }
+
+  async shouldRunEvaluators(
+    experimentId: string
+  ): Promise<Result<boolean, string>> {
+    const experimentManager = new ExperimentV2Manager(this.authParams);
+    const experiment = await experimentManager.hasAccessToExperiment(
+      experimentId
+    );
+    if (!experiment) {
+      return err("Unauthorized");
+    }
+
+    const evaluators = await this.getEvaluatorsForExperiment(experimentId);
+
+    const experimentData = await experimentManager.getExperimentOutputForScores(
+      experimentId
+    );
+
+    if (experimentData.error) {
+      return err(experimentData.error);
+    }
+
+    if (experimentData.data?.length === 0) {
+      return ok(false);
+    }
+
+    let shouldRun = false;
+    for (const request of experimentData.data ?? []) {
+      for (const evaluator of evaluators.data ?? []) {
+        const scoreName = getEvaluatorScoreName(evaluator.name);
+        if (!(request.scores && scoreName in request.scores)) {
+          shouldRun = true;
+        }
+      }
+    }
+    return ok(shouldRun);
   }
 
   async deleteExperimentEvaluator(
