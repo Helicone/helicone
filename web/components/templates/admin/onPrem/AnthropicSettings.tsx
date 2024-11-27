@@ -56,7 +56,9 @@ export const AnthropicSettings = () => {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="apiKey">API Key</Label>
+                <Label htmlFor="apiKey">
+                  API Key (For playground + experiments)
+                </Label>
                 <Button
                   variant="outline"
                   size="sm"

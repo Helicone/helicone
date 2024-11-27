@@ -1,8 +1,7 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AnthropicSettings } from "./AnthropicSettings";
 import { AzureSettings } from "./AzureSettings";
 import { OpenAISettings } from "./OpenAISettings";
-import { AnthropicSettings } from "./AnthropicSettings";
 interface AdminOnPremPageProps {}
 
 export interface AzureExperiment {

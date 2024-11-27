@@ -88,7 +88,7 @@ export const AzureSettings = () => {
       <div className="flex flex-col space-y-8 max-w-4xl">
         <Card className="bg-slate-200">
           <CardHeader>
-            <CardTitle>Azure Settings</CardTitle>
+            <CardTitle>Azure Settings (For experiments)</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
