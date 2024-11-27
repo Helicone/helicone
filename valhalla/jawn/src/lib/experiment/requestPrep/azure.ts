@@ -22,7 +22,7 @@ export async function prepareRequestAzure(
     "Helicone-OpenAI-API-Base": azureBaseUrl,
     "api-key": azureAPIKey,
     Accept: "application/json",
-    "Accept-Encoding": "",
+    "Accept-Encoding": "none",
     "Helicone-Manual-Access-Key": process.env.HELICONE_MANUAL_ACCESS_KEY ?? "",
   };
 

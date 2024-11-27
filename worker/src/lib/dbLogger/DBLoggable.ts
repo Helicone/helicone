@@ -325,6 +325,7 @@ export class DBLoggable {
         return ok(JSON.parse(result));
       }
     } catch (e) {
+      console.log("result", result);
       console.log("Error parsing response 1", e);
       return {
         data: null,

@@ -19,7 +19,7 @@ function prepareRequestAzure(
     Authorization: `Bearer ${OPENAI_KEY}`,
     "Helicone-Auth": `Bearer ${apiKey}`,
     Accept: "application/json",
-    "Accept-Encoding": "",
+    "Accept-Encoding": "none",
     "Helicone-Manual-Access-Key": process.env.HELICONE_MANUAL_ACCESS_KEY ?? "",
   };
 
@@ -56,7 +56,7 @@ function prepareRequestAnthropic(
     Authorization: `Bearer ${process.env.ANTHROPIC_API_KEY}`,
     "Helicone-Auth": `Bearer ${apiKey}`,
     Accept: "application/json",
-    "Accept-Encoding": "",
+    "Accept-Encoding": "none",
     "Helicone-Manual-Access-Key": process.env.HELICONE_MANUAL_ACCESS_KEY ?? "",
   };
 

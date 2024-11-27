@@ -115,10 +115,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     }
   }, [tools, requestId]);
 
-  const [newPlaygroundOpen, setNewPlaygroundOpen] = useLocalStorage<boolean>(
-    "newPlaygroundOpen",
-    false
-  );
+  const [newPlaygroundOpen, setNewPlaygroundOpen] = useState<boolean>(false);
   const runtime = usePlaygroundRuntime({
     api: "/api/aui", // TODO update this
     initialMessages: requestOptionsFromOpenAI({

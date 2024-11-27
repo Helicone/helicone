@@ -39,6 +39,7 @@ export async function handleProxyRequest(
 
   const requestStartTime = new Date();
   const callProps = callPropsFromProxyRequest(proxyRequest);
+  console.log("callProps", callProps);
   const response = await (retryOptions
     ? callProviderWithRetry(callProps, retryOptions)
     : callProvider(callProps));
