@@ -30,9 +30,9 @@ const Hero = () => {
       <h1 className="text-5xl sm:text-7xl md:text-[84px] font-semibold mb-3 w-full max-w-3xl text-wrap text-black z-[10]">
         Ship your AI app with <span className="text-brand">confidence</span>
       </h1>
-      <p className="text-lg sm:text-xl 2xl:text-2xl text-landing-secondary font-light mb-6 lg:mb-12 z-[10]">
-        The all-in-one platform to monitor, debug and improve <br />
-        production-ready LLM applications.
+      <p className="text-lg sm:text-xl 2xl:text-2xl text-landing-secondary font-light mb-6 lg:mb-12 z-[10] max-w-xl">
+        The all-in-one platform to monitor, debug and improve production-ready
+        LLM applications.
       </p>
       <Link href="https://us.helicone.ai/signup">
         <button className="bg-brand py-3 px-6 lg:py-[18px] lg:px-9 text-base lg:text-[22px] 2xl:text-[26px] font-normal flex gap-3 rounded-lg text-white self-start items-center z-[10]">

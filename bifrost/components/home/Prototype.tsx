@@ -32,9 +32,9 @@ const Prototype = () => {
   >("dashboard");
 
   return (
-    <div className=" bg-gradient-to-b from-white from-50% via-[#f2f9fc80] via-[61%] to-[#f2f9fc]">
+    <div className="bg-gradient-to-b from-white from-50% via-[#f2f9fc80] via-[61%] to-[#f2f9fc]">
       <div className={cn(ISLAND_WIDTH, "py-12")}>
-        <div className="bg-white rounded-[20px] p-1 lg:p-3 border border-[#D1D5DC] aspect-[2/1] shadow-md">
+        <div className="bg-white rounded-2xl p-1 lg:p-3 border border-[#D1D5DC] aspect-[2/1] shadow-md">
           <div className="hidden lg:grid w-full h-full bg-[#f8fafc] border border-[#f0f0f0] rounded-xl grid-cols-6">
             <PrototypeSidebar
               openedPage={openedPage}
