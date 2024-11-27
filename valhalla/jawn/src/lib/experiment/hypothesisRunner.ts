@@ -33,7 +33,7 @@ async function runWithRetry(
   } = props;
   const response = await fetch(url, {
     method: "POST",
-    headers: { ...headers },
+    headers: headers,
     body: JSON.stringify(body),
   });
 
