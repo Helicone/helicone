@@ -59,14 +59,15 @@ const NavItem: React.FC<NavItemProps> = ({
                 size: "icon",
               }),
               "h-9 w-9",
-              link.current && "bg-accent hover:bg-accent"
+              link.current &&
+                "bg-slate-100 dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900"
             )}
           >
             {link.icon && (
               <link.icon
                 className={cn(
-                  "h-4 w-4",
-                  link.current && "text-accent-foreground"
+                  "h-4 w-4 text-slate-500",
+                  link.current && "text-slate-800 dark:text-slate-200"
                 )}
               />
             )}
@@ -159,7 +160,7 @@ const NavItem: React.FC<NavItemProps> = ({
           <span className="border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 py-0.5 px-1 rounded-sm">
             g
           </span>{" "}
-          then{" "}
+          <span className="text-[10px]">then</span>{" "}
           <span className="border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 py-0.5 px-1 rounded-sm">
             {
               Object.entries(GO_TO_KEY_SEQUENCE ?? {}).filter(

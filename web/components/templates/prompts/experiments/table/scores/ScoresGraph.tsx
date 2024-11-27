@@ -20,6 +20,8 @@ import {
 import { CartesianGrid, Line, LineChart, XAxis } from "recharts";
 import { useQueryClient } from "@tanstack/react-query";
 import { useExperimentTable } from "../hooks/useExperimentTable";
+import { cn } from "@/lib/utils";
+import { ISLAND_MARGIN } from "@/components/ui/islandContainer";
 
 const ScoresGraph = ({
   promptVersions,
@@ -130,8 +132,8 @@ const ScoresGraph = ({
   const { selectedScoreKey } = useExperimentTable(experimentId);
 
   return (
-    <div className="w-full h-[300px] overflow-auto ">
-      <ChartContainer config={chartConfig} className="h-full w-full pb-3 px-1">
+    <div className={cn("w-full h-[300px] overflow-auto px-8")}>
+      <ChartContainer config={chartConfig} className="h-full w-full">
         <LineChart
           accessibilityLayer
           data={chartData}
@@ -158,7 +160,11 @@ const ScoresGraph = ({
             tickMargin={8}
             // tickFormatter={(value) => value.slice(0, 3)}
           />
-          <ChartLegend content={<ChartLegendContent key="" />} />
+          <ChartLegend
+            verticalAlign="top"
+            height={36}
+            content={<ChartLegendContent key="" />}
+          />
           <ChartTooltip cursor={true} content={<ChartTooltipContent />} />
           {scoreCriterias.map((score) => (
             <Line

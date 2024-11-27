@@ -14,10 +14,12 @@ import {
 } from "@/components/ui/select";
 import { Sheet } from "@/components/ui/sheet";
 import { useExperimentScores } from "@/services/hooks/prompts/experiment-scores";
-import { Loader2, TriangleAlertIcon, XIcon } from "lucide-react";
-import { memo, useState } from "react";
+import { CheckIcon, Loader2, TriangleAlertIcon, XIcon } from "lucide-react";
+import { memo, useState, useEffect } from "react";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { useQueryClient } from "@tanstack/react-query";
+import { ISLAND_MARGIN } from "@/components/ui/islandContainer";
+import { cn } from "@/lib/utils";
 
 const ScoresEvaluatorsConfig = memo(
   ({ experimentId }: { experimentId: string }) => {
@@ -35,8 +37,27 @@ const ScoresEvaluatorsConfig = memo(
 
     const queryClient = useQueryClient();
 
+    const [showSuccess, setShowSuccess] = useState(false);
+    const [showError, setShowError] = useState(false);
+
+    useEffect(() => {
+      if (runEvaluators.isSuccess) {
+        setShowSuccess(true);
+        const timer = setTimeout(() => setShowSuccess(false), 3000);
+        return () => clearTimeout(timer);
+      }
+    }, [runEvaluators.isSuccess]);
+
+    useEffect(() => {
+      if (runEvaluators.isError) {
+        setShowError(true);
+        const timer = setTimeout(() => setShowError(false), 3000);
+        return () => clearTimeout(timer);
+      }
+    }, [runEvaluators.isError]);
+
     return (
-      <Row className="gap-2 items-center p-1 w-full">
+      <Row className={cn("gap-2 items-center w-full", ISLAND_MARGIN, "mx-6")}>
         <Select
           value={value}
           onValueChange={(value) => {
@@ -114,24 +135,9 @@ const ScoresEvaluatorsConfig = memo(
                 <Badge
                   key={`evaluator-${evaluator.id}-${index}`}
                   variant="helicone"
-                  className="gap-1 text-xs text-nowrap whitespace-nowrap items-center"
+                  className="gap-1 text-xs text-nowrap whitespace-nowrap items-center cursor-pointer"
                   onClick={() => {
-                    const currentScoreKey = queryClient.getQueryData([
-                      "selectedScoreKey",
-                      experimentId,
-                    ]);
-                    const newScoreKey =
-                      evaluator.name
-                        .toLowerCase()
-                        .replace(" ", "_")
-                        .replace(/[^a-z0-9]+/g, "_") +
-                      (evaluator.scoring_type === "LLM-BOOLEAN"
-                        ? "-hcone-bool"
-                        : "");
-                    queryClient.setQueryData(
-                      ["selectedScoreKey", experimentId],
-                      currentScoreKey === newScoreKey ? "" : newScoreKey
-                    );
+                    removeEvaluator.mutate(evaluator.id);
                   }}
                 >
                   <XIcon
@@ -159,6 +165,24 @@ const ScoresEvaluatorsConfig = memo(
                 <span>For latest scores, re-run evaluators</span>
               </Badge>
             )}
+            {showSuccess && (
+              <Badge
+                variant="helicone"
+                className="gap-2 bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800 text-green-500 text-xs"
+              >
+                <CheckIcon className="w-3 h-3" />
+                <span>Evaluators ran successfully</span>
+              </Badge>
+            )}
+            {showError && (
+              <Badge
+                variant="helicone"
+                className="gap-2 bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800 text-red-500 text-xs"
+              >
+                <TriangleAlertIcon className="w-3 h-3" />
+                <span>Error running evaluators</span>
+              </Badge>
+            )}
             <Button
               size="sm"
               variant={"outline"}
@@ -172,16 +196,6 @@ const ScoresEvaluatorsConfig = memo(
               )}
             </Button>
           </div>
-          {runEvaluators.isSuccess && (
-            <span className="text-xs text-slate-500">
-              Evaluators ran successfully
-            </span>
-          )}
-          {runEvaluators.isError && (
-            <span className="text-xs text-red-500">
-              Error running evaluators
-            </span>
-          )}
         </Col>
       </Row>
     );
