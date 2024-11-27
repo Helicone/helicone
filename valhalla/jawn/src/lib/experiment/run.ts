@@ -16,6 +16,7 @@ import {
 import { prepareRequestOpenAIOnPremFull } from "./requestPrep/openai";
 import { getAllSignedURLsFromInputs } from "../../managers/inputs/InputsManager";
 import { prepareRequestOpenAIFull } from "./requestPrep/openaiCloud";
+import { SettingsManager } from "../../utils/settings";
 
 export const IS_ON_PREM =
   process.env.AZURE_BASE_URL &&
@@ -25,6 +26,17 @@ export const IS_ON_PREM =
     ? true
     : false;
 
+async function isOnPrem(): Promise<boolean> {
+  const settingsManager = new SettingsManager();
+  const azureSettings = await settingsManager.getSetting("azure:experiment");
+  const truthy =
+    azureSettings?.azureApiKey &&
+    azureSettings?.azureBaseUri &&
+    azureSettings?.azureApiVersion &&
+    azureSettings?.azureDeploymentName;
+  return truthy ? true : false;
+}
+
 async function prepareRequest(
   args: PreparedRequestArgs,
   onPremConfig: {
@@ -33,7 +45,7 @@ async function prepareRequest(
   provider: "OPENAI" | "ANTHROPIC"
 ): Promise<PreparedRequest> {
   if (args.providerKey === null) {
-    if (IS_ON_PREM && onPremConfig.deployment === "AZURE") {
+    if (await isOnPrem()) {
       return await prepareRequestAzureOnPremFull(args);
     } else if (provider === "ANTHROPIC") {
       return prepareRequestAnthropicFull(args);

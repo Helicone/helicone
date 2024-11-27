@@ -8,6 +8,7 @@ import {
   ImageBlockParam,
   TextBlockParam,
 } from "@anthropic-ai/sdk/resources/messages";
+import { getAnthropicKeyFromAdmin } from "@/lib/clients/settings";
 
 export interface ChatParams {
   content: string | Array<TextBlockParam | ImageBlockParam>;
@@ -39,7 +40,8 @@ export default async function handler(
   }
 
   if (!anthropicAPIKey || anthropicAPIKey == "") {
-    anthropicAPIKey = process.env.ANTHROPIC_API_KEY;
+    anthropicAPIKey =
+      (await getAnthropicKeyFromAdmin()) || process.env.ANTHROPIC_API_KEY;
   }
 
   const anthropic = new Anthropic({

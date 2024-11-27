@@ -1,7 +1,7 @@
 import { User } from "@supabase/auth-helpers-nextjs";
 import { ReactElement } from "react";
 import AdminLayout from "../../components/layout/admin/adminLayout";
-import AdminOnPremPage from "../../components/templates/admin/adminOnPrem";
+import { AdminOnPremPage } from "../../components/templates/admin/onPrem/adminOnPrem";
 import { withAuthSSR } from "../../lib/api/handlerWrappers";
 import { supabaseServer } from "../../lib/supabaseServer";
 
