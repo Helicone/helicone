@@ -264,6 +264,7 @@ export class ExperimentV2Manager extends BaseManager {
               CASE 
                 WHEN sa.value_type = 'int' THEN sv.int_value::text
                 WHEN sa.value_type = 'number' THEN sv.int_value::text
+                WHEN sa.value_type = 'boolean' THEN sv.int_value::text
               END,
               'valueType', sa.value_type
             )

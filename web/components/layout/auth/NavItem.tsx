@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { ChevronDownIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { GO_TO_KEY_SEQUENCE } from "./DesktopSidebar";
 
 interface NavigationItem {
   name: string;
@@ -86,63 +87,89 @@ const NavItem: React.FC<NavItemProps> = ({
   }
 
   return (
-    <div className={cn(isSubItem)}>
-      <Link
-        href={hasSubItems ? "#" : link.href}
-        onClick={hasSubItems ? () => toggleExpand(link.name) : onClick}
-        className={cn(
-          hasSubItems
-            ? "flex items-center gap-0.5 text-slate-400 text-xs mt-[14px] text-[11px] font-normal pl-2"
-            : cn(
-                buttonVariants({
-                  variant: link.current ? "secondary" : "ghost",
-                  size: "xs",
-                }),
-                deep && deep > 1 ? "h-6" : "h-8",
-                "justify-start w-full font-normal",
-                "text-sm  text-[12px] text-slate-500",
-                link.current && "text-slate-800 dark:text-slate-200"
-              ),
-          ""
-        )}
-      >
-        <div className="flex items-center">
-          {link.icon && (
-            <link.icon
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <div className={cn(isSubItem)}>
+          <>
+            <Link
+              href={hasSubItems ? "#" : link.href}
+              onClick={hasSubItems ? () => toggleExpand(link.name) : onClick}
               className={cn(
-                "mr-2 h-3.5 w-3.5 text-slate-500",
-                link.current && "text-slate-800 dark:text-slate-200"
+                hasSubItems
+                  ? "flex items-center gap-0.5 text-slate-400 text-xs mt-[14px] text-[11px] font-normal pl-2"
+                  : cn(
+                      buttonVariants({
+                        variant: link.current ? "secondary" : "ghost",
+                        size: "xs",
+                      }),
+                      deep && deep > 1 ? "h-6" : "h-8",
+                      "justify-start w-full font-normal",
+                      "text-sm  text-[12px] text-slate-500",
+                      link.current && "text-slate-800 dark:text-slate-200"
+                    ),
+                ""
               )}
-            />
-          )}
-          {link.name}
-        </div>
-        {hasSubItems && (
-          <ChevronDownIcon
-            className={cn(
-              "h-3 w-3 transition-transform text-slate-400",
-              !expandedItems.includes(link.name) && "-rotate-90"
+            >
+              <div className="flex items-center">
+                {link.icon && (
+                  <link.icon
+                    className={cn(
+                      "mr-2 h-3.5 w-3.5 text-slate-500",
+                      link.current && "text-slate-800 dark:text-slate-200"
+                    )}
+                  />
+                )}
+                {link.name}
+              </div>
+              {hasSubItems && (
+                <ChevronDownIcon
+                  className={cn(
+                    "h-3 w-3 transition-transform text-slate-400",
+                    !expandedItems.includes(link.name) && "-rotate-90"
+                  )}
+                />
+              )}
+            </Link>
+            {hasSubItems && expandedItems.includes(link.name) && (
+              <div className="mt-1">
+                {link.subItems!.map((subItem) => (
+                  <NavItem
+                    key={subItem.name}
+                    link={subItem}
+                    isCollapsed={isCollapsed}
+                    isSubItem={true}
+                    expandedItems={expandedItems}
+                    toggleExpand={toggleExpand}
+                    deep={deep ? deep + 1 : 1}
+                    onClick={onClick}
+                  />
+                ))}
+              </div>
             )}
-          />
-        )}
-      </Link>
-      {hasSubItems && expandedItems.includes(link.name) && (
-        <div className="mt-1">
-          {link.subItems!.map((subItem) => (
-            <NavItem
-              key={subItem.name}
-              link={subItem}
-              isCollapsed={isCollapsed}
-              isSubItem={true}
-              expandedItems={expandedItems}
-              toggleExpand={toggleExpand}
-              deep={deep ? deep + 1 : 1}
-              onClick={onClick}
-            />
-          ))}
+          </>
         </div>
+      </TooltipTrigger>
+      {Object.entries(GO_TO_KEY_SEQUENCE ?? {}).filter(
+        ([key, path]) => path === link.href
+      ).length > 0 && (
+        <TooltipContent
+          side="right"
+          className="text-xs flex items-center gap-1.5 !text-slate-500 !leading-tight"
+        >
+          <span className="border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 py-0.5 px-1 rounded-sm">
+            g
+          </span>{" "}
+          then{" "}
+          <span className="border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 py-0.5 px-1 rounded-sm">
+            {
+              Object.entries(GO_TO_KEY_SEQUENCE ?? {}).filter(
+                ([key, path]) => path === link.href
+              )?.[0]?.[0]
+            }
+          </span>
+        </TooltipContent>
       )}
-    </div>
+    </Tooltip>
   );
 };
 

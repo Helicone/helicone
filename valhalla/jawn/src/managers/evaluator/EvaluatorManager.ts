@@ -209,7 +209,9 @@ export class EvaluatorManager extends BaseManager {
     let shouldRun = false;
     for (const request of experimentData.data ?? []) {
       for (const evaluator of evaluators.data ?? []) {
-        const scoreName = getEvaluatorScoreName(evaluator.name);
+        const scoreName =
+          getEvaluatorScoreName(evaluator.name) +
+          (evaluator.scoring_type === "LLM-BOOLEAN" ? "-hcone-bool" : "");
         if (!(request.scores && scoreName in request.scores)) {
           shouldRun = true;
         }

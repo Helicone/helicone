@@ -430,7 +430,7 @@ export function ExperimentTable({
               <div
                 className={clsx(
                   "max-h-[calc(100vh-90px)] overflow-y-auto overflow-x-auto bg-slate-100 dark:bg-neutral-950",
-                  showScores && "max-h-[calc(100vh-90px-300px-59px)]"
+                  showScores && "max-h-[calc(100vh-90px-300px-80px)]"
                 )}
               >
                 <div className="w-fit h-full bg-slate-50 dark:bg-black rounded-sm">

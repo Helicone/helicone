@@ -12,10 +12,12 @@ import { PromptVersion } from "./ScoresGraphContainer";
 import {
   ChartConfig,
   ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { CartesianGrid, Line, LineChart, XAxis, Legend } from "recharts";
+import { CartesianGrid, Line, LineChart, XAxis } from "recharts";
 import { useQueryClient } from "@tanstack/react-query";
 import { useExperimentTable } from "../hooks/useExperimentTable";
 
@@ -61,7 +63,10 @@ const ScoresGraph = ({
       ...Object.fromEntries(
         scoreCriterias.map((score, index) => [
           score,
-          { label: score, color: `oklch(var(--chart-${(index % 5) + 1}))` },
+          {
+            label: score.replace("-hcone-bool", ""),
+            color: `oklch(var(--chart-${(index % 5) + 1}))`,
+          },
         ])
       ),
     } satisfies ChartConfig;
@@ -125,8 +130,8 @@ const ScoresGraph = ({
   const { selectedScoreKey } = useExperimentTable(experimentId);
 
   return (
-    <div className="w-full h-[300px] overflow-auto bg-white dark:bg-neutral-950">
-      <ChartContainer config={chartConfig} className="h-full w-full">
+    <div className="w-full h-[300px] overflow-auto ">
+      <ChartContainer config={chartConfig} className="h-full w-full pb-3 px-1">
         <LineChart
           accessibilityLayer
           data={chartData}
@@ -139,18 +144,22 @@ const ScoresGraph = ({
             queryClient.setQueryData(["selectedScoreKey", experimentId], null);
           }}
         >
-          <CartesianGrid vertical={false} />
+          <CartesianGrid
+            strokeDasharray="3 3"
+            strokeOpacity={0.4}
+            vertical={false}
+          />
           <XAxis
             padding={{ left: 12 }}
             dataKey="promptVersionLabel"
             type="category"
-            // tickLine={false}
-            // axisLine={false}
+            tickLine={false}
+            axisLine={false}
             tickMargin={8}
             // tickFormatter={(value) => value.slice(0, 3)}
           />
-          <Legend />
-          <ChartTooltip cursor={true} content={<ChartTooltipContent label />} />
+          <ChartLegend content={<ChartLegendContent key="" />} />
+          <ChartTooltip cursor={true} content={<ChartTooltipContent />} />
           {scoreCriterias.map((score) => (
             <Line
               style={{ cursor: "pointer" }}

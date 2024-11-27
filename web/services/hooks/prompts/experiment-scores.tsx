@@ -80,6 +80,7 @@ const useExperimentScores = (experimentId: string) => {
     onSuccess: () => {
       refetchEvaluators();
       refetchAllEvaluators();
+      queryClient.setQueryData(["shouldRunEvaluators", experimentId], true);
     },
   });
 
@@ -100,15 +101,12 @@ const useExperimentScores = (experimentId: string) => {
     onSuccess: () => {
       refetchEvaluators();
       refetchAllEvaluators();
-      queryClient
-        .invalidateQueries({
-          queryKey: ["evaluators", experimentId, currentOrgId],
-        })
-        .then(() => {
-          queryClient.invalidateQueries({
-            queryKey: ["experimentScores", experimentId],
-          });
-        });
+      queryClient.invalidateQueries({
+        queryKey: ["evaluators", experimentId, currentOrgId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["experimentScores", experimentId],
+      });
     },
   });
 
@@ -130,6 +128,9 @@ const useExperimentScores = (experimentId: string) => {
       });
       queryClient.invalidateQueries({
         queryKey: ["experimentScores", experimentId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["shouldRunEvaluators", experimentId],
       });
     },
   });
@@ -153,6 +154,23 @@ const useExperimentScores = (experimentId: string) => {
     [currentOrgId, experimentId]
   );
 
+  const shouldRunEvaluators = useQuery({
+    queryKey: ["shouldRunEvaluators", experimentId],
+    queryFn: async () => {
+      const result = await jawn.GET(
+        "/v2/experiment/{experimentId}/should-run-evaluators",
+        {
+          params: {
+            path: {
+              experimentId,
+            },
+          },
+        }
+      );
+      return result.data?.data ?? false;
+    },
+  });
+
   return {
     evaluators,
     addEvaluator,
@@ -160,6 +178,7 @@ const useExperimentScores = (experimentId: string) => {
     removeEvaluator,
     runEvaluators,
     fetchExperimentHypothesisScores,
+    shouldRunEvaluators,
   };
 };
 
