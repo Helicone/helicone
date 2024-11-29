@@ -1,4 +1,14 @@
-import { Controller, Route, Security, Tags, Request, Get, Path } from "tsoa";
+import {
+  Controller,
+  Route,
+  Security,
+  Tags,
+  Request,
+  Get,
+  Path,
+  Post,
+  Body,
+} from "tsoa";
 import { Result } from "../../lib/shared/result";
 import { JawnAuthenticatedRequest } from "../../types/request";
 import { ModelComparisonManager } from "../../managers/ModelComparisonManager";
@@ -54,20 +64,23 @@ export type ModelComparison = {
   models: Model[];
 };
 
-@Route("v1/public/comparison/{modelA}-vs-{modelB}")
+@Route("v1/public/compare")
 @Tags("Comparison")
 @Security("api_key")
 export class ModelComparisonController extends Controller {
-  @Get("")
+  @Post("/models")
   public async getModelComparison(
     @Request() request: JawnAuthenticatedRequest,
-    @Path() modelA: string,
-    @Path() modelB: string
+    @Body()
+    body: {
+      modelA: string;
+      modelB: string;
+    }
   ): Promise<Result<ModelComparison, string>> {
     const modelComparisonManager = new ModelComparisonManager();
     const result = await modelComparisonManager.getModelComparison(
-      decodeURIComponent(modelA),
-      decodeURIComponent(modelB)
+      body.modelA,
+      body.modelB
     );
 
     return result;

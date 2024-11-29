@@ -8,6 +8,22 @@ interface TextOperator {
   value: string;
 }
 
+export interface ModelDetails {
+  contextWindow: number;
+  features: {
+    vision: boolean;
+    json: boolean;
+    functionCalling: boolean;
+    parallelFunctions: boolean;
+    reproduction: boolean;
+  };
+  status: "preview" | "stable" | "deprecated";
+  releaseDate: string; // ISO date string
+  maxOutputTokens: number;
+  trainingCutoff: string; // Knowledge cutoff date
+  description: string; // Official OpenAI description
+}
+
 export interface ModelRow {
   model: TextOperator;
   cost: {
@@ -20,4 +36,5 @@ export interface ModelRow {
     start: string;
     end: string;
   };
+  details?: ModelDetails;
 }
