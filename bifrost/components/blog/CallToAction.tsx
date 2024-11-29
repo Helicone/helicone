@@ -1,5 +1,5 @@
-import { ArrowRight } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 // cursor
 
@@ -45,5 +45,5 @@ export function CallToAction({
         </div>
       </div>
     </section>
-  )
-} 
+  );
+}
