@@ -37,3 +37,14 @@ export function humanReadableNumber(num: number): string {
   if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
   return num.toString();
 }
+
+export function formatLatency(ms: number): string {
+  console.log(ms);
+  if (ms >= 1000) {
+    return `${(ms / 1000).toFixed(2)}s`;
+  } else if (ms < 1) {
+    return `${(ms * 1000).toFixed(2)}μs`;
+  } else {
+    return `${ms.toFixed(2)}ms`;
+  }
+}

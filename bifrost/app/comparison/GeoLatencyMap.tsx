@@ -9,6 +9,7 @@ import {
   TooltipContent,
   TooltipProvider,
 } from "@/components/ui/tooltip";
+import { formatLatency } from "../utils/formattingUtils";
 
 const geoUrl = "/countries-50m.json";
 
@@ -16,14 +17,12 @@ interface GeographicLatencyMapProps {
   model: components["schemas"]["Model"];
   className?: string;
   style?: React.CSSProperties;
-  setTooltipContent: (content: string) => void;
 }
 
 export const GeographicLatencyMap = ({
   model,
   className,
   style,
-  setTooltipContent,
 }: GeographicLatencyMapProps) => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [tooltipOpen, setTooltipOpen] = useState(false);
@@ -43,10 +42,13 @@ export const GeographicLatencyMap = ({
       Math.min(...data.map((d) => d.value)),
       Math.max(...data.map((d) => d.value)),
     ])
-    .range(["#e5f5ff", "#0077cc"]);
+    .range(["#2A4F7E", "#4ADEEB"]);
 
   return (
-    <Card className={`shadow-none border ${className}`} style={style}>
+    <Card
+      className={`shadow-none border bg-[#0A192F] ${className}`}
+      style={style}
+    >
       <CardContent className="p-4">
         <div
           className="relative"
@@ -74,38 +76,35 @@ export const GeographicLatencyMap = ({
                     <Geography
                       key={geo.rsmKey}
                       geography={geo}
-                      fill={country ? colorScale(country.value) : "#F5F5F5"}
-                      stroke="#D6D6DA"
+                      fill={country ? colorScale(country.value) : "#293548"}
+                      stroke="#475569"
                       strokeWidth={0.5}
                       style={{
                         default: {
                           outline: "none",
                         },
                         hover: {
-                          fill: "#90CDF4",
+                          fill: "#0EA5E9",
                           outline: "none",
                           cursor: "pointer",
                         },
                         pressed: {
-                          fill: "#90CDF4",
+                          fill: "#0EA5E9",
                           outline: "none",
                         },
                       }}
                       onMouseEnter={() => {
                         if (country) {
                           setTooltipOpen(true);
-                          setLocalTooltipContent(
-                            `${country.name}: ${country.value.toFixed(3)}ms`
-                          );
-                          setTooltipContent(
-                            `${country.name}: ${country.value.toFixed(3)}ms`
-                          );
+                          const tooltipText = `${country.name}\n${formatLatency(
+                            country.value
+                          )} per 1k tokens`;
+                          setLocalTooltipContent(tooltipText);
                         }
                       }}
                       onMouseLeave={() => {
                         setTooltipOpen(false);
                         setLocalTooltipContent("");
-                        setTooltipContent("");
                       }}
                     />
                   );
@@ -120,8 +119,10 @@ export const GeographicLatencyMap = ({
                   position: "fixed",
                   left: `${mousePosition.x}px`,
                   top: `${mousePosition.y - 40}px`,
+                  minWidth: "200px",
+                  width: "fit-content",
                 }}
-                className="pointer-events-none"
+                className="pointer-events-none whitespace-pre-line"
               >
                 {localTooltipContent}
               </TooltipContent>

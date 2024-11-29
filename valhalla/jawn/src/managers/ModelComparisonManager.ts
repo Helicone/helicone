@@ -185,7 +185,7 @@ export class ModelComparisonManager {
         quantile(0.90)(latency) as p90_latency,
         quantile(0.95)(latency) as p95_latency,
         quantile(0.99)(latency) as p99_latency,
-        avg(if(completion_tokens > 0, latency / completion_tokens, null)) as avg_latency_per_token,
+        median(if(completion_tokens > 0, (latency / completion_tokens) * 1000, null)) as avg_latency_per_token,
         -- TTFT stats
         avg(time_to_first_token) as average_ttft,
         median(time_to_first_token) as median_ttft,
@@ -217,7 +217,7 @@ export class ModelComparisonManager {
         quantile(0.90)(latency) as p90_latency,
         quantile(0.95)(latency) as p95_latency,
         quantile(0.99)(latency) as p99_latency,
-        avg(if(completion_tokens > 0, latency / completion_tokens, null)) as avg_latency_per_token
+        median(if(completion_tokens > 0, (latency / completion_tokens) * 1000, null)) as avg_latency_per_token
       FROM request_response_rmt
       WHERE model = '${model}'
         AND request_created_at >= now() - INTERVAL 30 DAY
