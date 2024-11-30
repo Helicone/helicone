@@ -43,6 +43,7 @@ export type Model = {
   };
   feedback: {
     positivePercentage: number;
+    negativePercentage: number;
   };
   geographicLatency: {
     countryCode: string;
@@ -61,6 +62,10 @@ export type Model = {
     ttft: TimeSeriesMetric[];
     successRate: TimeSeriesMetric[];
     errorRate: TimeSeriesMetric[];
+    positivePercentage: TimeSeriesMetric[];
+    negativePercentage: TimeSeriesMetric[];
+    positiveFeedbackCount: TimeSeriesMetric[];
+    negativeFeedbackCount: TimeSeriesMetric[];
   };
 };
 

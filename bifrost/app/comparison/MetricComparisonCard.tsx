@@ -2,7 +2,15 @@ import { Card, CardContent } from "@/components/ui/card";
 import ModelTimeSeriesChart from "./ModelTimeSeriesChart";
 import { components } from "@/lib/clients/jawnTypes/public";
 
-export type MetricType = "latency" | "ttft" | "errorRate" | "successRate";
+export type MetricType =
+  | "latency"
+  | "ttft"
+  | "errorRate"
+  | "successRate"
+  | "positivePercentage"
+  | "negativePercentage"
+  | "positiveFeedbackCount"
+  | "negativeFeedbackCount";
 
 interface MetricComparisonCardProps {
   models: components["schemas"]["Model"][];
@@ -50,25 +58,23 @@ export default function MetricComparisonCard({
                 >
                   <div
                     className={`flex items-center gap-2 p-2 rounded-lg ${
-                      isWinner
-                        ? "bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-red-500/10"
-                        : ""
+                      isWinner ? "bg-gray-100" : ""
                     }`}
                   >
                     <div
-                      className={`w-3 h-3 rounded-full ${
-                        index === 0 ? "bg-red-500" : "bg-blue-500"
+                      className={`w-2 h-2 rounded-full ${
+                        index === 0 ? "bg-gray-600" : "bg-gray-400"
                       }`}
                     />
                     <div
                       className={`text-sm ${
-                        isWinner ? "font-bold text-gray-900" : "text-gray-500"
+                        isWinner ? "font-medium" : "text-gray-500"
                       }`}
                     >
                       {model.model}
                       {isWinner && (
-                        <span className="text-xs font-semibold text-purple-500 ml-1">
-                          WINNER
+                        <span className="text-xs font-medium text-gray-600 ml-1">
+                          Winner
                         </span>
                       )}
                     </div>

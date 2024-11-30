@@ -16,6 +16,9 @@ export default function QueryProvider({
             // Cache time: 24 hours (in milliseconds)
             gcTime: 1000 * 60 * 60 * 24,
             staleTime: 1000 * 60 * 60 * 24,
+            retry: 3,
+            retryDelay: (attemptIndex) =>
+              Math.min(1000 * 2 ** attemptIndex, 30000),
           },
         },
       })

@@ -2,10 +2,11 @@ import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer } from "recharts";
 import { ChartTooltip } from "@/components/ui/chart";
 import { components } from "@/lib/clients/jawnTypes/public";
 import { formatLatency } from "../utils/formattingUtils";
+import { MetricType } from "./MetricComparisonCard";
 
 interface ModelTimeSeriesChartProps {
   models: components["schemas"]["Model"][];
-  metric: "latency" | "ttft" | "successRate" | "errorRate";
+  metric: MetricType;
 }
 
 const ModelTimeSeriesChart = ({
@@ -21,6 +22,14 @@ const ModelTimeSeriesChart = ({
         return `${(value * 100).toFixed(1)}%`;
       case "errorRate":
         return `${(value * 100).toFixed(3)}%`;
+      case "positivePercentage":
+        return `${(value * 100).toFixed(1)}%`;
+      case "negativePercentage":
+        return `${(value * 100).toFixed(1)}%`;
+      case "positiveFeedbackCount":
+        return value.toLocaleString();
+      case "negativeFeedbackCount":
+        return value.toLocaleString();
     }
   };
 

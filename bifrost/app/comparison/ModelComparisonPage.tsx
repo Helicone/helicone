@@ -129,6 +129,42 @@ export function ModelComparisonPage({
               metricKey="errorRate"
               metricPath="requestStatus.errorRate"
             />
+
+            {/* User Feedback Card */}
+            <MetricComparisonCard
+              models={comparisonData.models}
+              title="User Feedback"
+              subtitle="Percentage of positive user feedback"
+              metricKey="positivePercentage"
+              metricPath="feedback.positivePercentage"
+            />
+
+            {/* Negative Feedback Card */}
+            <MetricComparisonCard
+              models={comparisonData.models}
+              title="Negative Feedback"
+              subtitle="Percentage of negative user feedback"
+              metricKey="negativePercentage"
+              metricPath="feedback.negativePercentage"
+            />
+
+            {/* Positive Feedback Count Card */}
+            <MetricComparisonCard
+              models={comparisonData.models}
+              title="Positive Feedback Count"
+              subtitle="Number of positive user feedback"
+              metricKey="positiveFeedbackCount"
+              metricPath="feedback.positiveFeedbackCount"
+            />
+
+            {/* Negative Feedback Count Card */}
+            <MetricComparisonCard
+              models={comparisonData.models}
+              title="Negative Feedback Count"
+              subtitle="Number of negative user feedback"
+              metricKey="negativeFeedbackCount"
+              metricPath="feedback.negativeFeedbackCount"
+            />
           </>
         )
       )}

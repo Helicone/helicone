@@ -27,6 +27,11 @@ interface ModelMetricsQueryResult {
   success_rate: number;
   error_rate: number;
   positive_percentage: number;
+  negative_percentage: number;
+  positive_feedback_count: number;
+  negative_feedback_count: number;
+  total_feedback: number;
+  unique_feedback_values: number[];
 }
 
 interface GeographicLatencyQueryResult {
@@ -45,6 +50,10 @@ interface TimeSeriesQueryResult {
   ttft: number;
   success_rate: number;
   error_rate: number;
+  positive_percentage: number;
+  negative_percentage: number;
+  positive_feedback_count: number;
+  negative_feedback_count: number;
 }
 
 interface CostQueryResult {
@@ -148,6 +157,7 @@ export class ModelComparisonManager {
       },
       feedback: {
         positivePercentage: metrics.positive_percentage ?? 0,
+        negativePercentage: metrics.negative_percentage ?? 0,
       },
       geographicLatency: (geoResult.data ?? []).map((geo) => ({
         countryCode: geo.country_code,
@@ -177,6 +187,22 @@ export class ModelComparisonManager {
         errorRate: (timeSeriesResult.data ?? []).map((ts) => ({
           timestamp: ts.timestamp,
           value: ts.error_rate,
+        })),
+        positivePercentage: (timeSeriesResult.data ?? []).map((ts) => ({
+          timestamp: ts.timestamp,
+          value: ts.positive_percentage,
+        })),
+        negativePercentage: (timeSeriesResult.data ?? []).map((ts) => ({
+          timestamp: ts.timestamp,
+          value: ts.negative_percentage,
+        })),
+        positiveFeedbackCount: (timeSeriesResult.data ?? []).map((ts) => ({
+          timestamp: ts.timestamp,
+          value: ts.positive_feedback_count,
+        })),
+        negativeFeedbackCount: (timeSeriesResult.data ?? []).map((ts) => ({
+          timestamp: ts.timestamp,
+          value: ts.negative_feedback_count,
         })),
       },
     });
@@ -208,8 +234,13 @@ export class ModelComparisonManager {
         count(*) as total_requests,
         countIf(status < 500) / count(*) as success_rate,
         countIf(status >= 500) / count(*) as error_rate,
-        -- Feedback
-        avg(assumeNotNull(scores['thumbs_up'] = 1)) as positive_percentage
+        -- Feedback counts
+        coalesce(countIf(has(scores, 'helicone-score-feedback') AND scores['helicone-score-feedback'] = 1) / 
+          nullIf(countIf(has(scores, 'helicone-score-feedback')), 0), 0) as positive_percentage,
+        coalesce(countIf(has(scores, 'helicone-score-feedback') AND scores['helicone-score-feedback'] = 0) / 
+          nullIf(countIf(has(scores, 'helicone-score-feedback')), 0), 0) as negative_percentage,
+        coalesce(countIf(has(scores, 'helicone-score-feedback') AND scores['helicone-score-feedback'] = 1), 0) as positive_feedback_count,
+        coalesce(countIf(has(scores, 'helicone-score-feedback') AND scores['helicone-score-feedback'] = 0), 0) as negative_feedback_count
       FROM request_response_rmt
       WHERE model = '${model}'
         AND request_created_at >= now() - INTERVAL 30 DAY
@@ -256,7 +287,13 @@ export class ModelComparisonManager {
         median(if(latency > 0 AND completion_tokens > 0, latency / completion_tokens * 1000, null)) as latency,
         median(if(time_to_first_token > 0, time_to_first_token, null)) as ttft,
         countIf(status < 500) / count(*) as success_rate,
-        countIf(status >= 500) / count(*) as error_rate
+        countIf(status >= 500) / count(*) as error_rate,
+        coalesce(countIf(has(scores, 'helicone-score-feedback') AND scores['helicone-score-feedback'] = 1) / 
+          nullIf(countIf(has(scores, 'helicone-score-feedback')), 0), 0) as positive_percentage,
+        coalesce(countIf(has(scores, 'helicone-score-feedback') AND scores['helicone-score-feedback'] = 0) / 
+          nullIf(countIf(has(scores, 'helicone-score-feedback')), 0), 0) as negative_percentage,
+        coalesce(countIf(has(scores, 'helicone-score-feedback') AND scores['helicone-score-feedback'] = 1), 0) as positive_feedback_count,
+        coalesce(countIf(has(scores, 'helicone-score-feedback') AND scores['helicone-score-feedback'] = 0), 0) as negative_feedback_count
       FROM request_response_rmt
       WHERE model = '${model}'
         AND request_created_at >= now() - INTERVAL 30 DAY
