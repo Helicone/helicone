@@ -10,6 +10,7 @@ import { User } from "@supabase/auth-helpers-nextjs";
 import { FilterNode } from "../../services/lib/filters/filterDefs";
 import { Permission, Role, hasPermission } from "../../services/lib/user";
 import { Database } from "../../supabase/database.types";
+import { getRequestCountClickhouse } from "./request/request";
 
 export interface HandlerWrapperNext<RetVal> {
   req: NextApiRequest;
@@ -115,6 +116,37 @@ export function withAuth<T>(
       res.status(403).json({ error: "Forbidden" });
       return;
     }
+
+    // Check if the user is authorized by tier
+    const startOfThisMonth = new Date();
+    startOfThisMonth.setDate(1);
+    startOfThisMonth.setHours(0);
+    startOfThisMonth.setMinutes(0);
+    startOfThisMonth.setSeconds(0);
+    startOfThisMonth.setMilliseconds(0);
+    const count = await getRequestCountClickhouse(data.orgId, {
+      left: {
+        request_response_rmt: {
+          request_created_at: {
+            gte: startOfThisMonth,
+          },
+        },
+      },
+      operator: "and",
+      right: "all",
+    });
+    if (count.error == null) {
+      const currentTier = data.org?.tier;
+      if (currentTier === "free" && count.data > 100000) {
+        res.status(403).json({ error: "Forbidden please upgrade your plan" });
+        return;
+      }
+      if (currentTier === "pro" && count.data > 500000) {
+        res.status(403).json({ error: "Forbidden please upgrade your plan" });
+        return;
+      }
+    }
+    
 
     await handler({
       req,
