@@ -34,10 +34,18 @@ export function ModelComparisonPage({
     <div className="max-w-7xl mx-auto p-4">
       <div className="flex items-center justify-center mb-8">
         <div className="relative">
-          <h1 className="text-3xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-red-500 via-purple-500 to-blue-500 tracking-tight">
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-800 bg-clip-text text-transparent bg-gradient-to-r from-gray-700 to-gray-900">
             LLM Model Battle
           </h1>
-          <div className="absolute -bottom-2 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-purple-500 to-transparent opacity-50" />
+          <div className="absolute -bottom-1 left-0 right-0 flex justify-center space-x-1">
+            <div className="h-[2px] w-2 bg-gray-300 rounded-full" />
+            <div className="h-[2px] w-3 bg-gray-400 rounded-full" />
+            <div className="h-[2px] w-6 bg-gray-500 rounded-full" />
+            <div className="h-[2px] w-24 bg-gray-600 rounded-full" />
+            <div className="h-[2px] w-6 bg-gray-500 rounded-full" />
+            <div className="h-[2px] w-3 bg-gray-400 rounded-full" />
+            <div className="h-[2px] w-2 bg-gray-300 rounded-full" />
+          </div>
         </div>
       </div>
 
