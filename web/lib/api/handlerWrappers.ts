@@ -11,6 +11,7 @@ import { FilterNode } from "../../services/lib/filters/filterDefs";
 import { Permission, Role, hasPermission } from "../../services/lib/user";
 import { Database } from "../../supabase/database.types";
 import { getRequestCountClickhouse } from "./request/request";
+import { }
 
 export interface HandlerWrapperNext<RetVal> {
   req: NextApiRequest;
@@ -135,7 +136,8 @@ export function withAuth<T>(
       operator: "and",
       right: "all",
     });
-    if (count.error == null) {
+    
+    if (req.url && req.url.includes('/metrics') && count.error == null) {
       const currentTier = data.org?.tier;
       if (currentTier === "free" && count.data > 100000) {
         res.status(403).json({ error: "Forbidden please upgrade your plan" });
