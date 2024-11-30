@@ -54,6 +54,7 @@ export function formatLatency(ms: number): string {
   } else if (ms >= 1000) {
     return `${(ms / 1000).toFixed(2)}s`;
   } else if (ms < 1) {
+    console.log(`US: ${ms}`);
     return `${(ms * 1000).toFixed(2)}μs`;
   } else {
     return `${ms.toFixed(2)}ms`;

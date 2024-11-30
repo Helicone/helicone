@@ -5215,93 +5215,195 @@
 					}
 				]
 			},
-			"EvaluatorResult": {
+			"ResultSuccess__datasetId-string__": {
+				"properties": {
+					"data": {
+						"properties": {
+							"datasetId": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"datasetId"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__datasetId-string_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__datasetId-string__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"DatasetMetadata": {
+				"properties": {
+					"promptVersionId": {
+						"type": "string"
+					},
+					"inputRecordsIds": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"NewDatasetParams": {
+				"properties": {
+					"datasetName": {
+						"type": "string"
+					},
+					"requestIds": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"datasetType": {
+						"type": "string",
+						"enum": [
+							"experiment",
+							"helicone"
+						]
+					},
+					"meta": {
+						"$ref": "#/components/schemas/DatasetMetadata"
+					}
+				},
+				"required": [
+					"datasetName",
+					"requestIds",
+					"datasetType"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Pick_FilterLeaf.request-or-prompts_versions_": {
+				"properties": {
+					"request": {
+						"$ref": "#/components/schemas/Partial_RequestTableToOperators_"
+					},
+					"prompts_versions": {
+						"$ref": "#/components/schemas/Partial_PromptVersionsToOperators_"
+					}
+				},
+				"type": "object",
+				"description": "From T, pick a set of properties whose keys are in the union K"
+			},
+			"FilterLeafSubset_request-or-prompts_versions_": {
+				"$ref": "#/components/schemas/Pick_FilterLeaf.request-or-prompts_versions_"
+			},
+			"DatasetFilterNode": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/FilterLeafSubset_request-or-prompts_versions_"
+					},
+					{
+						"$ref": "#/components/schemas/DatasetFilterBranch"
+					},
+					{
+						"type": "string",
+						"enum": [
+							"all"
+						]
+					}
+				]
+			},
+			"DatasetFilterBranch": {
+				"properties": {
+					"right": {
+						"$ref": "#/components/schemas/DatasetFilterNode"
+					},
+					"operator": {
+						"type": "string",
+						"enum": [
+							"or",
+							"and"
+						]
+					},
+					"left": {
+						"$ref": "#/components/schemas/DatasetFilterNode"
+					}
+				},
+				"required": [
+					"right",
+					"operator",
+					"left"
+				],
+				"type": "object"
+			},
+			"RandomDatasetParams": {
+				"properties": {
+					"datasetName": {
+						"type": "string"
+					},
+					"filter": {
+						"$ref": "#/components/schemas/DatasetFilterNode"
+					},
+					"offset": {
+						"type": "number",
+						"format": "double"
+					},
+					"limit": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"datasetName",
+					"filter"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"DatasetResult": {
 				"properties": {
 					"id": {
+						"type": "string"
+					},
+					"name": {
 						"type": "string"
 					},
 					"created_at": {
 						"type": "string"
 					},
-					"scoring_type": {
-						"type": "string"
-					},
-					"llm_template": {},
-					"organization_id": {
-						"type": "string"
-					},
-					"updated_at": {
-						"type": "string"
-					},
-					"name": {
-						"type": "string"
+					"meta": {
+						"$ref": "#/components/schemas/DatasetMetadata"
 					}
 				},
 				"required": [
 					"id",
-					"created_at",
-					"scoring_type",
-					"llm_template",
-					"organization_id",
-					"updated_at",
-					"name"
+					"name",
+					"created_at"
 				],
 				"type": "object",
 				"additionalProperties": false
 			},
-			"ResultSuccess_EvaluatorResult_": {
-				"properties": {
-					"data": {
-						"$ref": "#/components/schemas/EvaluatorResult"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result_EvaluatorResult.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess_EvaluatorResult_"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
-			"CreateEvaluatorParams": {
-				"properties": {
-					"scoring_type": {
-						"type": "string"
-					},
-					"llm_template": {},
-					"name": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"scoring_type",
-					"llm_template",
-					"name"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"ResultSuccess_EvaluatorResult-Array_": {
+			"ResultSuccess_DatasetResult-Array_": {
 				"properties": {
 					"data": {
 						"items": {
-							"$ref": "#/components/schemas/EvaluatorResult"
+							"$ref": "#/components/schemas/DatasetResult"
 						},
 						"type": "array"
 					},
@@ -5320,46 +5422,22 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"Result_EvaluatorResult-Array.string_": {
+			"Result_DatasetResult-Array.string_": {
 				"anyOf": [
 					{
-						"$ref": "#/components/schemas/ResultSuccess_EvaluatorResult-Array_"
+						"$ref": "#/components/schemas/ResultSuccess_DatasetResult-Array_"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
 					}
 				]
 			},
-			"UpdateEvaluatorParams": {
-				"properties": {
-					"scoring_type": {
-						"type": "string"
-					},
-					"llm_template": {}
-				},
-				"type": "object",
-				"additionalProperties": false
-			},
-			"EvaluatorExperiment": {
-				"properties": {
-					"experiment_created_at": {
-						"type": "string"
-					},
-					"experiment_id": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"experiment_created_at",
-					"experiment_id"
-				],
-				"type": "object"
-			},
-			"ResultSuccess_EvaluatorExperiment-Array_": {
+			"ResultSuccess___-Array_": {
 				"properties": {
 					"data": {
 						"items": {
-							"$ref": "#/components/schemas/EvaluatorExperiment"
+							"properties": {},
+							"type": "object"
 						},
 						"type": "array"
 					},
@@ -5378,10 +5456,10 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"Result_EvaluatorExperiment-Array.string_": {
+			"Result___-Array.string_": {
 				"anyOf": [
 					{
-						"$ref": "#/components/schemas/ResultSuccess_EvaluatorExperiment-Array_"
+						"$ref": "#/components/schemas/ResultSuccess___-Array_"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
@@ -5925,6 +6003,73 @@
 					}
 				]
 			},
+			"EvaluatorResult": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"created_at": {
+						"type": "string"
+					},
+					"scoring_type": {
+						"type": "string"
+					},
+					"llm_template": {},
+					"organization_id": {
+						"type": "string"
+					},
+					"updated_at": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"id",
+					"created_at",
+					"scoring_type",
+					"llm_template",
+					"organization_id",
+					"updated_at",
+					"name"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_EvaluatorResult-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/EvaluatorResult"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_EvaluatorResult-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_EvaluatorResult-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
 			"ResponseObj": {
 				"properties": {
 					"body": {},
@@ -6346,18 +6491,10 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"ResultSuccess__datasetId-string__": {
+			"ResultSuccess_EvaluatorResult_": {
 				"properties": {
 					"data": {
-						"properties": {
-							"datasetId": {
-								"type": "string"
-							}
-						},
-						"required": [
-							"datasetId"
-						],
-						"type": "object"
+						"$ref": "#/components/schemas/EvaluatorResult"
 					},
 					"error": {
 						"type": "number",
@@ -6374,167 +6511,64 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"Result__datasetId-string_.string_": {
+			"Result_EvaluatorResult.string_": {
 				"anyOf": [
 					{
-						"$ref": "#/components/schemas/ResultSuccess__datasetId-string__"
+						"$ref": "#/components/schemas/ResultSuccess_EvaluatorResult_"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
 					}
 				]
 			},
-			"DatasetMetadata": {
+			"CreateEvaluatorParams": {
 				"properties": {
-					"promptVersionId": {
+					"scoring_type": {
 						"type": "string"
 					},
-					"inputRecordsIds": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
-					}
-				},
-				"type": "object",
-				"additionalProperties": false
-			},
-			"NewDatasetParams": {
-				"properties": {
-					"datasetName": {
+					"llm_template": {},
+					"name": {
 						"type": "string"
-					},
-					"requestIds": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
-					},
-					"datasetType": {
-						"type": "string",
-						"enum": [
-							"experiment",
-							"helicone"
-						]
-					},
-					"meta": {
-						"$ref": "#/components/schemas/DatasetMetadata"
 					}
 				},
 				"required": [
-					"datasetName",
-					"requestIds",
-					"datasetType"
+					"scoring_type",
+					"llm_template",
+					"name"
 				],
 				"type": "object",
 				"additionalProperties": false
 			},
-			"Pick_FilterLeaf.request-or-prompts_versions_": {
+			"UpdateEvaluatorParams": {
 				"properties": {
-					"request": {
-						"$ref": "#/components/schemas/Partial_RequestTableToOperators_"
+					"scoring_type": {
+						"type": "string"
 					},
-					"prompts_versions": {
-						"$ref": "#/components/schemas/Partial_PromptVersionsToOperators_"
-					}
+					"llm_template": {}
 				},
 				"type": "object",
-				"description": "From T, pick a set of properties whose keys are in the union K"
+				"additionalProperties": false
 			},
-			"FilterLeafSubset_request-or-prompts_versions_": {
-				"$ref": "#/components/schemas/Pick_FilterLeaf.request-or-prompts_versions_"
-			},
-			"DatasetFilterNode": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/FilterLeafSubset_request-or-prompts_versions_"
-					},
-					{
-						"$ref": "#/components/schemas/DatasetFilterBranch"
-					},
-					{
-						"type": "string",
-						"enum": [
-							"all"
-						]
-					}
-				]
-			},
-			"DatasetFilterBranch": {
+			"EvaluatorExperiment": {
 				"properties": {
-					"right": {
-						"$ref": "#/components/schemas/DatasetFilterNode"
+					"experiment_created_at": {
+						"type": "string"
 					},
-					"operator": {
-						"type": "string",
-						"enum": [
-							"or",
-							"and"
-						]
-					},
-					"left": {
-						"$ref": "#/components/schemas/DatasetFilterNode"
+					"experiment_id": {
+						"type": "string"
 					}
 				},
 				"required": [
-					"right",
-					"operator",
-					"left"
+					"experiment_created_at",
+					"experiment_id"
 				],
 				"type": "object"
 			},
-			"RandomDatasetParams": {
-				"properties": {
-					"datasetName": {
-						"type": "string"
-					},
-					"filter": {
-						"$ref": "#/components/schemas/DatasetFilterNode"
-					},
-					"offset": {
-						"type": "number",
-						"format": "double"
-					},
-					"limit": {
-						"type": "number",
-						"format": "double"
-					}
-				},
-				"required": [
-					"datasetName",
-					"filter"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"DatasetResult": {
-				"properties": {
-					"id": {
-						"type": "string"
-					},
-					"name": {
-						"type": "string"
-					},
-					"created_at": {
-						"type": "string"
-					},
-					"meta": {
-						"$ref": "#/components/schemas/DatasetMetadata"
-					}
-				},
-				"required": [
-					"id",
-					"name",
-					"created_at"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"ResultSuccess_DatasetResult-Array_": {
+			"ResultSuccess_EvaluatorExperiment-Array_": {
 				"properties": {
 					"data": {
 						"items": {
-							"$ref": "#/components/schemas/DatasetResult"
+							"$ref": "#/components/schemas/EvaluatorExperiment"
 						},
 						"type": "array"
 					},
@@ -6553,44 +6587,10 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"Result_DatasetResult-Array.string_": {
+			"Result_EvaluatorExperiment-Array.string_": {
 				"anyOf": [
 					{
-						"$ref": "#/components/schemas/ResultSuccess_DatasetResult-Array_"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
-			"ResultSuccess___-Array_": {
-				"properties": {
-					"data": {
-						"items": {
-							"properties": {},
-							"type": "object"
-						},
-						"type": "array"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result___-Array.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess___-Array_"
+						"$ref": "#/components/schemas/ResultSuccess_EvaluatorExperiment-Array_"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
@@ -8595,18 +8595,38 @@
 						],
 						"type": "object"
 					},
-					"geographicLatency": {
+					"geographicTtft": {
 						"items": {
 							"properties": {
-								"latency": {
-									"$ref": "#/components/schemas/TokenMetricStats"
+								"median": {
+									"type": "number",
+									"format": "double"
 								},
 								"countryCode": {
 									"type": "string"
 								}
 							},
 							"required": [
-								"latency",
+								"median",
+								"countryCode"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"geographicLatency": {
+						"items": {
+							"properties": {
+								"median": {
+									"type": "number",
+									"format": "double"
+								},
+								"countryCode": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"median",
 								"countryCode"
 							],
 							"type": "object"
@@ -8658,6 +8678,7 @@
 				"required": [
 					"timeSeriesData",
 					"requestStatus",
+					"geographicTtft",
 					"geographicLatency",
 					"feedback",
 					"costs",
@@ -12304,23 +12325,23 @@
 				"parameters": []
 			}
 		},
-		"/v1/evaluator": {
+		"/v1/experiment/dataset": {
 			"post": {
-				"operationId": "CreateEvaluator",
+				"operationId": "AddDataset",
 				"responses": {
 					"200": {
 						"description": "Ok",
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Result_EvaluatorResult.string_"
+									"$ref": "#/components/schemas/Result__datasetId-string_.string_"
 								}
 							}
 						}
 					}
 				},
 				"tags": [
-					"Evaluator"
+					"Dataset"
 				],
 				"security": [
 					{
@@ -12333,141 +12354,30 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/CreateEvaluatorParams"
+								"$ref": "#/components/schemas/NewDatasetParams"
 							}
 						}
 					}
 				}
 			}
 		},
-		"/v1/evaluator/{evaluatorId}": {
-			"get": {
-				"operationId": "GetEvaluator",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_EvaluatorResult.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Evaluator"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "evaluatorId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				]
-			},
-			"put": {
-				"operationId": "UpdateEvaluator",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_EvaluatorResult.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Evaluator"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "evaluatorId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/UpdateEvaluatorParams"
-							}
-						}
-					}
-				}
-			},
-			"delete": {
-				"operationId": "DeleteEvaluator",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_null.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Evaluator"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "evaluatorId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				]
-			}
-		},
-		"/v1/evaluator/query": {
+		"/v1/experiment/dataset/random": {
 			"post": {
-				"operationId": "QueryEvaluators",
+				"operationId": "AddRandomDataset",
 				"responses": {
 					"200": {
 						"description": "Ok",
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Result_EvaluatorResult-Array.string_"
+									"$ref": "#/components/schemas/Result__datasetId-string_.string_"
 								}
 							}
 						}
 					}
 				},
 				"tags": [
-					"Evaluator"
+					"Dataset"
 				],
 				"security": [
 					{
@@ -12480,7 +12390,47 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"properties": {},
+								"$ref": "#/components/schemas/RandomDatasetParams"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/experiment/dataset/query": {
+			"post": {
+				"operationId": "GetDatasets",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_DatasetResult-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Dataset"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"promptVersionId": {
+										"type": "string"
+									}
+								},
 								"type": "object"
 							}
 						}
@@ -12488,23 +12438,23 @@
 				}
 			}
 		},
-		"/v1/evaluator/{evaluatorId}/experiments": {
-			"get": {
-				"operationId": "GetExperimentsForEvaluator",
+		"/v1/experiment/dataset/{datasetId}/row/insert": {
+			"post": {
+				"operationId": "InsertDatasetRow",
 				"responses": {
 					"200": {
 						"description": "Ok",
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Result_EvaluatorExperiment-Array.string_"
+									"$ref": "#/components/schemas/Result_string.string_"
 								}
 							}
 						}
 					}
 				},
 				"tags": [
-					"Evaluator"
+					"Dataset"
 				],
 				"security": [
 					{
@@ -12514,13 +12464,191 @@
 				"parameters": [
 					{
 						"in": "path",
-						"name": "evaluatorId",
+						"name": "datasetId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"originalColumnId": {
+										"type": "string"
+									},
+									"inputs": {
+										"$ref": "#/components/schemas/Record_string.string_"
+									},
+									"inputRecordId": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"inputs",
+									"inputRecordId"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/experiment/dataset/{datasetId}/version/{promptVersionId}/row/new": {
+			"post": {
+				"operationId": "CreateDatasetRow",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_string.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Dataset"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "datasetId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "path",
+						"name": "promptVersionId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"sourceRequest": {
+										"type": "string"
+									},
+									"inputs": {
+										"$ref": "#/components/schemas/Record_string.string_"
+									}
+								},
+								"required": [
+									"inputs"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/experiment/dataset/{datasetId}/inputs/query": {
+			"post": {
+				"operationId": "GetDataset",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_PromptInputRecord-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Dataset"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "datasetId",
 						"required": true,
 						"schema": {
 							"type": "string"
 						}
 					}
 				]
+			}
+		},
+		"/v1/experiment/dataset/{datasetId}/mutate": {
+			"post": {
+				"operationId": "MutateDataset",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result___-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Dataset"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"removeRequests": {
+										"items": {
+											"type": "string"
+										},
+										"type": "array"
+									},
+									"addRequests": {
+										"items": {
+											"type": "string"
+										},
+										"type": "array"
+									}
+								},
+								"required": [
+									"removeRequests",
+									"addRequests"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/v1/experiment/new-empty": {
@@ -13500,23 +13628,23 @@
 				}
 			}
 		},
-		"/v1/experiment/dataset": {
+		"/v1/evaluator": {
 			"post": {
-				"operationId": "AddDataset",
+				"operationId": "CreateEvaluator",
 				"responses": {
 					"200": {
 						"description": "Ok",
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Result__datasetId-string_.string_"
+									"$ref": "#/components/schemas/Result_EvaluatorResult.string_"
 								}
 							}
 						}
 					}
 				},
 				"tags": [
-					"Dataset"
+					"Evaluator"
 				],
 				"security": [
 					{
@@ -13529,107 +13657,30 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/NewDatasetParams"
+								"$ref": "#/components/schemas/CreateEvaluatorParams"
 							}
 						}
 					}
 				}
 			}
 		},
-		"/v1/experiment/dataset/random": {
-			"post": {
-				"operationId": "AddRandomDataset",
+		"/v1/evaluator/{evaluatorId}": {
+			"get": {
+				"operationId": "GetEvaluator",
 				"responses": {
 					"200": {
 						"description": "Ok",
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Result__datasetId-string_.string_"
+									"$ref": "#/components/schemas/Result_EvaluatorResult.string_"
 								}
 							}
 						}
 					}
 				},
 				"tags": [
-					"Dataset"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/RandomDatasetParams"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/v1/experiment/dataset/query": {
-			"post": {
-				"operationId": "GetDatasets",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_DatasetResult-Array.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Dataset"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"properties": {
-									"promptVersionId": {
-										"type": "string"
-									}
-								},
-								"type": "object"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/v1/experiment/dataset/{datasetId}/row/insert": {
-			"post": {
-				"operationId": "InsertDatasetRow",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_string.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Dataset"
+					"Evaluator"
 				],
 				"security": [
 					{
@@ -13639,7 +13690,40 @@
 				"parameters": [
 					{
 						"in": "path",
-						"name": "datasetId",
+						"name": "evaluatorId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"put": {
+				"operationId": "UpdateEvaluator",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_EvaluatorResult.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Evaluator"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "evaluatorId",
 						"required": true,
 						"schema": {
 							"type": "string"
@@ -13651,45 +13735,28 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"properties": {
-									"originalColumnId": {
-										"type": "string"
-									},
-									"inputs": {
-										"$ref": "#/components/schemas/Record_string.string_"
-									},
-									"inputRecordId": {
-										"type": "string"
-									}
-								},
-								"required": [
-									"inputs",
-									"inputRecordId"
-								],
-								"type": "object"
+								"$ref": "#/components/schemas/UpdateEvaluatorParams"
 							}
 						}
 					}
 				}
-			}
-		},
-		"/v1/experiment/dataset/{datasetId}/version/{promptVersionId}/row/new": {
-			"post": {
-				"operationId": "CreateDatasetRow",
+			},
+			"delete": {
+				"operationId": "DeleteEvaluator",
 				"responses": {
 					"200": {
 						"description": "Ok",
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Result_string.string_"
+									"$ref": "#/components/schemas/Result_null.string_"
 								}
 							}
 						}
 					}
 				},
 				"tags": [
-					"Dataset"
+					"Evaluator"
 				],
 				"security": [
 					{
@@ -13699,71 +13766,7 @@
 				"parameters": [
 					{
 						"in": "path",
-						"name": "datasetId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					},
-					{
-						"in": "path",
-						"name": "promptVersionId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"properties": {
-									"sourceRequest": {
-										"type": "string"
-									},
-									"inputs": {
-										"$ref": "#/components/schemas/Record_string.string_"
-									}
-								},
-								"required": [
-									"inputs"
-								],
-								"type": "object"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/v1/experiment/dataset/{datasetId}/inputs/query": {
-			"post": {
-				"operationId": "GetDataset",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_PromptInputRecord-Array.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Dataset"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "datasetId",
+						"name": "evaluatorId",
 						"required": true,
 						"schema": {
 							"type": "string"
@@ -13772,23 +13775,23 @@
 				]
 			}
 		},
-		"/v1/experiment/dataset/{datasetId}/mutate": {
+		"/v1/evaluator/query": {
 			"post": {
-				"operationId": "MutateDataset",
+				"operationId": "QueryEvaluators",
 				"responses": {
 					"200": {
 						"description": "Ok",
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Result___-Array.string_"
+									"$ref": "#/components/schemas/Result_EvaluatorResult-Array.string_"
 								}
 							}
 						}
 					}
 				},
 				"tags": [
-					"Dataset"
+					"Evaluator"
 				],
 				"security": [
 					{
@@ -13801,29 +13804,47 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"properties": {
-									"removeRequests": {
-										"items": {
-											"type": "string"
-										},
-										"type": "array"
-									},
-									"addRequests": {
-										"items": {
-											"type": "string"
-										},
-										"type": "array"
-									}
-								},
-								"required": [
-									"removeRequests",
-									"addRequests"
-								],
+								"properties": {},
 								"type": "object"
 							}
 						}
 					}
 				}
+			}
+		},
+		"/v1/evaluator/{evaluatorId}/experiments": {
+			"get": {
+				"operationId": "GetExperimentsForEvaluator",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_EvaluatorExperiment-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Evaluator"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "evaluatorId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
 			}
 		},
 		"/v1/helicone-dataset": {

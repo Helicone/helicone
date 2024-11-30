@@ -13,34 +13,76 @@ import { formatLatency } from "../utils/formattingUtils";
 
 const geoUrl = "/countries-50m.json";
 
-interface GeographicLatencyMapProps {
+type MetricType = "latency" | "ttft";
+
+interface GeoMetricMapProps {
   model: components["schemas"]["Model"];
+  metric: MetricType;
   className?: string;
   style?: React.CSSProperties;
 }
 
-export const GeographicLatencyMap = ({
+const formatValue = (value: number, metric: MetricType) => {
+  switch (metric) {
+    case "latency":
+      return `${formatLatency(value)} per 1k tokens`;
+    case "ttft":
+      return `${formatLatency(value)}`;
+    default:
+      return `${value}`;
+  }
+};
+
+const getGeographicData = (
+  model: components["schemas"]["Model"],
+  metric: MetricType
+) => {
+  const geoData =
+    metric === "latency" ? model.geographicLatency : model.geographicTtft;
+
+  if (!geoData || geoData.length === 0) {
+    return [];
+  }
+
+  return geoData.map((geo: { countryCode: string; median: number }) => {
+    const country = ISO31661.whereAlpha2(geo.countryCode);
+    return {
+      id: country?.numeric || geo.countryCode,
+      value: geo.median,
+      name: country?.country || geo.countryCode,
+    };
+  });
+};
+
+export const GeoMetricMap = ({
   model,
+  metric,
   className,
   style,
-}: GeographicLatencyMapProps) => {
+}: GeoMetricMapProps) => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [tooltipOpen, setTooltipOpen] = useState(false);
   const [localTooltipContent, setLocalTooltipContent] = useState("");
 
-  const data = model.geographicLatency.map((geo) => {
-    const country = ISO31661.whereAlpha2(geo.countryCode);
-    return {
-      id: country?.numeric || geo.countryCode,
-      value: geo.latency.medianPer1000Tokens,
-      name: country?.country || geo.countryCode,
-    };
-  });
+  const data = getGeographicData(model, metric);
+
+  if (data.length === 0) {
+    return (
+      <Card
+        className={`shadow-none border bg-[#0A192F] ${className}`}
+        style={style}
+      >
+        <CardContent className="p-4 flex items-center justify-center h-[400px]">
+          <p className="text-gray-400">No geographic data available</p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   const colorScale = scaleLinear<string>()
     .domain([
-      Math.min(...data.map((d) => d.value)),
-      Math.max(...data.map((d) => d.value)),
+      Math.min(...data.map((d: any) => d.value)),
+      Math.max(...data.map((d: any) => d.value)),
     ])
     .range(["#2A4F7E", "#4ADEEB"]);
 
@@ -71,7 +113,7 @@ export const GeographicLatencyMap = ({
             <Geographies geography={geoUrl}>
               {({ geographies }) =>
                 geographies.map((geo) => {
-                  const country = data.find((d) => d.id === geo.id);
+                  const country = data.find((d: any) => d.id === geo.id);
                   return (
                     <Geography
                       key={geo.rsmKey}
@@ -96,9 +138,10 @@ export const GeographicLatencyMap = ({
                       onMouseEnter={() => {
                         if (country) {
                           setTooltipOpen(true);
-                          const tooltipText = `${country.name}\n${formatLatency(
-                            country.value
-                          )} per 1k tokens`;
+                          const tooltipText = `${country.name}\n${formatValue(
+                            country.value,
+                            metric
+                          )}`;
                           setLocalTooltipContent(tooltipText);
                         }
                       }}

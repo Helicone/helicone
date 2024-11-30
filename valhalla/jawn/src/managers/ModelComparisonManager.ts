@@ -31,13 +31,12 @@ interface ModelMetricsQueryResult {
 
 interface GeographicLatencyQueryResult {
   country_code: string;
-  average_latency_per_1000_tokens: number;
   median_latency_per_1000_tokens: number;
-  min_latency_per_1000_tokens: number;
-  max_latency_per_1000_tokens: number;
-  p90_latency_per_1000_tokens: number;
-  p95_latency_per_1000_tokens: number;
-  p99_latency_per_1000_tokens: number;
+}
+
+interface GeographicTtftQueryResult {
+  country_code: string;
+  median_ttft: number;
 }
 
 interface TimeSeriesQueryResult {
@@ -75,29 +74,38 @@ export class ModelComparisonManager {
   }
 
   private async getModelInfo(model: string): Promise<Result<Model, string>> {
-    const [metricsResult, geoResult, timeSeriesResult, costResult] =
-      await Promise.all([
-        clickhouseDb.dbQuery<ModelMetricsQueryResult>(
-          this.getModelMetricsQuery(model),
-          []
-        ),
-        clickhouseDb.dbQuery<GeographicLatencyQueryResult>(
-          this.getGeographicLatencyQuery(model),
-          []
-        ),
-        clickhouseDb.dbQuery<TimeSeriesQueryResult>(
-          this.getTimeSeriesQuery(model),
-          []
-        ),
-        clickhouseDb.dbQuery<CostQueryResult>(this.getCostQuery(model), []),
-      ]);
+    const [
+      metricsResult,
+      geoResult,
+      timeSeriesResult,
+      costResult,
+      geoTtftResult,
+    ] = await Promise.all([
+      clickhouseDb.dbQuery<ModelMetricsQueryResult>(
+        this.getModelMetricsQuery(model),
+        []
+      ),
+      clickhouseDb.dbQuery<GeographicLatencyQueryResult>(
+        this.getGeographicLatencyQuery(model),
+        []
+      ),
+      clickhouseDb.dbQuery<TimeSeriesQueryResult>(
+        this.getTimeSeriesQuery(model),
+        []
+      ),
+      clickhouseDb.dbQuery<CostQueryResult>(this.getCostQuery(model), []),
+      clickhouseDb.dbQuery<GeographicTtftQueryResult>(
+        this.getGeographicTtftQuery(model),
+        []
+      ),
+    ]);
 
     if (metricsResult.error) return metricsResult;
     if (geoResult.error) return geoResult;
     if (timeSeriesResult.error) return timeSeriesResult;
     if (costResult.error) return costResult;
+    if (geoTtftResult.error) return geoTtftResult;
 
-    console.log(`metricsResult.data: ${JSON.stringify(metricsResult.data)}`);
     const metrics = metricsResult.data?.[0];
     if (!metrics) {
       return err("No data found for model");
@@ -143,16 +151,11 @@ export class ModelComparisonManager {
       },
       geographicLatency: (geoResult.data ?? []).map((geo) => ({
         countryCode: geo.country_code,
-        latency: {
-          average: geo.average_latency_per_1000_tokens,
-          median: geo.median_latency_per_1000_tokens,
-          min: geo.min_latency_per_1000_tokens,
-          max: geo.max_latency_per_1000_tokens,
-          p90: geo.p90_latency_per_1000_tokens,
-          p95: geo.p95_latency_per_1000_tokens,
-          p99: geo.p99_latency_per_1000_tokens,
-          medianPer1000Tokens: geo.median_latency_per_1000_tokens,
-        },
+        median: geo.median_latency_per_1000_tokens,
+      })),
+      geographicTtft: (geoTtftResult.data ?? []).map((geo) => ({
+        countryCode: geo.country_code,
+        median: geo.median_ttft,
       })),
       requestStatus: {
         successRate: metrics.success_rate,
@@ -185,21 +188,22 @@ export class ModelComparisonManager {
         model,
         provider,
         -- Latency stats
-        avg(if(completion_tokens > 0, latency / completion_tokens * 1000, null)) as average_latency_per_1000_tokens,
-        median(if(completion_tokens > 0, latency / completion_tokens * 1000, null)) as median_latency_per_1000_tokens,
-        min(if(completion_tokens > 0, latency / completion_tokens * 1000, null)) as min_latency_per_1000_tokens,
-        max(if(completion_tokens > 0, latency / completion_tokens * 1000, null)) as max_latency_per_1000_tokens,
-        quantile(0.90)(if(completion_tokens > 0, latency / completion_tokens * 1000, null)) as p90_latency_per_1000_tokens,
-        quantile(0.95)(if(completion_tokens > 0, latency / completion_tokens * 1000, null)) as p95_latency_per_1000_tokens,
-        quantile(0.99)(if(completion_tokens > 0, latency / completion_tokens * 1000, null)) as p99_latency_per_1000_tokens,
+        avg(if(latency > 0 AND completion_tokens > 0, latency / completion_tokens * 1000, null)) as average_latency_per_1000_tokens,
+        median(if(latency > 0 AND completion_tokens > 0, latency / completion_tokens * 1000, null)) as median_latency_per_1000_tokens,
+        min(if(latency > 0 AND completion_tokens > 0, latency / completion_tokens * 1000, null)) as min_latency_per_1000_tokens,
+        max(if(latency > 0 AND completion_tokens > 0, latency / completion_tokens * 1000, null)) as max_latency_per_1000_tokens,
+        quantile(0.90)(if(latency > 0 AND completion_tokens > 0, latency / completion_tokens * 1000, null)) as p90_latency_per_1000_tokens,
+        quantile(0.95)(if(latency > 0 AND completion_tokens > 0, latency / completion_tokens * 1000, null)) as p95_latency_per_1000_tokens,
+        quantile(0.99)(if(latency > 0 AND completion_tokens > 0, latency / completion_tokens * 1000, null)) as p99_latency_per_1000_tokens,
+        countIf(latency > 0 AND completion_tokens > 0) as valid_latency_count,
         -- TTFT stats
-        avg(time_to_first_token) as average_ttft,
-        median(time_to_first_token) as median_ttft,
-        min(time_to_first_token) as min_ttft,
-        max(time_to_first_token) as max_ttft,
-        quantile(0.90)(time_to_first_token) as p90_ttft,
-        quantile(0.95)(time_to_first_token) as p95_ttft,
-        quantile(0.99)(time_to_first_token) as p99_ttft,
+        avg(if(time_to_first_token > 0, time_to_first_token, null)) as average_ttft,
+        median(if(time_to_first_token > 0, time_to_first_token, null)) as median_ttft,
+        min(if(time_to_first_token > 0, time_to_first_token, null)) as min_ttft,
+        max(if(time_to_first_token > 0, time_to_first_token, null)) as max_ttft,
+        quantile(0.90)(if(time_to_first_token > 0, time_to_first_token, null)) as p90_ttft,
+        quantile(0.95)(if(time_to_first_token > 0, time_to_first_token, null)) as p95_ttft,
+        quantile(0.99)(if(time_to_first_token > 0, time_to_first_token, null)) as p99_ttft,
         -- Request status
         count(*) as total_requests,
         countIf(status < 500) / count(*) as success_rate,
@@ -228,6 +232,20 @@ export class ModelComparisonManager {
       WHERE model = '${model}'
         AND request_created_at >= now() - INTERVAL 30 DAY
         AND country_code != ''
+        AND latency > 0
+      GROUP BY country_code`;
+  }
+
+  private getGeographicTtftQuery(model: string): string {
+    return `
+      SELECT
+        country_code,
+        median(time_to_first_token) as median_ttft
+      FROM request_response_rmt
+      WHERE model = '${model}'
+        AND request_created_at >= now() - INTERVAL 30 DAY
+        AND country_code != ''
+        AND time_to_first_token > 0
       GROUP BY country_code`;
   }
 
@@ -235,8 +253,8 @@ export class ModelComparisonManager {
     return `
       SELECT
         toStartOfInterval(request_created_at, INTERVAL 1 DAY) as timestamp,
-        median(if(completion_tokens > 0, latency / completion_tokens * 1000, null)) as latency,
-        median(time_to_first_token) as ttft,
+        median(if(latency > 0 AND completion_tokens > 0, latency / completion_tokens * 1000, null)) as latency,
+        median(if(time_to_first_token > 0, time_to_first_token, null)) as ttft,
         countIf(status < 500) / count(*) as success_rate,
         countIf(status >= 500) / count(*) as error_rate
       FROM request_response_rmt

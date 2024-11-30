@@ -46,7 +46,11 @@ export type Model = {
   };
   geographicLatency: {
     countryCode: string;
-    latency: TokenMetricStats;
+    median: number;
+  }[];
+  geographicTtft: {
+    countryCode: string;
+    median: number;
   }[];
   requestStatus: {
     successRate: number;
