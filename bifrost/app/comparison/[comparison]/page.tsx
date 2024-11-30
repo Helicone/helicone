@@ -1,5 +1,6 @@
 import { providers } from "@/packages/cost/providers/mappings";
 import { ModelComparisonPage } from "../ModelComparisonPage";
+import QueryProvider from "../QueryProvider";
 
 export default async function Home({
   params,
@@ -11,12 +12,14 @@ export default async function Home({
   const [modelA, modelB] = params.comparison.split("-vs-");
 
   return (
-    <div className="container mx-auto py-8">
-      <ModelComparisonPage
-        modelA={decodeURIComponent(modelA)}
-        modelB={decodeURIComponent(modelB)}
-      />
-    </div>
+    <QueryProvider>
+      <div className="container mx-auto py-8">
+        <ModelComparisonPage
+          modelA={decodeURIComponent(modelA)}
+          modelB={decodeURIComponent(modelB)}
+        />
+      </div>
+    </QueryProvider>
   );
 }
 

@@ -8513,13 +8513,13 @@
 					},
 					{
 						"properties": {
-							"averagePerCompletionToken": {
+							"medianPer1000Tokens": {
 								"type": "number",
 								"format": "double"
 							}
 						},
 						"required": [
-							"averagePerCompletionToken"
+							"medianPer1000Tokens"
 						],
 						"type": "object"
 					}
@@ -8625,20 +8625,20 @@
 						],
 						"type": "object"
 					},
-					"cost": {
+					"costs": {
 						"properties": {
-							"output": {
+							"completion_token": {
 								"type": "number",
 								"format": "double"
 							},
-							"input": {
+							"prompt_token": {
 								"type": "number",
 								"format": "double"
 							}
 						},
 						"required": [
-							"output",
-							"input"
+							"completion_token",
+							"prompt_token"
 						],
 						"type": "object"
 					},
@@ -8660,7 +8660,7 @@
 					"requestStatus",
 					"geographicLatency",
 					"feedback",
-					"cost",
+					"costs",
 					"ttft",
 					"latency",
 					"provider",

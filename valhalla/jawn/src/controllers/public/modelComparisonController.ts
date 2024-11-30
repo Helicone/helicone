@@ -24,7 +24,7 @@ export type MetricStats = {
 };
 
 export type TokenMetricStats = MetricStats & {
-  averagePerCompletionToken: number;
+  medianPer1000Tokens: number;
 };
 
 export type TimeSeriesMetric = {
@@ -37,9 +37,9 @@ export type Model = {
   provider: string;
   latency: TokenMetricStats;
   ttft: MetricStats;
-  cost: {
-    input: number;
-    output: number;
+  costs: {
+    prompt_token: number;
+    completion_token: number;
   };
   feedback: {
     positivePercentage: number;

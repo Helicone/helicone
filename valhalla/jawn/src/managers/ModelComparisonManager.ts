@@ -1,23 +1,21 @@
 import { Model } from "../controllers/public/modelComparisonController";
 import { ModelComparison } from "../controllers/public/modelComparisonController";
 import { clickhouseDb } from "../lib/db/ClickhouseWrapper";
-import { dbExecute } from "../lib/shared/db/dbExecute";
 import { err, ok } from "../lib/shared/result";
-
 import { Result } from "../lib/shared/result";
+import { providers } from "../packages/cost/providers/mappings";
 
 // Query Result Types
 interface ModelMetricsQueryResult {
   model: string;
   provider: string;
-  average_latency: number;
-  median_latency: number;
-  min_latency: number;
-  max_latency: number;
-  p90_latency: number;
-  p95_latency: number;
-  p99_latency: number;
-  avg_latency_per_token: number;
+  average_latency_per_1000_tokens: number;
+  median_latency_per_1000_tokens: number;
+  min_latency_per_1000_tokens: number;
+  max_latency_per_1000_tokens: number;
+  p90_latency_per_1000_tokens: number;
+  p95_latency_per_1000_tokens: number;
+  p99_latency_per_1000_tokens: number;
   average_ttft: number;
   median_ttft: number;
   min_ttft: number;
@@ -33,14 +31,13 @@ interface ModelMetricsQueryResult {
 
 interface GeographicLatencyQueryResult {
   country_code: string;
-  average_latency: number;
-  median_latency: number;
-  min_latency: number;
-  max_latency: number;
-  p90_latency: number;
-  p95_latency: number;
-  p99_latency: number;
-  avg_latency_per_token: number;
+  average_latency_per_1000_tokens: number;
+  median_latency_per_1000_tokens: number;
+  min_latency_per_1000_tokens: number;
+  max_latency_per_1000_tokens: number;
+  p90_latency_per_1000_tokens: number;
+  p95_latency_per_1000_tokens: number;
+  p99_latency_per_1000_tokens: number;
 }
 
 interface TimeSeriesQueryResult {
@@ -100,23 +97,37 @@ export class ModelComparisonManager {
     if (timeSeriesResult.error) return timeSeriesResult;
     if (costResult.error) return costResult;
 
+    console.log(`metricsResult.data: ${JSON.stringify(metricsResult.data)}`);
     const metrics = metricsResult.data?.[0];
     if (!metrics) {
       return err("No data found for model");
     }
 
+    const provider = providers.find((p) => p.provider === metrics.provider);
+    if (!provider) {
+      return err("Provider not found");
+    }
+
     return ok({
       model: metrics.model,
       provider: metrics.provider,
+      costs: {
+        prompt_token:
+          provider.costs?.find((c) => c.model.value === metrics.model)?.cost
+            ?.prompt_token ?? 0,
+        completion_token:
+          provider.costs?.find((c) => c.model.value === metrics.model)?.cost
+            ?.completion_token ?? 0,
+      },
       latency: {
-        average: metrics.average_latency,
-        median: metrics.median_latency,
-        min: metrics.min_latency,
-        max: metrics.max_latency,
-        p90: metrics.p90_latency,
-        p95: metrics.p95_latency,
-        p99: metrics.p99_latency,
-        averagePerCompletionToken: metrics.avg_latency_per_token,
+        average: metrics.average_latency_per_1000_tokens,
+        median: metrics.median_latency_per_1000_tokens,
+        min: metrics.min_latency_per_1000_tokens,
+        max: metrics.max_latency_per_1000_tokens,
+        p90: metrics.p90_latency_per_1000_tokens,
+        p95: metrics.p95_latency_per_1000_tokens,
+        p99: metrics.p99_latency_per_1000_tokens,
+        medianPer1000Tokens: metrics.median_latency_per_1000_tokens,
       },
       ttft: {
         average: metrics.average_ttft,
@@ -127,24 +138,20 @@ export class ModelComparisonManager {
         p95: metrics.p95_ttft,
         p99: metrics.p99_ttft,
       },
-      cost: {
-        input: costResult.data?.[0]?.avg_input_tokens ?? 0,
-        output: costResult.data?.[0]?.avg_output_tokens ?? 0,
-      },
       feedback: {
         positivePercentage: metrics.positive_percentage ?? 0,
       },
       geographicLatency: (geoResult.data ?? []).map((geo) => ({
         countryCode: geo.country_code,
         latency: {
-          average: geo.average_latency,
-          median: geo.median_latency,
-          min: geo.min_latency,
-          max: geo.max_latency,
-          p90: geo.p90_latency,
-          p95: geo.p95_latency,
-          p99: geo.p99_latency,
-          averagePerCompletionToken: geo.avg_latency_per_token,
+          average: geo.average_latency_per_1000_tokens,
+          median: geo.median_latency_per_1000_tokens,
+          min: geo.min_latency_per_1000_tokens,
+          max: geo.max_latency_per_1000_tokens,
+          p90: geo.p90_latency_per_1000_tokens,
+          p95: geo.p95_latency_per_1000_tokens,
+          p99: geo.p99_latency_per_1000_tokens,
+          medianPer1000Tokens: geo.median_latency_per_1000_tokens,
         },
       })),
       requestStatus: {
@@ -178,14 +185,13 @@ export class ModelComparisonManager {
         model,
         provider,
         -- Latency stats
-        avg(latency) as average_latency,
-        median(latency) as median_latency,
-        min(latency) as min_latency,
-        max(latency) as max_latency,
-        quantile(0.90)(latency) as p90_latency,
-        quantile(0.95)(latency) as p95_latency,
-        quantile(0.99)(latency) as p99_latency,
-        median(if(completion_tokens > 0, (latency / completion_tokens) * 1000, null)) as avg_latency_per_token,
+        avg(if(completion_tokens > 0, latency / completion_tokens * 1000, null)) as average_latency_per_1000_tokens,
+        median(if(completion_tokens > 0, latency / completion_tokens * 1000, null)) as median_latency_per_1000_tokens,
+        min(if(completion_tokens > 0, latency / completion_tokens * 1000, null)) as min_latency_per_1000_tokens,
+        max(if(completion_tokens > 0, latency / completion_tokens * 1000, null)) as max_latency_per_1000_tokens,
+        quantile(0.90)(if(completion_tokens > 0, latency / completion_tokens * 1000, null)) as p90_latency_per_1000_tokens,
+        quantile(0.95)(if(completion_tokens > 0, latency / completion_tokens * 1000, null)) as p95_latency_per_1000_tokens,
+        quantile(0.99)(if(completion_tokens > 0, latency / completion_tokens * 1000, null)) as p99_latency_per_1000_tokens,
         -- TTFT stats
         avg(time_to_first_token) as average_ttft,
         median(time_to_first_token) as median_ttft,
@@ -210,14 +216,14 @@ export class ModelComparisonManager {
     return `
       SELECT
         country_code,
-        avg(latency) as average_latency,
-        median(latency) as median_latency,
-        min(latency) as min_latency,
-        max(latency) as max_latency,
-        quantile(0.90)(latency) as p90_latency,
-        quantile(0.95)(latency) as p95_latency,
-        quantile(0.99)(latency) as p99_latency,
-        median(if(completion_tokens > 0, (latency / completion_tokens) * 1000, null)) as avg_latency_per_token
+        avg(if(completion_tokens > 0, latency / completion_tokens * 1000, null)) as average_latency_per_1000_tokens,
+        median(if(completion_tokens > 0, latency / completion_tokens * 1000, null)) as median_latency_per_1000_tokens,
+        min(if(completion_tokens > 0, latency / completion_tokens * 1000, null)) as min_latency_per_1000_tokens,
+        max(if(completion_tokens > 0, latency / completion_tokens * 1000, null)) as max_latency_per_1000_tokens,
+        quantile(0.90)(if(completion_tokens > 0, latency / completion_tokens * 1000, null)) as p90_latency_per_1000_tokens,
+        quantile(0.95)(if(completion_tokens > 0, latency / completion_tokens * 1000, null)) as p95_latency_per_1000_tokens,
+        quantile(0.99)(if(completion_tokens > 0, latency / completion_tokens * 1000, null)) as p99_latency_per_1000_tokens,
+        median(if(completion_tokens > 0, (latency / completion_tokens) * 1000, null)) as median_latency_per_1000_tokens
       FROM request_response_rmt
       WHERE model = '${model}'
         AND request_created_at >= now() - INTERVAL 30 DAY
@@ -228,9 +234,9 @@ export class ModelComparisonManager {
   private getTimeSeriesQuery(model: string): string {
     return `
       SELECT
-        toStartOfInterval(request_created_at, INTERVAL 5 MINUTE) as timestamp,
-        avg(latency) as latency,
-        avg(time_to_first_token) as ttft,
+        toStartOfInterval(request_created_at, INTERVAL 1 DAY) as timestamp,
+        median(if(completion_tokens > 0, latency / completion_tokens * 1000, null)) as latency,
+        median(time_to_first_token) as ttft,
         countIf(status < 500) / count(*) as success_rate,
         countIf(status >= 500) / count(*) as error_rate
       FROM request_response_rmt
@@ -239,9 +245,9 @@ export class ModelComparisonManager {
       GROUP BY timestamp
       ORDER BY timestamp ASC
       WITH FILL FROM
-        toStartOfInterval(now() - INTERVAL 30 DAY, INTERVAL 10 MINUTE)
-        TO toStartOfInterval(now(), INTERVAL 10 MINUTE)
-        STEP INTERVAL 10 MINUTE`;
+        toStartOfInterval(now() - INTERVAL 30 DAY, INTERVAL 1 DAY)
+        TO toStartOfInterval(now(), INTERVAL 1 DAY)
+        STEP INTERVAL 1 DAY`;
   }
 
   private getCostQuery(model: string): string {

@@ -2922,7 +2922,7 @@ Json: JsonObject;
     };
     TokenMetricStats: components["schemas"]["MetricStats"] & {
       /** Format: double */
-      averagePerCompletionToken: number;
+      medianPer1000Tokens: number;
     };
     TimeSeriesMetric: {
       /** Format: double */
@@ -2950,11 +2950,11 @@ Json: JsonObject;
         /** Format: double */
         positivePercentage: number;
       };
-      cost: {
+      costs: {
         /** Format: double */
-        output: number;
+        completion_token: number;
         /** Format: double */
-        input: number;
+        prompt_token: number;
       };
       ttft: components["schemas"]["MetricStats"];
       latency: components["schemas"]["TokenMetricStats"];

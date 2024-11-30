@@ -32,7 +32,7 @@ export const GeographicLatencyMap = ({
     const country = ISO31661.whereAlpha2(geo.countryCode);
     return {
       id: country?.numeric || geo.countryCode,
-      value: geo.latency.averagePerCompletionToken,
+      value: geo.latency.medianPer1000Tokens,
       name: country?.country || geo.countryCode,
     };
   });
