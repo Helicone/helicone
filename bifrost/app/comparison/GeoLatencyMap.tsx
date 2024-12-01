@@ -9,11 +9,10 @@ import {
   TooltipContent,
   TooltipProvider,
 } from "@/components/ui/tooltip";
-import { formatLatency } from "../utils/formattingUtils";
+import { formatLatency, formatPercentage } from "../utils/formattingUtils";
+import { MetricType } from "./GeographicMetricSection";
 
 const geoUrl = "/countries-50m.json";
-
-type MetricType = "latency" | "ttft";
 
 interface GeoMetricMapProps {
   model: components["schemas"]["Model"];
@@ -28,6 +27,8 @@ const formatValue = (value: number, metric: MetricType) => {
       return `${formatLatency(value)} per 1k tokens`;
     case "ttft":
       return `${formatLatency(value)}`;
+    case "errorRate":
+      return `${formatPercentage(value)}`;
     default:
       return `${value}`;
   }

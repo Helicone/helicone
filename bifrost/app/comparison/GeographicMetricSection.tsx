@@ -1,10 +1,10 @@
 import { Button } from "@/components/ui/button";
-import { GeoMetricMap } from "./GeoMetricMap";
+import { GeoMetricMap } from "./GeoLatencyMap";
 import { components } from "@/lib/clients/jawnTypes/public";
 import { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
-type MetricType = "latency" | "ttft";
+export type MetricType = "latency" | "ttft" | "errorRate";
 
 interface GeographicMetricSectionProps {
   models: components["schemas"]["Model"][];
@@ -16,6 +16,7 @@ interface GeographicMetricSectionProps {
 const metricTitles = {
   latency: "Average Latency by Region",
   ttft: "Time to First Token by Region",
+  errorRate: "Error Rate by Region",
 };
 
 const GeographicMetricSection = ({

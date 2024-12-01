@@ -5659,7 +5659,9 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": {
+          providerB: string;
           modelB: string;
+          providerA: string;
           modelA: string;
         };
       };

@@ -60,3 +60,10 @@ export function formatLatency(ms: number): string {
     return `${ms.toFixed(2)}ms`;
   }
 }
+
+export const formatPercentage = (value: number) => {
+  const percentage = value * 100;
+  if (percentage === 100) return "100%";
+  if (percentage === 0) return "0%";
+  return `${percentage.toFixed(2).replace(/\.?0+$/, "")}%`;
+};

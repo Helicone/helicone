@@ -12,17 +12,21 @@ import MetricComparisonCard from "./MetricComparisonCard";
 
 export function ModelComparisonPage({
   modelA,
+  providerA,
   modelB,
+  providerB,
 }: {
   modelA: string;
+  providerA: string;
   modelB: string;
+  providerB: string;
 }) {
   const jawnClient = useJawnClient();
   const { data: comparisonData, isLoading } = useQuery({
     queryKey: ["modelComparison", modelA, modelB],
     queryFn: async () => {
       const response = await jawnClient.POST("/v1/public/compare/models", {
-        body: { modelA, modelB },
+        body: { modelA, providerA, modelB, providerB },
       });
       return response.data?.data ?? null;
     },
@@ -35,7 +39,7 @@ export function ModelComparisonPage({
       <div className="flex items-center justify-center mb-8">
         <div className="relative">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-800 bg-clip-text text-transparent bg-gradient-to-r from-gray-700 to-gray-900">
-            LLM Model Battle
+            LLM Battle
           </h1>
           <div className="absolute -bottom-1 left-0 right-0 flex justify-center space-x-1">
             <div className="h-[2px] w-2 bg-gray-300 rounded-full" />
@@ -49,7 +53,12 @@ export function ModelComparisonPage({
         </div>
       </div>
 
-      <ModelSelector modelA={modelA} modelB={modelB} />
+      <ModelSelector
+        modelA={modelA}
+        modelB={modelB}
+        providerA={providerA}
+        providerB={providerB}
+      />
 
       {isLoading ? (
         <Card className="mb-8">
@@ -121,13 +130,12 @@ export function ModelComparisonPage({
               </div>
             </Card>
 
-            {/* Error Rate Card */}
             <MetricComparisonCard
               models={comparisonData.models}
-              title="Error Rate"
-              subtitle="Percentage of failed requests"
-              metricKey="errorRate"
-              metricPath="requestStatus.errorRate"
+              title="Success Rate"
+              subtitle="Percentage of successful requests"
+              metricKey="successRate"
+              metricPath="requestStatus.successRate"
             />
 
             {/* User Feedback Card */}

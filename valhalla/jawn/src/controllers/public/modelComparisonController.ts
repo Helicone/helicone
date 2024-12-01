@@ -83,13 +83,17 @@ export class ModelComparisonController extends Controller {
     @Body()
     body: {
       modelA: string;
+      providerA: string;
       modelB: string;
+      providerB: string;
     }
   ): Promise<Result<ModelComparison, string>> {
     const modelComparisonManager = new ModelComparisonManager();
     const result = await modelComparisonManager.getModelComparison(
       body.modelA,
-      body.modelB
+      body.providerA,
+      body.modelB,
+      body.providerB
     );
 
     return result;

@@ -1,7 +1,7 @@
 import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer } from "recharts";
 import { ChartTooltip } from "@/components/ui/chart";
 import { components } from "@/lib/clients/jawnTypes/public";
-import { formatLatency } from "../utils/formattingUtils";
+import { formatLatency, formatPercentage } from "../utils/formattingUtils";
 import { MetricType } from "./MetricComparisonCard";
 
 interface ModelTimeSeriesChartProps {
@@ -19,9 +19,8 @@ const ModelTimeSeriesChart = ({
       case "ttft":
         return formatLatency(value);
       case "successRate":
-        return `${(value * 100).toFixed(1)}%`;
       case "errorRate":
-        return `${(value * 100).toFixed(3)}%`;
+        return formatPercentage(value);
       case "positivePercentage":
         return `${(value * 100).toFixed(1)}%`;
       case "negativePercentage":
@@ -56,13 +55,49 @@ const ModelTimeSeriesChart = ({
     );
   };
 
-  const combinedData = models[0].timeSeriesData[metric].map((point) => ({
-    timestamp: point.timestamp,
-    [models[0].model]: point.value,
-    [models[1].model]: models[1].timeSeriesData[metric].find(
-      (p) => p.timestamp === point.timestamp
-    )?.value,
-  }));
+  const combinedData = models[0].timeSeriesData[metric]
+    .map((point) => {
+      const matchingPoint = models[1].timeSeriesData[metric].find(
+        (p) => p.timestamp === point.timestamp
+      );
+
+      return {
+        timestamp: point.timestamp,
+        [models[0].model]: point.value || null,
+        [models[1].model]: matchingPoint?.value || null,
+      };
+    })
+    .filter(Boolean);
+
+  const getYAxisProps = () => {
+    if (metric === "successRate" || metric === "errorRate") {
+      const allValues = combinedData
+        .flatMap((point) => [
+          point?.[models[0].model],
+          point?.[models[1].model],
+        ])
+        .filter((value): value is number => typeof value === "number");
+
+      const min = Math.min(...allValues);
+      const max = Math.max(...allValues);
+      const range = max - min;
+      const padding = range * 0.1;
+      const yMin = Math.max(0, min - padding);
+      const yMax = Math.min(1, max + padding);
+
+      return {
+        domain: [yMin, yMax],
+        tickCount: 5,
+        tickFormatter: (value: number) => `${(value * 100).toFixed(3)}%`,
+      };
+    }
+
+    return {
+      domain: ["auto", "auto"],
+      tickCount: 5,
+      tickFormatter: formatValue,
+    };
+  };
 
   return (
     <div className="h-full">
@@ -82,6 +117,7 @@ const ModelTimeSeriesChart = ({
               strokeWidth={1.5}
               dot={false}
               activeDot={{ r: 4 }}
+              connectNulls={true}
             />
           ))}
           <XAxis
@@ -101,9 +137,9 @@ const ModelTimeSeriesChart = ({
             axisLine={false}
             tickLine={false}
             tick={{ fontSize: 12, fill: "#888888" }}
-            tickFormatter={formatValue}
-            domain={["auto", "auto"]}
             width={60}
+            scale="linear"
+            {...getYAxisProps()}
           />
           <ChartTooltip
             content={<CustomTooltip />}

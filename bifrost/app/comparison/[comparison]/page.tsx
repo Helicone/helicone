@@ -9,14 +9,19 @@ export default async function Home({
     comparison: string;
   };
 }) {
-  const [modelA, modelB] = params.comparison.split("-vs-");
+  const [modelAWithProvider, modelBWithProvider] =
+    params.comparison.split("-vs-");
+  const [modelA, providerA] = modelAWithProvider.split("-on-");
+  const [modelB, providerB] = modelBWithProvider.split("-on-");
 
   return (
     <QueryProvider>
       <div className="container mx-auto py-8">
         <ModelComparisonPage
           modelA={decodeURIComponent(modelA)}
+          providerA={decodeURIComponent(providerA)}
           modelB={decodeURIComponent(modelB)}
+          providerB={decodeURIComponent(providerB)}
         />
       </div>
     </QueryProvider>
@@ -61,20 +66,23 @@ export async function generateStaticParams() {
   const paths = [];
   const uniqueModels = Array.from(modelToProviders.keys());
 
-  // Generate comparisons between different models
   for (let i = 0; i < uniqueModels.length; i++) {
     for (let j = i + 1; j < uniqueModels.length; j++) {
       const modelA = uniqueModels[i];
       const modelB = uniqueModels[j];
+      const providersA = modelToProviders.get(modelA)!;
+      const providersB = modelToProviders.get(modelB)!;
 
-      // Get all providers for each model
-      // const providersA = modelToProviders.get(modelA)!;
-      // const providersB = modelToProviders.get(modelB)!;
+      // Create URL-safe versions
+      const modelAPath = `${encodeURIComponent(modelA)}-on-${encodeURIComponent(
+        Array.from(providersA)[0]
+      )}`;
+      const modelBPath = `${encodeURIComponent(modelB)}-on-${encodeURIComponent(
+        Array.from(providersB)[0]
+      )}`;
 
-      // Use the first provider for each model
       paths.push({
-        modelA: encodeURIComponent(modelA),
-        modelB: encodeURIComponent(modelB),
+        comparison: `${modelAPath}-vs-${modelBPath}`,
       });
     }
   }

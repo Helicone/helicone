@@ -16266,7 +16266,13 @@
 						"application/json": {
 							"schema": {
 								"properties": {
+									"providerB": {
+										"type": "string"
+									},
 									"modelB": {
+										"type": "string"
+									},
+									"providerA": {
 										"type": "string"
 									},
 									"modelA": {
@@ -16274,7 +16280,9 @@
 									}
 								},
 								"required": [
+									"providerB",
 									"modelB",
+									"providerA",
 									"modelA"
 								],
 								"type": "object"
