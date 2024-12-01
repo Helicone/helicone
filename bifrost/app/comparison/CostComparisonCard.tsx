@@ -14,7 +14,7 @@ export default function CostComparisonCard({
   models,
 }: CostComparisonCardProps) {
   return (
-    <Card className="mb-8">
+    <Card>
       <CardContent className="p-4">
         <div className="flex justify-between items-center mb-4">
           <div>
@@ -22,7 +22,7 @@ export default function CostComparisonCard({
             <p className="text-sm text-gray-500">USD per 1M tokens</p>
           </div>
         </div>
-        <div className="flex flex-col md:grid md:grid-cols-2 gap-4 md:gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-1 gap-2">
           {models.map((model, index) => {
             const isWinner =
               model.costs.prompt_token < models[1 - index].costs.prompt_token;
@@ -39,7 +39,7 @@ export default function CostComparisonCard({
                   }`}
                 >
                   <div
-                    className={`w-3 h-3 rounded-full ${
+                    className={`w-3 h-3 rounded-sm ${
                       index === 0 ? "bg-red-500" : "bg-blue-500"
                     }`}
                   />

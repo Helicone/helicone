@@ -1,7 +1,13 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { components } from "@/lib/clients/jawnTypes/public";
-import { ComposableMap, Geographies, Geography } from "react-simple-maps";
-import { scaleLinear } from "d3-scale";
+import {
+  ComposableMap,
+  Geographies,
+  Geography,
+  Graticule,
+  Sphere,
+} from "react-simple-maps";
+import { scaleLog } from "d3-scale";
 import ISO31661 from "iso-3166-1";
 import { useState } from "react";
 import {
@@ -80,18 +86,17 @@ export const GeoMetricMap = ({
     );
   }
 
-  const colorScale = scaleLinear<string>()
+  const colorScale = scaleLog<string>()
     .domain([
-      Math.min(...data.map((d: any) => d.value)),
+      Math.max(1, Math.min(...data.map((d: any) => d.value))),
+      Math.max(...data.map((d: any) => d.value)) / 2,
       Math.max(...data.map((d: any) => d.value)),
     ])
-    .range(["#2A4F7E", "#4ADEEB"]);
+    .range(["rgb(184, 225, 240)", "rgb(130, 203, 230)", "rgb(24, 158, 211)"])
+    .clamp(true);
 
   return (
-    <Card
-      className={`shadow-none border bg-[#0A192F] ${className}`}
-      style={style}
-    >
+    <Card className={`shadow-none border bg-white ${className}`} style={style}>
       <CardContent className="p-4">
         <div
           className="relative"
@@ -107,54 +112,67 @@ export const GeoMetricMap = ({
             height={400}
             projectionConfig={{
               rotate: [-10, 0, 0],
-              scale: 150,
+              scale: 147,
             }}
             className="w-full h-full"
           >
-            <Geographies geography={geoUrl}>
-              {({ geographies }) =>
-                geographies.map((geo) => {
-                  const country = data.find((d: any) => d.id === geo.id);
-                  return (
-                    <Geography
-                      key={geo.rsmKey}
-                      geography={geo}
-                      fill={country ? colorScale(country.value) : "#293548"}
-                      stroke="#475569"
-                      strokeWidth={0.5}
-                      style={{
-                        default: {
-                          outline: "none",
-                        },
-                        hover: {
-                          fill: "#0EA5E9",
-                          outline: "none",
-                          cursor: "pointer",
-                        },
-                        pressed: {
-                          fill: "#0EA5E9",
-                          outline: "none",
-                        },
-                      }}
-                      onMouseEnter={() => {
-                        if (country) {
-                          setTooltipOpen(true);
-                          const tooltipText = `${country.name}\n${formatValue(
-                            country.value,
-                            metric
-                          )}`;
-                          setLocalTooltipContent(tooltipText);
+            <Sphere
+              stroke="#E4E5E6"
+              strokeWidth={0.5}
+              id={"sphere1"}
+              fill={"#ffffff"}
+            />
+            <Graticule stroke="#E4E5E6" strokeWidth={0.5} />
+            {data.length > 0 && (
+              <Geographies geography={geoUrl}>
+                {({ geographies }) =>
+                  geographies.map((geo) => {
+                    const country = data.find((d: any) => d.id === geo.id);
+                    return (
+                      <Geography
+                        key={geo.rsmKey}
+                        geography={geo}
+                        fill={
+                          country && country.value > 0
+                            ? colorScale(Math.max(1, country.value))
+                            : "#e5e7eb"
                         }
-                      }}
-                      onMouseLeave={() => {
-                        setTooltipOpen(false);
-                        setLocalTooltipContent("");
-                      }}
-                    />
-                  );
-                })
-              }
-            </Geographies>
+                        stroke="#ffffff"
+                        strokeWidth={0.5}
+                        style={{
+                          default: {
+                            outline: "none",
+                          },
+                          hover: {
+                            fill: "#0ea5e9",
+                            outline: "none",
+                            cursor: "pointer",
+                          },
+                          pressed: {
+                            fill: "#0ea5e9",
+                            outline: "none",
+                          },
+                        }}
+                        onMouseEnter={() => {
+                          if (country) {
+                            setTooltipOpen(true);
+                            const tooltipText = `${country.name}\n${formatValue(
+                              country.value,
+                              metric
+                            )}`;
+                            setLocalTooltipContent(tooltipText);
+                          }
+                        }}
+                        onMouseLeave={() => {
+                          setTooltipOpen(false);
+                          setLocalTooltipContent("");
+                        }}
+                      />
+                    );
+                  })
+                }
+              </Geographies>
+            )}
           </ComposableMap>
           <TooltipProvider>
             <Tooltip open={tooltipOpen}>

@@ -225,6 +225,7 @@ export class ModelComparisonManager {
       SELECT
         model,
         provider,
+        
         -- Latency stats
         avg(if(latency > 0 AND completion_tokens > 0, latency / completion_tokens * 1000, null)) as average_latency_per_1000_tokens,
         median(if(latency > 0 AND completion_tokens > 0, latency / completion_tokens * 1000, null)) as median_latency_per_1000_tokens,
@@ -234,6 +235,7 @@ export class ModelComparisonManager {
         quantile(0.95)(if(latency > 0 AND completion_tokens > 0, latency / completion_tokens * 1000, null)) as p95_latency_per_1000_tokens,
         quantile(0.99)(if(latency > 0 AND completion_tokens > 0, latency / completion_tokens * 1000, null)) as p99_latency_per_1000_tokens,
         countIf(latency > 0 AND completion_tokens > 0) as valid_latency_count,
+        
         -- TTFT stats
         avg(if(time_to_first_token > 0, time_to_first_token, null)) as average_ttft,
         median(if(time_to_first_token > 0, time_to_first_token, null)) as median_ttft,
@@ -242,19 +244,20 @@ export class ModelComparisonManager {
         quantile(0.90)(if(time_to_first_token > 0, time_to_first_token, null)) as p90_ttft,
         quantile(0.95)(if(time_to_first_token > 0, time_to_first_token, null)) as p95_ttft,
         quantile(0.99)(if(time_to_first_token > 0, time_to_first_token, null)) as p99_ttft,
+
         -- Request status
         count(*) as total_requests,
         countIf(status < 500) as successful_requests,
         countIf(status >= 500) as error_requests,
         (successful_requests / total_requests) as success_rate,
         (error_requests / total_requests) as error_rate,
+
         -- Feedback counts
+        countIf(has(scores, 'helicone-score-feedback')) as total_feedback,
         coalesce(countIf(has(scores, 'helicone-score-feedback') AND scores['helicone-score-feedback'] = 1) / 
-          nullIf(countIf(has(scores, 'helicone-score-feedback')), 0), 0) as positive_percentage,
+          nullIf(total_feedback, 0), 0) as positive_percentage,
         coalesce(countIf(has(scores, 'helicone-score-feedback') AND scores['helicone-score-feedback'] = 0) / 
-          nullIf(countIf(has(scores, 'helicone-score-feedback')), 0), 0) as negative_percentage,
-        coalesce(countIf(has(scores, 'helicone-score-feedback') AND scores['helicone-score-feedback'] = 1), 0) as positive_feedback_count,
-        coalesce(countIf(has(scores, 'helicone-score-feedback') AND scores['helicone-score-feedback'] = 0), 0) as negative_feedback_count
+          nullIf(total_feedback, 0), 0) as negative_percentage
       FROM request_response_rmt
       WHERE model = '${model}'
         AND upper(provider) = '${provider}'
@@ -299,23 +302,28 @@ export class ModelComparisonManager {
 
   private getTimeSeriesQuery(model: string, provider: string): string {
     return `
+      WITH daily_stats AS (
+        SELECT
+          toStartOfInterval(request_created_at, INTERVAL 1 DAY) as timestamp,
+          count(*) as total_requests,
+          median(if(latency > 0 AND completion_tokens > 0, latency / completion_tokens * 1000, null)) as latency,
+          median(if(time_to_first_token > 0, time_to_first_token, null)) as ttft,
+          countIf(status < 500) / count(*) as success_rate,
+          countIf(status >= 500) / count(*) as error_rate
+        FROM request_response_rmt
+        WHERE model = '${model}'
+          AND upper(provider) = '${provider}'
+          AND request_created_at >= now() - INTERVAL 30 DAY
+        GROUP BY timestamp
+        HAVING total_requests >= 100
+      )
       SELECT
-        toStartOfInterval(request_created_at, INTERVAL 1 DAY) as timestamp,
-        median(if(latency > 0 AND completion_tokens > 0, latency / completion_tokens * 1000, null)) as latency,
-        median(if(time_to_first_token > 0, time_to_first_token, null)) as ttft,
-        countIf(status < 500) / count(*) as success_rate,
-        countIf(status >= 500) / count(*) as error_rate,
-        coalesce(countIf(has(scores, 'helicone-score-feedback') AND scores['helicone-score-feedback'] = 1) / 
-          nullIf(countIf(has(scores, 'helicone-score-feedback')), 0), 0) as positive_percentage,
-        coalesce(countIf(has(scores, 'helicone-score-feedback') AND scores['helicone-score-feedback'] = 0) / 
-          nullIf(countIf(has(scores, 'helicone-score-feedback')), 0), 0) as negative_percentage,
-        coalesce(countIf(has(scores, 'helicone-score-feedback') AND scores['helicone-score-feedback'] = 1), 0) as positive_feedback_count,
-        coalesce(countIf(has(scores, 'helicone-score-feedback') AND scores['helicone-score-feedback'] = 0), 0) as negative_feedback_count
-      FROM request_response_rmt
-      WHERE model = '${model}'
-        AND upper(provider) = '${provider}'
-        AND request_created_at >= now() - INTERVAL 30 DAY
-      GROUP BY timestamp
+        timestamp,
+        latency,
+        ttft,
+        success_rate,
+        error_rate
+      FROM daily_stats
       ORDER BY timestamp ASC
       WITH FILL FROM
         toStartOfInterval(now() - INTERVAL 30 DAY, INTERVAL 1 DAY)

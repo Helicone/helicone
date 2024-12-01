@@ -9,6 +9,15 @@ import ModelComparisonTable from "./ModelComparisonTable";
 import GeographicMetricSection from "./GeographicMetricSection";
 import CostComparisonCard from "./CostComparisonCard";
 import MetricComparisonCard from "./MetricComparisonCard";
+import LoadingCard from "./LoadingCard";
+import { PieChart, Pie, Sector, ResponsiveContainer } from "recharts";
+import { Tooltip as ChartTooltip } from "recharts";
+import {
+  ChartConfig,
+  ChartContainer,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
+import FeedbackCard from "./FeedbackCard";
 
 export function ModelComparisonPage({
   modelA,
@@ -61,22 +70,14 @@ export function ModelComparisonPage({
       />
 
       {isLoading ? (
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle>Loading comparison data...</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="animate-pulse">
-              <div className="h-4 bg-gray-200 rounded mb-4"></div>
-              <div className="h-4 bg-gray-200 rounded mb-4"></div>
-              <div className="h-4 bg-gray-200 rounded"></div>
-            </div>
-          </CardContent>
-        </Card>
+        <LoadingCard />
       ) : (
         comparisonData?.models && (
-          <>
-            <CostComparisonCard models={comparisonData.models} />
+          <div className="grid grid-cols-1 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <CostComparisonCard models={comparisonData.models} />
+              <FeedbackCard models={comparisonData.models} />
+            </div>
 
             {/* Latency Card */}
             <Card className="mb-8">
@@ -133,47 +134,12 @@ export function ModelComparisonPage({
             <MetricComparisonCard
               models={comparisonData.models}
               title="Success Rate"
-              subtitle="Percentage of successful requests"
+              subtitle="Percentage of successful requests (200s vs 500s)"
               metricKey="successRate"
               metricPath="requestStatus.successRate"
+              higherIsBetter={true}
             />
-
-            {/* User Feedback Card */}
-            <MetricComparisonCard
-              models={comparisonData.models}
-              title="User Feedback"
-              subtitle="Percentage of positive user feedback"
-              metricKey="positivePercentage"
-              metricPath="feedback.positivePercentage"
-            />
-
-            {/* Negative Feedback Card */}
-            <MetricComparisonCard
-              models={comparisonData.models}
-              title="Negative Feedback"
-              subtitle="Percentage of negative user feedback"
-              metricKey="negativePercentage"
-              metricPath="feedback.negativePercentage"
-            />
-
-            {/* Positive Feedback Count Card */}
-            <MetricComparisonCard
-              models={comparisonData.models}
-              title="Positive Feedback Count"
-              subtitle="Number of positive user feedback"
-              metricKey="positiveFeedbackCount"
-              metricPath="feedback.positiveFeedbackCount"
-            />
-
-            {/* Negative Feedback Count Card */}
-            <MetricComparisonCard
-              models={comparisonData.models}
-              title="Negative Feedback Count"
-              subtitle="Number of negative user feedback"
-              metricKey="negativeFeedbackCount"
-              metricPath="feedback.negativeFeedbackCount"
-            />
-          </>
+          </div>
         )
       )}
     </div>

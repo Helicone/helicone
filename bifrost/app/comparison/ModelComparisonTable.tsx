@@ -1,5 +1,6 @@
 import { components } from "@/lib/clients/jawnTypes/public";
 import { formatLatency } from "../utils/formattingUtils";
+import { BarChart2 } from "lucide-react";
 
 export interface ModelComparisonTableProps {
   models: components["schemas"]["Model"][];
@@ -35,8 +36,11 @@ const ModelComparisonTable = ({
                 </span>
               </div>
             </th>
-            <th className="text-left py-4 px-6 text-sm font-medium text-gray-500 uppercase tracking-wider">
-              median
+            <th className="text-left py-4 px-6 text-sm font-medium text-gray-500 uppercase tracking-wider relative">
+              <div className="flex items-center gap-1">
+                <span>median</span>
+                <BarChart2 className="w-4 h-4 text-purple-500" />
+              </div>
             </th>
             <th
               key="average"
@@ -76,7 +80,7 @@ const ModelComparisonTable = ({
               >
                 <div className="flex items-center gap-2">
                   <div
-                    className={`w-3 h-3 ${
+                    className={`w-3 h-3 rounded-sm ${
                       index === 0 ? "bg-red-500" : "bg-blue-500"
                     }`}
                   />
