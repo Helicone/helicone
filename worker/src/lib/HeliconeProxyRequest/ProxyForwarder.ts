@@ -297,6 +297,7 @@ export async function proxyForwarder(
 
   async function log(loggable: DBLoggable) {
     const { data: auth, error: authError } = await request.auth();
+
     if (authError !== null) {
       console.error("Error getting auth", authError);
       return;
@@ -341,9 +342,11 @@ export async function proxyForwarder(
     if (res.error !== null) {
       console.error("Error logging", res.error);
     }
-    if (proxyRequest && proxyRequest.rateLimitOptions) {
+    const db = new DBWrapper(env, auth);
+    const { data: orgData, error: orgError } = await db.getAuthParams();
+    if (proxyRequest && proxyRequest.rateLimitOptions && !orgError) {
       await updateRateLimitCounter({
-        organizationId: proxyRequest.providerAuthHash,
+        organizationId: orgData?.organizationId,
         heliconeProperties:
           proxyRequest.requestWrapper.heliconeHeaders.heliconeProperties,
         rateLimitKV: env.RATE_LIMIT_KV,
