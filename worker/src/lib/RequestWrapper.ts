@@ -331,6 +331,22 @@ export class RequestWrapper {
     return this.request.url;
   }
 
+  private setUrl(url: string): void {
+    this.url = new URL(url);
+  }
+
+  public removeBedrock(): void {
+    const newUrl = new URL(this.url);
+    newUrl.pathname = newUrl.pathname
+      .split("/v1/")[1]
+      .split("/")
+      .slice(1)
+      .join("/");
+
+    console.log("newUrl", newUrl.toString());
+    this.setUrl(newUrl.toString());
+  }
+
   private async validateHeliconeAuthHeader(
     heliconeAuth: string
   ): Promise<Result<null, string>> {

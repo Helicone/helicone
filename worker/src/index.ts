@@ -123,6 +123,16 @@ function modifyEnvBasedOnPath(env: Env, request: RequestWrapper): Env {
     };
   }
 
+  // request.removeBedrock();
+
+  // console.log(request.url);
+
+  return {
+    ...env,
+    WORKER_TYPE: "GATEWAY_API",
+    GATEWAY_TARGET: "https://bedrock-runtime.ap-south-1.amazonaws.com",
+  };
+
   if (env.WORKER_TYPE) {
     return env;
   }
@@ -237,6 +247,15 @@ function modifyEnvBasedOnPath(env: Env, request: RequestWrapper): Env {
         WORKER_TYPE: "GATEWAY_API",
         GATEWAY_TARGET: "https://api.mistral.ai",
       };
+    } else if (hostParts[0].includes("bedrock")) {
+      return {
+        ...env,
+        WORKER_TYPE: "GATEWAY_API",
+        GATEWAY_TARGET:
+          "https://bedrock-runtime." +
+          url.pathname.split("/v1/")[1].split("/")[0] +
+          ".amazonaws.com",
+      };
     } else if (hostParts[0].includes("fireworks")) {
       if (isRootPath(url) && request.getMethod() === "GET") {
         return {
@@ -336,10 +355,18 @@ export default {
         return Response.redirect(env.WORKER_DEFINED_REDIRECT_URL, 301);
       }
 
+      console.log(env);
+
       const router = buildRouter(
         env.WORKER_TYPE,
         request.url.includes("browser")
       );
+
+      console.log("router", router);
+      console.log("requestWrapper", requestWrapper);
+      console.log("env", env);
+      console.log("ctx", ctx);
+
       return router
         .handle(request, requestWrapper.data, env, ctx)
         .catch(handleError);
