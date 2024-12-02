@@ -67,6 +67,10 @@ export class LLMAsAJudge {
       body: JSON.stringify(requestBody),
     });
 
+    if (!res.ok) {
+      console.error("error calling llm as a judge", res);
+      throw new Error("error calling llm as a judge");
+    }
     const data = await res.json();
     return data;
   }

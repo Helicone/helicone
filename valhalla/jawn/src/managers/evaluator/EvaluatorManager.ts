@@ -113,20 +113,28 @@ export class EvaluatorManager extends BaseManager {
         output: JSON.stringify(content),
         evaluatorName: evaluator.name,
       });
-      const result = await llmAsAJudge.evaluate();
+      try {
+        const result = await llmAsAJudge.evaluate();
 
-      const scoreName = getEvaluatorScoreName(evaluator.name);
+        const scoreName = getEvaluatorScoreName(evaluator.name);
 
-      const scoreManager = new ScoreManager(this.authParams);
-      const requestFeedback = await scoreManager.addScores(
-        run.request_id,
-        {
-          [scoreName]: result.score,
-        },
-        0
-      );
+        const scoreManager = new ScoreManager(this.authParams);
+        if (result.score == undefined || result.score == null) {
+          return err("Score is undefined");
+        }
+        const requestFeedback = await scoreManager.addScores(
+          run.request_id,
+          {
+            [scoreName]: result.score,
+          },
+          0
+        );
 
-      return ok(null);
+        return ok(null);
+      } catch (e) {
+        console.error("error evaluating", e);
+        return err("Error evaluating");
+      }
     }
 
     return err("Failed to get request response");
@@ -148,6 +156,8 @@ export class EvaluatorManager extends BaseManager {
     const experimentData = await experimentManager.getExperimentOutputForScores(
       experimentId
     );
+
+    console.log({ experimentData, length: experimentData.data?.length });
 
     if (experimentData.error) {
       return err(experimentData.error);

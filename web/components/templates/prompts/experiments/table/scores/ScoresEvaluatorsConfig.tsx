@@ -35,8 +35,6 @@ const ScoresEvaluatorsConfig = memo(
     const [open, setOpen] = useState<boolean>(false);
     const [value, setValue] = useState<string>("");
 
-    const queryClient = useQueryClient();
-
     const [showSuccess, setShowSuccess] = useState(false);
     const [showError, setShowError] = useState(false);
 
@@ -57,7 +55,7 @@ const ScoresEvaluatorsConfig = memo(
     }, [runEvaluators.isError]);
 
     return (
-      <Row className={cn("gap-2 items-center w-full", ISLAND_MARGIN, "mx-6")}>
+      <Row className={cn("gap-2 items-center w-full", "mx-6")}>
         <Select
           value={value}
           onValueChange={(value) => {

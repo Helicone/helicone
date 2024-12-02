@@ -261,7 +261,6 @@ export class ScoreManager extends BaseManager {
 
   private mapScores(scores: Scores): Score[] {
     return Object.entries(scores).map(([key, value]) => {
-      console.log("key", key, value);
       if (typeof value === "boolean") {
         // Convert booleans to integers (1 for true, 0 for false)
         return {

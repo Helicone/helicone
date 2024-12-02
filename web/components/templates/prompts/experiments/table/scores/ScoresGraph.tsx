@@ -21,7 +21,7 @@ import { CartesianGrid, Line, LineChart, XAxis } from "recharts";
 import { useQueryClient } from "@tanstack/react-query";
 import { useExperimentTable } from "../hooks/useExperimentTable";
 import { cn } from "@/lib/utils";
-import { ISLAND_MARGIN } from "@/components/ui/islandContainer";
+import { useExperimentScores } from "@/services/hooks/prompts/experiment-scores";
 
 const ScoresGraph = ({
   promptVersions,
@@ -60,18 +60,10 @@ const ScoresGraph = ({
     }
   );
 
+  const { getScoreColorMapping } = useExperimentScores(experimentId);
+
   const chartConfig = useMemo(() => {
-    return {
-      ...Object.fromEntries(
-        scoreCriterias.map((score, index) => [
-          score,
-          {
-            label: score.replace("-hcone-bool", ""),
-            color: `oklch(var(--chart-${(index % 5) + 1}))`,
-          },
-        ])
-      ),
-    } satisfies ChartConfig;
+    return getScoreColorMapping(scoreCriterias);
   }, [scoreCriterias]);
 
   const chartData = useMemo(() => {
@@ -152,7 +144,7 @@ const ScoresGraph = ({
             vertical={false}
           />
           <XAxis
-            padding={{ left: 12 }}
+            padding={{ left: 12, right: 24 }}
             dataKey="promptVersionLabel"
             type="category"
             tickLine={false}
@@ -161,9 +153,18 @@ const ScoresGraph = ({
             // tickFormatter={(value) => value.slice(0, 3)}
           />
           <ChartLegend
+            layout="horizontal"
             verticalAlign="top"
+            align="left"
             height={36}
-            content={<ChartLegendContent key="" />}
+            // iconType="square"
+            // iconSize={10}
+            content={
+              <ChartLegendContent
+                selectedScoreKey={selectedScoreKey ?? ""}
+                key=""
+              />
+            }
           />
           <ChartTooltip cursor={true} content={<ChartTooltipContent />} />
           {scoreCriterias.map((score) => (

@@ -6,6 +6,18 @@ import { getJawnClient } from "@/lib/clients/jawn";
 import useNotification from "@/components/shared/notification/useNotification";
 import { useCallback } from "react";
 
+const getScoreColorMapping = (scores: string[]) => {
+  return Object.fromEntries(
+    scores.map((score, index) => [
+      score,
+      {
+        label: score.replace("-hcone-bool", ""),
+        color: `oklch(var(--chart-${(index % 10) + 1}))`,
+      },
+    ])
+  );
+};
+
 const useExperimentScores = (experimentId: string) => {
   const org = useOrg();
   const currentOrgId = org?.currentOrg?.id;
@@ -150,7 +162,6 @@ const useExperimentScores = (experimentId: string) => {
       );
       return result.data ?? {};
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [currentOrgId, experimentId]
   );
 
@@ -179,7 +190,8 @@ const useExperimentScores = (experimentId: string) => {
     runEvaluators,
     fetchExperimentHypothesisScores,
     shouldRunEvaluators,
+    getScoreColorMapping,
   };
 };
 
-export { useExperimentScores };
+export { useExperimentScores, getScoreColorMapping };

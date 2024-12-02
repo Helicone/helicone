@@ -365,6 +365,24 @@ export function ExperimentTable({
 
   const queryClient = useQueryClient();
 
+  const handleShowScoresChange = useCallback(
+    (checked: boolean) => {
+      if (!checked) {
+        queryClient.setQueryData(["selectedScoreKey", experimentTableId], null);
+        queryClient.setQueryData(["experimentScores", experimentTableId], {});
+
+        for (const promptVersion of promptVersionsData ?? []) {
+          queryClient.setQueryData(
+            ["experimentScores", experimentTableId, promptVersion.id],
+            {}
+          );
+        }
+      }
+      setShowScores(checked);
+    },
+    [queryClient, experimentTableId]
+  );
+
   return (
     <>
       <div className="flex justify-between items-center py-4 pr-4">
@@ -382,28 +400,35 @@ export function ExperimentTable({
             ]}
           />
         </IslandContainer>
-        <div className="flex items-center gap-2">
-          <Switch
-            checked={showScores}
-            onCheckedChange={(checked) => {
-              setShowScores(checked);
-            }}
-          />
-          <p className="text-slate-800 dark:text-slate-200 text-sm font-medium">
-            Show scores
-          </p>
-          <Switch
-            checked={wrapText.data ?? false}
-            onCheckedChange={(checked) => {
-              queryClient.setQueryData(
-                ["wrapText", experimentTableId],
-                checked
-              );
-            }}
-          />
-          <p className="text-slate-800 dark:text-slate-200 text-sm font-medium">
-            Wrap text
-          </p>
+        <div className="flex items-center gap-5">
+          <div className="flex gap-2 items-center">
+            <Switch
+              size="sm"
+              checked={showScores}
+              onCheckedChange={(checked) => {
+                handleShowScoresChange(checked);
+                setShowScores(checked);
+              }}
+            />
+            <p className="text-slate-600 dark:text-slate-400 text-sm font-medium">
+              Show scores
+            </p>
+          </div>
+          <div className="flex gap-2 items-center">
+            <Switch
+              size="sm"
+              checked={wrapText.data ?? false}
+              onCheckedChange={(checked) => {
+                queryClient.setQueryData(
+                  ["wrapText", experimentTableId],
+                  checked
+                );
+              }}
+            />
+            <p className="text-slate-600 dark:text-slate-400 text-sm font-medium">
+              Wrap text
+            </p>
+          </div>
         </div>
       </div>
       <div className="h-[calc(100vh-50px)]">

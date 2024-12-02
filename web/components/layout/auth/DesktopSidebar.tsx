@@ -32,22 +32,22 @@ interface SidebarProps {
   setOpen: (open: boolean) => void;
 }
 
-export const GO_TO_KEY_SEQUENCE: Record<string, string> = {
-  d: "/dashboard",
-  r: "/requests",
-  s: "/sessions",
-  m: "/properties",
-  u: "/users",
-  p: "/prompts",
-  o: "/playground",
-  e: "/experiments",
-  v: "/evaluators",
-  t: "/datasets",
-  c: "/cache",
-  l: "/rate-limit",
-  a: "/alerts",
-  w: "/webhooks",
-};
+// export const GO_TO_KEY_SEQUENCE: Record<string, string> = {
+//   d: "/dashboard",
+//   r: "/requests",
+//   s: "/sessions",
+//   m: "/properties",
+//   u: "/users",
+//   p: "/prompts",
+//   o: "/playground",
+//   e: "/experiments",
+//   v: "/evaluators",
+//   t: "/datasets",
+//   c: "/cache",
+//   l: "/rate-limit",
+//   a: "/alerts",
+//   w: "/webhooks",
+// };
 
 const DesktopSidebar = ({ changelog, NAVIGATION }: SidebarProps) => {
   const org = useOrg();
@@ -131,19 +131,19 @@ const DesktopSidebar = ({ changelog, NAVIGATION }: SidebarProps) => {
   const [keySequence, setKeySequence] = useState<string>("");
 
   // Separate useEffect for key sequence handling
-  useEffect(() => {
-    const handleKeySequence = (event: KeyboardEvent) => {
-      if (event.key === "g") {
-        setKeySequence("g");
-      } else if (event.key in GO_TO_KEY_SEQUENCE && keySequence === "g") {
-        router.push(GO_TO_KEY_SEQUENCE[event.key]);
-        setKeySequence("");
-      }
-    };
+  // useEffect(() => {
+  //   const handleKeySequence = (event: KeyboardEvent) => {
+  //     if (event.key === "g") {
+  //       setKeySequence("g");
+  //     } else if (event.key in GO_TO_KEY_SEQUENCE && keySequence === "g") {
+  //       router.push(GO_TO_KEY_SEQUENCE[event.key]);
+  //       setKeySequence("");
+  //     }
+  //   };
 
-    window.addEventListener("keydown", handleKeySequence);
-    return () => window.removeEventListener("keydown", handleKeySequence);
-  }, [keySequence, router]);
+  //   window.addEventListener("keydown", handleKeySequence);
+  //   return () => window.removeEventListener("keydown", handleKeySequence);
+  // }, [keySequence, router]);
 
   // Keep the original useEffect for other keyboard shortcuts
   useEffect(() => {

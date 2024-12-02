@@ -113,8 +113,6 @@ export const HypothesisCellRenderer = forwardRef<
       queryFn: async () => {
         if (!hypothesisRequestId || !selectedScoreKey) return null;
 
-        console.log("hey thereeeee");
-
         const res = await jawnClient.GET(
           "/v2/experiment/{experimentId}/{requestId}/{scoreKey}",
           {
@@ -226,7 +224,7 @@ export const HypothesisCellRenderer = forwardRef<
               <div className="group relative w-full h-full">
                 <Button
                   variant="ghost"
-                  className="absolute top-2 right-2 w-6 h-6 p-0 border-slate-200 border rounded-md bg-slate-50 text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute top-2 right-2 w-6 h-6 p-0 border-slate-200 dark:border-slate-800 rounded-md text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity"
                   onClick={(e) => handleRunHypothesis(e)}
                 >
                   <PlayIcon className="w-4 h-4" />
@@ -236,10 +234,10 @@ export const HypothesisCellRenderer = forwardRef<
                   onClick={handleCellClick}
                 >
                   {selectedScoreKey && score && (
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 mb-3">
                       <div
                         className={clsx(
-                          "h-3 w-3 rounded-sm",
+                          "h-2.5 w-2.5 rounded-sm",
                           score.cellValue?.value &&
                             score.cellValue?.value > score.avg
                             ? "bg-green-500"
@@ -298,7 +296,7 @@ export const HypothesisCellRenderer = forwardRef<
               <div className="group relative w-full h-full">
                 <Button
                   variant="ghost"
-                  className="absolute top-2 right-2 w-6 h-6 p-0 border-slate-200 border rounded-md bg-slate-50 text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute top-2 right-2 w-6 h-6 p-0 border-slate-200 dark:border-slate-800 border rounded-md text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity"
                   onClick={(e) => handleRunHypothesis(e)}
                 >
                   <PlayIcon className="w-4 h-4" />
@@ -308,10 +306,10 @@ export const HypothesisCellRenderer = forwardRef<
                   onClick={handleCellClick}
                 >
                   {selectedScoreKey && score && (
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 mb-3">
                       <div
                         className={clsx(
-                          "h-3 w-3 rounded-sm",
+                          "h-2.5 w-2.5 rounded-sm",
                           score.cellValue?.value &&
                             score.cellValue?.value > score.avg
                             ? "bg-green-500"

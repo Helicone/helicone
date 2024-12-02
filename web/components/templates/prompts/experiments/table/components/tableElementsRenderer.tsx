@@ -1,6 +1,6 @@
 import { PlayIcon, SparklesIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { Button } from "../../../../../ui/button";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import PromptPlayground from "../../../id/promptPlayground";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useJawnClient } from "../../../../../../lib/clients/jawnHook";
@@ -11,6 +11,8 @@ import { FlaskConicalIcon, GitForkIcon, LightbulbIcon } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ArrayDiffViewer from "../../../id/arrayDiffViewer";
 import { useExperimentTable } from "../hooks/useExperimentTable";
+import { useExperimentScores } from "@/services/hooks/prompts/experiment-scores";
+import { cn } from "@/lib/utils";
 
 export interface InputEntry {
   key: string;
@@ -54,7 +56,6 @@ const ExperimentTableHeader = (props: ExperimentHeaderProps) => {
     isOriginal,
     onForkPromptVersion,
     experimentId,
-    showScores,
   } = props;
 
   const [showViewPrompt, setShowViewPrompt] = useState(false);
@@ -113,8 +114,11 @@ const ExperimentTableHeader = (props: ExperimentHeaderProps) => {
   });
 
   const { selectedScoreKey } = useExperimentTable(experimentId);
-
-  console.log("selectedScoreKey", selectedScoreKey);
+  const { getScoreColorMapping } = useExperimentScores(experimentId);
+  const scoreColorMapping = useMemo(() => {
+    const scores = Object.keys(promptVersionIdScore.data?.data ?? {});
+    return getScoreColorMapping(scores);
+  }, [promptVersionIdScore.data?.data]);
 
   return (
     <Dialog open={showViewPrompt} onOpenChange={setShowViewPrompt}>
@@ -123,9 +127,17 @@ const ExperimentTableHeader = (props: ExperimentHeaderProps) => {
           className="flex flex-col gap-2 h-full overflow-y-auto p-3 cursor-pointer"
           onClick={() => setShowViewPrompt(true)}
         >
-          <div className="flex flex-col gap-2">
-            {promptVersionIdScore.data ? (
-              <div className="flex gap-x-2 gap-y-1 flex-wrap">
+          <div
+            className={cn(
+              "flex flex-col",
+              Object.keys(promptVersionIdScore.data?.data ?? {}).length
+                ? "gap-4"
+                : "gap-0"
+            )}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {promptVersionIdScore.data && (
+              <div className="flex gap-2 flex-wrap">
                 {selectedScoreKey ? (
                   <div
                     className="w-full flex flex-col gap-1 py-1.5 px-2 rounded-md bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
@@ -173,44 +185,38 @@ const ExperimentTableHeader = (props: ExperimentHeaderProps) => {
                     </div>
                   </div>
                 ) : (
-                  // <Badge
-                  //   variant="helicone"
-                  //   onClick={(e) => {
-                  //     e.stopPropagation();
-                  //     setSelectedScoreKey(null);
-                  //   }}
-                  // >
-                  //   {selectedScoreKey?.toString().replace("-hcone-bool", "") ??
-                  //     ""}
-                  //   :{" "}
-                  //   {promptVersionIdScore.data?.data?.[selectedScoreKey]?.value}
-                  // </Badge>
                   Object.entries(
                     (
                       promptVersionIdScore.data as {
                         data: Record<string, { value: any }>;
                       }
-                    ).data
-                  ).map(([key, value]) => (
-                    <Badge
-                      variant="helicone"
-                      key={key}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        queryClient.setQueryData(
-                          ["selectedScoreKey", experimentId],
-                          key
-                        );
-                      }}
-                    >
-                      {key?.toString().replace("-hcone-bool", "") ?? ""}:{" "}
-                      {value?.value}
-                    </Badge>
-                  ))
+                    )?.data ?? {}
+                  ).map(([key, value]) => {
+                    const color = scoreColorMapping[key]?.color;
+                    return (
+                      <Badge
+                        className="gap-1.5"
+                        variant="helicone"
+                        key={key}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          queryClient.setQueryData(
+                            ["selectedScoreKey", experimentId],
+                            key
+                          );
+                        }}
+                      >
+                        <div
+                          className="w-2 h-2 rounded-sm"
+                          style={{ backgroundColor: color }}
+                        ></div>
+                        {key?.toString().replace("-hcone-bool", "") ?? ""}:{" "}
+                        {value?.value}
+                      </Badge>
+                    );
+                  })
                 )}
               </div>
-            ) : (
-              <></>
             )}
             <div className="flex gap-2 items-center ml-0.5">
               {icon(promptTemplate?.model ?? "")}

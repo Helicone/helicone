@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import { ChevronDownIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { GO_TO_KEY_SEQUENCE } from "./DesktopSidebar";
+// import { GO_TO_KEY_SEQUENCE } from "./DesktopSidebar";
 
 interface NavigationItem {
   name: string;
@@ -150,7 +150,7 @@ const NavItem: React.FC<NavItemProps> = ({
           </>
         </div>
       </TooltipTrigger>
-      {Object.entries(GO_TO_KEY_SEQUENCE ?? {}).filter(
+      {/* {Object.entries(GO_TO_KEY_SEQUENCE ?? {}).filter(
         ([key, path]) => path === link.href
       ).length > 0 && (
         <TooltipContent
@@ -169,7 +169,7 @@ const NavItem: React.FC<NavItemProps> = ({
             }
           </span>
         </TooltipContent>
-      )}
+      )} */}
     </Tooltip>
   );
 };
