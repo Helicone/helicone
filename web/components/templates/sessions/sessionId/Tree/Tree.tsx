@@ -47,7 +47,10 @@ const TreeNode: React.FC<TreeNodeProps> = ({
       )}
       key={`${node.name}-${node.trace?.request_id}`}
     >
-      {node.children && node.children.length > 1 ? (
+      {!node.trace &&
+      node.children &&
+      (node.children.filter((c) => c.trace).length === 0 ||
+        node.children.filter((c) => c.trace).length > 1) ? (
         <Col className="overflow-x-auto overflow-y-hidden">
           <Row className="w-full group">
             {new Array(level).fill(null).map((_, index) => (
@@ -113,7 +116,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({
                   <Button
                     variant="ghost"
                     className={clsx(
-                      "p-1 m-0 flex items-center hidden group-hover:block z-[20]"
+                      "p-1 m-0 items-center hidden group-hover:flex z-[20]"
                     )}
                     onClick={(e) => {
                       e.stopPropagation();
@@ -141,7 +144,10 @@ const TreeNode: React.FC<TreeNodeProps> = ({
                 key={index}
                 className={clsx(
                   "h-[42px] w-[24px] relative shrink-0 group-hover:cursor-pointer",
-                  selectedRequestId === node.trace?.request_id
+                  selectedRequestId ===
+                    (node.children
+                      ? node.children[0].trace?.request_id
+                      : node.trace?.request_id)
                     ? "bg-sky-100 dark:bg-slate-900"
                     : "bg-white dark:bg-slate-950 group-hover:bg-sky-50 dark:group-hover:bg-slate-900"
                 )}
@@ -187,24 +193,27 @@ export const Tree: React.FC<TreeProps> = ({
   selectedRequestIdDispatch,
   collapseAll,
   setShowDrawer,
-}) => (
-  <div
-    className={clsx(
-      "font-sans bg-slate-50 dark:bg-black border-t border-slate-200 dark:border-slate-700",
-      className
-    )}
-  >
-    {data.children &&
-      data.children.map((child, index) => (
-        <TreeNode
-          key={index}
-          node={child}
-          selectedRequestIdDispatch={selectedRequestIdDispatch}
-          isLastChild={!!data.children && index === data.children.length - 1}
-          level={0}
-          collapseAll={collapseAll}
-          setShowDrawer={setShowDrawer}
-        />
-      ))}
-  </div>
-);
+}) => {
+  console.log(data);
+  return (
+    <div
+      className={clsx(
+        "font-sans bg-slate-50 dark:bg-black border-t border-slate-200 dark:border-slate-700",
+        className
+      )}
+    >
+      {data.children &&
+        data.children.map((child, index) => (
+          <TreeNode
+            key={index}
+            node={child}
+            selectedRequestIdDispatch={selectedRequestIdDispatch}
+            isLastChild={!!data.children && index === data.children.length - 1}
+            level={0}
+            collapseAll={collapseAll}
+            setShowDrawer={setShowDrawer}
+          />
+        ))}
+    </div>
+  );
+};
