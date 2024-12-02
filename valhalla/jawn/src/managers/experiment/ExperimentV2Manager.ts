@@ -238,7 +238,6 @@ export class ExperimentV2Manager extends BaseManager {
         // prompt_versions: promptVersions.data ?? [],
       });
     } catch (e) {
-      console.log("oh okok");
       return err("Failed to get experiment");
     }
   }
@@ -286,7 +285,6 @@ export class ExperimentV2Manager extends BaseManager {
 
       return ok(rows.data ?? []);
     } catch (e) {
-      console.log("oh okok");
       return err("Failed to get experiment");
     }
   }

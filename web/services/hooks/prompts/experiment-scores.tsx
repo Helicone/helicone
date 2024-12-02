@@ -68,7 +68,6 @@ const useExperimentScores = (experimentId: string) => {
   const addEvaluator = useMutation({
     mutationFn: async (evaluatorId: string) => {
       const jawn = getJawnClient(currentOrgId);
-      console.log("evaluatorId", evaluatorId);
       const evaluator = await jawn.POST(
         "/v2/experiment/{experimentId}/evaluators",
         {
