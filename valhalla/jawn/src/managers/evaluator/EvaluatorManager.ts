@@ -157,8 +157,6 @@ export class EvaluatorManager extends BaseManager {
       experimentId
     );
 
-    console.log({ experimentData, length: experimentData.data?.length });
-
     if (experimentData.error) {
       return err(experimentData.error);
     }

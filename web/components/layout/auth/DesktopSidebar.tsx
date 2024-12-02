@@ -191,7 +191,6 @@ const DesktopSidebar = ({ changelog, NAVIGATION }: SidebarProps) => {
   };
 
   const handleModalOpen = (open: boolean) => {
-    console.log({ open });
     if (!open) {
       setChangelogToView(null);
     } else {
