@@ -20,6 +20,8 @@ import {
   getResponseMessage,
 } from "../../requests/chatComponent/messageUtils";
 import { cn } from "@/lib/utils";
+import { OnboardingPopover } from "../../onboarding/OnboardingPopover";
+import { ONBOARDING_STEPS } from "@/components/layout/onboardingContext";
 
 export type Input = {
   id: string;
@@ -318,34 +320,6 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
           setIsEditMode={setIsEditMode}
         />
 
-        {/* {!isAccordionOpen &&
-          chatType === "response" &&
-          playgroundMode === "experiment" && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div
-                  className="flex justify-center w-full cursor-pointer bg-slate-50 dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800"
-                  onClick={() => setIsAccordionOpen(!isAccordionOpen)}
-                >
-                  <Button
-                    variant="secondary"
-                    size="icon"
-                    className="w-auto h-auto px-2 rounded-full my-2 hover:bg-slate-200 dark:hover:bg-slate-800"
-                    // onClick={(e) => e.stopPropagation()}
-                  >
-                    <Ellipsis className="h-4 w-4" />
-                  </Button>
-                </div>
-              </TooltipTrigger>
-              <TooltipContent>View Inputs</TooltipContent>
-            </Tooltip>
-          )}
-
-        {chatType === "response" &&
-          playgroundMode === "experiment" &&
-          isAccordionOpen &&
-          renderMessages(messages.slice(0, messages.length - 1))} */}
-
         <div className="flex-grow overflow-auto rounded-b-md">
           {renderMessages(messages)}
         </div>
@@ -365,37 +339,44 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
                 Add Message
               </Button>
             </div>
-            <div className="flex space-x-4 w-full justify-end items-center">
-              <div className="font-normal">Model</div>
-              <Select
-                value={selectedModel}
-                onValueChange={setSelectedModel}
-                defaultValue={initialModel}
-              >
-                <SelectTrigger className="w-[200px]">
-                  <SelectValue placeholder="Select a model" />
-                </SelectTrigger>
-                <SelectContent>
-                  {MODEL_LIST.map((model) => (
-                    <SelectItem key={model.value} value={model.value}>
-                      {model.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {playgroundMode === "prompt" && (
-                <Button
-                  onClick={() =>
-                    onSubmit && onSubmit(currentChat, selectedModel || "")
-                  }
-                  variant="default"
-                  size="sm"
-                  className="px-4 font-normal"
+            <OnboardingPopover
+              popoverContentProps={{
+                onboardingStep: "EXPERIMENTS_ADD_SAVE",
+              }}
+              modal={true}
+            >
+              <div className="flex space-x-4 w-full justify-end items-center">
+                <div className="font-normal">Model</div>
+                <Select
+                  value={selectedModel}
+                  onValueChange={setSelectedModel}
+                  defaultValue={initialModel}
                 >
-                  Save prompt
-                </Button>
-              )}
-            </div>
+                  <SelectTrigger className="w-[200px]">
+                    <SelectValue placeholder="Select a model" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {MODEL_LIST.map((model) => (
+                      <SelectItem key={model.value} value={model.value}>
+                        {model.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {playgroundMode === "prompt" && (
+                  <Button
+                    onClick={() =>
+                      onSubmit && onSubmit(currentChat, selectedModel || "")
+                    }
+                    variant="default"
+                    size="sm"
+                    className="px-4 font-normal"
+                  >
+                    Save prompt
+                  </Button>
+                )}
+              </div>
+            </OnboardingPopover>
           </div>
         )}
       </div>
