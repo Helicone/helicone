@@ -8,6 +8,35 @@ interface TextOperator {
   value: string;
 }
 
+export interface ModelDetails {
+  matches: string[];
+  searchTerms: string[];
+  info: {
+    description: string;
+    recommendedFor: string[];
+    notRecommendedFor: string[];
+    tradeOffs: string[];
+  };
+}
+
+export type ModelDetailsMap = {
+  [key: string]: ModelDetails;
+};
+
+export interface ModelRow {
+  model: TextOperator;
+  cost: {
+    prompt_token: number;
+    completion_token: number;
+  };
+  showInPlayground?: boolean;
+  targetUrl?: string;
+  dateRange?: {
+    start: string;
+    end: string;
+  };
+}
+
 export interface ModelRow {
   model: TextOperator;
   cost: {

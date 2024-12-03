@@ -12,8 +12,10 @@ import { costs as mistralCosts } from "./mistral";
 import { costs as openRouterCosts } from "./openrouter";
 import { costs as fireworksAICosts } from "./fireworks";
 import { costs as groqCosts } from "./groq";
-import { ModelRow } from "../interfaces/Cost";
+import { ModelDetailsMap, ModelRow } from "../interfaces/Cost";
 import { costs as qstashCosts } from "./qstash";
+import { modelInfo as openaiModelDetails } from "./openai";
+import { modelInfo as anthropicModelDetails } from "./anthropic";
 
 const openAiPattern = /^https:\/\/api\.openai\.com/;
 const anthropicPattern = /^https:\/\/api\.anthropic\.com/;
@@ -80,16 +82,19 @@ export const providers: {
   pattern: RegExp;
   provider: ProviderName;
   costs?: ModelRow[];
+  modelDetails?: ModelDetailsMap;
 }[] = [
   {
     pattern: openAiPattern,
     provider: "OPENAI",
     costs: [...openaiCosts, ...fineTunedOpenAICosts],
+    modelDetails: openaiModelDetails,
   },
   {
     pattern: anthropicPattern,
     provider: "ANTHROPIC",
     costs: anthropicCosts,
+    modelDetails: anthropicModelDetails,
   },
   {
     pattern: azurePattern,

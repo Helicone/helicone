@@ -13,6 +13,15 @@ export default async function Home({
     params.comparison.split("-vs-");
   const [modelA, providerA] = modelAWithProvider.split("-on-");
   const [modelB, providerB] = modelBWithProvider.split("-on-");
+  const providerInfoA = providers.find(
+    (p) => p.provider === providerA.toUpperCase()
+  );
+  const providerInfoB = providers.find(
+    (p) => p.provider === providerB.toUpperCase()
+  );
+
+  const modelADetails = providerInfoA?.modelDetails?.[modelA];
+  const modelBDetails = providerInfoB?.modelDetails?.[modelB];
 
   return (
     <QueryProvider>
@@ -20,8 +29,10 @@ export default async function Home({
         <ModelComparisonPage
           modelA={decodeURIComponent(modelA)}
           providerA={decodeURIComponent(providerA)}
+          modelADetails={modelADetails}
           modelB={decodeURIComponent(modelB)}
           providerB={decodeURIComponent(providerB)}
+          modelBDetails={modelBDetails}
         />
       </div>
     </QueryProvider>

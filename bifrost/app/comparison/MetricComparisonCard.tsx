@@ -38,7 +38,7 @@ export default function MetricComparisonCard({
   };
 
   return (
-    <Card className="mb-8">
+    <Card>
       <div className="flex flex-col">
         <CardContent className="p-4">
           <div className="flex justify-between items-center mb-4">

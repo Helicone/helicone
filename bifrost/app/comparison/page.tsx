@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useState, useMemo } from "react";
 import { Card } from "@/components/ui/card";
 
-// Filter main providers
 const mainProviders = providers.filter((provider) =>
   [
     "OPENAI",
@@ -18,7 +17,6 @@ const mainProviders = providers.filter((provider) =>
   ].includes(provider.provider)
 );
 
-// Pre-compute model data
 const modelData = new Map<string, { provider: string }>();
 
 mainProviders.forEach((provider) => {

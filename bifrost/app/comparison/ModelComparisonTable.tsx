@@ -28,7 +28,7 @@ const ModelComparisonTable = ({
           <tr>
             <th className="text-left py-4 px-6">
               <div className="flex items-center gap-2">
-                <span className="text-3xl font-semibold text-gray-900">
+                <span className="text-2xl md:text-3xl font-semibold text-gray-900">
                   {title}
                 </span>
                 <span className="text-xs font-normal text-gray-500 mt-1">

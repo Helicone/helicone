@@ -9,19 +9,32 @@ interface TextOperator {
 }
 
 export interface ModelDetails {
-  contextWindow: number;
-  features: {
-    vision: boolean;
-    json: boolean;
-    functionCalling: boolean;
-    parallelFunctions: boolean;
-    reproduction: boolean;
+  matches: string[];
+  searchTerms: string[];
+  info: {
+    description: string;
+    recommendedFor: string[];
+    notRecommendedFor: string[];
+    tradeOffs: string[];
   };
-  status: "preview" | "stable" | "deprecated";
-  releaseDate: string; // ISO date string
-  maxOutputTokens: number;
-  trainingCutoff: string; // Knowledge cutoff date
-  description: string; // Official OpenAI description
+}
+
+export type ModelDetailsMap = {
+  [key: string]: ModelDetails;
+};
+
+export interface ModelRow {
+  model: TextOperator;
+  cost: {
+    prompt_token: number;
+    completion_token: number;
+  };
+  showInPlayground?: boolean;
+  targetUrl?: string;
+  dateRange?: {
+    start: string;
+    end: string;
+  };
 }
 
 export interface ModelRow {
@@ -36,5 +49,4 @@ export interface ModelRow {
     start: string;
     end: string;
   };
-  details?: ModelDetails;
 }
