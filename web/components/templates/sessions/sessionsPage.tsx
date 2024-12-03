@@ -22,6 +22,7 @@ import {
   getRootFilterNode,
   UIFilterRowTree,
 } from "@/services/lib/filters/uiFilterRowTree";
+import { useURLParams } from "@/services/hooks/localURLParams";
 
 interface SessionsPageProps {
   currentPage: number;
@@ -58,9 +59,9 @@ const SessionsPage = (props: SessionsPageProps) => {
     end: new Date(),
   });
 
-  const [sessionIdSearch, setSessionIdSearch] = useState<string | undefined>(
-    undefined
-  );
+  const [sessionIdSearch, setSessionIdSearch] = useURLParams<
+    string | undefined
+  >("session-search", undefined);
   const [sessionNameSearch, setSessionNameSearch] = useState<
     string | undefined
   >(undefined);

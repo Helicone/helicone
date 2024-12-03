@@ -116,6 +116,18 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"ApiKey": {
+				"properties": {
+					"apiKey": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"apiKey"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"Setting": {
 				"anyOf": [
 					{
@@ -123,6 +135,9 @@
 					},
 					{
 						"$ref": "#/components/schemas/AzureExperiment"
+					},
+					{
+						"$ref": "#/components/schemas/ApiKey"
 					}
 				]
 			},
@@ -136,7 +151,9 @@
 					"kafka:dlq:eu",
 					"kafka:log:eu",
 					"kafka:orgs-to-dlq",
-					"azure:experiment"
+					"azure:experiment",
+					"openai:apiKey",
+					"anthropic:apiKey"
 				],
 				"nullable": false
 			},

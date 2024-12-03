@@ -19,7 +19,6 @@ const ScrollArea = React.forwardRef<
     const handleScroll = () => {
       const MARGIN = 10;
       const { scrollTop, scrollHeight, clientHeight } = viewport;
-      console.log(scrollHeight - scrollTop, clientHeight, MARGIN);
       setIsAtBottom(scrollHeight - scrollTop <= clientHeight + MARGIN);
     };
 

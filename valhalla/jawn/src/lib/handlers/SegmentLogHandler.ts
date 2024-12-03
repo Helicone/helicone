@@ -105,12 +105,9 @@ export class SegmentLogHandler extends AbstractLogHandler {
   public async handleResults(): PromiseGenericResult<string> {
     for (const segmentEvent of this.segmentEvents) {
       try {
-        console.log("Sending segment event", segmentEvent);
         const response = await sendSegmentEvent(segmentEvent);
         if (!response.ok) {
           console.error("Failed to send segment event", await response.text());
-        } else {
-          console.log("Successfully sent segment event", await response.text());
         }
       } catch (error) {
         console.error(error);
