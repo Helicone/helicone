@@ -126,23 +126,28 @@ export const costs: ModelRow[] = [
   },
 ];
 
-export const modelInfo: ModelDetailsMap = {
+export const modelDetails: ModelDetailsMap = {
   "claude-3-opus": {
     matches: ["claude-3-opus-20240229"],
     searchTerms: ["claude 3 opus", "claude-3-opus", "opus"],
     info: {
       description:
         "Claude 3 Opus is Anthropic's most capable model, offering state-of-the-art performance across tasks.",
-      recommendedFor: [
-        "complex reasoning",
-        "advanced analysis",
-        "creative tasks",
-      ],
-      notRecommendedFor: ["simple tasks", "cost-sensitive applications"],
       tradeOffs: [
         "Highest cost among Claude models",
         "May be more than needed for simple tasks",
       ],
+      benchmarks: {
+        average: 0.00001,
+        ifeval: 0.00002,
+        bhh: 0.00003,
+        hellaswag: 0.00004,
+        mmlu: 0.00005,
+      },
+      capabilities: [],
+      strengths: [],
+      weaknesses: [],
+      recommendations: [],
     },
   },
   "claude-3-sonnet": {
@@ -160,16 +165,21 @@ export const modelInfo: ModelDetailsMap = {
     info: {
       description:
         "Claude 3 Sonnet offers a strong balance of intelligence and speed, suitable for most use cases.",
-      recommendedFor: [
-        "general purpose use",
-        "business applications",
-        "content generation",
-      ],
-      notRecommendedFor: ["tasks requiring Opus-level capabilities"],
       tradeOffs: [
         "Lower cost than Opus",
         "Slightly reduced capabilities compared to Opus",
       ],
+      benchmarks: {
+        average: 0.00001,
+        ifeval: 0.00002,
+        bhh: 0.00003,
+        hellaswag: 0.00004,
+        mmlu: 0.00005,
+      },
+      capabilities: [],
+      strengths: [],
+      weaknesses: [],
+      recommendations: [],
     },
   },
   "claude-3-haiku": {
@@ -183,17 +193,22 @@ export const modelInfo: ModelDetailsMap = {
     info: {
       description:
         "Claude 3 Haiku is Anthropic's fastest and most cost-effective model.",
-      recommendedFor: [
-        "quick responses",
-        "simple tasks",
-        "high-volume applications",
-      ],
-      notRecommendedFor: ["complex analysis", "tasks requiring deep reasoning"],
       tradeOffs: [
         "Fastest response times",
         "Most affordable",
         "Reduced capabilities compared to Opus and Sonnet",
       ],
+      benchmarks: {
+        average: 0.00001,
+        ifeval: 0.00002,
+        bhh: 0.00003,
+        hellaswag: 0.00004,
+        mmlu: 0.00005,
+      },
+      capabilities: [],
+      strengths: [],
+      weaknesses: [],
+      recommendations: [],
     },
   },
   "claude-2": {
@@ -202,12 +217,21 @@ export const modelInfo: ModelDetailsMap = {
     info: {
       description:
         "Claude 2 is Anthropic's previous generation model, offering reliable performance for various tasks.",
-      recommendedFor: ["general purpose use"],
-      notRecommendedFor: ["tasks better suited for Claude 3"],
       tradeOffs: [
         "More affordable than Claude 3",
         "Less capable than newer models",
       ],
+      benchmarks: {
+        average: 0.00001,
+        ifeval: 0.00002,
+        bhh: 0.00003,
+        hellaswag: 0.00004,
+        mmlu: 0.00005,
+      },
+      capabilities: [],
+      strengths: [],
+      weaknesses: [],
+      recommendations: [],
     },
   },
   "claude-instant": {
@@ -216,46 +240,81 @@ export const modelInfo: ModelDetailsMap = {
     info: {
       description:
         "Claude Instant is Anthropic's faster, lighter previous generation model.",
-      recommendedFor: ["simple tasks", "quick responses"],
-      notRecommendedFor: ["complex analysis", "tasks requiring newer models"],
       tradeOffs: [
         "Fastest response times in Claude 2 series",
         "Most affordable",
         "Reduced capabilities",
       ],
+      benchmarks: {
+        average: 0.00001,
+        ifeval: 0.00002,
+        bhh: 0.00003,
+        hellaswag: 0.00004,
+        mmlu: 0.00005,
+      },
+      capabilities: [],
+      strengths: [],
+      weaknesses: [],
+      recommendations: [],
     },
   },
   "claude-3.5-sonnet": {
-    matches: ["claude-3.5-sonnet-20241022"],
-    searchTerms: ["claude 3.5 sonnet", "claude-3.5-sonnet"],
+    matches: ["claude-3-5-sonnet-20240620", "claude-3-5-sonnet-20241022"],
+    searchTerms: ["claude 3.5 sonnet", "claude-3-5-sonnet"],
     info: {
       description:
-        "Claude 3.5 Sonnet is Anthropic's latest model, offering improved performance and capabilities.",
-      recommendedFor: ["general purpose use"],
-      notRecommendedFor: ["tasks requiring Opus-level capabilities"],
-      tradeOffs: [
-        "Lower cost than Opus",
-        "Slightly reduced capabilities compared to Opus",
-      ],
+        "Claude 3.5 Sonnet is Anthropic's latest model, offering a balance of speed and cost.",
+      tradeOffs: ["More expensive than Haiku", "Slightly faster than Sonnet"],
+      benchmarks: {
+        average: 0.00001,
+        ifeval: 0.00002,
+        bhh: 0.00003,
+        hellaswag: 0.00004,
+        mmlu: 0.00005,
+      },
+      capabilities: [],
+      strengths: [],
+      weaknesses: [],
+      recommendations: [],
     },
   },
   "claude-3.5-haiku": {
-    matches: ["claude-3.5-haiku-20241022"],
-    searchTerms: ["claude 3.5 haiku", "claude-3.5-haiku"],
+    matches: ["claude-3-5-haiku-20241022"],
+    searchTerms: ["claude 3.5 haiku", "claude-3-5-haiku"],
     info: {
       description:
         "Claude 3.5 Haiku is Anthropic's fastest and most cost-effective model.",
-      recommendedFor: [
-        "quick responses",
-        "simple tasks",
-        "high-volume applications",
-      ],
-      notRecommendedFor: ["complex analysis", "tasks requiring deep reasoning"],
       tradeOffs: [
         "Fastest response times",
         "Most affordable",
         "Reduced capabilities compared to Opus and Sonnet",
       ],
+      benchmarks: {
+        average: 0.00001,
+        ifeval: 0.00002,
+        bhh: 0.00003,
+        hellaswag: 0.00004,
+        mmlu: 0.00005,
+      },
+      capabilities: [],
+      strengths: [],
+      weaknesses: [],
+      recommendations: [],
     },
   },
+};
+
+const reverseModelMap: { [key: string]: string } = {};
+
+for (const parentModel in modelDetails) {
+  const details = modelDetails[parentModel];
+  details.matches.forEach((modelName) => {
+    reverseModelMap[modelName] = parentModel;
+  });
+}
+
+export const anthropicProvider = {
+  costs,
+  modelDetails,
+  reverseModelMap,
 };

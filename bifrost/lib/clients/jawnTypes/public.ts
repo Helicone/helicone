@@ -2973,15 +2973,17 @@ Json: JsonObject;
       provider: string;
       model: string;
     };
-    ModelComparison: {
-      models: components["schemas"]["Model"][];
-    };
-    ResultSuccess_ModelComparison_: {
-      data: components["schemas"]["ModelComparison"];
+    "ResultSuccess_Model-Array_": {
+      data: components["schemas"]["Model"][];
       /** @enum {number|null} */
       error: null;
     };
-    "Result_ModelComparison.string_": components["schemas"]["ResultSuccess_ModelComparison_"] | components["schemas"]["ResultError_string_"];
+    "Result_Model-Array.string_": components["schemas"]["ResultSuccess_Model-Array_"] | components["schemas"]["ResultError_string_"];
+    ModelsToCompare: {
+      provider: string;
+      names: string[];
+      parent: string;
+    };
     UpgradeToProRequest: {
       addons?: {
         prompts?: boolean;
@@ -5658,19 +5660,14 @@ export interface operations {
   GetModelComparison: {
     requestBody: {
       content: {
-        "application/json": {
-          providerB: string;
-          modelB: string;
-          providerA: string;
-          modelA: string;
-        };
+        "application/json": components["schemas"]["ModelsToCompare"][];
       };
     };
     responses: {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result_ModelComparison.string_"];
+          "application/json": components["schemas"]["Result_Model-Array.string_"];
         };
       };
     };

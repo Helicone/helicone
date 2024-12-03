@@ -5,7 +5,7 @@
 
 import { ModelDetailsMap, ModelRow } from "../../interfaces/Cost";
 
-export const costs: ModelRow[] = [
+const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
@@ -509,7 +509,7 @@ export const costs: ModelRow[] = [
   },
 ];
 
-export const modelInfo: ModelDetailsMap = {
+const modelDetails: ModelDetailsMap = {
   "gpt-4": {
     matches: [
       "gpt-4",
@@ -524,9 +524,18 @@ export const modelInfo: ModelDetailsMap = {
     info: {
       description:
         "GPT-4 is the latest and most advanced model in the GPT series, known for its superior performance in various tasks.",
-      recommendedFor: ["general"],
-      notRecommendedFor: ["general"],
       tradeOffs: ["More expensive than GPT-3.5 Turbo"],
+      benchmarks: {
+        average: 0.00001,
+        ifeval: 0.00002,
+        bhh: 0.00003,
+        hellaswag: 0.00004,
+        mmlu: 0.00005,
+      },
+      capabilities: [],
+      strengths: [],
+      weaknesses: [],
+      recommendations: [],
     },
   },
   "gpt-4o": {
@@ -535,20 +544,43 @@ export const modelInfo: ModelDetailsMap = {
     info: {
       description:
         "GPT-4o is a more recent model that offers a balance between cost and performance.",
-      recommendedFor: ["general"],
-      notRecommendedFor: ["general"],
       tradeOffs: ["More expensive than GPT-3.5 Turbo"],
+      benchmarks: {
+        average: 0.00001,
+        ifeval: 0.00002,
+        bhh: 0.00003,
+        hellaswag: 0.00004,
+        mmlu: 0.00005,
+      },
+      capabilities: [],
+      strengths: [],
+      weaknesses: [],
+      recommendations: [],
     },
   },
   "gpt-4o-mini": {
     matches: ["gpt-4o-mini", "gpt-4o-mini-2024-07-18"],
-    searchTerms: ["gpt 4o mini", "gpt-4o-mini", "chat gpt 4o mini", "4o mini"],
+    searchTerms: [
+      "gpt 4o mini",
+      "gpt-4o-mini",
+      "chat gpt 4o mini",
+      "chat 4o mini",
+    ],
     info: {
       description:
-        "GPT-4o Mini is a more recent model that offers a balance between cost and performance.",
-      recommendedFor: ["general"],
-      notRecommendedFor: ["general"],
+        "GPT-4o Mini is a model that offers a balance between cost and performance.",
       tradeOffs: ["More expensive than GPT-3.5 Turbo"],
+      benchmarks: {
+        average: 0.00001,
+        ifeval: 0.00002,
+        bhh: 0.00003,
+        hellaswag: 0.00004,
+        mmlu: 0.00005,
+      },
+      capabilities: [],
+      strengths: [],
+      weaknesses: [],
+      recommendations: [],
     },
   },
   "gpt-4-turbo": {
@@ -567,9 +599,18 @@ export const modelInfo: ModelDetailsMap = {
     info: {
       description:
         "GPT-4 Turbo is a more recent model that offers a balance between cost and performance.",
-      recommendedFor: ["general"],
-      notRecommendedFor: ["general"],
       tradeOffs: ["More expensive than GPT-3.5 Turbo"],
+      benchmarks: {
+        average: 0.00001,
+        ifeval: 0.00002,
+        bhh: 0.00003,
+        hellaswag: 0.00004,
+        mmlu: 0.00005,
+      },
+      capabilities: [],
+      strengths: [],
+      weaknesses: [],
+      recommendations: [],
     },
   },
   "gpt-3.5-turbo": {
@@ -591,9 +632,18 @@ export const modelInfo: ModelDetailsMap = {
     info: {
       description:
         "GPT-3.5 Turbo is a more recent model that offers a balance between cost and performance.",
-      recommendedFor: ["general"],
-      notRecommendedFor: ["general"],
       tradeOffs: ["More expensive than GPT-3.5 Turbo"],
+      benchmarks: {
+        average: 0.00001,
+        ifeval: 0.00002,
+        bhh: 0.00003,
+        hellaswag: 0.00004,
+        mmlu: 0.00005,
+      },
+      capabilities: [],
+      strengths: [],
+      weaknesses: [],
+      recommendations: [],
     },
   },
   "text-embedding-3": {
@@ -602,9 +652,18 @@ export const modelInfo: ModelDetailsMap = {
     info: {
       description:
         "Text Embedding 3 is a model that offers a balance between cost and performance.",
-      recommendedFor: ["general"],
-      notRecommendedFor: ["general"],
       tradeOffs: ["More expensive than GPT-3.5 Turbo"],
+      benchmarks: {
+        average: 0.00001,
+        ifeval: 0.00002,
+        bhh: 0.00003,
+        hellaswag: 0.00004,
+        mmlu: 0.00005,
+      },
+      capabilities: [],
+      strengths: [],
+      weaknesses: [],
+      recommendations: [],
     },
   },
   "text-embedding-ada": {
@@ -617,9 +676,18 @@ export const modelInfo: ModelDetailsMap = {
     info: {
       description:
         "Text Embedding Ada is a model that offers a balance between cost and performance.",
-      recommendedFor: ["general"],
-      notRecommendedFor: ["general"],
       tradeOffs: ["More expensive than GPT-3.5 Turbo"],
+      benchmarks: {
+        average: 0.00001,
+        ifeval: 0.00002,
+        bhh: 0.00003,
+        hellaswag: 0.00004,
+        mmlu: 0.00005,
+      },
+      capabilities: [],
+      strengths: [],
+      weaknesses: [],
+      recommendations: [],
     },
   },
   "o1-preview": {
@@ -635,9 +703,18 @@ export const modelInfo: ModelDetailsMap = {
     info: {
       description:
         "O1 Preview is a model that offers a balance between cost and performance.",
-      recommendedFor: ["general"],
-      notRecommendedFor: ["general"],
       tradeOffs: ["More expensive than GPT-3.5 Turbo"],
+      benchmarks: {
+        average: 0.00001,
+        ifeval: 0.00002,
+        bhh: 0.00003,
+        hellaswag: 0.00004,
+        mmlu: 0.00005,
+      },
+      capabilities: [],
+      strengths: [],
+      weaknesses: [],
+      recommendations: [],
     },
   },
   "o1-mini": {
@@ -646,9 +723,18 @@ export const modelInfo: ModelDetailsMap = {
     info: {
       description:
         "O1 Mini is a model that offers a balance between cost and performance.",
-      recommendedFor: ["general"],
-      notRecommendedFor: ["general"],
       tradeOffs: ["More expensive than GPT-3.5 Turbo"],
+      benchmarks: {
+        average: 0.00001,
+        ifeval: 0.00002,
+        bhh: 0.00003,
+        hellaswag: 0.00004,
+        mmlu: 0.00005,
+      },
+      capabilities: [],
+      strengths: [],
+      weaknesses: [],
+      recommendations: [],
     },
   },
   "gpt-4-vision-preview": {
@@ -663,9 +749,33 @@ export const modelInfo: ModelDetailsMap = {
     info: {
       description:
         "GPT-4 Vision is a model that offers a balance between cost and performance.",
-      recommendedFor: ["general"],
-      notRecommendedFor: ["general"],
       tradeOffs: ["More expensive than GPT-3.5 Turbo"],
+      benchmarks: {
+        average: 0.00001,
+        ifeval: 0.00002,
+        bhh: 0.00003,
+        hellaswag: 0.00004,
+        mmlu: 0.00005,
+      },
+      capabilities: ["Vision"],
+      strengths: ["Can process images"],
+      weaknesses: ["More expensive than GPT-3.5 Turbo"],
+      recommendations: ["Use for tasks that require image processing"],
     },
   },
+};
+
+const reverseModelMap: { [key: string]: string } = {};
+
+for (const parentModel in modelDetails) {
+  const details = modelDetails[parentModel];
+  details.matches.forEach((modelName) => {
+    reverseModelMap[modelName] = parentModel;
+  });
+}
+
+export const openAIProvider = {
+  costs,
+  modelDetails,
+  reverseModelMap,
 };

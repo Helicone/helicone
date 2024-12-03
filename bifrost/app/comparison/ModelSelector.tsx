@@ -1,5 +1,4 @@
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,31 +9,85 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import {
-  CheckIcon,
-  ChevronDownIcon,
-  XMarkIcon,
-} from "@heroicons/react/20/solid";
-import { modelInfo as openAIModelInfo } from "@/packages/cost/providers/openai";
-import { modelInfo as anthropicModelInfo } from "@/packages/cost/providers/anthropic";
+import { ChevronDownIcon } from "@heroicons/react/20/solid";
 import { useRouter } from "next/navigation";
+import { parentModelNames } from "@/packages/cost/providers/mappings";
 
 interface ModelSelectorProps {
   modelA: string;
   modelB: string;
   providerA: string;
   providerB: string;
-  setModelA: (model: string) => void;
-  setModelB: (model: string) => void;
 }
+
+interface ModelDropdownProps {
+  label: string;
+  selectedModel: string;
+  onSelect: (model: string, provider: string) => void;
+  color: string;
+}
+
+const ModelDropdown = ({
+  label,
+  selectedModel,
+  onSelect,
+  color,
+}: ModelDropdownProps) => (
+  <div className="flex-1 w-full">
+    <div className="h-9 justify-start items-center gap-3 inline-flex w-full">
+      <Badge
+        style={{
+          backgroundColor: `${color}20`,
+          color: color,
+        }}
+        className="px-2 py-1 text-[14px] font-semibold font-['Inter'] leading-tight whitespace-nowrap hover:bg-opacity-20"
+      >
+        {label}
+      </Badge>
+      <DropdownMenu>
+        <DropdownMenuTrigger className="flex-1 w-full">
+          <Button
+            variant="outline"
+            className="h-9 px-3 py-2 rounded-md border border-slate-300 justify-between items-center truncate w-full"
+          >
+            <span className="text-slate-700 text-base font-semibold font-['Inter'] leading-tight truncate">
+              {selectedModel}
+            </span>
+            <ChevronDownIcon className="w-4 h-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent
+          side="bottom"
+          align="start"
+          style={{ width: "var(--radix-dropdown-menu-trigger-width)" }}
+        >
+          {Object.entries(parentModelNames).map(([provider, models]) => (
+            <div key={provider}>
+              <DropdownMenuGroup>
+                <DropdownMenuLabel>{provider}</DropdownMenuLabel>
+                {models.map((model) => (
+                  <DropdownMenuItem
+                    key={model}
+                    onClick={() => onSelect(model, provider)}
+                  >
+                    {model}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuGroup>
+              <DropdownMenuSeparator />
+            </div>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+  </div>
+);
 
 const ModelSelector = ({
   modelA,
   modelB,
   providerA,
   providerB,
-  setModelA,
-  setModelB,
 }: ModelSelectorProps) => {
   const router = useRouter();
 
@@ -46,136 +99,44 @@ const ModelSelector = ({
   ) => {
     const model1Path = `${encodeURIComponent(modelA)}-on-${encodeURIComponent(
       providerA
-    )}`;
+    ).toLowerCase()}`;
     const model2Path = `${encodeURIComponent(modelB)}-on-${encodeURIComponent(
       providerB
-    )}`;
+    ).toLowerCase()}`;
     return `/comparison/${model1Path}-vs-${model2Path}`;
   };
 
-  const handleModelASelect = (model: string) => {
-    setModelA(model);
+  const handleModelASelect = (model: string, provider: string) => {
     if (modelB) {
-      router.push(createComparisonPath(model, modelB, providerA, providerB));
+      router.push(createComparisonPath(model, modelB, provider, providerB));
     }
   };
 
-  const handleModelBSelect = (model: string) => {
-    setModelB(model);
+  const handleModelBSelect = (model: string, provider: string) => {
     if (modelA) {
-      router.push(createComparisonPath(modelA, model, providerA, providerB));
+      router.push(createComparisonPath(modelA, model, providerA, provider));
     }
   };
 
-  const openAIModels = Object.keys(openAIModelInfo);
-  const anthropicModels = Object.keys(anthropicModelInfo);
   return (
-    <div className="relative grid grid-cols-1 md:grid-cols-[minmax(200px,_500px)_50px_minmax(200px,_500px)] gap-4 justify-center items-center max-w-[1000px] mx-auto w-full px-4">
-      <div className="w-full min-w-0">
-        <div className="h-9 justify-start items-center gap-3 inline-flex w-full">
-          <Badge className="px-2 py-1 bg-[#ef4544]/20 text-[#ef4544] text-[14px] font-semibold font-['Inter'] leading-tight hover:bg-[#ef4544]/20 whitespace-nowrap">
-            Model A
-          </Badge>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild className="flex-1 w-full min-w-0">
-              <Button
-                variant="outline"
-                className="h-9 px-3 py-2 bg-white rounded-md border border-slate-300 justify-between items-center truncate w-full"
-              >
-                <span className="text-slate-700 text-base font-semibold font-['Inter'] leading-tight truncate">
-                  {modelA}
-                </span>
-                <ChevronDownIcon className="w-4 h-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              side="bottom"
-              align="start"
-              style={{ width: "var(--radix-dropdown-menu-trigger-width)" }}
-            >
-              <DropdownMenuGroup>
-                <DropdownMenuLabel>OpenAI</DropdownMenuLabel>
-                {openAIModels.map((model) => (
-                  <DropdownMenuItem
-                    key={model}
-                    onClick={() => handleModelASelect(model)}
-                  >
-                    {model}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuGroup>
-              <DropdownMenuSeparator />
-              <DropdownMenuGroup>
-                <DropdownMenuLabel>Anthropic</DropdownMenuLabel>
-                {anthropicModels.map((model) => (
-                  <DropdownMenuItem
-                    key={model}
-                    onClick={() => handleModelASelect(model)}
-                  >
-                    {model}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </div>
-
-      <div className="flex justify-center items-center">
+    <div className="flex flex-col justify-center items-center mx-auto w-full md:flex-row gap-2">
+      <ModelDropdown
+        label="Model A"
+        selectedModel={modelA}
+        onSelect={handleModelASelect}
+        color="#ef4544"
+      />
+      <div className="flex justify-center items-center mx-4">
         <span className="text-black text-base font-medium font-['Inter'] leading-tight">
           vs.
         </span>
       </div>
-
-      <div className="w-full min-w-0">
-        <div className="h-9 justify-start items-center gap-3 inline-flex w-full">
-          <Badge className="px-2 py-1 bg-[#2563eb]/20 text-[#2563eb] text-[14px] font-semibold font-['Inter'] leading-tight hover:bg-[#2563eb]/20 whitespace-nowrap">
-            Model B
-          </Badge>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild className="flex-1 w-full min-w-0">
-              <Button
-                variant="outline"
-                className="w-full h-9 px-3 py-2 bg-white rounded-md border border-slate-300 justify-between items-center truncate w-full"
-              >
-                <span className="text-slate-700 text-base font-semibold font-['Inter'] leading-tight truncate">
-                  {modelB}
-                </span>
-                <ChevronDownIcon className="w-4 h-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              side="bottom"
-              align="start"
-              style={{ width: "var(--radix-dropdown-menu-trigger-width)" }}
-            >
-              <DropdownMenuGroup>
-                <DropdownMenuLabel>OpenAI</DropdownMenuLabel>
-                {openAIModels.map((model) => (
-                  <DropdownMenuItem
-                    key={model}
-                    onClick={() => handleModelBSelect(model)}
-                  >
-                    {model}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuGroup>
-              <DropdownMenuSeparator />
-              <DropdownMenuGroup>
-                <DropdownMenuLabel>Anthropic</DropdownMenuLabel>
-                {anthropicModels.map((model) => (
-                  <DropdownMenuItem
-                    key={model}
-                    onClick={() => handleModelBSelect(model)}
-                  >
-                    {model}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </div>
+      <ModelDropdown
+        label="Model B"
+        selectedModel={modelB}
+        onSelect={handleModelBSelect}
+        color="#2563eb"
+      />
     </div>
   );
 };

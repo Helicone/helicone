@@ -13,9 +13,14 @@ export interface ModelDetails {
   searchTerms: string[];
   info: {
     description: string;
-    recommendedFor: string[];
-    notRecommendedFor: string[];
     tradeOffs: string[];
+    benchmarks: {
+      [key: string]: number;
+    };
+    capabilities: string[];
+    strengths: string[];
+    weaknesses: string[];
+    recommendations: string[];
   };
 }
 

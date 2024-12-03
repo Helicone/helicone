@@ -1,4 +1,5 @@
 import { ModelDetails } from "@/packages/cost/interfaces/Cost";
+import { CubeIcon, CheckIcon } from "@heroicons/react/24/outline";
 
 interface ModelInfoCardProps {
   modelDetails?: ModelDetails;
@@ -8,109 +9,83 @@ interface ModelInfoCardProps {
 const ModelInfoCard = ({ modelDetails, title }: ModelInfoCardProps) => {
   if (!modelDetails) return null;
 
-  // Extract model name from title for mocking
-  const modelName = title.split(" ")[0];
-
-  console.log(modelDetails);
-
   return (
-    <div className="w-[400px] p-[17px] bg-white rounded-md shadow border border-slate-200 flex-col justify-start items-start gap-4 inline-flex">
+    <div className="w-full flex-1 p-4 bg-white rounded-md shadow border border-slate-200">
       {/* Header */}
-      <div className="self-stretch h-11 flex-col justify-start items-start gap-2 flex">
-        <div className="justify-start items-center gap-2 inline-flex">
-          <div className="w-4 h-4 relative"></div>
-          <div className="text-black text-base font-medium font-['Inter'] leading-none">
+      <div className="flex gap-2">
+        <CubeIcon className="w-4 h-4 text-slate-500" />
+        <div className="space-y-2">
+          <h3 className="text-black text-base font-medium font-['Inter'] leading-none">
             {title}
-          </div>
-        </div>
-        <div className="justify-start items-center gap-2 inline-flex">
-          <div className="w-3.5 h-3.5 relative opacity-10"></div>
-          <div className="text-slate-400 text-sm font-normal font-['Inter'] leading-tight">
+          </h3>
+          <p className="text-slate-400 text-sm font-normal font-['Inter'] leading-tight">
             {Object.keys(modelDetails)[0]?.split("-")[0] || "Provider"}
+          </p>
+        </div>
+      </div>
+
+      {/* Description & Stats */}
+      <div className="mt-4 px-4">
+        <p className="text-slate-400 text-sm py-2">
+          {modelDetails.info.description}
+        </p>
+
+        <div className="py-2 flex justify-between items-center">
+          <span className="text-slate-500 text-sm font-medium">
+            Release Date
+          </span>
+          <span className="text-slate-600 text-sm font-semibold">
+            {modelDetails.info.releaseDate}
+          </span>
+        </div>
+
+        <div className="py-2 flex justify-between items-center">
+          <span className="text-slate-500 text-sm font-medium">Max Tokens</span>
+          <span className="text-slate-600 text-sm font-semibold">
+            {modelDetails.info.maxTokens?.toLocaleString()}
+          </span>
+        </div>
+      </div>
+
+      {/* Performance Section */}
+      <div className="p-4 mt-4 bg-sky-50 rounded-md border border-sky-100">
+        <h4 className="text-slate-500 text-sm font-medium pb-2">Performance</h4>
+        <div className="flex justify-between">
+          <div>
+            <p className="text-slate-400 text-sm font-medium">Speed</p>
+            <p className="text-sky-500 text-base font-semibold">
+              {modelDetails.info.speed ?? "hihi"}
+            </p>
+          </div>
+          <div>
+            <p className="text-slate-400 text-sm font-medium">Accuracy</p>
+            <p className="text-sky-500 text-base font-semibold">
+              {modelDetails.info.accuracy ?? "byebye"}
+            </p>
+          </div>
+          <div>
+            <p className="text-slate-400 text-sm font-medium">Reliability</p>
+            <p className="text-sky-500 text-base font-semibold">
+              {modelDetails.info.reliability ?? "whwywhy"}
+            </p>
           </div>
         </div>
       </div>
 
-      {/* Model Info Section */}
-      <div className="self-stretch h-[242px] flex-col justify-start items-end gap-[9px] flex">
-        <div className="self-stretch h-[116px] px-4 flex-col justify-start items-start flex">
-          <div className="self-stretch py-1.5 bg-white justify-start items-center gap-2 inline-flex">
-            <div className="grow shrink basis-0 text-slate-400 text-sm font-normal font-['Inter'] leading-tight">
-              {modelDetails.info.description}
-            </div>
-          </div>
-          <div className="self-stretch py-1.5 bg-white justify-start items-center gap-2 inline-flex">
-            <div className="grow shrink basis-0 text-slate-500 text-sm font-medium font-['Inter'] leading-tight">
-              Release Date
-            </div>
-            <div className="text-[#6b8c9c] text-sm font-semibold font-['Inter'] leading-[16.80px]">
-              {modelDetails.info.releaseDate}
-            </div>
-          </div>
-          <div className="self-stretch py-1.5 bg-white justify-start items-center gap-2 inline-flex">
-            <div className="grow shrink basis-0 text-slate-500 text-sm font-medium font-['Inter'] leading-tight">
-              Max Tokens
-            </div>
-            <div className="text-[#6b8c9c] text-sm font-semibold font-['Inter'] leading-[16.80px]">
-              {modelDetails.info.maxTokens?.toLocaleString()}
-            </div>
-          </div>
-        </div>
-
-        {/* Performance Section */}
-        <div className="self-stretch h-[117px] p-4 bg-[#f2f9fc] rounded-md border border-[#e3eff2] flex-col justify-start items-start flex">
-          <div className="self-stretch pb-1.5 justify-start items-center gap-2 inline-flex">
-            <div className="grow shrink basis-0 text-slate-500 text-sm font-medium font-['Inter'] leading-tight">
-              Performance
-            </div>
-          </div>
-          <div className="self-stretch justify-between items-center inline-flex">
-            <div className="py-1.5 bg-[#f2f9fc] flex-col justify-center items-start gap-2 inline-flex">
-              <div className="self-stretch text-slate-400 text-sm font-medium font-['Inter'] leading-tight">
-                Speed
-              </div>
-              <div className="text-[#0da5e8] text-base font-semibold font-['Inter'] leading-tight">
-                {modelDetails.info.speed}
-              </div>
-            </div>
-            <div className="py-1.5 bg-[#f2f9fc] flex-col justify-center items-start gap-2 inline-flex">
-              <div className="text-slate-400 text-sm font-medium font-['Inter'] leading-tight">
-                Accuracy
-              </div>
-              <div className="text-[#0da5e8] text-base font-semibold font-['Inter'] leading-tight">
-                {modelDetails.info.accuracy}
-              </div>
-            </div>
-            <div className="py-1.5 bg-[#f2f9fc] flex-col justify-center items-start gap-2 inline-flex">
-              <div className="text-slate-400 text-sm font-medium font-['Inter'] leading-tight">
-                Reliability
-              </div>
-              <div className="text-[#0da5e8] text-base font-semibold font-['Inter'] leading-tight">
-                {modelDetails.info.reliability}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Recommendations Section */}
-      <div className="self-stretch h-[120px] px-4 pb-4 flex-col justify-start items-start flex">
-        <div className="w-[143px] py-1.5 justify-center items-center gap-2.5 inline-flex">
-          <div className="grow shrink basis-0 text-slate-500 text-sm font-medium font-['Inter'] leading-tight">
-            Recommended for
-          </div>
-        </div>
-        {modelDetails.info.recommendedFor.map((recommendation, index) => (
-          <div
-            key={index}
-            className="self-stretch py-0.5 bg-white justify-start items-center gap-2 inline-flex"
-          >
-            <div className="w-3.5 h-3.5 relative text-slate-400">•</div>
-            <div className="grow shrink basis-0 text-slate-400 text-sm font-medium font-['Inter'] leading-tight">
-              {recommendation}
-            </div>
-          </div>
-        ))}
+      <div className="px-4 mt-4">
+        <h4 className="text-slate-500 text-sm font-medium py-2">
+          Recommended for
+        </h4>
+        <ul className="space-y-1">
+          {modelDetails.info.recommendations.map((recommendation, index) => (
+            <li key={index} className="flex items-center gap-2 py-0.5">
+              <CheckIcon className="w-3.5 h-3.5 text-sky-500" />
+              <span className="text-slate-400 text-sm font-medium">
+                {recommendation}
+              </span>
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   );

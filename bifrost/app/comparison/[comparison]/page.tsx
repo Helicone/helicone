@@ -1,6 +1,7 @@
 import { providers } from "@/packages/cost/providers/mappings";
 import { ModelComparisonPage } from "../ModelComparisonPage";
 import QueryProvider from "../QueryProvider";
+import Banner from "@/app/components/templates/Banner";
 
 export default async function Home({
   params,
@@ -9,22 +10,25 @@ export default async function Home({
     comparison: string;
   };
 }) {
+  // Parse the comparison string
   const [modelAWithProvider, modelBWithProvider] =
     params.comparison.split("-vs-");
   const [modelA, providerA] = modelAWithProvider.split("-on-");
   const [modelB, providerB] = modelBWithProvider.split("-on-");
+
+  // Find the provider info
   const providerInfoA = providers.find(
     (p) => p.provider === providerA.toUpperCase()
   );
   const providerInfoB = providers.find(
     (p) => p.provider === providerB.toUpperCase()
   );
-
   const modelADetails = providerInfoA?.modelDetails?.[modelA];
   const modelBDetails = providerInfoB?.modelDetails?.[modelB];
 
   return (
     <QueryProvider>
+      <Banner />
       <div className="container mx-auto py-8">
         <ModelComparisonPage
           modelA={decodeURIComponent(modelA)}

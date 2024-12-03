@@ -8705,24 +8705,13 @@
 				],
 				"type": "object"
 			},
-			"ModelComparison": {
+			"ResultSuccess_Model-Array_": {
 				"properties": {
-					"models": {
+					"data": {
 						"items": {
 							"$ref": "#/components/schemas/Model"
 						},
 						"type": "array"
-					}
-				},
-				"required": [
-					"models"
-				],
-				"type": "object"
-			},
-			"ResultSuccess_ModelComparison_": {
-				"properties": {
-					"data": {
-						"$ref": "#/components/schemas/ModelComparison"
 					},
 					"error": {
 						"type": "number",
@@ -8739,15 +8728,37 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"Result_ModelComparison.string_": {
+			"Result_Model-Array.string_": {
 				"anyOf": [
 					{
-						"$ref": "#/components/schemas/ResultSuccess_ModelComparison_"
+						"$ref": "#/components/schemas/ResultSuccess_Model-Array_"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
 					}
 				]
+			},
+			"ModelsToCompare": {
+				"properties": {
+					"provider": {
+						"type": "string"
+					},
+					"names": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"parent": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"provider",
+					"names",
+					"parent"
+				],
+				"type": "object"
 			},
 			"UpgradeToProRequest": {
 				"properties": {
@@ -15706,7 +15717,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Result_ModelComparison.string_"
+									"$ref": "#/components/schemas/Result_Model-Array.string_"
 								}
 							}
 						}
@@ -15726,27 +15737,10 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"properties": {
-									"providerB": {
-										"type": "string"
-									},
-									"modelB": {
-										"type": "string"
-									},
-									"providerA": {
-										"type": "string"
-									},
-									"modelA": {
-										"type": "string"
-									}
+								"items": {
+									"$ref": "#/components/schemas/ModelsToCompare"
 								},
-								"required": [
-									"providerB",
-									"modelB",
-									"providerA",
-									"modelA"
-								],
-								"type": "object"
+								"type": "array"
 							}
 						}
 					}

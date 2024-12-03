@@ -1,4 +1,7 @@
-import { Model } from "../controllers/public/modelComparisonController";
+import {
+  Model,
+  ModelsToCompare,
+} from "../controllers/public/modelComparisonController";
 import { ModelComparison } from "../controllers/public/modelComparisonController";
 import { clickhouseDb } from "../lib/db/ClickhouseWrapper";
 import { err, ok } from "../lib/shared/result";
@@ -65,27 +68,34 @@ export class ModelComparisonManager {
   constructor() {}
 
   public async getModelComparison(
-    modelA: string,
-    providerA: string,
-    modelB: string,
-    providerB: string
-  ): Promise<Result<ModelComparison, string>> {
-    console.log("Getting model comparison for:", modelA, modelB);
-    const [modelAResult, modelBResult] = await Promise.all([
-      this.getModelInfo(modelA, providerA),
-      this.getModelInfo(modelB, providerB),
-    ]);
+    modelsToCompare: ModelsToCompare[]
+  ): Promise<Result<Model[], string>> {
+    // Map over all models to get their info in parallel
+    const modelResults = await Promise.all(
+      modelsToCompare.map((model) => {
+        const formattedModelNames = `('${model.names.join("','")}')`;
+        return this.getModelInfo(
+          model.parent,
+          formattedModelNames,
+          model.provider
+        );
+      })
+    );
 
-    if (modelAResult.error) return modelAResult;
-    if (modelBResult.error) return modelBResult;
+    const errorResult = modelResults.find((result) => result.error);
+    if (!modelResults || errorResult?.error)
+      return err(errorResult?.error ?? "Unknown error");
 
-    return ok({
-      models: [modelAResult.data, modelBResult.data] as Model[],
-    });
+    return ok(
+      modelResults
+        .map((result) => result.data)
+        .filter((model): model is Model => model !== null)
+    );
   }
 
   private async getModelInfo(
     model: string,
+    formattedModelNames: string,
     provider: string
   ): Promise<Result<Model, string>> {
     const normalizedProvider = provider.toUpperCase();
@@ -98,23 +108,23 @@ export class ModelComparisonManager {
       geoTtftResult,
     ] = await Promise.all([
       clickhouseDb.dbQuery<ModelMetricsQueryResult>(
-        this.getModelMetricsQuery(model, normalizedProvider),
+        this.getModelMetricsQuery(formattedModelNames, normalizedProvider),
         []
       ),
       clickhouseDb.dbQuery<GeographicLatencyQueryResult>(
-        this.getGeographicLatencyQuery(model, normalizedProvider),
+        this.getGeographicLatencyQuery(formattedModelNames, normalizedProvider),
         []
       ),
       clickhouseDb.dbQuery<TimeSeriesQueryResult>(
-        this.getTimeSeriesQuery(model, normalizedProvider),
+        this.getTimeSeriesQuery(formattedModelNames, normalizedProvider),
         []
       ),
       clickhouseDb.dbQuery<CostQueryResult>(
-        this.getCostQuery(model, normalizedProvider),
+        this.getCostQuery(formattedModelNames, normalizedProvider),
         []
       ),
       clickhouseDb.dbQuery<GeographicTtftQueryResult>(
-        this.getGeographicTtftQuery(model, normalizedProvider),
+        this.getGeographicTtftQuery(formattedModelNames, normalizedProvider),
         []
       ),
     ]);
@@ -138,8 +148,8 @@ export class ModelComparisonManager {
     }
 
     return ok({
-      model: metrics.model,
-      provider: metrics.provider,
+      model,
+      provider,
       costs: {
         prompt_token:
           providerCosts.costs?.find((c) => c.model.value === metrics.model)
@@ -220,7 +230,10 @@ export class ModelComparisonManager {
     });
   }
 
-  private getModelMetricsQuery(model: string, provider: string): string {
+  private getModelMetricsQuery(
+    formattedModelNames: string,
+    provider: string
+  ): string {
     return `
       SELECT
         model,
@@ -259,13 +272,16 @@ export class ModelComparisonManager {
         coalesce(countIf(has(scores, 'helicone-score-feedback') AND scores['helicone-score-feedback'] = 0) / 
           nullIf(total_feedback, 0), 0) as negative_percentage
       FROM request_response_rmt
-      WHERE model = '${model}'
+      WHERE model IN ${formattedModelNames}
         AND upper(provider) = '${provider}'
         AND request_created_at >= now() - INTERVAL 30 DAY
       GROUP BY model, provider`;
   }
 
-  private getGeographicLatencyQuery(model: string, provider: string): string {
+  private getGeographicLatencyQuery(
+    formattedModelNames: string,
+    provider: string
+  ): string {
     return `
       SELECT
         country_code,
@@ -278,7 +294,7 @@ export class ModelComparisonManager {
         quantile(0.99)(if(completion_tokens > 0, latency / completion_tokens * 1000, null)) as p99_latency_per_1000_tokens,
         median(if(completion_tokens > 0, (latency / completion_tokens) * 1000, null)) as median_latency_per_1000_tokens
       FROM request_response_rmt
-      WHERE model = '${model}'
+      WHERE model IN ${formattedModelNames}
         AND upper(provider) = '${provider}'
         AND request_created_at >= now() - INTERVAL 30 DAY
         AND country_code != ''
@@ -286,13 +302,16 @@ export class ModelComparisonManager {
       GROUP BY country_code`;
   }
 
-  private getGeographicTtftQuery(model: string, provider: string): string {
+  private getGeographicTtftQuery(
+    formattedModelNames: string,
+    provider: string
+  ): string {
     return `
       SELECT
         country_code,
         median(time_to_first_token) as median_ttft
       FROM request_response_rmt
-      WHERE model = '${model}'
+      WHERE model IN ${formattedModelNames}
         AND upper(provider) = '${provider}'
         AND request_created_at >= now() - INTERVAL 30 DAY
         AND country_code != ''
@@ -300,7 +319,10 @@ export class ModelComparisonManager {
       GROUP BY country_code`;
   }
 
-  private getTimeSeriesQuery(model: string, provider: string): string {
+  private getTimeSeriesQuery(
+    formattedModelNames: string,
+    provider: string
+  ): string {
     return `
       WITH daily_stats AS (
         SELECT
@@ -311,7 +333,7 @@ export class ModelComparisonManager {
           countIf(status < 500) / count(*) as success_rate,
           countIf(status >= 500) / count(*) as error_rate
         FROM request_response_rmt
-        WHERE model = '${model}'
+        WHERE model IN ${formattedModelNames}
           AND upper(provider) = '${provider}'
           AND request_created_at >= now() - INTERVAL 30 DAY
         GROUP BY timestamp
@@ -331,13 +353,13 @@ export class ModelComparisonManager {
         STEP INTERVAL 1 DAY`;
   }
 
-  private getCostQuery(model: string, provider: string): string {
+  private getCostQuery(formattedModelNames: string, provider: string): string {
     return `
       SELECT
         avg(prompt_tokens) as avg_input_tokens,
         avg(completion_tokens) as avg_output_tokens
       FROM request_response_rmt
-      WHERE model = '${model}'
+      WHERE model IN ${formattedModelNames}
         AND upper(provider) = '${provider}'
         AND request_created_at >= now() - INTERVAL 30 DAY`;
   }

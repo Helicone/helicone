@@ -69,8 +69,10 @@ export type Model = {
   };
 };
 
-export type ModelComparison = {
-  models: Model[];
+export type ModelsToCompare = {
+  parent: string;
+  names: string[];
+  provider: string;
 };
 
 @Route("v1/public/compare")
@@ -81,19 +83,12 @@ export class ModelComparisonController extends Controller {
   public async getModelComparison(
     @Request() request: JawnAuthenticatedRequest,
     @Body()
-    body: {
-      modelA: string;
-      providerA: string;
-      modelB: string;
-      providerB: string;
-    }
-  ): Promise<Result<ModelComparison, string>> {
+    modelsToCompare: ModelsToCompare[]
+  ): Promise<Result<Model[], string>> {
     const modelComparisonManager = new ModelComparisonManager();
+
     const result = await modelComparisonManager.getModelComparison(
-      body.modelA,
-      body.providerA,
-      body.modelB,
-      body.providerB
+      modelsToCompare
     );
 
     return result;
