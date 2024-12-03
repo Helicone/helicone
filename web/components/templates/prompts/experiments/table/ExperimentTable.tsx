@@ -46,6 +46,10 @@ import { IslandContainer } from "@/components/ui/islandContainer";
 import HcBreadcrumb from "@/components/ui/hcBreadcrumb";
 import { Switch } from "@/components/ui/switch";
 import { useQueryClient } from "@tanstack/react-query";
+import ScoresEvaluatorsConfig from "./scores/ScoresEvaluatorsConfig";
+import ScoresGraphContainer from "./scores/ScoresGraphContainer";
+import { useOrg } from "@/components/layout/organizationContext";
+import { cn } from "@/lib/utils";
 
 type TableDataType = {
   index: number;
@@ -84,6 +88,7 @@ export function ExperimentTable({
     id: string;
     inputKV: Record<string, string>;
   } | null>(null);
+  const [showScores, setShowScores] = useState(false);
 
   const cellRefs = useRef<Record<string, any>>({});
   const [
@@ -91,6 +96,9 @@ export function ExperimentTable({
     setExternallySelectedForkFromPromptVersionId,
   ] = useState<string | null>(null);
   const [isAddColumnDialogOpen, setIsAddColumnDialogOpen] = useState(false);
+
+  const org = useOrg();
+  const orgId = org?.currentOrg?.id ?? "";
 
   const columnHelper = createColumnHelper<TableDataType>();
 
@@ -206,6 +214,7 @@ export function ExperimentTable({
             columnHelper.accessor(`prompt_version_${pv.id}`, {
               header: () => (
                 <ExperimentTableHeader
+                  experimentId={experimentTableId}
                   isOriginal={
                     pv.id ===
                     experimentTableQuery?.copied_original_prompt_version
@@ -269,10 +278,8 @@ export function ExperimentTable({
           columnHelper.accessor("add_prompt", {
             header: () => <></>,
             cell: ({ row }) => <div></div>,
-            size: 200,
           }),
         ],
-        size: 200,
       }),
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -358,6 +365,24 @@ export function ExperimentTable({
 
   const queryClient = useQueryClient();
 
+  const handleShowScoresChange = useCallback(
+    (checked: boolean) => {
+      if (!checked) {
+        queryClient.setQueryData(["selectedScoreKey", experimentTableId], null);
+        queryClient.setQueryData(["experimentScores", experimentTableId], {});
+
+        for (const promptVersion of promptVersionsData ?? []) {
+          queryClient.setQueryData(
+            ["experimentScores", experimentTableId, promptVersion.id],
+            {}
+          );
+        }
+      }
+      setShowScores(checked);
+    },
+    [queryClient, experimentTableId]
+  );
+
   return (
     <>
       <div className="flex justify-between items-center py-4 pr-4">
@@ -375,34 +400,71 @@ export function ExperimentTable({
             ]}
           />
         </IslandContainer>
-        <div className="flex items-center gap-2">
-          <Switch
-            checked={wrapText.data ?? false}
-            onCheckedChange={(checked) => {
-              queryClient.setQueryData(
-                ["wrapText", experimentTableId],
-                checked
-              );
-            }}
-          />
-          <p className="text-slate-700 dark:text-slate-300 text-sm font-medium">
-            Wrap text
-          </p>
+        <div className="flex items-center gap-5">
+          <div className="flex gap-2 items-center">
+            <Switch
+              size="sm"
+              checked={showScores}
+              onCheckedChange={(checked) => {
+                handleShowScoresChange(checked);
+                setShowScores(checked);
+              }}
+            />
+            <p className="text-slate-600 dark:text-slate-400 text-sm font-medium">
+              Show scores
+            </p>
+          </div>
+          <div className="flex gap-2 items-center">
+            <Switch
+              size="sm"
+              checked={wrapText.data ?? false}
+              onCheckedChange={(checked) => {
+                queryClient.setQueryData(
+                  ["wrapText", experimentTableId],
+                  checked
+                );
+              }}
+            />
+            <p className="text-slate-600 dark:text-slate-400 text-sm font-medium">
+              Wrap text
+            </p>
+          </div>
         </div>
       </div>
       <div className="h-[calc(100vh-50px)]">
         <ResizablePanelGroup direction="horizontal" className="h-full">
           <ResizablePanel defaultSize={75}>
             <div className="flex flex-col">
-              <div className="max-h-[calc(100vh-90px)] overflow-y-auto overflow-x-auto bg-slate-100 dark:bg-neutral-950">
-                <div className="w-fit h-full bg-slate-50 dark:bg-black rounded-sm">
-                  <Table className="border-collapse w-full">
+              {showScores && (
+                <div className="flex flex-col w-full bg-white dark:bg-neutral-950 border-y border-r border-slate-200 dark:border-slate-800">
+                  {promptVersionsData && (
+                    <ScoresGraphContainer
+                      promptVersions={(promptVersionsData ?? []).map((pv) => ({
+                        ...pv,
+                        metadata: pv.metadata ?? {},
+                      }))}
+                      experimentId={experimentTableId}
+                    />
+                  )}
+                  <div className="flex justify-between items-center bg-white dark:bg-neutral-950 p-2">
+                    <ScoresEvaluatorsConfig experimentId={experimentTableId} />
+                  </div>
+                </div>
+              )}
+              <div
+                className={clsx(
+                  "max-h-[calc(100vh-90px)] overflow-y-auto overflow-x-auto bg-white dark:bg-neutral-950",
+                  showScores && "max-h-[calc(100vh-90px-300px-80px)]"
+                )}
+              >
+                <div className="min-w-fit h-full bg-white dark:bg-black rounded-sm">
+                  <Table className="border-collapse w-full border-t border-slate-200 dark:border-slate-800">
                     <TableHeader>
                       {table.getHeaderGroups().map((headerGroup, i) => (
                         <TableRow
                           key={headerGroup.id}
                           className={clsx(
-                            "sticky top-0 bg-slate-50 dark:bg-slate-900 shadow-sm border-b border-slate-300 dark:border-slate-700",
+                            "sticky top-0 bg-slate-50 dark:bg-slate-900 shadow-sm border-b border-slate-200 dark:border-slate-800",
                             i === 1 && "h-[225px]"
                           )}
                         >
@@ -436,10 +498,10 @@ export function ExperimentTable({
                                   )}
                                 />
                               </div>
-                              {/* {index < headerGroup.headers.length - 1 && ( */}
-                              <div className="absolute top-0 right-0 h-full w-px bg-slate-300 dark:bg-slate-700" />
-                              {/* )} */}
-                              <div className="absolute bottom-0 left-0 right-0 h-[0.5px] bg-slate-300 dark:bg-slate-700" />
+                              {index < headerGroup.headers.length - 1 && (
+                                <div className="absolute top-0 right-0 h-full w-px bg-slate-200 dark:bg-slate-800" />
+                              )}
+                              {/* <div className="absolute bottom-0 left-0 right-0 h-[0.5px] bg-slate-200 dark:bg-slate-800" /> */}
                             </TableHead>
                           ))}
                         </TableRow>
@@ -451,11 +513,14 @@ export function ExperimentTable({
                           <TableRow
                             key={row.id}
                             data-state={row.getIsSelected() && "selected"}
-                            className="border-b border-slate-300 dark:border-slate-700 hover:bg-white dark:hover:bg-neutral-950"
+                            className="border-b border-slate-200 dark:border-slate-800 hover:bg-white dark:hover:bg-neutral-950"
                           >
                             {row.getVisibleCells().map((cell) => (
                               <TableCell
-                                className="p-0 align-baseline border-r border-slate-300 dark:border-slate-700"
+                                className={cn(
+                                  "p-0 align-baseline border-r border-slate-200 dark:border-slate-800",
+                                  cell.column.getIsLastColumn() && "border-r-0"
+                                )}
                                 key={cell.id}
                                 style={{
                                   width: cell.column.getSize(),
@@ -491,7 +556,7 @@ export function ExperimentTable({
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="self-start flex flex-row space-x-2 text-slate-700 mt-0 shadow-none"
+                    className="self-start flex flex-row space-x-2 text-slate-800 mt-0 shadow-none"
                   >
                     <PlusIcon className="h-4 w-4" />
                     Add row

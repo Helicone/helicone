@@ -64,8 +64,8 @@ const NavItem: React.FC<NavItemProps> = ({
             {link.icon && (
               <link.icon
                 className={cn(
-                  "h-4 w-4",
-                  link.current && "text-accent-foreground"
+                  "h-4 w-4 text-slate-500",
+                  link.current && "text-slate-800 dark:text-slate-200"
                 )}
               />
             )}

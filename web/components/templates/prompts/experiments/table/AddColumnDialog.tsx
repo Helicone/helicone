@@ -126,7 +126,6 @@ const AddColumnDialog = ({
             }}
             className="border rounded-md border-slate-200 dark:border-slate-700"
             onSubmit={async (history, model) => {
-              console.log({ history });
               const promptData = {
                 model: model,
                 messages: history.map((msg) => ({
