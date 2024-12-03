@@ -617,7 +617,7 @@ export class ExperimentController extends Controller {
   }
 
   @Post("/")
-  public async createNewExperiment(
+  public async createNewExperimentOld(
     @Body()
     requestBody: NewExperimentParams,
     @Request() request: JawnAuthenticatedRequest
