@@ -205,13 +205,18 @@
         {
           "group": "Vector DB",
           "pages": [
+            "integrations/vectordb/python",
             "integrations/vectordb/javascript",
             "integrations/vectordb/curl"
           ]
         },
         {
           "group": "Tools",
-          "pages": ["integrations/tools/javascript", "integrations/tools/curl"]
+          "pages": [
+            "integrations/tools/python",
+            "integrations/tools/javascript",
+            "integrations/tools/curl"
+          ]
         }
       ]
     },
