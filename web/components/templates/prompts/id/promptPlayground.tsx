@@ -21,7 +21,6 @@ import {
 } from "../../requests/chatComponent/messageUtils";
 import { cn } from "@/lib/utils";
 import { OnboardingPopover } from "../../onboarding/OnboardingPopover";
-import { ONBOARDING_STEPS } from "@/components/layout/onboardingContext";
 
 export type Input = {
   id: string;
@@ -342,6 +341,9 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
             <OnboardingPopover
               popoverContentProps={{
                 onboardingStep: "EXPERIMENTS_ADD_SAVE",
+                next: () => {
+                  onSubmit && onSubmit(currentChat, selectedModel || "");
+                },
               }}
               modal={true}
             >

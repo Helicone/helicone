@@ -36,7 +36,7 @@ const ScoresGraph = ({
 }) => {
   const { outputColumns, scores: scoreCriterias } = promptVersions.reduce(
     (acc, promptVersion) => {
-      const promptVersionScores = scores[promptVersion.id]?.data;
+      const promptVersionScores = scores[promptVersion?.id]?.data;
       if (promptVersionScores) {
         acc.scores = Array.from(
           new Set([...acc.scores, ...Object.keys(promptVersionScores)])

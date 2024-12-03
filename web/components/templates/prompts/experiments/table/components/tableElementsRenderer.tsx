@@ -14,6 +14,9 @@ import { useExperimentTable } from "../hooks/useExperimentTable";
 import { useExperimentScores } from "@/services/hooks/prompts/experiment-scores";
 import { cn } from "@/lib/utils";
 import { OnboardingPopover } from "@/components/templates/onboarding/OnboardingPopover";
+import useOnboardingContext, {
+  ONBOARDING_STEPS,
+} from "@/components/layout/onboardingContext";
 
 export interface InputEntry {
   key: string;
@@ -350,31 +353,56 @@ const PromptColumnHeader = ({
   onForkColumn?: () => void;
   onRunColumn?: () => void;
 }) => {
+  const { isOnboardingVisible, currentStep } = useOnboardingContext();
   return (
-    <div className="flex justify-between w-full items-center py-2 px-4 group">
-      <h3 className="font-semibold text-sm text-slate-900 dark:text-slate-100 leading-[130%]">
-        {label}
-      </h3>
-      {onForkColumn && onRunColumn && (
-        <div className="items-center justify-center hidden group-hover:flex">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="p-0 h-auto w-auto !hover:bg-transparent"
-            onClick={onForkColumn}
+    <OnboardingPopover
+      popoverContentProps={{
+        onboardingStep: "EXPERIMENTS_FIND_EXPERIMENT",
+      }}
+      open={label === "Prompt 1"}
+      setDataWhen={label === "Prompt 1"}
+    >
+      <div className="flex justify-between w-full items-center py-2 px-4 group">
+        <h3 className="font-semibold text-sm text-slate-900 dark:text-slate-100 leading-[130%]">
+          {label}
+        </h3>
+        {onForkColumn && onRunColumn && (
+          <div
+            className={cn(
+              "items-center justify-center hidden group-hover:flex",
+              currentStep ===
+                ONBOARDING_STEPS.EXPERIMENTS_RUN_EXPERIMENTS.stepNumber &&
+                "flex"
+            )}
           >
-            <GitForkIcon className="w-4 h-4 text-slate-500" />
-          </Button>
-          <Button
-            variant="outline"
-            className="ml-2 p-0 border rounded-md text-slate-500 h-[22px] w-[24px] items-center justify-center flex"
-            onClick={onRunColumn}
-          >
-            <PlayIcon className="w-4 h-4 text-gray-600 dark:text-gray-300" />
-          </Button>
-        </div>
-      )}
-    </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="p-0 h-auto w-auto !hover:bg-transparent"
+              onClick={onForkColumn}
+            >
+              <GitForkIcon className="w-4 h-4 text-slate-500" />
+            </Button>
+            <OnboardingPopover
+              popoverContentProps={{
+                onboardingStep: "EXPERIMENTS_RUN_EXPERIMENTS",
+                next: onRunColumn,
+              }}
+              setDataWhen={label === "Prompt 1"}
+              open={label === "Prompt 1"}
+            >
+              <Button
+                variant="outline"
+                className="ml-2 p-0 border rounded-md text-slate-500 h-[22px] w-[24px] items-center justify-center flex"
+                onClick={onRunColumn}
+              >
+                <PlayIcon className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+              </Button>
+            </OnboardingPopover>
+          </div>
+        )}
+      </div>
+    </OnboardingPopover>
   );
 };
 

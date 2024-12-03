@@ -400,6 +400,7 @@ export type OnboardingContextType = {
   isOnboardingComplete: boolean;
   setIsOnboardingComplete: (isOnboardingComplete: boolean) => void;
   endOnboarding: () => void;
+  updatePointerPosition: () => void;
 };
 
 const OnboardingContext = createContext<OnboardingContextType | undefined>(
@@ -563,6 +564,7 @@ export const OnboardingProvider = ({
         isOnboardingComplete,
         setIsOnboardingComplete,
         endOnboarding,
+        updatePointerPosition,
       }}
     >
       {children}
