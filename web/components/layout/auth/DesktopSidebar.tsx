@@ -32,23 +32,6 @@ interface SidebarProps {
   setOpen: (open: boolean) => void;
 }
 
-// export const GO_TO_KEY_SEQUENCE: Record<string, string> = {
-//   d: "/dashboard",
-//   r: "/requests",
-//   s: "/sessions",
-//   m: "/properties",
-//   u: "/users",
-//   p: "/prompts",
-//   o: "/playground",
-//   e: "/experiments",
-//   v: "/evaluators",
-//   t: "/datasets",
-//   c: "/cache",
-//   l: "/rate-limit",
-//   a: "/alerts",
-//   w: "/webhooks",
-// };
-
 const DesktopSidebar = ({ changelog, NAVIGATION }: SidebarProps) => {
   const org = useOrg();
   const tier = org?.currentOrg?.tier;
@@ -128,24 +111,6 @@ const DesktopSidebar = ({ changelog, NAVIGATION }: SidebarProps) => {
 
   const { theme, setTheme } = useTheme();
 
-  const [keySequence, setKeySequence] = useState<string>("");
-
-  // Separate useEffect for key sequence handling
-  // useEffect(() => {
-  //   const handleKeySequence = (event: KeyboardEvent) => {
-  //     if (event.key === "g") {
-  //       setKeySequence("g");
-  //     } else if (event.key in GO_TO_KEY_SEQUENCE && keySequence === "g") {
-  //       router.push(GO_TO_KEY_SEQUENCE[event.key]);
-  //       setKeySequence("");
-  //     }
-  //   };
-
-  //   window.addEventListener("keydown", handleKeySequence);
-  //   return () => window.removeEventListener("keydown", handleKeySequence);
-  // }, [keySequence, router]);
-
-  // Keep the original useEffect for other keyboard shortcuts
   useEffect(() => {
     calculateAvailableSpace();
 
@@ -159,9 +124,11 @@ const DesktopSidebar = ({ changelog, NAVIGATION }: SidebarProps) => {
       }
     };
 
+    // Add event listeners
     window.addEventListener("resize", calculateAvailableSpace);
     window.addEventListener("keydown", handleKeyDown);
 
+    // Remove event listeners on cleanup
     return () => {
       window.removeEventListener("resize", calculateAvailableSpace);
       window.removeEventListener("keydown", handleKeyDown);
@@ -191,6 +158,7 @@ const DesktopSidebar = ({ changelog, NAVIGATION }: SidebarProps) => {
   };
 
   const handleModalOpen = (open: boolean) => {
+    console.log({ open });
     if (!open) {
       setChangelogToView(null);
     } else {

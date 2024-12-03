@@ -12,18 +12,11 @@ export type PromptVersion = {
 
 const ScoresGraphContainer = ({
   experimentId,
-  // fetchExperimentHypothesisScores,
   promptVersions,
 }: {
   promptVersions: PromptVersion[];
   experimentId: string;
-  // fetchExperimentHypothesisScores: (
-  //   hypothesisId: string
-  // ) => Promise<Record<string, any>>;
 }) => {
-  // const [scores, setScores] = useState<Record<string, Record<string, any>>>({});
-  // const [loading, setLoading] = useState(true);
-
   const { fetchExperimentHypothesisScores } = useExperimentScores(experimentId);
   const queryClient = useQueryClient();
   const {

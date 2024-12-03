@@ -1,27 +1,17 @@
-import { useMemo } from "react";
-// import { clsx } from "@/components/shared/clsx";
-// import { Badge } from "@/components/ui/badge";
-// import { InfoIcon } from "lucide-react";
-// import {
-//   Tooltip,
-//   TooltipContent,
-//   TooltipProvider,
-//   TooltipTrigger,
-// } from "@/components/ui/tooltip";
-import { PromptVersion } from "./ScoresGraphContainer";
 import {
-  ChartConfig,
   ChartContainer,
   ChartLegend,
   ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { CartesianGrid, Line, LineChart, XAxis } from "recharts";
-import { useQueryClient } from "@tanstack/react-query";
-import { useExperimentTable } from "../hooks/useExperimentTable";
 import { cn } from "@/lib/utils";
 import { useExperimentScores } from "@/services/hooks/prompts/experiment-scores";
+import { useQueryClient } from "@tanstack/react-query";
+import { useMemo } from "react";
+import { CartesianGrid, Line, LineChart, XAxis } from "recharts";
+import { useExperimentTable } from "../hooks/useExperimentTable";
+import { PromptVersion } from "./ScoresGraphContainer";
 
 const ScoresGraph = ({
   promptVersions,

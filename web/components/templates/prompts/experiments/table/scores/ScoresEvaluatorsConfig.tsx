@@ -17,8 +17,6 @@ import { useExperimentScores } from "@/services/hooks/prompts/experiment-scores"
 import { CheckIcon, Loader2, TriangleAlertIcon, XIcon } from "lucide-react";
 import { memo, useState, useEffect } from "react";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { useQueryClient } from "@tanstack/react-query";
-import { ISLAND_MARGIN } from "@/components/ui/islandContainer";
 import { cn } from "@/lib/utils";
 
 const ScoresEvaluatorsConfig = memo(

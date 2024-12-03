@@ -4,7 +4,8 @@ create table "public"."evaluator_experiments_v3" (
     "experiment" uuid not null,
     "evaluator" uuid not null
 );
-
+REVOKE ALL ON TABLE "public"."evaluator_experiments_v3" FROM anon;
+REVOKE ALL ON TABLE "public"."evaluator_experiments_v3" FROM authenticated;
 
 alter table "public"."evaluator_experiments_v3" enable row level security;
 
@@ -19,47 +20,4 @@ alter table "public"."evaluator_experiments_v3" validate constraint "public_eval
 alter table "public"."evaluator_experiments_v3" add constraint "public_evaluator_experiments_v3_experiment_fkey" FOREIGN KEY (experiment) REFERENCES experiment_v3(id) not valid;
 
 alter table "public"."evaluator_experiments_v3" validate constraint "public_evaluator_experiments_v3_experiment_fkey";
-
-grant delete on table "public"."evaluator_experiments_v3" to "anon";
-
-grant insert on table "public"."evaluator_experiments_v3" to "anon";
-
-grant references on table "public"."evaluator_experiments_v3" to "anon";
-
-grant select on table "public"."evaluator_experiments_v3" to "anon";
-
-grant trigger on table "public"."evaluator_experiments_v3" to "anon";
-
-grant truncate on table "public"."evaluator_experiments_v3" to "anon";
-
-grant update on table "public"."evaluator_experiments_v3" to "anon";
-
-grant delete on table "public"."evaluator_experiments_v3" to "authenticated";
-
-grant insert on table "public"."evaluator_experiments_v3" to "authenticated";
-
-grant references on table "public"."evaluator_experiments_v3" to "authenticated";
-
-grant select on table "public"."evaluator_experiments_v3" to "authenticated";
-
-grant trigger on table "public"."evaluator_experiments_v3" to "authenticated";
-
-grant truncate on table "public"."evaluator_experiments_v3" to "authenticated";
-
-grant update on table "public"."evaluator_experiments_v3" to "authenticated";
-
-grant delete on table "public"."evaluator_experiments_v3" to "service_role";
-
-grant insert on table "public"."evaluator_experiments_v3" to "service_role";
-
-grant references on table "public"."evaluator_experiments_v3" to "service_role";
-
-grant select on table "public"."evaluator_experiments_v3" to "service_role";
-
-grant trigger on table "public"."evaluator_experiments_v3" to "service_role";
-
-grant truncate on table "public"."evaluator_experiments_v3" to "service_role";
-
-grant update on table "public"."evaluator_experiments_v3" to "service_role";
-
 

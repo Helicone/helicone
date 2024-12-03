@@ -521,6 +521,11 @@ export class ExperimentV2Manager extends BaseManager {
     experimentId: string,
     promptVersionId: string
   ): Promise<Result<Record<string, ScoreV2>, string>> {
+    const experiment = await this.hasAccessToExperiment(experimentId);
+    if (!experiment) {
+      return err("Unauthorized");
+    }
+
     const rows = await dbExecute<{ scores: Record<string, ScoreV2> }>(
       `SELECT
        COALESCE((
@@ -565,8 +570,12 @@ export class ExperimentV2Manager extends BaseManager {
         ) as score
       FROM score_value sv
       JOIN score_attribute sa ON sa.id = sv.score_attribute
-      WHERE sv.request_id = $1 AND sa.score_key = $2`,
-      [requestId, scoreKey]
+      LEFT JOIN request r ON r.id = sv.request_id
+      WHERE  
+        sv.request_id = $1 
+        AND sa.score_key = $2
+        AND r.helicone_org_id = $3`,
+      [requestId, scoreKey, this.authParams.organizationId]
     );
 
     return ok(rows.data?.[0]?.score ?? null);
