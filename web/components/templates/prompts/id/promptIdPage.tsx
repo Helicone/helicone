@@ -76,6 +76,10 @@ import { clsx } from "clsx";
 import PromptInputItem from "./promptInputItem";
 import { IslandContainer } from "@/components/ui/islandContainer";
 import { cn } from "@/lib/utils";
+import useOnboardingContext, {
+  ONBOARDING_STEPS,
+} from "@/components/layout/onboardingContext";
+import { OnboardingPopover } from "../../onboarding/OnboardingPopover";
 
 interface PromptIdPageProps {
   id: string;
@@ -571,6 +575,8 @@ const PromptIdPage = (props: PromptIdPageProps) => {
     setIsSearchVisible(!isSearchVisible);
   };
 
+  const { isOnboardingVisible, currentStep } = useOnboardingContext();
+
   return (
     <IslandContainer className="mx-0">
       <div className="w-full h-full flex flex-col space-y-4 pt-4">
@@ -582,15 +588,25 @@ const PromptIdPage = (props: PromptIdPageProps) => {
             )}
           >
             <div className="flex items-center space-x-4">
-              <HcBreadcrumb
-                pages={[
-                  { href: "/prompts", name: "Prompts" },
-                  {
-                    href: `/prompts/${id}`,
-                    name: prompt?.user_defined_id || "Loading...",
-                  },
-                ]}
-              />
+              <OnboardingPopover
+                open={typeof prompt?.user_defined_id === "string"}
+                popoverContentProps={{
+                  onboardingStep: "PROMPTS_PAGE",
+                  align: "center",
+                  side: "bottom",
+                }}
+                triggerAsChild={false}
+              >
+                <HcBreadcrumb
+                  pages={[
+                    { href: "/prompts", name: "Prompts" },
+                    {
+                      href: `/prompts/${id}`,
+                      name: prompt?.user_defined_id || "Loading...",
+                    },
+                  ]}
+                />
+              </OnboardingPopover>
 
               <HoverCard>
                 <HoverCardTrigger>
@@ -877,25 +893,50 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                                             </DropdownMenu>
                                           ) : promptVersion.minor_version ===
                                             0 ? (
-                                            <DropdownMenu>
+                                            <DropdownMenu
+                                              open={
+                                                isOnboardingVisible &&
+                                                currentStep ===
+                                                  ONBOARDING_STEPS
+                                                    .PROMPTS_EXPERIMENT
+                                                    .stepNumber
+                                              }
+                                            >
                                               <DropdownMenuTrigger asChild>
                                                 <button className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full">
                                                   <EllipsisHorizontalIcon className="h-6 w-6 text-slate-500" />
                                                 </button>
                                               </DropdownMenuTrigger>
-                                              <DropdownMenuContent>
-                                                <DropdownMenuItem
-                                                  onClick={() =>
+                                              <OnboardingPopover
+                                                popoverContentProps={{
+                                                  onboardingStep:
+                                                    "PROMPTS_EXPERIMENT",
+                                                  next: () => {
                                                     startExperiment(
                                                       promptVersion.id,
                                                       promptVersion.helicone_template
-                                                    )
-                                                  }
-                                                >
-                                                  <BeakerIcon className="h-4 w-4 mr-2" />
-                                                  Experiment
-                                                </DropdownMenuItem>
-                                              </DropdownMenuContent>
+                                                    );
+                                                  },
+                                                  align: "start",
+                                                  side: "left",
+                                                  sideOffset: 140,
+                                                }}
+                                                triggerAsChild={false}
+                                              >
+                                                <DropdownMenuContent>
+                                                  <DropdownMenuItem
+                                                    onClick={() =>
+                                                      startExperiment(
+                                                        promptVersion.id,
+                                                        promptVersion.helicone_template
+                                                      )
+                                                    }
+                                                  >
+                                                    <BeakerIcon className="h-4 w-4 mr-2" />
+                                                    Experiment
+                                                  </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                              </OnboardingPopover>
                                             </DropdownMenu>
                                           ) : (
                                             <></>
