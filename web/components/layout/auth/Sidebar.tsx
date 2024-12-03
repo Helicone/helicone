@@ -1,26 +1,28 @@
 /* eslint-disable @next/next/no-img-element */
 
-import {
-  ArchiveBoxIcon,
-  BeakerIcon,
-  BellIcon,
-  CircleStackIcon,
-  HomeIcon,
-  LockClosedIcon,
-  ShieldCheckIcon,
-  SparklesIcon,
-  TableCellsIcon,
-  TagIcon,
-  UsersIcon,
-} from "@heroicons/react/24/outline";
 import { useUser } from "@supabase/auth-helpers-react";
 import { useRouter } from "next/router";
 import { useMemo } from "react";
 import DesktopSidebar, { NavigationItem } from "./DesktopSidebar";
 
-import { PiGraphLight } from "react-icons/pi";
 import { useOrg } from "../organizationContext";
-import { NotepadText, TestTube2, Webhook } from "lucide-react";
+import {
+  ArchiveIcon,
+  BellIcon,
+  DatabaseIcon,
+  FlaskConicalIcon,
+  Home,
+  ListTreeIcon,
+  LockIcon,
+  NotepadText,
+  SheetIcon,
+  ShieldCheckIcon,
+  SparklesIcon,
+  TagIcon,
+  TestTube2,
+  UsersIcon,
+  Webhook,
+} from "lucide-react";
 import { Enclosure } from "rss-parser";
 
 export interface ChangelogItem {
@@ -51,13 +53,13 @@ const Sidebar = ({ changelog, setOpen, sidebarRef }: SidebarProps) => {
       {
         name: "Dashboard",
         href: "/dashboard",
-        icon: HomeIcon,
+        icon: Home,
         current: pathname.includes("/dashboard"),
       },
       {
         name: "Requests",
         href: "/requests",
-        icon: TableCellsIcon,
+        icon: SheetIcon,
         current: pathname.includes("/requests"),
       },
 
@@ -70,7 +72,7 @@ const Sidebar = ({ changelog, setOpen, sidebarRef }: SidebarProps) => {
           {
             name: "Sessions",
             href: "/sessions",
-            icon: PiGraphLight,
+            icon: ListTreeIcon,
             current: pathname.includes("/sessions"),
           },
           {
@@ -109,7 +111,7 @@ const Sidebar = ({ changelog, setOpen, sidebarRef }: SidebarProps) => {
           {
             name: "Experiments",
             href: "/experiments",
-            icon: BeakerIcon,
+            icon: FlaskConicalIcon,
             current: pathname.includes("/experiments"),
           },
           ...(!user?.email?.includes("@helicone.ai") ||
@@ -126,7 +128,7 @@ const Sidebar = ({ changelog, setOpen, sidebarRef }: SidebarProps) => {
           {
             name: "Datasets",
             href: "/datasets",
-            icon: CircleStackIcon,
+            icon: DatabaseIcon,
             current: pathname.includes("/datasets"),
           },
         ],
@@ -141,7 +143,7 @@ const Sidebar = ({ changelog, setOpen, sidebarRef }: SidebarProps) => {
           {
             name: "Cache",
             href: "/cache",
-            icon: ArchiveBoxIcon,
+            icon: ArchiveIcon,
             current: pathname.includes("/cache"),
           },
           {
@@ -175,7 +177,7 @@ const Sidebar = ({ changelog, setOpen, sidebarRef }: SidebarProps) => {
                 {
                   name: "Vault",
                   href: "/vault",
-                  icon: LockClosedIcon,
+                  icon: LockIcon,
                   current: pathname.includes("/vault"),
                 },
               ],

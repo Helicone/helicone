@@ -76,10 +76,6 @@ import { clsx } from "clsx";
 import PromptInputItem from "./promptInputItem";
 import { IslandContainer } from "@/components/ui/islandContainer";
 import { cn } from "@/lib/utils";
-import useOnboardingContext, {
-  ONBOARDING_STEPS,
-} from "@/components/layout/onboardingContext";
-import { OnboardingPopover } from "../../onboarding/OnboardingPopover";
 
 interface PromptIdPageProps {
   id: string;
@@ -477,61 +473,28 @@ const PromptIdPage = (props: PromptIdPageProps) => {
     promptVersionId: string,
     promptData: string
   ) => {
-    if (
-      !(
-        experimentFlags?.hasFlag ||
-        user?.email?.includes("helicone.ai") ||
-        org?.currentOrg?.tier === "demo"
-      )
-    ) {
-      notification.setNotification(
-        "Experiment feature is not enabled - sign up for the waitlist to use it",
-        "error"
-      );
-      return;
-    }
-    const dataset = await jawn.POST("/v1/helicone-dataset", {
-      body: {
-        datasetName: "Dataset for Experiment",
-        requestIds: [],
-      },
-    });
-    if (!dataset.data?.data?.datasetId) {
-      notification.setNotification("Failed to create dataset", "error");
-      return;
-    }
     const promptVersion = prompts?.find((p) => p.id === promptVersionId);
 
-    const experimentTableResult = await jawn.POST("/v1/experiment/table/new", {
+    if (!promptVersion) {
+      notification.setNotification("Prompt version not found", "error");
+      return;
+    }
+
+    const experimentTableResult = await jawn.POST("/v2/experiment/new", {
       body: {
-        datasetId: dataset.data?.data?.datasetId!,
-        promptVersionId: promptVersionId,
-        newHeliconeTemplate: JSON.stringify(promptData),
-        isMajorVersion: false,
-        promptSubversionMetadata: {
-          experimentAssigned: true,
-        },
-        experimentMetadata: {
-          prompt_id: id,
-          prompt_version: promptVersionId,
-          experiment_name:
-            `${prompt?.user_defined_id}_V${promptVersion?.major_version}.${promptVersion?.minor_version}` ||
-            "",
-        },
-        experimentTableMetadata: {
-          datasetId: dataset.data?.data?.datasetId!,
-          model: promptVersion?.model,
-          prompt_id: id,
-          prompt_version: promptVersionId,
-        },
+        name: `${prompt?.user_defined_id}_V${promptVersion?.major_version}.${promptVersion?.minor_version}`,
+        originalPromptVersion: promptVersionId,
       },
     });
-    if (!experimentTableResult.data?.data?.experimentId) {
+
+    if (experimentTableResult.error || !experimentTableResult.data) {
       notification.setNotification("Failed to create experiment", "error");
       return;
     }
 
-    router.push(`/experiments/${experimentTableResult.data?.data?.tableId}`);
+    router.push(
+      `/experiments/${experimentTableResult.data.data?.experimentId}`
+    );
   };
 
   const deletePromptVersion = async (promptVersionId: string) => {
@@ -608,8 +571,6 @@ const PromptIdPage = (props: PromptIdPageProps) => {
     setIsSearchVisible(!isSearchVisible);
   };
 
-  const { isOnboardingVisible, currentStep } = useOnboardingContext();
-
   return (
     <IslandContainer className="mx-0">
       <div className="w-full h-full flex flex-col space-y-4 pt-4">
@@ -621,25 +582,15 @@ const PromptIdPage = (props: PromptIdPageProps) => {
             )}
           >
             <div className="flex items-center space-x-4">
-              <OnboardingPopover
-                open={typeof prompt?.user_defined_id === "string"}
-                popoverContentProps={{
-                  onboardingStep: "PROMPTS_PAGE",
-                  align: "center",
-                  side: "bottom",
-                }}
-                triggerAsChild={false}
-              >
-                <HcBreadcrumb
-                  pages={[
-                    { href: "/prompts", name: "Prompts" },
-                    {
-                      href: `/prompts/${id}`,
-                      name: prompt?.user_defined_id || "Loading...",
-                    },
-                  ]}
-                />
-              </OnboardingPopover>
+              <HcBreadcrumb
+                pages={[
+                  { href: "/prompts", name: "Prompts" },
+                  {
+                    href: `/prompts/${id}`,
+                    name: prompt?.user_defined_id || "Loading...",
+                  },
+                ]}
+              />
 
               <HoverCard>
                 <HoverCardTrigger>
@@ -924,55 +875,30 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                                                 )}
                                               </DropdownMenuContent>
                                             </DropdownMenu>
-                                          ) : (
-                                            <DropdownMenu
-                                              open={
-                                                isOnboardingVisible &&
-                                                currentStep ===
-                                                  ONBOARDING_STEPS
-                                                    .PROMPTS_EXPERIMENT
-                                                    .stepNumber
-                                              }
-                                            >
+                                          ) : promptVersion.minor_version ===
+                                            0 ? (
+                                            <DropdownMenu>
                                               <DropdownMenuTrigger asChild>
-                                                <button
-                                                  className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full"
-                                                  id="onboarding-prompt-experiment"
-                                                >
+                                                <button className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full">
                                                   <EllipsisHorizontalIcon className="h-6 w-6 text-slate-500" />
                                                 </button>
                                               </DropdownMenuTrigger>
-                                              <OnboardingPopover
-                                                popoverContentProps={{
-                                                  onboardingStep:
-                                                    "PROMPTS_EXPERIMENT",
-                                                  next: () => {
+                                              <DropdownMenuContent>
+                                                <DropdownMenuItem
+                                                  onClick={() =>
                                                     startExperiment(
                                                       promptVersion.id,
                                                       promptVersion.helicone_template
-                                                    );
-                                                  },
-                                                  align: "start",
-                                                  side: "left",
-                                                  sideOffset: 140,
-                                                }}
-                                                triggerAsChild={false}
-                                              >
-                                                <DropdownMenuContent>
-                                                  <DropdownMenuItem
-                                                    onClick={() =>
-                                                      startExperiment(
-                                                        promptVersion.id,
-                                                        promptVersion.helicone_template
-                                                      )
-                                                    }
-                                                  >
-                                                    <BeakerIcon className="h-4 w-4 mr-2" />
-                                                    Experiment
-                                                  </DropdownMenuItem>
-                                                </DropdownMenuContent>
-                                              </OnboardingPopover>
+                                                    )
+                                                  }
+                                                >
+                                                  <BeakerIcon className="h-4 w-4 mr-2" />
+                                                  Experiment
+                                                </DropdownMenuItem>
+                                              </DropdownMenuContent>
                                             </DropdownMenu>
+                                          ) : (
+                                            <></>
                                           )}
                                         </div>
                                       </div>

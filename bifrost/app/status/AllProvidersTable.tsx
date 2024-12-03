@@ -82,7 +82,7 @@ export function AllProvidersTable({ providers }: AllProvidersTableProps) {
                 ? (recentErrorCount / recentRequestCount) * 100
                 : 0;
 
-            const status = getProviderStatus(errorRate24h);
+            const status = getProviderStatus(recentErrorRate);
             const StatusIcon = status.icon;
 
             return (

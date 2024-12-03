@@ -206,7 +206,8 @@ export async function dbLoggableRequestFromAsyncLogModel(
         asyncLogModel.timing.endTime.seconds * 1000 +
           asyncLogModel.timing.endTime.milliseconds
       ),
-      timeToFirstToken: async () => null,
+      timeToFirstToken: async () =>
+        Number(asyncLogModel.timing.timeToFirstToken) ?? null,
     },
     tokenCalcUrl: env.VALHALLA_URL,
   });

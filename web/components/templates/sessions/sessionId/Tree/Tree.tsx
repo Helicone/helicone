@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Trace, TreeNodeData } from "../../../../../lib/sessions/sessionTypes";
+import { TreeNodeData } from "../../../../../lib/sessions/sessionTypes";
 import { clsx } from "../../../../shared/clsx";
 import { PathNode } from "./PathNode";
 import { RequestNode } from "./RequestNode";
@@ -12,8 +12,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { OnboardingPopover } from "@/components/templates/onboarding/OnboardingPopover";
-import { useRouter } from "next/navigation";
 
 export interface TreeNodeProps {
   node: TreeNodeData;
@@ -23,7 +21,6 @@ export interface TreeNodeProps {
   collapseAll?: boolean;
   setShowDrawer: (x: boolean) => void;
   isRequestSingleChild?: boolean;
-  onBoardingRequestTrace?: Trace;
 }
 
 const TreeNode: React.FC<TreeNodeProps> = ({
@@ -34,7 +31,6 @@ const TreeNode: React.FC<TreeNodeProps> = ({
   collapseAll,
   setShowDrawer,
   isRequestSingleChild,
-  onBoardingRequestTrace,
 }) => {
   const [closeChildren, setCloseChildren] = useState(collapseAll ?? false);
   const [selectedRequestId, setSelectedRequestId] = selectedRequestIdDispatch;
@@ -51,7 +47,10 @@ const TreeNode: React.FC<TreeNodeProps> = ({
       )}
       key={`${node.name}-${node.trace?.request_id}`}
     >
-      {node.children ? (
+      {!node.trace &&
+      node.children &&
+      (node.children.filter((c) => c.trace).length === 0 ||
+        node.children.filter((c) => c.trace).length > 1) ? (
         <Col className="overflow-x-auto overflow-y-hidden">
           <Row className="w-full group">
             {new Array(level).fill(null).map((_, index) => (
@@ -78,7 +77,6 @@ const TreeNode: React.FC<TreeNodeProps> = ({
           {!closeChildren &&
             node.children.map((child, index) => (
               <TreeNode
-                onBoardingRequestTrace={onBoardingRequestTrace}
                 key={index}
                 node={child}
                 selectedRequestIdDispatch={selectedRequestIdDispatch}
@@ -98,13 +96,16 @@ const TreeNode: React.FC<TreeNodeProps> = ({
           <div
             className={clsx(
               "h-[42px] w-[24px]  shrink-0 group-hover:cursor-pointer sticky top-1/2 left-0 z-[2]",
-              selectedRequestId === node.trace?.request_id
+              selectedRequestId ===
+                (node.children
+                  ? node.children[0].trace?.request_id
+                  : node.trace?.request_id)
                 ? "bg-sky-100 dark:bg-slate-900"
                 : "bg-white dark:bg-slate-950 group-hover:bg-sky-50 dark:group-hover:bg-slate-800"
             )}
             onClick={() =>
               node.children
-                ? setCloseChildren(!closeChildren)
+                ? setSelectedRequestId(node.children[0].trace?.request_id ?? "")
                 : setSelectedRequestId(node.trace?.request_id ?? "")
             }
           >
@@ -115,11 +116,15 @@ const TreeNode: React.FC<TreeNodeProps> = ({
                   <Button
                     variant="ghost"
                     className={clsx(
-                      "p-1 m-0 flex items-center hidden group-hover:block z-[20]"
+                      "p-1 m-0 items-center hidden group-hover:flex z-[20]"
                     )}
                     onClick={(e) => {
                       e.stopPropagation();
-                      setSelectedRequestId(node.trace?.request_id ?? "");
+                      setSelectedRequestId(
+                        node.children
+                          ? node.children[0].trace?.request_id ?? ""
+                          : node.trace?.request_id ?? ""
+                      );
                       setShowDrawer(true);
                     }}
                   >
@@ -139,13 +144,18 @@ const TreeNode: React.FC<TreeNodeProps> = ({
                 key={index}
                 className={clsx(
                   "h-[42px] w-[24px] relative shrink-0 group-hover:cursor-pointer",
-                  selectedRequestId === node.trace?.request_id
+                  selectedRequestId ===
+                    (node.children
+                      ? node.children[0].trace?.request_id
+                      : node.trace?.request_id)
                     ? "bg-sky-100 dark:bg-slate-900"
                     : "bg-white dark:bg-slate-950 group-hover:bg-sky-50 dark:group-hover:bg-slate-900"
                 )}
                 onClick={() =>
                   node.children
-                    ? setCloseChildren(!closeChildren)
+                    ? setSelectedRequestId(
+                        node.children[0].trace?.request_id ?? ""
+                      )
                     : setSelectedRequestId(node.trace?.request_id ?? "")
                 }
               >
@@ -154,17 +164,15 @@ const TreeNode: React.FC<TreeNodeProps> = ({
             ))}
 
           <RequestNode
-            isOnboardingRequest={
-              onBoardingRequestTrace?.request_id === node.trace?.request_id
-            }
             selectedRequestId={selectedRequestId}
-            node={node}
+            node={node.children ? node.children[0] : node}
             setCloseChildren={setCloseChildren}
             closeChildren={closeChildren}
             setSelectedRequestId={setSelectedRequestId}
             level={level}
             setShowDrawer={setShowDrawer}
             isRequestSingleChild={isRequestSingleChild ?? false}
+            label={node.children ? node.name : undefined}
           />
         </Row>
       )}
@@ -177,7 +185,6 @@ interface TreeProps {
   selectedRequestIdDispatch: [string, (x: string) => void];
   collapseAll?: boolean;
   setShowDrawer: (x: boolean) => void;
-  onBoardingRequestTrace?: Trace;
 }
 
 export const Tree: React.FC<TreeProps> = ({
@@ -186,40 +193,27 @@ export const Tree: React.FC<TreeProps> = ({
   selectedRequestIdDispatch,
   collapseAll,
   setShowDrawer,
-  onBoardingRequestTrace,
 }) => {
-  const router = useRouter();
-
+  console.log(data);
   return (
-    <OnboardingPopover
-      popoverContentProps={{
-        onboardingStep: "SESSIONS_PAGE",
-        align: "start",
-        side: "right",
-      }}
+    <div
+      className={clsx(
+        "font-sans bg-slate-50 dark:bg-black border-t border-slate-200 dark:border-slate-700",
+        className
+      )}
     >
-      <div
-        className={clsx(
-          "font-sans bg-slate-50 dark:bg-black border-t border-slate-200 dark:border-slate-700",
-          className
-        )}
-      >
-        {data.children &&
-          data.children.map((child, index) => (
-            <TreeNode
-              key={index}
-              node={child}
-              selectedRequestIdDispatch={selectedRequestIdDispatch}
-              isLastChild={
-                !!data.children && index === data.children.length - 1
-              }
-              onBoardingRequestTrace={onBoardingRequestTrace}
-              level={0}
-              collapseAll={collapseAll}
-              setShowDrawer={setShowDrawer}
-            />
-          ))}
-      </div>
-    </OnboardingPopover>
+      {data.children &&
+        data.children.map((child, index) => (
+          <TreeNode
+            key={index}
+            node={child}
+            selectedRequestIdDispatch={selectedRequestIdDispatch}
+            isLastChild={!!data.children && index === data.children.length - 1}
+            level={0}
+            collapseAll={collapseAll}
+            setShowDrawer={setShowDrawer}
+          />
+        ))}
+    </div>
   );
 };

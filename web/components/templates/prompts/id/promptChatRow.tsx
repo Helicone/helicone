@@ -1,8 +1,5 @@
 import {
   ArrowsPointingOutIcon,
-  ClipboardIcon,
-  EyeIcon,
-  EyeSlashIcon,
   TrashIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
@@ -19,11 +16,9 @@ import AddFileButton from "../../playground/new/addFileButton";
 import ThemedModal from "../../../shared/themed/themedModal";
 import MarkdownEditor from "../../../shared/markdownEditor";
 import { Message } from "../../requests/chatComponent/types";
-import useOnboardingContext, {
-  ONBOARDING_STEPS,
-} from "@/components/layout/onboardingContext";
-import { Popover, PopoverTrigger } from "@/components/ui/popover";
-import { OnboardingPopoverContent } from "../../onboarding/OnboardingPopover";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+import { ClipboardIcon, EyeIcon, EyeOffIcon } from "lucide-react";
 
 interface PromptChatRowProps {
   index: number;
@@ -35,7 +30,7 @@ interface PromptChatRowProps {
   ) => void;
   deleteRow: (rowId: string) => void;
   editMode?: boolean;
-  promptMode?: boolean;
+  playgroundMode?: "prompt" | "experiment" | "experiment-compact";
   selectedProperties: Record<string, string> | undefined;
   onExtractVariables?: (
     variables: Array<{ original: string; heliconeTag: string }>
@@ -54,9 +49,11 @@ export const hasImage = (content: string | any[] | null) => {
 export const PrettyInput = ({
   keyName,
   selectedProperties,
+  playgroundMode = "prompt",
 }: {
   keyName: string;
   selectedProperties: Record<string, string> | undefined;
+  playgroundMode?: "prompt" | "experiment" | "experiment-compact";
 }) => {
   const getRenderText = () => {
     if (selectedProperties) {
@@ -68,6 +65,13 @@ export const PrettyInput = ({
   const renderText = getRenderText();
   const [open, setOpen] = useState(false);
   const TEXT_LIMIT = 120;
+
+  if (
+    playgroundMode === "experiment" ||
+    playgroundMode === "experiment-compact"
+  ) {
+    return <span className="text-[#2463EB]">{`{{ ${renderText} }}`}</span>;
+  }
 
   return (
     <>
@@ -127,10 +131,10 @@ export const PrettyInput = ({
 
 const RenderWithPrettyInputKeys = (props: {
   text: string;
-
+  playgroundMode?: "prompt" | "experiment" | "experiment-compact";
   selectedProperties: Record<string, string> | undefined;
 }) => {
-  const { text, selectedProperties } = props;
+  const { text, selectedProperties, playgroundMode = "prompt" } = props;
 
   // Function to replace matched patterns with JSX components
   const replaceInputKeysWithComponents = (inputText: string) => {
@@ -157,6 +161,7 @@ const RenderWithPrettyInputKeys = (props: {
           keyName={keyName}
           key={offset}
           selectedProperties={selectedProperties}
+          playgroundMode={playgroundMode}
         />
       );
 
@@ -175,7 +180,15 @@ const RenderWithPrettyInputKeys = (props: {
   };
 
   return (
-    <div className="text-sm leading-7 text-slate-900 dark:text-slate-100 whitespace-pre-wrap">
+    <div
+      className={cn(
+        "text-sm leading-7 text-slate-900 dark:text-slate-100 whitespace-pre-wrap",
+        playgroundMode === "experiment" ||
+          playgroundMode === "experiment-compact"
+          ? "text-slate-700 dark:text-slate-300 text-xs leading-[140%]"
+          : ""
+      )}
+    >
       {replaceInputKeysWithComponents(text)}
     </div>
   );
@@ -190,6 +203,7 @@ const PromptChatRow = (props: PromptChatRowProps) => {
     editMode,
     selectedProperties,
     onExtractVariables,
+    playgroundMode = "prompt",
   } = props;
 
   const [currentMessage, setCurrentMessage] = useState(message);
@@ -278,22 +292,37 @@ const PromptChatRow = (props: PromptChatRowProps) => {
     return keyName ? keyName[1] : "";
   };
 
-  const getContent = (message: Message, minimize: boolean) => {
+  const getContent = (
+    message: Message,
+    minimize: boolean,
+    playgroundMode?: "prompt" | "experiment" | "experiment-compact"
+  ) => {
     // check if the content is an array and it has an image type or image_url type
     const content = message.content;
 
     if (Array.isArray(content)) {
       const textMessage = content.find((element) => element.type === "text");
       // if minimize is true, substring the text to 100 characters
-      const text = minimize
-        ? `${textMessage?.text.substring(0, 100)}...`
-        : textMessage?.text;
+      const text =
+        minimize && textMessage?.text.length > 100
+          ? `${textMessage?.text.substring(0, 100)}...`
+          : `${textMessage?.text}`;
+
+      const isStatic = textMessage?.text.includes("<helicone-prompt-static>");
 
       return (
         <div className="flex flex-col space-y-4 whitespace-pre-wrap">
           <RenderWithPrettyInputKeys
-            text={removeLeadingWhitespace(text)}
+            text={removeLeadingWhitespace(
+              isStatic
+                ? text.replace(
+                    /<helicone-prompt-static>(.*?)<\/helicone-prompt-static>/g,
+                    "$1"
+                  )
+                : text
+            )}
             selectedProperties={selectedProperties}
+            playgroundMode={playgroundMode}
           />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           {hasImage(content) && (
@@ -390,6 +419,7 @@ const PromptChatRow = (props: PromptChatRowProps) => {
                 : contentString
             }
             selectedProperties={selectedProperties}
+            playgroundMode={playgroundMode}
           />
         </div>
       );
@@ -448,82 +478,95 @@ const PromptChatRow = (props: PromptChatRowProps) => {
     setRole(message.role);
   }, [message]);
 
-  const { isOnboardingVisible, currentStep } = useOnboardingContext();
+  const isStatic = contentAsString?.includes("<helicone-prompt-static>");
 
-  const setText = (text: string): void => {
-    const newVariables = extractVariables(text);
-    const replacedText = replaceVariablesWithTags(text, newVariables);
-    const newMessages = { ...currentMessage };
-    const messageContent = newMessages.content;
-    if (Array.isArray(messageContent)) {
-      const textMessage = messageContent.find(
-        (element) => element.type === "text"
-      );
-      if (textMessage) {
-        textMessage.text = replacedText;
-      }
-    } else {
-      newMessages.content = replacedText;
-    }
+  const currentMessageContent = currentMessage.content;
+  const isCurrentMessageContentArray = Array.isArray(currentMessageContent);
+  const textMessage = isCurrentMessageContentArray
+    ? currentMessageContent.find((element) => element.type === "text")
+    : null;
+  const showMinimizeButton = textMessage && textMessage.text.length > 100;
 
-    setCurrentMessage(newMessages);
-    callback(replacedText, role, file);
-    setPromptVariables(newVariables);
-  };
-
-  useEffect(() => {
-    if (
-      isOnboardingVisible &&
-      currentStep === ONBOARDING_STEPS.EXPERIMENTS_ADD_CHANGE_PROMPT.stepNumber
-    ) {
-      setText(
-        contentAsString.replace(
-          "As a QA engineer, analyze the structure of the following page:",
-          "As a QA engineer, analyze the structure of the following page, I am providing the file name:"
-        )
-      );
-    }
-  }, [isOnboardingVisible, currentStep]);
+  if (playgroundMode === "experiment-compact") {
+    return (
+      <li className="flex flex-col gap-1 items-start">
+        <div className="flex w-full justify-between items-center">
+          <Badge
+            variant="helicone"
+            className="bg-slate-100 hover:bg-slate-100 border-slate-100 dark:border-slate-800 dark:bg-slate-800 cursor-default"
+          >
+            {role.slice(0, 1).toUpperCase() + role.slice(1)}
+          </Badge>
+          {isStatic && (
+            <Badge className="border border-[#3C82F6] dark:border-[#3C82F6] text-[#3C82F6] dark:text-[#3C82F6] text-[10px] py-[3px] px-2 leading-tight hover:border-[#3C82F6] !bg-blue-50 dark:!bg-blue-950">
+              Static
+            </Badge>
+          )}
+        </div>
+        <div className="text-xs text-slate-700 dark:text-slate-300">
+          {isStatic
+            ? contentAsString?.replace(
+                /<helicone-prompt-static>(.*?)<\/helicone-prompt-static>/g,
+                "$1"
+              )
+            : getContent(currentMessage, minimize, playgroundMode)}
+        </div>
+      </li>
+    );
+  }
 
   return (
     <li
       className={clsx(
-        index === 0 ? "" : "border-t",
-        "bg-white dark:bg-black",
+        index === 0 ? "rounded-t-lg" : "border-t",
+        playgroundMode === "experiment"
+          ? "bg-slate-50 dark:bg-slate-950"
+          : "bg-white dark:bg-black",
         "flex flex-row justify-between gap-8 border-slate-300 dark:border-slate-700"
       )}
     >
-      <div className="flex flex-col gap-4 w-full">
-        <div className="flex flex-col w-full h-full relative space-y-2">
+      <div className="flex flex-col gap-4 w-full rounded-t-lg">
+        <div className="flex flex-col w-full h-full relative space-y-2 rounded-t-lg">
           <div className="flex w-full justify-between px-4 pt-3 rounded-t-lg">
-            <RoleButton
-              size="small"
-              role={role}
-              onRoleChange={(newRole) => {
-                setRole(newRole);
-                const newMessage = {
-                  ...currentMessage,
-                };
+            {playgroundMode === "prompt" ? (
+              <RoleButton
+                size="small"
+                role={role}
+                onRoleChange={(newRole) => {
+                  setRole(newRole);
+                  const newMessage = {
+                    ...currentMessage,
+                  };
 
-                newMessage.role = newRole;
-                setCurrentMessage(newMessage);
-                callback(contentAsString || "", newRole, file);
-              }}
-              disabled={!editMode}
-            />
+                  newMessage.role = newRole;
+                  setCurrentMessage(newMessage);
+                  callback(contentAsString || "", newRole, file);
+                }}
+                disabled={!editMode}
+              />
+            ) : (
+              <Badge variant="helicone" className="bg-slate-200">
+                {role.slice(0, 1).toUpperCase() + role.slice(1)}
+              </Badge>
+            )}
             <div className="flex justify-end items-center space-x-2 w-full">
-              {!editMode && (
+              {!editMode && isStatic && (
+                <Badge className="bg-[#3C82F6] dark:bg-[#3C82F6] text-white dark:text-white text-[10px] py-[3px] px-2 leading-tight hover:bg-[#3C82F6]">
+                  Static
+                </Badge>
+              )}
+              {!editMode && showMinimizeButton && (
                 <Tooltip title={minimize ? "Expand" : "Shrink"} placement="top">
                   <button
                     onClick={() => {
                       setMinimize(!minimize);
                     }}
-                    className="text-slate-700 font-semibold"
+                    className="text-slate-500 font-semibold"
                   >
                     {minimize ? (
-                      <EyeIcon className="h-4 w-4" />
+                      <EyeIcon className="h-3 w-3" />
                     ) : (
-                      <EyeSlashIcon className="h-4 w-4" />
+                      <EyeOffIcon className="h-3 w-3" />
                     )}
                   </button>
                 </Tooltip>
@@ -535,9 +578,9 @@ const PromptChatRow = (props: PromptChatRowProps) => {
                       navigator.clipboard.writeText(contentAsString || "");
                       setNotification("Copied to clipboard", "success");
                     }}
-                    className="text-slate-700 font-semibold"
+                    className="text-slate-500"
                   >
-                    <ClipboardIcon className="h-4 w-4" />
+                    <ClipboardIcon className="h-3 w-3" />
                   </button>
                 </Tooltip>
               )}
@@ -568,46 +611,33 @@ const PromptChatRow = (props: PromptChatRowProps) => {
             <div className="w-full px-4 pb-3">
               {isEditing ? (
                 <div className="space-y-4">
-                  <Popover
-                    open={
-                      isOnboardingVisible &&
-                      currentStep ===
-                        ONBOARDING_STEPS.EXPERIMENTS_ADD_CHANGE_PROMPT
-                          .stepNumber
-                    }
-                  >
-                    <PopoverTrigger asChild>
-                      <div
-                        data-onboarding-step={
-                          ONBOARDING_STEPS.EXPERIMENTS_ADD_CHANGE_PROMPT
-                            .stepNumber
-                        }
-                      >
-                        <MarkdownEditor
-                          text={contentAsString || ""}
-                          setText={setText}
-                          language="markdown"
-                        />
-                      </div>
-                    </PopoverTrigger>
-                    <OnboardingPopoverContent
-                      next={() => {
-                        const scrollArea = document.getElementById(
-                          "add-experiment-scroll-area"
+                  <MarkdownEditor
+                    text={contentAsString || ""}
+                    setText={function (text: string): void {
+                      const newVariables = extractVariables(text);
+                      const replacedText = replaceVariablesWithTags(
+                        text,
+                        newVariables
+                      );
+                      const newMessages = { ...currentMessage };
+                      const messageContent = newMessages.content;
+                      if (Array.isArray(messageContent)) {
+                        const textMessage = messageContent.find(
+                          (element) => element.type === "text"
                         );
-                        if (scrollArea) {
-                          scrollArea.scrollTo({
-                            top: scrollArea.scrollHeight,
-                            behavior: "smooth",
-                          });
+                        if (textMessage) {
+                          textMessage.text = replacedText;
                         }
-                      }}
-                      delayMs={500}
-                      onboardingStep="EXPERIMENTS_ADD_CHANGE_PROMPT"
-                      align="start"
-                      side="right"
-                    />
-                  </Popover>
+                      } else {
+                        newMessages.content = replacedText;
+                      }
+
+                      setCurrentMessage(newMessages);
+                      callback(replacedText, role, file);
+                      setPromptVariables(newVariables);
+                    }}
+                    language="markdown"
+                  />
                   {promptVariables.length > 0 && (
                     <div className="flex flex-col space-y-2">
                       <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
@@ -631,7 +661,7 @@ const PromptChatRow = (props: PromptChatRowProps) => {
                   )}
                 </div>
               ) : (
-                <>{getContent(currentMessage, minimize)}</>
+                <>{getContent(currentMessage, minimize, playgroundMode)}</>
               )}
             </div>
           </div>

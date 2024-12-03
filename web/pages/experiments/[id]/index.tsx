@@ -3,7 +3,7 @@ import { User } from "@supabase/auth-helpers-react";
 import { ReactElement } from "react";
 import AuthLayout from "../../../components/layout/auth/authLayout";
 import { SupabaseServerWrapper } from "../../../lib/wrappers/supabase";
-import ExperimentTablePage from "../../../components/templates/prompts/experiments/table/experimentTablePage";
+import { ExperimentTable } from "../../../components/templates/prompts/experiments/table/ExperimentTable";
 
 interface ExperimentIdPage {
   user: User;
@@ -11,7 +11,7 @@ interface ExperimentIdPage {
 }
 
 const ExperimentId = (props: ExperimentIdPage) => {
-  return <ExperimentTablePage experimentTableId={props.experimentTableId} />;
+  return <ExperimentTable experimentTableId={props.experimentTableId} />;
 };
 
 export default ExperimentId;

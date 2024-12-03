@@ -12,7 +12,7 @@ export function DiffHighlight(props: DiffHighlightProps) {
 
   return (
     <div className="ph-no-capture w-full overflow-auto rounded-b-2xl">
-      <Highlight theme={themes.jettwaveDark} code={code} language={"tsx"}>
+      <Highlight theme={themes.jettwaveDark} code={code} language={language}>
         {({ className, style, tokens, getLineProps, getTokenProps }) => (
           <pre style={style} className="p-6 leading-7 max-h-96 overflow-auto">
             {tokens.map((line, i) => (

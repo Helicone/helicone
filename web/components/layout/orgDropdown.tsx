@@ -113,7 +113,7 @@ export default function OrgDropdown({}: OrgDropdownProps) {
                 aria-hidden="true"
               />
             )}
-            <p className="text-xs font-semibold w-fit text-left">
+            <p className="text-xs font-medium w-fit text-left">
               {orgContext?.currentOrg?.name}
             </p>
           </Button>

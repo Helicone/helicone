@@ -42,7 +42,7 @@ const IntegrationCard: React.FC<IntegrationCardProps> = ({
           onClick={onClick}
           className="text-blue-600 hover:text-blue-800 flex items-center text-sm"
         >
-          {title === "OpenPipe" ? "Configure" : "Learn more"}
+          Configure
           <ArrowRightIcon className="ml-1 h-4 w-4" />
         </button>
       </CardFooter>

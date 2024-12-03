@@ -11,14 +11,11 @@ interface ExperimentInputSelectorProps {
   open: boolean;
   setOpen: (open: boolean) => void;
   promptVersionId: string | undefined;
-  datasetId: string;
   onSuccess?: (success: boolean) => void;
   handleAddRows: (
     rows: {
       inputRecordId: string;
-      datasetId: string;
       inputs: Record<string, string>;
-      sourceRequest?: string;
     }[]
   ) => void;
 }
@@ -160,9 +157,7 @@ export const ExperimentRandomInputSelector = (
               await props.handleAddRows(
                 selectedRandomInputs.map((request) => ({
                   inputRecordId: request.id,
-                  datasetId: props.datasetId ?? "",
                   inputs: request.inputs,
-                  sourceRequest: request.source_request,
                 }))
               );
 

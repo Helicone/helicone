@@ -19,17 +19,7 @@ import {
   getRequestMessages,
   getResponseMessage,
 } from "../../requests/chatComponent/messageUtils";
-import { Ellipsis } from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import useOnboardingContext, {
-  ONBOARDING_STEPS,
-} from "@/components/layout/onboardingContext";
-import { OnboardingPopoverContent } from "../../onboarding/OnboardingPopover";
-import { Popover, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 
 export type Input = {
   id: string;
@@ -59,7 +49,7 @@ interface PromptPlaygroundProps {
   defaultEditMode?: boolean;
   editMode?: boolean;
   chatType?: "request" | "response" | "request-response";
-  playgroundMode?: "prompt" | "experiment";
+  playgroundMode?: "prompt" | "experiment" | "experiment-compact";
   handleCreateExperiment?: () => void;
   onExtractPromptVariables?: (
     variables: Array<{ original: string; heliconeTag: string; value: string }>
@@ -246,9 +236,15 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
     switch (mode) {
       case "Pretty":
         return (
-          <ul className="w-full relative h-fit">
+          <ul
+            className={cn(
+              "w-full relative h-fit",
+              playgroundMode === "experiment-compact" && "space-y-2"
+            )}
+          >
             {messages.map((message, index) => (
               <PromptChatRow
+                playgroundMode={playgroundMode}
                 key={message.id}
                 message={message}
                 editMode={isEditMode}
@@ -291,7 +287,23 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
 
   const [isAccordionOpen, setIsAccordionOpen] = useState(false);
 
-  const { isOnboardingVisible, currentStep } = useOnboardingContext();
+  if (
+    playgroundMode === "experiment-compact" ||
+    playgroundMode === "experiment"
+  ) {
+    return (
+      <div
+        className={cn(
+          "h-full rounded-md",
+          playgroundMode === "experiment-compact" && "space-y-2",
+          playgroundMode === "experiment" &&
+            "border border-slate-200 dark:border-slate-800"
+        )}
+      >
+        {renderMessages(messages)}
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col space-y-4">
@@ -306,7 +318,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
           setIsEditMode={setIsEditMode}
         />
 
-        {!isAccordionOpen &&
+        {/* {!isAccordionOpen &&
           chatType === "response" &&
           playgroundMode === "experiment" && (
             <Tooltip>
@@ -332,14 +344,10 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
         {chatType === "response" &&
           playgroundMode === "experiment" &&
           isAccordionOpen &&
-          renderMessages(messages.slice(0, messages.length - 1))}
+          renderMessages(messages.slice(0, messages.length - 1))} */}
 
         <div className="flex-grow overflow-auto rounded-b-md">
-          {chatType === "response" &&
-          playgroundMode === "experiment" &&
-          isEditMode === false
-            ? renderMessages([messages[messages.length - 1]])
-            : renderMessages(messages)}
+          {renderMessages(messages)}
         </div>
         {isEditMode && (
           <div className="flex justify-between items-center py-4 px-8 border-t border-slate-300 dark:border-slate-700 bg-white dark:bg-black rounded-b-lg">
@@ -357,67 +365,41 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
                 Add Message
               </Button>
             </div>
-            <Popover
-              open={
-                isOnboardingVisible &&
-                currentStep === ONBOARDING_STEPS.EXPERIMENTS_ADD_SAVE.stepNumber
-              }
-            >
-              <PopoverTrigger>
-                <div
-                  className="flex space-x-4 w-full justify-end items-center"
-                  data-onboarding-step={
-                    isOnboardingVisible &&
-                    currentStep ===
-                      ONBOARDING_STEPS.EXPERIMENTS_ADD_SAVE.stepNumber
-                      ? ONBOARDING_STEPS.EXPERIMENTS_ADD_SAVE.stepNumber
-                      : undefined
+            <div className="flex space-x-4 w-full justify-end items-center">
+              <div className="font-normal">Model</div>
+              <Select
+                value={selectedModel}
+                onValueChange={setSelectedModel}
+                defaultValue={initialModel}
+              >
+                <SelectTrigger className="w-[200px]">
+                  <SelectValue placeholder="Select a model" />
+                </SelectTrigger>
+                <SelectContent>
+                  {MODEL_LIST.map((model) => (
+                    <SelectItem key={model.value} value={model.value}>
+                      {model.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {playgroundMode === "prompt" && (
+                <Button
+                  onClick={() =>
+                    onSubmit && onSubmit(currentChat, selectedModel || "")
                   }
+                  variant="default"
+                  size="sm"
+                  className="px-4 font-normal"
                 >
-                  <div className="font-normal">Model</div>
-                  <Select
-                    value={selectedModel}
-                    onValueChange={setSelectedModel}
-                    defaultValue={initialModel}
-                  >
-                    <SelectTrigger className="w-[200px]">
-                      <SelectValue placeholder="Select a model" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {MODEL_LIST.map((model) => (
-                        <SelectItem key={model.value} value={model.value}>
-                          {model.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {playgroundMode === "prompt" && (
-                    <Button
-                      onClick={() =>
-                        onSubmit && onSubmit(currentChat, selectedModel || "")
-                      }
-                      variant="default"
-                      size="sm"
-                      className="px-4 font-normal"
-                    >
-                      Save prompt
-                    </Button>
-                  )}
-                </div>
-              </PopoverTrigger>
-              <OnboardingPopoverContent
-                next={() => {
-                  onSubmit && onSubmit(currentChat, selectedModel || "");
-                }}
-                onboardingStep="EXPERIMENTS_ADD_SAVE"
-                align="end"
-                side="right"
-              />
-            </Popover>
+                  Save prompt
+                </Button>
+              )}
+            </div>
           </div>
         )}
       </div>
-      {playgroundMode === "experiment" && handleCreateExperiment && (
+      {/* {playgroundMode === "experiment" && handleCreateExperiment && (
         <div className="flex flex-col space-y-4 pt-4 bg-white dark:bg-slate-950 rounded-b-lg">
           <Button
             onClick={handleCreateExperiment}
@@ -428,7 +410,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
             Create Experiment
           </Button>
         </div>
-      )}
+      )} */}
     </div>
   );
 };

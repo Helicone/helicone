@@ -54,36 +54,6 @@ export async function proxyForwarder(
   }
   const responseBuilder = new ResponseBuilder();
 
-  let rate_limited = false;
-  if (proxyRequest.rateLimitOptions) {
-    if (!proxyRequest.providerAuthHash) {
-      return new Response("Authorization header required for rate limiting", {
-        status: 401,
-      });
-    }
-
-    const rateLimitCheckResult = await checkRateLimit({
-      providerAuthHash: proxyRequest.providerAuthHash,
-      heliconeProperties: proxyRequest.heliconeProperties,
-      rateLimitKV: env.RATE_LIMIT_KV,
-      rateLimitOptions: proxyRequest.rateLimitOptions,
-      userId: proxyRequest.userId,
-      cost: 0,
-    });
-
-    responseBuilder.addRateLimitHeaders(
-      rateLimitCheckResult,
-      proxyRequest.rateLimitOptions
-    );
-    if (rateLimitCheckResult.status === "rate_limited") {
-      rate_limited = true;
-      request.injectCustomProperty(
-        "Helicone-Rate-Limit-Status",
-        rateLimitCheckResult.status
-      );
-    }
-  }
-
   const { data: cacheSettings, error: cacheError } = getCacheSettings(
     proxyRequest.requestWrapper.getHeaders()
   );
@@ -130,6 +100,37 @@ export async function proxyForwarder(
           }
         } catch (error) {
           console.error("Error getting cached response", error);
+        }
+      }
+    }
+  }
+
+  let rate_limited = false;
+  if (proxyRequest.rateLimitOptions) {
+    const { data: auth, error: authError } = await request.auth();
+    if (authError === null) {
+      const db = new DBWrapper(env, auth);
+      const { data: orgData, error: orgError } = await db.getAuthParams();
+      if (orgError === null && orgData?.organizationId) {
+        const rateLimitCheckResult = await checkRateLimit({
+          organizationId: orgData.organizationId,
+          heliconeProperties: proxyRequest.heliconeProperties,
+          rateLimitKV: env.RATE_LIMIT_KV,
+          rateLimitOptions: proxyRequest.rateLimitOptions,
+          userId: proxyRequest.userId,
+          cost: 0,
+        });
+
+        responseBuilder.addRateLimitHeaders(
+          rateLimitCheckResult,
+          proxyRequest.rateLimitOptions
+        );
+        if (rateLimitCheckResult.status === "rate_limited") {
+          rate_limited = true;
+          request.injectCustomProperty(
+            "Helicone-Rate-Limit-Status",
+            rateLimitCheckResult.status
+          );
         }
       }
     }
@@ -296,6 +297,7 @@ export async function proxyForwarder(
 
   async function log(loggable: DBLoggable) {
     const { data: auth, error: authError } = await request.auth();
+
     if (authError !== null) {
       console.error("Error getting auth", authError);
       return;
@@ -340,9 +342,11 @@ export async function proxyForwarder(
     if (res.error !== null) {
       console.error("Error logging", res.error);
     }
-    if (proxyRequest && proxyRequest.rateLimitOptions) {
+    const db = new DBWrapper(env, auth);
+    const { data: orgData, error: orgError } = await db.getAuthParams();
+    if (proxyRequest && proxyRequest.rateLimitOptions && !orgError) {
       await updateRateLimitCounter({
-        providerAuthHash: proxyRequest.providerAuthHash,
+        organizationId: orgData?.organizationId,
         heliconeProperties:
           proxyRequest.requestWrapper.heliconeHeaders.heliconeProperties,
         rateLimitKV: env.RATE_LIMIT_KV,

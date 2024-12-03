@@ -27,7 +27,7 @@
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
-    --radius: 0.5rem
+    --radius: 0.5rem;
   }
   .dark {
     --background: 240 10% 3.9%;
@@ -53,7 +53,7 @@
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%
+    --chart-5: 340 75% 55%;
   }
 }
 @layer base {
@@ -62,5 +62,39 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@keyframes floating {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-16px);
+  }
+}
+
+@keyframes dash {
+  0% { stroke-dashoffset: 100; }
+  100% { stroke-dashoffset: 0; }
+}
+
+@keyframes moveArrow {
+  0% { offset: 0; }
+  100% { offset: 100; }
+}
+
+@keyframes lift {
+  0%, 15%, 40%, 65%, 90%, 100% { transform: translateY(0); }
+  5%, 10% { transform: translateY(-10px); }
+  30%, 35% { transform: translateY(-10px); }
+  55%, 60% { transform: translateY(-10px); }
+  80%, 85% { transform: translateY(-10px); }
+}
+
+@keyframes drawLine {
+  to {
+    stroke-dashoffset: 0;
   }
 }

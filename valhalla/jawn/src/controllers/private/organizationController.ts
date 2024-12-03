@@ -328,13 +328,15 @@ export class OrganizationController extends Controller {
       return err(memberCount.error ?? "Error getting member count");
     }
 
-    // const userCount = await stripeManager.updateProUserCount(
-    //   memberCount.data - 1
-    // );
+    if (memberCount.data > 0) {
+      const userCount = await stripeManager.updateProUserCount(
+        memberCount.data - 1
+      );
 
-    // if (userCount.error) {
-    //   return err(userCount.error ?? "Error updating pro user count");
-    // }
+      if (userCount.error) {
+        return err(userCount.error ?? "Error updating pro user count");
+      }
+    }
 
     const result = await organizationManager.removeOrganizationMember(
       organizationId,

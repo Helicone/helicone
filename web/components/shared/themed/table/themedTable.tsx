@@ -211,7 +211,7 @@ export default function ThemedTable<T extends { id?: string }>(
   const searchParams = useSearchParams();
 
   return (
-    <div className="h-full flex flex-col border-b divide-y divide-slate-300 dark:divide-slate-700">
+    <div className="h-full flex flex-col border-b border-slate-300 dark:border-slate-700 divide-y divide-slate-300 dark:divide-slate-700">
       <div className="p-1 flex-shrink-0">
         <ThemedTableHeader
           search={search}

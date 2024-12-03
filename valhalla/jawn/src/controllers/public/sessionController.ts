@@ -18,12 +18,12 @@ import {
 import { RequestFilterNode } from "./requestController";
 
 export interface SessionQueryParams {
-  sessionIdContains: string;
+  search: string;
   timeFilter: {
     startTimeUnixMs: number;
     endTimeUnixMs: number;
   };
-  sessionName: string;
+  nameEquals?: string;
   timezoneDifference: number;
   filter: RequestFilterNode;
 }
