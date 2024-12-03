@@ -546,7 +546,7 @@ const PromptChatRow = (props: PromptChatRowProps) => {
               />
             ) : (
               <Badge variant="helicone" className="bg-slate-200">
-                {role.slice(0, 1).toUpperCase() + role.slice(1)}
+                {(role ?? "").slice(0, 1).toUpperCase() + (role ?? "").slice(1)}
               </Badge>
             )}
             <div className="flex justify-end items-center space-x-2 w-full">
