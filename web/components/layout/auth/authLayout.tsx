@@ -6,7 +6,6 @@ import { useAlertBanners, useChangelog } from "../../../services/hooks/admin";
 import UpgradeProModal from "../../shared/upgradeProModal";
 import { Row } from "../common";
 import MetaData from "../public/authMetaData";
-import AcceptTermsModal from "./AcceptTermsModal";
 import DemoModal from "./DemoModal";
 import MainContent from "./MainContent";
 import Sidebar from "./Sidebar";
