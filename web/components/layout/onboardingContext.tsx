@@ -540,15 +540,15 @@ export const OnboardingProvider = ({
   const pathname = usePathname();
   const router = useRouter();
 
-  // useEffect(() => {
-  //   if (
-  //     !isOnboardingVisible &&
-  //     org?.currentOrg?.tier === "demo" &&
-  //     pathname !== "/dashboard"
-  //   ) {
-  //     router.push("/dashboard");
-  //   }
-  // }, [isOnboardingVisible, org, router]);
+  useEffect(() => {
+    if (
+      !isOnboardingVisible &&
+      org?.currentOrg?.tier === "demo" &&
+      pathname !== "/dashboard"
+    ) {
+      router.push("/dashboard");
+    }
+  }, [isOnboardingVisible, org, router]);
 
   return (
     <OnboardingContext.Provider
