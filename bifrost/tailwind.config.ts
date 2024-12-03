@@ -23,6 +23,11 @@ const config: Config = {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         brand: "#0CA5EA",
+        landing: {
+          description: "#5D6673",
+          secondary: "#6B8C9C",
+          "muted-text": "#ACB3BA",
+        },
         card: {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",

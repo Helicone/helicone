@@ -17,18 +17,27 @@ export interface AzureExperiment {
 export interface OrgsToDLQ {
   orgs?: string[];
 }
+
+export interface ApiKey {
+  apiKey: string;
+}
+
 export interface SettingsType {
   "kafka:dlq": KafkaSettings;
   "kafka:log": KafkaSettings;
+  "kafka:score": KafkaSettings;
+  "kafka:dlq:score": KafkaSettings;
   "kafka:dlq:eu": KafkaSettings;
   "kafka:log:eu": KafkaSettings;
   "kafka:orgs-to-dlq": OrgsToDLQ;
   "azure:experiment": AzureExperiment;
+  "openai:apiKey": ApiKey;
+  "anthropic:apiKey": ApiKey;
 }
 
 export type SettingName = keyof SettingsType;
 
-export type Setting = KafkaSettings | AzureExperiment;
+export type Setting = KafkaSettings | AzureExperiment | ApiKey;
 
 class SettingsCache extends InMemoryCache {
   private static instance: SettingsCache;

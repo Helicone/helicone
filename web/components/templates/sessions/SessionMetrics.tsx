@@ -167,8 +167,8 @@ const SessionMetrics = ({ selectedSession }: SessionMetricsProps) => {
           <Chart
             title="Cost distribution"
             data={metrics.session_cost.map((sessionCost) => {
-              const start = Math.round(Number(sessionCost.range_start ?? 0));
-              const end = Math.round(Number(sessionCost.range_end ?? 0));
+              const start = Number(sessionCost.range_start ?? 0);
+              const end = Number(sessionCost.range_end ?? 0);
               return {
                 range:
                   start === end

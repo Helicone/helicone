@@ -1,0 +1,106 @@
+---
+title: "Tools Python SDK Integration"
+sidebarTitle: "Python"
+description: "Log any external tools used in your LLM applications to Helicone using Helicone's Python SDK."
+icon: "python"
+iconType: "solid"
+---
+
+The `HeliconeManualLogger` class can be used to log any external tools used in your LLM applications to Helicone.
+
+<Steps>
+  <Step title="To get started, install the `helicone-helpers` package">
+  ```bash
+  pip install helicone-helpers
+  ```
+  </Step>
+  <Step title="Create a new HeliconeManualLogger instance">
+  ```python
+  from helicone_helpers import HeliconeManualLogger
+
+  heliconeLogger = HeliconeManualLogger(
+    api_key="your-helicone-api-key", # Can be set as env variable
+    headers={} # Additional headers to be sent with the request
+  );
+  ```
+  </Step>
+  <Step title="Log your request">
+  ```python
+  def tool_call_operation(result_recorder: HeliconeResultRecorder):
+      # your tool call here
+      # you can access the request using result_recorder.request
+      result_recorder.appendResults({
+        ... # The results of the operation (this will be logged to Helicone)
+      })
+      return results # this will be returned by the logRequest function
+
+  res = heliconeLogger.logRequest(
+    request={
+      _type: "tool",
+      toolName: "...", # The name of the tool used
+      input: ..., # The input to the tool
+      # other data which you want to store about the tool call
+    },
+    operation=tool_call_operation,
+    additional_headers={
+      # Additional headers to be sent with the request
+    }
+  );
+  ```
+</Step>
+</Steps>
+
+## API Reference
+
+### HeliconeManualLogger
+
+```python
+class HeliconeManualLogger:
+    api_key: str
+    headers: dict
+    logging_endpoint: str # defaults to https://api.hconeai.com/custom/v1/log
+```
+
+### logRequest
+
+```python
+log_request(
+      self,
+      request: dict,
+      operation: Callable[[HeliconeResultRecorder], T],
+      additional_headers: dict = {},
+      provider: Optional[Union[Literal["openai", "anthropic"], str]] = None, # for tools you don't have to specify the provider
+  ) -> T
+```
+
+#### Parameters
+
+1. `request`:  - The request object to log
+```python
+{
+  _type: "tool";
+  toolName: str;
+  input: any;
+  # other data which you want to store about the tool call
+}
+```
+
+2. `operation`: `Callable[[HeliconeResultRecorder], T]` - The operation to be executed and logged
+```python
+class HeliconeResultRecorder:
+    def __init__(self, request: dict):
+        self.request = request
+        self.results = {}
+
+    def append_results(self, data: dict):
+        self.results.update(data)
+
+    def get_results(self):
+        return self.results
+```
+
+3. `additionalHeaders`: `dict`
+    - Additional headers to be sent with the request
+    - This can be used to use features like [session management](/features/sessions), [custom properties](/features/advanced-usage/custom-properties), etc.
+
+

@@ -12,6 +12,7 @@ import {
   SCORES_WORKER_COUNT,
 } from "./lib/clients/kafkaConsumers/constant";
 import { tokenRouter } from "./lib/routers/tokenRouter";
+import { DelayedOperationService } from "./lib/shared/delayedOperationService";
 import { runLoopsOnce, runMainLoops } from "./mainLoops";
 import { authMiddleware } from "./middleware/auth";
 import { IS_RATE_LIMIT_ENABLED, limiter } from "./middleware/ratelimitter";
@@ -21,7 +22,6 @@ import * as publicSwaggerDoc from "./tsoa-build/public/swagger.json";
 import { initLogs } from "./utils/injectLogs";
 import { initSentry } from "./utils/injectSentry";
 import { startConsumers } from "./workers/consumerInterface";
-import { DelayedOperationService } from "./lib/shared/delayedOperationService";
 
 export const ENVIRONMENT: "production" | "development" = (process.env
   .VERCEL_ENV ?? "development") as any;

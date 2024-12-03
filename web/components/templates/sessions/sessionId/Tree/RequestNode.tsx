@@ -10,6 +10,21 @@ import {
   TooltipProvider,
 } from "@/components/ui/tooltip";
 
+const bgColor = {
+  LLM: "bg-sky-200 dark:bg-sky-900 text-sky-700 dark:text-sky-200 ",
+  tool: "bg-slate-200 dark:bg-slate-900 text-slate-700 dark:text-slate-200 ",
+  vector_db:
+    "bg-orange-200 dark:bg-orange-900 text-orange-700 dark:text-orange-200 ",
+};
+
+const NAME_FOR = {
+  tool: (node: TreeNodeData) => node.trace?.request.model.split(":")[1],
+  vector_db: (node: TreeNodeData) =>
+    (node.trace?.request.requestBody as any).operation ??
+    node.trace?.request.model,
+  LLM: (node: TreeNodeData) => node.trace?.request.model,
+};
+
 export function RequestNode(props: {
   isRequestSingleChild: boolean;
   selectedRequestId: string;
@@ -19,6 +34,7 @@ export function RequestNode(props: {
   setSelectedRequestId: (x: string) => void;
   level: number;
   setShowDrawer: (x: boolean) => void;
+  label?: string;
 }) {
   const {
     isRequestSingleChild,
@@ -29,6 +45,7 @@ export function RequestNode(props: {
     setSelectedRequestId,
     level,
     setShowDrawer,
+    label,
   } = props;
 
   const modelRef = useRef<HTMLDivElement>(null);
@@ -40,6 +57,12 @@ export function RequestNode(props: {
       setIsTruncated(el.scrollWidth > el.clientWidth);
     }
   }, [node.trace?.request.model]);
+
+  const type = node.trace?.request.model.startsWith("tool:")
+    ? "tool"
+    : node.trace?.request.model.startsWith("vector_db")
+    ? "vector_db"
+    : "LLM";
 
   return (
     <TooltipProvider>
@@ -59,18 +82,12 @@ export function RequestNode(props: {
         <Row className="w-full gap-2 items-center">
           <Row className="items-center gap-2 flex-grow min-w-0">
             <div
-              className="flex-shrink-0 bg-sky-200 dark:bg-sky-900 text-sky-700 dark:text-sky-200 px-2 py-1 text-xs font-medium rounded-md whitespace-nowrap"
-              title={
-                node.trace?.request.model === "vector_db" ||
-                node.trace?.request.model.startsWith("tool")
-                  ? node.trace?.request.model.split(":")[0]
-                  : node.name
-              }
+              className={clsx(
+                "flex-shrink-0 px-2 py-1 text-xs font-medium rounded-md whitespace-nowrap",
+                bgColor[type as keyof typeof bgColor]
+              )}
             >
-              {node.trace?.request.model === "vector_db" ||
-              node.trace?.request.model.startsWith("tool")
-                ? node.trace?.request.model.split(":")[0]
-                : node.name}
+              {type}
             </div>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -78,7 +95,7 @@ export function RequestNode(props: {
                   ref={modelRef}
                   className="flex-grow flex-shrink-1 max-w-[200px] min-w-[100px] bg-transparent dark:bg-transparent dark:border-slate-700 text-slate-700 dark:text-slate-200 px-2 py-1 text-xs font-medium rounded-md truncate"
                 >
-                  {node.trace?.request.model}
+                  {label ?? NAME_FOR[type as keyof typeof NAME_FOR](node)}
                 </div>
               </TooltipTrigger>
               {isTruncated && (

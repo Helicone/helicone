@@ -617,7 +617,7 @@ export class ExperimentController extends Controller {
   }
 
   @Post("/")
-  public async createNewExperiment(
+  public async createNewExperimentOld(
     @Body()
     requestBody: NewExperimentParams,
     @Request() request: JawnAuthenticatedRequest
@@ -698,7 +698,7 @@ export class ExperimentController extends Controller {
   }
 
   @Post("/{experimentId}/evaluators/run")
-  public async runExperimentEvaluators(
+  public async runExperimentEvaluatorsOld(
     @Path() experimentId: string,
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<null, string>> {
@@ -708,7 +708,7 @@ export class ExperimentController extends Controller {
   }
 
   @Post("/{experimentId}/evaluators")
-  public async createExperimentEvaluator(
+  public async createExperimentEvaluatorOld(
     @Path() experimentId: string,
     @Body()
     requestBody: {
@@ -725,7 +725,7 @@ export class ExperimentController extends Controller {
   }
 
   @Delete("/{experimentId}/evaluators/{evaluatorId}")
-  public async deleteExperimentEvaluator(
+  public async deleteExperimentEvaluatorOld(
     @Path() experimentId: string,
     @Path() evaluatorId: string,
     @Request() request: JawnAuthenticatedRequest
@@ -739,7 +739,7 @@ export class ExperimentController extends Controller {
   }
 
   @Post("/query")
-  public async getExperiments(
+  public async getExperimentsOld(
     @Body()
     requestBody: {
       filter: ExperimentFilterNode;
@@ -762,126 +762,5 @@ export class ExperimentController extends Controller {
       this.setStatus(200); // set return status 201
       return result;
     }
-  }
-
-  @Post("/run")
-  public async runExperiment(
-    @Body()
-    requestBody: {
-      experimentTableId: string;
-      hypothesisId: string;
-      cells: {
-        cellId: string;
-      }[];
-    },
-    @Request() request: JawnAuthenticatedRequest
-  ): Promise<Result<ExperimentRun, string>> {
-    const experimentManager = new ExperimentManager(request.authParams);
-
-    const experimentTable =
-      await experimentManager.getExperimentTableSimplifiedById(
-        requestBody.experimentTableId
-      );
-    if (experimentTable.error || !experimentTable.data) {
-      this.setStatus(500);
-      console.error(experimentTable.error);
-      return err(experimentTable.error);
-    }
-    const cellsToUpdate = requestBody.cells.map((cell) => {
-      return {
-        cellId: cell.cellId,
-        status: "running",
-      };
-    });
-
-    const statusUpdateResult = await experimentManager.updateExperimentCells({
-      cells: cellsToUpdate,
-    });
-
-    if (statusUpdateResult.error) {
-      this.setStatus(500);
-      console.error(statusUpdateResult.error);
-      return err(statusUpdateResult.error);
-    }
-    const result = await experimentManager.getExperimentById(
-      experimentTable.data.experimentId,
-      {
-        inputs: true,
-        promptVersion: true,
-      }
-    );
-
-    if (result.error || !result.data) {
-      this.setStatus(500);
-      console.error(result.error);
-      return err("Not implemented");
-    }
-
-    const experiment = result.data;
-
-    const experimentCells = await experimentManager.getExperimentCellsByIds(
-      requestBody.cells.map((cell) => cell.cellId)
-    );
-
-    if (experimentCells.error || !experimentCells.data) {
-      this.setStatus(500);
-      console.error(experimentCells.error);
-      return err(experimentCells.error);
-    }
-
-    const datasetRows = await experimentManager.getDatasetRowsByIds({
-      datasetRowIds: experimentCells.data.map(
-        (cell) => cell.metadata?.datasetRowId
-      ),
-    });
-
-    if (datasetRows.error || !datasetRows.data) {
-      this.setStatus(500);
-      console.error(datasetRows.error);
-      return err(datasetRows.error);
-    }
-
-    if (datasetRows.data.length !== requestBody.cells.length) {
-      this.setStatus(404);
-      console.error("Row not found");
-      return err("Row not found");
-    }
-
-    const newDatasetRows = datasetRows.data.map((row, index) => {
-      const cellData = experimentCells.data.find(
-        (x) => x.metadata?.datasetRowId === row.rowId
-      );
-      return {
-        ...row,
-        rowIndex: cellData?.rowIndex ?? 0,
-        columnId: cellData?.columnId ?? "",
-      };
-    });
-
-    experiment.dataset.rows = newDatasetRows;
-
-    if (requestBody.hypothesisId === "original") {
-      return runOriginalExperiment(
-        experiment,
-        newDatasetRows,
-        requestBody.experimentTableId
-      );
-    }
-
-    const hypothesis = experiment.hypotheses.find(
-      (hypothesis) => hypothesis.id === requestBody.hypothesisId
-    );
-
-    if (!hypothesis) {
-      this.setStatus(404);
-      console.error("Hypothesis not found");
-      return err("Hypothesis not found");
-    }
-
-    experiment.hypotheses = [hypothesis];
-
-    const runResult = await run(experiment, requestBody.experimentTableId);
-
-    return runResult;
   }
 }

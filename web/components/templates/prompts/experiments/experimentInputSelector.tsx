@@ -10,27 +10,17 @@ interface ExperimentInputSelectorProps {
   open: boolean;
   setOpen: (open: boolean) => void;
   promptVersionId: string | undefined;
-  datasetId: string;
   onSuccess?: (success: boolean) => void;
   handleAddRows: (
     rows: {
       inputRecordId: string;
-      datasetId: string;
       inputs: Record<string, string>;
-      sourceRequest?: string;
     }[]
   ) => void;
 }
 
 const ExperimentInputSelector = (props: ExperimentInputSelectorProps) => {
-  const {
-    open,
-    setOpen,
-    promptVersionId,
-    datasetId,
-    onSuccess,
-    handleAddRows,
-  } = props;
+  const { open, setOpen, promptVersionId, onSuccess, handleAddRows } = props;
   const jawn = useJawnClient();
   const { setNotification } = useNotification();
 
@@ -200,9 +190,7 @@ const ExperimentInputSelector = (props: ExperimentInputSelectorProps) => {
               await handleAddRows(
                 selectedRequests.map((request) => ({
                   inputRecordId: request.id,
-                  datasetId: datasetId ?? "",
                   inputs: request.inputs,
-                  sourceRequest: request.source_request,
                 }))
               );
 

@@ -1,4 +1,9 @@
-import React, { useState } from "react";
+import React, {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useState,
+} from "react";
 import { Button } from "@/components/ui/button";
 import { PlayIcon } from "@heroicons/react/24/outline";
 import {
@@ -10,151 +15,364 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Dialog, DialogTrigger, DialogContent } from "@/components/ui/dialog";
 import clsx from "clsx";
 import PromptPlayground from "../../../id/promptPlayground";
-import { CellData } from "./types";
+import {
+  useExperimentRequestData,
+  useExperimentTable,
+} from "../hooks/useExperimentTable";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useJawnClient } from "../../../../../../lib/clients/jawnHook";
 
-export const HypothesisCellRenderer: React.FC<any> = (params) => {
-  const { data, colDef, context, wrapText, hypothesisId } = params;
-  const promptVersionTemplate = context.promptVersionTemplateRef ?? {};
-  const [showPromptPlayground, setShowPromptPlayground] = useState(false);
+export type HypothesisCellRef = {
+  runHypothesis: () => Promise<void>;
+};
 
-  // Parse the response data
-  const cellData = data.cells[colDef.cellRendererParams.columnId] as CellData;
-
-  const content =
-    cellData?.value?.response?.choices?.[0]?.message?.content || "";
-
-  if (cellData?.status === "running") {
-    return (
-      <div className="w-full h-full whitespace-pre-wrap flex flex-row items-center space-x-2 pl-4">
-        <span className="animate-ping inline-flex rounded-full bg-green-700 h-2 w-2"></span>
-        <div className="italic">Generating...</div>
-      </div>
-    );
+export const HypothesisCellRenderer = forwardRef<
+  HypothesisCellRef,
+  {
+    requestId?: string;
+    prompt?: any;
+    experimentTableId: string;
+    inputRecordId: string;
+    promptVersionId: string;
   }
+>(
+  (
+    { requestId, prompt, experimentTableId, inputRecordId, promptVersionId },
+    ref
+  ) => {
+    const [running, setRunning] = useState(false);
+    const [showPromptPlayground, setShowPromptPlayground] = useState(false);
+    const initialModel = prompt?.model || "";
+    const [hypothesisRequestId, setHypothesisRequestId] = useState<
+      string | null
+    >(requestId ?? "");
+    const [content, setContent] = useState<string | null>(null);
+    const [playgroundPrompt, setPlaygroundPrompt] = useState<any>(null);
 
-  // Extract the model and messages from the promptVersionTemplate
-  const initialModel = promptVersionTemplate?.model || "";
+    const { requestsData, isRequestsLoading } = useExperimentRequestData(
+      hypothesisRequestId ?? ""
+    );
+    const jawnClient = useJawnClient();
 
-  const handleCellClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setShowPromptPlayground(true);
-  };
+    useEffect(() => {
+      setHypothesisRequestId(requestId ?? "");
+    }, [requestId]);
 
-  const formatPromptForPlayground = (): any => {
-    return {
-      model: initialModel,
-      messages: [
-        ...(promptVersionTemplate.helicone_template?.messages ?? []),
-        {
-          role: "assistant",
-          content: content,
-        },
+    const { runHypothesis, wrapText, selectedScoreKey } =
+      useExperimentTable(experimentTableId);
+
+    const { data: promptTemplate } = useQuery(
+      ["promptTemplate", promptVersionId],
+      async () => {
+        if (!promptVersionId) return null;
+
+        const res = await jawnClient.GET(
+          "/v1/prompt/version/{promptVersionId}",
+          {
+            params: {
+              path: {
+                promptVersionId: promptVersionId,
+              },
+            },
+          }
+        );
+
+        const parentPromptVersion = await jawnClient.GET(
+          "/v1/prompt/version/{promptVersionId}",
+          {
+            params: {
+              path: {
+                promptVersionId: res.data?.data?.parent_prompt_version ?? "",
+              },
+            },
+          }
+        );
+
+        return {
+          ...res.data?.data,
+          parent_prompt_version: parentPromptVersion?.data?.data,
+        };
+      },
+      {
+        staleTime: Infinity,
+        refetchOnWindowFocus: false,
+        refetchOnMount: false,
+        refetchOnReconnect: false,
+      }
+    );
+
+    const queryClient = useQueryClient();
+
+    const { data: score } = useQuery({
+      queryKey: [
+        "experimentScore",
+        experimentTableId,
+        hypothesisRequestId,
+        selectedScoreKey,
       ],
+      queryFn: async () => {
+        if (!hypothesisRequestId || !selectedScoreKey) return null;
+
+        const res = await jawnClient.GET(
+          "/v2/experiment/{experimentId}/{requestId}/{scoreKey}",
+          {
+            params: {
+              path: {
+                experimentId: experimentTableId,
+                requestId: hypothesisRequestId,
+                scoreKey: selectedScoreKey,
+              },
+            },
+          }
+        );
+
+        const promptVersionIdScores = queryClient.getQueryData<{
+          data: Record<string, { value: any; max: number; min: number }>;
+        }>(["experimentScores", experimentTableId, promptVersionId]);
+
+        return {
+          cellValue: res.data?.data,
+          max: promptVersionIdScores?.data?.[selectedScoreKey]?.max,
+          min: promptVersionIdScores?.data?.[selectedScoreKey]?.min,
+          avg: promptVersionIdScores?.data?.[selectedScoreKey]?.value,
+        };
+      },
+      enabled: !!hypothesisRequestId && !!selectedScoreKey,
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+      refetchOnReconnect: false,
+    });
+
+    const handleCellClick = (e: React.MouseEvent) => {
+      e.stopPropagation();
+      setShowPromptPlayground(true);
     };
-  };
 
-  // Check if content is longer than 100 characters
-  const isContentLong = content.length > 100;
+    useEffect(() => {
+      if (
+        requestsData?.responseBody?.response?.choices?.[0]?.message?.content
+      ) {
+        setContent(
+          requestsData.responseBody.response.choices[0].message.content
+        );
+        setRunning(false);
+      }
+    }, [requestsData?.responseBody?.response?.choices]);
 
-  if (content) {
-    if (isContentLong) {
-      // Show Dialog for content longer than 100 characters
+    useEffect(() => {
+      if (content || (promptTemplate?.helicone_template as any)?.messages) {
+        setPlaygroundPrompt({
+          model: initialModel,
+          messages: [
+            ...((promptTemplate?.helicone_template as any)?.messages ?? []),
+            {
+              role: "assistant",
+              content: content,
+            },
+          ],
+        });
+      }
+    }, [content, promptTemplate?.helicone_template, initialModel]);
+
+    const handleRunHypothesis = async (e?: React.MouseEvent) => {
+      e?.stopPropagation();
+      setRunning(true);
+      const res = await runHypothesis.mutateAsync({
+        promptVersionId,
+        inputRecordId,
+      });
+
+      if (res) {
+        setHypothesisRequestId(res);
+      }
+      setRunning(false);
+    };
+
+    useImperativeHandle(ref, () => ({
+      runHypothesis: () => handleRunHypothesis(),
+    }));
+
+    // Check if content is longer than 100 characters
+    const isContentLong = content && content.length > 20000;
+
+    if (running) {
       return (
-        <Dialog
-          open={showPromptPlayground}
-          onOpenChange={setShowPromptPlayground}
-        >
-          <DialogTrigger asChild>
-            <div
-              className="w-full h-full items-center flex justify-start cursor-pointer"
-              onClick={handleCellClick}
-            >
-              <div className={clsx(wrapText && "whitespace-pre-wrap")}>
-                {content}
-              </div>
-            </div>
-          </DialogTrigger>
-          <DialogContent
-            className="w-[800px] p-0 [&>button]:hidden "
-            showOverlay={false}
-          >
-            <ScrollArea className="flex flex-col overflow-y-auto max-h-[50vh] w-[800px]">
-              <PromptPlayground
-                prompt={formatPromptForPlayground()}
-                selectedInput={data}
-                onSubmit={(history, model) => {
-                  setShowPromptPlayground(false);
-                }}
-                submitText="Save"
-                initialModel={initialModel}
-                isPromptCreatedFromUi={false}
-                defaultEditMode={false}
-                editMode={false}
-                playgroundMode="experiment"
-                chatType="response"
-              />
-            </ScrollArea>
-          </DialogContent>
-        </Dialog>
-      );
-    } else {
-      // Show Popover for content with 100 characters or less
-      return (
-        <Popover
-          open={showPromptPlayground}
-          onOpenChange={setShowPromptPlayground}
-          modal={true}
-        >
-          <PopoverTrigger asChild>
-            <div
-              className="w-full h-full items-center flex justify-start cursor-pointer"
-              onClick={handleCellClick}
-            >
-              <div className={clsx(wrapText && "whitespace-pre-wrap")}>
-                {content}
-              </div>
-            </div>
-          </PopoverTrigger>
-          <PopoverContent className="w-[800px] p-0" side="bottom" align="start">
-            <ScrollArea className="flex flex-col overflow-y-auto max-h-[50vh]">
-              <PromptPlayground
-                prompt={formatPromptForPlayground()}
-                selectedInput={data}
-                onSubmit={(history, model) => {
-                  setShowPromptPlayground(false);
-                }}
-                submitText="Save"
-                initialModel={initialModel}
-                isPromptCreatedFromUi={false}
-                defaultEditMode={false}
-                editMode={false}
-                playgroundMode="experiment"
-                chatType="response"
-              />
-            </ScrollArea>
-          </PopoverContent>
-        </Popover>
+        <div className="flex items-center gap-2 py-2 px-4">
+          <div className="w-2 h-2 bg-yellow-700 rounded-full animate-pulse"></div>
+          <div className="text-sm text-slate-700">Generating...</div>
+        </div>
       );
     }
-  } else {
-    return (
-      <div className="w-full h-full items-center flex justify-end">
-        <Button
-          variant="ghost"
-          className="w-6 h-6 p-0 border-slate-200 border rounded-md bg-slate-50 text-slate-500"
-          onClick={(e) => {
-            e.stopPropagation();
-            params.handleRunHypothesis(hypothesisId, [
-              {
-                cellId: cellData.cellId,
-                columnId: colDef.cellRendererParams.columnId,
-              },
-            ]);
-          }}
-        >
-          <PlayIcon className="w-4 h-4" />
-        </Button>
-      </div>
-    );
+
+    if (isRequestsLoading) {
+      return (
+        <div className="flex items-center gap-2 py-2 px-4">
+          <div className="w-2 h-2 bg-green-700 rounded-full animate-pulse"></div>
+          <div className="text-sm text-slate-700">Loading...</div>
+        </div>
+      );
+    }
+
+    if (hypothesisRequestId && content) {
+      if (isContentLong) {
+        return (
+          <Dialog
+            open={showPromptPlayground}
+            onOpenChange={setShowPromptPlayground}
+          >
+            <DialogTrigger asChild>
+              <div className="group relative w-full h-full">
+                <Button
+                  variant="ghost"
+                  className="absolute top-2 right-2 w-6 h-6 p-0 border-slate-200 dark:border-slate-800 rounded-md text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                  onClick={(e) => handleRunHypothesis(e)}
+                >
+                  <PlayIcon className="w-4 h-4" />
+                </Button>
+                <div
+                  className="w-full h-full flex flex-col justify-start cursor-pointer py-2 px-4 text-slate-700 dark:text-slate-300"
+                  onClick={handleCellClick}
+                >
+                  {selectedScoreKey && score && (
+                    <div className="flex items-center gap-2 mb-3">
+                      <div
+                        className={clsx(
+                          "h-2.5 w-2.5 rounded-sm",
+                          score.cellValue?.value &&
+                            score.cellValue?.value > score.avg
+                            ? "bg-green-500"
+                            : "bg-red-500"
+                        )}
+                      ></div>
+                      <p className="text-[11px] font-medium text-slate-700 dark:text-slate-300">
+                        {selectedScoreKey.replace("-hcone-bool", "")}:{" "}
+                        {score.cellValue?.value}
+                      </p>
+                    </div>
+                  )}
+                  <div
+                    className={clsx(
+                      wrapText.data
+                        ? "whitespace-nowrap max-h-[100px] overflow-y-hidden line-clamp-4 truncate text-ellipsis"
+                        : "break-words whitespace-normal"
+                    )}
+                  >
+                    {content}
+                  </div>
+                </div>
+              </div>
+            </DialogTrigger>
+            <DialogContent
+              className="w-[800px] p-0 [&>button]:hidden "
+              showOverlay={false}
+            >
+              <ScrollArea className="flex flex-col overflow-y-auto max-h-[50vh] w-[800px]">
+                <PromptPlayground
+                  prompt={playgroundPrompt}
+                  selectedInput={undefined}
+                  onSubmit={(history, model) => {
+                    setShowPromptPlayground(false);
+                  }}
+                  submitText="Save"
+                  initialModel={initialModel}
+                  isPromptCreatedFromUi={false}
+                  defaultEditMode={false}
+                  editMode={false}
+                  playgroundMode="experiment"
+                  chatType="response"
+                />
+              </ScrollArea>
+            </DialogContent>
+          </Dialog>
+        );
+      } else {
+        return (
+          <Popover
+            open={showPromptPlayground}
+            onOpenChange={setShowPromptPlayground}
+            modal={true}
+          >
+            <PopoverTrigger asChild>
+              <div className="group relative w-full h-full">
+                <Button
+                  variant="ghost"
+                  className="absolute top-2 right-2 w-6 h-6 p-0 border-slate-200 dark:border-slate-800 border rounded-md text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                  onClick={(e) => handleRunHypothesis(e)}
+                >
+                  <PlayIcon className="w-4 h-4" />
+                </Button>
+                <div
+                  className="w-full h-full flex flex-col justify-start cursor-pointer py-2 px-4 text-slate-700 dark:text-slate-300"
+                  onClick={handleCellClick}
+                >
+                  {selectedScoreKey && score && (
+                    <div className="flex items-center gap-2 mb-3">
+                      <div
+                        className={clsx(
+                          "h-2.5 w-2.5 rounded-sm",
+                          score.cellValue?.value &&
+                            score.cellValue?.value > score.avg
+                            ? "bg-green-500"
+                            : "bg-red-500"
+                        )}
+                      ></div>
+                      <p className="text-[11px] font-medium text-slate-700 dark:text-slate-300">
+                        {selectedScoreKey.replace("-hcone-bool", "")}:{" "}
+                        {score.cellValue?.value}
+                      </p>
+                    </div>
+                  )}
+                  <div
+                    className={clsx(
+                      wrapText.data
+                        ? "whitespace-nowrap max-h-[100px] overflow-y-hidden line-clamp-4 truncate text-ellipsis"
+                        : "break-words whitespace-normal"
+                    )}
+                  >
+                    {content}
+                  </div>
+                </div>
+              </div>
+            </PopoverTrigger>
+            <PopoverContent
+              className="w-[800px] p-0"
+              side="bottom"
+              align="start"
+            >
+              <ScrollArea className="flex flex-col overflow-y-auto max-h-[50vh]">
+                <PromptPlayground
+                  prompt={playgroundPrompt}
+                  selectedInput={undefined}
+                  onSubmit={(history, model) => {
+                    setShowPromptPlayground(false);
+                  }}
+                  submitText="Save"
+                  initialModel={initialModel}
+                  isPromptCreatedFromUi={false}
+                  defaultEditMode={false}
+                  editMode={false}
+                  playgroundMode="experiment"
+                  chatType="response"
+                />
+              </ScrollArea>
+            </PopoverContent>
+          </Popover>
+        );
+      }
+    } else {
+      return (
+        <div className="w-full h-full items-center flex justify-end">
+          <Button
+            variant="ghost"
+            className="w-6 h-6 m-2 p-0 border-slate-200 border rounded-md bg-slate-50 text-slate-500"
+            onClick={handleRunHypothesis}
+          >
+            <PlayIcon className="w-4 h-4" />
+          </Button>
+        </div>
+      );
+    }
   }
-};
+);
+
+HypothesisCellRenderer.displayName = "HypothesisCellRenderer";
