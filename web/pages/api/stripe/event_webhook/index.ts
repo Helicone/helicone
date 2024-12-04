@@ -4,7 +4,6 @@ import { buffer } from "micro";
 import { supabaseServer } from "../../../../lib/supabaseServer";
 import { Database } from "../../../../supabase/database.types";
 import { getExperimentUsage } from "@/lib/api/stripe/experimentUsage";
-import { providers } from "@/packages/cost/providers/mappings";
 import { costOf } from "@/packages/cost";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {

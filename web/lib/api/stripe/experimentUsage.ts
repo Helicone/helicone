@@ -25,6 +25,7 @@ export async function getExperimentUsage(
       AND request_created_at >= {val_1: DateTime}
       AND request_created_at <= {val_2: DateTime}
       AND properties['Helicone-Experiment-Id'] IS NOT NULL
+      AND properties['Helicone-Experiment-Id'] != ''
       AND status >= 200
       AND status < 300
     GROUP BY model, provider

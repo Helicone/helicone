@@ -5,7 +5,8 @@ import { PreparedRequest, PreparedRequestArgs } from "./PreparedRequest";
 const settingsManager = new SettingsManager();
 export async function prepareRequestAzure(
   apiKey?: string,
-  requestId?: string
+  requestId?: string,
+  experimentId?: string
 ): Promise<{
   url: URL;
   headers: { [key: string]: string };
@@ -38,6 +39,12 @@ export async function prepareRequestAzure(
       "Helicone-Request-Id": requestId,
     };
   }
+  if (experimentId) {
+    headers = {
+      ...headers,
+      "Helicone-Experiment-Id": experimentId,
+    };
+  }
 
   const fetchUrl = `${heliconeWorkerUrl}/openai/deployments/${azureDeploymentName}/chat/completions?api-version=${apiVersion}`;
 
@@ -54,6 +61,7 @@ export async function prepareRequestAzureFull({
   autoInputs,
   requestPath,
   requestId,
+  experimentId,
 }: PreparedRequestArgs): Promise<PreparedRequest> {
   const newRequestBody = autoFillInputs({
     template: template ?? {},
@@ -63,7 +71,8 @@ export async function prepareRequestAzureFull({
 
   const { url: fetchUrl, headers } = await prepareRequestAzure(
     apiKey,
-    requestId
+    requestId,
+    experimentId
   );
   return {
     url: fetchUrl,

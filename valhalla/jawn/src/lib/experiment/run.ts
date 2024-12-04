@@ -155,6 +155,7 @@ export async function run(
         >[],
         requestPath: `${process.env.HELICONE_WORKER_URL}/v1/chat/completions`,
         requestId,
+        experimentId,
       },
       {
         deployment: "AZURE",
