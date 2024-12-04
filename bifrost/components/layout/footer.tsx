@@ -133,28 +133,35 @@ const Footer = () => {
       </div>
 
       <div className="">
-        <p className="font-bold text-sm tracking-wide mb-2">COMPARE</p>
+        <p className="font-bold text-sm tracking-wide mb-2">GUIDES</p>
         <div className="flex flex-col items-start font-light text-sm tracking-wide gap-2">
+          <a
+            className="hover:underline"
+            href="/blog/ai-agent-builders"
+            target="_blank"
+          >
+            6 Awesome Frameworks for Building AI Agents
+          </a>
           <a
             className="hover:underline"
             href="/blog/best-langsmith-alternatives"
             target="_blank"
           >
-            Helicone vs Langsmith
+            Helicone vs LangSmith
           </a>
           <a
             className="hover:underline"
-            href="/blog/best-datadog-alternative-for-llm"
+            href="/blog/llm-stack-guide"
             target="_blank"
           >
-            Helicone vs Datadog
+            The Emerging LLM Stack
           </a>
           <a
             className="hover:underline"
-            href="/blog/weights-and-biases"
+            href="/blog/llm-api-providers"
             target="_blank"
           >
-            Helicone vs Weights & Biases
+            Top 10 LLM API Providers
           </a>
         </div>
       </div>
