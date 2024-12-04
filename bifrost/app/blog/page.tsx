@@ -214,6 +214,11 @@ export type BlogStructure =
     };
 
 const blogContent: BlogStructure[] = [
+    {
+    dynmaicEntry: {
+      folderName: "openai-gpt-5",
+    },
+  },
   {
     dynmaicEntry: {
       folderName: "test-your-llm-prompts",
