@@ -191,19 +191,6 @@ const InvoiceHandlers = {
         }
 
         if (experimentUsage.data.length !== 0) {
-          const totalCount = experimentUsage.data.reduce(
-            (acc, usage) => acc + usage.total_count,
-            0
-          );
-
-          await stripe.invoiceItems.create({
-            customer: customerID,
-            invoice: invoice.id,
-            currency: "usd",
-            unit_amount: EXPERIMENT_USAGE_COST,
-            description: "2 cents per experiment run " + invoice.number,
-            quantity: totalCount,
-          });
           for (const usage of experimentUsage.data) {
             const totalCost = costOf({
               model: usage.model,
