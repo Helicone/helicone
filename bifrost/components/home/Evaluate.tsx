@@ -89,8 +89,8 @@ const Evaluate = () => {
               <div className="overflow-hidden">
                 <p className="text-sm sm:text-lg font-light text-gray-400">
                   Online evaluation tests systems in real-time using live data
-                  and actual user interactions. It's useful to capture dynamic
-                  real-world scenarios. <br />
+                  and actual user interactions. It&apos;s useful to capture
+                  dynamic real-world scenarios. <br />
                   <br />
                   In contrast, offline evaluation occurs in controlled,
                   simulated environments using previous requests or synthetic

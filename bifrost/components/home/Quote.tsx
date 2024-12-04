@@ -10,7 +10,7 @@ const Quote = () => {
             The ability to test prompt variations on production traffic without
             touching a line of code is magical.{" "}
             <span className="text-black">
-              It feels like we're cheating; it's just that good!
+              It feels like we&apos;re cheating; it&apos;s just that good!
             </span>
           </h2>
           {/* <div className="flex flex-col gap-3"> */}
