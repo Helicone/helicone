@@ -5,6 +5,14 @@ description: "Leverage Helicone's powerful webhook system to automate your LLM w
 twitter:title: "Helicone Webhooks: Real-Time LLM Integration & Automation"
 ---
 
+import QuestionsSection from "/snippets/questions-section.mdx";
+
+<Info>
+  **Who can use this feature**: Anyone on [Pro or
+  Enterprise](https://www.helicone.ai/pricing) plan.
+</Info>
+
+
 ## Top use cases
 
 - **Scoring**: [Score requests based on custom logic](/features/advanced-usage/scores).
@@ -72,3 +80,5 @@ export default async function handler(
   return res.status(200).json({ message: "Webhook received" });
 }
 ```
+
+<QuestionsSection />
