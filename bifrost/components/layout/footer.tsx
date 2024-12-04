@@ -133,28 +133,38 @@ const Footer = () => {
       </div>
 
       <div className="">
-        <p className="font-bold text-sm tracking-wide mb-2">COMPARE</p>
+        <p className="font-bold text-sm tracking-wide mb-2">BLOGS</p>
         <div className="flex flex-col items-start font-light text-sm tracking-wide gap-2">
+          <a
+            className="hover:underline"
+            href="/blog/ai-agent-builders"
+            target="_blank"
+          >
+            6 Frameworks for Building AI Agents
+          </a>
+          <a
+            className="hover:underline"
+            href="/blog/llm-stack-guide"
+            target="_blank"
+          >
+            The Emerging LLM Stack
+          </a>
+          <a
+            className="hover:underline"
+            href="/blog/llm-api-providers"
+            target="_blank"
+          >
+            Top 10 LLM API Providers
+          </a>
           <a
             className="hover:underline"
             href="/blog/best-langsmith-alternatives"
             target="_blank"
           >
-            Helicone vs Langsmith
+            Helicone vs. LangSmith
           </a>
-          <a
-            className="hover:underline"
-            href="/blog/best-datadog-alternative-for-llm"
-            target="_blank"
-          >
-            Helicone vs Datadog
-          </a>
-          <a
-            className="hover:underline"
-            href="/blog/weights-and-biases"
-            target="_blank"
-          >
-            Helicone vs Weights & Biases
+          <a className="hover:underline" href="/blog" target="_blank">
+            More
           </a>
         </div>
       </div>
@@ -168,9 +178,6 @@ const Footer = () => {
             target="_blank"
           >
             Docs
-          </a>
-          <a className="hover:underline" href="/blog" target="_blank">
-            Blog
           </a>
           <a className="hover:underline" href="/pricing" target="_blank">
             Pricing
