@@ -4,7 +4,7 @@
   "title2": "How to test your LLM prompts (with examples)",
   "description": "How do you measure the quality of your LLM prompts and outputs? In this blog, we talk about how you can evaluate LLM performance and effectively test your prompts.",
   "images": "/static/blog/test-your-llm-prompts/cover.webp",
-  "time": "8 minute read",
+  "time": "10 minute read",
   "author": "Lina Lam",
-  "date": "November 30, 2024"
+  "date": "December 4, 2024"
 }
