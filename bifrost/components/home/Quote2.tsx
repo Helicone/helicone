@@ -29,7 +29,7 @@ const Quote2 = () => {
           )}
         >
           <p className="text-sm sm:text-lg">
-            What if I don't want Helicone to be in my critical path?{" "}
+            What if I don&apos;t want Helicone to be in my critical path?{" "}
           </p>
           <div className="transition-transform duration-300">
             {isQuestionOpen ? (
