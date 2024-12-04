@@ -46,7 +46,7 @@ export default async function Home({
   }
 
   return (
-    <div className="w-full bg-[#f8feff] h-full antialiased relative">
+    <div className="w-full bg-white h-full antialiased relative">
       <div className="flex flex-col md:flex-row items-start w-full mx-auto max-w-5xl py-16 px-4 md:py-24 relative gap-6">
         <div className="w-56 h-full flex flex-col space-y-2 md:sticky top-16 md:top-32">
           <Link href="/blog" className="flex items-center gap-1">
