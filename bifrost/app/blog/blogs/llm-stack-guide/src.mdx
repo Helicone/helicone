@@ -1,114 +1,88 @@
-As seasoned developers, we've witnessed the ebb and flow of numerous tech stacks. From the meteoric rise of **<span style={{color: '#0ea5e9'}}>MERN</span>** to the gradual decline of **<span style={{color: '#0ea5e9'}}>AngularJS</span>**, and the innovative emergence of Jamstack, tech stacks have been the backbone of web development evolution.
+See companion blog [here](/blog/building-an-llm-stack) before reading this.
 
 ![LLM stack guide](/static/blog/llm-stack-guide/cover.webp)
 
+As seasoned developers, we've witnessed the ebb and flow of numerous tech stacks. From the meteoric rise of MERN to the gradual decline of AngularJS, and the innovative emergence of Jamstack, tech stacks have been the backbone of web development evolution.
 
-In this blog, we will walk through the modern **<span style={{color: '#0ea5e9'}}>LLM Stack</span>** - an emerging tech stack that is changing how developers build and scale Large Language Model (LLM) applications.
-
-Before you continue, please first read the companion blog on [The Evolution of LLM Architecture](/blog/building-an-llm-stack). 
-
-
-## The Evolution of LLM Applications
-
-2023 marked the rise of LLMs and their applications, with **<span style={{color: '#0ea5e9'}}>Retrieval Augmented Generation (RAG)</span>** emerging as the most popular use case. RAG involves using data retrieved from vector databases as context for LLMs to generate human-readable responses.
-
-As we progress through 2024, we're witnessing advancements in implementation strategies. Key trends include:
-
-- Increased focus on production-ready LLM applications
-- Growing emphasis on observability and data versioning
-- Introduction of enterprise features to foundational components
-
+Enter the LLM Stack - a cutting-edge tech stack designed to revolutionize how developers build and scale LLM (Large Language Model) applications.
 
 ## Why a New Stack for LLM Applications?
 
-LLM applications, powered by pre-trained models, are deceptively simple to kickstart, but scaling them unveils unique challenges in machine learning and data processing:
+LLM applications are deceptively simple to kickstart, but scaling them unveils a Pandora's box of challenges:
 
-1. **Platform Limitations**: Traditional stacks struggle with LLM app demands, especially when dealing with real-time data pipelines.
-2. **Tooling Gaps**: Existing tools often fall short in managing LLM-specific workflows, including **<span style={{color: '#0ea5e9'}}>prompt engineering</span>** and efficient API calls.
-3. **Observability Hurdles**: Monitoring LLM performance requires specialized solutions for tracking **<span style={{color: '#0ea5e9'}}>embedding models</span>** and external API usage.
-4. **Security Concerns**: LLMs introduce new vectors for data breaches and **<span style={{color: '#0ea5e9'}}>prompt injections</span>**, necessitating robust data processing protocols.
+1. **Platform Limitations**: Traditional stacks struggle with the unique demands of LLM apps.
+2. **Tooling Gaps**: Existing tools often fall short in managing LLM-specific workflows.
+3. **Observability Hurdles**: Monitoring LLM performance requires specialized solutions.
+4. **Security Concerns**: LLMs introduce new vectors for data breaches and prompt injections.
 
-For a real-world example of an LLM application's journey from MVP to a scalable, cost-effective product, check out our [companion blog post](/blog/building-an-llm-stack). 
+To illustrate this evolution, we've created a [companion blog](/blog/building-an-llm-stack) that walks through a real-world LLM application's journey from MVP to scalable product.
 
-#### You might be interested in: 
+#### You might be interested in:
+
 - Read [Prompt Engineering Tools, Best Practices and Techniques](https://www.helicone.ai/blog/prompt-engineering-tools)
 
+# Anatomy of the LLM Stack
 
-## Anatomy of the LLM Stack
-
-**Rather than prescribing a specific stack choice, this blog will outline the <span style={{color: '#0ea5e9'}}>key components for building a robust LLM stack</span>.** We'll explore how these components work together to create powerful AI applications that enhance user experience.
-
-Let's dissect the architecture of the LLM stack mentioned in our companion blog post:
-
-1. **Observability Layer**
-2. **Inference Layer**
-3. **Testing & Experimentation Layer**
+Let's dissect the architecture of a robust LLM stack, based on our [detailed example](/blog/building-an-llm-stack):
 
 ![LLM Stack Architecture](/static/blog/llm-stack-guide/llm-architecture.webp)
+
+**Note:** that this article is not going to tell you what stack to choose, but rather outlines the components for building an LLM stack.
+
+## Key Components
 
 ### 1. Observability Layer
 
 This layer focuses on monitoring, tracking, and analyzing the performance and behavior of LLM applications. It provides insights into how the models are being used, their performance metrics, and helps in debugging and optimizing the system.
 
-![LLM Stack Architecture](/static/blog/llm-stack-guide/observability-layer.webp)
+![Observability Layer](/static/blog/llm-stack-guide/observability-layer.webp)
 
-| Service         | Tools                                                                                         |
-| :-------------- | :------------------------------------------------------------------------------------------------------------- |
+| Service         | Cutting-Edge Solutions                                                                                         |
+| --------------- | -------------------------------------------------------------------------------------------------------------- |
 | Observability   | [Helicone](/products/helicone-observability), LangSmith, LangFuse, Traceloop, PromptLayer, HoneyHive, AgentOps |
 | Clients         | LangChain, LiteLLM, LlamaIndex                                                                                 |
-| Agents          | Dify, CrewAI, AutoGen                                                                                                |
+| Agents          | CrewAI, AutoGPT, DifyAI, Autogen                                                                               |
 | Prompting Layer | [Helicone Prompting](https://docs.helicone.ai/features/prompts), PromptLayer, PromptFoo                        |
 | Integrations    | Zapier, LlamaIndex                                                                                             |
 
-#### You might be interested: 
+#### You might be interested:
+
 - Read: [6 Awesome Platforms & Frameworks for Building AI Agents (Open-Source)](https://www.helicone.ai/blog/ai-agent-builders)
 
 ### 2. Inference Layer
 
 The Inference Layer is responsible for processing requests to the LLM, managing model deployments, and load balancing. It handles the actual execution of the language models and ensures efficient and scalable access to these models.
 
-![LLM Stack Architecture](/static/blog/llm-stack-guide/inference-layer.webp)
+![Inference Layer](/static/blog/llm-stack-guide/inference-layer.webp)
 
-
-| Service           | Tools                                                                                                         |
-| :---------------- | :-------------------------------------------------------------------------------------------------------------------------- |
+| Service           | Innovative Products                                                                                                         |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------- |
 | Gateway           | [Helicone Gateway](https://docs.helicone.ai/getting-started/integration-method/gateway), Cloudflare AI, PortKey, KeywordsAI |
 | LLM Load Balancer | Martian, LiteLLM                                                                                                            |
-| Model Providers   | OpenAI (GPT), Meta (Llama), Google (Gemini), Mistral, Anthropic (Claude), TogetherAI, Anyscale, Groq, Amazon (Bedrock)      |                                                                           |
-
+| Model Providers   | OpenAI (GPT), Meta (Llama), Google (Gemini), Mistral, Anthropic (Claude), TogetherAI, Anyscale, Groq, Amazon (Bedrock)      |
 
 ### 3. Testing & Experimentation Layer
 
 This layer enables developers to test, evaluate, and experiment with different prompts, models, and configurations. It provides tools for fine-tuning models, running experiments, and assessing the quality and performance of LLM outputs.
 
-![LLM Stack Architecture](/static/blog/llm-stack-guide/testing-layer.webp)
+![Testing & Experimentation Layer](/static/blog/llm-stack-guide/testing-layer.webp)
 
-
-| Service         | Tools                                                                                                                  |
-| :-------------- | :------------------------------------------------------------------------------------------------------------------------------ |
+| Service         | Next-Gen Tools                                                                                                                  |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------- |
 | Datastores      | [Helicone API](https://docs.helicone.ai/rest/request/post-v1requestquery), LangFuse, LangSmith                                  |
 | Experimentation | [Helicone Experiments](https://docs.helicone.ai/use-cases/experiments#how-to-run-llm-prompt-experiments), Promptfoo, Braintrust |
 | Evaluators      | PromptFoo, Lastmile, BaseRun                                                                                                    |
 | Fine Tuning     | OpenPipe, Autonomi                                                                                                              |
+|  |
 
+---
 
-## Where Helicone Fit Into Your LLM Stack
+# Helicone: Your Gateway to LLM Excellence
 
-Helicone isn't just another tool in the LLM stack - it's a game-changer for building AI applications. Our primary focus areas, Gateway and Observability, are crucial for building robust, scalable LLM applications. We offer:
+Helicone isn't just another tool in the LLM stack - it's a game-changer. Our primary focus areas, Gateway and Observability, are crucial for building robust, scalable LLM applications.
 
-1. **Efficient LLM Cache**: Optimize your API calls and reduce costs.
-2. **Real-Time Monitoring**: Track your embedding models and external API usage.
-3. **Orchestration Framework**: Streamline your data processing and machine learning workflows.
+![Helicone in the LLM Stack](/static/pasted_images/llm-stack-helicone-in-picture.png)
 
-![Helicone in the emerging LLM Stack](/static/blog/llm-stack-guide/production.webp)
+By integrating Helicone into your LLM workflow, you're not just adopting a tool; you're embracing a philosophy of efficiency, scalability, and deep insights into your LLM applications.
 
-## The Future of LLM Applications
-
-As we look ahead, several trends are shaping the future of LLM applications:
-
-- Increased focus on specialized, domain-specific models
-- Enhanced privacy and security measures for LLM deployments
-- Improved integration between LLMs and traditional software stacks
-- Advancements in multimodal AI capabilities
-
-The LLM Stack is revolutionizing AI application development, enabling more robust and scalable solutions. As LLM architectures evolve, the focus is on creating cost-effective, powerful AI systems that expand the frontiers of machine learning and artificial intelligence. This new paradigm empowers developers to meet the growing demands of our AI-driven world with increased efficiency and innovation.
+Ready to supercharge your LLM development? Dive deeper into Helicone's capabilities and see how it can transform your LLM stack today!
