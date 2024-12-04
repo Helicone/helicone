@@ -3,14 +3,18 @@
   right: 0;
   top: 0;
   height: 100%;
+  width: 4px;
   cursor: col-resize;
   user-select: none;
   touch-action: none;
+  opacity: 0;
+  transition: opacity 0.2s;
 }
 
+.resizer:hover,
 .resizer.isResizing {
-  background: blue;
   opacity: 1;
+  background: rgba(0, 0, 0, 0.1);
 }
 
 .hide {
@@ -92,4 +96,8 @@ input[type="number"]::-webkit-outer-spin-button {
 /* Hide the arrows for Firefox */
 input[type="number"] {
   -moz-appearance: textfield;
+}
+
+#sessions-trace-span .recharts-xAxis .recharts-label {
+  font-size: 12px;
 }

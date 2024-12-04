@@ -1,27 +1,26 @@
-import { Button, buttonVariants } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useLocalStorage } from "@/services/hooks/localStorage";
 import {
-  BookOpenIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
-  CloudArrowUpIcon,
-  QuestionMarkCircleIcon,
+  Bars3Icon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { useMemo, useEffect, useRef, useState } from "react";
 import { useOrg } from "../organizationContext";
 import OrgDropdown from "../orgDropdown";
+import NavItem from "./NavItem";
+import { ChangelogItem } from "./Sidebar";
+import ChangelogModal from "../ChangelogModal";
+import SidebarHelpDropdown from "../SidebarHelpDropdown";
+import { useTheme } from "next-themes";
 
-interface NavigationItem {
+export interface NavigationItem {
   name: string;
   href: string;
-  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>> | null;
   current: boolean;
   featured?: boolean;
   subItems?: NavigationItem[];
@@ -29,15 +28,11 @@ interface NavigationItem {
 
 interface SidebarProps {
   NAVIGATION: NavigationItem[];
-  setReferOpen: (open: boolean) => void;
+  changelog: ChangelogItem[];
   setOpen: (open: boolean) => void;
 }
 
-const DesktopSidebar = ({
-  NAVIGATION,
-  setReferOpen,
-  setOpen,
-}: SidebarProps) => {
+const DesktopSidebar = ({ changelog, NAVIGATION }: SidebarProps) => {
   const org = useOrg();
   const tier = org?.currentOrg?.tier;
   const router = useRouter();
@@ -46,9 +41,13 @@ const DesktopSidebar = ({
     false
   );
 
+  const shouldShowInfoBox = useMemo(() => {
+    return tier === "pro" || tier === "growth";
+  }, [tier]);
+
   const [expandedItems, setExpandedItems] = useLocalStorage<string[]>(
     "expandedItems",
-    []
+    ["Developer", "Segments", "Improve"]
   );
 
   const toggleExpand = (name: string) => {
@@ -59,271 +58,274 @@ const DesktopSidebar = ({
         : [...prev, name]
     );
   };
+  const largeWith = useMemo(
+    () => cn(isCollapsed ? "w-16" : "w-52"),
+    [isCollapsed]
+  );
 
-  const renderNavItem = (link: NavigationItem, isSubItem = false) => {
-    const hasSubItems = link.subItems && link.subItems.length > 0;
+  const NAVIGATION_ITEMS = useMemo(() => {
+    if (isCollapsed) {
+      return NAVIGATION.flatMap((item) => {
+        if (item.subItems && expandedItems.includes(item.name)) {
+          return [
+            item,
+            ...item.subItems.filter((subItem) => subItem.icon !== null),
+          ];
+        }
+        return [item];
+      }).filter((item) => item.icon !== null);
+    }
 
-    return (
-      <div key={link.name}>
-        {isCollapsed ? (
-          <Tooltip delayDuration={0}>
-            <TooltipTrigger asChild>
-              <Link
-                href={hasSubItems ? "#" : link.href}
-                onClick={
-                  hasSubItems ? () => toggleExpand(link.name) : undefined
-                }
-                className={cn(
-                  buttonVariants({
-                    variant: "ghost",
-                    size: "icon",
-                  }),
-                  "h-9 w-9",
-                  link.current && "bg-accent hover:bg-accent"
-                )}
-              >
-                <link.icon
-                  className={cn(
-                    "h-4 w-4",
-                    link.current && "text-accent-foreground"
-                  )}
-                />
-                <span className="sr-only">{link.name}</span>
-              </Link>
-            </TooltipTrigger>
-            <TooltipContent
-              side="right"
-              className="flex items-center gap-4 dark:bg-gray-800 dark:text-gray-200"
-            >
-              {link.name}
-              {link.featured && (
-                <span className="ml-auto text-muted-foreground">New</span>
-              )}
-            </TooltipContent>
-          </Tooltip>
-        ) : (
-          <div className={cn(isSubItem && "ml-4")}>
-            <Link
-              href={hasSubItems ? "#" : link.href}
-              onClick={hasSubItems ? () => toggleExpand(link.name) : undefined}
-              className={cn(
-                buttonVariants({
-                  variant: link.current ? "secondary" : "ghost",
-                  size: "sm",
-                }),
-                "justify-start w-full",
-                hasSubItems && "flex items-center justify-between"
-              )}
-            >
-              <div className="flex items-center">
-                <link.icon
-                  className={cn(
-                    "mr-2 h-4 w-4",
-                    link.current && "text-accent-foreground"
-                  )}
-                />
-                {link.name}
-              </div>
-              {hasSubItems && (
-                <ChevronRightIcon
-                  className={cn(
-                    "h-4 w-4 transition-transform",
-                    expandedItems.includes(link.name) && "rotate-90"
-                  )}
-                />
-              )}
-            </Link>
-          </div>
-        )}
-        {hasSubItems && expandedItems.includes(link.name) && !isCollapsed && (
-          <div className="ml-4 mt-1">
-            {link.subItems!.map((subItem) => renderNavItem(subItem, true))}
-          </div>
-        )}
-      </div>
-    );
+    return NAVIGATION.map((item) => {
+      if (item.subItems) {
+        return {
+          ...item,
+          subItems: item.subItems.map((subItem) => ({
+            ...subItem,
+            href: subItem.href,
+          })),
+        };
+      }
+      return item;
+    });
+  }, [NAVIGATION, isCollapsed, expandedItems]);
+
+  const sidebarRef = useRef<HTMLDivElement>(null);
+  const navItemsRef = useRef<HTMLDivElement>(null);
+  const [canShowInfoBox, setCanShowInfoBox] = useState(false);
+
+  // Function to calculate if there's enough space to show the InfoBox
+  const calculateAvailableSpace = () => {
+    if (sidebarRef.current && navItemsRef.current) {
+      const sidebarHeight = sidebarRef.current.offsetHeight;
+      const navItemsHeight = navItemsRef.current.offsetHeight;
+      const fixedContentHeight = 100; // Approximate height of fixed elements (header, footer)
+      const infoBoxHeight = 150; // Approximate height of the InfoBox
+
+      const availableHeight =
+        sidebarHeight - navItemsHeight - fixedContentHeight;
+
+      setCanShowInfoBox(availableHeight >= infoBoxHeight);
+    }
+  };
+
+  const { theme, setTheme } = useTheme();
+
+  useEffect(() => {
+    calculateAvailableSpace();
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "b" && event.metaKey) {
+        event.preventDefault();
+        setIsCollapsed(!isCollapsed);
+      } else if (event.metaKey && event.shiftKey && event.key === "l") {
+        event.preventDefault();
+        setTheme(theme === "dark" ? "light" : "dark");
+      }
+    };
+
+    // Add event listeners
+    window.addEventListener("resize", calculateAvailableSpace);
+    window.addEventListener("keydown", handleKeyDown);
+
+    // Remove event listeners on cleanup
+    return () => {
+      window.removeEventListener("resize", calculateAvailableSpace);
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isCollapsed, expandedItems, setIsCollapsed, setTheme, theme]);
+
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const handleCollapseToggle = () => {
+    if (window.innerWidth < 768) {
+      // Mobile breakpoint
+      setIsMobileMenuOpen(false);
+    } else {
+      setIsCollapsed(!isCollapsed);
+    }
+  };
+
+  const [modalOpen, setModalOpen] = useState(false);
+  const [changelogToView, setChangelogToView] = useState<ChangelogItem | null>(
+    null
+  );
+
+  const handleChangelogClick = (changelog: ChangelogItem) => {
+    setChangelogToView(changelog);
+    setModalOpen(true);
+  };
+
+  const handleModalOpen = (open: boolean) => {
+    console.log({ open });
+    if (!open) {
+      setChangelogToView(null);
+    } else {
+      setChangelogToView(changelog[0]);
+    }
+    setModalOpen(open);
   };
 
   return (
     <>
+      {/* Mobile hamburger menu */}
+      <div className="sticky top-0 z-20 px-2 py-3 flex md:hidden flex-shrink-0 bg-white dark:bg-black border-b border-slate-300 dark:border-slate-70">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => {
+            setIsCollapsed(false);
+            setIsMobileMenuOpen(true);
+          }}
+          className="text-slate-500 hover:text-slate-600"
+        >
+          <Bars3Icon className="h-6 w-6" />
+        </Button>
+      </div>
+
+      {/* Mobile drawer overlay */}
+      {isMobileMenuOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+          onClick={() => {
+            setIsCollapsed(false);
+            setIsMobileMenuOpen(false);
+          }}
+        />
+      )}
+
+      {/* Sidebar container */}
       <div
         className={cn(
           "hidden md:block",
-          isCollapsed ? "w-16" : "w-56",
+          largeWith,
           "transition-all duration-300"
         )}
       />
+
+      {/* Sidebar content */}
       <div
+        ref={sidebarRef}
         className={cn(
-          "hidden md:flex md:flex-col z-30 bg-background dark:bg-gray-900 transition-all duration-300 h-screen bg-white pb-4",
-          isCollapsed ? "md:w-16" : "md:w-56",
-          "fixed top-0 left-0" // Changed from "sticky top-0" to "fixed top-0 left-0"
+          "flex flex-col z-50 bg-background dark:bg-neutral-950 transition-all duration-300 h-screen bg-white",
+          largeWith,
+          "fixed top-0 left-0",
+          "md:translate-x-0", // Always visible on desktop
+          isMobileMenuOpen
+            ? "translate-x-0"
+            : "-translate-x-full md:translate-x-0"
         )}
       >
-        <div className="w-full flex flex-grow flex-col overflow-y-auto border-r dark:border-gray-700 justify-between">
-          <div className="flex items-center gap-2 h-14 border-b dark:border-gray-700">
-            {!isCollapsed && <OrgDropdown setReferOpen={setReferOpen} />}
-            <div className={cn("mx-auto", !isCollapsed && "mr-2")}>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setIsCollapsed(!isCollapsed)}
-                className="w-full flex justify-center dark:hover:bg-gray-800 px-2"
-              >
-                {isCollapsed ? (
-                  <ChevronRightIcon className="h-4 w-4" />
-                ) : (
-                  <ChevronLeftIcon className="h-4 w-4" />
+        <div className="w-full flex flex-col h-full border-r dark:border-slate-800">
+          <div className="flex-grow overflow-y-auto pb-14">
+            {/* Collapsible button and OrgDropdown */}
+            <div className="flex items-center gap-2 h-14 border-b dark:border-slate-800">
+              {!isCollapsed && <OrgDropdown />}
+              <div
+                className={cn(
+                  "flex justify-center items-center",
+                  isCollapsed ? "w-full m-4" : "mr-2"
                 )}
-              </Button>
-            </div>
-          </div>
-
-          <div className="flex flex-grow flex-col">
-            {((!isCollapsed &&
-              org?.currentOrg?.organization_type === "reseller") ||
-              org?.isResellerOfCurrentCustomerOrg) && (
-              <div className="flex w-full justify-center px-5 py-2">
+              >
                 <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => {
-                    router.push("/enterprise/portal");
-                    if (
-                      org.currentOrg?.organization_type === "customer" &&
-                      org.currentOrg?.reseller_id
-                    ) {
-                      org.setCurrentOrg(org.currentOrg.reseller_id);
-                    }
-                  }}
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleCollapseToggle}
+                  className="w-full flex justify-center dark:hover:bg-slate-800 px-2"
                 >
-                  {org.currentOrg?.organization_type === "customer"
-                    ? "Back to Portal"
-                    : "Customer Portal"}
+                  {isCollapsed ? (
+                    <ChevronRightIcon className="h-4 w-4" />
+                  ) : (
+                    <ChevronLeftIcon className="h-4 w-4" />
+                  )}
                 </Button>
               </div>
-            )}
-
-            <div
-              data-collapsed={isCollapsed}
-              className="group flex flex-col gap-4 py-2 data-[collapsed=true]:py-2 "
-            >
-              <nav className="grid gap-1 px-2 group-[[data-collapsed=true]]:justify-center group-[[data-collapsed=true]]:px-2">
-                {NAVIGATION.map((link) => renderNavItem(link))}
-              </nav>
             </div>
-          </div>
 
-          <div className="mt-auto">
-            {isCollapsed ? (
-              <>
-                <Tooltip delayDuration={0}>
-                  <TooltipTrigger asChild>
+            <div className="flex flex-col justify-between h-[calc(100%-16px)]">
+              {/* Navigation items */}
+              <div className="flex flex-col justify-between">
+                {((!isCollapsed &&
+                  org?.currentOrg?.organization_type === "reseller") ||
+                  org?.isResellerOfCurrentCustomerOrg) && (
+                  <div className="flex w-full justify-center px-5 py-2">
                     <Button
-                      variant="ghost"
-                      size="icon"
-                      className="w-full dark:hover:bg-gray-800"
-                      asChild
+                      variant="outline"
+                      className="w-full  dark:text-slate-400"
+                      size="sm_sleek"
+                      onClick={() => {
+                        router.push("/enterprise/portal");
+                        if (
+                          org.currentOrg?.organization_type === "customer" &&
+                          org.currentOrg?.reseller_id
+                        ) {
+                          org.setCurrentOrg(org.currentOrg.reseller_id);
+                        }
+                      }}
                     >
-                      <Link
-                        href="https://docs.helicone.ai/introduction"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <BookOpenIcon className="h-4 w-4" />
-                      </Link>
+                      {org.currentOrg?.organization_type === "customer"
+                        ? "Back to Portal"
+                        : "Customer Portal"}
                     </Button>
-                  </TooltipTrigger>
-                  <TooltipContent
-                    side="right"
-                    className="dark:bg-gray-800 dark:text-gray-200"
-                  >
-                    View Documentation
-                  </TooltipContent>
-                </Tooltip>
-                <Tooltip delayDuration={0}>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="w-full dark:hover:bg-gray-800"
-                      asChild
-                    >
-                      <Link
-                        href="https://discord.gg/zsSTcH2qhG"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <QuestionMarkCircleIcon className="h-4 w-4" />
-                      </Link>
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent
-                    side="right"
-                    className="dark:bg-gray-800 dark:text-gray-200"
-                  >
-                    Help And Support
-                  </TooltipContent>
-                </Tooltip>
-              </>
-            ) : (
-              <>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="w-full justify-start dark:hover:bg-gray-800"
-                  asChild
-                >
-                  <Link
-                    href="https://docs.helicone.ai/introduction"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-2"
-                  >
-                    <BookOpenIcon className="h-4 w-4 mr-2" />
-                    View Documentation
-                  </Link>
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="w-full justify-start dark:hover:bg-gray-800"
-                  asChild
-                >
-                  <Link
-                    href="https://discord.gg/zsSTcH2qhG"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-2"
-                  >
-                    <QuestionMarkCircleIcon className="h-4 w-4 mr-2" />
-                    Help And Support
-                  </Link>
-                </Button>
-              </>
-            )}
-          </div>
-
-          {tier === "free" &&
-            org?.currentOrg?.organization_type !== "customer" && (
-              <div className={cn("p-4", isCollapsed && "hidden")}>
-                <Button
-                  variant="outline"
-                  className="w-full justify-between dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
-                  onClick={() => setOpen(true)}
-                >
-                  <div className="flex items-center">
-                    <CloudArrowUpIcon className="h-5 w-5 mr-1.5" />
-                    <span>Free Plan</span>
                   </div>
-                  <span className="text-xs font-normal text-primary dark:text-gray-300">
-                    Learn More
-                  </span>
-                </Button>
+                )}
+                <div
+                  ref={navItemsRef}
+                  data-collapsed={isCollapsed}
+                  className="group flex flex-col py-2 data-[collapsed=true]:py-2 "
+                >
+                  <nav className="grid flex-grow overflow-y-auto px-2 group-[[data-collapsed=true]]:justify-center group-[[data-collapsed=true]]:px-2">
+                    {NAVIGATION_ITEMS.map((link) => (
+                      <NavItem
+                        key={link.name}
+                        link={link}
+                        isCollapsed={isCollapsed}
+                        expandedItems={expandedItems}
+                        toggleExpand={toggleExpand}
+                        onClick={() => {
+                          setIsCollapsed(false);
+                          setIsMobileMenuOpen(false);
+                        }}
+                        deep={0}
+                      />
+                    ))}
+                  </nav>
+                </div>
               </div>
-            )}
+
+              {/* InfoBox */}
+              {canShowInfoBox && !isCollapsed && (
+                <div className="bg-slate-50 dark:bg-slate-900 rounded border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 flex flex-col md:flex-row md:gap-2 gap-4 justify-between md:justify-center md:items-center items-start px-3 py-2  mt-2 mx-2 mb-8 font-medium">
+                  <h1 className="text-xs text-start tracking-tight leading-[1.35rem]">
+                    ⚡ Introducing a new way to perfect your prompts.{" "}
+                    <Link
+                      href="https://helicone.ai/experiments"
+                      target="_blank"
+                      className="underline decoration-slate-400 decoration-1 underline-offset-2 font-medium"
+                    >
+                      Get early access here.
+                    </Link>{" "}
+                  </h1>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Sticky help dropdown */}
+          <div className="absolute bottom-3 left-3 z-10">
+            <SidebarHelpDropdown
+              changelog={changelog}
+              handleChangelogClick={handleChangelogClick}
+            />
+          </div>
         </div>
       </div>
+      <ChangelogModal
+        open={modalOpen}
+        setOpen={handleModalOpen}
+        changelog={changelogToView}
+      />
     </>
   );
 };

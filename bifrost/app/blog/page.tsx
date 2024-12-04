@@ -2,6 +2,31 @@ import { clsx } from "@/components/shared/utils";
 import Image from "next/image";
 import Link from "next/link";
 import { getMetadata } from "@/components/templates/blog/getMetaData";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Helicone Blog | AI Development Insights & Best Practices",
+  description:
+    "Stay updated with the latest insights on AI development, LLM observability, and industry best practices from the team building the future of AI infrastructure.",
+  icons: "/static/logo.webp",
+  openGraph: {
+    type: "website",
+    siteName: "Helicone.ai",
+    url: "https://www.helicone.ai/blog",
+    title: "Helicone Blog | AI Development Insights & Best Practices",
+    description:
+      "Stay updated with the latest insights on AI development, LLM observability, and industry best practices from the team building the future of AI infrastructure.",
+    images: "/static/dashboard-preview.png",
+    locale: "en_US",
+  },
+  twitter: {
+    title: "Helicone Blog | AI Development Insights & Best Practices",
+    description:
+      "Stay updated with the latest insights on AI development, LLM observability, and industry best practices from the team building the future of AI infrastructure.",
+    card: "summary_large_image",
+    images: "/static/dashboard-preview.png",
+  },
+};
 
 type BlogPostProps = {
   blog: BlogStructure;
@@ -15,6 +40,7 @@ const HEADSHOTS = {
   "Stefan Bokarev": "/static/blog/stefanbokarev-headshot.webp",
   "Justin Torre": "/static/blog/justintorre-headshot.webp",
   "Scott Nguyen": "/static/blog/scottnguyen-headshot.webp",
+  "Kavin Desi": "/static/blog/kavin-headshot.webp",
 };
 
 function metaDataToBlogStructure(
@@ -59,14 +85,12 @@ const RegularBlogPost: React.FC<BlogPostProps> = async ({ blog }) => {
       className="flex flex-col gap-6 w-full hover:bg-sky-50 rounded-lg p-8 col-span-2 md:col-span-1"
       href={blog.href}
     >
-      <img
+      <Image
         src={blog.imageUrl}
         alt={blog.imageAlt || blog.title}
         width={400}
         height={300}
-        style={{
-          objectFit: "cover",
-        }}
+        objectFit="cover"
         className="rounded-lg h-60 w-full border border-gray-300"
       />
 
@@ -120,7 +144,7 @@ const FeaturedBlogPost: React.FC<BlogPostProps> = async ({ blog }) => {
       className="flex flex-col md:flex-row items-start gap-8 w-full hover:bg-sky-50 rounded-lg p-8 col-span-2"
       href={blog.href}
     >
-      <div className="w-full md:w-[36rem] h-full rounded-lg flex flex-col space-y-4 text-left order-2 md:order-1">
+      <div className="w-full md:w-1/2 h-full rounded-lg flex flex-col space-y-4 text-left order-2 md:order-1">
         <div className="flex items-center gap-2">
           <span className="bg-blue-50 text-blue-700 ring-blue-200 w-max items-center rounded-lg px-2 py-1 -my-1 text-sm font-medium ring-1 ring-inset">
             / {blog.badgeText.toLowerCase()}
@@ -129,14 +153,14 @@ const FeaturedBlogPost: React.FC<BlogPostProps> = async ({ blog }) => {
           <span className="text-gray-400 text-sm">{blog.time}</span>
         </div>
 
-        <h2 className="font-semibold text-2xl pt-2">{blog.title}</h2>
-        <p className="text-gray-500 text-sm">{blog.description}</p>
+        <h2 className="font-semibold text-3xl pt-2">{blog.title}</h2>
+        <p className="text-gray-500 text-base">{blog.description}</p>
         <div className="flex flex-row justify-between gap-4 items-center py-4">
           <div className={clsx("flex items-center space-x-3 bottom-0")}>
             {blog.authors.map((author, i) => (
               <div className="flex items-center space-x-2" key={i}>
                 <img
-                  className="inline-block h-8 w-8 rounded-full"
+                  className="inline-block h-10 w-10 rounded-full"
                   src={author.imageUrl}
                   alt={author.imageAlt || ""}
                 />
@@ -154,12 +178,12 @@ const FeaturedBlogPost: React.FC<BlogPostProps> = async ({ blog }) => {
       <img
         src={blog.imageUrl}
         alt={blog.imageAlt || blog.title}
-        width={400}
-        height={300}
+        width={600}
+        height={400}
         style={{
           objectFit: "cover",
         }}
-        className="rounded-lg h-full md:h-96 w-full max-w-[30rem] border border-gray-300 order-1 md:order-2"
+        className="rounded-lg h-72 w-full md:w-1/2 border border-gray-300 order-1 md:order-2"
       />
     </Link>
   );
@@ -190,6 +214,66 @@ export type BlogStructure =
     };
 
 const blogContent: BlogStructure[] = [
+  {
+    dynmaicEntry: {
+      folderName: "crewai-vs-autogen",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "prompt-evaluation-for-llms",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "pdf-chatbot-tutorial",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "llamaindex-vs-langchain",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "llm-api-providers",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "when-to-finetune",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "debugging-chatbots-and-ai-agents-with-sessions",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "braintrust-alternatives",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "replaying-llm-sessions",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "helicone-recap",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "prompt-engineering-tools",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "langchain-qawolf",
+    },
+  },
   {
     dynmaicEntry: {
       folderName: "ai-agent-builders",
@@ -281,21 +365,9 @@ const blogContent: BlogStructure[] = [
     time: "4 minute read",
   },
   {
-    title: "What is LLM Observability and Monitoring?",
-    description:
-      "Building with LLMs in production (well) is incredibly difficult. You probably have heard of the word LLM observability'. What is it? How does it differ from traditional observability? What is observed? We have the answers. ",
-    badgeText: "insight",
-    date: "July 12, 2024",
-    href: "/blog/llm-observability",
-    imageUrl: "/static/blog/llm-observability-cover.webp",
-    authors: [
-      {
-        name: "Lina Lam",
-        imageUrl: "/static/blog/linalam-headshot.webp",
-        imageAlt: "Lina Lam's headshot",
-      },
-    ],
-    time: "3 minute read",
+    dynmaicEntry: {
+      folderName: "llm-observability",
+    },
   },
   {
     title: "Compare: The Best LangSmith Alternatives & Competitors",
@@ -452,7 +524,7 @@ const blogContent: BlogStructure[] = [
     badgeText: "Product",
     date: "May 14, 2024",
     href: "/blog/switch-models-safely",
-    imageUrl: "static/blog/experiments/gpt-4o.webp",
+    imageUrl: "/static/blog/experiments/gpt-4o.webp",
     authors: [
       {
         name: "Scott Nguyen",
@@ -463,13 +535,13 @@ const blogContent: BlogStructure[] = [
     time: "5 minute read",
   },
   {
-    title: "A Guide for Datadog Users Building with LLMs",
+    title: "An Open-Source Datadog Alternative for LLM Observability",
     description:
-      "Datadog has long been a favourite among developers for monitoring and observability. But recently, LLM developers have been exploring new options. Why? We have some answers.",
+      "Datadog has long been a favourite among developers for its application monitoring and observability capabilities. But recently, LLM developers have been exploring open-source observability options. Why? We have some answers.",
     badgeText: "Compare",
     date: "Apr 29, 2024",
-    href: "/blog/datadog",
-    imageUrl: "static/blog/datadog/title.webp",
+    href: "/blog/best-datadog-alternative-for-llm",
+    imageUrl: "/static/blog/datadog/title.webp",
     authors: [
       {
         name: "Lina Lam",
@@ -487,7 +559,7 @@ const blogContent: BlogStructure[] = [
     badgeText: "Compare",
     date: "Apr 18, 2024",
     href: "/blog/langsmith",
-    imageUrl: "static/blog/langsmith-vs-helicone/cover-image.webp",
+    imageUrl: "/static/blog/langsmith-vs-helicone/cover-image.webp",
     authors: [
       {
         name: "Lina Lam",
@@ -604,7 +676,7 @@ const blogContent: BlogStructure[] = [
   {
     title: "(a16z) Emerging Architectures for LLM Applications",
     description:
-      "Large language models are a powerful new primitive for building software. But since they are so new—and behave so differently from normal computing resources—it’s not always obvious how to use them.",
+      "Large language models are a powerful new primitive for building software. But since they are so new—and behave so differently from normal computing resources—it's not always obvious how to use them.",
     badgeText: "External",
     date: "Jun 20, 2023",
     href: "https://a16z.com/2023/06/20/emerging-architectures-for-llm-applications",

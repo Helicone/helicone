@@ -14,6 +14,7 @@ import { LlmType } from "../../../../lib/api/models/requestResponseModel";
 import ChatBuilder from "./chatBuilder";
 import { DalleBuilder } from "./dalleBuilder";
 import OpenAIAssistantBuilder from "./OpenAIAssistantBuilder";
+import { FluxBuilder } from "./fluxBuilder";
 
 export type BuilderType =
   | "ChatBuilder"
@@ -27,6 +28,7 @@ export type BuilderType =
   | "ClaudeBuilder"
   | "CustomBuilder"
   | "DalleBuilder"
+  | "FluxBuilder"
   | "UnknownBuilder";
 
 export const getBuilderType = (
@@ -64,6 +66,10 @@ export const getBuilderType = (
     return "ChatGPTBuilder";
   }
 
+  if (model == "black-forest-labs/FLUX.1-schnell") {
+    return "FluxBuilder";
+  }
+
   if (
     provider === "TOGETHER" ||
     (provider as any) === "TOGETHERAI" ||
@@ -92,7 +98,10 @@ export const getBuilderType = (
     return "GPT3Builder";
   }
 
-  if (/^(ft:)?gpt-(4|3\.5|35)(-turbo)?(-\d{2}k)?(-\d{4})?/.test(model)) {
+  if (
+    /^(ft:)?gpt-(4|3\.5|35)(-turbo)?(-\d{2}k)?(-\d{4})?/.test(model) ||
+    /^o1-(preview|mini)(-\d{4}-\d{2}-\d{2})?$/.test(model)
+  ) {
     return "ChatGPTBuilder";
   }
 
@@ -135,6 +144,7 @@ const builders: {
   ClaudeBuilder: ClaudeBuilder,
   CustomBuilder: CustomBuilder,
   DalleBuilder: DalleBuilder,
+  FluxBuilder: FluxBuilder,
   UnknownBuilder: UnknownBuilder,
   OpenAIAssistantBuilder: OpenAIAssistantBuilder,
 };

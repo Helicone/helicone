@@ -12,6 +12,8 @@ import { DBQueryTimer } from "../util/loggers/DBQueryTimer";
 import { S3Client } from "../clients/S3Client";
 import { RequestResponseManager } from "./RequestResponseManager";
 import { KafkaProducer } from "../clients/KafkaProducer";
+import { parseJSXObject } from "@helicone/prompts";
+import { TemplateWithInputs } from "@helicone/prompts/dist/objectParser";
 
 function mergeHeaders(x: Headers, y: Headers) {
   const merged = new Headers();
@@ -51,6 +53,16 @@ export async function logAsync(
     mergeHeaders(requestHeaders, requestWrapper.headers)
   );
 
+  let templateWithInputs: TemplateWithInputs | undefined;
+  try {
+    if (heliconeHeaders?.promptHeaders?.promptId) {
+      const parseResult = parseJSXObject(asyncLogModel.providerRequest.json);
+      templateWithInputs = parseResult?.templateWithInputs;
+    }
+  } catch (e) {
+    console.error("Error parsing prompt:", e);
+  }
+
   const loggable = await dbLoggableRequestFromAsyncLogModel({
     requestWrapper,
     env,
@@ -58,6 +70,7 @@ export async function logAsync(
     providerRequestHeaders: heliconeHeaders,
     providerResponseHeaders: responseHeaders,
     provider: provider,
+    heliconeTemplate: templateWithInputs,
   });
 
   const { data: auth, error: authError } = await requestWrapper.auth();

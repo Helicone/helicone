@@ -1,17 +1,17 @@
 import { RadioGroup } from "@headlessui/react";
+import { CheckCircleIcon } from "@heroicons/react/20/solid";
 import { KeyIcon, TrashIcon } from "@heroicons/react/24/outline";
-import { SecretInput } from "../../../../shared/themed/themedTable";
-import { useVaultPage } from "../../../vault/useVaultPage";
-import { clsx } from "../../../../shared/clsx";
-import { useState } from "react";
-import CreateProviderKeyModal from "../../../vault/createProviderKeyModal";
-import { Tooltip } from "@mui/material";
-import ThemedModal from "../../../../shared/themed/themedModal";
-import { DecryptedProviderKey } from "../../../../../services/lib/keys";
-import useNotification from "../../../../shared/notification/useNotification";
+import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
+import { Button } from "@/components/ui/button";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
-import { CheckCircleIcon, PlusIcon } from "@heroicons/react/20/solid";
-import HcButton from "../../../../ui/hcButton";
+import { useCallback, useState } from "react";
+import { DecryptedProviderKey } from "../../../../../services/lib/keys";
+import { clsx } from "../../../../shared/clsx";
+import useNotification from "../../../../shared/notification/useNotification";
+import ThemedModal from "../../../../shared/themed/themedModal";
+import { SecretInput } from "../../../../shared/themed/themedTable";
+import CreateProviderKeyModal from "../../../vault/createProviderKeyModal";
+import { useVaultPage } from "../../../vault/useVaultPage";
 
 interface ProviderKeyListProps {
   variant?: "portal" | "basic";
@@ -20,6 +20,7 @@ interface ProviderKeyListProps {
   orgProviderKey?: string;
   showTitle?: boolean;
   setDecryptedKey?: (key: string) => void;
+  defaultProviderKey?: string | null;
 }
 
 const ProviderKeyList = (props: ProviderKeyListProps) => {
@@ -29,6 +30,7 @@ const ProviderKeyList = (props: ProviderKeyListProps) => {
     orgId,
     orgProviderKey,
     variant = "portal",
+    defaultProviderKey,
     showTitle = true,
   } = props;
 
@@ -36,7 +38,9 @@ const ProviderKeyList = (props: ProviderKeyListProps) => {
   const { setNotification } = useNotification();
   const supabaseClient = useSupabaseClient();
 
-  const [providerKey, setProviderKey] = useState(orgProviderKey);
+  const [providerKey, setProviderKey] = useState(
+    defaultProviderKey || orgProviderKey
+  );
 
   const [isProviderOpen, setIsProviderOpen] = useState(false);
 
@@ -45,27 +49,37 @@ const ProviderKeyList = (props: ProviderKeyListProps) => {
   const [selectedProviderKey, setSelectedProviderKey] =
     useState<DecryptedProviderKey>();
 
-  const changeProviderKeyHandler = async (newProviderKey: string) => {
-    if (setProviderKeyCallback) {
-      setProviderKeyCallback(newProviderKey);
-      return;
-    }
-
-    if (orgId) {
-      // update the current orgs provider key if the orgId is set
-      const { error } = await supabaseClient
-        .from("organization")
-        .update({ org_provider_key: newProviderKey })
-        .eq("id", orgId);
-
-      if (error) {
-        setNotification("Error Updating Provider Key", "error");
-      } else {
-        setNotification("Provider Key Updated", "success");
+  const changeProviderKeyHandler = useCallback(
+    async (newProviderKey: string) => {
+      if (setProviderKeyCallback) {
         setProviderKey(newProviderKey);
+        setProviderKeyCallback(newProviderKey);
+        return;
       }
-    }
-  };
+
+      if (orgId) {
+        // update the current orgs provider key if the orgId is set
+        const { error } = await supabaseClient
+          .from("organization")
+          .update({ org_provider_key: newProviderKey })
+          .eq("id", orgId);
+
+        if (error) {
+          setNotification("Error Updating Provider Key", "error");
+        } else {
+          setNotification("Provider Key Updated", "success");
+          setProviderKey(newProviderKey);
+        }
+      }
+    },
+    [
+      setProviderKeyCallback,
+      orgId,
+      supabaseClient,
+      setNotification,
+      setProviderKey,
+    ]
+  );
 
   const deleteProviderKey = async (id: string) => {
     fetch(`/api/provider_keys/${id}/delete`, { method: "DELETE" })
@@ -85,20 +99,21 @@ const ProviderKeyList = (props: ProviderKeyListProps) => {
     <>
       <div className="w-full">
         <div className="mx-auto w-full space-y-2">
-          {showTitle && (
-            <div className="flex flex-row justify-between items-center">
-              <div className="flex items-center space-x-1">
-                <Tooltip title="Provider Keys are used to authenticate your requests to the API. This key is securely stored using our vault technologies, with the state of the art encryption.">
-                  <label
-                    htmlFor="alert-metric"
-                    className="text-gray-900 dark:text-gray-100 text-xs font-semibold"
-                  >
-                    Provider Keys
-                  </label>
-                </Tooltip>
-              </div>
+          {defaultProviderKey}
+          {providerKey}
+          <div className="flex flex-row justify-between items-center">
+            <div className="flex items-center space-x-1">
+              <Tooltip title="Provider Keys are used to authenticate your requests to the API. This key is securely stored using our vault technologies, with the state of the art encryption.">
+                <label
+                  htmlFor="alert-metric"
+                  className="text-gray-900 dark:text-gray-100 text-xs font-semibold"
+                >
+                  Provider Keys
+                </label>
+              </Tooltip>
             </div>
-          )}
+          </div>
+
           {providerKeys.length === 0 ? (
             <button
               onClick={(e) => {
@@ -193,13 +208,15 @@ const ProviderKeyList = (props: ProviderKeyListProps) => {
               </div>
             </RadioGroup>
           )}
-          <HcButton
-            variant={"secondary"}
-            size={"xs"}
-            title={"Add new key"}
-            onClick={() => setIsProviderOpen(true)}
-            icon={PlusIcon}
-          />
+          <Button
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              setIsProviderOpen(true);
+            }}
+          >
+            Add new key
+          </Button>
         </div>
       </div>
       <CreateProviderKeyModal

@@ -1,7 +1,9 @@
-import { Fragment } from "react";
-import { Dialog, Transition } from "@headlessui/react";
-import { clsx } from "../clsx";
-import { useTheme } from "../theme/themeContext";
+import {
+  Dialog,
+  DialogContent,
+  DialogPortal,
+  DialogOverlay,
+} from "@/components/ui/dialog";
 
 interface ThemedModalProps {
   open: boolean;
@@ -12,47 +14,17 @@ interface ThemedModalProps {
 const ThemedModal = (props: ThemedModalProps) => {
   const { open, setOpen, children } = props;
 
-  const themeContext = useTheme();
-
   return (
-    <Transition.Root show={open} as={Fragment}>
-      <Dialog
-        as="div"
-        className={clsx(themeContext?.theme ?? "light", "relative z-40")}
-        onClick={(e) => e.stopPropagation()}
-        onClose={() => setOpen(false)}
-      >
-        <Transition.Child
-          as={Fragment}
-          enter="ease-out duration-300"
-          enterFrom="opacity-0"
-          enterTo="opacity-100"
-          leave="ease-in duration-200"
-          leaveFrom="opacity-100"
-          leaveTo="opacity-0"
-        >
-          <div className="fixed inset-0 bg-gray-300 dark:bg-gray-700 bg-opacity-50 dark:bg-opacity-50 transition-opacity" />
-        </Transition.Child>
-
-        <div className="fixed inset-0 z-10 overflow-y-auto flex items-center justify-center">
-          <div className="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
-            <Transition.Child
-              as={Fragment}
-              enter="ease-out duration-300"
-              enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-              enterTo="opacity-100 translate-y-0 sm:scale-100"
-              leave="ease-in duration-200"
-              leaveFrom="opacity-100 translate-y-0 sm:scale-100"
-              leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-            >
-              <Dialog.Panel className="relative overflow-auto max-h-[90vh] transform rounded-xl bg-white dark:bg-black px-4 pt-5 pb-4 text-left shadow-xl transition-all sm:my-8 w-fit sm:p-6">
-                {children}
-              </Dialog.Panel>
-            </Transition.Child>
-          </div>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogPortal>
+        <DialogOverlay className="bg-slate-300/50 dark:bg-slate-950/50" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <DialogContent className="max-h-[90vh] w-fit overflow-auto">
+            {children}
+          </DialogContent>
         </div>
-      </Dialog>
-    </Transition.Root>
+      </DialogPortal>
+    </Dialog>
   );
 };
 

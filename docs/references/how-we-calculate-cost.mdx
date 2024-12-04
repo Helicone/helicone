@@ -1,0 +1,52 @@
+---
+title: "How We Calculate Cost"
+sidebarTitle: "Cost Calculation"
+description: "Learn how Helicone calculates the cost per request for nearly all models, including both streamed and non-streamed requests. Detailed explanations and examples provided."
+"twitter:title": "How We Calculate Cost - Helicone OSS LLM Observability"
+---
+
+import QuestionsSection from "/snippets/questions-section.mdx";
+
+### OpenAI Non-Streaming
+
+OpenAI Non-Streaming are requests made to the OpenAI API where the entire response is delivered in a single payload rather than in a series of streamed chunks.
+
+For these non-streaming requests, OpenAI provides a `usage` tag in the response, which includes data such as the number of prompt tokens, completion tokens, and total tokens used.
+
+Here is an example of how the `usage` tag might look in a response:
+
+```json
+"usage": {
+	"prompt_tokens": 11,
+	"completion_tokens": 9,
+	"total_tokens": 20
+},
+```
+
+We capture this data, and we estimate the cost based on the model returned in the response body, using [OpenAI's pricing tables](https://openai.com/pricing#language-models).
+
+### OpenAI Streaming
+
+To calculate cost using OpenAI streaming please look at enabling the [stream usage flag docs](/faq/enable-stream-usage#incorrect-cost-calculation-while-streaming)
+
+### Anthropic Requests
+
+In the case of Anthropic requests, there is no supported method for calculating tokens in Typescript. So, we have to manually calculate the tokens using a Python server. For more discussion and details on this topic, see our comments in this thread: [https://github.com/anthropics/anthropic-sdk-typescript/issues/16](https://github.com/anthropics/anthropic-sdk-typescript/issues/16)
+
+### Developer
+
+For a detailed look at how we calculate LLM costs, please follow this link: [https://github.com/Helicone/helicone/tree/main/costs](https://github.com/Helicone/helicone/tree/main/costs)
+
+<Tip>
+  If you want to calculate costs across models and providers, you can use our
+  free, open-source tool with 300+ models: [LLM API Pricing
+  Calculator](https://www.helicone.ai/llm-cost)
+</Tip>
+
+<Info>
+  Please note that these methods are based on our current understanding and may
+  be subject to changes in the future as APIs and token counting methodologies
+  evolve.
+</Info>
+
+<QuestionsSection />

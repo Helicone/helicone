@@ -1,3 +1,4 @@
+import { ENVIRONMENT } from "../..";
 import { Database } from "../../lib/db/database.types";
 import { AuthParams, supabaseServer } from "../../lib/db/supabase";
 import { ok, err, Result } from "../../lib/shared/result";
@@ -353,9 +354,30 @@ export class OrganizationManager extends BaseManager {
       );
 
     if (organizationLayoutError !== null) {
-      return err(organizationLayoutError);
+      return ok({ filters: [], id: "", organization_id: "", type: "" });
     }
     return ok(layout);
+  }
+
+  async getMemberCount(
+    filterHeliconeEmails: boolean = false
+  ): Promise<Result<number, string>> {
+    const { data: members, error: membersError } =
+      await this.organizationStore.getOrganizationMembers(
+        this.authParams.organizationId
+      );
+
+    if (membersError !== null) {
+      return err(membersError);
+    }
+    if (filterHeliconeEmails && ENVIRONMENT === "production") {
+      return ok(
+        members.filter((member) => !member.email.endsWith("@helicone.ai"))
+          .length
+      );
+    } else {
+      return ok(members.length);
+    }
   }
 
   async getOrganizationMembers(

@@ -3,7 +3,6 @@ import {
   usePrompt,
   usePromptRequestsOverTime,
 } from "../../../services/hooks/prompts/prompts";
-import HcBadge from "../../ui/hcBadge";
 import { AreaChart } from "@tremor/react";
 import {
   getTimeInterval,
@@ -18,6 +17,7 @@ import {
   FilterBranch,
   FilterLeaf,
 } from "../../../services/lib/filters/filterDefs";
+import { Badge } from "@/components/ui/badge";
 
 interface PromptCardProps {
   prompt: {
@@ -123,14 +123,8 @@ const PromptCard = (props: PromptCardProps) => {
         </span>
       </h3>
       <div className="flex flex-wrap items-center space-x-2">
-        <HcBadge
-          title={`${promptInfo?.major_version} major versions`}
-          size={"sm"}
-        />
-        <HcBadge
-          title={`${promptInfo?.versions.length} versions`}
-          size={"sm"}
-        />
+        <Badge variant="secondary">{`${promptInfo?.major_version} major versions`}</Badge>
+        <Badge variant="secondary">{`${promptInfo?.versions.length} versions`}</Badge>
       </div>
       <p className="text-sm text-gray-500">
         Created:{" "}

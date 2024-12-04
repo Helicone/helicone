@@ -9,6 +9,7 @@ import {
 import { DEMO_EMAIL } from "../../../../lib/constants";
 import { Result } from "../../../../lib/result";
 import { SupabaseServerWrapper } from "../../../../lib/wrappers/supabase";
+import { getOpenAIKeyFromAdmin } from "@/lib/clients/settings";
 
 export default async function handler(
   req: NextApiRequest,
@@ -43,7 +44,8 @@ export default async function handler(
   }
 
   if (!openAIApiKey || openAIApiKey == "") {
-    openAIApiKey = process.env.OPENAI_API_KEY;
+    openAIApiKey =
+      (await getOpenAIKeyFromAdmin()) || process.env.OPENAI_API_KEY;
   }
 
   const openai = new OpenAI({

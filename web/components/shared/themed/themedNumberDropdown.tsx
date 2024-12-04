@@ -1,5 +1,18 @@
-import { SearchSelect, SearchSelectItem } from "@tremor/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 
 interface ThemedNumberDropdownProps {
   options: {
@@ -12,28 +25,74 @@ interface ThemedNumberDropdownProps {
 
 const ThemedNumberDropdown = (props: ThemedNumberDropdownProps) => {
   const { options, onChange, value } = props;
+  const [query, setQuery] = useState("");
+  const [open, setOpen] = useState(false);
 
-  const [selected, setSelected] = useState(value);
+  useEffect(() => {
+    setQuery(value);
+  }, [value]);
+
+  const handleValueChange = (currentValue: string) => {
+    setQuery(currentValue);
+    onChange(
+      options.find((o) => o.param === currentValue)?.key ?? currentValue
+    );
+    setOpen(false);
+  };
+
+  const filteredOptions = Array.from(
+    new Set([...options.map((o) => o.param), query])
+  )
+    .filter(Boolean)
+    .sort()
+    .filter((option) => option.toLowerCase().includes(query.toLowerCase()));
 
   return (
-    <div className="w-full">
-      <SearchSelect
-        value={selected}
-        placeholder="Select value..."
-        onValueChange={(value) => {
-          setSelected(value);
-          onChange(value);
-        }}
-        enableClear={false}
-      >
-        {options.map((option, i) => (
-          <SearchSelectItem value={option.key} key={i}>
-            <p>
-              {option.param.charAt(0).toUpperCase() + option.param.slice(1)}
-            </p>
-          </SearchSelectItem>
-        ))}
-      </SearchSelect>
+    <div className="w-full flex flex-col gap-1">
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            role="combobox"
+            aria-expanded={open}
+            className="w-full justify-between text-xs"
+            size="md_sleek"
+          >
+            {options.find((o) => o.key === value)?.param ||
+              value ||
+              "Select or enter a value"}
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-full p-0">
+          <Command>
+            <CommandInput
+              placeholder="Select or enter a value"
+              value={query}
+              onValueChange={(value) => {
+                setQuery(value);
+              }}
+              className="text-xs h-6"
+            />
+            <CommandList>
+              {filteredOptions.length === 0 && (
+                <CommandEmpty>No results found.</CommandEmpty>
+              )}
+              <CommandGroup>
+                {filteredOptions.map((option, i) => (
+                  <CommandItem
+                    key={`${i}-${option}`}
+                    value={option}
+                    onSelect={() => handleValueChange(option)}
+                    className="text-xs"
+                  >
+                    {option}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
     </div>
   );
 };

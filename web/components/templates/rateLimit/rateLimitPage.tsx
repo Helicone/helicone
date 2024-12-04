@@ -1,4 +1,4 @@
-import { BookOpenIcon, CircleStackIcon } from "@heroicons/react/24/outline";
+import { BookOpenIcon } from "@heroicons/react/24/outline";
 import { AreaChart } from "@tremor/react";
 import Link from "next/link";
 import { useState } from "react";
@@ -18,6 +18,9 @@ import useSearchParams from "../../shared/utils/useSearchParams";
 import RequestsPageV2 from "../requestsV2/requestsPageV2";
 import { useGetPropertiesV2 } from "../../../services/hooks/propertiesV2";
 import { getPropertyFiltersV2 } from "../../../services/lib/filters/frontendFilterDefs";
+import { useOrg } from "@/components/layout/organizationContext";
+
+import { FeatureUpgradeCard } from "../../shared/helicone/FeatureUpgradeCard";
 
 const RateLimitPage = (props: {}) => {
   const [timeFilter, setTimeFilter] = useState<TimeFilter>({
@@ -34,7 +37,14 @@ const RateLimitPage = (props: {}) => {
       return currentTimeFilter || "24h";
     }
   };
-  const { properties } = useGetPropertiesV2(getPropertyFiltersV2);
+  const { properties, isLoading } = useGetPropertiesV2(getPropertyFiltersV2);
+
+  const org = useOrg();
+  const isPro =
+    org?.currentOrg?.tier === "pro-20240913" ||
+    org?.currentOrg?.tier === "growth" ||
+    org?.currentOrg?.tier === "pro" ||
+    org?.currentOrg?.tier === "enterprise";
 
   const rateLimitFilterLeaf = {
     request_response_rmt: {
@@ -85,7 +95,7 @@ const RateLimitPage = (props: {}) => {
   return (
     <>
       <AuthHeader
-        title={"Rate limits"}
+        title={<div className="flex items-center gap-2">Rate limits</div>}
         actions={
           <Link
             href="https://docs.helicone.ai/features/advanced-usage/custom-rate-limits"
@@ -97,32 +107,15 @@ const RateLimitPage = (props: {}) => {
           </Link>
         }
       />
-      {!properties.find((x) => x === "Helicone-Rate-Limit-Status") ? (
-        <>
-          <div className="flex flex-col w-full h-96 justify-center items-center">
-            <div className="flex flex-col w-2/5">
-              <CircleStackIcon className="h-12 w-12 text-black dark:text-white border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-2 rounded-lg" />
-              <p className="text-xl text-black dark:text-white font-semibold mt-8">
-                No Rate Limit data available
-              </p>
-              <p className="text-sm text-gray-500 max-w-sm mt-2">
-                Please view our documentation to learn how to enable rate limits
-                for your requests.
-              </p>
-              <div className="mt-4">
-                <Link
-                  href="https://docs.helicone.ai/features/advanced-usage/custom-rate-limits"
-                  target="_blank"
-                  rel="noreferrer noopener"
-                  className="w-fit items-center rounded-lg bg-black dark:bg-white px-2.5 py-1.5 gap-2 text-sm flex font-medium text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-                >
-                  <BookOpenIcon className="h-4 w-4" />
-                  View Docs
-                </Link>
-              </div>
-            </div>
-          </div>
-        </>
+      {!isPro && !properties.find((x) => x === "Helicone-Rate-Limit-Status") ? (
+        <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
+          <FeatureUpgradeCard
+            title="Unlock Rate Limits"
+            description="The Free plan does not include the Rate Limits feature, but getting access is easy."
+            infoBoxText="Enforcing custom API usage restrictions with rate limits."
+            documentationLink="https://docs.helicone.ai/features/advanced-usage/custom-rate-limits"
+          />
+        </div>
       ) : (
         <Col className="gap-8">
           <ThemedTimeFilter

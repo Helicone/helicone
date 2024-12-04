@@ -3,9 +3,14 @@ import {
   MinusIcon,
   PlusIcon,
 } from "@heroicons/react/24/outline";
-import { Tooltip } from "@mui/material";
-import { TextInput } from "@tremor/react";
-import { useEffect, useState } from "react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Input } from "@/components/ui/input";
+import { useEffect, useMemo, useState } from "react";
 import {
   addRequestLabel,
   addRequestScore,
@@ -13,13 +18,18 @@ import {
 import { useOrg } from "../../layout/organizationContext";
 import { clsx } from "../../shared/clsx";
 import useNotification from "../../shared/notification/useNotification";
-import HcButton from "../../ui/hcButton";
 import FeedbackButtons from "../feedback/thumbsUpThumbsDown";
 import { NormalizedRequest } from "./builder/abstractRequestBuilder";
 import ModelPill from "./modelPill";
 import StatusBadge from "./statusBadge";
 import ThemedModal from "../../shared/themed/themedModal";
 import NewDataset from "../datasets/NewDataset";
+import { getUSDateFromString } from "@/components/shared/utils/utils";
+import { formatNumber } from "../../shared/utils/formatNumber";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { useQuery } from "@tanstack/react-query";
+import { getJawnClient } from "@/lib/clients/jawn";
 
 function getPathName(url: string) {
   try {
@@ -28,26 +38,6 @@ function getPathName(url: string) {
     return url;
   }
 }
-const convertToUSDateFormat = (date: string) => {
-  const dateObj = new Date(date);
-  const tzOffset = dateObj.getTimezoneOffset() * 60000;
-
-  const localDateObj = new Date(dateObj.getTime() - tzOffset);
-  const formattedDate =
-    [
-      ("0" + (localDateObj.getMonth() + 1)).slice(-2),
-      ("0" + localDateObj.getDate()).slice(-2),
-      localDateObj.getFullYear(),
-    ].join("/") +
-    " " +
-    [
-      ("0" + localDateObj.getHours()).slice(-2),
-      ("0" + localDateObj.getMinutes()).slice(-2),
-      ("0" + localDateObj.getSeconds()).slice(-2),
-    ].join(":");
-
-  return formattedDate;
-};
 
 const RequestRow = (props: {
   request: NormalizedRequest;
@@ -79,6 +69,44 @@ const RequestRow = (props: {
   const [currentScores, setCurrentScores] = useState<Record<string, number>>();
 
   const { setNotification } = useNotification();
+
+  const promptId = useMemo(() => {
+    return request.customProperties?.["Helicone-Prompt-Id"] as
+      | string
+      | undefined;
+  }, [request.customProperties]);
+
+  const sessionData = useMemo(() => {
+    const sessionId = request.customProperties?.["Helicone-Session-Id"] as
+      | string
+      | undefined;
+    return { sessionId };
+  }, [request.customProperties]);
+
+  const experimentId = useMemo(() => {
+    return request.customProperties?.["Helicone-Experiment-Id"] as
+      | string
+      | undefined;
+  }, [request.customProperties]);
+
+  const promptData = useQuery({
+    queryKey: ["prompt", promptId, org?.currentOrg?.id],
+    queryFn: async (query) => {
+      const jawn = getJawnClient(query.queryKey[2]);
+      const prompt = await jawn.POST("/v1/prompt/query", {
+        body: {
+          filter: {
+            prompt_v2: {
+              user_defined_id: {
+                equals: query.queryKey[1],
+              },
+            },
+          },
+        },
+      });
+      return prompt.data?.data?.[0];
+    },
+  });
 
   useEffect(() => {
     // find all the key values of properties and set them to currentProperties
@@ -221,7 +249,7 @@ const RequestRow = (props: {
   const [newDatasetModalOpen, setNewDatasetModalOpen] = useState(false);
 
   return (
-    <div className="flex flex-col h-full space-y-8 pb-72">
+    <div className="flex flex-col h-full space-y-8 pb-72 sentry-mask-me">
       <div className="flex flex-row items-center">
         <ul
           className={clsx(
@@ -234,7 +262,7 @@ const RequestRow = (props: {
               Created At
             </p>
             <p className="text-gray-700 dark:text-gray-300 truncate">
-              {convertToUSDateFormat(request.createdAt)}
+              {getUSDateFromString(request.createdAt)}
             </p>
           </li>
           <li className="flex flex-row justify-between items-center py-2 gap-4">
@@ -279,6 +307,18 @@ const RequestRow = (props: {
             </p>
             <p className="text-gray-700 dark:text-gray-300 truncate">
               <span>{Number(request.latency) / 1000}s</span>
+            </p>
+          </li>
+          <li className="flex flex-row justify-between items-center py-2 gap-4">
+            <p className="font-semibold text-gray-900 dark:text-gray-100">
+              Cost
+            </p>
+            <p className="text-gray-700 dark:text-gray-300 truncate">
+              {request.cost !== null && request.cost !== undefined
+                ? `$${formatNumber(request.cost)}`
+                : request.status.statusType === "success"
+                ? "Calculating..."
+                : "N/A"}
             </p>
           </li>
           <li className="flex flex-row justify-between items-center py-2 gap-4">
@@ -341,39 +381,48 @@ const RequestRow = (props: {
             )}
         </ul>
       </div>
-
-      <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-4">
         <div className="font-semibold text-gray-900 dark:text-gray-100 text-sm items-center flex">
           <div className="flex flex-row items-center space-x-1">
             <span>Add to Dataset</span>
-            <Tooltip title="Add to Dataset" placement="top">
-              <button
-                onClick={() => {
-                  setNewDatasetModalOpen(true);
-                }}
-                className="ml-1.5 p-0.5 shadow-sm bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-md h-fit"
-              >
-                <PlusIcon className="h-3 w-3 text-gray-500" />
-              </button>
-            </Tooltip>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => {
+                      setNewDatasetModalOpen(true);
+                    }}
+                    className="ml-1.5 p-0.5 shadow-sm bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-md h-fit"
+                  >
+                    <PlusIcon className="h-3 w-3 text-gray-500" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>Add to Dataset</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
         </div>
         <div className="font-semibold text-gray-900 dark:text-gray-100 text-sm items-center flex">
           Custom Properties{" "}
-          <Tooltip title="Add a new label" placement="top">
-            <button
-              onClick={() => {
-                setIsAddingLabel(!isAddingLabel);
-              }}
-              className="ml-1.5 p-0.5 shadow-sm bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-md h-fit"
-            >
-              {isAddingLabel ? (
-                <MinusIcon className="h-3 w-3 text-gray-500" />
-              ) : (
-                <PlusIcon className="h-3 w-3 text-gray-500" />
-              )}
-            </button>
-          </Tooltip>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => {
+                    setIsAddingLabel(!isAddingLabel);
+                  }}
+                  className="ml-1.5 p-0.5 shadow-sm bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-md h-fit"
+                >
+                  {isAddingLabel ? (
+                    <MinusIcon className="h-3 w-3 text-gray-500" />
+                  ) : (
+                    <PlusIcon className="h-3 w-3 text-gray-500" />
+                  )}
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>Add a new label</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
         {isAddingLabel && (
           <form
@@ -388,13 +437,13 @@ const RequestRow = (props: {
                 Key
               </label>
               <div className="">
-                <TextInput
+                <Input
                   type="text"
                   name="key"
                   id="key"
                   required
                   className={clsx(
-                    "bg-white dark:bg-black block w-full rounded-md px-2 text-sm text-gray-900 dark:text-gray-100 shadow-sm placeholder:text-gray-400 border border-gray-300 dark:border-gray-700 sm:leading-6"
+                    "bg-white dark:bg-black block w-full rounded-md px-2 text-sm text-gray-900 dark:text-gray-100 shadow-sm placeholder:text-gray-400 border border-gray-300 dark:border-gray-700 sm:leading-6 h-full"
                   )}
                   placeholder={"Key"}
                 />
@@ -408,67 +457,84 @@ const RequestRow = (props: {
                 Value
               </label>
               <div className="">
-                <TextInput
+                <Input
                   type="text"
                   name="value"
                   id="value"
                   required
                   className={clsx(
-                    "bg-white dark:bg-black block w-full rounded-md px-2 text-sm text-gray-900 dark:text-gray-100 shadow-sm placeholder:text-gray-400 border border-gray-300 dark:border-gray-700 sm:leading-6"
+                    "bg-white dark:bg-black block w-full rounded-md px-2 text-sm text-gray-900 dark:text-gray-100 shadow-sm placeholder:text-gray-400 border border-gray-300 dark:border-gray-700 sm:leading-6 h-full"
                   )}
                   placeholder={"Value"}
                 />
               </div>
             </div>
-            <HcButton
-              size="sm"
-              title="Add"
-              variant="primary"
-              className="h-fit flex flex-row rounded-md bg-black dark:bg-white px-4 text-xs font-semibold border border-black dark:border-white hover:bg-gray-900 dark:hover:bg-gray-100 text-gray-50 dark:text-gray-900 shadow-sm hover:text-gray-300 dark:hover:text-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
-            >
+            <Button size="sm">
               {isAdding && (
                 <ArrowPathIcon className="w-4 h-4 mr-1.5 animate-spin" />
               )}
               Add
-            </HcButton>
+            </Button>
           </form>
         )}
-        <div className="flex flex-wrap gap-4 text-sm items-center pt-2">
-          {currentProperties?.map((property, i) => {
-            return (
-              <li
-                className="flex flex-col space-y-1 justify-between text-left p-2.5 shadow-sm border border-gray-300 dark:border-gray-700 rounded-lg min-w-[5rem]"
-                key={i}
-              >
-                <p className="font-semibold text-gray-900 dark:text-gray-100">
-                  {Object.keys(property)[0]}
-                </p>
-                <p className="text-gray-700 dark:text-gray-300">
-                  {property[Object.keys(property)[0]]}
-                </p>
-              </li>
-            );
-          })}
-        </div>
-      </div>
-
-      <div className="flex flex-col">
+        {currentProperties && currentProperties.length > 0 && (
+          <div className="flex flex-wrap gap-4 text-sm items-center pt-2">
+            {currentProperties
+              .filter(
+                (property) =>
+                  ![
+                    "Helicone-Prompt-Id",
+                    "Helicone-Session-Id",
+                    "Helicone-Experiment-Id",
+                  ].includes(Object.keys(property)[0])
+              )
+              .map((property, i) => {
+                const key = Object.keys(property)[0];
+                return (
+                  <li className="flex flex-row items-center space-x-2" key={i}>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="sm_sleek"
+                            className="flex flex-row items-center space-x-2 truncate select-text"
+                            onClick={() => {
+                              navigator.clipboard.writeText(`${property[key]}`);
+                            }}
+                          >
+                            <span>{key}:</span> <span>{property[key]}</span>
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Click to copy</TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </li>
+                );
+              })}
+          </div>
+        )}
         <div className="font-semibold text-gray-900 dark:text-gray-100 text-sm items-center flex">
           Scores{" "}
-          <Tooltip title="Add a new score" placement="top">
-            <button
-              onClick={() => {
-                setIsScoresAddingLabel(!isScoresAddingLabel);
-              }}
-              className="ml-1.5 p-0.5 shadow-sm bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-md h-fit"
-            >
-              {isScoresAddingLabel ? (
-                <MinusIcon className="h-3 w-3 text-gray-500" />
-              ) : (
-                <PlusIcon className="h-3 w-3 text-gray-500" />
-              )}
-            </button>
-          </Tooltip>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => {
+                    setIsScoresAddingLabel(!isScoresAddingLabel);
+                  }}
+                  className="ml-1.5 p-0.5 shadow-sm bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-md h-fit"
+                >
+                  {isScoresAddingLabel ? (
+                    <MinusIcon className="h-3 w-3 text-gray-500" />
+                  ) : (
+                    <PlusIcon className="h-3 w-3 text-gray-500" />
+                  )}
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>Add a new score</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
         {isScoresAddingLabel && (
           <form
@@ -483,13 +549,13 @@ const RequestRow = (props: {
                 Key
               </label>
               <div className="">
-                <TextInput
+                <Input
                   type="text"
                   name="key"
                   id="key"
                   required
                   className={clsx(
-                    "bg-white dark:bg-black block w-full rounded-md px-2  text-sm text-gray-900 dark:text-gray-100 shadow-sm placeholder:text-gray-400 border border-gray-300 dark:border-gray-700 sm:leading-6"
+                    "bg-white dark:bg-black block w-full rounded-md px-2  text-sm text-gray-900 dark:text-gray-100 shadow-sm placeholder:text-gray-400 border border-gray-300 dark:border-gray-700 sm:leading-6 h-full"
                   )}
                   placeholder={"Key"}
                 />
@@ -503,38 +569,32 @@ const RequestRow = (props: {
                 Value
               </label>
               <div className="">
-                <TextInput
+                <Input
                   //@ts-ignore
                   type="text"
                   name="value"
                   id="value"
                   required
                   className={clsx(
-                    "bg-white dark:bg-black block w-full rounded-md px-2  text-sm text-gray-900 dark:text-gray-100 shadow-sm placeholder:text-gray-400 border border-gray-300 dark:border-gray-700 sm:leading-6"
+                    "bg-white dark:bg-black block w-full rounded-md px-2  text-sm text-gray-900 dark:text-gray-100 shadow-sm placeholder:text-gray-400 border border-gray-300 dark:border-gray-700 sm:leading-6 h-full"
                   )}
                   placeholder={"Value"}
                 />
               </div>
             </div>
-            <HcButton
-              size="sm"
-              title="Add"
-              variant="primary"
-              type="submit"
-              className="h-fit flex flex-row rounded-md bg-black dark:bg-white px-4 text-xs font-semibold border border-black dark:border-white hover:bg-gray-900 dark:hover:bg-gray-100 text-gray-50 dark:text-gray-900 shadow-sm hover:text-gray-300 dark:hover:text-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
-            >
+            <Button size="sm" type="submit">
               {isAdding && (
                 <ArrowPathIcon className="w-4 h-4 mr-1.5 animate-spin" />
               )}
               Add
-            </HcButton>
+            </Button>
           </form>
         )}
 
-        <div className="flex flex-wrap gap-4 text-sm items-center pt-2">
-          {currentScores &&
-            Object.entries(currentScores)
-              .filter((x) => x[0] !== "helicone-score-feedback")
+        {currentScores && Object.keys(currentScores).length > 0 && (
+          <div className="flex flex-wrap gap-4 text-sm items-center pt-2">
+            {Object.entries(currentScores)
+              .filter(([key]) => key !== "helicone-score-feedback")
               .map(([key, value]) => (
                 <li
                   className="flex flex-col space-y-1 justify-between text-left p-2.5 shadow-sm border border-gray-300 dark:border-gray-700 rounded-lg min-w-[5rem]"
@@ -552,26 +612,72 @@ const RequestRow = (props: {
                   </p>
                 </li>
               ))}
+          </div>
+        )}
+      </div>
+      <div className="font-semibold text-gray-900 dark:text-gray-100 text-sm items-center flex">
+        Helicone Settings{" "}
+      </div>
+      <div className="flex w-full justify-between gap-8">
+        <div className="flex flex-col gap-2">
+          {promptId && (
+            <div className="flex flex-row items-center space-x-2">
+              <Button
+                variant="outline"
+                size="sm_sleek"
+                className="flex flex-row items-center space-x-2 truncate"
+                asChild
+              >
+                <Link href={`/prompts/${promptData.data?.id}`}>
+                  <span>Prompt:</span> <span>{promptId}</span>
+                </Link>
+              </Button>
+            </div>
+          )}
+          {sessionData.sessionId && (
+            <>
+              <div className="flex flex-row items-center space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm_sleek"
+                  className="flex flex-row items-center space-x-2 truncate"
+                  asChild
+                >
+                  <Link href={`/sessions/${sessionData.sessionId}`}>
+                    <span>Session:</span> <span>{sessionData.sessionId}</span>
+                  </Link>
+                </Button>
+              </div>
+            </>
+          )}
+          {experimentId && (
+            <div className="flex flex-row items-center space-x-2">
+              <Button variant="outline" size="sm_sleek" asChild>
+                <Link href={`/experiments/${experimentId}`}>
+                  Experiment: {experimentId}
+                </Link>
+              </Button>
+            </div>
+          )}
         </div>
+        <FeedbackButtons
+          requestId={request.id}
+          defaultValue={
+            request.scores && request.scores["helicone-score-feedback"]
+              ? Number(request.scores["helicone-score-feedback"]) === 1
+                ? true
+                : false
+              : null
+          }
+        />
       </div>
       {displayPreview && (
         <div className="flex flex-col space-y-8">
-          <div className="flex w-full justify-end">
-            <FeedbackButtons
-              requestId={request.id}
-              defaultValue={
-                request.scores && request.scores["helicone-score-feedback"]
-                  ? Number(request.scores["helicone-score-feedback"]) === 1
-                    ? true
-                    : false
-                  : null
-              }
-            />
-          </div>
-
           <div className="flex flex-col space-y-2">{request.render()}</div>
         </div>
       )}
+
+      <div className="min-h-[100px]">{/* space */}</div>
       <ThemedModal open={newDatasetModalOpen} setOpen={setNewDatasetModalOpen}>
         <NewDataset
           request_ids={[request.id]}

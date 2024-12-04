@@ -25,27 +25,6 @@ function formatNumber(num: number) {
   }
 }
 
-const convertToUSDateFormat = (date: string) => {
-  const dateObj = new Date(date);
-  const tzOffset = dateObj.getTimezoneOffset() * 60000;
-
-  const localDateObj = new Date(dateObj.getTime() - tzOffset);
-  const formattedDate =
-    [
-      ("0" + (localDateObj.getMonth() + 1)).slice(-2),
-      ("0" + localDateObj.getDate()).slice(-2),
-      localDateObj.getFullYear(),
-    ].join("/") +
-    " " +
-    [
-      ("0" + localDateObj.getHours()).slice(-2),
-      ("0" + localDateObj.getMinutes()).slice(-2),
-      ("0" + localDateObj.getSeconds()).slice(-2),
-    ].join(":");
-
-  return formattedDate;
-};
-
 export const getInitialColumns: (
   isCached?: boolean
 ) => ColumnDef<NormalizedRequest>[] = (isCached = false) => [
@@ -55,7 +34,7 @@ export const getInitialColumns: (
     header: "Created At",
     cell: (info) => (
       <span className="text-gray-900 dark:text-gray-100 font-medium">
-        {getUSDateFromString(convertToUSDateFormat(info.getValue() as string))}
+        {getUSDateFromString(info.getValue() as string)}
       </span>
     ),
     meta: {

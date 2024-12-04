@@ -1,13 +1,22 @@
 import { useOrg } from "@/components/layout/organizationContext";
 import useNotification from "@/components/shared/notification/useNotification";
 import { getJawnClient } from "@/lib/clients/jawn";
+import { components } from "@/lib/clients/jawnTypes/public";
 
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
-type IntegrationNames = "open_pipe";
+export type Integration = {
+  integration_name?: string;
+  settings?: components["schemas"]["Json"];
+  active?: boolean;
+  id: string;
+};
+
+type IntegrationNames = "open_pipe" | "segment";
 
 export function useIntegration(integrationName: IntegrationNames) {
   const org = useOrg();
+  const queryClient = useQueryClient();
   const { setNotification } = useNotification();
 
   const { data: integration, isLoading: isLoadingIntegration } = useQuery({
@@ -57,6 +66,9 @@ export function useIntegration(integrationName: IntegrationNames) {
           "OpenPipe integration settings updated successfully",
           "success"
         );
+        queryClient.invalidateQueries({
+          queryKey: ["integrations", org?.currentOrg?.id, integrationName],
+        });
       },
       onError: (error) => {
         setNotification(

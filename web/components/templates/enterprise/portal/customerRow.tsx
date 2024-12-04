@@ -1,4 +1,6 @@
-import { Badge, TableCell, TableRow, Text, AreaChart } from "@tremor/react";
+import { TableCell, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { AreaChart } from "@tremor/react";
 import { getUSDateFromString } from "../../../shared/utils/utils";
 import { Fragment, useState } from "react";
 import { clsx } from "../../../shared/clsx";
@@ -7,16 +9,16 @@ import { formatISO } from "date-fns";
 import { useRequestsOverTime } from "../../organization/plan/renderOrgPlan";
 import { useOrg } from "../../../layout/organizationContext";
 import { useRouter } from "next/router";
-import {
-  ORGANIZATION_COLORS,
-  ORGANIZATION_ICONS,
-  OrgLimits,
-} from "../../organization/createOrgForm";
+import { OrgLimits } from "../../organization/createOrgForm";
 import { EllipsisHorizontalIcon } from "@heroicons/react/24/outline";
 import { Menu, Transition } from "@headlessui/react";
 import { DeleteOrgModal } from "../../organization/deleteOrgModal";
 import EditCustomerOrgModal from "./editCustomerOrgModal";
 import { Database } from "../../../../supabase/database.types";
+import {
+  ORGANIZATION_COLORS,
+  ORGANIZATION_ICONS,
+} from "../../organization/orgConstants";
 
 interface CustomerRowProps {
   org: Database["public"]["Tables"]["organization"]["Row"];
@@ -100,15 +102,22 @@ const CustomerRow = (props: CustomerRowProps) => {
           {org.name}
         </TableCell>
         <TableCell>
-          <Text>{getUSDateFromString(org.created_at || "")}</Text>
+          <span className="text-sm text-gray-500 dark:text-gray-400">
+            {getUSDateFromString(org.created_at || "")}
+          </span>
         </TableCell>
         <TableCell>
-          <Badge color="emerald" size="xs" className="text-xs">
-            <span className="text-xs">active</span>
+          <Badge
+            variant="outline"
+            className="bg-emerald-50 text-emerald-700 hover:bg-emerald-50 border-emerald-200"
+          >
+            active
           </Badge>
         </TableCell>
         <TableCell>
-          <Text>{isLoading ? "..." : members?.length}</Text>
+          <span className="text-sm text-gray-500 dark:text-gray-400">
+            {isLoading ? "..." : members?.length}
+          </span>
         </TableCell>
         <TableCell>
           <div>

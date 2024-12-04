@@ -2,6 +2,7 @@ import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { getJawnClient } from "../../lib/clients/jawn";
 import { components } from "../../lib/clients/jawnTypes/private";
+import Parser from "rss-parser";
 
 const useAlertBanners = () => {
   const supabaseClient = useSupabaseClient();
@@ -146,10 +147,42 @@ const useGetSetting = (
   };
 };
 
+const useChangelog = () => {
+  const parser = new Parser({
+    customFields: {
+      item: ["description", "content:encoded", "content:encodedSnippet"],
+    },
+  });
+
+  const { data, isLoading, error, refetch, isRefetching } = useQuery({
+    queryKey: ["changelog"],
+    queryFn: async () => {
+      try {
+        const feed = await parser.parseURL(
+          "https://www.helicone.ai/rss/changelog.xml"
+        );
+        return feed.items;
+      } catch (err) {
+        console.error("Error parsing RSS feed:", err);
+        throw err;
+      }
+    },
+  });
+
+  return {
+    changelog: data,
+    isLoading,
+    error,
+    refetch,
+    isRefetching,
+  };
+};
+
 export {
   useAlertBanners,
   useCreateAlertBanner,
   useGetSetting,
   useUpdateAlertBanner,
   useUpdateSetting,
+  useChangelog,
 };

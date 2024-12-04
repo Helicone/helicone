@@ -14,6 +14,9 @@ import CreateProxyKeyModal from "./createProxyKeyModal";
 import { LimitCell } from "./limitsCell";
 import { useFeatureFlags } from "../../../services/hooks/featureFlags";
 import { useOrg } from "../../layout/organizationContext";
+import AuthHeader from "@/components/shared/authHeader";
+import { InfoBox } from "@/components/ui/helicone/infoBox";
+import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
 
 const VaultPage = ({
   variant = "basic",
@@ -101,9 +104,28 @@ const VaultPage = ({
       },
     });
   }
-
+  if (
+    org?.currentOrg?.tier !== "enterprise" &&
+    org?.currentOrg?.tier !== "pro-20240913"
+  ) {
+    return (
+      <div className="flex flex-col space-y-8 items-center min-h-[calc(100vh-200px)]">
+        <InfoBox variant="warning" className="mb-4 max-w-xl">
+          Vault is only available for Pro and Enterprise plans. If you have any
+          issues, please contact us at support@helicone.ai.
+        </InfoBox>
+        <FeatureUpgradeCard
+          title="Unlock Vault"
+          description="The Free plan does not include the Vault feature, but getting access is easy."
+          infoBoxText="Use Vault to securely store and manage your API keys within Helicone."
+          documentationLink="https://docs.helicone.ai/features/vault"
+        />
+      </div>
+    );
+  }
   return (
     <>
+      <AuthHeader title={"Vault"} />
       <div className="flex flex-col space-y-12 divide-y divide-gray-300 dark:divide-gray-700 py-4 max-w-3xl">
         <div className="flex flex-col space-y-4">
           <div className="flex flex-row justify-between w-full items-center">

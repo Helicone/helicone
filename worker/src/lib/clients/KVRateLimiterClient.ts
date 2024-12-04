@@ -66,7 +66,7 @@ interface RateLimitProps {
   heliconeProperties: HeliconeProperties;
   userId: string | undefined;
   rateLimitOptions: RateLimitOptions;
-  providerAuthHash: string | undefined;
+  organizationId: string | undefined;
   rateLimitKV: KVNamespace;
   cost: number;
 }
@@ -78,7 +78,7 @@ export async function checkRateLimit(
     heliconeProperties,
     userId,
     rateLimitOptions,
-    providerAuthHash,
+    organizationId,
     rateLimitKV,
   } = props;
   const { time_window, segment, quota } = rateLimitOptions;
@@ -88,7 +88,7 @@ export async function checkRateLimit(
     userId,
     segment
   );
-  const kvKey = `rl_${segmentKeyValue}_${providerAuthHash}_3`;
+  const kvKey = `rl_${segmentKeyValue}_${organizationId}`;
   const kv = await rateLimitKV.get(kvKey, "text");
   const timestamps: KVObject = kv !== null ? JSON.parse(kv) : [];
 
@@ -128,7 +128,7 @@ export async function updateRateLimitCounter(
     heliconeProperties,
     userId,
     rateLimitOptions,
-    providerAuthHash: heliconeAuthHash,
+    organizationId,
     rateLimitKV,
   } = props;
   const { time_window, segment } = rateLimitOptions;
@@ -139,7 +139,7 @@ export async function updateRateLimitCounter(
     segment
   );
 
-  const kvKey = `rl_${segmentKeyValue}_${heliconeAuthHash}_3`;
+  const kvKey = `rl_${segmentKeyValue}_${organizationId}`;
   const kv = await rateLimitKV.get(kvKey, "text");
   const timestamps: KVObject = kv !== null ? JSON.parse(kv) : [];
 

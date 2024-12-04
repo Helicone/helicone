@@ -11,7 +11,10 @@ interface LytixModelIO {
   modelOutput: string;
   metaData: Record<string, string>;
   session: string;
+  sessionPath: string;
+  sessionName: string;
   userIdentifier: string;
+  logId: string;
 }
 
 export class LytixHandler extends AbstractLogHandler {
@@ -32,8 +35,14 @@ export class LytixHandler extends AbstractLogHandler {
       modelInput: JSON.stringify(context.processedLog.request.body) ?? "",
       modelOutput: JSON.stringify(context.processedLog.response.body) ?? "",
       metaData: context.processedLog.request.properties ?? {},
-      session: "", // TODO when sessions are added
+      session:
+        context.message.log.request.properties?.["Helicone-Session-Id"] ?? "",
+      sessionPath:
+        context.message.log.request.properties?.["Helicone-Session-Path"] ?? "",
+      sessionName:
+        context.message.log.request.properties?.["Helicone-Session-Name"] ?? "",
       userIdentifier: context.message.log.request.userId,
+      logId: context.message.log.request.id ?? "",
     });
 
     return await super.handle(context);
@@ -56,6 +65,9 @@ export class LytixHandler extends AbstractLogHandler {
             metricMetadata: {},
             userIdentifier: lytixModelIO.userIdentifier,
             sessionId: lytixModelIO.session,
+            sessionPath: lytixModelIO.sessionPath,
+            sessionName: lytixModelIO.sessionName,
+            logId: lytixModelIO.logId,
           }),
         });
       } catch (error: any) {

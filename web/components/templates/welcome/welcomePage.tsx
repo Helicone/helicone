@@ -4,7 +4,6 @@ import CreateOrg from "./steps/createOrg";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import GenerateAPIKey from "./steps/generateAPIKey";
-import Integrations from "./steps/integrations";
 import Features from "./steps/features";
 import EventListen from "./steps/eventListen";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
@@ -32,7 +31,7 @@ const WelcomePageV2 = (props: WelcomePageV2Props) => {
   }, []);
 
   const handleStepChange = (step: number) => {
-    router.replace(`/welcome?step=${step}}`);
+    router.replace(`/welcome?step=${step}`);
     setStep(step);
   };
 
@@ -54,9 +53,8 @@ const WelcomePageV2 = (props: WelcomePageV2Props) => {
         handleStepChange(3);
       }}
     />,
-    <Integrations
+    <EventListen
       key={3}
-      apiKey={apiKey}
       previousStep={function (): void {
         handleStepChange(2);
       }}
@@ -69,15 +67,6 @@ const WelcomePageV2 = (props: WelcomePageV2Props) => {
       previousStep={function (): void {
         handleStepChange(3);
       }}
-      nextStep={function (): void {
-        handleStepChange(5);
-      }}
-    />,
-    <EventListen
-      key={5}
-      previousStep={function (): void {
-        handleStepChange(4);
-      }}
       nextStep={async function () {
         const jawn = getJawnClient(orgContext?.currentOrg?.id ?? "");
         await jawn.POST("/v1/organization/onboard", {
@@ -89,9 +78,9 @@ const WelcomePageV2 = (props: WelcomePageV2Props) => {
   ];
 
   return (
-    <div className="h-screen w-full bg-gray-50">
+    <div className="min-h-screen flex flex-col bg-gray-50">
       {isDemo && <InfoBanner />}
-      <div className="w-full max-w-7xl mx-auto h-full flex flex-col lg:flex-row p-4 lg:divide-x divide-gray-200">
+      <div className="flex-grow w-full max-w-7xl mx-auto flex flex-col lg:flex-row p-4 lg:divide-x divide-gray-200">
         <section
           id="steps"
           className="w-full min-w-[22.5rem] max-w-[22.5rem] lg:flex-1 flex flex-col py-8 px-4"
@@ -118,7 +107,7 @@ const WelcomePageV2 = (props: WelcomePageV2Props) => {
                 await router.reload();
               }}
             >
-              Skip Onboarding
+              Skip, go to Dashboard
             </button>
           </div>
           <Image
@@ -139,11 +128,12 @@ const WelcomePageV2 = (props: WelcomePageV2Props) => {
               setStep={(step) => {
                 handleStepChange(step);
               }}
+              allowStepSelection={currentStep !== 1}
             />
           </div>
         </section>
 
-        <div className="overflow-auto lg:pt-32 flex flex-auto">
+        <div className="overflow-auto flex flex-auto">
           {stepArray[step - 1]}
         </div>
       </div>

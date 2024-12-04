@@ -1,44 +1,24 @@
-import { useLocalStorage } from "@/services/hooks/localStorage";
-import {
-  ChartPieIcon,
-  ListBulletIcon,
-  MagnifyingGlassIcon,
-} from "@heroicons/react/24/outline";
-import { TextInput } from "@tremor/react";
 import { useRouter } from "next/router";
-import { useMemo } from "react";
-import { getTimeAgo } from "../../../lib/sql/timeHelpers";
 import {
   getTimeIntervalAgo,
   TimeInterval,
 } from "../../../lib/timeCalculations/time";
 import { useSessionNames } from "../../../services/hooks/sessions";
 import { SortDirection } from "../../../services/lib/sorts/users/sorts";
-import { Row } from "../../layout/common";
 import { Col } from "../../layout/common/col";
 import ThemedTable from "../../shared/themed/table/themedTable";
-import ThemedTabSelector from "../../shared/themed/themedTabSelector";
 import { INITIAL_COLUMNS } from "./initialColumns";
 
 import SessionMetrics from "./SessionMetrics";
-
-const TABS = [
-  {
-    id: "sessions",
-    label: "Sessions",
-    icon: <ListBulletIcon className="w-4 h-4" />,
-  },
-  {
-    id: "metrics",
-    label: "Metrics",
-    icon: <ChartPieIcon className="w-4 h-4" />,
-  },
-];
+import { TabsContent } from "@/components/ui/tabs";
+import { SESSIONS_TABLE_FILTERS } from "@/services/lib/filters/frontendFilterDefs";
+import { UIFilterRowTree } from "@/services/lib/filters/uiFilterRowTree";
 
 type TSessions = {
   created_at: string;
   latest_request_created_at: string;
-  session: string;
+  session_id: string;
+  session_name: string;
   total_cost: number;
   total_requests: number;
   prompt_tokens: number;
@@ -50,6 +30,7 @@ export type SessionResult = ReturnType<
   typeof useSessionNames
 >["sessions"][number];
 interface SessionDetailsProps {
+  currentTab: string;
   selectedSession: SessionResult | null;
   sessionIdSearch: string;
   setSessionIdSearch: (value: string) => void;
@@ -66,9 +47,12 @@ interface SessionDetailsProps {
   };
   setTimeFilter: (filter: { start: Date; end: Date }) => void;
   setInterval: (interval: TimeInterval) => void;
+  advancedFilters: UIFilterRowTree;
+  onSetAdvancedFiltersHandler: (filters: UIFilterRowTree) => void;
 }
 
 const SessionDetails = ({
+  currentTab,
   selectedSession,
   sessionIdSearch,
   setSessionIdSearch,
@@ -78,68 +62,35 @@ const SessionDetails = ({
   timeFilter,
   setTimeFilter,
   setInterval,
+  advancedFilters,
+  onSetAdvancedFiltersHandler,
 }: SessionDetailsProps) => {
   const router = useRouter();
 
-  const totalCost = useMemo(() => {
-    return sessions
-      .reduce((acc, session) => acc + session.total_cost, 0)
-      .toFixed(3);
-  }, [sessions]);
-
-  const [currentTab, setCurrentTab] = useLocalStorage<
-    (typeof TABS)[number]["id"]
-  >("session-details-tab", "sessions");
-
   return (
-    <Col className="space-y-4 w-full max-w-2xl">
-      <div>
-        <div className="text-xl font-semibold">
-          {selectedSession?.name ?? "No Name"}
-        </div>
-        <ul className="text-xs mt-1 text-gray-500 flex flex-row gap-5 list-disc">
-          <p>
-            <span className="font-semibold text-sky-500">
-              Active:{" "}
-              {getTimeAgo(new Date(selectedSession?.last_used ?? Date.now()))}
-            </span>
-          </p>
-          <li className="font-semibold">{sessions.length} sessions</li>
-          <li>
-            Total cost: <span className="font-semibold">${totalCost}</span>
-          </li>
-          <li>
-            Created on:{" "}
-            {new Date(selectedSession?.created_at ?? Date.now())
-              .toDateString()
-              .slice(4)}
-          </li>
-        </ul>
-      </div>
-
-      <Row className="items-center justify-between gap-10">
-        <ThemedTabSelector
-          tabs={TABS}
-          currentTab={currentTab}
-          onTabChange={(tabId) =>
-            setCurrentTab(tabId as (typeof TABS)[number]["id"])
-          }
-        />
-        <TextInput
-          icon={MagnifyingGlassIcon}
-          value={sessionIdSearch}
-          onValueChange={(value) => setSessionIdSearch(value)}
-          placeholder="Search session id..."
-        />
-      </Row>
-      {currentTab === "sessions" ? (
+    <Col className="space-y-4 w-full border-r border-slate-200 dark:border-slate-800 overflow-x-auto">
+      <TabsContent value="sessions" className="m-0">
         <ThemedTable
           id="session-table"
           defaultData={sessions || []}
           defaultColumns={INITIAL_COLUMNS}
           skeletonLoading={isLoading}
+          search={{
+            value: sessionIdSearch,
+            onChange: setSessionIdSearch,
+            placeholder: "Search session id or name...",
+          }}
           dataLoading={false}
           sortable={sort}
+          advancedFilters={{
+            filterMap: SESSIONS_TABLE_FILTERS,
+            setAdvancedFilters: onSetAdvancedFiltersHandler,
+            filters: advancedFilters,
+            searchPropertyFilters: async () => ({
+              data: null,
+              error: "Not implemented",
+            }),
+          }}
           timeFilter={{
             currentTimeFilter: timeFilter,
             defaultValue: "all",
@@ -164,12 +115,13 @@ const SessionDetails = ({
             },
           }}
           onRowSelect={(row) => {
-            router.push(`/sessions/${row.session}`);
+            router.push(`/sessions/${row.session_id}`);
           }}
         />
-      ) : (
+      </TabsContent>
+      <TabsContent value="metrics">
         <SessionMetrics selectedSession={selectedSession} />
-      )}
+      </TabsContent>
     </Col>
   );
 };

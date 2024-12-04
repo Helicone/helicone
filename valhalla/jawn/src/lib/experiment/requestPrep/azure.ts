@@ -23,6 +23,7 @@ export async function prepareRequestAzure(
     "api-key": azureAPIKey,
     Accept: "application/json",
     "Accept-Encoding": "",
+    "Helicone-Manual-Access-Key": process.env.HELICONE_MANUAL_ACCESS_KEY ?? "",
   };
 
   if (apiKey) {
@@ -47,15 +48,17 @@ export async function prepareRequestAzure(
 }
 
 export async function prepareRequestAzureFull({
-  hypothesis,
+  template,
   secretKey: apiKey,
-  datasetRow,
+  inputs,
+  autoInputs,
+  requestPath,
   requestId,
 }: PreparedRequestArgs): Promise<PreparedRequest> {
   const newRequestBody = autoFillInputs({
-    template: hypothesis.promptVersion?.template ?? {},
-    inputs: datasetRow.inputRecord?.inputs ?? {},
-    autoInputs: datasetRow.inputRecord?.autoInputs ?? [],
+    template: template ?? {},
+    inputs: inputs ?? {},
+    autoInputs: autoInputs ?? [],
   });
 
   const { url: fetchUrl, headers } = await prepareRequestAzure(

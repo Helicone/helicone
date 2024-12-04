@@ -5,7 +5,11 @@ import { err, ok, PromiseGenericResult, Result } from "../shared/result";
 import { LogStore } from "../stores/LogStore";
 import { VersionedRequestStore } from "../stores/request/VersionedRequestStore";
 import { AbstractLogHandler } from "./AbstractLogHandler";
-import { HandlerContext, PromptRecord } from "./HandlerContext";
+import {
+  ExperimentCellValue,
+  HandlerContext,
+  PromptRecord,
+} from "./HandlerContext";
 
 type S3Record = {
   requestId: string;
@@ -31,6 +35,7 @@ export type BatchPayload = {
   s3Records: S3Record[];
   requestResponseVersionedCH: RequestResponseRMT[];
   searchRecords: Database["public"]["Tables"]["request_response_search"]["Insert"][];
+  experimentCellValues: ExperimentCellValue[];
 };
 
 export class LoggingHandler extends AbstractLogHandler {
@@ -56,6 +61,7 @@ export class LoggingHandler extends AbstractLogHandler {
       s3Records: [],
       requestResponseVersionedCH: [],
       searchRecords: [],
+      experimentCellValues: [],
     };
   }
 
@@ -73,6 +79,7 @@ export class LoggingHandler extends AbstractLogHandler {
         context.processedLog.request.heliconeTemplate
           ? this.mapPrompt(context)
           : null;
+      const experimentCellValueMapped = this.mapExperimentCellValues(context);
       const requestResponseVersionedCHMapped =
         this.mapRequestResponseVersionedCH(context);
 
@@ -87,6 +94,10 @@ export class LoggingHandler extends AbstractLogHandler {
 
       if (promptMapped) {
         this.batchPayload.prompts.push(promptMapped);
+      }
+
+      if (experimentCellValueMapped) {
+        this.batchPayload.experimentCellValues.push(experimentCellValueMapped);
       }
 
       this.batchPayload.requestResponseVersionedCH.push(
@@ -200,6 +211,20 @@ export class LoggingHandler extends AbstractLogHandler {
     return ok("Images uploaded successfully");
   }
 
+  private isBase64Image(imageUrl: string): boolean {
+    const MIN_BASE64_LENGTH = 24;
+    const dataUriPattern = /^\s*data:image\/[a-zA-Z]+;base64,/;
+    const base64OnlyPattern = /^[A-Za-z0-9+/=]+\s*$/;
+
+    if (dataUriPattern.test(imageUrl)) {
+      return true;
+    }
+
+    return (
+      base64OnlyPattern.test(imageUrl) && imageUrl.length >= MIN_BASE64_LENGTH
+    );
+  }
+
   private async handleImageUpload(
     assetId: string,
     imageUrl: string,
@@ -207,7 +232,7 @@ export class LoggingHandler extends AbstractLogHandler {
     organizationId: string
   ): Promise<void> {
     try {
-      if (imageUrl.startsWith("data:image/")) {
+      if (this.isBase64Image(imageUrl)) {
         const [assetType, base64Data] = this.extractBase64Data(imageUrl);
         const buffer = Buffer.from(base64Data, "base64");
         await this.s3Client.uploadBase64ToS3(
@@ -241,14 +266,22 @@ export class LoggingHandler extends AbstractLogHandler {
   }
 
   private extractBase64Data(dataUri: string): [string, string] {
-    const matches = dataUri.match(
-      /^data:(image\/(?:png|jpeg|jpg|gif|webp));base64,(.*)$/
-    );
-    if (!matches || matches.length !== 3) {
-      console.error("Invalid base64 image data");
-      return ["", ""];
+    const dataUriRegex =
+      /^data:(image\/(?:png|jpeg|jpg|gif|webp|svg\+xml));base64,([A-Za-z0-9+/=]+)$/;
+    const base64Regex = /^([A-Za-z0-9+/=]+)$/;
+
+    let matches = dataUri.match(dataUriRegex);
+    if (matches && matches.length === 3) {
+      return [matches[1], matches[2]];
     }
-    return [matches[1], matches[2]];
+
+    matches = dataUri.match(base64Regex);
+    if (matches && matches.length === 2) {
+      return ["image/jpeg", matches[1]];
+    }
+
+    console.error("Invalid or unsupported base64 image data:", dataUri);
+    return ["", ""];
   }
 
   async logToClickhouse(): PromiseGenericResult<string> {
@@ -341,6 +374,22 @@ export class LoggingHandler extends AbstractLogHandler {
     return assetInserts;
   }
 
+  mapExperimentCellValues(context: HandlerContext): ExperimentCellValue | null {
+    const request = context.message.log.request;
+    const experimentColumnId = request.experimentColumnId;
+    const experimentRowIndex = request.experimentRowIndex;
+
+    if (!experimentColumnId || !experimentRowIndex) {
+      return null;
+    }
+
+    return {
+      columnId: experimentColumnId,
+      rowIndex: parseInt(experimentRowIndex),
+      value: request.id,
+    };
+  }
+
   mapPrompt(context: HandlerContext): PromptRecord | null {
     if (
       !context.message.log.request.promptId ||
@@ -374,9 +423,7 @@ export class LoggingHandler extends AbstractLogHandler {
       request_id: request.id,
       completion_tokens: usage.completionTokens ?? 0,
       latency: response.delayMs ?? 0,
-      model: context.processedLog.model && context.processedLog.model !== '' 
-        ? context.processedLog.model 
-        : this.getModelFromPath(request.path),
+      model: context.processedLog.model ?? "",
       prompt_tokens: usage.promptTokens ?? 0,
       request_created_at: formatTimeString(
         request.requestCreatedAt.toISOString()
@@ -407,23 +454,6 @@ export class LoggingHandler extends AbstractLogHandler {
     };
 
     return requestResponseLog;
-  }
-
-  private getModelFromPath(path: string): string {
-    const regex1 = /\/engines\/([^/]+)/;
-    const regex2 = /models\/([^/:]+)/;
-
-    let match = path.match(regex1);
-
-    if (!match) {
-      match = path.match(regex2);
-    }
-
-    if (match && match[1]) {
-      return match[1];
-    }
-
-    return "";
   }
 
   mapResponse(
@@ -485,21 +515,31 @@ export class LoggingHandler extends AbstractLogHandler {
 
   private extractRequestBodyMessage(requestBody: any): string {
     try {
-      const messagesArray = requestBody?.messages;
+      let systemPrompt = "";
+      let messagesArray = requestBody?.messages;
+
+      // Handle Anthropic-style system prompt
+      if (requestBody?.system && typeof requestBody.system === "string") {
+        systemPrompt = requestBody.system;
+      }
 
       if (!Array.isArray(messagesArray)) {
-        return "";
+        if (requestBody?.role && requestBody?.content) {
+          messagesArray = [requestBody];
+        } else {
+          return systemPrompt;
+        }
       }
 
       const allMessages = messagesArray
-        .filter((message) => {
-          return message?.role === "user";
-        })
-        .map((message) => {
+        .map((message: any) => {
           if (typeof message === "object" && message !== null) {
-            const content = message["content"];
+            const role = message.role;
+            const content = message.content;
+
+            let processedContent = "";
             if (Array.isArray(content)) {
-              return content
+              processedContent = content
                 .map((part) => {
                   if (part.type === "text") {
                     return part.text;
@@ -508,14 +548,17 @@ export class LoggingHandler extends AbstractLogHandler {
                 })
                 .join(" ");
             } else if (typeof content === "string") {
-              return content;
+              processedContent = content;
             }
+
+            return processedContent;
           }
           return "";
         })
         .join(" ");
 
-      return this.ensureMaxVectorLength(this.cleanBody(allMessages.trim()));
+      const fullMessage = `${systemPrompt} ${allMessages}`;
+      return this.ensureMaxVectorLength(this.cleanBody(fullMessage.trim()));
     } catch (error) {
       console.error("Error pulling request body messages:", error);
       return "";

@@ -1,0 +1,18 @@
+---
+title: "Cerebras Integration"
+sidebarTitle: "Cerebras"
+description: "Connect Helicone with Cerebras, a platform for running open-source language models. Monitor and optimize your AI applications using Cerebras' powerful models through a simple base_url configuration."
+"twitter:title": "Cerebras Integration - Helicone OSS LLM Observability"
+icon: "cloud"
+iconType: "solid"
+---
+
+You can seamlessly integrate Helicone with your OpenAI compatible models that are deployed on Cerebras.
+
+The integration process closely mirrors the [proxy approach](/integrations/openai/javascript). The only distinction lies in the modification of the base_url to point to the dedicated Cerebras endpoint `https://cerebras.helicone.ai/v1`.
+
+```bash
+base_url="https://cerebras.helicone.ai/v1"
+```
+
+Please ensure that the base_url is correctly set to ensure successful integration.

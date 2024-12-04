@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { removeLeadingWhitespace } from "../../shared/utils/utils";
 import { ChevronUpDownIcon } from "@heroicons/react/20/solid";
-import { Tooltip } from "@mui/material";
+import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
 
 interface CompletionProps {
   request: string;
@@ -34,12 +34,12 @@ export const Completion = (props: CompletionProps) => {
     const image_url = response?.image_url;
     if (image_url) {
       return (
-        <div className="flex flex-col space-y-4 divide-y divide-gray-100 dark:divide-gray-900">
+        <div className="flex flex-col space-y-4 divide-y divide-slate-100 dark:divide-slate-900">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           {image_url ? (
             <img src={image_url} alt={""} width={200} height={200} />
           ) : (
-            <div className="h-[150px] w-[200px] bg-white dark:bg-black border border-gray-300 dark:border-gray-700 text-center items-center flex justify-center text-xs italic text-gray-500">
+            <div className="h-[150px] w-[200px] bg-white dark:bg-black border border-slate-300 dark:border-slate-700 text-center items-center flex justify-center text-xs italic text-slate-500">
               Unsupported Image Type
             </div>
           )}
@@ -52,13 +52,13 @@ export const Completion = (props: CompletionProps) => {
 
   return (
     <div className="w-full flex flex-col text-left space-y-2 text-sm">
-      <div className="w-full border border-gray-300 dark:border-gray-700 rounded-md divide-y divide-gray-300 dark:divide-gray-700 h-full">
-        <div className="h-10 px-2 rounded-md flex flex-row items-center justify-end w-full bg-gray-50 text-gray-900 dark:bg-black dark:text-gray-100">
+      <div className="w-full border border-slate-200 dark:border-slate-700 divide-y divide-slate-300 dark:divide-slate-700 h-full">
+        <div className="h-10 px-2 flex flex-row items-center justify-end w-full bg-slate-50 text-slate-900 dark:bg-black dark:text-slate-100">
           {defaultMode === "json" ? (
             <Tooltip title="Model is pending mapping">
-              <button className="hover:cursor-not-allowed flex flex-row space-x-1 items-center hover:bg-gray-200 dark:hover:bg-gray-800 py-1 px-2 rounded-lg">
+              <button className="hover:cursor-not-allowed flex flex-row space-x-1 items-center hover:bg-slate-200 dark:hover:bg-slate-800 py-1 px-2 rounded-lg">
                 <ChevronUpDownIcon className="h-4 w-4" />
-                <p className="text-xs font-semibold text-gray-900 dark:text-gray-100">
+                <p className="text-xs font-semibold text-slate-900 dark:text-slate-100">
                   {mode === "pretty" ? "JSON" : "Pretty"}
                 </p>
               </button>
@@ -68,10 +68,10 @@ export const Completion = (props: CompletionProps) => {
               onClick={() => {
                 setMode(mode === "pretty" ? "json" : "pretty");
               }}
-              className="flex flex-row space-x-1 items-center hover:bg-gray-200 dark:hover:bg-gray-800 py-1 px-2 rounded-lg"
+              className="flex flex-row space-x-1 items-center hover:bg-slate-200 dark:hover:bg-slate-800 py-1 px-2 rounded-lg"
             >
               <ChevronUpDownIcon className="h-4 w-4" />
-              <p className="text-xs font-semibold text-gray-900 dark:text-gray-100">
+              <p className="text-xs font-semibold text-slate-900 dark:text-slate-100">
                 {mode === "pretty" ? "JSON" : "Pretty"}
               </p>
             </button>
@@ -79,39 +79,39 @@ export const Completion = (props: CompletionProps) => {
         </div>
 
         {mode === "json" ? (
-          <div className="flex flex-col space-y-4 bg-gray-100 dark:bg-black relative rounded-b-md">
+          <div className="flex flex-col space-y-4 bg-slate-100 dark:bg-black relative rounded-b-md">
             <div className="flex flex-col space-y-2 p-4">
-              <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm">
+              <p className="font-semibold text-slate-900 dark:text-slate-100 text-sm">
                 Request
               </p>
-              <pre className="text-gray-900 dark:text-gray-100 text-sm whitespace-pre-wrap rounded-lg overflow-auto p-4 border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#17191d]">
+              <pre className="text-slate-900 dark:text-slate-100 text-sm whitespace-pre-wrap rounded-lg overflow-auto p-4 border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#17191d]">
                 {JSON.stringify(rawRequest, null, 2)}
               </pre>
             </div>
             <div className="flex flex-col space-y-2 p-4">
-              <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm">
+              <p className="font-semibold text-slate-900 dark:text-slate-100 text-sm">
                 {response.title}
               </p>
-              <pre className="text-gray-900 dark:text-gray-100 text-sm whitespace-pre-wrap rounded-lg overflow-auto p-4 border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#17191d]">
+              <pre className="text-slate-900 dark:text-slate-100 text-sm whitespace-pre-wrap rounded-lg overflow-auto p-4 border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#17191d]">
                 {JSON.stringify(rawResponse, null, 2)}
               </pre>
             </div>
           </div>
         ) : (
-          <div className="flex flex-col space-y-4 bg-gray-100 dark:bg-black relative rounded-b-md">
+          <div className="flex flex-col space-y-4 bg-slate-100 dark:bg-black relative rounded-b-md">
             <div className="flex flex-col space-y-2 p-4">
-              <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm">
+              <p className="font-semibold text-slate-900 dark:text-slate-100 text-sm">
                 Request
               </p>
-              <p className="text-gray-900 dark:text-gray-100 text-sm whitespace-pre-wrap rounded-lg overflow-auto p-4 border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#17191d]">
+              <p className="text-slate-900 dark:text-slate-100 text-sm whitespace-pre-wrap rounded-lg overflow-auto p-4 border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#17191d]">
                 {removeLeadingWhitespace(request)}
               </p>
             </div>
             <div className="flex flex-col space-y-2 p-4">
-              <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm">
+              <p className="font-semibold text-slate-900 dark:text-slate-100 text-sm">
                 {response.title}
               </p>
-              <p className="text-gray-900 dark:text-gray-100 text-sm whitespace-pre-wrap rounded-lg overflow-auto p-4 border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#17191d]">
+              <p className="text-slate-900 dark:text-slate-100 text-sm whitespace-pre-wrap rounded-lg overflow-auto p-4 border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#17191d]">
                 {response && removeLeadingWhitespace(response.text)}
                 {renderImageRow()}
               </p>

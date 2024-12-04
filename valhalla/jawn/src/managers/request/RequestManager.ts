@@ -2,7 +2,7 @@
 import { RequestQueryParams } from "../../controllers/public/requestController";
 import { FREQUENT_PRECENT_LOGGING } from "../../lib/db/DBQueryTimer";
 import { AuthParams, supabaseServer } from "../../lib/db/supabase";
-import { dbExecute } from "../../lib/shared/db/dbExecute";
+import { dbExecute, dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
 import { S3Client } from "../../lib/shared/db/s3Client";
 import { FilterNode } from "../../lib/shared/filters/filterDefs";
 import { Result, err, ok, resultMap } from "../../lib/shared/result";
@@ -20,6 +20,22 @@ import { costOfPrompt } from "../../packages/cost";
 import { BaseManager } from "../BaseManager";
 import { ScoreManager } from "../score/ScoreManager";
 import { HeliconeScoresMessage } from "../../lib/handlers/HandlerContext";
+import { cacheResultCustom } from "../../utils/cacheResult";
+import { KVCache } from "../../lib/cache/kvCache";
+
+const deltaTime = (date: Date, minutes: number) => {
+  return new Date(date.getTime() + minutes * 60000);
+};
+
+function toISOStringClickhousePatch(date: string): string {
+  const dateObj = new Date(date);
+  const tzOffset = dateObj.getTimezoneOffset() * 60000;
+
+  const localDateObj = new Date(dateObj.getTime() - tzOffset);
+  return localDateObj.toISOString();
+}
+
+const kvCache = new KVCache(24 * 60 * 60 * 1000 - 1000); // 1 day - 1 second
 
 export class RequestManager extends BaseManager {
   private versionedRequestStore: VersionedRequestStore;
@@ -37,6 +53,95 @@ export class RequestManager extends BaseManager {
       process.env.S3_BUCKET_NAME ?? "",
       (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
     );
+  }
+
+  async getRequestById(
+    requestId: string
+  ): Promise<Result<HeliconeRequest, string>> {
+    return await cacheResultCustom(
+      "v1/request/" + requestId + this.authParams.organizationId,
+      () => this.uncachedGetRequestById(requestId),
+      kvCache
+    );
+  }
+
+  async getRequestByIds(
+    requestIds: string[]
+  ): Promise<Result<HeliconeRequest[], string>> {
+    const requests = await Promise.all(
+      requestIds.map((requestId) => this.getRequestById(requestId))
+    );
+
+    return ok(requests.map((r) => r.data).filter((r) => r !== null));
+  }
+
+  private async uncachedGetRequestById(
+    requestId: string
+  ): Promise<Result<HeliconeRequest, string>> {
+    const requestPostgres = await this.getRequestsPostgres({
+      filter: {
+        request: {
+          id: {
+            equals: requestId,
+          },
+        },
+      },
+    });
+
+    if (requestPostgres.error) {
+      return err(requestPostgres.error);
+    }
+
+    const requestFromPostgres = requestPostgres.data?.[0];
+    const requestClickhouse = await this.getRequestsClickhouse({
+      filter: {
+        left: {
+          left: {
+            request_response_rmt: {
+              request_id: {
+                equals: requestId,
+              },
+            },
+          },
+          operator: "and",
+          right: {
+            request_response_rmt: {
+              model: {
+                equals: requestFromPostgres?.response_model ?? "",
+              },
+            },
+          },
+        },
+        right: {
+          right: {
+            request_response_rmt: {
+              request_created_at: {
+                gt: deltaTime(
+                  new Date(requestFromPostgres?.request_created_at!),
+                  -10
+                ),
+              },
+            },
+          },
+          left: {
+            request_response_rmt: {
+              request_created_at: {
+                lt: deltaTime(
+                  new Date(requestFromPostgres?.request_created_at!),
+                  10
+                ),
+              },
+            },
+          },
+          operator: "and",
+        },
+        operator: "and",
+      },
+    });
+
+    return resultMap(requestClickhouse, (data) => {
+      return data?.[0];
+    });
   }
 
   async addPropertyToRequest(
@@ -168,6 +273,37 @@ export class RequestManager extends BaseManager {
     }
   }
 
+  private addScoreFilterClickhouse(
+    isScored: boolean,
+    filter: FilterNode
+  ): FilterNode {
+    if (isScored) {
+      return {
+        left: filter,
+        operator: "and",
+        right: {
+          request_response_rmt: {
+            scores_column: {
+              "not-equals": "{}",
+            },
+          },
+        },
+      };
+    } else {
+      return {
+        left: filter,
+        operator: "and",
+        right: {
+          request_response_rmt: {
+            scores_column: {
+              equals: "{}",
+            },
+          },
+        },
+      };
+    }
+  }
+
   private addPartOfExperimentFilter(
     isPartOfExperiment: boolean,
     filter: FilterNode
@@ -199,7 +335,7 @@ export class RequestManager extends BaseManager {
     }
   }
 
-  async getRequests(
+  async getRequestsPostgres(
     params: RequestQueryParams
   ): Promise<Result<HeliconeRequest[], string>> {
     const {
@@ -276,11 +412,7 @@ export class RequestManager extends BaseManager {
     let newFilter = filter;
 
     if (isScored !== undefined) {
-      newFilter = this.addScoreFilter(isScored, newFilter);
-    }
-
-    if (isPartOfExperiment !== undefined) {
-      newFilter = this.addPartOfExperimentFilter(isPartOfExperiment, newFilter);
+      newFilter = this.addScoreFilterClickhouse(isScored, newFilter);
     }
 
     const requests = isCached
@@ -307,6 +439,15 @@ export class RequestManager extends BaseManager {
         .map((r) => {
           return {
             ...r,
+            request_created_at: toISOStringClickhousePatch(
+              r.request_created_at
+            ),
+            feedback_created_at: r.feedback_created_at
+              ? toISOStringClickhousePatch(r.feedback_created_at)
+              : null,
+            response_created_at: r.response_created_at
+              ? toISOStringClickhousePatch(r.response_created_at)
+              : null,
             costUSD: costOfPrompt({
               model: r.request_model ?? "",
               provider: r.provider ?? "",

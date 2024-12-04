@@ -17,7 +17,7 @@ import {
 import { ScrollArea } from "../../ui/scroll-area";
 import { Checkbox } from "../../ui/checkbox";
 import { Button } from "@/components/ui/button";
-import { TextInput } from "@tremor/react";
+import { Input } from "@/components/ui/input";
 import { Label } from "../../ui/label";
 
 interface NewDatasetProps {
@@ -110,10 +110,10 @@ export default function NewDataset({
           {isCopyMode ? "Copy to dataset" : "Add to dataset"}{" "}
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4 p-2 rounded-xl border border-[#E2E8F0]">
+      <CardContent className="space-y-4 p-2 rounded-xl border border-[#E2E8F0] dark:border-slate-700">
         {isDatasetsLoading ? (
           <div className="h-[115px] flex items-center justify-center">
-            <p className="text-sm text-gray-700 dark:text-gray-100">
+            <p className="text-sm text-slate-700 dark:text-slate-100">
               Loading...
             </p>
           </div>
@@ -124,8 +124,8 @@ export default function NewDataset({
                 key={dataset.id}
                 className={`flex items-center space-x-2 p-2 cursor-pointer rounded-lg ${
                   selectedOption === dataset.id
-                    ? "bg-[#F1F5F9]"
-                    : "hover:bg-accent"
+                    ? "bg-[#F1F5F9] dark:bg-slate-700/50"
+                    : "hover:bg-accent dark:hover:bg-slate-700/50"
                 }`}
                 onClick={() => handleSelection(dataset.id)}
               >
@@ -148,11 +148,11 @@ export default function NewDataset({
           </ScrollArea>
         ) : (
           <div className="h-[115px] flex flex-col items-center justify-center">
-            <DatabaseIcon className="h-12 w-12 text-gray-700 dark:text-gray-100" />
-            <p className="text-sm text-gray-700 dark:text-gray-100 mt-2">
+            <DatabaseIcon className="h-12 w-12 text-slate-700 dark:text-slate-300" />
+            <p className="text-sm text-slate-700 dark:text-slate-300 mt-2">
               No Datasets
             </p>
-            <p className="text-xs text-gray-700 dark:text-gray-100 mt-1">
+            <p className="text-xs text-slate-700 dark:text-slate-300 mt-1">
               Create your first dataset below
             </p>
           </div>
@@ -160,13 +160,15 @@ export default function NewDataset({
         <div className="border-t border-[#E2E8F0] pt-1">
           <div
             className={`flex items-center space-x-2 p-2 cursor-pointer rounded-lg ${
-              selectedOption === "new" ? "bg-[#F1F5F9]" : "hover:bg-accent"
+              selectedOption === "new"
+                ? "bg-[#F1F5F9] dark:bg-slate-700/50 text-slate-700 dark:text-slate-300"
+                : "hover:bg-accent dark:hover:bg-slate-700/50 text-slate-700 dark:text-slate-300"
             }`}
             onClick={() => handleSelection("new")}
           >
             <div className="w-5 h-5 flex items-center justify-center">
               {selectedOption === "new" && (
-                <Check className="h-4 w-4 text-primary" />
+                <Check className="h-4 w-4 text-primary dark:text-slate-700" />
               )}
             </div>
             <span className="text-md font-normal text-[#334155]">
@@ -177,7 +179,7 @@ export default function NewDataset({
         {selectedOption === "new" && (
           <div className="pl-7">
             <Label htmlFor="new-dataset-name">Dataset name</Label>
-            <TextInput
+            <Input
               id="new-dataset-name"
               value={newDatasetName}
               onChange={(e) => setNewDatasetName(e.target.value)}
@@ -200,7 +202,7 @@ export default function NewDataset({
         <div className="flex justify-end items-center space-x-2">
           <label
             htmlFor="open-after"
-            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-slate-700 dark:text-slate-300"
           >
             Open dataset after
           </label>

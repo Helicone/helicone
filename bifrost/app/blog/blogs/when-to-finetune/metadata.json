@@ -1,0 +1,10 @@
+{
+  "title": "The Case Against Fine-Tuning",
+  "title1": "The Case Against Fine-Tuning",
+  "title2": "The Case Against Fine-Tuning",
+  "description": "Discover the strategic factors for when and why to fine-tune base language models like LLaMA for specialized tasks. Understand the limited use cases where fine-tuning provides significant benefits.",
+  "images": "/static/blog/when-to-finetune/finetune-cover.webp",
+  "time": "15 minute read",
+  "author": "Justin Torre",
+  "date": "October 8, 2024"
+}

@@ -9,6 +9,7 @@ import {
   Integration,
   IntegrationSection as IntegrationSectionType,
 } from "./types";
+import SegmentConfig from "./segmentConfig";
 
 const INTEGRATION_SECTIONS: IntegrationSectionType[] = [
   { title: "LLM Providers", type: "provider" },
@@ -27,19 +28,19 @@ const ConnectionsPage: React.FC = () => {
 
   const allItems: Integration[] = useMemo(
     () => [
-      { title: "OpenAI", type: "provider" },
-      { title: "Anthropic", type: "provider" },
-      { title: "Together AI", type: "provider" },
-      { title: "OpenRouter", type: "provider" },
-      { title: "Fireworks", type: "provider" },
-      { title: "Azure", type: "provider" },
-      { title: "Groq", type: "provider" },
-      { title: "Deepinfra", type: "provider" },
-      { title: "Anyscale", type: "provider" },
-      { title: "Cloudflare", type: "provider" },
-      { title: "LemonFox", type: "provider" },
-      { title: "Perplexity", type: "provider" },
-      { title: "Mistral", type: "provider" },
+      // { title: "OpenAI", type: "provider" },
+      // { title: "Anthropic", type: "provider" },
+      // { title: "Together AI", type: "provider" },
+      // { title: "OpenRouter", type: "provider" },
+      // { title: "Fireworks", type: "provider" },
+      // { title: "Azure", type: "provider" },
+      // { title: "Groq", type: "provider" },
+      // { title: "Deepinfra", type: "provider" },
+      // { title: "Anyscale", type: "provider" },
+      // { title: "Cloudflare", type: "provider" },
+      // { title: "LemonFox", type: "provider" },
+      // { title: "Perplexity", type: "provider" },
+      // { title: "Mistral", type: "provider" },
       {
         title: "OpenPipe",
         type: "fine-tuning",
@@ -48,12 +49,20 @@ const ConnectionsPage: React.FC = () => {
             (integration) => integration.integration_name === "open_pipe"
           )?.active ?? false,
       },
-      { title: "PostHog", type: "destination", enabled: false },
-      { title: "Datadog", type: "destination", enabled: false },
-      { title: "Pillar", type: "gateway", enabled: true },
-      { title: "NotDiamond", type: "gateway", enabled: false },
-      { title: "Diffy", type: "other-provider", enabled: false },
-      { title: "Lytix", type: "destination", enabled: false },
+      // { title: "PostHog", type: "destination", enabled: false },
+      {
+        title: "Segment",
+        type: "destination",
+        enabled:
+          integrations?.find(
+            (integration) => integration.integration_name === "segment"
+          )?.active ?? false,
+      },
+      // { title: "Datadog", type: "destination", enabled: false },
+      // { title: "Pillar", type: "gateway", enabled: true },
+      // { title: "NotDiamond", type: "gateway", enabled: false },
+      // { title: "Diffy", type: "other-provider", enabled: false },
+      // { title: "Lytix", type: "destination", enabled: false },
     ],
     [integrations]
   );
@@ -80,7 +89,7 @@ const ConnectionsPage: React.FC = () => {
   return (
     <div className="flex flex-col space-y-8 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="flex flex-col space-y-2">
-        <h1 className="text-3xl font-bold">Integrations</h1>
+        <h1 className="text-3xl font-bold">Connections</h1>
         <p className="text-gray-500">
           Explore and connect with various integrations to enhance your Helicone
           experience.
@@ -107,6 +116,9 @@ const ConnectionsPage: React.FC = () => {
       <ThemedDrawer open={activeDrawer !== null} setOpen={handleCloseDrawer}>
         {activeDrawer === "OpenPipe" && (
           <OpenPipeConfig onClose={handleCloseDrawer} />
+        )}
+        {activeDrawer === "Segment" && (
+          <SegmentConfig onClose={handleCloseDrawer} />
         )}
         {/* Add more configuration components for other integrations here */}
       </ThemedDrawer>

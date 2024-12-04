@@ -2,9 +2,34 @@ import { getMetadata } from "@/components/templates/blog/getMetaData";
 import { getCompiledServerMdx } from "@mintlify/mdx";
 import "@mintlify/mdx/dist/styles.css";
 import fs from "fs";
+import { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import path from "path";
+
+export const metadata: Metadata = {
+  title: "Helicone Changelog | Latest Updates & New Features",
+  description:
+    "Stay up to date with Helicone's latest features, improvements, and product updates. Track our journey in building the future of LLM observability and AI infrastructure.",
+  icons: "https://www.helicone.ai/static/logo.webp",
+  openGraph: {
+    type: "website",
+    siteName: "Helicone.ai",
+    url: "https://www.helicone.ai/changelog",
+    title: "Helicone Changelog | Latest Updates & New Features",
+    description:
+      "Stay up to date with Helicone's latest features, improvements, and product updates. Track our journey in building the future of LLM observability and AI infrastructure.",
+    images: "/static/dashboard-preview.png",
+    locale: "en_US",
+  },
+  twitter: {
+    title: "Helicone Changelog | Latest Updates & New Features",
+    description:
+      "Stay up to date with Helicone's latest features, improvements, and product updates. Track our journey in building the future of LLM observability and AI infrastructure.",
+    card: "summary_large_image",
+    images: "/static/dashboard-preview.png",
+  },
+};
 
 const getChangeMdxs = async () => {
   const changelogFolder = path.join(
@@ -98,6 +123,9 @@ export default async function Home() {
 
                 <article className="prose w-full h-full">
                   <Link href={link} className="no-underline" key={i}>
+                    <h1 className="text-sky-500 mt-16 md:mt-0 font-bold text-2xl">
+                      {String(title)}
+                    </h1>
                     {imageExists ? (
                       <Image
                         src={imagePath}
@@ -105,17 +133,13 @@ export default async function Home() {
                         width={500}
                         height={300}
                         layout="responsive"
+                        style={{ borderRadius: '16px', border: '1px solid #D3DCE6' }}
                       />
                     ) : (
-                      <div className="bg-gray-200 w-full h-64 flex items-center justify-center">
-                        <p>No image available</p>
-                      </div>
+                      <div className="bg-gray-200 w-full flex items-center justify-center"></div>
                     )}
-                    <h1 className="text-sky-500 mt-16 md:mt-0 font-semibold">
-                      {String(title)}
-                    </h1>
                   </Link>
-                  <p>{content}</p>
+                  <p className="text-base">{content}</p>
                 </article>
               </div>
             )

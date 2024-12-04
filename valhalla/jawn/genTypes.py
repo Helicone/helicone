@@ -1,5 +1,7 @@
 # Adjusting the script to replace the specific lines when it detects the start of the complex type definition.
 import os
+import time
+import concurrent.futures
 
 '''
 THIS IS A HACK UNTIL THIS CAN BE SOLVED: https://github.com/drwpow/openapi-typescript/issues/1603
@@ -90,9 +92,13 @@ def quick_check():
             file.write(tmp_controller_hash)
 
 
+def run_openapi_typescript(input_file, output_file):
+    os.system(f"npx openapi-typescript {input_file} -o {output_file}")
+    fixJsonType(output_file)
+
+
 def main():
     import argparse
-
     # if --quick is passed, check if the controllers have changed
 
     parser = argparse.ArgumentParser(
@@ -106,23 +112,24 @@ def main():
 
     os.system("bash tsoa_run.sh")
 
-    # Read the content of the TypeScript file
     current_dir = os.path.dirname(os.path.realpath(__file__))
 
-    # npx openapi-typescript  src/tsoa-build/swagger.json -o ../../web/lib/clients/jawnTypes.ts
-    os.system(
-        f"npx openapi-typescript {current_dir}/src/tsoa-build/public/swagger.json -o {current_dir}/../../web/lib/clients/jawnTypes/public.ts")
+    # Define the input and output files
+    tasks = [
+        (f"{current_dir}/src/tsoa-build/public/swagger.json",
+         f"{current_dir}/../../web/lib/clients/jawnTypes/public.ts",
+         f"{current_dir}/../../bifrost/lib/clients/jawnTypes/public.ts"),
+        (f"{current_dir}/src/tsoa-build/private/swagger.json",
+         f"{current_dir}/../../web/lib/clients/jawnTypes/private.ts",
+         f"{current_dir}/../../bifrost/lib/clients/jawnTypes/private.ts"),
+    ]
 
-    os.system(
-        f"npx openapi-typescript {current_dir}/src/tsoa-build/private/swagger.json -o {current_dir}/../../web/lib/clients/jawnTypes/private.ts")
-
-    os.system(
-        f"npx openapi-typescript {current_dir}/src/tsoa-build/public/swagger.json -o {current_dir}/../../helicone-node/api/generatedTypes/public.ts")
-
-    fixJsonType(f"{current_dir}/../../web/lib/clients/jawnTypes/public.ts")
-    fixJsonType(f"{current_dir}/../../web/lib/clients/jawnTypes/private.ts")
-    fixJsonType(
-        f"{current_dir}/../../helicone-node/api/generatedTypes/public.ts")
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        futures = []
+        for input_file, web_output, bifrost_output in tasks:
+            futures.append(executor.submit(run_openapi_typescript, input_file, web_output))
+            futures.append(executor.submit(run_openapi_typescript, input_file, bifrost_output))
+        concurrent.futures.wait(futures)
 
 
 if __name__ == "__main__":

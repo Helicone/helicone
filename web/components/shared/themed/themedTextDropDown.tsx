@@ -1,11 +1,17 @@
+import { Button } from "@/components/ui/button";
 import {
-  SearchSelect,
-  SearchSelectItem,
-  Tab,
-  TabGroup,
-  TabList,
-  TextInput,
-} from "@tremor/react";
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { useState } from "react";
 import { Result } from "../../../lib/result";
 
@@ -28,75 +34,79 @@ export function ThemedTextDropDown(props: ThemedTextDropDownProps) {
 
   const [query, setQuery] = useState("");
   const [tabMode, setTabMode] = useState<"smart" | "raw">("smart");
+  const [open, setOpen] = useState(false);
 
   const handleValueChange = (value: string) => {
     setQuery(value);
-
     onChange(value);
+    setOpen(false);
   };
+
+  const filteredOptions = Array.from(new Set([...parentOptions, query]))
+    .filter(Boolean)
+    .sort()
+    .filter((option) => option.toLowerCase().includes(query.toLowerCase()));
 
   return (
     <div className="w-full flex flex-col gap-1">
       {!hideTabModes && (
         <div className="flex items-center gap-1 text-xs w-full justify-end">
-          <div>
-            <TabGroup>
-              <TabList variant="solid" defaultValue="1">
-                <Tab
-                  value="1"
-                  className="text-xs px-2 py-0.5"
-                  onClick={() => {
-                    setTabMode("smart");
-                  }}
-                >
-                  smart
-                </Tab>
-                <Tab
-                  value="2"
-                  className="text-xs px-2 py-0.5"
-                  onClick={() => {
-                    setTabMode("raw");
-                  }}
-                >
-                  raw
-                </Tab>
-              </TabList>
-            </TabGroup>
-          </div>
+          <div>{/* Your Tab implementation goes here */}</div>
         </div>
       )}
       {tabMode === "smart" ? (
-        <SearchSelect
-          key={`search-select-${value}`}
-          searchValue={query}
-          onSearchValueChange={(value) => {
-            setQuery(value);
-          }}
-          value={value}
-          onValueChange={(value) => {
-            handleValueChange(value || query);
-          }}
-          enableClear={true}
-          placeholder="Select or enter a value"
-          onSelect={async () => {
-            await onSearchHandler?.(query);
-          }}
-        >
-          {[value, ...Array.from(new Set([...parentOptions, query]))]
-            .filter(Boolean)
-            .sort()
-            .map((option, i) => (
-              <SearchSelectItem value={option} key={`${i}-${option}`}>
-                {option}
-              </SearchSelectItem>
-            ))}
-        </SearchSelect>
+        <Popover open={open} onOpenChange={setOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              role="combobox"
+              aria-expanded={open}
+              className="w-full justify-between text-xs"
+              size="md_sleek"
+            >
+              {value || "Select or enter a value"}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-full p-0">
+            <Command>
+              <CommandInput
+                placeholder="Select or enter a value"
+                value={query}
+                onValueChange={(value) => {
+                  setQuery(value);
+                  onSearchHandler?.(value);
+                }}
+                className="text-xs h-6"
+              />
+              <CommandList>
+                {filteredOptions.length === 0 && (
+                  <CommandEmpty>No results found.</CommandEmpty>
+                )}
+                <CommandGroup>
+                  {filteredOptions.map((option, i) => (
+                    <CommandItem
+                      key={`${i}-${option}`}
+                      value={option}
+                      onSelect={() => handleValueChange(option)}
+                      className="text-xs"
+                    >
+                      {option}
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </CommandList>
+            </Command>
+          </PopoverContent>
+        </Popover>
       ) : (
-        <TextInput
+        <input
+          type="text"
           value={value}
           onChange={(e) => {
             onChange(e.target.value);
           }}
+          className="border border-gray-300 rounded-md px-2 py-1 text-sm w-full"
+          placeholder="Enter a value"
         />
       )}
     </div>

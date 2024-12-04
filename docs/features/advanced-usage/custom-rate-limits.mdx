@@ -50,7 +50,8 @@ curl https://oai.helicone.ai/v1/completions \
   -H 'Content-Type: application/json' \
   -H 'Authorization: Bearer <YOUR_API_KEY>' \
   -H 'Helicone-Property-IP: 111.1.1.1' \
-  -H 'Helicone-RateLimit-Policy: 10;w=1000;u=cents;s=user' \ # add this header and set the header value
+  -H 'Helicone-User-Id: user-123' \
+  -H 'Helicone-RateLimit-Policy: 10;w=1000;u=cents;s=user' \
   -d '{
     "model": "text-davinci-003",
     "prompt": "How do I enable custom rate limit policies?",
@@ -150,19 +151,20 @@ The `s=[segment]` parameter is used to specify the scope in which you want to ap
 Extracting the headers allows you to test your rate limit policy in a local environment before deploying to production.
 
 If your rate limit policy is **active**, the following headers will be returned:
-{/\*
 
-````ts
-Helicone-RateLimit-Limit:	"number" // the request/cost quota allowed in the time window.
+```bash
+Helicone-RateLimit-Limit: "number" // the request/cost quota allowed in the time window.
 Helicone-RateLimit-Policy: "[quota];w=[time_window];u=[unit];s=[segment]" // the active rate limit policy.
 Helicone-RateLimit-Remaining: "number" // the remaining quota in the time window.
-``` */}
+```
 
 - `Helicone-RateLimit-Limit`: The quota for the number of requests allowed in the time window.
 - `Helicone-RateLimit-Policy`: The active rate limit policy.
 - `Helicone-RateLimit-Remaining`: The remaining quota in the current window.
 
-<Note>If a request is rate-limited, a 429 rate limit error will be returned.</Note>
+<Note>
+  If a request is rate-limited, a 429 rate limit error will be returned.
+</Note>
 
 **Example:** Extracting headers from python with OpenAI
 
@@ -195,7 +197,7 @@ rate_limit = chat_completion_raw.http_response.headers.get(
 
 print(rate_limit) # will print the Rate Limit header responses
 
-````
+```
 
 ## Latency Considerations
 

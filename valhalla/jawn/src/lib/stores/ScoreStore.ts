@@ -11,7 +11,6 @@ export type Score = {
 
 export interface BatchScores {
   requestId: string;
-  provider: string;
   organizationId: string;
   mappedScores: Score[];
 }
@@ -37,7 +36,12 @@ export class ScoreStore extends BaseStore {
 
   public async putScoresIntoSupabase(requestId: string, scores: Score[]) {
     try {
-      const scoreKeys = scores.map((score) => score.score_attribute_key);
+      const scoreKeys = scores.map((score) => {
+        if (score.score_attribute_type === "boolean") {
+          return `${score.score_attribute_key}-hcone-bool`;
+        }
+        return score.score_attribute_key;
+      });
       const scoreTypes = scores.map((score) => score.score_attribute_type);
       const scoreValues = scores.map((score) => score.score_attribute_value);
 
@@ -106,10 +110,8 @@ export class ScoreStore extends BaseStore {
   ): Promise<Result<RequestResponseRMT[], string>> {
     const queryPlaceholders = newVersions
       .map((_, index) => {
-        const base = index * 3;
-        return `({val_${base} : String}, {val_${base + 1} : String}, {val_${
-          base + 2
-        } : String})`;
+        const base = index * 2;
+        return `({val_${base} : String}, {val_${base + 1} : String})`;
       })
       .join(",\n    ");
 
@@ -118,7 +120,7 @@ export class ScoreStore extends BaseStore {
     }
 
     const queryParams: (string | number | boolean | Date)[] =
-      newVersions.flatMap((v) => [v.requestId, v.organizationId, v.provider]);
+      newVersions.flatMap((v) => [v.requestId, v.organizationId]);
 
     if (queryParams.length === 0) {
       return err("No query params");
@@ -129,7 +131,8 @@ export class ScoreStore extends BaseStore {
         `
         SELECT *
         FROM request_response_rmt
-        WHERE (request_id, organization_id, provider) IN (${queryPlaceholders})
+        WHERE (request_id, organization_id) IN (${queryPlaceholders})
+        AND request_created_at > now() - INTERVAL 30 DAY
         `,
         queryParams
       ),
@@ -164,8 +167,33 @@ export class ScoreStore extends BaseStore {
       "request_response_rmt",
       filteredRequestResponseLogs.flatMap((row, index) => {
         const newVersion = newVersions[index];
+
+        // Merge existing scores with new scores
+        const combinedScores = {
+          ...(row.scores || {}),
+          ...newVersion.mappedScores.reduce((acc, score) => {
+            if (!Number.isInteger(score.score_attribute_value)) {
+              console.log(
+                `Skipping score ${score.score_attribute_key} with value ${score.score_attribute_value}`
+              );
+            } else {
+              acc[score.score_attribute_key] = score.score_attribute_value;
+            }
+            return acc;
+          }, {} as Record<string, number>),
+        };
+
+        // Validate and ensure the scores are in the correct format
+        const validScores = Object.entries(combinedScores).reduce(
+          (acc, [key, value]) => {
+            if (key && value !== null && value !== undefined) {
+              acc[key] = value;
+            }
+            return acc;
+          },
+          {} as Record<string, number>
+        );
         return [
-          // Insert the new version
           {
             response_id: row.response_id,
             response_created_at: row.response_created_at,
@@ -191,19 +219,14 @@ export class ScoreStore extends BaseStore {
             request_body: row.request_body,
             response_body: row.response_body,
             assets: row.assets,
-            scores: {
-              ...row.scores,
-              ...newVersion.mappedScores.reduce((acc, score) => {
-                acc[score.score_attribute_key] = score.score_attribute_value;
-                return acc;
-              }, {} as Record<string, number>),
-            },
+            scores: validScores,
           },
         ];
       })
     );
 
     if (res.error) {
+      console.error("dbInsertClickhouse Error:", res.error);
       return err(res.error);
     }
 
@@ -263,6 +286,10 @@ export class ScoreStore extends BaseStore {
       (feedback) =>
         feedback.responseId !== "00000000-0000-0000-0000-000000000000"
     );
+
+    if (validFeedbacks.length === 0) {
+      return ok([]);
+    }
 
     console.log(
       `Upserting feedback for ${

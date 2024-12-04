@@ -1,11 +1,13 @@
 import { err, ok, Result } from "../../lib/shared/result";
-import { BaseManager } from "../BaseManager";
 import { AuthParams } from "../../lib/db/supabase";
-import { BatchScores, Score, ScoreStore } from "../../lib/stores/ScoreStore";
+import { Score, ScoreStore } from "../../lib/stores/ScoreStore";
 import { dataDogClient } from "../../lib/clients/DataDogClient";
 import { KafkaProducer } from "../../lib/clients/KafkaProducer";
 import { HeliconeScoresMessage } from "../../lib/handlers/HandlerContext";
 import * as Sentry from "@sentry/node";
+import { DelayedOperationService } from "../../lib/shared/delayedOperationService";
+import { BaseManager } from "../BaseManager";
+import { validate as uuidValidate } from "uuid";
 
 type Scores = Record<string, number | boolean>;
 
@@ -16,25 +18,34 @@ export interface ScoreRequest {
 export class ScoreManager extends BaseManager {
   private scoreStore: ScoreStore;
   private kafkaProducer: KafkaProducer;
+
   constructor(authParams: AuthParams) {
     super(authParams);
     this.scoreStore = new ScoreStore(authParams.organizationId);
     this.kafkaProducer = new KafkaProducer();
   }
+  private getDefaultDelayMs(): number {
+    return process.env.NODE_ENV === "production" ? 10 * 60 * 1000 : 0; // 10 minutes in milliseconds
+  }
+
   public async addScores(
     requestId: string,
-    scores: Scores
+    scores: Scores,
+    delayMs?: number
   ): Promise<Result<null, string>> {
     const mappedScores = this.mapScores(scores);
     await this.scoreStore.putScoresIntoSupabase(requestId, mappedScores);
-    const res = await this.addBatchScores([
-      {
-        requestId,
-        scores: mappedScores,
-        organizationId: this.authParams.organizationId,
-        createdAt: new Date(),
-      },
-    ]);
+    const res = await this.addBatchScores(
+      [
+        {
+          requestId,
+          scores: mappedScores,
+          organizationId: this.authParams.organizationId,
+          createdAt: new Date(),
+        },
+      ],
+      delayMs
+    );
     if (res.error) {
       return err(`Error adding scores: ${res.error}`);
     }
@@ -42,34 +53,60 @@ export class ScoreManager extends BaseManager {
   }
 
   public async addBatchScores(
-    scoresMessage: HeliconeScoresMessage[]
+    scoresMessage: HeliconeScoresMessage[],
+    delayMs?: number
   ): Promise<Result<null, string>> {
     if (!this.kafkaProducer.isKafkaEnabled()) {
       console.log("Kafka is not enabled. Using score manager");
-      const scoreManager = new ScoreManager({
-        organizationId: this.authParams.organizationId,
-      });
-      return await scoreManager.handleScores(
-        {
-          batchId: "",
-          partition: 0,
-          lastOffset: "",
-          messageCount: 1,
-        },
-        scoresMessage
+
+      // Schedule the delayed operation and register it with ShutdownService
+      const timeoutId = DelayedOperationService.getTimeoutId(() => {
+        return this.handleScores(
+          {
+            batchId: "",
+            partition: 0,
+            lastOffset: "",
+            messageCount: 1,
+          },
+          scoresMessage
+        );
+      }, delayMs ?? this.getDefaultDelayMs());
+
+      // Register the timeout and operation with ShutdownService
+      DelayedOperationService.getInstance().addDelayedOperation(timeoutId, () =>
+        this.handleScores(
+          {
+            batchId: "",
+            partition: 0,
+            lastOffset: "",
+            messageCount: 1,
+          },
+          scoresMessage
+        )
       );
+
+      return ok(null);
     }
+
     console.log("Sending scores message to Kafka");
 
-    const res = await this.kafkaProducer.sendScoresMessage(
-      scoresMessage,
-      "helicone-scores-prod"
+    // Schedule the Kafka send operation and register it with ShutdownService
+    const timeoutId = setTimeout(() => {
+      this.kafkaProducer
+        .sendScoresMessage(scoresMessage, "helicone-scores-prod")
+        .catch((error) => {
+          console.error("Error sending scores message to Kafka:", error);
+        });
+    }, delayMs);
+
+    // Register the timeout and operation with ShutdownService
+    DelayedOperationService.getInstance().addDelayedOperation(timeoutId, () =>
+      this.kafkaProducer.sendScoresMessage(
+        scoresMessage,
+        "helicone-scores-prod"
+      )
     );
 
-    if (res.error) {
-      console.error(`Error sending scores message to Kafka: ${res.error}`);
-      return err(res.error);
-    }
     return ok(null);
   }
 
@@ -80,9 +117,12 @@ export class ScoreManager extends BaseManager {
       if (scoresMessages.length === 0) {
         return ok(null);
       }
+      const validScoresMessages = scoresMessages.filter((message) =>
+        uuidValidate(message.requestId)
+      );
       // Filter out duplicate scores messages and only keep the latest one
       const filteredMessages = Array.from(
-        scoresMessages
+        validScoresMessages
           .reduce((map, message) => {
             const key = `${message.requestId}-${message.organizationId}`;
             const existingMessage = map.get(key);
@@ -96,29 +136,15 @@ export class ScoreManager extends BaseManager {
           }, new Map<string, HeliconeScoresMessage>())
           .values()
       );
-      const bumpedVersions = await this.scoreStore.bumpRequestVersion(
-        filteredMessages.map((scoresMessage) => ({
-          id: scoresMessage.requestId,
-          organizationId: scoresMessage.organizationId,
-        }))
-      );
 
-      if (
-        bumpedVersions.error ||
-        !bumpedVersions.data ||
-        bumpedVersions.data.length === 0
-      ) {
-        return err(bumpedVersions.error);
-      }
       const scoresScoreResult = await this.scoreStore.putScoresIntoClickhouse(
-        bumpedVersions.data.map((scoresMessage) => {
+        filteredMessages.map((scoresMessage) => {
           return {
-            requestId: scoresMessage.id,
-            organizationId: scoresMessage.helicone_org_id,
-            provider: scoresMessage.provider,
+            requestId: scoresMessage.requestId,
+            organizationId: scoresMessage.organizationId,
             mappedScores:
               filteredMessages
-                .find((x) => x.requestId === scoresMessage.id)
+                .find((x) => x.requestId === scoresMessage.requestId)
                 ?.scores.map((score) => {
                   if (score.score_attribute_type === "boolean") {
                     return {
@@ -174,7 +200,7 @@ export class ScoreManager extends BaseManager {
       messageCount: number;
     },
     scoresMessages: HeliconeScoresMessage[]
-  ): Promise<Result<null, string>> {
+  ): Promise<void> {
     console.log(`Handling scores for batch ${batchContext.batchId}`);
     const start = performance.now();
     const result = await this.procesScores(scoresMessages);
@@ -229,20 +255,39 @@ export class ScoreManager extends BaseManager {
           },
         });
       }
-      return err(result.error);
     }
     console.log("Successfully processed scores messages");
-    return ok(null);
   }
 
   private mapScores(scores: Scores): Score[] {
     return Object.entries(scores).map(([key, value]) => {
-      return {
-        score_attribute_key: key,
-        score_attribute_type: typeof value === "boolean" ? "boolean" : "number",
-        score_attribute_value:
-          typeof value === "boolean" ? (value ? 1 : 0) : value,
-      };
+      if (typeof value === "boolean") {
+        // Convert booleans to integers (1 for true, 0 for false)
+        return {
+          score_attribute_key: key,
+          score_attribute_type: "boolean",
+          score_attribute_value: value ? 1 : 0,
+        };
+      } else if (typeof value === "number") {
+        // Check if the number is an integer
+        if (Number.isInteger(value)) {
+          return {
+            score_attribute_key: key,
+            score_attribute_type: "number",
+            score_attribute_value: value,
+          };
+        } else {
+          // Throw an error if the value is a float
+          throw new Error(
+            `Score value for key '${key}' must be an integer. Received: ${value}`
+          );
+        }
+      } else {
+        // Throw an error if the value is neither boolean nor number
+        throw new Error(
+          `Invalid score value for key '${key}': ${value}. Expected an integer or boolean.`
+        );
+      }
     });
   }
 }

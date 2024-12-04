@@ -79,6 +79,10 @@ export interface AuthParams {
   organizationId: string;
   userId?: string;
   heliconeApiKeyId?: number;
+  tier: string;
+  accessDict: {
+    cache: boolean;
+  };
 }
 
 export function dbLoggableRequestFromProxyRequest(
@@ -116,6 +120,7 @@ interface DBLoggableRequestFromAsyncLogModelProps {
   providerRequestHeaders: HeliconeHeaders;
   providerResponseHeaders: Headers;
   provider: Provider;
+  heliconeTemplate?: TemplateWithInputs;
 }
 
 function getResponseBodyFromJSON(json: Record<string, Json>): {
@@ -145,12 +150,24 @@ export async function dbLoggableRequestFromAsyncLogModel(
     providerRequestHeaders,
     providerResponseHeaders,
     provider,
+    heliconeTemplate,
   } = props;
 
   return new DBLoggable({
     request: {
       requestId: providerRequestHeaders.requestId ?? crypto.randomUUID(),
-      promptSettings: requestWrapper.promptSettings,
+      promptSettings: providerRequestHeaders.promptHeaders?.promptId
+        ? {
+            promptId: providerRequestHeaders.promptHeaders.promptId,
+            promptVersion:
+              providerRequestHeaders.promptHeaders.promptVersion ?? "",
+            promptMode: "production",
+          }
+        : {
+            promptId: undefined,
+            promptVersion: "",
+            promptMode: "deactivated",
+          },
       userId: providerRequestHeaders.userId ?? undefined,
       startTime: new Date(
         asyncLogModel.timing.startTime.seconds * 1000 +
@@ -169,6 +186,7 @@ export async function dbLoggableRequestFromAsyncLogModel(
       flaggedForModeration: null,
       request_ip: null,
       country_code: (requestWrapper.cf?.country as string) ?? null,
+      heliconeTemplate: heliconeTemplate ?? undefined,
     },
     response: {
       responseId: crypto.randomUUID(),
@@ -188,7 +206,8 @@ export async function dbLoggableRequestFromAsyncLogModel(
         asyncLogModel.timing.endTime.seconds * 1000 +
           asyncLogModel.timing.endTime.milliseconds
       ),
-      timeToFirstToken: async () => null,
+      timeToFirstToken: async () =>
+        Number(asyncLogModel.timing.timeToFirstToken) ?? null,
     },
     tokenCalcUrl: env.VALHALLA_URL,
   });
@@ -737,6 +756,8 @@ export class DBLoggable {
         lytixKey: requestHeaders.lytixKey ?? undefined,
         lytixHost: requestHeaders.lytixHost ?? undefined,
         posthogHost: requestHeaders.posthogHost ?? undefined,
+        heliconeManualAccessKey:
+          requestHeaders.heliconeManualAccessKey ?? undefined,
       },
       log: {
         request: {
@@ -759,6 +780,10 @@ export class DBLoggable {
           requestCreatedAt: this.request.startTime ?? new Date(),
           isStream: this.request.isStream,
           heliconeTemplate: this.request.heliconeTemplate ?? undefined,
+          experimentColumnId:
+            requestHeaders.experimentHeaders.columnId ?? undefined,
+          experimentRowIndex:
+            requestHeaders.experimentHeaders.rowIndex ?? undefined,
         },
         response: {
           id: this.response.responseId,

@@ -22,6 +22,7 @@ export interface IHeliconeHeaders {
   featureFlags: {
     streamForceFormat: boolean;
     increaseTimeout: boolean;
+    streamUsage: boolean;
   };
   retryHeaders: Nullable<{
     enabled: boolean;
@@ -60,6 +61,12 @@ export interface IHeliconeHeaders {
   lytixHost: Nullable<string>;
   posthogHost: Nullable<string>;
   webhookEnabled: boolean;
+  experimentHeaders: {
+    columnId: Nullable<string>;
+    rowIndex: Nullable<string>;
+    experimentId: Nullable<string>;
+  };
+  heliconeManualAccessKey: Nullable<string>;
 }
 
 export class HeliconeHeaders implements IHeliconeHeaders {
@@ -71,7 +78,11 @@ export class HeliconeHeaders implements IHeliconeHeaders {
     orgId?: string;
   }>;
   rateLimitPolicy: Nullable<string>;
-  featureFlags: { streamForceFormat: boolean; increaseTimeout: boolean };
+  featureFlags: {
+    streamForceFormat: boolean;
+    increaseTimeout: boolean;
+    streamUsage: boolean;
+  };
   retryHeaders: Nullable<{
     enabled: boolean;
     retries: number;
@@ -104,8 +115,15 @@ export class HeliconeHeaders implements IHeliconeHeaders {
   posthogKey: Nullable<string>;
   posthogHost: Nullable<string>;
   webhookEnabled: boolean;
+
+  experimentHeaders: {
+    columnId: Nullable<string>;
+    rowIndex: Nullable<string>;
+    experimentId: Nullable<string>;
+  };
   lytixKey: Nullable<string>;
   lytixHost: Nullable<string>;
+  heliconeManualAccessKey: Nullable<string>;
 
   constructor(private headers: Headers) {
     const heliconeHeaders = this.getHeliconeHeaders();
@@ -139,6 +157,13 @@ export class HeliconeHeaders implements IHeliconeHeaders {
     this.posthogKey = heliconeHeaders.posthogKey;
     this.posthogHost = heliconeHeaders.posthogHost;
     this.webhookEnabled = heliconeHeaders.webhookEnabled;
+
+    this.experimentHeaders = {
+      columnId: heliconeHeaders.experimentHeaders.columnId,
+      rowIndex: heliconeHeaders.experimentHeaders.rowIndex,
+      experimentId: heliconeHeaders.experimentHeaders.experimentId,
+    };
+    this.heliconeManualAccessKey = heliconeHeaders.heliconeManualAccessKey;
   }
 
   private getFallBacks(): Nullable<HeliconeFallback[]> {
@@ -271,6 +296,13 @@ export class HeliconeHeaders implements IHeliconeHeaders {
       posthogHost: this.headers.get("Helicone-Posthog-Host") ?? null,
       webhookEnabled:
         this.headers.get("Helicone-Webhook-Enabled") == "true" ? true : false,
+      experimentHeaders: {
+        experimentId: this.headers.get("Helicone-Experiment-Id") ?? null,
+        columnId: this.headers.get("Helicone-Experiment-Column-Id") ?? null,
+        rowIndex: this.headers.get("Helicone-Experiment-Row-Index") ?? null,
+      },
+      heliconeManualAccessKey:
+        this.headers.get("Helicone-Manual-Access-Key") ?? null,
     };
   }
 
@@ -297,9 +329,11 @@ export class HeliconeHeaders implements IHeliconeHeaders {
   private getHeliconeFeatureFlags(): IHeliconeHeaders["featureFlags"] {
     const streamForceFormat = this.headers.get("helicone-stream-force-format");
     const increaseTimeout = this.headers.get("helicone-increase-timeout");
+    const streamUsage = this.headers.get("helicone-stream-usage");
     return {
       streamForceFormat: streamForceFormat === "true",
       increaseTimeout: increaseTimeout === "true",
+      streamUsage: streamUsage === "true",
     };
   }
 
@@ -337,6 +371,11 @@ export class HeliconeHeaders implements IHeliconeHeaders {
     if (heliconeHeaders.sessionHeaders.path) {
       heliconePropertyHeaders["Helicone-Session-Path"] =
         heliconeHeaders.sessionHeaders.path;
+    }
+
+    if (heliconeHeaders.experimentHeaders.experimentId) {
+      heliconePropertyHeaders["Helicone-Experiment-Id"] =
+        heliconeHeaders.experimentHeaders.experimentId;
     }
 
     return heliconePropertyHeaders;

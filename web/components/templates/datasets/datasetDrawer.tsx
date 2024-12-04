@@ -3,7 +3,12 @@ import {
   PencilIcon,
   TrashIcon,
 } from "@heroicons/react/24/outline";
-import { Tooltip } from "@mui/material";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useRouter } from "next/router";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedDrawer from "../../shared/themed/themedDrawer";
@@ -172,62 +177,99 @@ const DatasetDrawerV2 = (props: DatasetDrawerV2Props) => {
                   {" "}
                   {(hasPrevious || hasNext) && (
                     <>
-                      <Tooltip title="Previous">
-                        <button
-                          onClick={onPrevHandler}
-                          disabled={!hasPrevious}
-                          className={clsx(
-                            !hasPrevious &&
-                              "opacity-50 hover:cursor-not-allowed",
-                            "hover:bg-gray-200 dark:hover:bg-gray-800  rounded-md -m-1 p-1"
-                          )}
-                        >
-                          <ArrowUpIcon className="h-5 w-5" />
-                        </button>
-                      </Tooltip>
-                      <Tooltip title="Next">
-                        <button
-                          onClick={onNextHandler}
-                          disabled={!hasNext}
-                          className={clsx(
-                            !hasNext && "opacity-50 hover:cursor-not-allowed",
-                            "hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md -m-1 p-1"
-                          )}
-                        >
-                          <ArrowDownIcon className="h-5 w-5" />
-                        </button>
-                      </Tooltip>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <button
+                              onClick={onPrevHandler}
+                              disabled={!hasPrevious}
+                              className={clsx(
+                                !hasPrevious &&
+                                  "opacity-50 hover:cursor-not-allowed",
+                                "hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md -m-1 p-1"
+                              )}
+                            >
+                              <ArrowUpIcon className="h-5 w-5" />
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Previous</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <button
+                              onClick={onNextHandler}
+                              disabled={!hasNext}
+                              className={clsx(
+                                !hasNext &&
+                                  "opacity-50 hover:cursor-not-allowed",
+                                "hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md -m-1 p-1"
+                              )}
+                            >
+                              <ArrowDownIcon className="h-5 w-5" />
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Next</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                     </>
                   )}
-                  <Tooltip title="Copy">
-                    <button
-                      onClick={() => {
-                        setNotification("Copied to clipboard", "success");
-                        navigator.clipboard.writeText(
-                          JSON.stringify(selectedRow || {}, null, 4)
-                        );
-                      }}
-                      className="hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md -m-1 p-1"
-                    >
-                      <ClipboardDocumentIcon className="h-5 w-5" />
-                    </button>
-                  </Tooltip>
-                  <Tooltip title="Edit">
-                    <button
-                      onClick={() => setIsEditing(!isEditing)}
-                      className="hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md -m-1 p-1"
-                    >
-                      <PencilIcon className="h-5 w-5" />
-                    </button>
-                  </Tooltip>
-                  <Tooltip title="Delete">
-                    <button
-                      onClick={() => setShowDeleteModal(true)}
-                      className="hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md -m-1 p-1"
-                    >
-                      <TrashIcon className="h-5 w-5" />
-                    </button>
-                  </Tooltip>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          onClick={() => {
+                            setNotification("Copied to clipboard", "success");
+                            navigator.clipboard.writeText(
+                              JSON.stringify(selectedRow || {}, null, 4)
+                            );
+                          }}
+                          className="hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md -m-1 p-1"
+                        >
+                          <ClipboardDocumentIcon className="h-5 w-5" />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Copy</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          onClick={() => setIsEditing(!isEditing)}
+                          className="hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md -m-1 p-1"
+                        >
+                          <PencilIcon className="h-5 w-5" />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Edit</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          onClick={() => setShowDeleteModal(true)}
+                          className="hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md -m-1 p-1"
+                        >
+                          <TrashIcon className="h-5 w-5" />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Delete</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 </>
               )}
             </div>

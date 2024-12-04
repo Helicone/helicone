@@ -156,15 +156,7 @@ const STATUS_OPS = numberWithSuggestions([
   },
   {
     key: "400",
-    param: "400",
-  },
-  {
-    key: "401",
-    param: "401",
-  },
-  {
-    key: "404",
-    param: "404",
+    param: "400 (bad request)",
   },
   {
     key: "429",
@@ -172,15 +164,15 @@ const STATUS_OPS = numberWithSuggestions([
   },
   {
     key: "500",
-    param: "500",
+    param: "500 (internal server error)",
   },
   {
     key: "502",
-    param: "502",
+    param: "502 (bad gateway)",
   },
   {
     key: "503",
-    param: "503",
+    param: "503 (service unavailable)",
   },
   {
     key: "524",
@@ -233,7 +225,102 @@ export const REQUEST_TABLE_FILTERS: [
   SingleFilterDef<"request_response_rmt">,
   SingleFilterDef<"request_response_rmt">,
   SingleFilterDef<"request_response_rmt">,
+  SingleFilterDef<"request_response_rmt">,
+  SingleFilterDef<"request_response_rmt">,
   SingleFilterDef<"request_response_rmt">
+] = [
+  {
+    label: "Request",
+    operators: VectorOperators,
+    table: "request_response_rmt",
+    column: "request_body",
+    category: "request",
+  },
+  {
+    label: "Request-Id",
+    operators: booleanToTextOperators,
+    table: "request_response_rmt",
+    column: "request_id",
+    category: "request",
+  },
+  {
+    label: "Response",
+    operators: VectorOperators,
+    table: "request_response_rmt",
+    column: "response_body",
+    category: "request",
+  },
+  {
+    label: "Prompt Tokens",
+    operators: numberOperators,
+    table: "request_response_rmt",
+    column: "prompt_tokens",
+    category: "request",
+  },
+  {
+    label: "Completion Tokens",
+    operators: numberOperators,
+    table: "request_response_rmt",
+    column: "completion_tokens",
+    category: "request",
+  },
+  {
+    label: "Total Tokens",
+    operators: numberOperators,
+    table: "request_response_rmt",
+    column: "total_tokens",
+    category: "request",
+  },
+  {
+    label: "User",
+    operators: textOperators,
+    table: "request_response_rmt",
+    column: "user_id",
+    category: "request",
+  },
+  {
+    label: "Model",
+    operators: textOperators,
+    table: "request_response_rmt",
+    column: "model",
+    category: "request",
+  },
+  {
+    label: "Status",
+    operators: STATUS_OPS,
+    category: "response",
+    table: "request_response_rmt",
+    column: "status",
+  },
+  {
+    label: "Path",
+    operators: textOperators,
+    table: "request_response_rmt",
+    column: "target_url",
+    category: "request",
+  },
+  {
+    label: "Feedback",
+    operators: booleanOperators,
+    table: "request_response_rmt",
+    column: "helicone-score-feedback",
+    category: "feedback",
+  },
+];
+
+export const SESSIONS_TABLE_FILTERS: [
+  SingleFilterDef<"request_response_rmt">,
+  SingleFilterDef<"request_response_rmt">,
+  SingleFilterDef<"request_response_rmt">,
+  SingleFilterDef<"sessions_request_response_rmt">,
+  SingleFilterDef<"request_response_rmt">,
+  SingleFilterDef<"request_response_rmt">,
+  SingleFilterDef<"request_response_rmt">,
+  SingleFilterDef<"request_response_rmt">,
+  SingleFilterDef<"request_response_rmt">,
+  SingleFilterDef<"request_response_rmt">,
+  SingleFilterDef<"request_response_rmt">,
+  SingleFilterDef<"sessions_request_response_rmt">
 ] = [
   {
     label: "Request",
@@ -259,6 +346,20 @@ export const REQUEST_TABLE_FILTERS: [
   {
     label: "Total Tokens",
     operators: numberOperators,
+    table: "sessions_request_response_rmt",
+    column: "total_tokens",
+    category: "request",
+  },
+  {
+    label: "Completion Tokens",
+    operators: numberOperators,
+    table: "request_response_rmt",
+    column: "completion_tokens",
+    category: "request",
+  },
+  {
+    label: "Prompt Tokens",
+    operators: numberOperators,
     table: "request_response_rmt",
     column: "prompt_tokens",
     category: "request",
@@ -279,60 +380,7 @@ export const REQUEST_TABLE_FILTERS: [
   },
   {
     label: "Status",
-    operators: numberWithSuggestions([
-      {
-        key: "200",
-        param: "200 (success)",
-      },
-      {
-        key: "-4",
-        param: "threat",
-      },
-      {
-        key: "-3",
-        param: "cancelled",
-      },
-      {
-        key: "-2",
-        param: "pending",
-      },
-      {
-        key: "-1",
-        param: "timeout",
-      },
-      {
-        key: "400",
-        param: "400",
-      },
-      {
-        key: "401",
-        param: "401",
-      },
-      {
-        key: "404",
-        param: "404",
-      },
-      {
-        key: "429",
-        param: "429 (rate-limit)",
-      },
-      {
-        key: "500",
-        param: "500",
-      },
-      {
-        key: "502",
-        param: "502",
-      },
-      {
-        key: "503",
-        param: "503",
-      },
-      {
-        key: "524",
-        param: "524 (server timeout)",
-      },
-    ]),
+    operators: STATUS_OPS,
     category: "response",
     table: "request_response_rmt",
     column: "status",
@@ -350,6 +398,13 @@ export const REQUEST_TABLE_FILTERS: [
     table: "request_response_rmt",
     column: "helicone-score-feedback",
     category: "feedback",
+  },
+  {
+    label: "Cost",
+    operators: numberOperators,
+    table: "sessions_request_response_rmt",
+    column: "total_cost",
+    category: "session",
   },
 ];
 

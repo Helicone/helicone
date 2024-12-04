@@ -1,158 +1,242 @@
 /* eslint-disable @next/next/no-img-element */
 
-import {
-  ArchiveBoxIcon,
-  BeakerIcon,
-  BellIcon,
-  ChartBarIcon,
-  CircleStackIcon,
-  CodeBracketIcon,
-  Cog6ToothIcon,
-  DocumentTextIcon,
-  HomeIcon,
-  ShieldCheckIcon,
-  SparklesIcon,
-  TableCellsIcon,
-  TagIcon,
-  UsersIcon,
-} from "@heroicons/react/24/outline";
 import { useUser } from "@supabase/auth-helpers-react";
 import { useRouter } from "next/router";
 import { useMemo } from "react";
-import { GoRepoForked } from "react-icons/go";
-import DesktopSidebar from "./DesktopSidebar";
+import DesktopSidebar, { NavigationItem } from "./DesktopSidebar";
 
-import { PiGraphLight } from "react-icons/pi";
-import MobileNavigation from "./MobileNavigation";
+import { useOrg } from "../organizationContext";
+import {
+  ArchiveIcon,
+  BellIcon,
+  DatabaseIcon,
+  FlaskConicalIcon,
+  Home,
+  ListTreeIcon,
+  LockIcon,
+  NotepadText,
+  SheetIcon,
+  ShieldCheckIcon,
+  SparklesIcon,
+  TagIcon,
+  TestTube2,
+  UsersIcon,
+  Webhook,
+} from "lucide-react";
+import { Enclosure } from "rss-parser";
 
+export interface ChangelogItem {
+  title: string;
+  description: string;
+  link: string;
+  content: string;
+  "content:encoded": string;
+  "content:encodedSnippet": string;
+  contentSnippet: string;
+  isoDate: string;
+  pubDate: string;
+  image?: Enclosure;
+}
 interface SidebarProps {
-  tier: string;
-  setReferOpen: (open: boolean) => void;
   setOpen: (open: boolean) => void;
+  changelog: ChangelogItem[];
 }
 
-const Sidebar = ({ tier, setReferOpen, setOpen }: SidebarProps) => {
+const Sidebar = ({ changelog, setOpen }: SidebarProps) => {
   const router = useRouter();
   const { pathname } = router;
   const user = useUser();
-
-  const NAVIGATION = useMemo(
+  const org = useOrg();
+  const NAVIGATION: NavigationItem[] = useMemo(
     () => [
       {
         name: "Dashboard",
         href: "/dashboard",
-        icon: HomeIcon,
+        icon: Home,
         current: pathname.includes("/dashboard"),
       },
       {
         name: "Requests",
         href: "/requests",
-        icon: TableCellsIcon,
+        icon: SheetIcon,
         current: pathname.includes("/requests"),
       },
+
       {
-        name: "Datasets",
-        href: "/datasets",
-        icon: CircleStackIcon,
-        current: pathname.includes("/datasets"),
-      },
-      ...(!user?.email?.includes("@helicone.ai")
-        ? []
-        : [
-            {
-              name: "Evals",
-              href: "/evals",
-              icon: ChartBarIcon,
-              current: pathname.includes("/evals"),
-            },
-            {
-              name: "Connections",
-              href: "/connections",
-              icon: GoRepoForked,
-              current: pathname.includes("/connections"),
-            },
-          ]),
-      {
-        name: "Sessions",
-        href: "/sessions",
-        icon: PiGraphLight,
-        current: pathname.includes("/sessions"),
-      },
-      {
-        name: "Prompts",
-        href: "/prompts",
-        icon: DocumentTextIcon,
-        current: pathname.includes("/prompts"),
+        name: "Segments",
+        href: "/segments",
+        icon: null,
+        current: false,
+        subItems: [
+          {
+            name: "Sessions",
+            href: "/sessions",
+            icon: ListTreeIcon,
+            current: pathname.includes("/sessions"),
+          },
+          {
+            name: "Properties",
+            href: "/properties",
+            icon: TagIcon,
+            current: pathname.includes("/properties"),
+          },
+
+          {
+            name: "Users",
+            href: "/users",
+            icon: UsersIcon,
+            current: pathname.includes("/users"),
+          },
+        ],
       },
       {
-        name: "Users",
-        href: "/users",
-        icon: UsersIcon,
-        current: pathname.includes("/users"),
+        name: "Improve",
+        href: "/improve",
+        icon: null,
+        current: false,
+        subItems: [
+          {
+            name: "Prompts",
+            href: "/prompts",
+            icon: NotepadText,
+            current: pathname.includes("/prompts"),
+          },
+          {
+            name: "Playground",
+            href: "/playground",
+            icon: TestTube2,
+            current: pathname.includes("/playground"),
+          },
+          {
+            name: "Experiments",
+            href: "/experiments",
+            icon: FlaskConicalIcon,
+            current: pathname.includes("/experiments"),
+          },
+          ...(!user?.email?.includes("@helicone.ai") ||
+          !!user?.email?.includes("@greptile")
+            ? []
+            : [
+                {
+                  name: "Evaluators",
+                  href: "/evaluators",
+                  icon: SparklesIcon,
+                  current: pathname.includes("/evaluators"),
+                },
+              ]),
+          {
+            name: "Datasets",
+            href: "/datasets",
+            icon: DatabaseIcon,
+            current: pathname.includes("/datasets"),
+          },
+        ],
       },
-      {
-        name: "Alerts",
-        href: "/alerts",
-        icon: BellIcon,
-        current: pathname.includes("/alerts"),
-      },
-      {
-        name: "Fine-Tune",
-        href: "/fine-tune",
-        icon: SparklesIcon,
-        current: pathname.includes("/fine-tune"),
-      },
-      {
-        name: "Properties",
-        href: "/properties",
-        icon: TagIcon,
-        current: pathname.includes("/properties"),
-      },
-      {
-        name: "Cache",
-        href: "/cache",
-        icon: ArchiveBoxIcon,
-        current: pathname.includes("/cache"),
-      },
-      {
-        name: "Rate Limits",
-        href: "/rate-limit",
-        icon: ShieldCheckIcon,
-        current: pathname.includes("/rate-limit"),
-      },
-      {
-        name: "Playground",
-        href: "/playground",
-        icon: BeakerIcon,
-        current: pathname.includes("/playground"),
-      },
+
       {
         name: "Developer",
         href: "/developer",
-        icon: CodeBracketIcon,
+        icon: null,
         current: pathname.includes("/developer"),
+        subItems: [
+          {
+            name: "Cache",
+            href: "/cache",
+            icon: ArchiveIcon,
+            current: pathname.includes("/cache"),
+          },
+          {
+            name: "Rate Limits",
+            href: "/rate-limit",
+            icon: ShieldCheckIcon,
+            current: pathname === "/rate-limit",
+          },
+          {
+            name: "Alerts",
+            href: "/alerts",
+            icon: BellIcon,
+            current: pathname.includes("/alerts"),
+          },
+          {
+            name: "Webhooks",
+            href: "/webhooks",
+            icon: Webhook,
+            current: pathname.includes("/webhooks"),
+          },
+        ],
       },
-      {
-        name: "Settings",
-        href: "/settings",
-        icon: Cog6ToothIcon,
-        current: pathname.includes("/settings"),
-      },
+      ...(org?.currentOrg?.tier === "enterprise"
+        ? [
+            {
+              name: "Enterprise",
+              href: "/enterprise",
+              current: pathname.includes("/enterprise"),
+              icon: null,
+              subItems: [
+                {
+                  name: "Vault",
+                  href: "/vault",
+                  icon: LockIcon,
+                  current: pathname.includes("/vault"),
+                },
+              ],
+            },
+          ]
+        : []),
+      // {
+      //   name: "Settings",
+      //   href: "/settings",
+      //   icon: Cog6ToothIcon,
+      //   current: false,
+      //   subItems: [
+      //     {
+      //       name: "Organization",
+      //       href: "/settings/organization",
+      //       icon: null,
+      //       current: false,
+      //     },
+      //     {
+      //       name: "API Keys",
+      //       href: "/settings/api-keys",
+      //       icon: null,
+      //       current: false,
+      //     },
+      //     ...(!user?.email?.includes("@helicone.ai")
+      //       ? []
+      //       : [
+      //           {
+      //             name: "Connections",
+      //             href: "/settings/connections",
+      //             icon: null,
+      //             current: pathname.includes("/settings/connections"),
+      //           },
+      //         ]),
+      //     {
+      //       name: "Members",
+      //       href: "/settings/members",
+      //       icon: null,
+      //       current: false,
+      //     },
+      //     {
+      //       name: "Billing",
+      //       href: "/settings/billing",
+      //       icon: null,
+      //       current: pathname.includes("/settings/billing"),
+      //     },
+      //   ],
+      // },
     ],
     [pathname, user?.email]
   );
 
   return (
     <>
-      <MobileNavigation
-        NAVIGATION={NAVIGATION}
-        setReferOpen={setReferOpen}
-        setOpen={setOpen}
-      />
+      {/* Remove this line */}
+      {/* <MobileNavigation NAVIGATION={NAVIGATION} setOpen={setOpen} /> */}
 
       <DesktopSidebar
+        changelog={changelog}
         NAVIGATION={NAVIGATION}
-        setReferOpen={setReferOpen}
         setOpen={setOpen}
       />
     </>

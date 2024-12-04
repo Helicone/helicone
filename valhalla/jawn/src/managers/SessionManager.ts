@@ -3,17 +3,19 @@ import {
   SessionQueryParams,
 } from "../controllers/public/sessionController";
 import { clickhouseDb } from "../lib/db/ClickhouseWrapper";
-import { AuthParams } from "../lib/db/supabase";
+import { AuthParams, supabaseServer } from "../lib/db/supabase";
 import { filterListToTree, FilterNode } from "../lib/shared/filters/filterDefs";
 import { buildFilterWithAuthClickHouse } from "../lib/shared/filters/filters";
 import { err, ok, Result, resultMap } from "../lib/shared/result";
 import { clickhousePriceCalc } from "../packages/cost";
 import { isValidTimeZoneDifference } from "../utils/helpers";
+import { RequestManager } from "./request/RequestManager";
 
 export interface SessionResult {
   created_at: string;
   latest_request_created_at: string;
-  session: string;
+  session_id: string;
+  session_name: string;
   total_cost: number;
   total_requests: number;
   prompt_tokens: number;
@@ -219,7 +221,7 @@ WHERE ${buildWhereClause("duration")}
             request_response_rmt: {
               properties: {
                 "Helicone-Session-Name": {
-                  ilike: `'%${nameContains}%'`,
+                  ilike: `%${nameContains}%`,
                 },
               },
             },
@@ -255,6 +257,7 @@ WHERE ${buildWhereClause("duration")}
       ${builtFilter.filter}
     )
     GROUP BY properties['Helicone-Session-Name']
+    LIMIT 50
     `;
 
     const results = await clickhouseDb.dbQuery<SessionNameResult>(
@@ -273,8 +276,13 @@ WHERE ${buildWhereClause("duration")}
   async getSessions(
     requestBody: SessionQueryParams
   ): Promise<Result<SessionResult[], string>> {
-    const { sessionIdContains, timeFilter, sessionName, timezoneDifference } =
-      requestBody;
+    const {
+      search,
+      timeFilter,
+      timezoneDifference,
+      filter: filterTree,
+      nameEquals,
+    } = requestBody;
 
     if (!isValidTimeZoneDifference(timezoneDifference)) {
       return err("Invalid timezone difference");
@@ -295,30 +303,47 @@ WHERE ${buildWhereClause("duration")}
           },
         },
       },
+      filterTree,
     ];
 
-    if (sessionName) {
+    if (nameEquals) {
       filters.push({
         request_response_rmt: {
           properties: {
             "Helicone-Session-Name": {
-              equals: sessionName,
+              equals: nameEquals,
             },
           },
         },
       });
     }
 
-    if (sessionIdContains) {
-      filters.push({
-        request_response_rmt: {
-          properties: {
-            "Helicone-Session-Id": {
-              ilike: `%${sessionIdContains}%`,
+    if (search) {
+      filters.push(
+        filterListToTree(
+          [
+            {
+              request_response_rmt: {
+                properties: {
+                  "Helicone-Session-Id": {
+                    ilike: `%${search}%`,
+                  },
+                },
+              },
             },
-          },
-        },
-      });
+            {
+              request_response_rmt: {
+                properties: {
+                  "Helicone-Session-Name": {
+                    ilike: `%${search}%`,
+                  },
+                },
+              },
+            },
+          ],
+          "or"
+        )
+      );
     }
 
     const builtFilter = await buildFilterWithAuthClickHouse({
@@ -327,25 +352,34 @@ WHERE ${buildWhereClause("duration")}
       argsAcc: [],
     });
 
+    const havingFilter = await buildFilterWithAuthClickHouse({
+      org_id: this.authParams.organizationId,
+      filter: filterListToTree(filters, "and"),
+      argsAcc: [],
+      having: true,
+    });
+
     // Step 1 get all the properties given this filter
     const query = `
     SELECT 
       min(request_response_rmt.request_created_at) + INTERVAL ${timezoneDifference} MINUTE AS created_at,
       max(request_response_rmt.request_created_at) + INTERVAL ${timezoneDifference} MINUTE AS latest_request_created_at,
-      properties['Helicone-Session-Id'] as session,
+      properties['Helicone-Session-Id'] as session_id,
+      properties['Helicone-Session-Name'] as session_name,
       ${clickhousePriceCalc("request_response_rmt")} AS total_cost,
       count(*) AS total_requests,
       sum(request_response_rmt.prompt_tokens) AS prompt_tokens,
-      sum(request_response_rmt.completion_tokens) AS completion_tokens
+      sum(request_response_rmt.completion_tokens) AS completion_tokens,
+      sum(request_response_rmt.prompt_tokens) + sum(request_response_rmt.completion_tokens) AS total_tokens
     FROM request_response_rmt
     WHERE (
         has(properties, 'Helicone-Session-Id')
-        ${sessionName ? "" : "AND NOT has(properties, 'Helicone-Session-Name')"}
         AND (
           ${builtFilter.filter}
         )
     )
-    GROUP BY properties['Helicone-Session-Id']
+    GROUP BY properties['Helicone-Session-Id'], properties['Helicone-Session-Name']
+    HAVING (${havingFilter.filter})
     ORDER BY created_at DESC
     LIMIT 50
     `;
@@ -360,8 +394,41 @@ WHERE ${buildWhereClause("duration")}
         ...y,
         completion_tokens: +y.completion_tokens,
         prompt_tokens: +y.prompt_tokens,
-        total_tokens: +y.completion_tokens + +y.prompt_tokens,
+        total_tokens: +y.total_tokens,
       }))
     );
+  }
+
+  async updateSessionFeedback(
+    sessionId: string,
+    rating: boolean
+  ): Promise<Result<null, string>> {
+    const { data, error } = await supabaseServer.client
+      .from("request")
+      .select("id")
+      .eq("properties->Helicone-Session-Id", `"${sessionId}"`)
+      .eq("helicone_org_id", this.authParams.organizationId)
+      .order("created_at", { ascending: true })
+      .limit(1);
+
+    if (error) {
+      return err(error.message);
+    }
+
+    if (!data || data.length === 0) {
+      return err("No request found");
+    }
+
+    const requestManager = new RequestManager(this.authParams);
+    const res = await requestManager.addPropertyToRequest(
+      data[0].id,
+      "Helicone-Session-Feedback",
+      rating ? "1" : "0"
+    );
+
+    if (res.error) {
+      return err(res.error);
+    }
+    return ok(null);
   }
 }

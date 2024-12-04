@@ -181,6 +181,7 @@ interface RequestResponseRMTToOperators {
   request_id: SingleKey<TextOperators>;
   prompt_tokens: SingleKey<NumberOperators>;
   completion_tokens: SingleKey<NumberOperators>;
+  total_tokens: SingleKey<NumberOperators>;
   target_url: SingleKey<TextOperators>;
   properties: {
     [key: string]: SingleKey<TextOperators>;
@@ -191,8 +192,14 @@ interface RequestResponseRMTToOperators {
   scores: {
     [key: string]: SingleKey<TextOperators>;
   };
+  scores_column: SingleKey<TextOperators>;
   request_body: SingleKey<VectorOperators>;
   response_body: SingleKey<VectorOperators>;
+}
+
+interface SessionsRequestResponseRMTToOperators {
+  total_cost: SingleKey<NumberOperators>;
+  total_tokens: SingleKey<NumberOperators>;
 }
 
 export type FilterLeafRequestResponseLog =
@@ -200,6 +207,9 @@ export type FilterLeafRequestResponseLog =
 
 export type FilterLeafRequestResponseRMT =
   SingleKey<RequestResponseRMTToOperators>;
+
+export type FilterLeafSessionsRequestResponseRMT =
+  SingleKey<SessionsRequestResponseRMTToOperators>;
 
 type PropertiesCopyV2ToOperators = {
   key: SingleKey<TextOperators>;
@@ -331,6 +341,7 @@ export type TablesAndViews = {
   // CLICKHOUSE TABLES
   request_response_log: FilterLeafRequestResponseLog;
   request_response_rmt: FilterLeafRequestResponseRMT;
+  sessions_request_response_rmt: FilterLeafSessionsRequestResponseRMT;
   users_view: FilterLeafUserView;
   properties_v3: FilterLeafPropertiesV3;
   property_with_response_v1: FilterLeafPropertyWithResponseV1;

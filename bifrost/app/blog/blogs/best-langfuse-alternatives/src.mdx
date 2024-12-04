@@ -2,7 +2,7 @@
 
 ## Introduction
 
-As the use of Large Language Models (LLMs) becomes increasingly prevalent in various applications, the need for robust observability tools has never been more critical. These tools help developers and teams monitor, analyze, and optimize their LLM-powered applications. While there are several options available in the market, many developers and organizations are exploring alternatives that offer unique features or better suit their specific needs. In this comparison, we'll look at two notable players in the LLM observability space: Helicone and Langfuse, with a focus on their distinct features and capabilities.
+As the use of Large Language Models (LLMs) becomes increasingly prevalent in various applications, the need for robust observability tools has never been more critical. These tools help developers and teams monitor, analyze, and optimize their LLM-powered applications. While several options are available in the market, many developers and organizations are exploring alternatives that offer unique features or better suit their specific needs. In this comparison, we'll look at two notable players in the LLM observability space: **Helicone** and **Langfuse**, focusing on their distinct features and capabilities.
 
 ---
 
@@ -10,32 +10,32 @@ As the use of Large Language Models (LLMs) becomes increasingly prevalent in var
 
 Here's a quick overview of how Helicone compares to Langfuse:
 
-| Aspect       | Helicone                                              | Langfuse                                      |
-| ------------ | ----------------------------------------------------- | --------------------------------------------- |
-| Best For     | Developers, Small to Large teams                      | Hobbyists, Small teams                        |
-| Pricing      | Free tier available, flexible pricing                 | Free tier available, flexible pricing         |
-| Key Strength | Comprehensive features, High scalability, Open-source | Open-source, Customizable                     |
-| Drawback     | Requires more resources for self-hosting              | Requires SDK integration, Limited scalability |
+| Aspect       | Helicone                                                        | Langfuse                                         |
+| ------------ | --------------------------------------------------------------- | ------------------------------------------------ |
+| Best For     | Teams wanting proxy-based monitoring or SDK integration         | Teams focusing on SDK-first integration          |
+| Pricing      | Free tier available, flexible pricing                           | Free tier available, flexible pricing            |
+| Key Strength | Comprehensive features, High scalability, Cloud-focused         | Self-hosting ease, Open-source                   |
+| Drawback     | More complex self-hosting setup due to distributed architecture | Single PostgreSQL database may limit scalability |
 
 ## Overview: Helicone vs. Langfuse
 
-| Feature              | Helicone | Langfuse |
-| -------------------- | -------- | -------- |
-| Open-Source          | ✅       | ✅       |
-| Self Hosting         | ✅       | ✅       |
-| One-line Integration | ✅       | ❌       |
-| Caching              | ✅       | ❌       |
-| Prompt Management    | ✅       | ✅       |
-| Agent Tracing        | ✅       | ✅       |
-| Prompt Experiments   | ✅       | ✅       |
-| Evaluation           | ✅       | ✅       |
-| Pricing              | ✅       | ✅       |
-| Image Support        | ✅       | ❌       |
-| Scalability          | ✅       | ❌       |
-| Data Export          | ✅       | ✅       |
-| Cost Analysis        | ✅       | ✅       |
-| User Tracking        | ✅       | ✅       |
-| User Feedback        | ✅       | ✅       |
+| Feature              | Helicone | Langfuse              |
+| -------------------- | -------- | --------------------- |
+| Open-Source          | ✅       | ✅                    |
+| Self-Hosting         | ✅       | ✅                    |
+| One-Line Integration | ✅       | ❌                    |
+| Caching              | ✅       | ❌                    |
+| Prompt Management    | ✅       | ✅                    |
+| Agent Tracing        | ✅       | 🟠 (Limited at scale) |
+| Prompt Experiments   | ✅       | ✅                    |
+| Evaluation           | ✅       | ✅                    |
+| Transparent Pricing  | ✅       | ✅                    |
+| Image Support        | ✅       | ✅                    |
+| Scalability          | ✅       | ❌                    |
+| Data Export          | ✅       | ✅                    |
+| Cost Analysis        | ✅       | 🟠 (Limited at scale) |
+| User Tracking        | ✅       | 🟠 (Limited at scale) |
+| User Feedback        | ✅       | 🟠 (Limited at scale) |
 
 ---
 
@@ -43,96 +43,116 @@ Here's a quick overview of how Helicone compares to Langfuse:
 
 Different tools excel in different scenarios. Here's a quick guide to help you choose the right tool for your specific needs:
 
-1. **Small Startup with Limited Budget**
+1. **Teams Needing Proxy-Based Implementation**
 
-   - Best Tool: Helicone
-   - Why: Offers a comprehensive feature set with a free tier, flexible pricing, and easy integration, suitable for growing startups.
+   - **Best Tool:** Helicone
+   - **Why:** Offers robust proxy architecture with caching and edge deployment capabilities
 
-2. **Large Enterprise with Complex Workflows**
+2. **Teams Requiring Deep Tracing & Evaluation**
 
-   - Best Tool: Helicone
-   - Why: Provides high scalability and advanced features necessary for complex enterprise-level LLM applications.
+   - **Best Tool:** Consider both
+   - **Why:** Both platforms offer comprehensive tracing and evaluation capabilities
 
-3. **Research Team Focused on Experimentation**
+3. **Simple Self-Hosting Setup**
 
-   - Best Tool: Helicone
-   - Why: Offers robust prompt experimentation and evaluation features, crucial for research and development.
+   - **Best Tool:** Langfuse
+   - **Why:** Single PostgreSQL database makes deployment straightforward
 
-4. **Solo Developer Working on Side Projects**
+4. **Highly Scalable Self-Hosting**
 
-   - Best Tool: Consider both
-   - Why: Helicone offers easy integration and comprehensive features, while Langfuse provides more customizability for those comfortable with SDK integration.
+   - **Best Tool:** Helicone
+   - **Why:** Helm chart with distributed architecture with Cloudflare Workers, ClickHouse, and Kafka enables better scaling
 
-5. **AI-Focused Company with High Volume LLM Usage**
-   - Best Tool: Helicone
-   - Why: Built on Cloudflare workers, ClickHouse, and Kafka, ensuring high scalability for intensive LLM usage.
+5. **High Volume LLM Usage**
+
+   - **Best Tool:** Helicone
+   - **Why:** While Langfuse handles moderate scale, Helicone's distributed architecture is built to handle many millions to billions of requests
+
+6. **Enterprise with Complex Workflows**
+   - **Best Tool:** Consider both
+   - **Why:** Both platforms serve enterprise customers with comprehensive feature sets
 
 ---
 
 ## Helicone
 
-**Designed for: developers & analysts**
+**Designed for: Developers & Analysts**
 
 ![Helicone Dashboard Image](/static/blog/langfuse-alternatives/helicone-dashboard.webp)
 
 ### What is Helicone?
 
-Helicone is a comprehensive, open-source LLM observability platform designed for developers of all skill levels. It offers a wide range of features including advanced caching, custom properties for detailed analysis, and robust security measures. Helicone's architecture, built on Cloudflare workers, ClickHouse, and Kafka, ensures high scalability and performance, making it suitable for both small projects and large-scale enterprise applications.
+Helicone is a comprehensive, open-source LLM observability platform designed for developers of all skill levels. It offers a wide range of features including advanced caching, custom properties for detailed analysis, and robust security measures. Helicone's architecture, built on Cloudflare Workers, ClickHouse, and Kafka, ensures high scalability and performance, making it suitable for both small projects and large-scale enterprise applications.
 
-### Top features
+### Top Features
 
-1. **High Scalability** - Built on a robust infrastructure to handle high-volume LLM interactions.
+1. **High Scalability** - Built on a robust infrastructure to handle high-volume LLM interactions. Helicone has processed over 2 billion LLM logs and 1.6 trillion tokens.
 2. **Advanced Caching** - Reduce latency and costs with edge caching and customizable cache settings.
 3. **Comprehensive Security** - Protect against prompt injections and data exfiltration with built-in security measures.
 4. **Flexible Integrations** - Seamlessly integrate with popular tools like PostHog, LlamaIndex, and LiteLLM.
 5. **Custom Properties and Scoring** - Add metadata and scoring metrics for in-depth analysis and optimization.
 
-### How does Helicone compare to Langfuse?
+### How Does Helicone Compare to Langfuse?
 
-While both Helicone and Langfuse offer open-source solutions for LLM observability, Helicone stands out with its more comprehensive feature set, higher scalability, and easier integration process. Helicone's advanced caching, robust security measures, and flexible integrations make it more suitable for complex, large-scale applications. Additionally, Helicone's one-line integration process is significantly simpler than Langfuse's SDK-based approach, making it more accessible for teams looking for quick implementation.
+Helicone differentiates itself from Langfuse by offering a more comprehensive feature set, higher scalability, and a focus on cloud performance. Its advanced infrastructure, built on Cloudflare Workers, ClickHouse, and Kafka, ensures superior performance for high-volume applications. With its one-line integration and clean UI, Helicone provides an accessible and user-friendly experience for developers of all levels.
+
+Compared to Langfuse, which emphasizes ease of self-hosting, Helicone offers both self-hosted and cloud options, giving users flexibility without compromising on performance. Helicone's advanced caching, custom properties, and robust security features further enhance its appeal for complex and large-scale projects.
 
 ---
 
 ## Langfuse
 
-**Designed for: Hobbyists**
-
 ![Langfuse Dashboard Image](/static/blog/langfuse-alternatives/langfuse-traces.webp)
 
 ### What is Langfuse?
 
-Langfuse is an open-source LLM observability tool that offers basic tracing and monitoring capabilities. It provides some essential features for analyzing LLM interactions but requires SDK integration for implementation. Langfuse runs on a Postgres database, making it relatively easy to self-host for smaller teams or individual developers who are comfortable with more involved setup processes.
+Langfuse is an open-source LLM observability tool that offers tracing and monitoring capabilities. It emphasizes ease of self-hosting, making it accessible for small teams or individual developers who prefer to manage their own infrastructure. Langfuse runs on a PostgreSQL database, simplifying the self-hosting process but potentially limiting scalability for high-volume applications.
 
-### Top features
+### Top Features
 
-1. **Open-Source** - Fully open-source, allowing for community contributions.
-2. **Basic Tracing** - Provides tracing capabilities for LLM interactions.
-3. **Prompt Management** - Basic prompt versioning and management capabilities.
-4. **Self-Hosting** - Can be self-hosted with a Postgres database backend.
+1. **Self-Hosting Focus** - Designed for easy self-deployment, allowing teams to manage their own infrastructure.
+2. **Open-Source** - Fully open-source, encouraging community contributions and customizations.
+3. **Tracing** - Provides tracing capabilities for LLM interactions, including session tracking.
+4. **Prompt Management** - Offers prompt versioning and management features.
 
-### How does Langfuse compare to Helicone?
+### How Does Langfuse Compare to Helicone?
 
-While Langfuse offers some basic LLM observability features, it falls short in several areas when compared to Helicone. Langfuse's SDK-based integration process is more complex and time-consuming than Helicone's simple one-line integration. Additionally, Langfuse lacks the advanced features, scalability, and comprehensive security measures that Helicone provides.
+Langfuse distinguishes itself by emphasizing ease of self-hosting and simplicity in setup. Its exclusive reliance on PostgreSQL as the sole database backend simplifies deployment and is well-suited for low-volume projects or developers who prefer managing their own infrastructure. This makes Langfuse an attractive option for teams or individual developers focusing on small to medium-scale applications.
 
-Helicone's robust infrastructure, built on Cloudflare workers, ClickHouse, and Kafka, ensures superior performance and scalability for high-volume LLM applications. Helicone also offers advanced caching, custom properties for detailed analysis, and flexible integrations with popular tools, making it a more versatile and powerful solution for LLM observability.
-
-While Langfuse can be self-hosted, its limited feature set and potential scalability issues make it less suitable for complex or growing projects. In contrast, Helicone's comprehensive feature set and scalability make it a better choice for a wider range of users, from small startups to large enterprises dealing with sophisticated LLM applications.
+However, as data volume increases, PostgreSQL may face performance limitations. Additionally, without a data streaming platform like **Kafka**, there can be challenges with scaling and data persistence; if the system goes down, logs may be lost.
 
 ---
 
 ## Frequently Asked Questions
 
-1. **Q: What is the main difference between Helicone and Langfuse?**
-   A: The main differences lie in their integration process, scalability, and feature set. Helicone offers one-line integration, higher scalability, and more advanced features, while Langfuse requires SDK integration and provides more basic tracing capabilities.
+1. **What is the main difference between Helicone and Langfuse?**
 
-2. **Q: Which tool is best for beginners?**
-   A: For beginners, especially those new to LLM development, Helicone might be easier to start with due to its one-line integration and comprehensive feature set. Langfuse, while offering basic tracing, requires more technical knowledge for integration and setup.
+   The main differences lie in their focus and scalability. Helicone emphasizes cloud performance, scalability, and advanced features, making it suitable for high-volume applications. Langfuse focuses on ease of self-hosting and simplicity, which may suit smaller projects but can face performance issues as data scales.
 
-3. **Q: Can I switch easily between these tools?**
-   A: Switching between these tools would require significant reconfiguration, especially when moving from Helicone to Langfuse, as you'd need to implement SDK integration. It's best to evaluate your long-term needs before choosing to minimize the need for switching later.
+2. **Which tool is best for beginners?**
 
-4. **Q: Are there any free options available?**
-   A: Yes, both Helicone and Langfuse offer free tiers, making them accessible for small projects or initial testing.
+   Both Helicone and Langfuse are good for beginners. Helicone offers an easy start with its one-line integration and comprehensive feature set. Langfuse, while simpler to self-host, may require the use of an SDK but is still not overly complicated to set up.
 
-5. **Q: How do these tools handle data privacy and security?**
-   A: Both tools take data privacy seriously. Helicone offers advanced security features, including protection against prompt injections and data exfiltration. Langfuse, being self-hostable, allows you to keep all data on your own infrastructure, which can be advantageous for teams with specific data handling requirements.
+3. **Can I switch easily between these tools?**
+
+   Yes, switching to and from Helicone is simple because it does not require an SDK; you only need to change the base URL and headers. On the other hand, Langfuse requires an SDK and code changes, making the switching process more involved.
+
+4. **Are there any free options available?**
+
+   Yes, both Helicone and Langfuse offer free tiers, making them accessible for small projects or initial testing.
+
+5. **How do these tools handle data privacy and security?**
+
+   Both tools take data privacy seriously and are **SOC 2 compliant**. They also offer self-hosting capabilities for higher compliance concerns, allowing you to keep all data on your own infrastructure if necessary.
+
+---
+
+## Conclusion
+
+Choosing the right LLM observability tool depends on your specific needs and priorities. **Helicone** offers a scalable, feature-rich platform ideal for applications ranging from startups to large enterprises, especially where high performance and advanced analytics are required. **Langfuse** provides a simpler, self-hosted solution suitable for smaller teams or low volume projects that prioritize managing their own infrastructure.
+
+---
+
+## Other Helicone vs Langfuse Comparisons
+
+- Langfuse has its own comparison against Helicone live on [their website](https://langfuse.com/faq/all/best-helicone-alternative)

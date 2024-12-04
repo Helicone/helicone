@@ -39,11 +39,18 @@ function isHTML(responseBody: string): boolean {
     return false;
   }
 
-  return (
-    responseBody.includes("<html") ||
-    responseBody.includes("<HTML") ||
-    responseBody.includes("<!DOCTYPE html>")
-  );
+  const htmlIndicators = [
+    "<html",
+    "<HTML",
+    "<!DOCTYPE html>",
+    "<!DOCTYPE HTML>",
+    "<body",
+    "<BODY",
+    "<head",
+    "<HEAD",
+    "<?xml",
+  ];
+  return htmlIndicators.some((indicator) => responseBody.startsWith(indicator));
 }
 
 export class ResponseBodyHandler extends AbstractLogHandler {
@@ -57,7 +64,8 @@ export class ResponseBodyHandler extends AbstractLogHandler {
         calculateModel(
           context.processedLog.request.model,
           context.processedLog.response.model,
-          context.message.heliconeMeta.modelOverride
+          context.message.heliconeMeta.modelOverride,
+          this.getModelFromPath(context.message.log.request.path)
         ) ?? undefined;
 
       const omittedResponseBody = this.handleOmitResponseBody(
@@ -105,6 +113,22 @@ export class ResponseBodyHandler extends AbstractLogHandler {
     }
   }
 
+  private getModelFromPath(path: string): string {
+    const regex1 = /\/engines\/([^/]+)/;
+    const regex2 = /models\/([^/:]+)/;
+
+    let match = path.match(regex1);
+
+    if (!match) {
+      match = path.match(regex2);
+    }
+
+    if (match && match[1]) {
+      return match[1];
+    }
+
+    return "";
+  }
   private processResponseBodyImages(
     responseId: string,
     responseBody: any,
@@ -236,6 +260,18 @@ export class ResponseBodyHandler extends AbstractLogHandler {
     );
   }
 
+  private isVectorDBResponse(responseBody: any): boolean {
+    return (
+      responseBody.hasOwnProperty("_type") && responseBody._type === "vector_db"
+    );
+  }
+
+  private isToolResponse(responseBody: any): boolean {
+    return (
+      responseBody.hasOwnProperty("_type") && responseBody._type === "tool"
+    );
+  }
+
   private determineAssistantModel(
     responseBody: any,
     currentModel?: string
@@ -248,6 +284,13 @@ export class ResponseBodyHandler extends AbstractLogHandler {
       return { responseModel: "Assistant Polling", model: "assistant-polling" };
     } else if (this.isAssistantResponse(responseBody) && !currentModel) {
       return { responseModel: "Assistant Call", model: "assistant-call" };
+    } else if (this.isVectorDBResponse(responseBody)) {
+      return { responseModel: "Vector DB", model: "vector_db" };
+    } else if (this.isToolResponse(responseBody)) {
+      return {
+        responseModel: "Tool",
+        model: `tool:${responseBody.toolName}`,
+      };
     }
     return { responseModel: currentModel || "", model: currentModel || "" };
   }

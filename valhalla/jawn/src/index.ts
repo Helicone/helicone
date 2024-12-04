@@ -12,6 +12,7 @@ import {
   SCORES_WORKER_COUNT,
 } from "./lib/clients/kafkaConsumers/constant";
 import { tokenRouter } from "./lib/routers/tokenRouter";
+import { DelayedOperationService } from "./lib/shared/delayedOperationService";
 import { runLoopsOnce, runMainLoops } from "./mainLoops";
 import { authMiddleware } from "./middleware/auth";
 import { IS_RATE_LIMIT_ENABLED, limiter } from "./middleware/ratelimitter";
@@ -36,25 +37,42 @@ const allowedOriginsEnv = {
     /^https?:\/\/(www\.)?helicone-git-valhalla-use-jawn-to-read-helicone\.vercel\.app$/,
     /^http:\/\/localhost:3000$/,
     /^http:\/\/localhost:3001$/,
+    /^http:\/\/localhost:3002$/,
     /^https?:\/\/(www\.)?eu\.helicone\.ai$/, // Added eu.helicone.ai
     /^https?:\/\/(www\.)?us\.helicone\.ai$/,
   ],
-  development: [/^http:\/\/localhost:3000$/, /^http:\/\/localhost:3001$/],
-  preview: [/^http:\/\/localhost:3000$/, /^http:\/\/localhost:3001$/],
+  development: [
+    /^http:\/\/localhost:3000$/,
+    /^http:\/\/localhost:3001$/,
+    /^http:\/\/localhost:3002$/,
+  ],
+  preview: [
+    /^http:\/\/localhost:3000$/,
+    /^http:\/\/localhost:3001$/,
+    /^http:\/\/localhost:3002$/,
+  ],
 };
 
 const allowedOrigins = allowedOriginsEnv[ENVIRONMENT];
 
 const app = express();
 
-app.use(bodyParser.json({ limit: "50mb" }));
+var rawBodySaver = function (req: any, res: any, buf: any, encoding: any) {
+  if (buf && buf.length) {
+    req.rawBody = buf.toString(encoding || "utf8");
+  }
+};
+
+app.use(bodyParser.json({ verify: rawBodySaver, limit: "50mb" }));
 app.use(
   bodyParser.urlencoded({
-    limit: "50mb",
+    verify: rawBodySaver,
     extended: true,
+    limit: "50mb",
     parameterLimit: 50000,
   })
 );
+app.use(bodyParser.raw({ verify: rawBodySaver, type: "*/*", limit: "50mb" }));
 
 const KAFKA_CREDS = JSON.parse(process.env.KAFKA_CREDS ?? "{}");
 const KAFKA_ENABLED = (KAFKA_CREDS?.KAFKA_ENABLED ?? "false") === "true";
@@ -102,7 +120,7 @@ app.options("*", (req, res) => {
   res.setHeader("Access-Control-Allow-Methods", "*");
   res.setHeader(
     "Access-Control-Allow-Headers",
-    "Content-Type, Authorization, Helicone-Authorization"
+    "Content-Type, Authorization, Helicone-Authorization, x-vercel-set-bypass-cookie, x-vercel-protection-bypass"
   );
   res.setHeader("Access-Control-Allow-Credentials", "true");
   res.status(200).send();
@@ -166,7 +184,7 @@ app.use((req, res, next) => {
   );
   res.setHeader(
     "Access-Control-Allow-Headers",
-    "Content-Type, Authorization, Helicone-Authorization"
+    "Content-Type, Authorization, Helicone-Authorization, x-vercel-set-bypass-cookie, x-vercel-protection-bypass"
   );
   res.setHeader("Access-Control-Allow-Credentials", "true");
   next();
@@ -202,5 +220,30 @@ const server = app.listen(
 
 server.on("error", console.error);
 
-// Thisp
 server.setTimeout(1000 * 60 * 10); // 10 minutes
+
+// This shuts down the server and all delayed operations with delay only locally, on AWS it will be killed by the OS with no delay
+// Please wait few minutes before terminating the original task on AWS
+async function gracefulShutdown(signal: string) {
+  console.log(`Received ${signal}. Starting graceful shutdown...`);
+
+  server.close(async () => {
+    console.log("HTTP server closed.");
+
+    await DelayedOperationService.getInstance().executeShutdown();
+
+    console.log("Graceful shutdown completed.");
+    process.exit(0);
+  });
+
+  // If server hasn't closed in 30 seconds, force shutdown
+  setTimeout(() => {
+    console.error(
+      "Could not close connections in time, forcefully shutting down"
+    );
+    process.exit(1);
+  }, 30000);
+}
+
+process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
+process.on("SIGINT", () => gracefulShutdown("SIGINT"));

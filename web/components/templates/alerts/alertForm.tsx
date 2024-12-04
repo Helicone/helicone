@@ -18,7 +18,7 @@ import {
   CurrencyDollarIcon,
   InformationCircleIcon,
 } from "@heroicons/react/24/outline";
-import { Tooltip } from "@mui/material";
+import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
 import { clsx } from "../../shared/clsx";
 import { alertTimeWindows } from "./alertsPage";
 import { Database } from "../../../supabase/database.types";
@@ -169,7 +169,10 @@ const AlertForm = (props: AlertFormProps) => {
         {initialValues ? "Edit Alert" : "Create Alert"}
       </h1>
       <div className="col-span-4 w-full space-y-1.5 text-sm">
-        <label htmlFor="alert-name" className="text-gray-500">
+        <label
+          htmlFor="alert-name"
+          className="text-gray-500 dark:text-gray-200"
+        >
           Name
         </label>
         <input
@@ -184,7 +187,10 @@ const AlertForm = (props: AlertFormProps) => {
       </div>
 
       <div className="col-span-2 w-full space-y-1.5 text-sm">
-        <label htmlFor="alert-metric" className="text-gray-500">
+        <label
+          htmlFor="alert-metric"
+          className="text-gray-500 dark:text-gray-200"
+        >
           Metric
         </label>
         <Select
@@ -219,7 +225,7 @@ const AlertForm = (props: AlertFormProps) => {
       <div className="col-span-2 w-full space-y-1.5 text-sm ">
         <label
           htmlFor="alert-threshold"
-          className="text-gray-500 items-center flex gap-1"
+          className="text-gray-500 dark:text-gray-200 items-center flex gap-1"
         >
           Threshold
           <Tooltip
@@ -266,7 +272,7 @@ const AlertForm = (props: AlertFormProps) => {
       <div className="col-span-2 w-full space-y-1.5 text-sm">
         <label
           htmlFor="time-frame"
-          className="text-gray-500 items-center flex gap-1"
+          className="text-gray-500 dark:text-gray-200 items-center flex gap-1"
         >
           Time Frame{" "}
           <Tooltip title="Define the time frame over which the metric is evaluated. An alert will be triggered if the threshold is exceeded within this period.">
@@ -293,7 +299,7 @@ const AlertForm = (props: AlertFormProps) => {
       <div className="col-span-2 w-full space-y-1.5 text-sm">
         <label
           htmlFor="min-requests"
-          className="text-gray-500 items-center flex gap-1"
+          className="text-gray-500 dark:text-gray-200 items-center flex gap-1"
         >
           Min Requests (optional){" "}
           <Tooltip title="Define this to set a minimum number of requests for this alert to be triggered.">
@@ -313,11 +319,14 @@ const AlertForm = (props: AlertFormProps) => {
         />
       </div>
 
-      <div className="col-span-4 w-full p-6 bg-gray-100 rounded-md space-y-1.5">
+      <div className="col-span-4 w-full p-6 bg-gray-100 dark:bg-gray-900 rounded-md space-y-1.5">
         <h3 className="text-gray-500 font-semibold">Notify By</h3>
         <div className="col-span-4 w-full space-y-1.5 text-sm">
           <div className="flex items-center justify-between">
-            <label htmlFor="alert-emails" className="text-gray-500">
+            <label
+              htmlFor="alert-emails"
+              className="text-gray-500 dark:text-gray-200"
+            >
               Emails
             </label>
             <Switch
@@ -351,7 +360,10 @@ const AlertForm = (props: AlertFormProps) => {
         </div>
         <div className="col-span-4 w-full space-y-1.5 text-sm">
           <div className="flex items-center justify-between">
-            <label htmlFor="alert-slack-channels" className="text-gray-500">
+            <label
+              htmlFor="alert-slack-channels"
+              className="text-gray-500 dark:text-gray-200"
+            >
               Slack Channels
             </label>
             <Switch

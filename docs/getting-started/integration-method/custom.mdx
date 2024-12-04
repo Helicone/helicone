@@ -10,49 +10,90 @@ description: "Integrate any custom LLM, including open-source models like Llama 
 <Tabs>
 <Tab title="NodeJS">
 Logging calls to custom models is currently supported via the Helicone NodeJS SDK.
+
+<Steps>
+  <Step title="To get started, install the `@helicone/helpers` package">
+  ```bash
+  npm install @helicone/helpers
+  ```
+  </Step>
+  <Step title="Set `HELICONE_API_KEY` as an environment variable">
+  ```bash
+  export HELICONE_API_KEY=sk-<your-api-key>
+  ```
+  <Info>You can also set the Helicone API Key in your code (See below)</Info>
+  </Step>
+  <Step title="Create a new HeliconeManualLogger instance">
+  ```typescript
+  import { HeliconeManualLogger } from "@helicone/helpers";
+
+  const heliconeLogger = new HeliconeManualLogger({
+    apiKey: process.env.HELICONE_API_KEY, // Can be set as env variable
+    headers: {} // Additional headers to be sent with the request
+  });
+  ```
+  </Step>
+  <Step title="Log your request">
+  ```typescript
+  const reqBody = {
+    model: "text-embedding-ada-002",
+    input: "The food was delicious and the waiter was very friendly.",
+    encoding_format: "float"
+  }
+  const res = await heliconeLogger.logRequest(
+    reqBody,
+    async (resultRecorder) => {
+      const r = await fetch("https://api.openai.com/v1/embeddings", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`
+        },
+        body: JSON.stringify(reqBody)
+      })
+      const resBody = await r.json();
+      resultRecorder.appendResults(resBody);
+      return results; // this will be returned by the logRequest function
+    },
+    {
+     // Additional headers to be sent with the request
+    }
+  );
+  ```
+</Step>
+</Steps>
+
+## API Reference
+
+### HeliconeManualLogger
+
 ```typescript
-import { HeliconeManualLogger } from "@helicone/helicone";
-
-const logger = new HeliconeManualLogger({
-  apiKey: process.env.HELICONE_API_KEY
-});
-
-const reqBody = {
-  "model": "text-embedding-ada-002",
-  "input": "The food was delicious and the waiter was very friendly.",
-  "encoding_format": "float"
+class HeliconeManualLogger {
+  constructor(opts: IHeliconeManualLogger)
 }
 
-logger.registerRequest(reqBody);
-
-const r = await fetch("https://api.openai.com/v1/embeddings", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${process.env.OPENAI_API_KEY}`
-  },
-  body: JSON.stringify(reqBody)
-})
-
-const res = await r.json();
-console.log(res);
-
-logger.sendLog(res);
+type IHeliconeManualLogger = {
+  apiKey: string;
+  headers?: Record<string, string>;
+  loggingEndpoint?: string; // defaults to https://api.hconeai.com/custom/v1/log
+};
 ```
 
-## Structure of Objects
-
-### Registering Request
-
-A typical request will have the following structure:
+### logRequest
 
 ```typescript
-type BaseRequest = {
-  model: string,
-  temperature?: number;
-  max_tokens?: number;
-  stream?: boolean;
-}
+logRequest<T>(
+    request: HeliconeLogRequest,
+    operation: (resultRecorder: HeliconeResultRecorder) => Promise<T>,
+    additionalHeaders?: Record<string, string>
+  ): Promise<T>
+```
+
+#### Parameters
+
+1. `request`: `HeliconeLogRequest` - The request object to log
+```typescript
+type HeliconeLogRequest = ILogRequest | HeliconeCustomEventRequest; // ILogRequest is the type for the request object for custom model logging
 
 // The name and structure of the prompt field depends on the model you are using.
 // Eg: for chat models it is named "messages", for embeddings models it is named "input".
@@ -60,36 +101,30 @@ type BaseRequest = {
 // You may also add more properties (eg: temperature, stop reason etc)
 type ILogRequest = {
   model: string;
-} & {
   [key: string]: any;
 };
 ```
 
-### Sending Log
-To submit logs, you need to extract the response from the model and send it to Helicone. The
-response should follow the below structure:
-
+2. `operation`: `(resultRecorder: HeliconeResultRecorder) => Promise<T>` - The operation to be executed and logged
 ```typescript
-type ILogResponse = {
-  id: string;
-  object: string;
-  created: string;
-  model: string;
-  choices: Array<{
-    index: number;
-    finish_reason: string;
-    message: {
-      role: string;
-      content: string;
-    };
-  }>
-  usage?: {
-    prompt_tokens: number;
-    completion_tokens: number;
-    total_tokens: number;
+class HeliconeResultRecorder {
+  private results: Record<string, any> = {};
+
+  appendResults(data: Record<string, any>): void {
+    this.results = { ...this.results, ...data };
+  }
+
+  getResults(): Record<string, any> {
+    return this.results;
   }
 }
 ```
+
+3. `additionalHeaders`: `Record<string, string>`
+    - Additional headers to be sent with the request
+    - This can be used to use features like [session management](/features/sessions), [custom properties](/features/advanced-usage/custom-properties), etc.
+
+
 </Tab>
 
 <Tab title="Curl">
@@ -99,7 +134,7 @@ A typical request will have the following structure:
 
 ### Endpoint
 ```
-POST https://api.us.helicone.ai/custom/v1/log
+POST https://api.us.hconeai.com/custom/v1/log
 ```
 
 ### Headers
@@ -112,14 +147,14 @@ Replace `{API_KEY}` with your actual API Key.
 
 ### Body
 ```typescript
-export type HeliconeAyncLogRequest = {
+export type HeliconeAsyncLogRequest = {
   providerRequest: ProviderRequest;
   providerResponse: ProviderResponse;
   timing: Timing;
 };
 
 export type ProviderRequest = {
-  url: string;
+  url: "custom-model-nopath";
   json: {
     [key: string]: any;
   };
@@ -149,15 +184,16 @@ export type Timing = {
 
 ## Example Usage
 ```
-curl -X POST https://api.us.helicone.ai/custom/v1/log \
+curl -X POST https://api.us.hconeai.com/custom/v1/log \
 -H 'Authorization: Bearer your_api_key' \
 -H 'Content-Type: application/json' \
 -d '{
   "providerRequest": {
-    "url": "https://example.com",
+    "url": "custom-model-nopath",
     "json": {
-      "key1": "value1",
-      "key2": "value2"
+      "model": "text-embedding-ada-002",
+      "input": "The food was delicious and the waiter was very friendly.",
+      "encoding_format": "float"
     },
     "meta": {
       "metaKey1": "metaValue1",
@@ -188,6 +224,122 @@ curl -X POST https://api.us.helicone.ai/custom/v1/log \
 }'
 ```
 
+
+</Tab>
+
+<Tab title="Python">
+Logging calls to custom models is supported via the Helicone Python SDK.
+
+<Steps>
+  <Step title="Install the Helicone helpers package">
+  ```bash
+  pip install helicone-helpers
+  ```
+  </Step>
+
+  <Step title="Set `HELICONE_API_KEY` as an environment variable">
+  ```bash
+  export HELICONE_API_KEY=sk-<your-api-key>
+  ```
+  <Info>You can also set the Helicone API Key in your code (See below)</Info>
+  </Step>
+
+  <Step title="Create a new HeliconeManualLogger instance">
+  ```python
+  from openai import OpenAI
+  from helicone_helpers import HeliconeManualLogger
+  from helicone_helpers.manual_logger import HeliconeResultRecorder
+
+  # Initialize the logger
+  logger = HeliconeManualLogger(
+      api_key="your-helicone-api-key",
+      headers={}
+  )
+
+  # Initialize OpenAI client
+  client = OpenAI(
+      api_key="your-openai-api-key"
+  )
+  ```
+  </Step>
+
+  <Step title="Define your operation and make the request">
+  ```python
+  def chat_completion_operation(result_recorder: HeliconeResultRecorder):
+      response = client.chat.completions.create(
+          **result_recorder.request
+      )
+      import json
+      result_recorder.append_results(json.loads(response.to_json()))
+      return response
+
+  # Define your request
+  request = {
+      "model": "gpt-4",
+      "messages": [{"role": "user", "content": "Hello, world!"}]
+  }
+
+  # Make the request with logging
+  result = logger.log_request(
+      provider="openai",  # Specify the provider
+      request=request,
+      operation=chat_completion_operation,
+      additional_headers={
+          "Helicone-Session-Id": "1234567890"  # Optional session tracking
+      }
+  )
+
+  print(result)
+  ```
+  </Step>
+</Steps>
+
+## API Reference
+
+### HeliconeManualLogger
+
+```python
+class HeliconeManualLogger:
+    def __init__(
+        self,
+        api_key: str,
+        headers: dict = {},
+        logging_endpoint: str = "https://api.hconeai.com"
+    )
+```
+
+### logRequest
+
+```python
+def log_request(
+    self,
+    request: dict,
+    operation: Callable[[HeliconeResultRecorder], T],
+    additional_headers: dict = {},
+    provider: Optional[Union[Literal["openai", "anthropic"], str]] = None,
+) -> T
+```
+
+#### Parameters
+
+1. `request`: A dictionary containing the request parameters
+2. `operation`: A callable that takes a HeliconeResultRecorder and returns a result
+3. `additional_headers`: Optional dictionary of additional headers
+4. `provider`: Optional provider specification ("openai", "anthropic", or None for custom)
+
+### HeliconeResultRecorder
+
+```python
+class HeliconeResultRecorder:
+    def __init__(self, request: dict):
+        """Initialize with request data"""
+        
+    def append_results(self, data: dict):
+        """Append results to be logged"""
+        
+    def get_results(self) -> dict:
+        """Get all recorded results"""
+```
 
 </Tab>
 

@@ -1,11 +1,11 @@
-import { useSupabaseClient } from "@supabase/auth-helpers-react";
+import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { useQuery } from "@tanstack/react-query";
 import { Database } from "../../supabase/database.types";
 
 const useFeatureFlags = (featureFlag: string, orgId: string) => {
   const supabaseClient = useSupabaseClient<Database>();
   const oneDayInMilliseconds = 24 * 60 * 60 * 1000;
-
+  const user = useUser();
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["featureFlags", featureFlag, orgId],
     queryFn: async (query) => {
@@ -26,7 +26,12 @@ const useFeatureFlags = (featureFlag: string, orgId: string) => {
 
   const hasFlag = data?.count ? data.data && data?.count > 0 : false;
 
-  return { hasFlag: hasFlag, isLoading, refetch, data: data ?? null };
+  return {
+    hasFlag: hasFlag || user?.email?.includes("@helicone.ai"),
+    isLoading,
+    refetch,
+    data: data ?? null,
+  };
 };
 
 export { useFeatureFlags };
