@@ -214,9 +214,14 @@ export type BlogStructure =
     };
 
 const blogContent: BlogStructure[] = [
-  {
+    {
     dynmaicEntry: {
       folderName: "openai-gpt-5",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "test-your-llm-prompts",
     },
   },
   {
@@ -731,7 +736,7 @@ const blogContent: BlogStructure[] = [
 
 const Blog = async () => {
   return (
-    <div className="w-full bg-[#f8feff] h-full antialiased relative text-black">
+    <div className="w-full bg-white h-full antialiased relative text-black">
       <div className="relative w-full flex flex-col space-y-4 mx-auto max-w-5xl h-full py-16 items-center text-center px-2 sm:px-2 lg:px-0">
         <Image
           src={"/static/pricing/bouncing-cube.webp"}
