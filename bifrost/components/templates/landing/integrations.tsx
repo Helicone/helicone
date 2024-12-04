@@ -317,10 +317,11 @@ self.model = AzureChatOpenAI(
     <div className={cn(ISLAND_WIDTH, "py-16 md:py-32 flex flex-col gap-8")}>
       <div className="flex flex-col lgxl:flex-row gap-4 justify-between items-start">
         <div className="flex flex-col items-start gap-3 w-auto">
-          <h2 className="text-3xl sm:text-5xl font-semibold text-black">
+          {/* <h2 className="text-3xl sm:text-5xl font-semibold text-black"> */}
+          <h2 className="font-semibold text-4xl sm:text-5xl leading-[120%] max-w-[600px] text-wrap text-black">
             Get integrated in <span className="text-brand">seconds</span>
           </h2>
-          <p className="text-lg sm:text-xl text-landing-description">
+          <p className="text-lg font-light sm:text-xl text-landing-description">
             Use any model and monitor applications at any scale.{" "}
           </p>
         </div>
@@ -360,7 +361,7 @@ self.model = AzureChatOpenAI(
           <Link
             href="https://docs.helicone.ai/getting-started/quick-start"
             target="_blank"
-            className="text-md flex w-full justify-end items-center gap-1"
+            className="text-md font-light flex w-full justify-end items-center gap-1 text-landing-description"
           >
             Other providers? See docs <ArrowUpRightIcon className="h-4 w-4" />
           </Link>

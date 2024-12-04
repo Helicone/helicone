@@ -60,7 +60,7 @@ export const TwoBillion = ({ className }: { className?: string }) => (
         width="1410.29"
         height="311.979"
         filterUnits="userSpaceOnUse"
-        color-interpolation-filters="sRGB"
+        colorInterpolationFilters="sRGB"
       >
         <feFlood flood-opacity="0" result="BackgroundImageFix" />
         <feGaussianBlur in="BackgroundImageFix" stdDeviation="5" />
@@ -84,8 +84,8 @@ export const TwoBillion = ({ className }: { className?: string }) => (
         y2="256.5"
         gradientUnits="userSpaceOnUse"
       >
-        <stop offset="0.65" stop-color="white" />
-        <stop offset="1" stop-color="white" stop-opacity="0" />
+        <stop offset="0.65" stopColor="white" />
+        <stop offset="1" stopColor="white" stopOpacity="0" />
       </linearGradient>
       <linearGradient
         id="paint1_linear_196_9728"
@@ -95,8 +95,8 @@ export const TwoBillion = ({ className }: { className?: string }) => (
         y2="302.5"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="white" />
-        <stop offset="1" stop-color="white" stop-opacity="0" />
+        <stop stopColor="white" />
+        <stop offset="1" stopColor="white" stopOpacity="0" />
       </linearGradient>
       <linearGradient
         id="paint2_linear_196_9728"
@@ -106,8 +106,8 @@ export const TwoBillion = ({ className }: { className?: string }) => (
         y2="142.5"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="white" stop-opacity="0.3" />
-        <stop offset="1" stop-color="white" stop-opacity="0" />
+        <stop stopColor="white" stopOpacity="0.3" />
+        <stop offset="1" stopColor="white" stopOpacity="0" />
       </linearGradient>
     </defs>
   </svg>

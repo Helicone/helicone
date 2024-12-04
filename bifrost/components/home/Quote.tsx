@@ -24,12 +24,14 @@ const Quote = () => {
               <img
                 src="/static/qawolf.webp"
                 alt="qawolf"
-                className="w-24 pb-2"
+                className="w-32 pb-2"
               />
-              <h4 className="text-[13px] sm:text-xl font-medium whitespace-nowrap">
+              <h4 className="text-[17px] sm:text-xl font-medium whitespace-nowrap">
                 Nishant Shukla
               </h4>
-              <p className="text-[11px] sm:text-lg w-auto">Sr. Director of AI</p>
+              <p className="text-[15px] sm:text-lg w-auto">
+                Sr. Director of AI
+              </p>
             </div>
           </div>
           {/* </div> */}

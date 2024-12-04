@@ -9,7 +9,7 @@ const SVG = () => (
   <svg
     // width="754"
     // height="525"
-    className="w-full h-full order-2 md:order-1"
+    className="w-full h-full"
     viewBox="0 0 754 525"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
@@ -2409,16 +2409,20 @@ const LLMLifecycle = () => {
       >
         <div className="flex flex-col h-full justify-between">
           <div className="flex flex-col flex-1 gap-6">
-            <h2 className="text-4xl sm:text-5xl font-semibold text-black max-w-[520px] text-wrap sm:leading-[57.6px]">
+            <h2 className="font-semibold text-4xl sm:text-5xl leading-[120%] max-w-[520px] text-wrap text-black">
+              {/* <h2 className="text-4xl sm:text-5xl font-semibold text-black max-w-[520px] text-wrap sm:leading-[57.6px]"> */}
               Designed for the{" "}
               <span className="text-brand">entire LLM lifecycle</span>
             </h2>
-            <p className="text-lg sm:text-xl max-w-[400px] leading-relaxed text-wrap">
+            <p className="text-lg sm:text-xl max-w-[440px] text-wrap font-light leading-relaxed text-landing-description">
               The CI workflow to take your LLM application from MVP to
               production, and from production to perfection.
             </p>
           </div>
-          <p className="items-center text-xs max-w-[300px] gap-2 text-slate-300 self-start text-wrap">
+        </div>
+        <SVG />
+        <div className="absolute bottom-4 right-4 w-full flex justify-end">
+          <p className="text-[10px] max-w-[240px] sm:max-w-full text-slate-300 self-start text-wrap text-right">
             Adapted from an illustration by GeeTest and YorKun 右可, licensed
             under{" "}
             <a
@@ -2430,7 +2434,6 @@ const LLMLifecycle = () => {
             </a>
           </p>
         </div>
-        <SVG />
       </div>
     </div>
   );

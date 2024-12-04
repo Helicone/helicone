@@ -27,9 +27,9 @@ const LightPurple = ({ className }: { className?: string }) => (
         width="1631"
         height="1631"
         filterUnits="userSpaceOnUse"
-        color-interpolation-filters="sRGB"
+        colorInterpolationFilters="sRGB"
       >
-        <feFlood flood-opacity="0" result="BackgroundImageFix" />
+        <feFlood floodOpacity="0" result="BackgroundImageFix" />
         <feBlend
           mode="normal"
           in="SourceGraphic"
@@ -73,9 +73,9 @@ const Purple = ({ className }: { className?: string }) => (
         width="1760.97"
         height="1232.46"
         filterUnits="userSpaceOnUse"
-        color-interpolation-filters="sRGB"
+        colorInterpolationFilters="sRGB"
       >
-        <feFlood flood-opacity="0" result="BackgroundImageFix" />
+        <feFlood floodOpacity="0" result="BackgroundImageFix" />
         <feBlend
           mode="normal"
           in="SourceGraphic"
@@ -111,9 +111,9 @@ const Blue = ({ className }: { className?: string }) => (
         width="1631"
         height="1631"
         filterUnits="userSpaceOnUse"
-        color-interpolation-filters="sRGB"
+        colorInterpolationFilters="sRGB"
       >
-        <feFlood flood-opacity="0" result="BackgroundImageFix" />
+        <feFlood floodOpacity="0" result="BackgroundImageFix" />
         <feBlend
           mode="normal"
           in="SourceGraphic"
@@ -152,9 +152,9 @@ const Pink = ({ className }: { className?: string }) => (
         width="1950.73"
         height="1720.48"
         filterUnits="userSpaceOnUse"
-        color-interpolation-filters="sRGB"
+        colorInterpolationFilters="sRGB"
       >
-        <feFlood flood-opacity="0" result="BackgroundImageFix" />
+        <feFlood floodOpacity="0" result="BackgroundImageFix" />
         <feBlend
           mode="normal"
           in="SourceGraphic"
@@ -233,9 +233,9 @@ const LightPurpleBottom = ({ className }: { className?: string }) => (
         width="1631"
         height="1631"
         filterUnits="userSpaceOnUse"
-        color-interpolation-filters="sRGB"
+        colorInterpolationFilters="sRGB"
       >
-        <feFlood flood-opacity="0" result="BackgroundImageFix" />
+        <feFlood floodOpacity="0" result="BackgroundImageFix" />
         <feBlend
           mode="normal"
           in="SourceGraphic"
@@ -319,9 +319,9 @@ const PinkBottom = ({ className }: { className?: string }) => (
         width="1697"
         height="1546"
         filterUnits="userSpaceOnUse"
-        color-interpolation-filters="sRGB"
+        colorInterpolationFilters="sRGB"
       >
-        <feFlood flood-opacity="0" result="BackgroundImageFix" />
+        <feFlood floodOpacity="0" result="BackgroundImageFix" />
         <feBlend
           mode="normal"
           in="SourceGraphic"

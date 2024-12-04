@@ -194,7 +194,7 @@ const OpenSource = async () => {
           <h2 className="font-semibold text-4xl sm:text-5xl leading-[120%]  text-black">
             Proudly <span className="text-brand">open-source</span>
           </h2>
-          <p className="text-base sm:text-xl">
+          <p className="text-lg sm:text-xl font-light leading-relaxed text-landing-description">
             We value transparency and we believe in the power of community.
           </p>
         </div>
@@ -284,9 +284,9 @@ const OpenSource = async () => {
         <Link
           href="/llm-cost"
           target="_blank"
-          className="col-span-1 md:col-span-4 p-6 bg-slate-50 rounded-xl border border-slate-200 flex justify-between relative hover:bg-slate-100"
+          className="col-span-1 md:col-span-4 px-6 pt-6 pb-2 sm:pb-6 bg-slate-50 rounded-xl border border-slate-200 flex flex-col sm:flex-row items-center sm:items-stretch gap-y-8 justify-between relative hover:bg-slate-100"
         >
-          <div className="flex flex-col gap-10">
+          <div className="flex flex-col gap-4 sm:gap-10">
             <div className="flex flex-col gap-2">
               <p className="text-sm text-slate-500">Built by Helicone</p>
               <div className="flex items-center gap-2">
@@ -314,7 +314,6 @@ const OpenSource = async () => {
           <div className="flex flex-col h-full justify-between">
             <div className="flex flex-col gap-2">
               <p className="text-sm text-slate-500">Built by Helicone</p>
-
               <div className="flex items-center gap-2">
                 <h3 className="text-xl sm:text-2xl font-semibold text-black">
                   Open Stats

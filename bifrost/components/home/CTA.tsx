@@ -60,15 +60,15 @@ const CTA = () => {
         <Link href="https://us.helicone.ai/signup" className="z-[10]">
           <Button
             size="lg"
-            className="lgxl:gap-8 text-base md:text-[40px] py-[18px] md:py-12 px-4 md:px-12 bg-brand hover:bg-brand/100 text-white font-normal rounded-lg md:rounded-2xl z-[10]"
+            className="md:gap-3 text-base md:text-[40px] py-[18px] md:py-12 px-4 md:px-12 bg-brand hover:bg-brand/100 text-white font-normal rounded-lg md:rounded-2xl z-[10]"
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
           >
             Try Helicone for free
             {isHovered && (
               <ChevronRightIcon
-                className="w-12 sm:w-5 h-12 sm:h-5"
-                strokeWidth={3}
+                className="md:w-12 w-5 md:h-12 h-5"
+                strokeWidth={2.5}
               />
             )}
           </Button>

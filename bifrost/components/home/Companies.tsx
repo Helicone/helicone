@@ -10,14 +10,14 @@ const Companies = () => {
         <ul className="grid grid-cols-4 lg:grid-cols-8 gap-2 lg:gap-8 px-2 md:px-8 grayscale opacity-40 items-center">
           {(
             [
-              ["/static/qawolf.webp", "qawolf", 119, 40],
-              ["/static/sunrun.webp", "sunrun", 100, 40],
-              ["/static/filevine.webp", "filevine", 98, 40],
-              ["/static/slate.webp", "slate", 78, 40],
-              ["/static/mintlify.svg", "mintlify", 113, 40],
-              ["/static/upenn.webp", "upenn", 100, 40],
-              ["/static/togetherai.webp", "togetherai", 128, 40],
-              ["/static/swiss.webp", "swiss red cross", 181, 40],
+              ["/static/togetherai.webp", "togetherai", 169, 53],
+              ["/static/qawolf.webp", "qawolf", 157, 53],
+              ["/static/sunrun.webp", "sunrun", 132, 53],
+              ["/static/filevine.webp", "filevine", 130, 53],
+              ["/static/slate.webp", "slate", 104, 53],
+              ["/static/mintlify.svg", "mintlify", 150, 53],
+              ["/static/upenn.webp", "upenn", 132, 53],
+              ["/static/swiss.webp", "swiss red cross", 240, 53],
             ] as const
           ).map((src, index) => (
             <li className="flex items-center justify-center p-2" key={index}>
