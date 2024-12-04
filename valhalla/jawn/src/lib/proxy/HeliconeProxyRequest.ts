@@ -47,6 +47,8 @@ export interface HeliconeProxyRequest {
   targetUrl: URL;
   threat?: boolean;
   flaggedForModeration?: boolean;
+  experimentColumnId: string | null;
+  experimentRowIndex: string | null;
 }
 
 const providerBaseUrlMappings: Record<
@@ -116,6 +118,10 @@ export class HeliconeProxyRequestMapper {
         requestWrapper: this.request,
         nodeId: this.request.heliconeHeaders.nodeId ?? null,
         targetUrl,
+        experimentColumnId:
+          this.request.heliconeHeaders.experimentColumnId ?? null,
+        experimentRowIndex:
+          this.request.heliconeHeaders.experimentRowIndex ?? null,
       },
       error: null,
     };

@@ -20,6 +20,7 @@ export interface TreeNodeProps {
   level: number;
   collapseAll?: boolean;
   setShowDrawer: (x: boolean) => void;
+  isRequestSingleChild?: boolean;
 }
 
 const TreeNode: React.FC<TreeNodeProps> = ({
@@ -29,6 +30,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({
   level,
   collapseAll,
   setShowDrawer,
+  isRequestSingleChild,
 }) => {
   const [closeChildren, setCloseChildren] = useState(collapseAll ?? false);
   const [selectedRequestId, setSelectedRequestId] = selectedRequestIdDispatch;
@@ -39,16 +41,22 @@ const TreeNode: React.FC<TreeNodeProps> = ({
 
   return (
     <div
-      className={level === 0 ? "p-0 m-0" : "relative flex flex-col"}
+      className={clsx(
+        level === 0 ? "p-0 m-0" : "relative flex flex-col",
+        "bg-white dark:bg-slate-950"
+      )}
       key={`${node.name}-${node.trace?.request_id}`}
     >
-      {node.children ? (
+      {!node.trace &&
+      node.children &&
+      (node.children.filter((c) => c.trace).length === 0 ||
+        node.children.filter((c) => c.trace).length > 1) ? (
         <Col className="overflow-x-auto overflow-y-hidden">
           <Row className="w-full group">
             {new Array(level).fill(null).map((_, index) => (
               <div
                 key={index}
-                className="h-9 bg-slate-50 dark:bg-slate-950 w-[24px] relative shrink-0 group-hover:bg-slate-100 group-hover:cursor-pointer"
+                className="h-9 bg-slate-50 dark:bg-slate-950 w-[24px] relative shrink-0 group-hover:bg-slate-100 dark:group-hover:bg-slate-900 group-hover:cursor-pointer"
                 onClick={() =>
                   node.children
                     ? setCloseChildren(!closeChildren)
@@ -79,6 +87,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({
                 }
                 level={level + 1}
                 setShowDrawer={setShowDrawer}
+                isRequestSingleChild={node?.children?.length === 1}
               />
             ))}
         </Col>
@@ -87,13 +96,16 @@ const TreeNode: React.FC<TreeNodeProps> = ({
           <div
             className={clsx(
               "h-[42px] w-[24px]  shrink-0 group-hover:cursor-pointer sticky top-1/2 left-0 z-[2]",
-              selectedRequestId === node.trace?.request_id
+              selectedRequestId ===
+                (node.children
+                  ? node.children[0].trace?.request_id
+                  : node.trace?.request_id)
                 ? "bg-sky-100 dark:bg-slate-900"
                 : "bg-white dark:bg-slate-950 group-hover:bg-sky-50 dark:group-hover:bg-slate-800"
             )}
             onClick={() =>
               node.children
-                ? setCloseChildren(!closeChildren)
+                ? setSelectedRequestId(node.children[0].trace?.request_id ?? "")
                 : setSelectedRequestId(node.trace?.request_id ?? "")
             }
           >
@@ -104,53 +116,63 @@ const TreeNode: React.FC<TreeNodeProps> = ({
                   <Button
                     variant="ghost"
                     className={clsx(
-                      "p-1 m-0 flex items-center hidden group-hover:block z-[20]"
-                      // selectedRequestId === node.trace?.request_id
-                      //   ? "bg-sky-100 dark:bg-sky-900 hover:bg-sky-100 dark:hover:bg-sky-900"
-                      //   : "bg-sky-50 dark:bg-slate-950 hover:bg-sky-50 dark:hover:bg-slate-900"
+                      "p-1 m-0 items-center hidden group-hover:flex z-[20]"
                     )}
                     onClick={(e) => {
                       e.stopPropagation();
-                      setSelectedRequestId(node.trace?.request_id ?? "");
+                      setSelectedRequestId(
+                        node.children
+                          ? node.children[0].trace?.request_id ?? ""
+                          : node.trace?.request_id ?? ""
+                      );
                       setShowDrawer(true);
                     }}
                   >
                     <SidebarCloseIcon className="w-4 h-4 text-slate-500" />
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent>
+                <TooltipContent side="right">
                   <p>View request</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
           </div>
 
-          {new Array(level - 1).fill(null).map((_, index) => (
-            <div
-              key={index}
-              className={clsx(
-                "h-[42px] w-[24px] relative shrink-0 group-hover:cursor-pointer",
-                selectedRequestId === node.trace?.request_id
-                  ? "bg-sky-100 dark:bg-sky-900"
-                  : "bg-white dark:bg-slate-950 group-hover:bg-sky-50 dark:group-hover:bg-slate-900"
-              )}
-              onClick={() =>
-                node.children
-                  ? setCloseChildren(!closeChildren)
-                  : setSelectedRequestId(node.trace?.request_id ?? "")
-              }
-            >
-              <div className="absolute top-0 right-[0px] w-[1px] h-[42px] bg-slate-200 dark:bg-slate-700 z-[2]" />
-            </div>
-          ))}
+          {level > 0 &&
+            new Array(level - 1).fill(null).map((_, index) => (
+              <div
+                key={index}
+                className={clsx(
+                  "h-[42px] w-[24px] relative shrink-0 group-hover:cursor-pointer",
+                  selectedRequestId ===
+                    (node.children
+                      ? node.children[0].trace?.request_id
+                      : node.trace?.request_id)
+                    ? "bg-sky-100 dark:bg-slate-900"
+                    : "bg-white dark:bg-slate-950 group-hover:bg-sky-50 dark:group-hover:bg-slate-900"
+                )}
+                onClick={() =>
+                  node.children
+                    ? setSelectedRequestId(
+                        node.children[0].trace?.request_id ?? ""
+                      )
+                    : setSelectedRequestId(node.trace?.request_id ?? "")
+                }
+              >
+                <div className="absolute top-0 right-[0px] w-[1px] h-[42px] bg-slate-200 dark:bg-slate-700 z-[2]" />
+              </div>
+            ))}
+
           <RequestNode
             selectedRequestId={selectedRequestId}
-            node={node}
+            node={node.children ? node.children[0] : node}
             setCloseChildren={setCloseChildren}
             closeChildren={closeChildren}
             setSelectedRequestId={setSelectedRequestId}
             level={level}
             setShowDrawer={setShowDrawer}
+            isRequestSingleChild={isRequestSingleChild ?? false}
+            label={node.children ? node.name : undefined}
           />
         </Row>
       )}
@@ -171,24 +193,27 @@ export const Tree: React.FC<TreeProps> = ({
   selectedRequestIdDispatch,
   collapseAll,
   setShowDrawer,
-}) => (
-  <div
-    className={clsx(
-      "font-sans bg-slate-50 dark:bg-black border-t border-slate-200 dark:border-slate-700",
-      className
-    )}
-  >
-    {data.children &&
-      data.children.map((child, index) => (
-        <TreeNode
-          key={index}
-          node={child}
-          selectedRequestIdDispatch={selectedRequestIdDispatch}
-          isLastChild={!!data.children && index === data.children.length - 1}
-          level={0}
-          collapseAll={collapseAll}
-          setShowDrawer={setShowDrawer}
-        />
-      ))}
-  </div>
-);
+}) => {
+  console.log(data);
+  return (
+    <div
+      className={clsx(
+        "font-sans bg-slate-50 dark:bg-black border-t border-slate-200 dark:border-slate-700",
+        className
+      )}
+    >
+      {data.children &&
+        data.children.map((child, index) => (
+          <TreeNode
+            key={index}
+            node={child}
+            selectedRequestIdDispatch={selectedRequestIdDispatch}
+            isLastChild={!!data.children && index === data.children.length - 1}
+            level={0}
+            collapseAll={collapseAll}
+            setShowDrawer={setShowDrawer}
+          />
+        ))}
+    </div>
+  );
+};

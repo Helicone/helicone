@@ -60,6 +60,8 @@ export interface IHeliconeHeaders {
   lytixKey: Nullable<string>;
   posthogHost: Nullable<string>;
   webhookEnabled: boolean;
+  experimentColumnId: Nullable<string>;
+  experimentRowIndex: Nullable<string>;
 }
 
 export class HeliconeHeaders<T extends IInternalHeaders>
@@ -107,6 +109,8 @@ export class HeliconeHeaders<T extends IInternalHeaders>
   posthogHost: Nullable<string>;
   webhookEnabled: boolean;
   lytixKey: Nullable<string>;
+  experimentColumnId: Nullable<string>;
+  experimentRowIndex: Nullable<string>;
 
   constructor(private headers: T) {
     const heliconeHeaders = this.getHeliconeHeaders({
@@ -141,6 +145,8 @@ export class HeliconeHeaders<T extends IInternalHeaders>
     this.posthogKey = heliconeHeaders.posthogKey;
     this.posthogHost = heliconeHeaders.posthogHost;
     this.webhookEnabled = heliconeHeaders.webhookEnabled;
+    this.experimentColumnId = heliconeHeaders.experimentColumnId;
+    this.experimentRowIndex = heliconeHeaders.experimentRowIndex;
   }
 
   private getFallBacks(): Nullable<HeliconeFallback[]> {
@@ -274,6 +280,10 @@ export class HeliconeHeaders<T extends IInternalHeaders>
       posthogHost: this.headers.get("Helicone-Posthog-Host") ?? null,
       webhookEnabled:
         this.headers.get("Helicone-Webhook-Enabled") == "true" ? true : false,
+      experimentColumnId:
+        this.headers.get("Helicone-Experiment-Column-Id") ?? null,
+      experimentRowIndex:
+        this.headers.get("Helicone-Experiment-Row-Index") ?? null,
     };
   }
 
@@ -300,6 +310,7 @@ export class HeliconeHeaders<T extends IInternalHeaders>
   private getHeliconeFeatureFlags(): IHeliconeHeaders["featureFlags"] {
     const streamForceFormat = this.headers.get("helicone-stream-force-format");
     const increaseTimeout = this.headers.get("helicone-increase-timeout");
+    const streamUsage = this.headers.get("helicone-stream-usage");
     return {
       streamForceFormat: streamForceFormat === "true",
       increaseTimeout: increaseTimeout === "true",

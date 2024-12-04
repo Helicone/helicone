@@ -22,11 +22,12 @@ import {
 import { useMemo, useState } from "react";
 import { TimeInterval } from "../../../lib/timeCalculations/time";
 import { FilterLeaf } from "../../../services/lib/filters/filterDefs";
-import { SingleFilterDef } from "../../../services/lib/filters/frontendFilterDefs";
+import {
+  ColumnType,
+  SingleFilterDef,
+} from "../../../services/lib/filters/frontendFilterDefs";
 import { clsx } from "../clsx";
 import ThemedTimeFilter from "./themedTimeFilter";
-
-import { Column } from "../../ThemedTableV2";
 import { AdvancedFilters } from "./themedAdvancedFilters";
 import ThemedModal from "./themedModal";
 import Link from "next/link";
@@ -37,6 +38,26 @@ import FiltersButton from "./table/filtersButton";
 import { OrganizationFilter } from "../../../services/lib/organization_layout/organization_layout";
 import { UIFilterRowTree } from "../../../services/lib/filters/uiFilterRowTree";
 import { Button } from "@/components/ui/button";
+import {
+  SortDirection,
+  SortLeafRequest,
+} from "../../../services/lib/sorts/requests/sorts";
+import { UserMetric } from "../../../lib/api/users/users";
+import { SortLeafUsers } from "../../../services/lib/sorts/users/sorts";
+
+export interface Column {
+  key: keyof UserMetric;
+  label: string;
+  active: boolean;
+  type?: ColumnType;
+  filter?: boolean;
+  sortBy?: SortDirection;
+  columnOrigin?: "property" | "value" | "feedback";
+  minWidth?: number;
+  align?: "center" | "inherit" | "left" | "right" | "justify";
+  toSortLeaf?: (direction: SortDirection) => SortLeafRequest | SortLeafUsers;
+  format?: (value: any, mode: "Condensed" | "Expanded") => string;
+}
 
 export function escapeCSVString(s: string | undefined): string | undefined {
   if (s === undefined) {

@@ -5,7 +5,7 @@ import {
   ChevronDoubleRightIcon,
 } from "@heroicons/react/20/solid";
 import { ArrowsPointingInIcon } from "@heroicons/react/24/outline";
-import { Tooltip } from "@mui/material";
+import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
 import { Fragment, useState } from "react";
 import { clsx } from "../clsx";
 import { useTheme } from "next-themes";
@@ -41,7 +41,7 @@ const ThemedDrawer: React.FC<ThemedDrawerProps> = ({
     <Transition.Root show={open} as={Fragment}>
       <Dialog
         as="div"
-        className={clsx(theme ?? "light", "relative z-40")}
+        className={clsx(theme ?? "light", "relative z-[200]")}
         onClose={setOpen}
       >
         <Transition.Child

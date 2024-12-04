@@ -98,6 +98,16 @@ const onConflictRequestResponseSearch = `ON CONFLICT (request_id, organization_i
 request_body_vector = EXCLUDED.request_body_vector,
 response_body_vector = EXCLUDED.response_body_vector`;
 
+const experimentCellValueColumns = new pgp.helpers.ColumnSet(
+  ["column_id", "row_index", "value", "status"],
+  { table: "experiment_cell" }
+);
+
+const onConflictExperimentCellValue =
+  " ON CONFLICT (column_id, row_index) DO UPDATE SET " +
+  "value = EXCLUDED.value, " +
+  "status = EXCLUDED.status";
+
 export class LogStore {
   constructor() {}
 

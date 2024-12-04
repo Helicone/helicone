@@ -13,9 +13,11 @@ import {
   ArrowLeftIcon,
   ArrowRightIcon,
 } from "@heroicons/react/24/outline";
-import { Button, MultiSelect, MultiSelectItem, TextInput } from "@tremor/react";
+import { MultiSelect, MultiSelectItem } from "@tremor/react";
+import { Input } from "@/components/ui/input";
 import ThemedModal from "../../shared/themed/themedModal";
 import Image from "next/image";
+import { Button } from "@/components/ui/button";
 
 import {
   ProviderName,
@@ -23,10 +25,8 @@ import {
   playgroundModels,
 } from "../../../packages/cost/providers/mappings";
 import FunctionButton from "./functionButton";
-import HcButton from "../../ui/hcButton";
-import { PlusIcon } from "@heroicons/react/20/solid";
 import { ChatCompletionTool } from "openai/resources";
-import { Tooltip } from "@mui/material";
+import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
 
 import {
   AssistantPlayground,
@@ -44,7 +44,6 @@ import Link from "next/link";
 import { Row } from "../../layout/common";
 import { useQuery } from "@tanstack/react-query";
 import { IslandContainer } from "@/components/ui/islandContainer";
-import { Input } from "@/components/ui/input";
 
 import { useTheme } from "next-themes";
 import { Slider } from "@/components/ui/slider";
@@ -149,10 +148,10 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
         actions={
           <div id="toolbar" className="flex flex-row items-center gap-2 w-full">
             <div className="max-w-sm w-[22rem]">
-              <TextInput
+              <Input
                 id="request-id"
                 name="request-id"
-                onValueChange={(e) => setRequestId(e)}
+                onChange={(e) => setRequestId(e.target.value)}
                 value={requestId}
                 placeholder="Enter in a Request ID"
                 className="w-full"
@@ -185,7 +184,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
         {showNewButton && (
           <Button
             onClick={() => setNewPlaygroundOpen(!newPlaygroundOpen)}
-            className="transition-all duration-300 hover:bg-sky-500 dark:hover:bg-sky-900"
+            className="transition-all duration-300"
           >
             {newPlaygroundOpen ? (
               <Row>
@@ -238,7 +237,9 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
         <div className="flex justify-between w-full h-full gap-8 min-h-[80vh]">
           <div className="flex w-full h-full ">
             {isLoading ? (
-              <div className="col-span-8 flex w-full border border-gray-300 rounded-lg bg-gray-200 h-96 animate-pulse" />
+              <div className="col-span-8 flex w-full border border-gray-300 dark:border-gray-700 rounded-lg bg-gray-200 dark:bg-gray-800 h-96 animate-pulse dark:text-gray-100 items-center justify-center">
+                Loading...
+              </div>
             ) : hasData && isChat && singleRequest !== null ? (
               <>
                 <ChatPlayground
@@ -403,8 +404,8 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                     }
                     setTemperature(parseFloat(e.target.value));
                   }}
-                  min={0}
-                  max={1}
+                  min={0.01}
+                  max={1.99}
                   step={0.01}
                   className="w-14 text-sm px-2 py-1 rounded-lg border border-gray-300"
                 />
@@ -414,7 +415,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                 onValueChange={(value) => {
                   setTemperature(value[0]);
                 }}
-                min={0}
+                min={0.01}
                 max={1.99}
                 step={0.01}
               />
@@ -465,11 +466,9 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                 <p className="font-medium text-sm text-gray-900 dark:text-gray-100">
                   Tools
                 </p>
-                <HcButton
-                  variant={"light"}
+                <Button
+                  variant={"ghost"}
                   size={"xs"}
-                  title={""}
-                  icon={PlusIcon}
                   onClick={() => {
                     const defaultTool = {
                       type: "function",

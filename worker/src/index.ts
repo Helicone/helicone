@@ -75,6 +75,7 @@ export interface BASE_Env {
   UPSTASH_KAFKA_USERNAME: string;
   UPSTASH_KAFKA_API_KEY: string;
   UPSTASH_KAFKA_PASSWORD: string;
+  HELICONE_MANUAL_ACCESS_KEY: string;
   ORG_IDS?: string;
   PERCENT_LOG_KAFKA?: string;
   WORKER_DEFINED_REDIRECT_URL?: string;
@@ -168,7 +169,7 @@ function modifyEnvBasedOnPath(env: Env, request: RequestWrapper): Env {
       if (isRootPath(url) && request.getMethod() === "GET") {
         return {
           ...env,
-          WORKER_DEFINED_REDIRECT_URL: "https://together.xyz",
+          WORKER_DEFINED_REDIRECT_URL: "THIS_DOESNT_MATTER",
         };
       } else {
         if (url.pathname.startsWith("/oai2ant")) {
@@ -223,6 +224,18 @@ function modifyEnvBasedOnPath(env: Env, request: RequestWrapper): Env {
         ...env,
         WORKER_TYPE: "GATEWAY_API",
         GATEWAY_TARGET: "https://api.hyperbolic.xyz",
+      };
+    } else if (hostParts[0].includes("cerebras")) {
+      return {
+        ...env,
+        WORKER_TYPE: "GATEWAY_API",
+        GATEWAY_TARGET: "https://api.cerebras.ai",
+      };
+    } else if (hostParts[0].includes("mistral")) {
+      return {
+        ...env,
+        WORKER_TYPE: "GATEWAY_API",
+        GATEWAY_TARGET: "https://api.mistral.ai",
       };
     } else if (hostParts[0].includes("fireworks")) {
       if (isRootPath(url) && request.getMethod() === "GET") {

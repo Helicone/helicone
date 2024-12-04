@@ -4,26 +4,6 @@ export const MODEL_LIST: {
   provider: string;
 }[] = [
   {
-    value: "gpt-3.5-turbo",
-    label: "gpt-3.5-turbo",
-    provider: "openai",
-  },
-  {
-    value: "gpt-3.5-turbo-16k",
-    label: "gpt-3.5-turbo-16k",
-    provider: "openai",
-  },
-  {
-    value: "gpt-3.5-turbo-instruct",
-    label: "gpt-3.5-turbo-instruct",
-    provider: "openai",
-  },
-  {
-    value: "gpt-3.5-turbo-1106",
-    label: "gpt-3.5-turbo-1106",
-    provider: "openai",
-  },
-  {
     value: "gpt-4",
     label: "gpt-4",
     provider: "openai",
@@ -56,6 +36,41 @@ export const MODEL_LIST: {
   {
     value: "gpt-4-1106-preview",
     label: "gpt-4-1106-preview",
+    provider: "openai",
+  },
+  {
+    value: "claude-3-5-sonnet-20241022",
+    label: "claude-3-5-sonnet-20241022",
+    provider: "anthropic",
+  },
+  {
+    value: "claude-3-opus-20240229",
+    label: "claude-3-opus-20240229",
+    provider: "anthropic",
+  },
+  {
+    value: "claude-3-haiku-20240307",
+    label: "claude-3-haiku-20240307",
+    provider: "anthropic",
+  },
+  {
+    value: "gpt-3.5-turbo",
+    label: "gpt-3.5-turbo",
+    provider: "openai",
+  },
+  {
+    value: "gpt-3.5-turbo-16k",
+    label: "gpt-3.5-turbo-16k",
+    provider: "openai",
+  },
+  {
+    value: "gpt-3.5-turbo-instruct",
+    label: "gpt-3.5-turbo-instruct",
+    provider: "openai",
+  },
+  {
+    value: "gpt-3.5-turbo-1106",
+    label: "gpt-3.5-turbo-1106",
     provider: "openai",
   },
 ];

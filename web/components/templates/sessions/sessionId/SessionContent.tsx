@@ -1,21 +1,19 @@
-import {
-  ArrowTurnDownRightIcon,
-  Bars3BottomRightIcon,
-  ChatBubbleLeftIcon,
-} from "@heroicons/react/24/outline";
 import { useRouter } from "next/router";
 import { useMemo, useState } from "react";
 import { Session } from "../../../../lib/sessions/sessionTypes";
 import { useLocalStorage } from "../../../../services/hooks/localStorage";
 import { useGetRequests } from "../../../../services/hooks/requests";
 import { Col } from "../../../layout/common/col";
-import ThemedTabSelector from "../../../shared/themed/themedTabSelector";
 import getNormalizedRequest from "../../requestsV2/builder/requestBuilder";
 import RequestDrawerV2 from "../../requestsV2/requestDrawerV2";
 import { BreadCrumb } from "./breadCrumb";
 import ChatSession from "./Chat/ChatSession";
-import { TraceSpan } from "./Span";
 import TreeView from "./Tree/TreeView";
+import { Row } from "@/components/layout/common";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { EyeIcon, EyeOffIcon } from "lucide-react";
+import LoadingAnimation from "@/components/shared/loadingAnimation";
 
 interface SessionContentProps {
   session: Session;
@@ -23,25 +21,18 @@ interface SessionContentProps {
   requests: ReturnType<typeof useGetRequests>;
 }
 
-const TABS = [
-  {
-    id: "span",
-    label: "Span",
-    icon: <Bars3BottomRightIcon className="size-5" />,
-  },
+export const TABS = [
   {
     id: "tree",
     label: "Tree",
-    icon: <ArrowTurnDownRightIcon className="size-5" />,
   },
   {
     id: "chat",
     label: "Chat",
-    icon: <ChatBubbleLeftIcon className="size-5" />,
   },
 ] as const;
 
-const SessionContent: React.FC<SessionContentProps> = ({
+export const SessionContent: React.FC<SessionContentProps> = ({
   session,
   session_id,
   requests,
@@ -65,6 +56,8 @@ const SessionContent: React.FC<SessionContentProps> = ({
     );
   };
 
+  const [openDrawer, setOpenDrawer] = useState(false);
+
   const [currentTopView, setCurrentTopView] = useLocalStorage(
     "currentTopView",
     (view as (typeof TABS)[number]["id"]) ?? "tree"
@@ -86,76 +79,137 @@ const SessionContent: React.FC<SessionContentProps> = ({
     return dates.sort((a, b) => b.getTime() - a.getTime())?.[0] ?? undefined;
   }, [requests.requests.requests]);
 
+  const requestWithFeedback = useMemo(() => {
+    return requests.requests.requests?.find(
+      (r) => r.properties["Helicone-Session-Feedback"]
+    );
+  }, [requests.requests.requests]);
+
+  const [showSpan, setShowSpan] = useLocalStorage("showSpan-TreeView", true);
+
+  if (requests.requests.isLoading) {
+    return (
+      <div className="h-screen w-full flex justify-center items-center">
+        <LoadingAnimation />
+      </div>
+    );
+  }
+
   return (
-    <Col className="gap-[12px]">
-      <BreadCrumb
-        // @ts-ignore
-        users={session.traces
-          .map((trace) => trace.request.user)
-          .filter((user) => user !== "" && user != null)}
-        models={session.traces.map((trace) => trace.request.model ?? "")}
-        promptTokens={session.traces.reduce(
-          (acc, trace) => acc + (trace?.request?.promptTokens || 0),
-          0
-        )}
-        completionTokens={session.traces.reduce(
-          (acc, trace) => acc + (trace?.request?.promptTokens || 0),
-          0
-        )}
-        sessionId={session_id as string}
-        numTraces={session.traces.length}
-        sessionCost={session.session_cost_usd}
-        startTime={startTime}
-        endTime={endTime}
-      />
-      <ThemedTabSelector
-        tabs={TABS as any}
-        currentTab={currentTopView}
-        onTabChange={(tabId) =>
-          setCurrentTopView(tabId as (typeof TABS)[number]["id"])
+    <Col className="h-screen">
+      <Tabs
+        value={currentTopView}
+        onValueChange={(tab) =>
+          setCurrentTopView(tab as (typeof TABS)[number]["id"])
         }
-      />
+        className="flex flex-col h-full"
+      >
+        <div className="sticky top-0 bg-white dark:bg-slate-950 z-10">
+          <Row className="items-center justify-between">
+            <BreadCrumb
+              className="mx-8 pt-10"
+              // @ts-ignore
+              users={session.traces
+                .map((trace) => trace.request.user)
+                .filter((user) => user !== "" && user != null)}
+              models={session.traces.map((trace) => trace.request.model ?? "")}
+              promptTokens={session.traces.reduce(
+                (acc, trace) =>
+                  acc + (parseInt(`${trace?.request?.promptTokens}`) || 0),
+                0
+              )}
+              completionTokens={session.traces.reduce(
+                (acc, trace) =>
+                  acc + (parseInt(`${trace?.request?.completionTokens}`) || 0),
+                0
+              )}
+              sessionId={session_id as string}
+              numTraces={session.traces.length}
+              sessionCost={session.session_cost_usd}
+              startTime={startTime}
+              endTime={endTime}
+              sessionFeedback={
+                requestWithFeedback?.properties["Helicone-Session-Feedback"] ===
+                "1"
+                  ? true
+                  : requestWithFeedback?.properties[
+                      "Helicone-Session-Feedback"
+                    ] === "0"
+                  ? false
+                  : null
+              }
+            />
 
-      {currentTopView === "span" && (
-        <div className="bg-white p-4">
-          <TraceSpan
-            session={session}
-            selectedRequestIdDispatch={[
-              selectedRequestId,
-              handleRequestIdChange,
-            ]}
-          />
+            <Row className="gap-2 items-center mr-8">
+              {currentTopView === "tree" &&
+                (showSpan ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-[30px] text-sm font-medium flex items-center gap-1"
+                    onClick={() => setShowSpan(!showSpan)}
+                  >
+                    <EyeOffIcon width={16} height={16} />
+                    Hide span
+                  </Button>
+                ) : (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-[30px] text-sm font-medium flex items-center gap-1"
+                    onClick={() => setShowSpan(!showSpan)}
+                  >
+                    <EyeIcon width={16} height={16} />
+                    Show span
+                  </Button>
+                ))}
+              <TabsList variant="secondary" className="h-[30px]">
+                {TABS.map((tab) => (
+                  <TabsTrigger
+                    className="h-[22px] text-slate-900 text-xs"
+                    variant="secondary"
+                    key={tab.id}
+                    value={tab.id}
+                  >
+                    {tab.label}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </Row>
+          </Row>
         </div>
-      )}
 
-      {currentTopView === "tree" && (
-        <TreeView
-          session={session}
-          selectedRequestId={selectedRequestId}
-          setSelectedRequestId={handleRequestIdChange}
-          requests={requests}
-          showSpan={false}
-        />
-      )}
+        <div className="flex-grow overflow-auto">
+          <TabsContent value="tree" className="h-full">
+            <TreeView
+              session={session}
+              selectedRequestId={selectedRequestId}
+              setSelectedRequestId={handleRequestIdChange}
+              requests={requests}
+              showSpan={showSpan}
+            />
+          </TabsContent>
 
-      {currentTopView === "chat" && <ChatSession requests={requests} />}
-      <RequestDrawerV2
-        request={
-          requests.requests.requests?.find(
-            (r) => r.request_id === selectedRequestId
-          ) &&
-          getNormalizedRequest(
+          <TabsContent value="chat" className="h-full">
+            <ChatSession requests={requests} />
+          </TabsContent>
+        </div>
+
+        <RequestDrawerV2
+          request={
             requests.requests.requests?.find(
               (r) => r.request_id === selectedRequestId
-            )!
-          )
-        }
-        open={selectedRequestId !== "" && currentTopView === "span"}
-        setOpen={(open) => handleRequestIdChange("")}
-        properties={[]}
-      />
+            ) &&
+            getNormalizedRequest(
+              requests.requests.requests?.find(
+                (r) => r.request_id === selectedRequestId
+              )!
+            )
+          }
+          open={selectedRequestId !== "" && openDrawer}
+          setOpen={(open) => handleRequestIdChange("")}
+        />
+      </Tabs>
     </Col>
   );
 };
-
-export default SessionContent;

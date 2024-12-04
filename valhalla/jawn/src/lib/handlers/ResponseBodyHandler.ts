@@ -39,11 +39,18 @@ function isHTML(responseBody: string): boolean {
     return false;
   }
 
-  return (
-    responseBody.includes("<html") ||
-    responseBody.includes("<HTML") ||
-    responseBody.includes("<!DOCTYPE html>")
-  );
+  const htmlIndicators = [
+    "<html",
+    "<HTML",
+    "<!DOCTYPE html>",
+    "<!DOCTYPE HTML>",
+    "<body",
+    "<BODY",
+    "<head",
+    "<HEAD",
+    "<?xml",
+  ];
+  return htmlIndicators.some((indicator) => responseBody.startsWith(indicator));
 }
 
 export class ResponseBodyHandler extends AbstractLogHandler {
@@ -57,7 +64,8 @@ export class ResponseBodyHandler extends AbstractLogHandler {
         calculateModel(
           context.processedLog.request.model,
           context.processedLog.response.model,
-          context.message.heliconeMeta.modelOverride
+          context.message.heliconeMeta.modelOverride,
+          this.getModelFromPath(context.message.log.request.path)
         ) ?? undefined;
 
       const omittedResponseBody = this.handleOmitResponseBody(
@@ -105,6 +113,22 @@ export class ResponseBodyHandler extends AbstractLogHandler {
     }
   }
 
+  private getModelFromPath(path: string): string {
+    const regex1 = /\/engines\/([^/]+)/;
+    const regex2 = /models\/([^/:]+)/;
+
+    let match = path.match(regex1);
+
+    if (!match) {
+      match = path.match(regex2);
+    }
+
+    if (match && match[1]) {
+      return match[1];
+    }
+
+    return "";
+  }
   private processResponseBodyImages(
     responseId: string,
     responseBody: any,

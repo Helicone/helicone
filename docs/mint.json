@@ -32,6 +32,9 @@
   "analytics": {
     "koala": {
       "publicApiKey": "pk_28dd6b0bb95629a42e92bd526a1234a9fc79"
+    },
+    "posthog": {
+      "apiKey": "phc_jeluwNoJNpc7zEzkQrPbjyMOqdnJQjFAVr849LaEaPG"
     }
   },
   "colors": {
@@ -189,18 +192,31 @@
         },
         "getting-started/integration-method/deepinfra",
         "getting-started/integration-method/openrouter",
-        "getting-started/integration-method/litellm",
+        {
+          "group": "LiteLLM",
+          "pages": [
+            "getting-started/integration-method/litellm-openllmetry",
+            "getting-started/integration-method/litellm"
+          ],
+          "icon": "code",
+          "iconType": "solid"
+        },
         "getting-started/integration-method/fireworks",
         {
           "group": "Vector DB",
           "pages": [
+            "integrations/vectordb/python",
             "integrations/vectordb/javascript",
             "integrations/vectordb/curl"
           ]
         },
         {
           "group": "Tools",
-          "pages": ["integrations/tools/javascript", "integrations/tools/curl"]
+          "pages": [
+            "integrations/tools/python",
+            "integrations/tools/javascript",
+            "integrations/tools/curl"
+          ]
         }
       ]
     },
@@ -228,14 +244,29 @@
     {
       "group": "Features",
       "pages": [
+        {
+          "group": "Evaluation",
+          "pages": [
+            "features/advanced-usage/feedback",
+            "features/advanced-usage/scores"
+          ],
+          "icon": "chart-line",
+          "iconType": "solid"
+        },
         "features/sessions",
         "features/prompts",
+        {
+          "group": "Webhooks",
+          "pages": ["features/webhooks", "features/webhooks-testing"],
+          "icon": "webhook",
+          "iconType": "solid"
+        },
+
         "features/advanced-usage/custom-properties",
         "features/advanced-usage/caching",
         "features/advanced-usage/omit-logs",
         "features/advanced-usage/user-metrics",
-        "features/advanced-usage/feedback",
-        "features/advanced-usage/scores",
+        "features/fine-tuning",
         "getting-started/integration-method/gateway-fallbacks",
         "features/advanced-usage/retries",
         "features/advanced-usage/custom-rate-limits",
@@ -264,8 +295,10 @@
         {
           "group": "Cookbooks",
           "pages": [
+            "guides/cookbooks/fine-tune",
             "guides/cookbooks/experiments",
             "guides/cookbooks/getting-user-requests",
+            "guides/cookbooks/getting-sessions",
             "guides/cookbooks/etl",
             "guides/cookbooks/replay-session",
             "guides/cookbooks/predefining-request-id",
@@ -274,6 +307,17 @@
             "guides/cookbooks/github-actions",
             "guides/cookbooks/debugging",
             "guides/cookbooks/labeling-request-data"
+          ]
+        },
+        {
+          "group": "Prompt Engineering",
+          "pages": [
+            "guides/prompt-engineering/be-specific-and-clear",
+            "guides/prompt-engineering/use-structured-formats",
+            "guides/prompt-engineering/leverage-role-playing",
+            "guides/prompt-engineering/implement-few-shot-learning",
+            "guides/prompt-engineering/use-constrained-outputs",
+            "guides/prompt-engineering/use-chain-of-thought-prompting"
           ]
         }
       ]
@@ -297,7 +341,25 @@
         "faq/overview",
         {
           "group": "Categories",
-          "pages": ["faq/tag/platform", "faq/tag/security", "faq/tag/concepts"]
+          "pages": [
+            "faq/tag/platform",
+            "faq/tag/security",
+            "faq/tag/concepts",
+            "faq/tag/fine-tuning"
+          ]
+        },
+        {
+          "group": "",
+          "pages": [
+            "faq/openai-fine-tuning-api",
+            "faq/llm-fine-tuning-time",
+            "faq/rag-vs-fine-tuning",
+            "faq/compliance",
+            "faq/enable-stream-usage",
+            "faq/how-encryption-works",
+            "faq/secret-vs-public-key",
+            "faq/soc2"
+          ]
         }
       ]
     },

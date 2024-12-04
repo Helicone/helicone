@@ -1,17 +1,17 @@
 import { GetServerSidePropsContext } from "next";
 import { User } from "@supabase/auth-helpers-react";
 import { ReactElement } from "react";
-
-import ExperimentTablePageEmpty from "../../../components/templates/prompts/experiments/table/experimentTablePageEmpty";
 import AuthLayout from "../../../components/layout/auth/authLayout";
 import { SupabaseServerWrapper } from "../../../lib/wrappers/supabase";
+import { ExperimentTable } from "../../../components/templates/prompts/experiments/table/ExperimentTable";
 
 interface ExperimentIdPage {
   user: User;
+  experimentTableId: string;
 }
 
 const ExperimentId = (props: ExperimentIdPage) => {
-  return <ExperimentTablePageEmpty />;
+  return <ExperimentTable experimentTableId={props.experimentTableId} />;
 };
 
 export default ExperimentId;
@@ -38,6 +38,7 @@ export const getServerSideProps = async (
   return {
     props: {
       user: session.user,
+      experimentTableId: context.params?.id,
     },
   };
 };

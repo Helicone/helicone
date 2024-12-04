@@ -1,24 +1,24 @@
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hoverCard";
+import { Input } from "@/components/ui/input";
+import { Tooltip, TooltipTrigger } from "@/components/ui/tooltip";
 import { DocumentTextIcon } from "@heroicons/react/24/outline";
+import { TooltipContent } from "@radix-ui/react-tooltip";
+import { InfoIcon } from "lucide-react";
+import Link from "next/link";
 import { getTimeAgo } from "../../../lib/sql/timeHelpers";
 import { Col } from "../../layout/common/col";
-import { clsx } from "../../shared/clsx";
 import { Row } from "../../layout/common/row";
-import { Input } from "@/components/ui/input";
-import { useState } from "react";
-import { TooltipTrigger, Tooltip } from "@/components/ui/tooltip";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { Card } from "@/components/ui/card";
-import { InfoIcon } from "lucide-react";
-import { HoverCardContent, HoverCardTrigger } from "@/components/ui/hoverCard";
-import { HoverCard } from "@/components/ui/hoverCard";
-import { TooltipContent } from "@radix-ui/react-tooltip";
+import { clsx } from "../../shared/clsx";
 
 interface SessionNameSelectionProps {
-  sessionIdSearch: string;
-  setSessionIdSearch: (value: string) => void;
-  sessionNameSearch: string;
-  setSessionNameSearch: (value: string) => void;
+  sessionNameSearch?: string;
+  setSessionNameSearch: (value?: string) => void;
   sessionNames: Array<{
     name: string;
     created_at: string;
@@ -26,21 +26,17 @@ interface SessionNameSelectionProps {
     last_used: string;
     session_count: number;
   }>;
-  selectedName: string;
-  setSelectedName: (name: string) => void;
+  selectedName?: string;
+  setSelectedName: (name?: string) => void;
 }
 
 const SessionNameSelection = ({
   sessionNameSearch,
   setSessionNameSearch,
-  sessionIdSearch,
-  setSessionIdSearch,
   sessionNames,
   selectedName,
   setSelectedName,
 }: SessionNameSelectionProps) => {
-  const [selectedCard, setSelectedCard] = useState<string | null>(null);
-
   return (
     <Col className="min-w-[20em] min-h-[calc(100vh-56px)] bg-slate-50 dark:bg-black border-r border-slate-200 dark:border-slate-800 place-items-stretch">
       <Row className="items-center border-b">
@@ -71,7 +67,7 @@ const SessionNameSelection = ({
             </Button>
           </TooltipTrigger>
           <TooltipContent>
-            <Card className="py-1 px-2 text-xs mb-1">View doc</Card>
+            <Card className="py-1 px-2 text-xs mb-1">View doccumentation</Card>
           </TooltipContent>
         </Tooltip>
       </Row>
@@ -82,13 +78,18 @@ const SessionNameSelection = ({
             key={seshName.name}
             className={clsx(
               "shadow-sm p-4 w-full items-start text-left rounded-none cursor-pointer border-0 border-b",
-              selectedCard === seshName.name
+              selectedName === seshName.name
                 ? "bg-sky-100 dark:bg-slate-900"
                 : "hover:bg-sky-50 dark:hover:bg-slate-700/50"
             )}
             onClick={() => {
-              setSelectedName(seshName.name);
-              setSelectedCard(seshName.name);
+              if (seshName.name === selectedName) {
+                setSelectedName(undefined);
+                setSessionNameSearch(undefined);
+              } else {
+                setSelectedName(seshName.name);
+                setSessionNameSearch(undefined);
+              }
             }}
           >
             <Row className="flex w-full justify-between items-center gap-2 mb-2">
@@ -139,7 +140,7 @@ const SessionNameSelection = ({
               <div
                 className={clsx(
                   "border border-slate-300 dark:border-slate-700 rounded-full h-4 w-4 flex items-center justify-center",
-                  selectedCard === seshName.name
+                  selectedName === seshName.name
                     ? "bg-sky-500 dark:bg-sky-500/80"
                     : "bg-white dark:bg-slate-700/50"
                 )}

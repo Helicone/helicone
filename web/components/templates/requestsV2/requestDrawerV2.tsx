@@ -1,5 +1,5 @@
 import { BeakerIcon, ClipboardDocumentIcon } from "@heroicons/react/24/outline";
-import { Tooltip } from "@mui/material";
+import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
 import { useRouter } from "next/router";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedDrawer from "../../shared/themed/themedDrawer";
@@ -7,6 +7,7 @@ import { NormalizedRequest } from "./builder/abstractRequestBuilder";
 import { ArrowDownIcon, ArrowUpIcon } from "@heroicons/react/20/solid";
 import { clsx } from "../../shared/clsx";
 import RequestRow from "./requestRow";
+import { useMemo } from "react";
 
 interface RequestDrawerV2Props {
   open: boolean;
@@ -16,7 +17,7 @@ interface RequestDrawerV2Props {
   onPrevHandler?: () => void;
   onNextHandler?: () => void;
   request?: NormalizedRequest;
-  properties: string[];
+  properties?: string[];
 }
 
 const RequestDrawerV2 = (props: RequestDrawerV2Props) => {
@@ -28,12 +29,19 @@ const RequestDrawerV2 = (props: RequestDrawerV2Props) => {
     onPrevHandler,
     onNextHandler,
     request,
-    properties,
+    properties: propsProperties,
   } = props;
 
   const { setNotification } = useNotification();
   const router = useRouter();
 
+  const properties = useMemo(
+    () =>
+      ((propsProperties?.length ?? 0) > 0
+        ? propsProperties
+        : Object.keys(request?.customProperties ?? {})) ?? [],
+    [request, propsProperties]
+  );
   const setOpenHandler = (drawerOpen: boolean) => {
     // if the drawerOpen boolean is true, open the drawer
     if (drawerOpen) {

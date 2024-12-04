@@ -239,9 +239,7 @@ const FilterTreeEditor: React.FC<FilterTreeEditorProps> = ({
       );
 
       return path.length === 1 ? (
-        <div className="flex flex-col  dark:bg-[#17191d] py-1  rounded-sm">
-          {filterRow}
-        </div>
+        <div className="flex flex-col py-1 rounded-sm">{filterRow}</div>
       ) : (
         filterRow
       );

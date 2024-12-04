@@ -43,7 +43,6 @@ export const TraceSpan = ({
       (trace.end_unix_timestamp_ms - trace.start_unix_timestamp_ms) / 1000,
     trace: trace,
   }));
-  console.log(spanData, "spanData");
   const roundedRadius = 5;
 
   const domain = [
@@ -67,6 +66,11 @@ export const TraceSpan = ({
             layout="vertical"
             barSize={barSize}
             margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+            onClick={(e) => {
+              setSelectedRequestId(
+                e.activePayload?.[0]?.payload.trace.request_id ?? ""
+              );
+            }}
           >
             <CartesianGrid
               strokeDasharray="3 3"
@@ -278,12 +282,6 @@ export const TraceSpan = ({
                         <h3 className="text-sm font-semibold text-slate-700">
                           {trace?.name}
                         </h3>
-                        {/* <div
-                          className={clsx(
-                            "w-2 h-2 rounded-lg animate-pulse",
-                            bgColor
-                          )}
-                        ></div> */}
                       </Row>
                       <Row className="gap-1 items-center">
                         <Clock4Icon
@@ -311,17 +309,8 @@ export const TraceSpan = ({
               stackId="a"
               fill="rgba(0,0,0,0)"
               isAnimationActive={false}
-            >
-              {/* {spanData.map((entry, index) => (
-                 <Cell key={`cell-${index}`} />
-               ))} */}
-            </Bar>
-            <Bar
-              dataKey="duration"
-              stackId="a"
-              fill="rgba(0,0,0,0)"
-              // className="text-black"
             ></Bar>
+            <Bar dataKey="duration" stackId="a" fill="rgba(0,0,0,0)"></Bar>
           </BarChart>
         </ResponsiveContainer>
       </div>

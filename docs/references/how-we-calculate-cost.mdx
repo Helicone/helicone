@@ -27,7 +27,7 @@ We capture this data, and we estimate the cost based on the model returned in th
 
 ### OpenAI Streaming
 
-Unlike non-streaming requests, OpenAI streaming requests do not return the `usage` tag. Therefore, we rely on 3rd party tokenizers like [TikToken](https://github.com/openai/tiktoken) to count our tokens. The calculation becomes complex when handling Chat messages, as hidden tokens are abstracted away from the user. To accurately estimate the amount of prompt and completion tokens, we have reverse-engineered the hidden tokens.
+To calculate cost using OpenAI streaming please look at enabling the [stream usage flag docs](/faq/enable-stream-usage#incorrect-cost-calculation-while-streaming)
 
 ### Anthropic Requests
 
@@ -37,10 +37,16 @@ In the case of Anthropic requests, there is no supported method for calculating 
 
 For a detailed look at how we calculate LLM costs, please follow this link: [https://github.com/Helicone/helicone/tree/main/costs](https://github.com/Helicone/helicone/tree/main/costs)
 
-<Note>
+<Tip>
+  If you want to calculate costs across models and providers, you can use our
+  free, open-source tool with 300+ models: [LLM API Pricing
+  Calculator](https://www.helicone.ai/llm-cost)
+</Tip>
+
+<Info>
   Please note that these methods are based on our current understanding and may
   be subject to changes in the future as APIs and token counting methodologies
   evolve.
-</Note>
+</Info>
 
 <QuestionsSection />

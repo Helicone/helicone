@@ -1,5 +1,5 @@
 import AuthHeader from "../../../../shared/authHeader";
-import { useExperiments } from "../../../../../services/hooks/prompts/experiments";
+import { useExperimentTables } from "../../../../../services/hooks/prompts/experiments";
 import ThemedTable from "../../../../shared/themed/table/themedTable";
 import { useRouter } from "next/router";
 import { PlusIcon, DocumentPlusIcon } from "@heroicons/react/24/outline";
@@ -7,25 +7,86 @@ import useNotification from "../../../../shared/notification/useNotification";
 import { usePrompts } from "../../../../../services/hooks/prompts/prompts";
 import { StartFromPromptDialog } from "./components/startFromPromptDialog";
 import { Dialog, DialogTrigger } from "../../../../ui/dialog";
-
-interface ExperimentsPageProps {}
-
 import { useState } from "react";
-const ExperimentsPage = (props: ExperimentsPageProps) => {
+import { useJawnClient } from "../../../../../lib/clients/jawnHook";
+import { getExampleExperimentPrompt } from "./helpers/basePrompt";
+
+const ExperimentsPage = () => {
+  const jawn = useJawnClient();
   const notification = useNotification();
   const { prompts } = usePrompts();
   const [dialogOpen, setDialogOpen] = useState(false);
   const router = useRouter();
-  const { experiments, isLoading } = useExperiments({
-    page: 1,
-    pageSize: 25,
-  });
+  const { experiments, isLoading } = useExperimentTables();
 
   const templateOptions = [
     { id: "text-classification", name: "Text classification" },
     { id: "knowledge-retrieval", name: "Knowledge retrieval" },
     { id: "step-by-step", name: "Step-by-step instructions" },
   ];
+
+  const handleStartFromScratch = async () => {
+    const exampleExperimentPrompt = getExampleExperimentPrompt();
+    const res = await jawn.POST("/v1/prompt/create", {
+      body: {
+        userDefinedId: exampleExperimentPrompt.promptName,
+        prompt: exampleExperimentPrompt.basePrompt,
+        metadata: {
+          createdFromUi: true,
+        },
+      },
+    });
+    if (res.error || !res.data) {
+      notification.setNotification("Failed to create prompt", "error");
+      return;
+    }
+
+    if (!res.data?.data?.id || !res.data?.data?.prompt_version_id) {
+      notification.setNotification("Failed to create prompt", "error");
+      return;
+    }
+
+    const dataset = await jawn.POST("/v1/helicone-dataset", {
+      body: {
+        datasetName: "Dataset for Experiment",
+        requestIds: [],
+      },
+    });
+    if (!dataset.data?.data?.datasetId) {
+      notification.setNotification("Failed to create dataset", "error");
+      return;
+    }
+    const experimentTableResult = await jawn.POST("/v1/experiment/table/new", {
+      body: {
+        datasetId: dataset.data?.data?.datasetId!,
+        promptVersionId: res.data?.data?.prompt_version_id!,
+        newHeliconeTemplate: JSON.stringify(exampleExperimentPrompt.basePrompt),
+        isMajorVersion: false,
+        promptSubversionMetadata: {
+          experimentAssigned: true,
+        },
+        experimentMetadata: {
+          prompt_id: res.data?.data?.id!,
+          prompt_version: res.data?.data?.prompt_version_id!,
+          experiment_name: `${exampleExperimentPrompt.promptName}_V1.0` || "",
+        },
+        experimentTableMetadata: {
+          datasetId: dataset.data?.data?.datasetId!,
+          model: exampleExperimentPrompt.basePrompt.model,
+          prompt_id: res.data?.data?.id!,
+          prompt_version: res.data?.data?.prompt_version_id!,
+        },
+      },
+    });
+    if (!experimentTableResult.data?.data?.experimentId) {
+      notification.setNotification("Failed to create experiment", "error");
+      return;
+    }
+
+    await router.push(
+      `/experiments/${experimentTableResult.data?.data?.tableId}`
+    );
+  };
 
   return (
     <>
@@ -38,8 +99,8 @@ const ExperimentsPage = (props: ExperimentsPageProps) => {
         <div className="flex space-x-4 p-4">
           <div>
             <button
-              className="flex flex-col items-center justify-center w-40 h-32 bg-white rounded-lg hover:bg-transparent transition-colors border-2 border-slate-100"
-              onClick={() => router.push("/experiments/new")}
+              className="flex flex-col items-center justify-center w-40 h-32 bg-white dark:bg-slate-800 rounded-lg hover:bg-transparent transition-colors border-2 border-slate-100 dark:border-slate-700"
+              onClick={() => {}}
             >
               <PlusIcon className="w-16 h-16 text-slate-200" />
             </button>
@@ -50,7 +111,7 @@ const ExperimentsPage = (props: ExperimentsPageProps) => {
           <div className="flex flex-col items-center justify-center space-y-1">
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
               <DialogTrigger asChild>
-                <button className="flex flex-col items-center justify-center w-40 h-32 bg-white rounded-lg hover:bg-transparent transition-colors border-2 border-slate-100">
+                <button className="flex flex-col items-center justify-center w-40 h-32 bg-white dark:bg-slate-800 rounded-lg hover:bg-transparent transition-colors border-2 border-slate-100 dark:border-slate-700">
                   <DocumentPlusIcon className="w-16 h-16 text-slate-200" />
                 </button>
               </DialogTrigger>
@@ -66,7 +127,7 @@ const ExperimentsPage = (props: ExperimentsPageProps) => {
           {templateOptions.map((template) => (
             <div key={template.id}>
               <button
-                className="flex flex-col items-center justify-center w-40 h-32 bg-white rounded-lg hover:bg-transparent  transition-colors border-2 border-slate-100"
+                className="flex flex-col items-center justify-center w-40 h-32 bg-white dark:bg-slate-800 rounded-lg hover:bg-transparent transition-colors border-2 border-slate-100 dark:border-slate-700"
                 onClick={() =>
                   notification.setNotification(
                     "Templates are coming soon!",
@@ -87,7 +148,7 @@ const ExperimentsPage = (props: ExperimentsPageProps) => {
           {
             header: "Name",
             accessorFn: (row) => {
-              return row.experimentName || row.datasetName;
+              return row.name;
             },
           },
           {
@@ -95,12 +156,8 @@ const ExperimentsPage = (props: ExperimentsPageProps) => {
             accessorKey: "created_at",
             minSize: 100,
             accessorFn: (row) => {
-              return new Date(row.createdAt ?? 0).toLocaleString();
+              return new Date(row.created_at ?? 0).toLocaleString();
             },
-          },
-          {
-            header: "Model",
-            accessorKey: "model",
           },
         ]}
         defaultData={experiments}
@@ -108,13 +165,10 @@ const ExperimentsPage = (props: ExperimentsPageProps) => {
         id="experiments"
         skeletonLoading={false}
         onRowSelect={(row) => {
-          const promptVersion = prompts?.find(
-            (p) => p.id === row.promptId || ""
-          );
-
-          router.push(
-            `/prompts/${row.promptId}/subversion/${row.promptVersionId}/experiment/${row.id}`
-          );
+          const promptId = row.original_prompt_version;
+          if (promptId) {
+            router.push(`/experiments/${row.id}`);
+          }
         }}
         fullWidth={true}
       />

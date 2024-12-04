@@ -1,17 +1,23 @@
-import { useUser } from "@supabase/auth-helpers-react";
+import { useUser, useSupabaseClient } from "@supabase/auth-helpers-react";
 import { PostgrestError } from "@supabase/supabase-js";
-import { Select, SelectItem, TextInput } from "@tremor/react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { getJawnClient } from "../../../../lib/clients/jawn";
 import { useOrg } from "../../../layout/organizationContext";
 import useNotification from "../../../shared/notification/useNotification";
-import HcButton from "../../../ui/hcButton";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
-import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useJawnClient } from "@/lib/clients/jawnHook";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export const COMPANY_SIZES = ["Just me", "2-5", "5-25", "25-100", "100+"];
 
@@ -164,13 +170,13 @@ const CreateOrg = (props: CreateOrgProps) => {
                 What is your company name?
               </label>
               <div>
-                <TextInput
+                <Input
                   name="org-name"
                   id="org-name"
                   required
                   placeholder={orgContext?.currentOrg?.name}
                   value={orgName}
-                  onValueChange={(value) => setOrgName(value)}
+                  onChange={(e) => setOrgName(e.target.value)}
                 />
               </div>
             </div>
@@ -183,19 +189,17 @@ const CreateOrg = (props: CreateOrgProps) => {
                   How large is your company?
                 </label>
                 <div>
-                  <Select
-                    id="org-size"
-                    name="org-size"
-                    required
-                    placeholder="Select company size"
-                    value={orgSize}
-                    onValueChange={(value) => setOrgSize(value)}
-                  >
-                    {COMPANY_SIZES.map((o) => (
-                      <SelectItem key={o} value={o}>
-                        {o}
-                      </SelectItem>
-                    ))}
+                  <Select value={orgSize} onValueChange={setOrgSize}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select company size" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {COMPANY_SIZES.map((o) => (
+                        <SelectItem key={o} value={o}>
+                          {o}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
                   </Select>
                 </div>
               </div>
@@ -207,42 +211,22 @@ const CreateOrg = (props: CreateOrgProps) => {
                   How did you hear about us?
                 </label>
                 <div className="">
-                  <Select
-                    id="org-referral"
-                    name="org-referral"
-                    required
-                    placeholder={t("Select referral source")}
-                    value={referralType}
-                    onValueChange={(value) => setReferralType(value)}
-                  >
-                    {referralOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
+                  <Select value={referralType} onValueChange={setReferralType}>
+                    <SelectTrigger>
+                      <SelectValue placeholder={t("Select referral source")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {referralOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
                   </Select>
                 </div>
               </div>
             </div>
-            {referralType === "friend_referral" && (
-              <div className="flex flex-col space-y-2">
-                <label
-                  htmlFor="referral-code"
-                  className="block text-md font-semibold leading-6"
-                >
-                  Referral Code (optional)
-                </label>
-                <div className="">
-                  <TextInput
-                    id="referral-code"
-                    name="referral-code"
-                    placeholder={"Referral code"}
-                    value={referralCode}
-                    onValueChange={(value) => setReferralCode(value)}
-                  />
-                </div>
-              </div>
-            )}
+
             <div className="flex flex-col space-y-4">
               <div className="flex items-center space-x-2">
                 <Checkbox
@@ -278,14 +262,16 @@ const CreateOrg = (props: CreateOrgProps) => {
           </div>
         </div>
         <div className="sticky bottom-0 p-4 flex items-center justify-between">
-          <HcButton variant={"secondary"} size={"sm"} title={"Back"} />
-          <HcButton
-            variant={"primary"}
+          <Button variant={"secondary"} size={"sm"}>
+            Back
+          </Button>
+          <Button
             size={"sm"}
-            title={"Accept terms and next"}
             onClick={handleOrgCreate}
             disabled={isLoading || !termsAccepted}
-          />
+          >
+            Accept terms and next
+          </Button>
         </div>
       </div>
     </>

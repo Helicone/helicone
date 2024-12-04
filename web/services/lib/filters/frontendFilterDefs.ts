@@ -156,15 +156,7 @@ const STATUS_OPS = numberWithSuggestions([
   },
   {
     key: "400",
-    param: "400",
-  },
-  {
-    key: "401",
-    param: "401",
-  },
-  {
-    key: "404",
-    param: "404",
+    param: "400 (bad request)",
   },
   {
     key: "429",
@@ -172,15 +164,15 @@ const STATUS_OPS = numberWithSuggestions([
   },
   {
     key: "500",
-    param: "500",
+    param: "500 (internal server error)",
   },
   {
     key: "502",
-    param: "502",
+    param: "502 (bad gateway)",
   },
   {
     key: "503",
-    param: "503",
+    param: "503 (service unavailable)",
   },
   {
     key: "524",
@@ -295,60 +287,7 @@ export const REQUEST_TABLE_FILTERS: [
   },
   {
     label: "Status",
-    operators: numberWithSuggestions([
-      {
-        key: "200",
-        param: "200 (success)",
-      },
-      {
-        key: "-4",
-        param: "threat",
-      },
-      {
-        key: "-3",
-        param: "cancelled",
-      },
-      {
-        key: "-2",
-        param: "pending",
-      },
-      {
-        key: "-1",
-        param: "timeout",
-      },
-      {
-        key: "400",
-        param: "400",
-      },
-      {
-        key: "401",
-        param: "401",
-      },
-      {
-        key: "404",
-        param: "404",
-      },
-      {
-        key: "429",
-        param: "429 (rate-limit)",
-      },
-      {
-        key: "500",
-        param: "500",
-      },
-      {
-        key: "502",
-        param: "502",
-      },
-      {
-        key: "503",
-        param: "503",
-      },
-      {
-        key: "524",
-        param: "524 (server timeout)",
-      },
-    ]),
+    operators: STATUS_OPS,
     category: "response",
     table: "request_response_rmt",
     column: "status",
@@ -441,60 +380,7 @@ export const SESSIONS_TABLE_FILTERS: [
   },
   {
     label: "Status",
-    operators: numberWithSuggestions([
-      {
-        key: "200",
-        param: "200 (success)",
-      },
-      {
-        key: "-4",
-        param: "threat",
-      },
-      {
-        key: "-3",
-        param: "cancelled",
-      },
-      {
-        key: "-2",
-        param: "pending",
-      },
-      {
-        key: "-1",
-        param: "timeout",
-      },
-      {
-        key: "400",
-        param: "400",
-      },
-      {
-        key: "401",
-        param: "401",
-      },
-      {
-        key: "404",
-        param: "404",
-      },
-      {
-        key: "429",
-        param: "429 (rate-limit)",
-      },
-      {
-        key: "500",
-        param: "500",
-      },
-      {
-        key: "502",
-        param: "502",
-      },
-      {
-        key: "503",
-        param: "503",
-      },
-      {
-        key: "524",
-        param: "524 (server timeout)",
-      },
-    ]),
+    operators: STATUS_OPS,
     category: "response",
     table: "request_response_rmt",
     column: "status",

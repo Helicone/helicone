@@ -9,8 +9,8 @@ const useSessions = (
     end: Date;
   },
   sessionIdSearch: string,
-  sessionName: string,
-  advancedFilters: UIFilterRowTree
+  advancedFilters: UIFilterRowTree,
+  nameEquals?: string
 ) => {
   const org = useOrg();
   const { data, isLoading, refetch, isRefetching } = useQuery({
@@ -19,7 +19,7 @@ const useSessions = (
       org?.currentOrg?.id,
       timeFilter,
       sessionIdSearch,
-      sessionName,
+      nameEquals,
       advancedFilters,
     ],
     queryFn: async (query) => {
@@ -30,18 +30,18 @@ const useSessions = (
       };
 
       const sessionIdSearch = query.queryKey[3] as string;
-      const sessionName = query.queryKey[4] as string;
+      const nameEquals = query.queryKey[4] as string;
 
       const jawnClient = getJawnClient(orgId);
 
       return await jawnClient.POST("/v1/session/query", {
         body: {
-          sessionIdContains: sessionIdSearch,
+          search: sessionIdSearch,
           timeFilter: {
             endTimeUnixMs: timeFilter.end.getTime(),
             startTimeUnixMs: timeFilter.start.getTime(),
           },
-          sessionName,
+          nameEquals: nameEquals,
           timezoneDifference: 0,
           filter: advancedFilters as any,
         },
@@ -146,4 +146,23 @@ const useSessionMetrics = (
   };
 };
 
-export { useSessions, useSessionNames, useSessionMetrics };
+const updateSessionFeedback = async (sessionId: string, rating: boolean) => {
+  const jawn = getJawnClient();
+  return (
+    await jawn.POST("/v1/session/{sessionId}/feedback", {
+      params: {
+        path: { sessionId },
+      },
+      body: {
+        rating,
+      },
+    })
+  ).response;
+};
+
+export {
+  useSessions,
+  useSessionNames,
+  useSessionMetrics,
+  updateSessionFeedback,
+};

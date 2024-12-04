@@ -1,14 +1,14 @@
 import { RadioGroup } from "@headlessui/react";
-import { CheckCircleIcon, PlusIcon } from "@heroicons/react/20/solid";
+import { CheckCircleIcon } from "@heroicons/react/20/solid";
 import { KeyIcon, TrashIcon } from "@heroicons/react/24/outline";
-import { Tooltip } from "@mui/material";
+import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
+
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useCallback, useState } from "react";
 import { DecryptedProviderKey } from "../../../../../services/lib/keys";
 import { clsx } from "../../../../shared/clsx";
 import useNotification from "../../../../shared/notification/useNotification";
 import { SecretInput } from "../../../../shared/themed/themedTable";
-import HcButton from "../../../../ui/hcButton";
 import { useVaultPage } from "../../../vault/useVaultPage";
 import { Button } from "../../../../ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
@@ -20,9 +20,16 @@ import {
   InformationCircleIcon,
 } from "@heroicons/react/24/outline";
 import { useOrg } from "../../../../layout/organizationContext";
-import { Select, SelectItem, TextInput } from "@tremor/react";
+import { Input } from "@/components/ui/input";
 import { useGetOrgMembers } from "../../../../../services/hooks/organizations";
 import { useUser } from "@supabase/auth-helpers-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface ProviderKeySelectorProps {
   variant?: "portal" | "basic";
@@ -231,18 +238,18 @@ const ProviderKeySelector = (props: ProviderKeySelectorProps) => {
               </div>
             </RadioGroup>
           )}
-          <HcButton
+          <Button
             variant={"secondary"}
             size={"sm"}
-            title={"Add new key"}
             onClick={(e) => {
               e.stopPropagation();
               e.preventDefault();
               setIsProviderOpen(true);
             }}
-            icon={PlusIcon}
             className="w-full"
-          />
+          >
+            Add new key
+          </Button>
 
           <div className="flex justify-between mt-4">
             <Button
@@ -277,10 +284,15 @@ const ProviderKeySelector = (props: ProviderKeySelectorProps) => {
           <div className="flex flex-col space-y-8 w-full text-gray-900 dark:text-gray-100">
             <div className="w-full space-y-1.5 text-sm">
               <label htmlFor="api-key">Provider</label>
-              <Select defaultValue="openai" disabled enableClear={false}>
-                <SelectItem value="openai">
-                  {variant === "portal" ? "Custom" : "OpenAI"}
-                </SelectItem>
+              <Select defaultValue="openai" disabled>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select provider" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="openai">
+                    {variant === "portal" ? "Custom" : "OpenAI"}
+                  </SelectItem>
+                </SelectContent>
               </Select>
             </div>
 
@@ -302,7 +314,7 @@ const ProviderKeySelector = (props: ProviderKeySelectorProps) => {
                 <code className="not-italic">authorization</code> header with
                 the <code className="not-italic">Bearer</code> prefix.
               </div>
-              <TextInput
+              <Input
                 type="password"
                 name="provider-key"
                 id="provider-key"
@@ -312,7 +324,7 @@ const ProviderKeySelector = (props: ProviderKeySelectorProps) => {
             </div>
             <div className="w-full space-y-1.5 text-sm">
               <label htmlFor="key-name">Key Name</label>
-              <TextInput
+              <Input
                 name="key-name"
                 id="key-name"
                 required

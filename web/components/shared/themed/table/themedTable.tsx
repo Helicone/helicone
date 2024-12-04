@@ -29,7 +29,7 @@ import DraggableColumnHeader from "./columns/draggableColumnHeader";
 import RequestRowView from "./requestRowView";
 import ThemedTableHeader from "./themedTableHeader";
 
-import { Checkbox } from "@mui/material";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -192,7 +192,7 @@ export default function ThemedTable<T extends { id?: string }>(
   }, [rightPanel]);
 
   return (
-    <div className="h-full flex flex-col border-b divide-y divide-slate-300 dark:divide-slate-700">
+    <div className="h-full flex flex-col border-b border-slate-300 dark:border-slate-700 divide-y divide-slate-300 dark:divide-slate-700">
       <div className="p-1 flex-shrink-0">
         <ThemedTableHeader
           search={search}
@@ -239,7 +239,7 @@ export default function ThemedTable<T extends { id?: string }>(
       <ResizablePanelGroup direction="horizontal">
         <ResizablePanel>
           {" "}
-          <div className="h-full overflow-x-auto bg-white dark:bg-black">
+          <div className="h-full overflow-x-auto bg-slate-100 dark:bg-slate-800">
             {skeletonLoading ? (
               <LoadingAnimation title="Loading Data..." />
             ) : rows.length === 0 ? (
@@ -271,7 +271,7 @@ export default function ThemedTable<T extends { id?: string }>(
                 properties={makeRow.properties}
               />
             ) : (
-              <div className="bg-white dark:bg-black rounded-sm h-full">
+              <div className="bg-slate-50 dark:bg-black rounded-sm h-full">
                 <div
                   className=""
                   style={{
@@ -296,16 +296,20 @@ export default function ThemedTable<T extends { id?: string }>(
                           {showCheckboxes && (
                             <th className="w-8 px-2 sticky left-0 z-20 bg-slate-50 dark:bg-slate-900">
                               <Checkbox
-                                onChange={(e) =>
-                                  handleSelectAll(e.target.checked)
-                                }
+                                variant="blue"
+                                onCheckedChange={handleSelectAll}
                                 checked={selectedIds?.length === rows.length}
-                                indeterminate={
-                                  selectedIds &&
-                                  selectedIds?.length > 0 &&
-                                  selectedIds?.length < rows.length
-                                }
-                                className="text-slate-700 dark:text-slate-400"
+                                ref={(ref) => {
+                                  if (ref) {
+                                    (
+                                      ref as unknown as HTMLInputElement
+                                    ).indeterminate =
+                                      selectedIds !== undefined &&
+                                      selectedIds.length > 0 &&
+                                      selectedIds.length < rows.length;
+                                  }
+                                }}
+                                className="data-[state=checked]:bg-primary data-[state=indeterminate]:bg-primary"
                               />
                               <div className="absolute bottom-0 left-0 right-0 h-px bg-slate-300 dark:bg-slate-700" />
                             </th>
@@ -313,7 +317,11 @@ export default function ThemedTable<T extends { id?: string }>(
                           {headerGroup.headers.map((header, index) => (
                             <th
                               key={`header-${index}`}
-                              className={clsx("relative")}
+                              className={clsx(
+                                "relative",
+                                index === headerGroup.headers.length - 1 &&
+                                  "border-r border-slate-300 dark:border-slate-700"
+                              )}
                             >
                               <DraggableColumnHeader
                                 header={header}
@@ -348,6 +356,7 @@ export default function ThemedTable<T extends { id?: string }>(
                           {showCheckboxes && (
                             <td className="w-8 px-2">
                               <Checkbox
+                                variant="blue"
                                 checked={selectedIds?.includes(
                                   row.original?.id ?? ""
                                 )}
@@ -363,15 +372,13 @@ export default function ThemedTable<T extends { id?: string }>(
                                 "py-3 border-t border-slate-300 dark:border-slate-700 px-2 text-slate-700 dark:text-slate-300",
                                 i === 0 && "pl-10", // Add left padding to the first column
                                 i === row.getVisibleCells().length - 1 &&
-                                  "pr-10"
+                                  "pr-10 border-r border-slate-300 dark:border-slate-700"
                               )}
-                              {...{
-                                style: {
-                                  maxWidth: cell.column.getSize(),
-                                  overflow: "hidden",
-                                  textOverflow: "ellipsis",
-                                  whiteSpace: "nowrap",
-                                },
+                              style={{
+                                maxWidth: cell.column.getSize(),
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
                               }}
                             >
                               {dataLoading &&

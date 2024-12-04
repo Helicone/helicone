@@ -34,7 +34,9 @@ const ThemedNumberDropdown = (props: ThemedNumberDropdownProps) => {
 
   const handleValueChange = (currentValue: string) => {
     setQuery(currentValue);
-    onChange(options.find((o) => o.param === currentValue)?.key ?? null);
+    onChange(
+      options.find((o) => o.param === currentValue)?.key ?? currentValue
+    );
     setOpen(false);
   };
 
@@ -57,6 +59,7 @@ const ThemedNumberDropdown = (props: ThemedNumberDropdownProps) => {
             size="md_sleek"
           >
             {options.find((o) => o.key === value)?.param ||
+              value ||
               "Select or enter a value"}
           </Button>
         </PopoverTrigger>

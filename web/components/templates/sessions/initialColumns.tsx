@@ -3,7 +3,16 @@ import { getUSDateFromString } from "../../shared/utils/utils";
 
 export const INITIAL_COLUMNS: ColumnDef<any>[] = [
   {
-    accessorKey: "session",
+    accessorKey: "session_name",
+    header: "Session Name",
+    cell: (info) => (
+      <span className="text-gray-900 dark:text-gray-100 font-medium">
+        {info.getValue() ? `${info.getValue()}` : "No Session Name"}
+      </span>
+    ),
+  },
+  {
+    accessorKey: "session_id",
     header: "Session ID",
     cell: (info) => (
       <span className="text-gray-900 dark:text-gray-100 font-medium">

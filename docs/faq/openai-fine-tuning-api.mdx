@@ -1,0 +1,130 @@
+---
+title: "How can I use the OpenAI fine-tuning API?"
+sidebarTitle: "OpenAI Fine-tuning API"
+description: "Learn how to use the OpenAI fine-tuning API for custom model versions"
+---
+
+The OpenAI fine-tuning API allows you to create custom versions of their models tailored to your specific use case. Here's a step-by-step guide on how to use it:
+
+<Steps>
+  <Step title="Prepare your training data">
+    Create a JSONL file with your training examples. Each example should be a prompt-completion pair. Ensure your dataset has at least a few hundred high-quality examples.
+
+    You can use Helicone datasets to curate a dataset and export it as JSONL for fine-tuning:
+    1. Within Helicone, create a new dataset or select an existing one.
+    2. Use Helicone's filtering and tagging features to curate your data.
+    3. Export the dataset in JSONL format, which is compatible with OpenAI's fine-tuning process.
+
+    Example format of the exported JSONL file:
+    ```json
+    {"messages": [{"role": "user", "content": "Hello"}, {"role": "assistant", "content": "Hi there! How can I assist you today?"}]}
+    {"messages": [{"role": "user", "content": "What's the weather like?"}, {"role": "assistant", "content": "I'm sorry, but I don't have access to real-time weather information. Could you please check a weather website or app for the most up-to-date forecast?"}]}
+    ```
+
+    This approach allows you to leverage your existing data in Helicone to create high-quality training datasets for fine-tuning.
+
+  </Step>
+
+  <Step title="Upload the file and create a fine-tuning job">
+    You have two main options for uploading your file and creating a fine-tuning job:
+
+    1. Using the OpenAI Fine-tuning UI (Recommended for beginners):
+       - Go to [platform.openai.com/finetune](https://platform.openai.com/finetune)
+       - Click on "Create a fine-tuning job"
+       - Upload your JSONL file
+       - Select the base model you want to fine-tune
+       - Configure any additional settings
+       - Start the fine-tuning job
+
+      This method allows you to upload your file and create a job in one streamlined process.
+
+    2. Using the OpenAI API:
+       First, upload your file:
+
+       ```python
+       import openai
+
+       file = openai.File.create(
+           file=open("training_data.jsonl", "rb"),
+           purpose="fine-tune"
+       )
+       ```
+
+       Then, create a fine-tuning job:
+
+       ```python
+       job = openai.FineTuningJob.create(
+           training_file=file.id,
+           model="gpt-3.5-turbo"
+       )
+       ```
+
+    Choose the method that best suits your needs and level of expertise.
+
+  </Step>
+
+  <Step title="Monitor the job">
+    If you used the UI, you can monitor your job's progress directly on the OpenAI platform.
+
+    If you used the API, you can check the status of your fine-tuning job using `openai.FineTuningJob.retrieve()`. You can also list all your fine-tuning jobs with `openai.FineTuningJob.list()`.
+
+    ```python
+    # Retrieve the state of a fine-tune
+    job_status = openai.FineTuningJob.retrieve(job.id)
+
+    # List all created fine-tunes
+    jobs = openai.FineTuningJob.list()
+    ```
+
+  </Step>
+
+  <Step title="Use the fine-tuned model">
+    Once complete, you can use your fine-tuned model by specifying its name in your API calls.
+
+    ```python
+    completion = openai.ChatCompletion.create(
+        model=job_status.fine_tuned_model,
+        messages=[{"role": "user", "content": "Hello, how are you?"}]
+    )
+    print(completion.choices[0].message.content)
+    ```
+
+  </Step>
+</Steps>
+
+### Best Practices
+
+When fine-tuning models, consider these best practices:
+
+1. **Data Quality**: Ensure your training data is high-quality, diverse, and representative of the tasks you want the model to perform. Quality often trumps quantity.
+
+2. **Model Selection**: Choose the appropriate base model. For most use cases, "gpt-3.5-turbo" is recommended, but consider your specific needs and budget. Learn more about [LLM fine-tuning duration](/faq/llm-fine-tuning-time) and [fine-tuning best practices chapter 2: models](https://openpipe.ai/blog/fine-tuning-best-practices-chapter-2-models) to make an informed decision.
+
+3. **Prompt Engineering**: Craft clear and consistent prompts. Include relevant context and instructions within your prompts to guide the model effectively.
+
+4. **Iterative Improvement**: Fine-tuning is often an iterative process. Be prepared to refine your dataset and try multiple fine-tuning runs based on performance evaluations.
+
+5. **Evaluation**: Always evaluate your fine-tuned model against a held-out test set to ensure it performs better than the base model for your specific task.
+
+6. **Version Control**: Keep track of different versions of your fine-tuned models, including the datasets and parameters used for each version.
+
+7. **Consider Alternatives**: Depending on your use case, [RAG (Retrieval Augmented Generation) might be a better fit](/faq/rag-vs-fine-tuning) than fine-tuning. Evaluate both approaches for your specific needs.
+
+Remember to consult the [official OpenAI documentation](https://platform.openai.com/docs/guides/fine-tuning) for the most up-to-date instructions on fine-tuning.
+
+<AccordionGroup>
+  <Accordion title="Does OpenAI support GPT fine-tuning?">
+    Yes, OpenAI supports GPT fine-tuning through their API, allowing you to customize GPT models for specific tasks.
+  </Accordion>
+
+  <Accordion title="Does OpenAI support O1 fine-tuning?">
+    No, OpenAI does not currently support O1 fine-tuning.
+  </Accordion>
+</AccordionGroup>
+
+For more in-depth best practices on fine-tuning, check out OpenPipe's detailed guides:
+
+- [Fine-Tuning Best Practices: Training Data](https://openpipe.ai/blog/fine-tuning-best-practices-series-introduction-and-chapter-1-training-data)
+- [Fine-Tuning Best Practices: Models](https://openpipe.ai/blog/fine-tuning-best-practices-chapter-2-models)
+
+For more detailed information on fine-tuning LLMs with Helicone, check out our [comprehensive guide](/guides/cookbooks/fine-tune).

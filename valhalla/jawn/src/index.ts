@@ -12,6 +12,7 @@ import {
   SCORES_WORKER_COUNT,
 } from "./lib/clients/kafkaConsumers/constant";
 import { tokenRouter } from "./lib/routers/tokenRouter";
+import { DelayedOperationService } from "./lib/shared/delayedOperationService";
 import { runLoopsOnce, runMainLoops } from "./mainLoops";
 import { authMiddleware } from "./middleware/auth";
 import { IS_RATE_LIMIT_ENABLED, limiter } from "./middleware/ratelimitter";
@@ -21,7 +22,6 @@ import * as publicSwaggerDoc from "./tsoa-build/public/swagger.json";
 import { initLogs } from "./utils/injectLogs";
 import { initSentry } from "./utils/injectSentry";
 import { startConsumers } from "./workers/consumerInterface";
-import { DelayedOperationService } from "./lib/shared/delayedOperationService";
 
 export const ENVIRONMENT: "production" | "development" = (process.env
   .VERCEL_ENV ?? "development") as any;
@@ -57,14 +57,22 @@ const allowedOrigins = allowedOriginsEnv[ENVIRONMENT];
 
 const app = express();
 
-app.use(bodyParser.json({ limit: "50mb" }));
+var rawBodySaver = function (req: any, res: any, buf: any, encoding: any) {
+  if (buf && buf.length) {
+    req.rawBody = buf.toString(encoding || "utf8");
+  }
+};
+
+app.use(bodyParser.json({ verify: rawBodySaver, limit: "50mb" }));
 app.use(
   bodyParser.urlencoded({
-    limit: "50mb",
+    verify: rawBodySaver,
     extended: true,
+    limit: "50mb",
     parameterLimit: 50000,
   })
 );
+app.use(bodyParser.raw({ verify: rawBodySaver, type: "*/*", limit: "50mb" }));
 
 const KAFKA_CREDS = JSON.parse(process.env.KAFKA_CREDS ?? "{}");
 const KAFKA_ENABLED = (KAFKA_CREDS?.KAFKA_ENABLED ?? "false") === "true";
@@ -112,7 +120,7 @@ app.options("*", (req, res) => {
   res.setHeader("Access-Control-Allow-Methods", "*");
   res.setHeader(
     "Access-Control-Allow-Headers",
-    "Content-Type, Authorization, Helicone-Authorization"
+    "Content-Type, Authorization, Helicone-Authorization, x-vercel-set-bypass-cookie, x-vercel-protection-bypass"
   );
   res.setHeader("Access-Control-Allow-Credentials", "true");
   res.status(200).send();
@@ -176,7 +184,7 @@ app.use((req, res, next) => {
   );
   res.setHeader(
     "Access-Control-Allow-Headers",
-    "Content-Type, Authorization, Helicone-Authorization"
+    "Content-Type, Authorization, Helicone-Authorization, x-vercel-set-bypass-cookie, x-vercel-protection-bypass"
   );
   res.setHeader("Access-Control-Allow-Credentials", "true");
   next();

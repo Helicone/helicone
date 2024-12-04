@@ -2,6 +2,31 @@ import { clsx } from "@/components/shared/utils";
 import Image from "next/image";
 import Link from "next/link";
 import { getMetadata } from "@/components/templates/blog/getMetaData";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Helicone Blog | AI Development Insights & Best Practices",
+  description:
+    "Stay updated with the latest insights on AI development, LLM observability, and industry best practices from the team building the future of AI infrastructure.",
+  icons: "/static/logo.webp",
+  openGraph: {
+    type: "website",
+    siteName: "Helicone.ai",
+    url: "https://www.helicone.ai/blog",
+    title: "Helicone Blog | AI Development Insights & Best Practices",
+    description:
+      "Stay updated with the latest insights on AI development, LLM observability, and industry best practices from the team building the future of AI infrastructure.",
+    images: "/static/dashboard-preview.png",
+    locale: "en_US",
+  },
+  twitter: {
+    title: "Helicone Blog | AI Development Insights & Best Practices",
+    description:
+      "Stay updated with the latest insights on AI development, LLM observability, and industry best practices from the team building the future of AI infrastructure.",
+    card: "summary_large_image",
+    images: "/static/dashboard-preview.png",
+  },
+};
 
 type BlogPostProps = {
   blog: BlogStructure;
@@ -15,6 +40,7 @@ const HEADSHOTS = {
   "Stefan Bokarev": "/static/blog/stefanbokarev-headshot.webp",
   "Justin Torre": "/static/blog/justintorre-headshot.webp",
   "Scott Nguyen": "/static/blog/scottnguyen-headshot.webp",
+  "Kavin Desi": "/static/blog/kavin-headshot.webp",
 };
 
 function metaDataToBlogStructure(
@@ -59,14 +85,12 @@ const RegularBlogPost: React.FC<BlogPostProps> = async ({ blog }) => {
       className="flex flex-col gap-6 w-full hover:bg-sky-50 rounded-lg p-8 col-span-2 md:col-span-1"
       href={blog.href}
     >
-      <img
+      <Image
         src={blog.imageUrl}
         alt={blog.imageAlt || blog.title}
         width={400}
         height={300}
-        style={{
-          objectFit: "cover",
-        }}
+        objectFit="cover"
         className="rounded-lg h-60 w-full border border-gray-300"
       />
 
@@ -190,6 +214,51 @@ export type BlogStructure =
     };
 
 const blogContent: BlogStructure[] = [
+    {
+    dynmaicEntry: {
+      folderName: "openai-gpt-5",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "test-your-llm-prompts",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "crewai-vs-autogen",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "prompt-evaluation-for-llms",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "pdf-chatbot-tutorial",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "llamaindex-vs-langchain",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "llm-api-providers",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "when-to-finetune",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "debugging-chatbots-and-ai-agents-with-sessions",
+    },
+  },
   {
     dynmaicEntry: {
       folderName: "braintrust-alternatives",
@@ -306,21 +375,9 @@ const blogContent: BlogStructure[] = [
     time: "4 minute read",
   },
   {
-    title: "What is LLM Observability and Monitoring?",
-    description:
-      "Building with LLMs in production (well) is incredibly difficult. You probably have heard of the word LLM observability'. What is it? How does it differ from traditional observability? What is observed? We have the answers. ",
-    badgeText: "insight",
-    date: "July 12, 2024",
-    href: "/blog/llm-observability",
-    imageUrl: "/static/blog/llm-observability-cover.webp",
-    authors: [
-      {
-        name: "Lina Lam",
-        imageUrl: "/static/blog/linalam-headshot.webp",
-        imageAlt: "Lina Lam's headshot",
-      },
-    ],
-    time: "3 minute read",
+    dynmaicEntry: {
+      folderName: "llm-observability",
+    },
   },
   {
     title: "Compare: The Best LangSmith Alternatives & Competitors",
@@ -477,7 +534,7 @@ const blogContent: BlogStructure[] = [
     badgeText: "Product",
     date: "May 14, 2024",
     href: "/blog/switch-models-safely",
-    imageUrl: "static/blog/experiments/gpt-4o.webp",
+    imageUrl: "/static/blog/experiments/gpt-4o.webp",
     authors: [
       {
         name: "Scott Nguyen",
@@ -494,7 +551,7 @@ const blogContent: BlogStructure[] = [
     badgeText: "Compare",
     date: "Apr 29, 2024",
     href: "/blog/best-datadog-alternative-for-llm",
-    imageUrl: "static/blog/datadog/title.webp",
+    imageUrl: "/static/blog/datadog/title.webp",
     authors: [
       {
         name: "Lina Lam",
@@ -512,7 +569,7 @@ const blogContent: BlogStructure[] = [
     badgeText: "Compare",
     date: "Apr 18, 2024",
     href: "/blog/langsmith",
-    imageUrl: "static/blog/langsmith-vs-helicone/cover-image.webp",
+    imageUrl: "/static/blog/langsmith-vs-helicone/cover-image.webp",
     authors: [
       {
         name: "Lina Lam",
@@ -679,7 +736,7 @@ const blogContent: BlogStructure[] = [
 
 const Blog = async () => {
   return (
-    <div className="w-full bg-[#f8feff] h-full antialiased relative text-black">
+    <div className="w-full bg-white h-full antialiased relative text-black">
       <div className="relative w-full flex flex-col space-y-4 mx-auto max-w-5xl h-full py-16 items-center text-center px-2 sm:px-2 lg:px-0">
         <Image
           src={"/static/pricing/bouncing-cube.webp"}

@@ -19,6 +19,8 @@ import { FeatureFlagStore } from "../lib/stores/FeatureFlagStore";
 import { supabaseServer } from "../lib/db/supabase";
 import { dataDogClient } from "../lib/clients/DataDogClient";
 import { LytixHandler } from "../lib/handlers/LytixHandler";
+import { ExperimentHandler } from "../lib/handlers/ExperimentHandler";
+import { SegmentLogHandler } from "../lib/handlers/SegmentLogHandler";
 
 export class LogManager {
   public async processLogEntry(logMessage: Message): Promise<void> {
@@ -62,10 +64,12 @@ export class LogManager {
     const posthogHandler = new PostHogHandler();
     const lytixHandler = new LytixHandler();
 
+    const experimentHandler = new ExperimentHandler();
+
     const webhookHandler = new WebhookHandler(
-      new WebhookStore(supabaseServer.client),
-      new FeatureFlagStore(supabaseServer.client)
+      new WebhookStore(supabaseServer.client)
     );
+    const segmentHandler = new SegmentLogHandler();
 
     authHandler
       .setNext(rateLimitHandler)
@@ -76,7 +80,9 @@ export class LogManager {
       .setNext(loggingHandler)
       .setNext(posthogHandler)
       .setNext(lytixHandler)
-      .setNext(webhookHandler);
+      .setNext(experimentHandler)
+      .setNext(webhookHandler)
+      .setNext(segmentHandler);
 
     await Promise.all(
       logMessages.map(async (logMessage) => {
@@ -139,6 +145,7 @@ export class LogManager {
 
     await this.logPosthogEvents(posthogHandler, batchContext);
     await this.logLytixEvents(lytixHandler, batchContext);
+    await this.logSegmentEvents(segmentHandler, batchContext);
     await this.logWebhooks(webhookHandler, batchContext);
     console.log(`Finished processing batch ${batchContext.batchId}`);
   }
@@ -274,6 +281,29 @@ export class LogManager {
       methodName: "handleResults",
       messageCount: batchContext.messageCount,
       message: "Lytix events",
+    });
+  }
+
+  private async logSegmentEvents(
+    handler: SegmentLogHandler,
+    batchContext: {
+      batchId: string;
+      partition: number;
+      lastOffset: string;
+      messageCount: number;
+    }
+  ): Promise<void> {
+    const start = performance.now();
+    await handler.handleResults();
+    const end = performance.now();
+    const executionTimeMs = end - start;
+
+    dataDogClient.logHandleResults({
+      executionTimeMs,
+      handlerName: handler.constructor.name,
+      methodName: "handleResults",
+      messageCount: batchContext.messageCount,
+      message: "Segment events",
     });
   }
 

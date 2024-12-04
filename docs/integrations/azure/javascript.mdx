@@ -34,6 +34,28 @@ HELICONE_API_KEY=<your API key>
   <Note>Please ensure to include the ‘api-version’ in all of your requests.</Note>
 <CodeGroup>
 
+```javascript AzureOpenAI
+import { AzureOpenAI } from "openai";
+
+const azureOpenai = new AzureOpenAI({
+  apiKey: "[AZURE_OPENAI_API_KEY]",
+  apiVersion: "[API_VERSION]",
+  baseURL: `https://oai.helicone.ai/openai/deployments/[DEPLOYMENT_NAME]`,
+  defaultHeaders: {
+    "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+    "Helicone-OpenAI-API-Base": `https://[AZURE_DOMAIN].openai.azure.com`,
+    "api-key": "[AZURE_OPENAI_API_KEY]",
+  },
+});
+
+const response = await azureOpenai.chat.completions.create({
+  model: "gpt-4",
+  messages: [{ role: "user", content: "Say Hi" }],
+});
+
+console.log(response);
+```
+
 ```javascript OpenAI V4+
 import OpenAI from "openai";
 
@@ -42,7 +64,7 @@ const openai = new OpenAI({
   defaultHeaders: {
     "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
     "Helicone-OpenAI-API-Base": "https://[AZURE_DOMAIN].openai.azure.com",
-    "api-key": "[AZURE_API_KEY]",
+    "api-key": "[AZURE_OPENAI_API_KEY]",
   },
   defaultQuery: { "api-version": "[API_VERSION]" },
 });

@@ -91,7 +91,8 @@ export class InputsManager extends BaseManager {
   async createInputRecord(
     promptVersionId: string,
     inputs: Record<string, string>,
-    sourceRequest?: string
+    sourceRequest?: string,
+    experimentId?: string
   ): Promise<Result<string, string>> {
     const inputRecordId = randomUUID();
     const existingPrompt = await supabaseServer.client
@@ -106,8 +107,8 @@ export class InputsManager extends BaseManager {
     }
 
     const insertQuery = `
-      INSERT INTO prompt_input_record (id, inputs, source_request, prompt_version)
-      VALUES ($1, $2, $3, $4)
+      INSERT INTO prompt_input_record (id, inputs, source_request, prompt_version, experiment_id)
+      VALUES ($1, $2, $3, $4, $5)
     `;
 
     const result = await dbExecute<PromptInputRecord>(insertQuery, [
@@ -115,6 +116,7 @@ export class InputsManager extends BaseManager {
       JSON.stringify(inputs),
       sourceRequest,
       promptVersionId,
+      experimentId,
     ]);
 
     if (result.error) {
@@ -122,6 +124,29 @@ export class InputsManager extends BaseManager {
     }
 
     return ok(inputRecordId);
+  }
+
+  async updateInputRecord(
+    inputRecordId: string,
+    inputs: Record<string, string>
+  ): Promise<Result<string, string>> {
+    const updateQuery = `
+      UPDATE prompt_input_record
+      SET inputs = COALESCE(inputs, '{}'::jsonb) || $1::jsonb
+      WHERE id = $2
+      RETURNING id
+    `;
+
+    const result = await dbExecute<{ id: string }>(updateQuery, [
+      JSON.stringify(inputs),
+      inputRecordId,
+    ]);
+
+    if (result.error || !result.data?.[0]?.id) {
+      return err(result.error ?? "Failed to update input record");
+    }
+
+    return ok(result.data?.[0]?.id ?? "");
   }
 
   async getInputsFromDataset(

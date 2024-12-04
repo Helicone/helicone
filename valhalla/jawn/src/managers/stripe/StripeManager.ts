@@ -208,6 +208,25 @@ WHERE (${builtFilter.filter})`,
     return currentDate < cutoffDate;
   }
 
+  private async shouldApplyWaterlooCoupon(
+    customerId: string
+  ): Promise<boolean> {
+    try {
+      const customer = await this.stripe.customers.retrieve(customerId);
+      if (
+        !customer.deleted &&
+        customer.object === "customer" &&
+        customer.email?.endsWith("uwaterloo.ca")
+      ) {
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error("Error checking Waterloo email:", error);
+      return false;
+    }
+  }
+
   private async portalLinkUpgradeToPro(
     origin: string,
     customerId: string,
@@ -258,8 +277,18 @@ WHERE (${builtFilter.filter})`,
           tier: "pro-20240913",
         },
       },
-      allow_promotion_codes: true,
     };
+
+    const isWaterlooEmail = await this.shouldApplyWaterlooCoupon(customerId);
+    if (isWaterlooEmail) {
+      sessionParams.discounts = [
+        {
+          coupon: "WATERLOO2025",
+        },
+      ];
+    } else {
+      sessionParams.allow_promotion_codes = true;
+    }
 
     const session = await this.stripe.checkout.sessions.create(sessionParams);
 

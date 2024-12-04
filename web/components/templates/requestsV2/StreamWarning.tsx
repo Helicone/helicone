@@ -1,5 +1,8 @@
 import { useLocalStorage } from "@/services/hooks/localStorage";
-import React from "react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { X } from "lucide-react";
+import Link from "next/link";
 
 interface StreamWarningProps {
   requestWithStreamUsage: boolean;
@@ -10,7 +13,7 @@ const StreamWarning: React.FC<StreamWarningProps> = ({
 }) => {
   const [isWarningHidden, setIsWarningHidden] = useLocalStorage(
     "isStreamWarningHiddenx",
-    false
+    requestWithStreamUsage
   );
 
   if (!requestWithStreamUsage || isWarningHidden) {
@@ -18,33 +21,31 @@ const StreamWarning: React.FC<StreamWarningProps> = ({
   }
 
   return (
-    <div className="alert alert-warning flex justify-between items-center mx-[50px]">
-      <p className="text-yellow-800">
-        We are unable to calculate your cost accurately because the
-        &#39;stream_usage&#39; option is not included in your message. Please
-        refer to{" "}
-        <a
-          href="https://docs.helicone.ai/use-cases/enable-stream-usage"
-          className="text-blue-600 underline"
+    <Alert variant="warning" className="w-full">
+      <div className="flex justify-between items-center">
+        <AlertDescription className="text-muted-foreground">
+          We are unable to calculate your cost accurately because the
+          &apos;stream_usage&apos; option is not included in your message.
+          Please refer to{" "}
+          <Link
+            href="https://docs.helicone.ai/use-cases/enable-stream-usage"
+            className="font-medium underline underline-offset-4"
+          >
+            this documentation
+          </Link>{" "}
+          for more information.
+        </AlertDescription>
+        <Button
+          onClick={() => setIsWarningHidden(true)}
+          variant="ghost"
+          size="icon"
+          className="h-6 w-6 mx-5"
         >
-          this documentation
-        </a>{" "}
-        for more information.
-      </p>
-      <button
-        onClick={() => setIsWarningHidden(true)}
-        className="text-yellow-800 hover:text-yellow-900"
-      >
-        <span className="sr-only">Close</span>
-        <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-          <path
-            fillRule="evenodd"
-            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-            clipRule="evenodd"
-          />
-        </svg>
-      </button>
-    </div>
+          <X className="h-4 w-4" />
+          <span className="sr-only">Close</span>
+        </Button>
+      </div>
+    </Alert>
   );
 };
 

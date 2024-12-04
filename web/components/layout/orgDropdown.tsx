@@ -28,6 +28,7 @@ import {
 import { LogOutIcon } from "lucide-react";
 import Link from "next/link";
 import OrgMoreDropdown from "./orgMoreDropdown";
+import { Cog6ToothIcon } from "@heroicons/react/24/outline";
 
 interface OrgDropdownProps {}
 
@@ -92,7 +93,7 @@ export default function OrgDropdown({}: OrgDropdownProps) {
         <DropdownMenuTrigger asChild>
           <Button
             variant="ghost"
-            className="flex items-center justify-start w-full ml-1 p-2"
+            className="flex items-center justify-start w-full ml-1 p-2 truncate"
           >
             {currentIcon && (
               <currentIcon.icon
@@ -103,7 +104,7 @@ export default function OrgDropdown({}: OrgDropdownProps) {
                 aria-hidden="true"
               />
             )}
-            <p className="text-xs font-semibold truncate w-fit text-left">
+            <p className="text-xs font-medium w-fit text-left">
               {orgContext?.currentOrg?.name}
             </p>
           </Button>
@@ -124,7 +125,7 @@ export default function OrgDropdown({}: OrgDropdownProps) {
                 <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-50">
                   {orgContext?.currentOrg?.name}
                 </h3>
-                <p className="text-xs text-slate-500 font-medium">
+                <p className="text-xs text-slate-500 font-medium max-w-[10rem] truncate">
                   {user?.email}
                 </p>
               </div>
@@ -173,6 +174,12 @@ export default function OrgDropdown({}: OrgDropdownProps) {
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
 
+          <Link href="/settings" rel="noopener noreferrer">
+            <DropdownMenuItem className="text-xs">
+              <Cog6ToothIcon className="h-4 w-4 mr-2" />
+              Settings
+            </DropdownMenuItem>
+          </Link>
           <DropdownMenuItem onSelect={handleSignOut} className="text-xs">
             <LogOutIcon className="h-4 w-4 mr-2" />
             Sign out

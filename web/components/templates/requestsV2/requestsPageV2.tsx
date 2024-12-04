@@ -584,30 +584,32 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     }
   };
 
-  const columnsWithProperties = [...getInitialColumns(isCached)].concat(
-    properties.map((property) => {
-      return {
-        id:
-          `${property}`.toLowerCase() === "cost"
+  const columnsWithProperties = useMemo(() => {
+    const initialColumns = getInitialColumns(isCached);
+    return [...initialColumns].concat(
+      properties.map((property) => {
+        return {
+          id: initialColumns.find((column) => column.id === property) // on id conflict, append property- to the property
             ? `property-${property}`
             : `${property}`,
-        accessorFn: (row) => {
-          const value = row.customProperties
-            ? row.customProperties[property]
-            : "";
-          return value;
-        },
-        header: property,
-        cell: (info) => {
-          return info.getValue();
-        },
-        meta: {
-          sortKey: property,
-          category: "Custom Property",
-        },
-      };
-    })
-  );
+          accessorFn: (row) => {
+            const value = row.customProperties
+              ? row.customProperties[property]
+              : "";
+            return value;
+          },
+          header: property,
+          cell: (info) => {
+            return info.getValue();
+          },
+          meta: {
+            sortKey: property,
+            category: "Custom Property",
+          },
+        };
+      })
+    );
+  }, [properties, isCached]);
 
   const {
     selectMode,
@@ -685,9 +687,11 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   return (
     <>
       <div className="h-screen flex flex-col">
-        <StreamWarning
-          requestWithStreamUsage={requestWithoutStream !== undefined}
-        />
+        <div className="mx-10">
+          <StreamWarning
+            requestWithStreamUsage={requestWithoutStream !== undefined}
+          />
+        </div>
 
         {!isCached && userId === undefined && (
           <AuthHeader
@@ -735,7 +739,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
         {unauthorized ? (
           <UnauthorizedView currentTier={currentTier || ""} />
         ) : (
-          <div className="flex flex-col h-full overflow-hidden">
+          <div className="flex flex-col h-full overflow-hidden sentry-mask-me">
             <div
               className={clsx(
                 isShiftPressed && "no-select",
@@ -882,10 +886,10 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
                 }
               >
                 {selectMode && (
-                  <Row className="gap-5 items-center w-full justify-between bg-white dark:bg-black p-5 border border-slate-300 dark:border-slate-700">
+                  <Row className="gap-5 items-center w-full justify-between bg-white dark:bg-black p-5">
                     <div className="flex flex-row gap-2 items-center">
                       <span className="text-sm font-medium text-slate-900 dark:text-slate-100 whitespace-nowrap">
-                        Select Mode:
+                        Request Selection:
                       </span>
                       <span className="text-sm p-2 rounded-md font-medium bg-[#F1F5F9] dark:bg-slate-900 text-[#1876D2] dark:text-slate-100 whitespace-nowrap">
                         {selectedIds.length} selected

@@ -53,10 +53,10 @@ const Footer = () => {
 
   return (
     <footer
-      className={`grid grid-cols-2 md:grid-cols-5 py-6 gap-y-8 pl-8 md:pl-0 md:justify-items-center items-start ${
+      className={`grid grid-cols-2 md:grid-cols-5 gap-y-8 pl-8 md:pl-0 md:justify-items-center items-start ${
         path === "/"
-          ? " bg-[#2B3AC7] text-white/70 fill-white stroke-white"
-          : "bg-inherit text-black/60 fill-[#5D6673] stroke-[#5D6673]"
+          ? " bg-white text-slate-700 fill-slate-700 stroke-slate-700 py-16"
+          : "bg-inherit text-black/60 fill-[#5D6673] stroke-[#5D6673] py-6"
       }`}
     >
       <div className="flex flex-col items-start font-light text-sm tracking-wide gap-1 col-span-2 md:col-span-1 justify-self-start md:justify-self-center">
@@ -133,28 +133,38 @@ const Footer = () => {
       </div>
 
       <div className="">
-        <p className="font-bold text-sm tracking-wide mb-2">COMPARE</p>
+        <p className="font-bold text-sm tracking-wide mb-2">BLOGS</p>
         <div className="flex flex-col items-start font-light text-sm tracking-wide gap-2">
+          <a
+            className="hover:underline"
+            href="/blog/ai-agent-builders"
+            target="_blank"
+          >
+            6 Frameworks for Building AI Agents
+          </a>
+          <a
+            className="hover:underline"
+            href="/blog/llm-stack-guide"
+            target="_blank"
+          >
+            The Emerging LLM Stack
+          </a>
+          <a
+            className="hover:underline"
+            href="/blog/llm-api-providers"
+            target="_blank"
+          >
+            Top 10 LLM API Providers
+          </a>
           <a
             className="hover:underline"
             href="/blog/best-langsmith-alternatives"
             target="_blank"
           >
-            Helicone vs Langsmith
+            Helicone vs. LangSmith
           </a>
-          <a
-            className="hover:underline"
-            href="/blog/best-datadog-alternative-for-llm"
-            target="_blank"
-          >
-            Helicone vs Datadog
-          </a>
-          <a
-            className="hover:underline"
-            href="/blog/weights-and-biases"
-            target="_blank"
-          >
-            Helicone vs Weights & Biases
+          <a className="hover:underline" href="/blog" target="_blank">
+            More
           </a>
         </div>
       </div>
@@ -168,9 +178,6 @@ const Footer = () => {
             target="_blank"
           >
             Docs
-          </a>
-          <a className="hover:underline" href="/blog" target="_blank">
-            Blog
           </a>
           <a className="hover:underline" href="/pricing" target="_blank">
             Pricing
@@ -227,6 +234,13 @@ const Footer = () => {
             target="_blank"
           >
             Email
+          </a>
+          <a
+            className="hover:underline"
+            href="https://www.helicone.ai/career"
+            target="_blank"
+          >
+            Work with Us
           </a>
         </div>
       </div>

@@ -1,6 +1,5 @@
 import { autoFillInputs } from "@helicone/prompts";
 import { PreparedRequest, PreparedRequestArgs } from "./PreparedRequest";
-import { ENVIRONMENT } from "../../..";
 
 function prepareRequestOpenAI(
   requestPath: string,
@@ -16,6 +15,7 @@ function prepareRequestOpenAI(
     Authorization: `Bearer ${proxyKey}`,
     Accept: "application/json",
     "Accept-Encoding": "",
+    "Helicone-Manual-Access-Key": process.env.HELICONE_MANUAL_ACCESS_KEY ?? "",
   };
   let fetchUrl = requestPath;
   return {
@@ -25,20 +25,21 @@ function prepareRequestOpenAI(
 }
 
 export function prepareRequestOpenAIFull({
-  hypothesis,
+  template,
   secretKey: proxyKey,
-  datasetRow,
+  inputs,
+  autoInputs,
+  requestPath,
   requestId,
 }: PreparedRequestArgs): PreparedRequest {
   const newRequestBody = autoFillInputs({
-    template: hypothesis.promptVersion?.template ?? {},
-    inputs: datasetRow.inputRecord?.inputs ?? {},
-    autoInputs: datasetRow.inputRecord?.autoInputs ?? [],
+    template: template ?? {},
+    inputs: inputs ?? {},
+    autoInputs: autoInputs ?? [],
   });
 
   const { url: fetchUrl, headers } = prepareRequestOpenAI(
-    datasetRow.inputRecord?.requestPath ??
-      `${process.env.HELICONE_WORKER_URL}/v1/chat/completions`,
+    requestPath ?? `${process.env.HELICONE_WORKER_URL}/v1/chat/completions`,
     proxyKey,
     requestId
   );

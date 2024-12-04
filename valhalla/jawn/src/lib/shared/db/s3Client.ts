@@ -207,7 +207,7 @@ export class S3Client {
       });
 
       const signedUrl = await getSignedUrl(this.awsClient, command, {
-        expiresIn: 1800, // 30 minutes
+        expiresIn: 60 * 60 * 24, // 1 day
       });
 
       return { data: signedUrl, error: null };

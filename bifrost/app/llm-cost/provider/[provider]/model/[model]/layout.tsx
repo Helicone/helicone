@@ -1,3 +1,6 @@
+import { formatProviderName } from "@/app/llm-cost/CalculatorInfo";
+import { Metadata } from "next";
+
 export async function generateMetadata({
   params,
 }: {
@@ -5,26 +8,36 @@ export async function generateMetadata({
     model: string;
     provider: string;
   };
-}) {
+}): Promise<Metadata> {
   const { model, provider } = params;
   const decodedModel = decodeURIComponent(model || "");
-  const decodedProvider = decodeURIComponent(provider || "");
+  const decodedProvider = formatProviderName(
+    decodeURIComponent(provider || "")
+  );
 
   const title = `${decodedProvider} ${decodedModel} Pricing Calculator | API Cost Estimation`;
-  const description = `Discover the cost of AI with our ${decodedProvider} ${decodedModel} Pricing Calculator. Get accurate API pricing, token costs, and budget estimation for ${decodedModel}. Compare ${decodedProvider} models.`;
+  const description = `Explore AI costs with our comprehensive ${decodedProvider} ${decodedModel} Pricing Calculator. Compare prices for 300+ models across 10+ providers, get accurate API pricing, token costs, and budget estimations.`;
+
   const imageUrl = "/static/pricing-calc/calculator-open-graph.webp";
 
   return {
     title,
     description,
+    icons: "https://www.helicone.ai/static/logo.webp",
     openGraph: {
+      type: "website",
+      siteName: "Helicone.ai",
+      url: `https://www.helicone.ai/llm-cost/provider/${provider}/model/${model}`,
       title,
       description,
-      images: [{ url: imageUrl }],
+      images: imageUrl,
+      locale: "en_US",
     },
-    authors: [{ name: "Helicone Team" }],
-    other: {
-      timeToRead: "3 minutes",
+    twitter: {
+      title,
+      description,
+      card: "summary_large_image",
+      images: imageUrl,
     },
   };
 }
