@@ -20,6 +20,20 @@ export interface UpgradeToProRequest {
   };
 }
 
+export interface ExperimentUsage {
+  model: string;
+  provider: string;
+  prompt_tokens: number;
+  completion_tokens: number;
+  total_count: number;
+  amount: number;
+  description: string;
+  totalCost: {
+    completion_token: number;
+    prompt_token: number;
+  };
+}
+
 @Route("v1/stripe")
 @Tags("Stripe")
 @Security("api_key")
@@ -167,6 +181,7 @@ export class StripeController extends Controller {
     subtotal: number;
     tax: number | null;
     total: number;
+    experiments_usage: ExperimentUsage[];
   } | null> {
     const stripeManager = new StripeManager(request.authParams);
     const result = await stripeManager.getUpcomingInvoice();
@@ -184,6 +199,7 @@ export class StripeController extends Controller {
       subtotal: result.data?.subtotal ?? 0,
       tax: result.data?.tax ?? null,
       total: result.data?.total ?? 0,
+      experiments_usage: result.data?.experiments_usage ?? [],
     };
   }
 

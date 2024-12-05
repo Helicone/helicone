@@ -2959,6 +2959,25 @@ Json: JsonObject;
         alerts?: boolean;
       };
     };
+    ExperimentUsage: {
+      model: string;
+      provider: string;
+      /** Format: double */
+      prompt_tokens: number;
+      /** Format: double */
+      completion_tokens: number;
+      /** Format: double */
+      total_count: number;
+      /** Format: double */
+      amount: number;
+      description: string;
+      totalCost: {
+        /** Format: double */
+        prompt_token: number;
+        /** Format: double */
+        completion_token: number;
+      };
+    };
   };
   responses: {
   };
@@ -5850,6 +5869,7 @@ export interface operations {
       200: {
         content: {
           "application/json": ({
+            experiments_usage: components["schemas"]["ExperimentUsage"][];
             /** Format: double */
             total: number;
             /** Format: double */

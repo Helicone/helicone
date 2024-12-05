@@ -11,6 +11,12 @@ import { useState } from "react";
 import { useOrg } from "@/components/layout/organizationContext";
 import { useQuery } from "@tanstack/react-query";
 import { getJawnClient } from "@/lib/clients/jawn";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { InfoIcon } from "lucide-react";
 
 export const InvoiceSheet: React.FC = () => {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -22,6 +28,7 @@ export const InvoiceSheet: React.FC = () => {
       const orgId = query.queryKey[1] as string;
       const jawn = getJawnClient(orgId);
       const invoice = await jawn.GET("/v1/stripe/subscription/preview-invoice");
+
       return invoice;
     },
   });
@@ -30,6 +37,7 @@ export const InvoiceSheet: React.FC = () => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: upcomingInvoice.data?.data?.currency || "USD",
+      maximumFractionDigits: 6,
     }).format(amount / 100);
   };
 
@@ -38,7 +46,10 @@ export const InvoiceSheet: React.FC = () => {
       <SheetTrigger asChild>
         <Button variant="outline">View Upcoming Invoice</Button>
       </SheetTrigger>
-      <SheetContent className="sm:max-w-[425px]">
+      <SheetContent
+        className="sm:max-w-[425px]"
+        onOpenAutoFocus={(event) => event.preventDefault()}
+      >
         <SheetHeader>
           <SheetTitle>Upcoming Invoice</SheetTitle>
           <SheetDescription>
@@ -55,7 +66,13 @@ export const InvoiceSheet: React.FC = () => {
               <div className="flex justify-between items-center">
                 <span className="font-semibold">Total Due:</span>
                 <span className="text-xl font-bold">
-                  {formatCurrency(upcomingInvoice.data.data.total)}
+                  {formatCurrency(
+                    upcomingInvoice.data.data.total +
+                      upcomingInvoice.data.data.experiments_usage.reduce(
+                        (acc, item) => acc + item.amount,
+                        0
+                      )
+                  )}
                 </span>
               </div>
               <div className="text-sm text-gray-500">
@@ -77,6 +94,81 @@ export const InvoiceSheet: React.FC = () => {
                         <span>{formatCurrency(item.amount)}</span>
                       </div>
                     )
+                  )}
+                  {upcomingInvoice.data.data.experiments_usage.length > 0 && (
+                    <>
+                      <h4 className="font-medium">Experiments</h4>
+                      {upcomingInvoice.data.data.experiments_usage.map(
+                        (
+                          item: {
+                            amount: number;
+                            description: string;
+                            model: string;
+                            provider: string;
+                            prompt_tokens: number;
+                            completion_tokens: number;
+                            totalCost: {
+                              completion_token: number;
+                              prompt_token: number;
+                            };
+                          },
+                          index: number
+                        ) => (
+                          <div
+                            key={index}
+                            className="flex justify-between items-center text-sm"
+                          >
+                            <div className="flex gap-1 items-center">
+                              <span>{item.model}</span>
+                              <Tooltip>
+                                <TooltipTrigger>
+                                  <InfoIcon className="w-3 h-3 text-slate-500" />
+                                </TooltipTrigger>
+                                <TooltipContent className="flex flex-col gap-2 w-full">
+                                  <div className="flex justify-between items-center">
+                                    <span className="font-medium mr-3">
+                                      Completion Tokens:
+                                    </span>
+                                    <span>
+                                      {item.completion_tokens.toLocaleString()}
+                                    </span>
+                                  </div>
+                                  <div className="flex justify-between items-center">
+                                    <span className="font-medium mr-3">
+                                      Prompt Tokens:
+                                    </span>
+                                    <span>
+                                      {item.prompt_tokens.toLocaleString()}
+                                    </span>
+                                  </div>
+                                  <div className="flex justify-between items-center">
+                                    <span className="font-medium mr-3">
+                                      Cost/1K Completion Tokens:
+                                    </span>
+                                    <span>
+                                      {formatCurrency(
+                                        item.totalCost.completion_token * 1000
+                                      )}
+                                    </span>
+                                  </div>
+                                  <div className="flex justify-between items-center">
+                                    <span className="font-medium mr-3">
+                                      Cost/1K Prompt Tokens:
+                                    </span>
+                                    <span>
+                                      {formatCurrency(
+                                        item.totalCost.prompt_token * 1000
+                                      )}
+                                    </span>
+                                  </div>
+                                </TooltipContent>
+                              </Tooltip>
+                            </div>
+                            <span>{formatCurrency(item.amount)}</span>
+                          </div>
+                        )
+                      )}
+                    </>
                   )}
                 </div>
               </div>
@@ -113,7 +205,15 @@ export const InvoiceSheet: React.FC = () => {
                 </div>
                 <div className="flex justify-between items-center font-semibold">
                   <span>Total:</span>
-                  <span>{formatCurrency(upcomingInvoice.data.data.total)}</span>
+                  <span>
+                    {formatCurrency(
+                      upcomingInvoice.data.data.total +
+                        upcomingInvoice.data.data.experiments_usage.reduce(
+                          (acc, item) => acc + item.amount,
+                          0
+                        )
+                    )}
+                  </span>
                 </div>
               </div>
             </>

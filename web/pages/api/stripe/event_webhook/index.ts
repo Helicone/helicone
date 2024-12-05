@@ -141,8 +141,6 @@ const PricingVersion20240913 = {
   handleDelete: PricingVersionOld.handleDelete,
 };
 
-const EXPERIMENT_USAGE_COST = 2;
-
 const InvoiceHandlers = {
   async handleInvoiceCreated(event: Stripe.Event) {
     const invoice = event.data.object as Stripe.Invoice;
@@ -207,14 +205,17 @@ const InvoiceHandlers = {
               invoice: invoice.id,
               currency: "usd",
               amount: Math.ceil(
-                totalCost.completion_token * usage.completion_tokens * 100
+                (totalCost.completion_token * usage.completion_tokens +
+                  totalCost.prompt_token * usage.prompt_tokens) *
+                  100
               ),
               description: `${usage.provider}/${
                 usage.model
-              }: ${usage.completion_tokens.toLocaleString()} completion tokens at $${(
-                (totalCost.completion_token * 1_000_000) /
-                100
-              ).toFixed(2)}/million tokens`,
+              }: ${usage.completion_tokens.toLocaleString()} completion tokens, ${usage.prompt_tokens.toLocaleString()} prompt tokens, at $${+(
+                totalCost.completion_token * 1000
+              ).toPrecision(6)}/1K completion tokens, $${+(
+                totalCost.prompt_token * 1000
+              ).toPrecision(6)}/1K prompt tokens`,
             });
           }
         }

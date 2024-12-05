@@ -8621,6 +8621,64 @@
 				},
 				"type": "object",
 				"additionalProperties": false
+			},
+			"ExperimentUsage": {
+				"properties": {
+					"model": {
+						"type": "string"
+					},
+					"provider": {
+						"type": "string"
+					},
+					"prompt_tokens": {
+						"type": "number",
+						"format": "double"
+					},
+					"completion_tokens": {
+						"type": "number",
+						"format": "double"
+					},
+					"total_count": {
+						"type": "number",
+						"format": "double"
+					},
+					"amount": {
+						"type": "number",
+						"format": "double"
+					},
+					"description": {
+						"type": "string"
+					},
+					"totalCost": {
+						"properties": {
+							"prompt_token": {
+								"type": "number",
+								"format": "double"
+							},
+							"completion_token": {
+								"type": "number",
+								"format": "double"
+							}
+						},
+						"required": [
+							"prompt_token",
+							"completion_token"
+						],
+						"type": "object"
+					}
+				},
+				"required": [
+					"model",
+					"provider",
+					"prompt_tokens",
+					"completion_tokens",
+					"total_count",
+					"amount",
+					"description",
+					"totalCost"
+				],
+				"type": "object",
+				"additionalProperties": false
 			}
 		},
 		"securitySchemes": {
@@ -16129,6 +16187,12 @@
 							"application/json": {
 								"schema": {
 									"properties": {
+										"experiments_usage": {
+											"items": {
+												"$ref": "#/components/schemas/ExperimentUsage"
+											},
+											"type": "array"
+										},
 										"total": {
 											"type": "number",
 											"format": "double"
@@ -16221,6 +16285,7 @@
 										}
 									},
 									"required": [
+										"experiments_usage",
 										"total",
 										"tax",
 										"subtotal",
