@@ -5,6 +5,31 @@ import { useState } from "react";
 import { Customers } from "./customers";
 import { Integrations } from "./integrations";
 import { Projects } from "./projects";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Helicone Community | Open-Source Projects & Integration Partners",
+  description:
+    "Discover the innovative projects, companies, and integrations powering the Helicone community. Join our hub of cutting-edge AI developers and see how teams are building and scaling with our platform.",
+  icons: "https://www.helicone.ai/static/logo.webp",
+  openGraph: {
+    type: "website",
+    siteName: "Helicone.ai",
+    url: "https://www.helicone.ai/community",
+    title: "Helicone Community | Open-Source Projects & Integration Partners",
+    description:
+      "Discover the innovative projects, companies, and integrations powering the Helicone community. Join our hub of cutting-edge AI developers and see how teams are building and scaling with our platform.",
+    images: "/static/new-open-graph.png",
+    locale: "en_US",
+  },
+  twitter: {
+    title: "Helicone Community | Open-Source Projects & Integration Partners",
+    description:
+      "Discover the innovative projects, companies, and integrations powering the Helicone community. Join our hub of cutting-edge AI developers and see how teams are building and scaling with our platform.",
+    card: "summary_large_image",
+    images: "/static/new-open-graph.png",
+  },
+};
 
 export type BlogStructure = {
   title: string;
