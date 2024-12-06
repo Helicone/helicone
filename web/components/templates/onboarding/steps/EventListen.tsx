@@ -1,5 +1,5 @@
 import { Result } from "@/lib/result";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
 import * as Listening from "../../../../public/lottie/Listening.json";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
@@ -9,9 +9,12 @@ import { DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useOrg } from "@/components/layout/organizationContext";
+import { useJawnClient } from "@/lib/clients/jawnHook";
+import { useState } from "react";
 const Lottie = dynamic(() => import("react-lottie"), { ssr: false });
 
 const EventListen = ({ setOpen }: { setOpen: (open: boolean) => void }) => {
+  const [loading, setLoading] = useState(false);
   const { data, isSuccess } = useQuery<Result<boolean, string>, Error>(
     ["hasOnboarded"],
     async () => {
@@ -36,6 +39,21 @@ const EventListen = ({ setOpen }: { setOpen: (open: boolean) => void }) => {
       enabled: true,
     }
   );
+
+  const jawn = useJawnClient();
+
+  const skipOnboarding = async () => {
+    setLoading(true);
+    await jawn.POST("/v1/organization/onboard", {
+      body: {},
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    org?.refreshCurrentOrg();
+    setOpen(false);
+  };
 
   const org = useOrg();
   const router = useRouter();
@@ -94,7 +112,7 @@ const EventListen = ({ setOpen }: { setOpen: (open: boolean) => void }) => {
       )}
       <DialogFooter className="mt-4">
         {!(data && data.data) && (
-          <Button variant="outline" onClick={() => setOpen(false)}>
+          <Button variant="outline" onClick={skipOnboarding}>
             Skip
           </Button>
         )}

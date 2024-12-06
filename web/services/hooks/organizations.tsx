@@ -258,9 +258,8 @@ const useOrgsContextManager = () => {
                   }),
                 },
               }
-            ).then(() => {
-              refreshCurrentOrg();
-            });
+            );
+            refreshCurrentOrg();
           });
         }
       });

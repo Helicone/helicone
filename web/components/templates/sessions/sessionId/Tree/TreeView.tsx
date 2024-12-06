@@ -48,7 +48,7 @@ const TreeView: React.FC<TreeViewProps> = ({
 
   const onBoardingRequestTrace = useMemo(
     () =>
-      session.traces.find((t) => t.path === "/EvalsPage/structure-analysis"),
+      session.traces.find((t) => t.path === "/planning/extract-travel-plan"),
     [session.traces]
   );
 
@@ -128,6 +128,7 @@ const TreeView: React.FC<TreeViewProps> = ({
                   collapseAll={collapseAll}
                   setShowDrawer={setShowDrawer}
                   onBoardingRequestTrace={onBoardingRequestTrace}
+                  sessionId={session.session_id}
                 />
               </Col>
             </ScrollArea>

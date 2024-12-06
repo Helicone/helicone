@@ -10,6 +10,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
+import { Loader2 } from "lucide-react";
+import { useState } from "react";
 
 const checklistItems = [
   "Review the requests",
@@ -30,6 +32,7 @@ const OnboardingQuickTourModal = ({
   startTour: () => void;
   integrateApp: () => void;
 }) => {
+  const [loading, setLoading] = useState(false);
   const { isOnboardingComplete } = useOnboardingContext();
 
   return (
@@ -107,7 +110,16 @@ const OnboardingQuickTourModal = ({
               <Button variant="outline" onClick={back}>
                 Go Back
               </Button>
-              <Button onClick={startTour}>Let&apos;s go!</Button>
+              <Button
+                disabled={loading}
+                onClick={() => {
+                  setLoading(true);
+                  startTour();
+                }}
+              >
+                {loading ? "Preparing Demo..." : "Let's go!"}{" "}
+                {loading && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
+              </Button>
             </>
           ) : (
             <Button onClick={integrateApp}>Integrate my app</Button>

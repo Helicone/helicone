@@ -11,11 +11,11 @@ const steps = [
     title: "Request",
     description: (
       <>
-        Here is where your request and response data lives. <br />
+        View all your LLM requests and responses in one place. <br />
         <br />
-        Find important metrics here like{" "}
-        <span className="text-blue-500 font-medium">total tokens consumed</span>
-        , <span className="text-blue-500 font-medium">cost</span>, and{" "}
+        Track key metrics like{" "}
+        <span className="text-blue-500 font-medium">token usage</span>,{" "}
+        <span className="text-blue-500 font-medium">cost</span>, and{" "}
         <span className="text-blue-500 font-medium">latency</span> for that
         request.
       </>
@@ -25,12 +25,11 @@ const steps = [
     title: "Session",
     description: (
       <>
-        Sessions helps you visualize your agentic workflow. This is especially
-        useful to pinpoint{" "}
+        Track how your agents execute tasks step by step. Easily{" "}
         <span className="text-blue-500 font-medium">
-          exactly where the failure happened
-        </span>
-        .
+          identify where issues occur
+        </span>{" "}
+        in your workflow.
       </>
     ),
   },

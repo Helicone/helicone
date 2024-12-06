@@ -1,49 +1,44 @@
 import { OpenAI } from "openai";
 import { v4 as uuid } from "uuid";
 import { hpf } from "@helicone/prompts";
-import { examples } from "./examples";
+import { HeliconeManualLogger } from "@helicone/helpers";
+import { examples } from "./travelExamples";
 import { OPENAI_KEY } from "../clients/constant";
 
-const sessionId = uuid();
-
-async function analyzePageStructure(
+async function getUsersTravelPlan(
+  openai: OpenAI,
   example: (typeof examples)[0],
-  openai: OpenAI
+  sessionId: string
 ) {
-  const prompt = hpf`
-  As a QA engineer, analyze the structure of the following page:
+  const prompt = hpf`As a travel planner, extract the user's travel plans from their request.
 
   ${{
-    page: example.page,
+    userMessage: JSON.stringify(example.userMessage),
   }}
-
-  Provide a high-level overview of the page components and their purposes.
 
   YOUR OUTPUT SHOULD BE IN THE FOLLOWING FORMAT:
   {
-    "components": [
-      {
-        "name": string,
-        "purpose": string
-      }
-    ]
-  }
-  `;
+    "destination": string,
+    "startDate": string,
+    "endDate": string,
+    "activities": string[]
+  }`;
 
   const requestId = uuid();
   const chatCompletion = await openai.chat.completions.create(
     {
-      messages: [{ role: "user", content: prompt }],
+      messages: [{ role: "system", content: prompt }],
       model: "gpt-3.5-turbo",
     },
     {
       headers: {
         "Helicone-Request-Id": requestId,
         "Helicone-Property-Environment": "development",
-        "Helicone-Prompt-Id": "qa-structure-analysis",
-        "Helicone-Session-Name": "QA Wolf",
+        "Helicone-Prompt-Id": "extract-travel-plan",
+        "Helicone-Session-Name": "XPedia Travel Planner",
         "Helicone-Session-Id": sessionId,
-        "Helicone-Session-Path": `/${example.page}/structure-analysis`,
+        "Helicone-Session-Path": `/planning/extract-travel-plan`,
+        "Helicone-User-Id": example.userId,
       },
     }
   );
@@ -59,51 +54,120 @@ async function analyzePageStructure(
   }
 }
 
-async function identifyInteractiveElements(
+async function getTravelTips(
+  openai: OpenAI,
+  heliconeLogger: HeliconeManualLogger,
   example: (typeof examples)[0],
-  openai: OpenAI
+  sessionId: string,
+  travelPlan: any
 ) {
-  const prompt = hpf`
-  As a QA engineer, identify all interactive elements (buttons, links, inputs) on the following page:
+  const destination = travelPlan?.destination || "unknown";
+
+  const res = await heliconeLogger.logRequest(
+    {
+      _type: "vector_db",
+      operation: "search",
+      text: `Generate travel tips for ${destination}`,
+      vector: [0.1, 0.2, 0.3, 0.4],
+      topK: 5,
+      filter: destination !== "unknown" ? { destination } : {},
+      databaseName: "travel-tips",
+      query: JSON.stringify({
+        ...travelPlan,
+        destination_parsed: destination !== "unknown",
+      }),
+    },
+    async (resultRecorder) => {
+      resultRecorder.appendResults({
+        status: "failed",
+        message: `No travel tips found with sufficient similarity for ${destination}`,
+        similarityThreshold: 0.8,
+        actualSimilarity: 0.5,
+        metadata: {
+          destination,
+          destination_parsed: destination !== "unknown",
+          timestamp: new Date().toISOString(),
+        },
+      });
+    },
+    {
+      "Helicone-Property-Environment": "development",
+      "Helicone-Session-Name": "XPedia Travel Planner",
+      "Helicone-Session-Id": sessionId,
+      "Helicone-Session-Path": `/planning/tips/vector-db`,
+      "Helicone-User-Id": example.userId,
+    }
+  );
+
+  const res2 = await heliconeLogger.logRequest(
+    {
+      _type: "tool",
+      toolName: "TravelTipsAPI",
+      input: {
+        destination: travelPlan?.destination || "unknown",
+        startDate: travelPlan?.startDate || "unknown",
+        endDate: travelPlan?.endDate || "unknown",
+        activities: Array.isArray(travelPlan?.activities)
+          ? travelPlan.activities
+          : ["general sightseeing"],
+      },
+      apiVersion: "v1",
+      metadata: {
+        timestamp: new Date().toISOString(),
+      },
+    },
+    async (resultRecorder) => {
+      // Simulate a successful tool call
+      resultRecorder.appendResults({
+        status: "success",
+        message: `Successfully retrieved travel tips for ${
+          travelPlan?.destination || "unknown"
+        }`,
+        tips: [
+          "Visit the local museum",
+          "Try the famous street food",
+          "Explore the historic district",
+        ],
+        metadata: {
+          timestamp: new Date().toISOString(),
+        },
+      });
+    },
+    {
+      "Helicone-Property-Environment": "development",
+      "Helicone-Session-Name": "XPedia Travel Planner",
+      "Helicone-Session-Id": sessionId,
+      "Helicone-Session-Path": `/planning/tips/api-call`,
+      "Helicone-User-Id": example.userId,
+    }
+  );
+
+  const prompt = hpf`As a travel planner, generate travel tips based on the user's travel plans.
 
   ${{
-    page: example.page,
+    travelPlan: JSON.stringify(travelPlan),
   }}
 
-  ${{
-    code: example.jsx
-      .split("\n")
-      .map((line, index) => `  ${index + 1}: ${line}`)
-      .join("\n"),
-  }}
-
-  YOUR OUTPUT MUST BE IN THE FOLLOWING JSON FORMAT:
+  YOUR OUTPUT SHOULD BE IN THE FOLLOWING FORMAT:
   {
-    "elements": [
-      {
-        "type": string,
-        "line": number,
-        "text": string,
-        "code": string
-      }
-    ]
-  }
-  `;
+    "tips": string[]
+  }`;
 
   const requestId = uuid();
   const chatCompletion = await openai.chat.completions.create(
     {
-      messages: [{ role: "user", content: prompt }],
+      messages: [{ role: "system", content: prompt }],
       model: "gpt-3.5-turbo",
     },
     {
       headers: {
         "Helicone-Request-Id": requestId,
         "Helicone-Property-Environment": "development",
-        "Helicone-Prompt-Id": "qa-interactive-elements",
-        "Helicone-Session-Name": "QA Wolf",
+        "Helicone-Prompt-Id": "generate-travel-tips",
+        "Helicone-Session-Name": "XPedia Travel Planner",
         "Helicone-Session-Id": sessionId,
-        "Helicone-Session-Path": `/${example.page}/interactive-elements`,
+        "Helicone-Session-Path": `/planning/tips/generation`,
+        "Helicone-User-Id": example.userId,
       },
     }
   );
@@ -119,151 +183,23 @@ async function identifyInteractiveElements(
   }
 }
 
-async function generateTestCases(
-  pageStructure: any,
-  interactiveElements: any,
+async function processExample(
+  openai: OpenAI,
+  heliconeLogger: HeliconeManualLogger,
   example: (typeof examples)[0],
-  openai: OpenAI
+  sessionId: string
 ) {
-  const prompt = hpf`
-  As a QA engineer, generate test cases for the following page structure and interactive elements:
+  const travelPlan = await getUsersTravelPlan(openai, example, sessionId);
 
-  Page Structure:
-  ${{
-    structure: JSON.stringify(pageStructure, null, 2),
-  }}
-
-  Interactive Elements:
-  ${{
-    elements: JSON.stringify(interactiveElements, null, 2),
-  }}
-
-  Generate at least 3 test cases that cover different aspects of the page functionality.
-
-  YOUR OUTPUT MUST BE IN THE FOLLOWING JSON FORMAT:
-  {
-    "testCases": [
-      {
-        "name": string,
-        "steps": string[],
-        "expectedResult": string
-      }
-    ]
-  }
-  `;
-
-  const requestId = uuid();
-  const chatCompletion = await openai.chat.completions.create(
-    {
-      messages: [{ role: "user", content: prompt }],
-      model: "gpt-3.5-turbo",
-    },
-    {
-      headers: {
-        "Helicone-Request-Id": requestId,
-        "Helicone-Property-Environment": "development",
-        "Helicone-Prompt-Id": "qa-test-cases",
-        "Helicone-Session-Name": "QA Wolf",
-        "Helicone-Session-Id": sessionId,
-        "Helicone-Session-Path": `/${example.page}/generate-test-cases`,
-      },
-    }
-  );
-
-  try {
-    const result = JSON.parse(
-      chatCompletion.choices[0].message.content || "{}"
-    );
-    return result;
-  } catch (e) {
-    console.error(e);
-    return {};
-  }
-}
-
-async function simulateTestExecution(
-  testCases: any,
-  example: (typeof examples)[0],
-  openai: OpenAI
-) {
-  const prompt = hpf`
-  As a QA engineer, simulate the execution of the following test cases:
-
-  ${{
-    cases: JSON.stringify(testCases, null, 2),
-  }}
-
-  Provide a mock execution result for each test case, including any potential issues or bugs found.
-
-  YOUR OUTPUT MUST BE IN THE FOLLOWING JSON FORMAT:
-  {
-    "executionResults": [
-      {
-        "testName": string,
-        "status": "PASS" | "FAIL",
-        "notes": string,
-        "bugs": string[]
-      }
-    ]
-  }
-  `;
-
-  const requestId = uuid();
-  const chatCompletion = await openai.chat.completions.create(
-    {
-      messages: [{ role: "user", content: prompt }],
-      model: "gpt-3.5-turbo",
-    },
-    {
-      headers: {
-        "Helicone-Request-Id": requestId,
-        "Helicone-Property-Environment": "development",
-        "Helicone-Prompt-Id": "qa-test-execution",
-        "Helicone-Session-Name": "QA Wolf",
-        "Helicone-Session-Id": sessionId,
-        "Helicone-Session-Path": `/${example.page}/simulate-test-execution`,
-      },
-    }
-  );
-
-  try {
-    const result = JSON.parse(
-      chatCompletion.choices[0].message.content || "{}"
-    );
-    return result;
-  } catch (err) {
-    console.error(err);
-    return {};
-  }
-}
-
-async function processExample(example: (typeof examples)[0], openai: OpenAI) {
-  console.log(`Starting QA process for ${example.page}...`);
-
-  const [pageStructure, interactiveElements] = await Promise.all([
-    analyzePageStructure(example, openai),
-    identifyInteractiveElements(example, openai),
-  ]);
-
-  console.log("Page Structure Analysis:", pageStructure);
-  console.log("Interactive Elements:", interactiveElements);
-
-  const testCases = await generateTestCases(
-    pageStructure,
-    interactiveElements,
+  const tips = await getTravelTips(
+    openai,
+    heliconeLogger,
     example,
-    openai
+    sessionId,
+    travelPlan
   );
-  console.log("Generated Test Cases:", testCases);
 
-  const executionResults = await simulateTestExecution(
-    testCases,
-    example,
-    openai
-  );
-  console.log("Test Execution Results:", executionResults);
-
-  console.log(`QA process completed for ${example.page}`);
+  return { travelPlan, tips };
 }
 
 export async function setupDemoOrganizationRequests({
@@ -271,6 +207,18 @@ export async function setupDemoOrganizationRequests({
 }: {
   heliconeApiKey: string;
 }) {
+  const heliconeWorkerUrl =
+    process.env.HELICONE_WORKER_URL ?? "http://localhost:8787/v1";
+
+  // const openai = new OpenAI({
+  //   apiKey: OPENAI_KEY,
+  //   baseURL: heliconeWorkerUrl,
+  //   defaultHeaders: {
+  //     "Helicone-Auth": `Bearer ${heliconeApiKey}`,
+  //   },
+  // });
+  console.log(`Using Helicone Worker URL: ${heliconeWorkerUrl}`);
+
   const openai = new OpenAI({
     apiKey: OPENAI_KEY,
     baseURL: "http://localhost:8787/v1",
@@ -279,12 +227,20 @@ export async function setupDemoOrganizationRequests({
     },
   });
 
-  // await Promise.all(
-  //   examples.map(async (example) => {
-  //     await processExample(example, openai);
-  //   })
-  // );
+  const heliconeLogger = new HeliconeManualLogger({
+    apiKey: heliconeApiKey,
+    loggingEndpoint: `${
+      process.env.HELICONE_API_WORKER_URL ?? ""
+    }/custom/v1/log`,
+  });
+
   for (const example of examples) {
-    await processExample(example, openai);
+    const sessionId = uuid();
+    const { travelPlan, tips } = await processExample(
+      openai,
+      heliconeLogger,
+      example,
+      sessionId
+    );
   }
 }

@@ -588,25 +588,15 @@ const PromptIdPage = (props: PromptIdPageProps) => {
             )}
           >
             <div className="flex items-center space-x-4">
-              <OnboardingPopover
-                open={typeof prompt?.user_defined_id === "string"}
-                popoverContentProps={{
-                  onboardingStep: "PROMPTS_PAGE",
-                  align: "center",
-                  side: "bottom",
-                }}
-                triggerAsChild={false}
-              >
-                <HcBreadcrumb
-                  pages={[
-                    { href: "/prompts", name: "Prompts" },
-                    {
-                      href: `/prompts/${id}`,
-                      name: prompt?.user_defined_id || "Loading...",
-                    },
-                  ]}
-                />
-              </OnboardingPopover>
+              <HcBreadcrumb
+                pages={[
+                  { href: "/prompts", name: "Prompts" },
+                  {
+                    href: `/prompts/${id}`,
+                    name: prompt?.user_defined_id || "Loading...",
+                  },
+                ]}
+              />
 
               <HoverCard>
                 <HoverCardTrigger>
@@ -724,21 +714,30 @@ const PromptIdPage = (props: PromptIdPageProps) => {
             <div className="flex items-start relative">
               <div className="py-4 flex flex-col space-y-4 w-full h-[calc(100vh-76px)]">
                 <div className="flex h-full">
-                  <div className="w-2/3 overflow-y-auto">
-                    <PromptPlayground
-                      prompt={selectedPrompt?.helicone_template || ""}
-                      selectedInput={selectedInput || undefined}
-                      onSubmit={async (history, model) => {
-                        await createSubversion(history, model);
-                      }}
-                      submitText="Test"
-                      initialModel={model}
-                      isPromptCreatedFromUi={
-                        prompt?.metadata?.createdFromUi as boolean | undefined
-                      }
-                      className="border-y border-slate-200 dark:border-slate-700"
-                    />
-                  </div>
+                  <OnboardingPopover
+                    open={typeof prompt?.user_defined_id === "string"}
+                    popoverContentProps={{
+                      onboardingStep: "PROMPTS_PAGE",
+                      align: "start",
+                      side: "right",
+                    }}
+                  >
+                    <div className="w-2/3 overflow-y-auto">
+                      <PromptPlayground
+                        prompt={selectedPrompt?.helicone_template || ""}
+                        selectedInput={selectedInput || undefined}
+                        onSubmit={async (history, model) => {
+                          await createSubversion(history, model);
+                        }}
+                        submitText="Test"
+                        initialModel={model}
+                        isPromptCreatedFromUi={
+                          prompt?.metadata?.createdFromUi as boolean | undefined
+                        }
+                        className="border-y border-slate-200 dark:border-slate-700"
+                      />
+                    </div>
+                  </OnboardingPopover>
                   <div className="w-1/3 flex flex-col h-full">
                     <div className="border-y border-x border-slate-200 dark:border-slate-700 bg-[#F9FAFB] dark:bg-black flex flex-col h-full">
                       <div
@@ -917,9 +916,10 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                                                       promptVersion.helicone_template
                                                     );
                                                   },
-                                                  align: "start",
-                                                  side: "left",
-                                                  sideOffset: 140,
+                                                  align: "end",
+                                                  side: "bottom",
+                                                  sideOffset: 80,
+                                                  alignOffset: -10,
                                                 }}
                                                 triggerAsChild={false}
                                               >

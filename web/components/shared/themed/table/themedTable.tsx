@@ -35,7 +35,9 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import useOnboardingContext from "@/components/layout/onboardingContext";
+import useOnboardingContext, {
+  ONBOARDING_STEPS,
+} from "@/components/layout/onboardingContext";
 import { OnboardingPopover } from "@/components/templates/onboarding/OnboardingPopover";
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -205,10 +207,23 @@ export default function ThemedTable<T extends { id?: string }>(
     return { sessionId };
   }, [rows]);
 
-  const { currentStep, isOnboardingVisible } = useOnboardingContext();
+  const { currentStep, isOnboardingVisible, setOnClickElement } =
+    useOnboardingContext();
 
   const router = useRouter();
   const searchParams = useSearchParams();
+  useEffect(() => {
+    if (
+      id === "requests-table" &&
+      isOnboardingVisible &&
+      currentStep === ONBOARDING_STEPS.REQUESTS_DRAWER.stepNumber
+    ) {
+      setOnClickElement(
+        () => () => router.push(`/sessions/${sessionData?.sessionId}`)
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOnboardingVisible, currentStep]);
 
   return (
     <div className="h-full flex flex-col border-b border-slate-300 dark:border-slate-700 divide-y divide-slate-300 dark:divide-slate-700">

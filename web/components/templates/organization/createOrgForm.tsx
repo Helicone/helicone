@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/select";
 import { useTranslation } from "react-i18next";
 import useOnboardingContext from "@/components/layout/onboardingContext";
+import { Loader2 } from "lucide-react";
 
 interface CreateOrgFormProps {
   variant?: "organization" | "reseller";
@@ -44,6 +45,7 @@ interface CreateOrgFormProps {
   };
   firstOrg?: boolean;
   onSuccess?: (param?: string) => void;
+  onCloseHandler?: () => void;
 }
 
 export type OrgLimits = {
@@ -58,6 +60,7 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
     initialValues,
     onSuccess,
     firstOrg,
+    onCloseHandler,
   } = props;
 
   const [orgName, setOrgName] = useState(initialValues?.name || "");
@@ -114,7 +117,7 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
   ];
 
   const { isOnboardingComplete } = useOnboardingContext();
-
+  const [loading, setLoading] = useState(false);
   return (
     <>
       <div>
@@ -415,7 +418,9 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
               </Button>
             )}
             <Button
+              disabled={loading}
               onClick={async () => {
+                setLoading(true);
                 if ((user?.email ?? "") === DEMO_EMAIL) {
                   setNotification(
                     "Cannot create organization in demo mode",
@@ -503,15 +508,21 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
                       "Organization created successfully",
                       "success"
                     );
-                    console.log("LMAOOOO", data?.data);
                     onSuccess && onSuccess(data?.data ?? "");
+                    orgContext?.refetchOrgs();
+                    onCloseHandler && onCloseHandler();
                   }
-                  onCancelHandler && onCancelHandler(false);
-                  orgContext?.refetchOrgs();
                 }
               }}
             >
-              {initialValues ? "Update" : "Create"}
+              {initialValues
+                ? loading
+                  ? "Updating..."
+                  : "Update"
+                : loading
+                ? "Creating..."
+                : "Create"}
+              {loading && <Loader2 className="w-4 h-4 ml-2 animate-spin" />}
             </Button>
           </DialogFooter>
         </div>

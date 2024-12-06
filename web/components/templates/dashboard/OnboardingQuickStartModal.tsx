@@ -10,6 +10,8 @@ import { cloneElement, useState } from "react";
 import IntegrationMethod from "../onboarding/steps/IntegrationMethod";
 import Framework from "../onboarding/steps/Framework";
 import EventListen from "../onboarding/steps/EventListen";
+import { useJawnClient } from "@/lib/clients/jawnHook";
+import { useOrg } from "@/components/layout/organizationContext";
 
 const steps = [
   "Choose integration method",
@@ -60,8 +62,26 @@ const OnboardingQuickStartModal = ({
   const [selectedIntegrationMethod, setSelectedIntegrationMethod] = useState<
     "async" | "proxy" | null
   >(null);
+
+  const org = useOrg();
+  const jawn = useJawnClient();
+
+  const close = async () => {
+    await jawn.POST("/v1/organization/onboard", {
+      body: {},
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    org?.refreshCurrentOrg();
+    setOpen(false);
+  };
+
   return (
-    <Dialog open={open}>
+    <Dialog
+      open={open}
+      onOpenChange={(open) => (open ? setOpen(true) : close())}
+    >
       <DialogContent className="w-11/12 sm:max-w-3xl gap-8 rounded-md">
         <DialogHeader className="flex flex-row gap-3 items-center space-y-0">
           <DialogTitle>

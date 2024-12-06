@@ -1113,7 +1113,6 @@ const DashboardPage = (props: DashboardPageProps) => {
               }}
               startTour={() => {
                 onboardingContext.startOnboarding();
-                router.push("/requests");
               }}
               integrateApp={() => {
                 setOpenQuickTour(false);
@@ -1130,6 +1129,9 @@ const DashboardPage = (props: DashboardPageProps) => {
                   onCancelHandler={() => {
                     setOpenCreateFirstOrg(false);
                     setOpenDemo(true);
+                  }}
+                  onCloseHandler={() => {
+                    setOpenCreateFirstOrg(false);
                   }}
                   onSuccess={(orgId) => {
                     setTimeout(() => {

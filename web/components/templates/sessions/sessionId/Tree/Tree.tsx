@@ -13,7 +13,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { OnboardingPopover } from "@/components/templates/onboarding/OnboardingPopover";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export interface TreeNodeProps {
   node: TreeNodeData;
@@ -196,6 +196,7 @@ interface TreeProps {
   collapseAll?: boolean;
   setShowDrawer: (x: boolean) => void;
   onBoardingRequestTrace?: Trace;
+  sessionId: string;
 }
 
 export const Tree: React.FC<TreeProps> = ({
@@ -205,15 +206,19 @@ export const Tree: React.FC<TreeProps> = ({
   collapseAll,
   setShowDrawer,
   onBoardingRequestTrace,
+  sessionId,
 }) => {
-  const router = useRouter();
-
   return (
     <OnboardingPopover
       popoverContentProps={{
         onboardingStep: "SESSIONS_PAGE",
         align: "start",
         side: "right",
+        next: () => {
+          selectedRequestIdDispatch[1](
+            onBoardingRequestTrace?.request_id ?? ""
+          );
+        },
       }}
     >
       <div

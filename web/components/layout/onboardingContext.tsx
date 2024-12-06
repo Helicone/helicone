@@ -130,7 +130,7 @@ export const ONBOARDING_STEPS: Record<OnboardingStepLabel, OnboardingStep> = {
       title: "Welcome to Requests!",
       stepNumber: 1,
       description:
-        "Here is where your request and response data lives. Simply add one line of code to track requests from any providers.",
+        "View all your request and response data here after adding one line of code to your LLM app.",
       additionalData: (
         <OnboardingPopoverAccordion
           icon={<MessageCircleQuestionIcon className="h-4 w-4" />}
@@ -156,7 +156,7 @@ export const ONBOARDING_STEPS: Record<OnboardingStepLabel, OnboardingStep> = {
       title: "Let’s dive deeper",
       stepNumber: 1,
       description:
-        "Here you can view the additional metadata and the LLM messages. You might have noticed that the response doesn’t look quite right. Let’s dive deeper to see what might have gone wrong.",
+        "See the complete request with all messages exchanged with the LLM, metadata, and key metrics. Notice anything unusual in the response? Let's investigate what might have gone wrong.",
     },
   },
   SESSIONS_PAGE: {
@@ -166,7 +166,7 @@ export const ONBOARDING_STEPS: Record<OnboardingStepLabel, OnboardingStep> = {
       title: "We are in the travel planning session",
       stepNumber: 2,
       description:
-        "The goal is to figure out where the original failure occurred.",
+        "Each session shows you the complete chain of LLM calls and how they connect. Here you can trace through every step of the travel planning process to find where things started going wrong.",
     },
   },
   SESSIONS_CULPRIT: {
@@ -177,9 +177,8 @@ export const ONBOARDING_STEPS: Record<OnboardingStepLabel, OnboardingStep> = {
       stepNumber: 2,
       description: (
         <>
-          Tracing the session made it clear that the problem happened during the{" "}
-          <strong>“extract-travel-plan”</strong> step. Let&apos;s go improve
-          this prompt.
+          The <strong>"extract-travel-plan"</strong> step is where things went{" "}
+          wrong. Let&apos;s go improve this prompt.
         </>
       ),
       additionalData: (
@@ -214,7 +213,7 @@ export const ONBOARDING_STEPS: Record<OnboardingStepLabel, OnboardingStep> = {
       description: (
         <>
           Here, you can view the latest <strong>“extract-travel-plan”</strong>
-          prompt in production, view its version history and previous requests.
+          prompt in production, its version history and previous requests.
         </>
       ),
       additionalData: (
@@ -245,7 +244,7 @@ export const ONBOARDING_STEPS: Record<OnboardingStepLabel, OnboardingStep> = {
       title: "Let’s iterate on this prompt",
       stepNumber: 3,
       description:
-        "The goal is to converge to 100% accuracy while preventing regressions.",
+        "Let's improve this prompt to give us better travel plan extractions. Click here to start experimenting.",
     },
   },
   EXPERIMENTS_TABLE: {
@@ -255,7 +254,7 @@ export const ONBOARDING_STEPS: Record<OnboardingStepLabel, OnboardingStep> = {
       title: "A playground for prompts",
       stepNumber: 4,
       description:
-        "This is your playground to experiment on the original prompt. Seamlessly iterate, test and evaluate the output at scale. ",
+        "This is where you can create variations of your prompt, test them against real data, and measure which performs best.",
     },
   },
   EXPERIMENTS_ORIGINAL: {
@@ -268,7 +267,7 @@ export const ONBOARDING_STEPS: Record<OnboardingStepLabel, OnboardingStep> = {
       description: (
         <>
           This is your <strong>“extract-travel-plan”</strong> production prompt.
-          Let&apos;s experiment on this.{" "}
+          Let's create a new version to test against it.
         </>
       ),
     },
@@ -290,7 +289,7 @@ export const ONBOARDING_STEPS: Record<OnboardingStepLabel, OnboardingStep> = {
       title: "Change the prompt",
       stepNumber: 4,
       description:
-        "Let’s prompt the model to generate step-by-step reasoning, which will help the model better extract the user’s travel plan. ",
+        "Try adding step-by-step reasoning to help the model better understand and extract travel plans.",
     },
   },
   EXPERIMENTS_ADD_SAVE: {
@@ -300,7 +299,7 @@ export const ONBOARDING_STEPS: Record<OnboardingStepLabel, OnboardingStep> = {
       title: "Save changes",
       stepNumber: 4,
       description:
-        "We already picked a model for you. Go ahead and save your prompt. ",
+        "We already picked a model for you. Go ahead and save your prompt.",
     },
   },
   EXPERIMENTS_FIND_EXPERIMENT: {
@@ -320,7 +319,7 @@ export const ONBOARDING_STEPS: Record<OnboardingStepLabel, OnboardingStep> = {
       title: "Add infinite test cases",
       stepNumber: 4,
       description:
-        "Testing with real data is always more reliable than testing on mock data, as it contains more realistic user queries. ",
+        "Test with real data from your users for more realistic results.",
     },
   },
   EXPERIMENTS_RUN_EXPERIMENTS: {
@@ -378,7 +377,7 @@ export const ONBOARDING_STEPS: Record<OnboardingStepLabel, OnboardingStep> = {
       title: "Congrats! You resolved the issue",
       stepNumber: 5,
       description:
-        "Now you can monitor the error rates, latency, and cost over time, and watch out for any anomalies that could suggest new issues. ",
+        "Now you can monitor error rates, latency, and costs over time to catch anomalies that could suggest new issues.",
     },
   },
 };
@@ -437,11 +436,30 @@ export const OnboardingProvider = ({
       setCurrentStepState(step);
     }
   }, []);
+  const router = useRouter();
 
   const startOnboarding = useCallback(() => {
-    setIsOnboardingVisible(true);
-    setCurrentStep(0);
-  }, [setCurrentStep]);
+    if (isOnboardingVisible) return;
+    const setReady = async () => {
+      const countResponse = await fetch("/api/request/ch/count", {
+        method: "POST",
+        body: JSON.stringify({ filter: {} }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const count = await countResponse.json();
+      if (count.data && count.data > 6) {
+        clearInterval(interval);
+        setIsOnboardingVisible(true);
+        setCurrentStep(0);
+        router.push("/requests");
+      }
+    };
+
+    const interval = setInterval(setReady, 1000);
+    return () => clearInterval(interval);
+  }, [setCurrentStep, isOnboardingVisible, router]);
 
   const endOnboarding = useCallback(() => {
     setCurrentStep(0);
@@ -538,17 +556,16 @@ export const OnboardingProvider = ({
 
   const org = useOrg();
   const pathname = usePathname();
-  const router = useRouter();
 
-  useEffect(() => {
-    if (
-      !isOnboardingVisible &&
-      org?.currentOrg?.tier === "demo" &&
-      pathname !== "/dashboard"
-    ) {
-      router.push("/dashboard");
-    }
-  }, [isOnboardingVisible, org, router]);
+  // useEffect(() => {
+  //   if (
+  //     !isOnboardingVisible &&
+  //     org?.currentOrg?.tier === "demo" &&
+  //     pathname !== "/dashboard"
+  //   ) {
+  //     router.push("/dashboard");
+  //   }
+  // }, [isOnboardingVisible, org, router]);
 
   return (
     <OnboardingContext.Provider

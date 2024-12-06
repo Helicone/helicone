@@ -109,6 +109,7 @@ export function RequestNode(props: {
         },
         align: "start",
         side: "right",
+        className: "sm:max-w-2xl",
       }}
       triggerAsChild={false}
     >
