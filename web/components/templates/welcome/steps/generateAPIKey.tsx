@@ -1,7 +1,6 @@
-import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
+import { useUser } from "@supabase/auth-helpers-react";
 import { Input } from "@/components/ui/input";
-import generateApiKey from "generate-api-key";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { generateAPIKeyHelper } from "../../../../utlis/generateAPIKeyHelper";
 import { useOrg } from "../../../layout/organizationContext";
 import useNotification from "../../../shared/notification/useNotification";
@@ -12,29 +11,65 @@ import AzureSnippets from "./providerIntegrations.tsx/azureSnippets";
 import AnthropicSnippets from "./providerIntegrations.tsx/anthropicSnippets";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { DiffHighlight } from "../diffHighlight";
+import { DialogFooter } from "@/components/ui/dialog";
 
-interface GenerateAPIKeyProps {
-  apiKey: string;
-  setApiKey: (apiKey: string) => void;
-  previousStep: () => void;
-  nextStep: () => void;
-}
+const ASYNC_CODE_CONVERTS = {
+  "node.js": (key: string) => `
+import { HeliconeAsyncLogger } from "@helicone/async";
+import OpenAI from "openai";
 
-const GenerateAPIKey = (props: GenerateAPIKeyProps) => {
-  const { apiKey, setApiKey, previousStep, nextStep } = props;
+const logger = new HeliconeAsyncLogger({
+  apiKey: "Bearer ${key}",
+  // pass in the providers you want logged
+  providers: {
+    openAI: OpenAI,
+    //anthropic: Anthropic,
+    //cohere: Cohere
+    // ...
+  }
+});
+logger.init();
 
-  const supabaseClient = useSupabaseClient();
+// your llm code here
+
+main();
+  `,
+  python: (key: string) => `
+from helicone_async import HeliconeAsyncLogger
+from openai import OpenAI
+
+logger = HeliconeAsyncLogger(
+  api_key="Bearer ${key}",
+)
+
+logger.init()
+
+# your llm code here
+
+print(response.choices[0])
+
+  `,
+};
+
+const GenerateAPIKey = ({
+  selectedIntegrationMethod,
+  setCurrentStep,
+}: {
+  selectedIntegrationMethod: "async" | "proxy";
+  setCurrentStep: (step: number) => void;
+}) => {
   const user = useUser();
 
   const { setNotification } = useNotification();
 
   const org = useOrg();
 
-  const [name, setName] = useState<string>("");
-  const [loaded, setLoaded] = useState(false);
   const [selectedProvider, setSelectedProvider] = useState<
     "openai" | "azure" | "anthropic"
   >("openai");
+  const [apiKey, setApiKey] = useState<string>("");
+  const [asyncLang, setAsyncLang] = useState<"node.js" | "python">("node.js");
 
   const renderProviderObject = {
     openai: <CodeSnippet apiKey={apiKey !== "" ? apiKey : undefined} />,
@@ -44,67 +79,102 @@ const GenerateAPIKey = (props: GenerateAPIKeyProps) => {
     ),
   };
 
-  async function generatePublicApiKey() {
-    const apiKey = `pk-helicone-${generateApiKey({
-      method: "base32",
-      dashes: true,
-    }).toString()}`.toLowerCase();
-    return apiKey;
-  }
+  useEffect(() => {
+    const generateKey = async () => {
+      if (!user) return;
+      if (apiKey) return;
+      const { res: promiseRes, apiKey: generatedApiKey } = generateAPIKeyHelper(
+        "rw",
+        org?.currentOrg?.organization_type ?? "",
+        user?.id ?? "",
+        "Main",
+        window.location.hostname.includes("eu.")
+      );
 
-  const onGenerateKeyHandler = async () => {
-    if (!user) return;
-    const { res: promiseRes, apiKey } = generateAPIKeyHelper(
-      "w",
-      org?.currentOrg?.organization_type ?? "",
-      user?.id ?? "",
-      name,
-      window.location.hostname.includes("eu.")
-    );
+      const res = await promiseRes;
 
-    const res = await promiseRes;
+      if (!res.response.ok) {
+        setNotification("Failed to generate API key", "error");
+        console.error(await res.response.text());
+      }
 
-    if (!res.response.ok) {
-      setNotification("Failed to generate API key", "error");
-      console.error(await res.response.text());
-    }
+      setApiKey(generatedApiKey);
+    };
 
-    setApiKey(apiKey);
-  };
+    generateKey();
+  }, [
+    user,
+    org?.currentOrg?.organization_type,
+    apiKey,
+    setApiKey,
+    setNotification,
+  ]);
 
   return (
-    <div id="content" className="w-full flex flex-col ">
-      <div className="flex flex-col p-4 h-full">
-        <div className="flex flex-col space-y-4 w-full">
-          <h2 className="text-2xl font-semibold">Integrate with Helicone</h2>
-          <div className="flex flex-col space-y-2">
-            <label
-              htmlFor="key-name"
-              className="block text-md font-semibold leading-6"
+    <div className="flex flex-col p-4 h-full max-h-[calc(100vh-20rem)] overflow-y-auto">
+      <div className="flex flex-col space-y-4 w-full">
+        <div className="flex flex-col space-y-2">
+          <label
+            htmlFor="key-name"
+            className="block text-md font-semibold leading-6"
+          >
+            API Key
+          </label>
+          <div className="flex items-center gap-4">
+            <Input
+              disabled
+              name="key-name"
+              id="key-name"
+              required
+              placeholder="Your Shiny API Key Name"
+              value={apiKey}
+              className="h-full"
+            />
+            <Button
+              variant={"secondary"}
+              size={"sm"}
+              onClick={() => {
+                navigator.clipboard.writeText(apiKey);
+                setNotification("Copied API key to clipboard", "success");
+              }}
             >
-              API Key Name
-            </label>
-            <div className="flex items-center gap-4">
-              <Input
-                name="key-name"
-                id="key-name"
-                required
-                placeholder="Your Shiny API Key Name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
-              <Button
-                variant={"secondary"}
-                size={"sm"}
-                onClick={() => {
-                  onGenerateKeyHandler();
-                }}
-              >
-                Generate API Key
-              </Button>
-            </div>
+              Copy
+            </Button>
           </div>
+        </div>
 
+        {selectedIntegrationMethod === "async" ? (
+          <>
+            <div className="flex flex-wrap gap-4 w-full">
+              <button
+                className={clsx(
+                  asyncLang === "node.js" ? "bg-sky-100" : "bg-white",
+                  "flex items-center gap-2 border border-gray-300 rounded-lg py-2 px-4"
+                )}
+                onClick={() => setAsyncLang("node.js")}
+              >
+                <h2 className="font-semibold">Node.js</h2>
+              </button>
+              <button
+                className={clsx(
+                  asyncLang === "python" ? "bg-sky-100" : "bg-white",
+                  "flex items-center gap-2 border border-gray-300 rounded-lg py-2 px-4"
+                )}
+                onClick={() => setAsyncLang("python")}
+              >
+                <h2 className="font-semibold">Python</h2>
+              </button>
+            </div>
+            <div className="mt-4">
+              <DiffHighlight
+                code={ASYNC_CODE_CONVERTS[asyncLang](apiKey)}
+                language={asyncLang}
+                newLines={[]}
+                oldLines={[]}
+              />
+            </div>
+          </>
+        ) : (
           <>
             <label className="font-semibold text-sm mt-4">
               Select your provider
@@ -210,23 +280,14 @@ const GenerateAPIKey = (props: GenerateAPIKeyProps) => {
             </div>
             <div className="mt-4">{renderProviderObject[selectedProvider]}</div>
           </>
-        </div>
+        )}
       </div>
-      <div className="sticky bottom-0 p-4 flex items-center justify-between">
-        <Button variant={"secondary"} size={"sm"} onClick={previousStep}>
-          Back
+      <DialogFooter className="mt-10">
+        <Button variant={"outline"} onClick={() => setCurrentStep(1)}>
+          Go Back
         </Button>
-        <Button
-          size={"sm"}
-          onClick={() => {
-            navigator.clipboard.writeText(apiKey);
-            setNotification("Copied API key to clipboard", "success");
-            nextStep();
-          }}
-        >
-          Next
-        </Button>
-      </div>
+        <Button onClick={() => setCurrentStep(3)}>Next</Button>
+      </DialogFooter>
     </div>
   );
 };

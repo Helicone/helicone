@@ -55,6 +55,18 @@ import { QuantilesGraph } from "./quantilesGraph";
 import StyledAreaChart from "./styledAreaChart";
 import SuggestionModal from "./suggestionsModal";
 import { useDashboardPage } from "./useDashboardPage";
+import OnboardingDemoModal from "./OnboardingDemoModal";
+import OnboardingQuickTourModal from "./OnboardingQuickTourModal";
+import useOnboardingContext, {
+  ONBOARDING_STEPS,
+} from "@/components/layout/onboardingContext";
+import { useRouter } from "next/navigation";
+import { OnboardingPopoverInside } from "../onboarding/OnboardingPopover";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import CreateOrgForm from "../organization/createOrgForm";
+import OnboardingQuickStartModal from "./OnboardingQuickStartModal";
+import { usePrompts } from "@/services/hooks/prompts/prompts";
+import { useJawnClient } from "@/lib/clients/jawnHook";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -100,6 +112,38 @@ const DashboardPage = (props: DashboardPageProps) => {
   const searchParams = useSearchParams();
 
   const orgContext = useOrg();
+
+  const [isDemo, setIsDemo] = useState(orgContext?.currentOrg?.tier === "demo");
+  const [openDemo, setOpenDemo] = useState(true);
+  const [openQuickTour, setOpenQuickTour] = useState(false);
+  const [openCreateFirstOrg, setOpenCreateFirstOrg] = useState(false);
+
+  const [showQuickStartModal, setShowQuickStartModal] = useState(
+    orgContext?.currentOrg?.has_onboarded != undefined
+      ? !orgContext?.currentOrg?.has_onboarded
+      : false
+  );
+  const onboardingContext = useOnboardingContext();
+
+  useEffect(() => {
+    if (isDemo && onboardingContext.isOnboardingComplete) {
+      setOpenQuickTour(true);
+    }
+  }, [isDemo, onboardingContext.isOnboardingComplete]);
+
+  const router = useRouter();
+
+  useEffect(() => {
+    setIsDemo(orgContext?.currentOrg?.tier === "demo");
+  }, [orgContext?.currentOrg?.tier]);
+
+  useEffect(() => {
+    setShowQuickStartModal(
+      orgContext?.currentOrg?.has_onboarded != undefined
+        ? !orgContext?.currentOrg?.has_onboarded
+        : false
+    );
+  }, [orgContext?.currentOrg?.has_onboarded]);
 
   const {
     organizationLayout: orgLayout,
@@ -468,6 +512,46 @@ const DashboardPage = (props: DashboardPageProps) => {
       onSetAdvancedFiltersHandler({ operator: "and", rows: [] }, null);
     }
   };
+
+  const { prompts, isLoading: isPromptsLoading } = usePrompts();
+
+  const jawn = useJawnClient();
+
+  // this is to prevent the quick tour from being access if an experiment is already created (will cause issues with the onboarding flow)
+  useEffect(() => {
+    const getPromptVersions = async () => {
+      if (prompts && orgContext?.currentOrg?.tier === "demo") {
+        const promptId = prompts.find(
+          (p) => p.user_defined_id === "qa-structure-analysis"
+        )?.id;
+        if (promptId) {
+          const { data } = await jawn.POST(
+            "/v1/prompt/{promptId}/versions/query",
+            {
+              params: {
+                path: {
+                  promptId: promptId,
+                },
+              },
+              body: {
+                includeExperimentVersions: false,
+              },
+            }
+          );
+          if (
+            data?.data?.length &&
+            data?.data?.length > 1 &&
+            onboardingContext.currentStep !==
+              ONBOARDING_STEPS.DASHBOARD_SUCCESS.stepNumber
+          ) {
+            onboardingContext.endOnboarding();
+            setOpenQuickTour(true);
+          }
+        }
+      }
+    };
+    getPromptVersions();
+  }, [prompts]);
 
   return (
     <>
@@ -975,6 +1059,26 @@ const DashboardPage = (props: DashboardPageProps) => {
                 </div>
               </ResponsiveGridLayout>
             </section>
+            <Dialog
+              open={
+                onboardingContext.isOnboardingVisible &&
+                onboardingContext.currentStep ===
+                  ONBOARDING_STEPS.DASHBOARD_SUCCESS.stepNumber
+              }
+            >
+              <DialogContent
+                className="left-[calc(100%-2rem)] -translate-x-full top-[calc(100%-2rem)] -translate-y-full"
+                closeButton={false}
+              >
+                <OnboardingPopoverInside
+                  onboardingStep="DASHBOARD_SUCCESS"
+                  nextOverride={() => {
+                    onboardingContext.endOnboarding();
+                    setOpenQuickTour(true);
+                  }}
+                />
+              </DialogContent>
+            </Dialog>
           </div>
         )}
         <SuggestionModal
@@ -983,6 +1087,68 @@ const DashboardPage = (props: DashboardPageProps) => {
         />
 
         <UpgradeProModal open={open} setOpen={setOpen} />
+
+        {isDemo && !onboardingContext.isOnboardingVisible && (
+          <>
+            <OnboardingDemoModal
+              open={
+                openDemo &&
+                !openCreateFirstOrg &&
+                !onboardingContext.isOnboardingComplete
+              }
+              quickStart={() => {
+                setOpenDemo(false);
+                setOpenCreateFirstOrg(true);
+              }}
+              quickTour={() => {
+                setOpenDemo(false);
+                setOpenQuickTour(true);
+              }}
+            />
+            <OnboardingQuickTourModal
+              open={openQuickTour && !openCreateFirstOrg}
+              back={() => {
+                setOpenQuickTour(false);
+                setOpenDemo(true);
+              }}
+              startTour={() => {
+                onboardingContext.startOnboarding();
+              }}
+              integrateApp={() => {
+                setOpenQuickTour(false);
+                setOpenCreateFirstOrg(true);
+              }}
+            />
+            <Dialog open={openCreateFirstOrg}>
+              <DialogContent
+                className="w-11/12 sm:max-w-2xl gap-8 rounded-md"
+                closeButton={false}
+              >
+                <CreateOrgForm
+                  firstOrg={true}
+                  onCancelHandler={() => {
+                    setOpenCreateFirstOrg(false);
+                    setOpenDemo(true);
+                  }}
+                  onCloseHandler={() => {
+                    setOpenCreateFirstOrg(false);
+                  }}
+                  onSuccess={(orgId) => {
+                    setTimeout(() => {
+                      orgContext?.setCurrentOrg(orgId ?? "");
+                    }, 3000);
+                  }}
+                />
+              </DialogContent>
+            </Dialog>
+          </>
+        )}
+        {orgContext?.currentOrg?.tier !== "demo" && (
+          <OnboardingQuickStartModal
+            open={showQuickStartModal ?? false}
+            setOpen={setShowQuickStartModal}
+          />
+        )}
       </IslandContainer>
     </>
   );

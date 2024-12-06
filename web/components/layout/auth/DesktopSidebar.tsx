@@ -16,6 +16,9 @@ import { ChangelogItem } from "./Sidebar";
 import ChangelogModal from "../ChangelogModal";
 import SidebarHelpDropdown from "../SidebarHelpDropdown";
 import { useTheme } from "next-themes";
+import OnboardingNavItems from "./OnboardingNavItems";
+import useOnboardingContext from "../onboardingContext";
+import EndOnboardingConfirmation from "@/components/templates/onboarding/EndOnboardingConfirmation";
 
 export interface NavigationItem {
   name: string;
@@ -30,9 +33,14 @@ interface SidebarProps {
   NAVIGATION: NavigationItem[];
   changelog: ChangelogItem[];
   setOpen: (open: boolean) => void;
+  sidebarRef: React.RefObject<HTMLDivElement>;
 }
 
-const DesktopSidebar = ({ changelog, NAVIGATION }: SidebarProps) => {
+const DesktopSidebar = ({
+  changelog,
+  NAVIGATION,
+  sidebarRef,
+}: SidebarProps) => {
   const org = useOrg();
   const tier = org?.currentOrg?.tier;
   const router = useRouter();
@@ -90,7 +98,6 @@ const DesktopSidebar = ({ changelog, NAVIGATION }: SidebarProps) => {
     });
   }, [NAVIGATION, isCollapsed, expandedItems]);
 
-  const sidebarRef = useRef<HTMLDivElement>(null);
   const navItemsRef = useRef<HTMLDivElement>(null);
   const [canShowInfoBox, setCanShowInfoBox] = useState(false);
 
@@ -115,7 +122,11 @@ const DesktopSidebar = ({ changelog, NAVIGATION }: SidebarProps) => {
     calculateAvailableSpace();
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "b" && event.metaKey) {
+      if (
+        event.key === "b" &&
+        event.metaKey &&
+        org?.currentOrg?.tier !== "demo"
+      ) {
         event.preventDefault();
         setIsCollapsed(!isCollapsed);
       } else if (event.metaKey && event.shiftKey && event.key === "l") {
@@ -158,7 +169,6 @@ const DesktopSidebar = ({ changelog, NAVIGATION }: SidebarProps) => {
   };
 
   const handleModalOpen = (open: boolean) => {
-    console.log({ open });
     if (!open) {
       setChangelogToView(null);
     } else {
@@ -166,6 +176,10 @@ const DesktopSidebar = ({ changelog, NAVIGATION }: SidebarProps) => {
     }
     setModalOpen(open);
   };
+
+  const { isOnboardingVisible } = useOnboardingContext();
+  const [showEndOnboardingConfirmation, setShowEndOnboardingConfirmation] =
+    useState(false);
 
   return (
     <>
@@ -276,26 +290,39 @@ const DesktopSidebar = ({ changelog, NAVIGATION }: SidebarProps) => {
                   className="group flex flex-col py-2 data-[collapsed=true]:py-2 "
                 >
                   <nav className="grid flex-grow overflow-y-auto px-2 group-[[data-collapsed=true]]:justify-center group-[[data-collapsed=true]]:px-2">
-                    {NAVIGATION_ITEMS.map((link) => (
-                      <NavItem
-                        key={link.name}
-                        link={link}
-                        isCollapsed={isCollapsed}
-                        expandedItems={expandedItems}
-                        toggleExpand={toggleExpand}
-                        onClick={() => {
-                          setIsCollapsed(false);
-                          setIsMobileMenuOpen(false);
-                        }}
-                        deep={0}
-                      />
-                    ))}
+                    {isOnboardingVisible && <OnboardingNavItems />}
+                    {!isOnboardingVisible &&
+                      NAVIGATION_ITEMS.map((link) => (
+                        <NavItem
+                          key={link.name}
+                          link={link}
+                          isCollapsed={isCollapsed}
+                          expandedItems={expandedItems}
+                          toggleExpand={toggleExpand}
+                          onClick={() => {
+                            setIsCollapsed(false);
+                            setIsMobileMenuOpen(false);
+                          }}
+                          deep={0}
+                        />
+                      ))}
                   </nav>
                 </div>
               </div>
+              {isOnboardingVisible && (
+                <Button
+                  className="mx-2 text-[13px] font-medium"
+                  variant="outline"
+                  onClick={() => {
+                    setShowEndOnboardingConfirmation(true);
+                  }}
+                >
+                  Ready to integrate
+                </Button>
+              )}
 
               {/* InfoBox */}
-              {canShowInfoBox && !isCollapsed && (
+              {canShowInfoBox && !isCollapsed && !isOnboardingVisible && (
                 <div className="bg-slate-50 dark:bg-slate-900 rounded border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 flex flex-col md:flex-row md:gap-2 gap-4 justify-between md:justify-center md:items-center items-start px-3 py-2  mt-2 mx-2 mb-8 font-medium">
                   <h1 className="text-xs text-start tracking-tight leading-[1.35rem]">
                     ⚡ Introducing a new way to perfect your prompts.{" "}
@@ -313,18 +340,24 @@ const DesktopSidebar = ({ changelog, NAVIGATION }: SidebarProps) => {
           </div>
 
           {/* Sticky help dropdown */}
-          <div className="absolute bottom-3 left-3 z-10">
-            <SidebarHelpDropdown
-              changelog={changelog}
-              handleChangelogClick={handleChangelogClick}
-            />
-          </div>
+          {!isOnboardingVisible && (
+            <div className="absolute bottom-3 left-3 z-10">
+              <SidebarHelpDropdown
+                changelog={changelog}
+                handleChangelogClick={handleChangelogClick}
+              />
+            </div>
+          )}
         </div>
       </div>
       <ChangelogModal
         open={modalOpen}
         setOpen={handleModalOpen}
         changelog={changelogToView}
+      />
+      <EndOnboardingConfirmation
+        open={showEndOnboardingConfirmation}
+        setOpen={setShowEndOnboardingConfirmation}
       />
     </>
   );

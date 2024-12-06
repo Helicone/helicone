@@ -18,6 +18,10 @@ import { CheckIcon, Loader2, TriangleAlertIcon, XIcon } from "lucide-react";
 import { memo, useState, useEffect } from "react";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
+import useOnboardingContext, {
+  ONBOARDING_STEPS,
+} from "@/components/layout/onboardingContext";
+import { OnboardingPopover } from "@/components/templates/onboarding/OnboardingPopover";
 
 const ScoresEvaluatorsConfig = memo(
   ({ experimentId }: { experimentId: string }) => {
@@ -52,9 +56,48 @@ const ScoresEvaluatorsConfig = memo(
       }
     }, [runEvaluators.isError]);
 
+    const {
+      isOnboardingVisible,
+      currentStep,
+      setOnClickElement,
+      setCurrentStep,
+    } = useOnboardingContext();
+    const [selectOpen, setSelectOpen] = useState(false);
+
+    useEffect(() => {
+      if (
+        isOnboardingVisible &&
+        currentStep === ONBOARDING_STEPS.EXPERIMENTS_CLICK_ADD_EVAL.stepNumber
+      ) {
+        setOnClickElement(() => () => {
+          setCurrentStep(ONBOARDING_STEPS.EXPERIMENTS_SPECIFIC_EVAL.stepNumber);
+          setSelectOpen(true);
+        });
+
+        const keydownHandler = (e: KeyboardEvent) => {
+          if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+            e.preventDefault();
+            setCurrentStep(
+              ONBOARDING_STEPS.EXPERIMENTS_SPECIFIC_EVAL.stepNumber
+            );
+            setSelectOpen(true);
+          }
+        };
+        window.addEventListener("keydown", keydownHandler);
+        return () => window.removeEventListener("keydown", keydownHandler);
+      } else if (
+        isOnboardingVisible &&
+        currentStep === ONBOARDING_STEPS.EXPERIMENTS_SPECIFIC_EVAL.stepNumber
+      ) {
+        setOnClickElement(() => () => {});
+      }
+    }, [isOnboardingVisible, currentStep, setOnClickElement, setCurrentStep]);
+
     return (
       <Row className={cn("gap-2 items-center w-full", "mx-6")}>
         <Select
+          open={selectOpen}
+          onOpenChange={setSelectOpen}
           value={value}
           onValueChange={(value) => {
             if (value === "helicone-new-custom") {
@@ -67,8 +110,23 @@ const ScoresEvaluatorsConfig = memo(
             }
           }}
         >
-          <SelectTrigger className="w-[200px]">
+          <SelectTrigger
+            className="w-[200px] relative"
+            data-onboarding-step={
+              ONBOARDING_STEPS.EXPERIMENTS_CLICK_ADD_EVAL.stepNumber
+            }
+          >
             <SelectValue placeholder="Select an evaluator" />
+            {isOnboardingVisible &&
+              currentStep ===
+                ONBOARDING_STEPS.EXPERIMENTS_CLICK_ADD_EVAL.stepNumber && (
+                <div className="absolute right-1/2 top-1/2 translate-x-2 -translate-y-1/2">
+                  <span className="relative flex h-3 w-3">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-sky-500"></span>
+                  </span>
+                </div>
+              )}
           </SelectTrigger>
 
           <SelectContent>
@@ -100,15 +158,25 @@ const ScoresEvaluatorsConfig = memo(
                       (e) => e.id === evaluator.id
                     ).length
                 )
-                .map((evaluator) => (
-                  <SelectItemRawNotText
+                .map((evaluator, i) => (
+                  <OnboardingPopover
+                    popoverContentProps={{
+                      onboardingStep: "EXPERIMENTS_SPECIFIC_EVAL",
+                      next: () => addEvaluator.mutate(evaluator.id),
+                    }}
+                    setDataWhen={i === 0}
+                    open={i === 0}
                     key={evaluator.id}
-                    value={evaluator.id}
-                    className="px-2 text-xs"
-                    showIndicator={false}
                   >
-                    {evaluator.name} ({evaluator.scoring_type})
-                  </SelectItemRawNotText>
+                    <SelectItemRawNotText
+                      key={evaluator.id}
+                      value={evaluator.id}
+                      className="px-2 text-xs"
+                      showIndicator={false}
+                    >
+                      {evaluator.name} ({evaluator.scoring_type})
+                    </SelectItemRawNotText>
+                  </OnboardingPopover>
                 ))}
             </SelectGroup>
           </SelectContent>
@@ -179,18 +247,25 @@ const ScoresEvaluatorsConfig = memo(
                 <span>Error running evaluators</span>
               </Badge>
             )}
-            <Button
-              size="sm"
-              variant={"outline"}
-              onClick={() => runEvaluators.mutate()}
-              disabled={runEvaluators.isLoading}
-              className="text-xs"
+            <OnboardingPopover
+              popoverContentProps={{
+                onboardingStep: "EXPERIMENTS_RUN_EVAL",
+                next: () => runEvaluators.mutate(),
+              }}
             >
-              {runEvaluators.isLoading ? "Running..." : "Run Evaluators"}
-              {runEvaluators.isLoading && (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              )}
-            </Button>
+              <Button
+                size="sm"
+                variant={"outline"}
+                onClick={() => runEvaluators.mutate()}
+                disabled={runEvaluators.isLoading}
+                className="text-xs"
+              >
+                {runEvaluators.isLoading ? "Running..." : "Run Evaluators"}
+                {runEvaluators.isLoading && (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                )}
+              </Button>
+            </OnboardingPopover>
           </div>
         </Col>
       </Row>
