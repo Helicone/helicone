@@ -1,3 +1,25 @@
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Privacy Policy | Helicone",
+  description:
+    "Privacy Policy for Helicone - Learn how we collect, use, and protect your data.",
+  openGraph: {
+    title: "Privacy Policy | Helicone",
+    description:
+      "Privacy Policy for Helicone - Learn how we collect, use, and protect your data.",
+    url: "https://www.helicone.ai/privacy",
+    siteName: "Helicone",
+    type: "website",
+  },
+  twitter: {
+    title: "Privacy Policy | Helicone",
+    description:
+      "Privacy Policy for Helicone - Learn how we collect, use, and protect your data.",
+    card: "summary_large_image",
+  },
+};
+
 const Privacy = () => {
   const privacyPageSection = (
     index: number,
