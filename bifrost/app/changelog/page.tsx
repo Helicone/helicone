@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     title: "Helicone Changelog | Latest Updates & New Features",
     description:
       "Stay up to date with Helicone's latest features, improvements, and product updates. Track our journey in building the future of LLM observability and AI infrastructure.",
-    images: "/static/dashboard-preview.png",
+    images: "/static/new-open-graph.png",
     locale: "en_US",
   },
   twitter: {
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     description:
       "Stay up to date with Helicone's latest features, improvements, and product updates. Track our journey in building the future of LLM observability and AI infrastructure.",
     card: "summary_large_image",
-    images: "/static/dashboard-preview.png",
+    images: "/static/new-open-graph.png",
   },
 };
 
@@ -133,7 +133,10 @@ export default async function Home() {
                         width={500}
                         height={300}
                         layout="responsive"
-                        style={{ borderRadius: '16px', border: '1px solid #D3DCE6' }}
+                        style={{
+                          borderRadius: "16px",
+                          border: "1px solid #D3DCE6",
+                        }}
                       />
                     ) : (
                       <div className="bg-gray-200 w-full flex items-center justify-center"></div>

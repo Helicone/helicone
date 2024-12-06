@@ -1,3 +1,29 @@
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Terms of Service | Helicone",
+  description:
+    "Understand the guidelines and agreements that govern your use of Helicone's AI observability platform. Learn about our commitments, user responsibilities, and the standards that support our AI developer tools.",
+  icons: "https://www.helicone.ai/static/logo.webp",
+  openGraph: {
+    type: "website",
+    siteName: "Helicone.ai",
+    url: "https://www.helicone.ai/terms",
+    title: "Terms of Service | Helicone",
+    description:
+      "Understand the guidelines and agreements that govern your use of Helicone's AI observability platform. Learn about our commitments, user responsibilities, and the standards that support our AI developer tools.",
+    images: "/static/new-open-graph.png",
+    locale: "en_US",
+  },
+  twitter: {
+    title: "Terms of Service | Helicone",
+    description:
+      "Understand the guidelines and agreements that govern your use of Helicone's AI observability platform. Learn about our commitments, user responsibilities, and the standards that support our AI developer tools.",
+    card: "summary_large_image",
+    images: "/static/new-open-graph.png",
+  },
+};
+
 const Terms = () => {
   const privacyPageSection = (
     index: number,
