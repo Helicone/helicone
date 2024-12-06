@@ -15,14 +15,23 @@ export class GenericBodyProcessor implements IBodyProcessor {
   }
 
   getUsage(parsedResponse: unknown): Usage {
-    if (
-      typeof parsedResponse !== "object" ||
-      parsedResponse === null ||
-      !("usage" in parsedResponse)
-    ) {
+    if (typeof parsedResponse !== "object" || parsedResponse === null) {
       return {
         promptTokens: undefined,
         completionTokens: undefined,
+        totalTokens: undefined,
+        heliconeCalculated: false,
+      };
+    }
+
+    if (!("usage" in parsedResponse)) {
+      const nonUsageResponse = parsedResponse as {
+        prompt_token_count?: number;
+        generation_token_count?: number;
+      };
+      return {
+        promptTokens: nonUsageResponse?.prompt_token_count ?? undefined,
+        completionTokens: nonUsageResponse?.generation_token_count ?? undefined,
         totalTokens: undefined,
         heliconeCalculated: false,
       };

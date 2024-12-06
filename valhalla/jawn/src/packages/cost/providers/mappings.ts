@@ -1,3 +1,4 @@
+import { ModelRow } from "../interfaces/Cost";
 import { costs as openaiCosts } from "./openai";
 import { costs as fineTunedOpenAICosts } from "./openai/fine-tuned-models";
 import { costs as togetherAIChatCosts } from "./togetherai/chat";
@@ -12,8 +13,8 @@ import { costs as mistralCosts } from "./mistral";
 import { costs as openRouterCosts } from "./openrouter";
 import { costs as fireworksAICosts } from "./fireworks";
 import { costs as groqCosts } from "./groq";
-import { ModelRow } from "../interfaces/Cost";
 import { costs as qstashCosts } from "./qstash";
+import { costs as awsBedrockCosts } from "./awsBedrock";
 
 const openAiPattern = /^https:\/\/api\.openai\.com/;
 const anthropicPattern = /^https:\/\/api\.anthropic\.com/;
@@ -46,6 +47,8 @@ const deepinfra = /^https:\/\/api\.deepinfra\.com/;
 const qstash = /^https:\/\/qstash\.upstash\.io/;
 //https://www.firecrawl.dev/
 const firecrawl = /^https:\/\/api\.firecrawl\.dev/;
+// https://bedrock-runtime.{some-region}.amazonaws.com/{something-after}
+const awsBedrock = /^https:\/\/bedrock-runtime\.[a-z0-9-]+\.amazonaws\.com\/.*/;
 
 export const providersNames = [
   "OPENAI",
@@ -70,6 +73,7 @@ export const providersNames = [
   "DEEPINFRA",
   "QSTASH",
   "FIRECRAWL",
+  "AWS",
 ] as const;
 
 export type ProviderName = (typeof providersNames)[number];
@@ -184,6 +188,11 @@ export const providers: {
   {
     pattern: firecrawl,
     provider: "FIRECRAWL",
+  },
+  {
+    pattern: awsBedrock,
+    provider: "AWS",
+    costs: awsBedrockCosts,
   },
 ];
 

@@ -770,6 +770,12 @@ WHEN (request_response_rmt.model ILIKE '%mistral%') THEN 300 * request_response_
   ELSE 0
 END
 )
+WHEN (request_response_rmt.provider = 'AWS') THEN (
+  CASE
+  WHEN (request_response_rmt.model ILIKE 'meta.llama3-8b-instruct-v1%3A0') THEN 220000 * request_response_rmt.prompt_tokens + 720000 * request_response_rmt.completion_tokens
+  ELSE 0
+END
+)
     ELSE 
   CASE
   WHEN (request_response_rmt.model ILIKE 'ada') THEN 400 * request_response_rmt.prompt_tokens + 400 * request_response_rmt.completion_tokens
