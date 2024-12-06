@@ -102,7 +102,10 @@ function isRootPath(url: URL) {
 }
 
 // If the url starts with oai.*.<>.com then we know WORKER_TYPE is OPENAI_PROXY
-function modifyEnvBasedOnPath(env: Env, request: RequestWrapper): Env {
+async function modifyEnvBasedOnPath(
+  env: Env,
+  request: RequestWrapper
+): Promise<Env> {
   const url = new URL(request.getUrl());
   const host = url.host;
   const hostParts = host.split(".");
@@ -237,6 +240,28 @@ function modifyEnvBasedOnPath(env: Env, request: RequestWrapper): Env {
         WORKER_TYPE: "GATEWAY_API",
         GATEWAY_TARGET: "https://api.mistral.ai",
       };
+    } else if (hostParts[0].includes("bedrock")) {
+      request.removeBedrock();
+      const region = url.pathname.split("/v1/")[1].split("/")[0];
+      const forwardToHost =
+        "bedrock-runtime." +
+        url.pathname.split("/v1/")[1].split("/")[0] +
+        ".amazonaws.com";
+      const forwardToUrl =
+        "https://" +
+        forwardToHost +
+        "/" +
+        url.pathname.split("/v1/")[1].split("/").slice(1).join("/");
+      await request.signAWSRequest({
+        region,
+        forwardToHost,
+      });
+
+      return {
+        ...env,
+        WORKER_TYPE: "GATEWAY_API",
+        GATEWAY_TARGET: forwardToUrl,
+      };
     } else if (hostParts[0].includes("fireworks")) {
       if (isRootPath(url) && request.getMethod() === "GET") {
         return {
@@ -330,7 +355,7 @@ export default {
       if (requestWrapper.error || !requestWrapper.data) {
         return handleError(requestWrapper.error);
       }
-      env = modifyEnvBasedOnPath(env, requestWrapper.data);
+      env = await modifyEnvBasedOnPath(env, requestWrapper.data);
 
       if (env.WORKER_DEFINED_REDIRECT_URL) {
         return Response.redirect(env.WORKER_DEFINED_REDIRECT_URL, 301);
@@ -340,6 +365,7 @@ export default {
         env.WORKER_TYPE,
         request.url.includes("browser")
       );
+
       return router
         .handle(request, requestWrapper.data, env, ctx)
         .catch(handleError);

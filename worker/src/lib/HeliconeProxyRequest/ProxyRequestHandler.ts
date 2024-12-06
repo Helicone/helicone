@@ -111,7 +111,7 @@ export async function handleProxyRequest(
     }
   }
 
-  return {
+  const result = {
     data: {
       loggable: new DBLoggable({
         request: dbLoggableRequestFromProxyRequest(
@@ -162,6 +162,7 @@ export async function handleProxyRequest(
     },
     error: null,
   };
+  return result;
 }
 
 export async function handleThreatProxyRequest(
