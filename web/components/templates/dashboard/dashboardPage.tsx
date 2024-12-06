@@ -1121,7 +1121,7 @@ const DashboardPage = (props: DashboardPageProps) => {
             />
             <Dialog open={openCreateFirstOrg}>
               <DialogContent
-                className="w-11/12 sm:max-w-2xl gap-8 rounded-md"
+                className="w-11/12 sm:max-w-md gap-8 rounded-md"
                 closeButton={false}
               >
                 <CreateOrgForm

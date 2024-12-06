@@ -111,36 +111,10 @@ const GenerateAPIKey = ({
   ]);
 
   return (
-    <div className="flex flex-col p-4 h-full max-h-[calc(100vh-20rem)] overflow-y-auto">
+    <div className="flex flex-col p-4 pt-0 h-full max-h-[calc(100vh-20rem)] overflow-y-auto">
       <div className="flex flex-col space-y-4 w-full">
         <div className="flex flex-col space-y-2">
-          <label
-            htmlFor="key-name"
-            className="block text-md font-semibold leading-6"
-          >
-            API Key
-          </label>
-          <div className="flex items-center gap-4">
-            <Input
-              disabled
-              name="key-name"
-              id="key-name"
-              required
-              placeholder="Your Shiny API Key Name"
-              value={apiKey}
-              className="h-full"
-            />
-            <Button
-              variant={"secondary"}
-              size={"sm"}
-              onClick={() => {
-                navigator.clipboard.writeText(apiKey);
-                setNotification("Copied API key to clipboard", "success");
-              }}
-            >
-              Copy
-            </Button>
-          </div>
+          <div>{renderProviderObject[selectedProvider]}</div>
         </div>
 
         {selectedIntegrationMethod === "async" ? (
@@ -171,25 +145,25 @@ const GenerateAPIKey = ({
                 language={asyncLang}
                 newLines={[]}
                 oldLines={[]}
+                minHeight={true}
               />
             </div>
           </>
         ) : (
           <>
-            <label className="font-semibold text-sm mt-4">
-              Select your provider
-            </label>
             <div className="flex flex-wrap gap-4 w-full">
               <button
                 className={clsx(
-                  selectedProvider === "openai" ? "bg-sky-100" : "bg-white",
-                  "flex items-center gap-2 border border-gray-300 rounded-lg py-2 px-4"
+                  selectedProvider === "openai"
+                    ? "bg-white shadow-md ring-2 ring-sky-500"
+                    : "bg-white hover:bg-gray-50",
+                  "flex items-center gap-3 border border-gray-200 rounded-xl py-3 px-4 transition-all duration-150",
+                  "hover:shadow-sm"
                 )}
                 onClick={() => setSelectedProvider("openai")}
               >
                 <svg
-                  className="w-[1.60625rem] m:w-[1.375rem] h-auto"
-                  width="28"
+                  className="w-6 h-6"
                   viewBox="0 0 28 28"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
@@ -199,86 +173,71 @@ const GenerateAPIKey = ({
                     fill="currentColor"
                   ></path>
                 </svg>
-                <h2 className="font-semibold">OpenAI</h2>
+                <span className="font-medium text-gray-900">OpenAI</span>
               </button>
               <button
                 className={clsx(
-                  selectedProvider === "azure" ? "bg-sky-100" : "bg-white",
-                  "flex items-center gap-2 border border-gray-300 rounded-lg py-2 px-4"
+                  selectedProvider === "azure"
+                    ? "bg-white shadow-md ring-2 ring-sky-500"
+                    : "bg-white hover:bg-gray-50",
+                  "flex items-center gap-3 border border-gray-200 rounded-xl py-3 px-4 transition-all duration-150",
+                  "hover:shadow-sm"
                 )}
                 onClick={() => setSelectedProvider("azure")}
               >
                 <Image
                   src="/assets/landing/azure.svg.png"
-                  alt={"Azure"}
-                  width={28}
-                  height={28}
+                  alt="Azure"
+                  width={24}
+                  height={24}
                   quality={100}
                   className="bg-transparent rounded-lg"
                 />
-                <h2 className="font-semibold">Azure</h2>
+                <span className="font-medium text-gray-900">Azure</span>
               </button>
 
               <button
                 className={clsx(
-                  selectedProvider === "anthropic" ? "bg-sky-100" : "bg-white",
-                  "flex items-center gap-2 border border-gray-300 rounded-lg py-2 px-4"
+                  selectedProvider === "anthropic"
+                    ? "bg-white shadow-md ring-2 ring-sky-500"
+                    : "bg-white hover:bg-gray-50",
+                  "flex items-center gap-3 border border-gray-200 rounded-xl py-3 px-4 transition-all duration-150",
+                  "hover:shadow-sm"
                 )}
                 onClick={() => setSelectedProvider("anthropic")}
               >
                 <Image
                   src="/assets/home/providers/anthropic.jpeg"
-                  alt={"Anthropic"}
-                  width={28}
-                  height={28}
+                  alt="Anthropic"
+                  width={24}
+                  height={24}
                   quality={100}
                   className="bg-transparent rounded-xl"
                 />
-                <h2 className="font-semibold">Anthropic</h2>
+                <span className="font-medium text-gray-900">Anthropic</span>
               </button>
               <Link
                 className={clsx(
-                  "bg-white",
-                  "flex items-center gap-2 border border-gray-300 rounded-lg py-2 px-4"
+                  "flex items-center gap-3 border border-gray-200 rounded-xl py-3 px-4",
+                  "hover:bg-gray-50 hover:shadow-sm transition-all duration-150"
                 )}
                 href="https://docs.helicone.ai/getting-started/integration-method/gateway"
                 target="_blank"
                 rel="noreferrer noopener"
               >
-                <div className="flex w-full">
-                  <div className="relative flex items-center w-16 h-4">
-                    <Image
-                      src="/assets/home/providers/lemonfox.png"
-                      alt={"Anthropic"}
-                      width={28}
-                      height={28}
-                      quality={100}
-                      className="bg-transparent absolute left-0 z-40 rounded-xl"
-                    />
-                    <Image
-                      src="/assets/home/providers/llama2.png"
-                      alt={"Anthropic"}
-                      width={28}
-                      height={28}
-                      quality={100}
-                      className="bg-transparent absolute left-4 z-30 rounded-xl"
-                    />
-                    <Image
-                      src="/assets/home/providers/anyscale.jpeg"
-                      alt={"Anthropic"}
-                      width={28}
-                      height={28}
-                      quality={100}
-                      className="bg-transparent absolute left-8 z-20 rounded-xl"
-                    />
-                  </div>
+                <div className="relative flex items-center w-6">
+                  <Image
+                    src="/assets/home/providers/lemonfox.png"
+                    alt="More Providers"
+                    width={24}
+                    height={24}
+                    quality={100}
+                    className="absolute left-0 z-40 rounded-xl"
+                  />
                 </div>
-                <h2 className="font-semibold w-fit text-nowrap">
-                  Explore our docs
-                </h2>
+                <span className="font-medium text-gray-900">More ›</span>
               </Link>
             </div>
-            <div className="mt-4">{renderProviderObject[selectedProvider]}</div>
           </>
         )}
       </div>

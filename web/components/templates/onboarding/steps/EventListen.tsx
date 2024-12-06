@@ -13,7 +13,11 @@ import { useJawnClient } from "@/lib/clients/jawnHook";
 import { useState } from "react";
 const Lottie = dynamic(() => import("react-lottie"), { ssr: false });
 
-const EventListen = ({ setOpen }: { setOpen: (open: boolean) => void }) => {
+const EventListen = ({
+  setCurrentStep,
+}: {
+  setCurrentStep: (step: number) => void;
+}) => {
   const [loading, setLoading] = useState(false);
   const { data, isSuccess } = useQuery<Result<boolean, string>, Error>(
     ["hasOnboarded"],
@@ -52,7 +56,7 @@ const EventListen = ({ setOpen }: { setOpen: (open: boolean) => void }) => {
     });
 
     org?.refreshCurrentOrg();
-    setOpen(false);
+    setCurrentStep(2);
   };
 
   const org = useOrg();
@@ -110,12 +114,10 @@ const EventListen = ({ setOpen }: { setOpen: (open: boolean) => void }) => {
           </div>
         </div>
       )}
-      <DialogFooter className="mt-4">
-        {!(data && data.data) && (
-          <Button variant="outline" onClick={skipOnboarding}>
-            Skip
-          </Button>
-        )}
+      <DialogFooter className="mt-10">
+        <Button variant={"outline"} onClick={() => setCurrentStep(2)}>
+          Go Back
+        </Button>
         <Button
           disabled={!(data && data.data)}
           onClick={() => {

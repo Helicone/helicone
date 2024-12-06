@@ -29,7 +29,7 @@ import {
 } from "@/components/ui/select";
 import { useTranslation } from "react-i18next";
 import useOnboardingContext from "@/components/layout/onboardingContext";
-import { Loader2 } from "lucide-react";
+import { Loader2, X } from "lucide-react";
 
 interface CreateOrgFormProps {
   variant?: "organization" | "reseller";
@@ -120,22 +120,50 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
   const [loading, setLoading] = useState(false);
   return (
     <>
-      <div>
+      <div className="relative">
         {initialValues || variant === "reseller" ? (
           <></>
         ) : (
           <>
             <DialogHeader className="space-y-2">
               <DialogTitle>
-                {firstOrg ? "Getting Started" : "Create New Organization"}
+                {firstOrg
+                  ? "Get Started with Helicone"
+                  : "Create New Organization"}
               </DialogTitle>
-              {firstOrg && (
-                <DialogDescription>
-                  Let’s help you create your first organization.
-                </DialogDescription>
-              )}
             </DialogHeader>
           </>
+        )}
+        {!(firstOrg && isOnboardingComplete) && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute right-0 top-0"
+            onClick={() => {
+              if (onCancelHandler) {
+                onCancelHandler(false);
+              } else {
+                // reset to the initial values
+                setOrgName(initialValues?.name || "");
+                setSelectedColor(
+                  initialValues?.color
+                    ? ORGANIZATION_COLORS.find(
+                        (c) => c.name === initialValues.color
+                      ) || ORGANIZATION_COLORS[0]
+                    : ORGANIZATION_COLORS[0]
+                );
+                setSelectedIcon(
+                  initialValues?.icon
+                    ? ORGANIZATION_ICONS.find(
+                        (i) => i.name === initialValues.icon
+                      ) || ORGANIZATION_ICONS[0]
+                    : ORGANIZATION_ICONS[0]
+                );
+              }
+            }}
+          >
+            <X className="h-4 w-4" />
+          </Button>
         )}
         <div className="flex flex-col w-full space-y-6 mt-8">
           <div className="space-y-1.5 text-sm">
@@ -153,95 +181,11 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
               id="org-name"
               value={orgName}
               placeholder={
-                variant === "organization"
-                  ? "Your shiny new org name"
-                  : "Customer name"
+                variant === "organization" ? "ACME" : "Customer name"
               }
               onChange={(e) => setOrgName(e.target.value)}
             />
           </div>
-          <RadioGroup value={selectedColor} onChange={setSelectedColor}>
-            <RadioGroup.Label className="block text-sm font-medium leading-6 text-slate-900 dark:text-slate-100">
-              Choose a color
-            </RadioGroup.Label>
-            <div className="mt-4 flex items-center justify-between px-8">
-              {ORGANIZATION_COLORS.map((color) => (
-                <RadioGroup.Option
-                  key={color.name}
-                  value={color}
-                  className={({ active, checked }) =>
-                    clsx(
-                      color.selectedColor,
-                      active && checked ? "ring ring-offset-1" : "",
-                      !active && checked ? "ring-2" : "",
-                      "relative -m-0.5 flex cursor-pointer items-center justify-center rounded-full p-0.5 focus:outline-none"
-                    )
-                  }
-                >
-                  <RadioGroup.Label as="span" className="sr-only">
-                    {color.name}
-                  </RadioGroup.Label>
-                  <span
-                    aria-hidden="true"
-                    className={clsx(
-                      color.bgColor,
-                      "h-8 w-8 rounded-full border border-black dark:border-white border-opacity-10"
-                    )}
-                  />
-                </RadioGroup.Option>
-              ))}
-            </div>
-          </RadioGroup>
-          <RadioGroup value={selectedIcon} onChange={setSelectedIcon}>
-            <RadioGroup.Label className="block text-sm font-medium leading-6 text-slate-900 dark:text-slate-100">
-              Choose an icon
-            </RadioGroup.Label>
-            <div className="mt-4 grid grid-cols-5 gap-4">
-              {ORGANIZATION_ICONS.map((icon) => (
-                <RadioGroup.Option
-                  key={icon.name}
-                  value={icon}
-                  className={({ active, checked }) =>
-                    clsx(
-                      checked
-                        ? "ring-2 ring-offset-1 ring-sky-300 dark:ring-sky-700"
-                        : "ring-1 ring-slate-200 dark:ring-slate-800",
-                      "bg-white dark:bg-black rounded-md p-2 flex items-center justify-center"
-                    )
-                  }
-                >
-                  <RadioGroup.Label as="span" className="sr-only">
-                    {icon.name}
-                  </RadioGroup.Label>
-                  {
-                    <icon.icon
-                      className={clsx(
-                        "h-6 w-6 hover:cursor-pointer",
-                        selectedColor.textColor
-                      )}
-                    />
-                  }
-                </RadioGroup.Option>
-              ))}
-            </div>
-          </RadioGroup>
-          {firstOrg && (
-            <div className="space-y-1.5 text-sm">
-              <Label htmlFor="org-referral">How did you hear about us?</Label>
-              <Select value={referralType} onValueChange={setReferralType}>
-                <SelectTrigger>
-                  <SelectValue placeholder={t("Select referral source")} />
-                </SelectTrigger>
-                <SelectContent>
-                  {referralOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
           {variant === "reseller" && (
             <>
               <div>
@@ -388,37 +332,9 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
             </>
           )}
           <DialogFooter>
-            {!(firstOrg && isOnboardingComplete) && (
-              <Button
-                variant="outline"
-                onClick={() => {
-                  if (onCancelHandler) {
-                    onCancelHandler(false);
-                  } else {
-                    // reset to the initial values
-                    setOrgName(initialValues?.name || "");
-                    setSelectedColor(
-                      initialValues?.color
-                        ? ORGANIZATION_COLORS.find(
-                            (c) => c.name === initialValues.color
-                          ) || ORGANIZATION_COLORS[0]
-                        : ORGANIZATION_COLORS[0]
-                    );
-                    setSelectedIcon(
-                      initialValues?.icon
-                        ? ORGANIZATION_ICONS.find(
-                            (i) => i.name === initialValues.icon
-                          ) || ORGANIZATION_ICONS[0]
-                        : ORGANIZATION_ICONS[0]
-                    );
-                  }
-                }}
-              >
-                Cancel
-              </Button>
-            )}
             <Button
               disabled={loading}
+              className="w-full"
               onClick={async () => {
                 setLoading(true);
                 if ((user?.email ?? "") === DEMO_EMAIL) {
@@ -520,8 +436,8 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
                   ? "Updating..."
                   : "Update"
                 : loading
-                ? "Creating..."
-                : "Create"}
+                ? "Loading..."
+                : "Continue"}
               {loading && <Loader2 className="w-4 h-4 ml-2 animate-spin" />}
             </Button>
           </DialogFooter>

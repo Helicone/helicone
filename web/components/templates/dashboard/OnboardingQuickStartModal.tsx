@@ -1,8 +1,10 @@
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { ArrowLeftRightIcon, RouteIcon } from "lucide-react";
@@ -12,6 +14,7 @@ import Framework from "../onboarding/steps/Framework";
 import EventListen from "../onboarding/steps/EventListen";
 import { useJawnClient } from "@/lib/clients/jawnHook";
 import { useOrg } from "@/components/layout/organizationContext";
+import { Button } from "@/components/ui/button";
 
 const steps = [
   "Choose integration method",
@@ -28,9 +31,9 @@ export const INTEGRATION_METHODS = [
     title: "Async",
     description: "Flexible, not on the critical path.",
     features: [
-      { good: true, description: "Zero propagation delay" },
-      { good: false, description: "Support varies based on your environment" },
-      { good: false, description: "Requires bulky SDK" },
+      { good: true, description: "Zero latency impact" },
+      { good: false, description: "Not all languages/frameworks supported" },
+      { good: false, description: "Requires SDK" },
     ],
   },
   {
@@ -40,11 +43,10 @@ export const INTEGRATION_METHODS = [
     title: "Proxy",
     description: "Simplest and fastest integration.",
     features: [
-      { good: true, description: "Unified proxy that supports 300+ models" },
+      { good: true, description: "Supports 300+ LLM models" },
       {
         good: true,
-        description:
-          "Access to gateway features (caching, rate limiting, API key management, and more). ",
+        description: "Built-in caching, rate limiting, & more",
       },
       { good: false, description: "~50 ms latency impact" },
     ],
@@ -83,27 +85,31 @@ const OnboardingQuickStartModal = ({
       onOpenChange={(open) => (open ? setOpen(true) : close())}
     >
       <DialogContent className="w-11/12 sm:max-w-3xl gap-8 rounded-md">
-        <DialogHeader className="flex flex-row gap-3 items-center space-y-0">
+        <DialogHeader className="flex flex-col space-y-1.5">
           <DialogTitle>
-            {currentStep === 3 ? "Listening for events..." : "Getting started"}
+            {currentStep === 3
+              ? "Listening for events..."
+              : `Hello ${org?.currentOrg?.name}!`}
           </DialogTitle>
-          {currentStep === 2 && (
-            <div className="px-4 py-1 flex items-center gap-3 bg-slate-100 dark:bg-slate-900 rounded-md border border-slate-200 dark:border-slate-800">
-              {cloneElement(
-                INTEGRATION_METHODS.filter(
-                  (m) => m.id === selectedIntegrationMethod
-                )[0].icon,
-                { className: "w-4 h-4 text-slate-400 dark:text-slate-500" }
-              )}
-              <p className="text-[13px] text-slate-900 dark:text-slate-100 font-medium">
-                {
+          <DialogDescription className="text-sm text-slate-500">
+            Let's set up your first{" "}
+            {currentStep === 2 ? (
+              <span className="inline-flex items-center gap-1 text-slate-700 dark:text-slate-300 font-medium">
+                {cloneElement(
                   INTEGRATION_METHODS.filter(
                     (m) => m.id === selectedIntegrationMethod
-                  )[0].title
-                }
-              </p>
-            </div>
-          )}
+                  )[0].icon,
+                  { className: "w-3 h-3" }
+                )}
+                {INTEGRATION_METHODS.filter(
+                  (m) => m.id === selectedIntegrationMethod
+                )[0].title.toLowerCase()}
+              </span>
+            ) : (
+              ""
+            )}{" "}
+            integration with Helicone
+          </DialogDescription>
         </DialogHeader>
         <div className="grid grid-cols-3 gap-2">
           {steps.map((step, index) => (
@@ -124,7 +130,7 @@ const OnboardingQuickStartModal = ({
                     : "text-slate-400 dark:text-slate-600"
                 )}
               >
-                {step}
+                {`${index + 1}. ${step}`}
               </p>
             </div>
           ))}
@@ -141,7 +147,7 @@ const OnboardingQuickStartModal = ({
             setCurrentStep={setCurrentStep}
           />
         )}
-        {currentStep === 3 && <EventListen setOpen={setOpen} />}
+        {currentStep === 3 && <EventListen setCurrentStep={setCurrentStep} />}
       </DialogContent>
     </Dialog>
   );

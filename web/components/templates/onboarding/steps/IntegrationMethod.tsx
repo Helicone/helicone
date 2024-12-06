@@ -32,14 +32,14 @@ const IntegrationMethod = ({
         target="_blank"
         rel="noreferrer"
       >
-        <div className="w-full bg-slate-50 dark:bg-slate-950 rounded-md p-4 flex justify-between items-center border border-slate-200 dark:border-slate-800">
+        <div className="w-full rounded-md p-2 flex justify-between items-center">
           <div className="flex flex gap-2 items-center">
             <BookOpenIcon className="w-4 h-4 text-slate-500" />
-            <p className="text-sm text-slate-700 dark:text-slate-300 font-medium">
+            <p className="text-sm text-slate-500 dark:text-slate-300 font-medium">
               Read more about Proxy vs Async integration.
             </p>
+            <ArrowUpRightIcon className="w-4 h-4 text-slate-500" />
           </div>
-          <ArrowUpRightIcon className="w-4 h-4 text-slate-500" />
         </div>
       </a>
     </div>
