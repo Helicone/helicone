@@ -45,7 +45,8 @@ function prepareRequestAzure(
 function prepareRequestAnthropic(
   requestPath: string,
   apiKey: string,
-  requestId: string
+  requestId: string,
+  experimentId?: string
 ): {
   url: URL;
   headers: { [key: string]: string };
@@ -59,6 +60,10 @@ function prepareRequestAnthropic(
     "Accept-Encoding": "",
     "Helicone-Manual-Access-Key": process.env.HELICONE_MANUAL_ACCESS_KEY ?? "",
   };
+
+  if (experimentId) {
+    headers["Helicone-Experiment-Id"] = experimentId;
+  }
 
   const fetchUrl = `${process.env.HELICONE_LLMMAPPER_URL}/oai2ant/v1/chat/completions`;
 
@@ -113,6 +118,7 @@ export function prepareRequestAnthropicFull({
   autoInputs,
   requestPath,
   requestId,
+  experimentId,
 }: PreparedRequestArgs): PreparedRequest {
   const newRequestBody = autoFillInputs({
     template: template ?? {},
@@ -128,7 +134,8 @@ export function prepareRequestAnthropicFull({
   const { url: fetchUrl, headers } = prepareRequestAnthropic(
     `${process.env.HELICONE_LLMMAPPER_URL}/oai2ant/v1/chat/completions`,
     proxyKey,
-    requestId
+    requestId,
+    experimentId
   );
   return {
     url: fetchUrl,
