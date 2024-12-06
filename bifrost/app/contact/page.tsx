@@ -1,6 +1,31 @@
 import Link from "next/link";
 import { CheckCircleIcon, ChevronRightIcon } from "@heroicons/react/20/solid";
 import Calendar from "@/components/templates/contact/calendar";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Contact Us | Helicone",
+  description:
+    "Get in touch for product demos, pricing information, onboarding support and inquiries about our platform and enterprise solutions.",
+  icons: "https://www.helicone.ai/static/logo.webp",
+  openGraph: {
+    type: "website",
+    siteName: "Helicone.ai",
+    url: "https://www.helicone.ai/contact",
+    title: "Contact Us | Helicone",
+    description:
+      "Get in touch for product demos, pricing information, onboarding support and inquiries about our platform and enterprise solutions.",
+    images: "/static/new-open-graph.png",
+    locale: "en_US",
+  },
+  twitter: {
+    title: "Contact Us | Helicone",
+    description:
+      "Get in touch for product demos, pricing information, onboarding support and inquiries about our platform and enterprise solutions.",
+    card: "summary_large_image",
+    images: "/static/new-open-graph.png",
+  },
+};
 
 const bullets = [
   "Request a demo",
