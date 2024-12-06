@@ -134,7 +134,7 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
             </DialogHeader>
           </>
         )}
-        {!(firstOrg && isOnboardingComplete) && (
+        {/* {!(firstOrg && isOnboardingComplete) && (
           <Button
             variant="ghost"
             size="icon"
@@ -164,7 +164,7 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
           >
             <X className="h-4 w-4" />
           </Button>
-        )}
+        )} */}
         <div className="flex flex-col w-full space-y-6 mt-8">
           <div className="space-y-1.5 text-sm">
             <Label htmlFor="org-name">
@@ -424,8 +424,8 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
                       "Organization created successfully",
                       "success"
                     );
-                    onSuccess && onSuccess(data?.data ?? "");
                     orgContext?.refetchOrgs();
+                    onSuccess && onSuccess(data?.data ?? "");
                     onCloseHandler && onCloseHandler();
                   }
                 }

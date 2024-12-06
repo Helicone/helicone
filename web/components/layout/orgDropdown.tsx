@@ -98,7 +98,7 @@ export default function OrgDropdown({}: OrgDropdownProps) {
 
   return (
     <>
-      <DropdownMenu>
+      <DropdownMenu modal={false}>
         <DropdownMenuTrigger asChild>
           <Button
             variant="ghost"
@@ -200,10 +200,15 @@ export default function OrgDropdown({}: OrgDropdownProps) {
           </DropdownMenuContent>
         )}
       </DropdownMenu>
-
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
         <DialogContent className="sm:max-w-[425px]">
-          <CreateOrgForm onCancelHandler={setCreateOpen} />
+          <CreateOrgForm
+            onCancelHandler={setCreateOpen}
+            onCloseHandler={() => setCreateOpen(false)}
+            onSuccess={(orgId) => {
+              orgContext?.setCurrentOrg(orgId ?? "");
+            }}
+          />
         </DialogContent>
       </Dialog>
 

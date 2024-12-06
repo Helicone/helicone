@@ -171,7 +171,7 @@ export default function OrgMoreDropdown({
 
       {/* Desktop view */}
       <div className="hidden sm:block">
-        <DropdownMenu>
+        <DropdownMenu modal={false}>
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"

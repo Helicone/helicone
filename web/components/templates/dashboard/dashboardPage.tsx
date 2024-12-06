@@ -1134,9 +1134,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                     setOpenCreateFirstOrg(false);
                   }}
                   onSuccess={(orgId) => {
-                    setTimeout(() => {
-                      orgContext?.setCurrentOrg(orgId ?? "");
-                    }, 3000);
+                    orgContext?.setCurrentOrg(orgId ?? "");
                   }}
                 />
               </DialogContent>
