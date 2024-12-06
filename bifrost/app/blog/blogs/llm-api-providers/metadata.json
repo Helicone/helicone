@@ -6,5 +6,6 @@
   "images": "/static/blog/llm-api-providers/ai-inferencing.webp",
   "time": "12 minute read",
   "author": "Lina Lam",
-  "date": "October 21, 2024"
+  "date": "October 21, 2024", 
+  "badge": "guide"
 }
