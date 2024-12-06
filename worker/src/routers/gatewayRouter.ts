@@ -115,8 +115,6 @@ async function getProvider(
     );
   }
 
-  console.log("targetBaseUrl", targetBaseUrl);
-
   setBaseURLOverride(targetBaseUrl);
   let provider = getProviderFromTargetUrl(targetBaseUrl);
 
