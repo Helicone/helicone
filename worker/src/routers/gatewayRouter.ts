@@ -120,8 +120,6 @@ async function getProvider(
   setBaseURLOverride(targetBaseUrl);
   let provider = getProviderFromTargetUrl(targetBaseUrl);
 
-  console.log("provider", provider);
-
   if (provider === "QSTASH") {
     const callback = headers.get("Upstash-Callback");
 
@@ -236,7 +234,6 @@ export const getGatewayAPIRouter = (router: BaseRouter) => {
       ctx: ExecutionContext
     ) => {
       function forwarder(targetBaseUrl: string | null) {
-        console.log("forwarder", targetBaseUrl);
         return gatewayForwarder(
           {
             targetBaseUrl,
@@ -251,9 +248,8 @@ export const getGatewayAPIRouter = (router: BaseRouter) => {
       }
 
       if (env.GATEWAY_TARGET) {
-        const hello = await forwarder(env.GATEWAY_TARGET);
-        console.log("hello1", hello.url);
-        return hello;
+        const response = await forwarder(env.GATEWAY_TARGET);
+        return response;
       }
       const fallbacks = requestWrapper.heliconeHeaders.fallBacks;
 

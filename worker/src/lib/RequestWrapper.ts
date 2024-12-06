@@ -16,6 +16,9 @@ import { getAndStoreInCache } from "./util/cache/secureCache";
 
 import { CfProperties } from "@cloudflare/workers-types";
 import { parseJSXObject } from "@helicone/prompts";
+import { SignatureV4 } from "@smithy/signature-v4";
+import { Sha256 } from "@aws-crypto/sha256-js";
+import { HttpRequest } from "@smithy/protocol-http";
 
 export type RequestHandlerType =
   | "proxy_only"
@@ -333,6 +336,87 @@ export class RequestWrapper {
 
   private setUrl(url: string): void {
     this.url = new URL(url);
+  }
+
+  async signAWSRequest({
+    region,
+    forwardToHost,
+  }: {
+    region: string;
+    forwardToHost: string;
+  }) {
+    // Extract model from URL path
+    const pathParts = this.url.pathname.split("/");
+    const model = decodeURIComponent(pathParts.at(-2) ?? "");
+
+    const awsAccessKey = this.headers.get("aws-access-key");
+    const awsSecretKey = this.headers.get("aws-secret-key");
+    const awsSessionToken = this.headers.get("aws-session-token");
+    const service = "bedrock";
+
+    const sigv4 = new SignatureV4({
+      service,
+      region,
+      credentials: {
+        accessKeyId: awsAccessKey ?? "",
+        secretAccessKey: awsSecretKey ?? "",
+        ...(awsSessionToken ? { sessionToken: awsSessionToken } : {}),
+      },
+      sha256: Sha256,
+    });
+
+    const headers = new Headers();
+
+    // Required headers for AWS requests
+    headers.set("host", forwardToHost);
+    headers.set("content-type", "application/json");
+
+    // Include only AWS-specific headers needed for authentication
+    const awsHeaders = [
+      "x-amz-date",
+      "x-amz-security-token",
+      "x-amz-content-sha256",
+      "x-amz-target",
+      // Add any other required x-amz headers for your specific use case
+    ];
+
+    for (const [key, value] of this.headers.entries()) {
+      if (awsHeaders.includes(key.toLowerCase())) {
+        headers.set(key, value);
+      }
+    }
+
+    const url = new URL(this.url.toString());
+    const request = new HttpRequest({
+      method: this.request.method,
+      protocol: url.protocol,
+      hostname: forwardToHost,
+      path: url.pathname + url.search,
+      headers: Object.fromEntries(headers.entries()),
+      body: await this.getRawText(),
+    });
+
+    const signedRequest = await sigv4.sign(request);
+
+    // Create new headers with the signed values
+    const newHeaders = new Headers();
+    // Only copy over the essential headers
+    newHeaders.set("host", forwardToHost);
+    newHeaders.set("content-type", "application/json");
+
+    // Add model override header if model was found
+    if (model) {
+      this.heliconeHeaders.setModelOverride(model);
+    }
+
+    // Add all the signed AWS headers
+    for (const [key, value] of Object.entries(signedRequest.headers)) {
+      if (value) {
+        newHeaders.set(key, value.toString());
+      }
+    }
+
+    this.remapHeaders(newHeaders);
   }
 
   public removeBedrock(): void {

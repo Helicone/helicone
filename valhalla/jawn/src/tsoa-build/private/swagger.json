@@ -987,7 +987,8 @@
 					"MISTRAL",
 					"DEEPINFRA",
 					"QSTASH",
-					"FIRECRAWL"
+					"FIRECRAWL",
+					"AWS"
 				]
 			},
 			"Provider": {
