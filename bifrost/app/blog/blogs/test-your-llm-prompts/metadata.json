@@ -6,5 +6,6 @@
   "images": "/static/blog/test-your-llm-prompts/cover.webp",
   "time": "10 minute read",
   "author": "Lina Lam",
-  "date": "December 4, 2024"
+  "date": "December 4, 2024", 
+  "badge": "how-to"
 }
