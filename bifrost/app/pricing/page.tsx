@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import PricingPage from "./pricingPage";
 
 export const metadata: Metadata = {
-  title: "Pricing | Helicone",
+  title: "Helicone Pricing | Ship Your AI App With Confidence",
   description:
     "Find a plan that accelerates your business. Usage-based pricing that scales with you. ",
   icons: "https://www.helicone.ai/static/logo.webp",
@@ -10,14 +10,14 @@ export const metadata: Metadata = {
     type: "website",
     siteName: "Helicone.ai",
     url: "https://www.helicone.ai/pricing",
-    title: "Pricing | Helicone",
+    title: "Helicone Pricing | Ship Your AI App With Confidence",
     description:
       "Find a plan that accelerates your business. Usage-based pricing that scales with you. ",
     images: "/static/new-open-graph.png",
     locale: "en_US",
   },
   twitter: {
-    title: "Pricing | Helicone",
+    title: "Helicone Pricing | Ship Your AI App With Confidence",
     description:
       "Find a plan that accelerates your business. Usage-based pricing that scales with you. ",
     card: "summary_large_image",
