@@ -3,7 +3,7 @@ import { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Privacy Policy | Helicone",
   description:
-    "Learn how Helicone safeguards your personal information. Our transparent policy outlines how we handle, protect, and respect your personal data.",
+    "Learn how Helicone safeguards your personal information. Our transparent policy outlines how we handle, protect, and respect your personal data in our AI observability platform.",
   icons: "https://www.helicone.ai/static/logo.webp",
   openGraph: {
     type: "website",
@@ -11,14 +11,14 @@ export const metadata: Metadata = {
     url: "https://www.helicone.ai/privacy",
     title: "Privacy Policy | Helicone",
     description:
-      "Learn how Helicone safeguards your personal information. Our transparent policy outlines how we handle, protect, and respect your personal data.",
+      "Learn how Helicone safeguards your personal information. Our transparent policy outlines how we handle, protect, and respect your personal data in our AI observability platform.",
     images: "/static/new-open-graph.png",
     locale: "en_US",
   },
   twitter: {
     title: "Privacy Policy | Helicone",
     description:
-      "Learn how Helicone safeguards your personal information. Our transparent policy outlines how we handle, protect, and respect your personal data.",
+      "Learn how Helicone safeguards your personal information. Our transparent policy outlines how we handle, protect, and respect your personal data in our AI observability platform.",
     card: "summary_large_image",
     images: "/static/new-open-graph.png",
   },
