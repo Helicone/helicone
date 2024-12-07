@@ -4,19 +4,15 @@ import { Result, err, ok } from "../shared/result";
 import { supabaseServer } from "../db/supabase";
 import { Experiment, ExperimentDatasetRow } from "../stores/experimentStore";
 import { BaseTempKey } from "./tempKeys/baseTempKey";
-import { prepareRequestAnthropicFull } from "./requestPrep/openai";
-import { prepareRequestAzureFull as prepareRequestAzureOnPremFull } from "./requestPrep/azure";
-import { runHypothesis, runOriginalRequest } from "./hypothesisRunner";
+import { runHypothesis } from "./hypothesisRunner";
 import { generateHeliconeAPIKey } from "./tempKeys/tempAPIKey";
-import { generateProxyKey } from "./tempKeys/tempProxyKey";
 import {
   PreparedRequest,
   PreparedRequestArgs,
 } from "./requestPrep/PreparedRequest";
-import { prepareRequestOpenAIOnPremFull } from "./requestPrep/openai";
 import { getAllSignedURLsFromInputs } from "../../managers/inputs/InputsManager";
-import { prepareRequestOpenAIFull } from "./requestPrep/openaiCloud";
-import { SettingsManager } from "../../utils/settings";
+import { prepareRequestOpenRouterFull } from "./requestPrep/openRouter";
+import { OPENROUTER_KEY } from "../clients/constant";
 
 export const IS_ON_PREM =
   process.env.AZURE_BASE_URL &&
@@ -25,37 +21,6 @@ export const IS_ON_PREM =
   process.env.OPENAI_API_KEY
     ? true
     : false;
-
-async function isOnPrem(): Promise<boolean> {
-  const settingsManager = new SettingsManager();
-  const azureSettings = await settingsManager.getSetting("azure:experiment");
-  const truthy =
-    azureSettings?.azureApiKey &&
-    azureSettings?.azureBaseUri &&
-    azureSettings?.azureApiVersion &&
-    azureSettings?.azureDeploymentName;
-  return truthy ? true : false;
-}
-
-async function prepareRequest(
-  args: PreparedRequestArgs,
-  onPremConfig: {
-    deployment: "AZURE" | "OPENAI";
-  },
-  provider: "OPENAI" | "ANTHROPIC"
-): Promise<PreparedRequest> {
-  if (args.providerKey === null) {
-    if (await isOnPrem()) {
-      return await prepareRequestAzureOnPremFull(args);
-    } else if (provider === "ANTHROPIC") {
-      return prepareRequestAnthropicFull(args);
-    } else {
-      return prepareRequestOpenAIOnPremFull(args);
-    }
-  } else {
-    return prepareRequestOpenAIFull(args);
-  }
-}
 
 export async function runOriginalExperiment(
   experiment: Experiment,
@@ -143,25 +108,20 @@ export async function run(
       );
     }
 
-    const preparedRequest = await prepareRequest(
-      {
-        template: promptVersion.data.helicone_template,
-        providerKey: null,
-        secretKey,
-        inputs: promptInputRecord.data.inputs as Record<string, string>,
-        autoInputs: promptInputRecord.data.auto_prompt_inputs as Record<
-          string,
-          any
-        >[],
-        requestPath: `${process.env.HELICONE_WORKER_URL}/v1/chat/completions`,
-        requestId,
-        experimentId,
-      },
-      {
-        deployment: "AZURE",
-      },
-      providerByModelName(promptVersion.data.model ?? "")
-    );
+    const preparedRequest = await prepareRequestOpenRouterFull({
+      template: promptVersion.data.helicone_template,
+      providerKey: OPENROUTER_KEY,
+      secretKey,
+      inputs: promptInputRecord.data.inputs as Record<string, string>,
+      autoInputs: promptInputRecord.data.auto_prompt_inputs as Record<
+        string,
+        any
+      >[],
+      requestPath: `${process.env.OPENROUTER_WORKER_URL}/api/v1/chat/completions`,
+      requestId,
+      experimentId,
+      model: promptVersion.data.model ?? "",
+    });
 
     await runHypothesis({
       body: preparedRequest.body,
