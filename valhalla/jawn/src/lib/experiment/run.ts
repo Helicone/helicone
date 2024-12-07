@@ -15,6 +15,7 @@ import { prepareRequestOpenRouterFull } from "./requestPrep/openRouter";
 import { prepareRequestAzureFull as prepareRequestAzureOnPremFull } from "./requestPrep/azure";
 import { OPENROUTER_KEY, OPENROUTER_WORKER_URL } from "../clients/constant";
 import { SettingsManager } from "../../utils/settings";
+import { prepareRequestOpenAIOnPremFull } from "./requestPrep/openai";
 
 export const IS_ON_PREM =
   process.env.AZURE_BASE_URL &&
@@ -36,10 +37,13 @@ async function isOnPrem(): Promise<boolean> {
 }
 
 async function prepareRequest(
-  args: PreparedRequestArgs
+  args: PreparedRequestArgs,
+  provider: "OPENAI" | "ANTHROPIC"
 ): Promise<PreparedRequest> {
   if (await isOnPrem()) {
     return await prepareRequestAzureOnPremFull(args);
+  } else if (provider === "OPENAI") {
+    return prepareRequestOpenAIOnPremFull(args);
   } else {
     return prepareRequestOpenRouterFull(args);
   }
@@ -131,20 +135,23 @@ export async function run(
       );
     }
 
-    const preparedRequest = await prepareRequest({
-      template: promptVersion.data.helicone_template,
-      providerKey: OPENROUTER_KEY,
-      secretKey,
-      inputs: promptInputRecord.data.inputs as Record<string, string>,
-      autoInputs: promptInputRecord.data.auto_prompt_inputs as Record<
-        string,
-        any
-      >[],
-      requestPath: `${OPENROUTER_WORKER_URL}/api/v1/chat/completions`,
-      requestId,
-      experimentId,
-      model: promptVersion.data.model ?? "",
-    });
+    const preparedRequest = await prepareRequest(
+      {
+        template: promptVersion.data.helicone_template,
+        providerKey: OPENROUTER_KEY,
+        secretKey,
+        inputs: promptInputRecord.data.inputs as Record<string, string>,
+        autoInputs: promptInputRecord.data.auto_prompt_inputs as Record<
+          string,
+          any
+        >[],
+        requestPath: `${OPENROUTER_WORKER_URL}/api/v1/chat/completions`,
+        requestId,
+        experimentId,
+        model: promptVersion.data.model ?? "",
+      },
+      providerByModelName(promptVersion.data.model ?? "")
+    );
 
     await runHypothesis({
       body: preparedRequest.body,
