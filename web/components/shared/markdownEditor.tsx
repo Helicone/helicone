@@ -1,11 +1,10 @@
-import { highlight, languages } from "prismjs";
-import "prismjs/components/prism-clike";
-import "prismjs/components/prism-javascript";
-import "prismjs/components/prism-json";
-import "prismjs/components/prism-markdown";
-import "prismjs/components/prism-markup-templating";
-import "prismjs/themes/prism.css";
-import Editor from "react-simple-code-editor";
+import { Editor as MonacoEditor } from "@monaco-editor/react";
+import { useTheme } from "next-themes";
+import {
+  ResizablePanel,
+  ResizableHandle,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable";
 
 interface MarkdownEditorProps {
   text: string;
@@ -25,42 +24,31 @@ const MarkdownEditor = (props: MarkdownEditorProps) => {
     className,
     textareaClassName,
   } = props;
-
-  const languageMap = {
-    json: {
-      lang: languages.json,
-      ref: "json",
-    },
-    markdown: {
-      lang: languages.markdown,
-      ref: "markdown",
-    },
-  };
-
-  const { lang, ref } = languageMap[language];
+  const { theme: currentTheme } = useTheme();
 
   return (
-    <Editor
-      value={text}
-      onValueChange={setText}
-      highlight={(code) => {
-        if (!code) return "";
-        if (typeof code !== "string") return "";
-        return highlight(code, lang, ref);
-      }}
-      padding={16}
-      className={
-        className ??
-        `text-sm text-black dark:text-white border border-gray-300 dark:border-gray-700 rounded-lg whitespace-pre-wrap `
-      }
-      textareaClassName={textareaClassName ?? ""}
-      // mono font
-      style={{
-        fontFamily: '"Fira Code", "Fira Mono", monospace',
-        fontSize: 12,
-      }}
-      disabled={disabled}
-    />
+    <ResizablePanelGroup direction="vertical" className="min-h-[500px]">
+      <ResizablePanel defaultSize={75}>
+        <MonacoEditor
+          value={text}
+          onChange={(value) => setText(value || "")}
+          language={language}
+          theme={currentTheme === "dark" ? "vs-dark" : "vs-light"}
+          options={{
+            minimap: { enabled: false },
+            fontSize: 12,
+            fontFamily: '"Fira Code", "Fira Mono", monospace',
+            readOnly: disabled,
+            wordWrap: "on",
+            lineNumbers: "off",
+            language: "markdown",
+          }}
+          className={className}
+          height="100%"
+        />
+      </ResizablePanel>
+      <ResizableHandle />
+    </ResizablePanelGroup>
   );
 };
 
