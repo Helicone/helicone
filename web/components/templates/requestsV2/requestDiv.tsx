@@ -12,6 +12,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import Link from "next/link";
 
 interface RequestDivProps {
   open: boolean;
@@ -79,16 +80,12 @@ const RequestDiv = (props: RequestDivProps) => {
           <div className="flex flex-row items-center space-x-2">
             <Tooltip>
               <TooltipTrigger asChild>
-                <button
-                  onClick={() => {
-                    if (request) {
-                      router.push("/playground?request=" + request.id);
-                    }
-                  }}
-                  className="hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md p-1 text-slate-700 dark:text-slate-400"
+                <Link
+                  href={request ? `/playground?request=${request.id}` : "#"}
+                  className="hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md p-1 text-slate-700 dark:text-slate-400 inline-block"
                 >
                   <BeakerIcon className="h-4 w-4" />
-                </button>
+                </Link>
               </TooltipTrigger>
               <TooltipContent>Playground</TooltipContent>
             </Tooltip>
