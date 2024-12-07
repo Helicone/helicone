@@ -12,7 +12,9 @@ import {
 } from "./requestPrep/PreparedRequest";
 import { getAllSignedURLsFromInputs } from "../../managers/inputs/InputsManager";
 import { prepareRequestOpenRouterFull } from "./requestPrep/openRouter";
+import { prepareRequestAzureFull as prepareRequestAzureOnPremFull } from "./requestPrep/azure";
 import { OPENROUTER_KEY } from "../clients/constant";
+import { SettingsManager } from "../../utils/settings";
 
 export const IS_ON_PREM =
   process.env.AZURE_BASE_URL &&
@@ -21,6 +23,27 @@ export const IS_ON_PREM =
   process.env.OPENAI_API_KEY
     ? true
     : false;
+
+async function isOnPrem(): Promise<boolean> {
+  const settingsManager = new SettingsManager();
+  const azureSettings = await settingsManager.getSetting("azure:experiment");
+  const truthy =
+    azureSettings?.azureApiKey &&
+    azureSettings?.azureBaseUri &&
+    azureSettings?.azureApiVersion &&
+    azureSettings?.azureDeploymentName;
+  return truthy ? true : false;
+}
+
+async function prepareRequest(
+  args: PreparedRequestArgs
+): Promise<PreparedRequest> {
+  if (await isOnPrem()) {
+    return await prepareRequestAzureOnPremFull(args);
+  } else {
+    return prepareRequestOpenRouterFull(args);
+  }
+}
 
 export async function runOriginalExperiment(
   experiment: Experiment,
@@ -108,7 +131,7 @@ export async function run(
       );
     }
 
-    const preparedRequest = await prepareRequestOpenRouterFull({
+    const preparedRequest = await prepareRequest({
       template: promptVersion.data.helicone_template,
       providerKey: OPENROUTER_KEY,
       secretKey,
