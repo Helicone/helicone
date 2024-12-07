@@ -22,4 +22,6 @@ export const getKey = (key: string) => {
   return process.env[key];
 };
 
-export const OPENROUTER_KEY = getKey("DEMO_OPENROUTER_API_KEY");
+export const OPENROUTER_KEY = getKey("OPENROUTER_API_KEY");
+
+export const OPENROUTER_WORKER_URL = getKey("OPENROUTER_WORKER_URL");
