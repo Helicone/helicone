@@ -1,6 +1,7 @@
 import { autoFillInputs } from "@helicone/prompts";
 import { PreparedRequest, PreparedRequestArgs } from "./PreparedRequest";
 import { OPENROUTER_MODEL_MAP } from "../openRouterModelMap";
+import { OPENROUTER_WORKER_URL } from "../../clients/constant";
 
 function prepareRequestOpenRouter(
   requestPath: string,
@@ -49,8 +50,7 @@ export function prepareRequestOpenRouterFull({
   });
 
   const { url: fetchUrl, headers } = prepareRequestOpenRouter(
-    requestPath ??
-      `${process.env.HELICONE_OPENROUTER_WORKER_URL}/api/v1/chat/completions`,
+    requestPath ?? `${OPENROUTER_WORKER_URL}/api/v1/chat/completions`,
     heliconeApiKey,
     providerKey ?? "",
     requestId,

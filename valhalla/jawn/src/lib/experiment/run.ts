@@ -13,7 +13,7 @@ import {
 import { getAllSignedURLsFromInputs } from "../../managers/inputs/InputsManager";
 import { prepareRequestOpenRouterFull } from "./requestPrep/openRouter";
 import { prepareRequestAzureFull as prepareRequestAzureOnPremFull } from "./requestPrep/azure";
-import { OPENROUTER_KEY } from "../clients/constant";
+import { OPENROUTER_KEY, OPENROUTER_WORKER_URL } from "../clients/constant";
 import { SettingsManager } from "../../utils/settings";
 
 export const IS_ON_PREM =
@@ -140,7 +140,7 @@ export async function run(
         string,
         any
       >[],
-      requestPath: `${process.env.OPENROUTER_WORKER_URL}/api/v1/chat/completions`,
+      requestPath: `${OPENROUTER_WORKER_URL}/api/v1/chat/completions`,
       requestId,
       experimentId,
       model: promptVersion.data.model ?? "",
