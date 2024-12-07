@@ -59,6 +59,17 @@ export class ScoreManager extends BaseManager {
     if (!this.kafkaProducer.isKafkaEnabled()) {
       console.log("Kafka is not enabled. Using score manager");
 
+      // run it immediately once
+      this.handleScores(
+        {
+          batchId: "",
+          partition: 0,
+          lastOffset: "",
+          messageCount: 1,
+        },
+        scoresMessage
+      );
+
       // Schedule the delayed operation and register it with ShutdownService
       const timeoutId = DelayedOperationService.getTimeoutId(() => {
         return this.handleScores(
@@ -89,6 +100,13 @@ export class ScoreManager extends BaseManager {
     }
 
     console.log("Sending scores message to Kafka");
+
+    // run it immediately once
+    this.kafkaProducer
+      .sendScoresMessage(scoresMessage, "helicone-scores-prod")
+      .catch((error) => {
+        console.error("Error sending scores message to Kafka:", error);
+      });
 
     // Schedule the Kafka send operation and register it with ShutdownService
     const timeoutId = setTimeout(() => {
