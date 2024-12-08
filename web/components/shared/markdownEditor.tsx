@@ -5,7 +5,8 @@ import {
   ResizableHandle,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import { useMemo } from "react";
+import { useMemo, useRef, useState } from "react";
+import { editor } from "monaco-editor";
 
 interface MarkdownEditorProps {
   text: string;
@@ -16,7 +17,7 @@ interface MarkdownEditorProps {
   textareaClassName?: string;
 }
 
-const MAX_EDITOR_HEIGHT = 1000;
+const MAX_EDITOR_HEIGHT = 500;
 const MarkdownEditor = (props: MarkdownEditorProps) => {
   const {
     text,
@@ -27,16 +28,16 @@ const MarkdownEditor = (props: MarkdownEditorProps) => {
     textareaClassName,
   } = props;
   const { theme: currentTheme } = useTheme();
+  const minHeight = 100;
 
-  const editorHeight = useMemo(() => {
-    const lineHeight = 18; // approximate line height in pixels
-    const lineCount = (text.match(/\n/g) || []).length + 1;
-    const minHeight = 50; // minimum height in pixels
-    return Math.min(
-      MAX_EDITOR_HEIGHT,
-      Math.max(minHeight, lineCount * lineHeight + 20)
+  const [height, setHeight] = useState(minHeight);
+  const updateHeight = (editor: editor.IStandaloneCodeEditor) =>
+    setHeight(
+      Math.min(
+        MAX_EDITOR_HEIGHT,
+        Math.max(minHeight, editor.getContentHeight())
+      )
     );
-  }, [text]);
 
   return (
     <MonacoEditor
@@ -44,6 +45,9 @@ const MarkdownEditor = (props: MarkdownEditorProps) => {
       onChange={(value) => setText(value || "")}
       language={language}
       theme={currentTheme === "dark" ? "vs-dark" : "vs-light"}
+      onMount={(editor) =>
+        editor.onDidContentSizeChange(() => updateHeight(editor))
+      }
       options={{
         minimap: { enabled: false },
         fontSize: 12,
@@ -56,7 +60,7 @@ const MarkdownEditor = (props: MarkdownEditorProps) => {
         automaticLayout: true, // Enables auto-resizing
       }}
       className={className}
-      height={editorHeight}
+      height={height}
     />
   );
 };
