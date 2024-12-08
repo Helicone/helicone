@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import { useOrg } from "@/components/layout/organizationContext";
 import { useJawnClient } from "@/lib/clients/jawnHook";
 import { useState } from "react";
+import Link from "next/link";
 const Lottie = dynamic(() => import("react-lottie"), { ssr: false });
 
 const EventListen = ({
@@ -73,6 +74,7 @@ const EventListen = ({
           <div className="bg-gray-50 dark:bg-gray-900 border border-slate-200 dark:border-slate-800 rounded-lg flex flex-col items-center justify-center">
             <Lottie
               height={300}
+              isClickToPauseDisabled={true}
               options={{
                 loop: true,
                 autoplay: true,
@@ -88,28 +90,52 @@ const EventListen = ({
               </p>
             </div>
             <div className="flex flex-col">
-              <div className="flex justify-between items-center py-3 border-b border-slate-200 dark:border-slate-800">
+              <Link
+                href="https://docs.helicone.ai/getting-started/quick-start"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex justify-between items-center py-3 border-b border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors"
+              >
                 <p className="text-[13px] text-slate-500 font-medium">
-                  I already sent a request. Why is it not recieved?
+                  Check out our quick start guide
+                </p>
+                <div className="flex gap-2 items-center">
+                  <p className="text-[13px] font-medium text-slate-500">Docs</p>
+                  <ArrowUpRightIcon className="w-4 h-4 text-slate-500" />
+                </div>
+              </Link>
+              <Link
+                href="https://discord.gg/2TkeWdXNPQ"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex justify-between items-center py-3 border-b border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors"
+              >
+                <p className="text-[13px] text-slate-500 font-medium">
+                  Need help? Join our Discord community
                 </p>
                 <div className="flex gap-2 items-center">
                   <p className="text-[13px] font-medium text-slate-500">
-                    See FAQ
+                    Discord
                   </p>
                   <ArrowUpRightIcon className="w-4 h-4 text-slate-500" />
                 </div>
-              </div>
-              <div className="flex justify-between items-center py-3">
+              </Link>
+              <Link
+                href="https://www.helicone.ai/contact"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex justify-between items-center py-3 hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors"
+              >
                 <p className="text-[13px] text-slate-500 font-medium">
-                  Other questions?
+                  Schedule a call with us
                 </p>
                 <div className="flex gap-2 items-center">
                   <p className="text-[13px] font-medium text-slate-500">
-                    Contact us
+                    Contact
                   </p>
                   <ArrowUpRightIcon className="w-4 h-4 text-slate-500" />
                 </div>
-              </div>
+              </Link>
             </div>
           </div>
         </div>

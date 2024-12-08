@@ -332,6 +332,16 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
             </>
           )}
           <DialogFooter>
+            {firstOrg && (
+              <Button
+                variant="outline"
+                onClick={() => {
+                  onCancelHandler?.(false);
+                }}
+              >
+                Go Back
+              </Button>
+            )}
             <Button
               disabled={loading}
               className="w-full"

@@ -221,18 +221,34 @@ const GenerateAPIKey = ({
                   "flex items-center gap-3 border border-gray-200 rounded-xl py-3 px-4",
                   "hover:bg-gray-50 hover:shadow-sm transition-all duration-150"
                 )}
-                href="https://docs.helicone.ai/getting-started/integration-method/gateway"
+                href="https://docs.helicone.ai/getting-started/quick-start#quick-start"
                 target="_blank"
                 rel="noreferrer noopener"
               >
-                <div className="relative flex items-center w-6">
+                <div className="relative flex items-center w-16 h-4">
                   <Image
                     src="/assets/home/providers/lemonfox.png"
-                    alt="More Providers"
-                    width={24}
-                    height={24}
+                    alt={"Anthropic"}
+                    width={28}
+                    height={28}
                     quality={100}
-                    className="absolute left-0 z-40 rounded-xl"
+                    className="bg-transparent absolute left-0 z-40 rounded-xl"
+                  />
+                  <Image
+                    src="/assets/home/providers/llama2.png"
+                    alt={"Anthropic"}
+                    width={28}
+                    height={28}
+                    quality={100}
+                    className="bg-transparent absolute left-4 z-30 rounded-xl"
+                  />
+                  <Image
+                    src="/assets/home/providers/anyscale.jpeg"
+                    alt={"Anthropic"}
+                    width={28}
+                    height={28}
+                    quality={100}
+                    className="bg-transparent absolute left-8 z-20 rounded-xl"
                   />
                 </div>
                 <span className="font-medium text-gray-900">More ›</span>

@@ -13,102 +13,128 @@ import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 
-const checklistItems = [
-  "Review the requests",
-  "Trace your agent",
-  "Improve your prompt",
-  "Experiment with production data",
-  "View metrics on dashboard",
-];
+const ONBOARDING_CONFIG = {
+  CHECKLIST_ITEMS: [
+    "Review the requests",
+    "Trace your agent",
+    "Improve your prompt",
+    "Experiment with production data",
+    "View metrics on dashboard",
+  ],
+  DEMO_APP: {
+    name: "Xpedia",
+    description:
+      "We've set up a demo travel app to help you learn the ropes. Follow along with this example to see how everything works.",
+    imagePath: "/assets/welcome/xpedia.png",
+  },
+} as const;
+
+// Split into smaller components for better readability
+const DemoAppPreview = () => (
+  <div className="flex flex-col gap-4">
+    <img
+      src={ONBOARDING_CONFIG.DEMO_APP.imagePath}
+      alt={ONBOARDING_CONFIG.DEMO_APP.name}
+      className="rounded-md w-full h-auto"
+    />
+    <p className="text-sm text-slate-500 dark:text-slate-400">
+      {ONBOARDING_CONFIG.DEMO_APP.description}
+    </p>
+  </div>
+);
+
+const CompletionEmoji = () => (
+  <div className="flex items-center justify-center w-full h-full text-9xl">
+    🎉
+  </div>
+);
+
+const ChecklistItem = ({
+  item,
+  checked,
+  stepNumber,
+}: {
+  item: string;
+  checked: boolean;
+  stepNumber: number;
+}) => (
+  <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+    <span className="text-xs font-medium text-blue-500 dark:text-blue-400 w-4">
+      {stepNumber}.
+    </span>
+    <Checkbox
+      disabled
+      className="border-2 border-slate-200 dark:border-slate-700 data-[state=checked]:bg-blue-500 data-[state=checked]:border-blue-500"
+      checked={checked}
+    />
+    <p className="text-sm text-slate-700 dark:text-slate-300">{item}</p>
+  </div>
+);
+
+// Main component with clearer type definition
+interface OnboardingQuickTourModalProps {
+  open: boolean;
+  back: () => void;
+  startTour: () => void;
+  integrateApp: () => void;
+}
 
 const OnboardingQuickTourModal = ({
   open,
   back,
   startTour,
   integrateApp,
-}: {
-  open: boolean;
-  back: () => void;
-  startTour: () => void;
-  integrateApp: () => void;
-}) => {
+}: OnboardingQuickTourModalProps) => {
   const [loading, setLoading] = useState(false);
   const { isOnboardingComplete } = useOnboardingContext();
 
   return (
     <Dialog open={open}>
-      <DialogContent
-        className="w-11/12 sm:max-w-2xl gap-8 rounded-md"
-        closeButton={false}
-      >
-        <DialogHeader className="space-y-2">
-          <DialogTitle>Take a quick tour</DialogTitle>
-          <DialogDescription>
-            Think of yourself as the AI engineer working at Xpedia. A user
-            reports that the app is providing unreliable travel plan. Let’s
-            diagnose and resolve the issue.
+      <DialogContent className="w-11/12 sm:max-w-[500px] gap-8 rounded-xl p-6">
+        <DialogHeader>
+          <DialogTitle className="text-xl font-semibold text-center">
+            {isOnboardingComplete ? "You're all set! 🎉" : "Quick Tour"}
+          </DialogTitle>
+          <DialogDescription className="text-center text-slate-500">
+            {isOnboardingComplete
+              ? "Ready to integrate these concepts into your own app?"
+              : "Let's explore Helicone with a practical example"}
           </DialogDescription>
         </DialogHeader>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div
-            className={cn(
-              "p-4 rounded-lg bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex flex-col gap-4",
-              isOnboardingComplete && "bg-slate-50 dark:bg-slate-900"
-            )}
-          >
-            {!isOnboardingComplete ? (
-              <>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
 
-                <img
-                  src="/assets/welcome/xpedia.png"
-                  alt="Xpedia"
-                  className="rounded-md w-full h-auto"
-                />
-
-                <div className="flex flex-col gap-2">
-                  <h3 className="text-sm font-medium text-slate-900 dark:text-slate-50 leading-4">
-                    Xpedia AI
-                  </h3>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">
-                    AI-powered travel planner to streamline trip planning. Find
-                    flights, accommodation and activities at your fingertip.
-                  </p>
-                </div>
-              </>
-            ) : (
-              <div className="flex items-center justify-center w-full h-full text-9xl">
-                🎉
-              </div>
-            )}
+        <div className="flex flex-col gap-8">
+          <div className="rounded-lg">
+            {!isOnboardingComplete ? <DemoAppPreview /> : <CompletionEmoji />}
           </div>
 
-          <div className="p-4 flex flex-col gap-4">
-            <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-              Checklist
+          <div className="space-y-4 bg-slate-50 dark:bg-slate-900/50 p-4 rounded-lg border border-slate-100 dark:border-slate-800">
+            <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-2">
+              {isOnboardingComplete
+                ? "What you've learned:"
+                : "Your learning path:"}
             </h3>
-            <div className="flex flex-col gap-3">
-              {checklistItems.map((item) => (
-                <div className="flex items-center gap-2" key={item}>
-                  <Checkbox
-                    disabled
-                    className="border-gray-200 dark:border-gray-800 data-[state=checked]:bg-[#34C759] data-[state=checked]:text-white data-[state=checked]:rounded-full disabled:opacity-100"
-                    iconClassName="h-3 w-3"
-                    checked={isOnboardingComplete}
-                  />
-                  <p className="text-sm text-slate-700 dark:text-slate-300 font-medium">
-                    {item}
-                  </p>
-                </div>
+            <div className="flex flex-col gap-1">
+              {ONBOARDING_CONFIG.CHECKLIST_ITEMS.map((item, index) => (
+                <ChecklistItem
+                  key={item}
+                  item={item}
+                  checked={isOnboardingComplete}
+                  stepNumber={index + 1}
+                />
               ))}
             </div>
           </div>
         </div>
-        <DialogFooter>
+
+        <DialogFooter className="gap-2 sm:gap-0">
           {!isOnboardingComplete ? (
             <>
-              <Button variant="outline" onClick={back}>
-                Go Back
+              <Button
+                variant="outline"
+                onClick={back}
+                className="border-2 hover:bg-slate-50 dark:hover:bg-slate-800"
+              >
+                Back
               </Button>
               <Button
                 disabled={loading}
@@ -116,13 +142,25 @@ const OnboardingQuickTourModal = ({
                   setLoading(true);
                   startTour();
                 }}
+                className="bg-blue-500 hover:bg-blue-600 font-medium"
               >
-                {loading ? "Preparing Demo..." : "Let's go!"}{" "}
-                {loading && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Loading...
+                  </>
+                ) : (
+                  "Start Learning"
+                )}
               </Button>
             </>
           ) : (
-            <Button onClick={integrateApp}>Integrate my app</Button>
+            <Button
+              onClick={integrateApp}
+              className="bg-blue-500 hover:bg-blue-600 w-full font-medium"
+            >
+              Apply to My App
+            </Button>
           )}
         </DialogFooter>
       </DialogContent>

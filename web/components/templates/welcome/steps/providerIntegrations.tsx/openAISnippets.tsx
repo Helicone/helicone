@@ -174,7 +174,7 @@ export default function OpenAISnippets(props: OpenAISnippetsProps) {
               <h2 className="font-semibold">cURL</h2>
             </button>
             <a
-              href="https://docs.helicone.ai"
+              href="https://docs.helicone.ai/integrations/openai/javascript"
               target="_blank"
               rel="noopener noreferrer"
               className="flex-shrink-0 flex items-center gap-2 border border-gray-300 rounded-lg py-1.5 px-3 text-sm hover:bg-gray-50"

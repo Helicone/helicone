@@ -14,12 +14,21 @@ import Framework from "../onboarding/steps/Framework";
 import EventListen from "../onboarding/steps/EventListen";
 import { useJawnClient } from "@/lib/clients/jawnHook";
 import { useOrg } from "@/components/layout/organizationContext";
-import { Button } from "@/components/ui/button";
 
 const steps = [
-  "Choose integration method",
-  "Select a framework",
-  "Send an event",
+  {
+    title: "Choose integration method",
+    description:
+      "Select how you want to connect your AI application with Helicone",
+  },
+  {
+    title: "Select a provider",
+    description: "Pick your preferred LLM provider and language",
+  },
+  {
+    title: "Send an event",
+    description: "Test your integration by making a sample request",
+  },
 ];
 
 export const INTEGRATION_METHODS = [
@@ -113,7 +122,7 @@ const OnboardingQuickStartModal = ({
         </DialogHeader>
         <div className="grid grid-cols-3 gap-2">
           {steps.map((step, index) => (
-            <div className="flex flex-col gap-2.5" key={step}>
+            <div className="flex flex-col gap-2.5" key={step.title}>
               <div
                 className={cn(
                   "w-full h-4 rounded-full",
@@ -122,16 +131,21 @@ const OnboardingQuickStartModal = ({
                     : "bg-slate-100 dark:bg-slate-900"
                 )}
               ></div>
-              <p
-                className={cn(
-                  "text-[13px] font-medium",
-                  index <= currentStep
-                    ? "text-slate-900 dark:text-slate-100"
-                    : "text-slate-400 dark:text-slate-600"
+              <div className="space-y-1">
+                <p
+                  className={cn(
+                    "text-[13px] font-medium",
+                    index + 1 <= currentStep
+                      ? "text-slate-900 dark:text-slate-100"
+                      : "text-slate-400 dark:text-slate-600"
+                  )}
+                >
+                  {`${index + 1}. ${step.title}`}
+                </p>
+                {index + 1 === currentStep && (
+                  <p className="text-xs text-slate-500">{step.description}</p>
                 )}
-              >
-                {`${index + 1}. ${step}`}
-              </p>
+              </div>
             </div>
           ))}
         </div>
