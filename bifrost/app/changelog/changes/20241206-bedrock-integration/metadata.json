@@ -1,0 +1,4 @@
+{
+  "title": "Support for AWS Bedrock Models",
+  "description": "Added support for AWS Bedrock, enabling access to models through Helicone."
+}
