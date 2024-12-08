@@ -139,17 +139,7 @@ const SessionsPage = (props: SessionsPageProps) => {
           </TabsList>
         }
       />
-      {org?.currentOrg?.tier === "free" && (
-        <InfoBox title="Sessions is a Pro feature">
-          <p>
-            Sessions is a Pro feature. In order to keep using it, you need to
-            upgrade your plan before September 27th, 2024.{" "}
-            <Link href="/settings/billing" className="text-blue-500 underline">
-              Upgrade to Pro
-            </Link>
-          </p>
-        </InfoBox>
-      )}
+
       <div>
         {allNames.isLoading ? (
           <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
