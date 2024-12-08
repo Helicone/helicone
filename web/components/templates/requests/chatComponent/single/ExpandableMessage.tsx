@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import { clsx } from "../../../../shared/clsx";
 import { RenderWithPrettyInputKeys } from "../../../playground/chatRow";
@@ -14,7 +14,7 @@ interface ExpandableMessageProps {
     expanded: boolean;
     setExpanded: (expanded: boolean) => void;
   };
-  showButton: boolean;
+
   selectedProperties?: Record<string, string>;
   mode: (typeof PROMPT_MODES)[number];
 }
@@ -23,11 +23,43 @@ export const ExpandableMessage: React.FC<ExpandableMessageProps> = ({
   formattedMessageContent,
   textContainerRef,
   expandedProps: { expanded, setExpanded },
-  showButton,
+
   selectedProperties,
   mode,
 }) => {
   const handleToggle = () => setExpanded(!expanded);
+
+  const parentRef = useRef<HTMLDivElement>(null);
+
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  const [showButton, setShowButton] = useState(false);
+
+  useEffect(() => {
+    if (!contentRef.current || !parentRef.current) return;
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        console.log("New scroll height:", entry.target.scrollHeight);
+        if (
+          entry.target.scrollHeight > (parentRef.current?.scrollHeight ?? 0)
+        ) {
+          setShowButton(true);
+        }
+      }
+    });
+
+    resizeObserver.observe(contentRef.current);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [contentRef, parentRef]);
+
+  const expandFormat = useMemo(() => {
+    return !expanded && showButton;
+  }, [expanded, showButton]);
+
   if (formattedMessageContent.length > 2_000_000) {
     return (
       <div className="text-red-500 font-normal">
@@ -37,15 +69,16 @@ export const ExpandableMessage: React.FC<ExpandableMessageProps> = ({
   }
 
   return (
-    <Col>
+    <Col ref={parentRef}>
       <div
-        ref={textContainerRef}
+        ref={contentRef}
         className={clsx(
-          !expanded && showButton ? "truncate-text" : "",
+          expandFormat ? "truncate-text" : "",
           "leading-6 pb-2 max-w-full"
         )}
         style={{ maxHeight: expanded ? "none" : "10.5rem" }}
       >
+        {textContainerRef.current?.scrollHeight}
         {mode === "Pretty" ? (
           <RenderWithPrettyInputKeys
             text={
@@ -53,6 +86,7 @@ export const ExpandableMessage: React.FC<ExpandableMessageProps> = ({
                 ? JSON.stringify(JSON.parse(formattedMessageContent), null, 2)
                 : formattedMessageContent
             }
+            ref={contentRef}
             selectedProperties={selectedProperties}
           />
         ) : (
@@ -71,7 +105,7 @@ export const ExpandableMessage: React.FC<ExpandableMessageProps> = ({
             <ChevronDownIcon
               className={clsx(
                 "rounded-full border text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-700 h-7 w-7 p-1.5",
-                expanded && "rotate-180"
+                expanded && "transition-transform rotate-180"
               )}
             />
           </button>
