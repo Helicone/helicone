@@ -80,7 +80,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
       </div>
 
       <UpgradeProModal open={open} setOpen={setOpen} />
-      <AcceptTermsModal />
+      {/* <AcceptTermsModal /> */}
     </MetaData>
   );
 };
