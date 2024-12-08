@@ -522,35 +522,60 @@ const modelDetails: ModelDetailsMap = {
     ],
     searchTerms: ["gpt 4", "gpt-4", "chat gpt 4", "4", "chat 4"],
     info: {
+      maxTokens: 8192,
+      releaseDate: "2024-03-13",
       description:
-        "GPT-4 is the latest and most advanced model in the GPT series, known for its superior performance in various tasks.",
-      tradeOffs: ["More expensive than GPT-3.5 Turbo"],
+        "GPT-4 is the latest and most advanced model in the GPT series, demonstrating sophisticated capabilities in complex reasoning, theory of mind, and narrative understanding.",
+      tradeOffs: [
+        "More expensive than GPT-3.5 Turbo",
+        "Performance can vary even with temperature=0",
+        "May struggle with world-building in absurd scenarios",
+      ],
       benchmarks: {
-        average: 0.00001,
-        ifeval: 0.00002,
-        bhh: 0.00003,
-        hellaswag: 0.00004,
-        mmlu: 0.00005,
+        average: 0.83,
+        mmlu: 0.864,
+        ifeval: 0.67,
+        hellaswag: 0.953,
+        bbh: 0.831,
       },
-      capabilities: [],
-      strengths: [],
-      weaknesses: [],
-      recommendations: [],
+      capabilities: [
+        "Advanced reasoning",
+        "Theory of mind",
+        "Complex narrative understanding",
+        "Chain-of-thought processing",
+      ],
+      strengths: [
+        "Strong performance in theory of mind tasks",
+        "Ability to track and reason about multiple entities",
+        "Can explain its reasoning process",
+      ],
+      weaknesses: [
+        "May struggle with highly abstract or unrealistic scenarios",
+        "Output can be non-deterministic even at temperature=0",
+        "Performance depends on how 'normal' the scenario is",
+      ],
+      recommendations: [
+        "Use chain-of-thought prompting for complex reasoning tasks",
+        "Consider running multiple attempts for critical applications",
+        "Frame scenarios in realistic contexts for better performance",
+      ],
     },
   },
   "gpt-4o": {
     matches: ["gpt-4o", "gpt-4o-2024-05-13"],
     searchTerms: ["gpt 4o", "gpt-4o", "chat gpt 4o", "4o", "chat 4o"],
     info: {
+      maxTokens: 128000,
+      releaseDate: "2024-05-13",
       description:
         "GPT-4o is a more recent model that offers a balance between cost and performance.",
       tradeOffs: ["More expensive than GPT-3.5 Turbo"],
       benchmarks: {
-        average: 0.00001,
-        ifeval: 0.00002,
-        bhh: 0.00003,
-        hellaswag: 0.00004,
-        mmlu: 0.00005,
+        average: 0.91,
+        mmlu: 0.887,
+        ifeval: 0.902,
+        hellaswag: 0.942,
+        bbh: 0.913,
       },
       capabilities: [],
       strengths: [],
@@ -567,15 +592,17 @@ const modelDetails: ModelDetailsMap = {
       "chat 4o mini",
     ],
     info: {
+      maxTokens: 128000,
+      releaseDate: "2024-07-18",
       description:
         "GPT-4o Mini is a model that offers a balance between cost and performance.",
       tradeOffs: ["More expensive than GPT-3.5 Turbo"],
       benchmarks: {
-        average: 0.00001,
-        ifeval: 0.00002,
-        bhh: 0.00003,
-        hellaswag: 0.00004,
-        mmlu: 0.00005,
+        average: 0.846,
+        mmlu: 0.82,
+        ifeval: 0.872,
+        hellaswag: 0.953,
+        bbh: 0.831,
       },
       capabilities: [],
       strengths: [],
@@ -597,6 +624,8 @@ const modelDetails: ModelDetailsMap = {
       "chat 4 turbo",
     ],
     info: {
+      maxTokens: 128000,
+      releaseDate: "2024-04-09",
       description:
         "GPT-4 Turbo is a more recent model that offers a balance between cost and performance.",
       tradeOffs: ["More expensive than GPT-3.5 Turbo"],
@@ -630,6 +659,8 @@ const modelDetails: ModelDetailsMap = {
     ],
     searchTerms: ["gpt 3.5", "gpt-3.5", "chat gpt 3.5", "chat 3.5"],
     info: {
+      maxTokens: 16385,
+      releaseDate: "2023-11-06",
       description:
         "GPT-3.5 Turbo is a more recent model that offers a balance between cost and performance.",
       tradeOffs: ["More expensive than GPT-3.5 Turbo"],
@@ -650,6 +681,8 @@ const modelDetails: ModelDetailsMap = {
     matches: ["text-embedding-3-small", "text-embedding-3-large"],
     searchTerms: ["text embedding 3", "text-embedding-3"],
     info: {
+      maxTokens: 3072,
+      releaseDate: "2022-12-15",
       description:
         "Text Embedding 3 is a model that offers a balance between cost and performance.",
       tradeOffs: ["More expensive than GPT-3.5 Turbo"],
@@ -674,6 +707,8 @@ const modelDetails: ModelDetailsMap = {
     ],
     searchTerms: ["text embedding ada", "text-embedding-ada"],
     info: {
+      maxTokens: 1536,
+      releaseDate: "2022-12-15",
       description:
         "Text Embedding Ada is a model that offers a balance between cost and performance.",
       tradeOffs: ["More expensive than GPT-3.5 Turbo"],
@@ -701,6 +736,8 @@ const modelDetails: ModelDetailsMap = {
       "chat o1 preview",
     ],
     info: {
+      maxTokens: 128000,
+      releaseDate: "2024-09-12",
       description:
         "O1 Preview is a model that offers a balance between cost and performance.",
       tradeOffs: ["More expensive than GPT-3.5 Turbo"],
@@ -721,6 +758,8 @@ const modelDetails: ModelDetailsMap = {
     matches: ["o1-mini", "o1-mini-2024-09-12"],
     searchTerms: ["o1 mini", "o1-mini", "chat gpt o1 mini", "chat o1 mini"],
     info: {
+      maxTokens: 128000,
+      releaseDate: "2024-09-12",
       description:
         "O1 Mini is a model that offers a balance between cost and performance.",
       tradeOffs: ["More expensive than GPT-3.5 Turbo"],
@@ -747,6 +786,8 @@ const modelDetails: ModelDetailsMap = {
       "chat 4 vision",
     ],
     info: {
+      maxTokens: 128000,
+      releaseDate: "2023-11-06",
       description:
         "GPT-4 Vision is a model that offers a balance between cost and performance.",
       tradeOffs: ["More expensive than GPT-3.5 Turbo"],

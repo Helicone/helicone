@@ -2,7 +2,6 @@ import {
   Model,
   ModelsToCompare,
 } from "../controllers/public/modelComparisonController";
-import { ModelComparison } from "../controllers/public/modelComparisonController";
 import { clickhouseDb } from "../lib/db/ClickhouseWrapper";
 import { err, ok } from "../lib/shared/result";
 import { Result } from "../lib/shared/result";

@@ -163,12 +163,8 @@ export function ModelComparisonPage({
               <ModelCapabilitiesCard
                 modelA={modelA}
                 modelB={modelB}
-                modelACapabilities={modelADetails?.info.capabilities ?? []}
-                modelBCapabilities={modelBDetails?.info.capabilities ?? []}
-                benchmarkData={modelADetails?.info.benchmarks ?? {}}
-                strengths={modelADetails?.info.strengths ?? []}
-                weaknesses={modelADetails?.info.weaknesses ?? []}
-                recommendations={modelADetails?.info.recommendations ?? []}
+                modelDetailsA={modelADetails}
+                modelDetailsB={modelBDetails}
               />
             </div>
           )

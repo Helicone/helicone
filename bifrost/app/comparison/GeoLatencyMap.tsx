@@ -7,7 +7,7 @@ import {
   Graticule,
   Sphere,
 } from "react-simple-maps";
-import { scaleLog } from "d3-scale";
+import { scaleLinear } from "d3-scale";
 import ISO31661 from "iso-3166-1";
 import { useState } from "react";
 import {
@@ -86,17 +86,37 @@ export const GeoMetricMap = ({
     );
   }
 
-  const colorScale = scaleLog<string>()
+  console.log(
+    "Geographic data:",
+    data.map((d) => ({
+      country: d.name,
+      value: d.value,
+    }))
+  );
+
+  const minValue = Math.min(...data.map((d: any) => d.value));
+  const maxValue = Math.max(...data.map((d: any) => d.value));
+
+  const colorScale = scaleLinear<string>()
     .domain([
-      Math.max(1, Math.min(...data.map((d: any) => d.value))),
-      Math.max(...data.map((d: any) => d.value)) / 2,
-      Math.max(...data.map((d: any) => d.value)),
+      minValue,
+      minValue + (maxValue - minValue) * 0.3, // 30% point
+      minValue + (maxValue - minValue) * 0.6, // 60% point
+      maxValue,
     ])
-    .range(["rgb(184, 225, 240)", "rgb(130, 203, 230)", "rgb(24, 158, 211)"])
+    .range([
+      "rgb(184, 225, 240)",
+      "rgb(120, 180, 220)",
+      "rgb(24, 158, 211)",
+      "rgb(8, 104, 172)",
+    ])
     .clamp(true);
 
   return (
-    <Card className={`shadow-none border bg-white ${className}`} style={style}>
+    <Card
+      className={`shadow-none border-none bg-white ${className}`}
+      style={style}
+    >
       <CardContent className="p-4">
         <div
           className="relative"

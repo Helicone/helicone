@@ -1,5 +1,8 @@
 "use client";
-import { providers } from "@/packages/cost/providers/mappings";
+import {
+  parentModelNames,
+  providers,
+} from "@/packages/cost/providers/mappings";
 import Link from "next/link";
 import { useState, useMemo } from "react";
 import { Card } from "@/components/ui/card";
@@ -40,6 +43,8 @@ const popularComparisons = [
 export default function ComparisonIndexPage() {
   const [model1, setModel1] = useState("");
   const [model2, setModel2] = useState("");
+  const [provider1, setProvider1] = useState("");
+  const [provider2, setProvider2] = useState("");
   const [search1, setSearch1] = useState("");
   const [search2, setSearch2] = useState("");
 
@@ -67,17 +72,19 @@ export default function ComparisonIndexPage() {
     [search2, model1]
   );
 
-  const createComparisonPath = (model1: string, model2: string) => {
-    const data1 = modelData.get(model1);
-    const data2 = modelData.get(model2);
-    if (!data1 || !data2) return "";
-
+  const createComparisonPath = (
+    model1: string,
+    provider1: string,
+    model2: string,
+    provider2: string
+  ) => {
     const model1Path = `${encodeURIComponent(model1)}-on-${encodeURIComponent(
-      data1.provider
+      provider1
     )}`;
     const model2Path = `${encodeURIComponent(model2)}-on-${encodeURIComponent(
-      data2.provider
+      provider2
     )}`;
+
     return `/comparison/${model1Path}-vs-${model2Path}`;
   };
 
@@ -96,7 +103,7 @@ export default function ComparisonIndexPage() {
           {popularComparisons.map(([model1, model2]) => (
             <Link
               key={`${model1}-${model2}`}
-              href={createComparisonPath(model1, model2)}
+              href={createComparisonPath(model1, provider1, model2, provider2)}
               className="p-4 border rounded-lg hover:bg-gray-50 transition-colors"
             >
               <div className="flex items-center justify-between">
@@ -125,23 +132,25 @@ export default function ComparisonIndexPage() {
             />
             {search1 && (
               <div className="border rounded-lg max-h-60 overflow-y-auto">
-                {filteredModels1.map((model) => {
-                  const data = modelData.get(model);
-                  return (
-                    <div
-                      key={model}
-                      className="p-3 hover:bg-gray-50 cursor-pointer border-b last:border-b-0"
-                      onClick={() => {
-                        setModel1(model);
-                        setSearch1("");
-                      }}
-                    >
-                      <div className="font-medium">{model}</div>
-                      <div className="text-sm text-gray-600">
-                        {data?.provider.toUpperCase()}
+                {Object.entries(parentModelNames).map(([provider, models]) => {
+                  return models.map((model) => {
+                    return (
+                      <div
+                        key={model}
+                        className="p-3 hover:bg-gray-50 cursor-pointer border-b last:border-b-0"
+                        onClick={() => {
+                          setModel1(model);
+                          setProvider1(provider);
+                          setSearch1("");
+                        }}
+                      >
+                        <div className="font-medium">{model}</div>
+                        <div className="text-sm text-gray-600">
+                          {provider.toUpperCase()}
+                        </div>
                       </div>
-                    </div>
-                  );
+                    );
+                  });
                 })}
               </div>
             )}
@@ -168,23 +177,25 @@ export default function ComparisonIndexPage() {
             />
             {search2 && (
               <div className="border rounded-lg max-h-60 overflow-y-auto">
-                {filteredModels2.map((model) => {
-                  const data = modelData.get(model);
-                  return (
-                    <div
-                      key={model}
-                      className="p-3 hover:bg-gray-50 cursor-pointer border-b last:border-b-0"
-                      onClick={() => {
-                        setModel2(model);
-                        setSearch2("");
-                      }}
-                    >
-                      <div className="font-medium">{model}</div>
-                      <div className="text-sm text-gray-600">
-                        {data?.provider.toUpperCase()}
+                {Object.entries(parentModelNames).map(([provider, models]) => {
+                  return models.map((model) => {
+                    return (
+                      <div
+                        key={model}
+                        className="p-3 hover:bg-gray-50 cursor-pointer border-b last:border-b-0"
+                        onClick={() => {
+                          setModel2(model);
+                          setProvider2(provider);
+                          setSearch2("");
+                        }}
+                      >
+                        <div className="font-medium">{model}</div>
+                        <div className="text-sm text-gray-600">
+                          {provider.toUpperCase()}
+                        </div>
                       </div>
-                    </div>
-                  );
+                    );
+                  });
                 })}
               </div>
             )}
@@ -202,8 +213,8 @@ export default function ComparisonIndexPage() {
         {model1 && model2 && (
           <div className="mt-6 text-center">
             <Link
-              href={createComparisonPath(model1, model2)}
-              className="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold shadow-md hover:bg-blue-700 transition-colors"
+              href={createComparisonPath(model1, provider1, model2, provider2)}
+              className="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold shadow-md hover:bg-blue-700 transition-colors disabled:opacity-50"
             >
               Compare Models
             </Link>

@@ -52,21 +52,21 @@ const ModelInfoCard = ({ modelDetails, title }: ModelInfoCardProps) => {
         <h4 className="text-slate-500 text-sm font-medium pb-2">Performance</h4>
         <div className="flex justify-between">
           <div>
-            <p className="text-slate-400 text-sm font-medium">Speed</p>
+            <p className="text-slate-400 text-sm font-medium">MMLU</p>
             <p className="text-sky-500 text-base font-semibold">
-              {modelDetails.info.speed ?? "hihi"}
+              {modelDetails.info.benchmarks?.mmlu || "-"}
             </p>
           </div>
           <div>
-            <p className="text-slate-400 text-sm font-medium">Accuracy</p>
+            <p className="text-slate-400 text-sm font-medium">HellaSwag</p>
             <p className="text-sky-500 text-base font-semibold">
-              {modelDetails.info.accuracy ?? "byebye"}
+              {modelDetails.info.benchmarks?.hellaswag || "-"}
             </p>
           </div>
           <div>
-            <p className="text-slate-400 text-sm font-medium">Reliability</p>
+            <p className="text-slate-400 text-sm font-medium">BBH</p>
             <p className="text-sky-500 text-base font-semibold">
-              {modelDetails.info.reliability ?? "whwywhy"}
+              {modelDetails.info.benchmarks?.bbh || "-"}
             </p>
           </div>
         </div>

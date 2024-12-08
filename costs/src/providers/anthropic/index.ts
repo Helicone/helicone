@@ -131,6 +131,8 @@ export const modelDetails: ModelDetailsMap = {
     matches: ["claude-3-opus-20240229"],
     searchTerms: ["claude 3 opus", "claude-3-opus", "opus"],
     info: {
+      maxTokens: 200000,
+      releaseDate: "2024-03-04",
       description:
         "Claude 3 Opus is Anthropic's most capable model, offering state-of-the-art performance across tasks.",
       tradeOffs: [
@@ -138,11 +140,9 @@ export const modelDetails: ModelDetailsMap = {
         "May be more than needed for simple tasks",
       ],
       benchmarks: {
-        average: 0.00001,
-        ifeval: 0.00002,
-        bhh: 0.00003,
-        hellaswag: 0.00004,
-        mmlu: 0.00005,
+        mmlu: 0.868, // 86.8% on MMLU
+        hellaswag: 0.954, // 95.4% on HellaSwag
+        bbh: 0.868, // 86.8% on BBHard
       },
       capabilities: [],
       strengths: [],
@@ -163,6 +163,8 @@ export const modelDetails: ModelDetailsMap = {
       "claude 3.5 sonnet",
     ],
     info: {
+      maxTokens: 200000,
+      releaseDate: "2024-03-04",
       description:
         "Claude 3 Sonnet offers a strong balance of intelligence and speed, suitable for most use cases.",
       tradeOffs: [
@@ -170,11 +172,9 @@ export const modelDetails: ModelDetailsMap = {
         "Slightly reduced capabilities compared to Opus",
       ],
       benchmarks: {
-        average: 0.00001,
-        ifeval: 0.00002,
-        bhh: 0.00003,
-        hellaswag: 0.00004,
-        mmlu: 0.00005,
+        mmlu: 0.79, // 79% on MMLU
+        hellaswag: 0.89, // 89% on HellaSwag
+        bbh: 0.829, // 82.9% on BBHard
       },
       capabilities: [],
       strengths: [],
@@ -191,6 +191,8 @@ export const modelDetails: ModelDetailsMap = {
       "claude 3.5 haiku",
     ],
     info: {
+      maxTokens: 200000,
+      releaseDate: "2024-03-04",
       description:
         "Claude 3 Haiku is Anthropic's fastest and most cost-effective model.",
       tradeOffs: [
@@ -199,11 +201,8 @@ export const modelDetails: ModelDetailsMap = {
         "Reduced capabilities compared to Opus and Sonnet",
       ],
       benchmarks: {
-        average: 0.00001,
-        ifeval: 0.00002,
-        bhh: 0.00003,
-        hellaswag: 0.00004,
-        mmlu: 0.00005,
+        mmlu: 0.752,
+        hellaswag: 0.859,
       },
       capabilities: [],
       strengths: [],
@@ -215,6 +214,8 @@ export const modelDetails: ModelDetailsMap = {
     matches: ["claude-2", "claude-2.0"],
     searchTerms: ["claude 2", "claude-2"],
     info: {
+      maxTokens: 200000,
+      releaseDate: "2023-07-11",
       description:
         "Claude 2 is Anthropic's previous generation model, offering reliable performance for various tasks.",
       tradeOffs: [
@@ -238,6 +239,8 @@ export const modelDetails: ModelDetailsMap = {
     matches: ["claude-instant-1", "claude-instant-1.2"],
     searchTerms: ["claude instant", "claude-instant"],
     info: {
+      maxTokens: 100000,
+      releaseDate: "2023-08-09",
       description:
         "Claude Instant is Anthropic's faster, lighter previous generation model.",
       tradeOffs: [
@@ -262,15 +265,15 @@ export const modelDetails: ModelDetailsMap = {
     matches: ["claude-3-5-sonnet-20240620", "claude-3-5-sonnet-20241022"],
     searchTerms: ["claude 3.5 sonnet", "claude-3-5-sonnet"],
     info: {
+      maxTokens: 200000,
+      releaseDate: "2024-06-20",
       description:
         "Claude 3.5 Sonnet is Anthropic's latest model, offering a balance of speed and cost.",
       tradeOffs: ["More expensive than Haiku", "Slightly faster than Sonnet"],
       benchmarks: {
-        average: 0.00001,
-        ifeval: 0.00002,
-        bhh: 0.00003,
-        hellaswag: 0.00004,
-        mmlu: 0.00005,
+        mmlu: 0.887, // 88.7% on MMLU
+        hellaswag: 0.89, // 89% on HellaSwag
+        bbh: 0.931, // 93.1% on BBHard
       },
       capabilities: [],
       strengths: [],
@@ -282,6 +285,8 @@ export const modelDetails: ModelDetailsMap = {
     matches: ["claude-3-5-haiku-20241022"],
     searchTerms: ["claude 3.5 haiku", "claude-3-5-haiku"],
     info: {
+      maxTokens: 200000,
+      releaseDate: "2024-10-22",
       description:
         "Claude 3.5 Haiku is Anthropic's fastest and most cost-effective model.",
       tradeOffs: [

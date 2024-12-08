@@ -1,42 +1,25 @@
 import { Card } from "@/components/ui/card";
-
-interface BenchmarkData {
-  model: string;
-  average: number;
-  ifeval: number;
-  bbh: number;
-  hellaswag: number;
-  mmlu: number;
-}
-
-interface StrengthWeakness {
-  strengths: string[];
-  weaknesses: string[];
-}
+import { ModelDetails } from "@/packages/cost/interfaces/Cost";
 
 interface ModelCapabilitiesCardProps {
   modelA: string;
   modelB: string;
-  modelACapabilities: string[];
-  modelBCapabilities: string[];
-  benchmarkData: {
-    [key: string]: number;
-  };
-  strengths: string[];
-  weaknesses: string[];
-  recommendations: string[];
+  modelDetailsA?: ModelDetails;
+  modelDetailsB?: ModelDetails;
 }
 
 export default function ModelCapabilitiesCard({
   modelA,
   modelB,
-  modelACapabilities,
-  modelBCapabilities,
-  benchmarkData,
-  strengths,
-  weaknesses,
-  recommendations,
+  modelDetailsA,
+  modelDetailsB,
 }: ModelCapabilitiesCardProps) {
+  const infoA = modelDetailsA?.info;
+  const infoB = modelDetailsB?.info;
+
+  console.log(`InfoA: ${JSON.stringify(infoA)}`);
+  console.log(`InfoB: ${JSON.stringify(infoB)}`);
+
   return (
     <Card className="p-8">
       <div className="flex-col justify-start items-start gap-[60px]">
@@ -47,13 +30,13 @@ export default function ModelCapabilitiesCard({
           </h2>
           <div className="text-slate-900 text-base font-medium font-['Inter'] leading-normal mb-2">
             Capabilities of {modelA}...
-            {modelACapabilities.map((cap, i) => (
+            {infoA?.capabilities.map((cap, i) => (
               <div key={i}>{cap}</div>
             ))}
           </div>
           <div className="text-slate-900 text-base font-medium font-['Inter'] leading-normal">
             Capabilities of {modelB}...
-            {modelBCapabilities.map((cap, i) => (
+            {infoB?.capabilities.map((cap, i) => (
               <div key={i}>{cap}</div>
             ))}
           </div>
@@ -86,6 +69,14 @@ export default function ModelCapabilitiesCard({
                 </tr>
               </thead>
               <tbody>
+                {/*
+                  average: 0.88,
+        ifeval: 0.67,
+        bhh: 0.83,
+        hellaswag: 0.95,
+        mmlu: 0.86,
+        theoryOfMind: 0.87,
+                */}
                 {[modelA, modelB].map((model, i, arr) => (
                   <tr key={model}>
                     <td
@@ -105,7 +96,9 @@ export default function ModelCapabilitiesCard({
                               : ""
                           }`}
                         >
-                          {benchmarkData[metric]}
+                          {infoA?.benchmarks[metric]
+                            ? `${(infoA.benchmarks[metric] * 100).toFixed(1)}%`
+                            : "-"}
                         </td>
                       )
                     )}
@@ -132,7 +125,7 @@ export default function ModelCapabilitiesCard({
                     Strengths
                   </div>
                   <div className="text-slate-400 text-sm font-medium">
-                    {strengths.map((strength, i) => (
+                    {infoA?.strengths.map((strength, i) => (
                       <div key={i}>{strength}</div>
                     ))}
                   </div>
@@ -142,7 +135,7 @@ export default function ModelCapabilitiesCard({
                     Weaknesses
                   </div>
                   <div className="text-slate-400 text-sm font-medium">
-                    {weaknesses.map((weakness, i) => (
+                    {infoA?.weaknesses.map((weakness, i) => (
                       <div key={i}>{weakness}</div>
                     ))}
                   </div>
@@ -162,7 +155,7 @@ export default function ModelCapabilitiesCard({
               key={model}
               className="text-slate-900 text-base font-medium leading-normal mb-2"
             >
-              {model} is recommended for {recommendations}
+              {model} is recommended for {infoA?.recommendations}
             </div>
           ))}
         </div>

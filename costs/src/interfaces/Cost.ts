@@ -12,6 +12,8 @@ export interface ModelDetails {
   matches: string[];
   searchTerms: string[];
   info: {
+    releaseDate: string;
+    maxTokens?: number;
     description: string;
     tradeOffs: string[];
     benchmarks: {

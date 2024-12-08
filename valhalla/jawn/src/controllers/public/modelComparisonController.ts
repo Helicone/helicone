@@ -85,6 +85,7 @@ export class ModelComparisonController extends Controller {
     @Body()
     modelsToCompare: ModelsToCompare[]
   ): Promise<Result<Model[], string>> {
+    console.log(`models to compare: ${JSON.stringify(modelsToCompare)}`);
     const modelComparisonManager = new ModelComparisonManager();
 
     const result = await modelComparisonManager.getModelComparison(
