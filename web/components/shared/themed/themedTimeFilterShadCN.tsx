@@ -94,6 +94,9 @@ export function ThemedTimeFilterShadCN({
 
   const handleDateChange = (newDate: DateRange | undefined) => {
     if (newDate?.from && newDate?.to) {
+      if (newDate.from > newDate.to) {
+        return;
+      }
       const daysDifference = differenceInDays(newDate.to, newDate.from);
       if (daysDifference > 31 && !hasAccess) {
         setIsDialogOpen(true);
@@ -159,11 +162,11 @@ export function ThemedTimeFilterShadCN({
             size="md_sleek"
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
-            {date?.from && date?.to ? (
+            {/* {date?.from && date?.to ? (
               formatDateDisplay(date.from, date.to)
             ) : (
               <span>Pick a date and time</span>
-            )}
+            )} */}
           </Button>
         </PopoverTrigger>
         <PopoverContent
@@ -268,35 +271,71 @@ export function ThemedTimeFilterShadCN({
                 day_today: "",
               }}
             />
-            {/* Time selection inputs */}
-            <div className="grid grid-cols-2 items-center gap-2">
-              <Input
-                type="time"
-                className="text-xs w-min ml-auto border-gray-300 rounded-md"
-                value={date?.from ? format(date.from, "HH:mm") : ""}
-                onChange={(e) => {
-                  if (date?.from) {
-                    const [hours, minutes] = e.target.value.split(":");
-                    const newFrom = new Date(date.from);
-                    newFrom.setHours(Number(hours), Number(minutes));
-                    handleDateChange({ ...date, from: newFrom });
-                  }
-                }}
-              />
 
-              <Input
-                type="time"
-                className="text-xs w-min ml-auto border-gray-300 rounded-md"
-                value={date?.to ? format(date.to, "HH:mm") : ""}
-                onChange={(e) => {
-                  if (date?.to) {
-                    const [hours, minutes] = e.target.value.split(":");
-                    const newTo = new Date(date.to);
-                    newTo.setHours(Number(hours), Number(minutes));
-                    handleDateChange({ ...date, to: newTo });
-                  }
-                }}
-              />
+            <div className="grid grid-cols-2 items-center gap-2">
+              <div className="flex justify-between gap-2">
+                <Input
+                  type="date"
+                  className="text-xs w-min ml-auto border-gray-300 rounded-md"
+                  value={date?.from ? format(date.from, "yyyy-MM-dd") : ""}
+                  onChange={(e) => {
+                    if (date?.from) {
+                      const newFrom = new Date(e.target.value);
+                      handleDateChange({ ...date, from: newFrom });
+                    }
+                  }}
+                />
+                <Input
+                  type="time"
+                  className="text-xs w-min ml-auto border-gray-300 rounded-md"
+                  value={date?.from ? format(date.from, "HH:mm") : ""}
+                  onChange={(e) => {
+                    if (date?.from) {
+                      let [hours, minutes] = e.target.value.split(":");
+                      if (+hours === 0) {
+                        hours = "12";
+                      }
+                      const newFrom = new Date(date.from);
+
+                      if (hours && minutes) {
+                        newFrom.setHours(Number(hours), Number(minutes));
+                        handleDateChange({ ...date, from: newFrom });
+                      }
+                    }
+                  }}
+                />
+              </div>
+              <div className="flex justify-between gap-2">
+                <Input
+                  type="date"
+                  className="text-xs w-min ml-auto border-gray-300 rounded-md"
+                  value={date?.to ? format(date.to, "yyyy-MM-dd") : ""}
+                  onChange={(e) => {
+                    if (date?.to) {
+                      const newTo = new Date(e.target.value);
+                      handleDateChange({ ...date, to: newTo });
+                    }
+                  }}
+                />
+                <Input
+                  type="time"
+                  className="text-xs w-min ml-auto border-gray-300 rounded-md"
+                  value={date?.to ? format(date.to, "HH:mm") : ""}
+                  onChange={(e) => {
+                    if (date?.to) {
+                      let [hours, minutes] = e.target.value.split(":");
+                      if (+hours === 0) {
+                        hours = "12";
+                      }
+                      if (hours && minutes) {
+                        const newTo = new Date(date.to);
+                        newTo.setHours(Number(hours), Number(minutes));
+                        handleDateChange({ ...date, to: newTo });
+                      }
+                    }
+                  }}
+                />
+              </div>
             </div>
           </div>
         </PopoverContent>
