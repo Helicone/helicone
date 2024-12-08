@@ -4,9 +4,10 @@ import { User } from "@supabase/auth-helpers-react";
 import { SortDirection } from "../services/lib/sorts/requests/sorts";
 import { ReactElement } from "react";
 import SessionsPage from "../components/templates/sessions/sessionsPage";
+import { GetServerSideProps, GetServerSidePropsContext } from "next";
+import { ParsedUrlQuery } from "querystring";
 
 interface SessionsProps {
-  user: User;
   currentPage: number;
   pageSize: number;
   sort: {
@@ -37,16 +38,18 @@ Sessions.getLayout = function getLayout(page: ReactElement) {
 
 export default Sessions;
 
-export const getServerSideProps = withAuthSSR(async (options) => {
+export const getServerSideProps: GetServerSideProps<
+  SessionsProps,
+  ParsedUrlQuery
+> = async (context: GetServerSidePropsContext) => {
   const { page, page_size, sortKey, sortDirection, isCustomProperty, tab } =
-    options.context.query;
+    context.query;
 
   const currentPage = parseInt(page as string, 10) || 1;
   const pageSize = parseInt(page_size as string, 10) || 10;
 
   return {
     props: {
-      user: options.userData.user,
       currentPage,
       pageSize,
       sort: {
@@ -57,4 +60,4 @@ export const getServerSideProps = withAuthSSR(async (options) => {
       defaultIndex: tab ? parseInt(tab as string) : 0,
     },
   };
-});
+};
