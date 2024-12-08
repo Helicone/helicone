@@ -1,3 +1,6 @@
+import { useState } from "react";
+import EndOnboardingConfirmation from "@/components/templates/onboarding/EndOnboardingConfirmation";
+import { createPortal } from "react-dom";
 import { Separator } from "@/components/ui/separator";
 import useOnboardingContext, {
   ONBOARDING_STEP_LABELS,
@@ -51,16 +54,28 @@ const steps = [
 ];
 
 const OnboardingNavItems = () => {
+  const [showEndOnboardingConfirmation, setShowEndOnboardingConfirmation] =
+    useState(false);
+
   return (
     <>
-      <p className="text-[12px] font-medium text-slate-500 mt-3 mb-4 mx-1">
-        Get to know Helicone in 5 steps
-      </p>
-      <div className="flex flex-col border border-slate-200 dark:border-slate-800 rounded-md p-1">
-        {steps.map((step, index) => (
-          <OnboardingNavItem key={index} number={index + 1} {...step} />
-        ))}
+      <div className="fixed bottom-6 left-6 z-50">
+        <p className="text-[12px] font-medium text-slate-500 mt-3 mb-4 mx-1">
+          Get to know Helicone in 5 steps
+        </p>
+        <div className="flex flex-col border border-slate-200 dark:border-slate-800 rounded-md p-1">
+          {steps.map((step, index) => (
+            <OnboardingNavItem key={index} number={index + 1} {...step} />
+          ))}
+        </div>
       </div>
+      {createPortal(
+        <EndOnboardingConfirmation
+          open={showEndOnboardingConfirmation}
+          setOpen={setShowEndOnboardingConfirmation}
+        />,
+        document.body
+      )}
     </>
   );
 };

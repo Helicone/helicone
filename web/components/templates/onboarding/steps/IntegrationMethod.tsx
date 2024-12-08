@@ -1,8 +1,6 @@
 import { CheckIcon } from "lucide-react";
-
 import { ArrowUpRightIcon } from "lucide-react";
 import { BookOpenIcon } from "lucide-react";
-
 import { INTEGRATION_METHODS } from "../../dashboard/OnboardingQuickStartModal";
 import { cn } from "@/lib/utils";
 

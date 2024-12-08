@@ -29,17 +29,22 @@ const ONBOARDING_CONFIG = {
   },
 } as const;
 
-// Split into smaller components for better readability
+// Simplified but informative demo preview
 const DemoAppPreview = () => (
-  <div className="flex flex-col gap-4">
-    <img
+  <div className="flex flex-col gap-6">
+    {/* <img
       src={ONBOARDING_CONFIG.DEMO_APP.imagePath}
       alt={ONBOARDING_CONFIG.DEMO_APP.name}
-      className="rounded-md w-full h-auto"
-    />
-    <p className="text-sm text-slate-500 dark:text-slate-400">
-      {ONBOARDING_CONFIG.DEMO_APP.description}
-    </p>
+      className="rounded-md w-full h-auto max-w-[300px] mx-auto"
+    /> */}
+    <div className="space-y-2">
+      <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+        {ONBOARDING_CONFIG.DEMO_APP.name}
+      </h3>
+      <p className="text-sm text-slate-500 dark:text-slate-400">
+        {ONBOARDING_CONFIG.DEMO_APP.description}
+      </p>
+    </div>
   </div>
 );
 
@@ -107,21 +112,24 @@ const OnboardingQuickTourModal = ({
             {!isOnboardingComplete ? <DemoAppPreview /> : <CompletionEmoji />}
           </div>
 
-          <div className="space-y-4 bg-slate-50 dark:bg-slate-900/50 p-4 rounded-lg border border-slate-100 dark:border-slate-800">
-            <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-2">
+          <div className="space-y-4">
+            <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300">
               {isOnboardingComplete
                 ? "What you've learned:"
                 : "Your learning path:"}
-            </h3>
-            <div className="flex flex-col gap-1">
-              {ONBOARDING_CONFIG.CHECKLIST_ITEMS.map((item, index) => (
-                <ChecklistItem
-                  key={item}
-                  item={item}
-                  checked={isOnboardingComplete}
-                  stepNumber={index + 1}
-                />
-              ))}
+            </h4>
+
+            <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-lg border border-slate-100 dark:border-slate-800">
+              <div className="flex flex-col gap-1">
+                {ONBOARDING_CONFIG.CHECKLIST_ITEMS.map((item, index) => (
+                  <ChecklistItem
+                    key={item}
+                    item={item}
+                    checked={isOnboardingComplete}
+                    stepNumber={index + 1}
+                  />
+                ))}
+              </div>
             </div>
           </div>
         </div>
