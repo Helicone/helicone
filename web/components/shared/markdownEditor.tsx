@@ -5,6 +5,7 @@ import {
   ResizableHandle,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
+import { useMemo } from "react";
 
 interface MarkdownEditorProps {
   text: string;
@@ -15,6 +16,7 @@ interface MarkdownEditorProps {
   textareaClassName?: string;
 }
 
+const MAX_EDITOR_HEIGHT = 1000;
 const MarkdownEditor = (props: MarkdownEditorProps) => {
   const {
     text,
@@ -26,29 +28,36 @@ const MarkdownEditor = (props: MarkdownEditorProps) => {
   } = props;
   const { theme: currentTheme } = useTheme();
 
+  const editorHeight = useMemo(() => {
+    const lineHeight = 18; // approximate line height in pixels
+    const lineCount = (text.match(/\n/g) || []).length + 1;
+    const minHeight = 50; // minimum height in pixels
+    return Math.min(
+      MAX_EDITOR_HEIGHT,
+      Math.max(minHeight, lineCount * lineHeight + 20)
+    );
+  }, [text]);
+
   return (
-    <ResizablePanelGroup direction="vertical" className="min-h-[500px]">
-      <ResizablePanel defaultSize={75}>
-        <MonacoEditor
-          value={text}
-          onChange={(value) => setText(value || "")}
-          language={language}
-          theme={currentTheme === "dark" ? "vs-dark" : "vs-light"}
-          options={{
-            minimap: { enabled: false },
-            fontSize: 12,
-            fontFamily: '"Fira Code", "Fira Mono", monospace',
-            readOnly: disabled,
-            wordWrap: "on",
-            lineNumbers: "off",
-            language: "markdown",
-          }}
-          className={className}
-          height="100%"
-        />
-      </ResizablePanel>
-      <ResizableHandle />
-    </ResizablePanelGroup>
+    <MonacoEditor
+      value={text}
+      onChange={(value) => setText(value || "")}
+      language={language}
+      theme={currentTheme === "dark" ? "vs-dark" : "vs-light"}
+      options={{
+        minimap: { enabled: false },
+        fontSize: 12,
+        fontFamily: '"Fira Code", "Fira Mono", monospace',
+        readOnly: disabled,
+        wordWrap: "on",
+        lineNumbers: "off",
+        language: "markdown",
+        scrollBeyondLastLine: false, // Prevents extra space at bottom
+        automaticLayout: true, // Enables auto-resizing
+      }}
+      className={className}
+      height={editorHeight}
+    />
   );
 };
 
