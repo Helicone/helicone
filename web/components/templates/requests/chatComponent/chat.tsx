@@ -102,7 +102,6 @@ export const Chat: React.FC<ChatProps> = ({
       >
         <div className="w-full border border-slate-200 dark:border-gray-700 divide-y divide-gray-300 dark:divide-gray-700 h-full">
           {!hideTopBar && <ChatTopBar {...chatTopBarProps} />}
-
           {mode === "JSON" ? (
             <JsonView requestBody={requestBody} responseBody={responseBody} />
           ) : messages.length > 0 ? (
