@@ -14,6 +14,7 @@ import { ModelDetails } from "@/packages/cost/interfaces/Cost";
 import ModelInfoCard from "./ModelInfoCard";
 import Image from "next/image";
 import ModelCapabilitiesCard from "./ModelCapabilitiesCard";
+import RelatedComparisons from "./RelatedComparisons";
 
 export function ModelComparisonPage({
   modelA,
@@ -161,13 +162,29 @@ export function ModelComparisonPage({
                   />
                 </div>
               </Card>
-
               <ModelCapabilitiesCard
                 modelA={modelA}
+                providerA={providerA}
                 modelB={modelB}
+                providerB={providerB}
                 modelDetailsA={modelADetails}
                 modelDetailsB={modelBDetails}
               />
+
+              <a
+                href="https://helicone.ai/signup"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Image
+                  src="/static/comparison/dashboard_bottom.webp"
+                  alt="LLM Leaderboard"
+                  width={0}
+                  height={0}
+                  sizes="100vw"
+                  className="w-full h-auto"
+                />
+              </a>
             </div>
           )
         )}
