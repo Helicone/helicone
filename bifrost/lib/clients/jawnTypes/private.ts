@@ -489,6 +489,9 @@ export interface paths {
   "/v1/public/status/provider/{provider}": {
     get: operations["GetProviderStatus"];
   };
+  "/v1/public/compare/models": {
+    post: operations["GetModelComparison"];
+  };
   "/v1/settings/query": {
     get: operations["GetSettings"];
   };
@@ -2978,6 +2981,82 @@ Json: JsonObject;
     "Result_ProviderMetrics.string_": components["schemas"]["ResultSuccess_ProviderMetrics_"] | components["schemas"]["ResultError_string_"];
     /** @enum {string} */
     TimeFrame: "24h" | "7d" | "30d";
+    MetricStats: {
+      /** Format: double */
+      p99: number;
+      /** Format: double */
+      p95: number;
+      /** Format: double */
+      p90: number;
+      /** Format: double */
+      max: number;
+      /** Format: double */
+      min: number;
+      /** Format: double */
+      median: number;
+      /** Format: double */
+      average: number;
+    };
+    TokenMetricStats: components["schemas"]["MetricStats"] & {
+      /** Format: double */
+      medianPer1000Tokens: number;
+    };
+    TimeSeriesMetric: {
+      /** Format: double */
+      value: number;
+      timestamp: string;
+    };
+    Model: {
+      timeSeriesData: {
+        errorRate: components["schemas"]["TimeSeriesMetric"][];
+        successRate: components["schemas"]["TimeSeriesMetric"][];
+        ttft: components["schemas"]["TimeSeriesMetric"][];
+        latency: components["schemas"]["TimeSeriesMetric"][];
+      };
+      requestStatus: {
+        /** Format: double */
+        errorRate: number;
+        /** Format: double */
+        successRate: number;
+      };
+      geographicTtft: {
+          /** Format: double */
+          median: number;
+          countryCode: string;
+        }[];
+      geographicLatency: {
+          /** Format: double */
+          median: number;
+          countryCode: string;
+        }[];
+      feedback: {
+        /** Format: double */
+        negativePercentage: number;
+        /** Format: double */
+        positivePercentage: number;
+      };
+      costs: {
+        /** Format: double */
+        completion_token: number;
+        /** Format: double */
+        prompt_token: number;
+      };
+      ttft: components["schemas"]["MetricStats"];
+      latency: components["schemas"]["TokenMetricStats"];
+      provider: string;
+      model: string;
+    };
+    "ResultSuccess_Model-Array_": {
+      data: components["schemas"]["Model"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Model-Array.string_": components["schemas"]["ResultSuccess_Model-Array_"] | components["schemas"]["ResultError_string_"];
+    ModelsToCompare: {
+      provider: string;
+      names: string[];
+      parent: string;
+    };
   };
   responses: {
   };
@@ -5945,6 +6024,21 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_ProviderMetrics.string_"];
+        };
+      };
+    };
+  };
+  GetModelComparison: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ModelsToCompare"][];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Model-Array.string_"];
         };
       };
     };
