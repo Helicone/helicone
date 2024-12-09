@@ -5,6 +5,7 @@ import {
   EyeIcon,
   EyeSlashIcon,
   PlusIcon,
+  LinkIcon,
 } from "@heroicons/react/24/outline";
 import { User, useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -35,7 +36,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { PiWebhooksLogo } from "react-icons/pi";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { ExternalLinkIcon } from "lucide-react";
 
@@ -125,7 +125,7 @@ const WebhooksPage = (props: WebhooksPageProps) => {
         <div className="flex flex-col w-full h-96 justify-center items-center">
           <Card className="w-full max-w-md">
             <CardContent className="flex flex-col items-center pt-6 space-y-4">
-              <PiWebhooksLogo className="h-12 w-12 text-primary mb-4" />
+              <LinkIcon className="h-12 w-12 text-primary mb-4" />
               <CardTitle className="text-xl mb-2">
                 No Webhooks Created
               </CardTitle>

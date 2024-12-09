@@ -8,7 +8,8 @@ import { useGetPropertiesV2 } from "../../../../../services/hooks/propertiesV2";
 import FeedbackButtons from "../../../feedback/thumbsUpThumbsDown";
 import StatusBadge from "../../../requestsV2/statusBadge";
 import { CustomPropertiesCard } from "../../../requestsV2/customProperties";
-import { FaChevronRight } from "react-icons/fa";
+import { Button } from "@/components/ui/button";
+import { ChevronRight } from "lucide-react";
 
 interface ChatSessionProps {
   requests: ReturnType<typeof useGetRequests>;
@@ -115,16 +116,18 @@ const ChatSession: React.FC<ChatSessionProps> = ({ requests }) => {
                   </Col>
                 </Col>
                 <Row className="justify-end mt-4">
-                  <button
-                    className="text-sm flex items-center text-blue-500 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-blue-500 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
                     onClick={() => {
                       setRequestDrawerRequest(normalizeRequest);
                       setOpen(true);
                     }}
                   >
-                    <span className="mr-1 font-medium">View more</span>{" "}
-                    <FaChevronRight />
-                  </button>
+                    <span className="mr-1 font-medium">View more</span>
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
                 </Row>
               </Col>
             </div>

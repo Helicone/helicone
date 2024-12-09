@@ -1,5 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
-import { BsGoogle, BsGithub } from "react-icons/bs";
+
 import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -14,6 +14,8 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
+import { GithubIcon } from "@/app/icons/github";
+import { GoogleIcon } from "@/app/icons/google";
 
 type CustomerPortalContent = {
   domain: string;
@@ -332,7 +334,7 @@ const AuthForm = (props: AuthFormProps) => {
                           onClick={() => handleGoogleSubmit()}
                           className="flex w-full items-center justify-center gap-2 rounded-md border border-gray-300 bg-white hover:bg-gray-200 px-3 py-1.5 text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
                         >
-                          <BsGoogle />
+                          <GoogleIcon />
                           <span className="text-sm lg:text-md font-semibold leading-6">
                             Google
                           </span>
@@ -345,7 +347,7 @@ const AuthForm = (props: AuthFormProps) => {
                           onClick={() => handleGithubSubmit()}
                           className="flex w-full items-center justify-center gap-2 rounded-md border border-gray-300 bg-white hover:bg-gray-200 px-3 py-1.5 text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
                         >
-                          <BsGithub />
+                          <GithubIcon />
                           <span className="text-sm lg:text-md font-semibold leading-6">
                             GitHub
                           </span>

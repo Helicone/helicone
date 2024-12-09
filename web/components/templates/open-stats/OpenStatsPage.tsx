@@ -1,7 +1,7 @@
-import { FaXTwitter } from "react-icons/fa6";
 import { Col, Row } from "../../layout/common";
 import { OtherStats } from "./otherStats";
 import { TopStats } from "./topStats";
+import { XTwitterIcon } from "@/app/icons/xTwitter";
 import { useQueryParams } from "./useQueryParams";
 
 export const OpenStatsPage = () => {
@@ -48,7 +48,7 @@ export const OpenStatsPage = () => {
                 window.open(tweetUrl, "_blank");
               }}
             >
-              <FaXTwitter />
+              <XTwitterIcon />
               <div>Share</div>
             </button>
             <Row className="gap-[16px] bg-black p-[4px] font-bold rounded-lg border-[#63758933] border-opacity-20 border">
@@ -90,7 +90,7 @@ export const OpenStatsPage = () => {
                 window.open(tweetUrl, "_blank");
               }}
             >
-              <FaXTwitter />
+              <XTwitterIcon />
               <div>Share</div>
             </button>
           </Row>

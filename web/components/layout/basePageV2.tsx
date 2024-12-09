@@ -1,7 +1,8 @@
 import { ReactNode, SVGProps } from "react";
-import { BsDiscord } from "react-icons/bs";
+
 import Footer from "./footer";
 import NavBarV2 from "./navbar/navBarV2";
+import { DiscordIcon } from "@/app/icons/discord";
 
 const meta = {
   social: [
@@ -31,7 +32,7 @@ const meta = {
       name: "Discord",
       href: "https://discord.gg/2TkeWdXNPQ",
       icon: (props: JSX.IntrinsicAttributes & SVGProps<SVGSVGElement>) => (
-        <BsDiscord {...props} />
+        <DiscordIcon className="h-4 w-4" {...props} />
       ),
     },
   ],

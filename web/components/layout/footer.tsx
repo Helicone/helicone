@@ -1,6 +1,6 @@
+import { DiscordIcon } from "@/app/icons/discord";
 import Link from "next/link";
 import { SVGProps } from "react";
-import { BsDiscord } from "react-icons/bs";
 
 interface FooterProps {}
 
@@ -32,7 +32,7 @@ const meta = {
       name: "Discord",
       href: "https://discord.gg/2TkeWdXNPQ",
       icon: (props: JSX.IntrinsicAttributes & SVGProps<SVGSVGElement>) => (
-        <BsDiscord {...props} />
+        <DiscordIcon {...props} />
       ),
     },
   ],

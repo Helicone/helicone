@@ -7,13 +7,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { ArrowUpRightIcon, FileTextIcon } from "lucide-react";
-import { FaDiscord } from "react-icons/fa6";
+
 import { CalendarIcon } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
 import { ChangelogItem } from "./auth/types";
 import { useLocalStorage } from "@/services/hooks/localStorage";
 import clsx from "clsx";
+import { DiscordIcon } from "@/app/icons/discord";
 
 const SidebarHelpDropdown = ({
   changelog,
@@ -67,7 +68,7 @@ const SidebarHelpDropdown = ({
         </Link>
         <Link href="https://discord.gg/zsSTcH2qhG" target="_blank">
           <DropdownMenuItem className="cursor-pointer">
-            <FaDiscord className="h-4 w-4 mr-2 text-slate-500" />
+            <DiscordIcon className="h-4 w-4 mr-2 text-slate-500" />
             Help and Support
             <ArrowUpRightIcon className="h-3.5 w-3.5 ml-2 text-slate-400 dark:text-slate-600" />
           </DropdownMenuItem>
