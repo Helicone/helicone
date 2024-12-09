@@ -11,13 +11,15 @@ const Banner: React.FC<BannerProps> = ({
   return (
     <div className="w-full flex justify-center py-4">
       <div className="max-w-5xl">
-        <Image
-          src={imagePath}
-          alt="Performance Graph"
-          width={1024}
-          height={60}
-          className="h-auto w-auto"
-        />
+        <a href="/signup" target="_blank" rel="noopener noreferrer">
+          <Image
+            src={imagePath}
+            alt="Performance Graph"
+            width={1024}
+            height={60}
+            className="h-auto w-auto"
+          />
+        </a>
       </div>
     </div>
   );
