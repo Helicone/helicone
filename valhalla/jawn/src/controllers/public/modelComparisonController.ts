@@ -9,9 +9,11 @@ import {
   Post,
   Body,
 } from "tsoa";
-import { Result } from "../../lib/shared/result";
+import { err, ok, Result } from "../../lib/shared/result";
 import { JawnAuthenticatedRequest } from "../../types/request";
 import { ModelComparisonManager } from "../../managers/ModelComparisonManager";
+import { KVCache } from "../../lib/cache/kvCache";
+import { cacheResultCustom } from "../../utils/cacheResult";
 
 export type MetricStats = {
   average: number;
@@ -71,6 +73,8 @@ export type ModelsToCompare = {
   provider: string;
 };
 
+const kvCache = new KVCache(12 * 60 * 60 * 1000); // 12 hours
+
 @Route("v1/public/compare")
 @Tags("Comparison")
 @Security("api_key")
@@ -83,10 +87,19 @@ export class ModelComparisonController extends Controller {
   ): Promise<Result<Model[], string>> {
     const modelComparisonManager = new ModelComparisonManager();
 
-    const result = await modelComparisonManager.getModelComparison(
-      modelsToCompare
+    const result = await cacheResultCustom(
+      "v1/public/compare/models" + JSON.stringify(modelsToCompare),
+      async () =>
+        await modelComparisonManager.getModelComparison(modelsToCompare),
+      kvCache
     );
 
-    return result;
+    if (result.error || !result.data) {
+      this.setStatus(500);
+      return err(result.error || "Failed to fetch model comparison");
+    } else {
+      this.setStatus(200);
+      return ok(result.data);
+    }
   }
 }
