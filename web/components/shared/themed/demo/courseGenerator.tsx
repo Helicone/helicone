@@ -217,7 +217,6 @@ export const CourseGenerator: React.FC = () => {
           }} for ${{
             audience: args.audience,
           }}}. Not overly lengthy but detailed enough to be useful.`,
-          
         });
         toolName = "generateSectionContent";
         toolDescription = "Generate content for a course section";
