@@ -93,7 +93,7 @@ const AuthForm = (props: AuthFormProps) => {
   };
 
   return (
-    <div className="w-full bg-[#f8feff] h-full antialiased relative">
+    <div className="w-full bg-[#f8feff] h-full antialiased relative light">
       <div className="h-screen flex flex-1 flex-col sm:flex-row justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-20 xl:px-24 relative">
         <div className="flex flex-col w-full space-y-4 h-full justify-center items-center max-w-lg">
           <div className="w-full flex justify-between items-center">
