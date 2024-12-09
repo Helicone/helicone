@@ -8680,6 +8680,291 @@
 					"7d",
 					"30d"
 				]
+			},
+			"MetricStats": {
+				"properties": {
+					"p99": {
+						"type": "number",
+						"format": "double"
+					},
+					"p95": {
+						"type": "number",
+						"format": "double"
+					},
+					"p90": {
+						"type": "number",
+						"format": "double"
+					},
+					"max": {
+						"type": "number",
+						"format": "double"
+					},
+					"min": {
+						"type": "number",
+						"format": "double"
+					},
+					"median": {
+						"type": "number",
+						"format": "double"
+					},
+					"average": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"p99",
+					"p95",
+					"p90",
+					"max",
+					"min",
+					"median",
+					"average"
+				],
+				"type": "object"
+			},
+			"TokenMetricStats": {
+				"allOf": [
+					{
+						"$ref": "#/components/schemas/MetricStats"
+					},
+					{
+						"properties": {
+							"medianPer1000Tokens": {
+								"type": "number",
+								"format": "double"
+							}
+						},
+						"required": [
+							"medianPer1000Tokens"
+						],
+						"type": "object"
+					}
+				]
+			},
+			"TimeSeriesMetric": {
+				"properties": {
+					"value": {
+						"type": "number",
+						"format": "double"
+					},
+					"timestamp": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"value",
+					"timestamp"
+				],
+				"type": "object"
+			},
+			"Model": {
+				"properties": {
+					"timeSeriesData": {
+						"properties": {
+							"errorRate": {
+								"items": {
+									"$ref": "#/components/schemas/TimeSeriesMetric"
+								},
+								"type": "array"
+							},
+							"successRate": {
+								"items": {
+									"$ref": "#/components/schemas/TimeSeriesMetric"
+								},
+								"type": "array"
+							},
+							"ttft": {
+								"items": {
+									"$ref": "#/components/schemas/TimeSeriesMetric"
+								},
+								"type": "array"
+							},
+							"latency": {
+								"items": {
+									"$ref": "#/components/schemas/TimeSeriesMetric"
+								},
+								"type": "array"
+							}
+						},
+						"required": [
+							"errorRate",
+							"successRate",
+							"ttft",
+							"latency"
+						],
+						"type": "object"
+					},
+					"requestStatus": {
+						"properties": {
+							"errorRate": {
+								"type": "number",
+								"format": "double"
+							},
+							"successRate": {
+								"type": "number",
+								"format": "double"
+							}
+						},
+						"required": [
+							"errorRate",
+							"successRate"
+						],
+						"type": "object"
+					},
+					"geographicTtft": {
+						"items": {
+							"properties": {
+								"median": {
+									"type": "number",
+									"format": "double"
+								},
+								"countryCode": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"median",
+								"countryCode"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"geographicLatency": {
+						"items": {
+							"properties": {
+								"median": {
+									"type": "number",
+									"format": "double"
+								},
+								"countryCode": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"median",
+								"countryCode"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"feedback": {
+						"properties": {
+							"negativePercentage": {
+								"type": "number",
+								"format": "double"
+							},
+							"positivePercentage": {
+								"type": "number",
+								"format": "double"
+							}
+						},
+						"required": [
+							"negativePercentage",
+							"positivePercentage"
+						],
+						"type": "object"
+					},
+					"costs": {
+						"properties": {
+							"completion_token": {
+								"type": "number",
+								"format": "double"
+							},
+							"prompt_token": {
+								"type": "number",
+								"format": "double"
+							}
+						},
+						"required": [
+							"completion_token",
+							"prompt_token"
+						],
+						"type": "object"
+					},
+					"ttft": {
+						"$ref": "#/components/schemas/MetricStats"
+					},
+					"latency": {
+						"$ref": "#/components/schemas/TokenMetricStats"
+					},
+					"provider": {
+						"type": "string"
+					},
+					"model": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"timeSeriesData",
+					"requestStatus",
+					"geographicTtft",
+					"geographicLatency",
+					"feedback",
+					"costs",
+					"ttft",
+					"latency",
+					"provider",
+					"model"
+				],
+				"type": "object"
+			},
+			"ResultSuccess_Model-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/Model"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_Model-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_Model-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ModelsToCompare": {
+				"properties": {
+					"provider": {
+						"type": "string"
+					},
+					"names": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"parent": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"provider",
+					"names",
+					"parent"
+				],
+				"type": "object"
 			}
 		},
 		"securitySchemes": {
@@ -16449,6 +16734,45 @@
 						}
 					}
 				]
+			}
+		},
+		"/v1/public/compare/models": {
+			"post": {
+				"operationId": "GetModelComparison",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_Model-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Comparison"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"items": {
+									"$ref": "#/components/schemas/ModelsToCompare"
+								},
+								"type": "array"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/v1/settings/query": {
