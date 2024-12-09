@@ -3,17 +3,15 @@ import { clsx } from "../../shared/clsx";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedModal from "../../shared/themed/themedModal";
 import { v4 as uuidv4 } from "uuid";
-import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
+import { UIFilterRow } from "@/services/lib/filters/types";
 import { SingleFilterDef } from "../../../services/lib/filters/frontendFilterDefs";
 import { OrganizationFilter } from "../../../services/lib/organization_layout/organization_layout";
-import { useOrg } from "../../layout/organizationContext";
+import { useOrg } from "../../layout/org/organizationContext";
 import { FunnelIcon } from "@heroicons/react/24/solid";
 import useSearchParams from "../../shared/utils/useSearchParams";
 import { useJawnClient } from "../../../lib/clients/jawnHook";
-import {
-  UIFilterRowTree,
-  isFilterRowNode,
-} from "../../../services/lib/filters/uiFilterRowTree";
+import { isFilterRowNode } from "../../../services/lib/filters/uiFilterRowTree";
+import { UIFilterRowTree } from "@/services/lib/filters/types";
 import { Button } from "@/components/ui/button";
 import { SaveIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";

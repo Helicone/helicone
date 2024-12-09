@@ -3,7 +3,9 @@ import { PROMPT_MODES } from "../chatTopBar";
 import { Message } from "../types";
 import { AutoInputMessage } from "./AutoInputMessage";
 import { ExpandableMessage } from "./ExpandableMessage";
-import { FunctionCall, FunctionMessage, ImageRow } from "./renderingUtils";
+import { FunctionMessage } from "./renderingUtils";
+import { ImageRow } from "./images/ImageRow";
+import { FunctionCall } from "./FunctionCall";
 import { getContentType, getFormattedMessageContent } from "./utils";
 
 interface MessageContentProps {

@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { clsx } from "../clsx";
 import useNotification from "../notification/useNotification";
 import useSearchParams from "../utils/useSearchParams";
-import { TimeFilter } from "../../templates/dashboard/dashboardPage";
+import { TimeFilter } from "@/types/timeFilter";
 import { ProFeatureWrapper } from "../ProBlockerComponents/ProFeatureWrapper";
 import { ThemedTimeFilterShadCN } from "./themedTimeFilterShadCN";
 

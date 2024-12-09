@@ -5,7 +5,7 @@ import {
   TrashIcon,
 } from "@heroicons/react/24/outline";
 import { OrganizationFilter } from "../../../../services/lib/organization_layout/organization_layout";
-import { useOrg } from "../../../layout/organizationContext";
+import { useOrg } from "../../../layout/org/organizationContext";
 import useNotification from "../../notification/useNotification";
 import useSearchParams from "../../utils/useSearchParams";
 import { useJawnClient } from "../../../../lib/clients/jawnHook";

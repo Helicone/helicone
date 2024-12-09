@@ -12,7 +12,7 @@ import {
   useGetOrgMembers,
   useGetOrgOwner,
 } from "../../../services/hooks/organizations";
-import { useOrg } from "../../layout/organizationContext";
+import { useOrg } from "../../layout/org/organizationContext";
 import { useUser } from "@supabase/auth-helpers-react";
 
 export interface ThemedTableProps {

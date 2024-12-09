@@ -8,7 +8,7 @@ import {
   ArrowPathIcon,
   InformationCircleIcon,
 } from "@heroicons/react/24/outline";
-import { useOrg } from "../../layout/organizationContext";
+import { useOrg } from "../../layout/org/organizationContext";
 import {
   Select,
   SelectContent,

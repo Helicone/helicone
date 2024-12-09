@@ -10,10 +10,10 @@ import { SortDirection } from "../../../services/lib/sorts/users/sorts";
 import AuthHeader from "../../shared/authHeader";
 import ThemedTable from "../../shared/themed/table/themedTable";
 import {
-  UIFilterRowTree,
   filterUITreeToFilterNode,
   getRootFilterNode,
 } from "../../../services/lib/filters/uiFilterRowTree";
+import { UIFilterRowTree } from "@/services/lib/filters/types";
 import TableFooter from "../requestsV2/tableFooter";
 import { INITIAL_COLUMNS } from "./initialColumns";
 

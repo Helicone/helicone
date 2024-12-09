@@ -1,5 +1,5 @@
 import Cookies from "js-cookie";
-import { useOrg } from "../../layout/organizationContext";
+import { useOrg } from "../../layout/org/organizationContext";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedModal from "../../shared/themed/themedModal";
 import { SUPABASE_AUTH_TOKEN } from "../../../lib/constants";

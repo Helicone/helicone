@@ -7,7 +7,7 @@ import {
 } from "../../../lib/timeCalculations/time";
 import { getTimeMap } from "../../../lib/timeCalculations/constants";
 import { useState } from "react";
-import { TimeFilter } from "../dashboard/dashboardPage";
+import { TimeFilter } from "@/types/timeFilter";
 
 interface PromptUsageChartProps {
   promptId: string;

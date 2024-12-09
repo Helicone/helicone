@@ -2,7 +2,7 @@ import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
 import ThemedModal from "../../../shared/themed/themedModal";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
-import { useOrg } from "../../../layout/organizationContext";
+import { useOrg } from "../../../layout/org/organizationContext";
 import Papa from "papaparse";
 import { Input } from "@/components/ui/input";
 

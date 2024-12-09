@@ -1,7 +1,7 @@
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useQuery } from "@tanstack/react-query";
 import { Database } from "../../supabase/database.types";
-import { useOrg } from "../../components/layout/organizationContext";
+import { useOrg } from "../../components/layout/org/organizationContext";
 
 export const useHeliconeKeys = () => {
   const client = useSupabaseClient<Database>();

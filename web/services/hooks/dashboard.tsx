@@ -1,11 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { UserMetric } from "../../lib/api/users/users";
+import { UserMetric } from "../../lib/api/users/UserMetric";
 import { Result } from "../../lib/result";
 import { FilterNode } from "../lib/filters/filterDefs";
 import { SortLeafUsers } from "../lib/sorts/users/sorts";
 import { Tier } from "../../pages/api/organization/tier";
-import { useOrg } from "../../components/layout/organizationContext";
+import { useOrg } from "../../components/layout/org/organizationContext";
 import { getJawnClient } from "@/lib/clients/jawn";
 
 const useGetTopUsers = (

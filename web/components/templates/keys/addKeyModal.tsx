@@ -5,7 +5,7 @@ import {
 import { User } from "@supabase/auth-helpers-react";
 import { FormEvent, useEffect, useState } from "react";
 import { generateAPIKeyHelper } from "../../../utlis/generateAPIKeyHelper";
-import { OrgContextValue } from "../../layout/organizationContext";
+import { OrgContextValue } from "@/components/layout/org/OrgContextValue";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedModal from "../../shared/themed/themedModal";
 

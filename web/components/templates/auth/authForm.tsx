@@ -3,7 +3,6 @@ import { BsGoogle, BsGithub } from "react-icons/bs";
 import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { CustomerPortalContent } from "../../../pages/signin";
 import { useRouter } from "next/router";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,6 +14,11 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
+
+type CustomerPortalContent = {
+  domain: string;
+  logo: string;
+};
 
 interface AuthFormProps {
   handleEmailSubmit: (email: string, password: string) => void;

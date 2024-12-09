@@ -10,7 +10,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { clsx } from "../../shared/clsx";
 import { useRouter } from "next/router";
-import { useOrg } from "../organizationContext";
+import { useOrg } from "../org/organizationContext";
 import MetaData from "../public/authMetaData";
 
 const navigation = [

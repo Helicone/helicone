@@ -7,7 +7,7 @@ import { clsx } from "../../../shared/clsx";
 import { useGetOrgMembers } from "../../../../services/hooks/organizations";
 import { formatISO } from "date-fns";
 import { useRequestsOverTime } from "../../organization/plan/renderOrgPlan";
-import { useOrg } from "../../../layout/organizationContext";
+import { useOrg } from "../../../layout/org/organizationContext";
 import { useRouter } from "next/router";
 import { OrgLimits } from "../../organization/createOrgForm";
 import { EllipsisHorizontalIcon } from "@heroicons/react/24/outline";
