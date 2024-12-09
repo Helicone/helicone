@@ -1,13 +1,13 @@
 import { expect, test } from "@jest/globals";
 
 import { clickhousePriceCalc } from "../src";
-import { costs as openaiCosts } from "../src/providers/openai";
+import { openAIProvider } from "../src/providers/openai";
 import { playgroundModels } from "../src/providers/mappings";
 
 test("check that there are no two models that are the same", () => {
-  openaiCosts.forEach((cost) => {
+  openAIProvider.costs.forEach((cost) => {
     const model = cost.model.value;
-    const modelCount = openaiCosts.filter(
+    const modelCount = openAIProvider.costs.filter(
       (c) => c.model.value === model
     ).length;
     expect(modelCount).toBe(1);

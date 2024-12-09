@@ -1,17 +1,22 @@
 import { Card } from "@/components/ui/card";
 import { ModelDetails } from "@/packages/cost/interfaces/Cost";
 import Image from "next/image";
+import RelatedComparisons from "./RelatedComparisons";
 
 interface ModelCapabilitiesCardProps {
   modelA: string;
+  providerA: string;
   modelB: string;
+  providerB: string;
   modelDetailsA?: ModelDetails;
   modelDetailsB?: ModelDetails;
 }
 
 export default function ModelCapabilitiesCard({
   modelA,
+  providerA,
   modelB,
+  providerB,
   modelDetailsA,
   modelDetailsB,
 }: ModelCapabilitiesCardProps) {
@@ -204,21 +209,13 @@ export default function ModelCapabilitiesCard({
             ))}
           </div>
         </div>
-      </div>
-      <a
-        href="https://helicone.ai/signup"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        <Image
-          src="/static/comparison/dashboard_bottom.webp"
-          alt="LLM Leaderboard"
-          width={0}
-          height={0}
-          sizes="100vw"
-          className="w-full h-auto"
+        <RelatedComparisons
+          modelA={modelA}
+          providerA={providerA}
+          modelB={modelB}
+          providerB={providerB}
         />
-      </a>
+      </div>
     </Card>
   );
 }
