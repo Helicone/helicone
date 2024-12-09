@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 
+import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { useRouter } from "next/router";
 import { useMemo, useState } from "react";
 import { useAlertBanners, useChangelog } from "../../../services/hooks/admin";
@@ -7,11 +8,9 @@ import UpgradeProModal from "../../shared/upgradeProModal";
 import { Row } from "../common";
 import { useOrg } from "../organizationContext";
 import MetaData from "../public/authMetaData";
-import AcceptTermsModal from "./AcceptTermsModal";
 import DemoModal from "./DemoModal";
 import MainContent from "./MainContent";
 import Sidebar from "./Sidebar";
-import { ErrorBoundary } from "@/components/ui/error-boundary";
 
 interface AuthLayoutProps {
   children: React.ReactNode;

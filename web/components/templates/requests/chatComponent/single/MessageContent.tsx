@@ -1,10 +1,10 @@
-import React, { useLayoutEffect, useMemo, useRef, useState } from "react";
+import React, { useMemo, useRef } from "react";
+import { PROMPT_MODES } from "../chatTopBar";
 import { Message } from "../types";
 import { AutoInputMessage } from "./AutoInputMessage";
 import { ExpandableMessage } from "./ExpandableMessage";
 import { FunctionCall, FunctionMessage, ImageRow } from "./renderingUtils";
 import { getContentType, getFormattedMessageContent } from "./utils";
-import { PROMPT_MODES } from "../chatTopBar";
 
 interface MessageContentProps {
   message: Message;

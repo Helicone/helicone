@@ -1,12 +1,7 @@
 import { Editor as MonacoEditor } from "@monaco-editor/react";
-import { useTheme } from "next-themes";
-import {
-  ResizablePanel,
-  ResizableHandle,
-  ResizablePanelGroup,
-} from "@/components/ui/resizable";
-import { useMemo, useRef, useState } from "react";
 import { editor } from "monaco-editor";
+import { useTheme } from "next-themes";
+import { useState } from "react";
 
 interface MarkdownEditorProps {
   text: string;
