@@ -19,7 +19,7 @@ const ThemedModal = (props: ThemedModalProps) => {
       <DialogPortal>
         <DialogOverlay className="bg-slate-300/50 dark:bg-slate-950/50" />
         <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <DialogContent className="max-h-[90vh] w-fit overflow-auto">
+          <DialogContent className="max-h-[90vh] max-w-[90vw] overflow-auto w-fit">
             {children}
           </DialogContent>
         </div>

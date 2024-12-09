@@ -7,18 +7,13 @@ import {
 import { Result, err, ok } from "../result";
 import { SupabaseServerWrapper } from "../wrappers/supabase";
 import { User } from "@supabase/auth-helpers-nextjs";
-import { FilterNode } from "../../services/lib/filters/filterDefs";
+import { FilterNode, TimeFilter } from "../../services/lib/filters/filterDefs";
 import { Permission, Role, hasPermission } from "../../services/lib/user";
 import { Database } from "../../supabase/database.types";
 
 export interface HandlerWrapperNext<RetVal> {
   req: NextApiRequest;
   res: NextApiResponse<RetVal>;
-}
-
-export interface TimeFilter {
-  start: Date;
-  end: Date;
 }
 
 export class RequestBodyParser {

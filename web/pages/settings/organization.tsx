@@ -2,7 +2,7 @@ import { NextPageWithLayout } from "../_app";
 import AuthLayout from "../../components/layout/auth/authLayout";
 import { ReactElement } from "react";
 import OrgSettingsPage from "../../components/templates/organization/settings/orgSettingsPage";
-import { useOrg } from "../../components/layout/organizationContext";
+import { useOrg } from "../../components/layout/org/organizationContext";
 import SettingsLayout from "@/components/templates/settings/settingsLayout";
 
 const OrganizationSettings: NextPageWithLayout = () => {

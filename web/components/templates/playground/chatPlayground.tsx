@@ -20,7 +20,7 @@ import { Message } from "../requests/chatComponent/types";
 import ModelPill from "../requestsV2/modelPill";
 import ChatRow from "./chatRow";
 import RoleButton from "./new/roleButton";
-import { PlaygroundModel } from "./playgroundPage";
+import { PlaygroundModel } from "./types";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,

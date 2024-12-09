@@ -8,8 +8,17 @@ import {
 import { CostOverTime } from "../../../pages/api/metrics/costOverTime";
 import { ErrorOverTime } from "../../../pages/api/metrics/errorOverTime";
 
+import { UIFilterRowTree } from "@/services/lib/filters/types";
+import { useCallback, useMemo } from "react";
 import { getTokensPerRequest } from "../../../lib/api/metrics/averageTokensPerRequest";
+import { LatencyOverTime } from "../../../lib/api/metrics/getLatencyOverTime";
+import { ThreatsOverTime } from "../../../lib/api/metrics/getThreatsOverTime";
+import { TimeToFirstToken } from "../../../lib/api/metrics/getTimeToFirstToken";
+import { UsersOverTime } from "../../../lib/api/metrics/getUsersOverTime";
 import { UnPromise } from "../../../lib/tsxHelpers";
+import { TokensOverTime } from "../../../pages/api/metrics/tokensOverTime";
+import { useModels } from "../../../services/hooks/models";
+import { useGetPropertiesV2 } from "../../../services/hooks/propertiesV2";
 import {
   BackendMetricsCall,
   useBackendMetricCall,
@@ -21,18 +30,7 @@ import {
   getPropertyFiltersV2,
   textWithSuggestions,
 } from "../../../services/lib/filters/frontendFilterDefs";
-import { LatencyOverTime } from "../../../pages/api/metrics/latencyOverTime";
-import { UsersOverTime } from "../../../pages/api/metrics/usersOverTime";
-import { TokensOverTime } from "../../../pages/api/metrics/tokensOverTime";
-import { TimeToFirstToken } from "../../../pages/api/metrics/timeToFirstToken";
-import { ThreatsOverTime } from "../../../pages/api/metrics/threatsOverTime";
-import { useModels } from "../../../services/hooks/models";
-import { useGetPropertiesV2 } from "../../../services/hooks/propertiesV2";
-import {
-  filterUITreeToFilterNode,
-  UIFilterRowTree,
-} from "../../../services/lib/filters/uiFilterRowTree";
-import { useMemo, useCallback } from "react";
+import { filterUITreeToFilterNode } from "../../../services/lib/filters/uiFilterRowTree";
 
 export async function fetchDataOverTime<T>(
   timeFilter: {

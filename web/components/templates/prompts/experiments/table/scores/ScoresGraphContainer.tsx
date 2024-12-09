@@ -3,13 +3,7 @@ import ScoresGraph from "./ScoresGraph";
 import { useExperimentScores } from "@/services/hooks/prompts/experiment-scores";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
-
-export type PromptVersion = {
-  id: string;
-  metadata: Record<string, any>;
-  major_version: number;
-  minor_version: number;
-};
+import { PromptVersion } from "./PromptVersion";
 
 const ScoresGraphContainer = ({
   experimentId,

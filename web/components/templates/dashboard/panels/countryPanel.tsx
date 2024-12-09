@@ -5,7 +5,7 @@ import {
   ArrowsPointingOutIcon,
 } from "@heroicons/react/24/outline";
 import { useCountries } from "../../../../services/hooks/country";
-import { TimeFilter } from "../dashboardPage";
+import { TimeFilter } from "@/types/timeFilter";
 import { COUTNRY_CODE_DIRECTORY } from "../../requestsV2/countryCodeDirectory";
 import { CountryData } from "../../../../services/lib/country";
 import ThemedModal from "../../../shared/themed/themedModal";

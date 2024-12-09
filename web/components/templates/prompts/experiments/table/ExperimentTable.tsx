@@ -48,7 +48,7 @@ import { Switch } from "@/components/ui/switch";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import ScoresEvaluatorsConfig from "./scores/ScoresEvaluatorsConfig";
 import ScoresGraphContainer from "./scores/ScoresGraphContainer";
-import { useOrg } from "@/components/layout/organizationContext";
+import { useOrg } from "@/components/layout/org/organizationContext";
 import { cn } from "@/lib/utils";
 import { OnboardingPopover } from "@/components/templates/onboarding/OnboardingPopover";
 import { useJawnClient } from "@/lib/clients/jawnHook";

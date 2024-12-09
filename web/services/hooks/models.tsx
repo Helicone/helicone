@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { TimeFilter } from "../../components/templates/dashboard/dashboardPage";
+import { TimeFilter } from "@/types/timeFilter";
 import { Result } from "../../lib/result";
 import { ModelMetric } from "../../lib/api/models/models";
 import { FilterNode } from "../lib/filters/filterDefs";

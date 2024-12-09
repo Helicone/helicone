@@ -2,7 +2,7 @@ import { useUser } from "@supabase/auth-helpers-react";
 import { Input } from "@/components/ui/input";
 import { useEffect, useState } from "react";
 import { generateAPIKeyHelper } from "../../../../utlis/generateAPIKeyHelper";
-import { useOrg } from "../../../layout/organizationContext";
+import { useOrg } from "../../../layout/org/organizationContext";
 import useNotification from "../../../shared/notification/useNotification";
 import Image from "next/image";
 import { clsx } from "../../../shared/clsx";

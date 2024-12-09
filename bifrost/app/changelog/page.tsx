@@ -90,7 +90,7 @@ export default async function Home() {
 
   return (
     <>
-      <div className="flex flex-col w-full bg-[#f8feff] h-full antialiased relative divide-gray-200 divide-y-2">
+      <div className="flex flex-col w-full h-full antialiased relative divide-gray-200 divide-y-2">
         {mdxs
           .reverse()
           .map(
@@ -133,7 +133,10 @@ export default async function Home() {
                         width={500}
                         height={300}
                         layout="responsive"
-                        style={{ borderRadius: '16px', border: '1px solid #D3DCE6' }}
+                        style={{
+                          borderRadius: "16px",
+                          border: "1px solid #D3DCE6",
+                        }}
                       />
                     ) : (
                       <div className="bg-gray-200 w-full flex items-center justify-center"></div>

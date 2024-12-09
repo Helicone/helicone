@@ -20,7 +20,7 @@ import { useCallback, useMemo, useState } from "react";
 import { clsx } from "../shared/clsx";
 import AddMemberModal from "../templates/organization/addMemberModal";
 import CreateOrgForm from "../templates/organization/createOrgForm";
-import { useOrg } from "./organizationContext";
+import { useOrg } from "./org/organizationContext";
 import {
   ORGANIZATION_COLORS,
   ORGANIZATION_ICONS,

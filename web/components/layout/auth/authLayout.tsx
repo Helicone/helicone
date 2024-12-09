@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 
+import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { useRouter } from "next/router";
 import { useMemo, useRef, useState } from "react";
 import { useAlertBanners, useChangelog } from "../../../services/hooks/admin";
@@ -9,7 +10,6 @@ import MetaData from "../public/authMetaData";
 import DemoModal from "./DemoModal";
 import MainContent from "./MainContent";
 import Sidebar from "./Sidebar";
-import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { OnboardingBackground, OnboardingProvider } from "../onboardingContext";
 
 interface AuthLayoutProps {
@@ -79,6 +79,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
       </div>
 
       <UpgradeProModal open={open} setOpen={setOpen} />
+      {/* <AcceptTermsModal /> */}
     </MetaData>
   );
 };

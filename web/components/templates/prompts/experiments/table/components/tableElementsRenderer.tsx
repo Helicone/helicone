@@ -122,6 +122,7 @@ const ExperimentTableHeader = (props: ExperimentHeaderProps) => {
   const scoreColorMapping = useMemo(() => {
     const scores = Object.keys(promptVersionIdScore.data?.data ?? {});
     return getScoreColorMapping(scores);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [promptVersionIdScore.data?.data]);
 
   return (

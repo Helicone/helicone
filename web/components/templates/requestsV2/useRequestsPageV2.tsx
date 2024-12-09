@@ -12,12 +12,10 @@ import {
   SingleFilterDef,
   textWithSuggestions,
 } from "../../../services/lib/filters/frontendFilterDefs";
-import {
-  filterUITreeToFilterNode,
-  UIFilterRowTree,
-} from "../../../services/lib/filters/uiFilterRowTree";
+import { filterUITreeToFilterNode } from "../../../services/lib/filters/uiFilterRowTree";
+import { UIFilterRowTree } from "@/services/lib/filters/types";
 import { SortLeafRequest } from "../../../services/lib/sorts/requests/sorts";
-import { TimeFilter } from "../dashboard/dashboardPage";
+import { TimeFilter } from "@/types/timeFilter";
 import getNormalizedRequest from "./builder/requestBuilder";
 
 const useRequestsPageV2 = (

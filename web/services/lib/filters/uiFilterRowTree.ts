@@ -1,17 +1,8 @@
-import { UIFilterRow } from "../../../components/shared/themed/themedAdvancedFilters";
-import {
-  filterListToTree,
-  FilterNode,
-  uiFilterRowToFilterLeaf,
-} from "./filterDefs";
+import { UIFilterRow, UIFilterRowNode, UIFilterRowTree } from "./types";
+import { FilterNode } from "./filterDefs";
+import { uiFilterRowToFilterLeaf } from "./helpers/filterFunctions";
+import { filterListToTree } from "./filterListToTree";
 import { SingleFilterDef } from "./frontendFilterDefs";
-
-export interface UIFilterRowNode {
-  operator: "and" | "or";
-  rows: UIFilterRowTree[];
-}
-
-export type UIFilterRowTree = UIFilterRowNode | UIFilterRow;
 
 export function isFilterRowNode(
   filter: UIFilterRowTree

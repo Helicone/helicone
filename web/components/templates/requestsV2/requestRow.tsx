@@ -15,7 +15,7 @@ import {
   addRequestLabel,
   addRequestScore,
 } from "../../../services/lib/requests";
-import { useOrg } from "../../layout/organizationContext";
+import { useOrg } from "../../layout/org/organizationContext";
 import { clsx } from "../../shared/clsx";
 import useNotification from "../../shared/notification/useNotification";
 import FeedbackButtons from "../feedback/thumbsUpThumbsDown";

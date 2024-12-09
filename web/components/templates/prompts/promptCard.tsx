@@ -9,7 +9,7 @@ import {
   getTimeIntervalAgo,
 } from "../../../lib/timeCalculations/time";
 import { useState } from "react";
-import { TimeFilter } from "../dashboard/dashboardPage";
+import { TimeFilter } from "@/types/timeFilter";
 import { BackendMetricsCall } from "../../../services/hooks/useBackendFunction";
 import { getTimeMap } from "../../../lib/timeCalculations/constants";
 import Link from "next/link";

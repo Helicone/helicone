@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Database } from "../../supabase/database.types";
 import { useCallback, useEffect, useState } from "react";
 import Cookies from "js-cookie";
-import { OrgContextValue } from "../../components/layout/organizationContext";
+import { OrgContextValue } from "@/components/layout/org/OrgContextValue";
 import { ORG_ID_COOKIE_KEY } from "../../lib/constants";
 import { getJawnClient } from "../../lib/clients/jawn";
 import posthog from "posthog-js";

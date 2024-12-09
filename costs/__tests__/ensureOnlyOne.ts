@@ -1,13 +1,13 @@
 import { expect, test } from "@jest/globals";
 
 import { clickhousePriceCalc } from "../src";
-import { costs as openaiCosts } from "../src/providers/openai";
+import { openAIProvider } from "../src/providers/openai";
 import { playgroundModels } from "../src/providers/mappings";
 
 test("check that there are no two models that are the same", () => {
-  openaiCosts.forEach((cost) => {
+  openAIProvider.costs.forEach((cost) => {
     const model = cost.model.value;
-    const modelCount = openaiCosts.filter(
+    const modelCount = openAIProvider.costs.filter(
       (c) => c.model.value === model
     ).length;
     expect(modelCount).toBe(1);
@@ -767,6 +767,12 @@ WHEN (request_response_rmt.provider = 'QSTASH') THEN (
   CASE
   WHEN (request_response_rmt.model ILIKE '%llama%') THEN 300 * request_response_rmt.prompt_tokens + 300 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE '%mistral%') THEN 300 * request_response_rmt.prompt_tokens + 300 * request_response_rmt.completion_tokens
+  ELSE 0
+END
+)
+WHEN (request_response_rmt.provider = 'AWS') THEN (
+  CASE
+  WHEN (request_response_rmt.model ILIKE 'meta.llama3-8b-instruct-v1%3A0') THEN 220000 * request_response_rmt.prompt_tokens + 720000 * request_response_rmt.completion_tokens
   ELSE 0
 END
 )

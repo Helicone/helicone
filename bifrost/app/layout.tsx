@@ -73,7 +73,7 @@ export default async function RootLayout({
       </Head>
       <PHProvider>
         <body>
-          <div className={`bg-[#f8feff] flex flex-col ${inter.className}`}>
+          <div className={`bg-white flex flex-col ${inter.className}`}>
             <Layout stars={stars}>{children}</Layout>
           </div>
           <PostHogPageView />

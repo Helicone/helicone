@@ -1,4 +1,3 @@
-import { ThreatsOverTime } from "../../../pages/api/metrics/threatsOverTime";
 import { Result, resultMap } from "../../result";
 import { getXOverTime } from "./getXOverTime";
 import { DataOverTimeRequest } from "./timeDataHandlerWrapper";
@@ -15,4 +14,8 @@ export async function getThreatsOverTime(
       count: Number(d.threats),
     }))
   );
+}
+export interface ThreatsOverTime {
+  count: number;
+  time: Date;
 }

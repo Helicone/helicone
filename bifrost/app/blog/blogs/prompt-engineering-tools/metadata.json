@@ -6,5 +6,6 @@
   "images": "/static/blog/prompt-engineering-tools/cover.webp",
   "time": "4 minute read",
   "author": "Lina Lam",
-  "date": "September 12, 2024"
+  "date": "September 12, 2024", 
+  "badge": "guide"
 }

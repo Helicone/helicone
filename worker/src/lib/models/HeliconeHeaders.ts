@@ -249,6 +249,10 @@ export class HeliconeHeaders implements IHeliconeHeaders {
     return null;
   }
 
+  setModelOverride(modelOverride: string | null) {
+    this.modelOverride = modelOverride;
+  }
+
   private getHeliconeHeaders(): IHeliconeHeaders {
     const requestId = this.getValidUUID(
       this.headers.get("Helicone-Request-Id")
@@ -281,7 +285,10 @@ export class HeliconeHeaders implements IHeliconeHeaders {
       },
       nodeId: this.headers.get("Helicone-Node-Id") ?? null,
       fallBacks: this.getFallBacks(),
-      modelOverride: this.headers.get("Helicone-Model-Override") ?? null,
+      modelOverride:
+        this.modelOverride ??
+        this.headers.get("Helicone-Model-Override") ??
+        null,
       promptSecurityEnabled:
         this.headers.get("Helicone-LLM-Security-Enabled") ??
         this.headers.get("Helicone-Prompt-Security-Enabled") ??

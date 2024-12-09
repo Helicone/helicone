@@ -12,6 +12,7 @@ export interface BlogStructureMetaData {
   date?: string;
   author?: string;
   authors?: string[];
+  badge?: string;
 }
 
 export async function getMetadata(

@@ -10,7 +10,7 @@ import { AreaChart } from "@tremor/react";
 import { useState } from "react";
 import LoadingAnimation from "../../../../shared/loadingAnimation";
 import ProviderKeyList from "./providerKeyList";
-import { useOrg } from "../../../../layout/organizationContext";
+import { useOrg } from "../../../../layout/org/organizationContext";
 import { useRouter } from "next/router";
 import { DeleteOrgModal } from "../../../organization/deleteOrgModal";
 import EditCustomerOrgModal from "../editCustomerOrgModal";

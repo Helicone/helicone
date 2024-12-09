@@ -1,5 +1,6 @@
-import { UIFilterRow } from "../../../components/shared/themed/themedAdvancedFilters";
-import { isUIFilterRow, UIFilterRowTree } from "../filters/uiFilterRowTree";
+import { UIFilterRow } from "../filters/types";
+import { isUIFilterRow } from "../filters/uiFilterRowTree";
+import { UIFilterRowTree } from "../filters/types";
 
 export type FilterRow = {
   filterMapIdx: number;

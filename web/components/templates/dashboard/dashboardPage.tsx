@@ -26,15 +26,15 @@ import {
   filterUITreeToFilterNode,
   getRootFilterNode,
   isFilterRowNode,
-  UIFilterRowTree,
 } from "../../../services/lib/filters/uiFilterRowTree";
+import { UIFilterRowTree } from "@/services/lib/filters/types";
 import {
   OrganizationFilter,
   OrganizationLayout,
   transformFilter,
   transformOrganizationLayoutFilters,
 } from "../../../services/lib/organization_layout/organization_layout";
-import { useOrg } from "../../layout/organizationContext";
+import { useOrg } from "../../layout/org/organizationContext";
 import AuthHeader from "../../shared/authHeader";
 import { clsx } from "../../shared/clsx";
 import LoadingAnimation from "../../shared/loadingAnimation";
@@ -56,6 +56,7 @@ import StyledAreaChart from "./styledAreaChart";
 import SuggestionModal from "./suggestionsModal";
 import { useDashboardPage } from "./useDashboardPage";
 import OnboardingQuickStartModal from "./OnboardingQuickStartModal";
+import { TimeFilter } from "@/types/timeFilter";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -63,15 +64,6 @@ interface DashboardPageProps {
   user: User;
   currentFilter: OrganizationFilter | null;
   organizationLayout: OrganizationLayout | null;
-}
-
-export type TimeFilter = {
-  start: Date;
-  end: Date;
-};
-
-interface StatusCounts {
-  [key: string]: number;
 }
 
 function max(arr: number[]) {

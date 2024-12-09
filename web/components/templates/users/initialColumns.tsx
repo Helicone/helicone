@@ -1,5 +1,5 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { UserMetric } from "../../../lib/api/users/users";
+import { UserMetric } from "../../../lib/api/users/UserMetric";
 import { getUSDateFromString } from "../../shared/utils/utils";
 
 export function formatNumber(num: number, decimals: number = 4) {

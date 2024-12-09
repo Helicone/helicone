@@ -1,4 +1,4 @@
-import { useOrg } from "@/components/layout/organizationContext";
+import { useOrg } from "@/components/layout/org/organizationContext";
 import AuthHeader from "@/components/shared/authHeader";
 import { Col } from "@/components/layout/common";
 import { FreePlanCard } from "./freeBillingPage";

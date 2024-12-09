@@ -3,7 +3,7 @@ import { useJawnClient } from "@/lib/clients/jawnHook";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { Switch } from "@/components/ui/switch";
 import { MultiSelect, MultiSelectItem } from "@tremor/react";
-import { useOrg } from "@/components/layout/organizationContext";
+import { useOrg } from "@/components/layout/org/organizationContext";
 import {
   useGetOrgMembers,
   useGetOrgSlackChannels,

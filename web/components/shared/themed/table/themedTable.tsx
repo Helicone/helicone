@@ -13,10 +13,10 @@ import { Result } from "../../../../lib/result";
 import { TimeInterval } from "../../../../lib/timeCalculations/time";
 import { useLocalStorage } from "../../../../services/hooks/localStorage";
 import { SingleFilterDef } from "../../../../services/lib/filters/frontendFilterDefs";
-import { UIFilterRowTree } from "../../../../services/lib/filters/uiFilterRowTree";
+import { UIFilterRowTree } from "@/services/lib/filters/types";
 import { OrganizationFilter } from "../../../../services/lib/organization_layout/organization_layout";
 import { SortDirection } from "../../../../services/lib/sorts/requests/sorts";
-import { TimeFilter } from "../../../templates/dashboard/dashboardPage";
+import { TimeFilter } from "@/types/timeFilter";
 import { NormalizedRequest } from "../../../templates/requestsV2/builder/abstractRequestBuilder";
 import { clsx } from "../../clsx";
 import LoadingAnimation from "../../loadingAnimation";
@@ -40,6 +40,7 @@ import useOnboardingContext, {
 } from "@/components/layout/onboardingContext";
 import { OnboardingPopover } from "@/components/templates/onboarding/OnboardingPopover";
 import { useRouter, useSearchParams } from "next/navigation";
+import { RequestViews } from "./RequestViews";
 
 interface ThemedTableV5Props<T extends { id?: string }> {
   id: string;
@@ -98,8 +99,6 @@ interface ThemedTableV5Props<T extends { id?: string }> {
     placeholder: string;
   };
 }
-
-export type RequestViews = "table" | "card" | "row";
 
 export default function ThemedTable<T extends { id?: string }>(
   props: ThemedTableV5Props<T>

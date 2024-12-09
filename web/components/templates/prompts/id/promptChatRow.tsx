@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import {
   ArrowsPointingOutIcon,
   TrashIcon,
@@ -536,7 +537,7 @@ const PromptChatRow = (props: PromptChatRowProps) => {
             variant="helicone"
             className="bg-slate-100 hover:bg-slate-100 border-slate-100 dark:border-slate-800 dark:bg-slate-800 cursor-default"
           >
-            {role.slice(0, 1).toUpperCase() + role.slice(1)}
+            {(role ?? "")?.slice(0, 1).toUpperCase() + (role ?? "").slice(1)}
           </Badge>
           {isStatic && (
             <Badge className="border border-[#3C82F6] dark:border-[#3C82F6] text-[#3C82F6] dark:text-[#3C82F6] text-[10px] py-[3px] px-2 leading-tight hover:border-[#3C82F6] !bg-blue-50 dark:!bg-blue-950">
@@ -587,7 +588,7 @@ const PromptChatRow = (props: PromptChatRowProps) => {
               />
             ) : (
               <Badge variant="helicone" className="bg-slate-200">
-                {role.slice(0, 1).toUpperCase() + role.slice(1)}
+                {(role ?? "").slice(0, 1).toUpperCase() + (role ?? "").slice(1)}
               </Badge>
             )}
             <div className="flex justify-end items-center space-x-2 w-full">

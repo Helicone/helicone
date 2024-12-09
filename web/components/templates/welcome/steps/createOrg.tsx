@@ -3,7 +3,7 @@ import { PostgrestError } from "@supabase/supabase-js";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { getJawnClient } from "../../../../lib/clients/jawn";
-import { useOrg } from "../../../layout/organizationContext";
+import { useOrg } from "../../../layout/org/organizationContext";
 import useNotification from "../../../shared/notification/useNotification";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";

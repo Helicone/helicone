@@ -20,7 +20,6 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 
 import {
-  ProviderName,
   playgroundModels as PLAYGROUND_MODELS,
   playgroundModels,
 } from "../../../packages/cost/providers/mappings";
@@ -47,6 +46,7 @@ import { IslandContainer } from "@/components/ui/islandContainer";
 
 import { useTheme } from "next-themes";
 import { Slider } from "@/components/ui/slider";
+import { PlaygroundModel } from "./types";
 
 const PlaygroundPage = (props: PlaygroundPageProps) => {
   const { theme } = useTheme();
@@ -582,11 +582,6 @@ interface PlaygroundPageProps {
   showNewButton?: boolean;
   request?: string;
 }
-
-export type PlaygroundModel = {
-  name: string;
-  provider: ProviderName;
-};
 
 export type TFinetunedJob = {
   object: string;

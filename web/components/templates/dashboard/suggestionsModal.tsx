@@ -4,7 +4,7 @@ import ThemedModal from "../../shared/themed/themedModal";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { useEffect, useState } from "react";
 import { Database } from "../../../supabase/database.types";
-import { useOrg } from "../../layout/organizationContext";
+import { useOrg } from "../../layout/org/organizationContext";
 
 interface SuggestionModalProps {
   open: boolean;
