@@ -46,13 +46,13 @@ const ModelDropdown = ({
         {label}
       </Badge>
       <DropdownMenu>
-        <DropdownMenuTrigger className="flex-1 w-full">
+        <DropdownMenuTrigger asChild>
           <Button
             variant="outline"
             className="h-9 px-3 py-2 rounded-md border border-slate-300 justify-between items-center truncate w-full"
           >
             <span className="text-slate-700 text-base font-semibold font-['Inter'] leading-tight truncate">
-              {selectedModel}
+              {selectedModel || "Select a model"}
             </span>
             <ChevronDownIcon className="w-4 h-4" />
           </Button>
