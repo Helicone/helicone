@@ -321,7 +321,7 @@ const Experiment = () => {
                 Push <span className="text-brand">high-quality</span> prompt
                 changes to production
               </h2>
-              <p className="text-lg max-w-[520px]">
+              <p className="text-lg max-w-[520px] text-landing-description font-light leading-relaxed">
                 Tune your prompts and justify your iterations with quantifiable
                 data, not just “vibes”.
               </p>
