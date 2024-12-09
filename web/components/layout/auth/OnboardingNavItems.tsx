@@ -8,6 +8,7 @@ import useOnboardingContext, {
 } from "../onboardingContext";
 import { cn } from "@/lib/utils";
 import { CheckIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const steps = [
   {
@@ -56,6 +57,7 @@ const steps = [
 const OnboardingNavItems = () => {
   const [showEndOnboardingConfirmation, setShowEndOnboardingConfirmation] =
     useState(false);
+  const router = useRouter();
 
   return (
     <>
@@ -73,6 +75,10 @@ const OnboardingNavItems = () => {
         <EndOnboardingConfirmation
           open={showEndOnboardingConfirmation}
           setOpen={setShowEndOnboardingConfirmation}
+          onEnd={() => {
+            setShowEndOnboardingConfirmation(false);
+            router.push("/dashboard");
+          }}
         />,
         document.body
       )}

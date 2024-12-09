@@ -13,7 +13,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { OnboardingPopover } from "@/components/templates/onboarding/OnboardingPopover";
-import { useRouter, useSearchParams } from "next/navigation";
 
 export interface TreeNodeProps {
   node: TreeNodeData;
