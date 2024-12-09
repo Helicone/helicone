@@ -177,8 +177,8 @@ export const ONBOARDING_STEPS: Record<OnboardingStepLabel, OnboardingStep> = {
       stepNumber: 2,
       description: (
         <>
-          The <strong>"extract-travel-plan"</strong> step is where things went{" "}
-          wrong. Let&apos;s go improve this prompt.
+          The <strong>&quot;extract-travel-plan&quot;</strong> step is where
+          things went wrong. Let&apos;s go improve this prompt.
         </>
       ),
       additionalData: (
@@ -267,7 +267,7 @@ export const ONBOARDING_STEPS: Record<OnboardingStepLabel, OnboardingStep> = {
       description: (
         <>
           This is your <strong>“extract-travel-plan”</strong> production prompt.
-          Let's create a new version to test against it.
+          Let&apos;s create a new version to test against it.
         </>
       ),
     },

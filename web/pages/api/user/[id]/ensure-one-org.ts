@@ -21,16 +21,15 @@ export default async function handler(
     .eq("owner", userId);
 
   if (!orgs.data || orgs.data.length === 0) {
-    console.log("creating org for user", userId);
     const result = await supabaseServer
       .from("organization")
       .insert([
         {
-          name: "Xpedia AI",
+          name: "Demo Org",
           owner: userId,
           tier: "demo",
           is_personal: true,
-          has_onboarded: false,
+          has_onboarded: true,
           soft_delete: false,
         },
       ])
