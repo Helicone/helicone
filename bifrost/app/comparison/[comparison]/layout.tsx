@@ -1,17 +1,15 @@
-import { formatProviderName } from "@/app/llm-cost/CalculatorInfo";
+import { providers } from "@/packages/cost/providers/mappings";
 import { Metadata } from "next";
 
 export async function generateMetadata({
   params,
 }: {
-  params: {
-    modelA: string;
-    modelB: string;
-    providerA: string;
-    providerB: string;
-  };
+  params: { comparison: string };
 }): Promise<Metadata> {
-  const { modelA, modelB, providerA, providerB } = params;
+  const [modelAWithProvider, modelBWithProvider] =
+    params.comparison.split("-vs-");
+  const [modelA, providerA] = modelAWithProvider.split("-on-");
+  const [modelB, providerB] = modelBWithProvider.split("-on-");
   const decodedModelA = decodeURIComponent(modelA || "");
   const decodedModelB = decodeURIComponent(modelB || "");
   const decodedProviderA = decodeURIComponent(providerA || "");
@@ -61,14 +59,29 @@ export default function RootLayout({
   return <>{children}</>;
 }
 
+const getDisplayName = (model: string, provider: string): string => {
+  const providerInfo = providers.find(
+    (p) => p.provider.toUpperCase() === provider.toUpperCase()
+  );
+  const modelDetails = providerInfo?.modelDetails;
+
+  const details = modelDetails?.[model.toLowerCase()];
+
+  if (details) {
+    return details.searchTerms[0];
+  }
+
+  return model;
+};
+
 const getComparisonTitle = (
   modelA: string,
   modelB: string,
   providerA: string,
   providerB: string
 ) => {
-  const modelADisplay = `${providerA}'s ${modelA}`;
-  const modelBDisplay = `${providerB}'s ${modelB}`;
+  const modelADisplay = getDisplayName(modelA, providerA);
+  const modelBDisplay = getDisplayName(modelB, providerB);
   return `${modelADisplay} vs ${modelBDisplay} - Model Comparison & Performance Analysis - Helicone`;
 };
 
@@ -78,7 +91,7 @@ const getComparisonDescription = (
   providerA: string,
   providerB: string
 ) => {
-  const modelADisplay = `${providerA}'s ${modelA}`;
-  const modelBDisplay = `${providerB}'s ${modelB}`;
+  const modelADisplay = `${providerA}'s ${getDisplayName(modelA, providerA)}`;
+  const modelBDisplay = `${providerB}'s ${getDisplayName(modelB, providerB)}`;
   return `Compare ${modelADisplay} and ${modelBDisplay}. Detailed analysis of performance metrics, costs, capabilities, and real-world usage patterns. Make data-driven decisions about which AI model best fits your needs.`;
 };
