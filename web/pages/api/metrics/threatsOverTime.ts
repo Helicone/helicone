@@ -2,14 +2,12 @@ import {
   HandlerWrapperOptions,
   withAuth,
 } from "../../../lib/api/handlerWrappers";
-import { getThreatsOverTime } from "../../../lib/api/metrics/getThreatsOverTime";
+import {
+  getThreatsOverTime,
+  ThreatsOverTime,
+} from "../../../lib/api/metrics/getThreatsOverTime";
 import { Result } from "../../../lib/result";
 import { MetricsBackendBody } from "../../../services/hooks/useBackendFunction";
-
-export interface ThreatsOverTime {
-  count: number;
-  time: Date;
-}
 
 async function handler(
   options: HandlerWrapperOptions<Result<ThreatsOverTime[], string>>

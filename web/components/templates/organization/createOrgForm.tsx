@@ -4,7 +4,7 @@ import { useUser } from "@supabase/auth-helpers-react";
 import { useState } from "react";
 import { getJawnClient } from "../../../lib/clients/jawn";
 import { DEMO_EMAIL } from "../../../lib/constants";
-import { useOrg } from "../../layout/organizationContext";
+import { useOrg } from "../../layout/org/organizationContext";
 import { clsx } from "../../shared/clsx";
 import useNotification from "../../shared/notification/useNotification";
 import ProviderKeyList from "../enterprise/portal/id/providerKeyList";

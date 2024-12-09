@@ -5,7 +5,7 @@ import DeveloperPage from "../../components/templates/developer/developerPage";
 import WebhooksPage from "../../components/templates/webhooks/webhooksPage";
 import { useUser } from "@supabase/auth-helpers-react";
 import { useFeatureFlags } from "../../services/hooks/featureFlags";
-import { useOrg } from "../../components/layout/organizationContext";
+import { useOrg } from "../../components/layout/org/organizationContext";
 import { ContactUsSection } from "../developer/index";
 
 const DeveloperWebhooks: NextPageWithLayout = () => {

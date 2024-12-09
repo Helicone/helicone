@@ -10,19 +10,7 @@ import {
   SortLeafUsers,
 } from "../../../services/lib/sorts/users/sorts";
 import { clickhousePriceCalc } from "../../../packages/cost";
-
-export interface UserMetric {
-  id?: string;
-  user_id: string;
-  active_for: number;
-  first_active: Date;
-  last_active: Date;
-  total_requests: number;
-  average_requests_per_day_active: number;
-  average_tokens_per_request: number;
-  cost: number;
-  rate_limited_count: number;
-}
+import { UserMetric } from "./UserMetric";
 
 export async function userMetrics(
   org_id: string,

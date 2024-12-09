@@ -4,7 +4,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ChangelogItem } from "./auth/Sidebar";
+import { ChangelogItem } from "./auth/types";
 
 const ChangelogModal = ({
   open,

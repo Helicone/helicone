@@ -1,9 +1,7 @@
 import { dbQueryClickhouse } from "../db/dbExecute";
 import { Result, resultMap } from "../../result";
-import {
-  FilterNode,
-  timeFilterToFilterNode,
-} from "../../../services/lib/filters/filterDefs";
+import { FilterNode } from "../../../services/lib/filters/filterDefs";
+import { timeFilterToFilterNode } from "@/services/lib/filters/helpers/filterFunctions";
 import { buildFilterWithAuthClickHouse } from "../../../services/lib/filters/filters";
 
 export async function getTotalFeedback(

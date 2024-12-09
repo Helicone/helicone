@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { endOfMonth, formatISO } from "date-fns";
 import { useEffect } from "react";
 import { getTimeInterval } from "../../../../lib/timeCalculations/time";
-import { filterListToTree } from "../../../../services/lib/filters/filterDefs";
+import { filterListToTree } from "@/services/lib/filters/filterListToTree";
 import StyledAreaChart from "../../dashboard/styledAreaChart";
 import { AreaChart } from "@tremor/react";
 

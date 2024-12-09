@@ -1,11 +1,11 @@
-import { useOrg } from "@/components/layout/organizationContext";
+import { useOrg } from "@/components/layout/org/organizationContext";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { getTimeMap } from "@/lib/timeCalculations/constants";
 import { TimeIncrement } from "@/lib/timeCalculations/fetchTimeData";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
-import { TimeFilter } from "../../dashboardPage";
-import { ScoresPanelProps } from "./scoresPanel";
+import { TimeFilter } from "@/types/timeFilter";
+import { ScoresPanelProps } from "./ScoresPanelProps";
 
 export function useScores({
   timeFilter,

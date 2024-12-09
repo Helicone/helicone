@@ -1,7 +1,6 @@
 import React from "react";
 import { Row } from "../../layout/common";
 import MarkdownEditor from "../../shared/markdownEditor";
-import { DatasetRow } from "./datasetsIdPage";
 import { ArrowUpRightIcon } from "@heroicons/react/24/outline";
 import {
   Tooltip,
@@ -10,6 +9,11 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { useGetHeliconeDatasetRows } from "@/services/hooks/dataset/heliconeDataset";
+
+type DatasetRow =
+  | ReturnType<typeof useGetHeliconeDatasetRows>["rows"][number]
+  | null;
 
 interface EditDatasetProps {
   selectedRow: DatasetRow;

@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { useOrg } from "../../components/layout/organizationContext";
+import { useOrg } from "../../components/layout/org/organizationContext";
 import { getJawnClient } from "../../lib/clients/jawn";
-import { UIFilterRowTree } from "../lib/filters/uiFilterRowTree";
+import { UIFilterRowTree } from "../lib/filters/types";
 
 const useSessions = (
   timeFilter: {

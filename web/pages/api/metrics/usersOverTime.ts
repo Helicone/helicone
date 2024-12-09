@@ -2,14 +2,12 @@ import {
   HandlerWrapperOptions,
   withAuth,
 } from "../../../lib/api/handlerWrappers";
-import { getUsersOverTime } from "../../../lib/api/metrics/getUsersOverTime";
+import {
+  getUsersOverTime,
+  UsersOverTime,
+} from "../../../lib/api/metrics/getUsersOverTime";
 import { Result } from "../../../lib/result";
 import { MetricsBackendBody } from "../../../services/hooks/useBackendFunction";
-
-export interface UsersOverTime {
-  count: number;
-  time: Date;
-}
 
 async function handler(
   options: HandlerWrapperOptions<Result<UsersOverTime[], string>>

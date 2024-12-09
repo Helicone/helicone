@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { useOrg } from "@/components/layout/organizationContext";
+import { useOrg } from "@/components/layout/org/organizationContext";
 
 import { getJawnClient } from "@/lib/clients/jawn";
 import useNotification from "@/components/shared/notification/useNotification";

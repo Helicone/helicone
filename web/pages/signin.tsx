@@ -10,11 +10,6 @@ import PublicMetaData from "../components/layout/public/publicMetaData";
 import { useEffect } from "react";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
 
-export type CustomerPortalContent = {
-  domain: string;
-  logo: string;
-};
-
 const SignIn = ({
   customerPortal,
 }: {

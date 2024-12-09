@@ -1,4 +1,4 @@
-import { useOrg } from "@/components/layout/organizationContext";
+import { useOrg } from "@/components/layout/org/organizationContext";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { useJawnClient } from "@/lib/clients/jawnHook";
@@ -96,7 +96,13 @@ const ReportsPage = () => {
       );
       setReportEnabled(report?.active ?? false);
     }
-  }, [isLoadingReport, isRefetchingReport]);
+  }, [
+    isLoadingReport,
+    isRefetchingReport,
+    report?.active,
+    report?.settings?.emails,
+    report?.settings?.slack_channels,
+  ]);
 
   // useEffect(() => {
   //   setShowEmails(

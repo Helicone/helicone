@@ -14,13 +14,13 @@ import ThemedTimeFilter from "../themedTimeFilter";
 import ExportButton from "./exportButton";
 import ViewColumns from "./columns/viewColumns";
 import useSearchParams from "../../utils/useSearchParams";
-import { TimeFilter } from "../../../templates/dashboard/dashboardPage";
+import { TimeFilter } from "@/types/timeFilter";
 import ViewButton from "./viewButton";
-import { RequestViews } from "./themedTable";
+import { RequestViews } from "./RequestViews";
 import { OrganizationFilter } from "../../../../services/lib/organization_layout/organization_layout";
 import FiltersButton from "./filtersButton";
 import { DragColumnItem } from "./columns/DragList";
-import { UIFilterRowTree } from "../../../../services/lib/filters/uiFilterRowTree";
+import { UIFilterRowTree } from "@/services/lib/filters/types";
 import { Button } from "@/components/ui/button";
 import {
   Popover,

@@ -1,5 +1,5 @@
 import { Row } from "@/components/layout/common";
-import { useOrg } from "@/components/layout/organizationContext";
+import { useOrg } from "@/components/layout/org/organizationContext";
 import { Button } from "@/components/ui/button";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { useQuery } from "@tanstack/react-query";

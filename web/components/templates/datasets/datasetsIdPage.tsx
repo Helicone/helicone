@@ -23,7 +23,7 @@ import { useSelectMode } from "../../../services/hooks/dataset/selectMode";
 import { useRouter } from "next/router";
 import TableFooter from "../requestsV2/tableFooter";
 import { clsx } from "../../shared/clsx";
-import { useOrg } from "../../layout/organizationContext";
+import { useOrg } from "../../layout/org/organizationContext";
 import ExportButton from "../../shared/themed/table/exportButton";
 import NewDataset from "./NewDataset";
 import ThemedModal from "../../shared/themed/themedModal";
@@ -40,7 +40,7 @@ interface DatasetIdPageProps {
   pageSize: number;
 }
 
-export type DatasetRow =
+type DatasetRow =
   | ReturnType<typeof useGetHeliconeDatasetRows>["rows"][number]
   | null;
 const DatasetIdPage = (props: DatasetIdPageProps) => {

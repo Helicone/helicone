@@ -1,4 +1,3 @@
-import { RateLimitOverTime } from "../../../pages/api/metrics/rateLimitsOverTime";
 import { Result, resultMap } from "../../result";
 import { getXOverTimeRateLimit } from "./getXOverTime";
 import { DataOverTimeRequest } from "./timeDataHandlerWrapper";
@@ -19,4 +18,8 @@ export async function getRateLimitOverTime(
       status: Number(d.status),
     }))
   );
+}
+export interface RateLimitOverTime {
+  count: number;
+  time: Date;
 }
