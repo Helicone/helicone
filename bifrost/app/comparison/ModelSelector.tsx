@@ -60,7 +60,11 @@ const ModelDropdown = ({
         <DropdownMenuContent
           side="bottom"
           align="start"
-          style={{ width: "var(--radix-dropdown-menu-trigger-width)" }}
+          className="overflow-y-auto"
+          style={{
+            width: "var(--radix-dropdown-menu-trigger-width)",
+            maxHeight: "var(--radix-dropdown-menu-content-available-height)",
+          }}
         >
           {Object.entries(parentModelNames).map(([provider, models]) => (
             <div key={provider}>
