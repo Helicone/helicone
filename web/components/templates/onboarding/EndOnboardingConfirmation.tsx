@@ -1,4 +1,3 @@
-import useOnboardingContext from "@/components/layout/onboardingContext";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -7,43 +6,32 @@ import {
   DialogHeader,
   DialogDescription,
   DialogFooter,
-  DialogOverlay,
 } from "@/components/ui/dialog";
-import { useRouter } from "next/navigation";
 
 const EndOnboardingConfirmation = ({
   open,
   setOpen,
+  onEnd,
 }: {
   open: boolean;
   setOpen: (open: boolean) => void;
+  onEnd: () => void;
 }) => {
-  const { endOnboarding } = useOnboardingContext();
-  const router = useRouter();
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogOverlay className="z-[10001]" />
       <DialogContent className="z-[10002]">
         <DialogHeader>
-          <DialogTitle>End tour?</DialogTitle>
+          <DialogTitle>🏁 Ready to integrate with Helicone?</DialogTitle>
         </DialogHeader>
         <DialogDescription>
-          The rest of the tour will show you how Helicone can help you debug and
-          monitor your LLM application. Would you like to end the tour here?
+          Don&apos;t worry, you can access this organization anytime from the
+          sidebar.
         </DialogDescription>
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)}>
             Nevermind
           </Button>
-          <Button
-            onClick={() => {
-              endOnboarding();
-              setOpen(false);
-              router.push("/dashboard");
-            }}
-          >
-            Yes, end the tour
-          </Button>
+          <Button onClick={onEnd}>Ready</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

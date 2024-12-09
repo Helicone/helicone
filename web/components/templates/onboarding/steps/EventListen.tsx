@@ -16,8 +16,10 @@ const Lottie = dynamic(() => import("react-lottie"), { ssr: false });
 
 const EventListen = ({
   setCurrentStep,
+  close,
 }: {
   setCurrentStep: (step: number) => void;
+  close: () => void;
 }) => {
   const [loading, setLoading] = useState(false);
   const { data, isSuccess } = useQuery<Result<boolean, string>, Error>(
@@ -57,7 +59,7 @@ const EventListen = ({
     });
 
     org?.refreshCurrentOrg();
-    setCurrentStep(2);
+    close();
   };
 
   const org = useOrg();
@@ -141,6 +143,11 @@ const EventListen = ({
         </div>
       )}
       <DialogFooter className="mt-10">
+        {!(data && data.data) && (
+          <Button variant={"ghost"} onClick={() => skipOnboarding()}>
+            Skip
+          </Button>
+        )}
         <Button variant={"outline"} onClick={() => setCurrentStep(2)}>
           Go Back
         </Button>

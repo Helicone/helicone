@@ -153,7 +153,9 @@ export default function OrgMoreDropdown({
           </DropdownMenuGroup>
         </>
       )}
-      <DropdownMenuSeparator />
+      {ownedOrgs.length + memberOrgs.length + customerOrgs.length > 1 && (
+        <DropdownMenuSeparator />
+      )}
       <DropdownMenuItem
         className="text-xs"
         onClick={() => createNewOrgHandler()}

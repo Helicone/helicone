@@ -19,6 +19,9 @@ import { useTheme } from "next-themes";
 import OnboardingNavItems from "./OnboardingNavItems";
 import useOnboardingContext from "../onboardingContext";
 import EndOnboardingConfirmation from "@/components/templates/onboarding/EndOnboardingConfirmation";
+import { Dialog } from "@/components/ui/dialog";
+import { DialogContent } from "@/components/ui/dialog";
+import CreateOrgForm from "@/components/templates/organization/createOrgForm";
 
 export interface NavigationItem {
   name: string;
@@ -180,6 +183,7 @@ const DesktopSidebar = ({
   const { isOnboardingVisible } = useOnboardingContext();
   const [showEndOnboardingConfirmation, setShowEndOnboardingConfirmation] =
     useState(false);
+  const [showCreateOrg, setShowCreateOrg] = useState(false);
 
   return (
     <>
@@ -309,38 +313,41 @@ const DesktopSidebar = ({
                   </nav>
                 </div>
               </div>
-              {isOnboardingVisible && (
-                <Button
-                  className="mx-2 text-[13px] font-medium"
-                  variant="outline"
-                  onClick={() => {
-                    setShowEndOnboardingConfirmation(true);
-                  }}
-                >
-                  Ready to integrate
-                </Button>
-              )}
+              {org?.currentOrg?.tier === "demo" &&
+                org?.allOrgs?.length === 1 && (
+                  <Button
+                    className="mx-2 text-[13px] font-medium"
+                    variant="outline"
+                    onClick={() => {
+                      setShowEndOnboardingConfirmation(true);
+                    }}
+                  >
+                    Ready to integrate
+                  </Button>
+                )}
 
               {/* InfoBox */}
-              {canShowInfoBox && !isCollapsed && !isOnboardingVisible && (
-                <div className="bg-slate-50 dark:bg-slate-900 rounded border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 flex flex-col md:flex-row md:gap-2 gap-4 justify-between md:justify-center md:items-center items-start px-3 py-2  mt-2 mx-2 mb-8 font-medium">
-                  <h1 className="text-xs text-start tracking-tight leading-[1.35rem]">
-                    ⚡ Introducing a new way to perfect your prompts.{" "}
-                    <Link
-                      href="https://helicone.ai/experiments"
-                      target="_blank"
-                      className="underline decoration-slate-400 decoration-1 underline-offset-2 font-medium"
-                    >
-                      Get early access here.
-                    </Link>{" "}
-                  </h1>
-                </div>
-              )}
+              {canShowInfoBox &&
+                !isCollapsed &&
+                org?.currentOrg?.tier !== "demo" && (
+                  <div className="bg-slate-50 dark:bg-slate-900 rounded border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 flex flex-col md:flex-row md:gap-2 gap-4 justify-between md:justify-center md:items-center items-start px-3 py-2  mt-2 mx-2 mb-8 font-medium">
+                    <h1 className="text-xs text-start tracking-tight leading-[1.35rem]">
+                      ⚡ Introducing a new way to perfect your prompts.{" "}
+                      <Link
+                        href="https://helicone.ai/experiments"
+                        target="_blank"
+                        className="underline decoration-slate-400 decoration-1 underline-offset-2 font-medium"
+                      >
+                        Access experiments now!
+                      </Link>{" "}
+                    </h1>
+                  </div>
+                )}
             </div>
           </div>
 
           {/* Sticky help dropdown */}
-          {!isOnboardingVisible && (
+          {org?.currentOrg?.tier !== "demo" && (
             <div className="absolute bottom-3 left-3 z-10">
               <SidebarHelpDropdown
                 changelog={changelog}
@@ -358,7 +365,28 @@ const DesktopSidebar = ({
       <EndOnboardingConfirmation
         open={showEndOnboardingConfirmation}
         setOpen={setShowEndOnboardingConfirmation}
+        onEnd={() => {
+          setShowEndOnboardingConfirmation(false);
+          setShowCreateOrg(true);
+        }}
       />
+      <Dialog open={showCreateOrg} onOpenChange={setShowCreateOrg}>
+        <DialogContent className="w-11/12 sm:max-w-md gap-8 rounded-md">
+          <CreateOrgForm
+            firstOrg={true}
+            onCancelHandler={() => {
+              setShowCreateOrg(false);
+            }}
+            onCloseHandler={() => {
+              setShowCreateOrg(false);
+            }}
+            onSuccess={(orgId) => {
+              org?.setCurrentOrg(orgId ?? "");
+              router.push("/dashboard");
+            }}
+          />
+        </DialogContent>
+      </Dialog>
     </>
   );
 };

@@ -130,7 +130,9 @@ const OnboardingQuickStartModal = ({
             setCurrentStep={setCurrentStep}
           />
         )}
-        {currentStep === 3 && <EventListen setCurrentStep={setCurrentStep} />}
+        {currentStep === 3 && (
+          <EventListen setCurrentStep={setCurrentStep} close={close} />
+        )}
       </DialogContent>
     </Dialog>
   );

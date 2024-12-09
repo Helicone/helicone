@@ -15,10 +15,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { useTranslation } from "react-i18next";
-import useOnboardingContext from "@/components/layout/onboardingContext";
 import { Loader2 } from "lucide-react";
 
 interface CreateOrgFormProps {
@@ -80,10 +77,6 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
       : ORGANIZATION_ICONS[0]
   );
 
-  const [referralType, setReferralType] = useState(
-    initialValues?.referral || "friend_referral"
-  );
-
   const user = useUser();
   const orgContext = useOrg();
   const { setNotification } = useNotification();
@@ -95,19 +88,8 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
 
   const [isProviderOpen, setIsProviderOpen] = useState(false);
 
-  const { t } = useTranslation();
-  const referralOptions = [
-    { value: "friend_referral", label: t("Friend (referral)") },
-    { value: "google", label: t("Google") },
-    { value: "twitter", label: t("Twitter") },
-    { value: "linkedin", label: t("LinkedIn") },
-    { value: "microsoft_startups", label: t("Microsoft for Startups") },
-    { value: "product_hunt", label: t("Product Hunt") },
-    { value: "other", label: t("Other") },
-  ];
-
-  const { isOnboardingComplete } = useOnboardingContext();
   const [loading, setLoading] = useState(false);
+
   return (
     <>
       <div className="relative">
@@ -116,55 +98,12 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
         ) : (
           <>
             <DialogHeader className="space-y-2">
-              <DialogTitle>
-                {firstOrg
-                  ? "Get Started with Helicone"
-                  : "Create New Organization"}
-              </DialogTitle>
+              <DialogTitle>What&apos;s your organization name?</DialogTitle>
             </DialogHeader>
           </>
         )}
-        {/* {!(firstOrg && isOnboardingComplete) && (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute right-0 top-0"
-            onClick={() => {
-              if (onCancelHandler) {
-                onCancelHandler(false);
-              } else {
-                // reset to the initial values
-                setOrgName(initialValues?.name || "");
-                setSelectedColor(
-                  initialValues?.color
-                    ? ORGANIZATION_COLORS.find(
-                        (c) => c.name === initialValues.color
-                      ) || ORGANIZATION_COLORS[0]
-                    : ORGANIZATION_COLORS[0]
-                );
-                setSelectedIcon(
-                  initialValues?.icon
-                    ? ORGANIZATION_ICONS.find(
-                        (i) => i.name === initialValues.icon
-                      ) || ORGANIZATION_ICONS[0]
-                    : ORGANIZATION_ICONS[0]
-                );
-              }
-            }}
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        )} */}
         <div className="flex flex-col w-full space-y-6 mt-8">
           <div className="space-y-1.5 text-sm">
-            <Label htmlFor="org-name">
-              {
-                {
-                  organization: "Organization Name",
-                  reseller: "Customer Name",
-                }[variant]
-              }
-            </Label>
             <Input
               type="text"
               name="org-name"
@@ -322,16 +261,6 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
             </>
           )}
           <DialogFooter>
-            {firstOrg && (
-              <Button
-                variant="outline"
-                onClick={() => {
-                  onCancelHandler?.(false);
-                }}
-              >
-                Go Back
-              </Button>
-            )}
             <Button
               disabled={loading}
               className="w-full"
@@ -400,16 +329,13 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
                         owner: user?.id!,
                         color: selectedColor.name,
                         icon: selectedIcon.name,
-                        has_onboarded: !firstOrg,
+                        has_onboarded: false,
                         tier: "free",
                         ...(variant === "reseller" && {
                           org_provider_key: providerKey,
                           limits: limits || undefined,
                           reseller_id: orgContext?.currentOrg?.id!,
                           organization_type: "customer",
-                        }),
-                        ...(firstOrg && {
-                          referral: referralType,
                         }),
                       },
                     }

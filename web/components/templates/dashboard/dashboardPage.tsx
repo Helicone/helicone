@@ -56,6 +56,7 @@ import StyledAreaChart from "./styledAreaChart";
 import SuggestionModal from "./suggestionsModal";
 import { useDashboardPage } from "./useDashboardPage";
 import OnboardingQuickStartModal from "./OnboardingQuickStartModal";
+import DemoDisclaimerModal from "./DemoDisclaimerModal";
 import { TimeFilter } from "@/types/timeFilter";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
@@ -468,6 +469,11 @@ const DashboardPage = (props: DashboardPageProps) => {
       onSetAdvancedFiltersHandler({ operator: "and", rows: [] }, null);
     }
   };
+
+  const [showDemoDisclaimerModal, setShowDemoDisclaimerModal] = useLocalStorage(
+    "showDemoDisclaimerModal-DashboardPage",
+    true
+  );
 
   return (
     <>
@@ -983,6 +989,16 @@ const DashboardPage = (props: DashboardPageProps) => {
         />
 
         <UpgradeProModal open={open} setOpen={setOpen} />
+
+        {showDemoDisclaimerModal && orgContext?.currentOrg?.tier === "demo" && (
+          <DemoDisclaimerModal
+            open={showDemoDisclaimerModal}
+            setOpen={setShowDemoDisclaimerModal}
+            onSuccess={() => {
+              setShowDemoDisclaimerModal(false);
+            }}
+          />
+        )}
 
         {orgContext?.currentOrg?.tier !== "demo" && (
           <OnboardingQuickStartModal
