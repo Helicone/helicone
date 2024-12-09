@@ -116,10 +116,9 @@ export const PrettyInput = ({
 
 export const RenderWithPrettyInputKeys = (props: {
   text: string;
-  ref: React.RefObject<HTMLDivElement>;
   selectedProperties: Record<string, string> | undefined;
 }) => {
-  const { text, selectedProperties, ref } = props;
+  const { text, selectedProperties } = props;
 
   // Function to replace matched patterns with JSX components
   const replaceInputKeysWithComponents = (inputText: string) => {
@@ -164,10 +163,7 @@ export const RenderWithPrettyInputKeys = (props: {
   };
 
   return (
-    <div
-      ref={ref}
-      className="text-md leading-8 text-black dark:text-white whitespace-pre-wrap"
-    >
+    <div className="text-md leading-8 text-black dark:text-white whitespace-pre-wrap">
       {replaceInputKeysWithComponents(text)}
     </div>
   );
