@@ -162,11 +162,11 @@ export function ThemedTimeFilterShadCN({
             size="md_sleek"
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
-            {/* {date?.from && date?.to ? (
+            {date?.from && date?.to ? (
               formatDateDisplay(date.from, date.to)
             ) : (
               <span>Pick a date and time</span>
-            )} */}
+            )}
           </Button>
         </PopoverTrigger>
         <PopoverContent
