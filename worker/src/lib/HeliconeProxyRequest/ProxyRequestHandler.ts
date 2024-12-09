@@ -61,6 +61,7 @@ export async function handleProxyRequest(
 
   const requestStartTime = new Date();
   const callProps = callPropsFromProxyRequest(proxyRequest);
+
   const response = await getProviderResponse(
     callProps,
     retryOptions,
@@ -110,7 +111,7 @@ export async function handleProxyRequest(
     }
   }
 
-  return {
+  const result = {
     data: {
       loggable: new DBLoggable({
         request: dbLoggableRequestFromProxyRequest(
@@ -161,6 +162,7 @@ export async function handleProxyRequest(
     },
     error: null,
   };
+  return result;
 }
 
 export async function handleThreatProxyRequest(

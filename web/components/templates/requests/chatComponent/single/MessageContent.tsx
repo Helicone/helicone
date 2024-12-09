@@ -1,10 +1,10 @@
-import React, { useLayoutEffect, useRef, useState } from "react";
+import React, { useMemo, useRef } from "react";
+import { PROMPT_MODES } from "../chatTopBar";
 import { Message } from "../types";
 import { AutoInputMessage } from "./AutoInputMessage";
 import { ExpandableMessage } from "./ExpandableMessage";
 import { FunctionCall, FunctionMessage, ImageRow } from "./renderingUtils";
 import { getContentType, getFormattedMessageContent } from "./utils";
-import { PROMPT_MODES } from "../chatTopBar";
 
 interface MessageContentProps {
   message: Message;
@@ -26,24 +26,11 @@ export const MessageContent: React.FC<MessageContentProps> = ({
   autoInputs,
   mode,
 }) => {
-  const [showButton, setShowButton] = useState(true);
   const textContainerRef = useRef<HTMLDivElement>(null);
-
-  useLayoutEffect(() => {
-    const calculateContentHeight = () => {
-      const current = textContainerRef.current;
-      if (current) {
-        const lineHeight = 1.5 * 16;
-        const maxContentHeight = lineHeight * 7;
-        setShowButton(current.scrollHeight > maxContentHeight);
-      }
-    };
-
-    const interval = setInterval(calculateContentHeight, 10);
-    return () => clearInterval(interval);
-  }, []);
-
-  const formattedMessageContent = getFormattedMessageContent(message);
+  const formattedMessageContent = useMemo(
+    () => getFormattedMessageContent(message),
+    [message]
+  );
 
   const contentType = getContentType(message);
 
@@ -73,7 +60,6 @@ export const MessageContent: React.FC<MessageContentProps> = ({
           formattedMessageContent={formattedMessageContent}
           textContainerRef={textContainerRef}
           expandedProps={expandedProps}
-          showButton={showButton}
           selectedProperties={selectedProperties}
           mode={mode}
         />

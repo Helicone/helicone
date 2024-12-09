@@ -360,6 +360,42 @@ export type Database = {
           },
         ]
       }
+      evaluator_experiments_v3: {
+        Row: {
+          created_at: string
+          evaluator: string
+          experiment: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          evaluator: string
+          experiment: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          evaluator?: string
+          experiment?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "public_evaluator_experiments_v3_evaluator_fkey"
+            columns: ["evaluator"]
+            isOneToOne: false
+            referencedRelation: "evaluator"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "public_evaluator_experiments_v3_experiment_fkey"
+            columns: ["experiment"]
+            isOneToOne: false
+            referencedRelation: "experiment_v3"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       experiment_cell: {
         Row: {
           column_id: string
@@ -714,7 +750,7 @@ export type Database = {
           id: string
           input_keys: string[] | null
           name: string
-          organization: string | null
+          organization: string
           original_prompt_version: string
         }
         Insert: {
@@ -723,7 +759,7 @@ export type Database = {
           id?: string
           input_keys?: string[] | null
           name: string
-          organization?: string | null
+          organization: string
           original_prompt_version: string
         }
         Update: {
@@ -732,7 +768,7 @@ export type Database = {
           id?: string
           input_keys?: string[] | null
           name?: string
-          organization?: string | null
+          organization?: string
           original_prompt_version?: string
         }
         Relationships: [

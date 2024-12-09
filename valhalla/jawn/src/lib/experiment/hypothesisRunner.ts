@@ -47,6 +47,7 @@ async function runWithRetry(
       requestId,
       response.status
     );
+    return err("Request failed");
   }
 
   const maxWaitTime = 10 * 60 * 1000; // 10 minutes in milliseconds

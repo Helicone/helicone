@@ -4,7 +4,8 @@ import { PreparedRequest, PreparedRequestArgs } from "./PreparedRequest";
 function prepareRequestOpenAI(
   requestPath: string,
   proxyKey: string,
-  requestId: string
+  requestId: string,
+  experimentId?: string
 ): {
   url: URL;
   headers: { [key: string]: string };
@@ -17,6 +18,9 @@ function prepareRequestOpenAI(
     "Accept-Encoding": "",
     "Helicone-Manual-Access-Key": process.env.HELICONE_MANUAL_ACCESS_KEY ?? "",
   };
+  if (experimentId) {
+    headers["Helicone-Experiment-Id"] = experimentId;
+  }
   let fetchUrl = requestPath;
   return {
     url: new URL(fetchUrl),
@@ -31,6 +35,7 @@ export function prepareRequestOpenAIFull({
   autoInputs,
   requestPath,
   requestId,
+  experimentId,
 }: PreparedRequestArgs): PreparedRequest {
   const newRequestBody = autoFillInputs({
     template: template ?? {},
@@ -41,7 +46,8 @@ export function prepareRequestOpenAIFull({
   const { url: fetchUrl, headers } = prepareRequestOpenAI(
     requestPath ?? `${process.env.HELICONE_WORKER_URL}/v1/chat/completions`,
     proxyKey,
-    requestId
+    requestId,
+    experimentId
   );
   return {
     url: fetchUrl,

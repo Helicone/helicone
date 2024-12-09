@@ -1,5 +1,17 @@
 import { useOrg } from "@/components/layout/organizationContext";
 
+import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
+import LoadingAnimation from "@/components/shared/loadingAnimation";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useLocalStorage } from "@/services/hooks/localStorage";
+import { useURLParams } from "@/services/hooks/localURLParams";
+import { SESSIONS_TABLE_FILTERS } from "@/services/lib/filters/frontendFilterDefs";
+import {
+  filterUITreeToFilterNode,
+  getRootFilterNode,
+  UIFilterRowTree,
+} from "@/services/lib/filters/uiFilterRowTree";
+import { ChartPieIcon, ListBulletIcon } from "@heroicons/react/24/outline";
 import { useCallback, useMemo, useState } from "react";
 import { getTimeIntervalAgo } from "../../../lib/timeCalculations/time";
 import { useDebounce } from "../../../services/hooks/debounce";
@@ -9,19 +21,6 @@ import { Row } from "../../layout/common/row";
 import AuthHeader from "../../shared/authHeader";
 import SessionNameSelection from "./nameSelection";
 import SessionDetails from "./sessionDetails";
-import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
-import { InfoBox } from "@/components/ui/helicone/infoBox";
-import Link from "next/link";
-import LoadingAnimation from "@/components/shared/loadingAnimation";
-import { Tabs, TabsTrigger, TabsList } from "@/components/ui/tabs";
-import { useLocalStorage } from "@/services/hooks/localStorage";
-import { ChartPieIcon, ListBulletIcon } from "@heroicons/react/24/outline";
-import { SESSIONS_TABLE_FILTERS } from "@/services/lib/filters/frontendFilterDefs";
-import {
-  filterUITreeToFilterNode,
-  getRootFilterNode,
-  UIFilterRowTree,
-} from "@/services/lib/filters/uiFilterRowTree";
 
 interface SessionsPageProps {
   currentPage: number;
@@ -58,9 +57,9 @@ const SessionsPage = (props: SessionsPageProps) => {
     end: new Date(),
   });
 
-  const [sessionIdSearch, setSessionIdSearch] = useState<string | undefined>(
-    undefined
-  );
+  const [sessionIdSearch, setSessionIdSearch] = useURLParams<
+    string | undefined
+  >("session-search", undefined);
   const [sessionNameSearch, setSessionNameSearch] = useState<
     string | undefined
   >(undefined);
@@ -138,17 +137,7 @@ const SessionsPage = (props: SessionsPageProps) => {
           </TabsList>
         }
       />
-      {org?.currentOrg?.tier === "free" && (
-        <InfoBox title="Sessions is a Pro feature">
-          <p>
-            Sessions is a Pro feature. In order to keep using it, you need to
-            upgrade your plan before September 27th, 2024.{" "}
-            <Link href="/settings/billing" className="text-blue-500 underline">
-              Upgrade to Pro
-            </Link>
-          </p>
-        </InfoBox>
-      )}
+
       <div>
         {allNames.isLoading ? (
           <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">

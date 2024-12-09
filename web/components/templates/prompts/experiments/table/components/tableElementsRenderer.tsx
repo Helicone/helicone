@@ -1,8 +1,8 @@
-import { PlayIcon, SparklesIcon } from "@heroicons/react/24/outline";
+import { PlayIcon, SparklesIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { Button } from "../../../../../ui/button";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import PromptPlayground from "../../../id/promptPlayground";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useJawnClient } from "../../../../../../lib/clients/jawnHook";
 import React from "react";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +10,9 @@ import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { FlaskConicalIcon, GitForkIcon, LightbulbIcon } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ArrayDiffViewer from "../../../id/arrayDiffViewer";
+import { useExperimentTable } from "../hooks/useExperimentTable";
+import { useExperimentScores } from "@/services/hooks/prompts/experiment-scores";
+import { cn } from "@/lib/utils";
 
 export interface InputEntry {
   key: string;
@@ -17,12 +20,14 @@ export interface InputEntry {
 }
 
 interface ExperimentHeaderProps {
+  experimentId: string;
   isOriginal: boolean;
   onRunColumn?: () => Promise<void>;
   originalPromptTemplate?: any;
   promptVersionId?: string;
   originalPromptVersionId?: string;
   onForkPromptVersion?: (promptVersionId: string) => void;
+  showScores?: boolean;
 }
 
 const icon = (model: string) => {
@@ -50,6 +55,7 @@ const ExperimentTableHeader = (props: ExperimentHeaderProps) => {
     originalPromptTemplate,
     isOriginal,
     onForkPromptVersion,
+    experimentId,
   } = props;
 
   const [showViewPrompt, setShowViewPrompt] = useState(false);
@@ -92,6 +98,27 @@ const ExperimentTableHeader = (props: ExperimentHeaderProps) => {
       refetchOnReconnect: false,
     }
   );
+  const queryClient = useQueryClient();
+
+  const promptVersionIdScore = useQuery<{
+    data: Record<string, { value: any; max: number; min: number }>;
+  }>({
+    queryKey: ["experimentScores", experimentId, promptVersionId],
+    queryFn: () => {
+      const scores = queryClient.getQueryData<Record<string, any>>([
+        "experimentScores",
+        experimentId,
+      ]);
+      return scores?.[promptVersionId ?? ""] ?? { data: {} };
+    },
+  });
+
+  const { selectedScoreKey } = useExperimentTable(experimentId);
+  const { getScoreColorMapping } = useExperimentScores(experimentId);
+  const scoreColorMapping = useMemo(() => {
+    const scores = Object.keys(promptVersionIdScore.data?.data ?? {});
+    return getScoreColorMapping(scores);
+  }, [promptVersionIdScore.data?.data]);
 
   return (
     <Dialog open={showViewPrompt} onOpenChange={setShowViewPrompt}>
@@ -100,11 +127,103 @@ const ExperimentTableHeader = (props: ExperimentHeaderProps) => {
           className="flex flex-col gap-2 h-full overflow-y-auto p-3 cursor-pointer"
           onClick={() => setShowViewPrompt(true)}
         >
-          <div className="flex gap-2 items-center ml-0.5">
-            {icon(promptTemplate?.model ?? "")}
-            <span className="text-xs font-medium text-slate-700 dark:text-slate-300">
-              {promptTemplate?.model}
-            </span>
+          <div
+            className={cn(
+              "flex flex-col",
+              Object.keys(promptVersionIdScore.data?.data ?? {}).length
+                ? "gap-4"
+                : "gap-0"
+            )}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {promptVersionIdScore.data && (
+              <div className="flex gap-2 flex-wrap">
+                {selectedScoreKey ? (
+                  <div
+                    className="w-full flex flex-col gap-1 py-1.5 px-2 rounded-md bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div className="flex justify-between items-center">
+                      <p className="text-[11px] font-medium text-slate-700 dark:text-slate-300 leading-tight">
+                        {(selectedScoreKey ?? "")
+                          .toString()
+                          .replace("-hcone-bool", "") ?? ""}
+                      </p>
+                      <XMarkIcon
+                        className="w-2.5 h-2.5 text-slate-500 dark:text-slate-400"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          queryClient.setQueryData(
+                            ["selectedScoreKey", experimentId],
+                            null
+                          );
+                        }}
+                      />
+                    </div>
+                    <div className="flex gap-3 items-center text-slate-500 text-[11px] leading-tight">
+                      <p>
+                        avg:{" "}
+                        {
+                          promptVersionIdScore.data?.data?.[selectedScoreKey]
+                            ?.value
+                        }
+                      </p>
+                      <p>
+                        max:{" "}
+                        {
+                          promptVersionIdScore.data?.data?.[selectedScoreKey]
+                            ?.max
+                        }
+                      </p>
+                      <p>
+                        min:{" "}
+                        {
+                          promptVersionIdScore.data?.data?.[selectedScoreKey]
+                            ?.min
+                        }
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  Object.entries(
+                    (
+                      promptVersionIdScore.data as {
+                        data: Record<string, { value: any }>;
+                      }
+                    )?.data ?? {}
+                  ).map(([key, value]) => {
+                    const color = scoreColorMapping[key]?.color;
+                    return (
+                      <Badge
+                        className="gap-1.5"
+                        variant="helicone"
+                        key={key}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          queryClient.setQueryData(
+                            ["selectedScoreKey", experimentId],
+                            key
+                          );
+                        }}
+                      >
+                        <div
+                          className="w-2 h-2 rounded-sm"
+                          style={{ backgroundColor: color }}
+                        ></div>
+                        {key?.toString().replace("-hcone-bool", "") ?? ""}:{" "}
+                        {value?.value}
+                      </Badge>
+                    );
+                  })
+                )}
+              </div>
+            )}
+            <div className="flex gap-2 items-center ml-0.5">
+              {icon(promptTemplate?.model ?? "")}
+              <span className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                {promptTemplate?.model}
+              </span>
+            </div>
           </div>
           <PromptPlayground
             prompt={promptTemplate?.helicone_template ?? ""}

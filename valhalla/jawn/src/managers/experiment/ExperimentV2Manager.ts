@@ -7,7 +7,6 @@ import { InputsManager } from "../inputs/InputsManager";
 import {
   CreateNewPromptVersionForExperimentParams,
   ExperimentV2,
-  ExperimentV2Output,
   ExperimentV2PromptVersion,
   ExperimentV2Row,
   ExtendedExperimentData,
@@ -15,8 +14,57 @@ import {
 import { run } from "../../lib/experiment/run";
 import { PromptManager } from "../prompt/PromptManager";
 import { PromptVersionResult } from "../../controllers/public/promptController";
-import { parseJSXObject } from "@helicone/prompts";
-import { uuid } from "uuidv4";
+
+export interface ScoreV2 {
+  valueType: string;
+  value: number | Date | string;
+  max: number;
+  min: number;
+}
+
+export interface ExperimentOutputForScores {
+  request_id: string;
+  input_record: {
+    id: string;
+    inputs: Record<string, string>;
+    autoInputs: Record<string, string>;
+  };
+  scores: Record<string, ScoreV2>;
+}
+
+function getCustomScores(
+  scores: Record<string, ScoreV2>[]
+): Record<string, ScoreV2> {
+  const scoresValues = scores.reduce((acc, record) => {
+    for (const key in record) {
+      if (record.hasOwnProperty(key) && typeof record[key].value === "number") {
+        if (!acc[key]) {
+          acc[key] = {
+            sum: 0,
+            count: 0,
+            valueType: record[key].valueType,
+            max: record[key].value as number,
+            min: record[key].value as number,
+          };
+        }
+        acc[key].sum += record[key].value as number;
+        acc[key].count += 1;
+        acc[key].max = Math.max(acc[key].max, record[key].value as number);
+        acc[key].min = Math.min(acc[key].min, record[key].value as number);
+      }
+    }
+    return acc;
+  }, {} as Record<string, { sum: number; count: number; valueType: string; max: number; min: number }>);
+
+  return Object.fromEntries(
+    Object.entries(scoresValues).map(
+      ([key, { sum, count, valueType, max, min }]) => [
+        key,
+        { value: sum / count, valueType, max, min },
+      ]
+    )
+  );
+}
 
 export class ExperimentV2Manager extends BaseManager {
   private ExperimentStore: ExperimentStore;
@@ -27,7 +75,7 @@ export class ExperimentV2Manager extends BaseManager {
 
   async hasAccessToExperiment(experimentId: string): Promise<boolean> {
     const experiment = await supabaseServer.client
-      .from("experiment_v2") // TODO: I have no clue if this has to be changed
+      .from("experiment_v3") // TODO: I have no clue if this has to be changed
       .select("*")
       .eq("id", experimentId)
       .eq("organization", this.authParams.organizationId)
@@ -144,12 +192,6 @@ export class ExperimentV2Manager extends BaseManager {
       .eq("organization", this.authParams.organizationId)
       .single();
 
-    // const promptVersions = await supabaseServer.client
-    //   .from("prompts_versions")
-    //   .select("*")
-    //   .eq("experiment_id", experimentId)
-    //   .eq("organization", this.authParams.organizationId);
-
     try {
       const rows = await dbExecute<ExperimentV2Row>(
         `
@@ -196,7 +238,53 @@ export class ExperimentV2Manager extends BaseManager {
         // prompt_versions: promptVersions.data ?? [],
       });
     } catch (e) {
-      console.log("oh okok");
+      return err("Failed to get experiment");
+    }
+  }
+
+  async getExperimentOutputForScores(
+    experimentId: string
+  ): Promise<Result<ExperimentOutputForScores[], string>> {
+    try {
+      const rows = await dbExecute<ExperimentOutputForScores>(
+        `
+    SELECT 
+      eo.request_id as request_id,
+      jsonb_build_object(
+        'id', pir.id,
+        'inputs', pir.inputs,
+        'autoInputs', pir.auto_prompt_inputs
+      ) as input_record,
+      COALESCE((
+          SELECT jsonb_object_agg(
+            sa.score_key,
+            jsonb_build_object(
+              'value', 
+              CASE 
+                WHEN sa.value_type = 'int' THEN sv.int_value::text
+                WHEN sa.value_type = 'number' THEN sv.int_value::text
+                WHEN sa.value_type = 'boolean' THEN sv.int_value::text
+              END,
+              'valueType', sa.value_type
+            )
+          )
+          FROM score_value sv
+          JOIN score_attribute sa ON sa.id = sv.score_attribute
+          WHERE sv.request_id = eo.request_id
+        ), '{}'::jsonb) as scores
+    FROM experiment_output eo
+    JOIN prompt_input_record pir ON pir.id = eo.input_record_id
+    WHERE eo.experiment_id = $1
+        `,
+        [experimentId]
+      );
+
+      if (rows.error || !rows.data) {
+        return err("Failed to get experiment");
+      }
+
+      return ok(rows.data ?? []);
+    } catch (e) {
       return err("Failed to get experiment");
     }
   }
@@ -427,5 +515,69 @@ export class ExperimentV2Manager extends BaseManager {
     } catch (e) {
       return err("Failed to run hypothesis");
     }
+  }
+
+  async getExperimentPromptVersionScores(
+    experimentId: string,
+    promptVersionId: string
+  ): Promise<Result<Record<string, ScoreV2>, string>> {
+    const experiment = await this.hasAccessToExperiment(experimentId);
+    if (!experiment) {
+      return err("Unauthorized");
+    }
+
+    const rows = await dbExecute<{ scores: Record<string, ScoreV2> }>(
+      `SELECT
+       COALESCE((
+        SELECT jsonb_object_agg(
+          sa.score_key,
+          jsonb_build_object(
+            'value', sv.int_value,
+            'valueType', sa.value_type
+          )
+        ) 
+      FROM score_value sv
+      JOIN score_attribute sa ON sa.id = sv.score_attribute
+      JOIN evaluator_experiments_v3 ee ON ee.experiment = $1
+      JOIN evaluator e ON e.id = ee.evaluator
+      WHERE sv.request_id = eo.request_id
+      AND sa.score_key = REGEXP_REPLACE(LOWER(REPLACE(e.name, ' ', '_')), '[^a-z0-9]+', '_', 'g') || 
+          CASE WHEN sa.value_type = 'boolean' THEN '-hcone-bool' ELSE '' END
+      ), '{}'::jsonb) as scores
+    FROM experiment_output eo
+    WHERE eo.experiment_id = $1
+    AND eo.prompt_version_id = $2
+    `,
+      [experimentId, promptVersionId]
+    );
+
+    const scoresArray = rows.data?.map((row) => row.scores) ?? [];
+
+    const scores = getCustomScores(scoresArray);
+
+    return ok(scores);
+  }
+
+  async getExperimentRequestScore(
+    experimentId: string,
+    requestId: string,
+    scoreKey: string
+  ): Promise<Result<ScoreV2 | null, string>> {
+    const rows = await dbExecute<{ score: ScoreV2 }>(
+      `SELECT jsonb_build_object(
+          'value', sv.int_value,
+          'valueType', sa.value_type
+        ) as score
+      FROM score_value sv
+      JOIN score_attribute sa ON sa.id = sv.score_attribute
+      LEFT JOIN request r ON r.id = sv.request_id
+      WHERE  
+        sv.request_id = $1 
+        AND sa.score_key = $2
+        AND r.helicone_org_id = $3`,
+      [requestId, scoreKey, this.authParams.organizationId]
+    );
+
+    return ok(rows.data?.[0]?.score ?? null);
   }
 }

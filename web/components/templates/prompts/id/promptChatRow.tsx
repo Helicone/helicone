@@ -491,11 +491,14 @@ const PromptChatRow = (props: PromptChatRowProps) => {
     return (
       <li className="flex flex-col gap-1 items-start">
         <div className="flex w-full justify-between items-center">
-          <Badge variant="helicone">
-            {role.slice(0, 1).toUpperCase() + role.slice(1)}
+          <Badge
+            variant="helicone"
+            className="bg-slate-100 hover:bg-slate-100 border-slate-100 dark:border-slate-800 dark:bg-slate-800 cursor-default"
+          >
+            {(role ?? "")?.slice(0, 1).toUpperCase() + (role ?? "").slice(1)}
           </Badge>
           {isStatic && (
-            <Badge className="bg-[#3C82F6] dark:bg-[#3C82F6] text-white dark:text-white text-[10px] py-[3px] px-2 leading-tight hover:bg-[#3C82F6]">
+            <Badge className="border border-[#3C82F6] dark:border-[#3C82F6] text-[#3C82F6] dark:text-[#3C82F6] text-[10px] py-[3px] px-2 leading-tight hover:border-[#3C82F6] !bg-blue-50 dark:!bg-blue-950">
               Static
             </Badge>
           )}
@@ -542,8 +545,8 @@ const PromptChatRow = (props: PromptChatRowProps) => {
                 disabled={!editMode}
               />
             ) : (
-              <Badge variant="helicone">
-                {role.slice(0, 1).toUpperCase() + role.slice(1)}
+              <Badge variant="helicone" className="bg-slate-200">
+                {(role ?? "").slice(0, 1).toUpperCase() + (role ?? "").slice(1)}
               </Badge>
             )}
             <div className="flex justify-end items-center space-x-2 w-full">

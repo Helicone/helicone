@@ -246,7 +246,8 @@ export const getGatewayAPIRouter = (router: BaseRouter) => {
       }
 
       if (env.GATEWAY_TARGET) {
-        return await forwarder(env.GATEWAY_TARGET);
+        const response = await forwarder(env.GATEWAY_TARGET);
+        return response;
       }
       const fallbacks = requestWrapper.heliconeHeaders.fallBacks;
 

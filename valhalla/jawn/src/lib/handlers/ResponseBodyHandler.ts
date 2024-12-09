@@ -60,7 +60,7 @@ export class ResponseBodyHandler extends AbstractLogHandler {
       context.processedLog.response.model = getModelFromResponse(
         processedResponseBody.data?.processedBody
       );
-      context.processedLog.model =
+      const definedModel =
         calculateModel(
           context.processedLog.request.model,
           context.processedLog.response.model,
@@ -78,7 +78,7 @@ export class ResponseBodyHandler extends AbstractLogHandler {
         this.processResponseBodyImages(
           context.message.log.response.id,
           omittedResponseBody,
-          context.processedLog.model
+          definedModel
         );
 
       // Set processed response body
@@ -91,7 +91,7 @@ export class ResponseBodyHandler extends AbstractLogHandler {
 
       const { responseModel, model } = this.determineAssistantModel(
         responseBodyFinal,
-        context.processedLog.response.model
+        definedModel
       );
 
       context.processedLog.response.model = responseModel;

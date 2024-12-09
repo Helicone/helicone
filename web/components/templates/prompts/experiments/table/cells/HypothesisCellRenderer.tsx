@@ -19,7 +19,7 @@ import {
   useExperimentRequestData,
   useExperimentTable,
 } from "../hooks/useExperimentTable";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useJawnClient } from "../../../../../../lib/clients/jawnHook";
 
 export type HypothesisCellRef = {
@@ -58,7 +58,8 @@ export const HypothesisCellRenderer = forwardRef<
       setHypothesisRequestId(requestId ?? "");
     }, [requestId]);
 
-    const { runHypothesis, wrapText } = useExperimentTable(experimentTableId);
+    const { runHypothesis, wrapText, selectedScoreKey } =
+      useExperimentTable(experimentTableId);
 
     const { data: promptTemplate } = useQuery(
       ["promptTemplate", promptVersionId],
@@ -99,6 +100,48 @@ export const HypothesisCellRenderer = forwardRef<
         refetchOnReconnect: false,
       }
     );
+
+    const queryClient = useQueryClient();
+
+    const { data: score } = useQuery({
+      queryKey: [
+        "experimentScore",
+        experimentTableId,
+        hypothesisRequestId,
+        selectedScoreKey,
+      ],
+      queryFn: async () => {
+        if (!hypothesisRequestId || !selectedScoreKey) return null;
+
+        const res = await jawnClient.GET(
+          "/v2/experiment/{experimentId}/{requestId}/{scoreKey}",
+          {
+            params: {
+              path: {
+                experimentId: experimentTableId,
+                requestId: hypothesisRequestId,
+                scoreKey: selectedScoreKey,
+              },
+            },
+          }
+        );
+
+        const promptVersionIdScores = queryClient.getQueryData<{
+          data: Record<string, { value: any; max: number; min: number }>;
+        }>(["experimentScores", experimentTableId, promptVersionId]);
+
+        return {
+          cellValue: res.data?.data,
+          max: promptVersionIdScores?.data?.[selectedScoreKey]?.max,
+          min: promptVersionIdScores?.data?.[selectedScoreKey]?.min,
+          avg: promptVersionIdScores?.data?.[selectedScoreKey]?.value,
+        };
+      },
+      enabled: !!hypothesisRequestId && !!selectedScoreKey,
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+      refetchOnReconnect: false,
+    });
 
     const handleCellClick = (e: React.MouseEvent) => {
       e.stopPropagation();
@@ -181,15 +224,32 @@ export const HypothesisCellRenderer = forwardRef<
               <div className="group relative w-full h-full">
                 <Button
                   variant="ghost"
-                  className="absolute top-2 right-2 w-6 h-6 p-0 border-slate-200 border rounded-md bg-slate-50 text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute top-2 right-2 w-6 h-6 p-0 border-slate-200 dark:border-slate-800 rounded-md text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity"
                   onClick={(e) => handleRunHypothesis(e)}
                 >
                   <PlayIcon className="w-4 h-4" />
                 </Button>
                 <div
-                  className="w-full h-full items-center flex justify-start cursor-pointer py-2 px-4 text-slate-700 dark:text-slate-300"
+                  className="w-full h-full flex flex-col justify-start cursor-pointer py-2 px-4 text-slate-700 dark:text-slate-300"
                   onClick={handleCellClick}
                 >
+                  {selectedScoreKey && score && (
+                    <div className="flex items-center gap-2 mb-3">
+                      <div
+                        className={clsx(
+                          "h-2.5 w-2.5 rounded-sm",
+                          score.cellValue?.value &&
+                            score.cellValue?.value > score.avg
+                            ? "bg-green-500"
+                            : "bg-red-500"
+                        )}
+                      ></div>
+                      <p className="text-[11px] font-medium text-slate-700 dark:text-slate-300">
+                        {selectedScoreKey.replace("-hcone-bool", "")}:{" "}
+                        {score.cellValue?.value}
+                      </p>
+                    </div>
+                  )}
                   <div
                     className={clsx(
                       wrapText.data
@@ -236,15 +296,32 @@ export const HypothesisCellRenderer = forwardRef<
               <div className="group relative w-full h-full">
                 <Button
                   variant="ghost"
-                  className="absolute top-2 right-2 w-6 h-6 p-0 border-slate-200 border rounded-md bg-slate-50 text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute top-2 right-2 w-6 h-6 p-0 border-slate-200 dark:border-slate-800 border rounded-md text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity"
                   onClick={(e) => handleRunHypothesis(e)}
                 >
                   <PlayIcon className="w-4 h-4" />
                 </Button>
                 <div
-                  className="w-full h-full items-center flex justify-start cursor-pointer py-2 px-4 text-slate-700 dark:text-slate-300"
+                  className="w-full h-full flex flex-col justify-start cursor-pointer py-2 px-4 text-slate-700 dark:text-slate-300"
                   onClick={handleCellClick}
                 >
+                  {selectedScoreKey && score && (
+                    <div className="flex items-center gap-2 mb-3">
+                      <div
+                        className={clsx(
+                          "h-2.5 w-2.5 rounded-sm",
+                          score.cellValue?.value &&
+                            score.cellValue?.value > score.avg
+                            ? "bg-green-500"
+                            : "bg-red-500"
+                        )}
+                      ></div>
+                      <p className="text-[11px] font-medium text-slate-700 dark:text-slate-300">
+                        {selectedScoreKey.replace("-hcone-bool", "")}:{" "}
+                        {score.cellValue?.value}
+                      </p>
+                    </div>
+                  )}
                   <div
                     className={clsx(
                       wrapText.data

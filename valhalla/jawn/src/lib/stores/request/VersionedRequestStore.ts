@@ -27,40 +27,6 @@ export class VersionedRequestStore {
       requestResponseLog
     );
 
-    // DELETE THIS
-    const legacy = await clickhouseDb.dbInsertClickhouse(
-      "request_response_versioned",
-      requestResponseLog.map((row) => ({
-        response_id: row.response_id,
-        response_created_at: row.response_created_at,
-        latency: row.latency,
-        status: row.status,
-        completion_tokens: row.completion_tokens,
-        prompt_tokens: row.prompt_tokens,
-        model:
-          row.model && row.model !== ""
-            ? row.model
-            : this.getModelFromPath(row.target_url),
-        request_id: row.request_id,
-        request_created_at: row.request_created_at,
-        user_id: row.user_id,
-        organization_id: row.organization_id,
-        proxy_key_id: row.proxy_key_id,
-        threat: row.threat,
-        time_to_first_token: row.time_to_first_token,
-        provider: row.provider,
-        country_code: row.country_code,
-        target_url: row.target_url,
-        properties: row.properties,
-        request_body: row.request_body,
-        response_body: row.response_body,
-        assets: row.assets,
-        scores: row.scores,
-        sign: 1,
-        version: 1,
-      }))
-    );
-
     if (result.error || !result.data) {
       return err(`Error inserting request response logs: ${result.error}`);
     }

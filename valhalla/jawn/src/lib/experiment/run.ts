@@ -4,18 +4,18 @@ import { Result, err, ok } from "../shared/result";
 import { supabaseServer } from "../db/supabase";
 import { Experiment, ExperimentDatasetRow } from "../stores/experimentStore";
 import { BaseTempKey } from "./tempKeys/baseTempKey";
-import { prepareRequestAnthropicFull } from "./requestPrep/openai";
-import { prepareRequestAzureFull as prepareRequestAzureOnPremFull } from "./requestPrep/azure";
-import { runHypothesis, runOriginalRequest } from "./hypothesisRunner";
+import { runHypothesis } from "./hypothesisRunner";
 import { generateHeliconeAPIKey } from "./tempKeys/tempAPIKey";
-import { generateProxyKey } from "./tempKeys/tempProxyKey";
 import {
   PreparedRequest,
   PreparedRequestArgs,
 } from "./requestPrep/PreparedRequest";
-import { prepareRequestOpenAIOnPremFull } from "./requestPrep/openai";
 import { getAllSignedURLsFromInputs } from "../../managers/inputs/InputsManager";
-import { prepareRequestOpenAIFull } from "./requestPrep/openaiCloud";
+import { prepareRequestOpenRouterFull } from "./requestPrep/openRouter";
+import { prepareRequestAzureFull as prepareRequestAzureOnPremFull } from "./requestPrep/azure";
+import { OPENROUTER_KEY, OPENROUTER_WORKER_URL } from "../clients/constant";
+import { SettingsManager } from "../../utils/settings";
+import { prepareRequestOpenAIOnPremFull } from "./requestPrep/openai";
 
 export const IS_ON_PREM =
   process.env.AZURE_BASE_URL &&
@@ -25,23 +25,27 @@ export const IS_ON_PREM =
     ? true
     : false;
 
+async function isOnPrem(): Promise<boolean> {
+  const settingsManager = new SettingsManager();
+  const azureSettings = await settingsManager.getSetting("azure:experiment");
+  const truthy =
+    azureSettings?.azureApiKey &&
+    azureSettings?.azureBaseUri &&
+    azureSettings?.azureApiVersion &&
+    azureSettings?.azureDeploymentName;
+  return truthy ? true : false;
+}
+
 async function prepareRequest(
   args: PreparedRequestArgs,
-  onPremConfig: {
-    deployment: "AZURE" | "OPENAI";
-  },
   provider: "OPENAI" | "ANTHROPIC"
 ): Promise<PreparedRequest> {
-  if (args.providerKey === null) {
-    if (IS_ON_PREM && onPremConfig.deployment === "AZURE") {
-      return await prepareRequestAzureOnPremFull(args);
-    } else if (provider === "ANTHROPIC") {
-      return prepareRequestAnthropicFull(args);
-    } else {
-      return prepareRequestOpenAIOnPremFull(args);
-    }
+  if (await isOnPrem()) {
+    return await prepareRequestAzureOnPremFull(args);
+  } else if (provider === "OPENAI") {
+    return prepareRequestOpenAIOnPremFull(args);
   } else {
-    return prepareRequestOpenAIFull(args);
+    return prepareRequestOpenRouterFull(args);
   }
 }
 
@@ -134,18 +138,17 @@ export async function run(
     const preparedRequest = await prepareRequest(
       {
         template: promptVersion.data.helicone_template,
-        providerKey: null,
+        providerKey: OPENROUTER_KEY,
         secretKey,
         inputs: promptInputRecord.data.inputs as Record<string, string>,
         autoInputs: promptInputRecord.data.auto_prompt_inputs as Record<
           string,
           any
         >[],
-        requestPath: `${process.env.HELICONE_WORKER_URL}/v1/chat/completions`,
+        requestPath: `${OPENROUTER_WORKER_URL}/api/v1/chat/completions`,
         requestId,
-      },
-      {
-        deployment: "AZURE",
+        experimentId,
+        model: promptVersion.data.model ?? "",
       },
       providerByModelName(promptVersion.data.model ?? "")
     );
