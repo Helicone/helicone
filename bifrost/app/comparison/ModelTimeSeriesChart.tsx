@@ -21,14 +21,6 @@ const ModelTimeSeriesChart = ({
       case "successRate":
       case "errorRate":
         return formatPercentage(value);
-      case "positivePercentage":
-        return `${(value * 100).toFixed(1)}%`;
-      case "negativePercentage":
-        return `${(value * 100).toFixed(1)}%`;
-      case "positiveFeedbackCount":
-        return value.toLocaleString();
-      case "negativeFeedbackCount":
-        return value.toLocaleString();
     }
   };
 

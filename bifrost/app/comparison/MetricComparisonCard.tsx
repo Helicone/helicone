@@ -2,15 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import ModelTimeSeriesChart from "./ModelTimeSeriesChart";
 import { components } from "@/lib/clients/jawnTypes/public";
 
-export type MetricType =
-  | "latency"
-  | "ttft"
-  | "errorRate"
-  | "successRate"
-  | "positivePercentage"
-  | "negativePercentage"
-  | "positiveFeedbackCount"
-  | "negativeFeedbackCount";
+export type MetricType = "latency" | "ttft" | "errorRate" | "successRate";
 
 interface MetricComparisonCardProps {
   models: components["schemas"]["Model"][];

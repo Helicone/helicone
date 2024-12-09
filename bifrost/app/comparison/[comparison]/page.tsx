@@ -1,4 +1,7 @@
-import { providers } from "@/packages/cost/providers/mappings";
+import {
+  parentModelNames,
+  providers,
+} from "@/packages/cost/providers/mappings";
 import { ModelComparisonPage } from "../ModelComparisonPage";
 import QueryProvider from "../QueryProvider";
 import Banner from "@/app/components/templates/Banner";
@@ -23,8 +26,26 @@ export default async function Home({
   const providerInfoB = providers.find(
     (p) => p.provider === providerB.toUpperCase()
   );
-  const modelADetails = providerInfoA?.modelDetails?.[modelA];
-  const modelBDetails = providerInfoB?.modelDetails?.[modelB];
+
+  // Helper function to find model details
+  const findModelDetails = (providerInfo: any, modelName: string) => {
+    // First try direct match
+    if (providerInfo?.modelDetails?.[modelName]) {
+      return providerInfo.modelDetails[modelName];
+    }
+    // If no direct match, search through matches
+    for (const [parentModel, details] of Object.entries<{ matches: string[] }>(
+      providerInfo?.modelDetails || {}
+    )) {
+      if (details.matches.includes(modelName)) {
+        return details;
+      }
+    }
+    return undefined;
+  };
+
+  const modelADetails = findModelDetails(providerInfoA, modelA);
+  const modelBDetails = findModelDetails(providerInfoB, modelB);
 
   return (
     <QueryProvider>
@@ -44,36 +65,16 @@ export default async function Home({
 }
 
 export async function generateStaticParams() {
-  const mainProviders = providers.filter((provider) =>
-    [
-      "OPENAI",
-      "ANTHROPIC",
-      "TOGETHER",
-      "FIREWORKS",
-      "PERPLEXITY",
-      "GOOGLE",
-      "OPENROUTER",
-      "GROQ",
-      // "COHERE",
-      // "MISTRAL",
-      // "DEEPINFRA",
-      // "FIRECRAWL",
-      // "QSTASH",
-    ].includes(provider.provider)
-  );
-
   // Create a map of model names to their providers
   const modelToProviders = new Map<string, Set<string>>();
 
-  // Collect all unique models and their providers
-  mainProviders.forEach((provider) => {
-    if (provider.costs) {
-      provider.costs.forEach((cost) => {
-        const model = cost.model.value;
-        if (!modelToProviders.has(model)) {
-          modelToProviders.set(model, new Set());
-        }
-        modelToProviders.get(model)?.add(provider.provider.toLowerCase());
+  providers.forEach((provider) => {
+    if (provider.modelDetails) {
+      Object.entries(provider.modelDetails).forEach(([model, details]) => {
+        modelToProviders.set(model, new Set([provider.provider]));
+        details.matches.forEach((match) => {
+          modelToProviders.set(match, new Set([provider.provider]));
+        });
       });
     }
   });

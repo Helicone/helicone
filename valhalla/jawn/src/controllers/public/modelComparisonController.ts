@@ -87,8 +87,6 @@ export class ModelComparisonController extends Controller {
       modelsToCompare
     );
 
-    console.log(`result: ${JSON.stringify(result)}`);
-
     return result;
   }
 }
