@@ -54,19 +54,27 @@ const ModelInfoCard = ({ modelDetails, title }: ModelInfoCardProps) => {
           <div>
             <p className="text-slate-400 text-sm font-medium">MMLU</p>
             <p className="text-sky-500 text-base font-semibold">
-              {modelDetails.info.benchmarks?.mmlu || "-"}
+              {modelDetails.info.benchmarks?.mmlu
+                ? `${(modelDetails.info.benchmarks.mmlu * 100).toFixed(1)}%`
+                : "-"}
             </p>
           </div>
           <div>
             <p className="text-slate-400 text-sm font-medium">HellaSwag</p>
             <p className="text-sky-500 text-base font-semibold">
-              {modelDetails.info.benchmarks?.hellaswag || "-"}
+              {modelDetails.info.benchmarks?.hellaswag
+                ? `${(modelDetails.info.benchmarks.hellaswag * 100).toFixed(
+                    1
+                  )}%`
+                : "-"}
             </p>
           </div>
           <div>
             <p className="text-slate-400 text-sm font-medium">BBH</p>
             <p className="text-sky-500 text-base font-semibold">
-              {modelDetails.info.benchmarks?.bbh || "-"}
+              {modelDetails.info.benchmarks?.bbh
+                ? `${(modelDetails.info.benchmarks.bbh * 100).toFixed(1)}%`
+                : "-"}
             </p>
           </div>
         </div>
@@ -77,14 +85,16 @@ const ModelInfoCard = ({ modelDetails, title }: ModelInfoCardProps) => {
           Recommended for
         </h4>
         <ul className="space-y-1">
-          {modelDetails.info.recommendations.map((recommendation, index) => (
-            <li key={index} className="flex items-center gap-2 py-0.5">
-              <CheckIcon className="w-3.5 h-3.5 text-sky-500" />
-              <span className="text-slate-400 text-sm font-medium">
-                {recommendation}
-              </span>
-            </li>
-          ))}
+          {modelDetails.info.recommendations
+            .slice(0, 3)
+            .map((recommendation, index) => (
+              <li key={index} className="flex items-center gap-2 py-0.5">
+                <CheckIcon className="w-3.5 h-3.5 text-sky-500" />
+                <span className="text-slate-400 text-sm font-medium">
+                  {recommendation}
+                </span>
+              </li>
+            ))}
         </ul>
       </div>
     </div>

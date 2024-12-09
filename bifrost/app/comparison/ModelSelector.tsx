@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
 import { useRouter } from "next/navigation";
 import { parentModelNames } from "@/packages/cost/providers/mappings";
+import { useState } from "react";
 
 interface ModelSelectorProps {
   modelA: string;
@@ -84,12 +85,16 @@ const ModelDropdown = ({
 );
 
 const ModelSelector = ({
-  modelA,
-  modelB,
-  providerA,
-  providerB,
+  modelA: initialModelA,
+  modelB: initialModelB,
+  providerA: initialProviderA,
+  providerB: initialProviderB,
 }: ModelSelectorProps) => {
   const router = useRouter();
+  const [modelA, setModelA] = useState(initialModelA);
+  const [modelB, setModelB] = useState(initialModelB);
+  const [providerA, setProviderA] = useState(initialProviderA);
+  const [providerB, setProviderB] = useState(initialProviderB);
 
   const createComparisonPath = (
     modelA: string,
@@ -107,12 +112,16 @@ const ModelSelector = ({
   };
 
   const handleModelASelect = (model: string, provider: string) => {
+    setModelA(model);
+    setProviderA(provider);
     if (modelB) {
       router.push(createComparisonPath(model, modelB, provider, providerB));
     }
   };
 
   const handleModelBSelect = (model: string, provider: string) => {
+    setModelB(model);
+    setProviderB(provider);
     if (modelA) {
       router.push(createComparisonPath(modelA, model, providerA, provider));
     }

@@ -30,24 +30,35 @@ export default function FeedbackCard({ models }: FeedbackCardProps) {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {models.map((model, index) => {
-            const positivePercentage = model.feedback.positivePercentage * 100;
-            const negativePercentage = model.feedback.negativePercentage * 100;
-            const isWinner =
-              model.feedback.positivePercentage >
-              models[1 - index].feedback.positivePercentage;
+            const hasData =
+              model.feedback?.positivePercentage != null &&
+              model.feedback?.negativePercentage != null;
 
-            const chartData = [
-              {
-                name: "Positive",
-                value: positivePercentage,
-                fill: index === 0 ? "#EF4444" : "#3B82F6",
-              },
-              {
-                name: "Negative",
-                value: negativePercentage,
-                fill: index === 0 ? "#FCA5A5" : "#93C5FD",
-              },
-            ];
+            const positivePercentage = hasData
+              ? model.feedback.positivePercentage * 100
+              : 0;
+            const negativePercentage = hasData
+              ? model.feedback.negativePercentage * 100
+              : 0;
+            const isWinner =
+              hasData &&
+              model.feedback.positivePercentage >
+                (models[1 - index]?.feedback?.positivePercentage || 0);
+
+            const chartData = hasData
+              ? [
+                  {
+                    name: "Positive",
+                    value: positivePercentage,
+                    fill: index === 0 ? "#EF4444" : "#3B82F6",
+                  },
+                  {
+                    name: "Negative",
+                    value: negativePercentage,
+                    fill: index === 0 ? "#FCA5A5" : "#93C5FD",
+                  },
+                ]
+              : [];
 
             const chartConfig = {
               Positive: {
@@ -72,14 +83,53 @@ export default function FeedbackCard({ models }: FeedbackCardProps) {
                         cursor={false}
                         content={<ChartTooltipContent hideLabel />}
                       />
-                      <Pie
-                        data={chartData}
-                        dataKey="value"
-                        nameKey="name"
-                        innerRadius={70}
-                        strokeWidth={5}
-                        activeIndex={0}
-                      >
+                      {hasData ? (
+                        <Pie
+                          data={chartData}
+                          dataKey="value"
+                          nameKey="name"
+                          innerRadius={70}
+                          strokeWidth={5}
+                          activeIndex={0}
+                        >
+                          <Label
+                            content={({ viewBox }: any) => {
+                              if (
+                                viewBox &&
+                                "cx" in viewBox &&
+                                "cy" in viewBox
+                              ) {
+                                return (
+                                  <text
+                                    x={viewBox.cx}
+                                    y={viewBox.cy}
+                                    textAnchor="middle"
+                                    dominantBaseline="middle"
+                                  >
+                                    <tspan
+                                      x={viewBox.cx}
+                                      y={viewBox.cy}
+                                      className="fill-foreground text-2xl font-bold"
+                                    >
+                                      {positivePercentage
+                                        .toFixed(1)
+                                        .toLocaleString()}
+                                      %
+                                    </tspan>
+                                    <tspan
+                                      x={viewBox.cx}
+                                      y={(viewBox.cy || 0) + 24}
+                                      className="fill-muted-foreground"
+                                    >
+                                      Positive
+                                    </tspan>
+                                  </text>
+                                );
+                              }
+                            }}
+                          />
+                        </Pie>
+                      ) : (
                         <Label
                           content={({ viewBox }: any) => {
                             if (viewBox && "cx" in viewBox && "cy" in viewBox) {
@@ -89,30 +139,15 @@ export default function FeedbackCard({ models }: FeedbackCardProps) {
                                   y={viewBox.cy}
                                   textAnchor="middle"
                                   dominantBaseline="middle"
+                                  className="fill-slate-400 text-sm italic"
                                 >
-                                  <tspan
-                                    x={viewBox.cx}
-                                    y={viewBox.cy}
-                                    className="fill-foreground text-2xl font-bold"
-                                  >
-                                    {positivePercentage
-                                      .toFixed(1)
-                                      .toLocaleString()}
-                                    %
-                                  </tspan>
-                                  <tspan
-                                    x={viewBox.cx}
-                                    y={(viewBox.cy || 0) + 24}
-                                    className="fill-muted-foreground"
-                                  >
-                                    Positive
-                                  </tspan>
+                                  No feedback data available
                                 </text>
                               );
                             }
                           }}
                         />
-                      </Pie>
+                      )}
                     </PieChart>
                   </ChartContainer>
                 </div>

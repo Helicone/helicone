@@ -1,5 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { ModelDetails } from "@/packages/cost/interfaces/Cost";
+import Image from "next/image";
 
 interface ModelCapabilitiesCardProps {
   modelA: string;
@@ -17,9 +18,6 @@ export default function ModelCapabilitiesCard({
   const infoA = modelDetailsA?.info;
   const infoB = modelDetailsB?.info;
 
-  console.log(`InfoA: ${JSON.stringify(infoA)}`);
-  console.log(`InfoB: ${JSON.stringify(infoB)}`);
-
   return (
     <Card className="p-8">
       <div className="flex-col justify-start items-start gap-[60px]">
@@ -28,17 +26,33 @@ export default function ModelCapabilitiesCard({
           <h2 className="text-black text-2xl font-bold font-['Inter'] mb-6">
             Reported Capabilities
           </h2>
-          <div className="text-slate-900 text-base font-medium font-['Inter'] leading-normal mb-2">
-            Capabilities of {modelA}...
-            {infoA?.capabilities.map((cap, i) => (
-              <div key={i}>{cap}</div>
-            ))}
-          </div>
-          <div className="text-slate-900 text-base font-medium font-['Inter'] leading-normal">
-            Capabilities of {modelB}...
-            {infoB?.capabilities.map((cap, i) => (
-              <div key={i}>{cap}</div>
-            ))}
+          <div className="grid grid-cols-2 gap-6">
+            <div className="bg-white rounded-lg p-6 border border-slate-200">
+              <h3 className="text-slate-900 text-lg font-semibold mb-4">
+                {modelA}
+              </h3>
+              <ul className="space-y-2">
+                {infoA?.capabilities.map((cap, i) => (
+                  <li key={i} className="flex items-start">
+                    <span className="text-sky-500 mr-2">•</span>
+                    <span className="text-slate-700 text-sm">{cap}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="bg-white rounded-lg p-6 border border-slate-200">
+              <h3 className="text-slate-900 text-lg font-semibold mb-4">
+                {modelB}
+              </h3>
+              <ul className="space-y-2">
+                {infoB?.capabilities.map((cap, i) => (
+                  <li key={i} className="flex items-start">
+                    <span className="text-sky-500 mr-2">•</span>
+                    <span className="text-slate-700 text-sm">{cap}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         </div>
 
@@ -54,29 +68,19 @@ export default function ModelCapabilitiesCard({
                   <th className="p-6 text-left text-slate-500 text-sm font-semibold border border-slate-200 rounded-tl-xl">
                     Model
                   </th>
-                  {["Average", "IFEval", "BBH", "HellaSwag", "MMLU"].map(
-                    (header, i, arr) => (
-                      <th
-                        key={header}
-                        className={`p-6 text-left text-slate-500 text-sm font-semibold border border-slate-200 ${
-                          i === arr.length - 1 ? "rounded-tr-xl" : ""
-                        }`}
-                      >
-                        {header}
-                      </th>
-                    )
-                  )}
+                  {["MMLU", "BBH", "HellaSwag"].map((header, i, arr) => (
+                    <th
+                      key={header}
+                      className={`p-6 text-left text-slate-500 text-sm font-semibold border border-slate-200 ${
+                        i === arr.length - 1 ? "rounded-tr-xl" : ""
+                      }`}
+                    >
+                      {header}
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
-                {/*
-                  average: 0.88,
-        ifeval: 0.67,
-        bhh: 0.83,
-        hellaswag: 0.95,
-        mmlu: 0.86,
-        theoryOfMind: 0.87,
-                */}
                 {[modelA, modelB].map((model, i, arr) => (
                   <tr key={model}>
                     <td
@@ -86,7 +90,7 @@ export default function ModelCapabilitiesCard({
                     >
                       {model}
                     </td>
-                    {["average", "ifeval", "bbh", "hellaswag", "mmlu"].map(
+                    {["mmlu", "bbh", "hellaswag"].map(
                       (metric, j, metricsArr) => (
                         <td
                           key={metric}
@@ -114,35 +118,55 @@ export default function ModelCapabilitiesCard({
           <h2 className="text-black text-2xl font-bold font-['Inter'] mb-6">
             Strengths and Weaknesses
           </h2>
-          {[modelA, modelB].map((model) => (
-            <div key={model} className="mb-6">
-              <div className="text-slate-900 text-base font-medium mb-3">
-                {model}
-              </div>
-              <div className="px-4 py-3 bg-white rounded-md flex">
-                <div className="w-[300px]">
-                  <div className="text-[#0da5e8] text-sm font-medium mb-1.5">
-                    Strengths
+          <div className="grid grid-cols-2 gap-6">
+            {[
+              { model: modelA, info: infoA },
+              { model: modelB, info: infoB },
+            ].map(({ model, info }) => (
+              <div
+                key={model}
+                className="bg-white rounded-lg border border-slate-200 overflow-hidden"
+              >
+                <div className="bg-slate-50 px-6 py-3 border-b border-slate-200">
+                  <h3 className="text-slate-900 text-lg font-semibold">
+                    {model}
+                  </h3>
+                </div>
+                <div className="p-6 space-y-6">
+                  <div>
+                    <h4 className="text-sky-600 text-sm font-semibold mb-3">
+                      Strengths
+                    </h4>
+                    <ul className="space-y-2">
+                      {info?.strengths.map((strength, i) => (
+                        <li key={i} className="flex items-start">
+                          <span className="text-emerald-500 mr-2">✓</span>
+                          <span className="text-slate-700 text-sm">
+                            {strength}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
-                  <div className="text-slate-400 text-sm font-medium">
-                    {infoA?.strengths.map((strength, i) => (
-                      <div key={i}>{strength}</div>
-                    ))}
+                  <div>
+                    <h4 className="text-sky-600 text-sm font-semibold mb-3">
+                      Weaknesses
+                    </h4>
+                    <ul className="space-y-2">
+                      {info?.weaknesses.map((weakness, i) => (
+                        <li key={i} className="flex items-start">
+                          <span className="text-red-400 mr-2">•</span>
+                          <span className="text-slate-700 text-sm">
+                            {weakness}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
                 </div>
-                <div className="w-[300px]">
-                  <div className="text-[#0da5e8] text-sm font-medium mb-1.5">
-                    Weaknesses
-                  </div>
-                  <div className="text-slate-400 text-sm font-medium">
-                    {infoA?.weaknesses.map((weakness, i) => (
-                      <div key={i}>{weakness}</div>
-                    ))}
-                  </div>
-                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
 
         {/* Recommendations Section */}
@@ -150,28 +174,51 @@ export default function ModelCapabilitiesCard({
           <h2 className="text-black text-2xl font-bold font-['Inter'] mb-6">
             Which model should you pick?
           </h2>
-          {[modelA, modelB].map((model) => (
-            <div
-              key={model}
-              className="text-slate-900 text-base font-medium leading-normal mb-2"
-            >
-              {model} is recommended for {infoA?.recommendations}
-            </div>
-          ))}
-        </div>
-
-        {/* References Section */}
-        <div className="self-stretch">
-          <h2 className="text-black text-2xl font-bold font-['Inter'] mb-6">
-            References
-          </h2>
-          <div className="text-slate-900 text-base font-medium leading-normal">
-            This leaderboard presents models' performance metrics, including
-            pricing and capabilities, based on benchmark data from their
-            technical reports. Updated December 2024.
+          <div className="grid grid-cols-2 gap-6">
+            {[
+              { model: modelA, info: infoA },
+              { model: modelB, info: infoB },
+            ].map(({ model, info }) => (
+              <div
+                key={model}
+                className="bg-white rounded-lg border border-slate-200 overflow-hidden"
+              >
+                <div className="bg-sky-50 px-6 py-3 border-b border-slate-200">
+                  <h3 className="text-slate-900 text-lg font-semibold">
+                    {model}
+                  </h3>
+                </div>
+                <div className="p-6">
+                  <ul className="space-y-2">
+                    {info?.recommendations?.map((rec: string, i: number) => (
+                      <li key={i} className="flex items-start">
+                        <span className="text-sky-500 mr-2">→</span>
+                        <span className="text-slate-700 text-sm">
+                          {rec.trim()}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
+      <a
+        href="https://helicone.ai/signup"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <Image
+          src="/static/comparison/dashboard_bottom.webp"
+          alt="LLM Leaderboard"
+          width={0}
+          height={0}
+          sizes="100vw"
+          className="w-full h-auto"
+        />
+      </a>
     </Card>
   );
 }

@@ -52,10 +52,6 @@ interface TimeSeriesQueryResult {
   ttft: number;
   success_rate: number;
   error_rate: number;
-  positive_percentage: number;
-  negative_percentage: number;
-  positive_feedback_count: number;
-  negative_feedback_count: number;
 }
 
 interface CostQueryResult {
@@ -208,22 +204,6 @@ export class ModelComparisonManager {
         errorRate: (timeSeriesResult.data ?? []).map((ts) => ({
           timestamp: ts.timestamp,
           value: ts.error_rate,
-        })),
-        positivePercentage: (timeSeriesResult.data ?? []).map((ts) => ({
-          timestamp: ts.timestamp,
-          value: ts.positive_percentage,
-        })),
-        negativePercentage: (timeSeriesResult.data ?? []).map((ts) => ({
-          timestamp: ts.timestamp,
-          value: ts.negative_percentage,
-        })),
-        positiveFeedbackCount: (timeSeriesResult.data ?? []).map((ts) => ({
-          timestamp: ts.timestamp,
-          value: ts.positive_feedback_count,
-        })),
-        negativeFeedbackCount: (timeSeriesResult.data ?? []).map((ts) => ({
-          timestamp: ts.timestamp,
-          value: ts.negative_feedback_count,
         })),
       },
     });

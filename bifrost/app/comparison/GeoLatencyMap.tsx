@@ -86,14 +86,6 @@ export const GeoMetricMap = ({
     );
   }
 
-  console.log(
-    "Geographic data:",
-    data.map((d) => ({
-      country: d.name,
-      value: d.value,
-    }))
-  );
-
   const minValue = Math.min(...data.map((d: any) => d.value));
   const maxValue = Math.max(...data.map((d: any) => d.value));
 
