@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { TimeFilter } from "../../lib/api/handlerWrappers";
+import { TimeFilter } from "../lib/filters/filterDefs";
 import { TimeIncrement } from "../../lib/timeCalculations/fetchTimeData";
 import { FilterNode } from "../lib/filters/filterDefs";
 

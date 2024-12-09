@@ -23,7 +23,7 @@ import {
 } from "../../../services/lib/filters/frontendFilterDefs";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import ExportButton from "../../shared/themed/table/exportButton";
-import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
+import { UIFilterRow } from "@/services/lib/filters/types";
 import ThemedTableHeader from "../../shared/themed/themedHeader";
 import useSearchParams from "../../shared/utils/useSearchParams";
 import { formatNumber } from "../users/initialColumns";

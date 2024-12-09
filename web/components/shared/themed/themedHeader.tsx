@@ -33,16 +33,16 @@ import ThemedModal from "./themedModal";
 import Link from "next/link";
 import { Result } from "../../../lib/result";
 import { ThemedMultiSelect } from "./themedMultiSelect";
-import { TimeFilter } from "../../templates/dashboard/dashboardPage";
+import { TimeFilter } from "@/types/timeFilter";
 import FiltersButton from "./table/filtersButton";
 import { OrganizationFilter } from "../../../services/lib/organization_layout/organization_layout";
-import { UIFilterRowTree } from "../../../services/lib/filters/uiFilterRowTree";
+import { UIFilterRowTree } from "@/services/lib/filters/types";
 import { Button } from "@/components/ui/button";
 import {
   SortDirection,
   SortLeafRequest,
 } from "../../../services/lib/sorts/requests/sorts";
-import { UserMetric } from "../../../lib/api/users/users";
+import { UserMetric } from "../../../lib/api/users/UserMetric";
 import { SortLeafUsers } from "../../../services/lib/sorts/users/sorts";
 
 export interface Column {

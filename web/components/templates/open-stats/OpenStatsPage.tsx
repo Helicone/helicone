@@ -4,34 +4,6 @@ import { OtherStats } from "./otherStats";
 import { TopStats } from "./topStats";
 import { useQueryParams } from "./useQueryParams";
 
-export const colors = [
-  "blue",
-  "red",
-  "orange",
-  "amber",
-  "yellow",
-  "violet",
-  "fuchsia",
-  "rose",
-  "lime",
-  "cyan",
-  "indigo",
-  "green",
-  "emerald",
-  "teal",
-];
-
-export function humanReadableNumber(num: number): string {
-  if (num >= 1_000_000_000) {
-    return `${Math.ceil(num / 1_000_000_00) / 10}B+`;
-  } else if (num >= 1_000_000) {
-    return `${Math.ceil(num / 1_000_00) / 10}M+`;
-  } else if (num >= 1_000) {
-    return `${Math.ceil(num / 100) / 10}k+`;
-  }
-  return num.toLocaleString();
-}
-
 export const OpenStatsPage = () => {
   const { queryParams, setQueryParams } = useQueryParams();
 

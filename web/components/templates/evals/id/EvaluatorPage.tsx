@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { useOrg } from "../../../layout/organizationContext";
+import { useOrg } from "../../../layout/org/organizationContext";
 import useSearchParams from "../../../shared/utils/useSearchParams";
-import { TimeFilter } from "../../dashboard/dashboardPage";
+import { TimeFilter } from "@/types/timeFilter";
 
 // Import shadcn components
 

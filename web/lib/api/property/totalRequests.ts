@@ -1,7 +1,5 @@
-import {
-  FilterNode,
-  timeFilterToFilterNode,
-} from "../../../services/lib/filters/filterDefs";
+import { FilterNode } from "../../../services/lib/filters/filterDefs";
+import { timeFilterToFilterNode } from "@/services/lib/filters/helpers/filterFunctions";
 import { buildFilterWithAuthClickHousePropertiesV2 } from "../../../services/lib/filters/filters";
 import { Result, resultMap } from "../../result";
 import { dbQueryClickhouse } from "../db/dbExecute";

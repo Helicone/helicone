@@ -1,4 +1,4 @@
-import { useOrg } from "@/components/layout/organizationContext";
+import { useOrg } from "@/components/layout/org/organizationContext";
 
 import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
@@ -9,8 +9,8 @@ import { SESSIONS_TABLE_FILTERS } from "@/services/lib/filters/frontendFilterDef
 import {
   filterUITreeToFilterNode,
   getRootFilterNode,
-  UIFilterRowTree,
 } from "@/services/lib/filters/uiFilterRowTree";
+import { UIFilterRowTree } from "@/services/lib/filters/types";
 import { ChartPieIcon, ListBulletIcon } from "@heroicons/react/24/outline";
 import { useCallback, useMemo, useState } from "react";
 import { getTimeIntervalAgo } from "../../../lib/timeCalculations/time";

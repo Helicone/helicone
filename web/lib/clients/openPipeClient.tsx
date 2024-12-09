@@ -116,7 +116,8 @@ const useOpenPipeClient = ({ apiKey }: OpenPipeClientProps) => {
 
       return response.json();
     },
-    [apiKey]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [headers, apiKey]
   );
 
   const createDatasetEntry = (

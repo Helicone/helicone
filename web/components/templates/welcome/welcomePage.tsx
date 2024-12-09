@@ -7,7 +7,7 @@ import GenerateAPIKey from "./steps/generateAPIKey";
 import Features from "./steps/features";
 import EventListen from "./steps/eventListen";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
-import { useOrg } from "../../layout/organizationContext";
+import { useOrg } from "../../layout/org/organizationContext";
 import { getJawnClient } from "../../../lib/clients/jawn";
 import { InfoBanner } from "../../shared/themed/themedDemoBanner";
 

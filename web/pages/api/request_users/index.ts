@@ -4,7 +4,8 @@ import {
   HandlerWrapperOptions,
   withAuth,
 } from "../../../lib/api/handlerWrappers";
-import { UserMetric, userMetrics } from "../../../lib/api/users/users";
+import { userMetrics } from "../../../lib/api/users/users";
+import { UserMetric } from "../../../lib/api/users/UserMetric";
 import { Result } from "../../../lib/result";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import { SortLeafUsers } from "../../../services/lib/sorts/users/sorts";

@@ -4,14 +4,12 @@ import {
   HandlerWrapperOptions,
   withAuth,
 } from "../../../lib/api/handlerWrappers";
-import { getLatencyOverTime } from "../../../lib/api/metrics/getLatencyOverTime";
+import {
+  getLatencyOverTime,
+  LatencyOverTime,
+} from "../../../lib/api/metrics/getLatencyOverTime";
 import { Result } from "../../../lib/result";
 import { MetricsBackendBody } from "../../../services/hooks/useBackendFunction";
-
-export interface LatencyOverTime {
-  duration: number;
-  time: Date;
-}
 
 async function handler(
   options: HandlerWrapperOptions<Result<LatencyOverTime[], string>>

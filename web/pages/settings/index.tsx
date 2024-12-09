@@ -6,7 +6,7 @@ import { SupabaseServerWrapper } from "../../lib/wrappers/supabase";
 import { ReactElement } from "react";
 import SettingsLayout from "@/components/templates/settings/settingsLayout";
 import OrgSettingsPage from "@/components/templates/organization/settings/orgSettingsPage";
-import { useOrg } from "@/components/layout/organizationContext";
+import { useOrg } from "@/components/layout/org/organizationContext";
 
 const Settings: NextPageWithLayout<
   InferGetServerSidePropsType<typeof getServerSideProps>

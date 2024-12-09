@@ -15,7 +15,7 @@ import { NextPage } from "next";
 import posthog from "posthog-js";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-import { OrgContextProvider } from "../components/layout/organizationContext";
+import { OrgContextProvider } from "../components/layout/org/organizationContext";
 import ThemeProvider from "../components/shared/theme/themeContext";
 import Script from "next/script";
 import { PostHogProvider } from "posthog-js/react";

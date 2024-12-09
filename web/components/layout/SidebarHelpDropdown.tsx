@@ -11,7 +11,7 @@ import { FaDiscord } from "react-icons/fa6";
 import { CalendarIcon } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
-import { ChangelogItem } from "./auth/Sidebar";
+import { ChangelogItem } from "./auth/types";
 import { useLocalStorage } from "@/services/hooks/localStorage";
 import clsx from "clsx";
 

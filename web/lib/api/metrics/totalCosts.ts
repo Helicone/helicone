@@ -1,8 +1,6 @@
 import { clickhousePriceCalc } from "../../../packages/cost";
-import {
-  FilterNode,
-  timeFilterToFilterNode,
-} from "../../../services/lib/filters/filterDefs";
+import { FilterNode } from "../../../services/lib/filters/filterDefs";
+import { timeFilterToFilterNode } from "@/services/lib/filters/helpers/filterFunctions";
 import { buildFilterWithAuthClickHouse } from "../../../services/lib/filters/filters";
 import { Result, resultMap } from "../../result";
 import { dbQueryClickhouse } from "../db/dbExecute";

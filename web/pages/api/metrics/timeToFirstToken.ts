@@ -2,14 +2,12 @@ import {
   HandlerWrapperOptions,
   withAuth,
 } from "../../../lib/api/handlerWrappers";
-import { getTimeToFirstToken } from "../../../lib/api/metrics/getTimeToFirstToken";
+import {
+  getTimeToFirstToken,
+  TimeToFirstToken,
+} from "../../../lib/api/metrics/getTimeToFirstToken";
 import { Result } from "../../../lib/result";
 import { MetricsBackendBody } from "../../../services/hooks/useBackendFunction";
-
-export interface TimeToFirstToken {
-  ttft: number;
-  time: Date;
-}
 
 async function handler(
   options: HandlerWrapperOptions<Result<TimeToFirstToken[], string>>
