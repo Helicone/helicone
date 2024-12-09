@@ -86,7 +86,6 @@ export const ExpandableMessage: React.FC<ExpandableMessageProps> = ({
                 ? JSON.stringify(JSON.parse(formattedMessageContent), null, 2)
                 : formattedMessageContent
             }
-            ref={contentRef}
             selectedProperties={selectedProperties}
           />
         ) : (
