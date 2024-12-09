@@ -81,9 +81,11 @@ export function ModelComparisonPage({
               {modelB}
             </span>
           </div>
-          <div className="w-[600px] text-center text-slate-700 text-[17px] font-normal font-['Inter'] leading-normal">
-            Compare LLM performance with industry benchmarks, a model selection
-            framework and insights powered by Helicone.
+          <div className="w-[600px] text-center text-slate-400 text-[16px] font-normal font-['Inter'] leading-normal">
+            Compare LLM performance using{" "}
+            <span className="text-[#0da5e8]">real-world</span> data from
+            thousands of applications. See actual latency, costs, and user
+            feedback powered by Helicone.ai.
           </div>
         </div>
 

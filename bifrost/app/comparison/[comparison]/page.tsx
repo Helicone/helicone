@@ -53,10 +53,10 @@ export default async function Home({
       <div className="container mx-auto py-8">
         <ModelComparisonPage
           modelA={decodeURIComponent(modelA)}
-          providerA={decodeURIComponent(providerA)}
+          providerA={decodeURIComponent(providerA.toLowerCase())}
           modelADetails={modelADetails}
           modelB={decodeURIComponent(modelB)}
-          providerB={decodeURIComponent(providerB)}
+          providerB={decodeURIComponent(providerB.toLowerCase())}
           modelBDetails={modelBDetails}
         />
       </div>
@@ -65,37 +65,35 @@ export default async function Home({
 }
 
 export async function generateStaticParams() {
-  // Create a map of model names to their providers
-  const modelToProviders = new Map<string, Set<string>>();
+  // First, create a flat array of [model, provider] pairs
+  const modelProviderPairs: [string, string][] = [];
 
   providers.forEach((provider) => {
+    const providerName = provider.provider.toLowerCase();
     if (provider.modelDetails) {
       Object.entries(provider.modelDetails).forEach(([model, details]) => {
-        modelToProviders.set(model, new Set([provider.provider]));
+        modelProviderPairs.push([model, providerName]);
         details.matches.forEach((match) => {
-          modelToProviders.set(match, new Set([provider.provider]));
+          modelProviderPairs.push([match, providerName]);
         });
       });
     }
   });
 
   const paths = [];
-  const uniqueModels = Array.from(modelToProviders.keys());
 
-  for (let i = 0; i < uniqueModels.length; i++) {
-    for (let j = i + 1; j < uniqueModels.length; j++) {
-      const modelA = uniqueModels[i];
-      const modelB = uniqueModels[j];
-      const providersA = modelToProviders.get(modelA)!;
-      const providersB = modelToProviders.get(modelB)!;
+  // Generate combinations with a single nested loop
+  for (let i = 0; i < modelProviderPairs.length; i++) {
+    for (let j = i + 1; j < modelProviderPairs.length; j++) {
+      const [modelA, providerA] = modelProviderPairs[i];
+      const [modelB, providerB] = modelProviderPairs[j];
 
-      // Create URL-safe versions
-      const modelAPath = `${encodeURIComponent(modelA)}-on-${encodeURIComponent(
-        Array.from(providersA)[0]
-      )}`;
-      const modelBPath = `${encodeURIComponent(modelB)}-on-${encodeURIComponent(
-        Array.from(providersB)[0]
-      )}`;
+      const modelAPath = `${encodeURIComponent(
+        modelA.toLowerCase()
+      )}-on-${encodeURIComponent(providerA.toLowerCase())}`;
+      const modelBPath = `${encodeURIComponent(
+        modelB.toLowerCase()
+      )}-on-${encodeURIComponent(providerB.toLowerCase())}`;
 
       paths.push({
         comparison: `${modelAPath}-vs-${modelBPath}`,
