@@ -109,7 +109,6 @@
     "stripe": "^16.11.0",
     "tailwind-merge": "^2.5.2",
     "vaul": "^1.0.0",
-    "yarn": "^1.22.22",
     "zustand": "^5.0.1"
   },
   "devDependencies": {
