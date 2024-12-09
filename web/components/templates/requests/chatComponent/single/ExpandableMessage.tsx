@@ -42,7 +42,7 @@ export const ExpandableMessage: React.FC<ExpandableMessageProps> = ({
       for (const entry of entries) {
         console.log("New scroll height:", entry.target.scrollHeight);
         if (
-          entry.target.scrollHeight > (parentRef.current?.scrollHeight ?? 0)
+          entry.target.scrollHeight > (parentRef.current?.clientHeight ?? 0)
         ) {
           setShowButton(true);
         }
@@ -71,33 +71,32 @@ export const ExpandableMessage: React.FC<ExpandableMessageProps> = ({
   return (
     <Col ref={parentRef}>
       <div
-        ref={contentRef}
         className={clsx(
           expandFormat ? "truncate-text" : "",
-          "leading-6 pb-2 max-w-full"
+          "leading-6 pb-2 max-w-full transition-all"
         )}
         style={{ maxHeight: expanded ? "none" : "10.5rem" }}
       >
-        {textContainerRef.current?.scrollHeight}
-        {mode === "Pretty" ? (
-          <RenderWithPrettyInputKeys
-            text={
-              isJSON(formattedMessageContent)
-                ? JSON.stringify(JSON.parse(formattedMessageContent), null, 2)
-                : formattedMessageContent
-            }
-            selectedProperties={selectedProperties}
-          />
-        ) : (
-          <MarkdownEditor
-            language="markdown"
-            text={formattedMessageContent}
-            setText={() => {}}
-            className=""
-          />
-        )}
+        <div className="h-full" ref={contentRef}>
+          {mode === "Pretty" ? (
+            <RenderWithPrettyInputKeys
+              text={
+                isJSON(formattedMessageContent)
+                  ? JSON.stringify(JSON.parse(formattedMessageContent), null, 2)
+                  : formattedMessageContent
+              }
+              selectedProperties={selectedProperties}
+            />
+          ) : (
+            <MarkdownEditor
+              language="markdown"
+              text={formattedMessageContent}
+              setText={() => {}}
+              className=""
+            />
+          )}
+        </div>
       </div>
-
       {showButton && (
         <div className="w-full flex justify-center items-center pt-2 pr-24">
           <button onClick={handleToggle}>
