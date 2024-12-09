@@ -1,5 +1,4 @@
 import { useUser } from "@supabase/auth-helpers-react";
-import { Input } from "@/components/ui/input";
 import { useEffect, useState } from "react";
 import { generateAPIKeyHelper } from "../../../../utlis/generateAPIKeyHelper";
 import { useOrg } from "../../../layout/org/organizationContext";

@@ -1,5 +1,5 @@
 import { Result } from "@/lib/result";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
 import * as Listening from "../../../../public/lottie/Listening.json";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
@@ -8,7 +8,7 @@ import { ArrowUpRightIcon, MessageCircleQuestionIcon } from "lucide-react";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import { useOrg } from "@/components/layout/organizationContext";
+import { useOrg } from "@/components/layout/org/organizationContext";
 import { useJawnClient } from "@/lib/clients/jawnHook";
 import { useState } from "react";
 import Link from "next/link";

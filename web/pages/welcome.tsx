@@ -1,6 +1,6 @@
 import { GetServerSidePropsContext } from "next";
 import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
-import { useOrg } from "@/components/layout/organizationContext";
+import { useOrg } from "@/components/layout/org/organizationContext";
 import { useEffect } from "react";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
 import { useRouter } from "next/router";

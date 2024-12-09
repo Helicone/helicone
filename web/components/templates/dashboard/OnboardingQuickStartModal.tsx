@@ -4,16 +4,16 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
-import { ArrowLeftRightIcon, RouteIcon } from "lucide-react";
 import { cloneElement, useState } from "react";
-import IntegrationMethod from "../onboarding/steps/IntegrationMethod";
+import IntegrationMethod, {
+  INTEGRATION_METHODS,
+} from "../onboarding/steps/IntegrationMethod";
 import Framework from "../onboarding/steps/Framework";
 import EventListen from "../onboarding/steps/EventListen";
 import { useJawnClient } from "@/lib/clients/jawnHook";
-import { useOrg } from "@/components/layout/organizationContext";
+import { useOrg } from "@/components/layout/org/organizationContext";
 
 const steps = [
   {
@@ -28,37 +28,6 @@ const steps = [
   {
     title: "Send an event",
     description: "Test your integration by making a sample request",
-  },
-];
-
-export const INTEGRATION_METHODS = [
-  {
-    id: "async",
-    icon: (
-      <ArrowLeftRightIcon className="w-6 h-6 text-slate-400 dark:text-slate-500" />
-    ),
-    title: "Async",
-    description: "Flexible, not on the critical path.",
-    features: [
-      { good: true, description: "Zero latency impact" },
-      { good: false, description: "Not all languages/frameworks supported" },
-      { good: false, description: "Requires SDK" },
-    ],
-  },
-  {
-    id: "proxy",
-    recommended: true,
-    icon: <RouteIcon className="w-6 h-6 text-slate-400 dark:text-slate-500" />,
-    title: "Proxy",
-    description: "Simplest and fastest integration.",
-    features: [
-      { good: true, description: "Supports 300+ LLM models" },
-      {
-        good: true,
-        description: "Built-in caching, rate limiting, & more",
-      },
-      { good: false, description: "~50 ms latency impact" },
-    ],
   },
 ];
 
@@ -101,7 +70,7 @@ const OnboardingQuickStartModal = ({
               : `Hello ${org?.currentOrg?.name}!`}
           </DialogTitle>
           <DialogDescription className="text-sm text-slate-500">
-            Let's set up your first{" "}
+            Let&apos;s set up your first{" "}
             {currentStep === 2 ? (
               <span className="inline-flex items-center gap-1 text-slate-700 dark:text-slate-300 font-medium">
                 {cloneElement(

@@ -1,8 +1,38 @@
-import { CheckIcon } from "lucide-react";
+import { ArrowLeftRightIcon, CheckIcon, RouteIcon } from "lucide-react";
 import { ArrowUpRightIcon } from "lucide-react";
 import { BookOpenIcon } from "lucide-react";
-import { INTEGRATION_METHODS } from "../../dashboard/OnboardingQuickStartModal";
 import { cn } from "@/lib/utils";
+
+export const INTEGRATION_METHODS = [
+  {
+    id: "async",
+    icon: (
+      <ArrowLeftRightIcon className="w-6 h-6 text-slate-400 dark:text-slate-500" />
+    ),
+    title: "Async",
+    description: "Flexible, not on the critical path.",
+    features: [
+      { good: true, description: "Zero latency impact" },
+      { good: false, description: "Not all languages/frameworks supported" },
+      { good: false, description: "Requires SDK" },
+    ],
+  },
+  {
+    id: "proxy",
+    recommended: true,
+    icon: <RouteIcon className="w-6 h-6 text-slate-400 dark:text-slate-500" />,
+    title: "Proxy",
+    description: "Simplest and fastest integration.",
+    features: [
+      { good: true, description: "Supports 300+ LLM models" },
+      {
+        good: true,
+        description: "Built-in caching, rate limiting, & more",
+      },
+      { good: false, description: "~50 ms latency impact" },
+    ],
+  },
+];
 
 const IntegrationMethod = ({
   setSelectedIntegrationMethod,

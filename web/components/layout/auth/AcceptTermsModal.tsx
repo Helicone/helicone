@@ -16,7 +16,7 @@ import { useJawnClient } from "@/lib/clients/jawnHook";
 import { Database } from "@/supabase/database.types";
 import { useLocalStorage } from "@/services/hooks/localStorage";
 import { usePathname } from "next/navigation";
-import { useOrg } from "../organizationContext";
+import { useOrg } from "../org/organizationContext";
 
 const AcceptTermsModal = () => {
   const [showTermsModal, setShowTermsModal] = useState(false);

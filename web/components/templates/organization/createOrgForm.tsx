@@ -1,5 +1,3 @@
-import { RadioGroup } from "@headlessui/react";
-
 import { useUser } from "@supabase/auth-helpers-react";
 import { useState } from "react";
 import { getJawnClient } from "../../../lib/clients/jawn";
@@ -12,7 +10,6 @@ import CreateProviderKeyModal from "../vault/createProviderKeyModal";
 import { useVaultPage } from "../vault/useVaultPage";
 import { ORGANIZATION_COLORS, ORGANIZATION_ICONS } from "./orgConstants";
 import {
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -20,16 +17,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useTranslation } from "react-i18next";
 import useOnboardingContext from "@/components/layout/onboardingContext";
-import { Loader2, X } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 interface CreateOrgFormProps {
   variant?: "organization" | "reseller";

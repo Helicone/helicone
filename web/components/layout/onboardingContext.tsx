@@ -20,7 +20,7 @@ import { BeakerIcon } from "@heroicons/react/24/outline";
 import { cn } from "@/lib/utils";
 import { OnboardingPopoverAccordion } from "../templates/onboarding/OnboardingPopoverMore";
 import { DiffHighlight } from "../templates/welcome/diffHighlight";
-import { useOrg } from "./organizationContext";
+import { useOrg } from "./org/organizationContext";
 import { useRouter } from "next/navigation";
 import { usePathname } from "next/navigation";
 
