@@ -2,7 +2,7 @@ import { BookOpenIcon } from "@heroicons/react/24/outline";
 import { AreaChart } from "@tremor/react";
 import Link from "next/link";
 import { useState } from "react";
-import { TimeFilter } from "../../../lib/api/handlerWrappers";
+import { TimeFilter } from "../../../services/lib/filters/filterDefs";
 import { Result, resultMap } from "../../../lib/result";
 import { RequestsOverTime } from "../../../lib/timeCalculations/fetchTimeData";
 import {
@@ -18,7 +18,7 @@ import useSearchParams from "../../shared/utils/useSearchParams";
 import RequestsPageV2 from "../requestsV2/requestsPageV2";
 import { useGetPropertiesV2 } from "../../../services/hooks/propertiesV2";
 import { getPropertyFiltersV2 } from "../../../services/lib/filters/frontendFilterDefs";
-import { useOrg } from "@/components/layout/organizationContext";
+import { useOrg } from "@/components/layout/org/organizationContext";
 
 import { FeatureUpgradeCard } from "../../shared/helicone/FeatureUpgradeCard";
 

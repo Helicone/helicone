@@ -630,7 +630,7 @@ Optimize your AI API costs:`;
           >
             Output Tokens
           </Label>
-          <div className="grow shrink basis-0 bg-[#f8feff] flex-col justify-start items-start gap-1.5 inline-flex">
+          <div className="grow shrink basis-0 flex-col justify-start items-start gap-1.5 inline-flex">
             <div className="self-stretch relative w-full">
               <Input
                 id="outputTokens"

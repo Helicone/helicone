@@ -3,7 +3,8 @@ import { BarChart } from "@tremor/react";
 import { getJawnClient } from "../../../lib/clients/jawn";
 import { Card, Grid } from "../../layout/common";
 import { clsx } from "../../shared/clsx";
-import { colors, humanReadableNumber } from "./OpenStatsPage";
+import { humanReadableNumber } from "./humanReadableNumber";
+import { colors } from "./colors";
 const transformAllProviderData = (
   data: { date: string; provider: string; tokens: number }[]
 ) => {

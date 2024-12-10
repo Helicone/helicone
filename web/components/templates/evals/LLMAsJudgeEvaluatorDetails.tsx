@@ -15,7 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useQuery } from "@tanstack/react-query";
 import { getJawnClient } from "@/lib/clients/jawn";
-import { useOrg } from "@/components/layout/organizationContext";
+import { useOrg } from "@/components/layout/org/organizationContext";
 import Link from "next/link";
 
 interface LLMAsJudgeEvaluatorDetailsProps {

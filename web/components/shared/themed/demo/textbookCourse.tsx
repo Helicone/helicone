@@ -7,7 +7,7 @@ import "prismjs/themes/prism.css";
 import "prismjs/components/prism-clike";
 import "prismjs/components/prism-javascript";
 import "prismjs/components/prism-json";
-import { Course } from "./courseGenerator";
+import { Course } from "./types";
 import Link from "next/link";
 import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/solid";
 import { useRouter } from "next/router";

@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import generateApiKey from "generate-api-key";
 import { useState } from "react";
 import { generateAPIKeyHelper } from "../../../../utlis/generateAPIKeyHelper";
-import { useOrg } from "../../../layout/organizationContext";
+import { useOrg } from "../../../layout/org/organizationContext";
 import useNotification from "../../../shared/notification/useNotification";
 import Image from "next/image";
 import { clsx } from "../../../shared/clsx";

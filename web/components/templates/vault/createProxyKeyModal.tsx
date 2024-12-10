@@ -15,7 +15,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { Database } from "../../../supabase/database.types";
 import { useFeatureFlags } from "../../../services/hooks/featureFlags";
-import { useOrg } from "../../layout/organizationContext";
+import { useOrg } from "../../layout/org/organizationContext";
 
 interface CreateProxyKeyModalProps {
   providerKeys: DecryptedProviderKey[];

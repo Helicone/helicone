@@ -12,7 +12,7 @@ import { INITIAL_COLUMNS } from "./initialColumns";
 import SessionMetrics from "./SessionMetrics";
 import { TabsContent } from "@/components/ui/tabs";
 import { SESSIONS_TABLE_FILTERS } from "@/services/lib/filters/frontendFilterDefs";
-import { UIFilterRowTree } from "@/services/lib/filters/uiFilterRowTree";
+import { UIFilterRowTree } from "@/services/lib/filters/types";
 
 type TSessions = {
   created_at: string;
@@ -26,9 +26,8 @@ type TSessions = {
   total_tokens: number;
 };
 
-export type SessionResult = ReturnType<
-  typeof useSessionNames
->["sessions"][number];
+type SessionResult = ReturnType<typeof useSessionNames>["sessions"][number];
+
 interface SessionDetailsProps {
   currentTab: string;
   selectedSession: SessionResult | null;

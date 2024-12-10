@@ -126,7 +126,10 @@
         },
         {
           "group": "AWS Bedrock",
-          "pages": ["integrations/bedrock/javascript"]
+          "pages": [
+            "integrations/bedrock/javascript",
+            "integrations/bedrock/python"
+          ]
         },
         {
           "group": "Gemini",

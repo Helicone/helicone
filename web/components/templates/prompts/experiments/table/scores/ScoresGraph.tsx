@@ -11,7 +11,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { CartesianGrid, Line, LineChart, XAxis } from "recharts";
 import { useExperimentTable } from "../hooks/useExperimentTable";
-import { PromptVersion } from "./ScoresGraphContainer";
+import { PromptVersion } from "./PromptVersion";
 
 const ScoresGraph = ({
   promptVersions,

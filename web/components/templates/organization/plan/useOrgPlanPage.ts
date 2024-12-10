@@ -1,7 +1,7 @@
 import { UseQueryResult } from "@tanstack/react-query";
 import { Result, resultMap } from "../../../../lib/result";
 import { TimeIncrement } from "../../../../lib/timeCalculations/fetchTimeData";
-import { RateLimitOverTime } from "../../../../pages/api/metrics/rateLimitsOverTime";
+import { RateLimitOverTime } from "../../../../pages/api/metrics/RateLimitOverTime";
 import { useBackendMetricCall } from "../../../../services/hooks/useBackendFunction";
 import { FilterNode } from "../../../../services/lib/filters/filterDefs";
 

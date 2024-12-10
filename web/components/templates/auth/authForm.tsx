@@ -3,7 +3,6 @@ import { BsGoogle, BsGithub } from "react-icons/bs";
 import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { CustomerPortalContent } from "../../../pages/signin";
 import { useRouter } from "next/router";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,6 +13,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+
+type CustomerPortalContent = {
+  domain: string;
+  logo: string;
+};
 
 interface AuthFormProps {
   handleEmailSubmit: (email: string, password: string) => void;
@@ -31,6 +36,8 @@ const AuthForm = (props: AuthFormProps) => {
     authFormType,
     customerPortalContent,
   } = props;
+
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   const router = useRouter();
   useEffect(() => {
@@ -91,6 +98,8 @@ const AuthForm = (props: AuthFormProps) => {
     }
     return "us";
   };
+
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   return (
     <div className="w-full bg-[#f8feff] h-full antialiased relative">
@@ -212,6 +221,59 @@ const AuthForm = (props: AuthFormProps) => {
                         </div>
                       </div>
                     )}
+                    {authFormType === "signup" && (
+                      <div>
+                        <label
+                          htmlFor="confirmPassword"
+                          className="block text-sm lg:text-md  font-medium leading-6 text-gray-900"
+                        >
+                          Confirm password
+                        </label>
+                        <div className="mt-1">
+                          <Input
+                            id="confirmPassword"
+                            name="confirmPassword"
+                            type="password"
+                            autoComplete="current-password"
+                            placeholder="***********"
+                            required
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                          />
+                        </div>
+                        {confirmPassword && password !== confirmPassword && (
+                          <p className="text-xs text-red-500">
+                            Passwords do not match
+                          </p>
+                        )}
+                      </div>
+                    )}
+
+                    {authFormType === "signup" && (
+                      <div className="flex items-center justify-start gap-1">
+                        <Checkbox
+                          checked={acceptedTerms}
+                          onCheckedChange={(checked) =>
+                            setAcceptedTerms(checked as boolean)
+                          }
+                        />
+                        <div className="text-xs leading-6 flex items-center gap-1">
+                          <Link
+                            href={"/terms"}
+                            className="font-medium text-blue-500 hover:text-blue-400 focus:outline-none focus:underline transition ease-in-out duration-150"
+                          >
+                            Accept terms
+                          </Link>
+                          and{" "}
+                          <Link
+                            href={"/privacy"}
+                            className="font-medium text-blue-500 hover:text-blue-400 focus:outline-none focus:underline transition ease-in-out duration-150"
+                          >
+                            privacy policy
+                          </Link>
+                        </div>
+                      </div>
+                    )}
                     {authFormType === "signin" && (
                       <div className="flex items-center justify-end">
                         <div className="text-xs leading-6">
@@ -229,7 +291,11 @@ const AuthForm = (props: AuthFormProps) => {
                   <div className="pt-2 w-full flex">
                     <Button
                       size={"sm"}
-                      disabled={isLoading}
+                      disabled={
+                        isLoading ||
+                        (authFormType === "signup" &&
+                          (!acceptedTerms || password !== confirmPassword))
+                      }
                       type="submit"
                       className="w-full flex"
                     >

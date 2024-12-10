@@ -10,7 +10,7 @@ import { Dialog, DialogTrigger } from "../../../../ui/dialog";
 import { useState } from "react";
 import { useJawnClient } from "../../../../../lib/clients/jawnHook";
 import { getExampleExperimentPrompt } from "./helpers/basePrompt";
-import { useOrg } from "@/components/layout/organizationContext";
+import { useOrg } from "@/components/layout/org/organizationContext";
 import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
 
 const ExperimentsPage = () => {

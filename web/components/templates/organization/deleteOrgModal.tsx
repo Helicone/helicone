@@ -1,5 +1,5 @@
 import { clsx } from "../../shared/clsx";
-import { useOrg } from "../../layout/organizationContext";
+import { useOrg } from "../../layout/org/organizationContext";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedModal from "../../shared/themed/themedModal";
 import { useRouter } from "next/router";

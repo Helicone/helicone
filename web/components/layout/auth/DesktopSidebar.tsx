@@ -9,22 +9,14 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useMemo, useEffect, useRef, useState } from "react";
-import { useOrg } from "../organizationContext";
+import { useOrg } from "../org/organizationContext";
 import OrgDropdown from "../orgDropdown";
 import NavItem from "./NavItem";
-import { ChangelogItem } from "./Sidebar";
+import { ChangelogItem } from "./types";
 import ChangelogModal from "../ChangelogModal";
 import SidebarHelpDropdown from "../SidebarHelpDropdown";
 import { useTheme } from "next-themes";
-
-export interface NavigationItem {
-  name: string;
-  href: string;
-  icon: React.ComponentType<React.SVGProps<SVGSVGElement>> | null;
-  current: boolean;
-  featured?: boolean;
-  subItems?: NavigationItem[];
-}
+import { NavigationItem } from "./types";
 
 interface SidebarProps {
   NAVIGATION: NavigationItem[];

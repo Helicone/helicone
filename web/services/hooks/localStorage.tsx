@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { useOrg } from "../../components/layout/organizationContext";
+import { useOrg } from "../../components/layout/org/organizationContext";
 
 export function useLocalStorage<T>(
   key: string,

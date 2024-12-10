@@ -7,7 +7,7 @@ import { DEMO_EMAIL } from "../../../lib/constants";
 
 import { Database } from "../../../supabase/database.types";
 import { clsx } from "../../shared/clsx";
-import { useOrg } from "../../layout/organizationContext";
+import { useOrg } from "../../layout/org/organizationContext";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedModal from "../../shared/themed/themedModal";

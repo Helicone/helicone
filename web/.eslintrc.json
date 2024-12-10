@@ -3,7 +3,11 @@
 
   "ignorePatterns": ["lib/clients/jawnTypes/*.ts"],
   "plugins": ["unused-imports"],
+  "parserOptions": {
+    "ecmaVersion": 13
+  },
   "rules": {
-    "unused-imports/no-unused-imports": "error"
+    "unused-imports/no-unused-imports": "error",
+    "import/no-cycle": "error"
   }
 }

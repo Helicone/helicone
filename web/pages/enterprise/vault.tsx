@@ -3,7 +3,7 @@ import AuthLayout from "../../components/layout/auth/authLayout";
 import { ReactElement } from "react";
 import DeveloperPage from "../../components/templates/developer/developerPage";
 import VaultPage from "../../components/templates/vault/vaultPage";
-import { useOrg } from "../../components/layout/organizationContext";
+import { useOrg } from "../../components/layout/org/organizationContext";
 import { ContactUsSection } from "../developer/index";
 
 const DeveloperVault: NextPageWithLayout = () => {

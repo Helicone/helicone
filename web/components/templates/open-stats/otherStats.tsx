@@ -7,7 +7,8 @@ import { getJawnClient } from "../../../lib/clients/jawn";
 import { Card, Col, Grid, Row } from "../../layout/common";
 import CheckBox from "../../layout/common/checkBox";
 import { clsx } from "../../shared/clsx";
-import { colors, humanReadableNumber } from "./OpenStatsPage";
+import { humanReadableNumber } from "./humanReadableNumber";
+import { colors } from "./colors";
 import { useQueryParams } from "./useQueryParams";
 const timeSpans = ["7d", "1m", "3m"] as const;
 export const allProviders = [

@@ -1,17 +1,8 @@
 import LoadingAnimation from "@/components/shared/loadingAnimation";
-import { TimeIncrement } from "@/lib/timeCalculations/fetchTimeData";
 import { Card, LineChart } from "@tremor/react";
 import clsx from "clsx";
-import { FilterNode } from "../../../../../services/lib/filters/filterDefs";
-import { TimeFilter } from "../../dashboardPage";
 import { useScores } from "./useScores";
-
-export interface ScoresPanelProps {
-  timeFilter: TimeFilter;
-  userFilters: FilterNode;
-  dbIncrement: TimeIncrement;
-  filterBool?: boolean;
-}
+import { ScoresPanelProps } from "./ScoresPanelProps";
 
 export const ScoresPanel = (props: ScoresPanelProps) => {
   const { timeFilter, userFilters, dbIncrement, filterBool } = props;

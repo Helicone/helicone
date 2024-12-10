@@ -6,20 +6,84 @@ icon: "js"
 iconType: "solid"
 ---
 
-# Async Integration
+# Proxy Integration
 
-<Note>
-  Helicone uses [OpenLLMetry](https://github.com/traceloop/openllmetry-js) to
-  capture traces when using async logging. Currently OpenLLMetry doesn't support
-  reporting message bodies for AWS Bedrock, we're currently working with them to
-  add proper support for reporting Bedrock traces.them to add proper support for
-  reporting Bedrock traces.
-</Note>
+<Steps>
+  <Step title="Create an account + Generate an API Key">
+    Log into [helicone](https://www.helicone.ai) or create an account. Once you have an account, you
+    can generate an [API key](https://us.helicone.ai/settings/api-keys).
+  </Step>
+  <Step title="Set HELICONE_API_KEY as an environment variable">
+```javascript
+HELICONE_API_KEY=<your API key>
+```
+  </Step>
+  <Step title="Run the Bedrock command with the Helicone Proxy">
+```javascript 
+import {
+  BedrockRuntimeClient,
+  InvokeModelCommand,
+} from "@aws-sdk/client-bedrock-runtime";
+
+const REGION = "ap-south-1"; // or any other region
+const client = new BedrockRuntimeClient({
+  region: REGION,
+  endpoint: `https://bedrock.helicone.ai/v1/${REGION}`,
+});
+
+// Add middleware to inject custom headers
+client.middlewareStack.add(
+  (next, context) => async (args: any) => {
+    if (!args.request.headers) {
+      args.request.headers = {};
+    }
+
+    // Add your custom headers here
+    args.request.headers["Helicone-Auth"] = `Bearer ${process.env.HELICONE_API_KEY}`;
+    args.request.headers["aws-access-key"] = "<AWS ACCESS KEY>";
+    args.request.headers["aws-secret-key"] = "<AWS SECRET KEY>";
+    // optionally, you can pass the aws-session-token instead of access and secret key if you are using temporary credentials
+    args.request.headers["aws-session-token"] = "<AWS SESSION TOKEN>";
+
+    return next(args);
+  },
+  {
+    step: "build",
+    name: "addCustomHeaders",
+  }
+);
+
+const model_id = "meta.llama3-8b-instruct-v1:0";
+
+export const main = async () => {
+  const command = new InvokeModelCommand({
+    modelId: model_id,
+    body: JSON.stringify({
+      prompt: "Hello, world!",
+      max_gen_len: 512,
+      temperature: 0.5,
+      top_p: 0.9,
+    }),
+    accept: "application/json",
+    contentType: "application/json",
+  });
+
+  const response = await client.send(command);
+  console.log(response.body?.transformToString());
+};
+
+main();
+```
+
+  </Step>
+</Steps>
+
+# Async Integration
 
 <Steps>
   <Step title="Create an account + Generate an API Key">
     Log into [Helicone](https://www.helicone.ai) or create an account. Once you have an account, you
-    can generate an [API key](https://helicone.ai/developer).
+    can generate an [API key](https://us.helicone.ai/settings/api-keys).
   </Step>
   <Step title="Set API keys as environment variables">
     ```bash
@@ -96,7 +160,7 @@ iconType: "solid"
   </Step>
 </Steps>
 
-## Complete Example
+### Complete Async Example
 
 Here's a complete example that puts all the steps together:
 

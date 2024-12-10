@@ -6,7 +6,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { XIcon } from "lucide-react";
 import { useState } from "react";
 import { getJawnClient } from "../../../lib/clients/jawn";
-import { useOrg } from "../../layout/organizationContext";
+import { useOrg } from "../../layout/org/organizationContext";
 
 interface FeatureFlagCardProps {
   flag: {

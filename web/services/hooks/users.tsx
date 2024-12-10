@@ -1,12 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { UserMetric } from "../../lib/api/users/users";
+import { UserMetric } from "../../lib/api/users/UserMetric";
 import { Result } from "../../lib/result";
-import {
-  FilterNode,
-  filterListToTree,
-  filterUIToFilterLeafs,
-} from "../lib/filters/filterDefs";
+import { FilterNode } from "../lib/filters/filterDefs";
+import { filterUIToFilterLeafs } from "../lib/filters/helpers/filterFunctions";
+import { filterListToTree } from "../lib/filters/filterListToTree";
 import { SortLeafUsers } from "../lib/sorts/users/sorts";
 import {
   DASHBOARD_PAGE_TABLE_FILTERS,
