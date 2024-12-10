@@ -58,7 +58,7 @@ export class OrganizationController extends Controller {
     @Body()
     requestBody: NewOrganizationParams,
     @Request() request: JawnAuthenticatedRequest
-  ): Promise<Result<null, string>> {
+  ): Promise<Result<string, string>> {
     const organizationManager = new OrganizationManager(request.authParams);
 
     const result = await organizationManager.createOrganization(requestBody);
@@ -67,7 +67,7 @@ export class OrganizationController extends Controller {
       return err(result.error ?? "Error creating organization");
     } else {
       this.setStatus(201); // set return status 201
-      return ok(null);
+      return ok(result.data.id ?? "");
     }
   }
 
@@ -345,6 +345,25 @@ export class OrganizationController extends Controller {
     if (result.error || !result.data) {
       this.setStatus(500);
       return err(result.error ?? "Error removing member from organization");
+    } else {
+      this.setStatus(201);
+      return ok(null);
+    }
+  }
+
+  @Post("/setup-demo")
+  public async setupDemo(
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<null, string>> {
+    const organizationManager = new OrganizationManager(request.authParams);
+
+    const result = await organizationManager.setupDemo(
+      request.authParams.organizationId ?? ""
+    );
+    if (result.error) {
+      this.setStatus(500);
+      console.error(result.error);
+      return err(result.error ?? "Error setting up demo");
     } else {
       this.setStatus(201);
       return ok(null);

@@ -52,13 +52,13 @@ export class SupabaseServerWrapper<T> {
     if (!user.data || !user.data.user) {
       return { error: "Unauthorized User", data: null };
     }
-
     const orgAccessCheck = await this.client
       .from("organization")
       .select("*")
       .eq("id", this.ctx.req.cookies[ORG_ID_COOKIE_KEY] || "");
 
     if (orgAccessCheck.data?.length === 0) {
+      // maybe then we should call the create dummy org api
       return ok({
         userId: user.data.user.id,
         orgId: "na",

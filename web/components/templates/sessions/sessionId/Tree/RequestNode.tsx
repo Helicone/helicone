@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useMemo } from "react";
 import { TreeNodeData } from "../../../../../lib/sessions/sessionTypes";
 import { Row } from "../../../../layout/common/row";
 import StatusBadge from "../../../requestsV2/statusBadge";
@@ -7,8 +7,12 @@ import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-  TooltipProvider,
 } from "@/components/ui/tooltip";
+import { OnboardingPopover } from "@/components/templates/onboarding/OnboardingPopover";
+import { useRouter } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
+import { useOrg } from "@/components/layout/org/organizationContext";
+import { getJawnClient } from "@/lib/clients/jawn";
 
 const bgColor = {
   LLM: "bg-sky-200 dark:bg-sky-900 text-sky-700 dark:text-sky-200 ",
@@ -26,6 +30,7 @@ const NAME_FOR = {
 };
 
 export function RequestNode(props: {
+  isOnboardingRequest: boolean;
   isRequestSingleChild: boolean;
   selectedRequestId: string;
   node: TreeNodeData;
@@ -37,9 +42,10 @@ export function RequestNode(props: {
   label?: string;
 }) {
   const {
+    isOnboardingRequest,
+    node,
     isRequestSingleChild,
     selectedRequestId,
-    node,
     setCloseChildren,
     closeChildren,
     setSelectedRequestId,
@@ -47,6 +53,35 @@ export function RequestNode(props: {
     setShowDrawer,
     label,
   } = props;
+
+  const promptId = useMemo(() => {
+    return node.trace?.request.customProperties?.["Helicone-Prompt-Id"] as
+      | string
+      | undefined;
+  }, [node.trace?.request.customProperties]);
+
+  const router = useRouter();
+
+  const org = useOrg();
+
+  const promptData = useQuery({
+    queryKey: ["prompt", promptId, org?.currentOrg?.id],
+    queryFn: async (query) => {
+      const jawn = getJawnClient(query.queryKey[2]);
+      const prompt = await jawn.POST("/v1/prompt/query", {
+        body: {
+          filter: {
+            prompt_v2: {
+              user_defined_id: {
+                equals: query.queryKey[1],
+              },
+            },
+          },
+        },
+      });
+      return prompt.data?.data?.[0];
+    },
+  });
 
   const modelRef = useRef<HTMLDivElement>(null);
   const [isTruncated, setIsTruncated] = useState(false);
@@ -65,7 +100,19 @@ export function RequestNode(props: {
     : "LLM";
 
   return (
-    <TooltipProvider>
+    <OnboardingPopover
+      open={isOnboardingRequest}
+      popoverContentProps={{
+        onboardingStep: "SESSIONS_CULPRIT",
+        next: () => {
+          router.push(`/prompts/${promptData.data?.id}`);
+        },
+        align: "start",
+        side: "right",
+        className: "sm:max-w-2xl",
+      }}
+      triggerAsChild={false}
+    >
       <div
         className={clsx(
           "flex flex-col dark:bg-slate-900 py-[8px] pl-4 px-4 group-hover:cursor-pointer w-full",
@@ -118,6 +165,6 @@ export function RequestNode(props: {
           </Row>
         </Row>
       </div>
-    </TooltipProvider>
+    </OnboardingPopover>
   );
 }

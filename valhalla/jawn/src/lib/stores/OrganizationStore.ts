@@ -6,7 +6,11 @@ import {
   OrganizationOwner,
   UpdateOrganizationParams,
 } from "../../managers/organization/OrganizationManager";
+import { hashAuth } from "../../utils/hash";
 import { supabaseServer } from "../db/supabase";
+import { BaseTempKey } from "../experiment/tempKeys/baseTempKey";
+import { generateHeliconeAPIKey } from "../experiment/tempKeys/tempAPIKey";
+import { setupDemoOrganizationRequests } from "../onboarding";
 import { dbExecute } from "../shared/db/dbExecute";
 import { err, ok, Result } from "../shared/result";
 import { BaseStore } from "./baseStore";
@@ -381,5 +385,30 @@ export class OrganizationStore extends BaseStore {
     }>(query, [orgId, userId]);
 
     return error === null && data?.length > 0;
+  }
+
+  public async setupDemo(
+    userId: string,
+    organizationId: string
+  ): Promise<Result<null, string>> {
+    const tempKey: Result<BaseTempKey, string> = await generateHeliconeAPIKey(
+      organizationId
+    );
+
+    if (tempKey.error) {
+      return err(tempKey.error);
+    }
+
+    try {
+      await tempKey.data?.with(async (apiKey) => {
+        await setupDemoOrganizationRequests({
+          heliconeApiKey: apiKey,
+        });
+      });
+
+      return ok(null);
+    } catch (error) {
+      return err(`Failed to setup demo: ${error}`);
+    }
   }
 }

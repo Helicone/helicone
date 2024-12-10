@@ -5,116 +5,39 @@ import { clsx } from "../../../../shared/clsx";
 const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH || "";
 
 const CODE_CONVERTS = {
-  typescript: (key: string) => `
-import Anthropic from '@anthropic-ai/sdk';
+  typescript: (key: string) => `import Anthropic from "@anthropic-ai/sdk";
 
-const anthropic = new Anthropic({
-  baseURL: "https://anthropic.helicone.ai/",
-  apiKey: 'my_api_key', // defaults to process.env["ANTHROPIC_API_KEY"]
+const client = new Anthropic({
+  apiKey: "{{ANTHROPIC_API_KEY}}",
+  baseURL: "https://anthropic.helicone.ai",
   defaultHeaders: {
-    "Helicone-Auth": "Bearer ${key}",
-  },
-});
-  
-const msg = await anthropic.messages.create({
-  model: "claude-3-opus-20240229",
-  max_tokens: 1024,
-  messages: [{ role: "user", content: "Hello, Claude" }],
-});
+    "Helicone-Auth": "Bearer ${key}"
+  }
+});`,
 
-console.log(msg);
-`,
+  python: (key: string) => `from anthropic import Anthropic
 
-  python: (key: string) => `
-import anthropic
-
-client = anthropic.Anthropic(
-  # defaults to os.environ.get("ANTHROPIC_API_KEY")
-  api_key="my_api_key",
-  base_url="https://anthropic.helicone.ai/",
+client = Anthropic(
+  api_key="{{ANTHROPIC_API_KEY}}",
+  base_url="https://anthropic.helicone.ai",
   default_headers={
-    "Helicone-Auth": "Bearer ${key}",
+    "Helicone-Auth": f"Bearer ${key}"
   }
-)
-  
-message = client.messages.create(
-  model="claude-3-opus-20240229",
-  max_tokens=1024,
-  messages=[
-    {"role": "user", "content": "Hello, Claude"}
-  ]
-)
-  
-print(message.content)
-`,
+)`,
 
-  langchain_python: (key: string) => `
-anthropic = ChatAnthropic(
-  temperature=0.9,
-  model="claude-3-opus-20240229",
-  anthropic_api_url="https://anthropic.helicone.ai/",
-  anthropic_api_key="ANTHROPIC_API_KEY",
-  model_kwargs={
-    "extra_headers":{
-      "Helicone-Auth": f"Bearer ${key}"
-    }
-  }
-)
-  
-
-`,
-  langchain_typescript: (key: string) => `
-const llm = new ChatAnthropic({
-  modelName: "claude-3-opus-20240229",
-  anthropicApiKey: "ANTHROPIC_API_KEY",
-  clientOptions: {
-    baseURL: "https://anthropic.helicone.ai/",
-    defaultHeaders: {
-      "Helicone-Auth": "Bearer ${key}",
-    }
-  }
-});
-`,
-
-  asyncLogging: (key: string) => `
-import { HeliconeAsyncLogger } from "@helicone/helicone";
-import Anthropic from "@anthropic-ai/sdk";
-
-const logger = new HeliconeAsyncLogger({
-  apiKey: process.env.HELICONE_API_KEY,
-  providers: {
-    anthropic: Anthropic
-  }
-});
-logger.init();
-
-const anthropic = new Anthropic();
-
-// Call Anthropic
-  `,
-  manualLogging: (key: string) => `
-import { HeliconeManualLogger } from "@helicone/helicone";
-
-const logger = new HeliconeManualLogger({
-  apiKey: process.env.HELICONE_API_KEY
-});
-
-const reqBody = {
-  max_tokens: 100,
-  model: "claude-3-opus-20240229",
-  messages: [{
-    role: "user",
-    content: "What is the UNIX Epoch?",
-  }],
-}
-
-logger.registerRequest(reqBody);
-// Call Anthropic using JS SDK / fetch
-const res = await r.json();
-console.log(res);
-
-logger.sendLog(res);
-  `,
+  curl: (key: string) => `curl "https://anthropic.helicone.ai/v1/messages" \\
+  -H "x-api-key: {{ANTHROPIC_API_KEY}}" \\
+  -H "Helicone-Auth: Bearer ${key}" \\
+  -H "anthropic-version: 2023-06-01" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "messages": [
+      {
+        "role": "user",
+        "content": "Hello!"
+      }
+    ]
+  }'`,
 };
 
 type SupportedLanguages = keyof typeof CODE_CONVERTS;
@@ -122,23 +45,9 @@ type SupportedLanguages = keyof typeof CODE_CONVERTS;
 const DIFF_LINES: {
   [key in SupportedLanguages]: number[];
 } = {
-  typescript: [3, 6],
-  python: [5, 7],
-  langchain_python: [3, 7],
-  langchain_typescript: [4, 6],
-  asyncLogging: [],
-  manualLogging: [],
-};
-
-const NAMES: {
-  [key in SupportedLanguages]: string;
-} = {
-  typescript: "Node.js",
-  python: "Python",
-  langchain_python: "LangChain",
-  langchain_typescript: "LangChainJS",
-  asyncLogging: "OpenLLMetry",
-  manualLogging: "Custom",
+  typescript: [4, 6],
+  python: [4, 6],
+  curl: [0, 2],
 };
 
 interface AnthropicSnippetsProps {
@@ -151,73 +60,55 @@ export default function AnthropicSnippets(props: AnthropicSnippetsProps) {
 
   return (
     <div className="w-full flex flex-col">
-      <label className="font-semibold text-sm">
-        Select your integration method
-      </label>
-      <div className="flex flex-wrap gap-4 py-2 w-full">
-        <button
-          className={clsx(
-            lang === "typescript" ? "bg-sky-100" : "bg-white",
-            "flex items-center gap-2 border border-gray-300 rounded-lg py-2 px-4"
-          )}
-          onClick={() => setLang("typescript")}
-        >
-          <h2 className="font-semibold">Node.js</h2>
-        </button>
-        <button
-          className={clsx(
-            lang === "python" ? "bg-sky-100" : "bg-white",
-            "flex items-center gap-2 border border-gray-300 rounded-lg py-2 px-4"
-          )}
-          onClick={() => setLang("python")}
-        >
-          <h2 className="font-semibold">Python</h2>
-        </button>
-        <button
-          className={clsx(
-            lang === "langchain_python" ? "bg-sky-100" : "bg-white",
-            "flex items-center gap-2 border border-gray-300 rounded-lg py-2 px-4"
-          )}
-          onClick={() => setLang("langchain_python")}
-        >
-          <h2 className="font-semibold">Langchain</h2>
-        </button>
-        <button
-          className={clsx(
-            lang === "langchain_typescript" ? "bg-sky-100" : "bg-white",
-            "flex items-center gap-2 border border-gray-300 rounded-lg py-2 px-4"
-          )}
-          onClick={() => setLang("langchain_typescript")}
-        >
-          <h2 className="font-semibold">LangchainJS</h2>
-        </button>
-        <button
-          className={clsx(
-            lang === "asyncLogging" ? "bg-sky-100" : "bg-white",
-            "flex items-center gap-2 border border-gray-300 rounded-lg py-2 px-4"
-          )}
-          onClick={() => setLang("asyncLogging")}
-        >
-          <h2 className="font-semibold">OpenLLMetry</h2>
-        </button>
-        <button
-          className={clsx(
-            lang === "manualLogging" ? "bg-sky-100" : "bg-white",
-            "flex items-center gap-2 border border-gray-300 rounded-lg py-2 px-4"
-          )}
-          onClick={() => setLang("manualLogging")}
-        >
-          <h2 className="font-semibold">Custom</h2>
-        </button>
-      </div>
-
       <DiffHighlight
         code={CODE_CONVERTS[lang](apiKey)}
-        language="lang"
+        language={lang === "curl" ? "bash" : lang}
         newLines={DIFF_LINES[lang]}
         oldLines={[]}
         minHeight={false}
       />
+
+      <div className="mt-2">
+        <div className="flex overflow-x-auto py-2 w-full no-scrollbar">
+          <div className="flex gap-2">
+            <button
+              className={clsx(
+                lang === "typescript" ? "bg-sky-100" : "bg-white",
+                "flex-shrink-0 flex items-center gap-2 border border-gray-300 rounded-lg py-1.5 px-3 text-sm"
+              )}
+              onClick={() => setLang("typescript")}
+            >
+              <h2 className="font-semibold">Node.js</h2>
+            </button>
+            <button
+              className={clsx(
+                lang === "python" ? "bg-sky-100" : "bg-white",
+                "flex-shrink-0 flex items-center gap-2 border border-gray-300 rounded-lg py-1.5 px-3 text-sm"
+              )}
+              onClick={() => setLang("python")}
+            >
+              <h2 className="font-semibold">Python</h2>
+            </button>
+            <button
+              className={clsx(
+                lang === "curl" ? "bg-sky-100" : "bg-white",
+                "flex-shrink-0 flex items-center gap-2 border border-gray-300 rounded-lg py-1.5 px-3 text-sm"
+              )}
+              onClick={() => setLang("curl")}
+            >
+              <h2 className="font-semibold">cURL</h2>
+            </button>
+            <a
+              href="https://docs.helicone.ai/integrations/anthropic/javascript"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-shrink-0 flex items-center gap-2 border border-gray-300 rounded-lg py-1.5 px-3 text-sm hover:bg-gray-50"
+            >
+              <h2 className="font-semibold">More ›</h2>
+            </a>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

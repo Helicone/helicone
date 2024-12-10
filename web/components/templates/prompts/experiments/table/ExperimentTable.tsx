@@ -1,5 +1,5 @@
 import { useExperimentTable } from "./hooks/useExperimentTable";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   createColumnHelper,
   flexRender,
@@ -45,11 +45,17 @@ import AddManualRowPanel from "./AddManualRowPanel";
 import { IslandContainer } from "@/components/ui/islandContainer";
 import HcBreadcrumb from "@/components/ui/hcBreadcrumb";
 import { Switch } from "@/components/ui/switch";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import ScoresEvaluatorsConfig from "./scores/ScoresEvaluatorsConfig";
 import ScoresGraphContainer from "./scores/ScoresGraphContainer";
 import { useOrg } from "@/components/layout/org/organizationContext";
 import { cn } from "@/lib/utils";
+import { OnboardingPopover } from "@/components/templates/onboarding/OnboardingPopover";
+import { useJawnClient } from "@/lib/clients/jawnHook";
+import useOnboardingContext, {
+  ONBOARDING_STEPS,
+} from "@/components/layout/onboardingContext";
+import { generateOpenAITemplate } from "@/components/shared/CreateNewEvaluator/evaluatorHelpers";
 
 type TableDataType = {
   index: number;
@@ -383,6 +389,119 @@ export function ExperimentTable({
     [queryClient, experimentTableId]
   );
 
+  const jawn = useJawnClient();
+  const {
+    isOnboardingVisible,
+    currentStep,
+    setOnClickElement,
+    onClickElement,
+    setCurrentStep,
+  } = useOnboardingContext();
+
+  // Fetch input records using useQuery
+  const {
+    data: inputRecordsData,
+    isLoading,
+    isError,
+  } = useQuery(
+    ["inputRecords", experimentTableQuery?.original_prompt_version],
+    async () => {
+      const res = await jawn.POST(
+        "/v1/prompt/version/{promptVersionId}/inputs/query",
+        {
+          params: {
+            path: {
+              promptVersionId:
+                experimentTableQuery?.original_prompt_version ?? "",
+            },
+          },
+          body: {
+            limit: 1000, // Adjust limit as needed
+          },
+        }
+      );
+      return res.data?.data ?? [];
+    },
+    {
+      enabled:
+        isOnboardingVisible &&
+        experimentTableQuery?.original_prompt_version !== undefined, // Fetch only when the drawer is open
+    }
+  );
+
+  // Process input records
+  const inputRecords = useMemo(() => {
+    if (!inputRecordsData) return [];
+    return inputRecordsData.map((record) => ({
+      inputRecordId: record.id,
+      inputs: record.inputs,
+    }));
+  }, [inputRecordsData]);
+
+  const addRowsBatchForOnboarding = useCallback(() => {
+    handleAddRowInsertBatch(inputRecords);
+    queryClient.invalidateQueries(["experimentTable", experimentTableId]);
+  }, [queryClient, experimentTableId, handleAddRowInsertBatch, inputRecords]);
+
+  useEffect(() => {
+    if (
+      isOnboardingVisible &&
+      currentStep === ONBOARDING_STEPS.EXPERIMENTS_CLICK_SHOW_SCORES.stepNumber
+    ) {
+      setOnClickElement(() => () => {
+        setShowScores(!showScores);
+        setCurrentStep(currentStep + 1);
+      });
+
+      const keydownHandler = (e: KeyboardEvent) => {
+        if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+          e.preventDefault();
+          setShowScores(!showScores);
+          setCurrentStep(currentStep + 1);
+        }
+      };
+      window.addEventListener("keydown", keydownHandler);
+
+      const openAIFunction = generateOpenAITemplate({
+        name: "Humor",
+        description: "Check if the response is funny",
+        expectedValueType: "choice",
+        choiceScores: [
+          {
+            score: 1,
+            description: "Not Funny",
+          },
+          {
+            score: 2,
+            description: "Slightly Funny",
+          },
+          {
+            score: 3,
+            description: "Funny",
+          },
+          {
+            score: 4,
+            description: "Very Funny",
+          },
+          {
+            score: 5,
+            description: "Hilarious",
+          },
+        ],
+        model: "gpt-4o-mini",
+      });
+
+      jawn.POST("/v1/evaluator", {
+        body: {
+          llm_template: openAIFunction,
+          scoring_type: `LLM-CHOICE`,
+          name: "Humor",
+        },
+      });
+      return () => window.removeEventListener("keydown", keydownHandler);
+    }
+  }, [isOnboardingVisible, currentStep, showScores]);
+
   return (
     <>
       <div className="flex justify-between items-center py-4 pr-4">
@@ -401,7 +520,12 @@ export function ExperimentTable({
           />
         </IslandContainer>
         <div className="flex items-center gap-5">
-          <div className="flex gap-2 items-center">
+          <div
+            className="flex gap-2 items-center relative"
+            data-onboarding-step={
+              ONBOARDING_STEPS.EXPERIMENTS_CLICK_SHOW_SCORES.stepNumber
+            }
+          >
             <Switch
               size="sm"
               checked={showScores}
@@ -413,6 +537,19 @@ export function ExperimentTable({
             <p className="text-slate-600 dark:text-slate-400 text-sm font-medium">
               Show scores
             </p>
+            {isOnboardingVisible &&
+              currentStep ===
+                ONBOARDING_STEPS.EXPERIMENTS_CLICK_SHOW_SCORES.stepNumber && (
+                <div className="absolute right-1/2 top-1/2 translate-x-2 -translate-y-1/2">
+                  <span className="relative flex h-3 w-3">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-sky-500"></span>
+                  </span>
+                </div>
+                // <div className="absolute right-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-red-500 animate-ping rounded-full">
+                //   <div className="w-full h-full bg-red-500 rounded-full"></div>
+                // </div>
+              )}
           </div>
           <div className="flex gap-2 items-center">
             <Switch
@@ -458,109 +595,125 @@ export function ExperimentTable({
                 )}
               >
                 <div className="min-w-fit h-full bg-white dark:bg-black rounded-sm">
-                  <Table className="border-collapse w-full border-t border-slate-200 dark:border-slate-800">
-                    <TableHeader>
-                      {table.getHeaderGroups().map((headerGroup, i) => (
-                        <TableRow
-                          key={headerGroup.id}
-                          className={clsx(
-                            "sticky top-0 bg-slate-50 dark:bg-slate-900 shadow-sm border-b border-slate-200 dark:border-slate-800",
-                            i === 1 && "h-[225px]"
-                          )}
-                        >
-                          {headerGroup.headers.map((header, index) => (
-                            <TableHead
-                              key={header.id}
-                              style={{
-                                width: header.getSize(),
-                              }}
-                              className="bg-white dark:bg-neutral-950 relative px-0"
-                            >
-                              {header.isPlaceholder
-                                ? null
-                                : flexRender(
-                                    header.column.columnDef.header,
-                                    header.getContext()
-                                  )}
-                              <div
-                                className="resizer absolute right-0 top-0 h-full w-4 cursor-col-resize"
-                                {...{
-                                  onMouseDown: header.getResizeHandler(),
-                                  onTouchStart: header.getResizeHandler(),
-                                }}
-                              >
-                                <div
-                                  className={clsx(
-                                    "h-full w-1",
-                                    header.column.getIsResizing()
-                                      ? "bg-blue-700 dark:bg-blue-300"
-                                      : "bg-gray-500"
-                                  )}
-                                />
-                              </div>
-                              {index < headerGroup.headers.length - 1 && (
-                                <div className="absolute top-0 right-0 h-full w-px bg-slate-200 dark:bg-slate-800" />
-                              )}
-                              {/* <div className="absolute bottom-0 left-0 right-0 h-[0.5px] bg-slate-200 dark:bg-slate-800" /> */}
-                            </TableHead>
-                          ))}
-                        </TableRow>
-                      ))}
-                    </TableHeader>
-                    <TableBody className="text-[13px] bg-white dark:bg-neutral-950 flex-1">
-                      {table.getRowModel().rows?.length ? (
-                        table.getRowModel().rows.map((row) => (
+                  <OnboardingPopover
+                    popoverContentProps={{
+                      onboardingStep: "EXPERIMENTS_TABLE",
+                      align: "start",
+                      alignOffset: 10,
+                    }}
+                  >
+                    <Table className="border-collapse w-full border-t border-slate-200 dark:border-slate-800">
+                      <TableHeader>
+                        {table.getHeaderGroups().map((headerGroup, i) => (
                           <TableRow
-                            key={row.id}
-                            data-state={row.getIsSelected() && "selected"}
-                            className="border-b border-slate-200 dark:border-slate-800 hover:bg-white dark:hover:bg-neutral-950"
+                            key={headerGroup.id}
+                            className={clsx(
+                              "sticky top-0 bg-slate-50 dark:bg-slate-900 shadow-sm border-b border-slate-200 dark:border-slate-800",
+                              i === 1 && "h-[225px]"
+                            )}
                           >
-                            {row.getVisibleCells().map((cell) => (
-                              <TableCell
-                                className={cn(
-                                  "p-0 align-baseline border-r border-slate-200 dark:border-slate-800",
-                                  cell.column.getIsLastColumn() && "border-r-0"
-                                )}
-                                key={cell.id}
+                            {headerGroup.headers.map((header, index) => (
+                              <TableHead
+                                key={header.id}
                                 style={{
-                                  width: cell.column.getSize(),
-                                  maxWidth: cell.column.getSize(),
-                                  minWidth: cell.column.getSize(),
+                                  width: header.getSize(),
                                 }}
+                                className="bg-white dark:bg-neutral-950 relative px-0"
                               >
-                                {flexRender(
-                                  cell.column.columnDef.cell,
-                                  cell.getContext()
+                                {header.isPlaceholder
+                                  ? null
+                                  : flexRender(
+                                      header.column.columnDef.header,
+                                      header.getContext()
+                                    )}
+                                <div
+                                  className="resizer absolute right-0 top-0 h-full w-4 cursor-col-resize"
+                                  {...{
+                                    onMouseDown: header.getResizeHandler(),
+                                    onTouchStart: header.getResizeHandler(),
+                                  }}
+                                >
+                                  <div
+                                    className={clsx(
+                                      "h-full w-1",
+                                      header.column.getIsResizing()
+                                        ? "bg-blue-700 dark:bg-blue-300"
+                                        : "bg-gray-500"
+                                    )}
+                                  />
+                                </div>
+                                {index < headerGroup.headers.length - 1 && (
+                                  <div className="absolute top-0 right-0 h-full w-px bg-slate-200 dark:bg-slate-800" />
                                 )}
-                              </TableCell>
+                                {/* <div className="absolute bottom-0 left-0 right-0 h-[0.5px] bg-slate-200 dark:bg-slate-800" /> */}
+                              </TableHead>
                             ))}
                           </TableRow>
-                        ))
-                      ) : (
-                        <TableRow>
-                          <TableCell
-                            colSpan={columnDef.length}
-                            className="h-24 text-center"
-                          >
-                            No results.
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
+                        ))}
+                      </TableHeader>
+                      <TableBody className="text-[13px] bg-white dark:bg-neutral-950 flex-1">
+                        {table.getRowModel().rows?.length ? (
+                          table.getRowModel().rows.map((row) => (
+                            <TableRow
+                              key={row.id}
+                              data-state={row.getIsSelected() && "selected"}
+                              className="border-b border-slate-200 dark:border-slate-800 hover:bg-white dark:hover:bg-neutral-950"
+                            >
+                              {row.getVisibleCells().map((cell) => (
+                                <TableCell
+                                  className={cn(
+                                    "p-0 align-baseline border-r border-slate-200 dark:border-slate-800",
+                                    cell.column.getIsLastColumn() &&
+                                      "border-r-0"
+                                  )}
+                                  key={cell.id}
+                                  style={{
+                                    width: cell.column.getSize(),
+                                    maxWidth: cell.column.getSize(),
+                                    minWidth: cell.column.getSize(),
+                                  }}
+                                >
+                                  {flexRender(
+                                    cell.column.columnDef.cell,
+                                    cell.getContext()
+                                  )}
+                                </TableCell>
+                              ))}
+                            </TableRow>
+                          ))
+                        ) : (
+                          <TableRow>
+                            <TableCell
+                              colSpan={columnDef.length}
+                              className="h-24 text-center"
+                            >
+                              No results.
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </TableBody>
+                    </Table>
+                  </OnboardingPopover>
                 </div>
               </div>
 
               <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
                 <PopoverTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="self-start flex flex-row space-x-2 text-slate-800 mt-0 shadow-none"
+                  <OnboardingPopover
+                    popoverContentProps={{
+                      onboardingStep: "EXPERIMENTS_ADD_TEST_CASES",
+                      next: addRowsBatchForOnboarding,
+                    }}
                   >
-                    <PlusIcon className="h-4 w-4" />
-                    Add row
-                  </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="self-start flex flex-row space-x-2 text-slate-800 mt-0 shadow-none"
+                    >
+                      <PlusIcon className="h-4 w-4" />
+                      Add row
+                    </Button>
+                  </OnboardingPopover>
                 </PopoverTrigger>
                 <PopoverContent className="w-full px-2 py-2">
                   <AddRowPopover
