@@ -406,7 +406,7 @@ Optimize your AI API costs:`;
             maxWidth: "100px",
           }}
         />
-        <h2 className="text-4xl font-semibold text-slate-700 mb-2">
+        <h1 className="text-4xl font-semibold text-slate-700 mb-2">
           {provider && model ? (
             <>
               {formatProviderName(provider)}{" "}
@@ -417,7 +417,7 @@ Optimize your AI API costs:`;
             "LLM API "
           )}
           Pricing Calculator
-        </h2>
+        </h1>
         <p className="text-slate-500 mb-4">
           {provider && model
             ? `Calculate the cost of using ${model} with Helicone's free pricing tool.`
