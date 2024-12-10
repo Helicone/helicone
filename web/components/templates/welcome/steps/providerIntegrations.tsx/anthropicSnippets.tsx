@@ -68,7 +68,7 @@ export default function AnthropicSnippets(props: AnthropicSnippetsProps) {
         minHeight={false}
       />
 
-      <div className="mt-8">
+      <div className="mt-2">
         <div className="flex overflow-x-auto py-2 w-full no-scrollbar">
           <div className="flex gap-2">
             <button

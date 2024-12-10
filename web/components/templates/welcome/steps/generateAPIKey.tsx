@@ -119,7 +119,7 @@ const GenerateAPIKey = ({
                   />
                 </div>
 
-                <div className="mt-8">
+                <div className="mt-2">
                   <div className="flex overflow-x-auto py-2 w-full no-scrollbar">
                     <div className="flex gap-2">
                       <button
@@ -191,13 +191,13 @@ const GenerateAPIKey = ({
                 selectedProvider === "openai"
                   ? "bg-white shadow-md ring-2 ring-sky-500"
                   : "bg-white hover:bg-gray-50",
-                "flex items-center gap-3 border border-gray-200 rounded-xl py-3 px-4 transition-all duration-150",
+                "flex items-center gap-3 border border-gray-200 rounded-xl py-2 px-3 transition-all duration-150",
                 "hover:shadow-sm"
               )}
               onClick={() => setSelectedProvider("openai")}
             >
               <svg
-                className="w-6 h-6"
+                className="w-5 h-5"
                 viewBox="0 0 28 28"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
@@ -207,14 +207,14 @@ const GenerateAPIKey = ({
                   fill="currentColor"
                 ></path>
               </svg>
-              <span className="font-medium text-gray-900">OpenAI</span>
+              <span className="font-small text-gray-900">OpenAI</span>
             </button>
             <button
               className={clsx(
                 selectedProvider === "azure"
                   ? "bg-white shadow-md ring-2 ring-sky-500"
                   : "bg-white hover:bg-gray-50",
-                "flex items-center gap-3 border border-gray-200 rounded-xl py-3 px-4 transition-all duration-150",
+                "flex items-center gap-3 border border-gray-200 rounded-xl py-2 px-3 transition-all duration-150",
                 "hover:shadow-sm"
               )}
               onClick={() => setSelectedProvider("azure")}
@@ -222,12 +222,12 @@ const GenerateAPIKey = ({
               <Image
                 src="/assets/landing/azure.svg.png"
                 alt="Azure"
-                width={24}
-                height={24}
+                width={20}
+                height={20}
                 quality={100}
                 className="bg-transparent rounded-lg"
               />
-              <span className="font-medium text-gray-900">Azure</span>
+              <span className="font-small text-gray-900">Azure</span>
             </button>
 
             <button
@@ -235,7 +235,7 @@ const GenerateAPIKey = ({
                 selectedProvider === "anthropic"
                   ? "bg-white shadow-md ring-2 ring-sky-500"
                   : "bg-white hover:bg-gray-50",
-                "flex items-center gap-3 border border-gray-200 rounded-xl py-3 px-4 transition-all duration-150",
+                "flex items-center gap-3 border border-gray-200 rounded-xl py-2 px-3 transition-all duration-150",
                 "hover:shadow-sm"
               )}
               onClick={() => setSelectedProvider("anthropic")}
@@ -243,16 +243,16 @@ const GenerateAPIKey = ({
               <Image
                 src="/assets/home/providers/anthropic.jpeg"
                 alt="Anthropic"
-                width={24}
-                height={24}
+                width={20}
+                height={20}
                 quality={100}
                 className="bg-transparent rounded-xl"
               />
-              <span className="font-medium text-gray-900">Anthropic</span>
+              <span className="font-small text-gray-900">Anthropic</span>
             </button>
             <Link
               className={clsx(
-                "flex items-center gap-3 border border-gray-200 rounded-xl py-3 px-4",
+                "flex items-center gap-2 border border-gray-200 rounded-xl py-2 px-3",
                 "hover:bg-gray-50 hover:shadow-sm transition-all duration-150"
               )}
               href="https://docs.helicone.ai/getting-started/quick-start#quick-start"
@@ -263,29 +263,29 @@ const GenerateAPIKey = ({
                 <Image
                   src="/assets/home/providers/lemonfox.png"
                   alt={"Anthropic"}
-                  width={28}
-                  height={28}
+                  width={24}
+                  height={24}
                   quality={100}
                   className="bg-transparent absolute left-0 z-40 rounded-xl"
                 />
                 <Image
                   src="/assets/home/providers/llama2.png"
                   alt={"Anthropic"}
-                  width={28}
-                  height={28}
+                  width={24}
+                  height={24}
                   quality={100}
                   className="bg-transparent absolute left-4 z-30 rounded-xl"
                 />
                 <Image
                   src="/assets/home/providers/anyscale.jpeg"
                   alt={"Anthropic"}
-                  width={28}
-                  height={28}
+                  width={24}
+                  height={24}
                   quality={100}
                   className="bg-transparent absolute left-8 z-20 rounded-xl"
                 />
               </div>
-              <span className="font-medium text-gray-900">More ›</span>
+              <span className="font-small text-gray-900">More ›</span>
             </Link>
           </div>
         )}

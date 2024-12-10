@@ -66,37 +66,43 @@ const EventListen = ({
   const router = useRouter();
 
   return (
-    <div className="flex flex-col p-4 h-full">
+    <div className="flex flex-col h-full">
       {data && data.data ? (
         <div className="bg-gray-50 dark:bg-gray-900 border border-slate-200 dark:border-slate-800 rounded-lg p-4 flex flex-col items-center justify-center h-full">
           <LoadingAnimation animation={PartyParrot} height={75} width={75} />
         </div>
       ) : (
         <div className="flex flex-col gap-3">
-          <div className="bg-gray-50 dark:bg-gray-900 border border-slate-200 dark:border-slate-800 rounded-lg flex flex-col items-center justify-center">
-            <Lottie
-              height={300}
-              isClickToPauseDisabled={true}
-              options={{
-                loop: true,
-                autoplay: true,
-                animationData: Listening,
-              }}
-            />
+          <div className="w-full h-[100px] dark:border-slate-800 rounded-lg flex flex-col items-center justify-center overflow-hidden">
+            <div className="w-[300px] h-full">
+              <Lottie
+                height="100%"
+                width="100%"
+                isClickToPauseDisabled={true}
+                options={{
+                  loop: true,
+                  autoplay: true,
+                  animationData: Listening,
+                  rendererSettings: {
+                    preserveAspectRatio: "xMidYMid slice",
+                  },
+                }}
+              />
+            </div>
           </div>
-          <div className="w-full bg-slate-50 dark:bg-slate-950 rounded-md p-4 flex flex-col gap-4 border border-slate-200 dark:border-slate-800">
+          <div className="w-full bg-slate-50 dark:bg-slate-950 rounded-md p-4 flex flex-col gap-2 border border-slate-200 dark:border-slate-800">
             <div className="flex gap-2 items-center">
               <MessageCircleQuestionIcon className="w-4 h-4 text-slate-500" />
               <p className="text-sm text-slate-700 dark:text-slate-300 font-medium">
                 Help me troubleshoot
               </p>
             </div>
-            <div className="flex flex-col">
+            <div className="flex flex-col gap-2">
               <Link
                 href="https://docs.helicone.ai/getting-started/quick-start"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex justify-between items-center py-3 border-b border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors"
+                className="flex justify-between items-center py-2.5 border-b border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors"
               >
                 <p className="text-[13px] text-slate-500 font-medium">
                   Check out our quick start guide
@@ -110,7 +116,7 @@ const EventListen = ({
                 href="https://discord.gg/2TkeWdXNPQ"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex justify-between items-center py-3 border-b border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors"
+                className="flex justify-between items-center py-2.5 border-b border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors"
               >
                 <p className="text-[13px] text-slate-500 font-medium">
                   Need help? Join our Discord community
@@ -126,7 +132,7 @@ const EventListen = ({
                 href="https://www.helicone.ai/contact"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex justify-between items-center py-3 hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors"
+                className="flex justify-between items-center py-2.5 hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors"
               >
                 <p className="text-[13px] text-slate-500 font-medium">
                   Schedule a call with us

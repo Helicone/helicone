@@ -18,16 +18,12 @@ import { useOrg } from "@/components/layout/org/organizationContext";
 const steps = [
   {
     title: "Choose integration method",
-    description:
-      "Select how you want to connect your AI application with Helicone",
   },
   {
     title: "Select a provider",
-    description: "Pick your preferred LLM provider and language",
   },
   {
     title: "Send an event",
-    description: "Test your integration by making a sample request",
   },
 ];
 
@@ -111,9 +107,6 @@ const OnboardingQuickStartModal = ({
                 >
                   {`${index + 1}. ${step.title}`}
                 </p>
-                {index + 1 === currentStep && (
-                  <p className="text-xs text-slate-500">{step.description}</p>
-                )}
               </div>
             </div>
           ))}
