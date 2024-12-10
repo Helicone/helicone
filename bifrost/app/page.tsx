@@ -1,3 +1,4 @@
+import Banner from "@/components/home/Banner";
 import BigDashboard from "@/components/home/BigDashboard";
 import Companies from "@/components/home/Companies";
 import CTA from "@/components/home/CTA";
@@ -40,6 +41,7 @@ export default async function Home() {
   return (
     <main className="bg-white text-landing-description">
       <div className="max-w-8xl mx-auto">
+        <Banner />
         <Hero />
         <Prototype />
         <Companies />

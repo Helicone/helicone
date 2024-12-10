@@ -328,6 +328,18 @@ const Experiment = () => {
             </div>
             <div className="flex gap-3 items-center">
               <a
+                href="https://docs.helicone.ai/features/experiments"
+                target="_blank"
+              >
+                <Button
+                  className="items-center gap-2 text-landing-secondary self-start"
+                  variant="outline"
+                >
+                  <ArrowUpRightIcon className="w-4 h-4" />
+                  Experiments
+                </Button>
+              </a>
+              <a
                 href="https://docs.helicone.ai/features/prompts"
                 target="_blank"
               >
@@ -336,7 +348,7 @@ const Experiment = () => {
                   variant="outline"
                 >
                   <ArrowUpRightIcon className="w-4 h-4" />
-                  Prompts &amp; Experiments
+                  Prompts
                 </Button>
               </a>
             </div>
