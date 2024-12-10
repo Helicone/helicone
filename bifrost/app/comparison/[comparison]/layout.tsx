@@ -82,7 +82,7 @@ const getComparisonTitle = (
 ) => {
   const modelADisplay = getDisplayName(modelA, providerA);
   const modelBDisplay = getDisplayName(modelB, providerB);
-  return `${modelADisplay} vs ${modelBDisplay} - Model Comparison - Helicone`;
+  return `${modelADisplay} vs ${modelBDisplay} - Model Comparison | Helicone`;
 };
 
 const getComparisonDescription = (
