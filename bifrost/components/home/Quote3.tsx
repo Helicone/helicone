@@ -12,7 +12,7 @@ const Quote3 = () => {
             <span className="text-black">
               excellent observability platform!
             </span>{" "}
-            . I pretty much use it for all my AI apps now.
+            I pretty much use it for all my AI apps now.
           </h2>
           <div className="flex flex-col gap-3">
             <img src="/static/togetherai.webp" alt="qawolf" className="w-36" />
