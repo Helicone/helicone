@@ -82,7 +82,32 @@ const getComparisonTitle = (
 ) => {
   const modelADisplay = getDisplayName(modelA, providerA);
   const modelBDisplay = getDisplayName(modelB, providerB);
-  return `${modelADisplay} vs ${modelBDisplay} - Model Comparison & Performance Analysis - Helicone`;
+
+  const suffix = " Comparison | Helicone";
+  const vsText = " vs ";
+  const maxTotalLength = 60;
+  const availableSpace = maxTotalLength - suffix.length - vsText.length;
+
+  if (modelADisplay.length + modelBDisplay.length > availableSpace) {
+    const ratio =
+      modelADisplay.length / (modelADisplay.length + modelBDisplay.length);
+    const maxLengthA = Math.floor(availableSpace * ratio);
+    const maxLengthB = availableSpace - maxLengthA;
+
+    const truncatedModelA =
+      modelADisplay.length > maxLengthA
+        ? `${modelADisplay.substring(0, maxLengthA - 3)}...`
+        : modelADisplay;
+    const truncatedModelB =
+      modelBDisplay.length > maxLengthB
+        ? `${modelBDisplay.substring(0, maxLengthB - 3)}...`
+        : modelBDisplay;
+
+    return `${truncatedModelA}${vsText}${truncatedModelB}${suffix}`;
+  }
+
+  // If total length is fine, use full names
+  return `${modelADisplay}${vsText}${modelBDisplay}${suffix}`;
 };
 
 const getComparisonDescription = (
