@@ -32,6 +32,18 @@ export async function generateStaticParams() {
         model: encodeURIComponent(cost.model.value),
       });
     }
+
+    if (provider.modelDetails) {
+      for (const parentModel in provider.modelDetails) {
+        const searchTerms = provider.modelDetails[parentModel].searchTerms;
+        if (searchTerms && searchTerms.length > 0) {
+          paths.push({
+            provider: encodeURIComponent(provider.provider.toLowerCase()),
+            model: encodeURIComponent(searchTerms[0]),
+          });
+        }
+      }
+    }
   }
 
   return paths;

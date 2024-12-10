@@ -40,208 +40,6 @@ type CostData = {
   totalCost: number;
 };
 
-// Custom MultiSelect component
-const MultiSelect = ({
-  label,
-  options,
-  selected,
-  onToggle,
-}: {
-  label: string;
-  options: { value: string; label: string }[];
-  selected: string[];
-  onToggle: (value: string) => void;
-}) => {
-  const [isOpen, setIsOpen] = useState(false);
-
-  return (
-    <div className="relative">
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between px-4 py-2 text-sm bg-white border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-      >
-        {selected.length > 0 ? `${selected.length} selected` : label}
-        <ChevronDown className="w-4 h-4 ml-2" />
-      </button>
-      {isOpen && (
-        <div className="absolute z-10 w-full mt-1 bg-white border border-slate-300 rounded-md shadow-lg max-h-60 overflow-auto">
-          {options.map((option) => (
-            <div
-              key={option.value}
-              className="flex items-center px-4 py-2 hover:bg-slate-100"
-            >
-              <Checkbox
-                id={`option-${option.value}`}
-                checked={selected.includes(option.value)}
-                onCheckedChange={() => onToggle(option.value)}
-              />
-              <label
-                htmlFor={`option-${option.value}`}
-                className="ml-2 text-sm text-slate-700"
-              >
-                {option.label}
-              </label>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
-
-const ProviderPill = ({
-  provider,
-  models,
-  selectedModels,
-  onRemoveProvider,
-  onAddModel,
-  onRemoveModel,
-}: {
-  provider: string;
-  models: string[];
-  selectedModels: string[];
-  onRemoveProvider: (provider: string) => void;
-  onAddModel: (model: string) => void;
-  onRemoveModel: (model: string) => void;
-}) => {
-  const [isOpen, setIsOpen] = useState(false);
-
-  return (
-    <div className="mb-2">
-      <div className="relative inline-block">
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="inline-flex items-center bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full"
-        >
-          {formatProviderName(provider)}
-          <ChevronDown
-            className={`w-4 h-4 ml-2 ${isOpen ? "transform rotate-180" : ""}`}
-          />
-        </button>
-        <button
-          onClick={() => onRemoveProvider(provider)}
-          className="ml-2 text-slate-500 hover:text-slate-700 focus:outline-none"
-        >
-          <XCircle className="w-4 h-4" />
-        </button>
-        {isOpen && (
-          <div className="absolute z-10 mt-1 w-56 bg-white border border-slate-300 rounded-md shadow-lg">
-            <ScrollArea className="h-48">
-              <div className="p-2">
-                {models.map((model) => (
-                  <button
-                    key={model}
-                    onClick={() => onAddModel(model)}
-                    className="w-full text-left px-2 py-1 hover:bg-slate-100 rounded truncate"
-                  >
-                    {model}
-                  </button>
-                ))}
-              </div>
-            </ScrollArea>
-          </div>
-        )}
-      </div>
-      <div className="mt-2 ml-4">
-        {selectedModels
-          .filter((model) => models.includes(model))
-          .map((model) => (
-            <span
-              key={model}
-              className="inline-flex items-center bg-green-100 text-green-800 text-sm font-medium px-3 py-1 rounded-full mr-2 mb-2"
-            >
-              {model}
-              <button
-                onClick={() => onRemoveModel(model)}
-                className="ml-2 text-slate-500 hover:text-slate-700 focus:outline-none"
-              >
-                <XCircle className="w-3 h-3" />
-              </button>
-            </span>
-          ))}
-      </div>
-    </div>
-  );
-};
-
-const ProviderItem = ({
-  provider,
-  models,
-  onAddModel,
-}: {
-  provider: string;
-  models: string[];
-  onAddModel: (model: string) => void;
-}) => {
-  const [showModels, setShowModels] = useState(false);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const itemRef = useRef<HTMLDivElement>(null);
-
-  const handleMouseEnter = () => {
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    timeoutRef.current = setTimeout(() => setShowModels(true), 200);
-  };
-
-  const handleMouseLeave = () => {
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    timeoutRef.current = setTimeout(() => setShowModels(false), 300);
-  };
-
-  const handleClick = () => {
-    setShowModels(!showModels);
-  };
-
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    };
-  }, []);
-
-  return (
-    <div
-      ref={itemRef}
-      className="relative"
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-    >
-      <div
-        onClick={handleClick}
-        className="flex items-center justify-between px-4 py-2 hover:bg-slate-100 cursor-pointer"
-      >
-        <span>{formatProviderName(provider)}</span>
-        <ChevronRight className="w-4 h-4" />
-      </div>
-      {showModels && (
-        <div
-          className="absolute left-full top-0 w-64 bg-white border border-slate-300 rounded-md shadow-lg ml-1"
-          onMouseEnter={() => {
-            if (timeoutRef.current) clearTimeout(timeoutRef.current);
-            setShowModels(true);
-          }}
-          onMouseLeave={handleMouseLeave}
-        >
-          <ScrollArea className="h-64">
-            <div className="p-2">
-              {models.map((model) => (
-                <button
-                  key={model}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onAddModel(model);
-                  }}
-                  className="w-full text-left px-4 py-2 hover:bg-slate-100 rounded truncate text-sm"
-                >
-                  {model}
-                </button>
-              ))}
-            </div>
-          </ScrollArea>
-        </div>
-      )}
-    </div>
-  );
-};
-
 const FilterSection = ({
   providers,
   selectedProviders,
@@ -280,13 +78,6 @@ const FilterSection = ({
     <div className="mb-4">
       <div className="flex justify-between items-center mb-2">
         <div className="flex gap-2">
-          {/* <button
-            className="inline-flex items-center gap-2 px-3 py-2 bg-white text-slate-700 border border-slate-300 rounded-md hover:bg-slate-50 transition-colors duration-100 h-full"
-            onClick={handleTwitterShare}
-          >
-            <Twitter className="w-4 h-4" />
-            <span className="font-medium text-sm hidden md:block">Share</span>
-          </button> */}
           <div className="w-full max-w-[10rem]">
             <ThemedTextDropDown
               options={availableProviders}
@@ -444,13 +235,42 @@ export default function ModelPriceCalculator({
     const urlModel = urlParts[urlParts.indexOf("model") + 1];
 
     if (urlProvider && urlModel) {
-      const selectedModel = costData.find(
+      const decodedModel = decodeURIComponent(urlModel);
+      const decodedProvider = decodeURIComponent(urlProvider);
+
+      // First try to find exact match
+      let selectedModel = costData.find(
         (data) =>
-          data.model.toLowerCase() ===
-            decodeURIComponent(urlModel).toLowerCase() &&
-          data.provider.toLowerCase() ===
-            decodeURIComponent(urlProvider).toLowerCase()
+          data.model.toLowerCase() === decodedModel.toLowerCase() &&
+          data.provider.toLowerCase() === decodedProvider.toLowerCase()
       );
+
+      // If not found, check if it's a parent model
+      if (!selectedModel) {
+        const providerData = providers.find(
+          (p) => p.provider.toLowerCase() === decodedProvider.toLowerCase()
+        );
+        if (providerData?.modelDetails) {
+          for (const [_, details] of Object.entries(
+            providerData.modelDetails
+          )) {
+            if (
+              details.searchTerms[0].toLowerCase() ===
+              decodedModel.toLowerCase()
+            ) {
+              // Use the first matching model's costs
+              const firstMatchModel = details.matches[0];
+              selectedModel = costData.find(
+                (data) =>
+                  data.model === firstMatchModel &&
+                  data.provider.toLowerCase() === decodedProvider.toLowerCase()
+              );
+              break;
+            }
+          }
+        }
+      }
+
       if (selectedModel) {
         setSelectedModelData(selectedModel);
       }
@@ -586,7 +406,7 @@ Optimize your AI API costs:`;
             maxWidth: "100px",
           }}
         />
-        <h2 className="text-4xl font-semibold text-slate-700 mb-2">
+        <h1 className="text-4xl font-semibold text-slate-700 mb-2">
           {provider && model ? (
             <>
               {formatProviderName(provider)}{" "}
@@ -597,7 +417,7 @@ Optimize your AI API costs:`;
             "LLM API "
           )}
           Pricing Calculator
-        </h2>
+        </h1>
         <p className="text-slate-500 mb-4">
           {provider && model
             ? `Calculate the cost of using ${model} with Helicone's free pricing tool.`
@@ -834,7 +654,7 @@ Optimize your AI API costs:`;
                       <td className="whitespace-nowrap text-sm text-slate-500 border border-slate-200 p-0">
                         <Link
                           href={`/llm-cost/provider/${encodeURIComponent(
-                            data.provider
+                            data.provider.toLowerCase()
                           )}/model/${encodeURIComponent(data.model)}`}
                           className="block w-full h-full px-6 py-2"
                         >
@@ -844,7 +664,7 @@ Optimize your AI API costs:`;
                       <td className="text-sm text-slate-900 font-medium border border-slate-200 p-0">
                         <Link
                           href={`/llm-cost/provider/${encodeURIComponent(
-                            data.provider
+                            data.provider.toLowerCase()
                           )}/model/${encodeURIComponent(data.model)}`}
                           className="block w-full h-full px-6 py-2"
                         >
@@ -854,7 +674,7 @@ Optimize your AI API costs:`;
                       <td className="whitespace-nowrap text-sm text-slate-500 border border-slate-200 p-0">
                         <Link
                           href={`/llm-cost/provider/${encodeURIComponent(
-                            data.provider
+                            data.provider.toLowerCase()
                           )}/model/${encodeURIComponent(data.model)}`}
                           className="block w-full h-full px-6 py-2"
                         >
@@ -864,7 +684,7 @@ Optimize your AI API costs:`;
                       <td className="whitespace-nowrap text-sm text-slate-500 border border-slate-200 p-0">
                         <Link
                           href={`/llm-cost/provider/${encodeURIComponent(
-                            data.provider
+                            data.provider.toLowerCase()
                           )}/model/${encodeURIComponent(data.model)}`}
                           className="block w-full h-full px-6 py-2"
                         >
@@ -874,7 +694,7 @@ Optimize your AI API costs:`;
                       <td className="whitespace-nowrap text-sm text-slate-500 border border-slate-200 p-0">
                         <Link
                           href={`/llm-cost/provider/${encodeURIComponent(
-                            data.provider
+                            data.provider.toLowerCase()
                           )}/model/${encodeURIComponent(data.model)}`}
                           className="block w-full h-full px-6 py-2"
                         >
@@ -884,7 +704,7 @@ Optimize your AI API costs:`;
                       <td className="whitespace-nowrap text-sm text-slate-500 border border-slate-200 p-0">
                         <Link
                           href={`/llm-cost/provider/${encodeURIComponent(
-                            data.provider
+                            data.provider.toLowerCase()
                           )}/model/${encodeURIComponent(data.model)}`}
                           className="block w-full h-full px-6 py-2"
                         >
@@ -894,7 +714,7 @@ Optimize your AI API costs:`;
                       <td className="whitespace-nowrap text-sm font-medium text-sky-500 border border-slate-200 p-0">
                         <Link
                           href={`/llm-cost/provider/${encodeURIComponent(
-                            data.provider
+                            data.provider.toLowerCase()
                           )}/model/${encodeURIComponent(data.model)}`}
                           className="block w-full h-full px-6 py-2"
                         >
