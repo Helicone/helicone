@@ -164,9 +164,9 @@ export function ProviderStatusInfo({
               return (
                 <>
                   <div className="flex items-center justify-between mb-2">
-                    <h2 className="text-2xl font-bold">
+                    <h1 className="text-2xl font-bold">
                       Is {formatProviderName(provider.providerName)} down?
-                    </h2>
+                    </h1>
                     <Badge
                       variant="secondary"
                       className={`${status.bgColor} ${status.color} hover:${status.bgColor} px-3 py-1 text-sm font-medium`}
