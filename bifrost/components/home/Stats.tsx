@@ -62,7 +62,7 @@ const Stats = ({
           <span
             ref={elementRef}
             className={cn(
-              "inline-block bg-[#E7F6FD] border-[3px] border-brand rounded-xl py-2 px-7 text-brand translate-y-[-10px] transition-transform duration-500 text-nowrap",
+              "inline-block bg-[#E7F6FD] border-[3px] border-brand rounded-xl py-1 px-5 text-brand translate-y-[-10px] transition-transform duration-500 text-nowrap",
               isVisible ? "rotate-[-3deg]" : "rotate-[0  deg]"
             )}
           >
