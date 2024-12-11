@@ -9,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import AddColumnDialog from "./AddColumnDialog";
+import { OnboardingPopover } from "@/components/templates/onboarding/OnboardingPopover";
 
 interface AddColumnHeaderProps {
   promptVersionId: string;
@@ -57,15 +58,31 @@ const AddColumnHeader: React.FC<AddColumnHeaderProps> = ({
     <>
       <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
         <DropdownMenuTrigger asChild>
-          <Button
-            variant="ghost"
-            className="text-slate-900 dark:text-slate-100"
+          <OnboardingPopover
+            popoverContentProps={{
+              onboardingStep: "EXPERIMENTS_ADD",
+              align: "start",
+              alignOffset: 10,
+              nextOverride: () => {
+                setSelectedForkFromPromptVersionId(
+                  experimentPromptVersions?.[0].id
+                );
+                setIsAddDialogOpen(true);
+                setIsDropdownOpen(false);
+              },
+              delayMs: 1000,
+            }}
           >
-            <PlusIcon className="w-5 h-5 text-slate-700 dark:text-slate-100" />
-            <span className="text-sm font-medium text-slate-700 dark:text-slate-100">
-              Add Column
-            </span>
-          </Button>
+            <Button
+              variant="ghost"
+              className="text-slate-900 dark:text-slate-100"
+            >
+              <PlusIcon className="w-5 h-5 text-slate-700 dark:text-slate-100" />
+              <span className="text-sm font-medium text-slate-700 dark:text-slate-100">
+                Add Column
+              </span>
+            </Button>
+          </OnboardingPopover>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
           <DropdownMenuLabel className="font-normal text-sm text-slate-500 leading-[140%]">

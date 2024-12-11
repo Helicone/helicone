@@ -1,19 +1,27 @@
 import { GetServerSidePropsContext } from "next";
-import MetaData from "../components/layout/public/authMetaData";
 import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
-import WelcomePage from "../components/templates/welcome/welcomePage";
-import "prismjs/themes/prism.css";
+import { useOrg } from "@/components/layout/org/organizationContext";
+import { useEffect } from "react";
+import LoadingAnimation from "@/components/shared/loadingAnimation";
+import { useRouter } from "next/router";
+// import "prismjs/themes/prism.css";
 interface WelcomeProps {
   currentStep: number;
 }
 
 const Welcome = (props: WelcomeProps) => {
   const { currentStep } = props;
-  return (
-    <MetaData title="Welcome">
-      <WelcomePage currentStep={currentStep} />
-    </MetaData>
-  );
+  const org = useOrg();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (org) {
+      if (org.allOrgs.length > 0) {
+        router.push("/dashboard");
+      }
+    }
+  }, [org, router]);
+  return <LoadingAnimation title="Just setting up your account..." />;
 };
 
 export default Welcome;
