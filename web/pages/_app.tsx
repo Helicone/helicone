@@ -20,9 +20,6 @@ import ThemeProvider from "../components/shared/theme/themeContext";
 import Script from "next/script";
 import { PostHogProvider } from "posthog-js/react";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { Inter } from "next/font/google";
-
-const inter = Inter({ subsets: ["latin"] });
 
 declare global {
   interface Window {
@@ -76,9 +73,7 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
                 <OrgContextProvider>
                   <ThemeProvider attribute="class" defaultTheme="light">
                     <TooltipProvider>
-                      <div className={inter.className}>
-                        {getLayout(<Component {...pageProps} />)}
-                      </div>
+                      {getLayout(<Component {...pageProps} />)}
                     </TooltipProvider>
                   </ThemeProvider>
                   <Notification />

@@ -634,14 +634,6 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     }
   };
 
-  useEffect(() => {
-    if (searchParams.get("requestId")) {
-      setOpen(true);
-    } else {
-      setOpen(false);
-    }
-  }, [searchParams]);
-
   const onSetAdvancedFiltersHandler = useCallback(
     (filters: UIFilterRowTree, layoutFilterId?: string | null) => {
       setAdvancedFilters(filters);
