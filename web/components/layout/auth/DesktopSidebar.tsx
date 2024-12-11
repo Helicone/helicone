@@ -332,7 +332,8 @@ const DesktopSidebar = ({
                   (org) => org.tier !== "demo" && org.owner === user?.id
                 ).length === 0 && (
                   <Button
-                    className="mx-2 text-[13px] font-medium bg-slate-200 border border-slate-300 dark:border-slate-700 dark:bg-slate-800 text-slate-700 dark:text-slate-400"
+                    variant="outline"
+                    className="mx-2 text-[13px] font-medium bg-slate-200 border border-slate-300 dark:border-slate-700 dark:bg-slate-800 text-slate-700 dark:text-slate-400 hover:dark:text-slate-400 hover:dark:bg-slate-700"
                     onClick={() => {
                       setShowEndOnboardingConfirmation(true);
                     }}
