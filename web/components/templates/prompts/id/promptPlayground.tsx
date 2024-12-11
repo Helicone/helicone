@@ -20,7 +20,6 @@ import {
   getResponseMessage,
 } from "../../requests/chatComponent/messageUtils";
 import { cn } from "@/lib/utils";
-import { OnboardingPopover } from "../../onboarding/OnboardingPopover";
 
 export type Input = {
   id: string;
@@ -338,47 +337,37 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
                 Add Message
               </Button>
             </div>
-            <OnboardingPopover
-              popoverContentProps={{
-                onboardingStep: "EXPERIMENTS_ADD_SAVE",
-                next: () => {
-                  onSubmit && onSubmit(currentChat, selectedModel || "");
-                },
-              }}
-              modal={true}
-            >
-              <div className="flex space-x-4 w-full justify-end items-center">
-                <div className="font-normal">Model</div>
-                <Select
-                  value={selectedModel}
-                  onValueChange={setSelectedModel}
-                  defaultValue={initialModel}
+            <div className="flex space-x-4 w-full justify-end items-center">
+              <div className="font-normal">Model</div>
+              <Select
+                value={selectedModel}
+                onValueChange={setSelectedModel}
+                defaultValue={initialModel}
+              >
+                <SelectTrigger className="w-[200px]">
+                  <SelectValue placeholder="Select a model" />
+                </SelectTrigger>
+                <SelectContent>
+                  {MODEL_LIST.map((model) => (
+                    <SelectItem key={model.value} value={model.value}>
+                      {model.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {playgroundMode === "prompt" && (
+                <Button
+                  onClick={() =>
+                    onSubmit && onSubmit(currentChat, selectedModel || "")
+                  }
+                  variant="default"
+                  size="sm"
+                  className="px-4 font-normal"
                 >
-                  <SelectTrigger className="w-[200px]">
-                    <SelectValue placeholder="Select a model" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {MODEL_LIST.map((model) => (
-                      <SelectItem key={model.value} value={model.value}>
-                        {model.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {playgroundMode === "prompt" && (
-                  <Button
-                    onClick={() =>
-                      onSubmit && onSubmit(currentChat, selectedModel || "")
-                    }
-                    variant="default"
-                    size="sm"
-                    className="px-4 font-normal"
-                  >
-                    Save prompt
-                  </Button>
-                )}
-              </div>
-            </OnboardingPopover>
+                  Save prompt
+                </Button>
+              )}
+            </div>
           </div>
         )}
       </div>

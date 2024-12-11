@@ -61,7 +61,7 @@ const IntegrationMethod = ({
         rel="noreferrer"
       >
         <div className="w-full rounded-md p-2 flex justify-between items-center">
-          <div className="flex flex gap-2 items-center">
+          <div className="flex gap-2 items-center">
             <BookOpenIcon className="w-4 h-4 text-slate-500" />
             <p className="text-sm text-slate-500 dark:text-slate-300 font-medium">
               Read more about Proxy vs Async integration.
