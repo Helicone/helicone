@@ -89,11 +89,13 @@ export default function OrgDropdown({}: OrgDropdownProps) {
 
   return (
     <>
-      <DropdownMenu>
+      <DropdownMenu modal={false}>
         <DropdownMenuTrigger asChild>
           <Button
             variant="ghost"
-            className="flex items-center justify-start w-full ml-1 p-2 truncate"
+            className={cn(
+              "flex items-center justify-start w-full ml-1 p-2 truncate"
+            )}
           >
             {currentIcon && (
               <currentIcon.icon
@@ -154,9 +156,11 @@ export default function OrgDropdown({}: OrgDropdownProps) {
             <DropdownMenuSeparator />
           </div>
           <DropdownMenuGroup>
-            <DropdownMenuItem asChild className="cursor-pointer text-xs">
-              <Link href="/settings/members">Invite members</Link>
-            </DropdownMenuItem>
+            {orgContext?.currentOrg?.tier !== "demo" && (
+              <DropdownMenuItem asChild className="cursor-pointer text-xs">
+                <Link href="/settings/members">Invite members</Link>
+              </DropdownMenuItem>
+            )}
             <DropdownMenuItem
               className={cn("hover:bg-transparent cursor-default")}
               disableHover
@@ -174,22 +178,30 @@ export default function OrgDropdown({}: OrgDropdownProps) {
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
 
-          <Link href="/settings" rel="noopener noreferrer">
-            <DropdownMenuItem className="text-xs">
-              <Cog6ToothIcon className="h-4 w-4 mr-2" />
-              Settings
-            </DropdownMenuItem>
-          </Link>
+          {orgContext?.currentOrg?.tier !== "demo" && (
+            <Link href="/settings" rel="noopener noreferrer">
+              <DropdownMenuItem className="text-xs">
+                <Cog6ToothIcon className="h-4 w-4 mr-2" />
+                Settings
+              </DropdownMenuItem>
+            </Link>
+          )}
           <DropdownMenuItem onSelect={handleSignOut} className="text-xs">
             <LogOutIcon className="h-4 w-4 mr-2" />
             Sign out
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
         <DialogContent className="sm:max-w-[425px]">
-          <CreateOrgForm onCancelHandler={setCreateOpen} />
+          <CreateOrgForm
+            onCancelHandler={setCreateOpen}
+            onCloseHandler={() => setCreateOpen(false)}
+            onSuccess={(orgId) => {
+              orgContext?.setCurrentOrg(orgId ?? "");
+              router.push("/dashboard");
+            }}
+          />
         </DialogContent>
       </Dialog>
 
