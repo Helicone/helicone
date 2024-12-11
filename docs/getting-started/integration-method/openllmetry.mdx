@@ -3,8 +3,6 @@ title: "OpenLLMetry Async Integration"
 sidebarTitle: "OpenLLMetry"
 description: "Log LLM traces directly to Helicone, bypassing our proxy, with OpenLLMetry. Supports OpenAI, Anthropic, Azure OpenAI, Cohere, Bedrock, Google AI Platform, and more."
 "twitter:title": "OpenLLMetry Async Integration - Helicone OSS LLM Observability"
-icon: "code"
-iconType: "solid"
 ---
 
 # Overview
@@ -26,33 +24,35 @@ import { HeliconeAsyncLogger } from "@helicone/async";
 import OpenAI from "openai";
 
 const logger = new HeliconeAsyncLogger({
-    apiKey: process.env.HELICONE_API_KEY,
-    // pass in the providers you want logged
-    providers: {
-      openAI: OpenAI,
-      //anthropic: Anthropic,
-      //cohere: Cohere
-      // ...
-    }
+apiKey: process.env.HELICONE_API_KEY,
+// pass in the providers you want logged
+providers: {
+openAI: OpenAI,
+//anthropic: Anthropic,
+//cohere: Cohere
+// ...
+}
 });
 logger.init();
 
 const openai = new OpenAI();
 
 async function main() {
-    const completion = await openai.chat.completions.create({
-      messages: [{"role": "system", "content": "You are a helpful assistant."},
-        {"role": "user", "content": "Who won the world series in 2020?"},
-        {"role": "assistant", "content": "The Los Angeles Dodgers won the World Series in 2020."},
-        {"role": "user", "content": "Where was it played?"}],
-      model: "gpt-3.5-turbo",
-    });
+const completion = await openai.chat.completions.create({
+messages: [{"role": "system", "content": "You are a helpful assistant."},
+{"role": "user", "content": "Who won the world series in 2020?"},
+{"role": "assistant", "content": "The Los Angeles Dodgers won the World Series in 2020."},
+{"role": "user", "content": "Where was it played?"}],
+model: "gpt-3.5-turbo",
+});
 
     console.log(completion.choices[0]);
+
 }
 
 main();
-```
+
+````
 </Step>
 <Step title="Properties">
 
@@ -70,7 +70,8 @@ logger.withProperties({
         ...
     })
 })
-```
+````
+
 </Step>
 </Steps>
 
@@ -89,7 +90,7 @@ from helicone_async import HeliconeAsyncLogger
 from openai import OpenAI
 
 logger = HeliconeAsyncLogger(
-    api_key=HELICONE_API_KEY,
+api_key=HELICONE_API_KEY,
 )
 
 logger.init()
@@ -99,17 +100,17 @@ client = OpenAI(api_key=OPENAI_API_KEY)
 # Make the OpenAI call
 
 response = client.chat.completions.create(
-    model="gpt-3.5-turbo",
-    messages=[{"role": "system", "content": "You are a helpful assistant."},
-      {"role": "user", "content": "Who won the world series in 2020?"},
-      {"role": "assistant",
-      "content": "The Los Angeles Dodgers won the World Series in 2020."},
-      {"role": "user", "content": "Where was it played?"}]
+model="gpt-3.5-turbo",
+messages=[{"role": "system", "content": "You are a helpful assistant."},
+{"role": "user", "content": "Who won the world series in 2020?"},
+{"role": "assistant",
+"content": "The Los Angeles Dodgers won the World Series in 2020."},
+{"role": "user", "content": "Where was it played?"}]
 )
 
 print(response.choices[0])
 
-```
+````
 </Step>
 <Step title="Properties">
 You can set properties on the logger to be used in Helicone using the `set_properties` method. (These can be used for [Sessions](/features/sessions), [User Metrics](/features/advanced-usage/user-metrics), and more.)
@@ -126,7 +127,8 @@ logger.set_properties({
 response = client.chat.completions.create(
     ...
 )
-```
+````
+
 </Step>
 </Steps>
 </Tab>
@@ -146,4 +148,7 @@ response = client.chat.completions.create(
 
 - [Comparing Proxy vs Async Integration](/references/proxy-vs-async)
 - [Gateway Integration](/getting-started/integration-method/gateway)
+
+```
+
 ```
