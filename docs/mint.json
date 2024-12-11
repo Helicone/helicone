@@ -60,7 +60,6 @@
       "group": "Getting Started",
       "pages": [
         "getting-started/quick-start",
-        "helicone-headers/header-directory",
         "helicone-headers/helicone-auth",
         {
           "group": "Self Host",
@@ -70,10 +69,9 @@
             "getting-started/self-host/docker",
             "getting-started/self-host/kubernetes",
             "getting-started/self-host/manual"
-          ],
-          "icon": "server",
-          "iconType": "solid"
-        }
+          ]
+        }, 
+        "helicone-headers/header-directory"
       ]
     },
     {
@@ -84,15 +82,11 @@
           "pages": [
             "getting-started/integration-method/gateway",
             "getting-started/integration-method/custom"
-          ],
-          "icon": "chart-network",
-          "iconType": "solid"
+          ]
         },
         {
           "group": "Async Logging",
-          "pages": ["getting-started/integration-method/openllmetry"],
-          "icon": "arrows-rotate",
-          "iconType": "solid"
+          "pages": ["getting-started/integration-method/openllmetry"]
         },
         {
           "group": "OpenAI",
@@ -104,9 +98,7 @@
             "integrations/openai/crewai",
             "integrations/openai/curl",
             "integrations/openai/assistants"
-          ],
-          "icon": "dice-d20",
-          "iconType": "solid"
+          ]
         },
         {
           "group": "Azure OpenAI",
@@ -115,9 +107,7 @@
             "integrations/azure/python",
             "integrations/azure/langchain",
             "integrations/azure/curl"
-          ],
-          "icon": "microsoft",
-          "iconType": "solid"
+          ]
         },
         {
           "group": "Anthropic",
@@ -126,24 +116,18 @@
             "integrations/anthropic/python",
             "integrations/anthropic/langchain",
             "integrations/anthropic/curl"
-          ],
-          "icon": "burst",
-          "iconType": "solid"
+          ]
         },
         {
           "group": "Ollama",
-          "pages": ["integrations/ollama/javascript"],
-          "icon": "alicorn",
-          "iconType": "solid"
+          "pages": ["integrations/ollama/javascript"]
         },
         {
           "group": "AWS Bedrock",
           "pages": [
             "integrations/bedrock/javascript",
             "integrations/bedrock/python"
-          ],
-          "icon": "aws",
-          "iconType": "solid"
+          ]
         },
         {
           "group": "Gemini",
@@ -154,9 +138,7 @@
                 "integrations/gemini/api/javascript",
                 "integrations/gemini/api/python",
                 "integrations/gemini/api/curl"
-              ],
-              "icon": "code",
-              "iconType": "solid"
+              ]
             },
             {
               "group": "Vertex AI (Enterprise)",
@@ -164,13 +146,9 @@
                 "integrations/gemini/vertex/javascript",
                 "integrations/gemini/vertex/python",
                 "integrations/gemini/vertex/curl"
-              ],
-              "icon": "code",
-              "iconType": "solid"
+              ]
             }
-          ],
-          "icon": "google",
-          "iconType": "solid"
+          ]
         },
         "getting-started/integration-method/vercelai",
         "getting-started/integration-method/anyscale",
@@ -182,9 +160,7 @@
             "integrations/groq/javascript",
             "integrations/groq/python",
             "integrations/groq/curl"
-          ],
-          "icon": "cloud",
-          "iconType": "solid"
+          ]
         },
         {
           "group": "Instructor",
@@ -200,9 +176,7 @@
           "pages": [
             "getting-started/integration-method/litellm-openllmetry",
             "getting-started/integration-method/litellm"
-          ],
-          "icon": "code",
-          "iconType": "solid"
+          ]
         },
         "getting-started/integration-method/fireworks",
         {
@@ -252,17 +226,13 @@
           "pages": [
             "features/advanced-usage/feedback",
             "features/advanced-usage/scores"
-          ],
-          "icon": "chart-line",
-          "iconType": "solid"
+          ]
         },
         "features/sessions",
         "features/prompts",
         {
           "group": "Webhooks",
-          "pages": ["features/webhooks", "features/webhooks-testing"],
-          "icon": "webhook",
-          "iconType": "solid"
+          "pages": ["features/webhooks", "features/webhooks-testing"]
         },
 
         "features/advanced-usage/custom-properties",
