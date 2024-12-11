@@ -1,0 +1,55 @@
+---
+title: "Use Least to Most Prompting"
+sidebarTitle: "Use least to most prompting"
+description: "Break down complex problems into smaller parts, starting with the least amount of information."
+"twitter:title": "Use Least to Most Prompting - Prompt Engineering Techniques"
+---
+
+import QuestionsSection from "/snippets/questions-section.mdx";
+
+## What is Least-to-Most (LtM) prompting
+
+Least-to-Most (LtM) prompting is a method that breaks down problems into simpler subproblems and solves them sequentially. This approach differs from [Chain-of-Thought prompting](use-chain-of-thought-prompting), where each step is independent, as LtM utilizes the output of previous subproblems as input for the next.
+
+Notably, LtM has demonstrated significantly higher accuracy than standard and Chain-of-Thought approaches in various tasks.
+
+## How to implement Least-to-Most prompting
+
+1. Break down the complex task into smaller, simpler parts and identify the key steps needed to solve it.
+2. Create a series of prompts that break down the problem into smaller, connected tasks.
+3. Guide the AI through each task in order, using previous answers to help with the next step.
+4. Check that each task's output is accurate and makes sense before moving on.
+5. Combine all the task results into a complete solution that solves the original problem.
+
+## Example
+
+**Customer Inquiry:**
+
+> I purchased a wireless noise-canceling headphone from your Premium Sound line last December during a holiday sale. The original price was 299, and I got them for 199. I noticed you're now offering a trade-in program where you give full credit for old headphones towards a new pair. My current headphones have a small scratch on the right ear cup. I'm wondering if I can trade these in and get the newest model, which is priced at $349.
+
+**Instructions:**
+
+> You are a customer service agent. Trade-in program offers 50% credit for headphones in good condition with minor wear. Trade-in credit cannot exceed 80% of the original product price. The current date is March 29th. Headphone models are typically valid for trade-in up to 18 months from purchase date. **What subproblems must be solved before answering the inquiry?**
+
+**Output:**
+
+> 1. Determine if the customer is within the 18-month trade-in window.
+> 2. Calculate the amount of store credit the customer would receive if they trade in their headphones.
+> 3. Determine if the customer's trade-in credit exceeds 80% of the cost of the original product.
+
+## Why use Least-to-Most prompting
+
+- Reduces errors by breaking down complex tasks into smaller parts
+- Provides clear, step-by-step explanations of the reasoning process
+- Makes difficult tasks easier to understand
+- Works well across a variety of problems
+
+## Tips for Effective Least-to-Most prompting
+
+- Make sure the logic flows between subtasks, and gradually increase complexity.
+- Make sure your instruction for each subtask is clear.
+- Decide how granular to break down the problem based on the AI's capabilities and your problem complexity.
+- Regularly verify the output of each subtask for accuracy.
+- Find the right balance between too many and too few steps.
+
+<QuestionsSection />
