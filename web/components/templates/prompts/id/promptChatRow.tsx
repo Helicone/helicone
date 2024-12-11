@@ -20,9 +20,6 @@ import { Message } from "../../requests/chatComponent/types";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { ClipboardIcon, EyeIcon, EyeOffIcon } from "lucide-react";
-import useOnboardingContext, {
-  ONBOARDING_STEPS,
-} from "@/components/layout/onboardingContext";
 
 interface PromptChatRowProps {
   index: number;
@@ -490,44 +487,6 @@ const PromptChatRow = (props: PromptChatRowProps) => {
     ? currentMessageContent.find((element) => element.type === "text")
     : null;
   const showMinimizeButton = textMessage && textMessage.text.length > 100;
-
-  const { isOnboardingVisible, currentStep } = useOnboardingContext();
-
-  const setText = (text: string): void => {
-    const newVariables = extractVariables(text);
-    const replacedText = replaceVariablesWithTags(text, newVariables);
-    const newMessages = { ...currentMessage };
-    const messageContent = newMessages.content;
-    if (Array.isArray(messageContent)) {
-      const textMessage = messageContent.find(
-        (element) => element.type === "text"
-      );
-      if (textMessage) {
-        textMessage.text = replacedText;
-      }
-    } else {
-      newMessages.content = replacedText;
-    }
-
-    setCurrentMessage(newMessages);
-    callback(replacedText, role, file);
-    setPromptVariables(newVariables);
-  };
-
-  useEffect(() => {
-    if (
-      isOnboardingVisible &&
-      currentStep === ONBOARDING_STEPS.EXPERIMENTS_ADD_CHANGE_PROMPT.stepNumber
-    ) {
-      setText(
-        contentAsString.replace(
-          "As a QA engineer, analyze the structure of the following page:",
-          "As a QA engineer, analyze the structure of the following page, I am providing the file name:"
-        )
-      );
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOnboardingVisible, currentStep, contentAsString]);
 
   if (playgroundMode === "experiment-compact") {
     return (

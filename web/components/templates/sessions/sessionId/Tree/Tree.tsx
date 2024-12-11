@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Trace, TreeNodeData } from "../../../../../lib/sessions/sessionTypes";
+import { TreeNodeData } from "../../../../../lib/sessions/sessionTypes";
 import { clsx } from "../../../../shared/clsx";
 import { PathNode } from "./PathNode";
 import { RequestNode } from "./RequestNode";
@@ -12,7 +12,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { OnboardingPopover } from "@/components/templates/onboarding/OnboardingPopover";
 
 export interface TreeNodeProps {
   node: TreeNodeData;
@@ -22,7 +21,6 @@ export interface TreeNodeProps {
   collapseAll?: boolean;
   setShowDrawer: (x: boolean) => void;
   isRequestSingleChild?: boolean;
-  onBoardingRequestTrace?: Trace;
 }
 
 const TreeNode: React.FC<TreeNodeProps> = ({
@@ -33,7 +31,6 @@ const TreeNode: React.FC<TreeNodeProps> = ({
   collapseAll,
   setShowDrawer,
   isRequestSingleChild,
-  onBoardingRequestTrace,
 }) => {
   const [closeChildren, setCloseChildren] = useState(collapseAll ?? false);
   const [selectedRequestId, setSelectedRequestId] = selectedRequestIdDispatch;
@@ -81,7 +78,6 @@ const TreeNode: React.FC<TreeNodeProps> = ({
           {!closeChildren &&
             node.children.map((child, index) => (
               <TreeNode
-                onBoardingRequestTrace={onBoardingRequestTrace}
                 key={index}
                 node={child}
                 selectedRequestIdDispatch={selectedRequestIdDispatch}
@@ -169,11 +165,6 @@ const TreeNode: React.FC<TreeNodeProps> = ({
             ))}
 
           <RequestNode
-            isOnboardingRequest={
-              node.children
-                ? node.children[0].trace === onBoardingRequestTrace
-                : node.trace === onBoardingRequestTrace
-            }
             selectedRequestId={selectedRequestId}
             node={node.children ? node.children[0] : node}
             setCloseChildren={setCloseChildren}
@@ -195,8 +186,6 @@ interface TreeProps {
   selectedRequestIdDispatch: [string, (x: string) => void];
   collapseAll?: boolean;
   setShowDrawer: (x: boolean) => void;
-  onBoardingRequestTrace?: Trace;
-  sessionId: string;
 }
 
 export const Tree: React.FC<TreeProps> = ({
@@ -205,44 +194,26 @@ export const Tree: React.FC<TreeProps> = ({
   selectedRequestIdDispatch,
   collapseAll,
   setShowDrawer,
-  onBoardingRequestTrace,
-  sessionId,
 }) => {
   return (
-    <OnboardingPopover
-      popoverContentProps={{
-        onboardingStep: "SESSIONS_PAGE",
-        align: "start",
-        side: "right",
-        next: () => {
-          selectedRequestIdDispatch[1](
-            onBoardingRequestTrace?.request_id ?? ""
-          );
-        },
-      }}
+    <div
+      className={clsx(
+        "font-sans bg-slate-50 dark:bg-black border-t border-slate-200 dark:border-slate-700",
+        className
+      )}
     >
-      <div
-        className={clsx(
-          "font-sans bg-slate-50 dark:bg-black border-t border-slate-200 dark:border-slate-700",
-          className
-        )}
-      >
-        {data.children &&
-          data.children.map((child, index) => (
-            <TreeNode
-              key={index}
-              node={child}
-              selectedRequestIdDispatch={selectedRequestIdDispatch}
-              isLastChild={
-                !!data.children && index === data.children.length - 1
-              }
-              onBoardingRequestTrace={onBoardingRequestTrace}
-              level={0}
-              collapseAll={collapseAll}
-              setShowDrawer={setShowDrawer}
-            />
-          ))}
-      </div>
-    </OnboardingPopover>
+      {data.children &&
+        data.children.map((child, index) => (
+          <TreeNode
+            key={index}
+            node={child}
+            selectedRequestIdDispatch={selectedRequestIdDispatch}
+            isLastChild={!!data.children && index === data.children.length - 1}
+            level={0}
+            collapseAll={collapseAll}
+            setShowDrawer={setShowDrawer}
+          />
+        ))}
+    </div>
   );
 };
