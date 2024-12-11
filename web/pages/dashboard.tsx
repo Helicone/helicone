@@ -40,6 +40,15 @@ export const getServerSideProps = withAuthSSR(async (options) => {
   } = options;
   const { context } = options;
 
+  if (!orgHasOnboarded) {
+    return {
+      redirect: {
+        destination: "/welcome",
+        permanent: false,
+      },
+    };
+  }
+
   const { data: orgLayout, error: organizationLayoutError } =
     await supabaseServer
       .from("organization_layout")

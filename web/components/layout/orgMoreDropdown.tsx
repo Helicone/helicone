@@ -153,9 +153,7 @@ export default function OrgMoreDropdown({
           </DropdownMenuGroup>
         </>
       )}
-      {ownedOrgs.length + memberOrgs.length + customerOrgs.length > 1 && (
-        <DropdownMenuSeparator />
-      )}
+      <DropdownMenuSeparator />
       <DropdownMenuItem
         className="text-xs"
         onClick={() => createNewOrgHandler()}
@@ -173,7 +171,7 @@ export default function OrgMoreDropdown({
 
       {/* Desktop view */}
       <div className="hidden sm:block">
-        <DropdownMenu modal={false}>
+        <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"

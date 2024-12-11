@@ -30,7 +30,6 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { getJawnClient } from "@/lib/clients/jawn";
-import useOnboardingContext from "@/components/layout/onboardingContext";
 
 function getPathName(url: string) {
   try {
@@ -248,7 +247,6 @@ const RequestRow = (props: {
   };
 
   const [newDatasetModalOpen, setNewDatasetModalOpen] = useState(false);
-  const { isOnboardingVisible, currentStep } = useOnboardingContext();
 
   return (
     <div className="flex flex-col h-full space-y-8 pb-72 sentry-mask-me">
@@ -638,7 +636,7 @@ const RequestRow = (props: {
           )}
           {sessionData.sessionId && (
             <>
-              <div className="flex flex-row items-center space-x-2 relative">
+              <div className="flex flex-row items-center space-x-2">
                 <Button
                   variant="outline"
                   size="sm_sleek"
@@ -649,12 +647,6 @@ const RequestRow = (props: {
                     <span>Session:</span> <span>{sessionData.sessionId}</span>
                   </Link>
                 </Button>
-                <div className="absolute right-1/2 top-1/2 translate-x-2 -translate-y-1/2">
-                  <span className="relative flex h-3 w-3">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-3 w-3 bg-sky-500"></span>
-                  </span>
-                </div>
               </div>
             </>
           )}
