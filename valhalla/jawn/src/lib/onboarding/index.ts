@@ -207,8 +207,9 @@ export async function setupDemoOrganizationRequests({
 }: {
   heliconeApiKey: string;
 }) {
-  const heliconeWorkerUrl =
-    process.env.HELICONE_WORKER_URL ?? "http://localhost:8787/v1";
+  const heliconeWorkerUrl = process.env.HELICONE_WORKER_URL
+    ? process.env.HELICONE_WORKER_URL + "/v1"
+    : "http://localhost:8787/v1";
 
   // const openai = new OpenAI({
   //   apiKey: OPENAI_KEY,
@@ -221,7 +222,7 @@ export async function setupDemoOrganizationRequests({
 
   const openai = new OpenAI({
     apiKey: OPENAI_KEY,
-    baseURL: "http://localhost:8787/v1",
+    baseURL: heliconeWorkerUrl,
     defaultHeaders: {
       "Helicone-Auth": `Bearer ${heliconeApiKey}`,
     },
@@ -230,7 +231,7 @@ export async function setupDemoOrganizationRequests({
   const heliconeLogger = new HeliconeManualLogger({
     apiKey: heliconeApiKey,
     loggingEndpoint: `${
-      process.env.HELICONE_API_WORKER_URL ?? ""
+      process.env.HELICONE_API_WORKER_URL ?? "https://api.worker.helicone.ai"
     }/custom/v1/log`,
   });
 
