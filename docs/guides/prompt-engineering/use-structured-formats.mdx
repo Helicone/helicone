@@ -28,6 +28,7 @@ import QuestionsSection from "/snippets/questions-section.mdx";
   A structured format allows the support team quickly identify the issue category (Billing), prioritize the request (High), and provides a ready-to-send response.
 
 **Prompt:**
+
 ```
 Based on the customer's query, generate a response in the following format:
 
@@ -39,63 +40,67 @@ Customer query: I was charged twice for my subscription this month. Can you help
 
 ```
 
-</Accordion>
+  </Accordion>
 
-<Accordion title="Example 2: Data entry automation.">
-By specifying CSV format, the extracted data can be directly imported into databases or spreadsheets, saving time on data entry.
+  <Accordion title="Example 2: Data entry automation.">
+    By specifying CSV format, the extracted data can be directly imported into databases or spreadsheets, saving time on data entry.
 
-**Prompt:**
-```
+    **Prompt:**
 
-Extract the following information from the email and present it in CSV format:
+    ```
 
-- First Name
-- Last Name
-- Email Address
-- Company Name
+    Extract the following information from the email and present it in CSV format:
 
-Email: Hello, my name is Maria Gonzalez from Tech Innovators. You can reach me at maria.gonzalez@techinnovators.com.
+    - First Name
+    - Last Name
+    - Email Address
+    - Company Name
 
-````
-</Accordion>
+    Email: Hello, my name is Maria Gonzalez from Tech Innovators. You can reach me at maria.gonzalez@techinnovators.com.
 
-<Accordion title="Example 3: Content creation for marketing.">
-  The structured prompt ensures all key marketing elements are included.
+    ```
 
-  **Prompt:**
-  ```
-  Create a social media post promoting our new product using this structure:
+  </Accordion>
 
-  Headline: Catchy headline
-  Body: Brief description (50 words max)
-  Call to Action: Encouraging users to visit our website
-  Hashtags: Include relevant hashtags
+  <Accordion title="Example 3: Content creation for marketing.">
+      The structured prompt ensures all key marketing elements are included.
 
-  Product: UltraBoost Wireless Earbuds
-  ```
-</Accordion>
+    **Prompt:**
 
-<Accordion title="Example 4: Medical report summarization.">
-The structured outputs help healthcare professionals quickly review critical patient information.
+    ```
+    Create a social media post promoting our new product using this structure:
 
-**Prompt:**
+    Headline: Catchy headline
+    Body: Brief description (50 words max)
+    Call to Action: Encouraging users to visit our website
+    Hashtags: Include relevant hashtags
 
-````
+    Product: UltraBoost Wireless Earbuds
+    ```
 
-Summarize the patient's medical report using the following template:
+  </Accordion>
 
-Patient Name: [Name]
-Age: [Age]
-Diagnosis: [Diagnosis]
-Prescribed Treatment: [Treatment Plan]
-Follow-Up Instructions: [Instructions]
+  <Accordion title="Example 4: Medical report summarization.">
+    The structured outputs help healthcare professionals quickly review critical patient information.
 
-Medical Report: [Insert detailed medical report here]
+    **Prompt:**
 
-```
-</Accordion>
+    ````
+
+    Summarize the patient's medical report using the following template:
+
+    Patient Name: [Name]
+    Age: [Age]
+    Diagnosis: [Diagnosis]
+    Prescribed Treatment: [Treatment Plan]
+    Follow-Up Instructions: [Instructions]
+
+    Medical Report: [Insert detailed medical report here]
+
+    ```
+
+  </Accordion>
 </AccordionGroup>
-
 
 ## Tips for effective structured formatting
 
@@ -105,4 +110,4 @@ Medical Report: [Insert detailed medical report here]
 - Implement checks to validate that the responses meet your format requirements.
 
 <QuestionsSection />
-```
+``` ````
