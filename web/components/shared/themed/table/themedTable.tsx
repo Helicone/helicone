@@ -8,7 +8,7 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Result } from "../../../../lib/result";
 import { TimeInterval } from "../../../../lib/timeCalculations/time";
 import { useLocalStorage } from "../../../../services/hooks/localStorage";
@@ -35,6 +35,11 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
+import useOnboardingContext, {
+  ONBOARDING_STEPS,
+} from "@/components/layout/onboardingContext";
+import { OnboardingPopover } from "@/components/templates/onboarding/OnboardingPopover";
+import { useRouter, useSearchParams } from "next/navigation";
 import { RequestViews } from "./RequestViews";
 
 interface ThemedTableV5Props<T extends { id?: string }> {
@@ -190,6 +195,35 @@ export default function ThemedTable<T extends { id?: string }>(
     }
   }, [rightPanel]);
 
+  const sessionData = useMemo(() => {
+    if (rows.length === 0) {
+      return undefined;
+    }
+    // @ts-ignore
+    const sessionId = rows[0].original?.customProperties?.[
+      "Helicone-Session-Id"
+    ] as string | undefined;
+    return { sessionId };
+  }, [rows]);
+
+  const { currentStep, isOnboardingVisible, setOnClickElement } =
+    useOnboardingContext();
+
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  useEffect(() => {
+    if (
+      id === "requests-table" &&
+      isOnboardingVisible &&
+      currentStep === ONBOARDING_STEPS.REQUESTS_DRAWER.stepNumber
+    ) {
+      setOnClickElement(
+        () => () => router.push(`/sessions/${sessionData?.sessionId}`)
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOnboardingVisible, currentStep]);
+
   return (
     <div className="h-full flex flex-col border-b border-slate-300 dark:border-slate-700 divide-y divide-slate-300 dark:divide-slate-700">
       <div className="p-1 flex-shrink-0">
@@ -339,71 +373,85 @@ export default function ThemedTable<T extends { id?: string }>(
                     </thead>
                     <tbody className="text-[13px] ">
                       {rows.map((row, index) => (
-                        <tr
+                        <OnboardingPopover
                           key={row.id}
-                          className={clsx(
-                            " hover:cursor-pointer",
-                            checkedIds?.includes(row.original?.id ?? "")
-                              ? "bg-sky-100 border-l border-sky-500 pl-2 dark:bg-slate-800/50 dark:border-sky-900"
-                              : "hover:bg-sky-50 dark:hover:bg-slate-700/50"
-                          )}
-                          onClick={
-                            onRowSelect &&
-                            (() => handleRowSelect(row.original, index))
-                          }
+                          open={index === 0 && id === "requests-table"}
+                          popoverContentProps={{
+                            onboardingStep: "REQUESTS_TABLE",
+                            next: () => {
+                              handleRowSelect(row.original, index);
+                            },
+                            align: "start",
+                            alignOffset: 10,
+                          }}
                         >
-                          {showCheckboxes && (
-                            <td className="w-8 px-2">
-                              <Checkbox
-                                variant="blue"
-                                checked={selectedIds?.includes(
-                                  row.original?.id ?? ""
-                                )}
-                                onChange={() => {}} // Handle individual row selection
-                                className="text-slate-700 dark:text-slate-400"
-                              />
-                            </td>
-                          )}
-                          {row.getVisibleCells().map((cell, i) => (
-                            <td
-                              key={i}
-                              className={clsx(
-                                "py-3 border-t border-slate-300 dark:border-slate-700 px-2 text-slate-700 dark:text-slate-300",
-                                i === 0 && "pl-10", // Add left padding to the first column
-                                i === row.getVisibleCells().length - 1 &&
-                                  "pr-10 border-r border-slate-300 dark:border-slate-700"
-                              )}
-                              style={{
-                                maxWidth: cell.column.getSize(),
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                                whiteSpace: "nowrap",
-                              }}
-                            >
-                              {dataLoading &&
-                              (cell.column.id == "requestText" ||
-                                cell.column.id == "responseText") ? (
-                                <span
-                                  className={clsx(
-                                    "w-full flex flex-grow",
-                                    (cell.column.id == "requestText" ||
-                                      cell.column.id == "responseText") &&
-                                      dataLoading
-                                      ? "animate-pulse bg-slate-200 rounded-md"
-                                      : "hidden"
+                          <tr
+                            className={clsx(
+                              " hover:cursor-pointer",
+                              checkedIds?.includes(row.original?.id ?? "")
+                                ? "bg-sky-100 border-l border-sky-500 pl-2 dark:bg-slate-800/50 dark:border-sky-900"
+                                : "hover:bg-sky-50 dark:hover:bg-slate-700/50"
+                            )}
+                            onClick={
+                              onRowSelect &&
+                              (() => {
+                                handleRowSelect(row.original, index);
+                              })
+                            }
+                          >
+                            {showCheckboxes && (
+                              <td className="w-8 px-2">
+                                <Checkbox
+                                  variant="blue"
+                                  checked={selectedIds?.includes(
+                                    row.original?.id ?? ""
                                   )}
-                                >
-                                  &nbsp;
-                                </span>
-                              ) : (
-                                flexRender(
-                                  cell.column.columnDef.cell,
-                                  cell.getContext()
-                                )
-                              )}
-                            </td>
-                          ))}
-                        </tr>
+                                  onChange={() => {}} // Handle individual row selection
+                                  className="text-slate-700 dark:text-slate-400"
+                                />
+                              </td>
+                            )}
+                            {row.getVisibleCells().map((cell, i) => (
+                              <td
+                                key={i}
+                                className={clsx(
+                                  "py-3 border-t border-slate-300 dark:border-slate-700 px-2 text-slate-700 dark:text-slate-300",
+                                  i === 0 && "pl-10", // Add left padding to the first column
+                                  i === row.getVisibleCells().length - 1 &&
+                                    "pr-10 border-r border-slate-300 dark:border-slate-700"
+                                )}
+                                style={{
+                                  maxWidth: cell.column.getSize(),
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {dataLoading &&
+                                (cell.column.id == "requestText" ||
+                                  cell.column.id == "responseText") ? (
+                                  <span
+                                    className={clsx(
+                                      "w-full flex flex-grow",
+                                      (cell.column.id == "requestText" ||
+                                        cell.column.id == "responseText") &&
+                                        dataLoading
+                                        ? "animate-pulse bg-slate-200 rounded-md"
+                                        : "hidden"
+                                    )}
+                                  >
+                                    &nbsp;
+                                  </span>
+                                ) : (
+                                  flexRender(
+                                    cell.column.columnDef.cell,
+                                    cell.getContext()
+                                  )
+                                )}
+                              </td>
+                            ))}
+                          </tr>
+                        </OnboardingPopover>
                       ))}
                     </tbody>
                   </table>
@@ -414,12 +462,29 @@ export default function ThemedTable<T extends { id?: string }>(
         </ResizablePanel>
         {rightPanel && (
           <>
-            <ResizableHandle withHandle />
-            <ResizablePanel minSize={25} maxSize={75}>
-              <div className="h-full flex-shrink-0 flex flex-col">
-                {rightPanel}
-              </div>
-            </ResizablePanel>
+            {isOnboardingVisible && currentStep === 1 ? (
+              <OnboardingPopover
+                popoverContentProps={{
+                  onboardingStep: "REQUESTS_DRAWER",
+                  next: () => {
+                    router.push(`/sessions/${sessionData?.sessionId}`);
+                  },
+                  align: "center",
+                  side: "left",
+                }}
+              >
+                <div className="h-full w-1/2">{rightPanel}</div>
+              </OnboardingPopover>
+            ) : (
+              <>
+                <ResizableHandle withHandle />
+                <ResizablePanel minSize={25} maxSize={75}>
+                  <div className="h-full flex-shrink-0 flex flex-col">
+                    {rightPanel}
+                  </div>
+                </ResizablePanel>
+              </>
+            )}
           </>
         )}
       </ResizablePanelGroup>

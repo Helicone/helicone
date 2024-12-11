@@ -5,9 +5,14 @@ export type Tier = "free" | "pro" | "growth" | "enterprise";
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<string>
+  res: NextApiResponse<{ orgId?: string; error?: string }>
 ) {
+  if (req.method !== "POST") {
+    res.status(405).json({ error: "Method not allowed" });
+    return;
+  }
   const userId = req.query.id as string;
+  const isEu = req.body.isEu;
 
   const orgs = await supabaseServer
     .from("organization")
@@ -20,17 +25,19 @@ export default async function handler(
       .from("organization")
       .insert([
         {
-          name: "My Organization",
+          name: "Demo Org",
           owner: userId,
-          tier: "free",
+          tier: "demo",
           is_personal: true,
+          has_onboarded: true,
+          soft_delete: false,
         },
       ])
       .select("*")
       .single();
 
     if (result.error) {
-      res.status(500).json(result.error.message);
+      res.status(500).json({ error: result.error.message });
     } else {
       const { data: memberInsert, error: memberError } = await supabaseServer
         .from("organization_member")
@@ -41,9 +48,10 @@ export default async function handler(
           org_role: "owner",
         })
         .select("*");
-      res.status(200).json("Added successfully");
+
+      res.status(200).json({ orgId: result.data.id });
     }
   } else {
-    res.status(201).json("Already exists");
+    res.status(201).json({ error: "Already exists" });
   }
 }

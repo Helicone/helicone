@@ -70,6 +70,7 @@
     "date-fns": "^4.1.0",
     "dateformat": "^5.0.3",
     "embla-carousel-react": "^8.2.0",
+    "framer-motion": "^11.11.11",
     "fuse.js": "^7.0.0",
     "generate-api-key": "^1.0.2",
     "js-cookie": "^3.0.5",

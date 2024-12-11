@@ -55,6 +55,8 @@ import { QuantilesGraph } from "./quantilesGraph";
 import StyledAreaChart from "./styledAreaChart";
 import SuggestionModal from "./suggestionsModal";
 import { useDashboardPage } from "./useDashboardPage";
+import OnboardingQuickStartModal from "./OnboardingQuickStartModal";
+import DemoDisclaimerModal from "./DemoDisclaimerModal";
 import { TimeFilter } from "@/types/timeFilter";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
@@ -86,28 +88,29 @@ export type Loading<T> = T | "loading";
 export type DashboardMode = "requests" | "costs" | "errors";
 
 const DashboardPage = (props: DashboardPageProps) => {
-  const { user, currentFilter, organizationLayout } = props;
+  const { user, organizationLayout } = props;
   const initialLoadRef = useRef(true);
 
   const searchParams = useSearchParams();
 
   const orgContext = useOrg();
 
-  const {
-    organizationLayout: orgLayout,
-    isLoading: isOrgLayoutLoading,
-    refetch: orgLayoutRefetch,
-    isRefetching: isOrgLayoutRefetching,
-  } = useOrganizationLayout(
-    orgContext?.currentOrg?.id!,
-    "dashboard",
-    organizationLayout
-      ? {
-          data: organizationLayout,
-          error: null,
-        }
-      : undefined
+  const [showQuickStartModal, setShowQuickStartModal] = useState(
+    orgContext?.currentOrg?.has_onboarded != undefined
+      ? !orgContext?.currentOrg?.has_onboarded
+      : false
   );
+  const { organizationLayout: orgLayout, refetch: orgLayoutRefetch } =
+    useOrganizationLayout(
+      orgContext?.currentOrg?.id!,
+      "dashboard",
+      organizationLayout
+        ? {
+            data: organizationLayout,
+            error: null,
+          }
+        : undefined
+    );
 
   const transformedFilters = useMemo(() => {
     if (orgLayout?.data?.filters) {
@@ -188,6 +191,12 @@ const DashboardPage = (props: DashboardPageProps) => {
   };
 
   const [isLive, setIsLive] = useLocalStorage("isLive-DashboardPage", false);
+
+  useEffect(() => {
+    if (orgContext?.currentOrg?.tier === "demo") {
+      setIsLive(true);
+    }
+  }, [orgContext?.currentOrg?.tier]);
 
   const [advancedFilters, setAdvancedFilters] = useState<UIFilterRowTree>(
     getRootFilterNode()
@@ -460,6 +469,11 @@ const DashboardPage = (props: DashboardPageProps) => {
       onSetAdvancedFiltersHandler({ operator: "and", rows: [] }, null);
     }
   };
+
+  const [showDemoDisclaimerModal, setShowDemoDisclaimerModal] = useLocalStorage(
+    "showDemoDisclaimerModal-DashboardPage",
+    true
+  );
 
   return (
     <>
@@ -975,6 +989,23 @@ const DashboardPage = (props: DashboardPageProps) => {
         />
 
         <UpgradeProModal open={open} setOpen={setOpen} />
+
+        {showDemoDisclaimerModal && orgContext?.currentOrg?.tier === "demo" && (
+          <DemoDisclaimerModal
+            open={showDemoDisclaimerModal}
+            setOpen={setShowDemoDisclaimerModal}
+            onSuccess={() => {
+              setShowDemoDisclaimerModal(false);
+            }}
+          />
+        )}
+
+        {orgContext?.currentOrg?.tier !== "demo" && (
+          <OnboardingQuickStartModal
+            open={showQuickStartModal ?? false}
+            setOpen={setShowQuickStartModal}
+          />
+        )}
       </IslandContainer>
     </>
   );
