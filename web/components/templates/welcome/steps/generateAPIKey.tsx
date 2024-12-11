@@ -12,6 +12,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { DiffHighlight } from "../diffHighlight";
 import { DialogFooter } from "@/components/ui/dialog";
+import { ArrowUpRightIcon } from "lucide-react";
 
 const ASYNC_CODE_CONVERTS = {
   "node.js": (key: string) => `
@@ -122,59 +123,67 @@ const GenerateAPIKey = ({
                 <div className="mt-2">
                   <div className="flex overflow-x-auto py-2 w-full no-scrollbar">
                     <div className="flex gap-2">
-                      <button
-                        className={clsx(
-                          asyncLang === "node.js" ? "bg-sky-100" : "bg-white",
-                          "flex-shrink-0 flex items-center gap-2 border border-gray-300 rounded-lg py-1.5 px-3 text-sm"
-                        )}
+                      <Button
+                        variant={"outline"}
+                        size="sm"
+                        className={
+                          asyncLang === "node.js"
+                            ? "bg-slate-200 border-slate-200 dark:bg-slate-800 dark:border-slate-800"
+                            : ""
+                        }
                         onClick={() => setAsyncLang("node.js")}
                       >
-                        <h2 className="font-semibold">Node.js</h2>
-                      </button>
-                      <button
-                        className={clsx(
-                          asyncLang === "python" ? "bg-sky-100" : "bg-white",
-                          "flex-shrink-0 flex items-center gap-2 border border-gray-300 rounded-lg py-1.5 px-3 text-sm"
-                        )}
+                        Node.js
+                      </Button>
+                      <Button
+                        variant={"outline"}
+                        size="sm"
+                        className={
+                          asyncLang === "python"
+                            ? "bg-slate-200 border-slate-200 dark:bg-slate-800 dark:border-slate-800"
+                            : ""
+                        }
                         onClick={() => setAsyncLang("python")}
                       >
-                        <h2 className="font-semibold">Python</h2>
-                      </button>
+                        Python
+                      </Button>
                       <Link
-                        className="flex-shrink-0 flex items-center gap-2 border border-gray-300 rounded-lg py-1.5 px-3 text-sm hover:bg-gray-50"
                         href="https://docs.helicone.ai/getting-started/integration-method/openllmetry#supported-languages"
                         target="_blank"
                         rel="noreferrer noopener"
                       >
-                        <div className="relative flex items-center w-16 h-4">
-                          <Image
-                            src="/assets/home/providers/azure.webp"
-                            alt="Go"
-                            width={28}
-                            height={28}
-                            quality={100}
-                            className="bg-transparent absolute left-0 z-40 rounded-xl"
-                          />
-                          <Image
-                            src="/assets/home/providers/bedrock.webp"
-                            alt="Java"
-                            width={28}
-                            height={28}
-                            quality={100}
-                            className="bg-transparent absolute left-4 z-30 rounded-xl"
-                          />
-                          <Image
-                            src="/assets/home/providers/gemini.webp"
-                            alt="Ruby"
-                            width={28}
-                            height={28}
-                            quality={100}
-                            className="bg-transparent absolute left-8 z-20 rounded-xl"
-                          />
-                        </div>
-                        <span className="font-medium text-gray-900">
-                          View Docs ›
-                        </span>
+                        <Button variant="outline">
+                          <div className="relative flex items-center w-12 h-4">
+                            <Image
+                              src="/assets/home/providers/lemonfox.png"
+                              alt={"Anthropic"}
+                              width={24}
+                              height={24}
+                              quality={100}
+                              className="bg-transparent absolute left-0 z-40 rounded-full"
+                            />
+                            <Image
+                              src="/assets/home/providers/llama2.png"
+                              alt={"Anthropic"}
+                              width={24}
+                              height={24}
+                              quality={100}
+                              className="bg-transparent absolute left-2 z-30 rounded-xl"
+                            />
+                            <Image
+                              src="/assets/home/providers/anyscale.jpeg"
+                              alt={"Anthropic"}
+                              width={24}
+                              height={24}
+                              quality={100}
+                              className="bg-transparent absolute left-4 z-20 rounded-xl"
+                            />
+                          </div>
+                          <span className="inline-flex items-center gap-1 text-sm text-slate-900 dark:text-slate-100">
+                            More{" "}
+                            <ArrowUpRightIcon className="w-3 h-3 text-slate-500" />
+                          </span>
+                        </Button>
                       </Link>
                     </div>
                   </div>
@@ -186,13 +195,13 @@ const GenerateAPIKey = ({
 
         {selectedIntegrationMethod === "proxy" && (
           <div className="flex flex-wrap gap-4 w-full">
-            <button
+            <Button
+              variant="outline"
               className={clsx(
                 selectedProvider === "openai"
-                  ? "bg-white shadow-md ring-2 ring-sky-500"
-                  : "bg-white hover:bg-gray-50",
-                "flex items-center gap-3 border border-gray-200 rounded-xl py-2 px-3 transition-all duration-150",
-                "hover:shadow-sm"
+                  ? "bg-slate-200 border-slate-200 dark:bg-slate-800 dark:border-slate-800"
+                  : "hover:bg-gray-50 dark:hover:bg-slate-800",
+                "gap-2"
               )}
               onClick={() => setSelectedProvider("openai")}
             >
@@ -207,15 +216,17 @@ const GenerateAPIKey = ({
                   fill="currentColor"
                 ></path>
               </svg>
-              <span className="font-small text-gray-900">OpenAI</span>
-            </button>
-            <button
+              <span className="text-sm text-slate-900 dark:text-slate-100">
+                OpenAI
+              </span>
+            </Button>
+            <Button
+              variant="outline"
               className={clsx(
                 selectedProvider === "azure"
-                  ? "bg-white shadow-md ring-2 ring-sky-500"
-                  : "bg-white hover:bg-gray-50",
-                "flex items-center gap-3 border border-gray-200 rounded-xl py-2 px-3 transition-all duration-150",
-                "hover:shadow-sm"
+                  ? "bg-slate-200 border-slate-200 dark:bg-slate-800 dark:border-slate-800"
+                  : "hover:bg-gray-50 dark:hover:bg-slate-800",
+                "gap-2"
               )}
               onClick={() => setSelectedProvider("azure")}
             >
@@ -227,16 +238,18 @@ const GenerateAPIKey = ({
                 quality={100}
                 className="bg-transparent rounded-lg"
               />
-              <span className="font-small text-gray-900">Azure</span>
-            </button>
+              <span className="text-sm text-slate-900 dark:text-slate-100">
+                Azure
+              </span>
+            </Button>
 
-            <button
+            <Button
+              variant="outline"
               className={clsx(
                 selectedProvider === "anthropic"
-                  ? "bg-white shadow-md ring-2 ring-sky-500"
-                  : "bg-white hover:bg-gray-50",
-                "flex items-center gap-3 border border-gray-200 rounded-xl py-2 px-3 transition-all duration-150",
-                "hover:shadow-sm"
+                  ? "bg-slate-200 border-slate-200 dark:bg-slate-800 dark:border-slate-800"
+                  : "hover:bg-gray-50 dark:hover:bg-slate-800",
+                "gap-2"
               )}
               onClick={() => setSelectedProvider("anthropic")}
             >
@@ -248,44 +261,46 @@ const GenerateAPIKey = ({
                 quality={100}
                 className="bg-transparent rounded-xl"
               />
-              <span className="font-small text-gray-900">Anthropic</span>
-            </button>
+              <span className="text-sm text-slate-900 dark:text-slate-100">
+                Anthropic
+              </span>
+            </Button>
             <Link
-              className={clsx(
-                "flex items-center gap-2 border border-gray-200 rounded-xl py-2 px-3",
-                "hover:bg-gray-50 hover:shadow-sm transition-all duration-150"
-              )}
               href="https://docs.helicone.ai/getting-started/quick-start#quick-start"
               target="_blank"
               rel="noreferrer noopener"
             >
-              <div className="relative flex items-center w-16 h-4">
-                <Image
-                  src="/assets/home/providers/lemonfox.png"
-                  alt={"Anthropic"}
-                  width={24}
-                  height={24}
-                  quality={100}
-                  className="bg-transparent absolute left-0 z-40 rounded-xl"
-                />
-                <Image
-                  src="/assets/home/providers/llama2.png"
-                  alt={"Anthropic"}
-                  width={24}
-                  height={24}
-                  quality={100}
-                  className="bg-transparent absolute left-4 z-30 rounded-xl"
-                />
-                <Image
-                  src="/assets/home/providers/anyscale.jpeg"
-                  alt={"Anthropic"}
-                  width={24}
-                  height={24}
-                  quality={100}
-                  className="bg-transparent absolute left-8 z-20 rounded-xl"
-                />
-              </div>
-              <span className="font-small text-gray-900">More ›</span>
+              <Button variant="outline">
+                <div className="relative flex items-center w-12 h-4">
+                  <Image
+                    src="/assets/home/providers/lemonfox.png"
+                    alt={"Anthropic"}
+                    width={24}
+                    height={24}
+                    quality={100}
+                    className="bg-transparent absolute left-0 z-40 rounded-full"
+                  />
+                  <Image
+                    src="/assets/home/providers/llama2.png"
+                    alt={"Anthropic"}
+                    width={24}
+                    height={24}
+                    quality={100}
+                    className="bg-transparent absolute left-2 z-30 rounded-xl"
+                  />
+                  <Image
+                    src="/assets/home/providers/anyscale.jpeg"
+                    alt={"Anthropic"}
+                    width={24}
+                    height={24}
+                    quality={100}
+                    className="bg-transparent absolute left-4 z-20 rounded-xl"
+                  />
+                </div>
+                <span className="inline-flex items-center gap-1 text-sm text-slate-900 dark:text-slate-100">
+                  More <ArrowUpRightIcon className="w-3 h-3 text-slate-500" />
+                </span>
+              </Button>
             </Link>
           </div>
         )}

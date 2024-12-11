@@ -23,6 +23,7 @@ import { Dialog } from "@/components/ui/dialog";
 import { DialogContent } from "@/components/ui/dialog";
 import CreateOrgForm from "@/components/templates/organization/createOrgForm";
 import { useJawnClient } from "@/lib/clients/jawnHook";
+import { useUser } from "@supabase/auth-helpers-react";
 
 export interface NavigationItem {
   name: string;
@@ -46,6 +47,7 @@ const DesktopSidebar = ({
   sidebarRef,
 }: SidebarProps) => {
   const org = useOrg();
+  const user = useUser();
   const tier = org?.currentOrg?.tier;
   const router = useRouter();
   const [isCollapsed, setIsCollapsed] = useLocalStorage(
@@ -326,10 +328,12 @@ const DesktopSidebar = ({
                 Stup date
               </Button> */}
               {org?.currentOrg?.tier === "demo" &&
-                org?.allOrgs?.length === 1 && (
+                org.allOrgs.filter(
+                  (org) => org.tier !== "demo" && org.owner === user?.id
+                ).length === 0 && (
                   <Button
-                    className="mx-2 text-[13px] font-medium"
                     variant="outline"
+                    className="mx-2 text-[13px] font-medium bg-slate-200 border border-slate-300 dark:border-slate-700 dark:bg-slate-800 text-slate-700 dark:text-slate-400 hover:dark:text-slate-400 hover:dark:bg-slate-700"
                     onClick={() => {
                       setShowEndOnboardingConfirmation(true);
                     }}
