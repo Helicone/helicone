@@ -1201,15 +1201,13 @@
     "@hapi/bourne" "^3.0.0"
     "@hapi/hoek" "^11.0.2"
 
-"@helicone/helpers@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@helicone/helpers/-/helpers-1.0.0.tgz#adcdfb9abb9d71901a780ccda7a1c383c4e7f24f"
-  integrity sha512-YZDGIsOe19+tADpM4ggOPsS3RmapjM8BHfaFBcpfOsNtedU/YGUmqK03wtVHjPZu0PHE9QHR/bXhiVlmTPCtvQ==
-
-"@helicone/prompts@^1.0.11":
-  version "1.0.11"
-  resolved "https://registry.yarnpkg.com/@helicone/prompts/-/prompts-1.0.11.tgz#f4fa6daa7a2b40fe6253bd8bc5d2ec0e39a291e7"
-  integrity sha512-cXBrSmWk6UQPkim94BrMY+jDv969r2ZLjXv8sYRizj97rzutLe4Q+CF53Ska7cYd81DUKJp99aYxc+N9NbFDgg==
+"@helicone/prompts@^1.0.10":
+  version "1.0.10"
+  resolved "https://registry.npmjs.org/@helicone/prompts/-/prompts-1.0.10.tgz"
+  integrity sha512-yaiYp6idDIckR9NATuMfmTtHBhS4xkd0MknD2A4egZ7EWhsHq0ns5q98fWzL6KMrokl35fnr2FVhGgFaRKvbGg==
+  dependencies:
+    "@types/node" "^20.14.11"
+    typescript "^5.5.3"
 
 "@ioredis/commands@^1.1.1":
   version "1.2.0"
@@ -2555,7 +2553,7 @@
     "@types/node" "*"
     form-data "^4.0.0"
 
-"@types/node@*", "@types/node@^20.8.10":
+"@types/node@*", "@types/node@^20.14.11", "@types/node@^20.8.10":
   version "20.17.0"
   resolved "https://registry.npmjs.org/@types/node/-/node-20.17.0.tgz"
   integrity sha512-a7zRo0f0eLo9K5X9Wp5cAqTUNGzuFLDG2R7C4HY2BhcMAsxgSPuRvAC1ZB6QkuUQXf0YZAgfOX2ZyrBa2n4nHQ==
@@ -5777,7 +5775,7 @@ typedarray@^0.0.6:
   resolved "https://registry.npmjs.org/typedarray/-/typedarray-0.0.6.tgz"
   integrity sha512-/aCDEGatGvZ2BIk+HmLf4ifCJFwvKFNb9/JeZPMulfgFracn9QFcAf5GO8B/mweUjSoblS5In0cWhqpfs/5PQA==
 
-typescript@^5.2.2, typescript@^5.6.2:
+typescript@^5.2.2, typescript@^5.5.3, typescript@^5.6.2:
   version "5.6.3"
   resolved "https://registry.npmjs.org/typescript/-/typescript-5.6.3.tgz"
   integrity sha512-hjcS1mhfuyi4WW8IWtjP7brDrG2cuDZukyrYrSauoXGNgx0S7zceP07adYkJycEr56BOUTNPzbInooiN3fn1qw==

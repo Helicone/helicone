@@ -446,9 +446,6 @@ export interface paths {
   "/v1/organization/{organizationId}/remove_member": {
     delete: operations["RemoveMemberFromOrganization"];
   };
-  "/v1/organization/setup-demo": {
-    post: operations["SetupDemo"];
-  };
   "/v1/dashboard/scores/query": {
     post: operations["GetScoresOverTime"];
   };
@@ -5591,7 +5588,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result_string.string_"];
+          "application/json": components["schemas"]["Result_null.string_"];
         };
       };
     };
@@ -5791,16 +5788,6 @@ export interface operations {
         organizationId: string;
       };
     };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  SetupDemo: {
     responses: {
       /** @description Ok */
       200: {

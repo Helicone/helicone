@@ -15,8 +15,6 @@ import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { useJawnClient } from "@/lib/clients/jawnHook";
 import { Database } from "@/supabase/database.types";
 import { useLocalStorage } from "@/services/hooks/localStorage";
-import { usePathname } from "next/navigation";
-import { useOrg } from "../org/organizationContext";
 
 const AcceptTermsModal = () => {
   const [showTermsModal, setShowTermsModal] = useState(false);
@@ -32,8 +30,6 @@ const AcceptTermsModal = () => {
   const user = useUser();
   const supabase = useSupabaseClient<Database>();
   const jawn = useJawnClient();
-  const org = useOrg();
-  const pathname = usePathname();
 
   const handleAcceptTerms = useCallback(async () => {
     try {
@@ -56,19 +52,11 @@ const AcceptTermsModal = () => {
     if (
       user &&
       !user.user_metadata.accepted_terms_date &&
-      !acceptedTermsLocalStorage &&
-      org?.currentOrg?.tier !== "demo" &&
-      !(pathname === "/dashboard" && !org?.currentOrg?.has_onboarded)
+      !acceptedTermsLocalStorage
     ) {
       setShowTermsModal(true);
     }
-  }, [
-    acceptedTermsLocalStorage,
-    user,
-    org?.currentOrg?.tier,
-    pathname,
-    org?.currentOrg?.has_onboarded,
-  ]);
+  }, [acceptedTermsLocalStorage, user]);
 
   const handleCheckedChange = useCallback(
     (checked: boolean) => {

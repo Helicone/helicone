@@ -61,5 +61,5 @@ export default async function handler(
     return res.status(500).json({ error: memberError.message });
   }
 
-  return res.status(200).json({ orgId: result.data.id });
+  return res.status(200).json({ orgId: result.data.organization_id });
 }

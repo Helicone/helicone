@@ -1,24 +1,23 @@
 import { getRequestCountClickhouse } from "../../../lib/api/request/request";
 
-import { supabaseServer } from "../../../lib/supabaseServer";
+import { SupabaseClient } from "@supabase/supabase-js";
 import {
   HandlerWrapperOptions,
   withAuth,
 } from "../../../lib/api/handlerWrappers";
 import { Result } from "../../../lib/result";
+import { Database } from "../../../supabase/database.types";
 
-async function checkAndUpdateOrgs(orgId: string): Promise<boolean> {
+async function checkAndUpdateOrgs(
+  orgId: string,
+  supabaseClient: SupabaseClient<Database>
+): Promise<boolean> {
   const count = (await getRequestCountClickhouse(orgId, "all")).data ?? 0;
   if (count > 0) {
-    const { error } = await supabaseServer
+    await supabaseClient
       .from("organization")
       .update({ has_onboarded: true })
       .eq("id", orgId);
-    if (error) {
-      console.error("Error updating org", error);
-      return false;
-    }
-    console.log("Updated org", orgId);
     return true;
   }
   return false;
@@ -26,13 +25,14 @@ async function checkAndUpdateOrgs(orgId: string): Promise<boolean> {
 
 async function handler({
   res,
+  supabaseClient,
   userData: { orgHasOnboarded, orgId },
 }: HandlerWrapperOptions<Result<boolean, string>>) {
   if (orgHasOnboarded) {
     res.status(200).json({ error: null, data: true });
     return;
   }
-  const data = await checkAndUpdateOrgs(orgId);
+  const data = await checkAndUpdateOrgs(orgId, supabaseClient.getClient());
   if (data) {
     res.status(200).json({ error: null, data });
   } else {
