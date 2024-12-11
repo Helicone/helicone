@@ -65,7 +65,7 @@ const OnboardingQuickStartModal = ({
               ? "Listening for events..."
               : `Hello ${org?.currentOrg?.name}!`}
           </DialogTitle>
-          <DialogDescription className="text-sm text-slate-500">
+          <DialogDescription className="text-sm text-slate-500 flex items-center gap-1 flex-wrap break-words">
             Let&apos;s set up your first{" "}
             {currentStep === 2 ? (
               <span className="inline-flex items-center gap-1 text-slate-700 dark:text-slate-300 font-medium">
@@ -90,12 +90,21 @@ const OnboardingQuickStartModal = ({
             <div className="flex flex-col gap-2.5" key={step.title}>
               <div
                 className={cn(
-                  "w-full h-4 rounded-full",
-                  index + 1 <= currentStep
-                    ? "bg-gradient-to-r from-[#0CA5EA] to-blue-700"
-                    : "bg-slate-100 dark:bg-slate-900"
+                  "w-full h-4 rounded-full transition-all relative overflow-hidden bg-slate-100 dark:bg-slate-900"
                 )}
-              ></div>
+              >
+                <div
+                  className={cn(
+                    "absolute inset-0 h-full top-0 left-0 bg-gradient-to-r transition-all duration-300",
+                    index === 0
+                      ? "from-[#0CA5EA] to-[#1479E1]"
+                      : index === 1
+                      ? "from-[#157AE2] to-[#1C50D9]"
+                      : "from-[#1767DD] to-blue-700",
+                    index + 1 <= currentStep ? "w-full" : "w-0"
+                  )}
+                ></div>
+              </div>
               <div className="space-y-1">
                 <p
                   className={cn(
