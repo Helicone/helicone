@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 const Banner = () => {
   return (
@@ -8,12 +9,12 @@ const Banner = () => {
       <div className="bg-slate-100 text-slate-500 text-center text-sm md:text-base py-3 w-full">
         <p>
           🎁 Our holiday gift to you:{" "}
-          <a
-            href="https:/docs.helicone.ai/experiments"
+          <Link
+            href="https://docs.helicone.ai/experiments"
             className="font-semibold underline hover:text-slate-600"
           >
             Experiments
-          </a>{" "}
+          </Link>{" "}
           is here!
         </p>
       </div>
