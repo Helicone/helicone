@@ -99,8 +99,6 @@ const AuthForm = (props: AuthFormProps) => {
     return "us";
   };
 
-  const [confirmPassword, setConfirmPassword] = useState("");
-
   return (
     <div className="w-full bg-[#f8feff] h-full antialiased relative light">
       <div className="h-screen flex flex-1 flex-col sm:flex-row justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-20 xl:px-24 relative">
@@ -221,33 +219,6 @@ const AuthForm = (props: AuthFormProps) => {
                         </div>
                       </div>
                     )}
-                    {authFormType === "signup" && (
-                      <div>
-                        <label
-                          htmlFor="confirmPassword"
-                          className="block text-sm lg:text-md  font-medium leading-6 text-gray-900"
-                        >
-                          Confirm password
-                        </label>
-                        <div className="mt-1">
-                          <Input
-                            id="confirmPassword"
-                            name="confirmPassword"
-                            type="password"
-                            autoComplete="current-password"
-                            placeholder="***********"
-                            required
-                            value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
-                          />
-                        </div>
-                        {confirmPassword && password !== confirmPassword && (
-                          <p className="text-xs text-red-500">
-                            Passwords do not match
-                          </p>
-                        )}
-                      </div>
-                    )}
 
                     {authFormType === "signup" && (
                       <div className="flex items-center justify-start gap-1">
@@ -293,8 +264,7 @@ const AuthForm = (props: AuthFormProps) => {
                       size={"sm"}
                       disabled={
                         isLoading ||
-                        (authFormType === "signup" &&
-                          (!acceptedTerms || password !== confirmPassword))
+                        (authFormType === "signup" && !acceptedTerms)
                       }
                       type="submit"
                       className="w-full flex"

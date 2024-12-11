@@ -1,9 +1,12 @@
+import { providers } from "@/packages/cost/providers/mappings";
 import {
   Accordion,
   AccordionItem,
   AccordionTrigger,
   AccordionContent,
 } from "@radix-ui/react-accordion";
+import { ChevronRight } from "lucide-react";
+import Link from "next/link";
 import React from "react";
 
 // Function to format provider names
@@ -25,6 +28,24 @@ export function formatProviderName(provider: string): string {
   return formattingMap[provider.toUpperCase()] || provider.toUpperCase();
 }
 
+const getParentModelInfo = (provider: string, model: string) => {
+  const providerData = providers.find(
+    (p) => p.provider.toLowerCase() === provider.toLowerCase()
+  );
+  if (!providerData?.modelDetails) return null;
+
+  for (const [parentModel, details] of Object.entries(
+    providerData.modelDetails
+  )) {
+    if (details.matches.includes(model)) {
+      return {
+        name: details.searchTerms[0],
+        matches: details.matches,
+      };
+    }
+  }
+  return null;
+};
 
 // Reusable FAQ component
 const LLMPricingFAQ = () => {
@@ -41,10 +62,15 @@ const LLMPricingFAQ = () => {
       </h3>
       <Accordion type="single" collapsible className="w-full">
         <AccordionItem value="faq-1" className="mb-4 mt-4">
-          <AccordionTrigger className="font-medium text-slate-700 mb-2 flex items-start justify-between w-full text-left" onClick={() => setFaq1Open(!faq1Open)}>
+          <AccordionTrigger
+            className="font-medium text-slate-700 mb-2 flex items-start justify-between w-full text-left"
+            onClick={() => setFaq1Open(!faq1Open)}
+          >
             How does LLM API pricing work?
             <svg
-              className={`w-5 h-5 text-slate-500 ml-auto ${faq1Open ? 'transform rotate-180' : ''}`}
+              className={`w-5 h-5 text-slate-500 ml-auto ${
+                faq1Open ? "transform rotate-180" : ""
+              }`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -61,11 +87,11 @@ const LLMPricingFAQ = () => {
           <AccordionContent className="text-slate-500 text-sm mb-6">
             LLM API pricing typically works on a pay-per-use model, where
             you&apos;re charged based on the number of tokens processed. Tokens
-            are pieces of text, with prices varying for input (prompts) and output
-            (completions). Prices can differ significantly between providers and
-            models. To optimize costs, consider using Helicone&apos;s caching
-            feature, which can significantly reduce API calls and save money.
-            Learn more about caching at{" "}
+            are pieces of text, with prices varying for input (prompts) and
+            output (completions). Prices can differ significantly between
+            providers and models. To optimize costs, consider using
+            Helicone&apos;s caching feature, which can significantly reduce API
+            calls and save money. Learn more about caching at{" "}
             <a
               href="https://docs.helicone.ai/features/advanced-usage/caching"
               target="_blank"
@@ -79,10 +105,15 @@ const LLMPricingFAQ = () => {
         </AccordionItem>
         <div className="border-t border-slate-200"></div>
         <AccordionItem value="faq-2" className="mb-4 mt-4">
-          <AccordionTrigger className="font-medium text-slate-700 mb-2 flex items-start justify-between w-full text-left" onClick={() => setFaq2Open(!faq2Open)}>
-            What are the most cost-effective LLM APIs for startups? 
+          <AccordionTrigger
+            className="font-medium text-slate-700 mb-2 flex items-start justify-between w-full text-left"
+            onClick={() => setFaq2Open(!faq2Open)}
+          >
+            What are the most cost-effective LLM APIs for startups?
             <svg
-              className={`w-5 h-5 text-slate-500 ml-auto ${faq2Open ? 'transform rotate-180' : ''}`}
+              className={`w-5 h-5 text-slate-500 ml-auto ${
+                faq2Open ? "transform rotate-180" : ""
+              }`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -97,21 +128,26 @@ const LLMPricingFAQ = () => {
             </svg>
           </AccordionTrigger>
           <AccordionContent className="text-slate-500 text-sm mb-6">
-            The most cost-effective LLM API depends on your specific use case and
-            volume. Generally, open-source and smaller parameter models like Llama
-            3 or Mistral can be more affordable for startups compared to larger
-            providers like OpenAI and Anthropic. Our calculator allows you to
-            compare prices across providers. Additionally, Helicone offers tools
-            to monitor costs and optimize usage, helping startups make informed
-            decisions and control expenses.
+            The most cost-effective LLM API depends on your specific use case
+            and volume. Generally, open-source and smaller parameter models like
+            Llama 3 or Mistral can be more affordable for startups compared to
+            larger providers like OpenAI and Anthropic. Our calculator allows
+            you to compare prices across providers. Additionally, Helicone
+            offers tools to monitor costs and optimize usage, helping startups
+            make informed decisions and control expenses.
           </AccordionContent>
         </AccordionItem>
         <div className="border-t border-slate-200"></div>
         <AccordionItem value="faq-3" className="mb-4 mt-4">
-          <AccordionTrigger className="font-medium text-slate-700 mb-2 flex items-start justify-between w-full text-left" onClick={() => setFaq3Open(!faq3Open)}>
+          <AccordionTrigger
+            className="font-medium text-slate-700 mb-2 flex items-start justify-between w-full text-left"
+            onClick={() => setFaq3Open(!faq3Open)}
+          >
             How can I reduce my LLM API costs?
             <svg
-              className={`w-5 h-5 text-slate-500 ml-auto ${faq3Open ? 'transform rotate-180' : ''}`}
+              className={`w-5 h-5 text-slate-500 ml-auto ${
+                faq3Open ? "transform rotate-180" : ""
+              }`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -193,10 +229,16 @@ const LLMPricingFAQ = () => {
         </AccordionItem>
         <div className="border-t border-slate-200"></div>
         <AccordionItem value="faq-4" className="mb-4 mt-4">
-          <AccordionTrigger className="font-medium text-slate-700 mb-2 flex items-start justify-between w-full text-left" onClick={() => setFaq4Open(!faq4Open)}>
-            What&apos;s the difference between input and output tokens in LLM API pricing?
+          <AccordionTrigger
+            className="font-medium text-slate-700 mb-2 flex items-start justify-between w-full text-left"
+            onClick={() => setFaq4Open(!faq4Open)}
+          >
+            What&apos;s the difference between input and output tokens in LLM
+            API pricing?
             <svg
-              className={`w-5 h-5 text-slate-500 ml-auto ${faq4Open ? 'transform rotate-180' : ''}`}
+              className={`w-5 h-5 text-slate-500 ml-auto ${
+                faq4Open ? "transform rotate-180" : ""
+              }`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -230,10 +272,15 @@ const LLMPricingFAQ = () => {
         </AccordionItem>
         <div className="border-t border-slate-200"></div>
         <AccordionItem value="faq-5" className="mb-4 mt-4">
-          <AccordionTrigger className="font-medium text-slate-700 mb-2 flex items-start justify-between w-full text-left" onClick={() => setFaq5Open(!faq5Open)}>
+          <AccordionTrigger
+            className="font-medium text-slate-700 mb-2 flex items-start justify-between w-full text-left"
+            onClick={() => setFaq5Open(!faq5Open)}
+          >
             How accurate is this LLM API pricing calculator?
             <svg
-              className={`w-5 h-5 text-slate-500 ml-auto ${faq5Open ? 'transform rotate-180' : ''}`}
+              className={`w-5 h-5 text-slate-500 ml-auto ${
+                faq5Open ? "transform rotate-180" : ""
+              }`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -246,16 +293,17 @@ const LLMPricingFAQ = () => {
                 d="m6 9 6 6 6-6"
               ></path>
             </svg>
-          </AccordionTrigger>          
+          </AccordionTrigger>
           <AccordionContent className="text-slate-500 text-sm mb-6">
             Our LLM API pricing calculator is highly accurate and regularly
             updated with the latest pricing information from various providers.
             The same collection of LLM API pricing data is used within the
             Helicone platform, which supports thousands of companies in tracking
-            their spending for projects to ensure profitability. This requirement
-            for accuracy in a production environment ensures that our calculator
-            provides reliable estimates. For enterprise-level estimates or custom
-            pricing agreements, it&apos;s best to contact providers directly.
+            their spending for projects to ensure profitability. This
+            requirement for accuracy in a production environment ensures that
+            our calculator provides reliable estimates. For enterprise-level
+            estimates or custom pricing agreements, it&apos;s best to contact
+            providers directly.
           </AccordionContent>
         </AccordionItem>
       </Accordion>
@@ -270,8 +318,8 @@ const ContributingSection = () => (
       Contribute to the open-source LLM API pricing database
     </h3>
     <p className="text-slate-500 mb-4">
-      As an open-source project, we welcome contributions from the community to keep the pricing data accurate and
-      up-to-date.
+      As an open-source project, we welcome contributions from the community to
+      keep the pricing data accurate and up-to-date.
     </p>
     <div className="bg-sky-50 p-4 rounded-md mb-4">
       <h4 className="font-semibold mb-2 text-sky-700">How to contribute:</h4>
@@ -330,6 +378,25 @@ const CalculatorInfo: React.FC<CalculatorInfoProps> = ({ model, provider }) => {
     <div className="mt-12 space-y-8 max-w-3xl mx-auto">
       {model && provider ? (
         <>
+          {(() => {
+            const parentInfo = getParentModelInfo(provider, model);
+            return (
+              parentInfo &&
+              parentInfo.name !== model && (
+                <div className="mx-auto w-full">
+                  <Link
+                    href={`/llm-cost/provider/${encodeURIComponent(
+                      provider.toLowerCase()
+                    )}/model/${encodeURIComponent(parentInfo.name)}`}
+                    className="inline-flex items-center gap-2 text-sm text-sky-600 hover:text-sky-700"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                    <span>View {parentInfo.name} model family pricing</span>
+                  </Link>
+                </div>
+              )
+            );
+          })()}
           <section className="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
             <h3 className="text-2xl font-semibold mb-4 text-slate-700">
               What is the {formatProviderName(provider)} {model} API Pricing
@@ -690,7 +757,9 @@ const CalculatorInfo: React.FC<CalculatorInfoProps> = ({ model, provider }) => {
                   />
                 </svg>
                 <div>
-                  <h4 className="font-medium text-slate-700">Compare multiple models</h4>
+                  <h4 className="font-medium text-slate-700">
+                    Compare multiple models
+                  </h4>
                   <p className="text-slate-500 mb-2">
                     Use the calculator to compare costs across different models
                     and providers to find the best fit for your needs.
@@ -713,7 +782,9 @@ const CalculatorInfo: React.FC<CalculatorInfoProps> = ({ model, provider }) => {
                   />
                 </svg>
                 <div>
-                  <h4 className="font-medium text-slate-700">Adjust token counts</h4>
+                  <h4 className="font-medium text-slate-700">
+                    Adjust token counts
+                  </h4>
                   <p className="text-slate-500 mb-2">
                     Experiment with different input and output token counts to
                     estimate costs for various use cases.
@@ -736,7 +807,9 @@ const CalculatorInfo: React.FC<CalculatorInfoProps> = ({ model, provider }) => {
                   />
                 </svg>
                 <div>
-                  <h4 className="font-medium text-slate-700">Consider your usage volume</h4>
+                  <h4 className="font-medium text-slate-700">
+                    Consider your usage volume
+                  </h4>
                   <p className="text-slate-500 mb-2">
                     Remember to factor in your expected usage volume when
                     comparing costs across different providers.

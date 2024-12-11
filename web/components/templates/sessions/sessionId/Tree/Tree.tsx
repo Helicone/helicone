@@ -52,7 +52,8 @@ const TreeNode: React.FC<TreeNodeProps> = ({
     >
       {!node.trace &&
       node.children &&
-      (node.children.filter((c) => c.trace).length === 0 ||
+      (node.children.filter((c) => !c.trace).length ||
+        node.children.filter((c) => c.trace).length === 0 ||
         node.children.filter((c) => c.trace).length > 1) ? (
         <Col className="overflow-x-auto overflow-y-hidden">
           <Row className="w-full group">
