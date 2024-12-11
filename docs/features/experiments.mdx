@@ -7,11 +7,6 @@ description: "Experiments is a spreadsheet-like experience designed to tune your
 
 import QuestionsSection from "/snippets/questions-section.mdx";
 
-<Info>
-  **Who can use this feature**: Anyone on Pro or Enterprise
-  [plan](https://www.helicone.ai/pricing), this feature will be charged at cost.
-</Info>
-
 ## What are Experiments?
 
 Helicone's Experiments is designed to help you tune your LLM prompt, test it on production data, and verify your iterations with quantifiable data. In Helicone, you can define and run LLM-as-a-judge or custom evaluators, then compare the results between prompts side-by-side to determine the best one for production.
@@ -94,22 +89,29 @@ The next step is to import golden datasets or your request data in Helicone. The
 
 ### 4. Create and run custom evaluators
 
-<Frame>
-  <img
-    src="/images/experiments/select-eval.webp"
-    alt="Create LLM-as-a-judge or custom evaluators to test your prompt. "
-  />
-</Frame>
-
 <Steps>
-    <Step title="Toggle on `Show scores`."></Step>
-    <Step title="Under the dropdown, select 'Create new custom evaluators'"></Step>
+    <Step title="Toggle on `Show scores`.">
+      <Frame>
+        <img
+          src="/images/experiments/select-eval.webp"
+          alt="Create LLM-as-a-judge or custom evaluators to test your prompt. "
+        />
+      </Frame>
+    </Step>
+    <Step title="Under the dropdown, select 'Create new custom evaluators'">
+    </Step>
     <Step title="Create the evaluator">
-        On the side panel, you will be able to create a new evaluator. We currently support LLM-as-a-judge, Python and TypeScript support is coming soon!
+        On the side panel, you will be able to create a new evaluator. We currently support LLM-as-a-judge. Python and TypeScript support is coming soon!
         <Tip>You can add as many evaluators as you like, and run them all at the same time. </Tip>
     </Step>
     <Step title="Run Evaluator">
         Once you add an evaluator, you will notice a warning that prompts you to re-run evaluation. Click on `Run Evaluators` to see the scores in graph.
+        <Frame>
+        <img
+            src="/images/experiments/run-eval.webp"
+            alt="View evaluator results in detail. "
+        />
+        </Frame>
     </Step>
     <Step title="(Optional) View score breakdown">
         To see the scores breakdown by input, click on an evaluator (humor in this example). You will see individual scores appear in each cell. 

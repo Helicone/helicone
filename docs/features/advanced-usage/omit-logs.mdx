@@ -7,11 +7,6 @@ description: "Configure Helicone to selectively exclude sensitive request and re
 
 import QuestionsSection from "/snippets/questions-section.mdx";
 
-<Info>
-  **Who can use this feature**: Anyone on any
-  [plan](https://www.helicone.ai/pricing).{" "}
-</Info>
-
 ## Introduction
 
 The "Omit Logs" feature is designed for users who may not want to have Helicone store or log their request body or response body. This can be particularly useful for those concerned with privacy, data sensitivity, or simply wanting to keep their data footprint minimal.
@@ -42,7 +37,8 @@ There are two ways to omit logs:
 ## Headers
 
 <Note>
-  **Note:** This method does not store the request or response but it still sends it to our backend.
+  **Note:** This method does not store the request or response but it still
+  sends it to our backend.
 </Note>
 
 To omit logging requests, set `Helicone-Omit-Request` to `true`.
@@ -99,7 +95,7 @@ const openai = new OpenAIApi(configuration);
 
 If you are using Helicone's [Asynchronous Logging](/getting-started/integration-method/openllmetry), you have the option to not even send the request or response to our backend.
 
-```python 
+```python
 from helicone_async import HeliconeAsyncLogger
 from openai import OpenAI
 
