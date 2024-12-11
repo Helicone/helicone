@@ -2,7 +2,7 @@
 CREATE OR REPLACE FUNCTION ensure_one_demo_org(user_id UUID)
 RETURNS TABLE (organization_id UUID) AS $$
 BEGIN
-    IF (SELECT COUNT(*) FROM organization o WHERE o.owner = user_id AND o.tier = 'demo') >= 1 THEN
+    IF (SELECT COUNT(*) FROM organization o WHERE o.owner = user_id) >= 1 THEN
         RAISE EXCEPTION 'User can only have one demo organization';
     ELSE
         RETURN QUERY
