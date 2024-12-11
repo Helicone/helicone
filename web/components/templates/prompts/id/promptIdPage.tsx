@@ -76,6 +76,10 @@ import { clsx } from "clsx";
 import PromptInputItem from "./promptInputItem";
 import { IslandContainer } from "@/components/ui/islandContainer";
 import { cn } from "@/lib/utils";
+import useOnboardingContext, {
+  ONBOARDING_STEPS,
+} from "@/components/layout/onboardingContext";
+import { OnboardingPopover } from "../../onboarding/OnboardingPopover";
 
 interface PromptIdPageProps {
   id: string;
@@ -514,6 +518,8 @@ const PromptIdPage = (props: PromptIdPageProps) => {
     setIsSearchVisible(!isSearchVisible);
   };
 
+  const { isOnboardingVisible, currentStep } = useOnboardingContext();
+
   return (
     <IslandContainer className="mx-0">
       <div className="w-full h-full flex flex-col space-y-4 pt-4">
@@ -651,21 +657,30 @@ const PromptIdPage = (props: PromptIdPageProps) => {
             <div className="flex items-start relative">
               <div className="py-4 flex flex-col space-y-4 w-full h-[calc(100vh-76px)]">
                 <div className="flex h-full">
-                  <div className="w-2/3 overflow-y-auto">
-                    <PromptPlayground
-                      prompt={selectedPrompt?.helicone_template || ""}
-                      selectedInput={selectedInput || undefined}
-                      onSubmit={async (history, model) => {
-                        await createSubversion(history, model);
-                      }}
-                      submitText="Test"
-                      initialModel={model}
-                      isPromptCreatedFromUi={
-                        prompt?.metadata?.createdFromUi as boolean | undefined
-                      }
-                      className="border-y border-slate-200 dark:border-slate-700"
-                    />
-                  </div>
+                  <OnboardingPopover
+                    open={typeof prompt?.user_defined_id === "string"}
+                    popoverContentProps={{
+                      onboardingStep: "PROMPTS_PAGE",
+                      align: "start",
+                      side: "right",
+                    }}
+                  >
+                    <div className="w-2/3 overflow-y-auto">
+                      <PromptPlayground
+                        prompt={selectedPrompt?.helicone_template || ""}
+                        selectedInput={selectedInput || undefined}
+                        onSubmit={async (history, model) => {
+                          await createSubversion(history, model);
+                        }}
+                        submitText="Test"
+                        initialModel={model}
+                        isPromptCreatedFromUi={
+                          prompt?.metadata?.createdFromUi as boolean | undefined
+                        }
+                        className="border-y border-slate-200 dark:border-slate-700"
+                      />
+                    </div>
+                  </OnboardingPopover>
                   <div className="w-1/3 flex flex-col h-full">
                     <div className="border-y border-x border-slate-200 dark:border-slate-700 bg-[#F9FAFB] dark:bg-black flex flex-col h-full">
                       <div
@@ -820,25 +835,51 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                                             </DropdownMenu>
                                           ) : promptVersion.minor_version ===
                                             0 ? (
-                                            <DropdownMenu>
+                                            <DropdownMenu
+                                              open={
+                                                isOnboardingVisible &&
+                                                currentStep ===
+                                                  ONBOARDING_STEPS
+                                                    .PROMPTS_EXPERIMENT
+                                                    .stepNumber
+                                              }
+                                            >
                                               <DropdownMenuTrigger asChild>
                                                 <button className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full">
                                                   <EllipsisHorizontalIcon className="h-6 w-6 text-slate-500" />
                                                 </button>
                                               </DropdownMenuTrigger>
-                                              <DropdownMenuContent>
-                                                <DropdownMenuItem
-                                                  onClick={() =>
+                                              <OnboardingPopover
+                                                popoverContentProps={{
+                                                  onboardingStep:
+                                                    "PROMPTS_EXPERIMENT",
+                                                  next: () => {
                                                     startExperiment(
                                                       promptVersion.id,
                                                       promptVersion.helicone_template
-                                                    )
-                                                  }
-                                                >
-                                                  <BeakerIcon className="h-4 w-4 mr-2" />
-                                                  Experiment
-                                                </DropdownMenuItem>
-                                              </DropdownMenuContent>
+                                                    );
+                                                  },
+                                                  align: "end",
+                                                  side: "bottom",
+                                                  sideOffset: 80,
+                                                  alignOffset: -10,
+                                                }}
+                                                triggerAsChild={false}
+                                              >
+                                                <DropdownMenuContent>
+                                                  <DropdownMenuItem
+                                                    onClick={() =>
+                                                      startExperiment(
+                                                        promptVersion.id,
+                                                        promptVersion.helicone_template
+                                                      )
+                                                    }
+                                                  >
+                                                    <BeakerIcon className="h-4 w-4 mr-2" />
+                                                    Experiment
+                                                  </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                              </OnboardingPopover>
                                             </DropdownMenu>
                                           ) : (
                                             <></>

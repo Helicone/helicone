@@ -16,15 +16,34 @@ import { ChangelogItem } from "./types";
 import ChangelogModal from "../ChangelogModal";
 import SidebarHelpDropdown from "../SidebarHelpDropdown";
 import { useTheme } from "next-themes";
-import { NavigationItem } from "./types";
+import OnboardingNavItems from "./OnboardingNavItems";
+import useOnboardingContext from "../onboardingContext";
+import EndOnboardingConfirmation from "@/components/templates/onboarding/EndOnboardingConfirmation";
+import { Dialog } from "@/components/ui/dialog";
+import { DialogContent } from "@/components/ui/dialog";
+import CreateOrgForm from "@/components/templates/organization/createOrgForm";
+
+export interface NavigationItem {
+  name: string;
+  href: string;
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>> | null;
+  current: boolean;
+  featured?: boolean;
+  subItems?: NavigationItem[];
+}
 
 interface SidebarProps {
   NAVIGATION: NavigationItem[];
   changelog: ChangelogItem[];
   setOpen: (open: boolean) => void;
+  sidebarRef: React.RefObject<HTMLDivElement>;
 }
 
-const DesktopSidebar = ({ changelog, NAVIGATION }: SidebarProps) => {
+const DesktopSidebar = ({
+  changelog,
+  NAVIGATION,
+  sidebarRef,
+}: SidebarProps) => {
   const org = useOrg();
   const tier = org?.currentOrg?.tier;
   const router = useRouter();
@@ -82,7 +101,6 @@ const DesktopSidebar = ({ changelog, NAVIGATION }: SidebarProps) => {
     });
   }, [NAVIGATION, isCollapsed, expandedItems]);
 
-  const sidebarRef = useRef<HTMLDivElement>(null);
   const navItemsRef = useRef<HTMLDivElement>(null);
   const [canShowInfoBox, setCanShowInfoBox] = useState(false);
 
@@ -107,7 +125,11 @@ const DesktopSidebar = ({ changelog, NAVIGATION }: SidebarProps) => {
     calculateAvailableSpace();
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "b" && event.metaKey) {
+      if (
+        event.key === "b" &&
+        event.metaKey &&
+        org?.currentOrg?.tier !== "demo"
+      ) {
         event.preventDefault();
         setIsCollapsed(!isCollapsed);
       } else if (event.metaKey && event.shiftKey && event.key === "l") {
@@ -150,7 +172,6 @@ const DesktopSidebar = ({ changelog, NAVIGATION }: SidebarProps) => {
   };
 
   const handleModalOpen = (open: boolean) => {
-    console.log({ open });
     if (!open) {
       setChangelogToView(null);
     } else {
@@ -158,6 +179,11 @@ const DesktopSidebar = ({ changelog, NAVIGATION }: SidebarProps) => {
     }
     setModalOpen(open);
   };
+
+  const { isOnboardingVisible } = useOnboardingContext();
+  const [showEndOnboardingConfirmation, setShowEndOnboardingConfirmation] =
+    useState(false);
+  const [showCreateOrg, setShowCreateOrg] = useState(false);
 
   return (
     <>
@@ -268,26 +294,42 @@ const DesktopSidebar = ({ changelog, NAVIGATION }: SidebarProps) => {
                   className="group flex flex-col py-2 data-[collapsed=true]:py-2 "
                 >
                   <nav className="grid flex-grow overflow-y-auto px-2 group-[[data-collapsed=true]]:justify-center group-[[data-collapsed=true]]:px-2">
-                    {NAVIGATION_ITEMS.map((link) => (
-                      <NavItem
-                        key={link.name}
-                        link={link}
-                        isCollapsed={isCollapsed}
-                        expandedItems={expandedItems}
-                        toggleExpand={toggleExpand}
-                        onClick={() => {
-                          setIsCollapsed(false);
-                          setIsMobileMenuOpen(false);
-                        }}
-                        deep={0}
-                      />
-                    ))}
+                    {isOnboardingVisible && <OnboardingNavItems />}
+                    {!isOnboardingVisible &&
+                      NAVIGATION_ITEMS.map((link) => (
+                        <NavItem
+                          key={link.name}
+                          link={link}
+                          isCollapsed={isCollapsed}
+                          expandedItems={expandedItems}
+                          toggleExpand={toggleExpand}
+                          onClick={() => {
+                            setIsCollapsed(false);
+                            setIsMobileMenuOpen(false);
+                          }}
+                          deep={0}
+                        />
+                      ))}
                   </nav>
                 </div>
               </div>
+              {org?.currentOrg?.tier === "demo" &&
+                org?.allOrgs?.length === 1 && (
+                  <Button
+                    className="mx-2 text-[13px] font-medium"
+                    variant="outline"
+                    onClick={() => {
+                      setShowEndOnboardingConfirmation(true);
+                    }}
+                  >
+                    Ready to integrate
+                  </Button>
+                )}
 
               {/* InfoBox */}
-              {canShowInfoBox && !isCollapsed && (
+              {canShowInfoBox &&
+                !isCollapsed &&
+                org?.currentOrg?.tier !== "demo" &&  (
                 <div className="bg-slate-50 dark:bg-slate-900 rounded border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 flex flex-col md:flex-row md:gap-2 gap-4 justify-between md:justify-center md:items-center items-start px-3 py-2  mt-2 mx-2 mb-8 font-medium">
                   <h1 className="text-xs text-start tracking-tight leading-[1.35rem]">
                     ⚡ Experiments is here: a new way to perfect your prompt.{" "}
@@ -305,12 +347,14 @@ const DesktopSidebar = ({ changelog, NAVIGATION }: SidebarProps) => {
           </div>
 
           {/* Sticky help dropdown */}
-          <div className="absolute bottom-3 left-3 z-10">
-            <SidebarHelpDropdown
-              changelog={changelog}
-              handleChangelogClick={handleChangelogClick}
-            />
-          </div>
+          {org?.currentOrg?.tier !== "demo" && (
+            <div className="absolute bottom-3 left-3 z-10">
+              <SidebarHelpDropdown
+                changelog={changelog}
+                handleChangelogClick={handleChangelogClick}
+              />
+            </div>
+          )}
         </div>
       </div>
       <ChangelogModal
@@ -318,6 +362,31 @@ const DesktopSidebar = ({ changelog, NAVIGATION }: SidebarProps) => {
         setOpen={handleModalOpen}
         changelog={changelogToView}
       />
+      <EndOnboardingConfirmation
+        open={showEndOnboardingConfirmation}
+        setOpen={setShowEndOnboardingConfirmation}
+        onEnd={() => {
+          setShowEndOnboardingConfirmation(false);
+          setShowCreateOrg(true);
+        }}
+      />
+      <Dialog open={showCreateOrg} onOpenChange={setShowCreateOrg}>
+        <DialogContent className="w-11/12 sm:max-w-md gap-8 rounded-md">
+          <CreateOrgForm
+            firstOrg={true}
+            onCancelHandler={() => {
+              setShowCreateOrg(false);
+            }}
+            onCloseHandler={() => {
+              setShowCreateOrg(false);
+            }}
+            onSuccess={(orgId) => {
+              org?.setCurrentOrg(orgId ?? "");
+              router.push("/dashboard");
+            }}
+          />
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
