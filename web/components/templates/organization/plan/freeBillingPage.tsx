@@ -126,20 +126,25 @@ export const FreePlanCard = () => {
               >
                 Upgrade to Pro
               </Button>
-              <div className="flex items-center gap-2">
-                <Switch
-                  checked={isAnnual}
-                  onChange={() => setIsAnnual(!isAnnual)}
-                  className="mx-2 bg-sky-500"
-                />
-                <span>{isAnnual ? "Annual" : "Monthly"}</span>
-              </div>
             </Row>
             <span className="text-slate-500 text-[12px]">
               14 days free trial
             </span>
           </Col>
           <div>
+            <div>
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={isAnnual}
+                  onCheckedChange={() => setIsAnnual(!isAnnual)}
+                  className="bg-sky-500 hover:bg-sky-600 hover:cursor-pointer"
+                />
+                <span>{isAnnual ? "Annual" : "Monthly"}</span>
+              </div>
+              <span className="text-sm text-muted-foreground text-slate-500">
+                Annual plans are billed upfront. 20% off for 12 months.
+              </span>
+            </div>
             <button
               onClick={() => setIsComparisonOpen(!isComparisonOpen)}
               className="flex items-center justify-between w-full text-left font-medium mb-2"

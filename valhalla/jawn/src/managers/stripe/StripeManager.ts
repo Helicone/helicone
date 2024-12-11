@@ -16,10 +16,17 @@ import { costOf } from "../../packages/cost";
 
 const proProductPrices = {
   "request-volume": process.env.PRICE_PROD_REQUEST_VOLUME_ID!, //(This is just growth)
-  "pro-users": process.env.PRICE_PROD_PRO_USERS_ID!,
-  "pro-users-annual": process.env.PRICE_PROD_PRO_USERS_ANNUAL_ID!,
-  prompts: process.env.PRICE_PROD_PROMPTS_ID!,
-  alerts: process.env.PRICE_PROD_ALERTS_ID!,
+
+  annual: {
+    "pro-users": process.env.PRICE_PROD_PRO_USERS_ANNUAL_ID!,
+    prompts: process.env.PRICE_PROD_PROMPTS_ANNUAL_ID!,
+    alerts: process.env.PRICE_PROD_ALERTS_ANNUAL_ID!,
+  },
+  monthly: {
+    "pro-users": process.env.PRICE_PROD_PRO_USERS_ID!,
+    prompts: process.env.PRICE_PROD_PROMPTS_ID!,
+    alerts: process.env.PRICE_PROD_ALERTS_ID!,
+  },
 };
 
 const EARLY_ADOPTER_COUPON = "9ca5IeEs"; // WlDg28Kf | prod: 9ca5IeEs
@@ -246,20 +253,23 @@ WHERE (${builtFilter.filter})`,
       customer: customerId,
       payment_method_types: ["card"],
       line_items: [
+        // {
+        //   price: proProductPrices["request-volume"],
+        //   // No quantity for usage based pricing
+        // },
+        // {
+        //   price: "price_1QUv2nFeVmeixR9woQk37va9",
+        //   quantity: 1,
+        // },
         {
-          price: proProductPrices["request-volume"],
-          // No quantity for usage based pricing
-        },
-        {
-          price: isAnnual
-            ? proProductPrices["pro-users-annual"]
-            : proProductPrices["pro-users"],
+          price: proProductPrices[isAnnual ? "annual" : "monthly"]["pro-users"],
           quantity: orgMemberCount,
         },
         ...(body?.addons?.prompts
           ? [
               {
-                price: proProductPrices["prompts"],
+                price:
+                  proProductPrices[isAnnual ? "annual" : "monthly"]["prompts"],
                 quantity: 1,
               },
             ]
@@ -267,7 +277,8 @@ WHERE (${builtFilter.filter})`,
         ...(body?.addons?.alerts
           ? [
               {
-                price: proProductPrices["alerts"],
+                price:
+                  proProductPrices[isAnnual ? "annual" : "monthly"]["alerts"],
                 quantity: 1,
               },
             ]
@@ -439,6 +450,15 @@ WHERE (${builtFilter.filter})`,
       return err(`Error retrieving upcoming invoice: ${error.message}`);
     }
   }
+  private async getIsAnnual(): Promise<boolean> {
+    const subscriptionResult = await this.getSubscription();
+    if (!subscriptionResult.data) {
+      return false;
+    }
+    return subscriptionResult.data.items.data.some(
+      (item) => item.price.id === proProductPrices["annual"]["pro-users"]
+    );
+  }
 
   private async addProductToStripe(
     productType: "alerts" | "prompts"
@@ -449,8 +469,11 @@ WHERE (${builtFilter.filter})`,
         return err("No existing subscription found");
       }
 
+      const isAnnual = await this.getIsAnnual();
+
       const subscription = subscriptionResult.data;
-      const priceId = proProductPrices[productType];
+      const priceId =
+        proProductPrices[isAnnual ? "annual" : "monthly"][productType];
 
       // Check if the product is already included in the subscription
       const existingItem = subscription.items.data.find(
@@ -549,8 +572,11 @@ WHERE (${builtFilter.filter})`,
         return err("No existing subscription found");
       }
 
+      const isAnnual = await this.getIsAnnual();
+
       const subscription = subscriptionResult.data;
-      const priceId = proProductPrices[productType];
+      const priceId =
+        proProductPrices[isAnnual ? "annual" : "monthly"][productType];
 
       const alertsItem = subscription.items.data.find(
         (item) => item.price.id === priceId
@@ -629,8 +655,10 @@ WHERE (${builtFilter.filter})`,
         (item) => item.price.id
       );
 
+      const isAnnual = await this.getIsAnnual();
+
       const missingProducts = Object.values([
-        proProductPrices["pro-users"],
+        proProductPrices[isAnnual ? "annual" : "monthly"]["pro-users"],
       ]).filter((productId) => !existingProducts.includes(productId));
 
       if (missingProducts.length === 0) {
@@ -776,11 +804,12 @@ WHERE (${builtFilter.filter})`,
       }
 
       const subscription = subscriptionResult.data;
+      const isAnnual = await this.getIsAnnual();
 
       const proUsersItem = subscription.items.data.find(
         (item) =>
-          item.price.id === proProductPrices["pro-users"] ||
-          item.price.id === proProductPrices["pro-users-annual"]
+          item.price.id ===
+          proProductPrices[isAnnual ? "annual" : "monthly"]["pro-users"]
       );
 
       if (!proUsersItem) {
