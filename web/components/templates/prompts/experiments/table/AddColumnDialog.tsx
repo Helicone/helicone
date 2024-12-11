@@ -229,5 +229,4 @@ const AddColumnDialog = ({
   );
 };
 
-
 export default AddColumnDialog;
