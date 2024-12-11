@@ -91,6 +91,14 @@ const rows: FeatureRowProps[] = [
     enterprise: <CheckIcon className="w-6 h-6 text-[#6AA84F]" />,
   },
   {
+    title: "Experiments",
+    description:
+      "Run controlled experiments on your prompts using production data, with built-in evaluation tools to measure performance.",
+    free: <XMarkIcon className="w-6 h-6 text-red-500" />,
+    pro: <CheckIcon className="w-6 h-6 text-[#6AA84F]" />,
+    enterprise: <CheckIcon className="w-6 h-6 text-[#6AA84F]" />,
+  },
+  {
     title: "Cache",
     description:
       "Reduce latency and save costs on LLM calls by caching responses on the edge. ",

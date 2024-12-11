@@ -5,35 +5,6 @@ import { XMarkIcon } from "@heroicons/react/24/outline";
 
 const rows: FeatureRowProps[] = [
   {
-    title: "Experiments",
-    description:
-      "Iterate on your LLM prompts, test it on production data, and verify with evaluations",
-    free: (
-      <>
-        <XMarkIcon className="w-6 h-6 text-red-500" />
-        <p className="text-center text-sm font-light text-slate-500">
-          Upgrade to Pro to enable Experiments.
-        </p>
-      </>
-    ),
-    pro: (
-      <>
-        <h3 className="font-bold text-xl">At cost</h3>
-        <p className="text-center text-sm font-light text-slate-500">
-          Exacly what Helicone pays for LLM API calls.
-        </p>
-      </>
-    ),
-    enterprise: (
-      <>
-        <h3 className="font-bold text-xl">At cost</h3>
-        <p className="text-center text-sm font-light text-slate-500">
-          Exacly what Helicone pays for LLM API calls.
-        </p>
-      </>
-    ),
-  },
-  {
     title: "Prompts",
     description:
       "Version prompts, create templates, and run experiments to improve LLM outputs.",
