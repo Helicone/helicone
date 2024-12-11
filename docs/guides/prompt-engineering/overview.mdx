@@ -1,16 +1,16 @@
 ---
 title: "Overview"
 sidebarTitle: "Overview"
-description: "Prompt engineering is the strategic crafting of prompts to guide Large Language Models (LLMs) like GPT-4 to produce accurate and desired outputs."
+description: "Prompt engineering is the strategic crafting of prompts to guide Large Language Models to produce accurate and desired outputs."
 "twitter:title": "Overview - Prompt Engineering Techniques"
 ---
 
 import QuestionsSection from "/snippets/questions-section.mdx";
 
-
 ## Before prompt engineering
 
 Before you follow along, we assume that you:
+
 - have a first draft of your prompt
 - know the audience that you are tailoring your prompt to
 - have some benchmark to measure prompt improvements
@@ -18,15 +18,15 @@ Before you follow along, we assume that you:
 
 We recommend taking a moment to brainstorm on these points to make the most of the following suggestions.
 
-
 ## How to prompt engineer
-1. [Be specific and clear](/use-cases/prompt-engineering/be-specific-and-clear)
-2. [Use structured formats](/use-cases/prompt-engineering/use-structured-formats)
-3. [Leverage role-playing](/use-cases/prompt-engineering/leverage-role-playing)
-4. [Implement few-shot learning](/use-cases/prompt-engineering/implement-few-shot-learning)
-5. [Use constrained outputs](/use-cases/prompt-engineering/use-constrained-outputs)
-6. [Use Chain-of-Thought prompting](/use-cases/prompt-engineering/use-chain-of-thought-prompting)
 
+1. [Be specific and clear](/guides/prompt-engineering/be-specific-and-clear)
+2. [Use structured formats](/guides/prompt-engineering/use-structured-formats)
+3. [Leverage role-playing](/guides/prompt-engineering/leverage-role-playing)
+4. [Implement few-shot learning](/guides/prompt-engineering/implement-few-shot-learning)
+5. [Use constrained outputs](/guides/prompt-engineering/use-constrained-outputs)
+6. [Use Chain-of-Thought prompting](/guides/prompt-engineering/use-chain-of-thought-prompting)
+7. [Use Thread-of-Thought prompting](/guides/prompt-engineering/use-thread-of-thought-prompting)
 
 ## When to start prompt engineering?
 
@@ -36,6 +36,7 @@ We recommend taking a moment to brainstorm on these points to make the most of t
 - **When you want to optimize cost and performance** to reduce token usage, lower latency, and improve performance.
 
 ## Why prompt engineer?
+
 - Get more accurate and relevant responses.
 - Get the response in a specific instructions, styles, or formats.
 - Reduce costs by decreasing the number of tokens used, lowering API costs.
@@ -47,43 +48,63 @@ We recommend taking a moment to brainstorm on these points to make the most of t
 
 <AccordionGroup>
 
-  <Accordion title="How often should I update my prompts?">
-    - Regularly: Especially if you notice changes in the model's performance or after updates to the model.
-    - After use feedback: Incorporate feedback to improve prompt effectiveness.
-    - When introducing a new feature: Adjust the prompt to cover new functionalities or use cases.
-  </Accordion>
+{" "}
 
-  <Accordion title="What's the difference between prompt engineering vs. finetuning?">
-    Prompt engineering is modifying the input prompts to guide the model's responses without changing the model itself. Fine-tuning is training the model on additional data to adjust its internal parameters for specific tasks.
-  </Accordion>
+<Accordion title="How often should I update my prompts?">
+  Regularly: Especially if you notice changes in the model's performance or
+  after updates to the model. - After use feedback: Incorporate feedback to
+  improve prompt effectiveness. - When introducing a new feature: Adjust the
+  prompt to cover new functionalities or use cases.
+</Accordion>
 
-  <Accordion title="What are some common mistakes with prompt engineering?">
-  - **Vague instructions**: Leads to unpredictable outputs.
-  - **Overcomplicating prompts**: Too much information can confuse the model.
-  - **Ignoring model limitations**: Expecting the model to perform tasks beyond its capabilities.
-  - **Lack of testing**: Not validating prompts with various inputs can result in inconsistent performance.
-  </Accordion>
+{" "}
+
+<Accordion title="What's the difference between prompt engineering vs. finetuning?">
+  Prompt engineering is modifying the input prompts to guide the model's
+  responses without changing the model itself. Fine-tuning is training the model
+  on additional data to adjust its internal parameters for specific tasks.
+</Accordion>
+
+{" "}
+
+<Accordion title="What are some common mistakes with prompt engineering?">
+  - **Vague instructions**: Leads to unpredictable outputs. - **Overcomplicating
+  prompts**: Too much information can confuse the model. - **Ignoring model
+  limitations**: Expecting the model to perform tasks beyond its capabilities. -
+  **Lack of testing**: Not validating prompts with various inputs can result in
+  inconsistent performance.
+</Accordion>
 
   <Accordion title="How does prompt length affect model responses?">
     - Short prompts can lead to ambiguous or generic answers because of a lack of context.
     - Long prompts provides more detail but can increase token usage and overwhelm the model.
 
     The optimal balance is aiming for concise prompts that include all necessary information without unnecessary verbosity.
+
   </Accordion>
 
-  <Accordion title="Can prompt engineering remove biases?">
-    Yes. When you carefully crafting prompts to avoid sensitive topics or by instructing the model to follow ethical guidelines, you can reduce the likelihood of biased or inappropriate responses.
-  </Accordion>
+{" "}
 
+<Accordion title="Can prompt engineering remove biases?">
+  Yes. When you carefully crafting prompts to avoid sensitive topics or by
+  instructing the model to follow ethical guidelines, you can reduce the
+  likelihood of biased or inappropriate responses.
+</Accordion>
 
-  <Accordion title="Do I need to be technical to prompt engineer?">
-    - For simple prompt adjustment, no extensive technical background is needed.
-    - For complex tasks or with the intention to optimize performance, some familiarity with AI concepts is helpful.
-  </Accordion>
+{" "}
 
-  <Accordion title="Can you cut cost with prompt engineering?">
-    Yes. A well-written prompt can minimize the number of tokens required for both the input and output, thereby reducing API usage costs.
-  </Accordion>
+<Accordion title="Do I need to be technical to prompt engineer?">
+  - For simple prompt adjustment, no extensive technical background is needed. -
+  For complex tasks or with the intention to optimize performance, some
+  familiarity with AI concepts is helpful.
+</Accordion>
+
+{" "}
+
+<Accordion title="Can you cut cost with prompt engineering?">
+  Yes. A well-written prompt can minimize the number of tokens required for both
+  the input and output, thereby reducing API usage costs.
+</Accordion>
 
 </AccordionGroup>
 

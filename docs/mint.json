@@ -285,12 +285,14 @@
         {
           "group": "Prompt Engineering",
           "pages": [
+            "guides/prompt-engineering/overview",
             "guides/prompt-engineering/be-specific-and-clear",
             "guides/prompt-engineering/use-structured-formats",
             "guides/prompt-engineering/leverage-role-playing",
             "guides/prompt-engineering/implement-few-shot-learning",
             "guides/prompt-engineering/use-constrained-outputs",
-            "guides/prompt-engineering/use-chain-of-thought-prompting"
+            "guides/prompt-engineering/use-chain-of-thought-prompting", 
+            "guides/prompt-engineering/use-thread-of-thought-prompting"
           ]
         }
       ]

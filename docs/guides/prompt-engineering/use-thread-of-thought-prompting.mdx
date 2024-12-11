@@ -1,0 +1,48 @@
+---
+title: "Use Thread of Thought Prompting"
+sidebarTitle: "Use thread of thought prompting"
+description: "Maintain a coherent line of reasoning between LLM interactions by building on previous ideas. "
+"twitter:title": "Use Thread of Thought Prompting - Prompt Engineering Techniques"
+---
+
+import QuestionsSection from "/snippets/questions-section.mdx";
+
+## What is Thread-of-Thought prompting
+
+Thread of Thought is an approach that extends [chain-of-thought prompting](use-chain-of-thought-prompting) by maintaining a continuous, evolving reasoning process across multiple, related prompts.
+It's like having a conversation where each new idea builds on previous ones, helping the LLM to think more deeply and keep track of all the details as we explore a topic.
+
+## How to implement Thread-of-Thought prompting
+
+1. **Provide templates.** Offer a clear structure (e.g., headings, bullet points).
+2. **Use labels & delimiters.** Clearly mark sections for easier parsing.
+3. **Follow conventions.** For instance, use Markdown headings or JSON keys.
+
+## Example
+
+```
+Initial Prompt:
+"Let’s create an app to improve community health. Start by suggesting a target audience we could focus on."
+
+Model responds with a target audience, e.g., senior citizens.
+
+```
+
+## Why use Thread-of-Thought prompting
+
+- **Coherent reasoning:** Promotes logical flow over time.
+- **Improved context handling:** Builds upon previously established knowledge.
+- **Better problem decomposition:** Breaks large challenges into manageable steps.
+- **Flexibility:** Adapts reasoning based on evolving information.
+- **Natural interaction:** Mimics human-like thought progression.
+
+## Tips for Effective Thread-of-Thought Prompting
+
+- Begin with a well-defined initial prompt.
+- Encourage referencing of earlier points as needed.
+- Periodically summarize key points to maintain focus.
+- Regularly filter or refocus context to avoid overload.
+- Structured Progression: Move through logical phases of reasoning.
+- Allow revision of earilier ideas to refine them.
+
+<QuestionsSection />
