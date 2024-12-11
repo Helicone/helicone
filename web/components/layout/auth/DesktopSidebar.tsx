@@ -22,6 +22,7 @@ import EndOnboardingConfirmation from "@/components/templates/onboarding/EndOnbo
 import { Dialog } from "@/components/ui/dialog";
 import { DialogContent } from "@/components/ui/dialog";
 import CreateOrgForm from "@/components/templates/organization/createOrgForm";
+import { useJawnClient } from "@/lib/clients/jawnHook";
 
 export interface NavigationItem {
   name: string;
@@ -185,6 +186,8 @@ const DesktopSidebar = ({
     useState(false);
   const [showCreateOrg, setShowCreateOrg] = useState(false);
 
+  const jawn = useJawnClient();
+
   return (
     <>
       {/* Mobile hamburger menu */}
@@ -313,6 +316,15 @@ const DesktopSidebar = ({
                   </nav>
                 </div>
               </div>
+              {/* <Button
+                variant="outline"
+                className="mx-2 text-[13px] font-medium"
+                onClick={() => {
+                  jawn.POST("/v1/organization/setup-demo");
+                }}
+              >
+                Stup date
+              </Button> */}
               {org?.currentOrg?.tier === "demo" &&
                 org?.allOrgs?.length === 1 && (
                   <Button
