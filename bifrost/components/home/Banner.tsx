@@ -10,7 +10,7 @@ const Banner = () => {
         <p>
           🎁 Our holiday gift to you:{" "}
           <Link
-            href="https://docs.helicone.ai/experiments"
+            href="https://docs.helicone.ai/features/experiments"
             className="font-semibold underline hover:text-slate-600"
           >
             Experiments
