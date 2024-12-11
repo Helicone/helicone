@@ -28,23 +28,12 @@ export default async function handler(
   }
 
   // If no demo org exists, create one with upsert
+
+  // Add member record
   const result = await supabaseServer
-    .from("organization")
-    .upsert(
-      {
-        name: "Demo Org",
-        owner: userId,
-        tier: "demo",
-        is_personal: true,
-        has_onboarded: true,
-        soft_delete: false,
-      },
-      {
-        onConflict: "owner,tier",
-        ignoreDuplicates: true,
-      }
-    )
-    .select("*")
+    .rpc("ensure_one_demo_org", {
+      user_id: userId,
+    })
     .single();
 
   if (result.error) {
@@ -59,7 +48,7 @@ export default async function handler(
       {
         created_at: new Date().toISOString(),
         member: userId,
-        organization: result.data.id,
+        organization: result.data.organization_id,
         org_role: "owner",
       },
       {
@@ -72,5 +61,5 @@ export default async function handler(
     return res.status(500).json({ error: memberError.message });
   }
 
-  return res.status(200).json({ orgId: result.data.id });
+  return res.status(200).json({ orgId: result.data.organization_id });
 }
