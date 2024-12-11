@@ -8,7 +8,6 @@ import { ORG_ID_COOKIE_KEY } from "../../lib/constants";
 import { getJawnClient } from "../../lib/clients/jawn";
 import posthog from "posthog-js";
 import { getHeliconeCookie } from "@/lib/cookies";
-import { generateApiKey } from "generate-api-key";
 
 const useGetOrgMembers = (orgId: string) => {
   const jawn = getJawnClient(orgId);
@@ -340,7 +339,7 @@ const useOrgsContextManager = () => {
     setCurrentOrg: (orgId) => {
       refetch().then((data) => {
         const org = data?.data?.find((org) => org.id === orgId);
-        if (org && org.tier !== "demo") {
+        if (org) {
           setOrg(org);
           setOrgCookie(org.id);
           setRenderKey((key) => key + 1);
