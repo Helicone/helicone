@@ -10,7 +10,9 @@ const LANG_MAPPINGS: Record<string, Language> = {
   typescript: "typescript",
   javascript: "javascript",
   bash: "bash",
+  shell: "bash",
   python: "python",
+  curl: "bash",
   langchain_python: "python",
   langchain_javascript: "javascript",
   langchain_typescript: "typescript",
@@ -31,7 +33,7 @@ export function DiffHighlight(props: DiffHighlightProps) {
   const { setNotification } = useNotification();
 
   return (
-    <div className={clsx("ph-no-capture w-full overflow-auto ")}>
+    <div className={clsx("ph-no-capture w-full overflow-auto")}>
       <Prism
         {...defaultProps}
         code={props.code.trim()}
@@ -45,8 +47,9 @@ export function DiffHighlight(props: DiffHighlightProps) {
                 textSize === "sm" && "text-xs",
                 textSize === "md" && "text-xs md:text-sm",
                 textSize === "lg" && "text-md md:text-lg",
-                minHeight ? "min-h-[300px] md:min-h-[420px]" : "",
-                "p-6 rounded-xl mt-3 overflow-auto relative space-y-0.5"
+                minHeight ? "min-h-[300px] md:min-h-[300px]" : "",
+                "p-6 rounded-xl mt-3 overflow-auto relative space-y-0.5",
+                "max-h-[240px]"
               )}
               style={style}
             >
@@ -70,13 +73,9 @@ export function DiffHighlight(props: DiffHighlightProps) {
 
                 return (
                   <div key={i} {...lineProps} className={lineClasses}>
-                    <span className="select-none text-right w-8 pr-4 text-gray-500">
-                      {lineNumber + 1}
-                    </span>
                     <code className="flex-1">
                       {line.map((token, key) => {
                         const tokenProps = getTokenProps({ token, key });
-                        // Remove highlighting for '=' tokens
                         if (token.content === "=" || token.content === ":") {
                           tokenProps.className = "";
                         }
