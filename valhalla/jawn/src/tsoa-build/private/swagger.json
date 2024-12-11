@@ -15558,7 +15558,16 @@
 						"api_key": []
 					}
 				],
-				"parameters": [],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "isAnnual",
+						"required": true,
+						"schema": {
+							"type": "boolean"
+						}
+					}
+				],
 				"requestBody": {
 					"required": true,
 					"content": {
@@ -15594,7 +15603,16 @@
 						"api_key": []
 					}
 				],
-				"parameters": [],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "isAnnual",
+						"required": true,
+						"schema": {
+							"type": "boolean"
+						}
+					}
+				],
 				"requestBody": {
 					"required": true,
 					"content": {

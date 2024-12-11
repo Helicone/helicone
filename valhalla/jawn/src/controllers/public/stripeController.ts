@@ -5,6 +5,7 @@ import {
   Get,
   Path,
   Post,
+  Query,
   Request,
   Route,
   Security,
@@ -54,14 +55,16 @@ export class StripeController extends Controller {
   @Post("/subscription/new-customer/upgrade-to-pro")
   public async upgradeToPro(
     @Request() request: JawnAuthenticatedRequest,
-    @Body() body: UpgradeToProRequest
+    @Body() body: UpgradeToProRequest,
+    @Query() isAnnual: boolean
   ) {
     const stripeManager = new StripeManager(request.authParams);
 
     const clientOrigin = request.headers.origin;
     const result = await stripeManager.upgradeToProLink(
       `${clientOrigin}`,
-      body
+      body,
+      isAnnual
     );
 
     if (result.error) {
@@ -75,13 +78,15 @@ export class StripeController extends Controller {
   @Post("/subscription/existing-customer/upgrade-to-pro")
   public async upgradeExistingCustomer(
     @Request() request: JawnAuthenticatedRequest,
-    @Body() body: UpgradeToProRequest
+    @Body() body: UpgradeToProRequest,
+    @Query() isAnnual: boolean
   ) {
     const stripeManager = new StripeManager(request.authParams);
 
     const result = await stripeManager.upgradeToProExistingCustomer(
       request.headers.origin ?? "",
-      body
+      body,
+      isAnnual
     );
 
     if (result.error) {

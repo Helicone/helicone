@@ -24,6 +24,7 @@ export const UpgradeToProCTA = ({
   const [prompts, setPrompts] = useState(defaultPrompts);
   const [alerts, setAlerts] = useState(defaultAlerts);
 
+  const [isAnnual, setIsAnnual] = useState(true);
   const upgradeToPro = useMutation({
     mutationFn: async () => {
       const jawn = getJawnClient(org?.currentOrg?.id);
@@ -36,6 +37,11 @@ export const UpgradeToProCTA = ({
           addons: {
             prompts,
             alerts,
+          },
+        },
+        params: {
+          query: {
+            isAnnual:
           },
         },
       });
@@ -112,6 +118,16 @@ export const UpgradeToProCTA = ({
           ? "Upgrade"
           : "Start 14-day free trial"}
       </Button>
+      <div className="flex items-center gap-2 mt-4">
+        <Switch
+          checked={isAnnual}
+          onCheckedChange={() => setIsAnnual(!isAnnual)}
+          className="mx-2"
+        />
+        <span className="text-sm text-gray-800">
+          {isAnnual ? "Annual (20% off)" : "Monthly"}
+        </span>
+      </div>
     </div>
   );
 };

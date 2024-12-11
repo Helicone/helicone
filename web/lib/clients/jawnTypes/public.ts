@@ -5878,6 +5878,11 @@ export interface operations {
     };
   };
   UpgradeToPro: {
+    parameters: {
+      query: {
+        isAnnual: boolean;
+      };
+    };
     requestBody: {
       content: {
         "application/json": components["schemas"]["UpgradeToProRequest"];
@@ -5893,6 +5898,11 @@ export interface operations {
     };
   };
   UpgradeExistingCustomer: {
+    parameters: {
+      query: {
+        isAnnual: boolean;
+      };
+    };
     requestBody: {
       content: {
         "application/json": components["schemas"]["UpgradeToProRequest"];

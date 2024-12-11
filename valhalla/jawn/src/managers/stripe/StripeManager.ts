@@ -17,6 +17,7 @@ import { costOf } from "../../packages/cost";
 const proProductPrices = {
   "request-volume": process.env.PRICE_PROD_REQUEST_VOLUME_ID!, //(This is just growth)
   "pro-users": process.env.PRICE_PROD_PRO_USERS_ID!,
+  "pro-users-annual": process.env.PRICE_PROD_PRO_USERS_ANNUAL_ID!,
   prompts: process.env.PRICE_PROD_PROMPTS_ID!,
   alerts: process.env.PRICE_PROD_ALERTS_ID!,
 };
@@ -153,7 +154,8 @@ WHERE (${builtFilter.filter})`,
   }
   public async upgradeToProExistingCustomer(
     origin: string,
-    body: UpgradeToProRequest
+    body: UpgradeToProRequest,
+    isAnnual: boolean
   ): Promise<Result<string, string>> {
     try {
       const customerId = await this.getOrCreateStripeCustomer();
@@ -171,7 +173,8 @@ WHERE (${builtFilter.filter})`,
         customerId.data,
         orgMemberCount.data,
         false,
-        body
+        body,
+        isAnnual
       );
 
       return sessionUrl;
@@ -236,7 +239,8 @@ WHERE (${builtFilter.filter})`,
     customerId: string,
     orgMemberCount: number,
     isNewCustomer: boolean,
-    body: UpgradeToProRequest
+    body: UpgradeToProRequest,
+    isAnnual: boolean
   ): Promise<Result<string, string>> {
     const sessionParams: Stripe.Checkout.SessionCreateParams = {
       customer: customerId,
@@ -247,7 +251,9 @@ WHERE (${builtFilter.filter})`,
           // No quantity for usage based pricing
         },
         {
-          price: proProductPrices["pro-users"],
+          price: isAnnual
+            ? proProductPrices["pro-users-annual"]
+            : proProductPrices["pro-users"],
           quantity: orgMemberCount,
         },
         ...(body?.addons?.prompts
@@ -301,7 +307,8 @@ WHERE (${builtFilter.filter})`,
 
   public async upgradeToProLink(
     origin: string,
-    body: UpgradeToProRequest
+    body: UpgradeToProRequest,
+    isAnnual: boolean
   ): Promise<Result<string, string>> {
     try {
       const subscriptionResult = await this.getSubscription();
@@ -325,34 +332,14 @@ WHERE (${builtFilter.filter})`,
         customerId.data,
         orgMemberCount.data,
         true,
-        body
+        body,
+        isAnnual
       );
 
       return sessionUrl;
     } catch (error: any) {
       return err(`Error creating upgrade link: ${error.message}`);
     }
-  }
-
-  private async verifyProSubscriptionWithStripe(): Promise<
-    Result<Stripe.Subscription, string>
-  > {
-    const subscriptionResult = await this.getSubscription();
-    if (!subscriptionResult.data) {
-      return err("No existing subscription found");
-    }
-
-    const subscription = subscriptionResult.data;
-
-    const existingProducts = subscription.items.data.map(
-      (item) => (item.price.product as Stripe.Product).id
-    );
-
-    if (!existingProducts.includes(proProductPrices["pro-users"])) {
-      return err("User does not have a pro subscription");
-    }
-
-    return ok(subscription);
   }
 
   private async getExperimentsUsage({
@@ -789,10 +776,11 @@ WHERE (${builtFilter.filter})`,
       }
 
       const subscription = subscriptionResult.data;
-      const proUsersPriceId = proProductPrices["pro-users"];
 
       const proUsersItem = subscription.items.data.find(
-        (item) => item.price.id === proUsersPriceId
+        (item) =>
+          item.price.id === proProductPrices["pro-users"] ||
+          item.price.id === proProductPrices["pro-users-annual"]
       );
 
       if (!proUsersItem) {

@@ -27,8 +27,15 @@ const ScaleCard: React.FC = () => {
                 <span className="text-[18px]">/user</span>
               </Row>
               <Row className="text-[18px] text-slate-900 font-semibold">
-                per month
+                <span>per month</span>
+                <span className="text-slate-500 text-[14px]">
+                  <span className="text-brand">*</span>
+                </span>
               </Row>
+            </Row>
+            <Row className="text-[14px] text-slate-500 items-center gap-[4px]">
+              <span className="text-brand">*</span>
+              <span>Billed annually, monthly is $24</span>
             </Row>
 
             <Col>

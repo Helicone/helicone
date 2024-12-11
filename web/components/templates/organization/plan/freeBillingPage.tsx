@@ -1,4 +1,4 @@
-import { Col } from "@/components/layout/common";
+import { Col, Row } from "@/components/layout/common";
 import { useOrg } from "@/components/layout/org/organizationContext";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,6 +13,7 @@ import { getJawnClient } from "@/lib/clients/jawn";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { CalendarIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react";
 import { useState } from "react";
+import { Switch } from "@/components/ui/switch";
 
 export const FreePlanCard = () => {
   const org = useOrg();
@@ -36,6 +37,8 @@ export const FreePlanCard = () => {
     },
   });
 
+  const [isAnnual, setIsAnnual] = useState(true);
+
   const upgradeToPro = useMutation({
     mutationFn: async () => {
       const jawn = getJawnClient(org?.currentOrg?.id);
@@ -45,6 +48,11 @@ export const FreePlanCard = () => {
           : "/v1/stripe/subscription/new-customer/upgrade-to-pro";
       const result = await jawn.POST(endpoint, {
         body: {},
+        params: {
+          query: {
+            isAnnual,
+          },
+        },
       });
       return result;
     },
@@ -103,20 +111,30 @@ export const FreePlanCard = () => {
             {getBillingCycleDates()}
           </div>
           <Col className="">
-            <Button
-              className="w-40 bg-blue-600 hover:bg-blue-700"
-              onClick={async () => {
-                const result = await upgradeToPro.mutateAsync();
-                if (result.data) {
-                  window.open(result.data, "_blank");
-                } else {
-                  console.error("No URL returned from upgrade mutation");
-                }
-              }}
-              disabled={upgradeToPro.isLoading}
-            >
-              Upgrade to Pro
-            </Button>
+            <Row>
+              <Button
+                className="w-40 bg-blue-600 hover:bg-blue-700"
+                onClick={async () => {
+                  const result = await upgradeToPro.mutateAsync();
+                  if (result.data) {
+                    window.open(result.data, "_blank");
+                  } else {
+                    console.error("No URL returned from upgrade mutation");
+                  }
+                }}
+                disabled={upgradeToPro.isLoading}
+              >
+                Upgrade to Pro
+              </Button>
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={isAnnual}
+                  onChange={() => setIsAnnual(!isAnnual)}
+                  className="mx-2 bg-sky-500"
+                />
+                <span>{isAnnual ? "Annual" : "Monthly"}</span>
+              </div>
+            </Row>
             <span className="text-slate-500 text-[12px]">
               14 days free trial
             </span>
