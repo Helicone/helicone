@@ -116,6 +116,11 @@ const NavItem: React.FC<NavItemProps> = ({
             />
           )}
           {link.name}
+          {link.name === "Experiments" && (
+            <div className="uppercase text-[9px] font-semibold border bg-blue-100 dark:bg-blue-800 border-blue-200 dark:border-blue-800 p-px px-1 rounded-md text-blue-500 ml-2">
+              New
+            </div>
+          )}
         </div>
         {hasSubItems && (
           <ChevronDownIcon
