@@ -348,13 +348,13 @@ const DesktopSidebar = ({
                 org?.currentOrg?.tier !== "demo" && (
                   <div className="bg-slate-50 dark:bg-slate-900 rounded border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 flex flex-col md:flex-row md:gap-2 gap-4 justify-between md:justify-center md:items-center items-start px-3 py-2  mt-2 mx-2 mb-8 font-medium">
                     <h1 className="text-xs text-start tracking-tight leading-[1.35rem]">
-                      ⚡ Introducing a new way to perfect your prompts.{" "}
+                      ⚡ Experiments is here: a new way to perfect your prompt.{" "}
                       <Link
-                        href="https://helicone.ai/experiments"
+                        href="/experiments"
                         target="_blank"
                         className="underline decoration-slate-400 decoration-1 underline-offset-2 font-medium"
                       >
-                        Access experiments now!
+                        Check out the docs.
                       </Link>{" "}
                     </h1>
                   </div>
