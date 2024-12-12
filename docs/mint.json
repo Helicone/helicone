@@ -69,9 +69,7 @@
             "getting-started/self-host/docker",
             "getting-started/self-host/kubernetes",
             "getting-started/self-host/manual"
-          ],
-          "icon": "server",
-          "iconType": "solid"
+          ]
         }, 
         "helicone-headers/header-directory"
       ]
