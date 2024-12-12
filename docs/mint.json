@@ -293,7 +293,8 @@
             "guides/prompt-engineering/use-constrained-outputs",
             "guides/prompt-engineering/use-chain-of-thought-prompting", 
             "guides/prompt-engineering/use-thread-of-thought-prompting",
-            "guides/prompt-engineering/use-least-to-most-prompting"
+            "guides/prompt-engineering/use-least-to-most-prompting", 
+            "guides/prompt-engineering/use-meta-prompting"
           ]
         }
       ]
