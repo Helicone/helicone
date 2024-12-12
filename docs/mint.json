@@ -69,8 +69,7 @@
             "getting-started/self-host/kubernetes",
             "getting-started/self-host/manual"
           ]
-        }, 
-        "helicone-headers/header-directory"
+        }
       ]
     },
     {
@@ -258,7 +257,8 @@
         "references/latency-affect",
         "references/data-autonomy",
         "references/open-source",
-        "references/how-we-calculate-cost"
+        "references/how-we-calculate-cost", 
+        "helicone-headers/header-directory"
       ]
     },
     {
