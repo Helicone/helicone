@@ -21,7 +21,6 @@ import { cn } from "@/lib/utils";
 import useOnboardingContext, {
   ONBOARDING_STEPS,
 } from "@/components/layout/onboardingContext";
-import { OnboardingPopover } from "@/components/templates/onboarding/OnboardingPopover";
 
 const ScoresEvaluatorsConfig = memo(
   ({ experimentId }: { experimentId: string }) => {
@@ -159,24 +158,14 @@ const ScoresEvaluatorsConfig = memo(
                     ).length
                 )
                 .map((evaluator, i) => (
-                  <OnboardingPopover
-                    popoverContentProps={{
-                      onboardingStep: "EXPERIMENTS_SPECIFIC_EVAL",
-                      next: () => addEvaluator.mutate(evaluator.id),
-                    }}
-                    setDataWhen={i === 0}
-                    open={i === 0}
+                  <SelectItemRawNotText
                     key={evaluator.id}
+                    value={evaluator.id}
+                    className="px-2 text-xs"
+                    showIndicator={false}
                   >
-                    <SelectItemRawNotText
-                      key={evaluator.id}
-                      value={evaluator.id}
-                      className="px-2 text-xs"
-                      showIndicator={false}
-                    >
-                      {evaluator.name} ({evaluator.scoring_type})
-                    </SelectItemRawNotText>
-                  </OnboardingPopover>
+                    {evaluator.name} ({evaluator.scoring_type})
+                  </SelectItemRawNotText>
                 ))}
             </SelectGroup>
           </SelectContent>
@@ -247,25 +236,18 @@ const ScoresEvaluatorsConfig = memo(
                 <span>Error running evaluators</span>
               </Badge>
             )}
-            <OnboardingPopover
-              popoverContentProps={{
-                onboardingStep: "EXPERIMENTS_RUN_EVAL",
-                next: () => runEvaluators.mutate(),
-              }}
+            <Button
+              size="sm"
+              variant={"outline"}
+              onClick={() => runEvaluators.mutate()}
+              disabled={runEvaluators.isLoading}
+              className="text-xs"
             >
-              <Button
-                size="sm"
-                variant={"outline"}
-                onClick={() => runEvaluators.mutate()}
-                disabled={runEvaluators.isLoading}
-                className="text-xs"
-              >
-                {runEvaluators.isLoading ? "Running..." : "Run Evaluators"}
-                {runEvaluators.isLoading && (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                )}
-              </Button>
-            </OnboardingPopover>
+              {runEvaluators.isLoading ? "Running..." : "Run Evaluators"}
+              {runEvaluators.isLoading && (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              )}
+            </Button>
           </div>
         </Col>
       </Row>
