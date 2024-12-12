@@ -37,6 +37,16 @@ Notably, LtM has demonstrated significantly higher accuracy than standard and Ch
 > 2. Calculate the amount of store credit the customer would receive if they trade in their headphones.
 > 3. Determine if the customer's trade-in credit exceeds 80% of the cost of the original product.
 
+**Now, let's solve the first subproblem:**
+
+> Determine if the customer is within the 18-month trade-in window.
+
+**Output:**
+
+> Yes, the customer is within the 18-month trade-in window. The customer purchased the headphones on December 1st, and today's date is March 29th, which is within the 18-month trade-in window.
+
+If the model doesn't provide the final answer right away, we can continue to solve the next subproblem. In some cases, solving just the first subproblem may give us enough information to address the customer's inquiry.
+
 ## Why use Least-to-Most prompting
 
 - Reduces errors by breaking down complex tasks into smaller parts
