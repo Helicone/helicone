@@ -50,7 +50,6 @@ import ScoresEvaluatorsConfig from "./scores/ScoresEvaluatorsConfig";
 import ScoresGraphContainer from "./scores/ScoresGraphContainer";
 import { useOrg } from "@/components/layout/org/organizationContext";
 import { cn } from "@/lib/utils";
-import { OnboardingPopover } from "@/components/templates/onboarding/OnboardingPopover";
 import { useJawnClient } from "@/lib/clients/jawnHook";
 import useOnboardingContext, {
   ONBOARDING_STEPS,
@@ -595,125 +594,109 @@ export function ExperimentTable({
                 )}
               >
                 <div className="min-w-fit h-full bg-white dark:bg-black rounded-sm">
-                  <OnboardingPopover
-                    popoverContentProps={{
-                      onboardingStep: "EXPERIMENTS_TABLE",
-                      align: "start",
-                      alignOffset: 10,
-                    }}
-                  >
-                    <Table className="border-collapse w-full border-t border-slate-200 dark:border-slate-800">
-                      <TableHeader>
-                        {table.getHeaderGroups().map((headerGroup, i) => (
-                          <TableRow
-                            key={headerGroup.id}
-                            className={clsx(
-                              "sticky top-0 bg-slate-50 dark:bg-slate-900 shadow-sm border-b border-slate-200 dark:border-slate-800",
-                              i === 1 && "h-[225px]"
-                            )}
-                          >
-                            {headerGroup.headers.map((header, index) => (
-                              <TableHead
-                                key={header.id}
-                                style={{
-                                  width: header.getSize(),
+                  <Table className="border-collapse w-full border-t border-slate-200 dark:border-slate-800">
+                    <TableHeader>
+                      {table.getHeaderGroups().map((headerGroup, i) => (
+                        <TableRow
+                          key={headerGroup.id}
+                          className={clsx(
+                            "sticky top-0 bg-slate-50 dark:bg-slate-900 shadow-sm border-b border-slate-200 dark:border-slate-800",
+                            i === 1 && "h-[225px]"
+                          )}
+                        >
+                          {headerGroup.headers.map((header, index) => (
+                            <TableHead
+                              key={header.id}
+                              style={{
+                                width: header.getSize(),
+                              }}
+                              className="bg-white dark:bg-neutral-950 relative px-0"
+                            >
+                              {header.isPlaceholder
+                                ? null
+                                : flexRender(
+                                    header.column.columnDef.header,
+                                    header.getContext()
+                                  )}
+                              <div
+                                className="resizer absolute right-0 top-0 h-full w-4 cursor-col-resize"
+                                {...{
+                                  onMouseDown: header.getResizeHandler(),
+                                  onTouchStart: header.getResizeHandler(),
                                 }}
-                                className="bg-white dark:bg-neutral-950 relative px-0"
                               >
-                                {header.isPlaceholder
-                                  ? null
-                                  : flexRender(
-                                      header.column.columnDef.header,
-                                      header.getContext()
-                                    )}
                                 <div
-                                  className="resizer absolute right-0 top-0 h-full w-4 cursor-col-resize"
-                                  {...{
-                                    onMouseDown: header.getResizeHandler(),
-                                    onTouchStart: header.getResizeHandler(),
-                                  }}
-                                >
-                                  <div
-                                    className={clsx(
-                                      "h-full w-1",
-                                      header.column.getIsResizing()
-                                        ? "bg-blue-700 dark:bg-blue-300"
-                                        : "bg-gray-500"
-                                    )}
-                                  />
-                                </div>
-                                {index < headerGroup.headers.length - 1 && (
-                                  <div className="absolute top-0 right-0 h-full w-px bg-slate-200 dark:bg-slate-800" />
+                                  className={clsx(
+                                    "h-full w-1",
+                                    header.column.getIsResizing()
+                                      ? "bg-blue-700 dark:bg-blue-300"
+                                      : "bg-gray-500"
+                                  )}
+                                />
+                              </div>
+                              {index < headerGroup.headers.length - 1 && (
+                                <div className="absolute top-0 right-0 h-full w-px bg-slate-200 dark:bg-slate-800" />
+                              )}
+                              {/* <div className="absolute bottom-0 left-0 right-0 h-[0.5px] bg-slate-200 dark:bg-slate-800" /> */}
+                            </TableHead>
+                          ))}
+                        </TableRow>
+                      ))}
+                    </TableHeader>
+                    <TableBody className="text-[13px] bg-white dark:bg-neutral-950 flex-1">
+                      {table.getRowModel().rows?.length ? (
+                        table.getRowModel().rows.map((row) => (
+                          <TableRow
+                            key={row.id}
+                            data-state={row.getIsSelected() && "selected"}
+                            className="border-b border-slate-200 dark:border-slate-800 hover:bg-white dark:hover:bg-neutral-950"
+                          >
+                            {row.getVisibleCells().map((cell) => (
+                              <TableCell
+                                className={cn(
+                                  "p-0 align-baseline border-r border-slate-200 dark:border-slate-800",
+                                  cell.column.getIsLastColumn() && "border-r-0"
                                 )}
-                                {/* <div className="absolute bottom-0 left-0 right-0 h-[0.5px] bg-slate-200 dark:bg-slate-800" /> */}
-                              </TableHead>
+                                key={cell.id}
+                                style={{
+                                  width: cell.column.getSize(),
+                                  maxWidth: cell.column.getSize(),
+                                  minWidth: cell.column.getSize(),
+                                }}
+                              >
+                                {flexRender(
+                                  cell.column.columnDef.cell,
+                                  cell.getContext()
+                                )}
+                              </TableCell>
                             ))}
                           </TableRow>
-                        ))}
-                      </TableHeader>
-                      <TableBody className="text-[13px] bg-white dark:bg-neutral-950 flex-1">
-                        {table.getRowModel().rows?.length ? (
-                          table.getRowModel().rows.map((row) => (
-                            <TableRow
-                              key={row.id}
-                              data-state={row.getIsSelected() && "selected"}
-                              className="border-b border-slate-200 dark:border-slate-800 hover:bg-white dark:hover:bg-neutral-950"
-                            >
-                              {row.getVisibleCells().map((cell) => (
-                                <TableCell
-                                  className={cn(
-                                    "p-0 align-baseline border-r border-slate-200 dark:border-slate-800",
-                                    cell.column.getIsLastColumn() &&
-                                      "border-r-0"
-                                  )}
-                                  key={cell.id}
-                                  style={{
-                                    width: cell.column.getSize(),
-                                    maxWidth: cell.column.getSize(),
-                                    minWidth: cell.column.getSize(),
-                                  }}
-                                >
-                                  {flexRender(
-                                    cell.column.columnDef.cell,
-                                    cell.getContext()
-                                  )}
-                                </TableCell>
-                              ))}
-                            </TableRow>
-                          ))
-                        ) : (
-                          <TableRow>
-                            <TableCell
-                              colSpan={columnDef.length}
-                              className="h-24 text-center"
-                            >
-                              No results.
-                            </TableCell>
-                          </TableRow>
-                        )}
-                      </TableBody>
-                    </Table>
-                  </OnboardingPopover>
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell
+                            colSpan={columnDef.length}
+                            className="h-24 text-center"
+                          >
+                            No results.
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
                 </div>
               </div>
 
               <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
                 <PopoverTrigger asChild>
-                  <OnboardingPopover
-                    popoverContentProps={{
-                      onboardingStep: "EXPERIMENTS_ADD_TEST_CASES",
-                      next: addRowsBatchForOnboarding,
-                    }}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="self-start flex flex-row space-x-2 text-slate-800 mt-0 shadow-none"
                   >
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="self-start flex flex-row space-x-2 text-slate-800 mt-0 shadow-none"
-                    >
-                      <PlusIcon className="h-4 w-4" />
-                      Add row
-                    </Button>
-                  </OnboardingPopover>
+                    <PlusIcon className="h-4 w-4" />
+                    Add row
+                  </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-full px-2 py-2">
                   <AddRowPopover

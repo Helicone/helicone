@@ -7,7 +7,6 @@ import { FlaskConicalIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import PromptPlayground from "../../id/promptPlayground";
 import { useJawnClient } from "@/lib/clients/jawnHook";
-import { OnboardingPopover } from "@/components/templates/onboarding/OnboardingPopover";
 import useOnboardingContext, {
   ONBOARDING_STEPS,
 } from "@/components/layout/onboardingContext";
@@ -131,33 +130,24 @@ const AddColumnDialog = ({
       }
     >
       <DialogContent className="w-[95vw] max-w-2xl gap-0 max-h-[90vh] overflow-y-auto">
-        <OnboardingPopover
-          popoverContentProps={{
-            onboardingStep: "EXPERIMENTS_ADD_CHANGE_PROMPT",
-            align: "start",
-            alignOffset: 10,
-          }}
-          modal={true}
-        >
-          <div className="flex justify-between items-center mb-8">
-            <div className="flex items-center">
-              <FlaskConicalIcon className="w-5 h-5 mr-2.5 text-slate-500" />
-              <h3 className="text-base font-medium text-slate-950 dark:text-white mr-3">
-                Add Prompt
-              </h3>
-              <div className="flex gap-1 items-center">
-                <p className="text-slate-500 text-sm font-medium leading-4">
-                  Forked from
-                </p>
-                <Badge variant="helicone" className="text-slate-500">
-                  <FlaskConicalIcon className="w-3.5 h-3.5 mr-1" />
-                  {(promptVersionTemplateData?.metadata?.label as string) ??
-                    `v${promptVersionTemplateData?.major_version}.${promptVersionTemplateData?.minor_version}`}
-                </Badge>
-              </div>
+        <div className="flex justify-between items-center mb-8">
+          <div className="flex items-center">
+            <FlaskConicalIcon className="w-5 h-5 mr-2.5 text-slate-500" />
+            <h3 className="text-base font-medium text-slate-950 dark:text-white mr-3">
+              Add Prompt
+            </h3>
+            <div className="flex gap-1 items-center">
+              <p className="text-slate-500 text-sm font-medium leading-4">
+                Forked from
+              </p>
+              <Badge variant="helicone" className="text-slate-500">
+                <FlaskConicalIcon className="w-3.5 h-3.5 mr-1" />
+                {(promptVersionTemplateData?.metadata?.label as string) ??
+                  `v${promptVersionTemplateData?.major_version}.${promptVersionTemplateData?.minor_version}`}
+              </Badge>
             </div>
           </div>
-        </OnboardingPopover>
+        </div>
 
         {promptVersionTemplateData && (
           <PromptPlayground
