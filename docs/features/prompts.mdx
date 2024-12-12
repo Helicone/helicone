@@ -1,15 +1,15 @@
 ---
-title: "Prompts & Experiments"
-sidebarTitle: "Prompts & Experiments"
-description: "Automatically version prompts from your codebase via our proxy, without changing your workflow. Run experiments using historical datasets to test, evaluate, and improve prompts over time while preventing regressions in production systems."
-"twitter:title": "Prompts and Experiments - Helicone OSS LLM Observability"
+title: "Prompts"
+sidebarTitle: "Prompts"
+description: "Automatically version and manage your prompts from the codebase or the UI."
+"twitter:title": "Prompts | Helicone OSS LLM Observability"
 ---
 
 import QuestionsSection from "/snippets/questions-section.mdx";
 
 <Info>
   **Who can use this feature**: Prompts is an add-on feature for our Pro
-  [plan](https://www.helicone.ai/pricing).
+  [plan](https://www.helicone.ai/pricing) and included in the Enterprise plan.
 </Info>
 
 <iframe
@@ -18,168 +18,92 @@ import QuestionsSection from "/snippets/questions-section.mdx";
   src="https://www.youtube.com/embed/pJAn6hoQJDc?autoplay=1&mute=1"
 ></iframe>
 
-## Introduction
+## What is Prompt Management?
 
-Helicone's prompt management provides a seamless way for users to track the prompts used in their generative AI applications. With Helicone, you can effortlessly monitor versions and inputs as they evolve.
+Helicone's prompt management provides a seamless way for users to version, track and optimize their prompts used in their AI applications.
 
-<Frame caption="Example: A Prompt Template designed for a rap battle between two people. ">
+<Frame caption="Example: A prompt template designed for a course generation application. ">
   <img
-    src="/images/prompts/example-prompt-rap-battle.png"
-    alt="Helicone example of a prompt template for monitoring and managing inputs from requests sent to your AI applications."
+    src="/images/prompts/prompt-cover.webp"
+    alt="Example: A prompt template designed for a course generation application. "
   />
 </Frame>
 
-### Why Prompts
+## Why manage prompts in Helicone?
 
-Requests are now matched to a `helicone-prompt-id`, allowing you to:
+Once you set up prompts in Helicone, your incoming requests will be matched to a `helicone-prompt-id`, allowing you to:
 
-- version and track iterations to your prompt over time, without losing any previous versions.
-- maintain a dataset of inputs and outputs for each prompt version.
+- version and track iterations of your prompt over time.
+- maintain a dataset of inputs and outputs for each prompt.
 
 ## Quick Start
 
 ### Prerequisites
 
-To use Prompts, you must set up Helicone in proxy mode. Please ensure you use one of the methods in our [Starter Guide](https://docs.helicone.ai/getting-started/quick-start#quick-start).
+Please set up Helicone in **proxy mode** using one of the methods in the [Starter Guide](https://docs.helicone.ai/getting-started/quick-start#quick-start).
 
 <Note>
-  Not sure if proxy is for you? We created a guide to explain the difference
+  Not sure if proxy is for you? We've created a guide to explain the difference
   between [Helicone Proxy vs Helicone Async
   integration](https://docs.helicone.ai/getting-started/proxy-vs-async).
 </Note>
 
-### How Prompt Templates Work
+### Create prompt templates
 
 As you modify your prompt in code, Helicone automatically tracks the new version and maintains a record of the old prompt. Additionally, a dataset of input/output keys is preserved for each version.
 
-<Accordion title="Get a deep dive of the feature">
-
-### For Typescript / Javascript users:
-
-By prefixing your prompt with `hpf` and enclosing your input variables in an additional `{}`, it allows Helicone to easily detect your prompt and inputs. We designed for minimum code change to keep it as easy as possible to use Prompts.
-
-```tsx
-const location = "space";
-const character = "two brothers";
-const promptInput = hpf`
-Compose a movie scene involving ${{ character }}, set in ${{ location }}
-`;
-```
-
-### Static Prompts with hpstatic
-
-In addition to `hpf`, Helicone provides `hpstatic` for creating static prompts that don't change between requests. This is useful for system prompts or other constant text that you don't want to be treated as variable input.
-
-To use `hpstatic`, import it along with `hpf`:
-
-```typescript
-import { hpf, hpstatic } from "@helicone/prompts";
-```
-
-Then, you can use it like this:
-
-```typescript
-const systemPrompt = hpstatic`You are a helpful assistant.`;
-const userPrompt = hpf`Write a story about ${{ character }}`;
-
-const chatCompletion = await openai.chat.completions.create(
-  {
-    messages: [
-      { role: "system", content: systemPrompt },
-      { role: "user", content: userPrompt },
-    ],
-    model: "gpt-3.5-turbo",
-  },
-  {
-    headers: {
-      "Helicone-Prompt-Id": "prompt_story",
-    },
-  }
-);
-```
-
-The `hpstatic` function wraps the entire text in `<helicone-prompt-static>` tags, indicating to Helicone that this part of the prompt should not be treated as variable input.
-
-### For other users:
-
-Currently, we only support packages for TypeScript and JavaScript for easy integration. For other users, we are utilizing an adapted version of JSX to manage prompts and their input variables.
-
-1. When you send over a prompt with the following syntax, we are able to extract the children text between the JSX element `helicone-prompt-input`, then place it back into the prompt to be sent to your LLM.
-
-```tsx
-<helicone-prompt-input key="my_input_key">
-  Input to your LLM
-</helicone-prompt-input>
-```
-
-Only the following will be sent to your LLM:
-
-```tsx
-    Input to your LLM
-```
-
-<Note>
-  It is crucial that each key has a unique identifier; otherwise, you will get
-  the same variable replacing in multiple places.
-</Note>
-
-2. Then, all of the input variables are mapped to the key `my_input_key` as a dictionary in Helicone:
-
-```json
-{
-  "my_input_key": "Input to your LLM"
-}
-```
-
-For static prompts, you can manually wrap static parts of your prompt in `<helicone-prompt-static>` tags:
-
-```
-<helicone-prompt-static>You are a helpful assistant.</helicone-prompt-static>
-Write a story about <helicone-prompt-input key="character">a secret agent</helicone-prompt-input>
-```
-
-This tells Helicone that the first part of the prompt is static and should not be treated as variable input.
-
-</Accordion>
-
-### Example
-
-Let's say we have an app that generates a short story, where users are able to input their own `character`. For example, the prompt is "Write a story about a secret agent", where the `character` is "a secret agent".
-
 <Tabs>
   <Tab title="Typescript / Javascript">
-    <Steps>
+    <Steps> 
       <Step title="Import hpf">
-      ```tsx
-      import { hpf } from "@helicone/prompts";
-      ```
+        ```tsx
+        import { hpf } from "@helicone/prompts";
+        ```
       </Step>
-
       <Step title="Add `hpf` and identify input variables">
-      Using the backtick string formatter in JavaScript, add `hpf` in front of your backtick to automatically format your text so that Helicone can determine where your variables are.
-
-      Next, nest your inputted variable so that it is within another bracket `{}`, this is essentially
-      making it so that we can determine the `input key` for Helicone.
+      By prefixing your prompt with `hpf` and enclosing your input variables in an additional `{}`, it allows Helicone to easily detect your prompt and inputs. We've designed for minimum code change to keep it as easy as possible to use Prompts.
 
       ```tsx
-      content: hpf`Write a story about ${{ character }}`,
+      const location = "space";
+      const character = "two brothers";
+      const promptInput = hpf`
+      Compose a movie scene involving ${{ character }}, set in ${{ location }}
+      `;
       ```
 
-        <Accordion title="Change input name">
-          If you want to rename your input or have a custom input, you can change the key-value pair in the passed dictionary to the string formatter function. Like this:
+      #### Static Prompts with hpstatic
 
-          ```tsx
-          content: hpf`Write a story about ${{ "my_magical_input": character  }}`,
-          ```
-        </Accordion>
+      In addition to `hpf`, Helicone provides `hpstatic` for creating static prompts that don't change between requests. This is useful for system prompts or other constant text that you don't want to be treated as variable input.
+
+      To use `hpstatic`, import it along with `hpf`:
+
+      ```typescript
+      import { hpf, hpstatic } from "@helicone/prompts";
+      ```
+
+      Then, you can use it like this:
+
+      ```typescript
+      const systemPrompt = hpstatic`You are a helpful assistant.`;
+      const userPrompt = hpf`Write a story about ${{ character }}`;
+      ```
+
+      The `hpstatic` function wraps the entire text in `<helicone-prompt-static>` tags, indicating to Helicone that this part of the prompt should not be treated as variable input.
+
+
+      #### Change input name
+      To rename your input or have a custom input, change the key-value pair in the passed dictionary to the string formatter function:
+
+      ```tsx
+      content: hpf`Write a story about ${{ "my_magical_input": character  }}`,
+      ```
+
       </Step>
 
       <Step title="Assign an id to your prompt">
         Assign a `Helicone-Prompt-Id` header to your LLM request.
 
-        Assigning an id allows us to associate your prompt with future versions of your prompt, and automatically manage versions on your behalf.
-
-        Depending on the package you are using, you will need to add a header. For more information on adding headers to packages, please see [Header Directory](/helicone-headers/header-directory).
+        Assigning an id allows us to associate your prompt with future versions of your prompt, and **automatically manage versions on your behalf.**
 
         ```tsx
         headers: {
@@ -189,8 +113,69 @@ Let's say we have an app that generates a short story, where users are able to i
       </Step>
     </Steps>
 
-    #### Here's what your code would look like:
+  </Tab> 
+  <Tab title="Packageless (cURL)">
+    Currently, we only support packages for TypeScript and JavaScript for easy integration. For other users, we recommend manually implementing input variables as follows:
+    <Steps>
+      <Step title="Identify the input variable, and create a key name.">
+      Given the below string, let's say `a secret agent` is our inputted variable. Let's name our key `character`.
 
+      ```tsx
+      Write a story about a secret agent
+      ```
+      </Step>
+
+      <Step title="Add helicone-prompt-input tags">
+      Add `<helicone-prompt-input key="<INPUT_ID>">` before your input variable, and `</helicone-prompt-input>` after, where `INPUT_ID` is your key name. In this example, `key="character"`:
+
+      ```tsx
+      Write a story about <helicone-prompt-input key="character" >a secret agent</helicone-prompt-input>
+      ```
+      <Check> Don't worry, Helicone will remove these tags for you before your prompt is sent to your LLM.</Check>
+      <Note>It is crucial that each key has a **unique identifier**; otherwise, the same variable will be replaced in multiple places. </Note>
+
+
+      #### Static Prompts
+
+      For static prompts, you can manually wrap static parts of your prompt in `<helicone-prompt-static>` tags:
+
+      ```tsx
+      <helicone-prompt-static>You are a helpful assistant.</helicone-prompt-static>
+      Write a story about <helicone-prompt-input key="character">a secret agent</helicone-prompt-input>
+      ```
+    This tells Helicone that the first part of the prompt is static and should not be treated as variable input.
+
+
+      </Step>
+
+      <Step title="Tag your prompt">
+
+        In order to securely ensure that we know when and how to parse and categorize your prompt, please append the following header to your LLM request.
+
+        ```tsx
+        Helicone-Prompt-Id: you_prompt_id
+        ```
+        <Note>
+        The id must not include any spaces or special characters. Underscores and dashes are acceptable.
+        </Note>
+
+      </Step>
+
+      <Step title="Make a request">
+        You just created a prompt template! Helicone will now keep track of all of your inputs for you. Rest assured that all of the helicone-prompt-input tags will be removed before your prompt is sent to your LLM.
+      </Step>
+
+    </Steps>
+
+  </Tab> 
+</Tabs>
+
+### Put it together
+
+Let's say we have an app that generates a short story, where users are able to input their own `character`. For example, the prompt is "Write a story about a secret agent", where the `character` is "a secret agent".
+
+<Tabs>
+  <Tab title="Typescript / Javascript example">
     ``` tsx
     // 1. Add these lines
     import { hpf, hpstatic } from "@helicone/prompts";
@@ -222,48 +207,8 @@ Let's say we have an app that generates a short story, where users are able to i
 
   </Tab>
 
-  <Tab title="Packageless (cURL)">
-      Currently, we only support packages for TypeScript and JavaScript for easy integration. For other users, we recommend manually implementing input variables as follow:
-    <Steps>
-      <Step title="Identify the input variable, and create a key name.">
-      Given the below string, let's say `a secret agent` is our inputted variable. Let's name our key `character`.
+  <Tab title="Packageless (cURL) example">
 
-      ```tsx
-      Write a story about a secret agent
-      ```
-      </Step>
-
-      <Step title="Add helicone-prompt-input tags">
-      Add `<helicone-prompt-input key="<INPUT_ID>">` before your input variable, and `</helicone-prompt-input>` after, where `INPUT_ID` is your key name. In this example, `key="character"`:
-
-      ```tsx
-      Write a story about <helicone-prompt-input key="character" >a secret agent</helicone-prompt-input>
-      ```
-      <Check> Don't worry, Helicone will remove these tags for you before the prompt is sent to your LLM.</Check>
-      <Note>It is crucial that each key has a **unique identifier**; otherwise, the same variable will be replaced in multiple places. </Note>
-
-      </Step>
-
-      <Step title="Tag your prompt">
-
-        In order to securely ensure that we know when and how to parse and categorize your prompt, please append the following header to your LLM request.
-
-        ```tsx
-        Helicone-Prompt-Id: you_prompt_id
-        ```
-        <Note>
-        The id must not include any spaces or special characters. Underscores and dashes are acceptable.
-        </Note>
-
-      </Step>
-
-      <Step title="Make a request">
-        You just created a prompt template! Helicone will now keep track of all of your inputs for you. Rest assure that all of the helicone-prompt-input tags will removed before your prompt is sent to your LLM.
-      </Step>
-
-    </Steps>
-
-    #### Here's what your code would look like:
     ```python
     openai.ChatCompletion.create(
       model="[DEPLOYMENT]",
@@ -280,7 +225,32 @@ Let's say we have an app that generates a short story, where users are able to i
   </Tab>
 </Tabs>
 
-## Using Prompts created on the UI
+### Create prompts from the UI
+
+In Helicone, you can create a prompt without touching the codebase for better collaboration between technical and non-technical teams.
+
+  <Steps> 
+    <Step title="Click on `Create Prompt`">
+      <Frame>
+        <img
+          src="/images/prompts/create-prompt.webp"
+          alt="Helicone's Prompts interface with a `Create Prompt` button to get started."
+        />
+      </Frame>
+    </Step>
+    <Step title="Toggle on `I'm not technical`">
+      <Frame caption="Create prompts from Helicone's UI">
+        <img
+          src="/images/prompts/create-new-prompt-from-ui.webp"
+          alt="An interface that shows two prompt creation methods: code and UI."
+        />
+      </Frame>
+    </Step>
+    <Step title="Click on `Save prompt`"></Step>
+
+  </Steps>
+
+### Use prompts created in the UI in code
 
 If you've created a prompt on the UI, you can easily pull this prompt into your codebase by calling the following API endpoint:
 
@@ -332,13 +302,11 @@ async function pullPromptAndRunCompletion() {
 
 ```
 
-## Running Experiments
+## Run experiments
 
-Once you've set up prompt management, you can leverage Helicone's experimentation features to test and improve your prompts.
+Once you've set up prompt management, you can use Helicone's [Experiments feature](https://docs.helicone.ai/features/experiments) to test and improve your prompts.
 
-To learn more about running experiments with your prompts, including step-by-step guides and best practices, visit our [Experiments guide](/guides/cookbooks/experiments).
-
-## Local Testing
+## Local testing
 
 Many times in development, you may want to test your prompt locally before deploying it to production and you don't want Helicone to track new prompt versions.
 
@@ -349,5 +317,28 @@ headers: {
   "Helicone-Prompt-Mode": "testing",
 },
 ```
+
+## FAQ
+
+<AccordionGroup>
+  <Accordion title="How can I improve my LLM app’s performance?">
+     Improving your LLM app primarily revolves around sophisticated prompt engineering. Here are some key techniques to optimize your prompt:
+
+      1.  Be specific and clear.
+      2.  Use structured formats.
+      3.  Leverage role-playing.
+      4.  Implement few-shot learning.
+
+      For more best practices, see [best practices of prompt engineering](https://docs.helicone.ai/guides/prompt-engineering).
+
+   </Accordion>
+   <Accordion title="Does Helicone own my prompts?">
+    Helicone does not own your prompts. We simply provide a logging and observability platform that captures and securely stores your LLM interaction data. When you use our UI, prompts are temporarily stored in our system, but when using code-based integration, prompts remain exclusively in your codebase. Our commitment is to offer transparent insights into your LLM interactions while ensuring your intellectual property remains completely under your control.
+  </Accordion>
+
+   <Accordion title="What does the version indexing work?">
+    In Helicone, you may notice that some of your prompt versions are labeled as `V2.0`, while others are labeled `V2.1`. Major versions (i.e., `V1.0`, `V2.0`, `V3.0`) are your prompts in production. Minor versions (`V1.1`, `V1.2`, `V1.3`) are experiment versions that are created in Helicone, which were forked off of your production version `V1.0` in this example.
+  </Accordion>
+</AccordionGroup>
 
 <QuestionsSection />

@@ -28,9 +28,10 @@ import {
 interface SidebarProps {
   setOpen: (open: boolean) => void;
   changelog: ChangelogItem[];
+  sidebarRef: React.RefObject<HTMLDivElement>;
 }
 
-const Sidebar = ({ changelog, setOpen }: SidebarProps) => {
+const Sidebar = ({ changelog, setOpen, sidebarRef }: SidebarProps) => {
   const router = useRouter();
   const { pathname } = router;
   const user = useUser();
@@ -218,16 +219,12 @@ const Sidebar = ({ changelog, setOpen }: SidebarProps) => {
   );
 
   return (
-    <>
-      {/* Remove this line */}
-      {/* <MobileNavigation NAVIGATION={NAVIGATION} setOpen={setOpen} /> */}
-
-      <DesktopSidebar
-        changelog={changelog}
-        NAVIGATION={NAVIGATION}
-        setOpen={setOpen}
-      />
-    </>
+    <DesktopSidebar
+      sidebarRef={sidebarRef}
+      changelog={changelog}
+      NAVIGATION={NAVIGATION}
+      setOpen={setOpen}
+    />
   );
 };
 

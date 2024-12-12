@@ -1,40 +1,34 @@
 import { useState } from "react";
 import { DiffHighlight } from "../../diffHighlight";
-import { clsx } from "../../../../shared/clsx";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH || "";
 
 const CODE_CONVERTS = {
-  typescript: (key: string) => `
-import OpenAI from "openai";
+  typescript: (key: string) => `import OpenAI from "openai";
 
-const openai = new OpenAI({
-  baseURL: "https://oai.helicone.ai/openai/deployments/[DEPLOYMENTNAME]",
+const client = new OpenAI({
+  apiKey: "{{AZURE_API_KEY}}",
+  baseURL: "https://oai.helicone.ai/openai/deployments/{{YOUR_DEPLOYMENT}}",
   defaultHeaders: {
     "Helicone-Auth": "Bearer ${key}",
-    "Helicone-OpenAI-API-Base": "https://[AZURE_DOMAIN].openai.azure.com",
-    "api-key": "[AZURE_API_KEY]",
+    "Helicone-OpenAI-Api-Base": "https://{{RESOURCE_NAME}}.openai.azure.com"
   },
-  defaultQuery: { "api-version": "[API_VERSION]" },
-});
-`,
+  defaultQuery: { "api-version": "{{API_VERSION}}" }
+});`,
 
-  python: (key: string) => `
-import OpenAI
+  python: (key: string) => `from openai import OpenAI
 
 client = OpenAI(
-  api_key="[AZURE_OPENAI_API_KEY]",
-  base_url="https://oai.helicone.ai/openai/deployments/[DEPLOYMENT]",
+  api_key="{{AZURE_API_KEY}}",
+  base_url="https://oai.helicone.ai/openai/deployments/{{YOUR_DEPLOYMENT}}",
   default_headers={
-      "Helicone-OpenAI-Api-Base": "https://[AZURE_DOMAIN].openai.azure.com",
-      "Helicone-Auth": "Bearer ${key}",
-      "api-key": "[AZURE_OPENAI_API_KEY]",
+    "Helicone-Auth": f"Bearer ${key}",
+    "Helicone-OpenAI-Api-Base": "https://{{RESOURCE_NAME}}.openai.azure.com"
   },
-  default_query={
-      "api-version": "[API_VERSION]"
-  }
-)
-`,
+  default_query={ "api-version": "{{API_VERSION}}" }
+)`,
 
   langchain_python: (key: string) => `
 from langchain.chat_models import AzureChatOpenAI
@@ -110,6 +104,21 @@ logger.registerRequest(reqBody);
 console.log(res);
 logger.sendLog(res);
   `,
+  curl: (
+    key: string
+  ) => `curl "https://oai.helicone.ai/openai/deployments/{{YOUR_DEPLOYMENT}}/chat/completions?api-version={{API_VERSION}}" \\
+  -H "api-key: {{AZURE_API_KEY}}" \\
+  -H "Helicone-Auth: Bearer ${key}" \\
+  -H "Helicone-OpenAI-Api-Base: https://{{RESOURCE_NAME}}.openai.azure.com" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "messages": [
+      {
+        "role": "user",
+        "content": "Hello!"
+      }
+    ]
+  }'`,
 };
 
 type SupportedLanguages = keyof typeof CODE_CONVERTS;
@@ -117,12 +126,13 @@ type SupportedLanguages = keyof typeof CODE_CONVERTS;
 const DIFF_LINES: {
   [key in SupportedLanguages]: number[];
 } = {
-  typescript: [3, 5],
-  python: [4, 7],
+  typescript: [4, 6, 7],
+  python: [4, 6, 7],
   langchain_python: [3, 4, 14],
   langchain_typescript: [4, 9, 10],
   asyncLogging: [],
   manualLogging: [],
+  curl: [0, 2, 3],
 };
 
 const NAMES: {
@@ -134,6 +144,7 @@ const NAMES: {
   langchain_typescript: "LangChainJS",
   asyncLogging: "OpenLLMetry",
   manualLogging: "Custom",
+  curl: "cURL",
 };
 
 interface AzureSnippetsProps {
@@ -146,66 +157,6 @@ export default function AzureSnippets(props: AzureSnippetsProps) {
 
   return (
     <div className="w-full flex flex-col">
-      <label className="font-semibold text-sm">
-        Select your integration method
-      </label>
-      <div className="flex flex-wrap gap-4 py-2 w-full">
-        <button
-          className={clsx(
-            lang === "typescript" ? "bg-sky-100" : "bg-white",
-            "flex items-center gap-2 border border-gray-300 rounded-lg py-2 px-4"
-          )}
-          onClick={() => setLang("typescript")}
-        >
-          <h2 className="font-semibold">Node.js</h2>
-        </button>
-        <button
-          className={clsx(
-            lang === "python" ? "bg-sky-100" : "bg-white",
-            "flex items-center gap-2 border border-gray-300 rounded-lg py-2 px-4"
-          )}
-          onClick={() => setLang("python")}
-        >
-          <h2 className="font-semibold">Python</h2>
-        </button>
-        <button
-          className={clsx(
-            lang === "langchain_python" ? "bg-sky-100" : "bg-white",
-            "flex items-center gap-2 border border-gray-300 rounded-lg py-2 px-4"
-          )}
-          onClick={() => setLang("langchain_python")}
-        >
-          <h2 className="font-semibold">Langchain</h2>
-        </button>
-        <button
-          className={clsx(
-            lang === "langchain_typescript" ? "bg-sky-100" : "bg-white",
-            "flex items-center gap-2 border border-gray-300 rounded-lg py-2 px-4"
-          )}
-          onClick={() => setLang("langchain_typescript")}
-        >
-          <h2 className="font-semibold">LangchainJS</h2>
-        </button>
-        <button
-          className={clsx(
-            lang === "asyncLogging" ? "bg-sky-100" : "bg-white",
-            "flex items-center gap-2 border border-gray-300 rounded-lg py-2 px-4"
-          )}
-          onClick={() => setLang("asyncLogging")}
-        >
-          <h2 className="font-semibold">OpenLLMetry</h2>
-        </button>
-        <button
-          className={clsx(
-            lang === "manualLogging" ? "bg-sky-100" : "bg-white",
-            "flex items-center gap-2 border border-gray-300 rounded-lg py-2 px-4"
-          )}
-          onClick={() => setLang("manualLogging")}
-        >
-          <h2 className="font-semibold">Custom</h2>
-        </button>
-      </div>
-
       <DiffHighlight
         code={CODE_CONVERTS[lang](apiKey)}
         language={lang}
@@ -213,6 +164,58 @@ export default function AzureSnippets(props: AzureSnippetsProps) {
         oldLines={[]}
         minHeight={false}
       />
+
+      <div className="mt-2">
+        <div className="flex overflow-x-auto py-2 w-full no-scrollbar">
+          <div className="flex gap-2">
+            <Button
+              variant={"outline"}
+              size="sm"
+              className={
+                lang === "typescript"
+                  ? "bg-slate-200 border-slate-200 dark:bg-slate-800 dark:border-slate-800"
+                  : ""
+              }
+              onClick={() => setLang("typescript")}
+            >
+              Node.js
+            </Button>
+            <Button
+              variant={"outline"}
+              size="sm"
+              className={
+                lang === "python"
+                  ? "bg-slate-200 border-slate-200 dark:bg-slate-800 dark:border-slate-800"
+                  : ""
+              }
+              onClick={() => setLang("python")}
+            >
+              Python
+            </Button>
+            <Button
+              variant={"outline"}
+              size="sm"
+              className={
+                lang === "curl"
+                  ? "bg-slate-200 border-slate-200 dark:bg-slate-800 dark:border-slate-800"
+                  : ""
+              }
+              onClick={() => setLang("curl")}
+            >
+              cURL
+            </Button>
+            <Link
+              href="https://docs.helicone.ai/integrations/azure/javascript"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Button variant={"outline"} size="sm">
+                <h2 className="font-semibold">More ›</h2>
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

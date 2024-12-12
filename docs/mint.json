@@ -69,7 +69,9 @@
             "getting-started/self-host/docker",
             "getting-started/self-host/kubernetes",
             "getting-started/self-host/manual"
-          ]
+          ],
+          "icon": "server",
+          "iconType": "solid"
         }, 
         "helicone-headers/header-directory"
       ]
@@ -230,6 +232,7 @@
         },
         "features/sessions",
         "features/prompts",
+        "features/experiments",
         {
           "group": "Webhooks",
           "pages": ["features/webhooks", "features/webhooks-testing"]
