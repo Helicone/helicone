@@ -20,9 +20,12 @@ Welcome to Helicone! Integrate your preferred provider with Helicone in seconds.
 
 <Steps>
 
-  <Step title="Create an account">
-    Once you have an [account](https://helicone.ai/), proceed to the next step.
-  </Step>
+{" "}
+
+<Step title="Create an account">
+  Once you have an [account](https://helicone.ai/), proceed to the next step.
+</Step>
+
   <Step title="Generate a Helicone API key">
     <AccordionGroup>
       <Accordion title="Go to Settings" icon="square-1">
@@ -57,7 +60,7 @@ Welcome to Helicone! Integrate your preferred provider with Helicone in seconds.
         </Frame>
 
         <Note>
-          Key's with read permissions will start with `sk-` and keys with write
+          Keys with read permissions will start with `sk-` and keys with write
           permissions will start with `pk-`. For our EU customers, keys are generated
           with the prefix `eu-` this allows our edge workers to know which region to
           route the request to.
@@ -71,6 +74,9 @@ Welcome to Helicone! Integrate your preferred provider with Helicone in seconds.
   </Step>
 
   <Step title="Pick your preferred integration method">
+
+    Follow the instructions depending on who your provider is.
+
     <CardGroup cols={4}>
     <Card title="OpenAI" href="/integrations/openai/javascript"></Card>
     <Card title="Azure" href="/integrations/azure/javascript"></Card>
@@ -112,6 +118,7 @@ Welcome to Helicone! Integrate your preferred provider with Helicone in seconds.
       title="Fireworks AI"
       href="/getting-started/integration-method/fireworks"
     ></Card>
+
   </CardGroup>
   <CardGroup cols={2}>
     <Card
@@ -125,6 +132,12 @@ Welcome to Helicone! Integrate your preferred provider with Helicone in seconds.
     </Card>
   </CardGroup>
 </Step>
+
+<Step title="Send your first request">
+  Once you have integrated with Helicone, send a request. Once received, you
+  will see the request and its metrics in the `Requests` tab.
+</Step>
+
 </Steps>
 
 ## New to Helicone?
