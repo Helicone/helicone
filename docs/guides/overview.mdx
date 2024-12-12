@@ -2,102 +2,126 @@
 title: "Helicone Guides"
 description: "Guides for building, optimizing, and analyzing LLM applications with Helicone."
 sidebarTitle: "Overview"
+"twitter:title": "Helicone Guides | Building, Optimizing, and Analyzing LLM Applications"
 ---
+
+<Frame>
+  <img
+    src="/images/guide/guides-cover.webp"
+    alt="Helicone's guides for building, optimizing, and analyzing LLM applications with Helicone."
+  />
+</Frame>
 
 ## Cookbooks
 
-Practical, hands-on guides for building and optimizing LLM applications with Helicone.
+Practical, hands-on guides for building and optimizing your LLM applications with Helicone.
 
 ### LLM Application Development
 
 <CardGroup cols={2} gap="medium">
   <Card
-    title="How to Run LLM Prompt Experiments"
+    title="How to run prompt experiments"
     icon="flask"
     href="/guides/cookbooks/experiments"
     iconType="light"
     vertical
-  />
+  >
+    Test your LLM prompts with real-world data and prevent regressions.
+  </Card>
   <Card
-    title="Replaying LLM Sessions"
+    title="How to replay LLM sessions"
     icon="rotate-right"
     href="/guides/cookbooks/replay-session"
     iconType="light"
     vertical
-  />
+  >
+    Optimize your AI agents and improve their performance with Helicone's
+    Session.
+  </Card>
   <Card
-    title="Debugging LLM Applications"
+    title="How to debug your LLM app"
     icon="bug"
     href="/guides/cookbooks/debugging"
-    description="Helicone provides an efficient platform for identifying and rectifying errors in your LLM applications, offering insights into their occurrence."
     vertical
     iconType="light"
-  />
+  >
+    Identify and debug errors in your LLM app with Helicone.
+  </Card>
 </CardGroup>
 
 ### Data Management and Analytics
 
 <CardGroup cols={2} gap="medium">
   <Card
-    title="ETL / Data Extraction"
+    title="ETL / data extraction"
     icon="database"
     href="/guides/cookbooks/etl"
-    description="Extract, transform, and load data from Helicone into your data warehouse using our robust REST API."
     vertical
     iconType="light"
-  />
+  >
+    Extract data from your LLM app with Helicone's ETL.
+  </Card>
   <Card
-    title="Using Custom Properties to Segment Data"
+    title="Segmenting data with Custom Properties"
     icon="chart-pie"
     href="/guides/cookbooks/segmentation"
-    description="Derive powerful insights into costs and user behaviors using custom properties in Helicone. Learn to track environments, user types, and more."
     vertical
     iconType="light"
-  />
+  >
+    Derive powerful insights into costs and user behaviors, track environments,
+    user types, and more.
+  </Card>
   <Card
-    title="Labeling Request Data"
+    title="Labeling request data"
     icon="tags"
     href="/guides/cookbooks/labeling-request-data"
-    description="Label your request data to make it easier to search and filter in Helicone. Learn about custom properties, feedback, and scores."
     vertical
     iconType="light"
-  />
+  >
+    Make it easier to search and filter your request data in Helicone.
+  </Card>
   <Card
-    title="Getting User Requests"
+    title="Getting user requests"
     icon="user"
     href="/guides/cookbooks/getting-user-requests"
-    description="Use the Request API to retrieve user-specific requests, allowing you to monitor, debug, and track costs for individual users."
     vertical
     iconType="light"
-  />
+  >
+    Retrieve user-specific requests to monitor, debug, and track costs for
+    individual users.
+  </Card>
   <Card
     title="Getting Sessions"
     icon="comments"
     href="/guides/cookbooks/getting-sessions"
-    description="Use the Request API to retrieve session data, allowing you to analyze and replay conversation threads."
     vertical
     iconType="light"
-  />
+  >
+    Retrieve session data to analyze and replay conversation threads.
+  </Card>
 </CardGroup>
 
 ### Integration and Environment Management
 
 <CardGroup cols={2} gap="medium">
   <Card
-    title="Environment Tracking"
+    title="Environment tracking"
     icon="sitemap"
     iconType="light"
     href="/guides/cookbooks/environment-tracking"
     vertical
-  />
+  >
+    Track and manage your development, staging, and production environments.
+  </Card>
   <Card
     title="Integrating Helicone with GitHub Actions"
     icon="github"
     href="/guides/cookbooks/github-actions"
-    description="Automate the monitoring and caching of LLM calls in your CI pipelines with Helicone."
     vertical
     iconType="light"
-  />
+  >
+    Automate the monitoring and caching of LLM calls in your CI pipelines.
+  </Card>
 </CardGroup>
 
 ---
@@ -109,55 +133,106 @@ practices.
 
 ### Prompt Engineering
 
+<CardGroup cols={1} gap="medium">
+  <Card
+    title="Overview"
+    icon="house"
+    href="/guides/prompt-engineering/overview"
+    horizontal
+    iconType="light"
+  >
+    Learn the basics of prompt engineering and how to craft effective LLM
+    prompts.
+  </Card>
+</CardGroup>
+
 <CardGroup cols={2} gap="medium">
   <Card
-    title="Prompt Engineering Overview"
-    icon="wand-magic-sparkles"
-    href="/guides/prompt-engineering/overview"
-    description="Learn the basics of prompt engineering and how to craft effective prompts for LLMs."
-    vertical
-    iconType="light"
-  />
-  <Card
-    title="Be Specific and Clear"
+    title="Be specific and clear"
     icon="bullseye-arrow"
     href="/guides/prompt-engineering/be-specific-and-clear"
-    description="Discover techniques to create clear and specific prompts for better LLM responses."
-    vertical
+    horizontal
     iconType="light"
-  />
+  >
+    Create concise prompts for better LLM responses.
+  </Card>
   <Card
-    title="Use Structured Formats"
+    title="Use structured formats"
     icon="table-list"
     href="/guides/prompt-engineering/use-structured-formats"
-    description="Learn how to use structured formats in your prompts for more organized and parseable outputs."
-    vertical
+    horizontal
     iconType="light"
-  />
+  >
+    Format the generated output for easier parsing and interpretation.
+  </Card>
   <Card
-    title="Leverage Role-Playing"
+    title="Role-playing"
     icon="user-gear"
     href="/guides/prompt-engineering/leverage-role-playing"
-    description="Explore how to use role-playing techniques in your prompts for tailored responses."
-    vertical
+    horizontal
     iconType="light"
-  />
+  >
+    Assign specific roles in system prompts to set the style, tone, and content.
+  </Card>
   <Card
-    title="Implement Few-Shot Learning"
+    title="Few-shot learning"
     icon="graduation-cap"
     href="/guides/prompt-engineering/implement-few-shot-learning"
-    description="Understand how to use few-shot learning to improve the accuracy of your LLM outputs."
-    vertical
+    horizontal
     iconType="light"
-  />
+  >
+    Provide examples of desired outputs to guide the LLM towards better
+    responses.
+  </Card>
   <Card
-    title="Use Chain of Thought Prompting"
-    icon="link"
-    href="/guides/prompt-engineering/use-chain-of-thought-prompting"
-    description="Learn about chain of thought prompting to get more detailed and reasoned responses from LLMs."
-    vertical
+    title="Use constrained outputs"
+    icon="ruler-combined"
+    href="/guides/prompt-engineering/use-constrained-outputs"
+    horizontal
     iconType="light"
-  />
+  >
+    Set clear rules for the model’s responses to improve accuracy and
+    consistency.
+  </Card>
+  <Card
+    title="Chain-of-thought prompting"
+    icon="stairs"
+    href="/guides/prompt-engineering/use-chain-of-thought-prompting"
+    horizontal
+    iconType="light"
+  >
+    Encourage the model to generate intermediate reasoning steps before arriving
+    at a final answer.
+  </Card>
+  <Card
+    title="Thread-of-thought prompting"
+    icon="arrow-progress"
+    href="/guides/prompt-engineering/use-thread-of-thought-prompting"
+    horizontal
+    iconType="light"
+  >
+    Build on previous ideas to maintain a coherent line of reasoning between
+    interactions.
+  </Card>
+  <Card
+    title="Least-to-most prompting"
+    icon="grid-dividers"
+    href="/guides/prompt-engineering/use-least-to-most-prompting"
+    horizontal
+    iconType="light"
+  >
+    Break down complex problems into smaller parts, gradually increasing in
+    complexity.
+  </Card>
+  <Card
+    title="Meta-Prompting"
+    icon="wand-magic-sparkles"
+    href="/guides/prompt-engineering/use-meta-prompting"
+    horizontal
+    iconType="light"
+  >
+    Use LLMs to create and refine prompts dynamically.
+  </Card>
 </CardGroup>
 
 ---

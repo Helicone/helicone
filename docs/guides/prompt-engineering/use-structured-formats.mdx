@@ -1,7 +1,7 @@
 ---
 title: "Use structured formats"
 sidebarTitle: "Use structured formats"
-description: "By formatting the generated output, it's easier to interpret and parse the information. This is especially useful for data extraction or wheres tandardized responses is needed."
+description: "Format the generated output to make it easier to interpret and parse the information."
 "twitter:title": "Use Structured Formats - Prompt Engineering Techniques"
 ---
 
@@ -24,31 +24,29 @@ import QuestionsSection from "/snippets/questions-section.mdx";
 ## Examples
 
 <AccordionGroup>
-  <Accordion title="Example 1: Customer support chatbot.">
-  A structured format allows the support team quickly identify the issue category (Billing), prioritize the request (High), and provides a ready-to-send response.
+  <Accordion title="Example 1: Customer support chatbot">
+    A structured format allows the support team quickly identify the issue category (Billing), prioritize the request (High), and provides a ready-to-send response.
 
-**Prompt:**
+    **Prompt:**
 
-```
-Based on the customer's query, generate a response in the following format:
+    ```
+    Based on the customer's query, generate a response in the following format:
 
-Issue Category: [Billing/Technical Support/General Inquiry]
-Priority Level: [High/Medium/Low]
-Suggested Response: [Your response to the customer]
+    Issue Category: [Billing/Technical Support/General Inquiry]
+    Priority Level: [High/Medium/Low]
+    Suggested Response: [Your response to the customer]
 
-Customer query: I was charged twice for my subscription this month. Can you help fix this?
-
-```
+    Customer query: I was charged twice for my subscription this month. Can you help fix this?
+    ```
 
   </Accordion>
 
-  <Accordion title="Example 2: Data entry automation.">
+  <Accordion title="Example 2: Data entry automation">
     By specifying CSV format, the extracted data can be directly imported into databases or spreadsheets, saving time on data entry.
 
     **Prompt:**
 
     ```
-
     Extract the following information from the email and present it in CSV format:
 
     - First Name
@@ -57,13 +55,12 @@ Customer query: I was charged twice for my subscription this month. Can you help
     - Company Name
 
     Email: Hello, my name is Maria Gonzalez from Tech Innovators. You can reach me at maria.gonzalez@techinnovators.com.
-
     ```
 
   </Accordion>
 
-  <Accordion title="Example 3: Content creation for marketing.">
-      The structured prompt ensures all key marketing elements are included.
+  <Accordion title="Example 3: Content creation for marketing">
+    The structured prompt ensures all key marketing elements are included.
 
     **Prompt:**
 
@@ -80,13 +77,12 @@ Customer query: I was charged twice for my subscription this month. Can you help
 
   </Accordion>
 
-  <Accordion title="Example 4: Medical report summarization.">
+  <Accordion title="Example 4: Medical report summarization">
     The structured outputs help healthcare professionals quickly review critical patient information.
 
     **Prompt:**
 
-    ````
-
+    ```
     Summarize the patient's medical report using the following template:
 
     Patient Name: [Name]
@@ -96,7 +92,6 @@ Customer query: I was charged twice for my subscription this month. Can you help
     Follow-Up Instructions: [Instructions]
 
     Medical Report: [Insert detailed medical report here]
-
     ```
 
   </Accordion>
@@ -110,4 +105,3 @@ Customer query: I was charged twice for my subscription this month. Can you help
 - Implement checks to validate that the responses meet your format requirements.
 
 <QuestionsSection />
-``` ````
