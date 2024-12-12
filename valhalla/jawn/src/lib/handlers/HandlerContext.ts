@@ -76,6 +76,7 @@ export type ProcessedLog = {
     heliconeTemplate?: TemplateWithInputs;
     assets?: Map<string, string>;
     properties?: Record<string, string>;
+    scores?: Record<string, number | boolean | undefined>;
   };
   response: {
     model?: string;

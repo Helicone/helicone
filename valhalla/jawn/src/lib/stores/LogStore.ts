@@ -98,16 +98,6 @@ const onConflictRequestResponseSearch = `ON CONFLICT (request_id, organization_i
 request_body_vector = EXCLUDED.request_body_vector,
 response_body_vector = EXCLUDED.response_body_vector`;
 
-const experimentCellValueColumns = new pgp.helpers.ColumnSet(
-  ["column_id", "row_index", "value", "status"],
-  { table: "experiment_cell" }
-);
-
-const onConflictExperimentCellValue =
-  " ON CONFLICT (column_id, row_index) DO UPDATE SET " +
-  "value = EXCLUDED.value, " +
-  "status = EXCLUDED.status";
-
 export class LogStore {
   constructor() {}
 
@@ -173,6 +163,17 @@ export class LogStore {
 
           for (const promptRecord of payload.prompts) {
             await this.processPrompt(promptRecord, t);
+          }
+        }
+
+        if (payload.scores && payload.scores.length > 0) {
+          for (const score of payload.scores) {
+            await this.processScore({
+              score: score.scores,
+              requestId: score.requestId,
+              organizationId: score.organizationId,
+              t,
+            });
           }
         }
 
@@ -380,6 +381,96 @@ export class LogStore {
     }
 
     return ok("Prompt processed successfully");
+  }
+
+  private mapScores(scores: Record<string, number | boolean | undefined>): {
+    score_attribute_key: string;
+    score_attribute_type: string;
+    score_attribute_value: number;
+  }[] {
+    return Object.entries(scores).map(([key, value]) => {
+      if (typeof value === "boolean") {
+        // Convert booleans to integers (1 for true, 0 for false)
+        return {
+          score_attribute_key: key,
+          score_attribute_type: "boolean",
+          score_attribute_value: value ? 1 : 0,
+        };
+      } else if (typeof value === "number") {
+        // Check if the number is an integer
+        if (Number.isInteger(value)) {
+          return {
+            score_attribute_key: key,
+            score_attribute_type: "number",
+            score_attribute_value: value,
+          };
+        } else {
+          // Throw an error if the value is a float
+          throw new Error(
+            `Score value for key '${key}' must be an integer. Received: ${value}`
+          );
+        }
+      } else {
+        // Throw an error if the value is neither boolean nor number
+        throw new Error(
+          `Invalid score value for key '${key}': ${value}. Expected an integer or boolean.`
+        );
+      }
+    });
+  }
+
+  async processScore({
+    score,
+    requestId,
+    t,
+    organizationId,
+  }: {
+    score: Record<string, number | boolean | undefined>;
+    requestId: string;
+    t: pgPromise.ITask<{}>;
+    organizationId: string;
+  }) {
+    const mappedScores = this.mapScores(score);
+
+    // Convert arrays for the upsert
+    const scoreKeys = mappedScores.map((s) =>
+      s.score_attribute_type === "boolean"
+        ? `${s.score_attribute_key}-hcone-bool`
+        : s.score_attribute_key
+    );
+    const scoreTypes = mappedScores.map((s) => s.score_attribute_type);
+    const scoreValues = mappedScores.map((s) => s.score_attribute_value);
+    const organizationIds = Array(scoreKeys.length).fill(organizationId);
+
+    // First upsert the score attributes and get their IDs
+    const upsertedAttributes = await t.many(
+      `
+      WITH upserted_attributes AS (
+        INSERT INTO score_attribute (score_key, value_type, organization)
+        SELECT unnest($1::text[]), unnest($2::text[]), unnest($3::uuid[])
+        ON CONFLICT (score_key, organization) DO UPDATE SET
+          score_key = EXCLUDED.score_key,
+          value_type = EXCLUDED.value_type
+        RETURNING id, score_key
+      )
+      SELECT id, score_key
+      FROM upserted_attributes
+    `,
+      [scoreKeys, scoreTypes, organizationIds]
+    );
+
+    // Then insert the score values
+    const attributeIds = upsertedAttributes.map((attr) => attr.id);
+    await t.none(
+      `
+      INSERT INTO score_value (score_attribute, request_id, int_value)
+      SELECT unnest($1::uuid[]), $2, unnest($3::bigint[])
+      ON CONFLICT (score_attribute, request_id) DO NOTHING
+    `,
+      [attributeIds, requestId, scoreValues]
+    );
+
+    return ok("Scores processed successfully");
   }
 
   filterDuplicateRequests(

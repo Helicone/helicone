@@ -36,6 +36,11 @@ export type BatchPayload = {
   requestResponseVersionedCH: RequestResponseRMT[];
   searchRecords: Database["public"]["Tables"]["request_response_search"]["Insert"][];
   experimentCellValues: ExperimentCellValue[];
+  scores: {
+    organizationId: string;
+    requestId: string;
+    scores: Record<string, number | boolean | undefined>;
+  }[];
 };
 
 export class LoggingHandler extends AbstractLogHandler {
@@ -62,6 +67,7 @@ export class LoggingHandler extends AbstractLogHandler {
       requestResponseVersionedCH: [],
       searchRecords: [],
       experimentCellValues: [],
+      scores: [],
     };
   }
 
@@ -87,6 +93,11 @@ export class LoggingHandler extends AbstractLogHandler {
       this.batchPayload.responses.push(responseMapped);
       this.batchPayload.assets.push(...assetsMapped);
       this.batchPayload.searchRecords.push(...searchRecordsMapped);
+      this.batchPayload.scores.push({
+        organizationId: context.orgParams?.id ?? "",
+        requestId: requestMapped.id ?? "",
+        scores: context.processedLog.request.scores ?? {},
+      });
 
       if (s3RecordMapped) {
         this.batchPayload.s3Records.push(s3RecordMapped);
@@ -445,7 +456,11 @@ export class LoggingHandler extends AbstractLogHandler {
       assets: context.processedLog.assets
         ? Array.from(context.processedLog.assets.keys())
         : [],
-      scores: {},
+      scores: Object.fromEntries(
+        Object.entries(context.processedLog.request.scores ?? {}).map(
+          ([key, value]) => [key, +(value ?? 0)]
+        )
+      ),
       request_body:
         this.extractRequestBodyMessage(context.processedLog.request.body) ?? "",
       response_body:

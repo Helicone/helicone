@@ -45,7 +45,7 @@ export function placeAssetIdValues(
   return traverseAndTransform(heliconeTemplate);
 }
 
-function getEvaluatorScoreName(evaluatorName: string) {
+export function getEvaluatorScoreName(evaluatorName: string) {
   return evaluatorName
     .toLowerCase()
     .replace(" ", "_")
