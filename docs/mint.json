@@ -251,7 +251,6 @@
     {
       "group": "References",
       "pages": [
-        "references/api",
         "references/proxy-vs-async",
         "references/availability",
         "references/latency-affect",
