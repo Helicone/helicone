@@ -60,7 +60,6 @@
       "group": "Getting Started",
       "pages": [
         "getting-started/quick-start",
-        "helicone-headers/helicone-auth",
         {
           "group": "Self Host",
           "pages": [

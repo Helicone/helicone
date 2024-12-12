@@ -7,7 +7,7 @@ description: "Helicone is the open-source LLM observability platform for develop
 
 <Frame>
   <img
-    src="/images/intro-dashboard.webp"
+    src="/images/introduction/intro-dashboard.webp"
     alt="Helicone dashboard to your AI applications."
   />
 </Frame>
@@ -16,62 +16,116 @@ Log your LLM requests, evaluate, and experiment with prompts, and get instant in
 
 ## Quick Start
 
-Welcome to Helicone! Get started by picking your preferred integration method.
+Welcome to Helicone! Integrate your preferred provider with Helicone in seconds.
 
-<CardGroup cols={4}>
-  <Card title="OpenAI" href="/integrations/openai/javascript"></Card>
-  <Card title="Azure" href="/integrations/azure/javascript"></Card>
-  <Card title="Anthropic" href="/integrations/anthropic/javascript"></Card>
-  <Card title="Ollama" href="/integrations/ollama/javascript"></Card>
-  <Card title="AWS Bedrock" href="/integrations/bedrock/javascript"></Card>
-  <Card title="Gemini" href="/integrations/gemini/api/javascript"></Card>
-  <Card
-    title="Vercel AI"
-    href="/getting-started/integration-method/vercelai"
-  ></Card>
-  <Card
-    title="Anyscale"
-    href="/getting-started/integration-method/anyscale"
-  ></Card>
-  <Card
-    title="Together AI"
-    href="/getting-started/integration-method/together"
-  ></Card>
-  <Card
-    title="Hyperbolic"
-    href="/getting-started/integration-method/hyperbolic"
-  ></Card>
-  <Card title="Groq" href="/integrations/groq/javascript"></Card>
-  <Card title="Instructor" href="/integrations/instructor/javascript"></Card>
-  <Card
-    title="Deepinfra"
-    href="/getting-started/integration-method/deepinfra"
-  ></Card>
-  <Card
-    title="OpenRouter"
-    href="/getting-started/integration-method/openrouter"
-  ></Card>
-  <Card
-    title="LiteLLM"
-    href="/getting-started/integration-method/litellm"
-  ></Card>
-  <Card
-    title="Fireworks AI"
-    href="/getting-started/integration-method/fireworks"
-  ></Card>
-</CardGroup>
+<Steps>
 
-<CardGroup cols={2}>
-  <Card
-    title="OpenLLMetry"
-    href="/getting-started/integration-method/openllmetry"
-  >
-    Log directly to Helicone without going through our proxy.
-  </Card>
-  <Card title="Gateway" href="/getting-started/integration-method/gateway">
-    Don't see your provider above? Try Helicone's universal Gateway.
-  </Card>
-</CardGroup>
+  <Step title="Create an account">
+    Once you have an [account](https://helicone.ai/), proceed to the next step.
+  </Step>
+  <Step title="Generate a Helicone API key">
+    <AccordionGroup>
+      <Accordion title="Go to Settings" icon="square-1">
+        Click on your organization on the top left, then select `Settings` from the dropdown.
+        <Frame>
+          <img
+            src="/images/introduction/key-step-1.webp"
+            alt="Find Settings from Helicone's sidebar."
+          />
+        </Frame>
+      </Accordion>
+
+      <Accordion title="Select the API Keys tab" icon="square-2">
+        <Frame>
+          <img
+            src="/images/introduction/key-step-2.webp"
+            alt="In Settings, select the API Keys tab."
+          />
+        </Frame>
+      </Accordion>
+
+      <Accordion title="Generate new key" icon="square-3">
+        Click on `Generate new key`.
+
+        When creating a new Helicone API key, you have the ability to enable `read` and `write` permissions.
+        Write keys can be used through Helicone via our proxy, feedback or any other Helicone service when calling a `POST` or using our gateway.
+        <Frame>
+          <img
+            src="/images/introduction/key-step-3.webp"
+            alt="Create a new Helicone API key from Settings."
+          />
+        </Frame>
+
+        <Note>
+          Key's with read permissions will start with `sk-` and keys with write
+          permissions will start with `pk-`. For our EU customers, keys are generated
+          with the prefix `eu-` this allows our edge workers to know which region to
+          route the request to.
+        </Note>
+      </Accordion>
+
+    </AccordionGroup>
+
+    For more details on Helicone API keys, check out the [Helicone Auth](/helicone-headers/helicone-auth) docs.
+
+  </Step>
+
+  <Step title="Pick your preferred integration method">
+    <CardGroup cols={4}>
+    <Card title="OpenAI" href="/integrations/openai/javascript"></Card>
+    <Card title="Azure" href="/integrations/azure/javascript"></Card>
+    <Card title="Anthropic" href="/integrations/anthropic/javascript"></Card>
+    <Card title="Ollama" href="/integrations/ollama/javascript"></Card>
+    <Card title="AWS Bedrock" href="/integrations/bedrock/javascript"></Card>
+    <Card title="Gemini" href="/integrations/gemini/api/javascript"></Card>
+    <Card
+      title="Vercel AI"
+      href="/getting-started/integration-method/vercelai"
+    ></Card>
+    <Card
+      title="Anyscale"
+      href="/getting-started/integration-method/anyscale"
+    ></Card>
+    <Card
+      title="Together AI"
+      href="/getting-started/integration-method/together"
+    ></Card>
+    <Card
+      title="Hyperbolic"
+      href="/getting-started/integration-method/hyperbolic"
+    ></Card>
+    <Card title="Groq" href="/integrations/groq/javascript"></Card>
+    <Card title="Instructor" href="/integrations/instructor/javascript"></Card>
+    <Card
+      title="Deepinfra"
+      href="/getting-started/integration-method/deepinfra"
+    ></Card>
+    <Card
+      title="OpenRouter"
+      href="/getting-started/integration-method/openrouter"
+    ></Card>
+    <Card
+      title="LiteLLM"
+      href="/getting-started/integration-method/litellm"
+    ></Card>
+    <Card
+      title="Fireworks AI"
+      href="/getting-started/integration-method/fireworks"
+    ></Card>
+  </CardGroup>
+  <CardGroup cols={2}>
+    <Card
+      title="OpenLLMetry"
+      href="/getting-started/integration-method/openllmetry"
+    >
+      Log directly to Helicone without going through our proxy.
+    </Card>
+    <Card title="Gateway" href="/getting-started/integration-method/gateway">
+      Don't see your provider above? Try Helicone's universal Gateway.
+    </Card>
+  </CardGroup>
+</Step>
+</Steps>
 
 ## New to Helicone?
 
