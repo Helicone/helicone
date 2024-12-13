@@ -13,6 +13,8 @@ import {
   MagnifyingGlassIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
+import { Input as PromptInput } from "@/components/templates/prompts/id/MessageInput";
+
 import { useRouter } from "next/router";
 import { useExperiments } from "../../../../services/hooks/prompts/experiments";
 import { useInputs } from "../../../../services/hooks/prompts/inputs";
@@ -34,7 +36,7 @@ import {
 import PromptPlayground from "./promptPlayground";
 import { useJawnClient } from "../../../../lib/clients/jawnHook";
 import useNotification from "../../../shared/notification/useNotification";
-import { Message } from "../../requests/chatComponent/types";
+import { Message, PromptMessage } from "../../requests/chatComponent/types";
 
 import { Badge } from "../../../ui/badge";
 import { ScrollArea } from "../../../ui/scroll-area";
@@ -108,27 +110,13 @@ export function getTimeAgo(date: Date): string {
   return `${Math.floor(secondsPast / 31536000)} years ago`;
 }
 
-type NotNullOrUndefined<T> = T extends null | undefined ? never : T;
-
-// Update the Input type definition
-type Input = {
-  id: string;
-  inputs: { [key: string]: string };
-  source_request: string;
-  prompt_version: string;
-  created_at: string;
-  response_body?: string; // Make response_body optional
-  auto_prompt_inputs: Record<string, any>[] | unknown[];
-};
-
 const PromptIdPage = (props: PromptIdPageProps) => {
   const { id, currentPage, pageSize } = props;
   const { prompt, isLoading, refetch: refetchPrompt } = usePrompt(id);
   const jawn = useJawnClient();
   const [page, setPage] = useState<number>(currentPage);
   const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);
-  const [inputView, setInputView] = useState<"list" | "grid">("list");
-  const [selectedInput, setSelectedInput] = useState<Input | undefined>();
+  const [selectedInput, setSelectedInput] = useState<PromptInput | undefined>();
   const [searchRequestId, setSearchRequestId] = useState<string>("");
   const searchParams = useSearchParams();
   const notification = useNotification();
@@ -173,7 +161,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
     getInterval() as TimeInterval
   );
 
-  const createSubversion = async (history: Message[], model: string) => {
+  const createSubversion = async (history: PromptMessage[], model: string) => {
     if (prompt?.metadata?.createdFromUi === false) {
       notification.setNotification(
         "Prompt was not created from the UI, please change the prompt in your codebase to use the new version",
@@ -183,15 +171,20 @@ const PromptIdPage = (props: PromptIdPageProps) => {
     }
     const promptData = {
       model: model,
-      messages: history.map((msg) => ({
-        role: msg.role,
-        content: [
-          {
-            text: msg.content,
-            type: "text",
-          },
-        ],
-      })),
+      messages: history.map((msg) => {
+        if (typeof msg === "string") {
+          return msg;
+        }
+        return {
+          role: msg.role,
+          content: [
+            {
+              text: msg.content,
+              type: "text",
+            },
+          ],
+        };
+      }),
     };
 
     const result = await jawn.POST(
@@ -352,7 +345,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
     }
   };
 
-  const handleInputSelect = (input: Input | undefined) => {
+  const handleInputSelect = (input: PromptInput | undefined) => {
     setSelectedInput((prevInput) => {
       if (prevInput?.id === input?.id) {
         return undefined; // Deselect if the same input is clicked again
@@ -471,13 +464,8 @@ const PromptIdPage = (props: PromptIdPageProps) => {
     refetchPromptVersions();
     refetchPrompt();
   };
-  const user = useUser();
-  const org = useOrg();
 
-  const experimentFlags = useFeatureFlags(
-    "experiment",
-    org?.currentOrg?.id ?? ""
-  );
+  const org = useOrg();
 
   const [isVersionsExpanded, setIsVersionsExpanded] = useState(true);
   const [isInputsExpanded, setIsInputsExpanded] = useState(true);

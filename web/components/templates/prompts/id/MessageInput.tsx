@@ -5,5 +5,5 @@ export type Input = {
   prompt_version: string;
   created_at: string;
   response_body?: string;
-  auto_prompt_inputs: Record<string, any>[] | unknown[];
+  auto_prompt_inputs: any[];
 };
