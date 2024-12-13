@@ -4,10 +4,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 import { BeakerIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/router";
-import PromptPlayground, {
-  PromptObject,
-  Input as PromptInput,
-} from "../../../id/promptPlayground";
+import PromptPlayground, { PromptObject } from "../../../id/promptPlayground";
+import { Input as PromptInput } from "../../../id/MessageInput";
 import useNotification from "../../../../../shared/notification/useNotification";
 import { useJawnClient } from "../../../../../../lib/clients/jawnHook";
 

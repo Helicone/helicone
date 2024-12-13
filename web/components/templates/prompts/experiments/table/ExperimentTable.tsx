@@ -59,6 +59,7 @@ import { generateOpenAITemplate } from "@/components/shared/CreateNewEvaluator/e
 type TableDataType = {
   index: number;
   inputs: Record<string, string>;
+  autoInputs: any[];
   rowRecordId: string;
   add_prompt: string;
   originalInputRecordId: string;
@@ -92,6 +93,7 @@ export function ExperimentTable({
   const [toEditInputRecord, setToEditInputRecord] = useState<{
     id: string;
     inputKV: Record<string, string>;
+    autoInputs: Record<string, any>;
   } | null>(null);
   const [showScores, setShowScores] = useState(false);
 
@@ -174,10 +176,12 @@ export function ExperimentTable({
                 experimentInputs={inputKeysData ?? []}
                 rowInputs={row.original.inputs}
                 rowRecordId={row.original.rowRecordId}
+                experimentAutoInputs={row.original.autoInputs}
                 onClick={() => {
                   setToEditInputRecord({
                     id: row.original.originalInputRecordId ?? "",
                     inputKV: row.original.inputs,
+                    autoInputs: row.original.autoInputs,
                   });
                   setRightPanel("edit_inputs");
                 }}
@@ -316,6 +320,7 @@ export function ExperimentTable({
         {}
       ),
       add_prompt: "",
+      autoInputs: row.auto_prompt_inputs,
       originalInputRecordId:
         row.requests.find(
           (r) =>
@@ -352,11 +357,13 @@ export function ExperimentTable({
       rows: {
         inputRecordId: string;
         inputs: Record<string, string>;
+        autoInputs: any[];
       }[]
     ) => {
       const newRows = rows.map((row) => ({
         inputRecordId: row.inputRecordId,
         inputs: row.inputs,
+        autoInputs: row.autoInputs,
       }));
 
       if (!newRows.length) return;
@@ -427,20 +434,6 @@ export function ExperimentTable({
         experimentTableQuery?.original_prompt_version !== undefined, // Fetch only when the drawer is open
     }
   );
-
-  // Process input records
-  const inputRecords = useMemo(() => {
-    if (!inputRecordsData) return [];
-    return inputRecordsData.map((record) => ({
-      inputRecordId: record.id,
-      inputs: record.inputs,
-    }));
-  }, [inputRecordsData]);
-
-  const addRowsBatchForOnboarding = useCallback(() => {
-    handleAddRowInsertBatch(inputRecords);
-    queryClient.invalidateQueries(["experimentTable", experimentTableId]);
-  }, [queryClient, experimentTableId, handleAddRowInsertBatch, inputRecords]);
 
   useEffect(() => {
     if (
@@ -743,6 +736,7 @@ export function ExperimentTable({
                       experimentId={experimentTableId}
                       inputRecord={toEditInputRecord}
                       inputKeys={inputKeysData ?? []}
+                      autoInputs={toEditInputRecord?.autoInputs ?? {}}
                       onClose={() => {
                         setToEditInputRecord(null);
                         setRightPanel(null);

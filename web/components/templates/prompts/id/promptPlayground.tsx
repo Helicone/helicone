@@ -1,10 +1,4 @@
-import { PlusIcon } from "@heroicons/react/24/outline";
 import { Button } from "@/components/ui/button";
-import { useState, useEffect, useCallback, useMemo } from "react";
-import { Message } from "../../requests/chatComponent/types";
-import { JsonView } from "../../requests/chatComponent/jsonView";
-import { MessageRenderer } from "../../requests/chatComponent/MessageRenderer";
-import { PlaygroundChatTopBar, PROMPT_MODES } from "./playgroundChatTopBar";
 import {
   Select,
   SelectContent,
@@ -12,24 +6,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
+import { PlusIcon } from "@heroicons/react/24/outline";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { MODEL_LIST } from "../../playground/new/modelList";
-import PromptChatRow from "./promptChatRow";
 import {
   getMessages,
   getRequestMessages,
   getResponseMessage,
 } from "../../requests/chatComponent/messageUtils";
-import { cn } from "@/lib/utils";
-
-export type Input = {
-  id: string;
-  inputs: { [key: string]: string };
-  source_request: string;
-  prompt_version: string;
-  created_at: string;
-  response_body?: string;
-  auto_prompt_inputs: Record<string, any>[] | unknown[];
-};
+import { Message } from "../../requests/chatComponent/types";
+import { Input } from "./MessageInput";
+import MessageRendererComponent from "./MessageRendererComponent";
+import { PlaygroundChatTopBar, PROMPT_MODES } from "./playgroundChatTopBar";
 
 export type PromptObject = {
   model: string;
@@ -42,7 +31,7 @@ export type PromptObject = {
 interface PromptPlaygroundProps {
   prompt: string | PromptObject;
   selectedInput: Input | undefined;
-  onSubmit?: (history: Message[], model: string) => void;
+  onSubmit?: (history: (Message | string)[], model: string) => void;
   submitText: string;
   initialModel?: string;
   isPromptCreatedFromUi?: boolean;
@@ -62,14 +51,10 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
   prompt,
   selectedInput,
   onSubmit,
-  submitText,
   initialModel,
   isPromptCreatedFromUi,
   defaultEditMode = false,
-  editMode = true,
-  chatType = "request",
   playgroundMode = "prompt",
-  handleCreateExperiment,
   onExtractPromptVariables,
   onPromptChange,
   className = "border rounded-md",
@@ -86,7 +71,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
   const parsePromptToMessages = (
     promptInput: string | PromptObject,
     inputs?: Record<string, string>
-  ): Message[] => {
+  ): (Message | string)[] => {
     if (typeof promptInput === "string") {
       return promptInput
         .split("\n\n")
@@ -102,9 +87,11 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
 
     const promptObject = promptInput as PromptObject;
     return (
-      promptObject?.messages
-        ?.filter((msg) => !isHeliconeAutoPromptInput(msg))
-        .map((msg, index) => ({
+      promptObject?.messages.map((msg, index) => {
+        if (typeof msg === "string") {
+          return msg;
+        }
+        return {
           id: `msg-${index}`,
           role: msg.role as "user" | "assistant" | "system",
           content: inputs
@@ -117,7 +104,8 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
             : Array.isArray(msg.content)
             ? msg.content.map((c) => c.text).join("\n")
             : msg.content,
-        })) || []
+        };
+      }) || []
     );
   };
 
@@ -130,7 +118,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
 
   const [mode, setMode] = useState<(typeof PROMPT_MODES)[number]>("Pretty");
   const [isEditMode, setIsEditMode] = useState(defaultEditMode);
-  const [currentChat, setCurrentChat] = useState<Message[]>(() =>
+  const [currentChat, setCurrentChat] = useState<(Message | string)[]>(() =>
     parsePromptToMessages(prompt, selectedInput?.inputs)
   );
 
@@ -172,11 +160,15 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
     newRole: string
   ) => {
     const updatedChat = [...currentChat];
-    updatedChat[index] = {
-      ...updatedChat[index],
-      content: newContent,
-      role: newRole as "user" | "assistant" | "system",
-    };
+    if (typeof updatedChat[index] === "string") {
+      return;
+    } else {
+      updatedChat[index] = {
+        ...updatedChat[index],
+        content: newContent,
+        role: newRole as "user" | "assistant" | "system",
+      };
+    }
     setCurrentChat(updatedChat);
   };
 
@@ -232,61 +224,6 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
     }
   }, [currentChat, selectedModel]);
 
-  const renderMessages = (messages: Message[]) => {
-    switch (mode) {
-      case "Pretty":
-        return (
-          <ul
-            className={cn(
-              "w-full relative h-fit",
-              playgroundMode === "experiment-compact" && "space-y-2"
-            )}
-          >
-            {messages.map((message, index) => (
-              <PromptChatRow
-                playgroundMode={playgroundMode}
-                key={message.id}
-                message={message}
-                editMode={isEditMode}
-                index={index}
-                callback={(userText, role) =>
-                  handleUpdateMessage(index, userText, role)
-                }
-                deleteRow={() => handleDeleteMessage(index)}
-                selectedProperties={selectedInput?.inputs}
-                onExtractVariables={onExtractVariables}
-              />
-            ))}
-          </ul>
-        );
-      case "Markdown":
-        return (
-          <MessageRenderer
-            messages={messages}
-            showAllMessages={true}
-            expandedChildren={expandedChildren}
-            setExpandedChildren={setExpandedChildren}
-            selectedProperties={selectedInput?.inputs}
-            isHeliconeTemplate={undefined}
-            autoInputs={selectedInput?.auto_prompt_inputs}
-            setShowAllMessages={() => {}}
-            mode={mode}
-          />
-        );
-      case "JSON":
-        return (
-          <JsonView
-            requestBody={requestMessages}
-            responseBody={responseMessage}
-          />
-        );
-      default:
-        return null;
-    }
-  };
-
-  const [isAccordionOpen, setIsAccordionOpen] = useState(false);
-
   if (
     playgroundMode === "experiment-compact" ||
     playgroundMode === "experiment"
@@ -300,7 +237,20 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
             "border border-slate-200 dark:border-slate-800"
         )}
       >
-        {renderMessages(messages)}
+        <MessageRendererComponent
+          messages={messages}
+          mode={mode}
+          playgroundMode={playgroundMode}
+          isEditMode={isEditMode}
+          expandedChildren={expandedChildren}
+          setExpandedChildren={setExpandedChildren}
+          selectedInput={selectedInput}
+          onExtractVariables={onExtractVariables}
+          handleUpdateMessage={handleUpdateMessage}
+          handleDeleteMessage={handleDeleteMessage}
+          requestMessages={requestMessages}
+          responseMessage={responseMessage}
+        />
       </div>
     );
   }
@@ -317,9 +267,21 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
           isEditMode={isEditMode}
           setIsEditMode={setIsEditMode}
         />
-
         <div className="flex-grow overflow-auto rounded-b-md">
-          {renderMessages(messages)}
+          <MessageRendererComponent
+            messages={messages}
+            mode={mode}
+            playgroundMode={playgroundMode}
+            isEditMode={isEditMode}
+            expandedChildren={expandedChildren}
+            setExpandedChildren={setExpandedChildren}
+            selectedInput={selectedInput}
+            onExtractVariables={onExtractVariables}
+            handleUpdateMessage={handleUpdateMessage}
+            handleDeleteMessage={handleDeleteMessage}
+            requestMessages={requestMessages}
+            responseMessage={responseMessage}
+          />
         </div>
         {isEditMode && (
           <div className="flex justify-between items-center py-4 px-8 border-t border-slate-300 dark:border-slate-700 bg-white dark:bg-black rounded-b-lg">
@@ -371,18 +333,6 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
           </div>
         )}
       </div>
-      {/* {playgroundMode === "experiment" && handleCreateExperiment && (
-        <div className="flex flex-col space-y-4 pt-4 bg-white dark:bg-slate-950 rounded-b-lg">
-          <Button
-            onClick={handleCreateExperiment}
-            variant="default"
-            size="sm"
-            className="w-full mt-4"
-          >
-            Create Experiment
-          </Button>
-        </div>
-      )} */}
     </div>
   );
 };

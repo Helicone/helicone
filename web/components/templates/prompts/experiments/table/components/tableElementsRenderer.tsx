@@ -404,11 +404,13 @@ const IndexColumnCell = ({
 
 const InputCell = ({
   experimentInputs,
+  experimentAutoInputs,
   rowInputs,
   onClick,
   rowRecordId,
 }: {
   experimentInputs: string[];
+  experimentAutoInputs: any[];
   rowInputs: Record<string, string>;
   onClick: () => void;
   rowRecordId: string;
@@ -434,6 +436,16 @@ const InputCell = ({
             {inputs.data?.[input]?.toString()}
           </li>
         ))}
+        {experimentAutoInputs.length > 0 &&
+          experimentAutoInputs?.map((input, index) => (
+            <li
+              key={index}
+              className="text-slate-700 dark:text-slate-300 leading-[130%] text-[13px] max-w-full overflow-hidden whitespace-nowrap truncate"
+            >
+              <span className="font-medium">Auto input {index}</span>:{" "}
+              {JSON.stringify(input)}
+            </li>
+          ))}
       </ul>
     </div>
   );
