@@ -29,6 +29,16 @@ interface MessageRendererComponentProps {
   requestMessages: any;
   responseMessage: any;
 }
+//<helicone-auto-prompt-input idx=0 />
+function getAutoPromptIndex(api: string) {
+  const autoPromptIndex = api.match(
+    /<helicone-auto-prompt-input idx=["']?(\d+)["']?\s*\/?>/
+  );
+  if (autoPromptIndex) {
+    return parseInt(autoPromptIndex[1]);
+  }
+  return -1;
+}
 
 const MessageRendererComponent: React.FC<MessageRendererComponentProps> = ({
   messages,
@@ -56,7 +66,11 @@ const MessageRendererComponent: React.FC<MessageRendererComponentProps> = ({
           {messages.map((message, index) =>
             typeof message === "string" ? (
               message.startsWith("<helicone-auto-prompt") ? (
-                <Badge variant="secondary">Auto Prompt Input</Badge>
+                <div className="flex items-center p-2">
+                  <Badge variant="secondary" className="py-2 px-4">
+                    Message {getAutoPromptIndex(message)}
+                  </Badge>
+                </div>
               ) : (
                 "bye"
               )
