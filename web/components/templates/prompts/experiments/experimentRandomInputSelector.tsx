@@ -16,7 +16,7 @@ interface ExperimentInputSelectorProps {
     rows: {
       inputRecordId: string;
       inputs: Record<string, string>;
-      autoInputs: Record<string, any>;
+      autoInputs: any[];
     }[]
   ) => void;
 }

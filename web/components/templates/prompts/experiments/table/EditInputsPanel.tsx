@@ -146,7 +146,7 @@ const EditInputsPanel = ({
             </AccordionItem>
           ))}
         </Accordion>
-        Auto Inputs {JSON.stringify(autoInputs)}
+        Message {JSON.stringify(autoInputs)}
         <div className="flex flex-col gap-2">
           {Object.entries(autoInputs).map(([key, value]) => (
             <div key={key}>

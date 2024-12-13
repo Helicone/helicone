@@ -15,17 +15,14 @@ import {
   getRequestMessages,
   getResponseMessage,
 } from "../../requests/chatComponent/messageUtils";
-import { PromptMessage } from "../../requests/chatComponent/types";
+import { Message, PromptMessage } from "../../requests/chatComponent/types";
 import { Input } from "./MessageInput";
 import MessageRendererComponent from "./MessageRendererComponent";
 import { PlaygroundChatTopBar, PROMPT_MODES } from "./playgroundChatTopBar";
 
 export type PromptObject = {
   model: string;
-  messages: {
-    role: string;
-    content: { text: string; type: string }[];
-  }[];
+  messages: PromptMessage[];
 };
 
 interface PromptPlaygroundProps {
@@ -98,7 +95,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
             ? replaceTemplateVariables(
                 Array.isArray(msg.content)
                   ? msg.content.map((c) => c.text).join("\n")
-                  : msg.content,
+                  : msg.content ?? "",
                 inputs
               )
             : Array.isArray(msg.content)
@@ -164,7 +161,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
       return;
     } else {
       updatedChat[index] = {
-        ...updatedChat[index],
+        ...(updatedChat[index] as Message),
         content: newContent,
         role: newRole as "user" | "assistant" | "system",
       };
@@ -208,17 +205,23 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
     if (onPromptChange) {
       const promptObject: PromptObject = {
         model: selectedModel || initialModel || "",
-        messages: currentChat.map((message) => ({
-          role: message.role as "user" | "assistant" | "system",
-          content: [
-            {
-              text: Array.isArray(message.content)
-                ? message.content.join(" ")
-                : message.content ?? "",
-              type: "text",
-            },
-          ],
-        })),
+        messages: currentChat.map((message) => {
+          if (typeof message === "string") {
+            return message;
+          }
+          return {
+            id: message.id,
+            role: message.role as "user" | "assistant" | "system",
+            content: [
+              {
+                text: Array.isArray(message.content)
+                  ? message.content.join(" ")
+                  : message.content ?? "",
+                type: "text",
+              },
+            ],
+          };
+        }),
       };
       onPromptChange(promptObject);
     }

@@ -1,86 +1,84 @@
-import { useEffect, useState, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   usePrompt,
   usePromptRequestsOverTime,
   usePromptVersions,
 } from "../../../../services/hooks/prompts/prompts";
 
+import { Input as PromptInput } from "@/components/templates/prompts/id/MessageInput";
 import {
-  BeakerIcon,
   ArrowTrendingUpIcon,
-  TrashIcon,
+  BeakerIcon,
   ChevronDownIcon,
   MagnifyingGlassIcon,
+  TrashIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
-import { Input as PromptInput } from "@/components/templates/prompts/id/MessageInput";
 
+import { TimeFilter } from "@/types/timeFilter";
+import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/router";
-import { useExperiments } from "../../../../services/hooks/prompts/experiments";
-import { useInputs } from "../../../../services/hooks/prompts/inputs";
-import HcBreadcrumb from "../../../ui/hcBreadcrumb";
-import { useGetDataSets } from "../../../../services/hooks/prompts/datasets";
-import { MODEL_LIST } from "../../playground/new/modelList";
-import { BackendMetricsCall } from "../../../../services/hooks/useBackendFunction";
+import { useJawnClient } from "../../../../lib/clients/jawnHook";
 import {
   TimeInterval,
   getTimeInterval,
   getTimeIntervalAgo,
 } from "../../../../lib/timeCalculations/time";
-import { useSearchParams } from "next/navigation";
-import { TimeFilter } from "@/types/timeFilter";
+import { useGetDataSets } from "../../../../services/hooks/prompts/datasets";
+import { useExperiments } from "../../../../services/hooks/prompts/experiments";
+import { useInputs } from "../../../../services/hooks/prompts/inputs";
+import { BackendMetricsCall } from "../../../../services/hooks/useBackendFunction";
 import {
   FilterBranch,
   FilterLeaf,
 } from "../../../../services/lib/filters/filterDefs";
-import PromptPlayground from "./promptPlayground";
-import { useJawnClient } from "../../../../lib/clients/jawnHook";
 import useNotification from "../../../shared/notification/useNotification";
-import { Message, PromptMessage } from "../../requests/chatComponent/types";
+import HcBreadcrumb from "../../../ui/hcBreadcrumb";
+import { MODEL_LIST } from "../../playground/new/modelList";
+import { PromptMessage } from "../../requests/chatComponent/types";
+import PromptPlayground from "./promptPlayground";
 
-import { Badge } from "../../../ui/badge";
-import { ScrollArea } from "../../../ui/scroll-area";
+import useOnboardingContext, {
+  ONBOARDING_STEPS,
+} from "@/components/layout/onboardingContext";
+import { useOrg } from "@/components/layout/org/organizationContext";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { EllipsisHorizontalIcon } from "@heroicons/react/24/solid";
-import { MultiSelect, MultiSelectItem, AreaChart } from "@tremor/react";
-import { getTimeMap } from "../../../../lib/timeCalculations/constants";
-import LoadingAnimation from "../../../shared/loadingAnimation";
-import { SimpleTable } from "../../../shared/table/simpleTable";
-import ThemedTimeFilter from "../../../shared/themed/themedTimeFilter";
-import { getUSDateFromString } from "../../../shared/utils/utils";
-import StyledAreaChart from "../../dashboard/styledAreaChart";
-import ModelPill from "../../requestsV2/modelPill";
-import StatusBadge from "../../requestsV2/statusBadge";
-import TableFooter from "../../requestsV2/tableFooter";
-import { Button } from "../../../ui/button";
-import { useUser } from "@supabase/auth-helpers-react";
-import { useFeatureFlags } from "@/services/hooks/featureFlags";
-import { useOrg } from "@/components/layout/org/organizationContext";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hoverCard";
-import { InfoIcon } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { IslandContainer } from "@/components/ui/islandContainer";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Input } from "@/components/ui/input";
-import { clsx } from "clsx";
-import PromptInputItem from "./promptInputItem";
-import { IslandContainer } from "@/components/ui/islandContainer";
 import { cn } from "@/lib/utils";
-import useOnboardingContext, {
-  ONBOARDING_STEPS,
-} from "@/components/layout/onboardingContext";
+import { EllipsisHorizontalIcon } from "@heroicons/react/24/solid";
+import { AreaChart, MultiSelect, MultiSelectItem } from "@tremor/react";
+import { clsx } from "clsx";
+import { InfoIcon } from "lucide-react";
+import { getTimeMap } from "../../../../lib/timeCalculations/constants";
+import LoadingAnimation from "../../../shared/loadingAnimation";
+import { SimpleTable } from "../../../shared/table/simpleTable";
+import ThemedTimeFilter from "../../../shared/themed/themedTimeFilter";
+import { getUSDateFromString } from "../../../shared/utils/utils";
+import { Badge } from "../../../ui/badge";
+import { Button } from "../../../ui/button";
+import { ScrollArea } from "../../../ui/scroll-area";
+import StyledAreaChart from "../../dashboard/styledAreaChart";
+import ModelPill from "../../requestsV2/modelPill";
+import StatusBadge from "../../requestsV2/statusBadge";
+import TableFooter from "../../requestsV2/tableFooter";
+import PromptInputItem from "./promptInputItem";
 
 interface PromptIdPageProps {
   id: string;

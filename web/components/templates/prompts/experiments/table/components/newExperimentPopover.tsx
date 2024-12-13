@@ -16,6 +16,7 @@ export const NewExperimentPopover = () => {
     model: "gpt-4",
     messages: [
       {
+        id: "1",
         role: "system",
         content: [{ text: "You are a helpful assistant.", type: "text" }],
       },
