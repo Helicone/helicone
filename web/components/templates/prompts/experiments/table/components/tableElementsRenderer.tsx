@@ -245,7 +245,7 @@ const ExperimentTableHeader = (props: ExperimentHeaderProps) => {
           />
         </div>
       </DialogTrigger>
-      <DialogContent className="w-[95vw] max-w-2xl gap-0 overflow-y-auto">
+      <DialogContent className="w-[95vw] max-w-5xl gap-0 overflow-y-auto">
         <div className="flex justify-between items-center mb-8">
           <div className="flex items-center">
             <FlaskConicalIcon className="w-5 h-5 mr-2.5 text-slate-500" />
