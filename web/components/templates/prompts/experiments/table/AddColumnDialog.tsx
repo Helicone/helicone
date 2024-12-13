@@ -34,7 +34,6 @@ const AddColumnDialog = ({
   originalColumnPromptVersionId: string;
   numberOfExistingPromptVersions: number;
 }) => {
-  // const [showSuggestionPanel, setShowSuggestionPanel] = useState(false);
   const [promptVariables, setPromptVariables] = useState<
     {
       original: string;
@@ -42,12 +41,6 @@ const AddColumnDialog = ({
       value: string;
     }[]
   >([]);
-  // const [scoreCriterias, setScoreCriterias] = useState<
-  //   {
-  //     scoreType?: (typeof SCORES)[number];
-  //     criteria?: string;
-  //   }[]
-  // >([]);
 
   const jawn = useJawnClient();
   const queryClient = useQueryClient();
@@ -76,22 +69,6 @@ const AddColumnDialog = ({
       });
 
       return res.data?.data;
-
-      // const parentPromptVersion = await jawnClient.GET(
-      //   "/v1/prompt/version/{promptVersionId}",
-      //   {
-      //     params: {
-      //       path: {
-      //         promptVersionId: res.data?.data?.parent_prompt_version ?? "",
-      //       },
-      //     },
-      //   }
-      // );
-
-      // return {
-      //   ...res.data?.data,
-      //   parent_prompt_version: parentPromptVersion?.data?.data,
-      // };
     },
     {
       enabled: !!selectedForkFromPromptVersionId && !!orgId,
@@ -161,15 +138,20 @@ const AddColumnDialog = ({
             onSubmit={async (history, model) => {
               const promptData = {
                 model: model,
-                messages: history.map((msg) => ({
-                  role: msg.role,
-                  content: [
-                    {
-                      text: msg.content,
-                      type: "text",
-                    },
-                  ],
-                })),
+                messages: history.map((msg) => {
+                  if (typeof msg === "string") {
+                    return msg;
+                  }
+                  return {
+                    role: msg.role,
+                    content: [
+                      {
+                        text: msg.content,
+                        type: "text",
+                      },
+                    ],
+                  };
+                }),
               };
 
               const result = await jawn.POST(
