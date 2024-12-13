@@ -2,11 +2,11 @@ import React from "react";
 
 import { MessageGroup } from "./MessageGroup";
 import { PartialMessages } from "./ParitalMessage";
-import { Message } from "./types";
+import { PromptMessage } from "./types";
 import { PROMPT_MODES } from "./chatTopBar";
 
 interface MessageRendererProps {
-  messages: Message[];
+  messages: PromptMessage[];
   showAllMessages: boolean;
   expandedChildren: Record<string, boolean>;
   setExpandedChildren: React.Dispatch<

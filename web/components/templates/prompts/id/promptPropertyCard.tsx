@@ -148,7 +148,22 @@ const PromptPropertyCard = (props: PromptPropertyCardProps) => {
                     {key}
                   </p>
                   <p className="text-xs text-slate-700 dark:text-slate-300 max-w-[22.5vw] truncate">
-                    {value}
+                    {JSON.stringify(value).slice(0, 100)}
+                  </p>
+                </li>
+              ))}
+            </ul>
+            <ul className="flex flex-wrap gap-2 pt-2">
+              {Object.entries(autoInputs).map(([key, value]) => (
+                <li
+                  key={key}
+                  className="flex items-center py-2 justify-between gap-8"
+                >
+                  <p className="font-semibold text-slate-900 dark:text-slate-100 text-xs">
+                    {key}
+                  </p>
+                  <p className="text-xs text-slate-700 dark:text-slate-300 max-w-[22.5vw] truncate">
+                    {JSON.stringify(value).slice(0, 100)}
                   </p>
                 </li>
               ))}

@@ -11,7 +11,7 @@ import {
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useJawnClient } from "../../../lib/clients/jawnHook";
 import { usePrompts } from "../../../services/hooks/prompts/prompts";
 import AuthHeader from "../../shared/authHeader";
@@ -38,21 +38,20 @@ import {
 import { Label } from "../../ui/label";
 import { Switch } from "../../ui/switch";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../../ui/tooltip";
-import { MODEL_LIST } from "../playground/new/modelList";
 import { PricingCompare } from "../pricing/pricingCompare";
+import { UpgradeToProCTA } from "../pricing/upgradeToProCTA";
 import { DiffHighlight } from "../welcome/diffHighlight";
 import PromptCard from "./promptCard";
 import PromptDelete from "./promptDelete";
 import PromptUsageChart from "./promptUsageChart";
-import { UpgradeToProCTA } from "../pricing/upgradeToProCTA";
 
 // **Import PromptPlayground and PromptObject**
-import PromptPlayground, { PromptObject } from "./id/promptPlayground";
-import { ScrollArea } from "../../ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { ISLAND_MARGIN } from "@/components/ui/islandContainer";
 import { cn } from "@/lib/utils";
+import { ScrollArea } from "../../ui/scroll-area";
+import PromptPlayground, { PromptObject } from "./id/promptPlayground";
 
 interface PromptsPageProps {
   defaultIndex: number;
@@ -65,46 +64,25 @@ const PromptsPage = (props: PromptsPageProps) => {
   const searchParams = useSearchParams();
   const [imNotTechnical, setImNotTechnical] = useState<boolean>(false);
   const [newPromptName, setNewPromptName] = useState<string>("");
-  const [newPromptModel, setNewPromptModel] = useState(MODEL_LIST[0].value);
 
   // **Update newPromptContent to basePrompt with type PromptObject**
   const [basePrompt, setBasePrompt] = useState<PromptObject>({
     model: "gpt-4",
     messages: [
       {
+        id: "1",
         role: "system",
         content: [{ text: "You are a helpful assistant.", type: "text" }],
       },
     ],
   });
 
-  const [promptVariables, setPromptVariables] = useState<string[]>([]);
-  const [variableValues, setVariableValues] = useState<Record<string, string>>(
-    {}
-  );
   const newPromptInputRef = useRef<HTMLInputElement>(null);
   const notification = useNotification();
   const filteredPrompts = prompts?.filter((prompt) =>
     prompt.user_defined_id.toLowerCase().includes(searchName.toLowerCase())
   );
   const jawn = useJawnClient();
-
-  const extractVariables = (content: string) => {
-    const regex = /\{\{([^}]+)\}\}/g;
-    const variables = new Set<string>();
-    let match;
-    while ((match = regex.exec(content)) !== null) {
-      variables.add(match[1].trim());
-    }
-    return Array.from(variables);
-  };
-
-  const replaceVariablesWithTags = useCallback((content: string) => {
-    return content.replace(
-      /\{\{([^}]+)\}\}/g,
-      (match, p1) => `<helicone-prompt-input key="${p1.trim()}" />`
-    );
-  }, []);
 
   const createPrompt = async (userDefinedId: string) => {
     if (!userDefinedId) {
