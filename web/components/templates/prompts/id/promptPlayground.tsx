@@ -106,13 +106,6 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
     );
   };
 
-  // Helper function to check if a message is a Helicone auto-prompt input
-  const isHeliconeAutoPromptInput = (msg: any): boolean => {
-    return (
-      typeof msg === "string" && msg.startsWith("<helicone-auto-prompt-input")
-    );
-  };
-
   const [mode, setMode] = useState<(typeof PROMPT_MODES)[number]>("Pretty");
   const [isEditMode, setIsEditMode] = useState(defaultEditMode);
   const [currentChat, setCurrentChat] = useState<PromptMessage[]>(() =>
@@ -270,7 +263,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
           isEditMode={isEditMode}
           setIsEditMode={setIsEditMode}
         />
-        <div className="flex-grow overflow-auto rounded-b-md">
+        <div className="flex-grow overflow-auto rounded-b-md ">
           <MessageRendererComponent
             messages={messages}
             mode={mode}
