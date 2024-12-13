@@ -167,7 +167,7 @@ export function ProviderStatusPage({ provider }: ProviderStatusPageProps) {
         )}
       </div>
       <i className="text-sm text-gray-500">
-        Lighting speeds powered by{" "}
+        Lightning speeds powered by{" "}
         <a
           href="https://clickhouse.com"
           target="_blank"
