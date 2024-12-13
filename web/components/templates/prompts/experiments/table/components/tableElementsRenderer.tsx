@@ -265,14 +265,14 @@ const ExperimentTableHeader = (props: ExperimentHeaderProps) => {
             </div>
           </div>
         </div>
-        <Tabs defaultValue="preview">
+        <Tabs defaultValue="preview" className="h-full">
           {!isOriginal && (
             <TabsList>
               <TabsTrigger value="preview">Preview</TabsTrigger>
               <TabsTrigger value="diff">Diff</TabsTrigger>
             </TabsList>
           )}
-          <TabsContent value="preview">
+          <TabsContent value="preview" className="max-h-[80vh] overflow-y-auto">
             <PromptPlayground
               prompt={promptTemplate?.helicone_template ?? ""}
               selectedInput={undefined}
@@ -288,7 +288,7 @@ const ExperimentTableHeader = (props: ExperimentHeaderProps) => {
               className="border rounded-md border-slate-200 dark:border-slate-700"
             />
           </TabsContent>
-          <TabsContent value="diff">
+          <TabsContent value="diff" className="max-h-[80vh] overflow-y-auto">
             <ArrayDiffViewer
               origin={originalPromptTemplate?.helicone_template?.messages ?? []}
               target={
@@ -442,7 +442,7 @@ const InputCell = ({
               key={index}
               className="text-slate-700 dark:text-slate-300 leading-[130%] text-[13px] max-w-full overflow-hidden whitespace-nowrap truncate"
             >
-              <span className="font-medium">Auto input {index}</span>:{" "}
+              <span className="font-medium">Message {index}</span>:{" "}
               {JSON.stringify(input)}
             </li>
           ))}
