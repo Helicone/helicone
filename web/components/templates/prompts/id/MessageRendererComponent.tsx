@@ -1,14 +1,14 @@
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 import React from "react";
-import { Message } from "../../requests/chatComponent/types";
-import PromptChatRow from "./promptChatRow";
 import { MessageRenderer } from "../../requests/chatComponent/MessageRenderer";
 import { JsonView } from "../../requests/chatComponent/jsonView";
-import { cn } from "@/lib/utils";
+import { PromptMessage } from "../../requests/chatComponent/types";
 import { Input } from "./MessageInput";
-import { Badge } from "@/components/ui/badge";
+import PromptChatRow from "./promptChatRow";
 
 interface MessageRendererComponentProps {
-  messages: (Message | string)[];
+  messages: PromptMessage[];
   mode: string;
   playgroundMode: "experiment-compact" | "prompt" | "experiment" | undefined;
   isEditMode: boolean;

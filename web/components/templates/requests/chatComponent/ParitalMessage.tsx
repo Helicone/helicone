@@ -1,5 +1,5 @@
 import React from "react";
-import { Message } from "./types";
+import { PromptMessage } from "./types";
 import { MessageGroup } from "./MessageGroup";
 import { ChatBubbleLeftRightIcon } from "@heroicons/react/24/outline";
 import { PROMPT_MODES } from "./chatTopBar";
@@ -30,7 +30,7 @@ export const ShowMoreButton: React.FC<ShowMoreButtonProps> = ({
 };
 
 interface PartialMessagesProps {
-  messages: Message[];
+  messages: PromptMessage[];
   expandedChildren: { [key: string]: boolean };
   setExpandedChildren: React.Dispatch<
     React.SetStateAction<{ [key: string]: boolean }>

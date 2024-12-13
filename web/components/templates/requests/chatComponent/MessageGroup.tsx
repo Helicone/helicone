@@ -1,10 +1,10 @@
 import React from "react";
-import { Message } from "./types";
+import { PromptMessage } from "./types";
 import { SingleChat } from "./single/singleChat";
 import { PROMPT_MODES } from "./chatTopBar";
 
 interface MessageGroupProps {
-  messages: (Message | string)[];
+  messages: PromptMessage[];
   expandedChildren: { [key: string]: boolean };
   setExpandedChildren: React.Dispatch<
     React.SetStateAction<{ [key: string]: boolean }>

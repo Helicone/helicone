@@ -15,7 +15,7 @@ import {
   getRequestMessages,
   getResponseMessage,
 } from "../../requests/chatComponent/messageUtils";
-import { Message } from "../../requests/chatComponent/types";
+import { PromptMessage } from "../../requests/chatComponent/types";
 import { Input } from "./MessageInput";
 import MessageRendererComponent from "./MessageRendererComponent";
 import { PlaygroundChatTopBar, PROMPT_MODES } from "./playgroundChatTopBar";
@@ -31,7 +31,7 @@ export type PromptObject = {
 interface PromptPlaygroundProps {
   prompt: string | PromptObject;
   selectedInput: Input | undefined;
-  onSubmit?: (history: (Message | string)[], model: string) => void;
+  onSubmit?: (history: PromptMessage[], model: string) => void;
   submitText: string;
   initialModel?: string;
   isPromptCreatedFromUi?: boolean;
@@ -71,7 +71,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
   const parsePromptToMessages = (
     promptInput: string | PromptObject,
     inputs?: Record<string, string>
-  ): (Message | string)[] => {
+  ): PromptMessage[] => {
     if (typeof promptInput === "string") {
       return promptInput
         .split("\n\n")
@@ -118,7 +118,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
 
   const [mode, setMode] = useState<(typeof PROMPT_MODES)[number]>("Pretty");
   const [isEditMode, setIsEditMode] = useState(defaultEditMode);
-  const [currentChat, setCurrentChat] = useState<(Message | string)[]>(() =>
+  const [currentChat, setCurrentChat] = useState<PromptMessage[]>(() =>
     parsePromptToMessages(prompt, selectedInput?.inputs)
   );
 
@@ -146,7 +146,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
   }, [initialModel]);
 
   const handleAddMessage = () => {
-    const newMessage: Message = {
+    const newMessage: PromptMessage = {
       id: `msg-${currentChat.length}`,
       role: "user",
       content: "",
