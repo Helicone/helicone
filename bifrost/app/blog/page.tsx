@@ -216,6 +216,11 @@ export type BlogStructure =
 const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
+      folderName: "google-gemini-exp-1206",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "openai-o1-and-chatgpt-pro",
     },
   },
