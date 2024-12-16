@@ -1,14 +1,12 @@
 The market is more crowded than ever, with models offering a dizzying array of capabilities. If you’re building tools for coding, tackling complex reasoning problems, or optimizing workflows, two advanced models stand out: **Claude 3.5 Sonnet** and **OpenAI o1**.
 
-![Gemini-Exp-1206 outperforming GPT-4o and O1 on Chatbot Arena](/static/blog/google-gemini-exp-1206/cover.webp)
+![A comprehensive comparison of Claude 3.5 Sonnet and OpenAI o1](/static/blog/claude-3.5-sonnet-vs-openai-o1/cover.webp)
 
 In this guide, we will help you understand which model suits your needs best. We’ll break down their **performance, pricing, coding abilities, and special features** to give you a clear picture of what each model brings to the table. After all, the right choice can make a significant difference in both your productivity and budget.
 
----
-
 ## Why Compare Claude 3.5 Sonnet and OpenAI o1?
 
-Choosing the right AI model can mean the difference between saving hours on coding tasks or struggling with incomplete solutions. It can also impact your budget, especially for long-term or high-volume use.
+Choosing the right model can mean the difference between saving hours on coding tasks or struggling with incomplete solutions. It can also impact your budget, especially for long-term or high-volume use.
 
 ### Quick Comparison Table
 
@@ -21,13 +19,11 @@ Choosing the right AI model can mean the difference between saving hours on codi
 | **Knowledge Cutoff**      | April 2024                                                           | October 2023                                                                              |
 | **Recommended For**       | Good for everyday coding, debugging and quick retrieval.             | Good for complex reasoning, long-context problems, and the need for nuanced explanations. |
 
----
+## Core Differences Between Claude 3.5 Sonnet and o1
 
-## Key Differences Between Claude 3.5 Sonnet and o1
+**<span style={{color: '#03A9F4'}}>OpenAI o1 is built for complex reasoning and problem-solving</span>**. Its deep, thoughtful responses make it perfect for developers working on intricate issues or requiring detailed explanations. o1 excels in tasks that demand precision and depth, such as advanced mathematics or scientific analysis.
 
-**OpenAI o1 is built for complex reasoning and problem-solving**. Its deep, thoughtful responses make it perfect for developers working on intricate issues or requiring detailed explanations. o1 excels in tasks that demand precision and depth, such as advanced mathematics or scientific analysis.
-
-In contrast, **Claude 3.5 Sonnet focuses on speed and efficiency**. It delivers quick responses, making it ideal for high-volume tasks, such as rapidly generating code or handling routine queries. With its cost-effective pricing, it’s a strong choice for users who prioritize productivity over deep reasoning.
+In contrast, **<span style={{color: '#03A9F4'}}>Claude 3.5 Sonnet focuses on speed and efficiency</span>**. It delivers quick responses, making it ideal for high-volume tasks, such as rapidly generating code or handling routine queries. With its cost-effective pricing, it’s a strong choice for users who prioritize productivity over deep reasoning.
 
 Let’s dive deeper into the performance, cost and speed.
 
@@ -44,12 +40,13 @@ In general, Claude’s strength lies in rapid generation and its simplicity. Ope
 
 ### 2. Cost Efficiency
 
-**Claude 3.5 Sonnet is 4x cheaper than OpenAI o1.** It’s ideal for budget-conscious users who need reliable performance for everyday coding tasks, whereas o1 is best for users tackling high-value projects where advanced reasoning and context retention justify the cost.
-| | Claude 3.5 Sonnet | OpenAI o1 |
-| --- | --- | --- |
-| **Input Cost** | $3 per million tokens | $15 per million tokens |
-| **Output Cost** | $15 per million tokens | $60 per million tokens |
-| **Highlight** | More budget-friendly and cost-effective | More expensive, but offers advanced reasoning and in-depth analysis |
+**<span style={{color: '#03A9F4'}}>Claude 3.5 Sonnet is 4x cheaper than OpenAI o1</span>**. It’s ideal for budget-conscious users who need reliable performance for everyday coding tasks, whereas o1 is best for users tackling high-value projects where advanced reasoning and context retention justify the cost.
+
+|                 | Claude 3.5 Sonnet                       | OpenAI o1                                                           |
+| --------------- | --------------------------------------- | ------------------------------------------------------------------- |
+| **Input Cost**  | $3 per million tokens                   | $15 per million tokens                                              |
+| **Output Cost** | $15 per million tokens                  | $60 per million tokens                                              |
+| **Highlight**   | More budget-friendly and cost-effective | More expensive, but offers advanced reasoning and in-depth analysis |
 
 <CallToAction
   title="Using Claude? Save up to 70% of API costs for free ⚡️"
@@ -62,7 +59,7 @@ In general, Claude’s strength lies in rapid generation and its simplicity. Ope
 
 ### 3. Context Window and Speed
 
-**Claude 3.5 Sonnet can handle about 150% more tokens compared to OpenAI o1**, giving it an edge for tasks requiring extensive context retention. The size of a <a href="https://zapier.com/blog/context-window/" target="_blank" rel="noopener">context window</a> is essential in determining how well AI models manage large inputs or extended conversations.
+**<span style={{color: '#03A9F4'}}>Claude 3.5 Sonnet can handle about 150% more tokens compared to OpenAI o1</span>**, giving it an edge for tasks requiring extensive context retention. The size of a <a href="https://zapier.com/blog/context-window/" target="_blank" rel="noopener">context window</a> is essential in determining how well AI models manage large inputs or extended conversations.
 
 |                      | Claude 3.5 Sonnet                                                                            | OpenAI o1                                                                    |
 | -------------------- | -------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
@@ -81,6 +78,8 @@ The upgraded model shows wide-ranging improvements across various industry bench
 
 Benchmarks help measure speed, accuracy, and efficiency between models. Let's look at real-world benchmarks to understand how o1 and Claude 3.5 Sonnet performs in practical applications.
 
+![OpenAI o1 outperforming GPT-4o and here are the benchmarks](/static/blog/claude-3.5-sonnet-vs-openai-o1/openai-o1-benchmarks.webp)
+
 | Benchmark                                                                               | OpenAI o1                                                                                                                | Claude 3.5 Sonnet                                                                                                                                                           |
 | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **MMLU**<br/>General Knowledge and Reasoning                                            | **92.3%**<br/><a href="https://openai.com/index/learning-to-reason-with-llms/" target="_blank" rel="noopener">OpenAI</a> | **89.3%**<br/>(0-shot CoT)<br/><a href="https://cdn.sanity.io/files/4zrzovbb/website/fed9cc193a14b84131812372d8d5857f8f304c52.pdf" target="_blank" rel="noopener">Paper</a> |
@@ -92,31 +91,34 @@ Benchmarks help measure speed, accuracy, and efficiency between models. Let's lo
 
 _💡 Keep in mind that o1 uses more compute to achieve its advanced reasoning capabilities, which helps it outperform Claude 3.5 Sonnet in many benchmarks._
 
-![Gemini-Exp-1206 outperforming GPT-4o and O1 on Chatbot Arena](/static/blog/google-gemini-exp-1206/cover.webp)
+---
 
 ## Comparing Claude 3.5 Sonnet and o1 on Coding Tasks
 
+We will now look at some examples of how Claude 3.5 Sonnet and o1 perform on generating simple functions, debugging, and writing unit tests.
+
+![Comparing Claude 3.5 Sonnet and o1 on Coding Tasks](/static/blog/claude-3.5-sonnet-vs-openai-o1/benchmark-comparisons.webp)
+
 ### Example 1: Generating a Simple Function
 
-Prompt: “Write a Python function that takes a list of integers and returns the sum of all even numbers in the list. The function should handle empty lists and lists containing only one element.”
+**Prompt:** Write a Python function that takes a list of integers and returns the sum of all even numbers in the list. The function should handle empty lists and lists containing only one element.
 
-→ <a href="https://copilot.getbind.co/chat/code-generation?query=Write+a+Python+function+that+takes+a+list+of+integers+and+returns+the+sum+of+all+even+numbers+in+the+list.+The+function+should+handle+empty+lists+and+lists+containing+only+one+element" target="_blank" rel="noopener">Try the prompt with Claude 3.5 Sonnet</a>
+--> <a href="https://copilot.getbind.co/chat/code-generation?query=Write+a+Python+function+that+takes+a+list+of+integers+and+returns+the+sum+of+all+even+numbers+in+the+list.+The+function+should+handle+empty+lists+and+lists+containing+only+one+element" target="_blank" rel="noopener">Try it with Claude 3.5 Sonnet</a>
 
-#### Observation
-
-| Claude 3.5 Sonnet                                                                                                                                                                                             | OpenAI o1                                                                                                                                                                                                 |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Provided a clean and straightforward solution. It used a simple loop to iterate through the list, with clear variable names and minimal comments, making it ideal for users seeking efficient, readable code. | The function was concise, addressing all the requirements and handling edge cases. The code was well-structured with clear variable names and effectively handled empty lists and lists with one element. |
+| Model                 | Observation                                                                                                                            |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| **Claude 3.5 Sonnet** | Used a simple loop to iterate through the list, with clear variable names and minimal comments. Clean and straightforward solution.    |
+| **OpenAI o1**         | Addressed all the requirements and handled edge cases well (i.e.empty lists and lists with one element). The code was well-structured. |
 
 #### Which model performed better?
 
-Claude 3.5 Sonnet provides a simple and elegant solution, while OpenAI o1 offers a more robust approach with thorough edge case handling.
+Claude 3.5 Sonnet provided a simpler and more elegant solution, while OpenAI o1's approach was more thorough with edge case handling.
 
 ---
 
 ### Example 2: Debugging Code
 
-Prompt: “Debug this JavaScript function to remove all vowels from a string”
+**Prompt:** Debug this JavaScript function to remove all vowels from a string.
 
 ```
 function removeVowels(str) {
@@ -124,13 +126,12 @@ function removeVowels(str) {
 }
 ```
 
-→ <a href="https://copilot.getbind.co/chat/code-generation?query=Debug+this+JavaScript+function+to+remove+all+vowels+from+a+string+function+removeVowels(str)+%7B+return+str.replace%28%2F%5Baeiou%5D%2Fgi%2C+%27%27%29%3B+%7D" target="_blank" rel="noopener">Try the prompt with GPT-4o</a>
+→ <a href="https://copilot.getbind.co/chat/code-generation?query=Debug+this+JavaScript+function+to+remove+all+vowels+from+a+string+function+removeVowels(str)+%7B+return+str.replace%28%2F%5Baeiou%5D%2Fgi%2C+%27%27%29%3B+%7D" target="_blank" rel="noopener">Try the prompt with GPT-4o</a> (as o1 isn't supported yet)
 
-#### Observation
-
-| Claude 3.5 Sonnet                                                                                                                                                                                        | OpenAI o1                                                                                                                                                                                                           |
-| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Claude 3.5 Sonnet pinpointed the mistake clearly and provided a straightforward correction. The solution was simple to implement and very user-friendly, making it ideal for those who value simplicity. | After analyzing the code, o1 quickly identified the issue and offered a concise fix that works. The solution was efficient and to the point, addressing the problem directly without adding unnecessary complexity. |
+| Model                 | Observation                                                                                                                               |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| **Claude 3.5 Sonnet** | Clearly pinpointed the mistake and provided a straightforward and simple-to-understand solution.                                          |
+| **OpenAI o1**         | Quickly identified the issue and offered an efficient solution that addresses the problem directly without adding unnecessary complexity. |
 
 #### Which model performed better?
 
@@ -140,39 +141,18 @@ Both models showed strengths in debugging. OpenAI o1 is direct, while Claude 3.5
 
 ### Example 3: Writing Unit Tests
 
-Prompt: “Develop a set of unit tests for a function that takes a list of strings as input and returns a new list containing only the strings that are palindromes. The function should handle empty lists and lists containing only one element.”
+**Prompt:** Develop a set of unit tests for a function that takes a list of strings as input and returns a new list containing only the strings that are palindromes. The function should handle empty lists and lists containing only one element.
 
 → <a href="https://copilot.getbind.co/chat/code-generation?query=Develop+a+set+of+unit+tests+for+a+function+that+takes+a+list+of+strings+as+input+and+returns+a+new+list+containing+only+the+strings+that+are+palindromes.+The+function+should+handle+empty+lists+and+lists+containing+only+one+element" target="_blank" rel="noopener">Try the prompt with Claude</a>
 
-#### Observation
-
-| Claude 3.5 Sonnet                                                                                                | OpenAI o1                                                                                                                                                          |
-| ---------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Produced a comprehensive set of unit tests covering all edge cases such as empty lists and single-element lists. | o1 also generated a solid set of unit tests, but lacked depth in addressing critical edge cases such as lists with multiple palindrome and non-palindrome strings. |
+| Model                 | Observation                                                                                                                                                        |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Claude 3.5 Sonnet** | Produced a comprehensive set of unit tests covering all edge cases such as empty lists and single-element lists.                                                   |
+| **OpenAI o1**         | o1 also generated a solid set of unit tests, but lacked depth in addressing critical edge cases such as lists with multiple palindrome and non-palindrome strings. |
 
 #### Which model performed better?
 
 This test indicates that Claude 3.5 Sonnet is more efficient in generating thorough unit tests, while o1's tests are functional but could be improved.
-
-## Choosing the Right AI Model
-
-Selecting the ideal AI model depends on your specific requirements. While both OpenAI o1 and Claude 3.5 Sonnet offer impressive capabilities, they excel in different domains.
-
-### Claude’s Computer Use
-
-Claude 3.5 Sonnet introduced <a href="https://www.anthropic.com/news/3-5-models-and-computer-use" target="_blank" rel="noopener">computer use</a>, currently in public beta, allowing it to **interact with computers (type, click, and navigate on your behalf)**, react to live screenshots and perform small tasks using shell commands. It's a game-changer for applications that require desktop automation, streamlining tasks that were previously manual.
-
-Meanwhile, OpenAI o1 focuses on complex reasoning and advanced problem-solving. o1 is the go-to when faced with tough and high-level challenges.
-
-### Claude’s Mathematics and Visual Reasoning
-
-**Claude 3.5 Sonnet demonstrates improved vision capabilities**, excelling in tasks that require visual reasoning. It can effortlessly interpret charts, graphs, and even transcribe distorted text from images that seem almost unreadable. On the Chart Q&A benchmark, Claude 3.5 Sonnet scores a 90.8% relaxed accuracy, leaving GPT-4o (o1’s cousin) trailing at 85.7%.
-
-### Which Model is Best for Coding?
-
-Claude 3.5 Sonnet is more cost-effective and highly competitive with o1, particularly when integrated with tools like <a href="https://www.anthropic.com/news/github-copilot" target="_blank" rel="noopener">GitHub Copilot</a>. It showed improvements over its predecessor, Claude 3 Opus, solving 64% of coding problems compared to Opus's 38%.
-
-In contrast, OpenAI o1 is preferred for complex coding tasks that require advanced reasoning and deep context retention. It’s especially suited for researchers working on challenging tasks that require deep analysis and advanced reasoning.
 
 <CallToAction
   title="How to build an AI app with o1 or Claude 3.5 Sonnet? 💡"
@@ -183,21 +163,32 @@ In contrast, OpenAI o1 is preferred for complex coding tasks that require advanc
   secondaryButtonLink="https://docs.helicone.ai/integrations/anthropic/javascript"
 />
 
-### Is OpenAI o1 Pro Worth the Premium Price?
+## Choosing the Right AI Model
 
-Or does Claude 3.5 Sonnet offer everything most users need at a fraction of the cost?
+To select your ideal model, consider how their unique features help you meet your requirements.
 
-The <a href="https://www.helicone.ai/blog/openai-o1-and-chatgpt-pro" target="_blank" rel="noopener">o1 Pro</a> is the most advanced version of the OpenAI o1 model, now available through the OpenAI API. Developers must subscribe to the ChatGPT Pro plan, which costs $200 per month. While o1 Pro excels in for complex reasoning tasks, the performance gap between o1 Pro and Claude 3.5 Sonnet is <a href="https://techstartups.com/2024/12/07/this-guy-spent-8-hours-testing-chatgpt-pro-200-month-vs-claude-sonnet-3-5-20-month-the-results-will-surprise-you/" target="_blank" rel="noopener nofollow noreferrer ">narrower than one might expect</a>. Claude 3.5 Sonnet achieves 90-95% accuracy in most practical applications, with significantly faster response times.
+- **For applications that require desktop automation**, pick Claude for its <a href="https://www.anthropic.com/news/3-5-models-and-computer-use" target="_blank" rel="noopener">computer use</a> feature that allows you to interact with computers.
+- **For deep reasoning and more complex problem-solving**, OpenAI o1 makes a better choice.
+- **For budget-conscious users** who don't need the 5-10% improvement that comes with o1, Claude 3.5 Sonnet is a better choice as it is 4x cheaper.
+- **For users who need to interpret charts and graphs**, Claude 3.5 Sonnet is better as it scores `90.8%` on the Chart Q&A benchmark compared to GPT-4o's `85.7%` (o1's data is currently not public).
+- **For real-time applications**, Claude 3.5 Sonnet is faster, with an average latency of `18.3s` per request compared to o1's `39.4s`.
+- **For users looking for the better coding experience**, both models are good choices. But if you're looking for a more cost-effective choice for everyday coding tasks, particularly when integrated with tools like <a href="https://www.anthropic.com/news/github-copilot" target="_blank" rel="noopener">GitHub Copilot</a>, Claude 3.5 Sonnet can be better.
+
+### What about o1's Pro Mode?
+
+Is it worth the premium price, or does Claude 3.5 Sonnet offer everything most users need at a fraction of the cost?
+
+OpenAI's <a href="https://www.helicone.ai/blog/openai-o1-and-chatgpt-pro" target="_blank" rel="noopener">o1 Pro</a> is the most advanced version of the o1 model available through the OpenAI API. Developers must subscribe to the ChatGPT Pro plan, which costs $200 per month. While o1 Pro showed impressive results, some users found the performance gap between o1 Pro and Claude 3.5 Sonnet <a href="https://techstartups.com/2024/12/07/this-guy-spent-8-hours-testing-chatgpt-pro-200-month-vs-claude-sonnet-3-5-20-month-the-results-will-surprise-you/" target="_blank" rel="noopener nofollow noreferrer ">narrower than one might expect</a>, since Claude 3.5 Sonnet can already achieve 90-95% accuracy in most applications, with **significantly faster response times**.
+
+---
 
 ## Bottom Line
-
-It’s clear that o1 and Claude 3.5 Sonnet both have their strengths, but the choice depends on your needs and budget.
 
 For most users, especially those working on practical coding tasks or needing fast, reliable solutions, Claude Sonnet 3.5 offers better value for money. However, if your work requires specialized capabilities like advanced vision or deep scientific analysis, and budget isn’t a concern, o1 Pro would be the better option.
 
 Ultimately, the decision hinges on whether you prioritize cutting-edge features and accuracy or a more cost-effective, practical AI solution.
 
-## Other related comparisons
+### Other related comparisons
 
 - <a
     href="https://www.helicone.ai/blog/openai-o1-and-chatgpt-pro"
