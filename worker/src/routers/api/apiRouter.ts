@@ -10,6 +10,12 @@ import { Route } from "itty-router";
 import { logAsync } from "../../lib/managers/AsyncLogManager";
 import { createAPIClient } from "../../api/lib/apiClient";
 
+import {
+  fetchVisibleProperties,
+  hideProperty,
+  unhideProperty,
+} from "../../lib/managers/PropertiesManager";
+
 function getAPIRouterV1(
   router: OpenAPIRouterType<
     Route,
@@ -464,6 +470,45 @@ function getAPIRouterV1(
             "Content-Type, helicone-jwt, helicone-org-id",
         },
       });
+    }
+  );
+
+  // Route to fetch visible properties
+  router.get(
+    "/v1/properties/visible",
+    async (
+      _,
+      requestWrapper: RequestWrapper,
+      env: Env,
+      _ctx: ExecutionContext
+    ) => {
+      return await fetchVisibleProperties(requestWrapper, env);
+    }
+  );
+
+  // Route to hide a property
+  router.post(
+    "/v1/properties/hide",
+    async (
+      _,
+      requestWrapper: RequestWrapper,
+      env: Env,
+      _ctx: ExecutionContext
+    ) => {
+      return await hideProperty(requestWrapper, env);
+    }
+  );
+
+  // Route to unhide a property
+  router.post(
+    "/v1/properties/unhide",
+    async (
+      _,
+      requestWrapper: RequestWrapper,
+      env: Env,
+      _ctx: ExecutionContext
+    ) => {
+      return await unhideProperty(requestWrapper, env);
     }
   );
 }
