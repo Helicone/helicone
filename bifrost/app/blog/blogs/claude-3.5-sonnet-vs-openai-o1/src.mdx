@@ -35,15 +35,16 @@ Let’s dive deeper into the performance, cost and speed.
 
 In general, Claude’s strength lies in rapid generation and its simplicity. OpenAI’s o1 is better for deep reasoning and debugging.
 
-| Tasks                  | Claude 3.5 Sonnet                                                                                                                                                                                                                            | OpenAI o1                                                                                                                                                                                                                                   |
-| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Coding**             | ✅ Excels in speed and reliability for generating boilerplate code, unit tests, and handling repetitive coding tasks.<br/><br/>Example: Developers using Claude generated setup files for 50+ APIs in minutes, streamlining their workflows. | ✅ Excels at solving intricate coding problems and handling advanced algorithms.<br/><br/>Example: o1 efficiently debugged complex React state management issues and provided insightful suggestions for legacy code refactoring.           |
-| **Debugging**          | ✅ Fast at identifying common coding errors and providing concise fixes.<br/><br/>Example: It improved the debugging process for nested functions by detecting overlooked security vulnerabilities.                                          | ✅ Delivers comprehensive analyses of multi-step errors, making it invaluable for debugging complex workflows.<br/><br/>Example: Researchers reported that o1's detailed explanations reduced debugging time for algorithmic issues by 30%. |
-| **Advanced Reasoning** | ✅ Handles general reasoning tasks effectively but focuses more on productivity and speed.<br/><br/>Example: Ideal for quick code reviews and iterative development cycles.                                                                  | ✅ Excels in deep reasoning and problem-solving, making it a favorite for scientific research and advanced mathematics.<br/><br/>Example: Achieved an 89th percentile ranking on competitive programming benchmarks.                        |
+|                        | Claude 3.5 Sonnet                                                                                                                                | OpenAI o1                                                                                                                                                                            |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Coding**             | ✅ Excels in speed and reliability for generating boilerplate code, unit tests, and handling repetitive coding tasks.                            | ✅ Excels at solving intricate coding problems and handling advanced algorithms.Debugging complex React state management issues and getting suggestions for legacy code refactoring. |
+| **Debugging**          | ✅ Fast at identifying common coding errors and providing quick fixes.                                                                           | ✅ Delivers analyses of multi-step errors, valuable for debugging complex workflows.                                                                                                 |
+| **Advanced Reasoning** | ✅ Handles general reasoning tasks effectively but focuses more on productivity and speed.                                                       | ✅ Excels in deep reasoning and problem-solving, good for scientific research and advanced mathematics.                                                                              |
+| **Example Use Cases**  | 1. Generating setup files for 50+ APIs in short time. <br/><br/>2. Detecting overlooked security vulnerabilities and debugging nested functions. | 1. Debugging React state management issues and legacy code refactoring.<br/><br/> 2. Using o1's to explain algorithmic issues for debugging.                                         |
 
 ### 2. Cost Efficiency
 
-Claude 3.5 Sonnet is 4x cheaper than OpenAI o1. It’s ideal for budget-conscious users who need reliable performance for everyday coding tasks, whereas o1 is best for users tackling high-value projects where advanced reasoning and context retention justify the cost.
+**Claude 3.5 Sonnet is 4x cheaper than OpenAI o1.** It’s ideal for budget-conscious users who need reliable performance for everyday coding tasks, whereas o1 is best for users tackling high-value projects where advanced reasoning and context retention justify the cost.
 | | Claude 3.5 Sonnet | OpenAI o1 |
 | --- | --- | --- |
 | **Input Cost** | $3 per million tokens | $15 per million tokens |
@@ -61,26 +62,24 @@ Claude 3.5 Sonnet is 4x cheaper than OpenAI o1. It’s ideal for budget-consciou
 
 ### 3. Context Window and Speed
 
-Claude 3.5 Sonnet can handle 200,000 tokens compared to 128,000 tokens of OpenAI o1, giving it an edge for tasks requiring extensive context retention, such as reviewing long codebases or analyzing detailed documents. The size of a <a href="https://zapier.com/blog/context-window/" target="_blank" rel="noopener">context window</a> is essential in determining how well AI models manage large inputs or extended conversations.
+**Claude 3.5 Sonnet can handle about 150% more tokens compared to OpenAI o1**, giving it an edge for tasks requiring extensive context retention. The size of a <a href="https://zapier.com/blog/context-window/" target="_blank" rel="noopener">context window</a> is essential in determining how well AI models manage large inputs or extended conversations.
 
-|                      | Claude 3.5 Sonnet                                                                                                                                                                       | OpenAI o1                                                                                                                                                            |
-| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Context Window**   | Supports up to 200,000 tokens                                                                                                                                                           | Handles up to 128,000 tokens                                                                                                                                         |
-| **Token Throughput** | 74.87 tokens/second                                                                                                                                                                     | 92.94 tokens/second                                                                                                                                                  |
-| **Average Latency**  | 18.3 seconds per request                                                                                                                                                                | 39.4 seconds per request                                                                                                                                             |
-| **Best For**         | Handling large codebases, lengthy documents or high-volume tasks and real-time applications. Claude is also a great option for handling efficient bug fixes and rapid code generations. | OpenAI o1 is exceptional in multistep reasoning, making it ideal for explaining complex code logic and tackling intricate problems that require detailed breakdowns. |
+|                      | Claude 3.5 Sonnet                                                                            | OpenAI o1                                                                    |
+| -------------------- | -------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| **Context Window**   | Supports up to 200,000 tokens                                                                | Handles up to 128,000 tokens                                                 |
+| **Token Throughput** | 74.87 tokens/second                                                                          | 92.94 tokens/second                                                          |
+| **Average Latency**  | 18.3 seconds per request                                                                     | 39.4 seconds per request                                                     |
+| **Best For**         | Handling large codebases, lengthy documents or high-volume tasks and real-time applications. | Multistep reasoning and tackling intricate problems that require breakdowns. |
 
-### Bonus: What’s New in the Upgraded Claude 3.5 Sonnet?
+## What’s new in the upgraded Claude 3.5 Sonnet - October 2024
 
-On October 22, 2024, Anthropic released <a href="https://www.anthropic.com/news/3-5-models-and-computer-use" target="_blank" rel="noopener">a new version of Claude 3.5 Sonnet</a>, improving its <a href="https://www.anthropic.com/research/swe-bench-sonnet" target="_blank" rel="noopener">SWE-bench Verified benchmark</a> score from `33.4%` to `49.0%`, **surpassing all publicly available models including OpenAI's o1-preview at `41.0%` at the time**.
+On October 22, 2024, Anthropic released <a href="https://www.anthropic.com/news/3-5-models-and-computer-use" target="_blank" rel="noopener">a new version of Claude 3.5 Sonnet</a>, improving its <a href="https://www.anthropic.com/research/swe-bench-sonnet" target="_blank" rel="noopener">SWE-bench Verified benchmark</a> score from `33.4%` to `49.0%`, surpassing all publicly available models including OpenAI's o1-preview at 41.0%.
 
 The upgraded model shows wide-ranging improvements across various industry benchmarks, particularly in coding and tool use tasks. Anthropic also introduced <a href="https://www.anthropic.com/news/3-5-models-and-computer-use" target="_blank" rel="noopener">Computer Use</a> capability that allows Claude 3.5 Sonnet to perform tasks by interacting with user interfaces (UI), such as generating keystrokes and mouse clicks.
 
-This makes the updated model an invaluable tool for developers looking to enhance their code review process and optimize system performance with greater efficiency.
-
 ## Model Benchmarks
 
-To evaluate **o1** and **Claude 3.5 Sonnet** further, let’s look at real-world benchmarks to understand how each model performs in practical applications. Benchmarks help measure speed, accuracy, and efficiency, offering insights into which model excels in various tasks.
+Benchmarks help measure speed, accuracy, and efficiency between models. Let's look at real-world benchmarks to understand how o1 and Claude 3.5 Sonnet performs in practical applications.
 
 | Benchmark                                                                               | OpenAI o1                                                                                                                | Claude 3.5 Sonnet                                                                                                                                                           |
 | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -95,7 +94,7 @@ _💡 Keep in mind that o1 uses more compute to achieve its advanced reasoning c
 
 ![Gemini-Exp-1206 outperforming GPT-4o and O1 on Chatbot Arena](/static/blog/google-gemini-exp-1206/cover.webp)
 
-## Comparing Claude 3.5 Sonnet and OpenAI o1 on Coding Tasks
+## Comparing Claude 3.5 Sonnet and o1 on Coding Tasks
 
 ### Example 1: Generating a Simple Function
 
@@ -112,6 +111,8 @@ Prompt: “Write a Python function that takes a list of integers and returns the
 #### Which model performed better?
 
 Claude 3.5 Sonnet provides a simple and elegant solution, while OpenAI o1 offers a more robust approach with thorough edge case handling.
+
+---
 
 ### Example 2: Debugging Code
 
@@ -134,6 +135,8 @@ function removeVowels(str) {
 #### Which model performed better?
 
 Both models showed strengths in debugging. OpenAI o1 is direct, while Claude 3.5 Sonnet provided a more user-friendly solution. This aligns with reports that o1 excels in complex problem-solving while Claude is preferred for simpler tasks.
+
+---
 
 ### Example 3: Writing Unit Tests
 
@@ -167,7 +170,8 @@ Meanwhile, OpenAI o1 focuses on complex reasoning and advanced problem-solving. 
 
 ### Which Model is Best for Coding?
 
-Claude 3.5 Sonnet is more cost-effective _(4x cheaper than OpenAI o1)_, and highly competitive with o1, particularly when integrated with tools like <a href="https://www.anthropic.com/news/github-copilot" target="_blank" rel="noopener">GitHub Copilot</a>. It showed improvements over its predecessor, Claude 3 Opus, solving 64% of coding problems compared to Opus's 38%.
+Claude 3.5 Sonnet is more cost-effective and highly competitive with o1, particularly when integrated with tools like <a href="https://www.anthropic.com/news/github-copilot" target="_blank" rel="noopener">GitHub Copilot</a>. It showed improvements over its predecessor, Claude 3 Opus, solving 64% of coding problems compared to Opus's 38%.
+
 In contrast, OpenAI o1 is preferred for complex coding tasks that require advanced reasoning and deep context retention. It’s especially suited for researchers working on challenging tasks that require deep analysis and advanced reasoning.
 
 <CallToAction
@@ -193,7 +197,7 @@ For most users, especially those working on practical coding tasks or needing fa
 
 Ultimately, the decision hinges on whether you prioritize cutting-edge features and accuracy or a more cost-effective, practical AI solution.
 
-## Other Related Comparisons
+## Other related comparisons
 
 - <a
     href="https://www.helicone.ai/blog/openai-o1-and-chatgpt-pro"
