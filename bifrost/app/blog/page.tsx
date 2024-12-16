@@ -221,6 +221,11 @@ const blogContent: BlogStructure[] = [
   },
   {
     dynmaicEntry: {
+      folderName: "meta-llama-3-3-70-b-instruct",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "openai-o1-and-chatgpt-pro",
     },
   },
