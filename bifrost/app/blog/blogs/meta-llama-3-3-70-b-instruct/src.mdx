@@ -1,0 +1,146 @@
+Meta just released their newest AI model <a href="https://www.llama.com/docs/model-cards-and-prompt-formats/llama3_3/" target="_blank" rel="noopener">Llama 3.3</a>. This 70-billion parameter model caught the attention of the open-source community, showing impressive performance, cost efficiency, and multilingual support while **having only ~17% of Llama 3.1 405B's parameters**.
+
+![OpenAI released the full o1 reasoning model on December 5, 2024](/static/blog/meta-llama-3-3-70-b-instruct/cover.webp)
+
+But is it truly better than the top models in the market? Let’s take a look at how `Llama 3.3 70B Instruct` compares with previous models and why it's a big deal.
+
+---
+
+# Comparing Llama 3.3 with Llama 3.1
+
+### Improved speed
+
+Llama 3.3 70B is a high-performance replacement for Llama 3.1 70B. Independent benchmarks indicate that Llama 3.3 70B achieves an inference speed of 276 tokens per second on Groq hardware, <a href="https://groq.com/new-ai-inference-speed-benchmark-for-llama-3-3-70b-powered-by-groq/" target="_blank" rel="noopener">surpassing Llama 3.1 70B by 25 tokens per second</a>. This makes it a viable option for real-time applications where latency is critical.
+
+### Similar performance, fewer parameters
+
+Despite its smaller size, <a href="https://x.com/AIatMeta/status/1865079068833780155" target="_blank" rel="noopener nofollow">Meta claimed</a> that Llama 3.3 has powerful performance comparable to the much larger Llama 3.1 405B model. With significantly lower computational overhead, developers can deploy it using mid-tier GPUs or run the model locally <a href="https://simonwillison.net/2024/Dec/9/llama-33-70b/#how-i-ran-llama-3-3-70b-on-my-machine-using-ollama" target="_blank" rel="noopener nofollow">on their consumer-grade laptops</a>.
+
+### Same multilingual support
+
+Like its predecessor Llama 3.1, Llama 3.3 also supports 8 languages, including English, Germain, French, Italian, Portuguese, Hindi, Spanish, and Thai. The model is versatile for developers who are targeting global audiences. On the Multilingual MGSM (0-shot) test, it scored 91.1, which is similar to its predecessor Llama 3.1 70B (91.6) and close to more advanced models like Claude 3.5 Sonnet (92.8). [More on this later](#performance-benchmarks).
+
+### More cost-effective
+
+Llama 3.3 70B has a significant advantage over its costs:
+
+- `$0.10` per million input tokens, compared to $1.00 for Llama 3.1 405B, and
+- `$0.40` per million output tokens, compared to $1.80 for Llama 3.1 405B
+
+In an AI conversation agent example by Databricks, using Llama 3.3 70B is <a href="https://www.databricks.com/blog/making-ai-more-accessible-80-cost-savings-meta-llama-33-databricks" target="_blank" rel="noopener">88% more cost-effective</a> to deploy than Llama 3.1 405B.
+
+![Llama 3.3 70B cost comparison with Llama 3.1 405B](/static/blog/meta-llama-3-3-70-b-instruct/llama-3-3-cost-comparison.webp)
+
+<CallToAction
+  title="Cut Llama 3 API costs by up to 70% ⚡️"
+  description="Use Helicone to cache responses, optimize prompts, and more."
+  primaryButtonText="Get started for free"
+  primaryButtonLink="/signin"
+  secondaryButtonText="Calculate API costs"
+  secondaryButtonLink="/llm-cost"
+/>
+### Extended context window
+
+Llama 3.3 70B supports a large context window of 128,000 tokens like Llama 3.1 405B. This extensive context handling allows both models to process large volumes of data and maintain contextual awareness in conversations.
+
+---
+
+# Performance Benchmarks
+
+Llama 3.3 has impressive results across code, math, and multilingual benchmarks. Highlights include:
+
+- A high score of **92.1 in IFEval** (instruction following).
+- **89.0 in HumanEval** and **88.6 in MBPP EvalPlus** (code).
+- Excels in the Multilingual MGSM benchmark with a score of **91.6**.
+
+In some evaluations, Llama 3.3 70B even outperforms established models like Google's Gemini 1.5 Pro and OpenAI's GPT-4 on key benchmarks, including MMLU (Massive Multitask Language Understanding).
+
+![Meta's performance benchmark for Llama 3.3 70B instruct](/static/blog/meta-llama-3-3-70-b-instruct/llama-3.3-benchmark.webp)
+
+## Is Llama 3.3 better than GPT-4 or Claude-Sonnet-3.5?
+
+At a glance, Llama 3.3’s **<span style={{color: '#03A9F4'}}>open-source nature</span>** makes it more customizable and accessible for developers. It also has lower operational costs which appeals to small and mid-sized teams.
+
+|                          | Llama 3.3                       | GPT-4                     | Claude 3            |
+| ------------------------ | ------------------------------- | ------------------------- | ------------------- |
+| **Parameters**           | 70B                             | Unknown (estimated large) | ~100B               |
+| **Cost-effectiveness**   | High (low token cost) 🏆        | Moderate                  | Moderate            |
+| **Open Source**          | Yes                             | No                        | No                  |
+| **Multilingual Support** | Moderate                        | Extensive 🏆              | Moderate            |
+| **Fine-Tuning**          | Easy and flexible 🏆            | Limited (API-based)       | Limited (API-based) |
+| **Ideal Use Cases**      | Cost-sensitive, domain-specific | Broad tasks               | General NLP tasks   |
+
+## How to access Llama 3.3 70B?
+
+Llama 3.3 70B is available through <a href="https://www.llama.com/" target="_blank" rel="noopener">Meta's official Llama site</a>, <a href="https://huggingface.co/meta-llama/Llama-3.3-70B-Instruct" target="_blank" rel="noopener">Hugging Face</a>, <a href="https://ollama.com/library/llama3.3" target="_blank" rel="noopener">Ollama</a>, <a href="https://fireworks.ai/models/fireworks/llama-v3p3-70b-instruct" target="_blank" rel="noopener">Fireworks AI</a>, and <a href="https://www.helicone.ai/blog/llm-api-providers" target="_blank" rel="noopener">other AI inferencing platforms</a>.
+
+---
+
+# Use Cases of Llama 3.3
+
+Llama 3.3 70B is versatile and can be used for various tasks, including:
+
+1. Chatbots and virtual assistants: Faster model speed and better accuracy helps to improve user experience, especially in customer service applications.
+2. Localization and translation services
+3. Content creation and summarization: developers report faster output generation for marketing copy, technical writing, and creative projects.
+4. Code generation and debugging
+5. Synthetic data generation
+
+## Limitations of Llama 3.3
+
+1. **License restrictions:** The license prohibits using any part of the Llama models, including response outputs, to train other AI models.
+2. **Limited modalities:** Llama 3.3 70B is a text-only model, lacking capabilities in other modalities such as image or audio processing
+3. **Knowledge cutoff:** The model's knowledge is limited to information up to December 2023, making it potentially outdated for current events or recent developments79.
+
+## Conclusion
+
+Llama 3.3 is a major advancement in open-sourced large language models. The increasing efficiency improvements are allowing developers to access more affordable and incredibly faster models, and more incredibly powerful models that one can run directly on their own device, making it more accessible to the open-source community.
+
+### Interested to learn about other models?
+
+- <a
+    href="https://www.helicone.ai/blog/openai-o1-and-chatgpt-pro"
+    target="_blank"
+    rel="noopener"
+  >
+    O1 and ChatGPT Pro — here's everything you need to know
+  </a>
+- <a
+    href="https://www.helicone.ai/blog/openai-gpt-5"
+    target="_blank"
+    rel="noopener"
+  >
+    GPT-5 — Release date, features & what to expect
+  </a>
+
+---
+
+## FAQ
+
+### How to finetune Llama 3.3?
+
+Fine-tuning Llama models can be done in two main ways:
+
+1. **Full parameter fine-tuning** by adjusting all model parameters. Best performance, but very time-consuming and GPU-intensive.
+2. **Parameter efficient fine-tuning (PEFT)** using either LoRA or QLoRA.
+
+Meta’s [official fine-tuning guide](https://www.llama.com/docs/how-to-guides/fine-tuning/) recommendeds starting with LoRA fine-tuning. If resources are extremely limited, use QLoRA. Then evaluate model performance after fine-tuning, and only consider full parameter fine-tuning if the results are not satisfactory.
+
+### What data was Llama 3.3 70B trained on?
+
+Llama 3.3 70B was pretrained on 15 trillion tokens from public sources, 7 times larger than Llama 2’s dataset. The training data includes:
+
+- New addition of publicly available online data
+- 25+ million synthetically-generated examples for fine-tuning
+- 4x more code data than Llama 2
+- 5%+ non-English data across 30+ languages
+
+### What is the knowledge cutoff of Llama 3.3 70B?
+
+Llama 3.3 70B has a knowledge cutoff of December 2023.
+
+---
+
+## Questions or feedback?
+
+Are the information out of date? Please <a href="https://github.com/Helicone/helicone/pulls" target="_blank" rel="noopener">raise an issue</a> and we’d love to hear your insights!
