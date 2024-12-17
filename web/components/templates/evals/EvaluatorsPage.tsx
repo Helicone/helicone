@@ -240,7 +240,9 @@ const EvalsPage = () => {
           customButtons={[
             <CreateNewEvaluator
               key="create-new-evaluator"
-              onSubmit={() => {}}
+              onSubmit={() => {
+                LLMAsJudgeEvaluators.refetch();
+              }}
             />,
           ]}
           dataLoading={defaultEvaluators.isLoading}
