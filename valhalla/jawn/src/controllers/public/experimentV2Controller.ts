@@ -111,25 +111,33 @@ export class ExperimentV2Controller extends Controller {
       return err(experiment.error);
     }
 
-    const inputRecord = await supabaseServer.client
+    let inputRecord = await supabaseServer.client
       .from("prompt_input_record")
-      .insert({
-        experiment_id: experiment.data.experimentId,
-        inputs: {},
-        prompt_version: promptVersionResult.data!,
-        auto_prompt_inputs: [],
-        source_request: requestId,
-      })
-      .select("id")
+      .select("*")
+      .eq("source_request", requestId)
       .single();
+
+    if (inputRecord.error || !inputRecord.data) {
+      inputRecord = await supabaseServer.client
+        .from("prompt_input_record")
+        .insert({
+          experiment_id: experiment.data.experimentId,
+          inputs: {},
+          prompt_version: promptVersionResult.data!,
+          auto_prompt_inputs: [],
+          source_request: requestId,
+        })
+        .select("id")
+        .single();
+    }
 
     await experimentManager.createExperimentTableRowBatch(
       experiment.data.experimentId,
       [
         {
           inputRecordId: inputRecord.data?.id!,
-          inputs: {},
-          autoInputs: [],
+          inputs: (inputRecord.data?.inputs as Record<string, string>) ?? {},
+          autoInputs: (inputRecord.data?.auto_prompt_inputs as any[]) ?? [],
         },
       ]
     );
