@@ -32,8 +32,8 @@ export class OnlineEvalHandler extends AbstractLogHandler {
         sampleRate < 0 ||
         sampleRate > 100 ||
         Math.random() * 100 > sampleRate ||
-        (context.processedLog.request.properties &&
-          "Helicone-Experiment-Id" in context.processedLog.request.properties)
+        context.message.heliconeMeta.evaluatorId ||
+        context.message.heliconeMeta.experimentId
       ) {
         continue;
       }
@@ -74,6 +74,8 @@ export class OnlineEvalHandler extends AbstractLogHandler {
         inputRecord,
         output: JSON.stringify(context.processedLog.response.body),
         evaluatorName: onlineEval.evaluator_name,
+        evaluatorId: onlineEval.evaluator_id,
+        organizationId: orgId,
       });
 
       try {

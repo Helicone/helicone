@@ -114,6 +114,8 @@ export class EvaluatorManager extends BaseManager {
         inputRecord,
         output: JSON.stringify(content),
         evaluatorName: evaluator.name,
+        evaluatorId: evaluator.id,
+        organizationId: this.authParams.organizationId,
       });
       try {
         const result = await llmAsAJudge.evaluate();

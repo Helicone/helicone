@@ -1,5 +1,8 @@
+import { BaseTempKey } from "../../experiment/tempKeys/baseTempKey";
 import { ExperimentDatasetRow } from "../../stores/experimentStore";
 import { autoFillInputs } from "@helicone/prompts";
+import { generateHeliconeAPIKey } from "../../experiment/tempKeys/tempAPIKey";
+import { Result } from "../../shared/result";
 
 interface ScoreResult {
   score: number | boolean;
@@ -17,6 +20,8 @@ export class LLMAsAJudge {
       };
       output: string;
       evaluatorName: string;
+      organizationId: string;
+      evaluatorId: string;
     }
   ) {}
 
@@ -58,21 +63,37 @@ export class LLMAsAJudge {
       autoInputs: [],
     });
 
-    const res = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${this.params.openAIApiKey}`,
-      },
-      body: JSON.stringify(requestBody),
-    });
+    const tempKey: Result<BaseTempKey, string> = await generateHeliconeAPIKey(
+      this.params.organizationId
+    );
 
-    if (!res.ok) {
-      console.error("error calling llm as a judge", res);
-      throw new Error("error calling llm as a judge");
+    if (tempKey.error || !tempKey.data) {
+      throw new Error("Error generating temp key");
     }
-    const data = await res.json();
-    return data;
+
+    return tempKey.data.with<Result<string, string>>(async (secretKey) => {
+      const heliconeWorkerUrl = process.env.HELICONE_WORKER_URL ?? "";
+      console.log("heliconeWorkerUrl", heliconeWorkerUrl);
+      const res = await fetch(`${heliconeWorkerUrl}/v1/chat/completions`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Helicone-Auth": `Bearer ${secretKey}`,
+          Authorization: `Bearer ${this.params.openAIApiKey}`,
+          "Helicone-Eval-Id": this.params.evaluatorId,
+          "Helicone-Manual-Access-Key":
+            process.env.HELICONE_MANUAL_ACCESS_KEY ?? "",
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      if (!res.ok) {
+        console.error("error calling llm as a judge", res);
+        throw new Error("error calling llm as a judge");
+      }
+      const data = await res.json();
+      return data;
+    });
   }
 
   async evaluate(): Promise<ScoreResult> {

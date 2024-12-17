@@ -21,8 +21,6 @@ export type Log = {
     requestCreatedAt: Date;
     isStream: boolean;
     heliconeTemplate?: TemplateWithInputs;
-    experimentColumnId?: string;
-    experimentRowIndex?: string;
   };
   response: {
     id: string;
@@ -44,6 +42,8 @@ export type HeliconeMeta = {
   lytixKey?: string;
   lytixHost?: string;
   heliconeManualAccessKey?: string;
+  experimentId?: string;
+  evaluatorId?: string;
 };
 
 export type KafkaMessage = {

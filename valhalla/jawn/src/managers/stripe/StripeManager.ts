@@ -8,7 +8,7 @@ import { dbExecute, dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
 import { clickhouseDb } from "../../lib/db/ClickhouseWrapper";
 import { buildFilterWithAuthClickHouse } from "../../lib/shared/filters/filters";
 import {
-  ExperimentUsage,
+  Usage,
   UpgradeToProRequest,
 } from "../../controllers/public/stripeController";
 import { OrganizationManager } from "../organization/OrganizationManager";
@@ -355,11 +355,13 @@ WHERE (${builtFilter.filter})`,
     return ok(subscription);
   }
 
-  private async getExperimentsUsage({
+  private async getUsage({
     startTime,
+    usageType,
   }: {
     startTime: Date;
-  }): Promise<Result<ExperimentUsage[], string>> {
+    usageType: "experiment" | "evaluator";
+  }): Promise<Result<Usage[], string>> {
     const orgId = this.authParams.organizationId;
 
     const query = `
@@ -372,17 +374,18 @@ WHERE (${builtFilter.filter})`,
     FROM request_response_rmt
     WHERE organization_id = {val_0: String}
       AND request_created_at >= {val_1: DateTime}
-      AND properties['Helicone-Experiment-Id'] IS NOT NULL
-      AND properties['Helicone-Experiment-Id'] != ''
+      AND properties['Helicone-${
+        usageType === "experiment" ? "Experiment" : "Eval"
+      }-Id'] IS NOT NULL
+      AND properties['Helicone-${
+        usageType === "experiment" ? "Experiment" : "Eval"
+      }-Id'] != ''
       AND status >= 200
       AND status < 300
     GROUP BY model, provider
   `;
 
-    const result = await dbQueryClickhouse<ExperimentUsage>(query, [
-      orgId,
-      startTime,
-    ]);
+    const result = await dbQueryClickhouse<Usage>(query, [orgId, startTime]);
 
     return ok(
       result.data
@@ -414,14 +417,15 @@ WHERE (${builtFilter.filter})`,
             total_count: model.total_count,
           };
         })
-        .filter((item): item is ExperimentUsage => item !== null) ?? []
+        .filter((item): item is Usage => item !== null) ?? []
     );
   }
 
   public async getUpcomingInvoice(): Promise<
     Result<
       Stripe.Response<Stripe.UpcomingInvoice> & {
-        experiments_usage: ExperimentUsage[];
+        experiments_usage: Usage[];
+        evaluators_usage: Usage[];
       },
       string
     >
@@ -440,13 +444,21 @@ WHERE (${builtFilter.filter})`,
         expand: ["lines.data.price.product"],
       });
 
-      const experimentsUsage = await this.getExperimentsUsage({
-        startTime: new Date(upcomingInvoice.period_start * 1000),
-      });
+      const [experimentsUsage, evalsUsage] = await Promise.all([
+        this.getUsage({
+          startTime: new Date(upcomingInvoice.period_start * 1000),
+          usageType: "experiment",
+        }),
+        this.getUsage({
+          startTime: new Date(upcomingInvoice.period_start * 1000),
+          usageType: "evaluator",
+        }),
+      ]);
 
       return ok({
         ...upcomingInvoice,
         experiments_usage: experimentsUsage.data ?? [],
+        evaluators_usage: evalsUsage.data ?? [],
       });
     } catch (error: any) {
       return err(`Error retrieving upcoming invoice: ${error.message}`);
