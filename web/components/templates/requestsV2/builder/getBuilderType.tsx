@@ -89,11 +89,7 @@ export const getBuilderType = (
   }
 
   if (/^claude/.test(model)) {
-    if (path?.includes("messages")) {
-      return "ChatGPTBuilder";
-    } else {
-      return "ClaudeBuilder";
-    }
+    return "ChatGPTBuilder";
   }
 
   return "UnknownBuilder";
