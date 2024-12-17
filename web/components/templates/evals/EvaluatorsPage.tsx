@@ -34,9 +34,9 @@ import { CreateNewEvaluator } from "@/components/shared/CreateNewEvaluator/Creat
 import { EvalMetric, INITIAL_COLUMNS } from "./EvaluratorColumns";
 import { useEvaluators } from "./EvaluatorHook";
 
-// Import Sheet components
-
-import EvaluatorDetailsSheet from "./EvaluatorDetailsSheet";
+import EvaluatorDetailsSheet, {
+  getEvaluatorScoreName,
+} from "./EvaluatorDetailsSheet";
 
 const EvalsPage = () => {
   const {
@@ -61,30 +61,36 @@ const EvalsPage = () => {
           scoreDistributions?.data?.data?.data?.find(
             (s) => s.name === evalRow.name
           )?.distribution ?? [],
-        type: evalRow.name.includes("-laj-") ? "LLM as a judge" : "Default",
         valueType: evalRow.name.includes("-hcone-bool") ? "Boolean" : "Numeric",
+        type: LLMAsJudgeEvaluators.data?.data?.data
+          ?.map((e) => getEvaluatorScoreName(e.name, e.scoring_type))
+          .includes(evalRow.name)
+          ? "LLM as a judge"
+          : "Default",
         id: evalRow.name,
       })) ?? [];
 
-    for (const evaluator of LLMAsJudgeEvaluators.data?.data?.data ?? []) {
-      if (allEvaluators.find((e) => e.name === evaluator.name)) {
-        continue;
-      } else {
-        allEvaluators.push({
-          averageOverTime: [],
-          averageScore: 0,
-          count: 0,
-          id: evaluator.name,
-          maxScore: 0,
-          minScore: 0,
-          name: evaluator.name,
-          overTime: [],
-          scoreDistribution: [],
-          type: "LLM as a judge",
-          valueType: "Numeric",
-        });
-      }
-    }
+    // for (const evaluator of LLMAsJudgeEvaluators.data?.data?.data ?? []) {
+    //   const scoreName =
+    //     getEvaluatorScoreName(evaluator.name) +
+    //     (evaluator.scoring_type === "LLM-BOOLEAN" ? "-hcone-bool" : "");
+    //   if (allEvaluators.find((e) => e.name === scoreName)) {
+    //   } else {
+    //     allEvaluators.push({
+    //       averageOverTime: [],
+    //       averageScore: 0,
+    //       count: 0,
+    //       id: evaluator.name,
+    //       maxScore: 0,
+    //       minScore: 0,
+    //       name: evaluator.name,
+    //       overTime: [],
+    //       scoreDistribution: [],
+    //       type: "LLM as a judge",
+    //       valueType: "Numeric",
+    //     });
+    //   }
+    // }
 
     return allEvaluators;
   }, [
