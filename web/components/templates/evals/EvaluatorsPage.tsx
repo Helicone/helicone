@@ -70,27 +70,27 @@ const EvalsPage = () => {
         id: evalRow.name,
       })) ?? [];
 
-    // for (const evaluator of LLMAsJudgeEvaluators.data?.data?.data ?? []) {
-    //   const scoreName =
-    //     getEvaluatorScoreName(evaluator.name) +
-    //     (evaluator.scoring_type === "LLM-BOOLEAN" ? "-hcone-bool" : "");
-    //   if (allEvaluators.find((e) => e.name === scoreName)) {
-    //   } else {
-    //     allEvaluators.push({
-    //       averageOverTime: [],
-    //       averageScore: 0,
-    //       count: 0,
-    //       id: evaluator.name,
-    //       maxScore: 0,
-    //       minScore: 0,
-    //       name: evaluator.name,
-    //       overTime: [],
-    //       scoreDistribution: [],
-    //       type: "LLM as a judge",
-    //       valueType: "Numeric",
-    //     });
-    //   }
-    // }
+    for (const evaluator of LLMAsJudgeEvaluators.data?.data?.data ?? []) {
+      const scoreName =
+        getEvaluatorScoreName(evaluator.name, evaluator.scoring_type) +
+        (evaluator.scoring_type === "LLM-BOOLEAN" ? "-hcone-bool" : "");
+      if (allEvaluators.find((e) => e.name === scoreName)) {
+      } else {
+        allEvaluators.push({
+          averageOverTime: [],
+          averageScore: 0,
+          count: 0,
+          id: evaluator.name,
+          maxScore: 0,
+          minScore: 0,
+          name: evaluator.name,
+          overTime: [],
+          scoreDistribution: [],
+          type: "LLM as a judge",
+          valueType: "Numeric",
+        });
+      }
+    }
 
     return allEvaluators;
   }, [
