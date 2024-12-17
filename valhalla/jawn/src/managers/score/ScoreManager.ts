@@ -169,7 +169,6 @@ export class ScoreManager extends BaseManager {
               filteredMessages
                 .find((x) => x.requestId === scoresMessage.requestId)
                 ?.scores.map((score) => {
-                  console.log("score", score);
                   if (score.score_attribute_type === "boolean") {
                     return {
                       ...score,

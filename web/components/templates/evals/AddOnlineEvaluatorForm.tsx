@@ -58,7 +58,6 @@ const AddOnlineEvaluatorForm = ({
   };
 
   const updatePropertyFilter = (index: number, key: string, value: string) => {
-    console.log(key, value);
     const updatedFilters = [...propertyFilters];
     updatedFilters[index] = { key, value };
     setPropertyFilters(updatedFilters);

@@ -53,13 +53,6 @@ const EvalsPage = () => {
     deleteEvaluator,
   } = useEvaluators();
 
-  console.log({
-    evalScores: evalScores.data?.data?.data,
-    scoreDistributions: scoreDistributions.data?.data?.data,
-    defaultEvaluators: defaultEvaluators.data?.data?.data,
-    LLMAsJudgeEvaluators: LLMAsJudgeEvaluators.data?.data?.data,
-  });
-
   const evals = useMemo(() => {
     const allEvaluators =
       defaultEvaluators?.data?.data?.data?.map((evalRow) => ({
