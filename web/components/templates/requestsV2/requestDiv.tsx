@@ -6,13 +6,16 @@ import { NormalizedRequest } from "./builder/abstractRequestBuilder";
 import { ArrowDownIcon, ArrowUpIcon } from "@heroicons/react/20/solid";
 import { clsx } from "../../shared/clsx";
 import RequestRow from "./requestRow";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import Link from "next/link";
+import { FlaskConicalIcon, TestTube2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useJawnClient } from "@/lib/clients/jawnHook";
 
 interface RequestDivProps {
   open: boolean;
@@ -71,6 +74,42 @@ const RequestDiv = (props: RequestDivProps) => {
     };
   }, [onNextHandler, onPrevHandler, setOpen]);
 
+  const promptVersion = useMemo(() => {
+    return request?.customProperties?.["Helicone-Prompt-Version-Id"];
+  }, [request]);
+
+  // const handleCreateExperiment = async () => {
+  //   if (!selectedPromptId || !selectedVersionId) {
+  //     notification.setNotification(
+  //       "Please select a prompt and version",
+  //       "error"
+  //     );
+  //     return;
+  //   }
+  //   const promptVersion = promptVersions?.find(
+  //     (p) => p.id === selectedVersionId
+  //   );
+  //   const prompt = prompts?.find((p) => p.id === selectedPromptId);
+
+  //   const experimentTableResult = await jawn.POST("/v2/experiment/new", {
+  //     body: {
+  //       name: `${prompt?.user_defined_id}_V${promptVersion?.major_version}.${promptVersion?.minor_version}`,
+  //       originalPromptVersion: selectedVersionId,
+  //     },
+  //   });
+
+  //   if (experimentTableResult.error || !experimentTableResult.data) {
+  //     notification.setNotification("Failed to create experiment", "error");
+  //     return;
+  //   }
+
+  //   router.push(
+  //     `/experiments/${experimentTableResult.data?.data?.experimentId}`
+  //   );
+  // };
+
+  const jawn = useJawnClient();
+
   return (
     <ThemedDiv
       open={open}
@@ -78,13 +117,47 @@ const RequestDiv = (props: RequestDivProps) => {
       actions={
         <div className="w-full flex flex-row justify-between items-center">
           <div className="flex flex-row items-center space-x-2">
+            {JSON.stringify(promptVersion)}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant={"ghost"}
+                  className="hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md p-1 text-slate-700 dark:text-slate-400 inline-block"
+                  onClick={() => {
+                    jawn
+                      .POST("/v2/experiment/create/from-request/{requestId}", {
+                        params: {
+                          path: {
+                            requestId: request?.id!,
+                          },
+                        },
+                      })
+                      .then((res) => {
+                        if (res.error || !res.data.data?.experimentId) {
+                          setNotification(
+                            "Failed to create experiment",
+                            "error"
+                          );
+                          return;
+                        }
+                        router.push(
+                          `/experiments/${res.data.data?.experimentId}`
+                        );
+                      });
+                  }}
+                >
+                  <FlaskConicalIcon className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Experiment</TooltipContent>
+            </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Link
                   href={request ? `/playground?request=${request.id}` : "#"}
                   className="hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md p-1 text-slate-700 dark:text-slate-400 inline-block"
                 >
-                  <BeakerIcon className="h-4 w-4" />
+                  <TestTube2 className="h-4 w-4" />
                 </Link>
               </TooltipTrigger>
               <TooltipContent>Playground</TooltipContent>

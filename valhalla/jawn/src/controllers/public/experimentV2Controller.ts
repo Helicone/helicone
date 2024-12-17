@@ -10,7 +10,7 @@ import {
   Security,
   Tags,
 } from "tsoa";
-import { Result } from "../../lib/shared/result";
+import { err, ok, Result } from "../../lib/shared/result";
 import { JawnAuthenticatedRequest } from "../../types/request";
 import {
   ExperimentV2Manager,
@@ -23,6 +23,9 @@ import {
 } from "./promptController";
 import { EvaluatorManager } from "../../managers/evaluator/EvaluatorManager";
 import { EvaluatorResult } from "./evaluatorController";
+import { RequestManager } from "../../managers/request/RequestManager";
+import { PromptManager } from "../../managers/prompt/PromptManager";
+import { supabaseServer } from "../../lib/db/supabase";
 
 export interface ExperimentV2 {
   id: string;
@@ -78,6 +81,62 @@ export interface CreateNewPromptVersionForExperimentParams
 @Tags("Experiment")
 @Security("api_key")
 export class ExperimentV2Controller extends Controller {
+  @Post("/create/from-request/{requestId}")
+  public async createExperimentFromRequest(
+    @Path() requestId: string,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<
+    Result<
+      {
+        experimentId: string;
+      },
+      string
+    >
+  > {
+    const promptManager = new PromptManager(request.authParams);
+    const promptVersionResult =
+      await promptManager.getOrCreatePromptVersionFromRequest(requestId);
+    if (promptVersionResult.error) {
+      return err(promptVersionResult.error);
+    }
+
+    const experimentManager = new ExperimentV2Manager(request.authParams);
+    const experiment = await experimentManager.createNewExperiment(
+      `experiment-from-request-${requestId}-${Date.now()}`,
+      promptVersionResult.data!
+    );
+
+    if (experiment.error || !experiment.data) {
+      console.log(experiment, promptVersionResult.data!);
+      return err(experiment.error);
+    }
+
+    const inputRecord = await supabaseServer.client
+      .from("prompt_input_record")
+      .insert({
+        experiment_id: experiment.data.experimentId,
+        inputs: {},
+        prompt_version: promptVersionResult.data!,
+        auto_prompt_inputs: [],
+        source_request: requestId,
+      })
+      .select("id")
+      .single();
+
+    await experimentManager.createExperimentTableRowBatch(
+      experiment.data.experimentId,
+      [
+        {
+          inputRecordId: inputRecord.data?.id!,
+          inputs: {},
+          autoInputs: [],
+        },
+      ]
+    );
+
+    return ok({ experimentId: experiment.data.experimentId });
+  }
+
   @Post("/new")
   public async createNewExperiment(
     @Body()

@@ -14,6 +14,7 @@ import {
 import { run } from "../../lib/experiment/run";
 import { PromptManager } from "../prompt/PromptManager";
 import { PromptVersionResult } from "../../controllers/public/promptController";
+import { RequestManager } from "../request/RequestManager";
 
 export interface ScoreV2 {
   valueType: string;
@@ -71,6 +72,22 @@ export class ExperimentV2Manager extends BaseManager {
   constructor(authParams: AuthParams) {
     super(authParams);
     this.ExperimentStore = new ExperimentStore(authParams.organizationId);
+  }
+
+  async getPromptVersionFromRequest(
+    requestId: string
+  ): Promise<Result<string, string>> {
+    const requestManager = new RequestManager(this.authParams);
+    const requestResult = await requestManager.getRequestById(requestId);
+    if (requestResult.error || !requestResult.data) {
+      return err(requestResult.error);
+    }
+
+    const res = await supabaseServer.client
+      .from("prompt_input_record")
+      .select("*")
+      .eq("request_id", requestId)
+      .single();
   }
 
   async hasAccessToExperiment(experimentId: string): Promise<boolean> {
