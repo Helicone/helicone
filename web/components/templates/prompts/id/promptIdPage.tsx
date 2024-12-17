@@ -38,9 +38,6 @@ import { MODEL_LIST } from "../../playground/new/modelList";
 import { PromptMessage } from "../../requests/chatComponent/types";
 import PromptPlayground from "./promptPlayground";
 
-import useOnboardingContext, {
-  ONBOARDING_STEPS,
-} from "@/components/layout/onboardingContext";
 import { useOrg } from "@/components/layout/org/organizationContext";
 import {
   DropdownMenu,
@@ -503,8 +500,6 @@ const PromptIdPage = (props: PromptIdPageProps) => {
     setIsSearchVisible(!isSearchVisible);
   };
 
-  const { isOnboardingVisible, currentStep } = useOnboardingContext();
-
   return (
     <IslandContainer className="mx-0">
       <div className="w-full h-full flex flex-col space-y-4 pt-4">
@@ -811,15 +806,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                                             </DropdownMenu>
                                           ) : promptVersion.minor_version ===
                                             0 ? (
-                                            <DropdownMenu
-                                              open={
-                                                isOnboardingVisible &&
-                                                currentStep ===
-                                                  ONBOARDING_STEPS
-                                                    .PROMPTS_EXPERIMENT
-                                                    .stepNumber
-                                              }
-                                            >
+                                            <DropdownMenu>
                                               <DropdownMenuTrigger asChild>
                                                 <button className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full">
                                                   <EllipsisHorizontalIcon className="h-6 w-6 text-slate-500" />
