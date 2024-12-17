@@ -76,6 +76,8 @@ export type ProcessedLog = {
     heliconeTemplate?: TemplateWithInputs;
     assets?: Map<string, string>;
     properties?: Record<string, string>;
+    scores?: Record<string, number | boolean | undefined>;
+    scores_evaluatorIds?: Record<string, string>;
   };
   response: {
     model?: string;
@@ -107,7 +109,7 @@ export type HeliconeScoresMessage = {
   organizationId: string;
   scores: {
     score_attribute_key: string;
-    score_attribute_type: string;
+    score_attribute_type: "number" | "boolean";
     score_attribute_value: number;
   }[];
   createdAt: Date;

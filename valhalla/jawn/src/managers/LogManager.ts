@@ -15,12 +15,11 @@ import { VersionedRequestStore } from "../lib/stores/request/VersionedRequestSto
 import { KafkaProducer } from "../lib/clients/KafkaProducer";
 import { WebhookHandler } from "../lib/handlers/WebhookHandler";
 import { WebhookStore } from "../lib/stores/WebhookStore";
-import { FeatureFlagStore } from "../lib/stores/FeatureFlagStore";
 import { supabaseServer } from "../lib/db/supabase";
 import { dataDogClient } from "../lib/clients/DataDogClient";
 import { LytixHandler } from "../lib/handlers/LytixHandler";
-import { ExperimentHandler } from "../lib/handlers/ExperimentHandler";
 import { SegmentLogHandler } from "../lib/handlers/SegmentLogHandler";
+import { OnlineEvalHandler } from "../lib/handlers/OnlineEvalHandler";
 
 export class LogManager {
   public async processLogEntry(logMessage: Message): Promise<void> {
@@ -55,6 +54,7 @@ export class LogManager {
     const requestHandler = new RequestBodyHandler();
     const responseBodyHandler = new ResponseBodyHandler();
     const promptHandler = new PromptHandler();
+    const onlineEvalHandler = new OnlineEvalHandler();
     const loggingHandler = new LoggingHandler(
       new LogStore(),
       new VersionedRequestStore(""),
@@ -63,8 +63,6 @@ export class LogManager {
     // Store in S3 after logging to DB
     const posthogHandler = new PostHogHandler();
     const lytixHandler = new LytixHandler();
-
-    const experimentHandler = new ExperimentHandler();
 
     const webhookHandler = new WebhookHandler(
       new WebhookStore(supabaseServer.client)
@@ -77,10 +75,10 @@ export class LogManager {
       .setNext(requestHandler)
       .setNext(responseBodyHandler)
       .setNext(promptHandler)
+      .setNext(onlineEvalHandler)
       .setNext(loggingHandler)
       .setNext(posthogHandler)
       .setNext(lytixHandler)
-      .setNext(experimentHandler)
       .setNext(webhookHandler)
       .setNext(segmentHandler);
 

@@ -1,46 +1,48 @@
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
+import { X } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useGetPropertiesV2 } from "@/services/hooks/propertiesV2";
-import { ChevronsUpDown, Loader2, Plus, X } from "lucide-react";
+import { getPropertyFiltersV2 } from "@/services/lib/filters/frontendFilterDefs";
 import { useState } from "react";
-import { getPropertyFiltersV2 } from "../../../services/lib/filters/frontendFilterDefs";
+import {
+  CommandGroup,
+  CommandEmpty,
+  CommandInput,
+  CommandList,
+  CommandItem,
+} from "@/components/ui/command";
+import { ChevronsUpDown } from "lucide-react";
+import { Command } from "@/components/ui/command";
+import { DialogFooter } from "@/components/ui/dialog";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
-interface AddWebhookFormProps {
+const AddOnlineEvaluatorForm = ({
+  onSubmit,
+  isLoading,
+  close,
+}: {
   onSubmit: (data: {
-    destination: string;
     config: {
       sampleRate: number;
       propertyFilters: { key: string; value: string }[];
     };
   }) => void;
   isLoading: boolean;
-}
-
-const AddWebhookForm = (props: AddWebhookFormProps) => {
-  const { onSubmit, isLoading } = props;
-  const [destination, setDestination] = useState("");
+  close: () => void;
+}) => {
   const [sampleRate, setSampleRate] = useState(100);
   const [propertyFilters, setPropertyFilters] = useState<
     { key: string; value: string }[]
@@ -62,23 +64,16 @@ const AddWebhookForm = (props: AddWebhookFormProps) => {
   };
 
   return (
-    <Card className="w-full border-none">
-      <CardHeader>
-        <CardTitle>Listen to events</CardTitle>
-      </CardHeader>
-      <CardContent>
+    <>
+      {isLoading ? (
+        <div className="space-y-4">
+          <Skeleton className="h-4 w-[250px]" />
+          <Skeleton className="h-4 w-[200px]" />
+          <Skeleton className="h-4 w-[300px]" />
+        </div>
+      ) : (
         <div className="space-y-4">
           <div className="space-y-2 max-w-xl">
-            <Label htmlFor="webhook-url">Endpoint URL</Label>
-            <Input
-              type="text"
-              id="webhook-url"
-              value={destination}
-              onChange={(e) => setDestination(e.target.value)}
-              placeholder="https://"
-            />
-          </div>
-          <div className="space-y-4 max-w-lg">
             <Label htmlFor="sample-rate" className="flex items-center gap-2">
               Sample Rate:{" "}
               <Input
@@ -104,7 +99,6 @@ const AddWebhookForm = (props: AddWebhookFormProps) => {
               onValueChange={(value) => setSampleRate(value[0])}
             />
           </div>
-
           <div className="space-y-2">
             <Label>Properties Filters</Label>
             <br />
@@ -129,40 +123,41 @@ const AddWebhookForm = (props: AddWebhookFormProps) => {
               >
                 <div className="col-span-1">
                   <Popover modal={true}>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        className="w-full justify-between truncate"
-                      >
-                        <span className="truncate">
+                    <PopoverTrigger className="w-full truncate">
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            className="w-full justify-between truncate"
+                          >
+                            <span className="truncate">
+                              {filter.key || "Select property"}
+                            </span>
+                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
                           {filter.key || "Select property"}
-                        </span>
-                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                      </Button>
+                        </TooltipContent>
+                      </Tooltip>
                     </PopoverTrigger>
-                    <PopoverContent className="w-[200px] p-0" sideOffset={4}>
+                    <PopoverContent className="w-[200px] p-0" align="start">
                       <Command>
-                        <CommandInput
-                          placeholder="Type in anything..."
-                          onValueChange={(value) => {
-                            updatePropertyFilter(index, value, filter.value);
-                          }}
-                        />
+                        <CommandInput placeholder="Search property..." />
                         <CommandList>
-                          <CommandEmpty>No results found.</CommandEmpty>
-                          <CommandGroup heading="Suggestions">
+                          <CommandEmpty>No property found.</CommandEmpty>
+                          <CommandGroup>
                             {properties.properties?.map((property) => (
                               <CommandItem
                                 key={property}
-                                onSelect={() =>
+                                onSelect={() => {
                                   updatePropertyFilter(
                                     index,
                                     property,
                                     filter.value
-                                  )
-                                }
-                                value={property}
+                                  );
+                                }}
                               >
                                 {property}
                               </CommandItem>
@@ -196,23 +191,20 @@ const AddWebhookForm = (props: AddWebhookFormProps) => {
             </Button>
           </div>
         </div>
-      </CardContent>
-      <CardFooter className="flex justify-end space-x-2">
+      )}
+      <DialogFooter>
         <Button variant="outline" onClick={close}>
           Cancel
         </Button>
         <Button
-          onClick={() =>
-            onSubmit({ destination, config: { sampleRate, propertyFilters } })
-          }
+          onClick={() => onSubmit({ config: { sampleRate, propertyFilters } })}
           disabled={isLoading}
         >
-          {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           Add Webhook
         </Button>
-      </CardFooter>
-    </Card>
+      </DialogFooter>
+    </>
   );
 };
 
-export default AddWebhookForm;
+export default AddOnlineEvaluatorForm;

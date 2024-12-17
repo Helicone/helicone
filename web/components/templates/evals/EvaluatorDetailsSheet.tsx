@@ -11,6 +11,19 @@ import { useEvaluators } from "./EvaluatorHook";
 import { EvalMetric } from "./EvaluratorColumns";
 import LLMAsJudgeEvaluatorDetails from "./LLMAsJudgeEvaluatorDetails";
 
+export function getEvaluatorScoreName(
+  evaluatorName: string,
+  scoringType: string
+) {
+  return (
+    evaluatorName
+      .toLowerCase()
+      .replace(" ", "_")
+      .replace(/[^a-z0-9]+/g, "_") +
+    (scoringType === "LLM-BOOLEAN" ? "-hcone-bool" : "")
+  );
+}
+
 interface EvaluatorDetailsSheetProps {
   selectedEvaluator: EvalMetric | null;
   setSelectedEvaluator: (evaluator: EvalMetric | null) => void;
@@ -26,7 +39,9 @@ const EvaluatorDetailsSheet: React.FC<EvaluatorDetailsSheetProps> = ({
 }) => {
   const LLMAsJudgeEvaluator = useMemo(() => {
     return LLMAsJudgeEvaluators.data?.data?.data?.find(
-      (e) => e.name === selectedEvaluator?.name
+      (e) =>
+        getEvaluatorScoreName(e.name, e.scoring_type) ===
+        selectedEvaluator?.name
     );
   }, [LLMAsJudgeEvaluators, selectedEvaluator]);
 
