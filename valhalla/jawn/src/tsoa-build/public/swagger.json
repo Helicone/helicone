@@ -2425,9 +2425,6 @@
 					"llm_template": {},
 					"name": {
 						"type": "string"
-					},
-					"llm_as_a_judge": {
-						"type": "boolean"
 					}
 				},
 				"required": [
@@ -8390,7 +8387,7 @@
 					}
 				]
 			},
-			"Record_string.number-or-boolean_": {
+			"Record_string.number-or-boolean-or-undefined_": {
 				"properties": {},
 				"additionalProperties": {
 					"anyOf": [
@@ -8407,7 +8404,7 @@
 				"description": "Construct a type with a set of properties K of type T"
 			},
 			"Scores": {
-				"$ref": "#/components/schemas/Record_string.number-or-boolean_"
+				"$ref": "#/components/schemas/Record_string.number-or-boolean-or-undefined_"
 			},
 			"ScoreRequest": {
 				"properties": {

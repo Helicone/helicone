@@ -7,6 +7,7 @@ import { Database } from "../db/database.types";
 
 import { shouldBumpVersion } from "@helicone/prompts";
 import { sanitizeObject } from "../../utils/sanitize";
+import { mapScores } from "../../managers/score/ScoreManager";
 
 const pgp = pgPromise();
 const db = pgp({
@@ -384,42 +385,6 @@ export class LogStore {
     return ok("Prompt processed successfully");
   }
 
-  private mapScores(scores: Record<string, number | boolean | undefined>): {
-    score_attribute_key: string;
-    score_attribute_type: string;
-    score_attribute_value: number;
-  }[] {
-    return Object.entries(scores).map(([key, value]) => {
-      if (typeof value === "boolean") {
-        // Convert booleans to integers (1 for true, 0 for false)
-        return {
-          score_attribute_key: key,
-          score_attribute_type: "boolean",
-          score_attribute_value: value ? 1 : 0,
-        };
-      } else if (typeof value === "number") {
-        // Check if the number is an integer
-        if (Number.isInteger(value)) {
-          return {
-            score_attribute_key: key,
-            score_attribute_type: "number",
-            score_attribute_value: value,
-          };
-        } else {
-          // Throw an error if the value is a float
-          throw new Error(
-            `Score value for key '${key}' must be an integer. Received: ${value}`
-          );
-        }
-      } else {
-        // Throw an error if the value is neither boolean nor number
-        throw new Error(
-          `Invalid score value for key '${key}': ${value}. Expected an integer or boolean.`
-        );
-      }
-    });
-  }
-
   async processScore({
     score,
     requestId,
@@ -433,7 +398,7 @@ export class LogStore {
     organizationId: string;
     evaluatorIds: Record<string, string>;
   }) {
-    const mappedScores = this.mapScores(score);
+    const mappedScores = mapScores(score);
 
     // Convert arrays for the upsert
     const scoreKeys = mappedScores.map((s) => s.score_attribute_key);

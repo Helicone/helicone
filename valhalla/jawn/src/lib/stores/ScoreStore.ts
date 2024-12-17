@@ -5,7 +5,7 @@ import { BaseStore } from "./baseStore";
 
 export type Score = {
   score_attribute_key: string;
-  score_attribute_type: string;
+  score_attribute_type: "number" | "boolean";
   score_attribute_value: number;
 };
 

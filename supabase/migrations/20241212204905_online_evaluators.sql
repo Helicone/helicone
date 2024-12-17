@@ -7,6 +7,9 @@ create table "public"."online_evaluators" (
 );
 
 
+REVOKE ALL ON TABLE "public"."online_evaluators" FROM anon;
+REVOKE ALL ON TABLE "public"."online_evaluators" FROM authenticated;
+
 alter table "public"."online_evaluators" enable row level security;
 
 CREATE UNIQUE INDEX online_evaluators_pkey ON public.online_evaluators USING btree (id);
@@ -20,47 +23,4 @@ alter table "public"."online_evaluators" validate constraint "public_online_eval
 alter table "public"."online_evaluators" add constraint "public_online_evaluators_organization_fkey" FOREIGN KEY (organization) REFERENCES organization(id) not valid;
 
 alter table "public"."online_evaluators" validate constraint "public_online_evaluators_organization_fkey";
-
-grant delete on table "public"."online_evaluators" to "anon";
-
-grant insert on table "public"."online_evaluators" to "anon";
-
-grant references on table "public"."online_evaluators" to "anon";
-
-grant select on table "public"."online_evaluators" to "anon";
-
-grant trigger on table "public"."online_evaluators" to "anon";
-
-grant truncate on table "public"."online_evaluators" to "anon";
-
-grant update on table "public"."online_evaluators" to "anon";
-
-grant delete on table "public"."online_evaluators" to "authenticated";
-
-grant insert on table "public"."online_evaluators" to "authenticated";
-
-grant references on table "public"."online_evaluators" to "authenticated";
-
-grant select on table "public"."online_evaluators" to "authenticated";
-
-grant trigger on table "public"."online_evaluators" to "authenticated";
-
-grant truncate on table "public"."online_evaluators" to "authenticated";
-
-grant update on table "public"."online_evaluators" to "authenticated";
-
-grant delete on table "public"."online_evaluators" to "service_role";
-
-grant insert on table "public"."online_evaluators" to "service_role";
-
-grant references on table "public"."online_evaluators" to "service_role";
-
-grant select on table "public"."online_evaluators" to "service_role";
-
-grant trigger on table "public"."online_evaluators" to "service_role";
-
-grant truncate on table "public"."online_evaluators" to "service_role";
-
-grant update on table "public"."online_evaluators" to "service_role";
-
 

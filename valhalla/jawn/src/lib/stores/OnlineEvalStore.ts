@@ -1,12 +1,5 @@
-import { RequestResponseRMT, clickhouseDb } from "../db/ClickhouseWrapper";
 import { dbExecute } from "../shared/db/dbExecute";
-import {
-  err,
-  resultMap,
-  ok,
-  Result,
-  PromiseGenericResult,
-} from "../shared/result";
+import { err, ok, PromiseGenericResult } from "../shared/result";
 import { BaseStore } from "./baseStore";
 
 export type OnlineEvaluatorByOrgId = {

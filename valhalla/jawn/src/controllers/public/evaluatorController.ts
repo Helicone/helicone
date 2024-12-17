@@ -25,7 +25,6 @@ export interface CreateEvaluatorParams {
   scoring_type: string;
   llm_template: any;
   name: string;
-  llm_as_a_judge?: boolean;
 }
 
 export interface UpdateEvaluatorParams {

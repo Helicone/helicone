@@ -983,7 +983,6 @@ const models: TsoaRoute.Models = {
             "scoring_type": {"dataType":"string","required":true},
             "llm_template": {"dataType":"any","required":true},
             "name": {"dataType":"string","required":true},
-            "llm_as_a_judge": {"dataType":"boolean"},
         },
         "additionalProperties": false,
     },
@@ -2833,14 +2832,14 @@ const models: TsoaRoute.Models = {
         "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_HeliconeRequestAsset_"},{"ref":"ResultError_string_"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "Record_string.number-or-boolean_": {
+    "Record_string.number-or-boolean-or-undefined_": {
         "dataType": "refAlias",
         "type": {"dataType":"nestedObjectLiteral","nestedProperties":{},"additionalProperties":{"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"boolean"}]},"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Scores": {
         "dataType": "refAlias",
-        "type": {"ref":"Record_string.number-or-boolean_","validators":{}},
+        "type": {"ref":"Record_string.number-or-boolean-or-undefined_","validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ScoreRequest": {

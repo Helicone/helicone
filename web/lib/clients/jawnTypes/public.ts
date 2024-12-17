@@ -1112,7 +1112,6 @@ Json: JsonObject;
       scoring_type: string;
       llm_template: unknown;
       name: string;
-      llm_as_a_judge?: boolean;
     };
     UpdateEvaluatorParams: {
       scoring_type?: string;
@@ -2909,10 +2908,10 @@ Json: JsonObject;
     };
     "Result_HeliconeRequestAsset.string_": components["schemas"]["ResultSuccess_HeliconeRequestAsset_"] | components["schemas"]["ResultError_string_"];
     /** @description Construct a type with a set of properties K of type T */
-    "Record_string.number-or-boolean_": {
+    "Record_string.number-or-boolean-or-undefined_": {
       [key: string]: number | boolean;
     };
-    Scores: components["schemas"]["Record_string.number-or-boolean_"];
+    Scores: components["schemas"]["Record_string.number-or-boolean-or-undefined_"];
     ScoreRequest: {
       scores: components["schemas"]["Scores"];
     };

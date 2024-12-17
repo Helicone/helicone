@@ -9,10 +9,42 @@ import { DelayedOperationService } from "../../lib/shared/delayedOperationServic
 import { BaseManager } from "../BaseManager";
 import { validate as uuidValidate } from "uuid";
 
-type Scores = Record<string, number | boolean>;
+type Scores = Record<string, number | boolean | undefined>;
 
 export interface ScoreRequest {
   scores: Scores;
+}
+
+export function mapScores(scores: Scores): Score[] {
+  return Object.entries(scores).map(([key, value]) => {
+    if (typeof value === "boolean") {
+      // Convert booleans to integers (1 for true, 0 for false)
+      return {
+        score_attribute_key: key,
+        score_attribute_type: "boolean",
+        score_attribute_value: value ? 1 : 0,
+      };
+    } else if (typeof value === "number") {
+      // Check if the number is an integer
+      if (Number.isInteger(value)) {
+        return {
+          score_attribute_key: key,
+          score_attribute_type: "number",
+          score_attribute_value: value,
+        };
+      } else {
+        // Throw an error if the value is a float
+        throw new Error(
+          `Score value for key '${key}' must be an integer. Received: ${value}`
+        );
+      }
+    } else {
+      // Throw an error if the value is neither boolean nor number
+      throw new Error(
+        `Invalid score value for key '${key}': ${value}. Expected an integer or boolean.`
+      );
+    }
+  });
 }
 
 export class ScoreManager extends BaseManager {
@@ -34,7 +66,7 @@ export class ScoreManager extends BaseManager {
     delayMs?: number,
     evaluatorId?: string
   ): Promise<Result<null, string>> {
-    const mappedScores = this.mapScores(scores);
+    const mappedScores = mapScores(scores);
     await this.scoreStore.putScoresIntoSupabase(
       requestId,
       mappedScores,
@@ -280,37 +312,5 @@ export class ScoreManager extends BaseManager {
       }
     }
     console.log("Successfully processed scores messages");
-  }
-
-  private mapScores(scores: Scores): Score[] {
-    return Object.entries(scores).map(([key, value]) => {
-      if (typeof value === "boolean") {
-        // Convert booleans to integers (1 for true, 0 for false)
-        return {
-          score_attribute_key: key,
-          score_attribute_type: "boolean",
-          score_attribute_value: value ? 1 : 0,
-        };
-      } else if (typeof value === "number") {
-        // Check if the number is an integer
-        if (Number.isInteger(value)) {
-          return {
-            score_attribute_key: key,
-            score_attribute_type: "number",
-            score_attribute_value: value,
-          };
-        } else {
-          // Throw an error if the value is a float
-          throw new Error(
-            `Score value for key '${key}' must be an integer. Received: ${value}`
-          );
-        }
-      } else {
-        // Throw an error if the value is neither boolean nor number
-        throw new Error(
-          `Invalid score value for key '${key}': ${value}. Expected an integer or boolean.`
-        );
-      }
-    });
   }
 }
