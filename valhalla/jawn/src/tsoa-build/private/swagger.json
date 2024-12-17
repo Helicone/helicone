@@ -5979,257 +5979,6 @@
 					}
 				]
 			},
-			"ResultSuccess__datasetId-string__": {
-				"properties": {
-					"data": {
-						"properties": {
-							"datasetId": {
-								"type": "string"
-							}
-						},
-						"required": [
-							"datasetId"
-						],
-						"type": "object"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result__datasetId-string_.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess__datasetId-string__"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
-			"DatasetMetadata": {
-				"properties": {
-					"promptVersionId": {
-						"type": "string"
-					},
-					"inputRecordsIds": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
-					}
-				},
-				"type": "object",
-				"additionalProperties": false
-			},
-			"NewDatasetParams": {
-				"properties": {
-					"datasetName": {
-						"type": "string"
-					},
-					"requestIds": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
-					},
-					"datasetType": {
-						"type": "string",
-						"enum": [
-							"experiment",
-							"helicone"
-						]
-					},
-					"meta": {
-						"$ref": "#/components/schemas/DatasetMetadata"
-					}
-				},
-				"required": [
-					"datasetName",
-					"requestIds",
-					"datasetType"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Pick_FilterLeaf.request-or-prompts_versions_": {
-				"properties": {
-					"request": {
-						"$ref": "#/components/schemas/Partial_RequestTableToOperators_"
-					},
-					"prompts_versions": {
-						"$ref": "#/components/schemas/Partial_PromptVersionsToOperators_"
-					}
-				},
-				"type": "object",
-				"description": "From T, pick a set of properties whose keys are in the union K"
-			},
-			"FilterLeafSubset_request-or-prompts_versions_": {
-				"$ref": "#/components/schemas/Pick_FilterLeaf.request-or-prompts_versions_"
-			},
-			"DatasetFilterNode": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/FilterLeafSubset_request-or-prompts_versions_"
-					},
-					{
-						"$ref": "#/components/schemas/DatasetFilterBranch"
-					},
-					{
-						"type": "string",
-						"enum": [
-							"all"
-						]
-					}
-				]
-			},
-			"DatasetFilterBranch": {
-				"properties": {
-					"right": {
-						"$ref": "#/components/schemas/DatasetFilterNode"
-					},
-					"operator": {
-						"type": "string",
-						"enum": [
-							"or",
-							"and"
-						]
-					},
-					"left": {
-						"$ref": "#/components/schemas/DatasetFilterNode"
-					}
-				},
-				"required": [
-					"right",
-					"operator",
-					"left"
-				],
-				"type": "object"
-			},
-			"RandomDatasetParams": {
-				"properties": {
-					"datasetName": {
-						"type": "string"
-					},
-					"filter": {
-						"$ref": "#/components/schemas/DatasetFilterNode"
-					},
-					"offset": {
-						"type": "number",
-						"format": "double"
-					},
-					"limit": {
-						"type": "number",
-						"format": "double"
-					}
-				},
-				"required": [
-					"datasetName",
-					"filter"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"DatasetResult": {
-				"properties": {
-					"id": {
-						"type": "string"
-					},
-					"name": {
-						"type": "string"
-					},
-					"created_at": {
-						"type": "string"
-					},
-					"meta": {
-						"$ref": "#/components/schemas/DatasetMetadata"
-					}
-				},
-				"required": [
-					"id",
-					"name",
-					"created_at"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"ResultSuccess_DatasetResult-Array_": {
-				"properties": {
-					"data": {
-						"items": {
-							"$ref": "#/components/schemas/DatasetResult"
-						},
-						"type": "array"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result_DatasetResult-Array.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess_DatasetResult-Array_"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
-			"ResultSuccess___-Array_": {
-				"properties": {
-					"data": {
-						"items": {
-							"properties": {},
-							"type": "object"
-						},
-						"type": "array"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result___-Array.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess___-Array_"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
 			"ResultSuccess__tableId-string--experimentId-string__": {
 				"properties": {
 					"data": {
@@ -7149,6 +6898,257 @@
 				},
 				"type": "object",
 				"additionalProperties": false
+			},
+			"ResultSuccess__datasetId-string__": {
+				"properties": {
+					"data": {
+						"properties": {
+							"datasetId": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"datasetId"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__datasetId-string_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__datasetId-string__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"DatasetMetadata": {
+				"properties": {
+					"promptVersionId": {
+						"type": "string"
+					},
+					"inputRecordsIds": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"NewDatasetParams": {
+				"properties": {
+					"datasetName": {
+						"type": "string"
+					},
+					"requestIds": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"datasetType": {
+						"type": "string",
+						"enum": [
+							"experiment",
+							"helicone"
+						]
+					},
+					"meta": {
+						"$ref": "#/components/schemas/DatasetMetadata"
+					}
+				},
+				"required": [
+					"datasetName",
+					"requestIds",
+					"datasetType"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Pick_FilterLeaf.request-or-prompts_versions_": {
+				"properties": {
+					"request": {
+						"$ref": "#/components/schemas/Partial_RequestTableToOperators_"
+					},
+					"prompts_versions": {
+						"$ref": "#/components/schemas/Partial_PromptVersionsToOperators_"
+					}
+				},
+				"type": "object",
+				"description": "From T, pick a set of properties whose keys are in the union K"
+			},
+			"FilterLeafSubset_request-or-prompts_versions_": {
+				"$ref": "#/components/schemas/Pick_FilterLeaf.request-or-prompts_versions_"
+			},
+			"DatasetFilterNode": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/FilterLeafSubset_request-or-prompts_versions_"
+					},
+					{
+						"$ref": "#/components/schemas/DatasetFilterBranch"
+					},
+					{
+						"type": "string",
+						"enum": [
+							"all"
+						]
+					}
+				]
+			},
+			"DatasetFilterBranch": {
+				"properties": {
+					"right": {
+						"$ref": "#/components/schemas/DatasetFilterNode"
+					},
+					"operator": {
+						"type": "string",
+						"enum": [
+							"or",
+							"and"
+						]
+					},
+					"left": {
+						"$ref": "#/components/schemas/DatasetFilterNode"
+					}
+				},
+				"required": [
+					"right",
+					"operator",
+					"left"
+				],
+				"type": "object"
+			},
+			"RandomDatasetParams": {
+				"properties": {
+					"datasetName": {
+						"type": "string"
+					},
+					"filter": {
+						"$ref": "#/components/schemas/DatasetFilterNode"
+					},
+					"offset": {
+						"type": "number",
+						"format": "double"
+					},
+					"limit": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"datasetName",
+					"filter"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"DatasetResult": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"created_at": {
+						"type": "string"
+					},
+					"meta": {
+						"$ref": "#/components/schemas/DatasetMetadata"
+					}
+				},
+				"required": [
+					"id",
+					"name",
+					"created_at"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_DatasetResult-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/DatasetResult"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_DatasetResult-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_DatasetResult-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess___-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"properties": {},
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result___-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess___-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
 			},
 			"HeliconeDatasetMetadata": {
 				"properties": {
@@ -9343,6 +9343,49 @@
 						}
 					}
 				}
+			}
+		},
+		"/v1/evaluator/{evaluatorId}/onlineEvaluators/{onlineEvaluatorId}": {
+			"delete": {
+				"operationId": "DeleteOnlineEvaluator",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Evaluator"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "evaluatorId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "path",
+						"name": "onlineEvaluatorId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
 			}
 		},
 		"/v1/prompt/query": {
@@ -13671,332 +13714,6 @@
 				"parameters": []
 			}
 		},
-		"/v1/experiment/dataset": {
-			"post": {
-				"operationId": "AddDataset",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result__datasetId-string_.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Dataset"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/NewDatasetParams"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/v1/experiment/dataset/random": {
-			"post": {
-				"operationId": "AddRandomDataset",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result__datasetId-string_.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Dataset"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/RandomDatasetParams"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/v1/experiment/dataset/query": {
-			"post": {
-				"operationId": "GetDatasets",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_DatasetResult-Array.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Dataset"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"properties": {
-									"promptVersionId": {
-										"type": "string"
-									}
-								},
-								"type": "object"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/v1/experiment/dataset/{datasetId}/row/insert": {
-			"post": {
-				"operationId": "InsertDatasetRow",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_string.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Dataset"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "datasetId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"properties": {
-									"originalColumnId": {
-										"type": "string"
-									},
-									"inputs": {
-										"$ref": "#/components/schemas/Record_string.string_"
-									},
-									"inputRecordId": {
-										"type": "string"
-									}
-								},
-								"required": [
-									"inputs",
-									"inputRecordId"
-								],
-								"type": "object"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/v1/experiment/dataset/{datasetId}/version/{promptVersionId}/row/new": {
-			"post": {
-				"operationId": "CreateDatasetRow",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_string.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Dataset"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "datasetId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					},
-					{
-						"in": "path",
-						"name": "promptVersionId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"properties": {
-									"sourceRequest": {
-										"type": "string"
-									},
-									"inputs": {
-										"$ref": "#/components/schemas/Record_string.string_"
-									}
-								},
-								"required": [
-									"inputs"
-								],
-								"type": "object"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/v1/experiment/dataset/{datasetId}/inputs/query": {
-			"post": {
-				"operationId": "GetDataset",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_PromptInputRecord-Array.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Dataset"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "datasetId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				]
-			}
-		},
-		"/v1/experiment/dataset/{datasetId}/mutate": {
-			"post": {
-				"operationId": "MutateDataset",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result___-Array.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Dataset"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"properties": {
-									"removeRequests": {
-										"items": {
-											"type": "string"
-										},
-										"type": "array"
-									},
-									"addRequests": {
-										"items": {
-											"type": "string"
-										},
-										"type": "array"
-									}
-								},
-								"required": [
-									"removeRequests",
-									"addRequests"
-								],
-								"type": "object"
-							}
-						}
-					}
-				}
-			}
-		},
 		"/v1/experiment/new-empty": {
 			"post": {
 				"operationId": "CreateNewEmptyExperiment",
@@ -14966,6 +14683,332 @@
 								},
 								"required": [
 									"filter"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/experiment/dataset": {
+			"post": {
+				"operationId": "AddDataset",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__datasetId-string_.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Dataset"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/NewDatasetParams"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/experiment/dataset/random": {
+			"post": {
+				"operationId": "AddRandomDataset",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__datasetId-string_.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Dataset"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/RandomDatasetParams"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/experiment/dataset/query": {
+			"post": {
+				"operationId": "GetDatasets",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_DatasetResult-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Dataset"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"promptVersionId": {
+										"type": "string"
+									}
+								},
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/experiment/dataset/{datasetId}/row/insert": {
+			"post": {
+				"operationId": "InsertDatasetRow",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_string.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Dataset"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "datasetId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"originalColumnId": {
+										"type": "string"
+									},
+									"inputs": {
+										"$ref": "#/components/schemas/Record_string.string_"
+									},
+									"inputRecordId": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"inputs",
+									"inputRecordId"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/experiment/dataset/{datasetId}/version/{promptVersionId}/row/new": {
+			"post": {
+				"operationId": "CreateDatasetRow",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_string.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Dataset"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "datasetId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "path",
+						"name": "promptVersionId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"sourceRequest": {
+										"type": "string"
+									},
+									"inputs": {
+										"$ref": "#/components/schemas/Record_string.string_"
+									}
+								},
+								"required": [
+									"inputs"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/experiment/dataset/{datasetId}/inputs/query": {
+			"post": {
+				"operationId": "GetDataset",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_PromptInputRecord-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Dataset"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "datasetId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/experiment/dataset/{datasetId}/mutate": {
+			"post": {
+				"operationId": "MutateDataset",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result___-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Dataset"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"removeRequests": {
+										"items": {
+											"type": "string"
+										},
+										"type": "array"
+									},
+									"addRequests": {
+										"items": {
+											"type": "string"
+										},
+										"type": "array"
+									}
+								},
+								"required": [
+									"removeRequests",
+									"addRequests"
 								],
 								"type": "object"
 							}

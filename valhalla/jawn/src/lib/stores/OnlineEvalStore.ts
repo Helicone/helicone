@@ -70,4 +70,19 @@ export class OnlineEvalStore extends BaseStore {
 
     return ok(data ?? []);
   }
+
+  public async deleteOnlineEvaluator(
+    onlineEvaluatorId: string
+  ): PromiseGenericResult<null> {
+    const { error } = await dbExecute(
+      `DELETE FROM online_evaluators WHERE id = $1`,
+      [onlineEvaluatorId]
+    );
+
+    if (error) {
+      return err(error);
+    }
+
+    return ok(null);
+  }
 }

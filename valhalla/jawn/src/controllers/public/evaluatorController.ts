@@ -233,4 +233,25 @@ export class EvaluatorController extends Controller {
       return ok(null);
     }
   }
+
+  @Delete("{evaluatorId}/onlineEvaluators/{onlineEvaluatorId}")
+  public async deleteOnlineEvaluator(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() evaluatorId: string,
+    @Path() onlineEvaluatorId: string
+  ): Promise<Result<null, string>> {
+    const onlineEvalStore = new OnlineEvalStore(
+      request.authParams.organizationId
+    );
+    const result = await onlineEvalStore.deleteOnlineEvaluator(
+      onlineEvaluatorId
+    );
+    if (result.error) {
+      this.setStatus(500);
+      return err(result.error || "Failed to delete online evaluator");
+    } else {
+      this.setStatus(204);
+      return ok(null);
+    }
+  }
 }

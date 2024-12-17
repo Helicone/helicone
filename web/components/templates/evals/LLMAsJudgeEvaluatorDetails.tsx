@@ -11,6 +11,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -18,7 +19,7 @@ import { getJawnClient } from "@/lib/clients/jawn";
 import { useOrg } from "@/components/layout/org/organizationContext";
 import Link from "next/link";
 import { SimpleTable } from "@/components/shared/table/simpleTable";
-import { PlusIcon } from "lucide-react";
+import { PlusIcon, TrashIcon } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -74,12 +75,21 @@ const LLMAsJudgeEvaluatorDetails: React.FC<LLMAsJudgeEvaluatorDetailsProps> = ({
   });
 
   const createOnlineEvaluator = useMutation({
-    mutationFn: (data: any) => {
+    mutationFn: async (data: any) => {
       const jawn = getJawnClient(org?.currentOrg?.id!);
-      return jawn.POST("/v1/evaluator/{evaluatorId}/onlineEvaluators", {
-        params: { path: { evaluatorId: evaluator.id } },
-        body: data,
-      });
+      const result = await jawn.POST(
+        "/v1/evaluator/{evaluatorId}/onlineEvaluators",
+        {
+          params: { path: { evaluatorId: evaluator.id } },
+          body: data,
+        }
+      );
+
+      if (result.error) {
+        throw new Error();
+      }
+
+      return result.data;
     },
     onSuccess: () => {
       setNotification("Online evaluator created!", "success");
@@ -89,6 +99,37 @@ const LLMAsJudgeEvaluatorDetails: React.FC<LLMAsJudgeEvaluatorDetailsProps> = ({
     onError: (error: any) => {
       console.error(error);
       setNotification("Error creating online evaluator", "error");
+    },
+  });
+
+  const deleteOnlineEvaluator = useMutation({
+    mutationFn: async (onlineEvaluatorId: string) => {
+      const jawn = getJawnClient(org?.currentOrg?.id!);
+      const result = await jawn.DELETE(
+        `/v1/evaluator/{evaluatorId}/onlineEvaluators/{onlineEvaluatorId}`,
+        {
+          params: {
+            path: {
+              evaluatorId: evaluator.id,
+              onlineEvaluatorId: onlineEvaluatorId,
+            },
+          },
+        }
+      );
+
+      if (result.error) {
+        throw new Error();
+      }
+
+      return result.data;
+    },
+    onSuccess: () => {
+      setNotification("Online evaluator deleted!", "success");
+      onlineEvaluators.refetch();
+    },
+    onError: (error: any) => {
+      console.error(error);
+      setNotification("Error deleting online evaluator", "error");
     },
   });
 
@@ -114,8 +155,8 @@ const LLMAsJudgeEvaluatorDetails: React.FC<LLMAsJudgeEvaluatorDetailsProps> = ({
 
             <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
               <DialogTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <PlusIcon className="w-4 h-4" />
+                <Button>
+                  Create <PlusIcon className="w-4 h-4 ml-2" />
                 </Button>
               </DialogTrigger>
               <DialogContent>
@@ -140,12 +181,11 @@ const LLMAsJudgeEvaluatorDetails: React.FC<LLMAsJudgeEvaluatorDetailsProps> = ({
           </span>
           <Col className="space-y-2">
             <SimpleTable<{
-              id: string;
               sampleRate: number;
               properties: any;
+              actions: any;
             }>
               columns={[
-                { key: "id", header: "ID", render: (item) => item.id },
                 {
                   key: "sampleRate",
                   header: "Sample Rate",
@@ -154,13 +194,61 @@ const LLMAsJudgeEvaluatorDetails: React.FC<LLMAsJudgeEvaluatorDetailsProps> = ({
                 {
                   key: "properties",
                   header: "Properties",
-                  render: (item) => JSON.stringify(item.properties),
+                  render: (item) =>
+                    item.properties.map(
+                      (property: { key: string; value: string }) => (
+                        <span key={property.key}>
+                          <span className="font-medium">{property.key}</span>:{" "}
+                          {property.value}
+                        </span>
+                      )
+                    ),
+                },
+                {
+                  key: "actions",
+                  header: "Actions",
+                  render: (item) => item.actions,
                 },
               ]}
               data={onlineEvaluators.data?.data?.data.map((item) => ({
-                id: item.id,
-                sampleRate: (item.config as any).sampleRate,
-                properties: (item.config as any).properties,
+                sampleRate: (item.config as { sampleRate: number }).sampleRate,
+                properties: (
+                  item.config as {
+                    propertyFilters: { key: string; value: string }[];
+                  }
+                ).propertyFilters,
+                actions: (
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="destructive"
+                        size="icon"
+                        className="w-8 h-8"
+                      >
+                        <TrashIcon className="w-4 h-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This will delete the online evaluator and your
+                          requests will no longer be evaluated by this
+                          evaluator.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          variant="destructive"
+                          onClick={() => deleteOnlineEvaluator.mutate(item.id)}
+                        >
+                          Delete
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                ),
               }))}
             />
           </Col>

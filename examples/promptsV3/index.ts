@@ -60,7 +60,7 @@ async function main() {
       headers: {
         "Helicone-Prompt-Id": "pirate-bot",
       },
-    },
+    }
   );
   console.log(chatCompletion.choices[0].message.content);
 }

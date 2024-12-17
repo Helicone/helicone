@@ -27,12 +27,7 @@ export class OnlineEvalHandler extends AbstractLogHandler {
         (onlineEval.config as any)?.["sampleRate"] ?? 100
       );
 
-      console.log(
-        "the sample rate for",
-        onlineEval.evaluator_name,
-        "is",
-        sampleRate
-      );
+      console.log("sampleRate", sampleRate);
 
       if (
         isNaN(sampleRate) ||

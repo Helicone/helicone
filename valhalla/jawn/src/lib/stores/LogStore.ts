@@ -167,7 +167,6 @@ export class LogStore {
         }
 
         if (payload.scores && payload.scores.length > 0) {
-          console.log("payload.scores", payload.scores);
           for (const score of payload.scores) {
             await this.processScore({
               score: score.scores,
