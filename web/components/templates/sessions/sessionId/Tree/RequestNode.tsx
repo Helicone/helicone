@@ -8,7 +8,6 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { OnboardingPopover } from "@/components/templates/onboarding/OnboardingPopover";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { useOrg } from "@/components/layout/org/organizationContext";
@@ -100,71 +99,57 @@ export function RequestNode(props: {
     : "LLM";
 
   return (
-    <OnboardingPopover
-      open={isOnboardingRequest}
-      popoverContentProps={{
-        onboardingStep: "SESSIONS_CULPRIT",
-        next: () => {
-          router.push(`/prompts/${promptData.data?.id}`);
-        },
-        align: "start",
-        side: "right",
-        className: "sm:max-w-2xl",
-      }}
-      triggerAsChild={false}
+    <div
+      className={clsx(
+        "flex flex-col dark:bg-slate-900 py-[8px] pl-4 px-4 group-hover:cursor-pointer w-full",
+        selectedRequestId === node.trace?.request_id
+          ? "bg-sky-100 dark:bg-slate-900 hover:bg-sky-100 dark:hover:bg-slate-800"
+          : "bg-white dark:bg-slate-950 group-hover:bg-sky-50 dark:group-hover:bg-slate-800"
+      )}
+      onClick={() =>
+        node.children
+          ? setCloseChildren(!closeChildren)
+          : setSelectedRequestId(node.trace?.request_id ?? "")
+      }
     >
-      <div
-        className={clsx(
-          "flex flex-col dark:bg-slate-900 py-[8px] pl-4 px-4 group-hover:cursor-pointer w-full",
-          selectedRequestId === node.trace?.request_id
-            ? "bg-sky-100 dark:bg-slate-900 hover:bg-sky-100 dark:hover:bg-slate-800"
-            : "bg-white dark:bg-slate-950 group-hover:bg-sky-50 dark:group-hover:bg-slate-800"
-        )}
-        onClick={() =>
-          node.children
-            ? setCloseChildren(!closeChildren)
-            : setSelectedRequestId(node.trace?.request_id ?? "")
-        }
-      >
-        <Row className="w-full gap-2 items-center">
-          <Row className="items-center gap-2 flex-grow min-w-0">
-            <div
-              className={clsx(
-                "flex-shrink-0 px-2 py-1 text-xs font-medium rounded-md whitespace-nowrap",
-                bgColor[type as keyof typeof bgColor]
-              )}
-            >
-              {type}
-            </div>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div
-                  ref={modelRef}
-                  className="flex-grow flex-shrink-1 max-w-[200px] min-w-[100px] bg-transparent dark:bg-transparent dark:border-slate-700 text-slate-700 dark:text-slate-200 px-2 py-1 text-xs font-medium rounded-md truncate"
-                >
-                  {label ?? NAME_FOR[type as keyof typeof NAME_FOR](node)}
-                </div>
-              </TooltipTrigger>
-              {isTruncated && (
-                <TooltipContent>
-                  <span>{node.trace?.request.model}</span>
-                </TooltipContent>
-              )}
-            </Tooltip>
-            <span className="text-slate-400 dark:text-slate-600 text-[11px] whitespace-nowrap">
-              {isRequestSingleChild ? "" : `(${node.duration})`}
-            </span>
-          </Row>
-          <Row className="flex-shrink-0 items-center gap-2">
-            {node.trace?.request.status && (
-              <StatusBadge
-                statusType={node.trace?.request.status.statusType}
-                errorCode={node.trace?.request.status.code}
-              />
+      <Row className="w-full gap-2 items-center">
+        <Row className="items-center gap-2 flex-grow min-w-0">
+          <div
+            className={clsx(
+              "flex-shrink-0 px-2 py-1 text-xs font-medium rounded-md whitespace-nowrap",
+              bgColor[type as keyof typeof bgColor]
             )}
-          </Row>
+          >
+            {type}
+          </div>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div
+                ref={modelRef}
+                className="flex-grow flex-shrink-1 max-w-[200px] min-w-[100px] bg-transparent dark:bg-transparent dark:border-slate-700 text-slate-700 dark:text-slate-200 px-2 py-1 text-xs font-medium rounded-md truncate"
+              >
+                {label ?? NAME_FOR[type as keyof typeof NAME_FOR](node)}
+              </div>
+            </TooltipTrigger>
+            {isTruncated && (
+              <TooltipContent>
+                <span>{node.trace?.request.model}</span>
+              </TooltipContent>
+            )}
+          </Tooltip>
+          <span className="text-slate-400 dark:text-slate-600 text-[11px] whitespace-nowrap">
+            {isRequestSingleChild ? "" : `(${node.duration})`}
+          </span>
         </Row>
-      </div>
-    </OnboardingPopover>
+        <Row className="flex-shrink-0 items-center gap-2">
+          {node.trace?.request.status && (
+            <StatusBadge
+              statusType={node.trace?.request.status.statusType}
+              errorCode={node.trace?.request.status.code}
+            />
+          )}
+        </Row>
+      </Row>
+    </div>
   );
 }

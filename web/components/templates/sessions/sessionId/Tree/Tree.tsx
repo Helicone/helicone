@@ -12,7 +12,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { OnboardingPopover } from "@/components/templates/onboarding/OnboardingPopover";
 
 export interface TreeNodeProps {
   node: TreeNodeData;
@@ -209,40 +208,25 @@ export const Tree: React.FC<TreeProps> = ({
   sessionId,
 }) => {
   return (
-    <OnboardingPopover
-      popoverContentProps={{
-        onboardingStep: "SESSIONS_PAGE",
-        align: "start",
-        side: "right",
-        next: () => {
-          selectedRequestIdDispatch[1](
-            onBoardingRequestTrace?.request_id ?? ""
-          );
-        },
-      }}
+    <div
+      className={clsx(
+        "font-sans bg-slate-50 dark:bg-black border-t border-slate-200 dark:border-slate-700",
+        className
+      )}
     >
-      <div
-        className={clsx(
-          "font-sans bg-slate-50 dark:bg-black border-t border-slate-200 dark:border-slate-700",
-          className
-        )}
-      >
-        {data.children &&
-          data.children.map((child, index) => (
-            <TreeNode
-              key={index}
-              node={child}
-              selectedRequestIdDispatch={selectedRequestIdDispatch}
-              isLastChild={
-                !!data.children && index === data.children.length - 1
-              }
-              onBoardingRequestTrace={onBoardingRequestTrace}
-              level={0}
-              collapseAll={collapseAll}
-              setShowDrawer={setShowDrawer}
-            />
-          ))}
-      </div>
-    </OnboardingPopover>
+      {data.children &&
+        data.children.map((child, index) => (
+          <TreeNode
+            key={index}
+            node={child}
+            selectedRequestIdDispatch={selectedRequestIdDispatch}
+            isLastChild={!!data.children && index === data.children.length - 1}
+            onBoardingRequestTrace={onBoardingRequestTrace}
+            level={0}
+            collapseAll={collapseAll}
+            setShowDrawer={setShowDrawer}
+          />
+        ))}
+    </div>
   );
 };

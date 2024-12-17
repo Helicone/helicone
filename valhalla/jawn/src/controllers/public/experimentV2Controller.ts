@@ -61,6 +61,7 @@ export interface ExperimentV2Row {
   inputs: Record<string, string>;
   prompt_version: string;
   requests: ExperimentV2Output[];
+  auto_prompt_inputs: any[];
 }
 
 export interface ExtendedExperimentData extends ExperimentV2 {
@@ -216,6 +217,7 @@ export class ExperimentV2Controller extends Controller {
       rows: {
         inputRecordId: string;
         inputs: Record<string, string>;
+        autoInputs: any[];
       }[];
     },
     @Request() request: JawnAuthenticatedRequest
