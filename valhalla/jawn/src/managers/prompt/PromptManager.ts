@@ -18,8 +18,57 @@ import { resultMap } from "../../lib/shared/result";
 import { User } from "../../models/user";
 import { BaseManager } from "../BaseManager";
 import { autoFillInputs } from "@helicone/prompts";
+import { RequestManager } from "../request/RequestManager";
+import { supabaseServer } from "../../lib/db/supabase";
 
 export class PromptManager extends BaseManager {
+  async getOrCreatePromptVersionFromRequest(
+    requestId: string
+  ): Promise<Result<string, string>> {
+    const requestManager = new RequestManager(this.authParams);
+    const requestResult = await requestManager.uncachedGetRequestByIdWithBody(
+      requestId
+    );
+    if (requestResult.error || !requestResult.data) {
+      return err(requestResult.error);
+    }
+
+    const promptVersionResult = await this.getPromptVersionFromRequest(
+      requestId
+    );
+    if (promptVersionResult.data) {
+      return ok(promptVersionResult.data);
+    }
+    const prompt = await this.createPrompt({
+      metadata: {
+        promptFromRequest: true,
+      },
+      prompt: requestResult.data.request_body,
+      userDefinedId: `prompt-from-request-${requestId}-${Date.now()}`,
+    });
+
+    if (prompt.error || !prompt.data) {
+      return err(prompt.error);
+    }
+
+    return ok(prompt.data.prompt_version_id);
+  }
+
+  private async getPromptVersionFromRequest(
+    requestId: string
+  ): Promise<Result<string, string>> {
+    const res = await supabaseServer.client
+      .from("prompt_input_record")
+      .select("*")
+      .eq("source_request", requestId)
+      .single();
+
+    if (res.error || !res.data) {
+      return err("Failed to get prompt version from request");
+    }
+
+    return ok(res.data.prompt_version);
+  }
   async createNewPromptVersion(
     parentPromptVersionId: string,
     params: PromptCreateSubversionParams
@@ -460,6 +509,7 @@ export class PromptManager extends BaseManager {
     WHERE prompt_v2.organization = $1
     AND prompt_v2.soft_delete = false
     AND (${filterWithAuth.filter})
+    AND (prompt_v2.metadata->>'promptFromRequest' != 'true' OR prompt_v2.metadata->>'promptFromRequest' IS NULL)
     ORDER BY created_at DESC
     `,
       filterWithAuth.argsAcc
