@@ -13,11 +13,22 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { useOrg } from "@/components/layout/org/organizationContext";
 import Link from "next/link";
-
+import { SimpleTable } from "@/components/shared/table/simpleTable";
+import { PlusIcon } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import useNotification from "@/components/shared/notification/useNotification";
+import AddOnlineEvaluatorForm from "./AddOnlineEvaluatorForm";
 interface LLMAsJudgeEvaluatorDetailsProps {
   evaluator: any; // Replace 'any' with the correct type
   deleteEvaluator: any; // Replace 'any' with the correct type
@@ -29,6 +40,7 @@ const LLMAsJudgeEvaluatorDetails: React.FC<LLMAsJudgeEvaluatorDetailsProps> = ({
   deleteEvaluator,
   setSelectedEvaluator,
 }) => {
+  const { setNotification } = useNotification();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = useState("");
   const org = useOrg();
@@ -47,6 +59,41 @@ const LLMAsJudgeEvaluatorDetails: React.FC<LLMAsJudgeEvaluatorDetailsProps> = ({
     },
   });
 
+  const onlineEvaluators = useQuery({
+    queryKey: ["onlineEvaluators", evaluator.id],
+    queryFn: () => {
+      const jawn = getJawnClient(org?.currentOrg?.id!);
+      return jawn.GET("/v1/evaluator/{evaluatorId}/onlineEvaluators", {
+        params: {
+          path: {
+            evaluatorId: evaluator.id,
+          },
+        },
+      });
+    },
+  });
+
+  const createOnlineEvaluator = useMutation({
+    mutationFn: (data: any) => {
+      const jawn = getJawnClient(org?.currentOrg?.id!);
+      return jawn.POST("/v1/evaluator/{evaluatorId}/onlineEvaluators", {
+        params: { path: { evaluatorId: evaluator.id } },
+        body: data,
+      });
+    },
+    onSuccess: () => {
+      setNotification("Online evaluator created!", "success");
+      onlineEvaluators.refetch();
+      setShowCreateModal(false);
+    },
+    onError: (error: any) => {
+      console.error(error);
+      setNotification("Error creating online evaluator", "error");
+    },
+  });
+
+  const [showCreateModal, setShowCreateModal] = useState(false);
+
   return (
     <Col className="space-y-4">
       <p>This evaluator is a LLM as a judge evaluator.</p>
@@ -60,6 +107,65 @@ const LLMAsJudgeEvaluatorDetails: React.FC<LLMAsJudgeEvaluatorDetailsProps> = ({
         </ScrollArea>
         <span>Editing is not yet supported for LLM as a judge evaluators.</span>
       </Col>
+      {onlineEvaluators.data?.data?.data && (
+        <Col className="space-y-2">
+          <Row className="justify-between">
+            <h3 className="text-lg font-medium">Online Evaluators</h3>
+
+            <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
+              <DialogTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <PlusIcon className="w-4 h-4" />
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Create Online Evaluator</DialogTitle>
+                </DialogHeader>
+                <DialogDescription>
+                  Create a new online evaluator for this evaluator.
+                </DialogDescription>
+                <AddOnlineEvaluatorForm
+                  onSubmit={(data) => {
+                    createOnlineEvaluator.mutate(data);
+                  }}
+                  isLoading={createOnlineEvaluator.isLoading}
+                  close={() => setShowCreateModal(false)}
+                />
+              </DialogContent>
+            </Dialog>
+          </Row>
+          <span>
+            This evaluator has been used in the following online evaluators:
+          </span>
+          <Col className="space-y-2">
+            <SimpleTable<{
+              id: string;
+              sampleRate: number;
+              properties: any;
+            }>
+              columns={[
+                { key: "id", header: "ID", render: (item) => item.id },
+                {
+                  key: "sampleRate",
+                  header: "Sample Rate",
+                  render: (item) => item.sampleRate,
+                },
+                {
+                  key: "properties",
+                  header: "Properties",
+                  render: (item) => JSON.stringify(item.properties),
+                },
+              ]}
+              data={onlineEvaluators.data?.data?.data.map((item) => ({
+                id: item.id,
+                sampleRate: (item.config as any).sampleRate,
+                properties: (item.config as any).properties,
+              }))}
+            />
+          </Col>
+        </Col>
+      )}
       {experiments.data?.data?.data && (
         <Col className="space-y-2">
           <h3 className="text-lg font-medium">Experiments</h3>
@@ -69,18 +175,19 @@ const LLMAsJudgeEvaluatorDetails: React.FC<LLMAsJudgeEvaluatorDetailsProps> = ({
           <Col className="space-y-2">
             {experiments.data?.data?.data?.map((experiment) => (
               <div key={experiment.experiment_id}>
-                <Button variant="link" className="p-0" asChild>
-                  <Link href={`/experiments/${experiment.experiment_id}`}>
-                    <Row className="justify-between">
-                      <span>{experiment.experiment_id}</span>
-                      <span>
-                        {new Date(
-                          experiment.experiment_created_at
-                        ).toLocaleString()}
-                      </span>
-                    </Row>
-                  </Link>
-                </Button>
+                <Link
+                  href={`/experiments/${experiment.experiment_id}`}
+                  className="hover:underline"
+                >
+                  <Row className="justify-between w-full">
+                    <span>{experiment.experiment_name}</span>
+                    <span>
+                      {new Date(
+                        experiment.experiment_created_at
+                      ).toLocaleString()}
+                    </span>
+                  </Row>
+                </Link>
               </div>
             ))}
           </Col>

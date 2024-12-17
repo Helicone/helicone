@@ -2489,6 +2489,7 @@ export type Database = {
       score_attribute: {
         Row: {
           created_at: string | null
+          evaluator_id: string | null
           id: string
           organization: string
           score_key: string
@@ -2496,6 +2497,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          evaluator_id?: string | null
           id?: string
           organization: string
           score_key: string
@@ -2503,6 +2505,7 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          evaluator_id?: string | null
           id?: string
           organization?: string
           score_key?: string
@@ -2514,6 +2517,13 @@ export type Database = {
             columns: ["organization"]
             isOneToOne: false
             referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "public_score_attribute_evaluator_id_fkey"
+            columns: ["evaluator_id"]
+            isOneToOne: false
+            referencedRelation: "evaluator"
             referencedColumns: ["id"]
           },
         ]

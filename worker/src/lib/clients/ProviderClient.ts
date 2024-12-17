@@ -103,6 +103,8 @@ export async function callProvider(props: CallProps): Promise<Response> {
     headersWithExtra = joinHeaders(removedHeaders, props.extraHeaders);
   }
 
+  headersWithExtra.set("Accept-Encoding", "Identity");
+
   const baseInit = { method, headers: headersWithExtra };
   const init = method === "GET" ? { ...baseInit } : { ...baseInit, body };
 

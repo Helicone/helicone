@@ -699,21 +699,14 @@ export function ExperimentTable({
 
               <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
                 <PopoverTrigger asChild>
-                  <OnboardingPopover
-                    popoverContentProps={{
-                      onboardingStep: "EXPERIMENTS_ADD_TEST_CASES",
-                      next: addRowsBatchForOnboarding,
-                    }}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="self-start flex flex-row space-x-2 text-slate-800 mt-0 shadow-none"
                   >
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="self-start flex flex-row space-x-2 text-slate-800 mt-0 shadow-none"
-                    >
-                      <PlusIcon className="h-4 w-4" />
-                      Add row
-                    </Button>
-                  </OnboardingPopover>
+                    <PlusIcon className="h-4 w-4" />
+                    Add row
+                  </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-full px-2 py-2">
                   <AddRowPopover

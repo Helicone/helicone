@@ -27,17 +27,21 @@ export class OnlineEvalHandler extends AbstractLogHandler {
         (onlineEval.config as any)?.["sampleRate"] ?? 100
       );
 
+      console.log(
+        "the sample rate for",
+        onlineEval.evaluator_name,
+        "is",
+        sampleRate
+      );
+
       if (
         isNaN(sampleRate) ||
         sampleRate < 0 ||
         sampleRate > 100 ||
-        Math.random() * 100 > sampleRate
+        Math.random() * 100 > sampleRate ||
+        (context.processedLog.request.properties &&
+          "Helicone-Experiment-Id" in context.processedLog.request.properties)
       ) {
-        context.processedLog.request.scores =
-          context.processedLog.request.scores ?? {};
-        context.processedLog.request.scores[
-          getEvaluatorScoreName(onlineEval.evaluator_name)
-        ] = undefined;
         continue;
       }
 
@@ -48,18 +52,13 @@ export class OnlineEvalHandler extends AbstractLogHandler {
         value: string;
       }[];
 
-      const shouldWebhookProperties = propertyFilters.every(
+      const shouldOnlineEvalProperties = propertyFilters.every(
         (propertyFilter) =>
           context.processedLog.request.properties?.[propertyFilter.key] ===
           propertyFilter.value
       );
 
-      if (!shouldWebhookProperties) {
-        context.processedLog.request.scores =
-          context.processedLog.request.scores ?? {};
-        context.processedLog.request.scores[
-          getEvaluatorScoreName(onlineEval.evaluator_name)
-        ] = undefined;
+      if (!shouldOnlineEvalProperties) {
         continue;
       }
 
@@ -87,11 +86,17 @@ export class OnlineEvalHandler extends AbstractLogHandler {
       try {
         const result = await llmAsAJudge.evaluate();
 
-        const scoreName = getEvaluatorScoreName(onlineEval.evaluator_name);
+        const scoreName =
+          getEvaluatorScoreName(onlineEval.evaluator_name) +
+          (typeof result.score === "boolean" ? "-hcone-bool" : "");
 
         context.processedLog.request.scores =
           context.processedLog.request.scores ?? {};
         context.processedLog.request.scores[scoreName] = result.score ?? 0;
+        context.processedLog.request.scores_evaluatorIds =
+          context.processedLog.request.scores_evaluatorIds ?? {};
+        context.processedLog.request.scores_evaluatorIds[scoreName] =
+          onlineEval.evaluator_id;
       } catch (e) {
         console.error(e);
       }

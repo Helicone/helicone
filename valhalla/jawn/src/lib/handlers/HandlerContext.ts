@@ -77,6 +77,7 @@ export type ProcessedLog = {
     assets?: Map<string, string>;
     properties?: Record<string, string>;
     scores?: Record<string, number | boolean | undefined>;
+    scores_evaluatorIds?: Record<string, string>;
   };
   response: {
     model?: string;

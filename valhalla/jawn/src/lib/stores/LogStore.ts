@@ -167,11 +167,13 @@ export class LogStore {
         }
 
         if (payload.scores && payload.scores.length > 0) {
+          console.log("payload.scores", payload.scores);
           for (const score of payload.scores) {
             await this.processScore({
               score: score.scores,
               requestId: score.requestId,
               organizationId: score.organizationId,
+              evaluatorIds: score.evaluatorIds,
               t,
             });
           }
@@ -424,39 +426,40 @@ export class LogStore {
     requestId,
     t,
     organizationId,
+    evaluatorIds,
   }: {
     score: Record<string, number | boolean | undefined>;
     requestId: string;
     t: pgPromise.ITask<{}>;
     organizationId: string;
+    evaluatorIds: Record<string, string>;
   }) {
     const mappedScores = this.mapScores(score);
 
     // Convert arrays for the upsert
-    const scoreKeys = mappedScores.map((s) =>
-      s.score_attribute_type === "boolean"
-        ? `${s.score_attribute_key}-hcone-bool`
-        : s.score_attribute_key
-    );
+    const scoreKeys = mappedScores.map((s) => s.score_attribute_key);
     const scoreTypes = mappedScores.map((s) => s.score_attribute_type);
     const scoreValues = mappedScores.map((s) => s.score_attribute_value);
     const organizationIds = Array(scoreKeys.length).fill(organizationId);
-
+    const scoreEvaluatorIds = mappedScores.map((s) => {
+      return evaluatorIds[s.score_attribute_key] || null;
+    });
     // First upsert the score attributes and get their IDs
     const upsertedAttributes = await t.many(
       `
       WITH upserted_attributes AS (
-        INSERT INTO score_attribute (score_key, value_type, organization)
-        SELECT unnest($1::text[]), unnest($2::text[]), unnest($3::uuid[])
+        INSERT INTO score_attribute (score_key, value_type, organization, evaluator_id)
+        SELECT unnest($1::text[]), unnest($2::text[]), unnest($3::uuid[]), unnest($4::uuid[])
         ON CONFLICT (score_key, organization) DO UPDATE SET
           score_key = EXCLUDED.score_key,
-          value_type = EXCLUDED.value_type
+          value_type = EXCLUDED.value_type,
+          evaluator_id = EXCLUDED.evaluator_id
         RETURNING id, score_key
       )
       SELECT id, score_key
       FROM upserted_attributes
     `,
-      [scoreKeys, scoreTypes, organizationIds]
+      [scoreKeys, scoreTypes, organizationIds, scoreEvaluatorIds]
     );
 
     // Then insert the score values

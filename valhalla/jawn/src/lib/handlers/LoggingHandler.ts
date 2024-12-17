@@ -40,6 +40,7 @@ export type BatchPayload = {
     organizationId: string;
     requestId: string;
     scores: Record<string, number | boolean | undefined>;
+    evaluatorIds: Record<string, string>;
   }[];
 };
 
@@ -93,11 +94,17 @@ export class LoggingHandler extends AbstractLogHandler {
       this.batchPayload.responses.push(responseMapped);
       this.batchPayload.assets.push(...assetsMapped);
       this.batchPayload.searchRecords.push(...searchRecordsMapped);
-      this.batchPayload.scores.push({
-        organizationId: context.orgParams?.id ?? "",
-        requestId: requestMapped.id ?? "",
-        scores: context.processedLog.request.scores ?? {},
-      });
+      if (
+        context.processedLog.request.scores &&
+        Object.keys(context.processedLog.request.scores).length > 0
+      ) {
+        this.batchPayload.scores.push({
+          organizationId: context.orgParams?.id ?? "",
+          requestId: requestMapped.id ?? "",
+          scores: context.processedLog.request.scores ?? {},
+          evaluatorIds: context.processedLog.request.scores_evaluatorIds ?? {},
+        });
+      }
 
       if (s3RecordMapped) {
         this.batchPayload.s3Records.push(s3RecordMapped);
