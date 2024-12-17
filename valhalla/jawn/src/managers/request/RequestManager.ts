@@ -65,6 +65,29 @@ export class RequestManager extends BaseManager {
     );
   }
 
+  // Never cache this unless you have a good reason
+  async uncachedGetRequestByIdWithBody(
+    requestId: string
+  ): Promise<Result<HeliconeRequest, string>> {
+    const request = await this.getRequestById(requestId);
+    if (request.error || !request.data) {
+      return err(request.error);
+    }
+    if (!request.data.signed_body_url) {
+      return err("Request body not found");
+    }
+    try {
+      const bodyResponse = await fetch(request.data.signed_body_url);
+      if (!bodyResponse.ok) {
+        return err("Error fetching request body");
+      }
+      const bodyData = (await bodyResponse.json())?.["request"];
+      return ok({ ...request.data, request_body: bodyData });
+    } catch (e) {
+      return err("Error fetching request body");
+    }
+  }
+
   async getRequestByIds(
     requestIds: string[]
   ): Promise<Result<HeliconeRequest[], string>> {
