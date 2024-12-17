@@ -86,8 +86,14 @@ export class ExperimentV2Manager extends BaseManager {
     const res = await supabaseServer.client
       .from("prompt_input_record")
       .select("*")
-      .eq("request_id", requestId)
+      .eq("source_request", requestId)
       .single();
+
+    if (res.error || !res.data) {
+      return err("Failed to get prompt version from request");
+    }
+
+    return ok(res.data.prompt_version);
   }
 
   async hasAccessToExperiment(experimentId: string): Promise<boolean> {
