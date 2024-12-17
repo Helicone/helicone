@@ -74,40 +74,6 @@ const RequestDiv = (props: RequestDivProps) => {
     };
   }, [onNextHandler, onPrevHandler, setOpen]);
 
-  const promptVersion = useMemo(() => {
-    return request?.customProperties?.["Helicone-Prompt-Version-Id"];
-  }, [request]);
-
-  // const handleCreateExperiment = async () => {
-  //   if (!selectedPromptId || !selectedVersionId) {
-  //     notification.setNotification(
-  //       "Please select a prompt and version",
-  //       "error"
-  //     );
-  //     return;
-  //   }
-  //   const promptVersion = promptVersions?.find(
-  //     (p) => p.id === selectedVersionId
-  //   );
-  //   const prompt = prompts?.find((p) => p.id === selectedPromptId);
-
-  //   const experimentTableResult = await jawn.POST("/v2/experiment/new", {
-  //     body: {
-  //       name: `${prompt?.user_defined_id}_V${promptVersion?.major_version}.${promptVersion?.minor_version}`,
-  //       originalPromptVersion: selectedVersionId,
-  //     },
-  //   });
-
-  //   if (experimentTableResult.error || !experimentTableResult.data) {
-  //     notification.setNotification("Failed to create experiment", "error");
-  //     return;
-  //   }
-
-  //   router.push(
-  //     `/experiments/${experimentTableResult.data?.data?.experimentId}`
-  //   );
-  // };
-
   const jawn = useJawnClient();
 
   return (
@@ -117,7 +83,6 @@ const RequestDiv = (props: RequestDivProps) => {
       actions={
         <div className="w-full flex flex-row justify-between items-center">
           <div className="flex flex-row items-center space-x-2">
-            {JSON.stringify(promptVersion)}
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
