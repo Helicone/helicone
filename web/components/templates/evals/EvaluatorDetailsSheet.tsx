@@ -27,8 +27,8 @@ export function getEvaluatorScoreName(
 interface EvaluatorDetailsSheetProps {
   selectedEvaluator: EvalMetric | null;
   setSelectedEvaluator: (evaluator: EvalMetric | null) => void;
-  LLMAsJudgeEvaluators: ReturnType<typeof useEvaluators>["evaluators"]; // Replace 'any' with the correct type
-  deleteEvaluator: ReturnType<typeof useEvaluators>["deleteEvaluator"]; // Replace 'any' with the correct type
+  LLMAsJudgeEvaluators: ReturnType<typeof useEvaluators>["evaluators"];
+  deleteEvaluator: ReturnType<typeof useEvaluators>["deleteEvaluator"];
 }
 
 const EvaluatorDetailsSheet: React.FC<EvaluatorDetailsSheetProps> = ({
@@ -41,7 +41,7 @@ const EvaluatorDetailsSheet: React.FC<EvaluatorDetailsSheetProps> = ({
     return LLMAsJudgeEvaluators.data?.data?.data?.find(
       (e) =>
         getEvaluatorScoreName(e.name, e.scoring_type) ===
-        selectedEvaluator?.name
+          selectedEvaluator?.name || e.name === selectedEvaluator?.name
     );
   }, [LLMAsJudgeEvaluators, selectedEvaluator]);
 
@@ -58,12 +58,14 @@ const EvaluatorDetailsSheet: React.FC<EvaluatorDetailsSheetProps> = ({
           <SheetTitle>{selectedEvaluator?.name}</SheetTitle>
         </SheetHeader>
         <SheetDescription>
-          {LLMAsJudgeEvaluator && (
+          {LLMAsJudgeEvaluator ? (
             <LLMAsJudgeEvaluatorDetails
               evaluator={LLMAsJudgeEvaluator}
               deleteEvaluator={deleteEvaluator}
               setSelectedEvaluator={setSelectedEvaluator}
             />
+          ) : (
+            <p>This evaluator is a default evaluator.</p>
           )}
         </SheetDescription>
       </SheetContent>
