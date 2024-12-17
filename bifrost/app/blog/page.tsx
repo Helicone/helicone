@@ -216,6 +216,11 @@ export type BlogStructure =
 const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
+      folderName: "crewai-vs-dify-ai",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "google-gemini-exp-1206",
     },
   },
