@@ -1,4 +1,4 @@
-import { BeakerIcon, ClipboardDocumentIcon } from "@heroicons/react/24/outline";
+import { ClipboardDocumentIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/router";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedDiv from "../../shared/themed/themedDiv";
@@ -6,7 +6,7 @@ import { NormalizedRequest } from "./builder/abstractRequestBuilder";
 import { ArrowDownIcon, ArrowUpIcon } from "@heroicons/react/20/solid";
 import { clsx } from "../../shared/clsx";
 import RequestRow from "./requestRow";
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 import {
   Tooltip,
   TooltipContent,

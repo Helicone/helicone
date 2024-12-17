@@ -509,6 +509,7 @@ export class PromptManager extends BaseManager {
     WHERE prompt_v2.organization = $1
     AND prompt_v2.soft_delete = false
     AND (${filterWithAuth.filter})
+    AND (prompt_v2.metadata->>'promptFromRequest' != 'true' OR prompt_v2.metadata->>'promptFromRequest' IS NULL)
     ORDER BY created_at DESC
     `,
       filterWithAuth.argsAcc
