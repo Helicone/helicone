@@ -55,25 +55,29 @@ const EvalsPage = () => {
 
   const evals = useMemo(() => {
     const allEvaluators =
-      defaultEvaluators?.data?.data?.data?.map((evalRow) => ({
-        ...evalRow,
-        scoreDistribution:
-          scoreDistributions?.data?.data?.data?.find(
-            (s) => s.name === evalRow.name
-          )?.distribution ?? [],
-        valueType: evalRow.name.includes("-hcone-bool") ? "Boolean" : "Numeric",
-        type: LLMAsJudgeEvaluators.data?.data?.data
+      defaultEvaluators?.data?.data?.data?.map((evalRow) => {
+        const isLLMAsJudge = LLMAsJudgeEvaluators.data?.data?.data
           ?.map((e) => getEvaluatorScoreName(e.name, e.scoring_type))
-          .includes(evalRow.name)
-          ? "LLM as a judge"
-          : "Default",
-        id: evalRow.name,
-      })) ?? [];
+          .includes(evalRow.name);
+        return {
+          ...evalRow,
+          scoreDistribution:
+            scoreDistributions?.data?.data?.data?.find(
+              (s) => s.name === evalRow.name
+            )?.distribution ?? [],
+          valueType: evalRow.name.includes("-hcone-bool")
+            ? "Boolean"
+            : "Numeric",
+          type: isLLMAsJudge ? "LLM as a judge" : "Default",
+          id: evalRow.name,
+        };
+      }) ?? [];
 
     for (const evaluator of LLMAsJudgeEvaluators.data?.data?.data ?? []) {
-      const scoreName =
-        getEvaluatorScoreName(evaluator.name, evaluator.scoring_type) +
-        (evaluator.scoring_type === "LLM-BOOLEAN" ? "-hcone-bool" : "");
+      const scoreName = getEvaluatorScoreName(
+        evaluator.name,
+        evaluator.scoring_type
+      );
       if (allEvaluators.find((e) => e.name === scoreName)) {
       } else {
         allEvaluators.push({
