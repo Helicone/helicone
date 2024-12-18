@@ -96,6 +96,8 @@ export type HeliconeMeta = {
   lytixKey?: string;
   lytixHost?: string;
   heliconeManualAccessKey?: string;
+  experimentId?: string;
+  evaluatorId?: string;
 };
 
 export type Message = {

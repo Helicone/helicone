@@ -18,6 +18,77 @@ import {
 } from "@/components/ui/tooltip";
 import { InfoIcon } from "lucide-react";
 
+// First, let's define the type for the usage item
+type UsageItem = {
+  amount: number;
+  description: string;
+  model: string;
+  provider: string;
+  prompt_tokens: number;
+  completion_tokens: number;
+  totalCost: {
+    completion_token: number;
+    prompt_token: number;
+  };
+};
+
+// Create a reusable component for the usage section
+const UsageSection: React.FC<{
+  title: string;
+  items: UsageItem[];
+  formatCurrency: (amount: number) => string;
+}> = ({ title, items, formatCurrency }) => {
+  if (items.length === 0) return null;
+
+  return (
+    <>
+      <h4 className="font-medium">{title}</h4>
+      {items.map((item, index) => (
+        <div key={index} className="flex justify-between items-center text-sm">
+          <div className="flex gap-1 items-center">
+            <span>{item.model}</span>
+            <Tooltip>
+              <TooltipTrigger>
+                <InfoIcon className="w-3 h-3 text-slate-500" />
+              </TooltipTrigger>
+              <TooltipContent className="flex flex-col gap-2 w-full">
+                <TokenInfoRow
+                  label="Completion Tokens"
+                  value={item.completion_tokens.toLocaleString()}
+                />
+                <TokenInfoRow
+                  label="Prompt Tokens"
+                  value={item.prompt_tokens.toLocaleString()}
+                />
+                <TokenInfoRow
+                  label="Cost/1K Completion Tokens"
+                  value={formatCurrency(item.totalCost.completion_token * 1000)}
+                />
+                <TokenInfoRow
+                  label="Cost/1K Prompt Tokens"
+                  value={formatCurrency(item.totalCost.prompt_token * 1000)}
+                />
+              </TooltipContent>
+            </Tooltip>
+          </div>
+          <span>{formatCurrency(item.amount)}</span>
+        </div>
+      ))}
+    </>
+  );
+};
+
+// Helper component for tooltip rows
+const TokenInfoRow: React.FC<{ label: string; value: string }> = ({
+  label,
+  value,
+}) => (
+  <div className="flex justify-between items-center">
+    <span className="font-medium mr-3">{label}:</span>
+    <span>{value}</span>
+  </div>
+);
+
 export const InvoiceSheet: React.FC = () => {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const org = useOrg();
@@ -95,81 +166,16 @@ export const InvoiceSheet: React.FC = () => {
                       </div>
                     )
                   )}
-                  {upcomingInvoice.data.data.experiments_usage.length > 0 && (
-                    <>
-                      <h4 className="font-medium">Experiments</h4>
-                      {upcomingInvoice.data.data.experiments_usage.map(
-                        (
-                          item: {
-                            amount: number;
-                            description: string;
-                            model: string;
-                            provider: string;
-                            prompt_tokens: number;
-                            completion_tokens: number;
-                            totalCost: {
-                              completion_token: number;
-                              prompt_token: number;
-                            };
-                          },
-                          index: number
-                        ) => (
-                          <div
-                            key={index}
-                            className="flex justify-between items-center text-sm"
-                          >
-                            <div className="flex gap-1 items-center">
-                              <span>{item.model}</span>
-                              <Tooltip>
-                                <TooltipTrigger>
-                                  <InfoIcon className="w-3 h-3 text-slate-500" />
-                                </TooltipTrigger>
-                                <TooltipContent className="flex flex-col gap-2 w-full">
-                                  <div className="flex justify-between items-center">
-                                    <span className="font-medium mr-3">
-                                      Completion Tokens:
-                                    </span>
-                                    <span>
-                                      {item.completion_tokens.toLocaleString()}
-                                    </span>
-                                  </div>
-                                  <div className="flex justify-between items-center">
-                                    <span className="font-medium mr-3">
-                                      Prompt Tokens:
-                                    </span>
-                                    <span>
-                                      {item.prompt_tokens.toLocaleString()}
-                                    </span>
-                                  </div>
-                                  <div className="flex justify-between items-center">
-                                    <span className="font-medium mr-3">
-                                      Cost/1K Completion Tokens:
-                                    </span>
-                                    <span>
-                                      {formatCurrency(
-                                        item.totalCost.completion_token * 1000
-                                      )}
-                                    </span>
-                                  </div>
-                                  <div className="flex justify-between items-center">
-                                    <span className="font-medium mr-3">
-                                      Cost/1K Prompt Tokens:
-                                    </span>
-                                    <span>
-                                      {formatCurrency(
-                                        item.totalCost.prompt_token * 1000
-                                      )}
-                                    </span>
-                                  </div>
-                                </TooltipContent>
-                              </Tooltip>
-                            </div>
-                            <span>{formatCurrency(item.amount)}</span>
-                          </div>
-                        )
-                      )}
-                    </>
-                  )}
+                  <UsageSection
+                    title="Experiments"
+                    items={upcomingInvoice.data.data.experiments_usage}
+                    formatCurrency={formatCurrency}
+                  />
+                  <UsageSection
+                    title="Evaluators"
+                    items={upcomingInvoice.data.data.evaluators_usage}
+                    formatCurrency={formatCurrency}
+                  />
                 </div>
               </div>
               {upcomingInvoice.data.data.discount && (
