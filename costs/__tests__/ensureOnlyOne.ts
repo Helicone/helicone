@@ -826,6 +826,8 @@ WHEN (request_response_rmt.model ILIKE 'o1-preview-2024-09-12') THEN 15000 * req
 WHEN (request_response_rmt.model ILIKE 'o1-mini') THEN 3000 * request_response_rmt.prompt_tokens + 12000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'o1-mini-2024-09-12') THEN 3000 * request_response_rmt.prompt_tokens + 12000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model LIKE 'ft:gpt-3.5-turbo-%') THEN 3000 * request_response_rmt.prompt_tokens + 6000 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model LIKE 'ft:gpt-4o-mini-2024-07-18:%') THEN 300 * request_response_rmt.prompt_tokens + 1200 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model LIKE 'ft:gpt-4o-2024-08-06:%') THEN 3750 * request_response_rmt.prompt_tokens + 15000 * request_response_rmt.completion_tokens
   ELSE 0
 END
 
