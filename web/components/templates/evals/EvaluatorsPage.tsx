@@ -27,7 +27,6 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { Check, ChevronsUpDown } from "lucide-react";
-import { useRouter } from "next/router";
 
 // Import Shadcn UI components for dropdown
 import { CreateNewEvaluator } from "@/components/shared/CreateNewEvaluator/CreateNewEvaluator";
@@ -117,8 +116,6 @@ const EvalsPage = () => {
   const [selectedEvaluator, setSelectedEvaluator] = useState<EvalMetric | null>(
     null
   );
-
-  const router = useRouter();
 
   return (
     <>

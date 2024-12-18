@@ -13,7 +13,6 @@ import {
   Tags,
 } from "tsoa";
 import { supabaseServer } from "../../lib/db/supabase";
-import { run, runOriginalExperiment } from "../../lib/experiment/run";
 import { FilterLeafSubset } from "../../lib/shared/filters/filterDefs";
 import { Result, err, ok } from "../../lib/shared/result";
 import {
@@ -23,16 +22,15 @@ import {
   IncludeExperimentKeys,
   Score,
 } from "../../lib/stores/experimentStore";
+import { DatasetManager } from "../../managers/dataset/DatasetManager";
+import { EvaluatorManager } from "../../managers/evaluator/EvaluatorManager";
 import {
   CreateExperimentTableParams,
   ExperimentManager,
 } from "../../managers/experiment/ExperimentManager";
+import { InputsManager } from "../../managers/inputs/InputsManager";
 import { JawnAuthenticatedRequest } from "../../types/request";
 import { EvaluatorResult } from "./evaluatorController";
-import { EvaluatorManager } from "../../managers/evaluator/EvaluatorManager";
-import { InputsManager } from "../../managers/inputs/InputsManager";
-import { DatasetManager } from "../../managers/dataset/DatasetManager";
-import { Database } from "../../lib/db/database.types";
 
 export type ExperimentFilterBranch = {
   left: ExperimentFilterNode;

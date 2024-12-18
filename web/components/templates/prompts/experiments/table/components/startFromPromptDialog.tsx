@@ -264,31 +264,6 @@ export const StartFromPromptDialog = ({
       },
     });
 
-    // const experimentTableResult = await jawn.POST("/v1/experiment/table/new", {
-    //   body: {
-    //     datasetId: dataset.data?.data?.datasetId!,
-    //     promptVersionId: selectedVersionId!,
-    //     newHeliconeTemplate: JSON.stringify(promptVersion?.helicone_template),
-    //     isMajorVersion: false,
-    //     promptSubversionMetadata: {
-    //       experimentAssigned: true,
-    //     },
-    //     experimentMetadata: {
-    //       prompt_id: selectedPromptId!,
-    //       prompt_version: selectedVersionId!,
-    //       experiment_name:
-    //         `${prompt?.user_defined_id}_V${promptVersion?.major_version}.${promptVersion?.minor_version}` ||
-    //         "",
-    //     },
-    //     experimentTableMetadata: {
-    //       datasetId: dataset.data?.data?.datasetId!,
-    //       model: promptVersion?.model,
-    //       prompt_id: selectedPromptId!,
-    //       prompt_version: selectedVersionId!,
-    //     },
-    //   },
-    // });
-
     if (experimentTableResult.error || !experimentTableResult.data) {
       notification.setNotification("Failed to create experiment", "error");
       return;
