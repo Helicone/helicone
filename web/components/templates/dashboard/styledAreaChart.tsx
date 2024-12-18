@@ -1,6 +1,6 @@
-import { Card } from "@tremor/react";
+import { Card, CardContent } from "@/components/ui/card";
 import LoadingAnimation from "../../shared/loadingAnimation";
-import clsx from "clsx";
+import { cn } from "@/lib/utils";
 
 interface StyledAreaChartProps {
   title: string;
@@ -33,29 +33,31 @@ const StyledAreaChart = (props: StyledAreaChartProps) => {
   };
 
   return (
-    <Card className="border border-slate-200 bg-white text-slate-950 !shadow-sm dark:border-slate-800 dark:bg-black dark:text-slate-50 rounded-lg ring-0">
-      <div className="flex flex-col space-y-0.5">
-        <p className="text-slate-500 text-sm">{title}</p>
-        {value !== undefined && (
-          <p className="text-black dark:text-white text-xl font-semibold">
-            {value}
-          </p>
-        )}
-      </div>
-      <div
-        className={clsx(value ? "p-2" : "py-4", "w-full")}
-        style={{
-          height: calculateHeight(),
-        }}
-      >
-        {isDataOverTimeLoading ? (
-          <div className="h-full w-full bg-slate-200 dark:bg-slate-800 rounded-md pt-4">
-            {withAnimation && <LoadingAnimation height={175} width={175} />}
-          </div>
-        ) : (
-          <>{children}</>
-        )}
-      </div>
+    <Card className="h-full overflow-y-auto">
+      <CardContent className="pt-6">
+        <div className="flex flex-col space-y-0.5">
+          <p className="text-slate-500 text-sm">{title}</p>
+          {value !== undefined && (
+            <p className="text-black dark:text-white text-xl font-semibold">
+              {value}
+            </p>
+          )}
+        </div>
+        <div
+          className={cn(value ? "p-2" : "py-4", "w-full")}
+          style={{
+            height: calculateHeight(),
+          }}
+        >
+          {isDataOverTimeLoading ? (
+            <div className="h-full w-full bg-slate-200 dark:bg-slate-800 rounded-md pt-4">
+              {withAnimation && <LoadingAnimation height={175} width={175} />}
+            </div>
+          ) : (
+            <>{children}</>
+          )}
+        </div>
+      </CardContent>
     </Card>
   );
 };

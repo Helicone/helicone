@@ -236,16 +236,17 @@ const ChartTooltipContent = React.forwardRef<
                           {itemConfig?.label || item.name}
                         </span>
                       </div>
-                      {item.payload[`${item.dataKey}_original`] !== undefined ||
+                      {`${item.dataKey}_original` in item.payload &&
+                      item.payload[`${item.dataKey}_original`] !== undefined &&
                       item.payload[`${item.dataKey}_original`] !== null ? (
                         <span className="font-mono font-medium tabular-nums text-slate-950 dark:text-slate-50">
                           {item.payload[`${item.dataKey}_original`]}
                         </span>
-                      ) : item.value ? (
+                      ) : (
                         <span className="font-mono font-medium tabular-nums text-slate-950 dark:text-slate-50">
-                          {item.value.toLocaleString()}
+                          {item.value ? item.value.toLocaleString() : "N/A"}
                         </span>
-                      ) : null}
+                      )}
                     </div>
                   </>
                 )}
@@ -318,16 +319,13 @@ const ChartLegendContent = React.forwardRef<
                 <itemConfig.icon />
               ) : (
                 <div
-                  className={cn(
-                    "h-2 w-2 shrink-0 rounded-[2px]",
-                    textClassName
-                  )}
+                  className={"h-2 w-2 shrink-0 rounded-[2px]"}
                   style={{
                     backgroundColor: item.color,
                   }}
                 />
               )}
-              {itemConfig?.label}
+              <span className={textClassName}>{itemConfig?.label}</span>
             </div>
           );
         })}
