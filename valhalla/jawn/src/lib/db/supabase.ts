@@ -6,49 +6,12 @@ import { hashAuth } from "../../utils/hash";
 import { HeliconeAuth } from "../requestWrapper";
 import { redisClient } from "../clients/redisClient";
 import { KeyPermissions, Role } from "../../models/models";
+import { KVCache } from "../cache/kvCache";
+import { cacheResultCustom } from "../../utils/cacheResult";
 
 require("dotenv").config({
   path: `${__dirname}/../../../.env`,
 });
-
-// SINGLETON
-class SupabaseAuthCache extends InMemoryCache {
-  private static instance: SupabaseAuthCache;
-  private API_KEY_CACHE_TTL = 60 * 1000; // 5 minutes
-  constructor() {
-    super(1_000);
-  }
-
-  static getInstance(): SupabaseAuthCache {
-    if (!SupabaseAuthCache.instance) {
-      SupabaseAuthCache.instance = new SupabaseAuthCache();
-    }
-    return SupabaseAuthCache.instance;
-  }
-
-  set<T>(key: string, value: T): void {
-    super.set(key, value, this.API_KEY_CACHE_TTL);
-  }
-}
-
-class SupabaseOrganizationCache extends InMemoryCache {
-  private static instance: SupabaseOrganizationCache;
-  private ORGANIZATION_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
-  constructor() {
-    super(1_000);
-  }
-
-  static getInstance(): SupabaseOrganizationCache {
-    if (!SupabaseOrganizationCache.instance) {
-      SupabaseOrganizationCache.instance = new SupabaseOrganizationCache();
-    }
-    return SupabaseOrganizationCache.instance;
-  }
-
-  set<T>(key: string, value: T): void {
-    super.set(key, value, this.ORGANIZATION_CACHE_TTL);
-  }
-}
 
 export interface AuthParams {
   organizationId: string;
@@ -82,19 +45,15 @@ const staticClient: SupabaseClient<Database> = createClient(
   supabaseURL,
   supabaseServiceRoleKey
 );
-const authCache = SupabaseAuthCache.getInstance();
-const orgCache = SupabaseOrganizationCache.getInstance();
+
+const kvCache = new KVCache(10 * 1000); // 10 seconds
 
 export class SupabaseConnector {
   client: SupabaseClient<Database>;
   connected: boolean = false;
-  authCache: SupabaseAuthCache;
-  orgCache: SupabaseOrganizationCache;
 
   constructor() {
     this.client = staticClient;
-    this.authCache = authCache;
-    this.orgCache = orgCache;
   }
 
   private async authenticateJWT(jwt: string, orgId?: string): AuthResult {
@@ -148,7 +107,8 @@ export class SupabaseConnector {
     let apiKey = await this.client
       .from("helicone_api_keys")
       .select("*")
-      .eq("api_key_hash", await hashAuth(bearer.replace("Bearer ", "")));
+      .eq("api_key_hash", await hashAuth(bearer.replace("Bearer ", "")))
+      .eq("soft_delete", false);
 
     if (apiKey.error) {
       return err(JSON.stringify(apiKey.error));
@@ -158,7 +118,8 @@ export class SupabaseConnector {
       apiKey = await this.client
         .from("helicone_api_keys")
         .select("*")
-        .eq("api_key_hash", await hashAuth(bearer));
+        .eq("api_key_hash", await hashAuth(bearer))
+        .eq("soft_delete", false);
     }
 
     if (apiKey.error) {
@@ -225,32 +186,10 @@ export class SupabaseConnector {
     return err("Invalid auth type");
   }
 
-  async authenticate(
+  private async uncachedAuth(
     authorization: HeliconeAuth,
     organizationId?: string
   ): AuthResult {
-    const cacheKey = await hashAuth(
-      JSON.stringify(authorization) + organizationId
-    );
-
-    const cacheResultMem = this.authCache.get<AuthParams>(cacheKey);
-
-    if (cacheResultMem) {
-      return ok(cacheResultMem);
-    }
-
-    const cachedResultRedis = await redisClient?.get(cacheKey);
-
-    if (cachedResultRedis) {
-      try {
-        const parsedResult: AuthParams = JSON.parse(cachedResultRedis);
-        this.authCache.set(cacheKey, parsedResult);
-        return ok(parsedResult);
-      } catch (e) {
-        console.error("Failed to parse cached result:", e);
-      }
-    }
-
     if (
       authorization.token.includes("sk-helicone-proxy") ||
       authorization.token.includes("pk-helicone-proxy")
@@ -284,39 +223,25 @@ export class SupabaseConnector {
       role,
     };
 
-    this.authCache.set(cacheKey, authParamsResult);
-
-    await redisClient?.set(
-      cacheKey,
-      JSON.stringify(authParamsResult),
-      "EX",
-      3600 // 1 hour
-    );
-
     return ok(authParamsResult);
   }
+  async authenticate(
+    authorization: HeliconeAuth,
+    organizationId?: string
+  ): AuthResult {
+    const cacheKey = await hashAuth(
+      JSON.stringify(authorization) + organizationId
+    );
+    return await cacheResultCustom(
+      cacheKey,
+      async () => await this.uncachedAuth(authorization, organizationId),
+      kvCache
+    );
+  }
 
-  async getOrganization(authParams: AuthParams): Promise<OrgResult> {
-    const cacheKey = `org:${authParams.organizationId}`;
-
-    const cacheResultMem = this.orgCache.get<OrgParams>(cacheKey);
-
-    if (cacheResultMem) {
-      return ok(cacheResultMem);
-    }
-
-    const cachedResult = await redisClient?.get(cacheKey);
-
-    if (cachedResult) {
-      try {
-        const parsedResult: OrgParams = JSON.parse(cachedResult);
-        this.orgCache.set(cacheKey, parsedResult);
-        return ok(parsedResult);
-      } catch (e) {
-        console.error("Failed to parse cached result:", e);
-      }
-    }
-
+  private async uncachedGetOrganization(
+    authParams: AuthParams
+  ): Promise<OrgResult> {
     const { data, error } = await this.client
       .from("organization")
       .select("*")
@@ -333,11 +258,16 @@ export class SupabaseConnector {
       percentLog: data.percent_to_log ?? 100_000,
     };
 
-    this.orgCache.set(cacheKey, orgResult);
-
-    await redisClient?.set(cacheKey, JSON.stringify(orgResult), "EX", 3600); // 1 hour
-
     return ok(orgResult);
+  }
+
+  async getOrganization(authParams: AuthParams): Promise<OrgResult> {
+    const cacheKey = `org:${authParams.organizationId}`;
+    return await cacheResultCustom(
+      cacheKey,
+      async () => await this.uncachedGetOrganization(authParams),
+      kvCache
+    );
   }
 }
 
