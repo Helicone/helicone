@@ -8,7 +8,7 @@ export const testAPIKey = async (apiKey: string) => {
   const options = {
     method: "POST",
     headers: {
-      authorization: "Bearer sk-helicone-y7v7vsi-7j4e2pa-rzz6sqi-jbbunza",
+      authorization: `Bearer ${apiKey}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
