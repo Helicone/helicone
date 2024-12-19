@@ -16,7 +16,7 @@ const Log = () => {
             <h2 className="font-semibold text-4xl sm:text-5xl leading-[120%] max-w-[600px] text-wrap text-black">
               Dive deep into each trace and debug your agent with ease
             </h2>
-            <p className="text-lg max-w-[520px]">
+            <p className="text-lg max-w-[520px] text-landing-description font-light leading-relaxed">
               Visualize your multi-step LLM interactions, log requests in
               real-time and pinpoint root cause of errors.
             </p>
