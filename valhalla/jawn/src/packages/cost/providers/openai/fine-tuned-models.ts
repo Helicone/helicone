@@ -23,8 +23,8 @@ export const costs: ModelRow[] = [
     },
     cost: {
       prompt_token: 0.0000003,
-      completion_token: 0.0000012
-    }
+      completion_token: 0.0000012,
+    },
   },
   {
     model: {
@@ -33,7 +33,7 @@ export const costs: ModelRow[] = [
     },
     cost: {
       prompt_token: 0.00000375,
-      completion_token: 0.000015
-    }
-  }
+      completion_token: 0.000015,
+    },
+  },
 ];
