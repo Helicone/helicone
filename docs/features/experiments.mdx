@@ -7,11 +7,6 @@ description: "Experiments is a spreadsheet-like experience designed to tune your
 
 import QuestionsSection from "/snippets/questions-section.mdx";
 
-<Info>
-  **Who can use this feature**: Anyone on Pro or Enterprise
-  [plan](https://www.helicone.ai/pricing), this feature will be charged at cost.
-</Info>
-
 ## What are prompt experiments?
 
 Helicone's prompt experiments are designed to help you tune your LLM prompt, test it on production data, and verify your iterations with quantifiable data.
@@ -140,6 +135,12 @@ The next step is to import golden datasets or your request data in Helicone. The
     </Step>
     <Step title="Run Evaluator">
         Once you add an evaluator, you will notice a warning that prompts you to re-run evaluation. Click on `Run Evaluators` to see the scores in graph.
+        <Frame>
+        <img
+            src="/images/experiments/run-eval.webp"
+            alt="View evaluator results in detail. "
+        />
+        </Frame>
     </Step>
     <Step title="(Optional) View score breakdown">
         To see the scores breakdown by input, click on an evaluator (humor in this example). You will see individual scores appear in each cell. 
