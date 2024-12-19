@@ -66,6 +66,12 @@ export interface paths {
   "/v1/prompt/create": {
     post: operations["CreatePrompt"];
   };
+  "/v1/prompt/version/{promptVersionId}/edit-label": {
+    post: operations["EditPromptVersionLabel"];
+  };
+  "/v1/prompt/version/{promptVersionId}/edit-template": {
+    post: operations["EditPromptVersionTemplate"];
+  };
   "/v1/prompt/version/{promptVersionId}/subversion": {
     post: operations["CreateSubversion"];
   };
@@ -988,6 +994,20 @@ export interface components {
       error: null;
     };
     "Result_CreatePromptResponse.string_": components["schemas"]["ResultSuccess_CreatePromptResponse_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__metadata-Record_string.any___": {
+      data: {
+        metadata: components["schemas"]["Record_string.any_"];
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__metadata-Record_string.any__.string_": components["schemas"]["ResultSuccess__metadata-Record_string.any___"] | components["schemas"]["ResultError_string_"];
+    PromptEditSubversionLabelParams: {
+      label: string;
+    };
+    PromptEditSubversionTemplateParams: {
+      heliconeTemplate: unknown;
+    };
     PromptVersionResult: {
       id: string;
       /** Format: double */
@@ -1001,6 +1021,7 @@ export interface components {
       metadata: components["schemas"]["Record_string.any_"];
       parent_prompt_version?: string | null;
       experiment_id?: string | null;
+      updated_at?: string;
     };
     ResultSuccess_PromptVersionResult_: {
       data: components["schemas"]["PromptVersionResult"];
@@ -3471,6 +3492,46 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_CreatePromptResponse.string_"];
+        };
+      };
+    };
+  };
+  EditPromptVersionLabel: {
+    parameters: {
+      path: {
+        promptVersionId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PromptEditSubversionLabelParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__metadata-Record_string.any__.string_"];
+        };
+      };
+    };
+  };
+  EditPromptVersionTemplate: {
+    parameters: {
+      path: {
+        promptVersionId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PromptEditSubversionTemplateParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
         };
       };
     };

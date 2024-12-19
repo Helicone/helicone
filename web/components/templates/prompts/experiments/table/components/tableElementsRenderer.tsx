@@ -1,6 +1,6 @@
 import { PlayIcon, SparklesIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { Button } from "../../../../../ui/button";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef, useEffect } from "react";
 import PromptPlayground from "../../../id/promptPlayground";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useJawnClient } from "../../../../../../lib/clients/jawnHook";
@@ -13,9 +13,7 @@ import ArrayDiffViewer from "../../../id/arrayDiffViewer";
 import { useExperimentTable } from "../hooks/useExperimentTable";
 import { useExperimentScores } from "@/services/hooks/prompts/experiment-scores";
 import { cn } from "@/lib/utils";
-import useOnboardingContext, {
-  ONBOARDING_STEPS,
-} from "@/components/layout/onboardingContext";
+import { Input } from "@/components/ui/input";
 
 export interface InputEntry {
   key: string;
@@ -274,6 +272,59 @@ const ExperimentTableHeader = (props: ExperimentHeaderProps) => {
           )}
           <TabsContent value="preview" className="max-h-[80vh] overflow-y-auto">
             <PromptPlayground
+              defaultEditMode={true}
+              prompt={promptTemplate?.helicone_template ?? ""}
+              selectedInput={undefined}
+              onExtractPromptVariables={() => {}}
+              className="border rounded-md border-slate-200 dark:border-slate-700"
+              onSubmit={async (history, model) => {
+                const promptData = {
+                  model: model,
+                  messages: history.map((msg) => {
+                    if (typeof msg === "string") {
+                      return msg;
+                    }
+                    return {
+                      role: msg.role,
+                      content: [
+                        {
+                          text: msg.content,
+                          type: "text",
+                        },
+                      ],
+                    };
+                  }),
+                };
+
+                const result = await jawnClient.POST(
+                  "/v1/prompt/version/{promptVersionId}/edit-template",
+                  {
+                    params: {
+                      path: {
+                        promptVersionId: promptVersionId ?? "",
+                      },
+                    },
+                    body: {
+                      heliconeTemplate: JSON.stringify(promptData),
+                    },
+                  }
+                );
+
+                queryClient.invalidateQueries({
+                  queryKey: ["promptTemplate", promptVersionId],
+                });
+                if (result.error || !result.data) {
+                  console.error(result);
+                  return;
+                }
+
+                setShowViewPrompt(false);
+              }}
+              submitText="Test"
+              initialModel={promptTemplate?.model ?? "gpt-4o"}
+              editMode={false}
+            />
+            {/* <PromptPlayground
               prompt={promptTemplate?.helicone_template ?? ""}
               selectedInput={undefined}
               onSubmit={(history, model) => {
@@ -286,7 +337,7 @@ const ExperimentTableHeader = (props: ExperimentHeaderProps) => {
               editMode={false}
               playgroundMode="experiment"
               className="border rounded-md border-slate-200 dark:border-slate-700"
-            />
+            /> */}
           </TabsContent>
           <TabsContent value="diff" className="max-h-[80vh] overflow-y-auto">
             <ArrayDiffViewer
@@ -339,25 +390,90 @@ const PromptColumnHeader = ({
   label,
   onForkColumn,
   onRunColumn,
+  promptVersionId,
 }: {
   label: string;
   onForkColumn?: () => void;
   onRunColumn?: () => void;
+  promptVersionId: string;
 }) => {
-  const { isOnboardingVisible, currentStep } = useOnboardingContext();
+  const [labelData, setLabelData] = useState(label);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedLabel, setEditedLabel] = useState(labelData);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const jawnClient = useJawnClient();
+  const queryClient = useQueryClient();
+  // Handle saving the label
+  const handleSave = async () => {
+    setIsEditing(false);
+    setLabelData(editedLabel);
+    if (editedLabel !== labelData) {
+      const result = await jawnClient.POST(
+        "/v1/prompt/version/{promptVersionId}/edit-label",
+        {
+          params: {
+            path: {
+              promptVersionId: promptVersionId ?? "",
+            },
+          },
+          body: {
+            label: editedLabel,
+          },
+        }
+      );
+
+      setLabelData(result.data?.data?.metadata?.label as string);
+      if (result.error || !result.data) {
+        console.error(result);
+        return;
+      }
+    }
+  };
+
+  // Focus input when editing starts
+  useEffect(() => {
+    if (isEditing) {
+      inputRef.current?.focus();
+    }
+  }, [isEditing]);
+
   return (
-    <div className="flex justify-between w-full items-center py-2 px-4 group">
-      <h3 className="font-semibold text-sm text-slate-900 dark:text-slate-100 leading-[130%]">
-        {label}
-      </h3>
-      {onForkColumn && onRunColumn && (
-        <div
-          className={cn(
-            "items-center justify-center hidden group-hover:flex",
-            currentStep ===
-              ONBOARDING_STEPS.EXPERIMENTS_RUN_EXPERIMENTS.stepNumber && "flex"
-          )}
+    <div
+      className={cn(
+        "flex justify-between w-full items-center py-2 px-4 group h-full",
+        isEditing &&
+          " border-2 border-r-[3px] border-blue-500 z-10 pl-3.5 pr-[13px]"
+      )}
+    >
+      {promptVersionId === "inputs" ? (
+        <h3 className="font-semibold text-sm text-slate-900 dark:text-slate-100 leading-[130%] cursor-pointer">
+          {labelData}
+        </h3>
+      ) : isEditing ? (
+        <Input
+          ref={inputRef}
+          type="text"
+          value={editedLabel}
+          onChange={(e) => setEditedLabel(e.target.value)}
+          onBlur={handleSave}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              handleSave();
+            }
+          }}
+          className="font-semibold text-sm text-slate-900 dark:text-slate-100 leading-[130%] bg-transparent border-none focus:ring-slate-300 rounded px-[5px] py-0 w-auto h-auto border-0 outline-none focus:border-0 focus:ring-0 focus:shadow-none focus:outline-none"
+        />
+      ) : (
+        <h3
+          onClick={() => setIsEditing(true)}
+          className="font-semibold text-sm text-slate-900 dark:text-slate-100 leading-[130%] cursor-pointer px-1 rounded transition-colors duration-150 border border-dashed border-transparent hover:border-slate-300 dark:hover:border-slate-600"
         >
+          {labelData}
+        </h3>
+      )}
+      {onForkColumn && onRunColumn && (
+        <div className="items-center justify-center hidden group-hover:flex">
           <Button
             variant="ghost"
             size="icon"

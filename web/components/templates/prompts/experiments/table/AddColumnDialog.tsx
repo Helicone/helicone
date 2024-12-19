@@ -2,7 +2,7 @@ import { useOrg } from "@/components/layout/org/organizationContext";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { FlaskConicalIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import PromptPlayground from "../../id/promptPlayground";
@@ -10,14 +10,6 @@ import { useJawnClient } from "@/lib/clients/jawnHook";
 import useOnboardingContext, {
   ONBOARDING_STEPS,
 } from "@/components/layout/onboardingContext";
-
-// const SCORES = [
-//   "Sentiment",
-//   "Accuracy",
-//   "Contain words",
-//   "Shorter than 50 characters",
-//   "Is English",
-// ];
 
 const AddColumnDialog = ({
   isOpen,
@@ -34,26 +26,13 @@ const AddColumnDialog = ({
   originalColumnPromptVersionId: string;
   numberOfExistingPromptVersions: number;
 }) => {
-  const [promptVariables, setPromptVariables] = useState<
-    {
-      original: string;
-      heliconeTag: string;
-      value: string;
-    }[]
-  >([]);
-
   const jawn = useJawnClient();
   const queryClient = useQueryClient();
 
   const org = useOrg();
   const orgId = org?.currentOrg?.id;
 
-  // Fetch promptVersionTemplateData
-  const {
-    data: promptVersionTemplateData,
-    isLoading,
-    error,
-  } = useQuery(
+  const { data: promptVersionTemplateData } = useQuery(
     ["promptVersionTemplate", selectedForkFromPromptVersionId],
     async () => {
       if (!selectedForkFromPromptVersionId || !orgId) {
@@ -131,9 +110,7 @@ const AddColumnDialog = ({
             defaultEditMode={true}
             prompt={promptVersionTemplateData?.helicone_template ?? ""}
             selectedInput={undefined}
-            onExtractPromptVariables={(promptInputKeys) => {
-              setPromptVariables(promptInputKeys);
-            }}
+            onExtractPromptVariables={() => {}}
             className="border rounded-md border-slate-200 dark:border-slate-700"
             onSubmit={async (history, model) => {
               const promptData = {
