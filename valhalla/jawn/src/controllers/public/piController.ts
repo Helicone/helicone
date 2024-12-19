@@ -11,7 +11,7 @@ export class PiController extends Controller {
   @Post("/session")
   public async addSession(
     @Body()
-    { sessionUUID }: { sessionUUID: string },
+    body: { sessionUUID: string },
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<string, string>> {
     // clean sessions should probably be done in a cron job
@@ -27,7 +27,7 @@ export class PiController extends Controller {
     }
 
     const result = await supabaseServer.client.from("pi_session").insert({
-      session_id: sessionUUID,
+      session_id: body.sessionUUID,
       organization_id: request.authParams.organizationId,
     });
 
