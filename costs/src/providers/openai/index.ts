@@ -466,6 +466,28 @@ const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
+      value: "o1",
+    },
+    cost: {
+      prompt_token: 0.000015,
+      completion_token: 0.00006,
+    },
+    showInPlayground: true,
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "o1-2024-12-17",
+    },
+    cost: {
+      prompt_token: 0.000015,
+      completion_token: 0.00006,
+    },
+    showInPlayground: true,
+  },
+  {
+    model: {
+      operator: "equals",
       value: "o1-preview",
     },
     cost: {
@@ -764,6 +786,21 @@ const modelDetails: ModelDetailsMap = {
       description:
         "Text Embedding Ada is a model that offers a balance between cost and performance.",
       tradeOffs: ["More expensive than GPT-3.5 Turbo"],
+      benchmarks: {},
+      capabilities: [],
+      strengths: [],
+      weaknesses: [],
+      recommendations: [],
+    },
+  },
+  "o1": {
+    matches: ["o1", "o1-2024-12-17"],
+    searchTerms: ["o1", "chat o1", "o1 model"],
+    info: {
+      maxTokens: 200000,
+      releaseDate: "2024-12-17",
+      description: "o1 offers high reasoning capabilites via chain-of-thought.",
+      tradeOffs: ["Very expensive and slower outputs."],
       benchmarks: {},
       capabilities: [],
       strengths: [],
