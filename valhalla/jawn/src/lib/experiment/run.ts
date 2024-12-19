@@ -5,7 +5,7 @@ import { supabaseServer } from "../db/supabase";
 import { Experiment, ExperimentDatasetRow } from "../stores/experimentStore";
 import { BaseTempKey } from "./tempKeys/baseTempKey";
 import { runHypothesis } from "./hypothesisRunner";
-import { generateHeliconeAPIKey } from "./tempKeys/tempAPIKey";
+import { generateTempHeliconeAPIKey } from "./tempKeys/tempAPIKey";
 import {
   PreparedRequest,
   PreparedRequestArgs,
@@ -55,7 +55,7 @@ export async function runOriginalExperiment(
   experiment: Experiment,
   datasetRows: ExperimentDatasetRow[]
 ): Promise<Result<string, string>> {
-  const tempKey: Result<BaseTempKey, string> = await generateHeliconeAPIKey(
+  const tempKey: Result<BaseTempKey, string> = await generateTempHeliconeAPIKey(
     experiment.organization
   );
 
@@ -97,7 +97,7 @@ export async function run(
   organizationId: string,
   isOriginalRequest?: boolean
 ): Promise<Result<string, string>> {
-  const tempKey: Result<BaseTempKey, string> = await generateHeliconeAPIKey(
+  const tempKey: Result<BaseTempKey, string> = await generateTempHeliconeAPIKey(
     organizationId
   );
 

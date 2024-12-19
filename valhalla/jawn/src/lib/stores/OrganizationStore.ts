@@ -9,7 +9,7 @@ import {
 import { hashAuth } from "../../utils/hash";
 import { supabaseServer } from "../db/supabase";
 import { BaseTempKey } from "../experiment/tempKeys/baseTempKey";
-import { generateHeliconeAPIKey } from "../experiment/tempKeys/tempAPIKey";
+import { generateTempHeliconeAPIKey } from "../experiment/tempKeys/tempAPIKey";
 import { setupDemoOrganizationRequests } from "../onboarding";
 import { dbExecute } from "../shared/db/dbExecute";
 import { err, ok, Result } from "../shared/result";
@@ -391,9 +391,8 @@ export class OrganizationStore extends BaseStore {
     userId: string,
     organizationId: string
   ): Promise<Result<null, string>> {
-    const tempKey: Result<BaseTempKey, string> = await generateHeliconeAPIKey(
-      organizationId
-    );
+    const tempKey: Result<BaseTempKey, string> =
+      await generateTempHeliconeAPIKey(organizationId);
 
     if (tempKey.error) {
       return err(tempKey.error);

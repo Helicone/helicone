@@ -463,6 +463,12 @@ export interface paths {
   "/v1/public/compare/models": {
     post: operations["GetModelComparison"];
   };
+  "/v1/public/pi/get-api-key": {
+    post: operations["GetApiKey"];
+  };
+  "/v1/pi/session": {
+    post: operations["AddSession"];
+  };
   "/v1/settings/query": {
     get: operations["GetSettings"];
   };
@@ -2688,6 +2694,14 @@ Json: JsonObject;
       names: string[];
       parent: string;
     };
+    "ResultSuccess__apiKey-string__": {
+      data: {
+        apiKey: string;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__apiKey-string_.string_": components["schemas"]["ResultSuccess__apiKey-string__"] | components["schemas"]["ResultError_string_"];
     /** @enum {string} */
     LlmType: "chat" | "completion";
     FunctionCall: {
@@ -5920,6 +5934,40 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_Model-Array.string_"];
+        };
+      };
+    };
+  };
+  GetApiKey: {
+    requestBody: {
+      content: {
+        "application/json": {
+          sessionUUID: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__apiKey-string_.string_"];
+        };
+      };
+    };
+  };
+  AddSession: {
+    requestBody: {
+      content: {
+        "application/json": {
+          sessionUUID: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_string.string_"];
         };
       };
     };

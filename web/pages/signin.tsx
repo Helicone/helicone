@@ -45,7 +45,11 @@ const SignIn = ({
   }, [unauthorized]);
 
   if (user) {
-    router.push("/dashboard");
+    const { pi_session, ...restQuery } = router.query;
+    router.push({
+      pathname: pi_session ? "/pi/onboarding" : "/dashboard",
+      query: router.query,
+    });
   }
 
   return (
