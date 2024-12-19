@@ -18,6 +18,7 @@ import { Button } from "../../../../../ui/button";
 import ArrayDiffViewer from "../../../id/arrayDiffViewer";
 import PromptPlayground, { PromptObject } from "../../../id/promptPlayground";
 import { useExperimentTable } from "../hooks/useExperimentTable";
+import { useOrg } from "@/components/layout/org/organizationContext";
 
 export interface InputEntry {
   key: string;
@@ -64,6 +65,9 @@ const ExperimentTableHeader = (props: ExperimentHeaderProps) => {
     experimentId,
     originalPromptVersionId,
   } = props;
+
+  const org = useOrg();
+  const orgId = org?.currentOrg?.id;
 
   const [showViewPrompt, setShowViewPrompt] = useState(false);
   const jawnClient = useJawnClient();
@@ -308,7 +312,7 @@ const ExperimentTableHeader = (props: ExperimentHeaderProps) => {
             </div>
           </div>
         </div>
-        <Tabs defaultValue="preview" className="h-full">
+        <Tabs defaultValue="preview" className="h-full w-full">
           {!isOriginal && (
             <TabsList>
               <TabsTrigger value="preview">Preview</TabsTrigger>
@@ -352,10 +356,14 @@ const ExperimentTableHeader = (props: ExperimentHeaderProps) => {
                     },
                     body: {
                       heliconeTemplate: JSON.stringify(promptData),
+                      experimentId: experimentId ?? "",
                     },
                   }
                 );
 
+                queryClient.invalidateQueries({
+                  queryKey: ["experimentInputKeys", orgId, experimentId],
+                });
                 queryClient.invalidateQueries({
                   queryKey: ["promptTemplate", promptVersionId],
                 });
