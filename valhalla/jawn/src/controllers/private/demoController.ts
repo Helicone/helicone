@@ -1,7 +1,7 @@
 // src/users/usersController.ts
 import OpenAI from "openai";
 import { Body, Controller, Post, Request, Route, Security, Tags } from "tsoa";
-import { generateHeliconeAPIKey } from "../../lib/experiment/tempKeys/tempAPIKey";
+import { generateTempHeliconeAPIKey } from "../../lib/experiment/tempKeys/tempAPIKey";
 import { ok, Result } from "../../lib/shared/result";
 import { JawnAuthenticatedRequest } from "../../types/request";
 import {
@@ -40,7 +40,7 @@ export class DemoController extends Controller {
       };
     }
 
-    const tempAPIKey = await generateHeliconeAPIKey(
+    const tempAPIKey = await generateTempHeliconeAPIKey(
       request.authParams.organizationId
     );
 

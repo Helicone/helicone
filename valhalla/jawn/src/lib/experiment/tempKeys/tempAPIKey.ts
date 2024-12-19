@@ -52,8 +52,17 @@ class TempHeliconeAPIKey implements BaseTempKey {
 }
 
 export async function generateHeliconeAPIKey(
-  organizationId: string
-): Promise<Result<TempHeliconeAPIKey, string>> {
+  organizationId: string,
+  keyName?: string
+): Promise<
+  Result<
+    {
+      apiKey: string;
+      heliconeApiKeyId: number;
+    },
+    string
+  >
+> {
   const apiKey = await getHeliconeApiKey();
   const organization = await supabaseServer.client
     .from("organization")
@@ -66,7 +75,7 @@ export async function generateHeliconeAPIKey(
     .insert({
       api_key_hash: await hashAuth(apiKey),
       user_id: organization.data?.owner ?? "",
-      api_key_name: "auto-generated-experiment-key",
+      api_key_name: keyName ?? "auto-generated-experiment-key",
       organization_id: organizationId,
     })
     .select("*")
@@ -75,6 +84,24 @@ export async function generateHeliconeAPIKey(
   if (res?.error || !res.data?.id) {
     return err("Failed to create apiKey key");
   } else {
-    return ok(new TempHeliconeAPIKey(apiKey, res.data?.id));
+    return ok({
+      apiKey: apiKey,
+      heliconeApiKeyId: res.data.id,
+    });
+  }
+}
+
+export async function generateTempHeliconeAPIKey(
+  organizationId: string,
+  keyName?: string
+): Promise<Result<TempHeliconeAPIKey, string>> {
+  const apiKey = await generateHeliconeAPIKey(organizationId, keyName);
+
+  if (apiKey.error) {
+    return err(apiKey.error);
+  } else {
+    return ok(
+      new TempHeliconeAPIKey(apiKey.data!.apiKey, apiKey.data!.heliconeApiKeyId)
+    );
   }
 }
