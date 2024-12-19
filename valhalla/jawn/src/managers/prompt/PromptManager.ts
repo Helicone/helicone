@@ -209,8 +209,6 @@ export class PromptManager extends BaseManager {
       return err(result.error);
     }
 
-    console.log("is there a experimentId", params.experimentId);
-
     if (params.experimentId) {
       const newPromptVersionInputKeys = Array.from(
         (typeof params.heliconeTemplate === "string"
@@ -219,21 +217,11 @@ export class PromptManager extends BaseManager {
         ).matchAll(/<helicone-prompt-input key=\\"(\w+)\\" \/>/g)
       ).map((match) => match[1]);
 
-      console.log("newPromptVersionInputKeys", newPromptVersionInputKeys);
-
       const existingExperimentInputKeys = await supabaseServer.client
         .from("experiment_v3")
         .select("input_keys")
         .eq("id", params.experimentId)
         .single();
-
-      console.log("existingExperimentInputKeys", existingExperimentInputKeys);
-      console.log("updated input keys", [
-        ...new Set([
-          ...(existingExperimentInputKeys.data?.input_keys ?? []),
-          ...newPromptVersionInputKeys,
-        ]),
-      ]);
 
       const res = await Promise.all([
         supabaseServer.client
