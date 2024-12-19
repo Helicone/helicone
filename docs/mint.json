@@ -60,7 +60,6 @@
       "group": "Getting Started",
       "pages": [
         "getting-started/quick-start",
-        "helicone-headers/helicone-auth",
         {
           "group": "Self Host",
           "pages": [
@@ -69,11 +68,8 @@
             "getting-started/self-host/docker",
             "getting-started/self-host/kubernetes",
             "getting-started/self-host/manual"
-          ],
-          "icon": "server",
-          "iconType": "solid"
-        }, 
-        "helicone-headers/header-directory"
+          ]
+        }
       ]
     },
     {
@@ -255,13 +251,13 @@
     {
       "group": "References",
       "pages": [
-        "references/api",
         "references/proxy-vs-async",
         "references/availability",
         "references/latency-affect",
         "references/data-autonomy",
         "references/open-source",
-        "references/how-we-calculate-cost"
+        "references/how-we-calculate-cost", 
+        "helicone-headers/header-directory"
       ]
     },
     {
@@ -288,12 +284,16 @@
         {
           "group": "Prompt Engineering",
           "pages": [
+            "guides/prompt-engineering/overview",
             "guides/prompt-engineering/be-specific-and-clear",
             "guides/prompt-engineering/use-structured-formats",
             "guides/prompt-engineering/leverage-role-playing",
             "guides/prompt-engineering/implement-few-shot-learning",
             "guides/prompt-engineering/use-constrained-outputs",
-            "guides/prompt-engineering/use-chain-of-thought-prompting"
+            "guides/prompt-engineering/use-chain-of-thought-prompting", 
+            "guides/prompt-engineering/use-thread-of-thought-prompting",
+            "guides/prompt-engineering/use-least-to-most-prompting", 
+            "guides/prompt-engineering/use-meta-prompting"
           ]
         }
       ]
