@@ -14,6 +14,19 @@ export class PiController extends Controller {
     { sessionUUID }: { sessionUUID: string },
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<string, string>> {
+    // clean sessions should probably be done in a cron job
+
+    let one_hour_ago = new Date(new Date().getTime() - 1 * 60 * 60 * 1000);
+    // delete all sessions older than 1 hour
+
+    // 10% chance of deleting all sessions older than 1 hour
+    if (Math.random() < 0.1) {
+      await supabaseServer.client
+        .from("pi_session")
+        .delete()
+        .lt("created_at", one_hour_ago);
+    }
+
     const result = await supabaseServer.client.from("pi_session").insert({
       session_id: sessionUUID,
       organization_id: request.authParams.organizationId,

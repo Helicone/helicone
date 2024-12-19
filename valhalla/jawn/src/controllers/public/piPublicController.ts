@@ -17,10 +17,13 @@ export class PiPublicController extends Controller {
     },
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<{ apiKey: string }, string>> {
+    let one_hour_ago = new Date(new Date().getTime() - 1 * 60 * 60 * 1000);
+
     const session = await supabaseServer.client
       .from("pi_session")
       .select("*")
       .eq("session_id", body.sessionUUID)
+      .gt("created_at", one_hour_ago.toISOString())
       .single();
 
     if (session.error) {
