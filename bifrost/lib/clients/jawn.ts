@@ -17,7 +17,8 @@ export function getJawnClient(orgId?: string | "none") {
   //     : {};
 
   return createClient<publicPaths>({
-    baseUrl: process.env.NEXT_PUBLIC_HELICONE_JAWN_SERVICE,
+    baseUrl:
+      process.env.NEXT_PUBLIC_HELICONE_JAWN_SERVICE ?? "http://localhost:8585",
   });
 }
 

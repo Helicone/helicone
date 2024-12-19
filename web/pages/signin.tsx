@@ -10,11 +10,6 @@ import PublicMetaData from "../components/layout/public/publicMetaData";
 import { useEffect } from "react";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
 
-export type CustomerPortalContent = {
-  domain: string;
-  logo: string;
-};
-
 const SignIn = ({
   customerPortal,
 }: {
@@ -50,7 +45,11 @@ const SignIn = ({
   }, [unauthorized]);
 
   if (user) {
-    router.push("/dashboard");
+    const { pi_session, ...restQuery } = router.query;
+    router.push({
+      pathname: pi_session ? "/pi/onboarding" : "/dashboard",
+      query: router.query,
+    });
   }
 
   return (

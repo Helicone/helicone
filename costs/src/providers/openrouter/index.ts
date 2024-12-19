@@ -9,6 +9,326 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
+      value: "sao10k/l3.3-euryale-70b",
+    },
+    cost: {
+      prompt_token: 1.5e-6,
+      completion_token: 1.5e-6,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "inflatebot/mn-mag-mell-r1",
+    },
+    cost: {
+      prompt_token: 9e-7,
+      completion_token: 9e-7,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "openai/o1",
+    },
+    cost: {
+      prompt_token: 1.5e-5,
+      completion_token: 6e-5,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "eva-unit-01/eva-llama-3.33-70b",
+    },
+    cost: {
+      prompt_token: 4e-6,
+      completion_token: 6e-6,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "x-ai/grok-2-vision-1212",
+    },
+    cost: {
+      prompt_token: 2e-6,
+      completion_token: 1e-5,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "x-ai/grok-2-1212",
+    },
+    cost: {
+      prompt_token: 2e-6,
+      completion_token: 1e-5,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "cohere/command-r7b-12-2024",
+    },
+    cost: {
+      prompt_token: 3.75e-8,
+      completion_token: 1.5e-7,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "google/gemini-2.0-flash-exp:free",
+    },
+    cost: {
+      prompt_token: 0.0,
+      completion_token: 0.0,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "google/gemini-exp-1206:free",
+    },
+    cost: {
+      prompt_token: 0.0,
+      completion_token: 0.0,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "meta-llama/llama-3.3-70b-instruct",
+    },
+    cost: {
+      prompt_token: 1.3e-7,
+      completion_token: 4e-7,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "amazon/nova-lite-v1",
+    },
+    cost: {
+      prompt_token: 6e-8,
+      completion_token: 2.4e-7,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "amazon/nova-micro-v1",
+    },
+    cost: {
+      prompt_token: 3.5e-8,
+      completion_token: 1.4e-7,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "amazon/nova-pro-v1",
+    },
+    cost: {
+      prompt_token: 8e-7,
+      completion_token: 3.2e-6,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "qwen/qwq-32b-preview",
+    },
+    cost: {
+      prompt_token: 1.3e-7,
+      completion_token: 2e-7,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "google/gemini-exp-1121:free",
+    },
+    cost: {
+      prompt_token: 0.0,
+      completion_token: 0.0,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "google/learnlm-1.5-pro-experimental:free",
+    },
+    cost: {
+      prompt_token: 0.0,
+      completion_token: 0.0,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "eva-unit-01/eva-qwen-2.5-72b",
+    },
+    cost: {
+      prompt_token: 4e-6,
+      completion_token: 6e-6,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "openai/gpt-4o-2024-11-20",
+    },
+    cost: {
+      prompt_token: 2.5e-6,
+      completion_token: 1e-5,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "mistralai/mistral-large-2411",
+    },
+    cost: {
+      prompt_token: 2e-6,
+      completion_token: 6e-6,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "mistralai/mistral-large-2407",
+    },
+    cost: {
+      prompt_token: 2e-6,
+      completion_token: 6e-6,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "mistralai/pixtral-large-2411",
+    },
+    cost: {
+      prompt_token: 2e-6,
+      completion_token: 6e-6,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "x-ai/grok-vision-beta",
+    },
+    cost: {
+      prompt_token: 5e-6,
+      completion_token: 1.5e-5,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "google/gemini-exp-1114:free",
+    },
+    cost: {
+      prompt_token: 0.0,
+      completion_token: 0.0,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "infermatic/mn-inferor-12b",
+    },
+    cost: {
+      prompt_token: 2.5e-7,
+      completion_token: 5e-7,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "qwen/qwen-2.5-coder-32b-instruct",
+    },
+    cost: {
+      prompt_token: 8e-8,
+      completion_token: 1.8e-7,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "raifle/sorcererlm-8x22b",
+    },
+    cost: {
+      prompt_token: 4.5e-6,
+      completion_token: 4.5e-6,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "eva-unit-01/eva-qwen-2.5-32b",
+    },
+    cost: {
+      prompt_token: 2.6e-6,
+      completion_token: 3.4e-6,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "thedrummer/unslopnemo-12b",
+    },
+    cost: {
+      prompt_token: 5e-7,
+      completion_token: 5e-7,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "anthropic/claude-3.5-haiku-20241022:beta",
+    },
+    cost: {
+      prompt_token: 8e-7,
+      completion_token: 4e-6,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "anthropic/claude-3.5-haiku-20241022",
+    },
+    cost: {
+      prompt_token: 8e-7,
+      completion_token: 4e-6,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "anthropic/claude-3.5-haiku:beta",
+    },
+    cost: {
+      prompt_token: 8e-7,
+      completion_token: 4e-6,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "anthropic/claude-3.5-haiku",
+    },
+    cost: {
+      prompt_token: 8e-7,
+      completion_token: 4e-6,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
       value: "neversleep/llama-3.1-lumimaid-70b",
     },
     cost: {
@@ -29,7 +349,7 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
-      value: "anthropic/claude-3.5-sonnet",
+      value: "anthropic/claude-3.5-sonnet:beta",
     },
     cost: {
       prompt_token: 3e-6,
@@ -39,7 +359,7 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
-      value: "anthropic/claude-3.5-sonnet:beta",
+      value: "anthropic/claude-3.5-sonnet",
     },
     cost: {
       prompt_token: 3e-6,
@@ -92,8 +412,8 @@ export const costs: ModelRow[] = [
       value: "nvidia/llama-3.1-nemotron-70b-instruct",
     },
     cost: {
-      prompt_token: 3.5e-7,
-      completion_token: 4e-7,
+      prompt_token: 2e-7,
+      completion_token: 2e-7,
     },
   },
   {
@@ -129,11 +449,11 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
-      value: "liquid/lfm-40b:free",
+      value: "anthracite-org/magnum-v2-72b",
     },
     cost: {
-      prompt_token: 0.0,
-      completion_token: 0.0,
+      prompt_token: 3e-6,
+      completion_token: 3e-6,
     },
   },
   {
@@ -142,8 +462,8 @@ export const costs: ModelRow[] = [
       value: "liquid/lfm-40b",
     },
     cost: {
-      prompt_token: 1e-6,
-      completion_token: 2e-6,
+      prompt_token: 1.5e-7,
+      completion_token: 1.5e-7,
     },
   },
   {
@@ -154,26 +474,6 @@ export const costs: ModelRow[] = [
     cost: {
       prompt_token: 2.5e-7,
       completion_token: 5e-7,
-    },
-  },
-  {
-    model: {
-      operator: "equals",
-      value: "eva-unit-01/eva-qwen-2.5-14b",
-    },
-    cost: {
-      prompt_token: 2.5e-7,
-      completion_token: 5e-7,
-    },
-  },
-  {
-    model: {
-      operator: "equals",
-      value: "anthracite-org/magnum-v2-72b",
-    },
-    cost: {
-      prompt_token: 3.75e-6,
-      completion_token: 4.5e-6,
     },
   },
   {
@@ -192,8 +492,8 @@ export const costs: ModelRow[] = [
       value: "meta-llama/llama-3.2-3b-instruct",
     },
     cost: {
-      prompt_token: 3e-8,
-      completion_token: 5e-8,
+      prompt_token: 1.8e-8,
+      completion_token: 3e-8,
     },
   },
   {
@@ -219,11 +519,21 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
+      value: "meta-llama/llama-3.2-90b-vision-instruct:free",
+    },
+    cost: {
+      prompt_token: 0.0,
+      completion_token: 0.0,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
       value: "meta-llama/llama-3.2-90b-vision-instruct",
     },
     cost: {
-      prompt_token: 3.5e-7,
-      completion_token: 4e-7,
+      prompt_token: 9e-7,
+      completion_token: 9e-7,
     },
   },
   {
@@ -252,7 +562,7 @@ export const costs: ModelRow[] = [
       value: "qwen/qwen-2.5-72b-instruct",
     },
     cost: {
-      prompt_token: 3.5e-7,
+      prompt_token: 2.3e-7,
       completion_token: 4e-7,
     },
   },
@@ -289,11 +599,11 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
-      value: "openai/o1-mini",
+      value: "openai/o1-preview",
     },
     cost: {
-      prompt_token: 3e-6,
-      completion_token: 1.2e-5,
+      prompt_token: 1.5e-5,
+      completion_token: 6e-5,
     },
   },
   {
@@ -309,11 +619,11 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
-      value: "openai/o1-preview",
+      value: "openai/o1-mini",
     },
     cost: {
-      prompt_token: 1.5e-5,
-      completion_token: 6e-5,
+      prompt_token: 3e-6,
+      completion_token: 1.2e-5,
     },
   },
   {
@@ -329,21 +639,21 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
-      value: "cohere/command-r-plus-08-2024",
-    },
-    cost: {
-      prompt_token: 2.375e-6,
-      completion_token: 9.5e-6,
-    },
-  },
-  {
-    model: {
-      operator: "equals",
       value: "cohere/command-r-08-2024",
     },
     cost: {
       prompt_token: 1.425e-7,
       completion_token: 5.7e-7,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "cohere/command-r-plus-08-2024",
+    },
+    cost: {
+      prompt_token: 2.375e-6,
+      completion_token: 9.5e-6,
     },
   },
   {
@@ -359,7 +669,7 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
-      value: "google/gemini-flash-1.5-8b-exp",
+      value: "google/gemini-flash-1.5-exp",
     },
     cost: {
       prompt_token: 0.0,
@@ -379,7 +689,7 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
-      value: "google/gemini-flash-1.5-exp",
+      value: "google/gemini-flash-1.5-8b-exp",
     },
     cost: {
       prompt_token: 0.0,
@@ -422,18 +732,8 @@ export const costs: ModelRow[] = [
       value: "nousresearch/hermes-3-llama-3.1-70b",
     },
     cost: {
-      prompt_token: 4e-7,
-      completion_token: 4e-7,
-    },
-  },
-  {
-    model: {
-      operator: "equals",
-      value: "nousresearch/hermes-3-llama-3.1-405b:free",
-    },
-    cost: {
-      prompt_token: 0.0,
-      completion_token: 0.0,
+      prompt_token: 2e-7,
+      completion_token: 2e-7,
     },
   },
   {
@@ -442,18 +742,8 @@ export const costs: ModelRow[] = [
       value: "nousresearch/hermes-3-llama-3.1-405b",
     },
     cost: {
-      prompt_token: 1.79e-6,
-      completion_token: 2.49e-6,
-    },
-  },
-  {
-    model: {
-      operator: "equals",
-      value: "nousresearch/hermes-3-llama-3.1-405b:extended",
-    },
-    cost: {
-      prompt_token: 1.79e-6,
-      completion_token: 2.49e-6,
+      prompt_token: 9e-7,
+      completion_token: 9e-7,
     },
   },
   {
@@ -482,8 +772,8 @@ export const costs: ModelRow[] = [
       value: "sao10k/l3-lunaris-8b",
     },
     cost: {
-      prompt_token: 2e-6,
-      completion_token: 2e-6,
+      prompt_token: 3e-8,
+      completion_token: 6e-8,
     },
   },
   {
@@ -492,8 +782,8 @@ export const costs: ModelRow[] = [
       value: "aetherwiing/mn-starcannon-12b",
     },
     cost: {
-      prompt_token: 2e-6,
-      completion_token: 2e-6,
+      prompt_token: 8e-7,
+      completion_token: 1.2e-6,
     },
   },
   {
@@ -522,8 +812,18 @@ export const costs: ModelRow[] = [
       value: "nothingiisreal/mn-celeste-12b",
     },
     cost: {
-      prompt_token: 1.5e-6,
-      completion_token: 1.5e-6,
+      prompt_token: 8e-7,
+      completion_token: 1.2e-6,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "perplexity/llama-3.1-sonar-small-128k-chat",
+    },
+    cost: {
+      prompt_token: 2e-7,
+      completion_token: 2e-7,
     },
   },
   {
@@ -539,7 +839,7 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
-      value: "perplexity/llama-3.1-sonar-large-128k-online",
+      value: "perplexity/llama-3.1-sonar-large-128k-chat",
     },
     cost: {
       prompt_token: 1e-6,
@@ -549,7 +849,7 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
-      value: "perplexity/llama-3.1-sonar-large-128k-chat",
+      value: "perplexity/llama-3.1-sonar-large-128k-online",
     },
     cost: {
       prompt_token: 1e-6,
@@ -569,17 +869,7 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
-      value: "perplexity/llama-3.1-sonar-small-128k-chat",
-    },
-    cost: {
-      prompt_token: 2e-7,
-      completion_token: 2e-7,
-    },
-  },
-  {
-    model: {
-      operator: "equals",
-      value: "meta-llama/llama-3.1-70b-instruct:free",
+      value: "meta-llama/llama-3.1-405b-instruct:free",
     },
     cost: {
       prompt_token: 0.0,
@@ -589,21 +879,21 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
-      value: "meta-llama/llama-3.1-70b-instruct",
+      value: "meta-llama/llama-3.1-405b-instruct",
     },
     cost: {
-      prompt_token: 3.5e-7,
-      completion_token: 4e-7,
+      prompt_token: 9e-7,
+      completion_token: 9e-7,
     },
   },
   {
     model: {
       operator: "equals",
-      value: "meta-llama/llama-3.1-70b-instruct:nitro",
+      value: "meta-llama/llama-3.1-405b-instruct:nitro",
     },
     cost: {
-      prompt_token: 3.9e-6,
-      completion_token: 3.9e-6,
+      prompt_token: 1.462e-5,
+      completion_token: 1.462e-5,
     },
   },
   {
@@ -622,14 +912,14 @@ export const costs: ModelRow[] = [
       value: "meta-llama/llama-3.1-8b-instruct",
     },
     cost: {
-      prompt_token: 5e-8,
+      prompt_token: 2e-8,
       completion_token: 5e-8,
     },
   },
   {
     model: {
       operator: "equals",
-      value: "meta-llama/llama-3.1-405b-instruct:free",
+      value: "meta-llama/llama-3.1-70b-instruct:free",
     },
     cost: {
       prompt_token: 0.0,
@@ -639,21 +929,31 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
-      value: "meta-llama/llama-3.1-405b-instruct",
+      value: "meta-llama/llama-3.1-70b-instruct",
     },
     cost: {
-      prompt_token: 1.79e-6,
-      completion_token: 1.79e-6,
+      prompt_token: 1.3e-7,
+      completion_token: 4e-7,
     },
   },
   {
     model: {
       operator: "equals",
-      value: "meta-llama/llama-3.1-405b-instruct:nitro",
+      value: "meta-llama/llama-3.1-70b-instruct:nitro",
     },
     cost: {
-      prompt_token: 1.79e-5,
-      completion_token: 1.79e-5,
+      prompt_token: 3.25e-6,
+      completion_token: 3.25e-6,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "mistralai/mistral-nemo",
+    },
+    cost: {
+      prompt_token: 4e-8,
+      completion_token: 9e-8,
     },
   },
   {
@@ -669,17 +969,7 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
-      value: "mistralai/mistral-nemo",
-    },
-    cost: {
-      prompt_token: 1.3e-7,
-      completion_token: 1.3e-7,
-    },
-  },
-  {
-    model: {
-      operator: "equals",
-      value: "openai/gpt-4o-mini-2024-07-18",
+      value: "openai/gpt-4o-mini",
     },
     cost: {
       prompt_token: 1.5e-7,
@@ -689,7 +979,7 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
-      value: "openai/gpt-4o-mini",
+      value: "openai/gpt-4o-mini-2024-07-18",
     },
     cost: {
       prompt_token: 1.5e-7,
@@ -739,16 +1029,6 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
-      value: "nousresearch/hermes-2-theta-llama-3-8b",
-    },
-    cost: {
-      prompt_token: 1.875e-7,
-      completion_token: 1.125e-6,
-    },
-  },
-  {
-    model: {
-      operator: "equals",
       value: "google/gemma-2-9b-it:free",
     },
     cost: {
@@ -762,8 +1042,18 @@ export const costs: ModelRow[] = [
       value: "google/gemma-2-9b-it",
     },
     cost: {
-      prompt_token: 6e-8,
+      prompt_token: 3e-8,
       completion_token: 6e-8,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "01-ai/yi-large",
+    },
+    cost: {
+      prompt_token: 3e-6,
+      completion_token: 3e-6,
     },
   },
   {
@@ -779,7 +1069,7 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
-      value: "anthropic/claude-3.5-sonnet-20240620",
+      value: "anthropic/claude-3.5-sonnet-20240620:beta",
     },
     cost: {
       prompt_token: 3e-6,
@@ -789,7 +1079,7 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
-      value: "anthropic/claude-3.5-sonnet-20240620:beta",
+      value: "anthropic/claude-3.5-sonnet-20240620",
     },
     cost: {
       prompt_token: 3e-6,
@@ -829,26 +1119,6 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
-      value: "nousresearch/hermes-2-pro-llama-3-8b",
-    },
-    cost: {
-      prompt_token: 1.4e-7,
-      completion_token: 1.4e-7,
-    },
-  },
-  {
-    model: {
-      operator: "equals",
-      value: "mistralai/mistral-7b-instruct-v0.3",
-    },
-    cost: {
-      prompt_token: 5.5e-8,
-      completion_token: 5.5e-8,
-    },
-  },
-  {
-    model: {
-      operator: "equals",
       value: "mistralai/mistral-7b-instruct:free",
     },
     cost: {
@@ -862,7 +1132,7 @@ export const costs: ModelRow[] = [
       value: "mistralai/mistral-7b-instruct",
     },
     cost: {
-      prompt_token: 5.5e-8,
+      prompt_token: 3e-8,
       completion_token: 5.5e-8,
     },
   },
@@ -874,6 +1144,26 @@ export const costs: ModelRow[] = [
     cost: {
       prompt_token: 7e-8,
       completion_token: 7e-8,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "mistralai/mistral-7b-instruct-v0.3",
+    },
+    cost: {
+      prompt_token: 3e-8,
+      completion_token: 5.5e-8,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "nousresearch/hermes-2-pro-llama-3-8b",
+    },
+    cost: {
+      prompt_token: 3e-8,
+      completion_token: 3e-8,
     },
   },
   {
@@ -939,16 +1229,6 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
-      value: "deepseek/deepseek-chat",
-    },
-    cost: {
-      prompt_token: 1.4e-7,
-      completion_token: 2.8e-7,
-    },
-  },
-  {
-    model: {
-      operator: "equals",
       value: "perplexity/llama-3-sonar-large-32k-online",
     },
     cost: {
@@ -959,11 +1239,11 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
-      value: "perplexity/llama-3-sonar-large-32k-chat",
+      value: "deepseek/deepseek-chat",
     },
     cost: {
-      prompt_token: 1e-6,
-      completion_token: 1e-6,
+      prompt_token: 1.4e-7,
+      completion_token: 2.8e-7,
     },
   },
   {
@@ -979,11 +1259,11 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
-      value: "meta-llama/llama-guard-2-8b",
+      value: "perplexity/llama-3-sonar-large-32k-chat",
     },
     cost: {
-      prompt_token: 1.8e-7,
-      completion_token: 1.8e-7,
+      prompt_token: 1e-6,
+      completion_token: 1e-6,
     },
   },
   {
@@ -994,6 +1274,16 @@ export const costs: ModelRow[] = [
     cost: {
       prompt_token: 5e-6,
       completion_token: 1.5e-5,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "meta-llama/llama-guard-2-8b",
+    },
+    cost: {
+      prompt_token: 1.8e-7,
+      completion_token: 1.8e-7,
     },
   },
   {
@@ -1019,16 +1309,6 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
-      value: "neversleep/llama-3-lumimaid-8b",
-    },
-    cost: {
-      prompt_token: 1.875e-7,
-      completion_token: 1.125e-6,
-    },
-  },
-  {
-    model: {
-      operator: "equals",
       value: "neversleep/llama-3-lumimaid-8b:extended",
     },
     cost: {
@@ -1039,31 +1319,11 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
-      value: "sao10k/fimbulvetr-11b-v2",
+      value: "neversleep/llama-3-lumimaid-8b",
     },
     cost: {
-      prompt_token: 3.75e-7,
-      completion_token: 1.5e-6,
-    },
-  },
-  {
-    model: {
-      operator: "equals",
-      value: "meta-llama/llama-3-70b-instruct",
-    },
-    cost: {
-      prompt_token: 3.5e-7,
-      completion_token: 4e-7,
-    },
-  },
-  {
-    model: {
-      operator: "equals",
-      value: "meta-llama/llama-3-70b-instruct:nitro",
-    },
-    cost: {
-      prompt_token: 7.92e-7,
-      completion_token: 7.92e-7,
+      prompt_token: 1.875e-7,
+      completion_token: 1.125e-6,
     },
   },
   {
@@ -1082,18 +1342,8 @@ export const costs: ModelRow[] = [
       value: "meta-llama/llama-3-8b-instruct",
     },
     cost: {
-      prompt_token: 4e-8,
-      completion_token: 4e-8,
-    },
-  },
-  {
-    model: {
-      operator: "equals",
-      value: "meta-llama/llama-3-8b-instruct:nitro",
-    },
-    cost: {
-      prompt_token: 1.62e-7,
-      completion_token: 1.62e-7,
+      prompt_token: 3e-8,
+      completion_token: 6e-8,
     },
   },
   {
@@ -1109,6 +1359,36 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
+      value: "meta-llama/llama-3-8b-instruct:nitro",
+    },
+    cost: {
+      prompt_token: 2e-7,
+      completion_token: 2e-7,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "meta-llama/llama-3-70b-instruct",
+    },
+    cost: {
+      prompt_token: 2.3e-7,
+      completion_token: 4e-7,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "meta-llama/llama-3-70b-instruct:nitro",
+    },
+    cost: {
+      prompt_token: 7.92e-7,
+      completion_token: 7.92e-7,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
       value: "mistralai/mixtral-8x22b-instruct",
     },
     cost: {
@@ -1119,21 +1399,21 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
-      value: "microsoft/wizardlm-2-7b",
-    },
-    cost: {
-      prompt_token: 5.5e-8,
-      completion_token: 5.5e-8,
-    },
-  },
-  {
-    model: {
-      operator: "equals",
       value: "microsoft/wizardlm-2-8x22b",
     },
     cost: {
       prompt_token: 5e-7,
       completion_token: 5e-7,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "microsoft/wizardlm-2-7b",
+    },
+    cost: {
+      prompt_token: 5.5e-8,
+      completion_token: 5.5e-8,
     },
   },
   {
@@ -1199,16 +1479,6 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
-      value: "cohere/command-r",
-    },
-    cost: {
-      prompt_token: 4.75e-7,
-      completion_token: 1.425e-6,
-    },
-  },
-  {
-    model: {
-      operator: "equals",
       value: "cohere/command",
     },
     cost: {
@@ -1219,11 +1489,11 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
-      value: "anthropic/claude-3-haiku",
+      value: "cohere/command-r",
     },
     cost: {
-      prompt_token: 2.5e-7,
-      completion_token: 1.25e-6,
+      prompt_token: 4.75e-7,
+      completion_token: 1.425e-6,
     },
   },
   {
@@ -1239,21 +1509,21 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
-      value: "anthropic/claude-3-sonnet",
+      value: "anthropic/claude-3-haiku",
     },
     cost: {
-      prompt_token: 3e-6,
-      completion_token: 1.5e-5,
+      prompt_token: 2.5e-7,
+      completion_token: 1.25e-6,
     },
   },
   {
     model: {
       operator: "equals",
-      value: "anthropic/claude-3-sonnet:beta",
+      value: "anthropic/claude-3-opus:beta",
     },
     cost: {
-      prompt_token: 3e-6,
-      completion_token: 1.5e-5,
+      prompt_token: 1.5e-5,
+      completion_token: 7.5e-5,
     },
   },
   {
@@ -1269,11 +1539,21 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
-      value: "anthropic/claude-3-opus:beta",
+      value: "anthropic/claude-3-sonnet:beta",
     },
     cost: {
-      prompt_token: 1.5e-5,
-      completion_token: 7.5e-5,
+      prompt_token: 3e-6,
+      completion_token: 1.5e-5,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "anthropic/claude-3-sonnet",
+    },
+    cost: {
+      prompt_token: 3e-6,
+      completion_token: 1.5e-5,
     },
   },
   {
@@ -1299,16 +1579,6 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
-      value: "openai/gpt-4-turbo-preview",
-    },
-    cost: {
-      prompt_token: 1e-5,
-      completion_token: 3e-5,
-    },
-  },
-  {
-    model: {
-      operator: "equals",
       value: "openai/gpt-3.5-turbo-0613",
     },
     cost: {
@@ -1319,21 +1589,21 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
-      value: "nousresearch/nous-hermes-2-mixtral-8x7b-dpo",
+      value: "openai/gpt-4-turbo-preview",
     },
     cost: {
-      prompt_token: 5.4e-7,
-      completion_token: 5.4e-7,
+      prompt_token: 1e-5,
+      completion_token: 3e-5,
     },
   },
   {
     model: {
       operator: "equals",
-      value: "mistralai/mistral-medium",
+      value: "nousresearch/nous-hermes-2-mixtral-8x7b-dpo",
     },
     cost: {
-      prompt_token: 2.75e-6,
-      completion_token: 8.1e-6,
+      prompt_token: 5.4e-7,
+      completion_token: 5.4e-7,
     },
   },
   {
@@ -1359,6 +1629,16 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
+      value: "mistralai/mistral-medium",
+    },
+    cost: {
+      prompt_token: 2.75e-6,
+      completion_token: 8.1e-6,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
       value: "mistralai/mistral-7b-instruct-v0.2",
     },
     cost: {
@@ -1379,6 +1659,16 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
+      value: "google/gemini-pro-vision",
+    },
+    cost: {
+      prompt_token: 5e-7,
+      completion_token: 1.5e-6,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
       value: "google/gemini-pro",
     },
     cost: {
@@ -1389,11 +1679,11 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
-      value: "google/gemini-pro-vision",
+      value: "mistralai/mixtral-8x7b",
     },
     cost: {
-      prompt_token: 5e-7,
-      completion_token: 1.5e-6,
+      prompt_token: 5.4e-7,
+      completion_token: 5.4e-7,
     },
   },
   {
@@ -1414,36 +1704,6 @@ export const costs: ModelRow[] = [
     cost: {
       prompt_token: 5.4e-7,
       completion_token: 5.4e-7,
-    },
-  },
-  {
-    model: {
-      operator: "equals",
-      value: "mistralai/mixtral-8x7b",
-    },
-    cost: {
-      prompt_token: 5.4e-7,
-      completion_token: 5.4e-7,
-    },
-  },
-  {
-    model: {
-      operator: "equals",
-      value: "gryphe/mythomist-7b:free",
-    },
-    cost: {
-      prompt_token: 0.0,
-      completion_token: 0.0,
-    },
-  },
-  {
-    model: {
-      operator: "equals",
-      value: "gryphe/mythomist-7b",
-    },
-    cost: {
-      prompt_token: 3.75e-7,
-      completion_token: 3.75e-7,
     },
   },
   {
@@ -1479,27 +1739,7 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
-      value: "anthropic/claude-instant-1.1",
-    },
-    cost: {
-      prompt_token: 8e-7,
-      completion_token: 2.4e-6,
-    },
-  },
-  {
-    model: {
-      operator: "equals",
-      value: "anthropic/claude-2.1",
-    },
-    cost: {
-      prompt_token: 8e-6,
-      completion_token: 2.4e-5,
-    },
-  },
-  {
-    model: {
-      operator: "equals",
-      value: "anthropic/claude-2.1:beta",
+      value: "anthropic/claude-2:beta",
     },
     cost: {
       prompt_token: 8e-6,
@@ -1519,7 +1759,17 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
-      value: "anthropic/claude-2:beta",
+      value: "anthropic/claude-2.1:beta",
+    },
+    cost: {
+      prompt_token: 8e-6,
+      completion_token: 2.4e-5,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "anthropic/claude-2.1",
     },
     cost: {
       prompt_token: 8e-6,
@@ -1559,31 +1809,11 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
-      value: "alpindale/goliath-120b",
-    },
-    cost: {
-      prompt_token: 9.375e-6,
-      completion_token: 9.375e-6,
-    },
-  },
-  {
-    model: {
-      operator: "equals",
       value: "undi95/toppy-m-7b:free",
     },
     cost: {
       prompt_token: 0.0,
       completion_token: 0.0,
-    },
-  },
-  {
-    model: {
-      operator: "equals",
-      value: "undi95/toppy-m-7b",
-    },
-    cost: {
-      prompt_token: 7e-8,
-      completion_token: 7e-8,
     },
   },
   {
@@ -1599,21 +1829,31 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
-      value: "openrouter/auto",
+      value: "undi95/toppy-m-7b",
     },
     cost: {
-      prompt_token: -1.0,
-      completion_token: -1.0,
+      prompt_token: 7e-8,
+      completion_token: 7e-8,
     },
   },
   {
     model: {
       operator: "equals",
-      value: "openai/gpt-4-1106-preview",
+      value: "alpindale/goliath-120b",
     },
     cost: {
-      prompt_token: 1e-5,
-      completion_token: 3e-5,
+      prompt_token: 9.375e-6,
+      completion_token: 9.375e-6,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "openrouter/auto",
+    },
+    cost: {
+      prompt_token: -1.0,
+      completion_token: -1.0,
     },
   },
   {
@@ -1629,7 +1869,17 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
-      value: "google/palm-2-codechat-bison-32k",
+      value: "openai/gpt-4-1106-preview",
+    },
+    cost: {
+      prompt_token: 1e-5,
+      completion_token: 3e-5,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "google/palm-2-chat-bison-32k",
     },
     cost: {
       prompt_token: 1e-6,
@@ -1639,7 +1889,7 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
-      value: "google/palm-2-chat-bison-32k",
+      value: "google/palm-2-codechat-bison-32k",
     },
     cost: {
       prompt_token: 1e-6,
@@ -1669,16 +1919,6 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
-      value: "mistralai/mistral-7b-instruct-v0.1",
-    },
-    cost: {
-      prompt_token: 1.8e-7,
-      completion_token: 1.8e-7,
-    },
-  },
-  {
-    model: {
-      operator: "equals",
       value: "openai/gpt-3.5-turbo-instruct",
     },
     cost: {
@@ -1689,31 +1929,21 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
+      value: "mistralai/mistral-7b-instruct-v0.1",
+    },
+    cost: {
+      prompt_token: 1.8e-7,
+      completion_token: 1.8e-7,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
       value: "pygmalionai/mythalion-13b",
     },
     cost: {
-      prompt_token: 1.125e-6,
-      completion_token: 1.125e-6,
-    },
-  },
-  {
-    model: {
-      operator: "equals",
-      value: "openai/gpt-4-32k-0314",
-    },
-    cost: {
-      prompt_token: 6e-5,
-      completion_token: 0.00012,
-    },
-  },
-  {
-    model: {
-      operator: "equals",
-      value: "openai/gpt-4-32k",
-    },
-    cost: {
-      prompt_token: 6e-5,
-      completion_token: 0.00012,
+      prompt_token: 8e-7,
+      completion_token: 1.2e-6,
     },
   },
   {
@@ -1729,11 +1959,41 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
+      value: "openai/gpt-4-32k",
+    },
+    cost: {
+      prompt_token: 6e-5,
+      completion_token: 0.00012,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "openai/gpt-4-32k-0314",
+    },
+    cost: {
+      prompt_token: 6e-5,
+      completion_token: 0.00012,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
       value: "nousresearch/nous-hermes-llama2-13b",
     },
     cost: {
       prompt_token: 1.7e-7,
       completion_token: 1.7e-7,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "mancer/weaver",
+    },
+    cost: {
+      prompt_token: 1.5e-6,
+      completion_token: 2.25e-6,
     },
   },
   {
@@ -1749,61 +2009,11 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
-      value: "mancer/weaver",
-    },
-    cost: {
-      prompt_token: 1.875e-6,
-      completion_token: 2.25e-6,
-    },
-  },
-  {
-    model: {
-      operator: "equals",
-      value: "anthropic/claude-instant-1.0",
-    },
-    cost: {
-      prompt_token: 8e-7,
-      completion_token: 2.4e-6,
-    },
-  },
-  {
-    model: {
-      operator: "equals",
-      value: "anthropic/claude-1.2",
+      value: "anthropic/claude-2.0:beta",
     },
     cost: {
       prompt_token: 8e-6,
       completion_token: 2.4e-5,
-    },
-  },
-  {
-    model: {
-      operator: "equals",
-      value: "anthropic/claude-1",
-    },
-    cost: {
-      prompt_token: 8e-6,
-      completion_token: 2.4e-5,
-    },
-  },
-  {
-    model: {
-      operator: "equals",
-      value: "anthropic/claude-instant-1",
-    },
-    cost: {
-      prompt_token: 8e-7,
-      completion_token: 2.4e-6,
-    },
-  },
-  {
-    model: {
-      operator: "equals",
-      value: "anthropic/claude-instant-1:beta",
-    },
-    cost: {
-      prompt_token: 8e-7,
-      completion_token: 2.4e-6,
     },
   },
   {
@@ -1819,21 +2029,11 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
-      value: "anthropic/claude-2.0:beta",
-    },
-    cost: {
-      prompt_token: 8e-6,
-      completion_token: 2.4e-5,
-    },
-  },
-  {
-    model: {
-      operator: "equals",
       value: "undi95/remm-slerp-l2-13b",
     },
     cost: {
-      prompt_token: 1.125e-6,
-      completion_token: 1.125e-6,
+      prompt_token: 8e-7,
+      completion_token: 1.2e-6,
     },
   },
   {
@@ -1849,7 +2049,7 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
-      value: "google/palm-2-codechat-bison",
+      value: "google/palm-2-chat-bison",
     },
     cost: {
       prompt_token: 1e-6,
@@ -1859,7 +2059,7 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
-      value: "google/palm-2-chat-bison",
+      value: "google/palm-2-codechat-bison",
     },
     cost: {
       prompt_token: 1e-6,
@@ -1882,8 +2082,8 @@ export const costs: ModelRow[] = [
       value: "gryphe/mythomax-l2-13b",
     },
     cost: {
-      prompt_token: 9e-8,
-      completion_token: 9e-8,
+      prompt_token: 7e-8,
+      completion_token: 7e-8,
     },
   },
   {
@@ -1919,21 +2119,11 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
-      value: "openai/gpt-4-0314",
+      value: "openai/gpt-3.5-turbo",
     },
     cost: {
-      prompt_token: 3e-5,
-      completion_token: 6e-5,
-    },
-  },
-  {
-    model: {
-      operator: "equals",
-      value: "openai/gpt-4",
-    },
-    cost: {
-      prompt_token: 3e-5,
-      completion_token: 6e-5,
+      prompt_token: 5e-7,
+      completion_token: 1.5e-6,
     },
   },
   {
@@ -1949,11 +2139,21 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
-      value: "openai/gpt-3.5-turbo",
+      value: "openai/gpt-4",
     },
     cost: {
-      prompt_token: 5e-7,
-      completion_token: 1.5e-6,
+      prompt_token: 3e-5,
+      completion_token: 6e-5,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "openai/gpt-4-0314",
+    },
+    cost: {
+      prompt_token: 3e-5,
+      completion_token: 6e-5,
     },
   },
 ];

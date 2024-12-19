@@ -27,16 +27,15 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { Check, ChevronsUpDown } from "lucide-react";
-import { useRouter } from "next/router";
 
 // Import Shadcn UI components for dropdown
 import { CreateNewEvaluator } from "@/components/shared/CreateNewEvaluator/CreateNewEvaluator";
 import { EvalMetric, INITIAL_COLUMNS } from "./EvaluratorColumns";
 import { useEvaluators } from "./EvaluatorHook";
 
-// Import Sheet components
-
-import EvaluatorDetailsSheet from "./EvaluatorDetailsSheet";
+import EvaluatorDetailsSheet, {
+  getEvaluatorScoreName,
+} from "./EvaluatorDetailsSheet";
 
 const EvalsPage = () => {
   const {
@@ -55,20 +54,30 @@ const EvalsPage = () => {
 
   const evals = useMemo(() => {
     const allEvaluators =
-      defaultEvaluators?.data?.data?.data?.map((evalRow) => ({
-        ...evalRow,
-        scoreDistribution:
-          scoreDistributions?.data?.data?.data?.find(
-            (s) => s.name === evalRow.name
-          )?.distribution ?? [],
-        type: evalRow.name.includes("-laj-") ? "LLM as a judge" : "Default",
-        valueType: evalRow.name.includes("-hcone-bool") ? "Boolean" : "Numeric",
-        id: evalRow.name,
-      })) ?? [];
+      defaultEvaluators?.data?.data?.data?.map((evalRow) => {
+        const isLLMAsJudge = LLMAsJudgeEvaluators.data?.data?.data
+          ?.map((e) => getEvaluatorScoreName(e.name, e.scoring_type))
+          .includes(evalRow.name);
+        return {
+          ...evalRow,
+          scoreDistribution:
+            scoreDistributions?.data?.data?.data?.find(
+              (s) => s.name === evalRow.name
+            )?.distribution ?? [],
+          valueType: evalRow.name.includes("-hcone-bool")
+            ? "Boolean"
+            : "Numeric",
+          type: isLLMAsJudge ? "LLM as a judge" : "Default",
+          id: evalRow.name,
+        };
+      }) ?? [];
 
     for (const evaluator of LLMAsJudgeEvaluators.data?.data?.data ?? []) {
-      if (allEvaluators.find((e) => e.name === evaluator.name)) {
-        continue;
+      const scoreName = getEvaluatorScoreName(
+        evaluator.name,
+        evaluator.scoring_type
+      );
+      if (allEvaluators.find((e) => e.name === scoreName)) {
       } else {
         allEvaluators.push({
           averageOverTime: [],
@@ -107,8 +116,6 @@ const EvalsPage = () => {
   const [selectedEvaluator, setSelectedEvaluator] = useState<EvalMetric | null>(
     null
   );
-
-  const router = useRouter();
 
   return (
     <>
@@ -234,7 +241,9 @@ const EvalsPage = () => {
           customButtons={[
             <CreateNewEvaluator
               key="create-new-evaluator"
-              onSubmit={() => {}}
+              onSubmit={() => {
+                LLMAsJudgeEvaluators.refetch();
+              }}
             />,
           ]}
           dataLoading={defaultEvaluators.isLoading}

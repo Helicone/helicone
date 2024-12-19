@@ -216,6 +216,26 @@ export type BlogStructure =
 const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
+      folderName: "claude-3.5-sonnet-vs-openai-o1",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "crewai-vs-dify-ai",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "google-gemini-exp-1206",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "meta-llama-3-3-70-b-instruct",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "openai-o1-and-chatgpt-pro",
     },
   },

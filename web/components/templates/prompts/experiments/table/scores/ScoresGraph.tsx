@@ -11,7 +11,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { CartesianGrid, Line, LineChart, XAxis } from "recharts";
 import { useExperimentTable } from "../hooks/useExperimentTable";
-import { PromptVersion } from "./ScoresGraphContainer";
+import { PromptVersion } from "./PromptVersion";
 
 const ScoresGraph = ({
   promptVersions,
@@ -36,7 +36,7 @@ const ScoresGraph = ({
 }) => {
   const { outputColumns, scores: scoreCriterias } = promptVersions.reduce(
     (acc, promptVersion) => {
-      const promptVersionScores = scores[promptVersion.id]?.data;
+      const promptVersionScores = scores[promptVersion?.id]?.data;
       if (promptVersionScores) {
         acc.scores = Array.from(
           new Set([...acc.scores, ...Object.keys(promptVersionScores)])

@@ -4,19 +4,18 @@ import { Result, err, ok } from "../shared/result";
 import { supabaseServer } from "../db/supabase";
 import { Experiment, ExperimentDatasetRow } from "../stores/experimentStore";
 import { BaseTempKey } from "./tempKeys/baseTempKey";
-import { prepareRequestAnthropicFull } from "./requestPrep/openai";
-import { prepareRequestAzureFull as prepareRequestAzureOnPremFull } from "./requestPrep/azure";
-import { runHypothesis, runOriginalRequest } from "./hypothesisRunner";
-import { generateHeliconeAPIKey } from "./tempKeys/tempAPIKey";
-import { generateProxyKey } from "./tempKeys/tempProxyKey";
+import { runHypothesis } from "./hypothesisRunner";
+import { generateTempHeliconeAPIKey } from "./tempKeys/tempAPIKey";
 import {
   PreparedRequest,
   PreparedRequestArgs,
 } from "./requestPrep/PreparedRequest";
-import { prepareRequestOpenAIOnPremFull } from "./requestPrep/openai";
 import { getAllSignedURLsFromInputs } from "../../managers/inputs/InputsManager";
-import { prepareRequestOpenAIFull } from "./requestPrep/openaiCloud";
+import { prepareRequestOpenRouterFull } from "./requestPrep/openRouter";
+import { prepareRequestAzureFull as prepareRequestAzureOnPremFull } from "./requestPrep/azure";
+import { OPENROUTER_KEY, OPENROUTER_WORKER_URL } from "../clients/constant";
 import { SettingsManager } from "../../utils/settings";
+import { prepareRequestOpenAIOnPremFull } from "./requestPrep/openai";
 
 export const IS_ON_PREM =
   process.env.AZURE_BASE_URL &&
@@ -37,23 +36,18 @@ async function isOnPrem(): Promise<boolean> {
   return truthy ? true : false;
 }
 
+type Provider = "OPENAI" | "OPENROUTER";
+
 async function prepareRequest(
   args: PreparedRequestArgs,
-  onPremConfig: {
-    deployment: "AZURE" | "OPENAI";
-  },
-  provider: "OPENAI" | "ANTHROPIC"
+  provider: Provider
 ): Promise<PreparedRequest> {
-  if (args.providerKey === null) {
-    if (await isOnPrem()) {
-      return await prepareRequestAzureOnPremFull(args);
-    } else if (provider === "ANTHROPIC") {
-      return prepareRequestAnthropicFull(args);
-    } else {
-      return prepareRequestOpenAIOnPremFull(args);
-    }
+  if (await isOnPrem()) {
+    return await prepareRequestAzureOnPremFull(args);
+  } else if (provider === "OPENAI") {
+    return prepareRequestOpenAIOnPremFull(args);
   } else {
-    return prepareRequestOpenAIFull(args);
+    return prepareRequestOpenRouterFull(args);
   }
 }
 
@@ -61,7 +55,7 @@ export async function runOriginalExperiment(
   experiment: Experiment,
   datasetRows: ExperimentDatasetRow[]
 ): Promise<Result<string, string>> {
-  const tempKey: Result<BaseTempKey, string> = await generateHeliconeAPIKey(
+  const tempKey: Result<BaseTempKey, string> = await generateTempHeliconeAPIKey(
     experiment.organization
   );
 
@@ -103,7 +97,7 @@ export async function run(
   organizationId: string,
   isOriginalRequest?: boolean
 ): Promise<Result<string, string>> {
-  const tempKey: Result<BaseTempKey, string> = await generateHeliconeAPIKey(
+  const tempKey: Result<BaseTempKey, string> = await generateTempHeliconeAPIKey(
     organizationId
   );
 
@@ -146,19 +140,17 @@ export async function run(
     const preparedRequest = await prepareRequest(
       {
         template: promptVersion.data.helicone_template,
-        providerKey: null,
+        providerKey: OPENROUTER_KEY,
         secretKey,
         inputs: promptInputRecord.data.inputs as Record<string, string>,
         autoInputs: promptInputRecord.data.auto_prompt_inputs as Record<
           string,
           any
         >[],
-        requestPath: `${process.env.HELICONE_WORKER_URL}/v1/chat/completions`,
+        requestPath: `${OPENROUTER_WORKER_URL}/api/v1/chat/completions`,
         requestId,
         experimentId,
-      },
-      {
-        deployment: "AZURE",
+        model: promptVersion.data.model ?? "",
       },
       providerByModelName(promptVersion.data.model ?? "")
     );
@@ -178,5 +170,9 @@ export async function run(
   });
 }
 const providerByModelName = (modelName: string) => {
-  return modelName.includes("claude") ? "ANTHROPIC" : "OPENAI";
+  if (modelName.includes("gpt")) {
+    return "OPENAI";
+  } else {
+    return "OPENROUTER";
+  }
 };

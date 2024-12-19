@@ -14,6 +14,7 @@ import {
 import { run } from "../../lib/experiment/run";
 import { PromptManager } from "../prompt/PromptManager";
 import { PromptVersionResult } from "../../controllers/public/promptController";
+import { RequestManager } from "../request/RequestManager";
 
 export interface ScoreV2 {
   valueType: string;
@@ -71,6 +72,28 @@ export class ExperimentV2Manager extends BaseManager {
   constructor(authParams: AuthParams) {
     super(authParams);
     this.ExperimentStore = new ExperimentStore(authParams.organizationId);
+  }
+
+  async getPromptVersionFromRequest(
+    requestId: string
+  ): Promise<Result<string, string>> {
+    const requestManager = new RequestManager(this.authParams);
+    const requestResult = await requestManager.getRequestById(requestId);
+    if (requestResult.error || !requestResult.data) {
+      return err(requestResult.error);
+    }
+
+    const res = await supabaseServer.client
+      .from("prompt_input_record")
+      .select("*")
+      .eq("source_request", requestId)
+      .single();
+
+    if (res.error || !res.data) {
+      return err("Failed to get prompt version from request");
+    }
+
+    return ok(res.data.prompt_version);
   }
 
   async hasAccessToExperiment(experimentId: string): Promise<boolean> {
@@ -199,6 +222,7 @@ export class ExperimentV2Manager extends BaseManager {
       pir.id,
       pir.inputs,
       pir.prompt_version,
+      pir.auto_prompt_inputs,
       COALESCE(
         (
           SELECT jsonb_agg(
@@ -399,7 +423,11 @@ export class ExperimentV2Manager extends BaseManager {
 
   async createExperimentTableRowBatch(
     experimentId: string,
-    rows: { inputRecordId: string; inputs: Record<string, string> }[]
+    rows: {
+      inputRecordId: string;
+      inputs: Record<string, string>;
+      autoInputs: Record<string, any>;
+    }[]
   ): Promise<Result<null, string>> {
     try {
       await Promise.all(
@@ -407,7 +435,8 @@ export class ExperimentV2Manager extends BaseManager {
           await this.createExperimentTableRow(
             experimentId,
             row.inputRecordId,
-            row.inputs
+            row.inputs,
+            row.autoInputs
           );
         })
       );
@@ -421,7 +450,8 @@ export class ExperimentV2Manager extends BaseManager {
   async createExperimentTableRow(
     experimentId: string,
     inputRecordId: string,
-    inputs: Record<string, string>
+    inputs: Record<string, string>,
+    autoInputs: Record<string, any>
   ): Promise<Result<null, string>> {
     try {
       const [originalPIR, experiment] = await Promise.all([
@@ -445,6 +475,7 @@ export class ExperimentV2Manager extends BaseManager {
         .from("prompt_input_record")
         .insert({
           inputs,
+          auto_prompt_inputs: autoInputs,
           prompt_version: experiment?.copied_original_prompt_version ?? "",
           experiment_id: experimentId,
         })

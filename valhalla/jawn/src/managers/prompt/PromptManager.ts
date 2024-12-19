@@ -1,7 +1,10 @@
 // src/users/usersService.ts
+import { autoFillInputs } from "@helicone/prompts";
 import {
   CreatePromptResponse,
   PromptCreateSubversionParams,
+  PromptEditSubversionLabelParams,
+  PromptEditSubversionTemplateParams,
   PromptQueryParams,
   PromptResult,
   PromptVersionResult,
@@ -10,16 +13,62 @@ import {
   PromptsQueryParams,
   PromptsResult,
 } from "../../controllers/public/promptController";
-import { Result, err, ok } from "../../lib/shared/result";
+import { supabaseServer } from "../../lib/db/supabase";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { FilterNode } from "../../lib/shared/filters/filterDefs";
 import { buildFilterPostgres } from "../../lib/shared/filters/filters";
-import { resultMap } from "../../lib/shared/result";
-import { User } from "../../models/user";
+import { Result, err, ok, resultMap } from "../../lib/shared/result";
 import { BaseManager } from "../BaseManager";
-import { autoFillInputs } from "@helicone/prompts";
+import { RequestManager } from "../request/RequestManager";
 
 export class PromptManager extends BaseManager {
+  async getOrCreatePromptVersionFromRequest(
+    requestId: string
+  ): Promise<Result<string, string>> {
+    const requestManager = new RequestManager(this.authParams);
+    const requestResult = await requestManager.uncachedGetRequestByIdWithBody(
+      requestId
+    );
+    if (requestResult.error || !requestResult.data) {
+      return err(requestResult.error);
+    }
+
+    const promptVersionResult = await this.getPromptVersionFromRequest(
+      requestId
+    );
+    if (promptVersionResult.data) {
+      return ok(promptVersionResult.data);
+    }
+    const prompt = await this.createPrompt({
+      metadata: {
+        promptFromRequest: true,
+      },
+      prompt: requestResult.data.request_body,
+      userDefinedId: `prompt-from-request-${requestId}-${Date.now()}`,
+    });
+
+    if (prompt.error || !prompt.data) {
+      return err(prompt.error);
+    }
+
+    return ok(prompt.data.prompt_version_id);
+  }
+
+  private async getPromptVersionFromRequest(
+    requestId: string
+  ): Promise<Result<string, string>> {
+    const res = await supabaseServer.client
+      .from("prompt_input_record")
+      .select("*")
+      .eq("source_request", requestId)
+      .single();
+
+    if (res.error || !res.data) {
+      return err("Failed to get prompt version from request");
+    }
+
+    return ok(res.data.prompt_version);
+  }
   async createNewPromptVersion(
     parentPromptVersionId: string,
     params: PromptCreateSubversionParams
@@ -134,6 +183,66 @@ export class PromptManager extends BaseManager {
     return resultMap(result, (data) => data[0]);
   }
 
+  async editPromptVersionTemplate(
+    promptVersionId: string,
+    params: PromptEditSubversionTemplateParams
+  ): Promise<Result<null, string>> {
+    if (
+      params.heliconeTemplate &&
+      JSON.stringify(params.heliconeTemplate).length > 1_000_000_000
+    ) {
+      return err("Helicone template too large");
+    }
+
+    const result = await dbExecute<PromptVersionResult>(
+      `
+    UPDATE prompts_versions
+    SET helicone_template = $1,
+    updated_at = now()
+    WHERE id = $2 AND organization = $3
+    `,
+      [params.heliconeTemplate, promptVersionId, this.authParams.organizationId]
+    );
+
+    if (result.error) {
+      return err(result.error);
+    }
+
+    return ok(null);
+  }
+
+  async editPromptVersionLabel(
+    promptVersionId: string,
+    params: PromptEditSubversionLabelParams
+  ): Promise<Result<{ metadata: Record<string, any> }, string>> {
+    if (params.label.length > 100) {
+      return err("Label too long");
+    }
+
+    if (params.label.length === 0) {
+      return err("Label cannot be empty");
+    }
+
+    const result = await dbExecute<{
+      metadata: Record<string, any>;
+    }>(
+      `
+    UPDATE prompts_versions
+    SET metadata = jsonb_set(
+      COALESCE(metadata, '{}'::jsonb),
+      '{label}',
+      to_jsonb($1::text)
+    )
+    WHERE id = $2 AND organization = $3
+    RETURNING 
+      metadata
+    `,
+      [params.label, promptVersionId, this.authParams.organizationId]
+    );
+
+    return resultMap(result, (data) => data[0]);
+  }
+
   async promotePromptVersionToProduction(
     promptVersionId: string,
     previousProductionVersionId: string
@@ -236,6 +345,7 @@ export class PromptManager extends BaseManager {
       metadata: Record<string, any>;
       experiment_id?: string | null;
       parent_prompt_version?: string | null;
+      updated_at: string;
     }>(
       `
     SELECT 
@@ -248,7 +358,8 @@ export class PromptManager extends BaseManager {
       prompts_versions.created_at,
       prompts_versions.metadata,
       prompts_versions.experiment_id,
-      prompts_versions.parent_prompt_version
+      prompts_versions.parent_prompt_version,
+      prompts_versions.updated_at
     FROM prompts_versions
     left join prompt_v2 on prompt_v2.id = prompts_versions.prompt_v2
     WHERE prompt_v2.organization = $1
@@ -460,6 +571,8 @@ export class PromptManager extends BaseManager {
     WHERE prompt_v2.organization = $1
     AND prompt_v2.soft_delete = false
     AND (${filterWithAuth.filter})
+    AND (prompt_v2.metadata->>'promptFromRequest' != 'true' OR prompt_v2.metadata->>'promptFromRequest' IS NULL)
+    AND (prompt_v2.metadata->>'emptyPrompt' != 'true' OR prompt_v2.metadata->>'emptyPrompt' IS NULL)
     ORDER BY created_at DESC
     `,
       filterWithAuth.argsAcc

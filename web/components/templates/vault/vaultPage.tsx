@@ -13,7 +13,7 @@ import CreateProviderKeyModal from "./createProviderKeyModal";
 import CreateProxyKeyModal from "./createProxyKeyModal";
 import { LimitCell } from "./limitsCell";
 import { useFeatureFlags } from "../../../services/hooks/featureFlags";
-import { useOrg } from "../../layout/organizationContext";
+import { useOrg } from "../../layout/org/organizationContext";
 import AuthHeader from "@/components/shared/authHeader";
 import { InfoBox } from "@/components/ui/helicone/infoBox";
 import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";

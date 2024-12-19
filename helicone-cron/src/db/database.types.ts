@@ -1795,6 +1795,35 @@ export type Database = {
           },
         ]
       }
+      pi_session: {
+        Row: {
+          created_at: string
+          id: number
+          organization_id: string
+          session_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          organization_id: string
+          session_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          organization_id?: string
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "public_pi_session_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       prompt_input_keys: {
         Row: {
           created_at: string | null
@@ -1931,6 +1960,7 @@ export type Database = {
           parent_prompt_version: string | null
           prompt_v2: string
           soft_delete: boolean | null
+          updated_at: string
         }
         Insert: {
           created_at?: string | null
@@ -1945,6 +1975,7 @@ export type Database = {
           parent_prompt_version?: string | null
           prompt_v2: string
           soft_delete?: boolean | null
+          updated_at?: string
         }
         Update: {
           created_at?: string | null
@@ -1959,6 +1990,7 @@ export type Database = {
           parent_prompt_version?: string | null
           prompt_v2?: string
           soft_delete?: boolean | null
+          updated_at?: string
         }
         Relationships: [
           {
@@ -2835,6 +2867,14 @@ export type Database = {
             }
             Returns: Record<string, unknown>[]
           }
+      ensure_one_demo_org: {
+        Args: {
+          user_id: string
+        }
+        Returns: {
+          organization_id: string
+        }[]
+      }
       ensure_personal: {
         Args: Record<PropertyKey, never>
         Returns: undefined
@@ -2955,6 +2995,7 @@ export type Database = {
           owner_id: string | null
           path_tokens: string[] | null
           updated_at: string | null
+          user_metadata: Json | null
           version: string | null
         }
         Insert: {
@@ -2968,6 +3009,7 @@ export type Database = {
           owner_id?: string | null
           path_tokens?: string[] | null
           updated_at?: string | null
+          user_metadata?: Json | null
           version?: string | null
         }
         Update: {
@@ -2981,6 +3023,7 @@ export type Database = {
           owner_id?: string | null
           path_tokens?: string[] | null
           updated_at?: string | null
+          user_metadata?: Json | null
           version?: string | null
         }
         Relationships: [
@@ -3002,6 +3045,7 @@ export type Database = {
           key: string
           owner_id: string | null
           upload_signature: string
+          user_metadata: Json | null
           version: string
         }
         Insert: {
@@ -3012,6 +3056,7 @@ export type Database = {
           key: string
           owner_id?: string | null
           upload_signature: string
+          user_metadata?: Json | null
           version: string
         }
         Update: {
@@ -3022,6 +3067,7 @@ export type Database = {
           key?: string
           owner_id?: string | null
           upload_signature?: string
+          user_metadata?: Json | null
           version?: string
         }
         Relationships: [
@@ -3118,7 +3164,7 @@ export type Database = {
         Args: {
           name: string
         }
-        Returns: string[]
+        Returns: unknown
       }
       get_size_by_bucket: {
         Args: Record<PropertyKey, never>
@@ -3157,6 +3203,10 @@ export type Database = {
           metadata: Json
           updated_at: string
         }[]
+      }
+      operation: {
+        Args: Record<PropertyKey, never>
+        Returns: string
       }
       search: {
         Args: {

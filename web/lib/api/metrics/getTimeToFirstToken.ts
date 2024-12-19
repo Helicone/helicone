@@ -1,4 +1,3 @@
-import { TimeToFirstToken } from "../../../pages/api/metrics/timeToFirstToken";
 import { Result, resultMap } from "../../result";
 import { getXOverTime } from "./getXOverTime";
 import { DataOverTimeRequest } from "./timeDataHandlerWrapper";
@@ -15,4 +14,8 @@ export async function getTimeToFirstToken(
       ttft: Number(d.ttft),
     }))
   );
+}
+export interface TimeToFirstToken {
+  ttft: number;
+  time: Date;
 }

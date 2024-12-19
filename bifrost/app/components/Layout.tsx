@@ -1,24 +1,24 @@
-"use client";
-
 import Footer from "@/components/layout/footer";
 import NavBar from "@/components/layout/navbar";
-import { usePathname } from "next/navigation";
 
-export const Layout = ({
+export const Layout = async ({
   children,
-  stars,
+  hideFooter,
 }: {
   children: React.ReactNode;
-  stars: number;
+  hideFooter?: boolean;
 }) => {
-  const path = usePathname();
-  const showFooter = !path.includes("experiments");
+  const githubResponse = await fetch(
+    "https://api.github.com/repos/helicone/helicone"
+  );
+  const githubData = await githubResponse.json();
+  const stars = githubData.stargazers_count;
 
   return (
     <>
       <NavBar stars={stars} />
       {children}
-      {showFooter && <Footer />}
+      {!hideFooter && <Footer />}
     </>
   );
 };

@@ -15,7 +15,7 @@ import {
   addRequestLabel,
   addRequestScore,
 } from "../../../services/lib/requests";
-import { useOrg } from "../../layout/organizationContext";
+import { useOrg } from "../../layout/org/organizationContext";
 import { clsx } from "../../shared/clsx";
 import useNotification from "../../shared/notification/useNotification";
 import FeedbackButtons from "../feedback/thumbsUpThumbsDown";
@@ -30,6 +30,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { getJawnClient } from "@/lib/clients/jawn";
+import useOnboardingContext from "@/components/layout/onboardingContext";
 
 function getPathName(url: string) {
   try {
@@ -247,6 +248,7 @@ const RequestRow = (props: {
   };
 
   const [newDatasetModalOpen, setNewDatasetModalOpen] = useState(false);
+  const { isOnboardingVisible, currentStep } = useOnboardingContext();
 
   return (
     <div className="flex flex-col h-full space-y-8 pb-72 sentry-mask-me">
@@ -636,7 +638,7 @@ const RequestRow = (props: {
           )}
           {sessionData.sessionId && (
             <>
-              <div className="flex flex-row items-center space-x-2">
+              <div className="flex flex-row items-center space-x-2 relative">
                 <Button
                   variant="outline"
                   size="sm_sleek"

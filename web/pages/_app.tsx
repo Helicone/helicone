@@ -15,11 +15,14 @@ import { NextPage } from "next";
 import posthog from "posthog-js";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-import { OrgContextProvider } from "../components/layout/organizationContext";
+import { OrgContextProvider } from "../components/layout/org/organizationContext";
 import ThemeProvider from "../components/shared/theme/themeContext";
 import Script from "next/script";
 import { PostHogProvider } from "posthog-js/react";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { Inter } from "next/font/google";
+
+const inter = Inter({ subsets: ["latin"] });
 
 declare global {
   interface Window {
@@ -73,7 +76,9 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
                 <OrgContextProvider>
                   <ThemeProvider attribute="class" defaultTheme="light">
                     <TooltipProvider>
-                      {getLayout(<Component {...pageProps} />)}
+                      <div className={inter.className}>
+                        {getLayout(<Component {...pageProps} />)}
+                      </div>
                     </TooltipProvider>
                   </ThemeProvider>
                   <Notification />

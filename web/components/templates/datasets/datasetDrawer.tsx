@@ -14,13 +14,17 @@ import useNotification from "../../shared/notification/useNotification";
 import ThemedDrawer from "../../shared/themed/themedDrawer";
 import { ArrowDownIcon, ArrowUpIcon } from "@heroicons/react/20/solid";
 import { clsx } from "../../shared/clsx";
-import { DatasetRow } from "./datasetsIdPage";
 import EditDataset from "./EditDataset";
 import { useState, useEffect } from "react";
 import { useJawnClient } from "../../../lib/clients/jawnHook";
 import { Button } from "../../ui/button";
 import { Check, X } from "lucide-react";
 import RemoveRequestsModal from "./RemoveRequests";
+import { useGetHeliconeDatasetRows } from "@/services/hooks/dataset/heliconeDataset";
+
+type DatasetRow =
+  | ReturnType<typeof useGetHeliconeDatasetRows>["rows"][number]
+  | null;
 
 interface DatasetDrawerV2Props {
   open: boolean;

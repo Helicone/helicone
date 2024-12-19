@@ -10,7 +10,7 @@ import ProviderKeyList from "../../../enterprise/portal/id/providerKeyList";
 import PromptPropertyCard from "../promptPropertyCard";
 import { useState } from "react";
 import useNotification from "../../../../shared/notification/useNotification";
-import { useOrg } from "../../../../layout/organizationContext";
+import { useOrg } from "../../../../layout/org/organizationContext";
 
 interface ExperimentConfigProps {
   currentPrompt: {

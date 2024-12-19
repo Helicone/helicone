@@ -13,6 +13,7 @@ import { KeyIcon, LinkIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { ReactNode } from "react";
+import { useOrg } from "@/components/layout/org/organizationContext";
 
 const tabs = [
   {
@@ -66,42 +67,45 @@ interface SettingsLayoutProps {
 const SettingsLayout = ({ children }: SettingsLayoutProps) => {
   const router = useRouter();
   const currentPath = router.pathname;
+  const org = useOrg();
 
   return (
     <IslandContainer className="space-y-6 ">
       <AuthHeader isWithinIsland={true} title={"Settings"} />
-      <div className="flex flex-col space-y-8 items-start">
-        <div className="flex flex-col space-y-2 items-start">
-          <Tabs
-            defaultValue={
-              tabs.find((tab) => tab.href === currentPath)?.id || "general"
-            }
-            className=""
-            orientation="vertical"
-          >
-            <TabsList className="flex flex-row h-full space-y-1">
-              {tabs.map((tab) => (
-                <Link key={tab.id} href={tab.href} passHref>
-                  <TabsTrigger
-                    value={tab.id}
-                    className="w-full justify-start"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      router.push(tab.href);
-                    }}
-                  >
-                    <tab.icon className="h-5 w-5 mr-2" />
-                    {tab.title}
-                  </TabsTrigger>
-                </Link>
-              ))}
-            </TabsList>
-          </Tabs>
-          <Separator />
-        </div>
+      {org?.currentOrg?.tier !== "demo" && (
+        <div className="flex flex-col space-y-8 items-start">
+          <div className="flex flex-col space-y-2 items-start">
+            <Tabs
+              defaultValue={
+                tabs.find((tab) => tab.href === currentPath)?.id || "general"
+              }
+              className=""
+              orientation="vertical"
+            >
+              <TabsList className="flex flex-row h-full space-y-1">
+                {tabs.map((tab) => (
+                  <Link key={tab.id} href={tab.href} passHref>
+                    <TabsTrigger
+                      value={tab.id}
+                      className="w-full justify-start"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        router.push(tab.href);
+                      }}
+                    >
+                      <tab.icon className="h-5 w-5 mr-2" />
+                      {tab.title}
+                    </TabsTrigger>
+                  </Link>
+                ))}
+              </TabsList>
+            </Tabs>
+            <Separator />
+          </div>
 
-        <div className="flex-1 w-full">{children}</div>
-      </div>
+          <div className="flex-1 w-full">{children}</div>
+        </div>
+      )}
     </IslandContainer>
   );
 };

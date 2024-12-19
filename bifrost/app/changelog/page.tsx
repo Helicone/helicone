@@ -90,7 +90,7 @@ export default async function Home() {
 
   return (
     <>
-      <div className="flex flex-col w-full bg-[#f8feff] h-full antialiased relative divide-gray-200 divide-y-2">
+      <div className="flex flex-col w-full h-full antialiased relative divide-gray-200 divide-y-2">
         {mdxs
           .reverse()
           .map(

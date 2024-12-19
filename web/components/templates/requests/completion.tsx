@@ -37,6 +37,7 @@ export const Completion = (props: CompletionProps) => {
         <div className="flex flex-col space-y-4 divide-y divide-slate-100 dark:divide-slate-900">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           {image_url ? (
+            // eslint-disable-next-line @next/next/no-img-element
             <img src={image_url} alt={""} width={200} height={200} />
           ) : (
             <div className="h-[150px] w-[200px] bg-white dark:bg-black border border-slate-300 dark:border-slate-700 text-center items-center flex justify-center text-xs italic text-slate-500">

@@ -1,4 +1,4 @@
-import { useOrg } from "@/components/layout/organizationContext";
+import { useOrg } from "@/components/layout/org/organizationContext";
 import { getJawnClient } from "../../../../../../lib/clients/jawn";
 import { placeAssetIdValues } from "../../../../../../services/lib/requestTraverseHelper";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -200,6 +200,7 @@ export const useExperimentTable = (experimentTableId: string) => {
       rows: {
         inputRecordId: string;
         inputs: Record<string, string>;
+        autoInputs: any[];
       }[];
     }) => {
       const jawnClient = getJawnClient(orgId);

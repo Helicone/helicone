@@ -2,14 +2,12 @@ import {
   HandlerWrapperOptions,
   withAuth,
 } from "../../../lib/api/handlerWrappers";
-import { getRateLimitOverTime } from "../../../lib/api/metrics/getRateLimitOverTime";
+import {
+  getRateLimitOverTime,
+  RateLimitOverTime,
+} from "../../../lib/api/metrics/getRateLimitOverTime";
 import { Result } from "../../../lib/result";
 import { MetricsBackendBody } from "../../../services/hooks/useBackendFunction";
-
-export interface RateLimitOverTime {
-  count: number;
-  time: Date;
-}
 
 async function handler(
   options: HandlerWrapperOptions<Result<RateLimitOverTime[], string>>

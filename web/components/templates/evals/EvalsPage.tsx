@@ -10,15 +10,13 @@ import {
 } from "../../../lib/timeCalculations/time";
 import { useDebounce } from "../../../services/hooks/debounce";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
-import {
-  UIFilterRowTree,
-  getRootFilterNode,
-} from "../../../services/lib/filters/uiFilterRowTree";
-import { useOrg } from "../../layout/organizationContext";
+import { getRootFilterNode } from "../../../services/lib/filters/uiFilterRowTree";
+import { UIFilterRowTree } from "@/services/lib/filters/types";
+import { useOrg } from "../../layout/org/organizationContext";
 import AuthHeader from "../../shared/authHeader";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import useSearchParams from "../../shared/utils/useSearchParams";
-import { TimeFilter } from "../dashboard/dashboardPage";
+import { TimeFilter } from "@/types/timeFilter";
 import { useUIFilterConvert } from "../dashboard/useDashboardPage";
 
 // Import shadcn components

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useOrg } from "../../components/layout/organizationContext";
+import { useOrg } from "../../components/layout/org/organizationContext";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { Database } from "../../supabase/database.types";
 import { TimeIncrement } from "../../lib/timeCalculations/fetchTimeData";

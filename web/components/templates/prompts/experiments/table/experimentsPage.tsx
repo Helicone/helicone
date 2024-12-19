@@ -10,7 +10,7 @@ import { Dialog, DialogTrigger } from "../../../../ui/dialog";
 import { useState } from "react";
 import { useJawnClient } from "../../../../../lib/clients/jawnHook";
 import { getExampleExperimentPrompt } from "./helpers/basePrompt";
-import { useOrg } from "@/components/layout/organizationContext";
+import { useOrg } from "@/components/layout/org/organizationContext";
 import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
 
 const ExperimentsPage = () => {
@@ -116,7 +116,19 @@ const ExperimentsPage = () => {
               <div>
                 <button
                   className="flex flex-col items-center justify-center w-40 h-32 bg-white dark:bg-slate-800 rounded-lg hover:bg-transparent transition-colors border-2 border-slate-100 dark:border-slate-700"
-                  onClick={() => {}}
+                  onClick={async () => {
+                    const res = await jawn.POST("/v2/experiment/create/empty");
+                    if (res.error) {
+                      notification.setNotification(
+                        "Failed to create experiment",
+                        "error"
+                      );
+                    } else {
+                      router.push(
+                        `/experiments/${res.data?.data?.experimentId}`
+                      );
+                    }
+                  }}
                 >
                   <PlusIcon className="w-16 h-16 text-slate-200" />
                 </button>

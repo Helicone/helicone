@@ -1,19 +1,20 @@
+import { UIFilterRowTree } from "@/services/lib/filters/types";
 import { UserGroupIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/router";
-import { useState, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useDebounce } from "../../../services/hooks/debounce";
 import { useUsers } from "../../../services/hooks/users";
 import { userTableFilters } from "../../../services/lib/filters/frontendFilterDefs";
+import {
+  filterUITreeToFilterNode,
+  getRootFilterNode,
+} from "../../../services/lib/filters/uiFilterRowTree";
 import { SortLeafRequest } from "../../../services/lib/sorts/requests/sorts";
 import { SortDirection } from "../../../services/lib/sorts/users/sorts";
 import AuthHeader from "../../shared/authHeader";
 import ThemedTable from "../../shared/themed/table/themedTable";
-import {
-  UIFilterRowTree,
-  filterUITreeToFilterNode,
-  getRootFilterNode,
-} from "../../../services/lib/filters/uiFilterRowTree";
 import TableFooter from "../requestsV2/tableFooter";
 import { INITIAL_COLUMNS } from "./initialColumns";
 
@@ -27,8 +28,50 @@ interface UsersPageV2Props {
   };
 }
 
+function useQueryParam(
+  paramName: string,
+  defaultValue: string
+): [queryParam: string, setQueryParam: (value: string) => void] {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const setQueryParam = useCallback(
+    (value: string) => {
+      const currentQuery = { ...router.query };
+      currentQuery[paramName] = value;
+      router.push(
+        {
+          pathname: router.pathname,
+          query: currentQuery,
+        },
+        undefined,
+        { shallow: true }
+      );
+    },
+    [router, paramName]
+  );
+
+  // Get the current value from the URL
+  const queryParam = searchParams?.get(paramName) || defaultValue;
+
+  useEffect(() => {
+    // If the parameter is not in the URL, set it to the default value
+    if (!searchParams?.has(paramName)) {
+      setQueryParam(defaultValue);
+    }
+  }, [paramName, defaultValue, searchParams, setQueryParam]);
+
+  return [queryParam, setQueryParam];
+}
+
 const UsersPageV2 = (props: UsersPageV2Props) => {
-  const { currentPage, pageSize, sort } = props;
+  const [currentPage, setCurrentPage] = useQueryParam("page", "1");
+  const [pageSize, setPageSize] = useQueryParam("pageSize", "100");
+  const [sortDirection, setSortDirection] = useQueryParam(
+    "sortDirection",
+    "asc"
+  );
+  const [sortKey, setSortKey] = useQueryParam("sortKey", "last_active");
 
   const [advancedFilters, setAdvancedFilters] = useState<UIFilterRowTree>(
     getRootFilterNode()
@@ -38,22 +81,24 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
   const router = useRouter();
 
   const sortLeaf: SortLeafRequest =
-    sort.sortKey && sort.sortDirection
+    sortKey && sortDirection
       ? {
-          [sort.sortKey]: sort.sortDirection,
+          [sortKey]: sortDirection,
         }
       : {
           last_active: "desc",
         };
+  // const [timeFilter, setTimeFilter] = useState<FilterNode>("all");
 
   const { users, count, from, isLoading, to, refetch } = useUsers(
-    currentPage,
-    pageSize,
+    parseInt(currentPage, 10),
+    parseInt(pageSize, 10),
     sortLeaf,
     filterUITreeToFilterNode(
       userTableFilters.sort((a, b) => a.label.localeCompare(b.label)),
       debouncedAdvancedFilters
     )
+    // timeFilter
   );
 
   const checkIsNotUniqueUser = useCallback(() => {
@@ -74,17 +119,63 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
     []
   );
 
+  // const onTimeSelectHandler = (key: TimeInterval, value: string) => {
+  //   if (key === "custom") {
+  //     const [start, end] = value.split("_");
+  //     const filter: FilterNode = {
+  //       left: {
+  //         request_response_rmt: {
+  //           request_created_at: {
+  //             gte: new Date(start),
+  //           },
+  //         },
+  //       },
+  //       operator: "and",
+  //       right: {
+  //         request_response_rmt: {
+  //           request_created_at: {
+  //             lte: new Date(end),
+  //           },
+  //         },
+  //       },
+  //     };
+  //     setTimeFilter(filter);
+  //   } else {
+  //     setTimeFilter({
+  //       request_response_rmt: {
+  //         request_created_at: {
+  //           gte: new Date(getTimeIntervalAgo(key)),
+  //         },
+  //       },
+  //     });
+  //   }
+  // };
+  // const defaultTimeFilter: TimeFilter = useMemo(() => {
+  //   return {
+  //     start: new Date(getTimeIntervalAgo("1m")),
+  //     end: new Date(),
+  //   };
+  // }, []);
   return (
     <>
       <AuthHeader title={"Users"} />
-      <div className="flex flex-col space-y-4">
+      <div className="flex flex-col space-y-4 pb-10">
         <ThemedTable
           id="user-table"
           defaultData={users}
           defaultColumns={INITIAL_COLUMNS}
           skeletonLoading={isLoading}
           dataLoading={false}
-          sortable={sort}
+          // timeFilter={{
+          //   currentTimeFilter: defaultTimeFilter,
+          //   defaultValue: "24h",
+          //   onTimeSelectHandler: onTimeSelectHandler,
+          // }}
+          sortable={{
+            sortKey: sortKey,
+            sortDirection: sortDirection as SortDirection,
+            isCustomProperty: false,
+          }}
           advancedFilters={{
             filterMap: userTableFilters,
             setAdvancedFilters: onSetAdvancedFiltersHandler,
@@ -123,17 +214,17 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
         )}
 
         <TableFooter
-          currentPage={currentPage}
-          pageSize={pageSize}
+          currentPage={parseInt(currentPage, 10)}
+          pageSize={parseInt(pageSize, 10)}
           isCountLoading={isLoading}
           count={count || 0}
-          onPageChange={() => {
-            refetch();
+          onPageChange={(newPage) => {
+            setCurrentPage(newPage.toString());
           }}
-          onPageSizeChange={() => {
-            refetch();
+          onPageSizeChange={(newPageSize) => {
+            setPageSize(newPageSize.toString());
           }}
-          pageSizeOptions={[25, 50, 100]}
+          pageSizeOptions={[100, 250, 500]}
           showCount={true}
         />
       </div>

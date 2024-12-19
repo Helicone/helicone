@@ -6,6 +6,10 @@ import "prismjs/components/prism-markdown";
 import "prismjs/components/prism-markup-templating";
 import "prismjs/themes/prism.css";
 import Editor from "react-simple-code-editor";
+import { Editor as MonacoEditor } from "@monaco-editor/react";
+import { editor } from "monaco-editor";
+import { useTheme } from "next-themes";
+import { useState } from "react";
 
 interface MarkdownEditorProps {
   text: string;
@@ -15,6 +19,70 @@ interface MarkdownEditorProps {
   className?: string;
   textareaClassName?: string;
 }
+
+const MAX_EDITOR_HEIGHT = 500;
+const MonacoMarkdownEditor = (props: MarkdownEditorProps) => {
+  const {
+    text,
+    setText,
+    language,
+    disabled = false,
+    className,
+    textareaClassName,
+  } = props;
+  const { theme: currentTheme } = useTheme();
+  const minHeight = 100;
+
+  const [height, setHeight] = useState(minHeight);
+  const updateHeight = (editor: editor.IStandaloneCodeEditor) =>
+    setHeight(
+      Math.min(
+        MAX_EDITOR_HEIGHT,
+        Math.max(minHeight, editor.getContentHeight())
+      )
+    );
+
+  return (
+    <div>
+      <MonacoEditor
+        value={text}
+        onChange={(value) => setText(value || "")}
+        language={language}
+        theme={currentTheme === "dark" ? "vs-dark" : "vs-light"}
+        onMount={(editor) =>
+          editor.onDidContentSizeChange(() => updateHeight(editor))
+        }
+        options={{
+          minimap: { enabled: false },
+          fontSize: 12,
+          fontFamily: '"Fira Code", "Fira Mono", monospace',
+          readOnly: disabled,
+          wordWrap: "on",
+          lineNumbers: "off",
+          language: "markdown",
+          scrollBeyondLastLine: false, // Prevents extra space at bottom
+          automaticLayout: true, // Enables auto-resizing
+        }}
+        className={className}
+        height={height}
+      />
+      <i className="text-xs text-gray-500">
+        Helicone: Large text detected, falling back to large text editor
+      </i>
+    </div>
+  );
+};
+
+interface MarkdownEditorProps {
+  text: string;
+  setText: (text: string) => void;
+  language: "json" | "markdown";
+  disabled?: boolean;
+  className?: string;
+  textareaClassName?: string;
+}
+
+const LARGE_TEXT_THRESHOLD = 50;
 
 const MarkdownEditor = (props: MarkdownEditorProps) => {
   const {
@@ -38,6 +106,9 @@ const MarkdownEditor = (props: MarkdownEditorProps) => {
   };
 
   const { lang, ref } = languageMap[language];
+  if (text.split("\n").length > LARGE_TEXT_THRESHOLD) {
+    return <MonacoMarkdownEditor {...props} />;
+  }
 
   return (
     <Editor

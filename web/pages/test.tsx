@@ -5,7 +5,7 @@ import { NextPageWithLayout } from "./_app";
 import AuthLayout from "../components/layout/auth/authLayout";
 import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
 import getStripe from "../utlis/getStripe";
-import { useOrg } from "../components/layout/organizationContext";
+import { useOrg } from "../components/layout/org/organizationContext";
 import { useUser } from "@supabase/auth-helpers-react";
 
 const Test: NextPageWithLayout<

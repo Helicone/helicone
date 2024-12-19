@@ -59,7 +59,6 @@ export async function prepareRequestAzureFull({
   secretKey: apiKey,
   inputs,
   autoInputs,
-  requestPath,
   requestId,
   experimentId,
 }: PreparedRequestArgs): Promise<PreparedRequest> {

@@ -3,9 +3,10 @@
 import { useUser } from "@supabase/auth-helpers-react";
 import { useRouter } from "next/router";
 import { useMemo } from "react";
-import DesktopSidebar, { NavigationItem } from "./DesktopSidebar";
+import DesktopSidebar from "./DesktopSidebar";
+import { ChangelogItem, NavigationItem } from "./types";
 
-import { useOrg } from "../organizationContext";
+import { useOrg } from "../org/organizationContext";
 import {
   ArchiveIcon,
   BellIcon,
@@ -23,26 +24,14 @@ import {
   UsersIcon,
   Webhook,
 } from "lucide-react";
-import { Enclosure } from "rss-parser";
 
-export interface ChangelogItem {
-  title: string;
-  description: string;
-  link: string;
-  content: string;
-  "content:encoded": string;
-  "content:encodedSnippet": string;
-  contentSnippet: string;
-  isoDate: string;
-  pubDate: string;
-  image?: Enclosure;
-}
 interface SidebarProps {
   setOpen: (open: boolean) => void;
   changelog: ChangelogItem[];
+  sidebarRef: React.RefObject<HTMLDivElement>;
 }
 
-const Sidebar = ({ changelog, setOpen }: SidebarProps) => {
+const Sidebar = ({ changelog, setOpen, sidebarRef }: SidebarProps) => {
   const router = useRouter();
   const { pathname } = router;
   const user = useUser();
@@ -230,16 +219,12 @@ const Sidebar = ({ changelog, setOpen }: SidebarProps) => {
   );
 
   return (
-    <>
-      {/* Remove this line */}
-      {/* <MobileNavigation NAVIGATION={NAVIGATION} setOpen={setOpen} /> */}
-
-      <DesktopSidebar
-        changelog={changelog}
-        NAVIGATION={NAVIGATION}
-        setOpen={setOpen}
-      />
-    </>
+    <DesktopSidebar
+      sidebarRef={sidebarRef}
+      changelog={changelog}
+      NAVIGATION={NAVIGATION}
+      setOpen={setOpen}
+    />
   );
 };
 

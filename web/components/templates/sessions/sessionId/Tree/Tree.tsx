@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { TreeNodeData } from "../../../../../lib/sessions/sessionTypes";
+import { Trace, TreeNodeData } from "../../../../../lib/sessions/sessionTypes";
 import { clsx } from "../../../../shared/clsx";
 import { PathNode } from "./PathNode";
 import { RequestNode } from "./RequestNode";
@@ -21,6 +21,7 @@ export interface TreeNodeProps {
   collapseAll?: boolean;
   setShowDrawer: (x: boolean) => void;
   isRequestSingleChild?: boolean;
+  onBoardingRequestTrace?: Trace;
 }
 
 const TreeNode: React.FC<TreeNodeProps> = ({
@@ -31,6 +32,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({
   collapseAll,
   setShowDrawer,
   isRequestSingleChild,
+  onBoardingRequestTrace,
 }) => {
   const [closeChildren, setCloseChildren] = useState(collapseAll ?? false);
   const [selectedRequestId, setSelectedRequestId] = selectedRequestIdDispatch;
@@ -49,7 +51,8 @@ const TreeNode: React.FC<TreeNodeProps> = ({
     >
       {!node.trace &&
       node.children &&
-      (node.children.filter((c) => c.trace).length === 0 ||
+      (node.children.filter((c) => !c.trace).length ||
+        node.children.filter((c) => c.trace).length === 0 ||
         node.children.filter((c) => c.trace).length > 1) ? (
         <Col className="overflow-x-auto overflow-y-hidden">
           <Row className="w-full group">
@@ -77,6 +80,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({
           {!closeChildren &&
             node.children.map((child, index) => (
               <TreeNode
+                onBoardingRequestTrace={onBoardingRequestTrace}
                 key={index}
                 node={child}
                 selectedRequestIdDispatch={selectedRequestIdDispatch}
@@ -164,6 +168,11 @@ const TreeNode: React.FC<TreeNodeProps> = ({
             ))}
 
           <RequestNode
+            isOnboardingRequest={
+              node.children
+                ? node.children[0].trace === onBoardingRequestTrace
+                : node.trace === onBoardingRequestTrace
+            }
             selectedRequestId={selectedRequestId}
             node={node.children ? node.children[0] : node}
             setCloseChildren={setCloseChildren}
@@ -185,6 +194,8 @@ interface TreeProps {
   selectedRequestIdDispatch: [string, (x: string) => void];
   collapseAll?: boolean;
   setShowDrawer: (x: boolean) => void;
+  onBoardingRequestTrace?: Trace;
+  sessionId: string;
 }
 
 export const Tree: React.FC<TreeProps> = ({
@@ -193,8 +204,9 @@ export const Tree: React.FC<TreeProps> = ({
   selectedRequestIdDispatch,
   collapseAll,
   setShowDrawer,
+  onBoardingRequestTrace,
+  sessionId,
 }) => {
-  console.log(data);
   return (
     <div
       className={clsx(
@@ -209,6 +221,7 @@ export const Tree: React.FC<TreeProps> = ({
             node={child}
             selectedRequestIdDispatch={selectedRequestIdDispatch}
             isLastChild={!!data.children && index === data.children.length - 1}
+            onBoardingRequestTrace={onBoardingRequestTrace}
             level={0}
             collapseAll={collapseAll}
             setShowDrawer={setShowDrawer}

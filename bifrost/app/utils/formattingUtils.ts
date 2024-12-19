@@ -37,3 +37,32 @@ export function humanReadableNumber(num: number): string {
   if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
   return num.toString();
 }
+
+export function formatLatency(ms: number): string {
+  if (ms === 0) return "N/A";
+
+  const days = Math.floor(ms / (24 * 60 * 60 * 1000));
+  const hours = Math.floor((ms % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
+  const minutes = Math.floor((ms % (60 * 60 * 1000)) / (60 * 1000));
+
+  if (days > 0) {
+    return `${days}d ${hours}h`;
+  } else if (hours > 0) {
+    return `${hours}h ${minutes}m`;
+  } else if (minutes > 0) {
+    return `${minutes}m ${((ms % (60 * 1000)) / 1000).toFixed(0)}s`;
+  } else if (ms >= 1000) {
+    return `${(ms / 1000).toFixed(2)}s`;
+  } else if (ms < 1) {
+    return `${(ms * 1000).toFixed(2)}μs`;
+  } else {
+    return `${ms.toFixed(2)}ms`;
+  }
+}
+
+export const formatPercentage = (value: number) => {
+  const percentage = value * 100;
+  if (percentage === 100) return "100%";
+  if (percentage === 0) return "0%";
+  return `${percentage.toFixed(2).replace(/\.?0+$/, "")}%`;
+};

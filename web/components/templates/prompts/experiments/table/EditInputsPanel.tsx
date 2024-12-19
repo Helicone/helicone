@@ -30,6 +30,7 @@ interface EditInputsPanelProps {
   } | null;
   inputKeys: string[];
   onClose: () => void;
+  autoInputs: Record<string, any>;
 }
 
 const EditInputsPanel = ({
@@ -37,6 +38,7 @@ const EditInputsPanel = ({
   inputRecord,
   inputKeys,
   onClose,
+  autoInputs,
 }: EditInputsPanelProps) => {
   const { updateExperimentTableRow } = useExperimentTable(experimentId);
   const [inputKV, setInputKV] = useState(inputRecord?.inputKV ?? {});
@@ -144,6 +146,16 @@ const EditInputsPanel = ({
             </AccordionItem>
           ))}
         </Accordion>
+        {autoInputs && Object.keys(autoInputs).length > 0 && (
+          <div className="flex flex-col gap-2">
+            {Object.entries(autoInputs).map(([key, value]) => (
+              <div key={key}>
+                <p>{key}</p>
+                <p>{JSON.stringify(value)}</p>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
       {hasUnsavedChanges && (
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-200 dark:border-slate-800 flex justify-end items-center w-full gap-3 bg-white dark:bg-neutral-950">

@@ -3,10 +3,11 @@ import { useQuery } from "@tanstack/react-query";
 import { Database } from "../../supabase/database.types";
 import { useCallback, useEffect, useState } from "react";
 import Cookies from "js-cookie";
-import { OrgContextValue } from "../../components/layout/organizationContext";
+import { OrgContextValue } from "@/components/layout/org/OrgContextValue";
 import { ORG_ID_COOKIE_KEY } from "../../lib/constants";
 import { getJawnClient } from "../../lib/clients/jawn";
 import posthog from "posthog-js";
+import { getHeliconeCookie } from "@/lib/cookies";
 
 const useGetOrgMembers = (orgId: string) => {
   const jawn = getJawnClient(orgId);
@@ -212,22 +213,53 @@ const useOrgsContextManager = () => {
   const refreshCurrentOrg = useCallback(() => {
     refetch().then((x) => {
       if (x.data && x.data.length > 0) {
-        const firstOrg = x.data[0];
-        setOrg(firstOrg);
-        setOrgCookie(firstOrg.id);
-        setRenderKey((key) => key + 1);
+        const currentOrg = x.data.find(
+          (organization) => organization.id === org?.id
+        );
+        if (currentOrg) {
+          setOrg(currentOrg);
+          setOrgCookie(currentOrg.id);
+          setRenderKey((key) => key + 1);
+        }
       }
     });
   }, [refetch]);
 
+  const [ensuringOneOrg, setEnsuringOneOrg] = useState(false);
+
   useEffect(() => {
-    if ((!orgs || orgs.length === 0) && user?.id) {
-      fetch(`/api/user/${user.id}/ensure-one-org`).then((res) => {
+    if ((!orgs || orgs.length === 0) && user?.id && !ensuringOneOrg) {
+      setEnsuringOneOrg(true);
+      const jwtToken = getHeliconeCookie().data?.jwtToken;
+      const isEu = window.location.hostname.includes("eu.");
+      fetch(`/api/user/${user.id}/ensure-one-org`, {
+        method: "POST",
+        body: JSON.stringify({
+          isEu,
+        }),
+      }).then((res) => {
+        setEnsuringOneOrg(false);
         if (res.status === 201) {
         } else if (res.status !== 200) {
           console.error("Failed to create org", res.json());
         } else {
-          refreshCurrentOrg();
+          res.json().then((x) => {
+            fetch(
+              `${process.env.NEXT_PUBLIC_HELICONE_JAWN_SERVICE}/v1/organization/setup-demo`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  "helicone-authorization": JSON.stringify({
+                    _type: "jwt",
+                    token: jwtToken,
+                    orgId: x.orgId,
+                  }),
+                },
+              }
+            );
+            refreshCurrentOrg();
+          });
         }
       });
     }
@@ -305,8 +337,8 @@ const useOrgsContextManager = () => {
     isResellerOfCurrentCustomerOrg,
     refreshCurrentOrg,
     setCurrentOrg: (orgId) => {
-      refetch().then(() => {
-        const org = orgs?.find((org) => org.id === orgId);
+      refetch().then((data) => {
+        const org = data?.data?.find((org) => org.id === orgId);
         if (org) {
           setOrg(org);
           setOrgCookie(org.id);
