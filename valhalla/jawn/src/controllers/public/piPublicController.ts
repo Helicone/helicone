@@ -39,7 +39,8 @@ export class PiPublicController extends Controller {
 
     const apiKey = await generateHeliconeAPIKey(
       session.data.organization_id,
-      "Auto Generated PI Key"
+      "Auto Generated PI Key",
+      "rw"
     );
 
     const deleteKey = await supabaseServer.client

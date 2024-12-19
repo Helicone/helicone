@@ -8,7 +8,7 @@ export const testAPIKey = async (apiKey: string) => {
   const options = {
     method: "POST",
     headers: {
-      authorization: "Bearer sk-helicone-y7v7vsi-7j4e2pa-rzz6sqi-jbbunza",
+      authorization: `Bearer ${apiKey}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
@@ -23,7 +23,9 @@ export const testAPIKey = async (apiKey: string) => {
   };
 
   const response = await fetch(
-    "https://api.helicone.ai/v1/request/query",
+    process.env.NODE_ENV === "development"
+      ? "http://localhost:8585/v1/request/query"
+      : "https://api.helicone.ai/v1/request/query",
     options
   );
   const data = await response.json();
@@ -33,7 +35,7 @@ export const testAPIKey = async (apiKey: string) => {
 
 export const useTestAPIKey = (apiKey: string) => {
   return useQuery({
-    queryKey: ["test-api-key"],
+    queryKey: ["test-api-key", apiKey],
     queryFn: () => testAPIKey(apiKey),
   });
 };

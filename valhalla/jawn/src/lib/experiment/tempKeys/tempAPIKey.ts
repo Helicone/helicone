@@ -53,7 +53,8 @@ class TempHeliconeAPIKey implements BaseTempKey {
 
 export async function generateHeliconeAPIKey(
   organizationId: string,
-  keyName?: string
+  keyName?: string,
+  keyPermissions?: "rw" | "r" | "w"
 ): Promise<
   Result<
     {
@@ -77,6 +78,7 @@ export async function generateHeliconeAPIKey(
       user_id: organization.data?.owner ?? "",
       api_key_name: keyName ?? "auto-generated-experiment-key",
       organization_id: organizationId,
+      key_permissions: keyPermissions ?? "w",
     })
     .select("*")
     .single();

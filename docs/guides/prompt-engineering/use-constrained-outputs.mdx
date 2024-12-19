@@ -19,52 +19,53 @@ Constrained outputs involve instructing the LLM to generate responses that adher
 4. **Use controlled vocabularies**: Restrict the model to use only certain words or phrases.
 5. **Provide templates**: Offer a template that the model should fill in.
 
-
 ## Example
 
 <AccordionGroup>
   <Accordion title="Example 1: Binary Classification.">
   Limiting the response to 'Approved' or 'Denied' ensures consistency and simplifies automated processing.
 
+**Prompt:**
 
-  **Prompt:**
-  ```
-  Review the following application and respond with 'Approved' or 'Denied' only.
+```
+Review the following application and respond with 'Approved' or 'Denied' only.
 
-  Application Details: [Applicant's information and criteria]
+Application Details: [Applicant's information and criteria]
 
-  Decision:
-  ```
+Decision:
+```
+
 </Accordion>
 
   <Accordion title="Example 2: Short Answer Generation.">
   By specifying that the answer should be in one sentence, you prevent the model from providing overly long or off-topic responses.  **Prompt:**
 
-  **Prompt:**
-  ```
-  Based on the text below, answer the question in one sentence.
+**Prompt:**
 
-  Text: 'The Great Barrier Reef is the world's largest coral reef system located in Australia.'
+```
+Based on the text below, answer the question in one sentence.
 
-  Question: 'Where is the Great Barrier Reef located?'
+Text: 'The Great Barrier Reef is the world's largest coral reef system located in Australia.'
 
-  Answer:
-  ```
+Question: 'Where is the Great Barrier Reef located?'
+
+Answer:
+```
 
   </Accordion>
 
   <Accordion title="Example 3: Technical writing.">
   Setting an exact word limit challenges the model to be concise and focus on the most important information.
 
-
     **Prompt:**
-  ```
-  Summarize the following article in exactly 50 words.
 
-  [Insert article text]
+```
+Summarize the following article in exactly 50 words.
 
-  Summary (50 words):
-  ```
+[Insert article text]
+
+Summary (50 words):
+```
 
   </Accordion>
 
@@ -76,7 +77,5 @@ Constrained outputs involve instructing the LLM to generate responses that adher
 - **Enhance consistency**: Ensures uniformity across multiple outputs, which is crucial for tasks like data entry or form filling.
 - **Simplify parsing**: Makes it easier to programmatically process the responses.
 - **Reduce errors**: Minimizes the chance of irrelevant or incorrect information creeping into the output.
-
-
 
 <QuestionsSection />

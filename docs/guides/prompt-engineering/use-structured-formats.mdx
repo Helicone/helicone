@@ -1,7 +1,7 @@
 ---
 title: "Use structured formats"
 sidebarTitle: "Use structured formats"
-description: "By formatting the generated output, it's easier to interpret and parse the information. This is especially useful for data extraction or wheres tandardized responses is needed."
+description: "Format the generated output to make it easier to interpret and parse the information."
 "twitter:title": "Use Structured Formats - Prompt Engineering Techniques"
 ---
 
@@ -13,7 +13,6 @@ import QuestionsSection from "/snippets/questions-section.mdx";
 2. Use clear delimiters and labels. For example, label sections and use delimiters to separate different parts of the response.
 3. Use formatting conventions. For example, "generate a Markdown-formatted summary with headings and bullet points".
 
-
 ## Common structured formats
 
 - **JSON/XML**: Ideal for data interchange between systems.
@@ -22,46 +21,49 @@ import QuestionsSection from "/snippets/questions-section.mdx";
 - **Headings and subheadings**: Organizes content for readability, especially in longer texts.
 - **Custom templates**: Tailored formats specific to your application's needs.
 
-
 ## Examples
 
 <AccordionGroup>
-  <Accordion title="Example 1: Customer support chatbot.">
-  A structured format allows the support team quickly identify the issue category (Billing), prioritize the request (High), and provides a ready-to-send response.
+  <Accordion title="Example 1: Customer support chatbot">
+    A structured format allows the support team quickly identify the issue category (Billing), prioritize the request (High), and provides a ready-to-send response.
 
-  **Prompt:**
+    **Prompt:**
+
     ```
-  Based on the customer's query, generate a response in the following format:
+    Based on the customer's query, generate a response in the following format:
 
-  Issue Category: [Billing/Technical Support/General Inquiry]
-  Priority Level: [High/Medium/Low]
-  Suggested Response: [Your response to the customer]
+    Issue Category: [Billing/Technical Support/General Inquiry]
+    Priority Level: [High/Medium/Low]
+    Suggested Response: [Your response to the customer]
 
-  Customer query: I was charged twice for my subscription this month. Can you help fix this?
-  ```
+    Customer query: I was charged twice for my subscription this month. Can you help fix this?
+    ```
 
   </Accordion>
 
-  <Accordion title="Example 2: Data entry automation.">
-  By specifying CSV format, the extracted data can be directly imported into databases or spreadsheets, saving time on data entry.
+  <Accordion title="Example 2: Data entry automation">
+    By specifying CSV format, the extracted data can be directly imported into databases or spreadsheets, saving time on data entry.
 
-  **Prompt:**
-  ```
-  Extract the following information from the email and present it in CSV format:
+    **Prompt:**
 
-  - First Name
-  - Last Name
-  - Email Address
-  - Company Name
+    ```
+    Extract the following information from the email and present it in CSV format:
 
-  Email: Hello, my name is Maria Gonzalez from Tech Innovators. You can reach me at maria.gonzalez@techinnovators.com.
-  ```
+    - First Name
+    - Last Name
+    - Email Address
+    - Company Name
+
+    Email: Hello, my name is Maria Gonzalez from Tech Innovators. You can reach me at maria.gonzalez@techinnovators.com.
+    ```
+
   </Accordion>
 
-  <Accordion title="Example 3: Content creation for marketing.">
+  <Accordion title="Example 3: Content creation for marketing">
     The structured prompt ensures all key marketing elements are included.
 
     **Prompt:**
+
     ```
     Create a social media post promoting our new product using this structure:
 
@@ -72,27 +74,28 @@ import QuestionsSection from "/snippets/questions-section.mdx";
 
     Product: UltraBoost Wireless Earbuds
     ```
+
   </Accordion>
 
-  <Accordion title="Example 4: Medical report summarization.">
-  The structured outputs help healthcare professionals quickly review critical patient information.
+  <Accordion title="Example 4: Medical report summarization">
+    The structured outputs help healthcare professionals quickly review critical patient information.
 
-  **Prompt:**
+    **Prompt:**
 
-  ```
-  Summarize the patient's medical report using the following template:
+    ```
+    Summarize the patient's medical report using the following template:
 
-  Patient Name: [Name]
-  Age: [Age]
-  Diagnosis: [Diagnosis]
-  Prescribed Treatment: [Treatment Plan]
-  Follow-Up Instructions: [Instructions]
+    Patient Name: [Name]
+    Age: [Age]
+    Diagnosis: [Diagnosis]
+    Prescribed Treatment: [Treatment Plan]
+    Follow-Up Instructions: [Instructions]
 
-  Medical Report: [Insert detailed medical report here]
-  ```
+    Medical Report: [Insert detailed medical report here]
+    ```
+
   </Accordion>
 </AccordionGroup>
-
 
 ## Tips for effective structured formatting
 

@@ -15,7 +15,6 @@ export class PiController extends Controller {
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<string, string>> {
     // clean sessions should probably be done in a cron job
-
     let one_hour_ago = new Date(new Date().getTime() - 1 * 60 * 60 * 1000);
     // delete all sessions older than 1 hour
 

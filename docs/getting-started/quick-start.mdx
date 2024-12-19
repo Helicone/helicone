@@ -1,87 +1,157 @@
 ---
 title: "Introduction"
 sidebarTitle: "Introduction"
-description: "Get started with Helicone, the open-source LLM observability platform for developers to monitor, debug, and optimize their applications."
+description: "Helicone is the open-source LLM observability platform for developers to monitor, debug, and improve **production-ready** applications."
 "twitter:title": "Introduction to Helicone - Open Source LLM Observability"
-icon: "rocket"
-iconType: "solid"
 ---
 
-<Note>
-  **Tip:** Open search with `control`/`command` + `k` to search docs.{" "}
-</Note>
+<Frame>
+  <img
+    src="/images/introduction/intro-dashboard.webp"
+    alt="Helicone dashboard where you can monitor your AI applications."
+  />
+</Frame>
+
+Log your LLM requests, evaluate, and experiment with prompts, and get instant insights that helps you push changes to production with _confidence_. Helicone is the CI workflow designed for the entire LLM lifecycle.
 
 ## Quick Start
 
-Integrate with Helicone and send your first events in seconds.
+Welcome to Helicone! Integrate your preferred provider with Helicone in seconds.
 
-<CardGroup cols={3}>
-  <Card title="OpenAI" href="/integrations/openai/javascript">
-    JavaScript, Python, Langchain, Async logging, cURL
-  </Card>
-  <Card title="Azure" href="/integrations/azure/javascript">
-    JavaScript, Python, Langchain, cURL
-  </Card>
-  <Card title="Anthropic" href="/integrations/anthropic/javascript">
-    JavaScript, Python, Langchain
-  </Card>
-  <Card title="Gemini" href="/integrations/gemini/api/javascript">
-    JavaScript, cURL
-  </Card>
-  <Card title="Anyscale" href="/getting-started/integration-method/anyscale">
-    JavaScript, Python, cURL
-  </Card>
-  <Card title="Together AI" href="/getting-started/integration-method/together">
-    JavaScript, Python, cURL
-  </Card>
-  <Card
-    title="Hyperbolic"
-    href="/getting-started/integration-method/hyperbolic"
-  >
-    JavaScript, Python, cURL
-  </Card>
-  <Card title="Groq" href="/integrations/groq/javascript">
-    JavaScript, Python, cURL
-  </Card>
-  <Card title="Deepinfra" href="/getting-started/integration-method/deepinfra">
-    JavaScript, Python, cURL
-  </Card>
-  <Card
-    title="OpenRouter"
-    href="/getting-started/integration-method/openrouter"
-  >
-    JavaScript, Python, cURL
-  </Card>
-  <Card title="LiteLLM" href="/getting-started/integration-method/litellm">
-    JavaScript, Python, cURL
-  </Card>
-  <Card
-    title="OpenLLMetry"
-    href="/getting-started/integration-method/openllmetry"
-  >
-    Log directly to Helicone without going through our proxy.
-  </Card>
-  <Card
-    title="Gateway"
-    href="/getting-started/integration-method/gateway"
-    icon="flag"
-  >
-    Don't see your provider above? Try Helicone's universal Gateway.
-  </Card>
-</CardGroup>
+<Steps>
 
-## New to Helicone?
+<Step title="Create an account">
+  Once you have an [account](https://helicone.ai/), proceed to the next step.
+</Step>
 
-To help you get the most out of Helicone, we curated a list of actions that you can do next. Our users typically find themselves doing majority of the following, but you're welcome to explore the product on your own!
+  <Step title="Generate an API key">
+    <AccordionGroup>
+      <Accordion title="Go to Settings" icon="square-1">
+        Click on your organization on the top left, then select `Settings` from the dropdown.
+        <Frame>
+          <img
+            src="/images/introduction/key-step-1.webp"
+            alt="Find Settings from Helicone's sidebar."
+          />
+        </Frame>
+      </Accordion>
 
-<CardGroup cols={1}>
+      <Accordion title="Select the API Keys tab" icon="square-2">
+        <Frame>
+          <img
+            src="/images/introduction/key-step-2.webp"
+            alt="In Settings, select the API Keys tab."
+          />
+        </Frame>
+      </Accordion>
+
+      <Accordion title="Generate new key" icon="square-3">
+        Click on `Generate new key`.
+
+        When creating a new Helicone API key, you have the ability to enable `read` and `write` permissions.
+        Write keys can be used through Helicone via our proxy, feedback or any other Helicone service when calling a `POST` or using our gateway.
+        <Frame>
+          <img
+            src="/images/introduction/key-step-3.webp"
+            alt="Create a new Helicone API key from Settings."
+          />
+        </Frame>
+
+        <Note>
+          Keys with read permissions will start with `sk-` and keys with write
+          permissions will start with `pk-`. For our EU customers, keys are generated
+          with the prefix `eu-` this allows our edge workers to know which region to
+          route the request to.
+        </Note>
+      </Accordion>
+
+    </AccordionGroup>
+
+    For more details on Helicone API keys, check out the [Helicone Auth](/helicone-headers/helicone-auth) docs.
+
+  </Step>
+
+  <Step title="Pick your preferred integration method">
+
+    Select the provider you are using below as the next instruction varies.
+
+    <CardGroup cols={4}>
+    <Card title="OpenAI" href="/integrations/openai/javascript"></Card>
+    <Card title="Azure" href="/integrations/azure/javascript"></Card>
+    <Card title="Anthropic" href="/integrations/anthropic/javascript"></Card>
+    <Card title="Ollama" href="/integrations/ollama/javascript"></Card>
+    <Card title="AWS Bedrock" href="/integrations/bedrock/javascript"></Card>
+    <Card title="Gemini" href="/integrations/gemini/api/javascript"></Card>
+    <Card
+      title="Vercel AI"
+      href="/getting-started/integration-method/vercelai"
+    ></Card>
+    <Card
+      title="Anyscale"
+      href="/getting-started/integration-method/anyscale"
+    ></Card>
+    <Card
+      title="Together AI"
+      href="/getting-started/integration-method/together"
+    ></Card>
+    <Card
+      title="Hyperbolic"
+      href="/getting-started/integration-method/hyperbolic"
+    ></Card>
+    <Card title="Groq" href="/integrations/groq/javascript"></Card>
+    <Card title="Instructor" href="/integrations/instructor/javascript"></Card>
+    <Card
+      title="Deepinfra"
+      href="/getting-started/integration-method/deepinfra"
+    ></Card>
+    <Card
+      title="OpenRouter"
+      href="/getting-started/integration-method/openrouter"
+    ></Card>
+    <Card
+      title="LiteLLM"
+      href="/getting-started/integration-method/litellm"
+    ></Card>
+    <Card
+      title="Fireworks AI"
+      href="/getting-started/integration-method/fireworks"
+    ></Card>
+
+  </CardGroup>
+  <CardGroup cols={2}>
+    <Card
+      title="OpenLLMetry"
+      href="/getting-started/integration-method/openllmetry"
+    >
+      Log directly to Helicone without going through our proxy.
+    </Card>
+    <Card title="Gateway" href="/getting-started/integration-method/gateway">
+      Don't see your provider above? Try Helicone's universal Gateway.
+    </Card>
+  </CardGroup>
+
+</Step>
+
+<Step title="Send your first request 🎉">
+  Once we receive your requests, you will see them in the `Requests` tab.
+
+You will also see that your `Dashboard` has been updated with your new request.
+
+</Step>
+
+</Steps>
+
+## What's next?
+
+We curated a list to help you make the most of Helicone, but you're welcome to explore the product on your own!
+
+<CardGroup cols={2}>
   <Card
     title="Add a custom property"
     href="/features/advanced-usage/custom-properties"
     icon="square-1"
   >
-    Label your requests. We will walk you through how to segment, analyze, and
-    visualize them.
+    Label your requests to segment, analyze, and visualize them.
   </Card>
   <Card
     title="Create your first prompt"
@@ -91,9 +161,16 @@ To help you get the most out of Helicone, we curated a list of actions that you 
     Version your prompt and inputs as they evolve.
   </Card>
   <Card
+    title="Track a session"
+    href="/features/advanced-usage/sessions"
+    icon="square-3"
+  >
+    Group and visualize multi-step LLM interactions (i.e. AI agents).
+  </Card>
+  <Card
     title="Cache responses"
     href="/features/advanced-usage/caching"
-    icon="square-3"
+    icon="square-4"
   >
     Cache and watch how much time and cost you saved.
   </Card>
@@ -101,16 +178,16 @@ To help you get the most out of Helicone, we curated a list of actions that you 
 
 ### Recommendations
 
-The following guides are optional, but we think you'll find them useful (and fun).
+The following guides are optional, but we think you'll find them useful.
 
 <CardGroup cols={2}>
   <Card
-    title="Run an experiment"
-    href="/use-cases/experiments"
+    title="Run a prompt experiment (new)"
+    href="/features/experiments"
     icon="star-christmas"
   >
-    How much better can the output be, if you tweak your prompt or use a
-    different model? The answer is in Experiments.
+    Did tweaking your prompt or using a different model cause any regression?
+    The answer is in Experiments.
   </Card>
   <Card
     title="Bring it to PostHog"
@@ -124,22 +201,36 @@ The following guides are optional, but we think you'll find them useful (and fun
 
 ## Explore Features
 
-Discover features for monitoring and experimenting with your prompts.
+Discover all the features for monitoring and experimenting with your prompts.
 
 <CardGroup cols={3}>
   <Card
-    title="Prompts (Beta)"
+    title="Prompts"
     href="/features/prompts"
     icon="square-terminal"
   >
-    Effortlessly monitor prompt versions and inputs.sdkj
+    Manage and version prompts from code or UI.
   </Card>
   <Card
     title="Sessions"
     href="/features/sessions"
     icon="rectangle-history"
   >
-    Automatically track sessions and traces with Helicone.
+    Trace agentic workflows and visualize them.
+  </Card>
+    <Card
+    title="Experiments (new)"
+    href="/features/experiments"
+    icon="flask"
+  >
+    Tune your LLM prompts for production.
+  </Card>
+  <Card
+    title="Webhooks"
+    href="/features/webhooks"
+    icon="webhook"
+  >
+    Instantly react to events, trigger actions, and integrate with external tools.
   </Card>
   <Card
     title="Custom Properties"
@@ -156,6 +247,13 @@ Discover features for monitoring and experimenting with your prompts.
     Save cost and improve latency.
   </Card>
   <Card
+    title="Scores"
+    href="/features/advanced-usage/scores"
+    icon="chart-line-up"
+  >
+    Evaluate prompt performance and quantify model outputs.
+  </Card>
+  <Card
     title="Omit Logs"
     href="/features/advanced-usage/omit-logs"
     icon="square-minus"
@@ -168,6 +266,13 @@ Discover features for monitoring and experimenting with your prompts.
     icon="chart-user"
   >
     Get insights into your user's usage.
+  </Card>
+  <Card
+    title="Datasets & Fine-tuning"
+    href="/features/fine-tuning"
+    icon="folders"
+  >
+    Curate datasets and fine-tune your LLMs.
   </Card>
   <Card
     title="Feedback"
@@ -197,11 +302,10 @@ Discover features for monitoring and experimenting with your prompts.
   >
     Easily rate-limit power users.
   </Card>
-  <Card
-    title="Key Vault"
-    href="/features/advanced-usage/vault"
-    icon="key"
-  >
+  <Card 
+    title="Key Vault" 
+    href="/features/advanced-usage/vault" 
+    icon="key">
     Manage and distribute your provider API keys securely.
   </Card>
   <Card
@@ -218,13 +322,13 @@ Discover features for monitoring and experimenting with your prompts.
   >
     Secure OpenAI chat completions against prompt injections.
   </Card>
-  {/* <Card
+  <Card
     title="Webhooks"
     href="/features/Webhooks"
     icon="webhook"
   >
     Set up integrations tp subscribe Helicone events.
-  </Card> */}
+  </Card> 
   <Card
     title="Customer Portal"
     href="/features/customer-portal"
@@ -241,8 +345,8 @@ Discover features for monitoring and experimenting with your prompts.
   <Card title="Proxy or Async?" href="/getting-started/proxy-vs-async">
     Determine when you should use a proxy or async function in Helicone.
   </Card>
-  <Card title="How We Calculate Costs" href="/faq/how-we-calculate-cost">
-    An explanation of our process for calculating cost per request.
+  <Card title="How we calculate costs" href="/faq/how-we-calculate-cost">
+    A detailed breakdown of our process to calculate cost per request.
   </Card>
   <Card
     title="Understanding Helicone Headers"
@@ -254,11 +358,9 @@ Discover features for monitoring and experimenting with your prompts.
 
 ## Questions?
 
-<Check>
-  Although we designed the docs to be as self-serving as possible, you are
-  welcome to join our [Discord](https://discord.com/invite/HwUbV3Q8qz) or
-  contact [help@helicone.ai](help@helicone.ai) with any questions or feedback
-  you have.{" "}
-</Check>
+Although we designed the docs to be as self-serving as possible, you are
+welcome to join our [Discord](https://discord.com/invite/HwUbV3Q8qz) or
+contact [help@helicone.ai](help@helicone.ai) with any questions or feedback
+you have.
 
 Interested in deploying Helicone on-prem? [Schedule a call](https://www.helicone.ai/contact) with us.
