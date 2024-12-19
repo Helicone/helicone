@@ -20,6 +20,7 @@ import { buildFilterPostgres } from "../../lib/shared/filters/filters";
 import { Result, err, ok, resultMap } from "../../lib/shared/result";
 import { BaseManager } from "../BaseManager";
 import { RequestManager } from "../request/RequestManager";
+import { ExperimentV2Manager } from "../experiment/ExperimentV2Manager";
 
 export class PromptManager extends BaseManager {
   async getOrCreatePromptVersionFromRequest(
@@ -206,6 +207,48 @@ export class PromptManager extends BaseManager {
 
     if (result.error) {
       return err(result.error);
+    }
+
+    if (params.experimentId) {
+      const newPromptVersionInputKeys = Array.from(
+        (typeof params.heliconeTemplate === "string"
+          ? params.heliconeTemplate
+          : JSON.stringify(params.heliconeTemplate)
+        ).matchAll(/<helicone-prompt-input key=\\"(\w+)\\" \/>/g)
+      ).map((match) => match[1]);
+
+      const existingExperimentInputKeys = await supabaseServer.client
+        .from("experiment_v3")
+        .select("input_keys")
+        .eq("id", params.experimentId)
+        .single();
+
+      const res = await Promise.all([
+        supabaseServer.client
+          .from("experiment_v3")
+          .update({
+            input_keys: [
+              ...new Set([
+                ...(existingExperimentInputKeys.data?.input_keys ?? []),
+                ...newPromptVersionInputKeys,
+              ]),
+            ],
+          })
+          .eq("organization", this.authParams.organizationId)
+          .eq("id", params.experimentId),
+        dbExecute(
+          `INSERT INTO prompt_input_keys (key, prompt_version)
+       SELECT unnest($1::text[]), $2
+       ON CONFLICT (key, prompt_version) DO NOTHING`,
+          [`{${newPromptVersionInputKeys.join(",")}}`, promptVersionId]
+        ),
+      ]);
+
+      if (res.some((r) => r.error)) {
+        return err("Failed to update experiment input keys");
+      }
+
+      return ok(null);
     }
 
     return ok(null);
