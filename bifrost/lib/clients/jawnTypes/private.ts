@@ -91,6 +91,9 @@ export interface paths {
   "/v1/prompt/{user_defined_id}/template": {
     post: operations["GetPromptVersionTemplates"];
   };
+  "/v2/experiment/create/empty": {
+    post: operations["CreateEmptyExperiment"];
+  };
   "/v2/experiment/create/from-request/{requestId}": {
     post: operations["CreateExperimentFromRequest"];
   };
@@ -3656,6 +3659,16 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_PromptVersionResultFilled.string_"];
+        };
+      };
+    };
+  };
+  CreateEmptyExperiment: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__experimentId-string_.string_"];
         };
       };
     };

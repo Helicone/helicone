@@ -11264,6 +11264,32 @@
 				}
 			}
 		},
+		"/v2/experiment/create/empty": {
+			"post": {
+				"operationId": "CreateEmptyExperiment",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__experimentId-string_.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Experiment"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
 		"/v2/experiment/create/from-request/{requestId}": {
 			"post": {
 				"operationId": "CreateExperimentFromRequest",
