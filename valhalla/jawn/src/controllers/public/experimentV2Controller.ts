@@ -81,6 +81,52 @@ export interface CreateNewPromptVersionForExperimentParams
 @Tags("Experiment")
 @Security("api_key")
 export class ExperimentV2Controller extends Controller {
+  @Post("/create/empty")
+  public async createEmptyExperiment(
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<
+    Result<
+      {
+        experimentId: string;
+      },
+      string
+    >
+  > {
+    const promptManager = new PromptManager(request.authParams);
+    const promptVersionResult = await promptManager.createPrompt({
+      metadata: {
+        emptyPrompt: true,
+      },
+      prompt: {
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content: "You are a helpful assistant.",
+          },
+        ],
+      },
+      userDefinedId: `empty-prompt-${Date.now()}`,
+    });
+
+    if (promptVersionResult.error) {
+      return err(promptVersionResult.error);
+    }
+
+    const experimentManager = new ExperimentV2Manager(request.authParams);
+    const experiment = await experimentManager.createNewExperiment(
+      `experiment-${Date.now()}`,
+      promptVersionResult.data?.prompt_version_id!
+    );
+
+    if (experiment.error || !experiment.data) {
+      console.log(experiment, promptVersionResult.data!);
+      return err(experiment.error);
+    }
+
+    return ok({ experimentId: experiment.data.experimentId });
+  }
+
   @Post("/create/from-request/{requestId}")
   public async createExperimentFromRequest(
     @Path() requestId: string,

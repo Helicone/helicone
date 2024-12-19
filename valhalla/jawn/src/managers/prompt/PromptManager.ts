@@ -510,6 +510,7 @@ export class PromptManager extends BaseManager {
     AND prompt_v2.soft_delete = false
     AND (${filterWithAuth.filter})
     AND (prompt_v2.metadata->>'promptFromRequest' != 'true' OR prompt_v2.metadata->>'promptFromRequest' IS NULL)
+    AND (prompt_v2.metadata->>'emptyPrompt' != 'true' OR prompt_v2.metadata->>'emptyPrompt' IS NULL)
     ORDER BY created_at DESC
     `,
       filterWithAuth.argsAcc
