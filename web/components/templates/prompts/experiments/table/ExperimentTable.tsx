@@ -165,7 +165,9 @@ export function ExperimentTable({
       }),
       columnHelper.group({
         id: "inputs__outer",
-        header: () => <PromptColumnHeader label="Inputs" />,
+        header: () => (
+          <PromptColumnHeader label="Inputs" promptVersionId="inputs" />
+        ),
         columns: [
           columnHelper.accessor("inputs", {
             header: () => (
@@ -196,6 +198,7 @@ export function ExperimentTable({
           id: `prompt_version_${pv.id}__outer`,
           header: () => (
             <PromptColumnHeader
+              promptVersionId={pv.id}
               label={
                 pv.metadata?.label
                   ? `${pv.metadata?.label}`
@@ -230,6 +233,9 @@ export function ExperimentTable({
                   }
                   promptVersionId={pv.id}
                   originalPromptTemplate={promptVersionTemplateData}
+                  originalPromptVersionId={
+                    experimentTableQuery?.copied_original_prompt_version ?? ""
+                  }
                   onForkPromptVersion={(promptVersionId: string) => {
                     setExternallySelectedForkFromPromptVersionId(
                       promptVersionId
@@ -254,6 +260,7 @@ export function ExperimentTable({
                   promptVersionId={pv.id}
                 />
               ),
+              size: 400,
             }),
           ],
         })
@@ -341,7 +348,7 @@ export function ExperimentTable({
       defaultColumn: {
         minSize: 50,
         maxSize: 1000,
-        size: 300,
+        size: 200,
       },
       getCoreRowModel: getCoreRowModel(),
       enableColumnResizing: true,
@@ -563,7 +570,7 @@ export function ExperimentTable({
       <div className="h-[calc(100vh-50px)]">
         <ResizablePanelGroup direction="horizontal" className="h-full">
           <ResizablePanel defaultSize={75}>
-            <div className="flex flex-col">
+            <div className="flex flex-col overflow-x-auto w-full">
               {showScores && (
                 <div className="flex flex-col w-full bg-white dark:bg-neutral-950 border-y border-r border-slate-200 dark:border-slate-800">
                   {promptVersionsData && (
@@ -582,12 +589,12 @@ export function ExperimentTable({
               )}
               <div
                 className={clsx(
-                  "max-h-[calc(100vh-90px)] overflow-y-auto overflow-x-auto bg-white dark:bg-neutral-950",
+                  "max-h-[calc(100vh-90px)] overflow-y-auto bg-white dark:bg-neutral-950 w-full",
                   showScores && "max-h-[calc(100vh-90px-300px-80px)]"
                 )}
               >
-                <div className="min-w-fit h-full bg-white dark:bg-black rounded-sm">
-                  <Table className="border-collapse w-full border-t border-slate-200 dark:border-slate-800">
+                <div className="h-full bg-white dark:bg-black rounded-sm inline-block min-w-0 w-max">
+                  <Table className="border-collapse border-t border-slate-200 dark:border-slate-800 h-[1px]">
                     <TableHeader>
                       {table.getHeaderGroups().map((headerGroup, i) => (
                         <TableRow
@@ -600,10 +607,12 @@ export function ExperimentTable({
                           {headerGroup.headers.map((header, index) => (
                             <TableHead
                               key={header.id}
-                              style={{
-                                width: header.getSize(),
-                              }}
-                              className="bg-white dark:bg-neutral-950 relative px-0"
+                              style={{ width: header.getSize() }}
+                              className={cn(
+                                "bg-white dark:bg-neutral-950 relative p-0",
+                                index < headerGroup.headers.length - 1 &&
+                                  "border-r border-slate-200 dark:border-slate-800"
+                              )}
                             >
                               {header.isPlaceholder
                                 ? null
@@ -627,16 +636,12 @@ export function ExperimentTable({
                                   )}
                                 />
                               </div>
-                              {index < headerGroup.headers.length - 1 && (
-                                <div className="absolute top-0 right-0 h-full w-px bg-slate-200 dark:bg-slate-800" />
-                              )}
-                              {/* <div className="absolute bottom-0 left-0 right-0 h-[0.5px] bg-slate-200 dark:bg-slate-800" /> */}
                             </TableHead>
                           ))}
                         </TableRow>
                       ))}
                     </TableHeader>
-                    <TableBody className="text-[13px] bg-white dark:bg-neutral-950 flex-1">
+                    <TableBody className="text-[13px] bg-white dark:bg-neutral-950">
                       {table.getRowModel().rows?.length ? (
                         table.getRowModel().rows.map((row) => (
                           <TableRow
@@ -647,15 +652,10 @@ export function ExperimentTable({
                             {row.getVisibleCells().map((cell) => (
                               <TableCell
                                 className={cn(
-                                  "p-0 align-baseline border-r border-slate-200 dark:border-slate-800",
+                                  "p-0 align-baseline border-r border-slate-200 dark:border-slate-800 h-full flex-1 relative",
                                   cell.column.getIsLastColumn() && "border-r-0"
                                 )}
                                 key={cell.id}
-                                style={{
-                                  width: cell.column.getSize(),
-                                  maxWidth: cell.column.getSize(),
-                                  minWidth: cell.column.getSize(),
-                                }}
                               >
                                 {flexRender(
                                   cell.column.columnDef.cell,

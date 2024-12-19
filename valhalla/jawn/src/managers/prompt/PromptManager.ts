@@ -1,7 +1,10 @@
 // src/users/usersService.ts
+import { autoFillInputs } from "@helicone/prompts";
 import {
   CreatePromptResponse,
   PromptCreateSubversionParams,
+  PromptEditSubversionLabelParams,
+  PromptEditSubversionTemplateParams,
   PromptQueryParams,
   PromptResult,
   PromptVersionResult,
@@ -10,16 +13,13 @@ import {
   PromptsQueryParams,
   PromptsResult,
 } from "../../controllers/public/promptController";
-import { Result, err, ok } from "../../lib/shared/result";
+import { supabaseServer } from "../../lib/db/supabase";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { FilterNode } from "../../lib/shared/filters/filterDefs";
 import { buildFilterPostgres } from "../../lib/shared/filters/filters";
-import { resultMap } from "../../lib/shared/result";
-import { User } from "../../models/user";
+import { Result, err, ok, resultMap } from "../../lib/shared/result";
 import { BaseManager } from "../BaseManager";
-import { autoFillInputs } from "@helicone/prompts";
 import { RequestManager } from "../request/RequestManager";
-import { supabaseServer } from "../../lib/db/supabase";
 
 export class PromptManager extends BaseManager {
   async getOrCreatePromptVersionFromRequest(
@@ -183,6 +183,66 @@ export class PromptManager extends BaseManager {
     return resultMap(result, (data) => data[0]);
   }
 
+  async editPromptVersionTemplate(
+    promptVersionId: string,
+    params: PromptEditSubversionTemplateParams
+  ): Promise<Result<null, string>> {
+    if (
+      params.heliconeTemplate &&
+      JSON.stringify(params.heliconeTemplate).length > 1_000_000_000
+    ) {
+      return err("Helicone template too large");
+    }
+
+    const result = await dbExecute<PromptVersionResult>(
+      `
+    UPDATE prompts_versions
+    SET helicone_template = $1,
+    updated_at = now()
+    WHERE id = $2 AND organization = $3
+    `,
+      [params.heliconeTemplate, promptVersionId, this.authParams.organizationId]
+    );
+
+    if (result.error) {
+      return err(result.error);
+    }
+
+    return ok(null);
+  }
+
+  async editPromptVersionLabel(
+    promptVersionId: string,
+    params: PromptEditSubversionLabelParams
+  ): Promise<Result<{ metadata: Record<string, any> }, string>> {
+    if (params.label.length > 100) {
+      return err("Label too long");
+    }
+
+    if (params.label.length === 0) {
+      return err("Label cannot be empty");
+    }
+
+    const result = await dbExecute<{
+      metadata: Record<string, any>;
+    }>(
+      `
+    UPDATE prompts_versions
+    SET metadata = jsonb_set(
+      COALESCE(metadata, '{}'::jsonb),
+      '{label}',
+      to_jsonb($1::text)
+    )
+    WHERE id = $2 AND organization = $3
+    RETURNING 
+      metadata
+    `,
+      [params.label, promptVersionId, this.authParams.organizationId]
+    );
+
+    return resultMap(result, (data) => data[0]);
+  }
+
   async promotePromptVersionToProduction(
     promptVersionId: string,
     previousProductionVersionId: string
@@ -285,6 +345,7 @@ export class PromptManager extends BaseManager {
       metadata: Record<string, any>;
       experiment_id?: string | null;
       parent_prompt_version?: string | null;
+      updated_at: string;
     }>(
       `
     SELECT 
@@ -297,7 +358,8 @@ export class PromptManager extends BaseManager {
       prompts_versions.created_at,
       prompts_versions.metadata,
       prompts_versions.experiment_id,
-      prompts_versions.parent_prompt_version
+      prompts_versions.parent_prompt_version,
+      prompts_versions.updated_at
     FROM prompts_versions
     left join prompt_v2 on prompt_v2.id = prompts_versions.prompt_v2
     WHERE prompt_v2.organization = $1
