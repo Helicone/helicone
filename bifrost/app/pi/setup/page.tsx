@@ -49,7 +49,7 @@ const PiPageContent = () => {
         </Link>
         <div className=" bg-blue-500 bg-opacity-60 absolute top-1/2 left-1/2 transform translate-x-[20px] -translate-y-[110px] text-white font-bold">
           <QRCode
-            value={`https://helicone.ai/signin?pi_session_id=${sessionUUID}`}
+            value={`https://helicone.ai/signin?pi_session=${sessionUUID}`}
             size={75}
           />
         </div>
