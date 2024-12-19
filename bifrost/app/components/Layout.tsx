@@ -4,7 +4,7 @@ import Footer from "@/components/layout/footer";
 import NavBar from "@/components/layout/navbar";
 import { usePathname } from "next/navigation";
 
-export const Layout = async ({
+export const Layout = ({
   children,
   hideFooter,
 }: {
