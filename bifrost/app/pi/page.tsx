@@ -6,10 +6,11 @@ import { useRouter, useSearchParams } from "next/navigation";
 import QRCode from "react-qr-code";
 import { useHeliconeLogin } from "./useHeliconeLogin";
 import { useTestAPIKey } from "./first_page/useTestApiKey";
+import { Suspense } from "react";
 
 const jetbrainsMono = JetBrains_Mono({ subsets: ["latin"] });
 
-const PiPage = () => {
+const PiPageContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { apiKey, sessionUUID } = useHeliconeLogin(
@@ -17,7 +18,7 @@ const PiPage = () => {
   );
   const { data, isLoading } = useTestAPIKey(apiKey.data ?? "");
 
-  if (!apiKey.data && data) {
+  if (!apiKey.data && data && !isLoading) {
     router.push("/pi/first_page");
     return <div>Loading...</div>;
   }
@@ -47,6 +48,14 @@ const PiPage = () => {
         </div>
       </div>
     </div>
+  );
+};
+
+const PiPage = () => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <PiPageContent />
+    </Suspense>
   );
 };
 

@@ -2,19 +2,16 @@
 
 import { useJawnClient } from "@/lib/clients/jawnHook";
 import { JetBrains_Mono } from "next/font/google";
-import Image from "next/image";
-import QRCode from "react-qr-code";
+import { useRouter } from "next/navigation";
+import { Suspense } from "react";
 import { useHeliconeLogin } from "./../useHeliconeLogin";
 import { useTestAPIKey } from "./useTestApiKey";
-import { useRouter } from "next/navigation";
 
 const jetbrainsMono = JetBrains_Mono({ subsets: ["latin"] });
 
-const PiPage = () => {
+const FirstPageContent = () => {
   const jawn = useJawnClient();
-
   const { apiKey, sessionUUID } = useHeliconeLogin();
-
   const { data, isLoading } = useTestAPIKey(apiKey.data ?? "");
   const router = useRouter();
 
@@ -32,6 +29,14 @@ const PiPage = () => {
       </h1>
       {data && JSON.stringify(data).slice(0, 100)}
     </div>
+  );
+};
+
+const PiPage = () => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <FirstPageContent />
+    </Suspense>
   );
 };
 
