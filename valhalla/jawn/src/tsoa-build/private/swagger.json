@@ -9031,6 +9031,44 @@
 					"parent"
 				],
 				"type": "object"
+			},
+			"ResultSuccess__apiKey-string__": {
+				"properties": {
+					"data": {
+						"properties": {
+							"apiKey": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"apiKey"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__apiKey-string_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__apiKey-string__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
 			}
 		},
 		"securitySchemes": {
@@ -17022,6 +17060,94 @@
 									"$ref": "#/components/schemas/ModelsToCompare"
 								},
 								"type": "array"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/public/pi/get-api-key": {
+			"post": {
+				"operationId": "GetApiKey",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__apiKey-string_.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"PI"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"sessionUUID": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"sessionUUID"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/pi/session": {
+			"post": {
+				"operationId": "AddSession",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_string.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"PI"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"sessionUUID": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"sessionUUID"
+								],
+								"type": "object"
 							}
 						}
 					}

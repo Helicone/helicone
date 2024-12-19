@@ -1521,45 +1521,6 @@ export type Database = {
           },
         ]
       }
-      online_evaluators: {
-        Row: {
-          config: Json | null
-          created_at: string
-          evaluator: string
-          id: number
-          organization: string
-        }
-        Insert: {
-          config?: Json | null
-          created_at?: string
-          evaluator: string
-          id?: number
-          organization: string
-        }
-        Update: {
-          config?: Json | null
-          created_at?: string
-          evaluator?: string
-          id?: number
-          organization?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "public_online_evaluators_evaluator_fkey"
-            columns: ["evaluator"]
-            isOneToOne: false
-            referencedRelation: "evaluator"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "public_online_evaluators_organization_fkey"
-            columns: ["organization"]
-            isOneToOne: false
-            referencedRelation: "organization"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       org_rate_limit_tracker: {
         Row: {
           created_at: string | null
@@ -1827,6 +1788,35 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "organization_usage_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pi_session: {
+        Row: {
+          created_at: string
+          id: number
+          organization_id: string
+          session_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          organization_id: string
+          session_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          organization_id?: string
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "public_pi_session_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organization"
@@ -2489,7 +2479,6 @@ export type Database = {
       score_attribute: {
         Row: {
           created_at: string | null
-          evaluator_id: string | null
           id: string
           organization: string
           score_key: string
@@ -2497,7 +2486,6 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
-          evaluator_id?: string | null
           id?: string
           organization: string
           score_key: string
@@ -2505,7 +2493,6 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
-          evaluator_id?: string | null
           id?: string
           organization?: string
           score_key?: string
@@ -2517,13 +2504,6 @@ export type Database = {
             columns: ["organization"]
             isOneToOne: false
             referencedRelation: "organization"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "public_score_attribute_evaluator_id_fkey"
-            columns: ["evaluator_id"]
-            isOneToOne: false
-            referencedRelation: "evaluator"
             referencedColumns: ["id"]
           },
         ]
@@ -3012,6 +2992,7 @@ export type Database = {
           owner_id: string | null
           path_tokens: string[] | null
           updated_at: string | null
+          user_metadata: Json | null
           version: string | null
         }
         Insert: {
@@ -3025,6 +3006,7 @@ export type Database = {
           owner_id?: string | null
           path_tokens?: string[] | null
           updated_at?: string | null
+          user_metadata?: Json | null
           version?: string | null
         }
         Update: {
@@ -3038,6 +3020,7 @@ export type Database = {
           owner_id?: string | null
           path_tokens?: string[] | null
           updated_at?: string | null
+          user_metadata?: Json | null
           version?: string | null
         }
         Relationships: [
@@ -3059,6 +3042,7 @@ export type Database = {
           key: string
           owner_id: string | null
           upload_signature: string
+          user_metadata: Json | null
           version: string
         }
         Insert: {
@@ -3069,6 +3053,7 @@ export type Database = {
           key: string
           owner_id?: string | null
           upload_signature: string
+          user_metadata?: Json | null
           version: string
         }
         Update: {
@@ -3079,6 +3064,7 @@ export type Database = {
           key?: string
           owner_id?: string | null
           upload_signature?: string
+          user_metadata?: Json | null
           version?: string
         }
         Relationships: [
@@ -3175,7 +3161,7 @@ export type Database = {
         Args: {
           name: string
         }
-        Returns: string[]
+        Returns: unknown
       }
       get_size_by_bucket: {
         Args: Record<PropertyKey, never>
@@ -3214,6 +3200,10 @@ export type Database = {
           metadata: Json
           updated_at: string
         }[]
+      }
+      operation: {
+        Args: Record<PropertyKey, never>
+        Returns: string
       }
       search: {
         Args: {
