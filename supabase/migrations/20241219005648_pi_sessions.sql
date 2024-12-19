@@ -4,6 +4,7 @@ create table "public"."pi_session" (
     "session_id" uuid not null,
     "organization_id" uuid not null
 );
+CREATE UNIQUE INDEX pi_session_pkey ON public.pi_session USING btree (id);
 alter table "public"."pi_session"
 add constraint "pi_session_pkey" PRIMARY KEY using index "pi_session_pkey";
 alter table "public"."pi_session"
@@ -14,7 +15,6 @@ REVOKE all PRIVILEGES on "public"."pi_session"
 from authenticated;
 REVOKE all PRIVILEGES on "public"."pi_session"
 from anon;
-CREATE UNIQUE INDEX pi_session_pkey ON public.pi_session USING btree (id);
 CREATE UNIQUE INDEX pi_session_session_id_key ON public.pi_session USING btree (session_id);
 ALTER TABLE "public"."pi_session"
 ADD CONSTRAINT "pi_session_session_id_key" UNIQUE USING INDEX "pi_session_session_id_key";
