@@ -460,6 +460,36 @@ const models: TsoaRoute.Models = {
         "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_CreatePromptResponse_"},{"ref":"ResultError_string_"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ResultSuccess__metadata-Record_string.any___": {
+        "dataType": "refObject",
+        "properties": {
+            "data": {"dataType":"nestedObjectLiteral","nestedProperties":{"metadata":{"ref":"Record_string.any_","required":true}},"required":true},
+            "error": {"dataType":"enum","enums":[null],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Result__metadata-Record_string.any__.string_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess__metadata-Record_string.any___"},{"ref":"ResultError_string_"}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "PromptEditSubversionLabelParams": {
+        "dataType": "refObject",
+        "properties": {
+            "label": {"dataType":"string","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "PromptEditSubversionTemplateParams": {
+        "dataType": "refObject",
+        "properties": {
+            "heliconeTemplate": {"dataType":"any","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "PromptVersionResult": {
         "dataType": "refObject",
         "properties": {
@@ -473,6 +503,7 @@ const models: TsoaRoute.Models = {
             "metadata": {"ref":"Record_string.any_","required":true},
             "parent_prompt_version": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
             "experiment_id": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
+            "updated_at": {"dataType":"string"},
         },
         "additionalProperties": false,
     },
@@ -3573,6 +3604,72 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'createPrompt',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.post('/v1/prompt/version/:promptVersionId/edit-label',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(PromptController)),
+            ...(fetchMiddlewares<RequestHandler>(PromptController.prototype.editPromptVersionLabel)),
+
+            async function PromptController_editPromptVersionLabel(request: ExRequest, response: ExResponse, next: any) {
+            const args: Record<string, TsoaRoute.ParameterSchema> = {
+                    requestBody: {"in":"body","name":"requestBody","required":true,"ref":"PromptEditSubversionLabelParams"},
+                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
+                    promptVersionId: {"in":"path","name":"promptVersionId","required":true,"dataType":"string"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args, request, response });
+
+                const controller = new PromptController();
+
+              await templateService.apiHandler({
+                methodName: 'editPromptVersionLabel',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.post('/v1/prompt/version/:promptVersionId/edit-template',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(PromptController)),
+            ...(fetchMiddlewares<RequestHandler>(PromptController.prototype.editPromptVersionTemplate)),
+
+            async function PromptController_editPromptVersionTemplate(request: ExRequest, response: ExResponse, next: any) {
+            const args: Record<string, TsoaRoute.ParameterSchema> = {
+                    requestBody: {"in":"body","name":"requestBody","required":true,"ref":"PromptEditSubversionTemplateParams"},
+                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
+                    promptVersionId: {"in":"path","name":"promptVersionId","required":true,"dataType":"string"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args, request, response });
+
+                const controller = new PromptController();
+
+              await templateService.apiHandler({
+                methodName: 'editPromptVersionTemplate',
                 controller,
                 response,
                 next,
