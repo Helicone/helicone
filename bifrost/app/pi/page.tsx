@@ -7,22 +7,11 @@ import QRCode from "react-qr-code";
 import { useHeliconeLogin } from "./useHeliconeLogin";
 import { useTestAPIKey } from "./first_page/useTestApiKey";
 import { Suspense } from "react";
+import Link from "next/link";
 
 const jetbrainsMono = JetBrains_Mono({ subsets: ["latin"] });
 
 const PiPageContent = () => {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const { apiKey, sessionUUID } = useHeliconeLogin(
-    searchParams.get("invalid_api_key") === "true"
-  );
-  const { data, isLoading } = useTestAPIKey(apiKey.data ?? "");
-
-  if (apiKey.data && data && !isLoading) {
-    router.push("/pi/first_page");
-    return <div>Loading...</div>;
-  }
-
   return (
     <div className="w-full flex flex-col justify-center items-center h-[100vh]">
       <h1
@@ -40,12 +29,12 @@ const PiPageContent = () => {
           className=""
         />
 
-        <div className=" bg-blue-500 bg-opacity-60 absolute top-1/2 left-1/2 transform translate-x-[20px] -translate-y-[110px] text-white font-bold">
-          <QRCode
-            value={`https://helicone.ai/signin?pi_session_id=${sessionUUID}`}
-            size={75}
-          />
-        </div>
+        <Link
+          href="/pi/setup"
+          className=" bg-blue-500 p-5 bg-opacity-60 absolute top-1/2 left-1/2 transform translate-x-[30px] -translate-y-[110px] text-white font-bold"
+        >
+          Start
+        </Link>
       </div>
     </div>
   );

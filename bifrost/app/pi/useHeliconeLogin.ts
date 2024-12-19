@@ -1,6 +1,6 @@
 import { useJawnClient } from "@/lib/clients/jawnHook";
 import { useQuery } from "@tanstack/react-query";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Cookies from "js-cookie";
 import { testAPIKey } from "./first_page/useTestApiKey";
 
@@ -13,26 +13,27 @@ function generateUUID() {
   return "SERVER_SIDE_UUID";
 }
 
-export const useHeliconeLogin = (invalid_api_key?: boolean) => {
-  const getSessionUUID = useCallback(() => {
-    const cookie = Cookies.get("sessionUUID");
-    console.log("cookie", cookie);
-    if (cookie && !invalid_api_key) {
-      return cookie;
-    } else {
-      const newUUID = generateUUID();
-      Cookies.set("sessionUUID", newUUID, {
-        path: "/",
-        expires: 1000 * 60 * 60, // 1 hour
-        sameSite: "strict",
-      });
-      return newUUID;
-    }
+export const useCountDown = (seconds: number, onFinish: () => void) => {
+  const [countDown, setCountDown] = useState(seconds);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCountDown((prev) => prev - 1);
+    }, 1000);
+    return () => clearInterval(interval);
   }, []);
 
+  return countDown;
+};
+
+export const useHeliconeLogin = (invalid_api_key?: boolean) => {
   const sessionUUID = useQuery({
     queryKey: ["sessionUUID"],
-    queryFn: () => getSessionUUID(),
+    queryFn: () => generateUUID(),
+  });
+
+  const countDown = useCountDown(600, () => {
+    sessionUUID.refetch();
   });
 
   const jawn = useJawnClient();
@@ -43,11 +44,10 @@ export const useHeliconeLogin = (invalid_api_key?: boolean) => {
         return null;
       }
       const cookie = Cookies.get("pi-api-key");
-      console.log("cookie", cookie);
 
       if (cookie) {
         const test = await testAPIKey(cookie);
-        console.log("test", test);
+
         if (test.data) {
           return cookie;
         }
@@ -83,5 +83,6 @@ export const useHeliconeLogin = (invalid_api_key?: boolean) => {
   return {
     apiKey,
     sessionUUID: sessionUUID.data,
+    countDown,
   };
 };

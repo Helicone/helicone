@@ -16,7 +16,7 @@ const FirstPageContent = () => {
   const router = useRouter();
 
   if ((!data && !isLoading) || !apiKey.data) {
-    router.push("/pi?invalid_api_key=true");
+    router.push("/pi/setup?invalid_api_key=true");
     return <div>Loading...</div>;
   }
 
