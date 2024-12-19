@@ -228,7 +228,11 @@ export class PromptManager extends BaseManager {
     }>(
       `
     UPDATE prompts_versions
-    SET metadata = metadata || '{"label": $1}'::jsonb
+    SET metadata = jsonb_set(
+      COALESCE(metadata, '{}'::jsonb),
+      '{label}',
+      to_jsonb($1::text)
+    )
     WHERE id = $2 AND organization = $3
     RETURNING 
       metadata

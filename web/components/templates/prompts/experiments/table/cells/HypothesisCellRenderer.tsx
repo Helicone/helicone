@@ -220,7 +220,7 @@ export const HypothesisCellRenderer = forwardRef<
     if (hypothesisRequestId && content) {
       return (
         <Popover modal={true}>
-          <PopoverTrigger asChild className="h-full">
+          <PopoverTrigger asChild>
             <div className="group relative w-full h-full flex flex-col">
               <Button
                 variant="outline"
@@ -285,9 +285,6 @@ export const HypothesisCellRenderer = forwardRef<
             alignOffset={10}
             side="bottom"
             align="start"
-            onOpenAutoFocus={(event) => {
-              event.preventDefault();
-            }}
           >
             <ScrollArea className="flex flex-col overflow-y-auto max-h-[50vh]">
               <PromptPlayground
@@ -307,15 +304,13 @@ export const HypothesisCellRenderer = forwardRef<
       );
     } else {
       return (
-        <div className="w-full h-full items-center flex justify-end">
-          <Button
-            variant="ghost"
-            className="w-6 h-6 m-2 p-0 border-slate-200 border rounded-md bg-slate-50 text-slate-500"
-            onClick={handleRunHypothesis}
-          >
-            <PlayIcon className="w-4 h-4" />
-          </Button>
-        </div>
+        <Button
+          variant="ghost"
+          className="w-6 h-6 m-2 p-0 border-slate-200 border rounded-md bg-slate-50 text-slate-500 absolute top-1 right-1"
+          onClick={handleRunHypothesis}
+        >
+          <PlayIcon className="w-4 h-4" />
+        </Button>
       );
     }
   }

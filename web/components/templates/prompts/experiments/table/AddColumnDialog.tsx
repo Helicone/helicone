@@ -2,14 +2,11 @@ import { useOrg } from "@/components/layout/org/organizationContext";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { FlaskConicalIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import PromptPlayground from "../../id/promptPlayground";
+import PromptPlayground, { PromptObject } from "../../id/promptPlayground";
 import { useJawnClient } from "@/lib/clients/jawnHook";
-import useOnboardingContext, {
-  ONBOARDING_STEPS,
-} from "@/components/layout/onboardingContext";
 
 const AddColumnDialog = ({
   isOpen,
@@ -54,37 +51,16 @@ const AddColumnDialog = ({
     }
   );
 
-  const { isOnboardingVisible, currentStep, setCurrentStep } =
-    useOnboardingContext();
+  const [basePrompt, setBasePrompt] = useState<string | PromptObject | null>(
+    promptVersionTemplateData?.helicone_template ?? ""
+  );
 
   useEffect(() => {
-    if (
-      isOpen &&
-      isOnboardingVisible &&
-      currentStep === ONBOARDING_STEPS.EXPERIMENTS_ADD.stepNumber &&
-      !promptVersionTemplateData
-    ) {
-      setCurrentStep(ONBOARDING_STEPS.EXPERIMENTS_ADD_CHANGE_PROMPT.stepNumber);
-    }
-  }, [
-    isOpen,
-    isOnboardingVisible,
-    currentStep,
-    promptVersionTemplateData,
-    setCurrentStep,
-  ]);
+    setBasePrompt(promptVersionTemplateData?.helicone_template ?? "");
+  }, [promptVersionTemplateData]);
 
   return (
-    <Dialog
-      open={isOpen}
-      onOpenChange={
-        isOnboardingVisible &&
-        currentStep ===
-          ONBOARDING_STEPS.EXPERIMENTS_ADD_CHANGE_PROMPT.stepNumber
-          ? undefined
-          : onOpenChange
-      }
-    >
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="w-[95vw] max-w-5xl gap-0 max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-8">
           <div className="flex items-center">
@@ -105,10 +81,10 @@ const AddColumnDialog = ({
           </div>
         </div>
 
-        {promptVersionTemplateData && (
+        {promptVersionTemplateData && basePrompt && (
           <PromptPlayground
             defaultEditMode={true}
-            prompt={promptVersionTemplateData?.helicone_template ?? ""}
+            prompt={basePrompt}
             selectedInput={undefined}
             onExtractPromptVariables={() => {}}
             className="border rounded-md border-slate-200 dark:border-slate-700"
@@ -168,7 +144,10 @@ const AddColumnDialog = ({
 
               onOpenChange(false);
             }}
-            submitText="Test"
+            onPromptChange={(prompt) => {
+              setBasePrompt(prompt);
+            }}
+            submitText="Create Prompt"
             initialModel={promptVersionTemplateData?.model ?? "gpt-4o"}
             editMode={false}
           />

@@ -233,6 +233,9 @@ export function ExperimentTable({
                   }
                   promptVersionId={pv.id}
                   originalPromptTemplate={promptVersionTemplateData}
+                  originalPromptVersionId={
+                    experimentTableQuery?.copied_original_prompt_version ?? ""
+                  }
                   onForkPromptVersion={(promptVersionId: string) => {
                     setExternallySelectedForkFromPromptVersionId(
                       promptVersionId
@@ -605,7 +608,11 @@ export function ExperimentTable({
                             <TableHead
                               key={header.id}
                               style={{ width: header.getSize() }}
-                              className="bg-white dark:bg-neutral-950 relative p-0"
+                              className={cn(
+                                "bg-white dark:bg-neutral-950 relative p-0",
+                                index < headerGroup.headers.length - 1 &&
+                                  "border-r border-slate-200 dark:border-slate-800"
+                              )}
                             >
                               {header.isPlaceholder
                                 ? null
@@ -629,9 +636,6 @@ export function ExperimentTable({
                                   )}
                                 />
                               </div>
-                              {index < headerGroup.headers.length - 1 && (
-                                <div className="absolute top-0 right-0 h-full w-px bg-slate-200 dark:bg-slate-800 z-0" />
-                              )}
                             </TableHead>
                           ))}
                         </TableRow>
@@ -648,7 +652,7 @@ export function ExperimentTable({
                             {row.getVisibleCells().map((cell) => (
                               <TableCell
                                 className={cn(
-                                  "p-0 align-baseline border-r border-slate-200 dark:border-slate-800 h-full flex-1",
+                                  "p-0 align-baseline border-r border-slate-200 dark:border-slate-800 h-full flex-1 relative",
                                   cell.column.getIsLastColumn() && "border-r-0"
                                 )}
                                 key={cell.id}
