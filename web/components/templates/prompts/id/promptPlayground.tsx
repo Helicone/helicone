@@ -75,9 +75,9 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
         .filter((msg) => msg.trim() !== "")
         .map((content, index) => ({
           id: `msg-${index}`,
-          role: content.startsWith("<helicone-prompt-static>")
+          role: (content.startsWith("<helicone-prompt-static>")
             ? "system"
-            : "user",
+            : "user") as "system" | "user",
           content: inputs ? replaceTemplateVariables(content, inputs) : content,
         }));
     }
@@ -192,6 +192,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
     if (onExtractPromptVariables) {
       onExtractPromptVariables(promptVariables);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [promptVariables]);
 
   useEffect(() => {
@@ -218,6 +219,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
       };
       onPromptChange(promptObject);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentChat, selectedModel]);
 
   if (

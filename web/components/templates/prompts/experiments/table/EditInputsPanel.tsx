@@ -146,15 +146,16 @@ const EditInputsPanel = ({
             </AccordionItem>
           ))}
         </Accordion>
-        Message {JSON.stringify(autoInputs)}
-        <div className="flex flex-col gap-2">
-          {Object.entries(autoInputs).map(([key, value]) => (
-            <div key={key}>
-              <p>{key}</p>
-              <p>{JSON.stringify(value)}</p>
-            </div>
-          ))}
-        </div>
+        {autoInputs && Object.keys(autoInputs).length > 0 && (
+          <div className="flex flex-col gap-2">
+            {Object.entries(autoInputs).map(([key, value]) => (
+              <div key={key}>
+                <p>{key}</p>
+                <p>{JSON.stringify(value)}</p>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
       {hasUnsavedChanges && (
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-200 dark:border-slate-800 flex justify-end items-center w-full gap-3 bg-white dark:bg-neutral-950">

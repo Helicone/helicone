@@ -105,6 +105,7 @@ export interface PromptVersionResult extends PromptVersionResultBase {
   metadata: Record<string, any>;
   parent_prompt_version?: string | null;
   experiment_id?: string | null;
+  updated_at?: string;
 }
 
 export interface PromptVersionResultCompiled extends PromptVersionResultBase {
@@ -121,6 +122,14 @@ export interface PromptCreateSubversionParams {
   metadata?: Record<string, any>;
   experimentId?: string;
   bumpForMajorPromptVersionId?: string;
+}
+
+export interface PromptEditSubversionLabelParams {
+  label: string;
+}
+
+export interface PromptEditSubversionTemplateParams {
+  heliconeTemplate: any;
 }
 
 export interface PromptInputRecord {
@@ -214,6 +223,50 @@ export class PromptController extends Controller {
 
     const result = await promptManager.createPrompt(requestBody);
     if (result.error || !result.data) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(201); // set return status 201
+    }
+    return result;
+  }
+
+  @Post("version/{promptVersionId}/edit-label")
+  public async editPromptVersionLabel(
+    @Body()
+    requestBody: PromptEditSubversionLabelParams,
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() promptVersionId: string
+  ): Promise<Result<{ metadata: Record<string, any> }, string>> {
+    const promptManager = new PromptManager(request.authParams);
+
+    const result = await promptManager.editPromptVersionLabel(
+      promptVersionId,
+      requestBody
+    );
+    if (result.error || !result.data) {
+      console.log(result.error);
+      this.setStatus(500);
+    } else {
+      this.setStatus(201); // set return status 201
+    }
+    return result;
+  }
+
+  @Post("version/{promptVersionId}/edit-template")
+  public async editPromptVersionTemplate(
+    @Body()
+    requestBody: PromptEditSubversionTemplateParams,
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() promptVersionId: string
+  ): Promise<Result<null, string>> {
+    const promptManager = new PromptManager(request.authParams);
+
+    const result = await promptManager.editPromptVersionTemplate(
+      promptVersionId,
+      requestBody
+    );
+    if (result.error) {
+      console.log(result.error);
       this.setStatus(500);
     } else {
       this.setStatus(201); // set return status 201

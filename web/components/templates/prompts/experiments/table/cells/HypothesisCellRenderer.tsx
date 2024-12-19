@@ -12,7 +12,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Dialog, DialogTrigger, DialogContent } from "@/components/ui/dialog";
 import clsx from "clsx";
 import PromptPlayground from "../../../id/promptPlayground";
 import {
@@ -21,6 +20,12 @@ import {
 } from "../hooks/useExperimentTable";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useJawnClient } from "../../../../../../lib/clients/jawnHook";
+import { TriangleAlertIcon } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export type HypothesisCellRef = {
   runHypothesis: () => Promise<void>;
@@ -41,7 +46,6 @@ export const HypothesisCellRenderer = forwardRef<
     ref
   ) => {
     const [running, setRunning] = useState(false);
-    const [showPromptPlayground, setShowPromptPlayground] = useState(false);
     const initialModel = prompt?.model || "";
     const [hypothesisRequestId, setHypothesisRequestId] = useState<
       string | null
@@ -145,7 +149,6 @@ export const HypothesisCellRenderer = forwardRef<
 
     const handleCellClick = (e: React.MouseEvent) => {
       e.stopPropagation();
-      setShowPromptPlayground(true);
     };
 
     useEffect(() => {
@@ -192,14 +195,13 @@ export const HypothesisCellRenderer = forwardRef<
       runHypothesis: () => handleRunHypothesis(),
     }));
 
-    // Check if content is longer than 100 characters
-    const isContentLong = content && content.length > 20000;
-
     if (running) {
       return (
         <div className="flex items-center gap-2 py-2 px-4">
           <div className="w-2 h-2 bg-yellow-700 rounded-full animate-pulse"></div>
-          <div className="text-sm text-slate-700">Generating...</div>
+          <div className="text-sm text-slate-700 dark:text-slate-400">
+            Generating...
+          </div>
         </div>
       );
     }
@@ -208,168 +210,107 @@ export const HypothesisCellRenderer = forwardRef<
       return (
         <div className="flex items-center gap-2 py-2 px-4">
           <div className="w-2 h-2 bg-green-700 rounded-full animate-pulse"></div>
-          <div className="text-sm text-slate-700">Loading...</div>
+          <div className="text-sm text-slate-700 dark:text-slate-400">
+            Loading...
+          </div>
         </div>
       );
     }
 
     if (hypothesisRequestId && content) {
-      if (isContentLong) {
-        return (
-          <Dialog
-            open={showPromptPlayground}
-            onOpenChange={setShowPromptPlayground}
-          >
-            <DialogTrigger asChild>
-              <div className="group relative w-full h-full">
-                <Button
-                  variant="ghost"
-                  className="absolute top-2 right-2 w-6 h-6 p-0 border-slate-200 dark:border-slate-800 rounded-md text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity"
-                  onClick={(e) => handleRunHypothesis(e)}
-                >
-                  <PlayIcon className="w-4 h-4" />
-                </Button>
-                <div
-                  className="w-full h-full flex flex-col justify-start cursor-pointer py-2 px-4 text-slate-700 dark:text-slate-300"
-                  onClick={handleCellClick}
-                >
-                  {selectedScoreKey && score && (
-                    <div className="flex items-center gap-2 mb-3">
-                      <div
-                        className={clsx(
-                          "h-2.5 w-2.5 rounded-sm",
-                          score.cellValue?.value &&
-                            score.cellValue?.value > score.avg
-                            ? "bg-green-500"
-                            : "bg-red-500"
-                        )}
-                      ></div>
-                      <p className="text-[11px] font-medium text-slate-700 dark:text-slate-300">
-                        {selectedScoreKey.replace("-hcone-bool", "")}:{" "}
-                        {score.cellValue?.value}
-                      </p>
-                    </div>
-                  )}
-                  <div
-                    className={clsx(
-                      wrapText.data
-                        ? "whitespace-nowrap max-h-[100px] overflow-y-hidden line-clamp-4 truncate text-ellipsis"
-                        : "break-words whitespace-normal"
-                    )}
-                  >
-                    {content}
+      return (
+        <Popover modal={true}>
+          <PopoverTrigger asChild>
+            <div className="group relative w-full h-full flex flex-col">
+              <Button
+                variant="outline"
+                className="absolute top-2 right-2 w-6 h-6 p-0 border-slate-200 dark:border-slate-800 border rounded-md text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity z-[1] "
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleRunHypothesis(e);
+                }}
+              >
+                <PlayIcon className="w-4 h-4" />
+              </Button>
+              <div className="w-full h-full flex flex-col justify-start cursor-pointer py-2 px-4 text-slate-700 dark:text-slate-300">
+                {selectedScoreKey && score && (
+                  <div className="flex items-center gap-2 mb-3">
+                    <div
+                      className={clsx(
+                        "h-2.5 w-2.5 rounded-sm",
+                        score.cellValue?.value &&
+                          score.cellValue?.value > score.avg
+                          ? "bg-green-500"
+                          : "bg-red-500"
+                      )}
+                    ></div>
+                    <p className="text-[11px] font-medium text-slate-700 dark:text-slate-300">
+                      {selectedScoreKey.replace("-hcone-bool", "")}:{" "}
+                      {score.cellValue?.value}
+                    </p>
                   </div>
+                )}
+                <div
+                  className={clsx(
+                    "break-words whitespace-normal",
+                    wrapText.data &&
+                      "max-h-[100px] overflow-y-hidden line-clamp-4 truncate text-ellipsis"
+                  )}
+                >
+                  {content}
                 </div>
               </div>
-            </DialogTrigger>
-            <DialogContent
-              className="w-[800px] p-0 [&>button]:hidden "
-              showOverlay={false}
-            >
-              <ScrollArea className="flex flex-col overflow-y-auto max-h-[50vh] w-[800px]">
-                <PromptPlayground
-                  prompt={playgroundPrompt}
-                  selectedInput={undefined}
-                  onSubmit={(history, model) => {
-                    setShowPromptPlayground(false);
-                  }}
-                  submitText="Save"
-                  initialModel={initialModel}
-                  isPromptCreatedFromUi={false}
-                  defaultEditMode={false}
-                  editMode={false}
-                  playgroundMode="experiment"
-                  chatType="response"
-                />
-              </ScrollArea>
-            </DialogContent>
-          </Dialog>
-        );
-      } else {
-        return (
-          <Popover
-            open={showPromptPlayground}
-            onOpenChange={setShowPromptPlayground}
-            modal={true}
-          >
-            <PopoverTrigger asChild>
-              <div className="group relative w-full h-full">
-                <Button
-                  variant="ghost"
-                  className="absolute top-2 right-2 w-6 h-6 p-0 border-slate-200 dark:border-slate-800 border rounded-md text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity"
-                  onClick={(e) => handleRunHypothesis(e)}
-                >
-                  <PlayIcon className="w-4 h-4" />
-                </Button>
-                <div
-                  className="w-full h-full flex flex-col justify-start cursor-pointer py-2 px-4 text-slate-700 dark:text-slate-300"
-                  onClick={handleCellClick}
-                >
-                  {selectedScoreKey && score && (
-                    <div className="flex items-center gap-2 mb-3">
-                      <div
-                        className={clsx(
-                          "h-2.5 w-2.5 rounded-sm",
-                          score.cellValue?.value &&
-                            score.cellValue?.value > score.avg
-                            ? "bg-green-500"
-                            : "bg-red-500"
-                        )}
-                      ></div>
-                      <p className="text-[11px] font-medium text-slate-700 dark:text-slate-300">
-                        {selectedScoreKey.replace("-hcone-bool", "")}:{" "}
-                        {score.cellValue?.value}
-                      </p>
-                    </div>
-                  )}
-                  <div
-                    className={clsx(
-                      wrapText.data
-                        ? "whitespace-nowrap max-h-[100px] overflow-y-hidden line-clamp-4 truncate text-ellipsis"
-                        : "break-words whitespace-normal"
-                    )}
-                  >
-                    {content}
-                  </div>
-                </div>
+              <div className="absolute bottom-2 right-2 text-xs text-slate-500 z-[20]">
+                {new Date(promptTemplate?.updated_at ?? "").getTime() >
+                  new Date(
+                    requestsData?.request_created_at ?? ""
+                  ).getTime() && (
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <TriangleAlertIcon className="w-4 h-4 text-yellow-500" />
+                    </TooltipTrigger>
+                    <TooltipContent
+                      side="left"
+                      className="text-[11px] p-0 border-0 text-yellow-500 dark:text-yellow-500 shadow-none rounded-none bg-yellow-50/80 dark:bg-yellow-950/50"
+                    >
+                      Prompt has changed since this cell was last run
+                    </TooltipContent>
+                  </Tooltip>
+                )}
               </div>
-            </PopoverTrigger>
-            <PopoverContent
-              className="w-[800px] p-0"
-              side="bottom"
-              align="start"
-            >
-              <ScrollArea className="flex flex-col overflow-y-auto max-h-[50vh]">
-                <PromptPlayground
-                  prompt={playgroundPrompt}
-                  selectedInput={undefined}
-                  onSubmit={(history, model) => {
-                    setShowPromptPlayground(false);
-                  }}
-                  submitText="Save"
-                  initialModel={initialModel}
-                  isPromptCreatedFromUi={false}
-                  defaultEditMode={false}
-                  editMode={false}
-                  playgroundMode="experiment"
-                  chatType="response"
-                />
-              </ScrollArea>
-            </PopoverContent>
-          </Popover>
-        );
-      }
+            </div>
+          </PopoverTrigger>
+          <PopoverContent
+            className="w-[800px] max-h-[80vh] overflow-y-auto p-0"
+            alignOffset={10}
+            side="bottom"
+            align="start"
+          >
+            <ScrollArea className="flex flex-col overflow-y-auto max-h-[50vh]">
+              <PromptPlayground
+                prompt={playgroundPrompt}
+                selectedInput={undefined}
+                submitText="Save"
+                initialModel={initialModel}
+                isPromptCreatedFromUi={false}
+                defaultEditMode={false}
+                editMode={false}
+                playgroundMode="experiment"
+                chatType="response"
+              />
+            </ScrollArea>
+          </PopoverContent>
+        </Popover>
+      );
     } else {
       return (
-        <div className="w-full h-full items-center flex justify-end">
-          <Button
-            variant="ghost"
-            className="w-6 h-6 m-2 p-0 border-slate-200 border rounded-md bg-slate-50 text-slate-500"
-            onClick={handleRunHypothesis}
-          >
-            <PlayIcon className="w-4 h-4" />
-          </Button>
-        </div>
+        <Button
+          variant="ghost"
+          className="w-6 h-6 m-2 p-0 border-slate-200 border rounded-md bg-slate-50 text-slate-500 absolute top-1 right-1"
+          onClick={handleRunHypothesis}
+        >
+          <PlayIcon className="w-4 h-4" />
+        </Button>
       );
     }
   }
