@@ -46,6 +46,7 @@ interface DialogContentProps
   backgroundOpacity?: number;
   width?: string;
   closeButton?: boolean;
+  preventAutoFocus?: boolean;
 }
 
 const DialogContent = React.forwardRef<
@@ -60,6 +61,7 @@ const DialogContent = React.forwardRef<
       backgroundOpacity = 0.8,
       width,
       closeButton = true,
+      preventAutoFocus = true,
       ...props
     },
     ref
@@ -73,6 +75,9 @@ const DialogContent = React.forwardRef<
       )}
       <DialogPrimitive.Content
         ref={ref}
+        onOpenAutoFocus={
+          preventAutoFocus ? (event) => event.preventDefault() : undefined
+        }
         className={cn(
           "fixed left-[50%] top-[50%] z-50 grid translate-x-[-50%] " +
             "translate-y-[-50%] gap-4 border border-slate-200 bg-white p-6 shadow-lg duration-200 " +
