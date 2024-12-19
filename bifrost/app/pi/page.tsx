@@ -39,6 +39,8 @@ const PiPageContent = () => {
           height={360}
           className=""
         />
+        {sessionUUID}
+        {apiKey.data}
 
         <div className=" bg-blue-500 bg-opacity-60 absolute top-1/2 left-1/2 transform translate-x-[20px] -translate-y-[110px] text-white font-bold">
           <QRCode

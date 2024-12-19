@@ -2,6 +2,7 @@ import { useJawnClient } from "@/lib/clients/jawnHook";
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo } from "react";
 import Cookies from "js-cookie";
+import { testAPIKey } from "./first_page/useTestApiKey";
 
 function generateUUID() {
   // Only use crypto.randomUUID() in browser environment
@@ -42,9 +43,14 @@ export const useHeliconeLogin = (invalid_api_key?: boolean) => {
         return null;
       }
       const cookie = Cookies.get("pi-api-key");
+      console.log("cookie", cookie);
 
       if (cookie) {
-        return cookie;
+        const test = await testAPIKey(cookie);
+        console.log("test", test);
+        if (test.data) {
+          return cookie;
+        }
       }
       if (!sessionUUID.data) {
         return null;
@@ -55,7 +61,7 @@ export const useHeliconeLogin = (invalid_api_key?: boolean) => {
         },
       });
 
-      if (apiKey.data?.error || !apiKey.data?.data?.apiKey) {
+      if (apiKey.data?.error) {
         console.error(apiKey.data);
         alert(apiKey.data?.error ?? "Something went wrong");
         return null;

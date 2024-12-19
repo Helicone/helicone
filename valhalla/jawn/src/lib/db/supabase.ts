@@ -14,7 +14,7 @@ require("dotenv").config({
 // SINGLETON
 class SupabaseAuthCache extends InMemoryCache {
   private static instance: SupabaseAuthCache;
-  private API_KEY_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+  private API_KEY_CACHE_TTL = 60 * 1000; // 5 minutes
   constructor() {
     super(1_000);
   }
