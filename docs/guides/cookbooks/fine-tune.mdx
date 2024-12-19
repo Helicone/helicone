@@ -1,6 +1,6 @@
 ---
-title: "How to Fine-Tune LLMs with Helicone and OpenPipe"
-sidebarTitle: "Fine-Tuning LLMs with Helicone and OpenPipe"
+title: "How to fine-tune LLMs with Helicone and OpenPipe"
+sidebarTitle: "Fine-tuning LLMs with Helicone and OpenPipe"
 description: "Learn how to fine-tune large language models with Helicone and OpenPipe to optimize performance for specific tasks."
 "twitter:title": "How to Fine-Tune LLMs with Helicone and OpenPipe"
 ---
@@ -9,7 +9,12 @@ description: "Learn how to fine-tune large language models with Helicone and Ope
   <Step title="Add the OpenPipe Integration">
     Navigate to `Settings` -> `Connections` in your Helicone dashboard and configure the OpenPipe integration.
 
-    ![Configure OpenPipe Integration](/images/use-cases/fine-tune/openpipe-integration.webp)
+    <Frame>
+      <img
+        src="/images/use-cases/fine-tune/openpipe-integration.webp"
+        alt="Configure OpenPipe Integration"
+      />
+    </Frame>
 
     This integration allows you to manage your fine-tuning datasets and jobs seamlessly within Helicone.
 
@@ -20,7 +25,12 @@ description: "Learn how to fine-tune large language models with Helicone and Ope
 
     - **Recommendation**: Start with 50-200 examples that are representative of the tasks you want the model to perform.
 
-    ![Create a New Dataset](/images/use-cases/fine-tune/dataset.webp)
+<Frame>
+  <img
+    src="/images/use-cases/fine-tune/dataset.webp"
+    alt="Create a new dataset"
+  />
+</Frame>
 
     Ensure your dataset includes clear input-output pairs to guide the model during fine-tuning.
 
@@ -32,7 +42,12 @@ description: "Learn how to fine-tune large language models with Helicone and Ope
     - **Review Samples**: Check for consistency and clarity in your examples.
     - **Modify as Needed**: Make adjustments to ensure the dataset aligns closely with your desired outcomes.
 
-    ![Evaluate Your Dataset](/images/use-cases/fine-tune/openpipe-button.webp)
+    <Frame>
+      <img
+        src="/images/use-cases/fine-tune/openpipe-button.webp"
+        alt="Evaluate your dataset"
+      />
+    </Frame>
 
     Regular evaluation helps in creating a robust fine-tuning dataset that enhances model performance.
 
@@ -45,11 +60,13 @@ description: "Learn how to fine-tune large language models with Helicone and Ope
     - **Training Settings**: Adjust hyperparameters like learning rate, epochs, and batch size.
     - **Validation Metrics**: Define how you'll measure the model's performance during training.
 
-    <img
-      src="/images/use-cases/fine-tune/fine-tune-config.webp"
-      alt="Configure Fine-Tuning Job"
-      width="300"
-    />
+    <Frame>
+      <img
+        src="/images/use-cases/fine-tune/fine-tune-config.webp"
+        alt="Configure your fine-tuning job"
+        width="300"
+      />
+    </Frame>
 
     After configuring, initiate the fine-tuning process. Helicone and OpenPipe handle the heavy lifting, providing you with progress updates.
 

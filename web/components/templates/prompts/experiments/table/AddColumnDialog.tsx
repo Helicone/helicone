@@ -5,20 +5,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { FlaskConicalIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import PromptPlayground from "../../id/promptPlayground";
+import PromptPlayground, { PromptObject } from "../../id/promptPlayground";
 import { useJawnClient } from "@/lib/clients/jawnHook";
-import { OnboardingPopover } from "@/components/templates/onboarding/OnboardingPopover";
-import useOnboardingContext, {
-  ONBOARDING_STEPS,
-} from "@/components/layout/onboardingContext";
-
-// const SCORES = [
-//   "Sentiment",
-//   "Accuracy",
-//   "Contain words",
-//   "Shorter than 50 characters",
-//   "Is English",
-// ];
 
 const AddColumnDialog = ({
   isOpen,
@@ -35,33 +23,13 @@ const AddColumnDialog = ({
   originalColumnPromptVersionId: string;
   numberOfExistingPromptVersions: number;
 }) => {
-  // const [showSuggestionPanel, setShowSuggestionPanel] = useState(false);
-  const [promptVariables, setPromptVariables] = useState<
-    {
-      original: string;
-      heliconeTag: string;
-      value: string;
-    }[]
-  >([]);
-  // const [scoreCriterias, setScoreCriterias] = useState<
-  //   {
-  //     scoreType?: (typeof SCORES)[number];
-  //     criteria?: string;
-  //   }[]
-  // >([]);
-
   const jawn = useJawnClient();
   const queryClient = useQueryClient();
 
   const org = useOrg();
   const orgId = org?.currentOrg?.id;
 
-  // Fetch promptVersionTemplateData
-  const {
-    data: promptVersionTemplateData,
-    isLoading,
-    error,
-  } = useQuery(
+  const { data: promptVersionTemplateData } = useQuery(
     ["promptVersionTemplate", selectedForkFromPromptVersionId],
     async () => {
       if (!selectedForkFromPromptVersionId || !orgId) {
@@ -77,109 +45,66 @@ const AddColumnDialog = ({
       });
 
       return res.data?.data;
-
-      // const parentPromptVersion = await jawnClient.GET(
-      //   "/v1/prompt/version/{promptVersionId}",
-      //   {
-      //     params: {
-      //       path: {
-      //         promptVersionId: res.data?.data?.parent_prompt_version ?? "",
-      //       },
-      //     },
-      //   }
-      // );
-
-      // return {
-      //   ...res.data?.data,
-      //   parent_prompt_version: parentPromptVersion?.data?.data,
-      // };
     },
     {
       enabled: !!selectedForkFromPromptVersionId && !!orgId,
     }
   );
 
-  const { isOnboardingVisible, currentStep, setCurrentStep } =
-    useOnboardingContext();
+  const [basePrompt, setBasePrompt] = useState<string | PromptObject | null>(
+    promptVersionTemplateData?.helicone_template ?? ""
+  );
 
   useEffect(() => {
-    if (
-      isOpen &&
-      isOnboardingVisible &&
-      currentStep === ONBOARDING_STEPS.EXPERIMENTS_ADD.stepNumber &&
-      !promptVersionTemplateData
-    ) {
-      setCurrentStep(ONBOARDING_STEPS.EXPERIMENTS_ADD_CHANGE_PROMPT.stepNumber);
-    }
-  }, [
-    isOpen,
-    isOnboardingVisible,
-    currentStep,
-    promptVersionTemplateData,
-    setCurrentStep,
-  ]);
+    setBasePrompt(promptVersionTemplateData?.helicone_template ?? "");
+  }, [promptVersionTemplateData]);
 
   return (
-    <Dialog
-      open={isOpen}
-      onOpenChange={
-        isOnboardingVisible &&
-        currentStep ===
-          ONBOARDING_STEPS.EXPERIMENTS_ADD_CHANGE_PROMPT.stepNumber
-          ? undefined
-          : onOpenChange
-      }
-    >
-      <DialogContent className="w-[95vw] max-w-2xl gap-0 max-h-[90vh] overflow-y-auto">
-        <OnboardingPopover
-          popoverContentProps={{
-            onboardingStep: "EXPERIMENTS_ADD_CHANGE_PROMPT",
-            align: "start",
-            alignOffset: 10,
-          }}
-          modal={true}
-        >
-          <div className="flex justify-between items-center mb-8">
-            <div className="flex items-center">
-              <FlaskConicalIcon className="w-5 h-5 mr-2.5 text-slate-500" />
-              <h3 className="text-base font-medium text-slate-950 dark:text-white mr-3">
-                Add Prompt
-              </h3>
-              <div className="flex gap-1 items-center">
-                <p className="text-slate-500 text-sm font-medium leading-4">
-                  Forked from
-                </p>
-                <Badge variant="helicone" className="text-slate-500">
-                  <FlaskConicalIcon className="w-3.5 h-3.5 mr-1" />
-                  {(promptVersionTemplateData?.metadata?.label as string) ??
-                    `v${promptVersionTemplateData?.major_version}.${promptVersionTemplateData?.minor_version}`}
-                </Badge>
-              </div>
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <DialogContent className="w-[95vw] max-w-5xl gap-0 max-h-[90vh] overflow-y-auto">
+        <div className="flex justify-between items-center mb-8">
+          <div className="flex items-center">
+            <FlaskConicalIcon className="w-5 h-5 mr-2.5 text-slate-500" />
+            <h3 className="text-base font-medium text-slate-950 dark:text-white mr-3">
+              Add Prompt
+            </h3>
+            <div className="flex gap-1 items-center">
+              <p className="text-slate-500 text-sm font-medium leading-4">
+                Forked from
+              </p>
+              <Badge variant="helicone" className="text-slate-500">
+                <FlaskConicalIcon className="w-3.5 h-3.5 mr-1" />
+                {(promptVersionTemplateData?.metadata?.label as string) ??
+                  `v${promptVersionTemplateData?.major_version}.${promptVersionTemplateData?.minor_version}`}
+              </Badge>
             </div>
           </div>
-        </OnboardingPopover>
+        </div>
 
-        {promptVersionTemplateData && (
+        {promptVersionTemplateData && basePrompt && (
           <PromptPlayground
             defaultEditMode={true}
-            prompt={promptVersionTemplateData?.helicone_template ?? ""}
+            prompt={basePrompt}
             selectedInput={undefined}
-            onExtractPromptVariables={(promptInputKeys) => {
-              setPromptVariables(promptInputKeys);
-            }}
+            onExtractPromptVariables={() => {}}
             className="border rounded-md border-slate-200 dark:border-slate-700"
             onSubmit={async (history, model) => {
               const promptData = {
                 model: model,
-                messages: history.map((msg) => ({
-                  role: msg.role,
-                  content: [
-                    {
-                      text: msg.content,
-                      type: "text",
-                    },
-                  ],
-                })),
+                messages: history.map((msg) => {
+                  if (typeof msg === "string") {
+                    return msg;
+                  }
+                  return {
+                    role: msg.role,
+                    content: [
+                      {
+                        text: msg.content,
+                        type: "text",
+                      },
+                    ],
+                  };
+                }),
               };
 
               const result = await jawn.POST(
@@ -219,7 +144,10 @@ const AddColumnDialog = ({
 
               onOpenChange(false);
             }}
-            submitText="Test"
+            onPromptChange={(prompt) => {
+              setBasePrompt(prompt);
+            }}
+            submitText="Create Prompt"
             initialModel={promptVersionTemplateData?.model ?? "gpt-4o"}
             editMode={false}
           />

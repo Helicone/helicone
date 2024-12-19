@@ -60,7 +60,7 @@ export function DiffHighlight(props: DiffHighlightProps) {
                   navigator.clipboard.writeText(props.code);
                 }}
               >
-                <ClipboardIcon className="w-6 h-6 text-gray-500" />
+                <ClipboardIcon className="w-5 h-5 text-gray-500" />
               </button>
               {tokens.map((line, i) => {
                 const lineProps = getLineProps({ line, key: i });

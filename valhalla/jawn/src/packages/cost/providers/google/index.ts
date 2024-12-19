@@ -48,6 +48,16 @@ export const costs: ModelRow[] = [
   },
   {
     model: {
+      operator: "equals",
+      value: "gemini-flash-1.5-8b",
+    },
+    cost: {
+      prompt_token: 3.75e-8,
+      completion_token: 1.5e-7,
+    },
+  },
+  {
+    model: {
       operator: "includes",
       value: "gemini-1.5-pro",
     },

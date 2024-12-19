@@ -45,7 +45,7 @@ export function placeAssetIdValues(
   return traverseAndTransform(heliconeTemplate);
 }
 
-function getEvaluatorScoreName(evaluatorName: string) {
+export function getEvaluatorScoreName(evaluatorName: string) {
   return evaluatorName
     .toLowerCase()
     .replace(" ", "_")
@@ -57,10 +57,12 @@ export class EvaluatorManager extends BaseManager {
     const result = await dbExecute<{
       experiment_id: string;
       experiment_created_at: string;
+      experiment_name: string;
     }>(
       `SELECT
       experiment.id as experiment_id,
-      experiment.created_at as experiment_created_at
+      experiment.created_at as experiment_created_at,
+      experiment.name as experiment_name
       FROM evaluator_experiments_v3
       left join experiment_v3 as experiment on evaluator_experiments_v3.experiment = experiment.id
       WHERE evaluator = $1
@@ -127,7 +129,8 @@ export class EvaluatorManager extends BaseManager {
           {
             [scoreName]: result.score,
           },
-          0
+          0,
+          evaluator.id
         );
 
         return ok(null);
@@ -307,6 +310,23 @@ export class EvaluatorManager extends BaseManager {
   async createEvaluator(
     params: CreateEvaluatorParams
   ): Promise<Result<EvaluatorResult, string>> {
+    const scoreName = getEvaluatorScoreName(params.name);
+    const scoreAttributes = await dbExecute<{
+      id: string;
+      score_key: string;
+    }>(
+      `
+      SELECT id, score_key
+      FROM score_attributes
+      WHERE score_key = $1 AND organization_id = $2
+      `,
+      [scoreName, this.authParams.organizationId]
+    );
+
+    if (scoreAttributes.data?.length && scoreAttributes.data.length > 0) {
+      return err("Score attribute by this name already exists");
+    }
+
     const result = await dbExecute<EvaluatorResult>(
       `
       INSERT INTO evaluator (scoring_type, llm_template, organization_id, name)

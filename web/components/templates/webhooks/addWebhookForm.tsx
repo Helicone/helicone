@@ -128,23 +128,24 @@ const AddWebhookForm = (props: AddWebhookFormProps) => {
                 className="grid grid-cols-3 items-center space-x-2"
               >
                 <div className="col-span-1">
-                  <Popover>
+                  <Popover modal={true}>
                     <PopoverTrigger asChild>
                       <Button
                         variant="outline"
                         role="combobox"
-                        className="w-full justify-between"
+                        className="w-full justify-between truncate"
                       >
-                        {filter.key || "Select property"}
+                        <span className="truncate">
+                          {filter.key || "Select property"}
+                        </span>
                         <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-[200px] p-0">
-                      <Command className="rounded-lg border shadow-md md:min-w-[450px]">
+                    <PopoverContent className="w-[200px] p-0" sideOffset={4}>
+                      <Command>
                         <CommandInput
                           placeholder="Type in anything..."
                           onValueChange={(value) => {
-                            console.log(value);
                             updatePropertyFilter(index, value, filter.value);
                           }}
                         />

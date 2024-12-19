@@ -1795,6 +1795,35 @@ export type Database = {
           },
         ]
       }
+      pi_session: {
+        Row: {
+          created_at: string
+          id: number
+          organization_id: string
+          session_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          organization_id: string
+          session_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          organization_id?: string
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "public_pi_session_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       prompt_input_keys: {
         Row: {
           created_at: string | null
@@ -1931,6 +1960,7 @@ export type Database = {
           parent_prompt_version: string | null
           prompt_v2: string
           soft_delete: boolean | null
+          updated_at: string
         }
         Insert: {
           created_at?: string | null
@@ -1945,6 +1975,7 @@ export type Database = {
           parent_prompt_version?: string | null
           prompt_v2: string
           soft_delete?: boolean | null
+          updated_at?: string
         }
         Update: {
           created_at?: string | null
@@ -1959,6 +1990,7 @@ export type Database = {
           parent_prompt_version?: string | null
           prompt_v2?: string
           soft_delete?: boolean | null
+          updated_at?: string
         }
         Relationships: [
           {

@@ -44,12 +44,6 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const githubResponse = await fetch(
-    "https://api.github.com/repos/helicone/helicone"
-  );
-  const githubData = await githubResponse.json();
-  const stars = githubData.stargazers_count;
-
   return (
     <html lang="en">
       <Head>
@@ -74,7 +68,7 @@ export default async function RootLayout({
       <PHProvider>
         <body>
           <div className={`bg-white flex flex-col ${inter.className}`}>
-            <Layout stars={stars}>{children}</Layout>
+            {children}
           </div>
           <PostHogPageView />
           <Analytics />

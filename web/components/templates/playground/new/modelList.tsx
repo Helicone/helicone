@@ -73,4 +73,259 @@ export const MODEL_LIST: {
     label: "gpt-3.5-turbo-1106",
     provider: "openai",
   },
+  {
+    value: "gemini-flash-1.5-8b",
+    label: "gemini-flash-1.5-8b",
+    provider: "google",
+  },
+  {
+    value: "gemini-flash-1.5-8b-exp",
+    label: "gemini-flash-1.5-8b-exp",
+    provider: "google",
+  },
+  {
+    value: "gemini-flash-1.5-exp",
+    label: "gemini-flash-1.5-exp",
+    provider: "google",
+  },
+  {
+    value: "gemini-flash-1.5",
+    label: "gemini-flash-1.5",
+    provider: "google",
+  },
+  {
+    value: "gemini-pro-1.5",
+    label: "gemini-pro-1.5",
+    provider: "google",
+  },
+  {
+    value: "gemini-pro",
+    label: "gemini-pro",
+    provider: "google",
+  },
+  {
+    value: "gemini-pro-vision",
+    label: "gemini-pro-vision",
+    provider: "google",
+  },
+  {
+    value: "ministral-8b",
+    label: "ministral-8b",
+    provider: "mistralai",
+  },
+  {
+    value: "ministral-3b",
+    label: "ministral-3b",
+    provider: "mistralai",
+  },
+  {
+    value: "pixtral-12b",
+    label: "pixtral-12b",
+    provider: "mistralai",
+  },
+  {
+    value: "codestral-mamba",
+    label: "codestral-mamba",
+    provider: "mistralai",
+  },
+  {
+    value: "mistral-nemo",
+    label: "mistral-nemo",
+    provider: "mistralai",
+  },
+  {
+    value: "mistral-7b-instruct-v0.3",
+    label: "mistral-7b-instruct-v0.3",
+    provider: "mistralai",
+  },
+  {
+    value: "mistral-7b-instruct:free",
+    label: "mistral-7b-instruct:free",
+    provider: "mistralai",
+  },
+  {
+    value: "mistral-7b-instruct",
+    label: "mistral-7b-instruct",
+    provider: "mistralai",
+  },
+  {
+    value: "mistral-7b-instruct:nitro",
+    label: "mistral-7b-instruct:nitro",
+    provider: "mistralai",
+  },
+  {
+    value: "mistral-8x22b-instruct",
+    label: "mistral-8x22b-instruct",
+    provider: "mistralai",
+  },
+  {
+    value: "mistral-large",
+    label: "mistral-large",
+    provider: "mistralai",
+  },
+  {
+    value: "mistral-medium",
+    label: "mistral-medium",
+    provider: "mistralai",
+  },
+  {
+    value: "mistral-small",
+    label: "mistral-small",
+    provider: "mistralai",
+  },
+  {
+    value: "mistral-tiny",
+    label: "mistral-tiny",
+    provider: "mistralai",
+  },
+  {
+    value: "mistral-7b-instruct-v0.2",
+    label: "mistral-7b-instruct-v0.2",
+    provider: "mistralai",
+  },
+  {
+    value: "mistral-8x7b-instruct",
+    label: "mistral-8x7b-instruct",
+    provider: "mistralai",
+  },
+  {
+    value: "mistral-8x7b-instruct:nitro",
+    label: "mistral-8x7b-instruct:nitro",
+    provider: "mistralai",
+  },
+  {
+    value: "mistral-8x7b",
+    label: "mistral-8x7b",
+    provider: "mistralai",
+  },
+  {
+    value: "mistral-7b-instruct-v0.1",
+    label: "mistral-7b-instruct-v0.1",
+    provider: "mistralai",
+  },
+  {
+    value: "grok-beta",
+    label: "grok-beta",
+    provider: "x-ai",
+  },
+  {
+    value: "llama-3.2-3b-instruct:free",
+    label: "llama-3.2-3b-instruct:free",
+    provider: "meta-llama",
+  },
+  {
+    value: "llama-3.2-3b-instruct",
+    label: "llama-3.2-3b-instruct",
+    provider: "meta-llama",
+  },
+  {
+    value: "llama-3.2-1b-instruct:free",
+    label: "llama-3.2-1b-instruct:free",
+    provider: "meta-llama",
+  },
+  {
+    value: "llama-3.2-1b-instruct",
+    label: "llama-3.2-1b-instruct",
+    provider: "meta-llama",
+  },
+  {
+    value: "llama-3.2-90b-vision-instruct",
+    label: "llama-3.2-90b-vision-instruct",
+    provider: "meta-llama",
+  },
+  {
+    value: "llama-3.2-11b-vision-instruct:free",
+    label: "llama-3.2-11b-vision-instruct:free",
+    provider: "meta-llama",
+  },
+  {
+    value: "llama-3.2-11b-vision-instruct",
+    label: "llama-3.2-11b-vision-instruct",
+    provider: "meta-llama",
+  },
+  {
+    value: "llama-3.1-405b",
+    label: "llama-3.1-405b",
+    provider: "meta-llama",
+  },
+  {
+    value: "llama-3.1-70b-instruct:free",
+    label: "llama-3.1-70b-instruct:free",
+    provider: "meta-llama",
+  },
+  {
+    value: "llama-3.1-70b-instruct",
+    label: "llama-3.1-70b-instruct",
+    provider: "meta-llama",
+  },
+  {
+    value: "llama-3.1-70b-instruct:nitro",
+    label: "llama-3.1-70b-instruct:nitro",
+    provider: "meta-llama",
+  },
+  {
+    value: "llama-3.1-8b-instruct:free",
+    label: "llama-3.1-8b-instruct:free",
+    provider: "meta-llama",
+  },
+  {
+    value: "llama-3.1-8b-instruct",
+    label: "llama-3.1-8b-instruct",
+    provider: "meta-llama",
+  },
+  {
+    value: "llama-3.1-405b-instruct:free",
+    label: "llama-3.1-405b-instruct:free",
+    provider: "meta-llama",
+  },
+  {
+    value: "llama-3.1-405b-instruct",
+    label: "llama-3.1-405b-instruct",
+    provider: "meta-llama",
+  },
+  {
+    value: "llama-3.1-405b-instruct:nitro",
+    label: "llama-3.1-405b-instruct:nitro",
+    provider: "meta-llama",
+  },
+  {
+    value: "llama-guard-2-8b",
+    label: "llama-guard-2-8b",
+    provider: "meta-llama",
+  },
+  {
+    value: "llama-3-70b-instruct",
+    label: "llama-3-70b-instruct",
+    provider: "meta-llama",
+  },
+  {
+    value: "llama-3-70b-instruct:nitro",
+    label: "llama-3-70b-instruct:nitro",
+    provider: "meta-llama",
+  },
+  {
+    value: "llama-3-8b-instruct:free",
+    label: "llama-3-8b-instruct:free",
+    provider: "meta-llama",
+  },
+  {
+    value: "llama-3-8b-instruct",
+    label: "llama-3-8b-instruct",
+    provider: "meta-llama",
+  },
+  {
+    value: "llama-3-8b-instruct:nitro",
+    label: "llama-3-8b-instruct:nitro",
+    provider: "meta-llama",
+  },
+  {
+    value: "llama-3-8b-instruct:extended",
+    label: "llama-3-8b-instruct:extended",
+    provider: "meta-llama",
+  },
+  {
+    value: "llama-2-13b-chat",
+    label: "llama-2-13b-chat",
+    provider: "meta-llama",
+  },
 ];

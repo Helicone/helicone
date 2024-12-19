@@ -15,7 +15,7 @@ import Quote from "@/components/home/Quote";
 import Quote2 from "@/components/home/Quote2";
 import Quote3 from "@/components/home/Quote3";
 import Stats from "@/components/home/Stats";
-import Footer from "@/components/layout/footer";
+import { Layout } from "@/app/components/Layout";
 import Integrations from "@/components/templates/landing/integrations";
 
 export default async function Home() {
@@ -39,27 +39,29 @@ export default async function Home() {
     : undefined;
 
   return (
-    <main className="bg-white text-landing-description">
-      <div className="max-w-8xl mx-auto">
-        <Banner />
-        <Hero />
-        <Prototype />
-        <Companies />
-        <Quote />
-        <Integrations />
-        <Quote2 />
-        <LLMLifecycle />
-        <Log />
-        <Evaluate />
-        <Experiment />
-        <Production />
-        <BigDashboard />
-        <Stats totalValuesData={totalValuesData} />
-        <OpenSource />
-        <FAQ />
-        <Quote3 />
-        <CTA />
-      </div>
-    </main>
+    <Layout>
+      <main className="bg-white text-landing-description">
+        <div className="max-w-8xl mx-auto">
+          <Banner />
+          <Hero />
+          <Prototype />
+          <Companies />
+          <Quote />
+          <Integrations />
+          <Quote2 />
+          <LLMLifecycle />
+          <Log />
+          <Evaluate />
+          <Experiment />
+          <Production />
+          <BigDashboard />
+          <Stats totalValuesData={totalValuesData} />
+          <OpenSource />
+          <FAQ />
+          <Quote3 />
+          <CTA />
+        </div>
+      </main>
+    </Layout>
   );
 }

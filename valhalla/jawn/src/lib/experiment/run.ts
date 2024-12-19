@@ -5,7 +5,7 @@ import { supabaseServer } from "../db/supabase";
 import { Experiment, ExperimentDatasetRow } from "../stores/experimentStore";
 import { BaseTempKey } from "./tempKeys/baseTempKey";
 import { runHypothesis } from "./hypothesisRunner";
-import { generateHeliconeAPIKey } from "./tempKeys/tempAPIKey";
+import { generateTempHeliconeAPIKey } from "./tempKeys/tempAPIKey";
 import {
   PreparedRequest,
   PreparedRequestArgs,
@@ -36,9 +36,11 @@ async function isOnPrem(): Promise<boolean> {
   return truthy ? true : false;
 }
 
+type Provider = "OPENAI" | "OPENROUTER";
+
 async function prepareRequest(
   args: PreparedRequestArgs,
-  provider: "OPENAI" | "ANTHROPIC"
+  provider: Provider
 ): Promise<PreparedRequest> {
   if (await isOnPrem()) {
     return await prepareRequestAzureOnPremFull(args);
@@ -53,7 +55,7 @@ export async function runOriginalExperiment(
   experiment: Experiment,
   datasetRows: ExperimentDatasetRow[]
 ): Promise<Result<string, string>> {
-  const tempKey: Result<BaseTempKey, string> = await generateHeliconeAPIKey(
+  const tempKey: Result<BaseTempKey, string> = await generateTempHeliconeAPIKey(
     experiment.organization
   );
 
@@ -95,7 +97,7 @@ export async function run(
   organizationId: string,
   isOriginalRequest?: boolean
 ): Promise<Result<string, string>> {
-  const tempKey: Result<BaseTempKey, string> = await generateHeliconeAPIKey(
+  const tempKey: Result<BaseTempKey, string> = await generateTempHeliconeAPIKey(
     organizationId
   );
 
@@ -168,5 +170,9 @@ export async function run(
   });
 }
 const providerByModelName = (modelName: string) => {
-  return modelName.includes("claude") ? "ANTHROPIC" : "OPENAI";
+  if (modelName.includes("gpt")) {
+    return "OPENAI";
+  } else {
+    return "OPENROUTER";
+  }
 };

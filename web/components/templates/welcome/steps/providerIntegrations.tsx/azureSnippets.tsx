@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { DiffHighlight } from "../../diffHighlight";
-import { clsx } from "../../../../shared/clsx";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH || "";
 
@@ -167,41 +168,51 @@ export default function AzureSnippets(props: AzureSnippetsProps) {
       <div className="mt-2">
         <div className="flex overflow-x-auto py-2 w-full no-scrollbar">
           <div className="flex gap-2">
-            <button
-              className={clsx(
-                lang === "typescript" ? "bg-sky-100" : "bg-white",
-                "flex-shrink-0 flex items-center gap-2 border border-gray-300 rounded-lg py-1.5 px-3 text-sm"
-              )}
+            <Button
+              variant={"outline"}
+              size="sm"
+              className={
+                lang === "typescript"
+                  ? "bg-slate-200 border-slate-200 dark:bg-slate-800 dark:border-slate-800"
+                  : ""
+              }
               onClick={() => setLang("typescript")}
             >
-              <h2 className="font-semibold">Node.js</h2>
-            </button>
-            <button
-              className={clsx(
-                lang === "python" ? "bg-sky-100" : "bg-white",
-                "flex-shrink-0 flex items-center gap-2 border border-gray-300 rounded-lg py-1.5 px-3 text-sm"
-              )}
+              Node.js
+            </Button>
+            <Button
+              variant={"outline"}
+              size="sm"
+              className={
+                lang === "python"
+                  ? "bg-slate-200 border-slate-200 dark:bg-slate-800 dark:border-slate-800"
+                  : ""
+              }
               onClick={() => setLang("python")}
             >
-              <h2 className="font-semibold">Python</h2>
-            </button>
-            <button
-              className={clsx(
-                lang === "curl" ? "bg-sky-100" : "bg-white",
-                "flex-shrink-0 flex items-center gap-2 border border-gray-300 rounded-lg py-1.5 px-3 text-sm"
-              )}
+              Python
+            </Button>
+            <Button
+              variant={"outline"}
+              size="sm"
+              className={
+                lang === "curl"
+                  ? "bg-slate-200 border-slate-200 dark:bg-slate-800 dark:border-slate-800"
+                  : ""
+              }
               onClick={() => setLang("curl")}
             >
-              <h2 className="font-semibold">cURL</h2>
-            </button>
-            <a
+              cURL
+            </Button>
+            <Link
               href="https://docs.helicone.ai/integrations/azure/javascript"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex-shrink-0 flex items-center gap-2 border border-gray-300 rounded-lg py-1.5 px-3 text-sm hover:bg-gray-50"
             >
-              <h2 className="font-semibold">More ›</h2>
-            </a>
+              <Button variant={"outline"} size="sm">
+                <h2 className="font-semibold">More ›</h2>
+              </Button>
+            </Link>
           </div>
         </div>
       </div>

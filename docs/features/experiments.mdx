@@ -7,9 +7,9 @@ description: "Experiments is a spreadsheet-like experience designed to tune your
 
 import QuestionsSection from "/snippets/questions-section.mdx";
 
-## What are Experiments?
+## What are prompt experiments?
 
-Helicone's Experiments is designed to help you tune your LLM prompt, test it on production data, and verify your iterations with quantifiable data. In Helicone, you can define and run LLM-as-a-judge or custom evaluators, then compare the results between prompts side-by-side to determine the best one for production.
+Helicone's prompt experiments are designed to help you tune your LLM prompt, test it on production data, and verify your iterations with quantifiable data.
 
 <Frame>
   <img
@@ -18,15 +18,17 @@ Helicone's Experiments is designed to help you tune your LLM prompt, test it on 
   />
 </Frame>
 
+In Helicone, you can define and run LLM-as-a-judge or custom evaluators, then compare the results between prompts side-by-side to determine the best one for production.
+
 ## Why experiment with prompts?
 
 - **Prevent regression:** Prompt engineering is iterative. Engineers want to prevent regression with each prompt change.
-- **Model update:** LLMs are sensitive to prompt changes. As new models with advanced capability come out, prompts that worked previously can become less effective.
+- **Model update:** LLMs are sensitive to prompt changes. As new models with advanced capabilities come out, prompts that worked previously can become less effective.
 - **Quick feedback loop:** Instead of waiting for user feedback, get feedback immediately and adjust before pushing to production.
 
-## What is the prompt iteration workflow?
+## What is the recommended workflow?
 
-1. Create a new experiment
+1. Create a new experiment in Helicone
 2. Create new prompt variations
 3. Add input rows
 4. Create and run custom evaluators
@@ -36,12 +38,40 @@ Helicone's Experiments is designed to help you tune your LLM prompt, test it on 
 
 ### 1. Create a new experiment
 
-Head to the `Experiment` tab. If you have a prompt with Helicone, click on `start from a prompt`, then choose the desired prompt version. Otherwise, click on `start from scratch`.
+There are a few ways to do this:
+
+#### Method 1: Start with a prompt
+
+If you have an existing prompt in Helicone, head to the `Experiment` tab. Click on `start from a prompt`, then choose the desired prompt version.
 
 <Frame>
   <img
     src="/images/experiments/create-new-experiment.webp"
-    alt="Start an experiment with a prompt or from scratch. "
+    alt="Start an experiment from a prompt. "
+  />
+</Frame>
+
+#### Method 2: Start with a request
+
+If you don't have an existing prompt, we recommend choosing this method or starting from scratch (method 3).
+
+Head to the `Requests` tab. Open the desired request, then click on the experiments icon. You should see an experiment being generated for the prompt associated with this request.
+
+<Frame>
+  <img
+    src="/images/experiments/method-2-request.webp"
+    alt="Start an experiment from a request."
+  />
+</Frame>
+
+#### Method 3: Start from scratch
+
+Head to the `Experiment` tab, then click on `Start from scratch`. A helper prompt will be generated for you; you can edit it by clicking on the cell.
+
+<Frame>
+  <img
+    src="/images/experiments/method-3-scratch.webp"
+    alt="Start an experiment from scratch."
   />
 </Frame>
 
@@ -56,7 +86,7 @@ To create a new prompt, click `Add column` and select a prompt that you want to 
 <Frame>
   <img
     src="/images/experiments/fork-prompt.webp"
-    alt="Fork existing prompts to create new variations in Helicone's Experiments. "
+    alt="Fork existing prompts to create new variations in Helicone's Experiments."
   />
 </Frame>
 
@@ -89,20 +119,19 @@ The next step is to import golden datasets or your request data in Helicone. The
 
 ### 4. Create and run custom evaluators
 
+<Frame>
+  <img
+    src="/images/experiments/select-eval.webp"
+    alt="Create LLM-as-a-judge or custom evaluators to test your prompt."
+  />
+</Frame>
+
 <Steps>
-    <Step title="Toggle on `Show scores`.">
-      <Frame>
-        <img
-          src="/images/experiments/select-eval.webp"
-          alt="Create LLM-as-a-judge or custom evaluators to test your prompt. "
-        />
-      </Frame>
-    </Step>
-    <Step title="Under the dropdown, select 'Create new custom evaluators'">
-    </Step>
+    <Step title="Toggle on `Show scores`."></Step>
+    <Step title="Under the dropdown, select 'Create new custom evaluators'"></Step>
     <Step title="Create the evaluator">
-        On the side panel, you will be able to create a new evaluator. We currently support LLM-as-a-judge. Python and TypeScript support is coming soon!
-        <Tip>You can add as many evaluators as you like, and run them all at the same time. </Tip>
+        On the side panel, you will be able to create a new evaluator. We currently support LLM-as-a-judge; Python and TypeScript support is coming soon!
+        <Tip>You can add as many evaluators as you like, and run them all at the same time.</Tip>
     </Step>
     <Step title="Run Evaluator">
         Once you add an evaluator, you will notice a warning that prompts you to re-run evaluation. Click on `Run Evaluators` to see the scores in graph.
@@ -120,7 +149,7 @@ The next step is to import golden datasets or your request data in Helicone. The
         <Frame>
         <img
             src="/images/experiments/run-custom-eval.webp"
-            alt="View evaluator results in detail. "
+            alt="View evaluator results in detail."
         />
         </Frame>
 
@@ -131,6 +160,6 @@ The next step is to import golden datasets or your request data in Helicone. The
 ### 5. Push changes to production
 
 The more prompts you create, the more data points on the scores graph you will see. Keep in mind that prompt engineering is an iterative process. The more input you test, the more edge cases you can cover with your new prompts.
-Once you are happy with a prompt, copy and paste it in your code for production.
+Once you are happy with a prompt, copy and paste it into your code for production.
 
 <QuestionsSection />

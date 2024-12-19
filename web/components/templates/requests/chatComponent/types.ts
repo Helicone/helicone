@@ -11,3 +11,5 @@ export type Message = {
   model?: string;
   latency?: number;
 };
+
+export type PromptMessage = Message | string;
