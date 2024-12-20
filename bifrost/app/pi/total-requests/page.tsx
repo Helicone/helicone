@@ -131,7 +131,7 @@ const TotalRequestsPage = () => {
 
   return (
     <div
-      className={`w-full flex flex-col justify-center items-center h-[100vh] p-5 ${jetbrainsMono.className}`}
+      className={`w-full flex flex-col justify-center items-center h-[100vh] p-5 gap-4 ${jetbrainsMono.className}`}
     >
       <div className="h-full w-full bg-[#E5E5E5] border-2 border-black flex flex-col items-center justify-center gap-7">
         <div className="bg-white p-2.5 border-2 border-black border-r-4 border-b-4 font-medium text-[21px]">
@@ -149,9 +149,12 @@ const TotalRequestsPage = () => {
             )
           )}
         </div>
+        <div className="bg-white p-2.5 border-2 border-black border-r-4 border-b-4 font-medium text-[14px]">
+          Last 30 days
+        </div>
         {/* {JSON.stringify(formatNumber(totalRequests.data?.data?.data ?? 0))} */}
       </div>
-      <div className="flex justify-between items-center">
+      <div className="flex w-full justify-between items-center">
         <img
           src="/static/pi/arrow-left.png"
           alt="arrow-left"
@@ -159,7 +162,7 @@ const TotalRequestsPage = () => {
         />
         <div className="flex flex-col items-center">
           <img
-            src="/static/pi/arrow-left.png"
+            src="/static/pi/arrow-right.png"
             alt="arrow-left"
             className="w-16 h-16"
           />
