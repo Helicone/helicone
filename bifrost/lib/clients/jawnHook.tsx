@@ -1,6 +1,6 @@
 import { getJawnClient } from "./jawn";
 
-export const useJawnClient = () => {
+export const useJawnClient = (apiKey?: string) => {
   // const org = useOrg();
-  return getJawnClient();
+  return getJawnClient(apiKey);
 };
