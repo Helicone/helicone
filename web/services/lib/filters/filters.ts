@@ -219,7 +219,7 @@ const whereKeyMappings: KeyMappings = {
       value: placeValueSafely(value),
     };
   },
-  users_view: easyKeyMappings<"request_response_log">({
+  users_view: easyKeyMappings<"request_response_rmt">({
     status: "r.status",
     user_id: "r.user_id",
   }),
