@@ -3,6 +3,10 @@ import { Result, err, ok } from "../../lib/shared/result";
 import { JawnAuthenticatedRequest } from "../../types/request";
 
 import { supabaseServer } from "../../lib/db/supabase";
+import { RequestManager } from "../../managers/request/RequestManager";
+import { buildFilterWithAuthClickHouse } from "../../lib/shared/filters/filters";
+import { timeFilterToFilterNode } from "../../lib/shared/filters/filterDefs";
+import { dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
 
 @Route("/v1/pi")
 @Tags("PI")
@@ -39,5 +43,51 @@ export class PiController extends Controller {
       this.setStatus(200);
       return ok("success");
     }
+  }
+
+  @Post("/total_requests")
+  public async getTotalRequests(
+    @Body()
+    body: {
+      startTime: string;
+      endTime: string;
+    },
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<number, string>> {
+    const reqManager = new RequestManager(request.authParams);
+    const { filter: filterString, argsAcc } =
+      await buildFilterWithAuthClickHouse({
+        org_id: request.authParams.organizationId,
+        filter: {
+          left: timeFilterToFilterNode(
+            {
+              start: new Date(body.startTime),
+              end: new Date(body.endTime),
+            },
+            "request_response_rmt"
+          ),
+          right: "all",
+          operator: "and",
+        },
+        argsAcc: [],
+      });
+
+    const query = `
+  WITH total_count AS (
+    SELECT count(*) as count
+    FROM request_response_rmt
+    WHERE (
+      (${filterString})
+    )
+  )
+  SELECT coalesce(sum(count), 0) as count
+  FROM total_count
+`;
+
+    const result = await dbQueryClickhouse<{
+      count: number;
+    }>(query, argsAcc);
+
+    return ok(result.data?.[0]?.count || 0);
   }
 }
