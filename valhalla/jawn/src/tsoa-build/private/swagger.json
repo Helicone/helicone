@@ -9193,6 +9193,52 @@
 						"$ref": "#/components/schemas/ResultError_string_"
 					}
 				]
+			},
+			"ResultSuccess__cost-number--created_at_trunc-string_-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"properties": {
+								"created_at_trunc": {
+									"type": "string"
+								},
+								"cost": {
+									"type": "number",
+									"format": "double"
+								}
+							},
+							"required": [
+								"created_at_trunc",
+								"cost"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__cost-number--created_at_trunc-string_-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__cost-number--created_at_trunc-string_-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
 			}
 		},
 		"securitySchemes": {
@@ -17446,6 +17492,58 @@
 				}
 			}
 		},
+		"/v1/pi/org-name/query": {
+			"post": {
+				"operationId": "GetOrgName",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_string.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"PI"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/pi/total-costs": {
+			"post": {
+				"operationId": "GetTotalCosts",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_number.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"PI"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
 		"/v1/pi/total_requests": {
 			"post": {
 				"operationId": "GetTotalRequests",
@@ -17470,6 +17568,55 @@
 					}
 				],
 				"parameters": []
+			}
+		},
+		"/v1/pi/costs-over-time/query": {
+			"post": {
+				"operationId": "GetCostsOverTime",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__cost-number--created_at_trunc-string_-Array.string_"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"userFilter": "all",
+											"timeFilter": {
+												"start": "2024-01-01",
+												"end": "2024-01-31"
+											},
+											"dbIncrement": "day",
+											"timeZoneDifference": 0
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"PI"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/DataOverTimeRequest"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/v1/settings/query": {

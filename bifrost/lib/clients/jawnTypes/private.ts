@@ -523,8 +523,17 @@ export interface paths {
   "/v1/pi/session": {
     post: operations["AddSession"];
   };
+  "/v1/pi/org-name/query": {
+    post: operations["GetOrgName"];
+  };
+  "/v1/pi/total-costs": {
+    post: operations["GetTotalCosts"];
+  };
   "/v1/pi/total_requests": {
     post: operations["GetTotalRequests"];
+  };
+  "/v1/pi/costs-over-time/query": {
+    post: operations["GetCostsOverTime"];
   };
   "/v1/settings/query": {
     get: operations["GetSettings"];
@@ -3141,6 +3150,16 @@ Json: JsonObject;
       error: null;
     };
     "Result__apiKey-string_.string_": components["schemas"]["ResultSuccess__apiKey-string__"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__cost-number--created_at_trunc-string_-Array_": {
+      data: {
+          created_at_trunc: string;
+          /** Format: double */
+          cost: number;
+        }[];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__cost-number--created_at_trunc-string_-Array.string_": components["schemas"]["ResultSuccess__cost-number--created_at_trunc-string_-Array_"] | components["schemas"]["ResultError_string_"];
   };
   responses: {
   };
@@ -6298,6 +6317,41 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_string.string_"];
+        };
+      };
+    };
+  };
+  GetOrgName: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_string.string_"];
+        };
+      };
+    };
+  };
+  GetTotalCosts: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_number.string_"];
+        };
+      };
+    };
+  };
+  GetCostsOverTime: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DataOverTimeRequest"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__cost-number--created_at_trunc-string_-Array.string_"];
         };
       };
     };
