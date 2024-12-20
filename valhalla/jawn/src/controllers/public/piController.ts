@@ -47,22 +47,19 @@ export class PiController extends Controller {
 
   @Post("/total_requests")
   public async getTotalRequests(
-    @Body()
-    body: {
-      startTime: string;
-      endTime: string;
-    },
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<number, string>> {
-    const reqManager = new RequestManager(request.authParams);
+    const startTime = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000); // 30 days ago
+    const endTime = new Date(Date.now());
+
     const { filter: filterString, argsAcc } =
       await buildFilterWithAuthClickHouse({
         org_id: request.authParams.organizationId,
         filter: {
           left: timeFilterToFilterNode(
             {
-              start: new Date(body.startTime),
-              end: new Date(body.endTime),
+              start: startTime,
+              end: endTime,
             },
             "request_response_rmt"
           ),

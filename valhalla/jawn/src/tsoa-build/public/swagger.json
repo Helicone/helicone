@@ -16776,29 +16776,7 @@
 						"api_key": []
 					}
 				],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"properties": {
-									"endTime": {
-										"type": "string"
-									},
-									"startTime": {
-										"type": "string"
-									}
-								},
-								"required": [
-									"endTime",
-									"startTime"
-								],
-								"type": "object"
-							}
-						}
-					}
-				}
+				"parameters": []
 			}
 		},
 		"/v1/settings/query": {

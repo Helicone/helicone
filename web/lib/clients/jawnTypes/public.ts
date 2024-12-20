@@ -5421,14 +5421,6 @@ export interface operations {
     };
   };
   GetTotalRequests: {
-    requestBody: {
-      content: {
-        "application/json": {
-          endTime: string;
-          startTime: string;
-        };
-      };
-    };
     responses: {
       /** @description Ok */
       200: {
