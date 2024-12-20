@@ -7,6 +7,7 @@ import { JetBrains_Mono } from "next/font/google";
 import { useTestAPIKey } from "../first_page/useTestApiKey";
 import { useJawnClient } from "@/lib/clients/jawnHook";
 import { useQuery } from "@tanstack/react-query";
+import Link from "next/link";
 const jetbrainsMono = JetBrains_Mono({ subsets: ["latin"] });
 
 const formatNumber = (
@@ -155,18 +156,22 @@ const TotalRequestsPage = () => {
         {/* {JSON.stringify(formatNumber(totalRequests.data?.data?.data ?? 0))} */}
       </div>
       <div className="flex w-full justify-between items-center">
-        <img
-          src="/static/pi/arrow-left.png"
-          alt="arrow-left"
-          className="w-16 h-16"
-        />
-        <div className="flex flex-col items-center">
+        <Link href="/pi/total-cost">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/static/pi/arrow-right.png"
+            src="/static/pi/arrow-left.webp"
             alt="arrow-left"
             className="w-16 h-16"
           />
-        </div>
+        </Link>
+        <Link href="/pi/total-cost">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/static/pi/arrow-right.webp"
+            alt="arrow-left"
+            className="w-16 h-16"
+          />
+        </Link>
       </div>
     </div>
   );

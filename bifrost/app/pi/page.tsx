@@ -22,7 +22,7 @@ const PiPageContent = () => {
 
       <div className="relative h-[80vh]">
         <Image
-          src="/static/pi/intro-image.png"
+          src="/static/pi/intro-image.webp"
           alt="Helicone Logo"
           width={460}
           height={360}
