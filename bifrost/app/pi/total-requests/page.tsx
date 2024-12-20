@@ -30,6 +30,7 @@ const PiGraphLayout = ({ children }: { children: React.ReactNode }) => {
     <div
       className={`w-full flex flex-col justify-center items-center h-[100vh] p-5 ${jetbrainsMono.className}`}
     >
+      {totalRequests.data?.data?.data}
       <div className="h-full w-full">{children}</div>
       <div className="flex justify-between items-center">
         <img
