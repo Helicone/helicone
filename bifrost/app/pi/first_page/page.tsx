@@ -15,6 +15,8 @@ const FirstPageContent = () => {
   const { data, isLoading } = useTestAPIKey(apiKey.data ?? "");
   const jawn = useJawnClient(apiKey.data ?? "");
   const router = useRouter();
+
+  router.push("/pi/total-requests");
   const orgName = useQuery({
     queryKey: ["org-name", apiKey.data],
     queryFn: () => jawn.POST("/v1/pi/org-name/query"),
