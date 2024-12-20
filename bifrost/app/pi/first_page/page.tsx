@@ -10,9 +10,9 @@ import { useTestAPIKey } from "./useTestApiKey";
 const jetbrainsMono = JetBrains_Mono({ subsets: ["latin"] });
 
 const FirstPageContent = () => {
-  const jawn = useJawnClient();
   const { apiKey, sessionUUID } = useHeliconeLogin();
   const { data, isLoading } = useTestAPIKey(apiKey.data ?? "");
+  const jawn = useJawnClient(apiKey.data ?? "");
   const router = useRouter();
 
   if ((!data && !isLoading) || !apiKey.data) {
