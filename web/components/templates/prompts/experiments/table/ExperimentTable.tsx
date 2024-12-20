@@ -190,6 +190,7 @@ export function ExperimentTable({
               />
             ),
             size: 250,
+            enableResizing: true,
           }),
         ],
       }),
@@ -349,6 +350,7 @@ export function ExperimentTable({
         minSize: 50,
         maxSize: 1000,
         size: 200,
+        enableResizing: true,
       },
       getCoreRowModel: getCoreRowModel(),
       enableColumnResizing: true,
@@ -589,12 +591,15 @@ export function ExperimentTable({
               )}
               <div
                 className={clsx(
-                  "max-h-[calc(100vh-90px)] overflow-y-auto bg-white dark:bg-neutral-950 w-full",
-                  showScores && "max-h-[calc(100vh-90px-300px-80px)]"
+                  "h-[calc(100vh-90px)] bg-white dark:bg-neutral-950 w-full",
+                  showScores && "h-[calc(100vh-90px-300px-80px)]"
                 )}
               >
-                <div className="h-full bg-white dark:bg-black rounded-sm inline-block min-w-0 w-max">
-                  <Table className="border-collapse border-t border-slate-200 dark:border-slate-800 h-[1px]">
+                <div
+                  className="h-full bg-white dark:bg-black rounded-sm inline-block min-w-0 w-max"
+                  // style={{ width: "fit-content" }}
+                >
+                  <Table className="border-collapse border-t border-slate-200 dark:border-slate-800">
                     <TableHeader>
                       {table.getHeaderGroups().map((headerGroup, i) => (
                         <TableRow
@@ -652,9 +657,14 @@ export function ExperimentTable({
                             {row.getVisibleCells().map((cell) => (
                               <TableCell
                                 className={cn(
-                                  "p-0 align-baseline border-r border-slate-200 dark:border-slate-800 h-full flex-1 relative",
+                                  "p-0 align-baseline border-r border-slate-200 dark:border-slate-800 h-full relative",
+                                  "w-full max-w-0",
                                   cell.column.getIsLastColumn() && "border-r-0"
                                 )}
+                                style={{
+                                  width: cell.column.getSize(),
+                                  maxWidth: cell.column.getSize(),
+                                }}
                                 key={cell.id}
                               >
                                 {flexRender(
