@@ -517,6 +517,9 @@ export interface paths {
   "/v1/session/{sessionId}/feedback": {
     post: operations["UpdateSessionFeedback"];
   };
+  "/v1/user/metrics-overview/query": {
+    post: operations["GetUserMetricsOverview"];
+  };
   "/v1/user/metrics/query": {
     post: operations["GetUserMetrics"];
   };
@@ -3034,31 +3037,15 @@ Json: JsonObject;
       error: null;
     };
     "Result_SessionMetrics.string_": components["schemas"]["ResultSuccess_SessionMetrics_"] | components["schemas"]["ResultError_string_"];
-    UserMetricsResult: {
-      user_id: string;
-      /** Format: double */
-      active_for: number;
-      first_active: string;
-      last_active: string;
-      /** Format: double */
-      total_requests: number;
-      /** Format: double */
-      average_requests_per_day_active: number;
-      /** Format: double */
-      average_tokens_per_request: number;
-      /** Format: double */
-      total_completion_tokens: number;
-      /** Format: double */
-      total_prompt_tokens: number;
-      /** Format: double */
-      cost: number;
-    };
-    "ResultSuccess_UserMetricsResult-Array_": {
-      data: components["schemas"]["UserMetricsResult"][];
+    "ResultSuccess__request_count-HistogramRow-Array--user_cost-HistogramRow-Array__": {
+      data: {
+        user_cost: components["schemas"]["HistogramRow"][];
+        request_count: components["schemas"]["HistogramRow"][];
+      };
       /** @enum {number|null} */
       error: null;
     };
-    "Result_UserMetricsResult-Array.string_": components["schemas"]["ResultSuccess_UserMetricsResult-Array_"] | components["schemas"]["ResultError_string_"];
+    "Result__request_count-HistogramRow-Array--user_cost-HistogramRow-Array_.string_": components["schemas"]["ResultSuccess__request_count-HistogramRow-Array--user_cost-HistogramRow-Array__"] | components["schemas"]["ResultError_string_"];
     /** @description Make all properties in T optional */
     Partial_UserMetricsToOperators_: {
       user_id?: components["schemas"]["Partial_TextOperators_"];
@@ -3084,6 +3071,33 @@ Json: JsonObject;
       operator: "or" | "and";
       left: components["schemas"]["UserFilterNode"];
     };
+    /** @enum {string} */
+    PSize: "p50" | "p75" | "p95" | "p99" | "p99.9";
+    UserMetricsResult: {
+      user_id: string;
+      /** Format: double */
+      active_for: number;
+      first_active: string;
+      last_active: string;
+      /** Format: double */
+      total_requests: number;
+      /** Format: double */
+      average_requests_per_day_active: number;
+      /** Format: double */
+      average_tokens_per_request: number;
+      /** Format: double */
+      total_completion_tokens: number;
+      /** Format: double */
+      total_prompt_tokens: number;
+      /** Format: double */
+      cost: number;
+    };
+    "ResultSuccess_UserMetricsResult-Array_": {
+      data: components["schemas"]["UserMetricsResult"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_UserMetricsResult-Array.string_": components["schemas"]["ResultSuccess_UserMetricsResult-Array_"] | components["schemas"]["ResultError_string_"];
     UserMetricsQueryParams: {
       filter: components["schemas"]["UserFilterNode"];
       /** Format: double */
@@ -6264,6 +6278,25 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  GetUserMetricsOverview: {
+    requestBody: {
+      content: {
+        "application/json": {
+          useInterquartile: boolean;
+          pSize: components["schemas"]["PSize"];
+          filter: components["schemas"]["UserFilterNode"];
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__request_count-HistogramRow-Array--user_cost-HistogramRow-Array_.string_"];
         };
       };
     };
