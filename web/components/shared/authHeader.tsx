@@ -43,7 +43,7 @@ const AuthHeader = (props: AuthHeaderProps) => {
           </div>
         )}
       </div>
-      <div className="flex">{actions}</div>
+      <div className="items-center flex">{actions}</div>
     </div>
   );
 };
