@@ -17446,6 +17446,54 @@
 				}
 			}
 		},
+		"/v1/pi/total_requests": {
+			"post": {
+				"operationId": "GetTotalRequests",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_number.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"PI"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"endTime": {
+										"type": "string"
+									},
+									"startTime": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"endTime",
+									"startTime"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
 		"/v1/settings/query": {
 			"get": {
 				"operationId": "GetSettings",
