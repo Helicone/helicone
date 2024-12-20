@@ -1,0 +1,4 @@
+{
+  "title": "User Histograms: Analyze LLM Usage Patterns",
+  "description": "Gain deeper insights into your LLM application usage with Helicone's new user histogram feature. Track OpenAI, Anthropic, and other LLM provider costs, prompt token usage, and request patterns per user through intuitive distribution visualizations. Perfect for understanding user engagement and optimizing your AI spend."
+}

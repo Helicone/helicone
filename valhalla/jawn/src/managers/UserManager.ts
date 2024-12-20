@@ -17,8 +17,10 @@ import { err, ok, Result, resultMap } from "../lib/shared/result";
 import { clickhousePriceCalc } from "../packages/cost";
 import { isValidTimeZoneDifference } from "../utils/helpers";
 import { BaseManager } from "./BaseManager";
-import { getHistogramRowOnKeys } from "./helpers/percentileDistributions";
-import { HistogramRow } from "./SessionManager";
+import {
+  getHistogramRowOnKeys,
+  HistogramRow,
+} from "./helpers/percentileDistributions";
 
 export type PSize = "p50" | "p75" | "p95" | "p99" | "p99.9";
 
