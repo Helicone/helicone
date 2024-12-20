@@ -14,14 +14,12 @@ const jetbrainsMono = JetBrains_Mono({ subsets: ["latin"] });
 const PiPageContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  console.log("searchParams", searchParams.get("invalid_api_key") === "true");
   const { apiKey, sessionUUID, countDown } = useHeliconeLogin(
     searchParams.get("invalid_api_key") === "true"
   );
   const { data, isLoading } = useTestAPIKey(apiKey.data ?? "");
-  console.log("setup page", apiKey.data, data, isLoading);
 
-  if (apiKey.data && data && !isLoading) {
+  if (apiKey.data && data && !isLoading && !apiKey.isLoading) {
     router.push("/pi/first_page");
     return <div>Loading...</div>;
   }

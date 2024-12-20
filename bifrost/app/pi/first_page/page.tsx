@@ -15,7 +15,7 @@ const FirstPageContent = () => {
   const jawn = useJawnClient(apiKey.data ?? "");
   const router = useRouter();
 
-  if ((!data && !isLoading) || !apiKey.data) {
+  if (!data && !isLoading && !apiKey.data && !apiKey.isLoading) {
     router.push("/pi/setup?invalid_api_key=true");
     return <div>Loading...</div>;
   }

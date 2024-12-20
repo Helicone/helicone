@@ -78,6 +78,7 @@ export const useHeliconeLogin = (invalid_api_key?: boolean) => {
       return apiKey.data?.data?.apiKey;
     },
     refetchInterval: 10_000, // 1 second
+    staleTime: 0,
   });
 
   return {
