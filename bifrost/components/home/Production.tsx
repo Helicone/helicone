@@ -18,7 +18,8 @@ const Production = () => {
             Turn complexity and abstraction to{" "}
             <span className="text-brand">actionable insights</span>
           </h2>
-          <p className="text-base sm:text-lg max-w-[520px]">
+          {/* <p className="text-base sm:text-lg max-w-[520px]"> */}
+          <p className="text-lg max-w-[520px] text-landing-description font-light leading-relaxed">
             Unified insights across all providers to quickly detect
             hallucinations, abuse and performance issues.
           </p>
