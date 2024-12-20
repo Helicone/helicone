@@ -1,3 +1,4 @@
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UIFilterRowTree } from "@/services/lib/filters/types";
 import { UserGroupIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
@@ -17,11 +18,7 @@ import AuthHeader from "../../shared/authHeader";
 import ThemedTable from "../../shared/themed/table/themedTable";
 import TableFooter from "../requestsV2/tableFooter";
 import { INITIAL_COLUMNS } from "./initialColumns";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UserMetrics } from "./UserMetrics";
-import ThemedTableHeader from "@/components/shared/themed/table/themedTableHeader";
-import { TimeFilter } from "@/types/timeFilter";
-import ThemedHeader from "@/components/shared/themed/themedHeader";
 
 interface UsersPageV2Props {
   currentPage: number;
