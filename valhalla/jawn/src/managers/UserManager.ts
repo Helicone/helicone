@@ -13,12 +13,61 @@ import {
   buildFilterClickHouse,
   buildFilterWithAuthClickHouse,
 } from "../lib/shared/filters/filters";
-import { err, Result, resultMap } from "../lib/shared/result";
+import { err, ok, Result, resultMap } from "../lib/shared/result";
 import { clickhousePriceCalc } from "../packages/cost";
 import { isValidTimeZoneDifference } from "../utils/helpers";
 import { BaseManager } from "./BaseManager";
+import { getHistogramRowOnKeys } from "./helpers/percentileDistributions";
+import { HistogramRow } from "./SessionManager";
+
+export type PSize = "p50" | "p75" | "p95" | "p99" | "p99.9";
 
 export class UserManager extends BaseManager {
+  async getUserMetricsOverview(
+    filter: FilterNode,
+    pSize: PSize,
+    useInterquartile: boolean
+  ): Promise<
+    Result<{ request_count: HistogramRow[]; user_cost: HistogramRow[] }, string>
+  > {
+    const { organizationId } = this.authParams;
+
+    const builtFilter = await buildFilterWithAuthClickHouse({
+      org_id: organizationId,
+      argsAcc: [],
+      filter: filter,
+    });
+
+    const requestCountData = await getHistogramRowOnKeys({
+      keys: [{ key: "user_id", alias: "user_id" }],
+      pSize,
+      useInterquartile,
+      builtFilter,
+      aggregateFunction: "count(*)",
+    });
+
+    if (requestCountData.error) {
+      return requestCountData;
+    }
+
+    const userCostData = await getHistogramRowOnKeys({
+      keys: [{ key: "user_id", alias: "user_id" }],
+      pSize,
+      useInterquartile,
+      builtFilter,
+      aggregateFunction: clickhousePriceCalc("request_response_rmt"),
+    });
+
+    if (userCostData.error) {
+      return userCostData;
+    }
+
+    return ok({
+      request_count: requestCountData.data!,
+      user_cost: userCostData.data!,
+    });
+  }
+
   async getUserMetrics(
     queryParams: UserMetricsQueryParams
   ): Promise<Result<UserMetricsResult[], string>> {
