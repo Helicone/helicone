@@ -19,8 +19,8 @@ const PiPageContent = () => {
   );
   const { data, isLoading } = useTestAPIKey(apiKey.data ?? "");
 
-  if (apiKey.data && data && !isLoading) {
-    router.push("/pi/first_page");
+  if (apiKey.data && data && !isLoading && !apiKey.isLoading) {
+    router.push("/pi/total-requests");
     return <div>Loading...</div>;
   }
 
@@ -34,7 +34,7 @@ const PiPageContent = () => {
 
       <div className="relative h-[80vh]">
         <Image
-          src="/static/pi/intro-image.png"
+          src="/static/pi/intro-image.webp"
           alt="Helicone Logo"
           width={460}
           height={360}

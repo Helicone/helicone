@@ -6,30 +6,51 @@ import { useRouter } from "next/navigation";
 import { Suspense } from "react";
 import { useHeliconeLogin } from "./../useHeliconeLogin";
 import { useTestAPIKey } from "./useTestApiKey";
+import { useQuery } from "@tanstack/react-query";
 
 const jetbrainsMono = JetBrains_Mono({ subsets: ["latin"] });
 
 const FirstPageContent = () => {
-  const jawn = useJawnClient();
   const { apiKey, sessionUUID } = useHeliconeLogin();
   const { data, isLoading } = useTestAPIKey(apiKey.data ?? "");
+  const jawn = useJawnClient(apiKey.data ?? "");
   const router = useRouter();
 
-  if ((!data && !isLoading) || !apiKey.data) {
+  router.push("/pi/total-requests");
+  const orgName = useQuery({
+    queryKey: ["org-name", apiKey.data],
+    queryFn: () => jawn.POST("/v1/pi/org-name/query"),
+  });
+
+  const totalCosts = useQuery({
+    queryKey: ["total-costs", apiKey.data],
+    queryFn: () => jawn.POST("/v1/pi/total-costs"),
+  });
+
+  const costsOverTime = useQuery({
+    queryKey: ["costs-over-time", apiKey.data],
+    queryFn: () =>
+      jawn.POST("/v1/pi/costs-over-time/query", {
+        body: {
+          userFilter: "all",
+          dbIncrement: "day",
+          timeZoneDifference: new Date().getTimezoneOffset(),
+          timeFilter: {
+            start: new Date(
+              Date.now() - 30 * 24 * 60 * 60 * 1000
+            ).toISOString(),
+            end: new Date().toISOString(),
+          },
+        },
+      }),
+  });
+
+  if (!data && !isLoading && !apiKey.data && !apiKey.isLoading) {
     router.push("/pi/setup?invalid_api_key=true");
     return <div>Loading...</div>;
   }
 
-  return (
-    <div className="w-full flex flex-col justify-center items-center h-[100vh]">
-      <h1
-        className={`text-3xl font-extrabold truncate max-w-[80vw] ${jetbrainsMono.className} py-2`}
-      >
-        LOGGED IN! WOOOHOO
-      </h1>
-      {data && JSON.stringify(data).slice(0, 100)}
-    </div>
-  );
+  return <div></div>;
 };
 
 const PiPage = () => {
