@@ -2837,6 +2837,12 @@
 			},
 			"HeliconeMeta": {
 				"properties": {
+					"evaluatorId": {
+						"type": "string"
+					},
+					"experimentId": {
+						"type": "string"
+					},
 					"heliconeManualAccessKey": {
 						"type": "string"
 					},
@@ -6600,7 +6606,7 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"ExperimentUsage": {
+			"Usage": {
 				"properties": {
 					"model": {
 						"type": "string"
@@ -15621,9 +15627,15 @@
 							"application/json": {
 								"schema": {
 									"properties": {
+										"evaluators_usage": {
+											"items": {
+												"$ref": "#/components/schemas/Usage"
+											},
+											"type": "array"
+										},
 										"experiments_usage": {
 											"items": {
-												"$ref": "#/components/schemas/ExperimentUsage"
+												"$ref": "#/components/schemas/Usage"
 											},
 											"type": "array"
 										},
@@ -15719,6 +15731,7 @@
 										}
 									},
 									"required": [
+										"evaluators_usage",
 										"experiments_usage",
 										"total",
 										"tax",

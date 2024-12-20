@@ -1236,6 +1236,8 @@ Json: JsonObject;
         }[];
     };
     HeliconeMeta: {
+      evaluatorId?: string;
+      experimentId?: string;
       heliconeManualAccessKey?: string;
       lytixHost?: string;
       lytixKey?: string;
@@ -2444,7 +2446,7 @@ Json: JsonObject;
         alerts?: boolean;
       };
     };
-    ExperimentUsage: {
+    Usage: {
       model: string;
       provider: string;
       /** Format: double */
@@ -5638,7 +5640,8 @@ export interface operations {
       200: {
         content: {
           "application/json": ({
-            experiments_usage: components["schemas"]["ExperimentUsage"][];
+            evaluators_usage: components["schemas"]["Usage"][];
+            experiments_usage: components["schemas"]["Usage"][];
             /** Format: double */
             total: number;
             /** Format: double */

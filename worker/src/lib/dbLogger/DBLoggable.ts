@@ -758,6 +758,8 @@ export class DBLoggable {
         posthogHost: requestHeaders.posthogHost ?? undefined,
         heliconeManualAccessKey:
           requestHeaders.heliconeManualAccessKey ?? undefined,
+        experimentId: requestHeaders.experimentId ?? undefined,
+        evaluatorId: requestHeaders.evaluatorId ?? undefined,
       },
       log: {
         request: {
@@ -780,10 +782,6 @@ export class DBLoggable {
           requestCreatedAt: this.request.startTime ?? new Date(),
           isStream: this.request.isStream,
           heliconeTemplate: this.request.heliconeTemplate ?? undefined,
-          experimentColumnId:
-            requestHeaders.experimentHeaders.columnId ?? undefined,
-          experimentRowIndex:
-            requestHeaders.experimentHeaders.rowIndex ?? undefined,
         },
         response: {
           id: this.response.responseId,
