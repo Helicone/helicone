@@ -74,7 +74,7 @@ When <a href="https://blog.google/technology/google-deepmind/google-gemini-ai-up
 
 ![Google Gemini 2.0 Flash - Benchmarks](/static/blog/gemini-2.0-flash/gemini-2.0-benchmark.webp)
 
-These upgrades make Gemini 2.0 not just a tool for **developers** but also a potential game-changer in industries like **healthcare, finance, and gaming**, where decision-making, multi-step reasoning, and real-time data interaction are vital.
+These upgrades make Gemini 2.0 not just a tool for developers but also a potential game-changer in industries like **healthcare, finance, and gaming**, where decision-making, multi-step reasoning, and real-time data interaction are vital.
 
 ---
 
@@ -142,43 +142,59 @@ For users requiring more extensive capabilities, Gemini 2.0 Flash offers flexibl
 
 # How to Build Reliable LLM Applications with Gemini 2.0
 
-When building an LLM application, especially with new models or switching from one model to another, it’s important to monitor AI responses to ensure consistent performance for your end-users. We recommend:
+When building an LLM application, especially with new models or switching from one model to another, it’s important to monitor AI responses to ensure consistent performance for your end-users. We recommend to:
 
-### Step 1. Setting up an LLM observability and monitoring tool
+### Step 1. Set up an LLM observability and monitoring tool
 
-Start by choosing an observability tool. <a href="https://helicone.ai/" target="_blank" rel="noopener">Helicone</a> is easy to set up and free to start. Next, <a href="https://docs.helicone.ai/integrations/gemini/api/javascript" target="_blank" rel="noopener">integrate</a> your Gemini-powered AI app. If you choose to use Helicone, this step takes about a minute.
+Start by choosing an observability tool. **Helicone** has a generous <a href="https://helicone.ai/pricing" target="_blank" rel="noopener">free tier</a> and it's easy to set up.
 
-(show listing for events)
+Next, <a href="https://docs.helicone.ai/integrations/gemini/api/javascript" target="_blank" rel="noopener">follow the instruction to integrate</a> your Gemini-powered AI app. If you choose to use Helicone, this step takes about a minute.
+
+![Integrating Gemini-2.0 powered AI app with Helicone](/static/blog/gemini-2.0-flash/listen-for-events.webp)
 
 Once you've integrated your Gemini-powered AI app, you can start monitoring your model's response time, latency and costs in real time.
 
-(Show dashboard)
+### Step 2. Monitor user behaviors and evaluate model outputs
 
-### Step 2. Monitor usage, analyze user behaviors and evaluate model outputs
+Analyze your user behavior patterns regularly.
 
-Analyze your user behavior patterns regularly. You can gain some insights through user feedback or by reviewing your logs. In Helicone, all your logs are filterable in the `Request` tab.
+You can gain insights through user feedback or by reviewing your request logs.
 
-You can filter by errors or by other custom properties like **user segment**, **environment**, or **session ID** to get more granular insights, identify opportunities and performance bottlenecks to know if you should improve your prompt, cut down API costs, or improve speed - just to name a few.
+In Helicone, all your logs are filterable in the `Request` tab.
 
-### Step 3. Tweak your prompt
+![Track request and response logs for Gemini-2.0 powered AI app with Helicone](/static/blog/gemini-2.0-flash/requests.webp)
 
-As LLMs are sensitive to model and prompt changes, use Helicone's Experiments feature to test and compare different versions of your prompts to see which version improves the output, or if the new changes you made will cause performance regressions.
+You can **filter by errors** or by **other custom properties like user segment**, **environment**, or **session ID** to get more granular insights, identify opportunities and performance bottlenecks.
 
-Use Helicone’s dashboard to monitor your model’s response time, latency and costs in real time. <a href="https://docs.helicone.ai/integrations/gemini/api/javascript" target="_blank" rel="noopener">Integrating your Gemini app</a> only takes a few seconds and 2 lines of code.
+This will give you insights on if you should improve your prompt, cut down API costs, or improve speed - just to name a few.
+
+### Step 3. Iterate on your prompt
+
+As LLMs are sensitive to model and prompt changes, use Helicone's <a href="https://docs.helicone.ai/features/experiments" target="_blank" rel="noopener">Experiments feature</a> to test and compare different versions of your prompts.
+
+This will help you see quickly which prompt version result in the best output, or if the new changes you made caused performance regressions.
+
+![Compare different versions of your prompt with Helicone](/static/blog/gemini-2.0-flash/experiments.webp)
 
 ### Step 4. Push new changes to production
 
-Once you are happy with your changes, you can push your new changes to production.
+Once you are happy with your changes, push your new changes to production.
 
-(show dashboard)
+**Helicone will automatically track your prompt changes** and version it for you. You can continue to monitor your model's performance and improve your prompts.
 
-### Step 5. Rinse and repeat (from Step 2)
+![Merge PR in GitHub](/static/blog/gemini-2.0-flash/merge.webp)
+
+### Step 5. Repeat from Step 2
 
 A continuous improvement cycle is key to building a reliable LLM application. **Keep monitoring your model's performance & improving your prompts to make sure your application is always performing at its best.**
 
+Use Helicone’s dashboard to monitor your model’s response time, latency and costs in real time.
+
+![Helicone dashboard](/static/blog/gemini-2.0-flash/dashboard.webp)
+
 ---
 
-# What's Next for Google's AI?
+# What's Next for Google Gemini?
 
 Looking ahead, Google’s vision for Gemini 2.0 is centered around making AI more "agentic"—being able to take actions on behalf of users. This concept has evolved from previous "assistant" models, where AI was used primarily for answering questions and providing insights. Now with Gemini 2.0, the goal is to create models that can handle more practical, action-oriented tasks, such as planning a trip, completing programming tasks, or interacting with other software tools.
 
@@ -191,21 +207,21 @@ In line with this, Google is developing Project Astra, a research initiative exp
     target="_blank"
     rel="noopener"
   >
-    Google's Gemini-Exp-1206
+    Google's Gemini-Exp-1206 (Dec 2024)
   </a>
 - <a
     href="https://www.helicone.ai/blog/openai-o1-and-chatgpt-pro"
     target="_blank"
     rel="noopener"
   >
-    OpenAI's o1 & ChatGPT Pro
+    OpenAI's o1 & ChatGPT Pro (Dec 2024)
   </a>
 - <a
     href="https://www.helicone.ai/blog/meta-llama-3-3-70-b-instruct"
     target="_blank"
     rel="noopener"
   >
-    Meta's Llama 3.3 70b Instruct
+    Meta's Llama 3.3 70b Instruct (Dec 2024)
   </a>
 
 ---
