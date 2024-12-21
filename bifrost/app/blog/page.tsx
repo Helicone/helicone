@@ -216,6 +216,11 @@ export type BlogStructure =
 const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
+      folderName: "gemini-2.0-flash",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "claude-3.5-sonnet-vs-openai-o1",
     },
   },
