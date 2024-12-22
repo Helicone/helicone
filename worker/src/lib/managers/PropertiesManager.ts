@@ -71,55 +71,6 @@ export async function updateRequestProperties(
   }
 }
 
-// New functionality for managing property visibility
-export async function fetchVisibleProperties(
-    request: RequestWrapper,
-    env: Env
-): Promise<Response> {
-  const headers = request.getHeaders(); // Get all headers
-  const organizationId = headers.get("organization-id"); // Retrieve the specific header value
-
-  if (!organizationId) {
-    return new Response("Missing organization ID", { status: 400 });
-  }
-
-  const dbClient = createClient(
-      env.SUPABASE_URL,
-      env.SUPABASE_SERVICE_ROLE_KEY
-  );
-
-  try {
-    const { data: allProps, error: fetchError } = await dbClient
-        .from("properties")
-        .select("key")
-        .eq("organization_id", organizationId);
-
-    if (fetchError) {
-      console.error("Error fetching properties:", fetchError.message);
-      throw fetchError;
-    }
-
-    const { data: hiddenProps, error: hiddenError } = await dbClient
-        .from("hidden_properties")
-        .select("property_key")
-        .eq("organization_id", organizationId);
-
-    if (hiddenError) {
-      console.error("Error fetching hidden properties:", hiddenError.message);
-      throw hiddenError;
-    }
-
-    const hiddenSet = new Set(hiddenProps?.map((p) => p.property_key));
-    const visibleProperties =
-        allProps?.filter((prop) => !hiddenSet.has(prop.key)) || [];
-
-    return Response.json({ properties: visibleProperties });
-  } catch (error) {
-    console.error("Error fetching visible properties:", error);
-    return new Response("Error fetching visible properties", { status: 500 });
-  }
-}
-
 export async function hideProperty(
     request: RequestWrapper,
     env: Env
@@ -200,4 +151,3 @@ export async function unhideProperty(
     });
   }
 }
-

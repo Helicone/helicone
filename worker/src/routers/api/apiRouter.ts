@@ -11,7 +11,6 @@ import { logAsync } from "../../lib/managers/AsyncLogManager";
 import { createAPIClient } from "../../api/lib/apiClient";
 
 import {
-  fetchVisibleProperties,
   hideProperty,
   unhideProperty,
 } from "../../lib/managers/PropertiesManager";
@@ -473,44 +472,30 @@ function getAPIRouterV1(
     }
   );
 
-  // Route to fetch visible properties
-  router.get(
-    "/v1/properties/visible",
-    async (
-      _,
-      requestWrapper: RequestWrapper,
-      env: Env,
-      _ctx: ExecutionContext
-    ) => {
-      return await fetchVisibleProperties(requestWrapper, env);
-    }
+  router.post(
+      "/v2/properties/hide",
+      async (
+          _,
+          requestWrapper: RequestWrapper,
+          env: Env,
+          _ctx: ExecutionContext
+      ) => {
+        return await hideProperty(requestWrapper, env); // Ensure the updated hide logic is used.
+      }
   );
 
-  // Route to hide a property
   router.post(
-    "/v1/properties/hide",
-    async (
-      _,
-      requestWrapper: RequestWrapper,
-      env: Env,
-      _ctx: ExecutionContext
-    ) => {
-      return await hideProperty(requestWrapper, env);
-    }
+      "/v2/properties/unhide",
+      async (
+          _,
+          requestWrapper: RequestWrapper,
+          env: Env,
+          _ctx: ExecutionContext
+      ) => {
+        return await unhideProperty(requestWrapper, env); // Ensure the updated unhide logic is used.
+      }
   );
 
-  // Route to unhide a property
-  router.post(
-    "/v1/properties/unhide",
-    async (
-      _,
-      requestWrapper: RequestWrapper,
-      env: Env,
-      _ctx: ExecutionContext
-    ) => {
-      return await unhideProperty(requestWrapper, env);
-    }
-  );
 }
 
 export const getAPIRouter = (
