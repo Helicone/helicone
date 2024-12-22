@@ -28,13 +28,22 @@ export class PropertyController extends Controller {
       filter: "all",
     });
 
+
     const query = `
-    SELECT DISTINCT arrayJoin(mapKeys(properties)) AS property
-    FROM request_response_rmt
-    WHERE (
-      ${builtFilter.filter}
-    )
-  `;
+      SELECT DISTINCT
+        arrayJoin(mapKeys(properties)) AS property,
+        CASE
+          WHEN hidden_properties.property_key IS NOT NULL THEN 'hidden'
+          ELSE 'visible'
+          END AS visibility
+      FROM request_response_rmt
+             LEFT JOIN hidden_properties
+                       ON hidden_properties.property_key = arrayJoin(mapKeys(properties))
+                         AND hidden_properties.organization_id = '${request.authParams.organizationId}'
+      WHERE (
+              ${builtFilter.filter}
+              )
+    `;
 
     return await cacheResultCustom(
       "v1/property/query" + request.authParams.organizationId,
