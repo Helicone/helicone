@@ -271,7 +271,7 @@ export const HypothesisCellRenderer = forwardRef<
                     </TooltipTrigger>
                     <TooltipContent
                       side="left"
-                      className="text-[11px] p-0 border-0 text-yellow-500 dark:text-yellow-500 shadow-none rounded-none bg-yellow-50/80 dark:bg-yellow-950/50"
+                      className="text-[11px] py-px px-1 border-0 text-yellow-500 dark:text-yellow-500 shadow-none rounded-none bg-yellow-50 dark:bg-yellow-950"
                     >
                       Prompt has changed since this cell was last run
                     </TooltipContent>
@@ -281,7 +281,10 @@ export const HypothesisCellRenderer = forwardRef<
             </div>
           </PopoverTrigger>
           <PopoverContent
-            className="w-[800px] max-h-[80vh] overflow-y-auto p-0"
+            className="w-[800px] overflow-y-auto p-0"
+            style={{
+              maxHeight: "var(--radix-popover-content-available-height)",
+            }}
             alignOffset={10}
             side="bottom"
             align="start"

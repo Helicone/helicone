@@ -599,7 +599,7 @@ export function ExperimentTable({
                   className="h-full bg-white dark:bg-black rounded-sm inline-block min-w-0 w-max"
                   // style={{ width: "fit-content" }}
                 >
-                  <Table className="border-collapse border-t border-slate-200 dark:border-slate-800">
+                  <Table className="border-collapse border-t border-slate-200 dark:border-slate-800 h-[1px]">
                     <TableHeader>
                       {table.getHeaderGroups().map((headerGroup, i) => (
                         <TableRow
