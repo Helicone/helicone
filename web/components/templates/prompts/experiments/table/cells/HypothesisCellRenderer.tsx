@@ -309,7 +309,7 @@ export const HypothesisCellRenderer = forwardRef<
       return (
         <Button
           variant="ghost"
-          className="w-6 h-6 m-2 p-0 border-slate-200 border rounded-md bg-slate-50 text-slate-500 absolute top-1 right-1"
+          className="w-6 h-6 p-0 border-slate-200 border rounded-md bg-slate-50 text-slate-500 absolute top-2 right-2"
           onClick={handleRunHypothesis}
         >
           <PlayIcon className="w-4 h-4" />

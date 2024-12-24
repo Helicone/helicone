@@ -548,7 +548,7 @@ const IndexColumnCell = ({
         {index}
       </span>
       <Button
-        variant="ghost"
+        variant="outline"
         className="ml-2 p-0 border rounded-md h-[22px] w-[24px] items-center justify-center absolute invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-opacity duration-200"
         onClick={onRunRow}
       >
