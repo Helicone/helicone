@@ -337,7 +337,7 @@ const PromptsPage = (props: PromptsPageProps) => {
 
               {filteredPrompts && (hasLimitedAccess || hasAccess) ? (
                 searchParams.get("view") === "card" ? (
-                  <ul className="w-full h-full grid grid-cols-2 xl:grid-cols-4 gap-4">
+                  <ul className={cn("w-full h-full grid grid-cols-2 xl:grid-cols-4 gap-4", ISLAND_MARGIN)}>
                     {filteredPrompts.map((prompt, i) => (
                       <li key={i} className="col-span-1">
                         <PromptCard prompt={prompt} />
