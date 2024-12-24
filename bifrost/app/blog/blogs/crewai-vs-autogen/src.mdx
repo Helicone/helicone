@@ -1,24 +1,19 @@
-Selecting the right framework to power your agents is crucial for efficiency and scalability. Two notable **<span style={{color: '#03A9F4'}}>open-source frameworks</span>** in the AI agent landscape are **CrewAI** and **AutoGen**. CrewAI offers collaborative and team-oriented workflows, while AutoGen offers finely tuned control for more intricate, iterative problem-solving. 
+Selecting the right framework to power your agents is crucial for efficiency and scalability. Two notable **<span style={{color: '#03A9F4'}}>open-source frameworks</span>** in the AI agent landscape are **CrewAI** and **AutoGen**. CrewAI offers collaborative and team-oriented workflows, while AutoGen offers finely tuned control for more intricate, iterative problem-solving.
 
 ![CrewAI vs. AutoGen for building AI Agents](/static/blog/crewai-vs-autogen.webp)
 
 Both platforms are powerful and cater to different aspects of AI application development. Depending on your project’s specific needs, you might find one edges out the other. We will cover the key differences, example implementations and share our recommendations if you are starting out in agent-building.
 
-
 ## Key Differences
 
-| Feature | CrewAI | AutoGen |
-| --- | --- | --- |
-| Ease of use | More accessible and easier to set up, built on LangChain. | May require more effort to set up initially, but offers more flexibility for specialized tasks. |
-| Functionality | Provides more control over the process, suited for automating known workflows. | More capable for open-ended problem-solving and exploring unknown solutions. |
-| Code Execution | Leverages LangChain's ecosystem for language understanding. | Has better default code execution capabilities, using Docker for isolation. |
-| LLM Support | Has dependencies on OpenAI, limiting for other LLMs. | More reliant on OpenAI's GPT models, which can be limiting. |
+| Feature        | CrewAI                                                                         | AutoGen                                                                                         |
+| -------------- | ------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------- |
+| Ease of use    | More accessible and easier to set up, built on LangChain.                      | May require more effort to set up initially, but offers more flexibility for specialized tasks. |
+| Functionality  | Provides more control over the process, suited for automating known workflows. | More capable for open-ended problem-solving and exploring unknown solutions.                    |
+| Code Execution | Leverages LangChain's ecosystem for language understanding.                    | Has better default code execution capabilities, using Docker for isolation.                     |
+| LLM Support    | Has dependencies on OpenAI, limiting for other LLMs.                           | More reliant on OpenAI's GPT models, which can be limiting.                                     |
 
----
-
-## Overview
-
-### [CrewAI](https://www.crewai.com/) — Structured collaboration
+## CrewAI — Structured collaboration
 
 `free` `open-source`
 
@@ -28,7 +23,6 @@ CrewAI is a Python-based framework that implements a hierarchical, role-based ar
 - Explicit skill mappings
 - Configurable interaction patterns
 - Built-in workflow orchestration
-
 
 ### CrewAI implementation example
 
@@ -68,23 +62,52 @@ crew = Crew(
 )
 ```
 
-*Note: Always check [CrewAI's official documentation](https://docs.crewai.com/concepts/agents) for the most up-to-date information and best practices.*
+_Note: Always check CrewAI's official <a href="https://docs.crewai.com/concepts/agents" target="_blank">documentation</a> for the most up-to-date information and best practices._
 
+### Use Cases of CrewAI
+
+- Better for prototyping and quickly testing complex agent interactions.
+- Better for automating regular workflows with a defined structure.
+
+#### Example 1: Multi-stage data processing
+
+```python
+data_collector = Agent(role='Collector')
+validator = Agent(role='Validator')
+transformer = Agent(role='Transformer')
+crew = Crew(agents=[data_collector, validator, transformer])
+
+result = crew.kickoff()
+```
+
+#### Example 2: Tiered support system
+
+```python
+first_line = Agent(role='InitialResponse')
+specialist = Agent(role='TechnicalSupport')
+escalation = Agent(role='EscalationManager')
+support_crew = Crew(agents=[first_line, specialist, escalation])
+
+result = support_crew.kickoff()
+```
+
+_You might find these helpful: <a href="https://pypi.org/project/crewai/" target="_blank">Python Package</a>_
 
 ---
 
-### [AutoGen](https://microsoft.github.io/autogen/0.2/) — Autonomous problem-solving
+## AutoGen — Autonomous problem-solving
 
 `free` `open-source`
 
-AutoGen is a framework developed by Microsoft, allowing developers to create AI agents that can interact with each other and with humans to solve complex tasks. These agents can be customized to perform specific roles or have particular expertise: 
+Microsoft's <a href="https://microsoft.github.io/autogen/0.2/" target="_blank">AutoGen</a> is a framework developed by Microsoft, allowing developers to create AI agents
+that can interact with each other and with humans to solve complex tasks. These agents
+can be customized to perform specific roles or have particular expertise:
 
-1. code execution for tasks involving programming or data analysis. 
-2. conversational approach to problem-solving, where agents can discuss, plan, and execute tasks iteratively. 
-3. manage the flow of multi-agent interactions by determining when a task is complete. 
+1. code execution for tasks involving programming or data analysis.
+2. conversational approach to problem-solving, where agents can discuss, plan, and execute tasks iteratively.
+3. manage the flow of multi-agent interactions by determining when a task is complete.
 
-In AutoGen, you can assign specific roles to agents so they can engage in conversations or interact with each other. A conversation consists of a series of messages exchanged between agents, which can then be used to advance a task. 
-
+In AutoGen, you can assign specific roles to agents so they can engage in conversations or interact with each other. A conversation consists of a series of messages exchanged between agents, which can then be used to advance a task.
 
 ### AutoGen configuration example
 
@@ -110,61 +133,28 @@ joe = ConversableAgent(
 )
 ```
 
-*Note: Always check [AutoGen's official documentation](https://microsoft.github.io/autogen/0.2/docs/tutorial/introduction/#agents) for the most up-to-date information and best practices.*
+_Note: Always check <a href="https://microsoft.github.io/autogen/0.2/docs/tutorial/introduction/#agents" target="_blank">AutoGen's official documentation</a> for the most up-to-date information and best practices._
 
----
-
-## Use Cases
-
-### CrewAI
-
-- Better for prototyping and quickly testing complex agent interactions.
-- Better for automating regular workflows with a defined structure.
-
-
-#### Example 1: Multi-stage data processing
-
-```python
-data_collector = Agent(role='Collector')
-validator = Agent(role='Validator')
-transformer = Agent(role='Transformer')
-crew = Crew(agents=[data_collector, validator, transformer])
-
-result = crew.kickoff()
-```
-
-#### Example 2: Tiered support system
-
-```python 
-first_line = Agent(role='InitialResponse')
-specialist = Agent(role='TechnicalSupport')
-escalation = Agent(role='EscalationManager')
-support_crew = Crew(agents=[first_line, specialist, escalation])
-
-result = support_crew.kickoff()
-```
-
-
-### AutoGen
+### Use Cases of AutoGen
 
 - Preferred for tasks requiring precise control over information processing and API access.
 - Better for one-time, complex problem-solving where the solution approach is unclear.
 
 #### Example 1: Single agent performing data retrieval
 
-```python 
+```python
 news_agent = AssistantAgent(name="news_agent") # retrieve top 10 technology news headlines
 user_proxy = UserProxyAgent(name="user_proxy") # Initialize the user proxy agent to simulate user interactions
-user_proxy.initiate_chat(news_agent) # start the conversation 
+user_proxy.initiate_chat(news_agent) # start the conversation
 ```
 
 #### Example 2: Multi-agent collaboration for data analysis
 
-```python 
+```python
 data_retriever = AssistantAgent(name="data_retriever") # retrieve stock data
 data_analyst = AssistantAgent(name="data_analyst") # analyze stock data and provide insights
 user_proxy = UserProxyAgent(name="user_proxy") # Initialize the user proxy agent to simulate user interactions
-user_proxy.initiate_chat(data_retriever) # start the conversation 
+user_proxy.initiate_chat(data_retriever) # start the conversation
 user_proxy.initiate_chat(data_analyst)
 ```
 
@@ -172,38 +162,34 @@ user_proxy.initiate_chat(data_analyst)
 
 ## Which framework is better for beginners, CrewAI or AutoGen?
 
-For beginners, CrewAI is generally considered the more accessible and easier-to-use framework compared to AutoGen. Here’s why: 
+For beginners, **<span style={{color: '#03A9F4'}}>CrewAI is generally considered the more accessible</span>** and easier-to-use framework compared to AutoGen. Here’s why:
 
 1. faster setup process and more straightforward to getting started
 2. documentation contains examples, which is particularly beneficial for beginners
 3. higher level of abstraction, helps beginners quickly prototype and explore multi-agent interactions without delving too deeply into complex setups.
 
-
-## Developer Opinions
+### Developer Opinions
 
 Many developers find that the choice between CrewAI and AutoGen depends on the specific project requirements:
 
 - Some prefer AutoGen for its ability to run multiple models concurrently.
 - Others appreciate CrewAI's integration with LangChain and its broader ecosystem support.
-- Some recommend using CrewAI if you know how to solve a problem and want to automate the process, and AutoGen if you want the agent to come up with a solution for you. 
+- Some recommend using CrewAI if you know how to solve a problem and want to automate the process, and AutoGen if you want the agent to come up with a solution for you.
 - Both frameworks are seen as valuable tools, with the choice often coming down to the particular use case and development needs.
-
----
 
 ## Bottom Line
 
-It's worth noting that the field of AI agent frameworks is competitive and rapidly evolving, with alternatives like LlamaIndex and LangChain. We encourage you to explore multiple options to find the best fit for your use case, and stay updated with the latest advancements in the field. 
+It's worth noting that there are many <a href="https://www.helicone.ai/blog/ai-agent-builders" target="_blank">awesome AI agent frameworks</a> out there and they are rapidly evolving. We encourage you to explore multiple options to find the best fit for your use case, and stay updated with the latest advancements in the field.
 
 Always be sure to check the official documentation for the most up-to-date information and best practices.
 
+### More Comparisons
 
-### You might find these helpful: 
+- Comparing <a href="https://www.helicone.ai/blog/crewai-vs-dify-ai" target="_blank">CrewAI and Dify AI</a>
+- Comparing <a href="https://www.helicone.ai/blog/llamaindex-vs-langchain" target="_blank">LlamaIndex and LangChain</a>
 
-- <a href="https://docs.crewai.com/introduction" target="_blank">CrewAI Documentation</a>, <a href="https://pypi.org/project/crewai/" target="_blank">CrewAI Python Package</a>
-- <a href="https://microsoft.github.io/autogen/0.2/docs/Getting-Started" target="_blank">AutoGen Documentation</a>
-- <a href="https://www.helicone.ai/blog/ai-agent-builders" target="_blank">6 Awesome Frameworks for Building AI Agents (Open-Source)</a>
-
+---
 
 ### Questions or feedback?
 
-Are the information out of date? Do you have additional platforms to add? Please raise an issue and we’d love to share your insights! 
+Are the information out of date? Do you have additional platforms to add? Please raise an issue and we’d love to share your insights!

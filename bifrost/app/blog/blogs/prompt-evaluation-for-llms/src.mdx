@@ -1,19 +1,16 @@
-Crafting high-quality prompts and evaluating them has become a pressing issue for AI teams. A well-designed prompt can elicit highly relevant, coherent, and useful responses, while a suboptimal one can lead to irrelevant, incoherent, or even harmful outputs. 
+Crafting high-quality prompts and evaluating them has become a pressing issue for AI teams. A <a href="https://www.helicone.ai/blog/prompt-engineering-tools" target="_blank">well-designed prompt</a> can elicit highly relevant, coherent, and useful responses, while a suboptimal one can lead to irrelevant, incoherent, or even harmful outputs.
 
 **<span style={{color: '#0ea5e9'}}>To create high-performing prompts, teams need both high-quality input variables and clearly defined tasks.</span>** However, since LLMs are inherently unpredictable, quantifying the impact of even small prompt changes is extremely difficult.
 
 ![Prompt Evaluation for Large Language Models: Golden Datasets vs. Random Sampling](/static/blog/prompt-evaluation-for-llms/cover.webp)
 
-
 In a recent QA Wolf webinar, **<span style={{color: '#0ea5e9'}}>Nishant Shukla</span>**, the senior director of AI at QA Wolf, and **<span style={{color: '#0ea5e9'}}>Justin Torre</span>**, the CEO and co-founder of Helicone, shared their insights on how they tackled the challenge of effective prompt evaluation.
-
 
 ## The Old Approach: Curating Golden Datasets
 
 To address this challenge, teams have traditionally turned to the use of Golden Datasets. Golden Datasets are widely used because they are great for benchmarking and evaluating problems that are well-defined and easily reproducible.
 
-Golden Datasets are meticulously cleaned, labeled, and verified. **<span style={{color: '#0ea5e9'}}>Teams use Golden Datasets to make sure their applications perform optimally under controlled conditions.</span>** 
-
+Golden Datasets are meticulously cleaned, labeled, and verified. **<span style={{color: '#0ea5e9'}}>Teams use Golden Datasets to make sure their applications perform optimally under controlled conditions.</span>**
 
 ## The Limitation of the Golden Dataset Approach
 
@@ -31,7 +28,6 @@ Golden Datasets tend to be simplified or idealized examples that may not accurat
 
 Keeping a Golden Dataset up-to-date and representative of the evolving data and prompt structures is an ongoing and resource-intensive task.
 
-
 ## The New Approach: Random Sampling for Prompt Evaluation
 
 To overcome these limitations, QA Wolf and Helicone have turned to **<span style={{color: '#0ea5e9'}}>a more innovative approach: random sampling of production data</span>**. By randomly selecting a small subset of actual user interactions and using that as the evaluation benchmark, they've been able to achieve several key benefits:
@@ -48,36 +44,32 @@ Random sampling ensures that the evaluation data accurately reflects the complex
 
 By sampling a subset of production data rather than evaluating against the entire dataset, QA Wolf has been able to significantly reduce the computational resources and costs associated with prompt evaluation.
 
-
 ## Implement Random Sampling in Helicone
 
-To implement this random sampling approach, QA Wolf has partnered with Helicone, a platform that specializes in managing and optimizing LLM-powered workflows. Helicone's ability to log and track all production data, combined with its experimentation capabilities, has been a key enabler for QA Wolf's success.
+To implement this random sampling approach, QA Wolf has partnered with Helicone, a platform that specializes in managing and optimizing LLM-powered workflows. Helicone's ability to log and track all production data, combined with its experimentation capabilities to <a href="https://www.helicone.ai/blog/test-your-llm-prompts" target="_blank">test prompt changes</a>, has been a key enabler for QA Wolf's success.
 
 ![Prompt Evaluation for Large Language Models: Golden Datasets vs. Random Sampling](/static/blog/prompt-evaluation-for-llms/golden-datasets-vs-random-sampling.webp)
 
 As Justin explained, Helicone allows QA Wolf to randomly sample production data, use it to iterate on prompt definitions, and then evaluate the impact of those changes against the real-world benchmark. This iterative process helps the QA Wolf team converge on prompts that are well-aligned with actual user needs and behaviors.
 
-
 ## Conclusion
 
-The QA Wolf and Helicone collaboration shows how taking different approaches to prompt evaluation can help AI teams progress. By using random sampling of production data instead of using Golden Datasets, teams can become **<span style={{color: '#0ea5e9'}}>more agile and more cost-effective.</span>** 
+The QA Wolf and Helicone collaboration shows how taking different approaches to prompt evaluation can help AI teams progress. By using random sampling of production data instead of using Golden Datasets, teams can become **<span style={{color: '#0ea5e9'}}>more agile and more cost-effective.</span>**
 
-| | **Golden Datasets** | **Random Sampling** |
-| --- | --- | --- |
-| **Data Quality** | Meticulously cleaned and labeled data | Real-world production data |
-| **Conditions** | Controlled conditions | Reflects actual user interactions |
-| **Cost** | High maintenance costs | Cost-effective |
-| **Generalization** | Risk of overfitting (Model performing well on training data but poorly on new data) | Better generalization |
-| **Iteration Speed** | Slower iteration due to dataset updates | Faster iteration cycles |
-
+|                     | **Golden Datasets**                                                                 | **Random Sampling**               |
+| ------------------- | ----------------------------------------------------------------------------------- | --------------------------------- |
+| **Data Quality**    | Meticulously cleaned and labeled data                                               | Real-world production data        |
+| **Conditions**      | Controlled conditions                                                               | Reflects actual user interactions |
+| **Cost**            | High maintenance costs                                                              | Cost-effective                    |
+| **Generalization**  | Risk of overfitting (Model performing well on training data but poorly on new data) | Better generalization             |
+| **Iteration Speed** | Slower iteration due to dataset updates                                             | Faster iteration cycles           |
 
 This case study is a valuable example as the AI landscape evolves as companies building better observability tools continue to improve developer’s workflow for prompt engineering and evaluation.
 
-For detailed webinar, check out **<a href="https://www.qawolf.com/blog/dump-the-golden-data-set-switch-to-random-sampling" target="_blank">AI Prompt Evaluation - Beyond Golden Datasets</a>**. 
+For detailed webinar, check out **<a href="https://www.qawolf.com/blog/dump-the-golden-data-set-switch-to-random-sampling" target="_blank">AI Prompt Evaluation - Beyond Golden Datasets</a>**.
 
 ---
 
 ### Questions or feedback?
 
 Are the information out of date? Please <a href="https://github.com/Helicone/helicone/issues" target="_blank">raise an issue</a> and we’d love to share your insights!
-
