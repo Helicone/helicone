@@ -4,17 +4,17 @@
 
 **<span style={{color: '#0ea5e9'}}>Datadog</span>** has long been a favourite among developers for its monitoring and observability capabilities. It is most known for its logging, analytics, and performance data visualization across the entire stack of applications and infrastructure, and can handle incredible amounts of data at scale.
 
-But recently, Large Language Models (LLM) developers have been exploring open-source observability options. Why? We have some answers. 
+But recently, Large Language Models (LLM) developers have been exploring open-source observability options. Why? We have some answers.
 
-### 1. Datadog Pricing Surge with Scale
+## 1. Datadog Pricing Surge with Scale
 
-Developers working in large companies have been complaining about the **<span style={{color: '#0ea5e9'}}>increasing costs and bill shocks with Datadog</span>** as their companies scale. Many are turning to open-source alternatives to control their overall costs on monitoring infrastructure. 
+Developers working in large companies have been complaining about the **<span style={{color: '#0ea5e9'}}>increasing costs and bill shocks with Datadog</span>** as their companies scale. Many are turning to open-source alternatives to control their overall costs on monitoring infrastructure.
 
-### 2. The Need for Specialized LLM Observability Tools
+## 2. The Need for Specialized LLM Observability Tools
 
-**<span style={{color: '#0ea5e9'}}>Speed is key in the GenAI space.</span>** As LLMs continue to make their way into different industries, traditional monitoring is no longer enough. New problems require new solutions in order to facilitate LLM workflows, manage and experiment with prompts, and fine-tune models. Among the LLM observability tools, **<span style={{color: '#0ea5e9'}}>Helicone is the one of the best option that developers today are choosing. </span>** 
+**<span style={{color: '#0ea5e9'}}>Speed is key in the GenAI space.</span>** As LLMs continue to make their way into different industries, traditional monitoring is no longer enough. New problems require new solutions in order to facilitate LLM workflows, manage and experiment with prompts, and fine-tune models. Among the LLM observability tools, **<span style={{color: '#0ea5e9'}}>Helicone is the one of the best option that developers today are choosing. </span>**
 
-**Customers love us for:**
+### Customers love Helicone for:
 
 - our dead easy integration
 - our flat learning curve
@@ -23,8 +23,7 @@ Developers working in large companies have been complaining about the **<span st
 - being purpose-built for Large Language Models
 - being exceptionally responsive to our customers
 
-
-## The Initial Setup
+### The Initial Setup
 
 To integrate with Helicone, you only need to modify two lines of code (we weren't joking earlier). Here’s where you can <a href="https://us.helicone.ai/signup" target="_blank">sign up</a>.
 
@@ -34,22 +33,22 @@ Don't worry, We walk you through this step during onboarding. Let's dive into th
 
 ## 3 Most Useful Features in LLM Observability Tools
 
-### 1. Create Prompt Templates, Run Experiments & Compare LLM Outputs
+### 1. Prompt Templates, Experiments and LLM Evaluations
 
-**<span style={{color: '#0ea5e9'}}>Testing prompts is hard, but critical.</span>** Consider <a href="https://x.com/melaniesclar/status/1745557109419458695" target="_blank">this Tweet</a> on how even minimal changes can significantly affect the accuracy of your output with **GPT-3.5 Turbo** and **Llama-2-70b 5-shot**. Helicone makes it easy to maintain and version your prompts, run experiments on prompt variations, and compare key metrics (token count, cost, accuracy, etc.) based on the LLM outputs.
+**<span style={{color: '#0ea5e9'}}>Testing prompts is hard, but critical.</span>** Consider <a href="https://x.com/melaniesclar/status/1745557109419458695" rel="noopener nofollow" target="_blank">this tweet</a> on how even minimal changes can significantly affect the accuracy of your output with **GPT-3.5 Turbo** and **Llama-2-70b 5-shot**. Helicone makes it easy to maintain and version your prompts, run experiments on prompt variations, and compare key metrics (token count, cost, accuracy, etc.) based on the LLM outputs.
 
 ![Create Prompt Templates, Run Experiments and Compare LLM Outputs](/static/blog/datadog/prompt_template.webp)
 
-**Why our developers love this feature:**
+#### Why developers love this feature:
 
 - Create as many prompt versions as you want **<span style={{color: '#0ea5e9'}}>without impacting production data</span>**.
 - Evaluate the LLM outputs of new prompts (**<span style={{color: '#0ea5e9'}}>and have data to back you up</span>** 📈)
 - Test a prompt with specific datasets to save costs by making fewer calls to providers like OpenAI 🤑
 - Have **<span style={{color: '#0ea5e9'}}>full ownership of your prompts</span>**. Unlike many other prompt evaluation tools that require you to store the prompt with them, prompts are stored in your code when using Helicone.
 
-**You might find this useful:**
+#### You might find this useful:
 
-- Docs: <a href="https://docs.helicone.ai/features/prompts" target="_blank">How to create prompt templates in Helicone</a>. 
+- Docs: <a href="https://docs.helicone.ai/features/prompts" target="_blank">How to create prompt templates in Helicone</a>.
 - Guide: <a href="https://docs.helicone.ai/use-cases/debugging" target="_blank">How to debug prompts in the Playground</a>.
 
 ### 2. Use Custom Properties to Segment Requests
@@ -58,39 +57,40 @@ Don't worry, We walk you through this step during onboarding. Let's dive into th
 
 ![Add custom properties to requests](/static/blog/datadog/request.webp)
 
-**Why our developers love this feature:**
+#### Why developers love this feature:
 
 - Get the “**<span style={{color: '#0ea5e9'}}>unit economics</span>**”. For example, the average cost of a conversation.
 - Slice and dice your requests and metrics by any custom property to pinpoint errors.
 - Get the the total cost or latency for a group of requests in a prompt chain
 - Segment requests by different environments or different use-cases
 
-**You might find this useful:**
+#### You might find this useful:
 
 - Docs: <a href="https://docs.helicone.ai/features/advanced-usage/custom-properties" target="_blank">Using Custom Properties in Helicone</a>.
 - Blog: <a href="https://www.helicone.ai/blog/custom-properties" target="_blank">How to understand your users better with Custom Properties</a>.
 
 ### 3. Save LLM Costs by Caching on the Edge 🧗
 
-Helicone uses <a href="https://www.cloudflare.com/network/" target="_blank">Cloudflare Workers</a> in order to live as close to the edge as possible - guaranteeing minimal latency impact for features like caching. We also precompute results or frequently accessed data to reduce the load on backend resources. 
+Helicone uses <a href="https://www.cloudflare.com/network/" target="_blank">Cloudflare Workers</a> in order to live as close to the edge as possible - guaranteeing minimal latency impact for features like caching. We also precompute results or frequently accessed data to reduce the load on backend resources.
 **<span style={{color: '#0ea5e9'}}>By using cached responses, one of our customer was able to save 386 hours in response time</span>**.
 
 ![Caching on the edge](/static/blog/datadog/caching.webp)
 
-**Why our developers love this feature:**
+#### Why developers love this feature:
 
 - Faster response, low latency means you can develop your app more efficiently.
 - You save money by making fewer calls to OpenAI and other models.
 - **<span style={{color: '#0ea5e9'}}>Better user experience for your users</span>**
 
-**You might find this useful:**
+#### You might find this useful:
+
 - Docs: <a href="https://docs.helicone.ai/features/advanced-usage/caching" target="_blank">How to Cache Responses in Helicone</a>.
 
 ## We use Datadog, too
 
-Datadog is designed for infrastructure and application performance monitoring, rather than specifically for LLM observability needs. Our engineers at Helicone use and love it for error detection, setting up alerts, and aggregating metrics across our infrastructure. One key difference is that Datadog is ideal for technical users, whereas Helicone is intuitive to both technical and non-technical users. 
+Datadog is designed for infrastructure and application performance monitoring, rather than specifically for LLM observability needs. Our engineers at Helicone use and love it for error detection, setting up alerts, and aggregating metrics across our infrastructure. One key difference is that Datadog is ideal for technical users, whereas Helicone is intuitive to both technical and non-technical users.
 
-### Comparing Helicone vs. Datadog Pricing 
+### Comparing Helicone vs. Datadog Pricing
 
 We’ve observed that some customers find Datadog to be expensive, especially as usage scales up or if they're not utilizing all features efficiently. At Helicone, we take pride in our scalable solutions where you only pay for what you use.
 
