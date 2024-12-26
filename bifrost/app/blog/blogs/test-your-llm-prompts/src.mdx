@@ -29,7 +29,7 @@ Each prompt modification can trigger unexpected cascading effects, so engineers 
 
 ## 5 best prompt experiment tools for building AI apps
 
-We hand-picked a few tools that support all of the following, along with comprehensive logging, dataset export capabilities and detailed performance tracking: **<span style={{color: '#0ea5e9'}}>Helicone, Langfuse, Arize AI, PromptLayer and LangSmith.</span>** Here's a quick comparison:
+We hand-picked a few tools that support all of the following, along with comprehensive logging, dataset export capabilities and detailed performance tracking: **<a href="https://www.helicone.ai/" rel="noopener" target="_blank">Helicone</a>, <a href="https://www.helicone.ai/blog/best-langfuse-alternatives" rel="noopener" target="_blank">Langfuse</a>, <a href="https://www.helicone.ai/blog/best-arize-alternatives" rel="noopener" target="_blank">Arize AI</a>, PromptLayer and <a href="https://www.helicone.ai/blog/best-langsmith-alternatives" rel="noopener" target="_blank">LangSmith</a>.** Here's a quick comparison:
 | | Prompt Management | Playground | Evaluations | Experiments | Open-source | Testing with real-world data |
 | -------- | ----------------- | ---------- | ----------- | ----------- | ----------- | ---------------------------- |
 | **Helicone** | ✔️ | ✔️ | ✔️ | ✔️ | ✔️ | ✔️ |
@@ -44,11 +44,11 @@ We hand-picked a few tools that support all of the following, along with compreh
 
 You need high-quality input variables to create high-quality prompts. A common practice is to use “**<span style={{color: '#0ea5e9'}}>golden datasets</span>**” - data that’s meticulously cleaned and labeled - to tune your prompt for problems that are easily reproducible.
 
-Teams like QA Wolf use a new approach by **<span style={{color: '#0ea5e9'}}>randomly sampling production data</span>**, which represents actual user interactions and offers a more accurate representation of real-world use cases. QA Wolf leverages Helicone to monitor their agents and run systematic experiments, iteratively refining them to achieve 100% accuracy.
+Teams like QA Wolf use a new approach by <a href="https://www.helicone.ai/blog/prompt-evaluation-for-llms" rel="noopener" target="_blank">randomly sampling production data</a>, which represents actual user interactions and offers a more accurate representation of real-world use cases. QA Wolf leverages Helicone to monitor their agents and run systematic experiments, iteratively refining them to achieve 100% accuracy.
 
 ### Prompt management
 
-Think of it like Git for prompts. Prompt registries are specialized tools to help engineers **<span style={{color: '#0ea5e9'}}>version, manage or improve prompts</span>**, and roll back to a previous version easily.
+Think of it like Git for prompts. <a href="https://www.helicone.ai/blog/prompt-management" rel="noopener" target="_blank">Prompt management</a> tools are specialized tools to help engineers **<span style={{color: '#0ea5e9'}}>version, manage or improve prompts</span>**, and roll back to a previous version easily.
 
 ### Prompt playgrounds
 
@@ -59,10 +59,10 @@ Playgrounds are **<span style={{color: '#0ea5e9'}}>interactive environments</spa
 Feedback is essential for continuous improvement. The best tools analyze LLM outputs by assigning **<span style={{color: '#0ea5e9'}}>qualitative and quantitative scores</span>** such as tone alignment and Semantic Similarity. They make it easy to compare different prompt variations and help engineers justify prompt changes with data before pushing to production
 
 <CallToAction
-  title="Experiment with prompts in Helicone ⚡️"
+  title="Prevent prompt regression with Helicone ⚡️"
   description="Quickly iterate prompts, test with production datasets and evaluate with custom metrics. Join to get exclusive access. "
   primaryButtonText="Get started for free"
-  primaryButtonLink="/signin"
+  primaryButtonLink="https://www.helicone.ai/signup"
 />
 
 ## How to properly test your prompts
@@ -76,7 +76,7 @@ _Steps to test your prompt: log > evaluate > experiment > deploy_
 
 ### Step 1: Log your LLM requests
 
-Use an observability tool to log your LLM requests and track key metrics like usage, latency, cost, time-to-first-token (TTFT). These tools provide dashboards to help you monitor irregularity, such as:
+Use an <a href="https://www.helicone.ai/blog/best-langsmith-alternatives" rel="noopener" target="_blank">observability tool</a> like Helicone to log your LLM requests and track key metrics like usage, latency, cost, time-to-first-token (TTFT). These tools provide dashboards to help you monitor irregularity, such as:
 
 - Rising error rates
 - Sudden spikes in API costs.
@@ -88,27 +88,27 @@ This data helps you identify when it’s time to improve your prompt.
 
 ### Step 2: Create prompt variations
 
-Experiment with prompt versions using <a href="https://www.helicone.ai/blog/prompt-engineering-tools" target="_blank" rel="noopener noreferrer">techniques like chain-of-thought reasoning and multi-shot prompting</a>. Testing environments like _Helicone_ makes it easier to track prompt versions, inputs, and outputs, while also providing rollback capabilities if changes lead to underperformance/regression.
+Experiment with prompt variations using <a href="https://www.helicone.ai/blog/prompt-engineering-tools" target="_blank" rel="noopener noreferrer">prompt engineering techniques</a> like chain-of-thought reasoning and multi-shot prompting. Testing environments like _Helicone_ makes it easier to track prompt versions, inputs, and outputs, while also providing rollback capabilities if changes lead to underperformance/regression.
 
 <BottomLine
   title="💡 Pro Tip"
-  description="You can create as many prompt variations as you need, where each tests one variable at a time (i.e. phrasing, model parameters) to isolate its impact."
+  description="In Helicone, create as many prompt variations as you need. Each test isolates one variable at a time (i.e. phrasing, model parameters) to isolate its impact."
 />
 
 ### Step 3: Use real data to generate outputs
 
 Run your prompts on real-world datasets to ensure they can handle variability and edge cases. There are 2 options:
 
-- **<span style={{color: '#0ea5e9'}}>Golden datasets</span>** with curated inputs with known expected outputs.
-- **<span style={{color: '#0ea5e9'}}>Randomly sampled production data</span>** which is more representative of real-world scenarios (Here's <a href="https://www.helicone.ai/blog/prompt-evaluation-for-llms" target="_blank" rel="noopener noreferrer">why this approach is better</a>).
+- **Golden datasets** with curated inputs with known expected outputs.
+- **Randomly sampled production data** which is more representative of real-world scenarios (Here's <a href="https://www.helicone.ai/blog/prompt-evaluation-for-llms" target="_blank" rel="noopener noreferrer">why this approach is better</a>).
 
 ### Step 4: Compare outputs
 
 Evaluate the performance of your prompts using the best methods that suits your goals and capacity, such as:
 
-- **<span style={{color: '#0ea5e9'}}>Real user feedback</span>** for subjective insights.
-- **<span style={{color: '#0ea5e9'}}>Human evaluators</span>** for nuanced assessments.
-- **<span style={{color: '#0ea5e9'}}>LLM-as-a-judge</span>** for scalable and efficient comparisons.
+- Real user feedback for subjective insights.
+- Human evaluators (scores)for nuanced assessments.
+- LLM-as-a-judge for scalable and efficient comparisons.
 
 ### Step 5: Push the best prompt to production
 
@@ -126,11 +126,11 @@ _Add preset or custom evaluators to score your LLM outputs._
 
 ### 1. Real user feedback
 
-Collect feedback directly from users to gauge how well your LLM performs in real-world scenarios. This can be done through feature implementation to **<span style={{color: '#0ea5e9'}}>solicit explicit feedback</span>**, such as thumbs up/down rating or scoring outputs, or by **<span style={{color: '#0ea5e9'}}>analyzing implicit user behaviors</span>**, like time spent engaging with responses or completion rates.
+Collect feedback directly from users to gauge how well your LLM performs in real-world scenarios. This can be done through feature implementation to <a href="https://docs.helicone.ai/features/advanced-usage/feedback" target="_blank" rel="noopener"> solicit explicit feedback</a> or by analyzing implicit user behaviors, like time spent engaging with responses or completion rates.
 
 **Bottom Line**
 
-Getting user feedback is very useful for understanding practical challenges, but it can be time-consuming and subjective. However, only when your users use your product over time, will you start receiving feedback to improve upon.
+Getting user feedback is very useful for understanding practical challenges, but can be time-consuming and subjective. However, only when your users use your product over time, will you start receiving feedback to improve upon.
 
 How can we evaluate prompts before deployment? Let’s look at some alternative evaluation methods.
 
@@ -138,7 +138,7 @@ How can we evaluate prompts before deployment? Let’s look at some alternative 
 
 Use human reviewers to assess output quality based on specific criteria like relevance, tone, or correctness. This method usually begins with building a test dataset that human evaluators will compare the output against.
 
-Based on the output, evaluators will score the response with `yes/no`, `0-10` (**<span style={{color: '#0ea5e9'}}>direct scoring</span>**) or is given a set of LLM responses where the evaluator will pick the better response (**<span style={{color: '#0ea5e9'}}>A/B testing or pairwise comparisons</span>**).
+Based on the output, evaluators will score the response with `yes/no`, `0-10` (<a href="https://docs.helicone.ai/features/advanced-usage/scores" target="_blank" rel="noopener">direct scoring</a>) or is given a set of LLM responses where the evaluator will pick the better response (A/B testing or pairwise comparisons).
 
 **Bottom Line**
 

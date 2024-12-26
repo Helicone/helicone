@@ -1,12 +1,11 @@
-
-AutoGPT is diligently developing their [Auto-GPT-Benchmarks repository](https://github.com/Significant-Gravitas/Auto-GPT-Benchmarks). Their goal? To construct the optimal evaluation pipeline for comparing different agents. 
+AutoGPT is diligently developing their <a href="https://github.com/Significant-Gravitas/Auto-GPT-Benchmarks" target="_blank" rel="noopener nofollow">Auto-GPT-Benchmarks repository</a>. Their goal? To construct the optimal evaluation pipeline for comparing different agents.
 
 ![AutoGPT x Helicone: Optimizing Evaluation Pipelines](/static/blog/autogpt.webp)
 
 AutoGPT is fully leveraging the capabilities of Helicone without modifying a single line of code. Here are the key features that facilitate this synergy:
 
-- **Proxy Integration:** Helicone's role as a proxy allows AutoGPT to maintain their codebase intact. Learn more about this feature in our [MITM Proxy documentation](https://docs.helicone.ai/tools/mitm-proxy).
-- **Caching:** For minor code modifications that don't necessitate re-calling the LLM for an entire CI pipeline, requests can be cached on edge servers. This feature saves AutoGPT over $10 per PR! You can read more about this in our [Caching documentation](https://docs.helicone.ai/features/advanced-usage/caching).
+- **Proxy Integration:** Helicone's role as a proxy allows AutoGPT to maintain their codebase intact. Learn more about this feature in our <a href="https://docs.helicone.ai/tools/mitm-proxy" target="_blank" rel="noopener">MITM Proxy documentation</a>.
+- **Caching:** For minor code modifications that don't necessitate re-calling the LLM for an entire CI pipeline, requests can be cached on edge servers. This feature saves AutoGPT over $10 per PR! You can read more about this in our <a href="https://docs.helicone.ai/features/advanced-usage/caching" target="_blank" rel="noopener">Caching documentation</a>.
 - **GraphQL:** Our data extraction API enables AutoGPT to generate custom reports upon the completion of a CI job.
 
 ## AutoGPT's Workflow with Helicone
@@ -22,9 +21,7 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/Helicone/helicone/main/m
 
 ```
 
-Within the benchmarks, AutoGPT implemented a Python library where they could set specific custom properties for detailed measurements, as shown here. You can learn more about this in our [Custom Properties documentation](https://docs.helicone.ai/features/advanced-usage/custom-properties).
-
-
+Within the benchmarks, AutoGPT implemented a Python library where they could set specific custom properties for detailed measurements, as shown here. You can learn more about this in our <a href="https://docs.helicone.ai/features/advanced-usage/custom-properties" target="_blank" rel="noopener">Custom Properties documentation</a>.
 
 ```python
 HeliconeLockManager.write_custom_property("job_id", "1")
@@ -39,41 +36,36 @@ export HELICONE_CACHE_ENABLED="true"
 
 The total integration process required at most 5 lines of code, which enabled AutoGPT to immediately get rich dashboards and save costs on their CI jobs.
 
-
 ### Data Ingest
 
 AutoGPT can track how different agents are impacting their costs.
 
 ![Agent Comparisons](/static/blog/agentComparisons.webp)
-*AutoGPT's agent comparison dashboard*
+_AutoGPT's agent comparison dashboard_
 
 If they wish to examine specific requests, they can do this by using the filter feature.
 
 ![Agent Filters](/static/blog/agentFilters.webp)
-*Filtering feature for examining specific requests*
-
+_Filtering feature for examining specific requests_
 
 ### Determining Cost Savings
 
 For scenarios where testing the agent's functionality is needed but calling the API is not, such as small code changes, they can monitor their cache usage effortlessly through the dashboards. Here's an example:
 
-
 ![Cache Page Stats](/static/blog/cachePageStats.webp)
-*Dashboard showing cache usage statistics*
+_Dashboard showing cache usage statistics_
 
 We also maintain a log of each cached request, ensuring that caching is effective and marking agents as "Cacheable Agents".
 
 ![Cache Request Table](/static/blog/cacheRequestTable.webp)
-*Log of each cached request*
-
+_Log of each cached request_
 
 ## The Road Ahead
 
 We are currently developing a suite of GraphQL endpoints that will allow AutoGPT to easily ingest some of their data and add it directly to the reports after a run.
 
 ![GraphQL](/static/blog/graphQL.webp)
-*GraphQL endpoints in development*
-
+_GraphQL endpoints in development_
 
 This development is being paired with deep links so that we can have a tight integration between report generation and Helicone. Here is a preview of what a benchmark report will look like:
 
@@ -87,7 +79,7 @@ Challenge go-to-market
   Number of OpenAI calls: 231
   Total Cache hits: 231
   Cache $ saved: $231
-  Link: https://helicone.ai/requests?propertyFilters=%5B%7B%22key%22%3A%22challenge%22%2C%22value%22%3A%22got-to-market%22%7D%5D 
+  Link: https://helicone.ai/requests?propertyFilters=%5B%7B%22key%22%3A%22challenge%22%2C%22value%22%3A%22got-to-market%22%7D%5D
 
   Model breakdown
   |                   | gpt4  | claude | gpt3.5 |
@@ -103,7 +95,7 @@ Challenge send-email
   Number of OpenAI calls: 231
   Total Cache hits: 231
   Cache $ saved: $231
-  Link: https://helicone.ai/requests?propertyFilters=%5B%7B%22key%22%3A%22challenge%22%2C%22value%22%3A%22send-email%22%7D%5D 
+  Link: https://helicone.ai/requests?propertyFilters=%5B%7B%22key%22%3A%22challenge%22%2C%22value%22%3A%22send-email%22%7D%5D
 
   Model breakdown
   |                   | gpt4  | claude | gpt3.5 |
