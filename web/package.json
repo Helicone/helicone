@@ -12,7 +12,8 @@
     "lint": "next lint",
     "lint-fix": "next lint --fix",
     "postbuild": "next-sitemap",
-    "analyze": "cross-env ANALYZE=true next build"
+    "analyze": "cross-env ANALYZE=true next build",
+    "stripe:listen": "stripe listen --forward-to http://localhost:3000/api/stripe/event_webhook"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^0.0.53",

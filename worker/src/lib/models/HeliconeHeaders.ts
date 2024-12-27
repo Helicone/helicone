@@ -61,11 +61,13 @@ export interface IHeliconeHeaders {
   lytixHost: Nullable<string>;
   posthogHost: Nullable<string>;
   webhookEnabled: boolean;
+  experimentId: Nullable<string>;
   experimentHeaders: {
     columnId: Nullable<string>;
     rowIndex: Nullable<string>;
     experimentId: Nullable<string>;
   };
+  evaluatorId: Nullable<string>;
   heliconeManualAccessKey: Nullable<string>;
 }
 
@@ -116,11 +118,13 @@ export class HeliconeHeaders implements IHeliconeHeaders {
   posthogHost: Nullable<string>;
   webhookEnabled: boolean;
 
+  experimentId: Nullable<string>;
   experimentHeaders: {
     columnId: Nullable<string>;
     rowIndex: Nullable<string>;
     experimentId: Nullable<string>;
   };
+  evaluatorId: Nullable<string>;
   lytixKey: Nullable<string>;
   lytixHost: Nullable<string>;
   heliconeManualAccessKey: Nullable<string>;
@@ -158,11 +162,13 @@ export class HeliconeHeaders implements IHeliconeHeaders {
     this.posthogHost = heliconeHeaders.posthogHost;
     this.webhookEnabled = heliconeHeaders.webhookEnabled;
 
+    this.experimentId = heliconeHeaders.experimentHeaders.experimentId;
     this.experimentHeaders = {
       columnId: heliconeHeaders.experimentHeaders.columnId,
       rowIndex: heliconeHeaders.experimentHeaders.rowIndex,
       experimentId: heliconeHeaders.experimentHeaders.experimentId,
     };
+    this.evaluatorId = heliconeHeaders.evaluatorId;
     this.heliconeManualAccessKey = heliconeHeaders.heliconeManualAccessKey;
   }
 
@@ -303,11 +309,13 @@ export class HeliconeHeaders implements IHeliconeHeaders {
       posthogHost: this.headers.get("Helicone-Posthog-Host") ?? null,
       webhookEnabled:
         this.headers.get("Helicone-Webhook-Enabled") == "true" ? true : false,
+      experimentId: this.headers.get("Helicone-Experiment-Id") ?? null,
       experimentHeaders: {
         experimentId: this.headers.get("Helicone-Experiment-Id") ?? null,
         columnId: this.headers.get("Helicone-Experiment-Column-Id") ?? null,
         rowIndex: this.headers.get("Helicone-Experiment-Row-Index") ?? null,
       },
+      evaluatorId: this.headers.get("Helicone-Eval-Id") ?? null,
       heliconeManualAccessKey:
         this.headers.get("Helicone-Manual-Access-Key") ?? null,
     };
@@ -383,6 +391,10 @@ export class HeliconeHeaders implements IHeliconeHeaders {
     if (heliconeHeaders.experimentHeaders.experimentId) {
       heliconePropertyHeaders["Helicone-Experiment-Id"] =
         heliconeHeaders.experimentHeaders.experimentId;
+    }
+
+    if (heliconeHeaders.evaluatorId) {
+      heliconePropertyHeaders["Helicone-Eval-Id"] = heliconeHeaders.evaluatorId;
     }
 
     return heliconePropertyHeaders;
