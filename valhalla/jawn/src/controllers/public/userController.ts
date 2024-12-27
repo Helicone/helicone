@@ -6,11 +6,12 @@ import {
   FilterLeaf,
   FilterLeafSubset,
   filterListToTree,
+  FilterNode,
 } from "../../lib/shared/filters/filterDefs";
 import { buildFilterWithAuthClickHouse } from "../../lib/shared/filters/filters";
 import { JawnAuthenticatedRequest } from "../../types/request";
 import { clickhousePriceCalc } from "../../packages/cost";
-import { UserManager } from "../../managers/UserManager";
+import { PSize, UserManager } from "../../managers/UserManager";
 
 export interface UserQueryParams {
   userIds?: string[];
@@ -57,6 +58,24 @@ export interface UserMetricsResult {
 @Tags("User")
 @Security("api_key")
 export class UserController extends Controller {
+  @Post("metrics-overview/query")
+  public async getUserMetricsOverview(
+    @Body()
+    requestBody: {
+      filter: UserFilterNode;
+      pSize: PSize;
+      useInterquartile: boolean;
+    },
+    @Request() request: JawnAuthenticatedRequest
+  ) {
+    const userManager = new UserManager(request.authParams);
+    return userManager.getUserMetricsOverview(
+      requestBody.filter,
+      requestBody.pSize,
+      requestBody.useInterquartile
+    );
+  }
+
   @Post("metrics/query")
   public async getUserMetrics(
     @Body()

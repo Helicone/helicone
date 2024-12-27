@@ -18,6 +18,7 @@ import { Button } from "../../../../../ui/button";
 import ArrayDiffViewer from "../../../id/arrayDiffViewer";
 import PromptPlayground, { PromptObject } from "../../../id/promptPlayground";
 import { useExperimentTable } from "../hooks/useExperimentTable";
+import { useOrg } from "@/components/layout/org/organizationContext";
 
 export interface InputEntry {
   key: string;
@@ -64,6 +65,9 @@ const ExperimentTableHeader = (props: ExperimentHeaderProps) => {
     experimentId,
     originalPromptVersionId,
   } = props;
+
+  const org = useOrg();
+  const orgId = org?.currentOrg?.id;
 
   const [showViewPrompt, setShowViewPrompt] = useState(false);
   const jawnClient = useJawnClient();
@@ -308,7 +312,7 @@ const ExperimentTableHeader = (props: ExperimentHeaderProps) => {
             </div>
           </div>
         </div>
-        <Tabs defaultValue="preview" className="h-full">
+        <Tabs defaultValue="preview" className="h-full w-full">
           {!isOriginal && (
             <TabsList>
               <TabsTrigger value="preview">Preview</TabsTrigger>
@@ -352,10 +356,14 @@ const ExperimentTableHeader = (props: ExperimentHeaderProps) => {
                     },
                     body: {
                       heliconeTemplate: JSON.stringify(promptData),
+                      experimentId: experimentId ?? "",
                     },
                   }
                 );
 
+                queryClient.invalidateQueries({
+                  queryKey: ["experimentInputKeys", orgId, experimentId],
+                });
                 queryClient.invalidateQueries({
                   queryKey: ["promptTemplate", promptVersionId],
                 });
@@ -570,28 +578,29 @@ const InputCell = ({
 
   return (
     <div
-      className="cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 h-full w-full py-2 px-4"
-      style={{ cursor: "pointer" }}
+      className="cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 h-full w-full py-2 px-4 overflow-hidden"
+      style={{ cursor: "pointer", minWidth: 0 }} // Add minWidth: 0 to allow shrinking
       onClick={onClick}
     >
-      <ul className="w-full flex flex-col gap-y-1">
+      <ul className="w-full flex flex-col gap-y-1 overflow-hidden">
         {experimentInputs?.map((input) => (
           <li
             key={input}
-            className="text-slate-700 dark:text-slate-300 leading-[130%] text-[13px] max-w-full overflow-hidden whitespace-nowrap truncate"
+            className="text-slate-700 dark:text-slate-300 leading-[130%] text-[13px] max-w-full overflow-hidden whitespace-nowrap truncate flex"
           >
-            <span className="font-medium">{input}</span>:{" "}
-            {inputs.data?.[input]?.toString()}
+            <span className="font-medium shrink-0">{input}</span>:&nbsp;
+            <span className="truncate">{inputs.data?.[input]?.toString()}</span>
           </li>
         ))}
         {experimentAutoInputs.length > 0 &&
           experimentAutoInputs?.map((input, index) => (
             <li
               key={index}
-              className="text-slate-700 dark:text-slate-300 leading-[130%] text-[13px] max-w-full overflow-hidden whitespace-nowrap truncate"
+              className="text-slate-700 dark:text-slate-300 leading-[130%] text-[13px] max-w-full overflow-hidden whitespace-nowrap truncate flex"
             >
-              <span className="font-medium">Message {index}</span>:{" "}
-              {JSON.stringify(input)}
+              <span className="font-medium shrink-0">Message {index}</span>
+              :&nbsp;
+              <span className="truncate">{JSON.stringify(input)}</span>
             </li>
           ))}
       </ul>

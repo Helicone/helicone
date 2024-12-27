@@ -130,6 +130,7 @@ export interface PromptEditSubversionLabelParams {
 
 export interface PromptEditSubversionTemplateParams {
   heliconeTemplate: any;
+  experimentId?: string;
 }
 
 export interface PromptInputRecord {

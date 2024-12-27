@@ -1,9 +1,10 @@
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UIFilterRowTree } from "@/services/lib/filters/types";
 import { UserGroupIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/router";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDebounce } from "../../../services/hooks/debounce";
 import { useUsers } from "../../../services/hooks/users";
 import { userTableFilters } from "../../../services/lib/filters/frontendFilterDefs";
@@ -17,6 +18,7 @@ import AuthHeader from "../../shared/authHeader";
 import ThemedTable from "../../shared/themed/table/themedTable";
 import TableFooter from "../requestsV2/tableFooter";
 import { INITIAL_COLUMNS } from "./initialColumns";
+import { UserMetrics } from "./UserMetrics";
 
 interface UsersPageV2Props {
   currentPage: number;
@@ -88,17 +90,19 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
       : {
           last_active: "desc",
         };
-  // const [timeFilter, setTimeFilter] = useState<FilterNode>("all");
+
+  const filterNode = useMemo(() => {
+    return filterUITreeToFilterNode(
+      userTableFilters.sort((a, b) => a.label.localeCompare(b.label)),
+      debouncedAdvancedFilters
+    );
+  }, [debouncedAdvancedFilters]);
 
   const { users, count, from, isLoading, to, refetch } = useUsers(
     parseInt(currentPage, 10),
     parseInt(pageSize, 10),
     sortLeaf,
-    filterUITreeToFilterNode(
-      userTableFilters.sort((a, b) => a.label.localeCompare(b.label)),
-      debouncedAdvancedFilters
-    )
-    // timeFilter
+    filterNode
   );
 
   const checkIsNotUniqueUser = useCallback(() => {
@@ -118,116 +122,111 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
     },
     []
   );
+  const [activeTab, setActiveTab] = useQueryParam("tab", "all");
 
-  // const onTimeSelectHandler = (key: TimeInterval, value: string) => {
-  //   if (key === "custom") {
-  //     const [start, end] = value.split("_");
-  //     const filter: FilterNode = {
-  //       left: {
-  //         request_response_rmt: {
-  //           request_created_at: {
-  //             gte: new Date(start),
-  //           },
-  //         },
-  //       },
-  //       operator: "and",
-  //       right: {
-  //         request_response_rmt: {
-  //           request_created_at: {
-  //             lte: new Date(end),
-  //           },
-  //         },
-  //       },
-  //     };
-  //     setTimeFilter(filter);
-  //   } else {
-  //     setTimeFilter({
-  //       request_response_rmt: {
-  //         request_created_at: {
-  //           gte: new Date(getTimeIntervalAgo(key)),
-  //         },
-  //       },
-  //     });
-  //   }
-  // };
-  // const defaultTimeFilter: TimeFilter = useMemo(() => {
-  //   return {
-  //     start: new Date(getTimeIntervalAgo("1m")),
-  //     end: new Date(),
-  //   };
-  // }, []);
+  const advancedFiltersProp = useMemo(
+    () => ({
+      filterMap: userTableFilters,
+      setAdvancedFilters: onSetAdvancedFiltersHandler,
+      filters: advancedFilters,
+      searchPropertyFilters: async () => ({
+        data: null,
+        error: "Not implemented",
+      }),
+    }),
+    [advancedFilters, onSetAdvancedFiltersHandler]
+  );
+
   return (
     <>
-      <AuthHeader title={"Users"} />
-      <div className="flex flex-col space-y-4 pb-10">
-        <ThemedTable
-          id="user-table"
-          defaultData={users}
-          defaultColumns={INITIAL_COLUMNS}
-          skeletonLoading={isLoading}
-          dataLoading={false}
-          // timeFilter={{
-          //   currentTimeFilter: defaultTimeFilter,
-          //   defaultValue: "24h",
-          //   onTimeSelectHandler: onTimeSelectHandler,
-          // }}
-          sortable={{
-            sortKey: sortKey,
-            sortDirection: sortDirection as SortDirection,
-            isCustomProperty: false,
-          }}
-          advancedFilters={{
-            filterMap: userTableFilters,
-            setAdvancedFilters: onSetAdvancedFiltersHandler,
-            filters: advancedFilters,
-            searchPropertyFilters: async () => ({
-              data: null,
-              error: "Not implemented",
-            }),
-          }}
-          exportData={users}
-          onRowSelect={(row) => {
-            router.push(`/users/${encodeURIComponent(row.user_id)}`);
-          }}
+      <Tabs
+        value={activeTab}
+        onValueChange={(value) => setActiveTab(value)}
+        defaultValue="all"
+        className=""
+      >
+        <AuthHeader
+          title={"Users"}
+          actions={
+            <TabsList>
+              <TabsTrigger value="all">All Users</TabsTrigger>
+              <TabsTrigger value="active">User Metrics</TabsTrigger>
+            </TabsList>
+          }
         />
-        {!isLoading && checkIsNotUniqueUser() && (
-          <div className="flex flex-col w-full h-96 justify-center items-center bg-white rounded-lg border border-gray-300 dark:border-gray-700 dark:bg-black">
-            <div className="flex flex-col w-2/5">
-              <UserGroupIcon className="h-12 w-12 text-black dark:text-white border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-2 rounded-lg" />
-              <p className="text-xl text-black dark:text-white font-semibold mt-8">
-                No unique users found.
-              </p>
-              <p className="text-sm text-gray-500 max-w-sm mt-2">
-                Please explore our docs{" "}
-                <Link
-                  href="https://docs.helicone.ai/features/advanced-usage/user-metrics"
-                  target="_blank"
-                  rel="noreferrer noopener"
-                  className="underline text-blue-500"
-                >
-                  here
-                </Link>{" "}
-                to learn more about user tracking and metrics.
-              </p>
-            </div>
-          </div>
-        )}
 
-        <TableFooter
-          currentPage={parseInt(currentPage, 10)}
-          pageSize={parseInt(pageSize, 10)}
-          isCountLoading={isLoading}
-          count={count || 0}
-          onPageChange={(newPage) => {
-            setCurrentPage(newPage.toString());
-          }}
-          onPageSizeChange={(newPageSize) => {
-            setPageSize(newPageSize.toString());
-          }}
-          pageSizeOptions={[100, 250, 500]}
-          showCount={true}
-        />
-      </div>
+        <TabsContent value="all">
+          {" "}
+          <div className="flex flex-col space-y-4 pb-10">
+            <ThemedTable
+              id="user-table"
+              defaultData={users}
+              defaultColumns={INITIAL_COLUMNS}
+              skeletonLoading={isLoading}
+              dataLoading={false}
+              sortable={{
+                sortKey: sortKey,
+                sortDirection: sortDirection as SortDirection,
+                isCustomProperty: false,
+              }}
+              advancedFilters={advancedFiltersProp}
+              exportData={users}
+              onRowSelect={(row) => {
+                router.push(`/users/${encodeURIComponent(row.user_id)}`);
+              }}
+            />
+            {!isLoading && checkIsNotUniqueUser() && (
+              <div className="flex flex-col w-full h-96 justify-center items-center bg-white rounded-lg border border-gray-300 dark:border-gray-700 dark:bg-black">
+                <div className="flex flex-col w-2/5">
+                  <UserGroupIcon className="h-12 w-12 text-black dark:text-white border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-2 rounded-lg" />
+                  <p className="text-xl text-black dark:text-white font-semibold mt-8">
+                    No unique users found.
+                  </p>
+                  <p className="text-sm text-gray-500 max-w-sm mt-2">
+                    Please explore our docs{" "}
+                    <Link
+                      href="https://docs.helicone.ai/features/advanced-usage/user-metrics"
+                      target="_blank"
+                      rel="noreferrer noopener"
+                      className="underline text-blue-500"
+                    >
+                      here
+                    </Link>{" "}
+                    to learn more about user tracking and metrics.
+                  </p>
+                </div>
+              </div>
+            )}
+            <TableFooter
+              currentPage={parseInt(currentPage, 10)}
+              pageSize={parseInt(pageSize, 10)}
+              isCountLoading={isLoading}
+              count={count || 0}
+              onPageChange={(newPage) => {
+                setCurrentPage(newPage.toString());
+              }}
+              onPageSizeChange={(newPageSize) => {
+                setPageSize(newPageSize.toString());
+              }}
+              pageSizeOptions={[100, 250, 500]}
+              showCount={true}
+            />
+          </div>
+        </TabsContent>
+        <TabsContent value="active">
+          {/* I will add this back in later... we need to move everything to JAWN
+          <ThemedHeader
+            advancedFilter={{
+              filterMap: advancedFiltersProp.filterMap,
+              filters: advancedFiltersProp.filters,
+              onAdvancedFilter: advancedFiltersProp.setAdvancedFilters,
+              searchPropertyFilters: advancedFiltersProp.searchPropertyFilters,
+            }}
+            isFetching={false}
+          /> */}
+          <UserMetrics filterNode={filterNode} />
+        </TabsContent>
+      </Tabs>
     </>
   );
 };

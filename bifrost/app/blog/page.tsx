@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     title: "Helicone Blog | AI Development Insights & Best Practices",
     description:
       "Stay updated with the latest insights on AI development, LLM observability, and industry best practices from the team building the future of AI infrastructure.",
-    images: "/static/dashboard-preview.png",
+    images: "/static/new-open-graph.png",
     locale: "en_US",
   },
   twitter: {
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     description:
       "Stay updated with the latest insights on AI development, LLM observability, and industry best practices from the team building the future of AI infrastructure.",
     card: "summary_large_image",
-    images: "/static/dashboard-preview.png",
+    images: "/static/new-open-graph.png",
   },
 };
 
@@ -214,6 +214,16 @@ export type BlogStructure =
     };
 
 const blogContent: BlogStructure[] = [
+  {
+    dynmaicEntry: {
+      folderName: "rag-chunking-strategies",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "openai-o3",
+    },
+  },
   {
     dynmaicEntry: {
       folderName: "gemini-2.0-flash",

@@ -3,7 +3,7 @@ import type { paths as privatePaths } from "./jawnTypes/private";
 import createClient from "openapi-fetch";
 export type JawnFilterNode = any;
 
-export function getJawnClient(orgId?: string | "none") {
+export function getJawnClient(apiKey?: string) {
   // const jwtToken = getHeliconeCookie().data?.jwtToken;
   // const headers =
   //   orgId !== "none"
@@ -19,6 +19,9 @@ export function getJawnClient(orgId?: string | "none") {
   return createClient<publicPaths>({
     baseUrl:
       process.env.NEXT_PUBLIC_HELICONE_JAWN_SERVICE ?? "http://localhost:8585",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+    },
   });
 }
 
