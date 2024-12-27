@@ -8,14 +8,15 @@ For some, AI agents are groundbreaking ways to solve big problems by **breaking 
 
 However, this doesn't mean that AI agents aren’t incredibly useful today. Many platforms are already making meaningful strides in building robust, practical AI agents that empower teams, streamline processes, and unlock new possibilities across industries.
 
-Today, we are covering our favorite **<span style={{color: '#0ea5e9'}}>open-source frameworks & platforms for building AI agents, how they compare, and our recommendations for different use cases</span>** — whether you need complex multi-agent systems or a simple no-code solution, these will help you get started.
+Today, we are covering our favorite **<span style={{color: '#0ea5e9'}}>open-source frameworks & platforms</span>** for building AI agents, how they compare, and our recommendations for different use cases — whether you need complex multi-agent systems or a simple no-code solution, these will help you get started.
 
 1. Dify `freemium` `no-code` `open-source`
 2. AutoGen `free` `open-source`
 3. LlamaIndex `freemium` `open-source`
 4. LangChain `freemium` `open-source`
 5. crewAI `free` `waitlist` `open-source`
-6. (Bonus) Wordware `freemium` `not open-source`
+6. Pydantic AI `free` `open-source`
+7. (Bonus) Wordware `freemium` `not open-source`
 
 ---
 
@@ -223,7 +224,37 @@ Compare <a href="https://www.helicone.ai/blog/llamaindex-vs-langchain" rel="noop
 
 ---
 
-## 6. <a href="https://www.wordware.ai/" rel="noopener nofollow" target="_blank">Wordware</a>: The Versatile AI Toolkit
+## 6. <a href="https://www.pydantic.ai/" rel="noopener nofollow" target="_blank">Pydantic AI</a>: Simplify Building AI Apps for Production
+
+**Best for**: production-grade AI apps that require structured output and type safety.
+
+`free` `open-source`
+
+![Pydantic AI: AI Agent Builder](/static/blog/ai-agent-builders/pydantic-ai.webp)
+
+[![Pydantic AI](https://img.shields.io/github/stars/pydantic/pydantic-ai.svg?stylAe=social)](https://github.com/pydantic/pydantic-ai)
+
+Pydantic AI is a powerful Python agent framework that simplifies the development of production-grade applications with Generative AI. Pydantic is created by the team behind the popular Pydantic <a href="https://docs.pydantic.dev/latest/" rel="noopener nofollow" target="_blank">data validation library</a>. As an open-source project, it follows the same model as the core Pydantic library, allowing developers to use it freely for both personal and commercial projects.
+
+### Key features of Pydantic AI
+
+- 🔄 **Model-Agnostic:** Pydantic AI supports various models, including OpenAI, Anthropic, Gemini, Ollama, Groq, and Mistral, with the flexibility to implement support for other models.
+- 🚀 **Ease of Use:** Creating an agent with Pydantic AI requires just a few lines of code to define an agent with a specified model and system prompt.
+- 🏗️ **Structured Responses:** The framework leverages Pydantic's capabilities to validate and structure model outputs, making sure the output is consistent across runs.
+- 📊 **Observability:** Pydantic AI integrates seamlessly with Pydantic Logfire for real-time debugging, usage and cost monitoring, and behavior tracking of AI applications.
+- ✅ **Type Safety:** Pydantic AI works well with static type checkers like mypy and pyright, which improves code reliability and maintainability.
+
+### Pros and Cons of Pydantic AI
+
+| **Pros**                                                                                                                             | **Cons**                                                                                                                                                  |
+| ------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| • **Built on Vanilla Python:** full control and visibility into the agent's inner workings.                                          | • **Steep learning curve:** While designed for ease of use, developers still need to familiarize themselves with Pydantic's specific syntax and behavior. |
+| • **Cost Tracking:** built-in monitoring of token usage and associated costs.                                                        | • **Exception Handling:** Some developers find that Pydantic's exceptions can sometimes be difficult to debug.                                            |
+| • **Function Calling and Structured Output:** Excels in generating structured output and defining object models for agent responses. | • **Dependency on External Library:** Using Pydantic AI introduces a dependency on an external library, and may not be desirable for all projects.        |
+
+---
+
+## 7. <a href="https://www.wordware.ai/" rel="noopener nofollow" target="_blank">Wordware</a>: The Versatile AI Toolkit
 
 **Best for**: Rapid AI agent development with collaborative features
 
@@ -254,35 +285,44 @@ Wordware is an AI toolkit designed to streamline the creation and deployment (vi
 
 ## Choosing the Right Platform
 
-**Dify, AutoGen, LlamaIndex, crewAI, LangChain, Wordware — <span style={{color: '#0ea5e9'}}>which is better for your use case?</span>** We have a short and long answer.
+**Dify, AutoGen, LlamaIndex, crewAI, LangChain, Pydantic AI, Wordware — <span style={{color: '#0ea5e9'}}>which is better for your use case?</span>** We have a short and long answer.
 
 ### The short answer
 
-| Criteria            | Dify   | AutoGen | LlamaIndex | crewAI | LangChain | Wordware |
-| ------------------- | ------ | ------- | ---------- | ------ | --------- | -------- |
-| Rapid development   | ✔️✔️✔️ | ✔️      | ✔️✔️       | ✔️✔️✔️ | ✔️✔️      | ✔️✔️✔️   |
-| Deep customization  | ✔️     | ✔️✔️✔️  | ✔️✔️       | ✔️✔️   | ✔️✔️✔️    | ✔️✔️     |
-| Data integration    | ✔️✔️   | ✔️✔️    | ✔️✔️✔️     | ✔️     | ✔️✔️      | ✔️✔️     |
-| Scalability         | ✔️✔️   | ✔️✔️✔️  | ✔️✔️✔️     | ✔️✔️   | ✔️✔️      | ✔️✔️     |
-| Ease of use         | ✔️✔️✔️ | ✔️      | ✔️         | ✔️✔️   | ✔️        | ✔️✔️✔️   |
-| Multi-agent support | ✔️     | ✔️✔️✔️  | ✔️         | ✔️✔️✔️ | ✔️✔️      | ✔️       |
-| Code execution      | ✔️     | ✔️✔️✔️  | ✔️         | ✔️     | ✔️✔️      | ✔️✔️     |
-| Community support   | ✔️✔️   | ✔️✔️    | ✔️✔️       | ✔️     | ✔️✔️✔️    | ✔️       |
+| Criteria            | Dify   | AutoGen | LlamaIndex | crewAI | LangChain | Pydantic | Wordware |
+| ------------------- | ------ | ------- | ---------- | ------ | --------- | -------- | -------- |
+| Rapid development   | ✔️✔️✔️ | ✔️      | ✔️✔️       | ✔️✔️✔️ | ✔️✔️      | ✔️✔️✔️   | ✔️✔️✔️   |
+| Deep customization  | ✔️     | ✔️✔️✔️  | ✔️✔️       | ✔️✔️   | ✔️✔️✔️    | ✔️✔️✔️   | ✔️✔️     |
+| Data integration    | ✔️✔️   | ✔️✔️    | ✔️✔️✔️     | ✔️     | ✔️✔️      | ✔️✔️✔️   | ✔️✔️     |
+| Scalability         | ✔️✔️   | ✔️✔️✔️  | ✔️✔️✔️     | ✔️✔️   | ✔️✔️      | ✔️✔️     | ✔️✔️     |
+| Ease of use         | ✔️✔️✔️ | ✔️      | ✔️         | ✔️✔️   | ✔️        | ✔️✔️✔️   | ✔️✔️✔️   |
+| Multi-agent support | ✔️     | ✔️✔️✔️  | ✔️         | ✔️✔️✔️ | ✔️✔️      | ✔️       | ✔️       |
+| Code execution      | ✔️     | ✔️✔️✔️  | ✔️         | ✔️     | ✔️✔️      | ✔️✔️     | ✔️✔️     |
+| Community support   | ✔️✔️   | ✔️✔️    | ✔️✔️       | ✔️     | ✔️✔️✔️    | ✔️       | ✔️       |
+
+<CallToAction
+  title="How to trace my agentic workflow?"
+  description="Helicone helps you trace, debug, and monitor your AI agents faster."
+  primaryButtonText="Start for free"
+  primaryButtonLink="https://helicone.ai/signup"
+  secondaryButtonText="Read the doc"
+  secondaryButtonLink="https://docs.helicone.ai/features/sessions"
+/>
 
 ### The long answer…
 
 Picking the right AI agent platform comes down to understanding your needs and matching them with the right tools. Consider the following factors:
 
-- **For rapid prototyping**, go for **<span style={{color: '#0ea5e9'}}>Dify</span>** or **<span style={{color: '#0ea5e9'}}>Wordware</span>** for their no-code/low-code platform.
-- **For deep customization**, go for **<span style={{color: '#0ea5e9'}}>AutoGen</span>** or **<span style={{color: '#0ea5e9'}}>LangChain</span>** for their extensive customization capabilities.
+- **For rapid prototyping**, go for **<span style={{color: '#0ea5e9'}}>Dify</span>**, **<span style={{color: '#0ea5e9'}}>Pydantic AI</span>** or **<span style={{color: '#0ea5e9'}}>Wordware</span>** for their no-code/low-code platform.
+- **For deep customization**, **<span style={{color: '#0ea5e9'}}>AutoGen</span>**, **<span style={{color: '#0ea5e9'}}>LangChain</span>** and **<span style={{color: '#0ea5e9'}}>Pydantic AI</span>** are strong choices for their extensive customization options. Especially Pydantic AI with its vanilla Python approach.
 - **For teams with mixed technical backgrounds**, **<span style={{color: '#0ea5e9'}}>Dify</span>** is ideal due to its user-friendly interface for both developers and non-technical users.
-- **For highly technical teams**, **<span style={{color: '#0ea5e9'}}>AutoGen</span>** or **<span style={{color: '#0ea5e9'}}>LangChain</span>** may be better choices as they provide the depth and flexibility advanced developers often require.
-- **If your project involves complex data integration**, **<span style={{color: '#0ea5e9'}}>LlamaIndex</span>** does well for handling diverse data sources and efficient retrieval.
-- **For projects focused on language processing**, **<span style={{color: '#0ea5e9'}}>LangChain</span>** offers more robust NLP capabilities and integrations with various language models.
-- **For enterprise-grade scalability**, **<span style={{color: '#0ea5e9'}}>AutoGen</span>** integrates well with cloud services for large-scale operations.
+- **For highly technical teams**, **<span style={{color: '#0ea5e9'}}>AutoGen</span>**, **<span style={{color: '#0ea5e9'}}>LangChain</span>** and **<span style={{color: '#0ea5e9'}}>Pydantic AI</span>** may be better choices as they provide the depth and flexibility advanced developers need.
+- **If your project involves complex data integration**, **<span style={{color: '#0ea5e9'}}>LlamaIndex</span>** does well for handling diverse data sources and efficient retrieval. **<span style={{color: '#0ea5e9'}}>Pydantic AI</span>** is also a great option that supports robust data validation and structuring.
+- **For projects focused on language processing**, both **<span style={{color: '#0ea5e9'}}>LangChain</span>** and **<span style={{color: '#0ea5e9'}}>Pydantic AI</span>** support various language models, including those specialized in NLP tasks.
+- **For enterprise-grade scalability**, **<span style={{color: '#0ea5e9'}}>AutoGen</span>** and **<span style={{color: '#0ea5e9'}}>Pydantic AI</span>** are strong choices as they integrate well with cloud services. However all the tools mentioned can be integrated with **<span style={{color: '#0ea5e9'}}>Helicone</span>** for observability and monitoring.
 - **For efficient handling of large datasets**, **<span style={{color: '#0ea5e9'}}>LlamaIndex</span>** provides optimized indexing and retrieval mechanisms.
 - **For building conversational AI or chatbots**, **<span style={{color: '#0ea5e9'}}>Dify</span>** or **<span style={{color: '#0ea5e9'}}>LangChain</span>** have strong support for dialogue management and NLP tasks.
-- **For data analysis and research applications**, **<span style={{color: '#0ea5e9'}}>LlamaIndex</span>** or **<span style={{color: '#0ea5e9'}}>AutoGen</span>** will be better suited for their robust data processing and analysis capabilities.
+- **For data analysis and research applications**, **<span style={{color: '#0ea5e9'}}>LlamaIndex</span>**, **<span style={{color: '#0ea5e9'}}>AutoGen</span>** and **<span style={{color: '#0ea5e9'}}>Pydantic AI</span>** will be better suited for their robust data processing and analysis capabilities.
 - **For workflow automation with distinct AI roles**, **<span style={{color: '#0ea5e9'}}>crewAI</span>** specializes in creating teams of AI agents with defined roles and collaboration patterns.
 
 Don’t forget to consider the learning curves of each platform and the kind of support available, especially if your team is new to AI development.
