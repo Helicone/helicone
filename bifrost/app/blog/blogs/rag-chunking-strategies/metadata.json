@@ -1,0 +1,11 @@
+{
+  "title": "Chunking Strategies For Production-Grade RAG Applications",
+  "title1": "Chunking Strategies For Production-Grade RAG Applications",
+  "title2": "Chunking Strategies For Production-Grade RAG Applications",
+  "description": "Optimize your RAG-powered application with semantic and agentic chunking. Learn about their limitation, and when to use them.",
+  "images": "/static/blog/rag-chunking-strategies/cover.webp",
+  "time": "5 minute read",
+  "author": "Lina Lam",
+  "date": "December 26, 2024", 
+  "badge": "how-to"
+}
