@@ -1,7 +1,7 @@
 {
-  "title": "OpenAI Unveils New O3 Model: What Is It and How Is It Different from O1?",
-  "title1": "OpenAI Unveils New O3 Model: What Is It and How Is It Different from O1?",
-  "title2": "OpenAI Unveils New O3 Model: What Is It and How Is It Different from O1?",
+  "title": "OpenAI Unveils O3 Model: What is it? How Is It Different from O1?",
+  "title1": "OpenAI Unveils O3 Model: What is it? How Is It Different from O1?",
+  "title2": "OpenAI Unveils O3 Model: What is it? How Is It Different from O1?",
   "description": "OpenAI just launched the o3 and o3-mini reasoning models. These models are built on the foundation of OpenAI's o1 models, introducing several notable improvements in performance, reasoning capabilities, and testing results.",
   "images": "/static/blog/openai-o3/o3-cover.webp",
   "time": "7 minute read",
