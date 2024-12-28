@@ -1,7 +1,7 @@
 {
   "title": "The Emerging LLM Stack: A New Paradigm in Tech Architecture",
-  "title1": "The Emerging LLM Stack: A Comprehensive Guide for Developers - Helicone",
-  "title2": "The Emerging LLM Stack: From Hobbyist Projects to Enterprise-Scale Applications - Helicone",
+  "title1": "The Emerging LLM Stack: A Comprehensive Guide for Developers",
+  "title2": "The Emerging LLM Stack: From Hobbyist Projects to Enterprise-Scale Applications",
   "description": "Explore the emerging LLM Stack, designed for building and scaling LLM applications. Learn about its components, including observability, gateways, and experiments, and how it adapts from hobbyist projects to enterprise-scale solutions.",
   "images": "/static/blog/llm-stack-guide/cover.webp",
   "time": "7 minute read",
