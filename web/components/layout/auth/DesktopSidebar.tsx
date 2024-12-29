@@ -350,7 +350,7 @@ const DesktopSidebar = ({
                     <h1 className="text-xs text-start tracking-tight leading-[1.35rem]">
                       ⚡ Experiments is here: a new way to perfect your prompt.{" "}
                       <Link
-                        href="/experiments"
+                        href="https://docs.helicone.ai/features/experiments"
                         target="_blank"
                         className="underline decoration-slate-400 decoration-1 underline-offset-2 font-medium"
                       >
