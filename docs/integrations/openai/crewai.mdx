@@ -16,8 +16,8 @@ This guide walks you through setting up Helicone alongside Crew AI, demonstratin
 ## Integration Steps
 
 <Steps>
-  <Step title="Create an Account & Generate an API Key">
-    1. Log into [Helicone](https://www.helicone.ai) (or create a new account).  
+  <Step title="1. Create an Account & Generate an API Key">
+    1. Log into [Helicone](https://www.helicone.ai) (or create a new account).
     2. Generate a [write-only API key](https://docs.helicone.ai/helicone-headers/helicone-auth).
 
     <Note>
@@ -26,13 +26,31 @@ This guide walks you through setting up Helicone alongside Crew AI, demonstratin
     </Note>
   </Step>
 
-  <Step title="Configure Helicone & Crew AI">
+  <Step title="2. Configure Helicone">
+    Configure your environment to securely store and access your API keys.
+
+    <CodeGroup>
+    ```python example.py
+    import os
+
+    # It's a best practice to store API keys in environment variables
+    os.environ["HELICONE_API_KEY"] = "your-helicone-api-key"
+    os.environ["OPENAI_API_KEY"] = "your-openai-api-key"
+    ```
+    </CodeGroup>
+
+    <Note>
+      Ensure that your environment variables are securely managed and not hard-coded into your source files. Tools like [dotenv](https://github.com/motdotla/dotenv) can help manage environment variables effectively.
+    </Note>
+  </Step>
+
+  <Step title="3. Integrate Helicone with Crew AI">
     Below is a sample code snippet demonstrating how to integrate Helicone into Crew AI via the <code>LLM</code> class. Replace the placeholder values (e.g., <code>dummy</code> or <code>Bearer KEY</code>) with your actual credentials and environment variables.
 
     <CodeGroup>
     ```python example.py
     import os
-    from crewai import LLM, Agent
+    from crewai import LLM
 
     # Instantiate a Helicone-enabled LLM
     helicone_llm = LLM(
@@ -43,27 +61,14 @@ This guide walks you through setting up Helicone alongside Crew AI, demonstratin
         extra_headers={
             "Helicone-Auth": "Bearer " + os.environ.get("HELICONE_API_KEY", ""),  # Helicone Auth
             "Helicone-Session-Id": "Unique session/tracing ID",
-            "Helicone-Session-Name": "Give your session a descriptive name",
-            "Helicone-Session-Path": "Use slashes to represent nested traces, e.g. parent/child",
+            "Helicone-Session-Name": "Descriptive session name, e.g., Course Plan",
+            "Helicone-Session-Path": "parent/child",  # Nested trace paths
             "Helicone-Cache-Enabled": "true",  # or "false" if you do not want caching
             "Helicone-Prompt-Id": "prompt_story",
             # ... add additional headers as needed
         },
     )
-
-    # Assign this LLM to a Crew AI Agent
-    # Prompt templates can be used by including <helicone-prompt-input> elements.
-    input_variable = "character"
-    input_value = "a secret agent"
-
-    coder = Agent(
-        role="Software developer",
-        goal=f"Write a story about <helicone-prompt-input key=\"{input_variable}\">{input_value}</helicone-prompt-input>",
-        backstory="An expert coder with a keen eye for software trends.",
-        llm=helicone_llm
-    )
     ```
-
     </CodeGroup>
 
     <Note>
@@ -72,32 +77,47 @@ This guide walks you through setting up Helicone alongside Crew AI, demonstratin
       - Explore all available headers and their features in the [Helicone Header Directory](https://docs.helicone.ai/helicone-headers/header-directory).
     </Note>
   </Step>
+
+  <Step title="4. Incorporate the Agent Class">
+    Assign the configured `LLM` to a Crew AI `Agent`. This step involves defining the agent's role, goal, and backstory, utilizing prompt templates with **Helicone Prompt Inputs** for dynamic variable embedding.
+
+    <CodeGroup>
+    ```python example.py
+    from crewai import Agent
+
+    # Define input variables for prompt templates
+    input_variable = "character"
+    input_value = "a secret agent"
+
+    # Assign the Helicone-enabled LLM to a Crew AI Agent
+    coder = Agent(
+        role="Software developer",
+        goal=f"Write a story about <helicone-prompt-input key=\"{input_variable}\">{input_value}</helicone-prompt-input>",
+        backstory="An expert coder with a keen eye for software trends.",
+        llm=helicone_llm
+    )
+    ```
+    </CodeGroup>
+
+    <Note>
+      - When using **prompt templates**, ensure your variables appear in the <code>goal</code>, <code>role</code>, or <code>backstory</code> strings.  
+      - Refer to [Helicone's Prompt Management docs](https://docs.helicone.ai/features/prompts) for more details on properly structuring prompt inputs.  
+      - Explore all available headers and their features in the [Helicone Header Directory](https://docs.helicone.ai/helicone-headers/header-directory).
+    </Note>
+  </Step>
+
+  <Step title="5. Test and Validate the Integration">
+    1. **Run your Crew AI application**: Execute the code to ensure that requests are being routed through Helicone.
+    2. **Check Helicone Dashboard**: Navigate to your Helicone dashboard to see if your calls, sessions, and prompt IDs are visible and properly tracked.
+    3. **Review Logs & Metrics**: Use Helicone’s analytics to monitor usage, identify bottlenecks, or debug issues in your multi-agent workflow.
+
+    <Note>
+      Remember that precise naming conventions, such as `Helicone-Prompt-Id`, help you quickly identify specific prompt runs and agent interactions in Helicone’s logs.
+    </Note>
+  </Step>
 </Steps>
-
-## Suggestions and Best Practices
-
-- **Use Environment Variables for Credentials**  
-  Storing your keys (e.g., `HELICONE_API_KEY` or `OPENAI_API_KEY`) in plain text is unsafe. Always leverage environment variables or a secure key management system to reduce the risk of exposure.
-
-- **Maintain Clear Naming Conventions**  
-  - **`Helicone-Session-Id`**: Use a unique identifier for each new session or trace.  
-  - **`Helicone-Session-Name`**: Pick short but descriptive names to quickly identify the workflow or use case (e.g., `CoursePlan`, `BugFix`, etc.).  
-  - **`Helicone-Session-Path`**: Represent nested flows with slashes (e.g., `parent/child`) to track hierarchical interactions between agents.
-
-- **Take Advantage of Prompt IDs**  
-  Using headers like **`Helicone-Prompt-Id`** (for instance, `prompt_story`) enables you to group logs for the same prompt usage, making it easier to analyze user journeys and correlate sessions.
-
-- **Assess Your Caching Needs**  
-  If you reuse prompts frequently, set `Helicone-Cache-Enabled` to `"true"`. This can reduce costs and improve response times by avoiding repetitive calls. Conversely, for highly dynamic prompts, you may want to keep it as `"false"` to ensure the latest output each time.
-
-- **Leverage Prompt Templates Wisely**  
-  Crew AI’s flexibility with `<helicone-prompt-input>` tags helps you parameterize text. Keep your goal, role, or backstory strings concise and explicit, embedding your variables as needed. Review [Helicone’s Prompt Management docs](https://docs.helicone.ai/features/prompts) for advanced tips.
-
-- **Validate Your Integration in the Helicone Dashboard**  
-  After running your Crew AI agents, log in to your Helicone dashboard. Ensure all requests, sessions, and traces appear as expected. Use the logs and metrics to debug or optimize.
 
 ## Additional Information
 
 - For more examples and best practices, explore the [Crew AI GitHub repository](https://github.com/joaomdmoura/crewAI).  
 - Leverage Helicone’s observability features like caching, session management, and metrics to optimize your multi-agent workflows.  
-- Feel free to reach out via [Helicone support](https://www.helicone.ai/support) for additional guidance.
