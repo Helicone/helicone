@@ -326,7 +326,13 @@ export class LogStore {
         console.error("Error updating and inserting prompt version", error);
         throw error;
       }
-    } else if (shouldBump.shouldUpdateNotBump) {
+    } else if (
+      shouldBump.shouldUpdateNotBump &&
+      !(
+        "error" in heliconeTemplate.template &&
+        heliconeTemplate.template.error === "Invalid template"
+      )
+    ) {
       try {
         const updateQuery = `
         UPDATE prompts_versions
