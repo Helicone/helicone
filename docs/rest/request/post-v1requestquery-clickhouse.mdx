@@ -1,0 +1,59 @@
+---
+title: "Get Requests (faster)"
+sidebarTitle: "Get Requests (faster)"
+description: "Retrieve all requests visible in the request table at Helicone."
+"twitter:title": "Get Requests - Helicone OSS LLM Observability"
+openapi: post /v1/request/query-clickhouse
+---
+
+The following API is the same as the [Get Requests](/rest/request/post-v1requestquery) API, but it is optimized for speed when querying large amount of data. This endpoint will timeout for point queries and is really slow when querying just a few requests.
+
+The following API lets you get all of the requests
+that would be visible in the request table at
+[helicone.ai/requests](https://helicone.ai/requests).
+
+### Premade examples 👇
+
+| Filter                                                         | Description                         |
+| -------------------------------------------------------------- | ----------------------------------- |
+| [Get Request by User](/guides/cookbooks/getting-user-requests) | Get all the requests made by a user |
+
+### Filter
+
+A filter is either a FilterLeaf or a FilterBranch, and can be composed of multiple filters generating an [AST](https://en.wikipedia.org/wiki/Abstract_syntax_tree) of ANDs/ORs.
+
+Here is how it is represented in typescript:
+
+```ts
+export interface FilterBranch {
+  left: FilterNode;
+  operator: "or" | "and"; // Can add more later
+  right: FilterNode;
+}
+
+export type FilterNode = FilterLeaf | FilterBranch | "all";
+```
+
+This allows us to build complex filters like this:
+
+```json
+{
+  "filter": {
+    "operator": "and",
+    "right": {
+      "request_response_rmt": {
+        "model": {
+          "contains": "gpt-4"
+        }
+      }
+    },
+    "left": {
+      "request_response_rmt": {
+        "user_id": {
+          "equals": "abc@email.com"
+        }
+      }
+    }
+  }
+}
+```
