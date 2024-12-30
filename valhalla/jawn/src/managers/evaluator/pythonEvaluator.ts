@@ -8,10 +8,12 @@ export async function testPythonEvaluator({
   code,
   requestBodyString,
   responseString,
+  orgId,
 }: {
   code: string;
   requestBodyString: string;
   responseString: string;
+  orgId: string;
 }): Promise<
   Result<
     {
@@ -22,12 +24,10 @@ export async function testPythonEvaluator({
     string
   >
 > {
-  console.log("Starting");
-  const sdk = new CodeSandbox();
-
   console.log("Creating sandbox");
 
-  const sandbox = await sdk.sandbox.create();
+  const sandbox = await pool.getSandbox({ id: orgId });
+
   process.on("SIGINT", () => {
     sandbox.shutdown();
   });
