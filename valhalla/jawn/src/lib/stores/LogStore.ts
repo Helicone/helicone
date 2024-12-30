@@ -216,6 +216,7 @@ export class LogStore {
     newPromptRecord: PromptRecord,
     t: pgPromise.ITask<{}>
   ): PromiseGenericResult<string> {
+    const INVALID_TEMPLATE_ERROR = "Invalid template";
     const { promptId, orgId, requestId, heliconeTemplate, model } =
       newPromptRecord;
 
@@ -225,7 +226,7 @@ export class LogStore {
 
     if (typeof heliconeTemplate.template === "string") {
       heliconeTemplate.template = {
-        error: "Invalid template",
+        error: INVALID_TEMPLATE_ERROR,
         template: heliconeTemplate.template,
       };
     }
@@ -330,7 +331,7 @@ export class LogStore {
       shouldBump.shouldUpdateNotBump &&
       !(
         "error" in heliconeTemplate.template &&
-        heliconeTemplate.template.error === "Invalid template"
+        heliconeTemplate.template.error === INVALID_TEMPLATE_ERROR
       )
     ) {
       try {
