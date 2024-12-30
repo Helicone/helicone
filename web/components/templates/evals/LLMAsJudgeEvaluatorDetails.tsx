@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Col, Row } from "@/components/layout/common";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -30,8 +30,24 @@ import {
 } from "@/components/ui/dialog";
 import useNotification from "@/components/shared/notification/useNotification";
 import AddOnlineEvaluatorForm from "./AddOnlineEvaluatorForm";
+import { useEvaluators } from "./EvaluatorHook";
+import {
+  OpenAIFunctionToFunctionParams,
+  openAITemplateToOpenAIFunctionParams,
+} from "@/components/shared/CreateNewEvaluator/evaluatorHelpers";
+import { LLMEvaluatorConfigForm } from "@/components/shared/CreateNewEvaluator/LLMEvaluatorConfigForm";
+
+type NotUndefined<T> = T extends undefined ? never : T;
+type NotNull<T> = T extends null ? never : T;
+
 interface LLMAsJudgeEvaluatorDetailsProps {
-  evaluator: any; // Replace 'any' with the correct type
+  evaluator: NotNull<
+    NotUndefined<
+      NotUndefined<
+        ReturnType<typeof useEvaluators>["evaluators"]["data"]
+      >["data"]
+    >["data"]
+  >[number];
   deleteEvaluator: any; // Replace 'any' with the correct type
   setSelectedEvaluator: (evaluator: any | null) => void;
 }
@@ -135,24 +151,38 @@ const LLMAsJudgeEvaluatorDetails: React.FC<LLMAsJudgeEvaluatorDetailsProps> = ({
 
   const [showCreateModal, setShowCreateModal] = useState(false);
 
+  const llmFunctionParams = useMemo(
+    () =>
+      openAITemplateToOpenAIFunctionParams(
+        evaluator.llm_template,
+        evaluator.scoring_type as "LLM-BOOLEAN" | "LLM-CHOICE" | "LLM-RANGE"
+      ),
+    [evaluator.llm_template, evaluator.scoring_type]
+  );
+
+  const [configFormParams, setConfigFormParams] = useState(llmFunctionParams);
+
   return (
     <Col className="space-y-4">
       <p>This evaluator is a LLM as a judge evaluator.</p>
 
       <Col className="space-y-2">
         <h3 className="text-lg font-medium">LLM Template</h3>
-        <ScrollArea className="h-[50vh] border rounded-md">
-          <code className="p-2 rounded-md whitespace-pre-wrap">
-            {JSON.stringify(evaluator.llm_template, null, 2)}
-          </code>
-        </ScrollArea>
+
+        <LLMEvaluatorConfigForm
+          evaluatorType={""}
+          configFormParams={configFormParams}
+          setConfigFormParams={setConfigFormParams}
+          onSubmit={() => {}}
+          existingEvaluatorId={evaluator.id}
+        />
+
         <span>Editing is not yet supported for LLM as a judge evaluators.</span>
       </Col>
       {onlineEvaluators.data?.data?.data && (
         <Col className="space-y-2">
           <Row className="justify-between">
             <h3 className="text-lg font-medium">Online Evaluators</h3>
-
             <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
               <DialogTrigger asChild>
                 <Button>

@@ -28,7 +28,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 
 const modelOptions = ["gpt-4o", "gpt-4o-mini", "gpt-3.5-turbo"];
 
-export type EvaluatorConfigFormPreset = {
+export type LLMEvaluatorConfigFormPreset = {
   name: string;
   description: string;
   expectedValueType: "boolean" | "choice" | "range";
@@ -38,14 +38,21 @@ export type EvaluatorConfigFormPreset = {
   model: (typeof modelOptions)[number];
 };
 
-export const EvaluatorConfigForm: React.FC<{
+export const LLMEvaluatorConfigForm: React.FC<{
   evaluatorType: string;
   onSubmit: (evaluatorId: string) => void;
-  configFormParams: EvaluatorConfigFormPreset;
-  setConfigFormParams: (params: EvaluatorConfigFormPreset) => void;
-}> = ({ evaluatorType, onSubmit, configFormParams, setConfigFormParams }) => {
+  configFormParams: LLMEvaluatorConfigFormPreset;
+  setConfigFormParams: (params: LLMEvaluatorConfigFormPreset) => void;
+  existingEvaluatorId?: string;
+}> = ({
+  evaluatorType,
+  onSubmit,
+  configFormParams,
+  setConfigFormParams,
+  existingEvaluatorId,
+}) => {
   const updateConfigFormParams = (
-    updates: Partial<EvaluatorConfigFormPreset>
+    updates: Partial<LLMEvaluatorConfigFormPreset>
   ) => {
     setConfigFormParams({ ...configFormParams, ...updates });
   };
@@ -70,7 +77,7 @@ export const EvaluatorConfigForm: React.FC<{
 
   return (
     <Col className="h-full flex flex-col">
-      <ScrollArea className="flex-grow" showBottomGradient>
+      <ScrollArea className="flex-grow">
         <Col className="space-y-4 h-full">
           <div className="space-y-2">
             <Label htmlFor="name">Name</Label>
@@ -90,7 +97,6 @@ export const EvaluatorConfigForm: React.FC<{
               }}
             />
           </div>
-
           <div className="space-y-2">
             <Label>Expected Value Type</Label>
             <RadioGroup
@@ -153,7 +159,6 @@ export const EvaluatorConfigForm: React.FC<{
               </span>
             </div>
           )}
-
           {configFormParams.expectedValueType === "choice" && (
             <div className="space-y-2">
               <Label>Choice Scores</Label>
@@ -238,7 +243,6 @@ export const EvaluatorConfigForm: React.FC<{
               ))}
             </div>
           )}
-
           {configFormParams.expectedValueType === "range" && (
             <div className="space-y-2">
               <Label>Range Scorer</Label>
@@ -270,7 +274,6 @@ export const EvaluatorConfigForm: React.FC<{
               </div>
             </div>
           )}
-
           <div className="space-y-2">
             <Label htmlFor="description">Description</Label>
             <br />
@@ -294,7 +297,6 @@ export const EvaluatorConfigForm: React.FC<{
               }
             />
           </div>
-
           <div className="space-y-2">
             <Label htmlFor="model">Model</Label>
             <Select
@@ -323,31 +325,55 @@ export const EvaluatorConfigForm: React.FC<{
       <Row className="justify-between mt-4">
         <Button
           onClick={() => {
-            jawn
-              .POST("/v1/evaluator", {
-                body: {
-                  llm_template: openAIFunction,
-                  scoring_type: `LLM-${configFormParams.expectedValueType.toUpperCase()}`,
-                  name: configFormParams.name,
-                },
-              })
-              .then((res) => {
-                if (res.data?.data) {
-                  notification.setNotification(
-                    "Evaluator created successfully",
-                    "success"
-                  );
-                  onSubmit(res.data.data.id);
-                } else {
-                  notification.setNotification(
-                    "Failed to create evaluator",
-                    "error"
-                  );
-                }
-              });
+            if (existingEvaluatorId) {
+              jawn
+                .PUT(`/v1/evaluator/{evaluatorId}`, {
+                  params: {
+                    path: {
+                      evaluatorId: existingEvaluatorId,
+                    },
+                  },
+                  body: {
+                    llm_template: openAIFunction,
+                    scoring_type: `LLM-${configFormParams.expectedValueType.toUpperCase()}`,
+                    name: configFormParams.name,
+                  },
+                })
+                .then((res) => {
+                  if (res.data?.data) {
+                    notification.setNotification(
+                      "Evaluator updated successfully",
+                      "success"
+                    );
+                  }
+                });
+            } else {
+              jawn
+                .POST("/v1/evaluator", {
+                  body: {
+                    llm_template: openAIFunction,
+                    scoring_type: `LLM-${configFormParams.expectedValueType.toUpperCase()}`,
+                    name: configFormParams.name,
+                  },
+                })
+                .then((res) => {
+                  if (res.data?.data) {
+                    notification.setNotification(
+                      "Evaluator created successfully",
+                      "success"
+                    );
+                    onSubmit(res.data.data.id);
+                  } else {
+                    notification.setNotification(
+                      "Failed to create evaluator",
+                      "error"
+                    );
+                  }
+                });
+            }
           }}
         >
-          Create Evaluator
+          {existingEvaluatorId ? "Update Evaluator" : "Create Evaluator"}
         </Button>
 
         <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>

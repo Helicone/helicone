@@ -30,6 +30,7 @@ export interface CreateEvaluatorParams {
 export interface UpdateEvaluatorParams {
   scoring_type?: string;
   llm_template?: any;
+  name?: string;
 }
 
 export interface EvaluatorResult {
@@ -251,6 +252,40 @@ export class EvaluatorController extends Controller {
     } else {
       this.setStatus(204);
       return ok(null);
+    }
+  }
+
+  @Post("/python/test")
+  public async testPythonEvaluator(
+    @Request() request: JawnAuthenticatedRequest,
+    @Body()
+    requestBody: {
+      code: string;
+      requestBodyString: string;
+      responseString: string;
+    }
+  ): Promise<
+    Result<
+      {
+        output: string;
+        traces: string[];
+        statusCode?: number;
+      },
+      string
+    >
+  > {
+    const evaluatorManager = new EvaluatorManager(request.authParams);
+    const result = await evaluatorManager.testPythonEvaluator({
+      code: requestBody.code,
+      requestBodyString: requestBody.requestBodyString,
+      responseString: requestBody.responseString,
+    });
+    if (result.error || !result.data) {
+      this.setStatus(500);
+      return err(result.error || "Failed to test python evaluator");
+    } else {
+      this.setStatus(200);
+      return ok(result.data);
     }
   }
 }

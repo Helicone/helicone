@@ -53,7 +53,7 @@ const EvaluatorDetailsSheet: React.FC<EvaluatorDetailsSheetProps> = ({
       <SheetTrigger asChild>
         <span style={{ display: "none" }}></span>
       </SheetTrigger>
-      <SheetContent className="w-[50vw] max-w-[50vw] sm:max-w-[50vw]">
+      <SheetContent className="w-full sm:max-w-2xl overflow-y-auto ">
         <SheetHeader>
           <SheetTitle>{selectedEvaluator?.name}</SheetTitle>
         </SheetHeader>

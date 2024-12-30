@@ -21,28 +21,6 @@ export interface paths {
   "/v1/evals/score-distributions/query": {
     post: operations["QueryScoreDistributions"];
   };
-  "/v1/webhooks": {
-    get: operations["GetWebhooks"];
-    post: operations["NewWebhook"];
-  };
-  "/v1/webhooks/{webhookId}": {
-    delete: operations["DeleteWebhook"];
-  };
-  "/v1/public/waitlist/experiments": {
-    post: operations["AddToWaitlist"];
-  };
-  "/v1/vault/add": {
-    post: operations["AddKey"];
-  };
-  "/v1/vault/keys": {
-    get: operations["GetKeys"];
-  };
-  "/v1/vault/key/{providerKeyId}": {
-    get: operations["GetKeyById"];
-  };
-  "/v1/vault/update/{id}": {
-    patch: operations["UpdateKey"];
-  };
   "/v1/evaluator": {
     post: operations["CreateEvaluator"];
   };
@@ -63,6 +41,9 @@ export interface paths {
   };
   "/v1/evaluator/{evaluatorId}/onlineEvaluators/{onlineEvaluatorId}": {
     delete: operations["DeleteOnlineEvaluator"];
+  };
+  "/v1/evaluator/python/test": {
+    post: operations["TestPythonEvaluator"];
   };
   "/v2/experiment/create/empty": {
     post: operations["CreateEmptyExperiment"];
@@ -202,6 +183,42 @@ export interface paths {
   "/v1/admin/alert_banners": {
     post: operations["CreateAlertBanner"];
     patch: operations["UpdateAlertBanner"];
+  };
+  "/v1/public/waitlist/experiments": {
+    post: operations["AddToWaitlist"];
+  };
+  "/v1/vault/add": {
+    post: operations["AddKey"];
+  };
+  "/v1/vault/keys": {
+    get: operations["GetKeys"];
+  };
+  "/v1/vault/key/{providerKeyId}": {
+    get: operations["GetKeyById"];
+  };
+  "/v1/vault/update/{id}": {
+    patch: operations["UpdateKey"];
+  };
+  "/v1/session/query": {
+    post: operations["GetSessions"];
+  };
+  "/v1/session/name/query": {
+    post: operations["GetNames"];
+  };
+  "/v1/session/metrics/query": {
+    post: operations["GetMetrics"];
+  };
+  "/v1/session/{sessionId}/feedback": {
+    post: operations["UpdateSessionFeedback"];
+  };
+  "/v1/user/metrics-overview/query": {
+    post: operations["GetUserMetricsOverview"];
+  };
+  "/v1/user/metrics/query": {
+    post: operations["GetUserMetrics"];
+  };
+  "/v1/user/query": {
+    post: operations["GetUsers"];
   };
   "/v1/trace/log": {
     post: operations["LogTrace"];
@@ -517,26 +534,12 @@ export interface paths {
   "/v1/request/{requestId}/score": {
     post: operations["AddScores"];
   };
-  "/v1/session/query": {
-    post: operations["GetSessions"];
+  "/v1/webhooks": {
+    get: operations["GetWebhooks"];
+    post: operations["NewWebhook"];
   };
-  "/v1/session/name/query": {
-    post: operations["GetNames"];
-  };
-  "/v1/session/metrics/query": {
-    post: operations["GetMetrics"];
-  };
-  "/v1/session/{sessionId}/feedback": {
-    post: operations["UpdateSessionFeedback"];
-  };
-  "/v1/user/metrics-overview/query": {
-    post: operations["GetUserMetricsOverview"];
-  };
-  "/v1/user/metrics/query": {
-    post: operations["GetUserMetrics"];
-  };
-  "/v1/user/query": {
-    post: operations["GetUsers"];
+  "/v1/webhooks/{webhookId}": {
+    delete: operations["DeleteWebhook"];
   };
 }
 
@@ -671,6 +674,8 @@ export interface components {
       offset?: number;
       /** Format: double */
       limit?: number;
+      /** Format: double */
+      timeZoneDifference?: number;
     };
     "ResultSuccess_string-Array_": {
       data: string[];
@@ -702,74 +707,6 @@ export interface components {
       error: null;
     };
     "Result_ScoreDistribution-Array.string_": components["schemas"]["ResultSuccess_ScoreDistribution-Array_"] | components["schemas"]["ResultError_string_"];
-    ResultSuccess_unknown_: {
-      data: unknown;
-      /** @enum {number|null} */
-      error: null;
-    };
-    ResultError_unknown_: {
-      /** @enum {number|null} */
-      data: null;
-      error: unknown;
-    };
-    /** @description Construct a type with a set of properties K of type T */
-    "Record_string.any_": {
-      [key: string]: unknown;
-    };
-    WebhookData: {
-      destination: string;
-      config: components["schemas"]["Record_string.any_"];
-    };
-    "ResultSuccess__id-string--created_at-string--destination-string--version-string--config-string--hmac_key-string_-Array_": {
-      data: {
-          hmac_key: string;
-          config: string;
-          version: string;
-          destination: string;
-          created_at: string;
-          id: string;
-        }[];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__id-string--created_at-string--destination-string--version-string--config-string--hmac_key-string_-Array.string_": components["schemas"]["ResultSuccess__id-string--created_at-string--destination-string--version-string--config-string--hmac_key-string_-Array_"] | components["schemas"]["ResultError_string_"];
-    ResultError_any_: {
-      /** @enum {number|null} */
-      data: null;
-      error: unknown;
-    };
-    "ResultSuccess__id-string__": {
-      data: {
-        id: string;
-      };
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__id-string_.string_": components["schemas"]["ResultSuccess__id-string__"] | components["schemas"]["ResultError_string_"];
-    AddVaultKeyParams: {
-      key: string;
-      provider: string;
-      name?: string;
-    };
-    DecryptedProviderKey: {
-      provider_key_name: string | null;
-      provider_name: string | null;
-      provider_key: string | null;
-      org_id: string | null;
-      id: string | null;
-    };
-    "ResultSuccess_DecryptedProviderKey-Array_": {
-      data: components["schemas"]["DecryptedProviderKey"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_DecryptedProviderKey-Array.string_": components["schemas"]["ResultSuccess_DecryptedProviderKey-Array_"] | components["schemas"]["ResultError_string_"];
-    ResultSuccess_DecryptedProviderKey_: {
-      data: components["schemas"]["DecryptedProviderKey"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_DecryptedProviderKey.string_": components["schemas"]["ResultSuccess_DecryptedProviderKey_"] | components["schemas"]["ResultError_string_"];
     EvaluatorResult: {
       id: string;
       created_at: string;
@@ -799,6 +736,7 @@ export interface components {
     UpdateEvaluatorParams: {
       scoring_type?: string;
       llm_template?: unknown;
+      name?: string;
     };
     EvaluatorExperiment: {
       experiment_name: string;
@@ -821,9 +759,24 @@ export interface components {
       error: null;
     };
     "Result_OnlineEvaluatorByEvaluatorId-Array.string_": components["schemas"]["ResultSuccess_OnlineEvaluatorByEvaluatorId-Array_"] | components["schemas"]["ResultError_string_"];
+    /** @description Construct a type with a set of properties K of type T */
+    "Record_string.any_": {
+      [key: string]: unknown;
+    };
     CreateOnlineEvaluatorParams: {
       config: components["schemas"]["Record_string.any_"];
     };
+    "ResultSuccess__output-string--traces-string-Array--statusCode_63_-number__": {
+      data: {
+        /** Format: double */
+        statusCode?: number;
+        traces: string[];
+        output: string;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__output-string--traces-string-Array--statusCode_63_-number_.string_": components["schemas"]["ResultSuccess__output-string--traces-string-Array--statusCode_63_-number__"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess__experimentId-string__": {
       data: {
         experimentId: string;
@@ -1191,6 +1144,304 @@ Json: JsonObject;
      * https://nodejs.org/api/url.html#the-whatwg-url-api
      */
     "url.URL": string;
+    ResultSuccess_unknown_: {
+      data: unknown;
+      /** @enum {number|null} */
+      error: null;
+    };
+    ResultError_any_: {
+      /** @enum {number|null} */
+      data: null;
+      error: unknown;
+    };
+    "ResultSuccess__id-string__": {
+      data: {
+        id: string;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__id-string_.string_": components["schemas"]["ResultSuccess__id-string__"] | components["schemas"]["ResultError_string_"];
+    AddVaultKeyParams: {
+      key: string;
+      provider: string;
+      name?: string;
+    };
+    DecryptedProviderKey: {
+      provider_key_name: string | null;
+      provider_name: string | null;
+      provider_key: string | null;
+      org_id: string | null;
+      id: string | null;
+    };
+    "ResultSuccess_DecryptedProviderKey-Array_": {
+      data: components["schemas"]["DecryptedProviderKey"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_DecryptedProviderKey-Array.string_": components["schemas"]["ResultSuccess_DecryptedProviderKey-Array_"] | components["schemas"]["ResultError_string_"];
+    ResultSuccess_DecryptedProviderKey_: {
+      data: components["schemas"]["DecryptedProviderKey"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_DecryptedProviderKey.string_": components["schemas"]["ResultSuccess_DecryptedProviderKey_"] | components["schemas"]["ResultError_string_"];
+    SessionResult: {
+      created_at: string;
+      latest_request_created_at: string;
+      session_id: string;
+      session_name: string;
+      /** Format: double */
+      total_cost: number;
+      /** Format: double */
+      total_requests: number;
+      /** Format: double */
+      prompt_tokens: number;
+      /** Format: double */
+      completion_tokens: number;
+      /** Format: double */
+      total_tokens: number;
+    };
+    "ResultSuccess_SessionResult-Array_": {
+      data: components["schemas"]["SessionResult"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_SessionResult-Array.string_": components["schemas"]["ResultSuccess_SessionResult-Array_"] | components["schemas"]["ResultError_string_"];
+    /** @description Make all properties in T optional */
+    Partial_ResponseTableToOperators_: {
+      body_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      body_model?: components["schemas"]["Partial_TextOperators_"];
+      body_completion?: components["schemas"]["Partial_TextOperators_"];
+      status?: components["schemas"]["Partial_NumberOperators_"];
+      model?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_TimestampOperators_: {
+      gte?: string;
+      lte?: string;
+      lt?: string;
+      gt?: string;
+    };
+    /** @description Make all properties in T optional */
+    Partial_RequestTableToOperators_: {
+      prompt?: components["schemas"]["Partial_TextOperators_"];
+      created_at?: components["schemas"]["Partial_TimestampOperators_"];
+      user_id?: components["schemas"]["Partial_TextOperators_"];
+      auth_hash?: components["schemas"]["Partial_TextOperators_"];
+      org_id?: components["schemas"]["Partial_TextOperators_"];
+      id?: components["schemas"]["Partial_TextOperators_"];
+      node_id?: components["schemas"]["Partial_TextOperators_"];
+      model?: components["schemas"]["Partial_TextOperators_"];
+      modelOverride?: components["schemas"]["Partial_TextOperators_"];
+      path?: components["schemas"]["Partial_TextOperators_"];
+      prompt_id?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_FeedbackTableToOperators_: {
+      id?: components["schemas"]["Partial_NumberOperators_"];
+      created_at?: components["schemas"]["Partial_TimestampOperators_"];
+      rating?: components["schemas"]["Partial_BooleanOperators_"];
+      response_id?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_RequestResponseSearchToOperators_: {
+      request_body_vector?: components["schemas"]["Partial_VectorOperators_"];
+      response_body_vector?: components["schemas"]["Partial_VectorOperators_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_SessionsRequestResponseRMTToOperators_: {
+      total_cost?: components["schemas"]["Partial_NumberOperators_"];
+      total_tokens?: components["schemas"]["Partial_NumberOperators_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_CacheHitsTableToOperators_: {
+      organization_id?: components["schemas"]["Partial_TextOperators_"];
+      request_id?: components["schemas"]["Partial_TextOperators_"];
+      latency?: components["schemas"]["Partial_NumberOperators_"];
+      completion_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      prompt_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
+    };
+    /** @description From T, pick a set of properties whose keys are in the union K */
+    "Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_": {
+      request_response_rmt?: components["schemas"]["Partial_RequestResponseRMTToOperators_"];
+      response?: components["schemas"]["Partial_ResponseTableToOperators_"];
+      request?: components["schemas"]["Partial_RequestTableToOperators_"];
+      feedback?: components["schemas"]["Partial_FeedbackTableToOperators_"];
+      request_response_search?: components["schemas"]["Partial_RequestResponseSearchToOperators_"];
+      sessions_request_response_rmt?: components["schemas"]["Partial_SessionsRequestResponseRMTToOperators_"];
+      cache_hits?: components["schemas"]["Partial_CacheHitsTableToOperators_"];
+      properties?: {
+        [key: string]: components["schemas"]["Partial_TextOperators_"];
+      };
+      values?: {
+        [key: string]: components["schemas"]["Partial_TextOperators_"];
+      };
+    };
+    "FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_": components["schemas"]["Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_"];
+    RequestFilterNode: components["schemas"]["FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_"] | components["schemas"]["RequestFilterBranch"] | "all";
+    RequestFilterBranch: {
+      right: components["schemas"]["RequestFilterNode"];
+      /** @enum {string} */
+      operator: "or" | "and";
+      left: components["schemas"]["RequestFilterNode"];
+    };
+    SessionQueryParams: {
+      search: string;
+      timeFilter: {
+        /** Format: double */
+        endTimeUnixMs: number;
+        /** Format: double */
+        startTimeUnixMs: number;
+      };
+      nameEquals?: string;
+      /** Format: double */
+      timezoneDifference: number;
+      filter: components["schemas"]["RequestFilterNode"];
+    };
+    SessionNameResult: {
+      name: string;
+      created_at: string;
+      /** Format: double */
+      total_cost: number;
+      last_used: string;
+      first_used: string;
+      /** Format: double */
+      session_count: number;
+    };
+    "ResultSuccess_SessionNameResult-Array_": {
+      data: components["schemas"]["SessionNameResult"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_SessionNameResult-Array.string_": components["schemas"]["ResultSuccess_SessionNameResult-Array_"] | components["schemas"]["ResultError_string_"];
+    SessionNameQueryParams: {
+      nameContains: string;
+      /** Format: double */
+      timezoneDifference: number;
+      /** @enum {string} */
+      pSize?: "p50" | "p75" | "p95" | "p99" | "p99.9";
+      useInterquartile?: boolean;
+    };
+    HistogramRow: {
+      range_start: string;
+      range_end: string;
+      /** Format: double */
+      value: number;
+    };
+    SessionMetrics: {
+      session_count: components["schemas"]["HistogramRow"][];
+      session_duration: components["schemas"]["HistogramRow"][];
+      session_cost: components["schemas"]["HistogramRow"][];
+    };
+    ResultSuccess_SessionMetrics_: {
+      data: components["schemas"]["SessionMetrics"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_SessionMetrics.string_": components["schemas"]["ResultSuccess_SessionMetrics_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__request_count-HistogramRow-Array--user_cost-HistogramRow-Array__": {
+      data: {
+        user_cost: components["schemas"]["HistogramRow"][];
+        request_count: components["schemas"]["HistogramRow"][];
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__request_count-HistogramRow-Array--user_cost-HistogramRow-Array_.string_": components["schemas"]["ResultSuccess__request_count-HistogramRow-Array--user_cost-HistogramRow-Array__"] | components["schemas"]["ResultError_string_"];
+    /** @description Make all properties in T optional */
+    Partial_UserMetricsToOperators_: {
+      user_id?: components["schemas"]["Partial_TextOperators_"];
+      last_active?: components["schemas"]["Partial_TimestampOperators_"];
+      total_requests?: components["schemas"]["Partial_NumberOperators_"];
+      active_for?: components["schemas"]["Partial_NumberOperators_"];
+      average_requests_per_day_active?: components["schemas"]["Partial_NumberOperators_"];
+      average_tokens_per_request?: components["schemas"]["Partial_NumberOperators_"];
+      total_completion_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      total_prompt_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      cost?: components["schemas"]["Partial_NumberOperators_"];
+    };
+    /** @description From T, pick a set of properties whose keys are in the union K */
+    "Pick_FilterLeaf.user_metrics-or-request_response_rmt_": {
+      request_response_rmt?: components["schemas"]["Partial_RequestResponseRMTToOperators_"];
+      user_metrics?: components["schemas"]["Partial_UserMetricsToOperators_"];
+    };
+    "FilterLeafSubset_user_metrics-or-request_response_rmt_": components["schemas"]["Pick_FilterLeaf.user_metrics-or-request_response_rmt_"];
+    UserFilterNode: components["schemas"]["FilterLeafSubset_user_metrics-or-request_response_rmt_"] | components["schemas"]["UserFilterBranch"] | "all";
+    UserFilterBranch: {
+      right: components["schemas"]["UserFilterNode"];
+      /** @enum {string} */
+      operator: "or" | "and";
+      left: components["schemas"]["UserFilterNode"];
+    };
+    /** @enum {string} */
+    PSize: "p50" | "p75" | "p95" | "p99" | "p99.9";
+    UserMetricsResult: {
+      user_id: string;
+      /** Format: double */
+      active_for: number;
+      first_active: string;
+      last_active: string;
+      /** Format: double */
+      total_requests: number;
+      /** Format: double */
+      average_requests_per_day_active: number;
+      /** Format: double */
+      average_tokens_per_request: number;
+      /** Format: double */
+      total_completion_tokens: number;
+      /** Format: double */
+      total_prompt_tokens: number;
+      /** Format: double */
+      cost: number;
+    };
+    "ResultSuccess_UserMetricsResult-Array_": {
+      data: components["schemas"]["UserMetricsResult"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_UserMetricsResult-Array.string_": components["schemas"]["ResultSuccess_UserMetricsResult-Array_"] | components["schemas"]["ResultError_string_"];
+    UserMetricsQueryParams: {
+      filter: components["schemas"]["UserFilterNode"];
+      /** Format: double */
+      offset: number;
+      /** Format: double */
+      limit: number;
+      timeFilter?: {
+        /** Format: double */
+        endTimeUnixSeconds: number;
+        /** Format: double */
+        startTimeUnixSeconds: number;
+      };
+      /** Format: double */
+      timeZoneDifferenceMinutes?: number;
+    };
+    "ResultSuccess__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array_": {
+      data: {
+          /** Format: double */
+          cost_usd: number;
+          user_id: string;
+          /** Format: double */
+          completion_tokens: number;
+          /** Format: double */
+          prompt_tokens: number;
+          /** Format: double */
+          count: number;
+        }[];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array.string_": components["schemas"]["ResultSuccess__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array_"] | components["schemas"]["ResultError_string_"];
+    UserQueryParams: {
+      userIds?: string[];
+      timeFilter?: {
+        /** Format: double */
+        endTimeUnixSeconds: number;
+        /** Format: double */
+        startTimeUnixSeconds: number;
+      };
+    };
     OTELTrace: {
       resourceSpans: {
           scopeSpans: {
@@ -1974,27 +2225,6 @@ Json: JsonObject;
       datasetType: "experiment" | "helicone";
       meta?: components["schemas"]["DatasetMetadata"];
     };
-    /** @description Make all properties in T optional */
-    Partial_TimestampOperators_: {
-      gte?: string;
-      lte?: string;
-      lt?: string;
-      gt?: string;
-    };
-    /** @description Make all properties in T optional */
-    Partial_RequestTableToOperators_: {
-      prompt?: components["schemas"]["Partial_TextOperators_"];
-      created_at?: components["schemas"]["Partial_TimestampOperators_"];
-      user_id?: components["schemas"]["Partial_TextOperators_"];
-      auth_hash?: components["schemas"]["Partial_TextOperators_"];
-      org_id?: components["schemas"]["Partial_TextOperators_"];
-      id?: components["schemas"]["Partial_TextOperators_"];
-      node_id?: components["schemas"]["Partial_TextOperators_"];
-      model?: components["schemas"]["Partial_TextOperators_"];
-      modelOverride?: components["schemas"]["Partial_TextOperators_"];
-      path?: components["schemas"]["Partial_TextOperators_"];
-      prompt_id?: components["schemas"]["Partial_TextOperators_"];
-    };
     /** @description From T, pick a set of properties whose keys are in the union K */
     "Pick_FilterLeaf.request-or-prompts_versions_": {
       request?: components["schemas"]["Partial_RequestTableToOperators_"];
@@ -2312,6 +2542,11 @@ Json: JsonObject;
       error: null;
     };
     "Result_HeliconeDataset-Array.string_": components["schemas"]["ResultSuccess_HeliconeDataset-Array_"] | components["schemas"]["ResultError_string_"];
+    ResultError_unknown_: {
+      /** @enum {number|null} */
+      data: null;
+      error: unknown;
+    };
     ResultSuccess_any_: {
       data: unknown;
       /** @enum {number|null} */
@@ -2866,64 +3101,6 @@ Json: JsonObject;
       error: null;
     };
     "Result_HeliconeRequest-Array.string_": components["schemas"]["ResultSuccess_HeliconeRequest-Array_"] | components["schemas"]["ResultError_string_"];
-    /** @description Make all properties in T optional */
-    Partial_ResponseTableToOperators_: {
-      body_tokens?: components["schemas"]["Partial_NumberOperators_"];
-      body_model?: components["schemas"]["Partial_TextOperators_"];
-      body_completion?: components["schemas"]["Partial_TextOperators_"];
-      status?: components["schemas"]["Partial_NumberOperators_"];
-      model?: components["schemas"]["Partial_TextOperators_"];
-    };
-    /** @description Make all properties in T optional */
-    Partial_FeedbackTableToOperators_: {
-      id?: components["schemas"]["Partial_NumberOperators_"];
-      created_at?: components["schemas"]["Partial_TimestampOperators_"];
-      rating?: components["schemas"]["Partial_BooleanOperators_"];
-      response_id?: components["schemas"]["Partial_TextOperators_"];
-    };
-    /** @description Make all properties in T optional */
-    Partial_RequestResponseSearchToOperators_: {
-      request_body_vector?: components["schemas"]["Partial_VectorOperators_"];
-      response_body_vector?: components["schemas"]["Partial_VectorOperators_"];
-    };
-    /** @description Make all properties in T optional */
-    Partial_SessionsRequestResponseRMTToOperators_: {
-      total_cost?: components["schemas"]["Partial_NumberOperators_"];
-      total_tokens?: components["schemas"]["Partial_NumberOperators_"];
-    };
-    /** @description Make all properties in T optional */
-    Partial_CacheHitsTableToOperators_: {
-      organization_id?: components["schemas"]["Partial_TextOperators_"];
-      request_id?: components["schemas"]["Partial_TextOperators_"];
-      latency?: components["schemas"]["Partial_NumberOperators_"];
-      completion_tokens?: components["schemas"]["Partial_NumberOperators_"];
-      prompt_tokens?: components["schemas"]["Partial_NumberOperators_"];
-      created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
-    };
-    /** @description From T, pick a set of properties whose keys are in the union K */
-    "Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_": {
-      request_response_rmt?: components["schemas"]["Partial_RequestResponseRMTToOperators_"];
-      response?: components["schemas"]["Partial_ResponseTableToOperators_"];
-      request?: components["schemas"]["Partial_RequestTableToOperators_"];
-      feedback?: components["schemas"]["Partial_FeedbackTableToOperators_"];
-      request_response_search?: components["schemas"]["Partial_RequestResponseSearchToOperators_"];
-      sessions_request_response_rmt?: components["schemas"]["Partial_SessionsRequestResponseRMTToOperators_"];
-      cache_hits?: components["schemas"]["Partial_CacheHitsTableToOperators_"];
-      properties?: {
-        [key: string]: components["schemas"]["Partial_TextOperators_"];
-      };
-      values?: {
-        [key: string]: components["schemas"]["Partial_TextOperators_"];
-      };
-    };
-    "FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_": components["schemas"]["Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_"];
-    RequestFilterNode: components["schemas"]["FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_"] | components["schemas"]["RequestFilterBranch"] | "all";
-    RequestFilterBranch: {
-      right: components["schemas"]["RequestFilterNode"];
-      /** @enum {string} */
-      operator: "or" | "and";
-      left: components["schemas"]["RequestFilterNode"];
-    };
     /** @enum {string} */
     SortDirection: "asc" | "desc";
     SortLeafRequest: {
@@ -2983,183 +3160,23 @@ Json: JsonObject;
     ScoreRequest: {
       scores: components["schemas"]["Scores"];
     };
-    SessionResult: {
-      created_at: string;
-      latest_request_created_at: string;
-      session_id: string;
-      session_name: string;
-      /** Format: double */
-      total_cost: number;
-      /** Format: double */
-      total_requests: number;
-      /** Format: double */
-      prompt_tokens: number;
-      /** Format: double */
-      completion_tokens: number;
-      /** Format: double */
-      total_tokens: number;
+    WebhookData: {
+      destination: string;
+      config: components["schemas"]["Record_string.any_"];
     };
-    "ResultSuccess_SessionResult-Array_": {
-      data: components["schemas"]["SessionResult"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_SessionResult-Array.string_": components["schemas"]["ResultSuccess_SessionResult-Array_"] | components["schemas"]["ResultError_string_"];
-    SessionQueryParams: {
-      search: string;
-      timeFilter: {
-        /** Format: double */
-        endTimeUnixMs: number;
-        /** Format: double */
-        startTimeUnixMs: number;
-      };
-      nameEquals?: string;
-      /** Format: double */
-      timezoneDifference: number;
-      filter: components["schemas"]["RequestFilterNode"];
-    };
-    SessionNameResult: {
-      name: string;
-      created_at: string;
-      /** Format: double */
-      total_cost: number;
-      last_used: string;
-      first_used: string;
-      /** Format: double */
-      session_count: number;
-    };
-    "ResultSuccess_SessionNameResult-Array_": {
-      data: components["schemas"]["SessionNameResult"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_SessionNameResult-Array.string_": components["schemas"]["ResultSuccess_SessionNameResult-Array_"] | components["schemas"]["ResultError_string_"];
-    SessionNameQueryParams: {
-      nameContains: string;
-      /** Format: double */
-      timezoneDifference: number;
-      /** @enum {string} */
-      pSize?: "p50" | "p75" | "p95" | "p99" | "p99.9";
-      useInterquartile?: boolean;
-    };
-    HistogramRow: {
-      range_start: string;
-      range_end: string;
-      /** Format: double */
-      value: number;
-    };
-    SessionMetrics: {
-      session_count: components["schemas"]["HistogramRow"][];
-      session_duration: components["schemas"]["HistogramRow"][];
-      session_cost: components["schemas"]["HistogramRow"][];
-    };
-    ResultSuccess_SessionMetrics_: {
-      data: components["schemas"]["SessionMetrics"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_SessionMetrics.string_": components["schemas"]["ResultSuccess_SessionMetrics_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess__request_count-HistogramRow-Array--user_cost-HistogramRow-Array__": {
+    "ResultSuccess__id-string--created_at-string--destination-string--version-string--config-string--hmac_key-string_-Array_": {
       data: {
-        user_cost: components["schemas"]["HistogramRow"][];
-        request_count: components["schemas"]["HistogramRow"][];
-      };
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__request_count-HistogramRow-Array--user_cost-HistogramRow-Array_.string_": components["schemas"]["ResultSuccess__request_count-HistogramRow-Array--user_cost-HistogramRow-Array__"] | components["schemas"]["ResultError_string_"];
-    /** @description Make all properties in T optional */
-    Partial_UserMetricsToOperators_: {
-      user_id?: components["schemas"]["Partial_TextOperators_"];
-      last_active?: components["schemas"]["Partial_TimestampOperators_"];
-      total_requests?: components["schemas"]["Partial_NumberOperators_"];
-      active_for?: components["schemas"]["Partial_NumberOperators_"];
-      average_requests_per_day_active?: components["schemas"]["Partial_NumberOperators_"];
-      average_tokens_per_request?: components["schemas"]["Partial_NumberOperators_"];
-      total_completion_tokens?: components["schemas"]["Partial_NumberOperators_"];
-      total_prompt_tokens?: components["schemas"]["Partial_NumberOperators_"];
-      cost?: components["schemas"]["Partial_NumberOperators_"];
-    };
-    /** @description From T, pick a set of properties whose keys are in the union K */
-    "Pick_FilterLeaf.user_metrics-or-request_response_rmt_": {
-      request_response_rmt?: components["schemas"]["Partial_RequestResponseRMTToOperators_"];
-      user_metrics?: components["schemas"]["Partial_UserMetricsToOperators_"];
-    };
-    "FilterLeafSubset_user_metrics-or-request_response_rmt_": components["schemas"]["Pick_FilterLeaf.user_metrics-or-request_response_rmt_"];
-    UserFilterNode: components["schemas"]["FilterLeafSubset_user_metrics-or-request_response_rmt_"] | components["schemas"]["UserFilterBranch"] | "all";
-    UserFilterBranch: {
-      right: components["schemas"]["UserFilterNode"];
-      /** @enum {string} */
-      operator: "or" | "and";
-      left: components["schemas"]["UserFilterNode"];
-    };
-    /** @enum {string} */
-    PSize: "p50" | "p75" | "p95" | "p99" | "p99.9";
-    UserMetricsResult: {
-      user_id: string;
-      /** Format: double */
-      active_for: number;
-      first_active: string;
-      last_active: string;
-      /** Format: double */
-      total_requests: number;
-      /** Format: double */
-      average_requests_per_day_active: number;
-      /** Format: double */
-      average_tokens_per_request: number;
-      /** Format: double */
-      total_completion_tokens: number;
-      /** Format: double */
-      total_prompt_tokens: number;
-      /** Format: double */
-      cost: number;
-    };
-    "ResultSuccess_UserMetricsResult-Array_": {
-      data: components["schemas"]["UserMetricsResult"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_UserMetricsResult-Array.string_": components["schemas"]["ResultSuccess_UserMetricsResult-Array_"] | components["schemas"]["ResultError_string_"];
-    UserMetricsQueryParams: {
-      filter: components["schemas"]["UserFilterNode"];
-      /** Format: double */
-      offset: number;
-      /** Format: double */
-      limit: number;
-      timeFilter?: {
-        /** Format: double */
-        endTimeUnixSeconds: number;
-        /** Format: double */
-        startTimeUnixSeconds: number;
-      };
-      /** Format: double */
-      timeZoneDifferenceMinutes?: number;
-    };
-    "ResultSuccess__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array_": {
-      data: {
-          /** Format: double */
-          cost_usd: number;
-          user_id: string;
-          /** Format: double */
-          completion_tokens: number;
-          /** Format: double */
-          prompt_tokens: number;
-          /** Format: double */
-          count: number;
+          hmac_key: string;
+          config: string;
+          version: string;
+          destination: string;
+          created_at: string;
+          id: string;
         }[];
       /** @enum {number|null} */
       error: null;
     };
-    "Result__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array.string_": components["schemas"]["ResultSuccess__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array_"] | components["schemas"]["ResultError_string_"];
-    UserQueryParams: {
-      userIds?: string[];
-      timeFilter?: {
-        /** Format: double */
-        endTimeUnixSeconds: number;
-        /** Format: double */
-        startTimeUnixSeconds: number;
-      };
-    };
+    "Result__id-string--created_at-string--destination-string--version-string--config-string--hmac_key-string_-Array.string_": components["schemas"]["ResultSuccess__id-string--created_at-string--destination-string--version-string--config-string--hmac_key-string_-Array_"] | components["schemas"]["ResultError_string_"];
   };
   responses: {
   };
@@ -3238,127 +3255,6 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_ScoreDistribution-Array.string_"];
-        };
-      };
-    };
-  };
-  GetWebhooks: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__id-string--created_at-string--destination-string--version-string--config-string--hmac_key-string_-Array.string_"];
-        };
-      };
-    };
-  };
-  NewWebhook: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["WebhookData"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["ResultSuccess_unknown_"] | components["schemas"]["ResultError_unknown_"];
-        };
-      };
-    };
-  };
-  DeleteWebhook: {
-    parameters: {
-      path: {
-        webhookId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  AddToWaitlist: {
-    requestBody: {
-      content: {
-        "application/json": {
-          email: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["ResultSuccess_unknown_"] | components["schemas"]["ResultError_any_"];
-        };
-      };
-    };
-  };
-  AddKey: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["AddVaultKeyParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__id-string_.string_"];
-        };
-      };
-    };
-  };
-  GetKeys: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_DecryptedProviderKey-Array.string_"];
-        };
-      };
-    };
-  };
-  GetKeyById: {
-    parameters: {
-      path: {
-        providerKeyId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_DecryptedProviderKey.string_"];
-        };
-      };
-    };
-  };
-  UpdateKey: {
-    parameters: {
-      path: {
-        id: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          active?: boolean;
-          name?: string;
-          key?: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
         };
       };
     };
@@ -3505,6 +3401,25 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  TestPythonEvaluator: {
+    requestBody: {
+      content: {
+        "application/json": {
+          responseString: string;
+          requestBodyString: string;
+          code: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__output-string--traces-string-Array--statusCode_63_-number_.string_"];
         };
       };
     };
@@ -4483,6 +4398,203 @@ export interface operations {
       /** @description No content */
       204: {
         content: never;
+      };
+    };
+  };
+  AddToWaitlist: {
+    requestBody: {
+      content: {
+        "application/json": {
+          email: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ResultSuccess_unknown_"] | components["schemas"]["ResultError_any_"];
+        };
+      };
+    };
+  };
+  AddKey: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AddVaultKeyParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__id-string_.string_"];
+        };
+      };
+    };
+  };
+  GetKeys: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_DecryptedProviderKey-Array.string_"];
+        };
+      };
+    };
+  };
+  GetKeyById: {
+    parameters: {
+      path: {
+        providerKeyId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_DecryptedProviderKey.string_"];
+        };
+      };
+    };
+  };
+  UpdateKey: {
+    parameters: {
+      path: {
+        id: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          active?: boolean;
+          name?: string;
+          key?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  GetSessions: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SessionQueryParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_SessionResult-Array.string_"];
+        };
+      };
+    };
+  };
+  GetNames: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SessionNameQueryParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_SessionNameResult-Array.string_"];
+        };
+      };
+    };
+  };
+  GetMetrics: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SessionNameQueryParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_SessionMetrics.string_"];
+        };
+      };
+    };
+  };
+  UpdateSessionFeedback: {
+    parameters: {
+      path: {
+        sessionId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          rating: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  GetUserMetricsOverview: {
+    requestBody: {
+      content: {
+        "application/json": {
+          useInterquartile: boolean;
+          pSize: components["schemas"]["PSize"];
+          filter: components["schemas"]["UserFilterNode"];
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__request_count-HistogramRow-Array--user_cost-HistogramRow-Array_.string_"];
+        };
+      };
+    };
+  };
+  GetUserMetrics: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UserMetricsQueryParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_UserMetricsResult-Array.string_"];
+        };
+      };
+    };
+  };
+  GetUsers: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UserQueryParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array.string_"];
+        };
       };
     };
   };
@@ -6267,62 +6379,35 @@ export interface operations {
       };
     };
   };
-  GetSessions: {
+  GetWebhooks: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__id-string--created_at-string--destination-string--version-string--config-string--hmac_key-string_-Array.string_"];
+        };
+      };
+    };
+  };
+  NewWebhook: {
     requestBody: {
       content: {
-        "application/json": components["schemas"]["SessionQueryParams"];
+        "application/json": components["schemas"]["WebhookData"];
       };
     };
     responses: {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result_SessionResult-Array.string_"];
+          "application/json": components["schemas"]["ResultSuccess_unknown_"] | components["schemas"]["ResultError_unknown_"];
         };
       };
     };
   };
-  GetNames: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["SessionNameQueryParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_SessionNameResult-Array.string_"];
-        };
-      };
-    };
-  };
-  GetMetrics: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["SessionNameQueryParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_SessionMetrics.string_"];
-        };
-      };
-    };
-  };
-  UpdateSessionFeedback: {
+  DeleteWebhook: {
     parameters: {
       path: {
-        sessionId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          rating: boolean;
-        };
+        webhookId: string;
       };
     };
     responses: {
@@ -6330,55 +6415,6 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  GetUserMetricsOverview: {
-    requestBody: {
-      content: {
-        "application/json": {
-          useInterquartile: boolean;
-          pSize: components["schemas"]["PSize"];
-          filter: components["schemas"]["UserFilterNode"];
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__request_count-HistogramRow-Array--user_cost-HistogramRow-Array_.string_"];
-        };
-      };
-    };
-  };
-  GetUserMetrics: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UserMetricsQueryParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_UserMetricsResult-Array.string_"];
-        };
-      };
-    };
-  };
-  GetUsers: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UserQueryParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array.string_"];
         };
       };
     };

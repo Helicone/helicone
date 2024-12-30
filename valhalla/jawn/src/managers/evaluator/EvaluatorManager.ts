@@ -18,6 +18,7 @@ import {
 } from "../../managers/experiment/ExperimentV2Manager";
 import { ScoreManager } from "../score/ScoreManager";
 import { RequestManager } from "../request/RequestManager";
+import { testPythonEvaluator } from "./pythonEvaluator";
 
 export function placeAssetIdValues(
   inputValues: Record<string, string>,
@@ -53,6 +54,21 @@ export function getEvaluatorScoreName(evaluatorName: string) {
 }
 
 export class EvaluatorManager extends BaseManager {
+  testPythonEvaluator({
+    code,
+    requestBodyString,
+    responseString,
+  }: {
+    code: string;
+    requestBodyString: string;
+    responseString: string;
+  }) {
+    return testPythonEvaluator({
+      code,
+      requestBodyString,
+      responseString,
+    });
+  }
   async getExperiments(evaluatorId: string) {
     const result = await dbExecute<{
       experiment_id: string;

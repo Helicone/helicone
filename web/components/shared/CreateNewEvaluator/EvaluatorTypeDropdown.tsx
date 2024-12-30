@@ -11,13 +11,45 @@ import {
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { EvaluatorConfigFormPreset } from "./EvaluatorConfigForm";
+import { LLMEvaluatorConfigFormPreset } from "./LLMEvaluatorConfigForm";
 
-export const LLM_AS_A_JUDGE_OPTIONS: {
+export type LLMOption = {
   name: string;
+  preset: LLMEvaluatorConfigFormPreset;
+  _type: "llm";
+};
 
-  preset: EvaluatorConfigFormPreset;
-}[] = [
+export type CompositeOption = {
+  name: string;
+  _type: "composite";
+  preset: {
+    code: string;
+    description: string;
+    testInput: string;
+    testOutput: string;
+  };
+};
+
+export const LLM_AS_A_JUDGE_OPTIONS: LLMOption[] = [
+  {
+    name: "Response Quality",
+    preset: {
+      model: "gpt-4o-mini",
+      choiceScores: [
+        { score: 1, description: "Incorrect or irrelevant" },
+        { score: 2, description: "Partially correct but incomplete" },
+        { score: 3, description: "Correct but could be better" },
+        { score: 4, description: "Very good and comprehensive" },
+        { score: 5, description: "Excellent, accurate and thorough" },
+      ],
+      expectedValueType: "choice",
+      description: "Evaluate the overall quality and accuracy of the response",
+      name: "Response Quality",
+      rangeMin: 1,
+      rangeMax: 5,
+    },
+    _type: "llm",
+  },
   {
     name: "Humor",
     preset: {
@@ -35,6 +67,7 @@ export const LLM_AS_A_JUDGE_OPTIONS: {
       rangeMin: 1,
       rangeMax: 100,
     },
+    _type: "llm",
   },
   {
     name: "SQL",
@@ -46,6 +79,7 @@ export const LLM_AS_A_JUDGE_OPTIONS: {
       rangeMin: 1,
       rangeMax: 5,
     },
+    _type: "llm",
   },
   {
     name: "Moderation",
@@ -57,6 +91,7 @@ export const LLM_AS_A_JUDGE_OPTIONS: {
       rangeMin: 1,
       rangeMax: 5,
     },
+    _type: "llm",
   },
   {
     name: "Language - English",
@@ -68,25 +103,137 @@ export const LLM_AS_A_JUDGE_OPTIONS: {
       rangeMin: 1,
       rangeMax: 5,
     },
+    _type: "llm",
   },
 ];
 
+export const COMPOSITE_OPTIONS: CompositeOption[] = [
+  {
+    name: "String Contains",
+    _type: "composite",
+    preset: {
+      code: `import os
+import json
+
+class HeliconeEvaluator:
+    @staticmethod
+    def request():
+      with open("/tmp/request.json", "r") as f:
+        return json.load(f)
+    
+    @staticmethod
+    def response():
+      with open("/tmp/response.json", "r") as f:
+        return json.load(f)
+
+    @staticmethod
+    def output(output: int | bool):
+      if isinstance(output, bool) or isinstance(output, int):
+        with open("/tmp/output.txt", "w") as f:
+          f.write(str(output))
+      else:
+        raise ValueError("Output must be a boolean or an integer")
+
+if ("Hello" in HeliconeEvaluator.response()["choices"][0]["message"]["content"]):
+  HeliconeEvaluator.output(1)
+else:
+  HeliconeEvaluator.output(0)
+      
+`,
+      description: "Check if the response contains the input",
+      testInput: JSON.stringify({
+        id: "chatcmpl-AijHFxqZKjpyWX5A6h06Wkhvrt3DB",
+        object: "chat.completion",
+        created: 1735223841,
+        model: "gpt-3.5-turbo-0125",
+        choices: [
+          {
+            index: 0,
+            message: {
+              role: "assistant",
+              content: "Hello world! I am an assistant",
+              refusal: null,
+            },
+            logprobs: null,
+            finish_reason: "stop",
+          },
+        ],
+        usage: {
+          prompt_tokens: 2222,
+          completion_tokens: 116,
+          total_tokens: 2338,
+          prompt_tokens_details: {
+            cached_tokens: 0,
+            audio_tokens: 0,
+          },
+          completion_tokens_details: {
+            reasoning_tokens: 0,
+            audio_tokens: 0,
+            accepted_prediction_tokens: 0,
+            rejected_prediction_tokens: 0,
+          },
+        },
+        system_fingerprint: null,
+      }),
+      testOutput: JSON.stringify({
+        id: "chatcmpl-AijHFxqZKjpyWX5A6h06Wkhvrt3DB",
+        object: "chat.completion",
+        created: 1735223841,
+        model: "gpt-3.5-turbo-0125",
+        choices: [
+          {
+            index: 0,
+            message: {
+              role: "assistant",
+              content: "Hello world! I am an assistant",
+              refusal: null,
+            },
+            logprobs: null,
+            finish_reason: "stop",
+          },
+        ],
+        usage: {
+          prompt_tokens: 2222,
+          completion_tokens: 116,
+          total_tokens: 2338,
+          prompt_tokens_details: {
+            cached_tokens: 0,
+            audio_tokens: 0,
+          },
+          completion_tokens_details: {
+            reasoning_tokens: 0,
+            audio_tokens: 0,
+            accepted_prediction_tokens: 0,
+            rejected_prediction_tokens: 0,
+          },
+        },
+        system_fingerprint: null,
+      }),
+    },
+  },
+  {
+    name: "Valid JSON",
+    _type: "composite",
+    preset: {
+      code: "return response.includes(input)",
+      description: "Check if the response contains the input",
+      testInput: "hello",
+      testOutput: "hello world",
+    },
+  },
+];
+
+export type EvaluatorType =
+  | (typeof LLM_AS_A_JUDGE_OPTIONS)[number]
+  | (typeof COMPOSITE_OPTIONS)[number];
+
 export const EvaluatorTypeDropdown: React.FC<{
   selectedOption: string;
-  onOptionSelect: (option: (typeof LLM_AS_A_JUDGE_OPTIONS)[number]) => void;
+  onOptionSelect: (option: EvaluatorType) => void;
 }> = ({ selectedOption, onOptionSelect }) => {
   return (
-    <Tabs defaultValue="llm-as-a-judge">
-      <TabsList>
-        <TabsTrigger value="llm-as-a-judge">LLM-as-a-judge</TabsTrigger>
-        <TabsTrigger value="python" disabled>
-          Python <span className="text-xs text-gray-500 px-3">(soon)</span>
-        </TabsTrigger>
-        <TabsTrigger value="typescript" disabled>
-          Typescript <span className="text-xs text-gray-500 px-3">(soon)</span>
-        </TabsTrigger>
-      </TabsList>
-      <TabsContent value="llm-as-a-judge">
+    <>
+      <div className="pb-8">
         Presets:{" "}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -99,6 +246,18 @@ export const EvaluatorTypeDropdown: React.FC<{
             <DropdownMenuGroup>
               <DropdownMenuLabel>LLM As a Judge</DropdownMenuLabel>
               {LLM_AS_A_JUDGE_OPTIONS.map((option) => (
+                <DropdownMenuItem
+                  key={option.name}
+                  onClick={() => onOptionSelect(option)}
+                >
+                  {option.name}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuGroup>
+            <DropdownMenuSeparator />
+            <DropdownMenuGroup>
+              <DropdownMenuLabel>Composite</DropdownMenuLabel>
+              {COMPOSITE_OPTIONS.map((option) => (
                 <DropdownMenuItem
                   key={option.name}
                   onClick={() => onOptionSelect(option)}
@@ -131,28 +290,19 @@ export const EvaluatorTypeDropdown: React.FC<{
                 SourceProperly
               </DropdownMenuItem>
             </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuLabel>
-                Composite <span className="text-xs text-gray-500">(soon)</span>
-              </DropdownMenuLabel>
-              <DropdownMenuItem
-                // onClick={() => onOptionSelect("StringContains")}
-                disabled
-              >
-                StringContains
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                // onClick={() => onOptionSelect("ValidJSON")}
-                disabled
-              >
-                ValidJSON
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
           </DropdownMenuContent>
         </DropdownMenu>
-      </TabsContent>
-      <TabsContent value="python"></TabsContent>
-    </Tabs>
+      </div>
+      <TabsList>
+        <TabsTrigger value="llm-as-a-judge">LLM-as-a-judge</TabsTrigger>
+        <TabsTrigger value="python">
+          Python <span className="text-xs text-gray-500 px-3"></span>
+        </TabsTrigger>
+        <TabsTrigger value="typescript">LastMile.Dev </TabsTrigger>
+        <TabsTrigger value="typescript" disabled>
+          Typescript <span className="text-xs text-gray-500 px-3">(soon)</span>
+        </TabsTrigger>
+      </TabsList>
+    </>
   );
 };

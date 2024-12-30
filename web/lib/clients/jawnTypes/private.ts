@@ -30,6 +30,9 @@ export interface paths {
   "/v1/evaluator/{evaluatorId}/onlineEvaluators/{onlineEvaluatorId}": {
     delete: operations["DeleteOnlineEvaluator"];
   };
+  "/v1/evaluator/python/test": {
+    post: operations["TestPythonEvaluator"];
+  };
   "/v1/request/query": {
     post: operations["GetRequests"];
   };
@@ -578,6 +581,7 @@ export interface components {
     UpdateEvaluatorParams: {
       scoring_type?: string;
       llm_template?: unknown;
+      name?: string;
     };
     ResultSuccess_null_: {
       /** @enum {number|null} */
@@ -614,6 +618,17 @@ export interface components {
     CreateOnlineEvaluatorParams: {
       config: components["schemas"]["Record_string.any_"];
     };
+    "ResultSuccess__output-string--traces-string-Array--statusCode_63_-number__": {
+      data: {
+        /** Format: double */
+        statusCode?: number;
+        traces: string[];
+        output: string;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__output-string--traces-string-Array--statusCode_63_-number_.string_": components["schemas"]["ResultSuccess__output-string--traces-string-Array--statusCode_63_-number__"] | components["schemas"]["ResultError_string_"];
     /** @description Construct a type with a set of properties K of type T */
     "Record_string.string_": {
       [key: string]: string;
@@ -1364,6 +1379,8 @@ Json: JsonObject;
       offset?: number;
       /** Format: double */
       limit?: number;
+      /** Format: double */
+      timeZoneDifference?: number;
     };
     ScoreDistribution: {
       name: string;
@@ -3320,6 +3337,25 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  TestPythonEvaluator: {
+    requestBody: {
+      content: {
+        "application/json": {
+          responseString: string;
+          requestBodyString: string;
+          code: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__output-string--traces-string-Array--statusCode_63_-number_.string_"];
         };
       };
     };
