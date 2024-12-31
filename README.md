@@ -44,7 +44,7 @@
 
 ## Quick Start ⚡️ One line of code
 
-1. Get your `write-only` API key by signing up [here](helicone.ai/signup).
+1. Get your `write-only` API key by signing up [here](https://helicone.ai/signup).
 
 2. Update only the `baseURL` in your code:
 
